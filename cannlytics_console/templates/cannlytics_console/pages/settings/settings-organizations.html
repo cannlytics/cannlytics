@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+<!-- Organizations -->
+<!-- URL: settings/organizations -->
+<!-- Created 12/9/2020 -->
+{% extends "cannlytics_console/console.html" %}
+{% load static %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Breadcrumbs -->
+    {% include "cannlytics_console/components/breadcrumbs.html" with
+      breadcrumbs=organizations.breadcrumbs
+      only
+    %}
+
+    <!-- Body -->
+    <div class="col">
+
+    <!-- TODO: No organizations placeholder -->
+
+    <!-- TODO: Start an organization -->
+    <!-- Join an organization -->
+
+      <!-- Organizations table -->
+      <div class="card my-3">
+        <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
+          <h2 class="h6 text-dark">Your organizations</h2>
+          <a
+            class="btn btn-sm btn-outline-secondary ml-2"
+            href="./organizations/new"
+          >
+            New
+          </a>
+        </div>
+
+        <!-- TODO: Dynamic placeholder for empty tables -->
+        <!-- TODO: Make reusable -->
+        {% if True %}
+          {% include "cannlytics_console/components/placeholders/placeholder.html" with
+            placeholder=organizations.placeholder
+            only
+          %}
+          {% comment %} <div class="card-body text-center">
+            <a href="/settings/team">
+              <img
+                src="{% static 'cannlytics_console/images/illustrations/chemistry_scientist.svg' %}"
+                style="height:200px;"
+              >
+            </a>
+            <h2 class="h4 text-dark mt-3 mb-1">
+              {{ organizations.new_prompt }}
+            </h2>
+            <p class="text-muted lh-sm">
+              <small>
+                Add team members to your organization
+                or join an organization to begin collaborating.
+              </small>
+            </p>
+            <a class="btn btn-outline-primary my-3" href="/settings/team">
+              Start an organization
+            </a>
+          </div> {% endcomment %}
+
+        <!-- TODO: Populate table dynamically -->
+        {% else %}
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover table-sm">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>License</th>
+                    <th>Team members</th>
+                  </tr>
+                </thead>
+                
+                <tbody>
+                  <tr>
+                    <td>1,001</td>
+                    <td>Lorem</td>
+                    <td>ipsum</td>
+                    <td>sit</td>
+                  </tr>
+                  <tr>
+                    <td>1,002</td>
+                    <td>amet</td>
+                    <td>consectetur</td>
+                    <td>elit</td>
+                  </tr>
+                  <tr>
+                    <td>1,003</td>
+                    <td>Integer</td>
+                    <td>nec</td>
+                    <td>Praesent</td>
+                  </tr>
+                  <tr>
+                    <td>1,003</td>
+                    <td>libero</td>
+                    <td>Sed</td>
+                    <td>ante</td>
+                  </tr>
+                  <tr>
+                    <td>1,004</td>
+                    <td>dapibus</td>
+                    <td>diam</td>
+                    <td>nisi</td>
+                  </tr>
+                  <tr>
+                    <td>1,005</td>
+                    <td>Nulla</td>
+                    <td>quis</td>
+                    <td>at</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% endif %}
+
+      </div><!-- End of organizations table -->
+
+    </div><!-- End of Body -->
+
+  </main>
+{% endblock %}
+
+<!-- Organizations JavaScript -->
+{% block console_js %}
+  <script>
+    console.log('Organizations page javascript loaded.');
+    cannlytics.settings.getOrganizations();
+  </script>
+{% endblock %}
+
+</html>

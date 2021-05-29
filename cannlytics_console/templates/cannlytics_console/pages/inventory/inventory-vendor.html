@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<!-- Inventory Page -->
+<!-- Created 12/18/2020 -->
+{% extends "cannlytics_console/console.html" %}
+{% block console_body %}
+
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="fs-5 mb-0 lh-base">Inventory</h1>
+    </div>
+
+    <!-- Projects / Samples / Batches Table -->
+    <div class="col-md-12">
+      <div class="d-flex flex-wrap align-items-center justify-content-between">
+        <div class="dropdown d-flex align-items-center px-2">
+          <a
+            class="h6 my-3 dropdown-toggle text-dark"
+            id="dropdownSamplesTable"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            role="button"
+            href="#"
+          >
+            Received Inventory
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="dropdownSamplesTable">
+            <li><a class="dropdown-item" href="#">Requested Inventory</a></li>
+            <li><a class="dropdown-item" href="#">Approved Inventory</a></li>
+          </ul>
+        </div>
+        <div class="d-flex align-items-center text-dark">
+          <form
+            id="search-transfers"
+            class="d-flex px-2"
+            role="search"
+            style="width:unset;"
+          >
+            <input
+              type="text"
+              class="table-search-input form-control form-control-sm"
+              placeholder="Search"
+              aria-label="Search"
+              name="transfer"
+              style="width:unset;"
+            >
+            <button
+              type="submit"
+              id="search-transfers-button"
+              class="nav-search-button btn btn-sm btn-default p-0"
+              style="transform:translateX(-32px);width:0;"
+            >
+              {% icon "search" %}
+            </button>
+          </form>
+          <div class="dropdown">
+            <button
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              id="dropdown-time-projects"
+              class="btn btn-sm btn-outline-secondary dropdown-toggle"
+            >
+              This week
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdown-time-projects">
+              <li><a class="dropdown-item" href="#">Today</a></li>
+              <li><a class="dropdown-item" href="#">Yesterday</a></li>
+              <li><a class="dropdown-item" href="#">Last 7 days</a></li>
+              <li><a class="dropdown-item" href="#">Last 30 days</a></li>
+              <li><a class="dropdown-item" href="#">Last 90 days</a></li>
+              <li><a class="dropdown-item" href="#">Custom</a></li>
+            </ul>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-secondary ml-2">
+            New
+          </button>
+        </div>
+      </div>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Client</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1</th>
+            <td>OpenTHC</td>
+            <td>In-Transit</td>
+          </tr>
+          <tr>
+            <th scope="row">2</th>
+            <td>OpenTHC</td>
+            <td>Received</td>
+          </tr>
+        </tbody>
+      </table><!-- End of projects/samples/batches table -->
+    </div>
+
+  </main>
+
+{% endblock console_body %}
+
+{% block console_js %}
+  <script>
+    {% comment %} cannlytics.intake.initialize(); {% endcomment %}
+  </script>
+{% endblock console_js %}
+</html>

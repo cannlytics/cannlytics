@@ -1,0 +1,5 @@
+
+/* Adjust box-sizing for certain widgets */
+.content-box-sizing {
+  box-sizing: content-box;
+}

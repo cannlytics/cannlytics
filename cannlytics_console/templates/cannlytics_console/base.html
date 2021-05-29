@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en-US">
+ {% load static %}
+ 
+  <!--
+    Base Template | Cannlytics Console
+    Author: Keegan Skeate
+    Contact: <keegan@cannlytics.com>
+    Created: 1/7/2021
+    Updated: 5/4/2021
+    Hashes filled by build.py
+  -->
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+  <meta content="Super power your lab with free cannabis-testing software made with love and ready for you to plug and play or pop the hood and tinker to your heart's content." name="description"/>
+  <meta content="Keegan Skeate &lt;contact@cannlytics.com&gt;" name="author"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  
+  <!-- Icons -->
+  <link href="{% static 'cannlytics_console/images/favicon/cannlytics-icon.ico' %}" rel="icon"/>
+  <link href="{% static 'images/logos/favicon-32x32.png' %}" rel="icon" sizes="32x32" type="image/png"/>
+  <link href="{% static 'images/logos/favicon-16x16.png' %}" rel="icon" sizes="16x16" type="image/png"/>
+  <link href="{% static 'images/logos/apple-touch-icon.png' %}" rel="apple-touch-icon" sizes="180x180"/>
+  <link color="#e48632" href="{% static 'images/logos/safari-pinned-tab.svg' %}" rel="mask-icon"/>
+  <link href="{% static 'images/logos/favicon.ico' %}" rel="shortcut icon" type="image/x-icon"/>
+  <link href="{% static 'cannlytics_console/images/logos/favicon.ico' %}" rel="shortcut icon" type="image/x-icon"/>
+  
+  <!-- Title -->
+  <title>
+   {% block title %}Cannlytics{% endblock %}
+  </title>
+  
+  <!-- Bootstrap Stylesheet -->
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" rel="stylesheet"/>
+  
+  <!-- jQuery (TODO: Migrate to modern framework (Svelte?)) | Dependencies: bootstrap-datepicker -->
+  <script crossorigin="anonymous" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" src="https://code.jquery.com/jquery-3.5.1.slim.min.js">
+  </script>
+  
+  <!-- Cannlytics stylesheets -->
+  <link href="{% static 'cannlytics_console/plugins/cannlytics/cannlytics-64367f6a49afcb3057e7.css'%}" id="cannlytics_css" rel="stylesheet" type="text/css"/>
+  <link href="{% static 'cannlytics_console/plugins/cannlytics/console-64367f6a49afcb3057e7.css'%}" id="console_css" rel="stylesheet" type="text/css"/>
+  {% block page_css %}{% endblock %}
+  
+  <!-- Firebase JavaScript -->
+  <script src="https://www.gstatic.com/firebasejs/8.2.6/firebase-app.js">
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.6/firebase-auth.js">
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.6/firebase-firestore.js">
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.6/firebase-storage.js">
+  </script>
+  
+  <!-- Cannlytics module -->
+  <script id="cannlytics" src="{% static 'cannlytics_console/plugins/cannlytics/cannlytics-64367f6a49afcb3057e7.js'%}">
+  </script>
+ </head>
+ 
+  <!-- Body -->
+ <body class="base">
+  
+  <!-- Dynamic Page -->
+  <div id="page">
+   {% block page %}{% endblock %}
+  </div>
+  
+  <!-- JavaScript -->
+  {% comment %}
+  <script crossorigin="anonymous" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js">
+   {% endcomment %}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous">
+  </script>
+ </body>
+</html>
+{% block page_js %}{% endblock page_js %}

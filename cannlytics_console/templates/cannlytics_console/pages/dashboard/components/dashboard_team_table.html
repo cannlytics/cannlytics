@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+
+{% load static %}
+
+  <!-- Simple Instruments Table -->
+  <div class="card my-3">
+    <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
+      <h2 class="h6 text-dark">Team</h2>
+      <a
+        type="button"
+        class="btn btn-sm btn-outline-secondary ml-2"
+        href="/settings/team"
+      >
+        New
+      </a>
+    </div>
+
+    <!-- TODO: Dynamic placeholder for empty tables -->
+    <!-- TODO: Make reusable -->
+    {% if True %}
+      {% comment %} {% include "cannlytics_console/components/table_placeholder.html" with  %} {% endcomment %}
+      <div class="card-body text-center">
+        <a href="/settings/team">
+          <img
+            src="{% static 'cannlytics_console/images/icons/expert_plus_light.svg' %}"
+            style="height:75px;width:75px;"
+            class="light-only"
+          >
+          <img
+            src="{% static 'cannlytics_console/images/icons/expert_plus_dark.svg' %}"
+            style="height:75px;width:75px;"
+            class="dark-only"
+          >
+        </a>
+        <h2 class="h4 text-dark mt-3 mb-1">
+            Create or join a team.
+        </h2>
+        <p class="text-muted lh-sm">
+          <small>
+            Add team members to your organization
+            or join an organization to begin collaborating.
+          </small>
+        </p>
+        <a class="btn btn-outline-primary my-3" href="/settings/team">
+          Start a team
+        </a>
+      </div>
+
+    <!-- TODO: Populate table dynamically -->
+    {% else %}
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Analyses</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            
+            <tbody>
+              <tr>
+                <td>1,001</td>
+                <td>Lorem</td>
+                <td>ipsum</td>
+                <td>sit</td>
+              </tr>
+              <tr>
+                <td>1,002</td>
+                <td>amet</td>
+                <td>consectetur</td>
+                <td>elit</td>
+              </tr>
+              <tr>
+                <td>1,003</td>
+                <td>Integer</td>
+                <td>nec</td>
+                <td>Praesent</td>
+              </tr>
+              <tr>
+                <td>1,003</td>
+                <td>libero</td>
+                <td>Sed</td>
+                <td>ante</td>
+              </tr>
+              <tr>
+                <td>1,004</td>
+                <td>dapibus</td>
+                <td>diam</td>
+                <td>nisi</td>
+              </tr>
+              <tr>
+                <td>1,005</td>
+                <td>Nulla</td>
+                <td>quis</td>
+                <td>at</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+
+</html>

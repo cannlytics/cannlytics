@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+
+  <!-- Support Page -->
+  <!-- Created 1/15/2021 -->
+  {% extends "cannlytics_website/index.html" %}
+  {% load static %}
+
+  <!-- Title -->
+  {% block title %}Support | {{ general.title }}{% endblock %}
+
+  {% block material %}
+    <div class="products">
+      
+      <!-- Hero -->
+      {% include "cannlytics_website/components/heros/hero_featurette.html" with
+        title="Support and Consulting"
+        description="Cannlytics is free and always will be free. If you need assistance above and beyond the documentation, then you can consult with the dedicated Cannlytics team for a nominal price."
+        image_path="cannlytics_website/images/illustrations/cannlytics_communication.svg"
+        only
+      %}
+
+      <!-- Pricing Options -->
+      <div class="container mb-5">
+
+      <!-- AB TEST: Offers -->
+
+        <!-- Tiers -->
+        <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+          {% for item in support.pricing_tiers %}
+            <div class="col">
+              <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-gradient-{{ item.color }}">
+                  <h4 class="font-weight-normal text-white my-0">
+                    {{ item.name }}
+                  </h4>
+                </div>
+                <div class="card-body">
+                  <h1 class="text-dark card-title pricing-card-title">
+                    {{ item.price }}
+                  </h1>
+                  <ul class="text-dark list-unstyled mt-3 mb-4">
+                    {% for attribute in item.attributes %}
+                      <li class="fs-6 mb-1">
+                        <small class="serif text-muted">
+                          {{ attribute }}
+                        </small>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                  <a
+                    type="button"
+                    class="btn btn-block bg-gradient-{{ item.color }} text-white"
+                    href="{{ item.url }}"
+                  >
+                    {{ item.action }}
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div><!-- End of tiers -->
+
+        <!-- Historic Lab Result Migration -->
+        <div class="markdown">
+        <h1 class="pt-4">Historic Lab Result Migration</h1>
+        <p class="lead double-line simple-serif">
+          Your laboratory results are valuable to you and your clients,
+          therefore, you can have the Cannlytics Team work to migrate all of your
+          historic lab results into a Cannlytics compatible format for use
+          within Cannlytics and OpenTHC systems.
+        </p>
+        <p class="text-start mt-3">
+          <a
+            class="h4 fw-bold simple-serif underline-hover"
+            href="{% url 'contact' %}"
+          >
+            Request a quote &rarr;
+          </a>
+        </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Vines -->
+    {% include "cannlytics_website/components/art/vines.html" %}
+
+  {% endblock %}
+
+</html>

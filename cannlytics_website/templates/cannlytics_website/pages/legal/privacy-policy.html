@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+
+  <!-- Privacy Page -->
+  {% extends "cannlytics_website/index.html" %}
+
+  <!-- Title -->
+  {% block title %}Privacy | {{ general.title }}{% endblock %}
+
+  {% block material %}
+    <main role="main" class="container py-3 my-3">
+      <div class="d-flex mt-auto justify-content-center flex-wrap-reverse">
+        <div class="col-md-8 pb-5 markdown">
+          {{ privacy_policy | safe }}
+        </div>
+      </div>
+    </main>
+  {% endblock %}
+
+</html>

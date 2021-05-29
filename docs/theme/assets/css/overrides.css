@@ -1,0 +1,206 @@
+/*--------------------------------------------------------------------------
+  Cannlytics Website Style
+  Created: 4/30/2021
+  Updated: 5/1/2021
+---------------------------------------------------------------------------*/
+
+/* Static header */
+.md-header {
+  position: initial;
+  box-shadow: none !important;
+}
+
+.md-tabs {
+  border-bottom: none !important;
+}
+
+.md-header__title {
+  margin-left: 0;
+}
+
+/* Main container */
+.md-main {
+  display: none;
+}
+
+.md-content {
+  display: none;
+}
+
+.md-main__inner {
+  display: flex;
+  height: 100%;
+  margin: 0;
+}
+
+.md-announce__inner {
+  margin: .4rem auto !important;
+}
+
+/* Wave gradient background */
+.tx-container {
+  flex-grow: 1;
+  padding-top: 20px;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1123 258'><path d='M1124,2c0,0 0,256 0,256l-1125,0l0,-48c0,0 16,5 55,5c116,0 197,-92 325,-92c121,0 114,46 254,46c140,0 214,-167 572,-166Z' style='fill: hsla(0, 0%, 100%, 1)' /></svg>") no-repeat bottom,
+    linear-gradient(
+      to bottom,
+      var(--md-primary-fg-color),
+      #45B649 99%,
+      var(--md-default-bg-color) 99%
+    );
+}
+
+body[data-md-color-scheme="slate"] .tx-container {
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1123 258'><path d='M1124,2c0,0 0,256 0,256l-1125,0l0,-48c0,0 16,5 55,5c116,0 197,-92 325,-92c121,0 114,46 254,46c140,0 214,-167 572,-166Z' style='fill: hsla(232, 15%, 21%, 1)' /></svg>") no-repeat bottom,
+    linear-gradient(
+      to bottom,
+      var(--md-primary-fg-color),
+      hsla(160deg, 47%, 55%, 1) 99%,
+      var(--md-default-bg-color) 99%
+    );
+}
+
+/* Hero format */
+.tx-hero {
+  margin: 32px 2.8rem;
+  color: var(--md-primary-bg-color);
+  justify-content: center;
+}
+
+.tx-hero h1 {
+  margin-bottom: 1rem;
+  color: currentColor;
+  font-weight: 700
+}
+
+.tx-hero__content {
+  padding-bottom: 1rem;
+  margin: 0 auto;
+}
+
+.tx-hero__image{
+  width: 100%;
+  height: 25rem;
+  order: 1;
+}
+
+.tx-hero .md-button {
+  margin-top: .5rem;
+  margin-right: .5rem;
+  color: var(--md-primary-bg-color)
+}
+
+.tx-hero .md-button--primary {
+  background-color: var(--md-primary-bg-color);
+  color: var(--md-default-bg-color);
+  border-color: var(--md-primary-bg-color)
+}
+
+.tx-hero .md-button:focus,
+.tx-hero .md-button:hover {
+  background-color: var(--md-accent-fg-color);
+  color: var(--md-default-bg-color);
+  border-color: var(--md-accent-fg-color)
+}
+
+@media screen and (max-width:30em) {
+  .tx-hero h1 {
+      font-size: 1.4rem
+  }
+}
+
+@media screen and (min-width:60em) {
+
+  .tx-hero {
+    display: flex;
+    /* align-items: center; */
+    justify-content: center;
+  }
+
+  .tx-hero__content {
+    max-width: 22rem;
+    margin-top: 1.5rem;
+    margin-bottom: 3.5rem;
+    margin-left: 1.0rem;
+    margin-right: 4.0rem;
+    /* align-items: center; */
+  }
+}
+
+.shadow {
+  border-radius: 5px;
+  box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+}
+
+/*--------------------------------------------------------------------------
+  Actions
+---------------------------------------------------------------------------*/
+
+.md-content__inner p {
+  line-height: 2 !important;
+}
+
+.md-typeset a {
+  color: #009485;
+}
+
+.md-nav__link--active {
+  color: #009485 !important;
+}
+
+.md-nav__link--active:hover {
+  color: #ff6e42 !important;
+}
+
+.md-search-result__more summary {
+  color: #009485 !important;
+}
+
+.md-search-result__more summary:focus,
+.md-search-result__more summary:hover {
+  color: #ff6e42 !important;
+}
+
+/* Announcement actions */
+.md-announce .md-typeset a {
+  color: #ffa600 !important;
+}
+.md-announce .md-typeset a:hover {
+  color: #ff6e42 !important;
+}
+
+/*--------------------------------------------------------------------------
+  Header
+---------------------------------------------------------------------------*/
+
+.md-tabs__link {
+  font-weight: 600;
+}
+.md-tabs__link--active,
+.md-tabs__link:hover {
+  color: #1a1a1a;
+}
+body[data-md-color-scheme="slate"] .md-tabs__link--active,
+body[data-md-color-scheme="slate"] .md-tabs__link:hover {
+  color: #ffa600;
+}
+
+/*--------------------------------------------------------------------------
+  Mobile
+---------------------------------------------------------------------------*/
+
+/* Hide table of contents */
+/* @media screen and (min-width: 60em) {
+  .md-sidebar--secondary {
+    display: none;
+  }
+} */
+
+/* Hide navigation */
+/* @media screen and (min-width: 76.25em) {
+  .md-sidebar--primary {
+    display: none;
+  }
+} */

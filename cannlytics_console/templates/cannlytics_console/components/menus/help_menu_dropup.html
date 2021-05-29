@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<!--
+  Help Menu Drop Up | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com
+  Created: 5/4/2021
+  Updated: 5/5/2021
+-->
+{% load icon %}
+<div class="btn-group dropup">
+  <button
+    type="button"
+    class="btn dropdown-toggle simple-dropdown"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+  >
+    {% icon 'help-circle' width="18px" height="18px" class="text-secondary" %}
+  </button>
+  <ul class="dropdown-menu shadow">
+    <li>
+      <a class="dropdown-item text-dark" href="https://docs.cannlytics.com" target="_blank">
+        Documentation <sup>{% icon 'external-link' width="16px" height="16px" %}</sup>
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item text-dark" href="https://cannlytics.com/support" target="_blank">
+        Get support
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item text-dark" href="https://docs.cannlytics.com/about/license" target="_blank">
+        License
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item text-dark" href="https://github.com/cannlytics/cannlytics-console" target="_blank">
+        Source Code
+      </a>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    <li class="px-3"><small>Version {{ APP_VERSION_NUMBER }}</small></li>
+  </ul>
+</div>
+</html>

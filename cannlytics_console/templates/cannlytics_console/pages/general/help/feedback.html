@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<!-- Feedback -->
+<!-- URL: help/feedback -->
+<!-- Created 12/8/2020 -->
+{% extends "cannlytics_console/console.html" %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header-->
+    {% include "cannlytics_console/components/notifications/breadcrumbs.html" with
+      base_page="Help"
+      base_page_url="/help"
+      current_page="Feedback"
+    %}
+
+    <!-- Feedback form -->
+    <div class="col-md-8 px-0">
+      <p class="fs-6 mb-3">
+        Please share your feedback, feature requests, bugs, questions, comments,
+        complaints, thoughts, or ideas.
+      </p>
+      <div class="form-floating">
+        <textarea
+          class="form-control"
+          placeholder="Write your feedback here"
+          id="feedback-message"
+          style="height:250px"
+        ></textarea>
+        <label for="feedback-message">
+          Start writing your message...
+        </label>
+      </div>
+      <!-- Optional: File attachment -->
+      <div class="d-flex justify-content-end mt-3">
+        <button
+          class="btn bg-gradient-green text-white"
+          type="button"
+          onclick="cannlytics.settings.sendFeedback()"
+        >
+          Send Feedback
+        </button>
+      </div>
+    </div>
+
+  </main>
+{% endblock console_body %}
+</html>

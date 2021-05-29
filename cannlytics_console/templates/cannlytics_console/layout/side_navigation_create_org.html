@@ -1,0 +1,43 @@
+<!doctype>
+<html>
+  <!-- Sidebar Create Organization | Cannlytics Console -->
+  <!-- TODO: Make minimizable -->
+
+  {% load static icon %}
+
+  <nav
+    id="sidebar-menu"
+    class="col-md-3 col-lg-2 d-md-block bg-light sidebar sidebar-sticky collapse"
+  >
+    <div class="text-center pt-3 px-3">
+
+      <!-- Prompt -->
+      <img
+        src="{% static 'cannlytics_console/images/icons/multi-tone/lab.png' %}"
+        style="width:175px;"
+      >
+      <h4 class="fs-5 fw-bold">No organizations yet</h4>
+      <p class=""><small>Create or join an organization to get started.</small></p>
+      <a
+        class="w-100 text-link fs-6 pt-3"
+        type="button"
+        href="/organizations"
+      >
+        Create an Organization
+      </a>
+
+    <!-- Bottom option -->
+    <div class="w-100 text-center mt-5 mb-3 position-absolute bottom-0" style="left:0;">
+      <a
+        class="h6 btn btn-sm btn-outline-primary"
+        href="https://cannlytics.com/support"
+        target="_blank"
+      >
+        {% icon "life-buoy" class="me-2" height="16" width="16" %}
+        Get support
+      </a>
+    </div>
+
+    </div>
+  </nav>
+</html>

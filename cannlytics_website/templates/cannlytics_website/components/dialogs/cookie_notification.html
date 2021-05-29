@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <!-- Cookie notification -->
+  <!-- Created 1/9/20201 -->
+  <!-- TODO: Hidden by default, the cookie notification is shown if not already accepted -->
+  <div
+    id="accept-cookies"
+    class="toast position-fixed"
+    style="display:none; right:1rem; bottom:1rem; z-index:10002;"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    data-bs-autohide="false"
+  >
+    <div class="toast-header">
+      <span class="link-primary me-1" data-feather="alert-circle"></span>
+      <strong class="me-auto">This website uses cookies</strong>
+      {% comment %} <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button> {% endcomment %}
+    </div>
+    <div class="toast-body">
+      We use cookies to analyze site traffic and offer you a better browsing experience.
+      Learn about how we use cookies in our <a href="/privacy-policy">privacy policy</a>.
+      By using our site, you consent to our use of cookies.
+      <div class="mt-2 pt-2 border-top">
+        <!-- TODO: Accept cookie functionality-->
+        <button type="button" class="btn btn-primary btn-sm" onclick="cannlytics.website.acceptCookies();">
+          Agree
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast" href="https://google.com">
+          Disagree
+        </button>
+      </div>
+    </div>
+  </div>
+
+</html>

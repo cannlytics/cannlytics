@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <!-- Logistics Map -->
+  <!-- Created 12/10/2020 -->
+  {% extends "cannlytics_console/screens/logistics/logistics.html" %}
+  {% block section %}
+
+    <!-- TODO: Dynamic section -->
+    <section>
+      <div id="map" style="height:400px;width:100%;"></div>
+    </section>
+
+    <!-- Logistics JavaScript -->
+    {% block console_js %}
+      <script>
+        cannlytics.logistics.initializeMap();
+      </script>
+    {% endblock console_js %}
+
+  {% endblock %}
+
+</html>

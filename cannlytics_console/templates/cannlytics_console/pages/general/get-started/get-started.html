@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+<!-- Get Started Page -->
+<!-- Created 2/20/2021 -->
+{% extends "cannlytics_console/console.html" %}
+{% block console_body %}
+{% load static icon %}
+  <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mx-auto mb-5">
+
+    <!-- Dynamic get-started form -->
+    <div class="mx-auto px-5" style="max-width:900px;">
+      {% block unit %}{% endblock %}
+    </div>
+
+  </main>
+{% endblock %}
+</html>

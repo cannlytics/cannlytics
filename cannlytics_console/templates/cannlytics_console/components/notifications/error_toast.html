@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <!-- Error notification -->
+  <!-- Created 1/9/20201 -->
+  {% load icon %}
+  <div
+    id="error-notification"
+    class="toast toast-error position-fixed"
+    style="bottom:2rem; right:2rem; z-index:10005;"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    data-bs-autohide="true"
+  >
+    <div class="toast-header bg-light">
+
+      <!-- Icon -->
+      {% icon "alert-circle" class="error-icon me-2" %}
+
+      <!-- Title -->
+      <span
+        id="error-notification-title"
+        class="me-auto fs-5 text-dark"
+      ></span>
+
+      <!-- Close -->
+      <button
+        id="error-notification-close"
+        type="button"
+        class="custom-close-button position-static"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      >
+        {% icon "x" class="text-dark" %}
+      </button>
+
+    </div>
+
+    <!-- Message -->
+    <div class="toast-body">
+      <p class="fs-6" id="error-notification-message"></p>
+    </div>
+
+  </div>
+</html>

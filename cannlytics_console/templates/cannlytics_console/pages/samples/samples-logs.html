@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+<!--
+  Samples Logs Page | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 5/5/2021
+  Updated: 5/5/2021
+-->
+{% extends "cannlytics_console/pages/samples/samples.html" %}
+{% block section %}
+
+  <!-- Table -->
+  {% include "cannlytics_console/pages/clients/components/records_table.html" with records=records %}
+
+
+{% endblock %}
+</html>

@@ -1,0 +1,24 @@
+<!-- Placeholder -->
+<!-- Created 12/28/2020 -->
+{% load static %}
+
+<div class="card-body bg-transparent text-left">
+  <img
+    src="{% static image %}"
+    style="height:{{ image_height }}"
+  >
+  <h2 class="h3 serif text-dark mt-3 mb-1">
+    {{ title }}
+  </h2>
+  <p class="text-muted lh-sm w-75">
+    <small class="serif">{{ message }}</small>
+  </p>
+  {% if action %}
+    <a
+      class="btn bg-gradient-green text-white my-3"
+      href="{{ url }}"
+    >
+      {{ action }}
+    </a>
+  {% endif %}
+</div>

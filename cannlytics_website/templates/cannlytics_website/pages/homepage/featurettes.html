@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <!-- Featurettes -->
+  <!-- Created 1/5/2021 -->
+  {% load static %}
+  <div class="container marketing features">
+    {% for featurette in featurettes %}
+      <div
+        class="row featurette {% if forloop.counter|divisibleby:2 %}large-vertical-margin{% endif %}"
+      >
+        <div class="col-md-6 {% if forloop.counter|divisibleby:2 %}order-md-2{% endif %}">
+          <h2 class="featurette-heading display-4 serif large-line text-dark mt-0">
+            {{ featurette.title }}
+            {{ featurette.subtitle }}
+          </h2>
+        </div>
+        <div class="col-md-6 d-flex align-items-center {% if forloop.counter|divisibleby:2 %}order-md-1 ps-0 pe-5 {% else %}ps-5{% endif %}">
+          <figure class="figure">
+            <a href="https://console.cannlytics.com">
+              <img
+                src="{% static featurette.image %}"
+                class="figure-img img-fluid rounded shadow light-only"
+                width="100%"
+              >
+              <img
+                src="{% static featurette.image_dark %}"
+                class="figure-img img-fluid rounded shadow dark-only"
+                width="100%"
+              >
+            </a>
+            <figcaption class="figure-caption">{{ featurette.message }}</figcaption>
+          </figure>
+          
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+  <!-- Add Your Lab Page -->
+  <!-- Created 1/26/2021 -->
+  {% extends "cannlytics_website/index.html" %}
+  {% block title%}Add your lab | Cannlytics{% endblock %}
+  {% block material %}
+
+    <!-- Hero Banner -->
+    {% include "cannlytics_website/components/heros/hero_banner.html" with
+      title="Add your lab"
+      description="Have your lab listed in the directory of cannabis-testing laboratories so that you can be discovered by members of the community and people seeking cannabis-testing."
+      image_url="cannlytics_website/images/illustrations/chemistry_microscope.svg"
+      only
+    %}
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="labTabs" role="tablist">
+      {% for item in tabs %}
+        <li class="nav-item" role="presentation">
+          <a
+            id="{{ item.section }}-tab"
+            data-bs-toggle="tab"
+            class="nav-link serif fs-6 {% if item.active %}active{% endif %}"
+            aria-selected="{% if item.active %}true{% else %}false{% endif %}"
+            aria-controls="{{ item.section }}"
+            href="#{{ item.section }}"
+            role="tab"
+          >
+            {{ item.name }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content" id="labTabsContent">
+
+      <!-- Details -->
+      <div
+        id="details" 
+        class="tab-pane fade show active"
+        role="tabpanel"
+        aria-labelledby="details-tab"
+      >
+        {% include "./details.html" with lab=lab fields=fields only%}
+      </div>
+
+      <!-- Analyses -->
+      <div
+        id="analyses"
+        class="tab-pane fade"
+        role="tabpanel"
+        aria-labelledby="analyses-tab"
+      >
+        {% include "./analyses.html" with lab=lab only%}
+      </div>
+
+    </div><!-- End of tab content -->
+
+  {% endblock %}
+
+
+</html>

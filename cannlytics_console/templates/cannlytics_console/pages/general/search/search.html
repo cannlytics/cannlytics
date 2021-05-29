@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<!--
+  Search Page | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 5/14/2021
+  Updated: 5/14/2021
+-->
+{% extends "cannlytics_console/console.html" %}
+{% block title %}Search | Cannlytics{% endblock %}
+{% block console_body %}
+  <div>
+    <p class="fs-6 font-weight-light serif text-left mt-5 mb-4" style="line-height:2;">
+      The page you were looking for can not be found. Can you please
+      report this occurance to support@cannlytics.com?
+    </p>
+    <div class="simple-flex">
+      <button
+        class="btn bg-gradient-green text-white"
+        style="width: 191px;"
+        type="button"
+        onclick="cannlytics.settings.reportError({ 'status_code': 404, 'version': {{ APP_VERSION_NUMBER }} });"
+      >
+        Report Error
+      </button>
+    </div>
+    <p class="fs-6 font-weight-light serif text-left my-4" style="line-height:2;">
+      You can use the following links to
+      try to get to where you need to go.
+    </p>
+    <button
+      class="btn btn-link text-dark"
+      type="button"
+      onclick="goBack()"
+    >
+      Back
+    </button>
+    <a
+      class="btn btn-link text-dark"
+      type="button"
+      href="/"
+    >
+      Home
+    </a>
+    <a
+      class="btn btn-link text-dark"
+      type="button"
+      href="/account/sign-in"
+    >
+      Login
+    </a>
+  </div>
+{% endblock %}
+</html>

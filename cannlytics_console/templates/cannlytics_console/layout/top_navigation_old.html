@@ -1,0 +1,121 @@
+<!doctype html>
+<!-- Console Navigation -->
+<!-- Created 11/27/2020 -->
+{% load static icon %}
+<html>
+  <header
+    id="console-header"
+    class="navbar navbar-expand flex-md-nowrap border-bottom p-0"
+  >
+
+    <!-- Menu toggle -->
+    <a
+      class="nav-link navbar-toggle d-flex d-md-none ps-3 py-0"
+      href="#"
+      id="navbarNotificationMenu"
+      role="button"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#sidebarMenu"
+      aria-controls="sidebarMenu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      {% icon "menu" class="text-dark" %}
+    </a>
+
+    <!-- Logo -->
+    <div class="navbar-brand d-none d-md-flex align-items-center col-md-3 col-lg-2 mr-0 ps-2 px-md-3">
+      <img
+        src="{% static 'cannlytics_console/images/logos/cannlytics_logo_with_text_light.png' %}"
+        style="height:30px;"
+        class="pe-2"
+        id="organizationPhoto"
+        class="light-only"
+      >
+      <img
+        src="{% static 'cannlytics_console/images/logos/cannlytics_logo_with_text_dark.png' %}"
+        style="height:30px;"
+        class="pe-2"
+        id="organizationPhoto"
+        class="dark-only"
+      >
+    </div>
+
+    <!-- Organization Choice -->
+    <!-- TODO: Dynamically render up to 3 of user's organizations -->
+    <!-- TODO: Show organization if already created -->
+    {% include "cannlytics_console/components/menus/organization_menu.html" %}
+
+    <!-- Search -->
+    {% comment %} <form id="console-search" class="d-flex flex-grow-1 nav-search-form px-sm-3" role="search">
+      <input type="text" class="nav-search-input form-control" placeholder="Search" aria-label="Search" name="q">
+      <button class="nav-search-button btn btn-default p-0" type="submit"
+        style="transform:translateX(-32px);width:0;"
+      >
+        {% icon "search" height="16" width="16" %}
+      </button>
+    </form> {% endcomment %}
+
+    <!-- Options -->
+    <ul id="console-options" class="navbar-nav">
+
+      <!-- Optional: Notification menu -->
+      <!-- TODO: Dynamically render notifications -->
+      <!-- https://bbbootstrap.com/snippets/bootstrap-5-list-search-inputs-66815316 -->
+      {% comment %} <li class="nav-item dropdown">
+        <a
+          class="nav-link dropdown-toggle py-0"
+          href="#"
+          id="navbarNotificationMenu"
+          role="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          {% icon "bell" %}
+        </a>
+        <ul
+          class="dropdown-menu dropdown-menu-end mx-2 my-0 py-0"
+          aria-labelledby="navbarNotificationMenu"
+          style="border-bottom:none;"
+        >
+          <div class="notifications">
+            <h2 class="h5 text-dark p-2 mb-0">Notifications</h2>
+            <div class="notifications-item">
+              <img src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_calyx_green_background_square.png?alt=media&token=095cdaf5-fdb0-4d40-840d-7dc50209bd14">
+              <div class="text">
+                <p class="lh-1 text-dark mt-1 mb-0"><small>Welcome to the OpenTHC Community</small></p>
+                <p class="fs-6"><small>See you in the clubhouse.</small></p>
+              </div>
+            </div>
+            <h2 class="h5 text-center text-dark p-2 mb-0">
+              <a class="fs-6 d-block" href="/settings/notifications">View All</a>
+            </h2>
+          </div>
+        </ul>
+      </li> {% endcomment %}
+
+      <!-- TODO: e-lab notebook -->
+      <!-- Easily log / journal laboratory activities -->
+      {% comment %} <li class="nav-item d-flex align-items-center">
+        <a
+          class="nav-link py-0"
+          href="#"
+          role="button"
+        >
+          {% icon "book-open" class="text-dark" %}
+        </a>
+      </li> {% endcomment %}
+
+      <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
+        <input type="search" class="form-control" placeholder="Search...">
+      </form>
+
+      <!-- User Menu -->
+      {% include "cannlytics_console/components/menus/user_menu.html" with user=user %}
+
+    </ul>
+
+  </header>
+
+</html>

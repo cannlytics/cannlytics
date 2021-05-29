@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+  <!-- Cannlytics Console -->
+  <!-- Created: 11/26/2020 | Thanksgiving -->
+  <!-- Updated: 5/4/2021 -->
+  {% extends "cannlytics_console/base.html" %}
+  {% load static %}
+
+  <!-- Title -->
+  {% block title %}
+    {% if screen %}{{ screen|title }}{% else %}Dashboard{% endif %} | Cannlytics
+  {% endblock %}
+
+  <!-- Console header -->
+  {% block page_css %}
+    <script src="{% static 'cannlytics_console/plugins/ag-grid/ag-grid-community.min.noStyle.js'%}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'cannlytics_console/plugins/ag-grid/ag-grid.min.css'%}">
+    <link rel="stylesheet" type="text/css" href="{% static 'cannlytics_console/plugins/ag-grid/ag-theme-alpine.min.css'%}">
+    <link rel="stylesheet" type="text/css" href="{% static 'cannlytics_console/plugins/ag-grid/ag-theme-alpine-dark.min.css'%}">
+    {% block console_css %}{% endblock console_css %}
+  {% endblock %}
+
+  <!-- Console Template -->
+  {% block page %}
+
+    <!-- Set the theme after the body, but before the page, loads. -->
+    <script>
+      cannlytics.theme.setInitialTheme();
+    </script>
+
+    <!-- Top Navigation -->
+    {% include "cannlytics_console/layout/top_navigation.html" with
+      navbar=navbar
+      version=APP_VERSION_NUMBER
+      user=user
+      only
+    %}
+
+    <!-- Console -->
+    <div class="container-fluid">
+      <div class="row">
+
+        <!-- Verify email prompt -->
+        <!-- TODO: Show verify email promty if uesr isn't verified. -->
+        <!-- 
+          img
+
+        Please verify your email address
+        Before you dive in, can you please verify your email address? A verification email
+        has been sent to EMAIL.
+
+        Resend
+        -->
+        
+        <!-- Side Navigation -->
+        <!-- Optional: Custom sidebars -->
+        {% include "cannlytics_console/layout/side_navigation.html" with
+          screen=screen
+          sidebar=sidebar
+          user=user
+          organization=organization
+          only
+        %}
+
+        <!-- Dynamic Body -->
+        {% block console_body %}{% endblock console_body %}
+        
+      </div>
+    </div>
+
+    <!-- Footer -->
+    {% include "cannlytics_console/layout/footer.html" %}
+
+    <!-- Notifications -->
+    {% include "cannlytics_console/components/notifications/notification_toast.html" %}
+
+  {% endblock %}
+
+  <!-- Console JavaScript -->
+  {% block page_js %}
+
+    <!-- Initialize the console -->
+    <script>
+      cannlytics.app.initialize();
+    </script>
+
+    <!-- Page-specific JavaScript -->
+    {% block console_js %}{% endblock console_js %}
+
+  {% endblock page_js %}
+</html>

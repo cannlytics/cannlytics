@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<!--
+  Top Navigation | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 11/27/2020
+  Updated: 5/11/2021
+-->
+{% load static icon %}
+
+  <!-- Header -->
+  <header
+    id="console-header"
+    class="navbar navbar-expand flex-md-nowrap justify-content-between border-bottom px-0 py-0"
+  >
+
+    <!-- Menu toggle -->
+    <!-- FIXME: Show sidebar toggle on small screens
+      data-bs-toggle="collapse"
+      data-bs-target="#sidebarMenu"
+      aria-controls="sidebarMenu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+      d-md-none
+    -->
+    {% comment %} <a
+      id="navbar-menu-button"
+      class="nav-link navbar-toggle d-flex pe-0 py-0"
+      href="#"
+      role="button"
+      type="button"
+      onclick="cannlytics.ui.showSidebar();"
+    >
+      {% icon "menu" class="text-secondary" width="21px" height="21px" %}
+    </a> {% endcomment %}
+
+    <!-- Logo -->
+    <div class="navbar-brand d-none d-md-flex align-items-center col-md-3 col-lg-2 me-0 ps-2 pe-0 px-md-3">
+      <a
+        href="/"
+        data-bs-toggle="tooltip"
+        data-bs-placement="bottom"
+        title="Dashboard"
+      >
+        <img
+          src="{% static 'cannlytics_console/images/logos/cannlytics_logo_with_text_light.png' %}"
+          style="height:30px;"
+          class="pe-2"
+          id="organizationPhoto"
+          class="light-only"
+        >
+        <img
+          src="{% static 'cannlytics_console/images/logos/cannlytics_logo_with_text_dark.png' %}"
+          style="height:30px;"
+          class="pe-2"
+          id="organizationPhoto"
+          class="dark-only"
+        >
+      </a>
+
+      <!-- Website Link -->
+      <!-- TODO: Fancy tooltip -->
+      <a
+        class="nav-link text-secondary navbar-toggle d-flex px-2"
+        href="https://get.cannlytics.com"
+        target="_blank"
+        data-bs-toggle="tooltip"
+        data-bs-placement="bottom"
+        title="Website"
+      >
+        {% icon "globe" width="21px" height="21px" %}
+      </a>
+
+    </div>
+
+    <!-- Organization Choice -->
+    <!-- TODO: Dynamically render up to 3 of user's organizations -->
+    <!-- TODO: Show organization if already created -->
+    {% if organization %}
+      {% include "cannlytics_console/components/menus/organization_menu.html" %}
+    {% endif %}
+
+    <!-- Search -->
+    <!-- col-12 col-lg-auto me-lg-3 d-flex align-items-center -->
+    <!--  -->
+    <form
+      class="d-flex flex-grow-1 nav-search-form"
+      role="search"
+    >
+      <input
+        id="navigation-search"
+        class="nav-search-input form-control py-1 my-1"
+        placeholder="Search"
+        aria-label="Search"
+        type="text"
+        name="q"
+        spellcheck="false"
+      >
+      <button
+        class="nav-search-button btn btn-default p-0"
+        style="transform:translateX(-32px);width:0;"
+        type="submit"
+        onclick="cannlytics.app.search();"
+      >
+        {% icon "search" height="16" width="16" class="text-secondary" %}
+      </button>
+    </form>
+
+    <!-- Options -->
+    <ul id="console-options" class="navbar-nav float-end">      
+
+      <!-- Theme switch -->
+      <!-- Optional: Better moon icon -->
+      <button
+        class="btn px-2"
+        onClick="cannlytics.theme.changeTheme();"
+        data-bs-toggle="tooltip"
+        data-bs-placement="right"
+        title="Toggle the theme"
+      >
+        {% icon "sun" class="light-only text-secondary" %}
+        {% icon "moon" class="dark-only text-secondary" %}
+      </button>
+
+      <!-- Help Menu -->
+      {% include "cannlytics_console/components/menus/help_menu.html" with
+        version=version
+      %}
+
+      <!-- User Menu -->
+      {% include "cannlytics_console/components/menus/user_menu.html" with
+        user=user
+      %}
+
+    </ul>
+
+  </header>
+
+</html>

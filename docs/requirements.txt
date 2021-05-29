@@ -1,0 +1,21 @@
+# Cannlytics requirements
+# pip install -r requirements.txt
+mkdocstrings==0.15.0
+requests==2.25.1
+ulid-py==1.1.0
+beautifulsoup4==4.9.3
+Django==3.2
+# firebase_admin==5.0.0
+# googlemaps==4.4.5
+# google
+# google-cloud-firestore
+# google-api-python-client
+# google-auth-httplib2
+# google-auth-oauthlib
+# google-cloud-storage
+# google-cloud
+# setuptools
+# numpy
+# Cython
+# wheel
+# pandas

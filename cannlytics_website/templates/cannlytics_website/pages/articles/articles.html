@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<!--
+  Articles Page | Cannlytics
+  Created: 5/18/2021
+  Updated: 5/18/2021
+-->
+<!-- https://apnews.com/press-release/pr-newswire/university-of-louisville-technology-science-64b4448495f57d24d41da802914b6794 -->
+{% extends "cannlytics_website/index.html" %}
+{% load static %}
+{% block title %}Articles | Cannlytics{% endblock %}
+{% block page_css %}
+{% endblock %}
+{% block material %}
+
+  <!-- Hero Banner -->
+  {% include "cannlytics_website/components/heros/hero_banner.html" with
+    title="Articles"
+    only
+  %}
+
+  <!-- TODO: List articles -->
+
+  
+
+{% endblock %}
+</html>

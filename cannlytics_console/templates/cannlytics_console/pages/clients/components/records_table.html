@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<!--
+  Clients Table | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 5/5/2021
+  Updated: 5/5/2021
+-->
+<div class="card my-3">
+  <div class="card-body">
+    <h2 class="h6 mb-3 text-dark">Clients</h2>
+    <div class="table-responsive">
+
+      <!-- Placeholder if no records -->
+      {% if True %}
+        {% include "cannlytics_console/components/placeholders/placeholder.html" with
+          placeholder=records.placeholder
+          only
+        %}
+
+      <!-- Client records table -->
+      {% else %}
+        <!-- Clients Tabls-->
+        <div id="clients-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+{% block consoje_js %}
+  <!-- JavaScript -->
+  <script type="text/javascript" charset="utf-8">
+
+    // TODO: Get data from the back-end through the API.
+    console.log('Get clients from the API...');
+  
+    // specify the columns
+    const columnDefs = [
+      { field: "make" },
+      { field: "model" },
+      { field: "price" }
+    ];
+
+    // specify the data
+    const rowData = [
+      { make: "Toyota", model: "Celica", price: 35000 },
+      { make: "Ford", model: "Mondeo", price: 32000 },
+      { make: "Porsche", model: "Boxter", price: 72000 }
+    ];
+
+    // let the grid know which columns and what data to use
+    const gridOptions = {
+      columnDefs: columnDefs,
+      rowData: rowData
+    };
+
+    // lookup the container we want the Grid to use
+    const eGridDiv = document.querySelector('#clients-table');
+
+    // create the grid passing in the div to use together with the columns & data we want to use
+    // new agGrid.Grid(eGridDiv, gridOptions);
+
+  </script>
+{% endblock %}
+
+</html>

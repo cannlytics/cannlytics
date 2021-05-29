@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+  <!-- Analysis -->
+  <!-- Created 12/17/2020 -->
+  <!-- https://stackoverflow.com/questions/40534715/how-to-embed-matplotlib-graph-in-django-webpage -->
+  <!-- https://medium.com/@mdhv.kothari99/matplotlib-into-django-template-5def2e159997 -->
+  {% extends "cannlytics_console/console.html" %}
+  {% block console_body %}
+
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+      <!-- Header -->
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="fs-5 mb-0 lh-base">Analysis</h1>
+      </div>
+    
+      <!-- Concentration plot -->
+      {% comment %} <div style="width:400px;">
+        <canvas class="my-4" id="graph-concentrations" width="400" height="380"></canvas>
+      </div> {% endcomment %}
+      <div class="row">
+        <div class="col">
+          <!-- Analyses table -->
+          {% include "cannlytics_console/screens/analysis/analyses_table.html" %}
+        </div>
+        <div class="col">
+          <!-- Instruments table -->
+          {% include "cannlytics_console/screens/analysis/instruments_table.html" %}
+        </div>
+      </div>
+
+      <!-- Extractions table -->
+      {% include "cannlytics_console/screens/analysis/extractions_table.html" %}
+
+      <!-- Calculations table -->
+      {% include "cannlytics_console/screens/analysis/calculations_table.html" %}
+
+    </main>
+
+  {% endblock console_body %}
+
+  <!-- Analysis JavaScript -->
+  {% block console_js %}
+    {% comment %} <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script> {% endcomment %}
+    {% comment %} <script src="{% static 'cannlytics_console/plugins/chartjs/chartjs-chart-matrix.min.js' %}"></script> {% endcomment %}
+    <script>
+      {% comment %} cannlytics.analysis.initialize(); {% endcomment %}
+    </script>
+  {% endblock console_js %}
+</html>

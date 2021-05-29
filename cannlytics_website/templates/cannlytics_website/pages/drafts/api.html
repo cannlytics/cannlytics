@@ -1,0 +1,78 @@
+<!-- Home Page -->
+{% extends "cannlytics_website/index.html" %}
+
+{% load static %}
+
+{% block material %}
+  <div class="homepage pb-5">
+
+    <!-- Main Feature -->
+    <div class="position-relative overflow-hidden light-green-fade py-3 my-3 text-center text-lg-left">
+      <div class="d-flex mt-auto justify-content-center flex-wrap-reverse">
+        <div class="col-lg-5">
+          <h1 class="display-4 font-weight-normal">
+            API
+          </h1>
+          <p class="lead font-weight-normal mb-4">
+
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vine -->
+    <img class="side-vine" height="300" src="{% static 'cannlytics_website/images/theme/bean_stalk_curly.svg' %}">
+
+<!-- Features -->
+<div class="container">
+
+    <!-- Feature -->
+    <div class="row align-items-center justify-content-center">
+      <div class="col-9 col-md-6 pt-3 px-3 pe-lg-5 pt-md-5 text-start overflow-hidden">
+        <div class="my-3 py-3">
+          <img src="{% static 'cannlytics_website/images/lab_icons/cannlytics_atom.svg' %}"
+            width="50"
+            class="mb-2"
+          >
+          <h2 class="display-5">Installation</h2>
+          <p class="lead">
+            Installing the
+            <span class="brand-font">Cannlytics Engine</span>
+            into your lab is easy.
+          </p>
+          <p class="mb-4"><small>The engine provides you with...</small><p>
+          <a
+            type="button"
+            class="btn btn-outline-success"
+            onclick="location.href='{% url 'cannlytics_docs:index' %}'"
+          >
+            Installation Guide
+          </a>
+        </div>
+      </div>
+      <div class="col-9 col-md-6 px-3 ps-lg-5 py-md-5 text-start overflow-hidden bg-light">
+        <p class="lead"><code>Example Code</code></p>
+      </div>
+    </div>
+
+    <!-- Vine -->
+    <img class="side-vine side-vine-right" height="300" src="{% static 'cannlytics_website/images/theme/bean_stalk_curly.svg' %}">
+
+  </div>
+  </div>
+
+  <!-- Vines -->
+  <img src="{% static 'cannlytics_website/images/theme/bean_stalk_simple.svg' %}"
+    class="side-vine side-vine-right straight-vine-right"
+    height="100" 
+  >
+  <img src="{% static 'cannlytics_website/images/theme/bean_stalk_complex.svg' %}"
+    class="side-vine side-vine-right straight-vine-right"
+    height="300" 
+  >
+  <img src="{% static 'cannlytics_website/images/theme/bean_stalk_simple.svg' %}"
+    class="side-vine side-vine-right straight-vine-right vine-nudge-left"
+    height="150" 
+  >
+
+{% endblock %}

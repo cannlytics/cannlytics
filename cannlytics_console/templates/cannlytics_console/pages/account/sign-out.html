@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<!-- Password Logout Page -->
+<!-- Created 12/5/2020 -->
+{% extends "./base_sign_in.html" %}
+{% block title %}Logged Out | Cannlytics{% endblock %}
+{% block login_form %}
+  <div class="text-center">
+    <p class="h6 font-weight-light serif text-center mt-5 mb-4">
+      You have been logged out. Navigating home in
+      <span id="navigation-countdown">10</span>...
+    </p>
+    <a
+      class="btn bg-gradient-green text-white"
+      style="width: 191px;"
+      type="button"
+      href="/account/sign-in"
+    >
+      Sign In
+    </a>
+  </div>
+
+  <!-- Redirect to login JavaScript -->
+  <script>
+    var count = 10;
+    var countdownElement = document.getElementById('navigation-countdown');
+    setInterval(function() {
+      count -= 1
+      countdownElement.textContent = count.toString();
+      if (count === 0) document.location.href = '/account/sign-in';
+    }, 1000);
+  </script>
+
+{% endblock %}
+
+</html>

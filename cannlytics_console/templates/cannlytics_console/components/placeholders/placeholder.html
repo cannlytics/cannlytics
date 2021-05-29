@@ -1,0 +1,24 @@
+<!-- Placeholder -->
+<!-- Created 12/28/2020 -->
+{% load static %}
+
+<div class="card-body text-center">
+  <a href="{{ placeholder.url }}">
+    <img
+      src="{% static placeholder.image %}"
+      style="height:{{ placeholder.height }}"
+    >
+  </a>
+  <h2 class="h4 text-dark mt-3 mb-1">
+    {{ placeholder.title }}
+  </h2>
+  <p class="text-muted lh-sm">
+    <small>{{ placeholder.message }}</small>
+  </p>
+  <a
+    class="btn btn-outline-primary my-3"
+    href="{{ placeholder.url }}"
+  >
+    {{ placeholder.action }}
+  </a>
+</div>

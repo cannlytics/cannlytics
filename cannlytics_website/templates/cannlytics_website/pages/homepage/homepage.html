@@ -1,0 +1,130 @@
+<!-- Home Page -->
+<!-- Created 1/5/2020 -->
+{% extends "cannlytics_website/index.html" %}
+{% load static %}
+{% block title %}Welcome | {{ general.title }}{% endblock %}
+{% block material %}
+  <div class="homepage pb-5 overflow-hidden">
+
+    <!-- Hero -->
+    {% include "./hero.html" with hero=homepage.hero only %}
+
+    <!-- Features -->
+    {% include "./features.html" with features=homepage.features only %}
+
+    <!-- Wave -->
+    <div class="wave small upside-down" >
+      <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+        <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
+      </svg>
+    </div>
+
+    <!-- Featurettes -->
+    {% include "./featurettes.html" with featurettes=homepage.featurettes only %}
+
+    <!-- Demo -->
+    {% include "./demo.html" %}
+
+    <!-- Call to Action -->
+    {% include "./call_to_action.html" with general=general %}
+
+  </div>
+
+  <!-- Vines -->
+  {% include "cannlytics_website/components/art/vines.html" %}
+
+{% endblock %}
+
+<!-- Homepage JavaScript -->
+{% block page_js %}
+  <script>
+
+    function CopyToClipboard(containerid) {
+      /*
+       * Copy a block of code to the clipboard.
+       */
+      if (window.getSelection) {
+        if (window.getSelection().empty) { // Chrome
+          window.getSelection().empty();
+        } else if (window.getSelection().removeAllRanges) { // Firefox
+          window.getSelection().removeAllRanges();
+        }
+      } else if (document.selection) { // IE
+        document.selection.empty();
+      }
+      if (document.selection) {
+        var range = document.body.createTextRange();
+        range.moveToElementText(document.getElementById(containerid));
+        range.select().createTextRange();
+        document.execCommand('copy');
+      } else if (window.getSelection) {
+        var range = document.createRange();
+        range.selectNode(document.getElementById(containerid));
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+      }
+    }
+
+    $('.copy-btn').on('click', function(event){
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      console.log(event.currentTarget);
+      var par = $(`#${event.currentTarget.id}`).siblings()[0];
+      var code = $(`#${par.id}`).find('.code-block')[0];
+      CopyToClipboard(code.id);
+    });
+
+  </script>
+{% endblock %}
+
+
+<!-- JavaScript SCRAP -->
+
+{% comment %} <script>
+  (function () {
+    function SelectText(element) {
+      var range;
+      var selection;
+      if (document.body.createTextRange) {
+        range = document.body.createTextRange();
+        range.moveToElementText(element);
+        range.select();
+        copy2clipboard(range.text, element.innerHTML);
+        document.getSelection().removeAllRanges();
+      } else if (window.getSelection) {
+        selection = window.getSelection();
+        range = document.createRange();
+        range.selectNodeContents(element);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        copy2clipboard(selection.toString(), element.innerHTML);
+        selection.removeAllRanges();
+      }
+    };
+    function copy2clipboard(text, html) {
+      function listener(e) {
+        e.clipboardData.setData('text/plain', text);
+        e.clipboardData.setData('text/html', html);
+        e.preventDefault();
+      }
+      document.addEventListener('copy', listener);
+      document.execCommand('copy');
+      document.removeEventListener('copy', listener);
+    };
+    $('#notebook-container').on('mouseenter', '.codehilite', function () {
+      if ($(this).find('i:last').length) {
+        $(this).find('i:last').show();
+      } else {
+        $(this).css({
+          'position': 'relative'
+        }).append($('<i style=\"position:absolute; top:7px; left: 7px;\" class=\"fa-copy fa\">Copy</i>').on('click', function () {
+          SelectText($(this).parent().find('.codehilite') [0]);
+          $(this).slideUp();
+        }));
+      }
+    });
+    $('#notebook-container').on('mouseleave', '.codehilite', function () {
+      $(this).find('i:last').hide();
+    });
+  }) ();
+</script> {% endcomment %}

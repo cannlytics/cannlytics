@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<!--
+  Videos Page | Cannlytics
+  Created: 2/23/2021
+  Updated: 5/18/2021
+-->
+  <!--  -->
+  {% extends "cannlytics_website/index.html" %}
+  {% load static %}
+  {% block title %}Videos | Cannlytics{% endblock %}
+  {% block page_css %}
+  {% endblock %}
+  {% block material %}
+
+  <!-- https://cloudinary.com/documentation/cloudinary_video_player -->
+    <!-- Hero Banner -->
+    {% include "cannlytics_website/components/heros/hero_banner.html" with
+      title="Videos"
+      only
+    %}
+
+    
+    
+    {% comment %} <!-- Archive list -->
+    <div class="album py-5 my-5">
+      <div class="container">
+        {% for item in events %}
+          <div
+            class="row featurette"
+            style="{% if forloop.counter|divisibleby:2 %}margin-top:10rem;margin-bottom:10rem;{% endif %}"
+          >
+            <div class="col-md-6 {% if forloop.counter|divisibleby:2 %}order-md-2{% endif %}">
+              <h2 class="featurette-heading display-4 serif large-line text-dark mt-0">
+                {{ item.name }}
+              </h2>
+              <p class="text-secondary fs-5 double-line my-4">
+                {{ item.description }}
+              </p>
+            </div>
+            <div class="col col-md-6 d-flex justify-content-center {% if forloop.counter|divisibleby:2 %}order-md-1 ps-0 pe-5 {% else %}ps-5{% endif %}">
+              <figure class="figure">
+                <a href="{{ item.url }}">
+                  <img
+                    src="{{ item.image }}"
+                    class="figure-img img-fluid rounded shadow"
+                    style="max-height:420px;max-width:100%;"
+                  >
+                </a>
+                <figcaption class="figure-caption">
+                  <div>When: {{ item.date }} {{ item.time }}</div>
+                  <div>Price: {{ item.price }}</div>
+                  <a
+                    class="btn btn-large bg-gradient-green text-white mb-5 mt-2"
+                    href="{{ item.url }}"
+                  >
+                    Register
+                  </a>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div><!-- End of archive list --> {% endcomment %}
+
+  {% endblock %}
+
+  <!-- Archive JavaScript -->
+  {% comment %} {% block page_js %}
+    <script>
+    </script>
+  {% endblock %} {% endcomment %}
+
+</html>

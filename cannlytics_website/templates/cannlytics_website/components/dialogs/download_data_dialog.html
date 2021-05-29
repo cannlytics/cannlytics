@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <!-- Download Data Dialog -->
+  <!-- Created 1/13/20201 -->
+  {% load static %}
+  <div
+    class="modal fade"
+    id="downloadDialog"
+    tabindex="-1"
+    aria-labelledby="downloadDialogLabel"
+    aria-hidden="false"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Dialog header -->
+        <div class="modal-header bg-light">
+          <h5
+            id="downloadDialogLabel"
+            class="modal-title text-dark serif h3"
+          >
+            Download Data
+          </h5>
+          <button type="button" class="btn-close btn-sm light-only" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close btn-sm btn-close-white dark-only" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <!-- Dialog body -->
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm border-end">
+              <h1 class="h4 serif text-dark card-title pricing-card-title mb-3">
+                Free labs dataset
+              </h1>
+              <ul class="text-dark text-start w-75">
+                <li class="fs-6 mb-1"><small class="serif text-dark">
+                  14 data points
+                </small></li>
+              </ul>
+            </div>
+            <div class="col-sm">
+              <h1 class="h4 serif text-dark card-title pricing-card-title mb-3">
+                Full labs dataset
+              </h1>
+              <ul class="text-dark text-start w-75">
+                <li class="fs-6 mb-1"><small class="serif text-dark">
+                  29 data points
+                </small></li>
+                <li class="fs-6 mb-1"><small class="serif text-dark">
+                  Latitude and longitude
+                </small></li>
+                <li class="fs-6 mb-1"><small class="serif text-dark">
+                  Search and viewing statistics
+                </small></li>
+              </ul>
+              <button
+                id="promo-button"
+                class="btn btn-sm btn-light"
+                onclick="cannlytics.community.showPromo();"
+              >
+                <span class="me-1" data-feather="tag"></span>
+                Use promo code
+              </button>
+              <div id="promo-input-group" class="visually-hidden input-group mb-3">
+                <input
+                  id="promo-input"
+                  class="form-control"
+                  placeholder="Code"
+                  aria-label="Code"
+                  aria-describedby="download-button"
+                  type="text"
+                >
+                <button
+                  id="download-button"
+                  class="btn btn-outline-secondary"
+                  onclick="cannlytics.community.downloadLabs({subscription: 'code'});"
+                  type="button"
+                >
+                  Download
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dialog actions -->
+        <div class="modal-footer bg-light d-flex">
+          <button
+            type="button"
+            class="btn flex-grow-1 bg-gradient-green text-white"
+            onclick="cannlytics.community.downloadLabs({subscription: 'free'});"
+          >
+            Download free data
+          </button>
+          <!-- TODO: Pass plan_id from Django from Firestore -->
+          <a
+            type="button"
+            class="btn flex-grow-1 bg-gradient-orange text-white"
+            href="/subscriptions/checkout?id=P-7PY14290YP4037846MACLL6Q"
+          >
+            Get all data for $1
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</html>

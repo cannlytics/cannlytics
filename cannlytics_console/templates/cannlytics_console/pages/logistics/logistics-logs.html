@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<!-- Logs Page -->
+<!-- URL: logistics/logs -->
+<!-- Created 12/10/2020 -->
+{% extends "cannlytics_console/screens/logistics/logistics.html" %}
+
+{% block section %}
+
+  <!-- Logs Table -->
+  <div class="card my-3">
+    <div class="card-body">
+      <h2 class="h6 mb-3 text-dark">Logs</h2>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Time</th>
+              <th scope="col">Action</th>
+              <th scope="col">User</th>
+              <th scope="col">Activity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">1</th>
+              <td>Mark</td>
+              <td>Otto</td>
+              <td>@mdo</td>
+            </tr>
+            <tr>
+              <th scope="row">2</th>
+              <td>Jacob</td>
+              <td>Thornton</td>
+              <td>@fat</td>
+            </tr>
+            <tr>
+              <th scope="row">3</th>
+              <td colspan="2">Larry the Bird</td>
+              <td>@twitter</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+</html>

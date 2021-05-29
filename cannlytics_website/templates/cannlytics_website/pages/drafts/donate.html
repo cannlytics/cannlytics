@@ -1,0 +1,36 @@
+<!-- Donations Page -->
+<!-- 11/17/2020 -->
+{% extends "cannlytics_website/index.html" %}
+{% load static %}
+{% block title %}Donate | {{ general.title }}{% endblock %}
+{% block material %}
+  <div class="donations pb-5">
+
+    <!-- Hero -->
+    <div class="position-relative overflow-hidden light-green-fade py-3 my-3 text-center text-lg-left">
+      <div class="d-flex mt-auto justify-content-center flex-wrap-reverse">
+        <div class="col-lg-5">
+          <h1 class="display-4 font-weight-normal">
+            Donate
+          </h1>
+          <p class="lead font-weight-normal mb-4">
+
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Donations -->
+    <div class="container">
+        <div class="row align-items-center justify-content-center">
+          <p>TODO: Implement Stripe donations</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Vines -->
+  {% include "cannlytics_website/components/art/vines.html" %}
+
+{% endblock %}

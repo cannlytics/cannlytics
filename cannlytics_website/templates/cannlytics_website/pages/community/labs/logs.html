@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+
+  <!-- Lab Logs -->
+  <!-- Created 1/24/2021  -->
+
+  <!-- Placeholder -->
+  <div class="col mt-5">
+    {% include "cannlytics_website/components/placeholders/placeholder.html" with
+      url="#"
+      image="cannlytics_website/images/illustrations/chemist.svg"
+      image_height="120px"
+      title="No activity"
+      message="Changes made to this lab's data will be listed here."
+      only
+    %}
+  </div>
+
+  <!-- TODO: Table of analyses -->
+
+  <!-- Logs JavaScript -->
+  <script>
+    cannlytics.lab.initializeLogs("{{ lab.id }}"); // Passing org ID from Django.
+  </script>
+
+</html>

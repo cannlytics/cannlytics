@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<!-- Templates -->
+<!-- URL: intake/templates -->
+<!-- Created 1/13/2021 -->
+{% extends "cannlytics_console/console.html" %}
+{% load static %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Breadcrumbs -->
+    {% include "cannlytics_console/components/breadcrumbs.html" with
+      breadcrumbs=templates.breadcrumbs
+      only
+    %}
+
+    <!-- Body -->
+    <div class="col">
+
+      <!-- Transfer samples -->
+      <h2 class="h6 my-3">Edit templates</h2>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Handle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+          </tr>
+          <tr>
+            <th scope="row">2</th>
+            <td>Jacob</td>
+            <td>Thornton</td>
+            <td>@fat</td>
+          </tr>
+          <tr>
+            <th scope="row">3</th>
+            <td colspan="2">Larry the Bird</td>
+            <td>@twitter</td>
+          </tr>
+        </tbody>
+      </table><!-- End of templates table -->
+
+    </div><!-- End of Body -->
+
+  </main>
+  {% endblock %}
+</html>
