@@ -67,7 +67,7 @@ typings/
 *.sqlite3
 
 # Ignore Webpack hashes
-cannlytics_console/static/cannlytics_console/webpack-stats.json
+console/static/console/webpack-stats.json
 
 # Ignore documentation build
 docs/build
@@ -75,3 +75,6 @@ docs/build
 # Ignore Firebase source control
 # https://firebase.google.com/docs/cli/#source_control_aliases
 .firebasesrc
+
+# Ignore datasets created or retrived with data tools.
+tools/data/.datasets
