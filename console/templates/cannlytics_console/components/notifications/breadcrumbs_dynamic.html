@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <!-- Breadcrumbs
+    e.g. [
+      {"title": "Settings", "url": "/settings"},
+      {"title": "Organizations", "url": "/settings/organizations"},
+      {"title": "Cannlytics", "active": True}
+    ]
+  -->
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+      <ol class="breadcrumb bg-transparent p-0 mb-0">
+        {% for item in breadcrumbs %}
+          {% if item.active %}
+            <li class="breadcrumb-item active fs-5" aria-current="page">
+              {{ item.title }}
+            </li>
+          {% else %}
+            <li class="breadcrumb-item fs-5">
+              <a class="action" href="{{ item.url }}">
+                {{ item.title }}
+              </a>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ol>
+    </nav>
+  </div>
+</html>

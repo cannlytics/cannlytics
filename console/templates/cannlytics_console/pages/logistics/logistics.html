@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <!-- Logistics -->
+  <!-- Created 12/10/2020 -->
+{% extends "cannlytics_console/console.html" %}
+{% load static %}
+{% block console_body %}
+
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header -->
+    <div class="col pt-3 pb-2 mb-3">
+      <h1 class="fs-5 mb-0 lh-base mb-3">Logistics</h1>
+      <ul class="nav nav-tabs">
+      {% for item in logistics.tabs %}
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == item.section %}active{% endif %}"
+            aria-current="{% if section == item.section %}page{% endif %}"
+            href="{{ item.url }}"
+          >
+            {{ item.name }}
+          </a>
+        </li>
+      {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Dynamic section -->
+    <section>
+      {% block section %}{% endblock %}
+    </section>
+
+    <!-- Logistics JavaScript -->
+    {% comment %} {% block console_js %}
+      <script>
+        cannlytics.logistics.initialize();
+      </script>
+    {% endblock console_js %} {% endcomment %}
+
+  </main>
+
+{% endblock %}
+</html>

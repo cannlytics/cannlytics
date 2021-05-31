@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<!-- Sign Up Complete Page -->
+<!-- Created 12/5/2020 -->
+{% extends "./base_sign_in.html" %}
+
+{% block login_form %}
+
+  <!-- Message -->
+  <div class="text-center">
+    <p class="fs-6 lh-lg font-weight-light serif text-center mt-5 mb-4">
+      Sign up successful and verification email sent.
+      Please verify your email so you can get started.
+    </p>
+    <a
+      class="btn bg-gradient-green text-white"
+      style="width: 191px;"
+      type="button"
+      href="/account/sign-in"
+    >
+      Sign In
+    </a>
+  </div>
+
+{% endblock %}
+</html>

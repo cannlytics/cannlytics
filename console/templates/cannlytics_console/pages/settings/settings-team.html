@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<!-- Team -->
+<!-- URL: settings/team -->
+<!-- Created 12/9/2020 -->
+{% extends "cannlytics_console/console.html" %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header-->
+    {% include "cannlytics_console/components/notifications/breadcrumbs.html" with
+      base_page="Settings"
+      base_page_url="/settings"
+      current_page="Team"
+    %}
+
+    <!-- Body -->
+    <div class="col">
+
+      <!-- Team table -->
+      <h2 class="h6 my-3">Your team members</h2>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Handle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+          </tr>
+          <tr>
+            <th scope="row">2</th>
+            <td>Jacob</td>
+            <td>Thornton</td>
+            <td>@fat</td>
+          </tr>
+          <tr>
+            <th scope="row">3</th>
+            <td colspan="2">Larry the Bird</td>
+            <td>@twitter</td>
+          </tr>
+        </tbody>
+      </table><!-- End of table -->
+
+    </div><!-- End of Body -->
+
+  </main>
+{% endblock console_body %}
+</html>

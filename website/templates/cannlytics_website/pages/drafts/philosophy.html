@@ -1,0 +1,15 @@
+<!-- Philosophy Page -->
+<!-- Created 11/17/2020 -->
+{% extends "cannlytics_website/index.html" %}
+
+{% block title %}Philosophy | {{ general.title }}{% endblock %}
+
+{% load static %}
+
+{% block material %}
+  <div class="philosophy">
+    <div class="container markdown py-3">
+      {{ markdown | safe }}
+    </div>
+  </div>
+{% endblock %}

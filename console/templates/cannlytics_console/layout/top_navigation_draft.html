@@ -1,0 +1,53 @@
+<!doctype html>
+<!-- Console Navigation -->
+<!-- Created 11/27/2020 -->
+{% load static icon %}
+<html>
+  <header id="console-header" class="py-3 border-bottom">
+    <div class="container-fluid d-grid gap-3 align-items-center" style="grid-template-columns: 1fr 2fr;">
+      
+      
+      <div class="dropdown">
+        <a href="#" class="d-flex align-items-center col-lg-4 mb-2 mb-lg-0 link-dark text-decoration-none dropdown-toggle" id="dropdownNavLink" data-bs-toggle="dropdown" aria-expanded="false">
+          <img
+              src="{% static 'cannlytics_console/images/logos/cannlytics_logo_with_text_light.png' %}"
+              style="height:30px;"
+              class="pe-2"
+              id="organizationPhoto"
+              class="light-only"
+            >
+            <img
+              src="{% static 'cannlytics_console/images/logos/cannlytics_logo_with_text_dark.png' %}"
+              style="height:30px;"
+              class="pe-2"
+              id="organizationPhoto"
+              class="dark-only"
+            >
+        </a>
+        <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownNavLink">
+          <li><a class="dropdown-item active" href="#">Overview</a></li>
+          <li><a class="dropdown-item" href="#">Inventory</a></li>
+          <li><a class="dropdown-item" href="#">Customers</a></li>
+          <li><a class="dropdown-item" href="#">Products</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#">Reports</a></li>
+          <li><a class="dropdown-item" href="#">Analytics</a></li>
+        </ul>
+      </div>
+
+      <div class="d-flex justify-content-end">
+        {% comment %} <form class="w-100 me-3">
+          <input type="search" class="form-control" placeholder="Search...">
+        </form> {% endcomment %}
+        <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
+          <input type="search" class="form-control" placeholder="Search...">
+        </form>
+
+        <!-- User Menu -->
+      {% include "cannlytics_console/components/menus/user_menu.html" with user=user %}
+        
+      </div>
+    </div>
+  </header>
+
+</html>

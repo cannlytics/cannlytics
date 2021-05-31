@@ -1,0 +1,41 @@
+
+<!doctype html>
+<html>
+<!-- Organization Menu -->
+<!-- Created 4/18/2021 -->
+{% load icon %}
+
+  <div class="d-none d-md-flex">
+    <div class="dropdown">
+      <a
+        class="dropdown-toggle d-flex align-items-center btn btn-light text-dark py-1"
+        href="#"
+        id="navbarLabChoice"
+        role="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        <span id="userOrganization" class="brand-font fs-6">
+          {% if not organization %}
+            {% icon "alert-circle" class="text-primary me-1" height="16" width="16" %}
+              Set your organization
+          {% endif %}
+        </span>
+      </a>
+      <ul
+        class="dropdown-menu dropdown-menu-left"
+        aria-labelledby="navbarLabChoice"
+      >
+        <li>
+          <a
+            class="dropdown-item"
+            href="/settings/organizations"
+          >
+            Start or join an organization
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</html>

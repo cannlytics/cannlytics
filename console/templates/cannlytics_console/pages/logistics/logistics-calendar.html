@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<!-- Calendar -->
+<!-- Created 12/10/2020 -->
+<!-- URL: logistics/calendar -->
+<!-- https://fullcalendar.io/docs/css-customization -->
+<!-- https://fullcalendar.io/docs/view-render-hooks -->
+{% extends "cannlytics_console/screens/logistics/logistics.html" %}
+{% load static %}
+
+<!-- Calendar CSS -->
+{% block console_css %}
+  {% comment %} <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js"></script>{% endcomment %}
+  <link
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.css"
+    rel="stylesheet"
+    type="text/css"
+  >
+{% endblock console_css %}
+
+<!-- Calendar Template -->
+{% block section %}
+ 
+  <!-- Calendar -->
+  <section>
+    <div class="card my-3">
+      <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
+        <h2 class="h6 text-dark">Transfers</h2>
+      </div>
+      {% include "cannlytics_console/components/placeholders/placeholder.html" with
+        placeholder=calendar.placeholder
+        only
+      %}
+    </div>        
+  </section>
+  <div id="calendar"></div>
+
+{% endblock section %}
+
+<!-- Logistics JavaScript -->
+{% block console_js %}
+  <script>
+    cannlytics.logistics.initialize();
+  </script>
+{% endblock console_js %}
+</html>

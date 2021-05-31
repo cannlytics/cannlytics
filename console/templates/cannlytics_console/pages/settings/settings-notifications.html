@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<!-- Notifications -->
+<!-- URL: settings/notifications -->
+<!-- Created 12/8/2020 -->
+{% extends "cannlytics_console/console.html" %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header-->
+    {% include "cannlytics_console/components/notifications/breadcrumbs.html" with
+      base_page="Settings"
+      base_page_url="/settings"
+      current_page="Notifications"
+    %}
+
+    <!-- Body -->
+    <div class="col">
+
+      <!-- Notification Settings -->
+      <h1 class="h4">Notification Settings</h1>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+        <label class="form-check-label" for="flexRadioDefault1">
+          Off
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
+        <label class="form-check-label" for="flexRadioDefault2">
+          On
+        </label>
+      </div>
+
+      <!-- Notifications Table -->
+      <h1 class="h4 mt-5">Notifications</h1>
+      <!-- TODO: List of checkboxes -->
+      <!-- 
+        Email Notifications
+          A privileged account is provisioned for future use
+          Any view is created
+          A comment is submitted requiring moderation
+          A new nomination is created
+          Any nomination is moderated
+          A user creates their privileged account
+          Any view is deleted
+          Any view is made public
+          Actions directly affecting you, such as comment replies and status updates
+      -->
+
+    </div><!-- End of Body -->
+
+  </main>
+{% endblock console_body %}
+</html>

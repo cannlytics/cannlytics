@@ -1,0 +1,245 @@
+# Copyright (c) 2021 Cannlytics <contact@cannlytics.com>
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+# Project information
+site_name: Cannlytics
+site_url: https://cannlytics.com/docs
+site_author: Keegan Skeate
+site_description: >-
+  Cannlytics is a user-friendly interface to quickly transfer laboratory samples,
+  perform analyses, collect and review results,
+  manage certificates of analysis (CoAs), and crunch statistics
+  to your ❤️'s content.
+
+# Repository
+repo_name: Cannlytics
+repo_url: https://github.com/cannlytics/cannlytics-engine
+edit_uri: ""
+
+# Copyright
+copyright: Copyright &copy; 2021 Cannlytics
+
+# Configuration
+docs_dir: docs/src
+site_dir: docs/build
+
+# Theme
+theme:
+  name: material
+  custom_dir: docs/theme
+  favicon: assets/images/favicon.ico
+  logo: assets/images/cannlytics_calyx_512.svg
+  palette:
+    - scheme: default
+      primary: white
+      accent: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  font:
+    text: Lora
+    # text: Source Serif Pro
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.tracking
+    #   - navigation.sections
+    # - navigation.instant
+  # FIXME: Custom 404 page.
+  # static_templates:
+  #   - partials/404.html
+  
+
+# Site map
+nav:
+  - Home: index.md
+  - App:
+    - Getting Started: app/get-started.md
+    - Authentication: app/authentication.md
+    - Analysis:
+      - Analyses: app/analyses.md
+      - Analytes: app/analytes.md
+      - Instruments: app/instruments.md
+      - Regulations: app/regulations.md
+      - Limits: app/limits.md
+      - Labs: app/labs.md
+      - Samples: app/samples.md
+      - Results: app/results.md
+    - Clients: app/clients.md
+    - Transfers: app/transfers.md
+    - Inventory: app/inventory.md
+    - Invoices: app/invoices.md
+    - Traceability: app/traceability.md
+    - Settings: app/settings.md
+    - Website and Portal:
+      - Installation: website/installation.md
+      - Development: website/development.md
+      - Publishing: website/publishing.md
+    - Development:
+      - Installation: app/installation.md
+      - Development: app/development.md
+      - Publishing: app/publishing.md
+  - API:
+    - Getting Started: api/get-started.md
+    - Authentication: api/authentication.md
+    - Development:
+      - Installation: api/dev/installation.md
+      - Development: api/dev/development.md
+      - Publishing: api/dev/publishing.md
+  - Python SDK:
+    - Getting Started: sdk/get-started.md
+    - Firebase Module: sdk/firebase/firebase.md
+    - Leaf Data Systems Module: sdk/traceability/leaf.md
+    - LIMS Module: sdk/lims/lims.md
+    - Metrc Module: sdk/traceability/metrc.md
+    - Development:
+      - Installation: sdk/dev/installation.md
+      - Development: sdk/dev/development.md
+      - Publishing: sdk/dev/publishing.md
+  - About:
+    - Contributing &amp; Support: about/contributing.md
+    - Development: about/development.md
+    - Release Notes:
+        - '0.0.3': about/releases/0.0.3.md
+    - License: about/license.md
+    - Frequently Asked Questions: about/faq.md
+    - Support: about/support.md
+
+# Extensions
+markdown_extensions:
+  - markdown.extensions.toc:
+      slugify: !!python/name:pymdownx.slugs.uslugify
+      permalink: ""
+  - markdown.extensions.admonition:
+  - markdown.extensions.smarty:
+      smart_quotes: false
+  - pymdownx.betterem:
+  - markdown.extensions.attr_list:
+  - markdown.extensions.def_list:
+  - markdown.extensions.tables:
+  - markdown.extensions.abbr:
+  - markdown.extensions.footnotes:
+  - markdown.extensions.md_in_html:
+  - pymdownx.superfences:
+      preserve_tabs: true
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: math
+          class: arithmatex
+          format: !!python/name:pymdownx.arithmatex.fence_mathjax_format
+        # - name: md-render
+        #   class: md-render
+        #   format: !!python/name:docs.tools.pymdownx_md_render.md_sub_render
+  - pymdownx.highlight:
+      extend_pygments_lang:
+        - name: php-inline
+          lang: php
+          options:
+            startinline: true
+        - name: pycon3
+          lang: pycon
+          options:
+            python3: true
+      linenums_style: pymdownx-inline
+  - pymdownx.inlinehilite:
+      custom_inline:
+        - name: math
+          class: arithmatex
+          format: !!python/name:pymdownx.arithmatex.inline_mathjax_format
+  - pymdownx.magiclink:
+      repo_url_shortener: true
+      repo_url_shorthand: true
+      social_url_shorthand: true
+      social_url_shortener: true
+      user: cannlytics
+      repo: cannlytics-engine
+      # normalize_issue_symbols: true
+  - pymdownx.tilde:
+  - pymdownx.caret:
+  - pymdownx.smartsymbols:
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.escapeall:
+      hardbreak: True
+      nbsp: True
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  # - pymdownx.progressbar:
+  - pymdownx.arithmatex:
+  - pymdownx.mark:
+  - pymdownx.striphtml:
+  # - pymdownx.snippets:
+  #     base_path: docs/src/markdown/_snippets
+  - pymdownx.keys:
+      separator: "\uff0b"
+  - pymdownx.details:
+  - pymdownx.tabbed:
+  - pymdownx.saneheaders:
+
+# Customization
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/cannlytics
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/cannlytics/
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/company/cannlytics
+
+# Plugins
+# Optional: Add updated at date for docs
+# https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#revision-date-localized
+plugins:
+  # - admonition
+  - autorefs
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            - from unittest.mock import MagicMock as mock
+            - sys.path.append('../../')
+            - sys.modules["pandas"] = mock()
+            - sys.modules["firebase_admin"] = mock()
+            - sys.modules["googlemaps"] = mock()
+            - sys.modules["google-cloud"] = mock()
+            - sys.modules["google-cloud-firestore"] = mock()
+          # selection:
+          #   new_path_syntax: true
+  - minify:
+      minify_html: true
+
+# Google Analytics
+# google_analytics:
+#   - !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+#   - auto
+
+# FIXME: Specify development server
+# dev_addr: '0.0.0.0:4200'

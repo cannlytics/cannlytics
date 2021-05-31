@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <!-- Index Template | Cannlytics Website -->
+  <!-- Created 1/7/2021 -->
+  {% extends "cannlytics_website/base.html" %}
+  {% load static %}
+  {% block page %}
+
+    <!-- Header -->
+    {% include "cannlytics_website/layout/header.html" %}
+
+    <!-- Page Material -->
+    <div id="material">{% block material %}{% endblock %}</div>
+
+    <!-- Footer -->
+    {% include "cannlytics_website/layout/footer.html" %}
+
+    <!-- Subscribe Dialog -->
+    {% include "cannlytics_website/components/dialogs/subscribe_dialog.html" %}
+
+  {% endblock %}
+</html>

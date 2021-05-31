@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<!-- Theme -->
+<!-- URL: settings/theme -->
+<!-- Created 12/9/2020 -->
+{% extends "cannlytics_console/console.html" %}
+{% block console_body %}
+
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header-->
+    {% include "cannlytics_console/components/notifications/breadcrumbs.html" with
+      base_page="Settings"
+      base_page_url="/settings"
+      current_page="Theme"
+    %}
+
+    <!-- Body -->
+    <div class="col">
+
+      <!-- Notification Settings -->
+      <h2 class="h6 my-3">Theme Options</h2>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+        <label class="form-check-label" for="flexRadioDefault1">
+          Default
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
+        <label class="form-check-label" for="flexRadioDefault2">
+          Dracula
+        </label>
+      </div>
+
+      <!-- TODO: Choose Icon/Organization -->
+
+      <!-- Optional: Custom color themes (dracula) -->
+
+      <!-- Optional: Custom fonts -->
+
+    </div><!-- End of Body -->
+
+  </main>
+
+{% endblock console_body %}
+</html>

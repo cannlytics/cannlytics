@@ -1,0 +1,67 @@
+{
+  "firestore": {
+    "indexes": ".firebase/firestore.indexes.json",
+    "rules": ".firebase/firestore.rules"
+  },
+  "storage": {
+    "rules": ".firebase/storage.rules"
+  },
+  "hosting": [
+    {
+      "target": "docs",
+      "public": "docs/build"
+    },
+    {
+      "target": "dev",
+      "public": "public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**",
+        "**/development/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "run": {
+            "serviceId": "cannlytics-console",
+            "region": "us-central1"
+          }
+        }
+      ]
+    },
+    {
+      "target": "production",
+      "public": "public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**",
+        "**/development/**"
+      ],
+      "rewrites": [
+        {
+          "source": "!/sitemap",
+          "run": {
+            "serviceId": "cannlytics-console",
+            "region": "us-central1"
+          }
+        },
+        {
+          "source": "!/static",
+          "run": {
+            "serviceId": "cannlytics-console",
+            "region": "us-central1"
+          }
+        },
+        {
+          "source": "**",
+          "run": {
+            "serviceId": "cannlytics-console",
+            "region": "us-central1"
+          }
+        }
+      ]
+    }
+  ]
+}

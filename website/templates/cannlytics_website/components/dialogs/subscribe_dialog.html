@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+  <!-- Subscribe Dialog -->
+  <!-- Created 1/13/20201 -->
+  {% load static %}
+  <div
+    class="modal fade"
+    id="subscribeDialog"
+    tabindex="-1"
+    aria-labelledby="subscribeDialogLabel"
+    aria-hidden="false"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Dialog header -->
+        <div class="modal-header bg-light">
+          <h5
+            id="subscribeDialogLabel"
+            class="modal-title text-dark serif h3"
+          >
+            Pick your subscription
+          </h5>
+          <button type="button" class="btn-close btn-sm light-only" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close btn-sm btn-close-white dark-only" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <!-- Dialog body -->
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm">
+              <p class="fs-6 serif">
+                Get a premium subscription
+                and get access to all
+                Cannlytics' whitepapers. You will also
+                receive first access to Cannlytics' data sets.
+                Get a free subscription and get all
+                Cannlytics news articles.
+              </p>
+            </div>
+            <div class="col-sm d-flex justify-content-center">
+              <a href="/whitepapers">
+                <img
+                  src={% static "cannlytics_website/images/whitepapers/cannlytics-2020-washington-state-review.png" %}
+                  class="figure-img img-fluid rounded shadow"
+                  width="150px"
+                >
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dialog actions -->
+        <div class="modal-footer bg-light d-flex">
+          <button
+            type="button"
+            class="btn flex-grow-1 bg-gradient-green text-white"
+            onclick="cannlytics.payments.subscribe({ plan_id: 'free', subscription_id: 'free'});"
+          >
+            Get a free subscription
+          </button>
+          <!-- TODO: Pass plan_id from Django from Firestore -->
+          <a
+            type="button"
+            class="btn flex-grow-1 bg-gradient-orange text-white"
+            href="/subscriptions/checkout?id=P-7PY14290YP4037846MACLL6Q"
+          >
+            Go premium for $1/mo.
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</html>

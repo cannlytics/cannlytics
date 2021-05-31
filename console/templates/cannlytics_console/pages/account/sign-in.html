@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+<!--
+  Sign In Page
+  Created: 2/18/2021
+  Updated: 5/16/2021
+-->
+<!--  -->
+{% extends "./base_sign_in.html" %}
+{% load static %}
+{% block login_form %}
+
+  <!-- Login Style -->
+  <style>
+    #google-signin {
+      background: url({% static 'cannlytics_console/images/logos/signin-assets/btn_google_signin_dark_normal_web@2x.png' %});
+      width: 191px;
+      height: 46px;
+      background-size: contain;
+    }
+    #google-signin:hover {
+      background: url({% static 'cannlytics_console/images/logos/signin-assets/btn_google_signin_dark_focus_web@2x.png' %});
+      width: 191px;
+      height: 46px;
+      background-size: contain;
+    }
+    #google-signin:active {
+      background: url({% static 'cannlytics_console/images/logos/signin-assets/btn_google_signin_dark_pressed_web@2x.png' %});
+      width: 191px;
+      height: 46px;
+      background-size: contain;
+    }
+  </style>
+
+  <!-- Email -->
+  <div class="mt-5 mb-3 row">
+    <label
+      for="login-email"
+      class="col-sm-2 col-form-label pe-2 fs-6"
+    >
+      Email
+    </label>
+    <div class="col-sm-10">
+      <input
+        type="email"
+        class="form-control"
+        id="login-email"
+        required
+        autofocus
+        spellcheck="false"
+      >
+    </div>
+  </div>
+
+  <!-- Password -->
+  <div class="mb-3 row">
+    <label
+      for="login-password"
+      class="col-sm-2 col-form-label pe-2 fs-6"
+    >
+      Password
+    </label>
+    <div class="col-sm-10">
+      <input
+        type="password"
+        class="form-control"
+        id="login-password"
+        required
+      >
+    </div>
+  </div>
+
+  <!-- Reset password or sign up -->
+  <div class="d-flex justify-content-between w-100">
+    <div class="d-flex align-items-center">
+      <a
+        href="./password-reset"
+        class="text-dark fs-6"
+      >
+        Lost your password? Get a new one &rarr;
+      </a>
+    </div>
+    <button
+      id="sign-in-button"
+      class="ms-1 btn bg-gradient-green text-white"
+      style="max-width:250px;"
+      type="button"
+      onclick="cannlytics.auth.signIn()"
+    >
+      Sign In
+    </button>
+    <button id="sign-in-loading-button" class="ms-1 btn bg-gradient-green text-white d-none" style="width:77px;" type="button" disabled>
+      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <!-- Remember Me -->
+  <!-- FIXME: Implement remember user option | custom checkbox color -->
+  {% comment %} <div class="d-flex justify-content-between">
+    <div class="custom-control custom-checkbox mb-3">
+      <input type="checkbox" class="custom-control-input app-action" id="input_remember_password">
+      <label class="custom-control-label app-action" for="input_remember_password">
+        Stay signed in?
+      </label>
+    </div>
+  </div> {% endcomment %}
+
+  <!-- Google Sign In -->
+  <!-- FIXME: Google sign-in on redirect does not work -->
+  {% comment %} <div class="text-dark text-center my-3">
+    &mdash;&nbsp;or&nbsp;&mdash;
+  </div>
+  <div class="d-grid gap-2 justify-content-center">
+    <a id="google-signin" class="app-action" onclick="cannlytics.auth.googleSignIn()"></a>
+  </div>
+  <img style="display:none;" src="{% static 'cannlytics_console/images/logos/signin-assets/btn_google_signin_dark_focus_web@2x.png' %}"/>
+  <img style="display:none;" src="{% static 'cannlytics_console/images/logos/signin-assets/btn_google_signin_dark_pressed_web@2x.png' %}"/>
+ {% endcomment %}
+
+  <!-- Sign up -->
+  <div class="d-flex align-items-center justify-content-center" style="margin-top:6rem;">
+    <p class="text-center h6 font-weight-light">
+        Are you new to Cannlytics?
+        <a class="text-dark" href="./sign-up">
+          <b>Sign up</b>
+        </a>
+        or
+        <a class="text-dark" href="/?type=test">
+          <b>test it out 🧪</b>
+        </a>
+    </p>
+  </div>
+
+{% endblock %}
+</html>

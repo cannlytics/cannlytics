@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+
+  <!-- Lab Locator -->
+  <!-- Created 1/20/2021 -->
+  <!-- https://developers.google.com/maps/documentation/javascript/geocoding -->
+  <!-- https://stackoverflow.com/questions/5984179/javascript-geocoding-from-address-to-latitude-and-longitude-numbers-not-working -->
+
+  <!-- Lab Locator -->
+  <div class="container lab-locator py-4">
+
+    <!-- Introduction -->
+    <div class="row">
+
+      <!-- Description -->
+      <div class="col-md-6">
+        <h2 class="display-5 text-dark fw-bold my-2">Find your lab</h2>
+        <p class="h6 double-line mb-3">
+          Locate your cannabis-testing laboratory, browse analyses, and
+          engage with like-minded scientists around the world.
+        </p>
+
+        <!-- Search -->
+        <!-- TODO: Let people search by analysis and compare prices -->
+        <div
+          id="search"
+          class="d-flex flex-grow-1 nav-search-form mb-3"
+        >
+          <input
+            aria-label="Search"
+            id="searchInput"
+            class="nav-search-input form-control"
+            placeholder="Search"
+            list="searchOptions"
+            name="org_id"
+            oninput="cannlytics.community.onInput()"
+            type="text"
+          >
+          <datalist id="searchOptions"></datalist>
+          <button
+            id="searchButton"
+            class="nav-search-button btn btn-default p-0"
+            style="transform:translateX(-32px);width:0;"
+          >
+            <span data-feather="search"></span>
+          </button>
+        </div><!-- End of search -->
+
+      </div><!-- End of description -->
+
+      <!-- Options -->
+      <div class="col-md-6 d-none d-md-flex align-items-end justify-content-end mb-3">
+      <!-- TODO: Add a lab -->
+        {% comment %} <a
+          class="btn btn-outline-primary me-2"
+          href="/labs/new/"
+        >
+          Add your lab
+        </a> {% endcomment %}
+        <button
+          class="btn btn-outline-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#downloadDialog"
+        >
+          Download data
+        </button>
+      </div>
+    
+    </div><!-- End of introduction -->
+    
+    <!-- Lab map -->
+    <figure class="figure w-100">
+
+      <!-- Map -->
+      <div id="map" style="height:540px;width:100%;" class="figure-img img-fluid"></div>
+
+      <!-- Caption -->
+      <figcaption class="figure-caption" style="max-width:540px;">
+        <h6 class="sans-serif fw-bold mt-3">
+          How Cannlytics sources data
+        </h6>
+        Cannlytics retrieves data through listings on Google Search and
+        Google Maps and from a company's official website. Users can
+        <a href="/labs/">contribute factual information</a> about labs, such as
+        analyses and prices. If you believe that any
+        information is incorrect or should be removed, then please contact
+        <a href="mailto:support@cannlytics.com">support@cannlytics.com</a>.
+        For further information about how Cannlytics sources data, then please
+        see the open source
+        <a href="https://github.com/cannlytics/cannlytics-engine">Cannlytics engine</a>.
+      </figcaption>
+
+    </figure>
+
+    <!-- Download data dialog -->
+    {% include "cannlytics_website/components/dialogs/download_data_dialog.html" %}
+
+  </div>
+
+</html>

@@ -1,0 +1,30 @@
+# To ensure app dependencies are ported from your
+# virtual environment/host machine into your container,
+# run 'pip freeze > requirements.txt' in the terminal to overwrite this file.
+
+# cannlytics==0.0.2
+coreapi
+dj_static==0.0.6
+django==3.2
+django-crispy-forms==1.11.2
+django-environ==0.4.5
+django-feather==0.2.6
+django-livereload-server
+django-storages[google]==1.9.1
+firebase_admin==4.3.0
+google-auth==1.20.1
+google-cloud-secret-manager==1.0.0
+gunicorn==20.0.4
+Markdown==3.2.2
+markdown-markup-emoji==0.2.2 # FIXME: Not working
+PyJWT==2.1.0
+python-decouple==3.3
+psycopg2-binary==2.8.5
+ulid-py==1.1.0
+xhtml2pdf==0.2.5
+
+# Docs (TODO: Split up requirements?)
+# git+https://github.com/facelessuser/pymdown-lexers.git
+# mkdocs-git-revision-date-localized-plugin
+# mkdocs-minify-plugin
+# pyspelling

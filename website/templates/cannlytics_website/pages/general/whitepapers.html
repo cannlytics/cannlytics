@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+
+  <!-- Whitepapers Page -->
+  <!-- Created 1/9/2021 -->
+  {% extends "cannlytics_website/index.html" %}
+
+  <!-- Title -->
+  {% block title %}Whitepapers | {{ general.title }}{% endblock %}
+
+  <!-- Main material -->
+  {% block material %}
+
+    <!-- Hero Banner -->
+    {% include "cannlytics_website/components/heros/hero_banner.html" with
+      title='Whitepapers'
+      description='Cannlytics strives to deliver industry-leading research to help advance cannabis science.'
+      primary_action='Subscribe now'
+      primary_action_url='/subscriptions'
+      secondary_action='Get with premium'
+      secondary_action_url='/subscriptions'
+      only
+    %}
+
+    <!-- Whitepapers -->
+    <div class="album py-5 my-5">
+      <div class="container">
+        {% for item in whitepapers %}
+          <div
+            class="row featurette"
+            style="{% if forloop.counter|divisibleby:2 %}margin-top:10rem;margin-bottom:10rem;{% endif %}"
+          >
+            <div class="col-md-6 {% if forloop.counter|divisibleby:2 %}order-md-2{% endif %}">
+              <h2 class="featurette-heading display-4 serif large-line text-dark mt-0">
+                {{ item.title }}
+                {{ item.subtitle }}
+              </h2>
+              <p class="text-secondary fs-5 double-line my-4">
+                {{ item.description }}
+              </p>
+            </div>
+            <div class="col col-md-6 d-flex justify-content-center {% if forloop.counter|divisibleby:2 %}order-md-1 ps-0 pe-5 {% else %}ps-5{% endif %}">
+              <figure class="figure">
+                <!-- TODO: Pass product_id from Django from Firestore -->
+                <a href="/subscriptions/checkout?id=P-7PY14290YP4037846MACLL6Q">
+                  <img
+                    src="{{ item.image }}"
+                    class="figure-img img-fluid rounded shadow"
+                    style="max-height:420px;max-width:100%;"
+                  >
+                </a>
+                <figcaption class="figure-caption">
+                  {% if item.published_at == "Coming soon" %}
+                    <span class="text-danger fw-bold">Coming soon</span>
+                  {% else %}
+                    <div>Published: {{ item.published_at|date:"F j, Y" }}</div>
+                  {% endif %}
+                  <div>Author: {{ item.author }}</div>
+                  <div>Price: {{ item.price }}</div>
+                  <a
+                    class="btn btn-large bg-gradient-green text-white mb-5 mt-2"
+                    href="/subscriptions/checkout?id=P-7PY14290YP4037846MACLL6Q"
+                  >
+                    Pre-order
+                  </a>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div><!-- End of Whitepapers -->
+
+  {% endblock %}
+</html>

@@ -1,0 +1,440 @@
+/*--------------------------------------------------------------------------
+  Cannlytics Console Style
+  Author: Keegan Skeate
+  Created: 11/26/2020
+---------------------------------------------------------------------------*/
+
+body {
+  font-size: .875rem;
+}
+
+/*--------------------------------------------------------------------------
+  Layout
+---------------------------------------------------------------------------*/
+
+#loading-screen {
+  background-color:#f5f5f5;
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  z-index: 100001;
+}
+
+/*--------------------------------------------------------------------------
+  Images and icons
+---------------------------------------------------------------------------*/
+
+.avatar {
+  vertical-align: middle;
+  width: 33px;
+  height: 33px;
+  border-radius: 50%;
+}
+.feather {
+  width: 16px;
+  height: 16px;
+  vertical-align: text-bottom;
+}
+.nav-link:after {
+  display: none;
+}
+.primary-icon.feather {
+  color: #0BA67F;
+}
+
+/*--------------------------------------------------------------------------
+  Navigation
+---------------------------------------------------------------------------*/
+
+.navbar {
+  background-color: #fff !important;
+}
+body.dark .navbar {
+  background-color: rgba(0, 0, 0, .5) !important;
+  border-color: #dee2e680 !important;
+}
+.navbar-brand {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: 1rem;
+  /* background-color: rgba(0, 0, 0, .25); */
+  /* box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25); */
+}
+/* .navbar .navbar-toggler {
+  top: .25rem;
+  left: 0rem;
+} */
+/* .navbar .form-control {
+  padding: .75rem 1rem;
+  border-width: 0;
+  border-radius: 0;
+} */
+.form-control-dark {
+  color: #fff;
+  background-color: rgba(255, 255, 255, .1);
+  border-color: rgba(255, 255, 255, .1);
+}
+.form-control-dark:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+}
+.nav-link .feather {
+  color: #1a1a1a;
+}
+.nav-link:hover .feather {
+  color: #585858;
+}
+
+/* Dark top navigation */
+body.dark .table-search-input,
+body.dark .nav-search-input {
+  background: #333644;
+  border-color: #9b9ca3;
+}
+body.dark .nav-search-button .feather,
+body.dark .nav-link .feather {
+  color: #fff;
+}
+body.dark .nav-search-button:hover .feather,
+body.dark .nav-link:hover .feather {
+  color: #ccc;
+}
+body.dark .navbar {
+  background-color: #111217 !important;
+}
+
+/*--------------------------------------------------------------------------
+  Search
+---------------------------------------------------------------------------*/
+
+.nav-search-input {
+  width: 60%;
+}
+@media (max-width: 767.98px) {
+  .nav-search-input {
+    width: 100%;
+  }
+  #sidebarMenu {
+    border-bottom: solid 5px #0BA67F;
+  }
+}
+body.dark .nav-search-form .feather {
+  color: #fff;
+}
+body.dark .nav-search-form .feather:hover {
+  color: #ccc;
+}
+
+/*--------------------------------------------------------------------------
+  Select
+---------------------------------------------------------------------------*/
+
+.simple-select {
+  background-color: transparent;
+  border: none;
+  width: unset;
+}
+.simple-select option {
+  font-size: 2rem !important;
+}
+
+/*--------------------------------------------------------------------------
+  Notifications
+---------------------------------------------------------------------------*/
+
+.notifications {
+  border-radius: 5px 0px 5px 5px;
+  min-width: 250px;
+}
+.notifications h2 {
+  border-bottom: 1px solid #eee;
+  color: #999
+}
+.notifications-item {
+  display: flex;
+  border-bottom: 1px solid #eee;
+  padding: 6px 9px;
+  margin-bottom: 0px;
+  cursor: pointer
+}
+.notifications-item:hover {
+  background-color: #96e6a133;
+}
+.notifications-item img {
+  display: block;
+  width: 50px;
+  height: 50px;
+  margin-right: 1rem;
+  border-radius: 50%;
+}
+.notifications-item .text h4 {
+  color: #777;
+}
+.notifications-item .text p {
+  color: #aaa;
+}
+
+/*--------------------------------------------------------------------------
+  Breadcrumbs
+---------------------------------------------------------------------------*/
+
+.breadcrumb-item+.breadcrumb-item::before {
+  /* float: left;
+  padding-right: .5rem;
+  color: #6c757d; */
+  content: ">";
+}
+.breadcrumb-item,
+.breadcrumb-item .action {
+  color: #1a1a1a !important;
+}
+body.dark .breadcrumb-item,
+body.dark .breadcrumb-item .action {
+  color: #f5f5f5 !important;
+}
+
+/*--------------------------------------------------------------------------
+  Sidebar
+---------------------------------------------------------------------------*/
+
+.sidebar {
+  /* position: fixed; */
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100; /* Behind the navbar */
+  padding: 48px 0 0; /* Height of navbar */
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+@media (max-width: 767.98px) {
+  .sidebar {
+    top: 5rem;
+  }
+  .sidebar .position-fixed {
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    position: fixed;
+  }
+}
+.sidebar .nav-item {
+  width: 100%;
+}
+.sidebar-sticky {
+  position: relative;
+  top: 0;
+  /* height: calc(100vh - 48px); */
+  min-height: calc(100vh - 48px);
+  padding-top: .5rem;
+  overflow-x: hidden;
+  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+}
+.sidebar .nav-link {
+  font-weight: 500;
+  color: #333;
+  border-radius: .25rem;
+  /* width: 100%; */
+}
+.sidebar .nav-link .feather {
+  margin-right: .5rem;
+  color: #727272;
+}
+.sidebar .nav-link:hover {
+  color: inherit !important;
+  background: rgb(0 0 0 / 5%);
+}
+.sidebar .nav-link.active {
+  color: #0BA67F !important;
+  background: rgb(0 0 0 / 5%);
+  font-weight: 600;
+}
+.sidebar .nav-link.active .feather {
+  color: #0BA67F;
+}
+.sidebar-heading {
+  font-size: .75rem;
+  text-transform: uppercase;
+}
+
+/* Dark sidebar */
+body.dark .sidebar {
+  box-shadow: inset -1px 0 0 #dee2e680;
+}
+body.dark .sidebar .nav-link .feather {
+  color: #ccc;
+}
+body.dark .sidebar .nav-link:hover .feather {
+  color: #fff;
+}
+body.dark .sidebar .active {
+  color: #50fa7b !important;
+}
+body.dark .sidebar .active .feather {
+  color: #50fa7b !important;
+}
+
+/*--------------------------------------------------------------------------
+  Console screens
+---------------------------------------------------------------------------*/
+
+main .action {
+  color: #0BA67F !important;
+}
+body.dark main .action {
+  color: #50fa7b !important;
+}
+body.dark .btn-outline-primary {
+  border-color: #50fa7b;
+  color: #50fa7b;
+}
+body.dark .btn-outline-primary:hover {
+  background: #50fa7b;
+  color: #1a1a1a;
+}
+/* TODO: Style primary buttons */
+
+/*--------------------------------------------------------------------------
+  Features
+---------------------------------------------------------------------------*/
+
+.support-features .feather {
+  height: 75px;
+  width: 75px;
+}
+.feature-icon {
+  background-color: #f8f9fa;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  border-radius: 50%;
+  padding: 1rem;
+}
+.feature-icon:hover {
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .3), 0 2px 6px 2px rgba(60, 64, 67,.15);
+}
+body.dark .feature-icon:hover {
+  box-shadow: 0 1px 2px 0 rgba(108, 112, 130, .3), 0 2px 6px 2px rgba(108, 112, 130, .15);
+}
+body.dark .feature-icon {
+  background-color: rgba(191, 149, 249, .1);
+}
+
+/*--------------------------------------------------------------------------
+  List groups
+---------------------------------------------------------------------------*/
+
+body.dark .list-group-item-action {
+  background-color: rgba(191, 149, 249, .1);
+}
+body.dark .list-group-item-action:hover {
+  background-color: rgba(191, 149, 249, .25);
+}
+
+/*------------------------------------------------
+  Tables
+-------------------------------------------------- */
+
+/* Dark tables */
+body.dark .card-header {
+  border-bottom-color: rgba(255, 255, 255,.125);
+}
+
+/*--------------------------------------------------------------------------
+  Tabs
+---------------------------------------------------------------------------*/
+
+.nav-tabs .nav-link {
+  color: #777;
+}
+.nav-tabs .nav-link.active {
+  color: #1a1a1a;
+}
+.nav-tabs .nav-link:hover {
+  color: #0BA67F !important;
+}
+
+/*--------------------------------------------------------------------------
+  Console Dark Theme
+---------------------------------------------------------------------------*/
+
+body.dark {
+  background-color: rgb(50, 52, 67);
+}
+body.dark h1 {
+  color: #fff;
+}
+
+/* Dark layout */
+body:not(.dark) .dark-only {
+  display: none;
+}
+body.dark .light-only {
+  display: none;
+}
+
+/* Dark forms */
+body.dark .form-check-input:checked {
+  background-color: rgb(29 233 182);
+  border-color: rgb(29 233 182);
+}
+body.dark textarea,
+body.dark textarea:focus {
+  color: #fff;
+  background: #333644;
+}
+body.dark .form-select,
+body.dark .form-control {
+  background: #333644;
+  border-color: #9b9ca3;
+  color: #ccc;
+}
+
+/* Dark Cards */
+body.dark .card-body {
+  background-color: #333644;
+}
+body.dark .card {
+  border-color: #dee2e6;
+}
+
+/*--------------------------------------------------------------------------
+  Console Dark Forrest Theme
+---------------------------------------------------------------------------*/
+
+body.forrest {
+  background-color: #263238ff !important;
+}
+body.forrest .bg-light,
+body.forrest .card-header,
+body.forrest .dropdown-menu {
+  background-color: #1e272cff !important;
+}
+body.forrest .card-body,
+body.forrest .form-select,
+body.forrest .form-control,
+body.forrest textarea,
+body.forrest textarea:focus,
+body.forrest .list-group-item-action,
+body.forrest .feature-icon {
+  background-color: #32424aff;
+}
+body.forrest .list-group-item-action:hover {
+  background-color: #495C65;
+}
+body.forrest p.lead a,
+body.forrest main .action,
+body.forrest .sidebar .active,
+body.forrest .sidebar .active .feather {
+  color: #42B2A6 !important;
+}
+body.forrest .btn-outline-primary {
+  border-color: #42B2A6;
+  color: #42B2A6;
+}
+body.forrest .btn-outline-primary:hover {
+  background: #42B2A6;
+  color: #11252F;
+}
+body.forrest p.lead a:hover {
+  color: #42B2A6;
+}

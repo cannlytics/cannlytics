@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+ 
+  <!--
+    Login Template | Cannlytics Console
+    Created: 11/26/2020 Thanksgiving
+    Hashes filled by build.py
+  -->
+ {% extends "cannlytics_console/base.html" %}
+  {% load static %}
+  {% block title %}Console | Cannlytics{% endblock %}
+  {% block page_css %}
+ <link href="{% static 'cannlytics_console/plugins/cannlytics/login-64367f6a49afcb3057e7.css'%}" id="login_css" rel="stylesheet" type="text/css"/>
+ {% endblock %}
+  {% block page %}
+ 
+  <!-- Theme Toggle -->
+ <script>
+  cannlytics.theme.setInitialTheme();
+ </script>
+ {% include "cannlytics_console/components/buttons/theme_toggle.html" %}
+ 
+  <!-- Auth template -->
+ <div class="login py-0" style="min-height:100vh; height:100vh">
+  <div class="d-flex w-100 h-100">
+   
+  <!-- Decorative background -->
+   <div class="col-7 d-none d-lg-flex justify-content-center align-items-center bg-decorative">
+    <div class="h-100 col-7 position-absolute" id="particles-js">
+    </div>
+    <img class="floating" src="{% static 'cannlytics_console/images/science/chemist.png' %}" style="height:20rem; max-height:100%; max-width:100%;"/>
+   </div>
+   
+  <!-- Form section -->
+   <div class="col col-lg-5">
+    <form class="form-login px-5 py-5 mx-auto" style="max-width:540px;">
+     {% csrf_token %}
+     
+  <!-- Logo -->
+     <div class="text-center mb-3 mb-sm-4">
+      <img class="light-only" src="{% static 'cannlytics_console/images/logos/cannlytics_logo_with_phrase.png' %}" style="max-height:6rem; max-width:100%;"/>
+      <img class="dark-only" src="{% static 'cannlytics_console/images/logos/cannlytics_logo_with_phrase_dark.png' %}" style="max-height:6rem; max-width:100%;"/>
+     </div>
+     
+  <!-- Form -->
+     {% block login_form %}{% endblock %}
+     
+  <!-- Privacy policy and terms of service -->
+     <div class="text-center text-dark" style="margin-top:6rem;">
+      
+  <!-- Policies -->
+      <a class="text-dark fs-6" href="https://cannlytics.com/privacy-policy">
+       Privacy Policy
+      </a>
+      |
+      <a class="text-dark fs-6" href="https://cannlytics.com/terms-of-service">
+       Terms of Service
+      </a>
+     </div>
+    </form>
+   </div>
+   
+  <!-- End of form section -->
+  </div>
+ </div>
+ 
+  <!-- End of auth template -->
+ 
+  <!-- Error toast -->
+ {% include "cannlytics_console/components/notifications/notification_toast.html" %}
+
+{% endblock %}
+ 
+  <!-- JavaScript -->
+ {% block page_js %}
+ {% comment %}
+ <script>
+  cannlytics.auth.initialize();
+ </script>
+ {% endcomment %}
+ <script src="{% static 'cannlytics_console/plugins/particlesjs/particles.js' %}" type="text/javascript">
+ </script>
+ <script type="text/javascript">
+  particlesJS.load('particles-js', '{% static "cannlytics_console/plugins/particlesjs/particles.json"%}');
+ </script>
+ {% endblock page_js %}
+</html>

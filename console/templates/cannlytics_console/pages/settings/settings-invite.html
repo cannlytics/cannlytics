@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<!-- Invite -->
+<!-- URL: settings/invite -->
+<!-- Created 1/13/2021 -->
+{% extends "cannlytics_console/console.html" %}
+{% block console_body %}
+
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header-->
+    {% include "cannlytics_console/components/notifications/breadcrumbs.html" with
+      base_page="Settings"
+      base_page_url="/settings"
+      current_page="Invite a user"
+    %}
+
+    <!-- Feedback form -->
+    <div class="col-md-8 px-0">
+      <p class="fs-6 mb-3">
+        Please enter the email and a brief message for your invitee.
+      </p>
+      <div class="form-floating">
+        <textarea
+          class="form-control"
+          placeholder="Write your feedback here"
+          id="feedback-message"
+          style="height:250px"
+        ></textarea>
+        <label for="feedback-message">
+          Enter an email and a message here...
+        </label>
+      </div>
+      <!-- Optional: File attachment -->
+      <div class="d-flex justify-content-end mt-3">
+        <button
+          class="btn bg-gradient-green text-white"
+          onclick="cannlytics.sendFeedback()"
+        >
+          Invite user
+        </button>
+      </div>
+    </div>
+
+{% endblock console_body %}
+</html>

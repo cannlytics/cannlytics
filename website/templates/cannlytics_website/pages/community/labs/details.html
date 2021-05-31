@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+
+  <!-- Lab Details -->
+  <!-- Created 1/24/2021  -->
+  <form>
+    <div class="row my-5 mb-3">
+
+      <!-- User image -->
+      <div class="col-md-6 order-md-2">
+        <!-- TODO: Upload image button -->
+        <img
+          src="{{ lab.image_url }}"
+          style="max-height:200px; max-width:400px;"
+          class="mx-2 mb-2"
+        >
+        <div class="my-md-3">
+          <textarea
+            id="input-description"
+            class="form-control form-control-sm form-control-plaintext"
+            placeholder="Start a lab description..."
+            rows="10"
+          >{{ lab.description }}</textarea>
+        </div>
+      </div>
+
+      <!-- Account fields -->
+      <div class="col-md-6">
+        {% for item in fields %}        
+          <div class="row mb-1">
+
+            <!-- Field label -->
+            <label
+              for="input-{{ item.key }}"
+              class="col col-form-label col-form-label-sm fw-bold"
+            >
+              {{ item.title }}
+            </label>
+
+            <!-- Field input -->
+            <div class="col-sm-9">
+              {% if item.type == "textarea" %}
+                <textarea
+                  id="input-{{ item.key }}"
+                  class="form-control form-control-sm form-control-plaintext"
+                  name="{{item.key}}"
+                  rows="3"
+                  readonly
+                >{{ lab|dict_key:item.key }}</textarea>
+              <!-- TODO: Handle checkboxes -->
+              {% elif item.type == "color" %}
+                <input
+                  id="input-{{ item.key }}"
+                  class="form-control form-control-color"
+                  name="{{item.key}}"
+                  value="{{ lab|dict_key:item.key }}"
+                  title="Pick a color"
+                  type="color"
+                  disabled
+                >
+              {% else %}
+                <input
+                  id="input-{{ item.key }}"
+                  class="form-control form-control-sm form-control-plaintext"
+                  name="{{item.key}}"
+                  spellcheck="false"
+                  type="{{ item.type }}"
+                  value="{{ lab|dict_key:item.key }}"
+                  autocomplete="off"
+                  readonly
+                >
+              {% endif %}
+            </div>
+
+          </div>
+        {% endfor %}
+
+      </div><!-- End of account fields -->
+
+    </div>
+    
+    <!-- Option buttons -->
+    {% comment %} <div class="mt-5 requires-auth visually-hidden">
+      <button
+        id="cancel-button"
+        class="btn btn-sm btn-light visually-hidden me-2"
+        onclick="cannlytics.lab.toggleEditLab(edit=false);"
+        type="button"
+      >
+        Cancel
+      </button>
+      <button
+        id="save-button"
+        class="btn btn-sm btn-success visually-hidden me-2"
+        type="submit"
+      >
+        Save
+      </button>
+      <button
+        id="edit-button"
+        class="btn btn-sm btn-primary me-2"
+        onclick="cannlytics.lab.toggleEditLab(edit=true);"
+        type="button"
+      >
+        Edit
+      </button>
+    </div><!-- End of options --> {% endcomment %}
+
+  </form><!-- End of lab details -->
+
+  <!-- Login alert -->
+  {% comment %} <div id="login-alert" class="alert alert-warning fade show mt-4 w-75 indicates-auth" role="alert">
+    <strong>Unauthenticated!</strong> Please
+    <a class="app-action" data-bs-toggle="modal" data-bs-target="#login-dialog">login</a>
+    to your Cannlytics account to edit.
+  </div> {% endcomment %}
+
+  <!-- Claim lab -->
+  <div class="markdown mt-5 pt-5">
+    <a
+      class="text-dark"
+      href="https://console.cannlytics.com/account/login/"
+    >
+      Is this your lab? Claim and edit now &rarr;
+    </a>
+  </div>
+
+  <!-- Details JavaScript -->
+  <script>
+    cannlytics.lab.initializeDetails();
+  </script>
+
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<!--
+  Invoices Page | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 5/5/2021
+  Updated: 5/5/2021
+-->
+{% extends "cannlytics_console/console.html" %}
+{% block console_body %}
+
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header -->
+    <!-- Optional: Dynamically render tabs -->
+    <div class="col pt-3 pb-2 mb-3">
+      <h1 class="fs-5 mb-0 lh-base mb-3">Invoices</h1>
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'records' %}active{% endif %}"
+            aria-current="{% if section == 'records' %}page{% endif %}"
+            href="/invoices/items"
+          >
+            Current
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'marketing' %}active{% endif %}"
+            aria-current="{% if section == 'marketing' %}page{% endif %}"
+            href="/invoices/vendors"
+          >
+            Paid
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'logs' %}active{% endif %}"
+            aria-current="{% if section == 'logs' %}page{% endif %}"
+            href="/invoices/logs"
+          >
+            Logs
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Dynamic section -->
+    <section>
+      {% block section %}{% endblock %}
+    </section>
+
+  </main>
+
+{% endblock console_body %}
+
+</html>

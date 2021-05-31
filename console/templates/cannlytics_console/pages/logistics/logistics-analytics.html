@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<!-- Analytics Page -->
+<!-- URL: logistics/analytics -->
+<!-- Created 1/13/2020 -->
+{% extends "cannlytics_console/screens/logistics/logistics.html" %}
+
+{% block section %}
+
+    <!-- Analytics section -->
+    <section>
+      <div class="card my-3">
+        <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
+          <h2 class="h6 text-dark">Analytics</h2>
+        </div>
+        {% include "cannlytics_console/components/placeholders/placeholder.html" with
+          placeholder=logistics.placeholder
+          only
+        %}
+      </div>        
+    </section>
+
+    <!-- Logistics JavaScript -->
+    {% block console_js %}
+      <script>
+        cannlytics.logistics.initializeAnalytics();
+      </script>
+    {% endblock console_js %}
+
+  {% endblock %}
+
+</html>

@@ -1,0 +1,295 @@
+<!doctype html>
+<html>
+<!--
+  API Settings | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 5/9/2021
+  Updated: 5/12/2021
+-->
+{% extends "cannlytics_console/console.html" %}
+{% load icon %}
+{% block console_css %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
+{% endblock console_css %}
+{% block console_body %}
+
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header-->
+    {% include "cannlytics_console/components/notifications/breadcrumbs.html" with
+      base_page="Settings"
+      base_page_url="/settings"
+      current_page="API"
+    %}
+
+    <div class="d-flex flex-wrap">
+
+      <div class="col-12">
+
+        <!-- Title  -->
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="fs-5 mb-0 lh-base">API Keys</h1>
+            <button
+              class="btn btn-sm bg-gradient-green text-white"
+              onclick="showNewKeyForm();"
+            >
+              Add a key
+            </button>
+          </div>
+
+        <!-- Table -->
+
+          <!-- TODO: API key management -->
+          <div id="key-table" style="height:500px; width:100%;" class="ag-theme-alpine"></div>
+
+      </div><!-- End of column -->
+
+      <!-- Options -->
+      <div class="col mt-2">
+
+        <!-- TODO: Placeholder? -->
+
+        <!-- Create a key card -->
+        <div
+          id="new-key-card"
+          class="card bg-transparent border-secondary rounded-3 px-2 py-2 d-none"
+          style="max-width: 375px;"
+        >
+          <div class="simple-flex justify-content-between border-bottom pb-2 mb-3">
+            <h4 class="fs-5 text-dark mb-0">New API Key</h4>
+            <button
+              class="btn btn-sm btn-light text-dark"
+              onclick="hideNewKeyForm()"
+            >
+              Cancel
+            </button>
+          </div>
+          <div class="col pb-2">
+            <p class="fs-6 text-secondary mb-3">
+              <small>
+                A Cannlytics API key identifies a particular application,
+                granting programmatic use with a selected subset of a user's permissions.
+              </small>
+            </p>
+
+            <!-- API Key Fields -->
+            <!-- Optional: Render dynamically -->
+            <form id="new-api-key-form">
+              <div class="row mb-3">
+                <label
+                  for="input-key-name"
+                  class="col-sm-3 col-form-label col-form-label-sm fs-6 pe-2 text-dark text-no-wrap"
+                >
+                  Key name
+                </label>
+                <div class="col-sm-9">
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    id="input-key-name"
+                    spellcheck="false"
+                    name="name"
+                  >
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label
+                  for="input-expiration-at"
+                  class="col-sm-3 col-form-label col-form-label-sm fs-6 pe-2 text-dark text-no-wrap"
+                >
+                  Expiration
+                </label>
+                <div class="col-sm-9">
+                  <input
+                    id="input-key-name"
+                    type="text"
+                    class="form-control form-control-sm"
+                    name="expiration_at"
+                    data-provide="datepicker"
+                    data-date-start-date="-0d"
+                  >
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label
+                  for="input-permissions"
+                  class="col-sm-3 col-form-label col-form-label-sm fs-6 pe-2 text-dark text-no-wrap"
+                >
+                  Permissions
+                </label>
+                <div class="col-sm-9">
+                  <select
+                    id="input-permissions"
+                    class="form-select form-select-sm"
+                    aria-label=".form-select-sm permissions"
+                    name="permissions"
+                  >
+                    <option selected>Choose key permissions...</option>
+                    <option value="read">Read only</option>
+                    <option value="staff">Read and write (Staff)</option>
+                    <option value="qa">Read and write (QA)</option>
+                    <option value="admin">Read and write (Admin)</option>
+                  </select>
+                </div>
+              </div>
+            </form>
+
+            <!-- Create button -->
+            <div class="d-flex justify-content-end">
+              <button
+                id='create-api-key-button'
+                class="btn btn-sm bg-gradient-green text-white"
+                onclick="cannlytics.settings.createAPIKey();"
+              >
+                Create key
+              </button>
+              {% include 'cannlytics_console/components/buttons/loading_button.html' with
+                button_id='create-api-key-button-loading'
+                size='sm'
+              %}
+            </div>
+
+          </div><!-- End of fields -->
+        </div><!-- End of create key card -->
+
+        <!-- TODO: Key created success card -->
+        {% comment %} <p class="fs-6 text-secondary">
+          <small>
+            We strongly recommend that you encrypt your API keys in your data store
+            and in memory when working with them, except when you need to access them
+            to interface with the API.
+            Your API key is observable if you use HTTP, so,
+            please use HTTPS when you make requests to the Cannlytics API.
+            Cannlytics does not store API keys, so, lost API keys are not recoverable
+            In this case, or given any other anomalous activity, it is recommended
+            that you void your old API key and create a new API key.
+
+          </small>
+        </p> {% endcomment %}
+
+        <!-- Key information card -->
+        <!-- TODO: Create and style key form / data block -->
+        <div
+          id="key-information-card"
+          class="card h-100 bg-transparent border-secondary rounded-3 px-2 py-2 d-none"
+          style="max-width: 375px;"
+        >
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="fs-5 mb-0 lh-base">Key Information</h1>
+            <button
+              class="btn btn-sm btn-danger text-white"
+              onclick="cannlytics.settings.deleteAPIKey();"
+            >
+              Delete
+            </button>
+          </div>
+          <h4 class="fs-5 text-dark"></h4>
+
+
+
+
+        </div><!-- End of key information -->
+
+      </div><!-- End of options -->
+
+    </div><!-- End of row -->
+
+  </main>
+
+{% endblock console_body %}
+{% block console_js %}
+
+  <script type="text/javascript" charset="utf-8">
+
+    // Render the date picker.
+    $('.datepicker').datepicker({
+      format: 'mm/dd/yyyy',
+    });
+
+    function showNewKeyForm() {
+      /*
+       * Show the add new key form and hide the key information form.
+       */
+      document.getElementById('new-key-card').classList.remove('d-none');
+      document.getElementById('key-information-card').classList.add('d-none');
+    }
+
+
+    function hideNewKeyForm() {
+      /*
+       * Show the add new key form and hide the key information form.
+       */
+      document.getElementById('new-key-card').classList.add('d-none');
+      // document.getElementById('key-information-card').classList.remove('d-none');
+    }
+
+    
+    function onSelectionChanged() {
+      /*
+       * Show a key's details on selection.
+       */
+      hideNewKeyForm();
+      const selectedRows = gridOptions.api.getSelectedRows();
+      console.log('Selected:', selectedRows);
+      // TODO: Show the selected key in the key-information-card, e.g.
+      // document.querySelector('#selectedRows').innerHTML = selectedRows.length === 1 ? selectedRows[0].athlete : '';
+    };
+
+    // Specify the table columns.
+    const columnDefs = [
+      { field: 'name', headerName: 'Name' },
+      { field: 'created_at', headerName: 'Created' },
+      { field: 'expiration_at', headerName: 'Expiration' },
+      { field: 'permissions', headerName: 'Permissions' },
+    ];
+
+    // Specify the table options.
+    const gridOptions = {
+      columnDefs: columnDefs,
+      defaultColDef: {
+        flex: 1,
+        minWidth: 100,
+      },
+      rowSelection: 'single',
+      onSelectionChanged: onSelectionChanged,
+      overlayLoadingTemplate: `
+        <div class="spinner-grow text-success" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      `,
+      overlayNoRowsTemplate: `
+        <div class="card-body bg-transparent text-center" style="max-width:320px;">
+          <a href="showNewKeyForm();">
+            <img
+              src="/static/cannlytics_console/images/icons/two-tone/two_tone_network.svg"
+              style="width:75px;"
+            >
+          </a>
+          <h2 class="fs-5 text-dark mt-3 mb-1">
+            Create your 1st API Key
+          </h2>
+          <p class="text-secondary fs-6 text-small">
+            <small>Create an API key to begin programmatic use of your account.
+            You can share your API key with a third party that you trust to facilitate your Cannlytics workflow.
+            </small>
+          </p>
+        </div>
+      `
+    };
+
+    // Render the table.
+    const eGridDiv = document.querySelector('#key-table');
+    new agGrid.Grid(eGridDiv, gridOptions);
+    cannlytics.theme.setTableTheme();
+
+    // Get the row data and provide it to the table via the AG Grid API.
+    // Note that the user UID is passed from Django's user session.
+    cannlytics.settings.getAPIKeys('{{ user.uid }}').then(function(data) {
+      gridOptions.api.setRowData(data);
+    });
+
+  </script>
+
+{% endblock %}
+</html>
