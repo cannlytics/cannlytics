@@ -1,26 +1,22 @@
 {
-  "name": "cannlytics_console",
-  "version": "0.0.3",
-  "description": "Cannlytics Community Console.",
-  "keywords": [
-    "cannabis",
-    "analytics",
-    "python"
-  ],
-  "homepage": "https://cannlytics.com/",
+  "name": "cannlytics",
+  "version": "0.0.4",
+  "description": "The Cannlytics Platform, including the website, console, documentation, and tools.",
+  "keywords": ["cannabis", "analytics", "python"],
+  "homepage": "https://cannlytics.com",
   "bugs": {
-    "url": "https://github.com/cannlytics/cannlytics-console/issues",
+    "url": "https://github.com/cannlytics/cannlytics/issues",
     "email": "contact@cannlytics.com"
   },
-  "license": "GPLv3",
+  "license": "MIT",
   "private": true,
   "author": {
-    "name": "Keegan Skeate",
+    "name": "Keegan Leon Skeate",
     "email": "keegan@cannlytics.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cannlytics/cannlytics-console.git"
+    "url": "https://github.com/cannlytics/cannlytics.git"
   },
   "scripts": {
     "start": "npm-run-all --parallel livereload dev webpack",

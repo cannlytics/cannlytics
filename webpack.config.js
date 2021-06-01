@@ -110,7 +110,7 @@ module.exports = env => {
       {
         apply: (compiler) => {
           compiler.hooks.afterEmit.tap('AfterEmitPlugin', (data) => {
-            exec('python build.py', (err, stdout, stderr) => {
+            exec('python tools.build.py', (err, stdout, stderr) => {
               if (stdout) process.stdout.write(stdout);
               if (stderr) process.stderr.write(stderr);
             });

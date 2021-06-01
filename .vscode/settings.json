@@ -73,6 +73,7 @@
     "cloudsql",
     "coas",
     "collectstatic",
+    "coreapi",
     "csrf",
     "csrftoken",
     "daygrid",
