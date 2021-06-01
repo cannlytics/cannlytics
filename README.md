@@ -2,41 +2,36 @@
 
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cannlytics/cannlytics-console/fork)
 
+Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software made with 💖. Cannlytics' mission is to make cannabis analysis **simple** and **easy**. We believe that everyone in the cannabis industry should be able to easily access rich, valuable data and that your business will be better for it.
 
-<!-- Useful links: >
-<!-- https://github.com/haltu/muuri#table-of-contents-->
-
-
-Cannlytics is a simple, easy-to-use, **end-to-end** laboratory software solution. Cannlytics' mission is to make cannabis analysis **simple** and **easy**. You can easily have dozens and dozens of data points for your cannabis products. Cannlytics believes that there is no good reason that you can't access your data.
+This documentation covers the Cannlytics architecture, how to build, how to develop, and how to publish Cannlytics software. You can view the platform live at <https://cannlytics.com>.
 
 - [Introduction](#introduction)
 - [Features](#features)
 - [Contributing](#contributing)
 - [Installation](#installation)
+- [Architecture](#architecture)
 - [Authentication](#authentication)
 - [Development](#development)
-- [Building](#building)
 - [Testing](#testing)
 - [Publishing](#publishing)
 - [Administration](#administration)
 - [Resources](#resources)
 - [License](#license)
 
-## Introduction <a name="introduction"></a>
+## 🏫 Introduction <a name="introduction"></a>
 
 Cannlytics is a healthy mix of user friendly interfaces and software that you can use in your cannabis-testing lab. Users do not have to have any advanced knowledge and can jump in at any point. There are many advanced features that people with background in the web stack, Python, or your favorite programming language can jump right into.
 
 The Cannlytics Website provides people with information about Cannlytics. The Cannlytics Engine is a mobile, desktop, and web app that provides administrators, laboratory staff, laboratory clients, and client integrators to interact with laboratory information.
 
-## Architecture
+## Features <a name="features"></a>
 
 The `cannlytics` package is the core module implementing cannabis analytics logic. The `cannlytics` module handles database interactions, file management, authentication and authorization, traceability, data importing and exporting, and the logic for all workflows, such as certificate creation, item transfers, and publishing results.
 
 The `cannlytics_api` is the interface between the user's application and the cannabis analytics logic of `cannlytics`.
 
 The `cannlytics_console` is the user application where user's can interface with the infrastructure, such as the database, and utilize the cannabis analytics logic.
-
-## Features <a name="features"></a>
 
 ### 🧪 Labs
 
@@ -78,7 +73,7 @@ The `cannlytics_console` is the user application where user's can interface with
 * Cannlytics Assistant (bot)
 * Users can chose their own UTC time.
 
-## Contributing <a name="contributing"></a>
+## 🤝 Contributing <a name="contributing"></a>
 
 Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](/docs/markdown/about/contributing.md) to get started. Anyone is welcome to contribute anything. Currently, the Cannlytics Console would love:
 
@@ -87,7 +82,7 @@ Contributions are always welcome! You are encouraged to submit issues, functiona
 * More documentation;
 * Ideas.
 
-## Installation <a name="installation"></a>
+## 📖 Installation <a name="installation"></a>
 
 Cannlytics is an open box and transparent. You do not have to guess about the software used in the Cannlytics Engine. Cannlytics is built and depends on the following software and services.
 
@@ -114,7 +109,7 @@ A good place to begin is to clone the repository and get a lay of the architectu
 ```shell
 git clone https://github.com/cannlytics/cannlytics_website.git
 ```
-## Architecture <a name="architecture"></a>
+## 🏛️ Architecture <a name="architecture"></a>
 
 The Cannlytics Website is built with [Python] using the [Django] framework. The Cannlytics Website runs on [Cloud Run] and is hosted with [Firebase Hosting]. The Cannlytics Website utilizes [Firebase Authentication], an optional SQL database, a [Firestore] NoSQL database for real-time data management, and [Firebase Storage] for file storage. The Cannlytics Engine has a user interface that is built with [Flutter] and [Dart] with a backend powered by [Python].
 
@@ -133,8 +128,6 @@ Resources:
 
 * [WSGI Servers](https://www.fullstackpython.com/wsgi-servers.html)
 
-<!-- Architecture References: -->
-
   [Cloud Registry]: https://cloud.google.com/container-registry
   [Cloud Run]: https://firebase.google.com/docs/hosting/cloud-run
   [Dart]: https://dart.dev/guides
@@ -146,7 +139,7 @@ Resources:
   [Futter]: https://flutter.dev/docs
   [Python]: https://www.python.org/
 
-## Authentication <a name="authentication"></a>
+## 🛡️ Authentication <a name="authentication"></a>
 
 When you are ready to begin working, then you will need to setup your authorization.
 
@@ -155,11 +148,11 @@ Resources:
 * [Firebase Custom Authentication System with Django](https://medium.com/@gabriel_gamil/firebase-custom-authentication-system-with-django-c411009ddb44)
 * [Django with Google Firebase](https://hackanons.com/2018/03/python-django-with-google-firebase-getting-started-intro-basic-configuration-firebase-authentication-part1.html)
 
-## Development <a name="development"></a>
+## 🔨 Development <a name="development"></a>
 
 See [the development guide](https://cannlytics.com/dev) for a full-guide. Development can happen in many avenues. Principally, clone the repository, create a fork, work on your desired problem, and finally create a pull request for your changes.
 
-## Data <a name="data"></a>
+### 📡 Data <a name="data"></a>
 
 Cannlytics operates with a NoSQL database, Firebase by default, however, can be configured with any SQL database.
 
@@ -167,13 +160,13 @@ Resources:
 
 * [Django Database API](https://docs.djangoproject.com/en/3.1/topics/db/queries/)
 
-## Storage <a name="storage"></a>
+### 📁 Storage <a name="storage"></a>
 
 Cannlytics utilizes Firebase Storage / Google Cloud Storage for most storage solutions.
 
 * [Serving static files on App Engine](https://cloud.google.com/appengine/docs/standard/python3/serving-static-files)
 
-## Bugs <a name="bugs"></a>
+### 🐞 Bugs <a name="bugs"></a>
 
 See [bugs](https://cannlytics.com/bugs) for a full list of bugs and issues that you may encounter. Below are noteworthy bugs that you may encounter and their solutions.
 
@@ -185,7 +178,7 @@ See [bugs](https://cannlytics.com/bugs) for a full list of bugs and issues that 
 
   > **Solution** - In order to use a rewrite at the root in Firebase Hosting, you must not include an `index.html` file in the public folder.
 
-## Testing <a name="testing"></a>
+## ⚗️ Testing <a name="testing"></a>
 
 Please see [the testing guide](https://cannlyitcs.com/docs/testing) for full documentation on Cannlytics software testing. Generally, you can run tests for an app, e.g. `app_name` as follows.
 
@@ -201,7 +194,7 @@ gcloud auth configure-docker
 docker push gcr.io/cannlytics/cannlytics-website
 ```
 
-## Publishing <a name="publishing"></a>
+## 📚 Publishing <a name="publishing"></a>
 
 See [the publishing guide](https://cannlytics.com/publishing) for complete instructions on how to publish the Cannlytics Engine for use. Publishing is done with one command:
 
@@ -227,7 +220,7 @@ This step provides access to this containerized app from a [Firebase Hosting](ht
 
 `firebase deploy --only hosting:production`
 
-## Administration <a name="administration"></a>
+## 🕵️ Administration <a name="administration"></a>
 
 *Admin Site*
 
@@ -242,7 +235,7 @@ Helpful resources:
 * [Authentication](https://cloud.google.com/run/docs/authenticating/public)
 * [Google Cloud Authentication](https://google-auth.readthedocs.io/en/latest/user-guide.html)
 
-## Resources <a name="resources"></a>
+## 🐕‍🦺 Resources <a name="resources"></a>
 
 * [Django Philosophy](https://docs.djangoproject.com/en/3.1/misc/design-philosophies)
 * [Django on Cloud Run](https://codelabs.developers.google.com/codelabs/cloud-run-django)
@@ -251,22 +244,15 @@ Helpful resources:
 * [Docker Tips](https://twg.io/blog/things-i-wish-i-knew-about-docker-before-i-started-using-it/)
 * [Testing Docker Locally](https://cloud.google.com/run/docs/testing/local)
 * [The Python Runtime for the App Engine Flexible Environment](https://cloud.google.com/appengine/docs/flexible/python/runtime)
-* [Quickstart for Python in the App Engine Flexible Environment](https://cloud.google.com/appengine/docs/flexible/python/quickstart#windows)
+* [Quick start for Python in the App Engine Flexible Environment](https://cloud.google.com/appengine/docs/flexible/python/quickstart#windows)
 
 
-## License <a name="license"></a>
+## 📜 License <a name="license"></a>
 
-**Cannlytics Console** Copyright (C) 2020-2021 Cannlytics and Cannlytics Contributors.
+**Cannlytics** Copyright (C) 2020-2021 Cannlytics and Cannlytics Contributors.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
