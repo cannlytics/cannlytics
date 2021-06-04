@@ -30,7 +30,7 @@ Create a secret with:
 
 ```shell
 gcloud secrets create \
-  cannlytics_api_settings \
+  api_settings \
   --replication-policy automatic
 ```
 
@@ -42,7 +42,7 @@ PROJECTNUM=$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumbe
 CLOUDRUN=${PROJECTNUM}-compute@developer.gserviceaccount.com
 
 gcloud secrets add-iam-policy-binding \
-  cannlytics_api_settings \
+  api_settings \
   --member serviceAccount:${CLOUDRUN} \
   --role roles/secretmanager.secretAccessor
 ```
@@ -57,7 +57,7 @@ echo GS_BUCKET_NAME=\"${GS_BUCKET_NAME}\" >> .env
 echo GCS_SA=\"${PROJECT_NUM}-compute@developer.gserviceaccount.com\" >> .env
 echo SECRET_KEY=\"$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 50 | head -n 1)\" >> .env
 echo DEBUG=\"False\" >> .env
-gcloud secrets versions add cannlytics_api_settings --data-file .env
+gcloud secrets versions add api_settings --data-file .env
 rm .env
 ```
 
@@ -70,7 +70,7 @@ gcloud beta run services add-iam-policy-binding --region=us-central1 --member=al
 You can confirm that the secret was created or updated with:
 
 ```shell
-gcloud secrets versions list cannlytics_api_settings
+gcloud secrets versions list api_settings
 ```
 
 Helpful resources:
@@ -87,7 +87,7 @@ You can build your container image using Cloud Build by running the following co
 
 ```shell
 set PROJECT_ID=cannlytics
-set APP_ID=cannlytics_api
+set APP_ID=api
 gcloud builds submit --tag gcr.io/%PROJECT_ID%/%APP_ID%
 ```
 

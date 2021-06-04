@@ -1,8 +1,8 @@
 /**
  * store.js | Cannlytics Console (v1.0.0)
- * Licensed under GPLv3 (https://github.com/cannlytics/cannlytics_console/blob/main/LICENSE)
  * Author: Keegan Skeate
  * Created: 12/26/2020
+ * Updated: 6/3/2021
  * Resources:
  *   https://www.npmjs.com/package/idb
  *   https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB

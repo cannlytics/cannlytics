@@ -1,0 +1,106 @@
+<!doctype>
+<html>
+  <!-- Console Sidebar -->
+  <!-- TODO: Make minimizable -->
+
+  {% load static icon %}
+
+  <nav
+    id="sidebar-menu"
+    class="col-md-3 col-lg-2 d-md-block bg-light sidebar sidebar-sticky collapse"
+  >
+
+    <!-- Toggle Sidebar
+      data-bs-toggle="collapse"
+      data-bs-target="#sidebar-menu"
+      aria-controls="sidebar-menu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    -->
+    <button
+      id="sidebar-toggle"
+      class="btn nav-link navbar-toggle d-flex position-absolute text-secondary"
+      style="right:0; top:0; background: transparent;"
+      role="button"
+      type="button"
+      onclick="cannlytics.ui.hideSidebar();"
+      data-bs-toggle="tooltip"
+      data-bs-placement="right"
+      title="Hide the sidebar"
+    >
+      {% icon "sidebar" width="16px" height="16px" %}
+    </button>
+
+    <div class="pt-3">
+
+      <!-- Create Organization Prompt -->
+      {% if not organization and not user.disabled_org_prompt %}
+        <div class="text-center border-bottom px-2 pb-4 mb-3">
+          <!-- Optional: Close message button -->
+          <img
+            src="{% static 'console/images/icons/multi-tone/lab_large.png' %}"
+            style="width:175px;"
+          >
+          <h4 class="fs-5 mt-0 mb-0 fw-bold">Get started</h4>
+          <p class=""><small>Create or join an organization to get started.</small></p>
+          <div class="d-flex align-items-center justify-content-center mt-2">
+            <a
+              class="btn btn-sm bg-gradient-orange text-white text-no-wrap me-1"
+              href="/organizations"
+            >
+              Setup your Organization
+            </a>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Main Index -->
+      <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-4 mb-2 text-muted">
+        <span>Main</span>
+      </h6>
+      <ul class="nav flex-column">
+        {% for item in sidebar.lab_index %}
+          {% if user.type in item.user_type or item.user_type == '*' %}
+            <li class="nav-item px-2 mb-1">
+              <a
+                class="nav-link d-flex py-1 px-3 {% if item.slug == screen %}active{% endif %}"
+                href="{{ item.url }}"
+              >
+                {% icon item.icon class="me-2" height="16" width="16" %}
+                {{ item.title }}
+              </a>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul><!-- End of main index -->
+
+    <!-- Bottom option -->
+    {% comment %} <div class="w-100 text-center mt-5 mb-3 position-absolute bottom-0">
+      <a
+        class="h6 btn btn-sm btn-outline-orange"
+        href="https://cannlytics.com/support"
+        target="_blank"
+      >
+        {% icon "life-buoy" class="me-2" height="16" width="16" %}
+        Get support
+      </a>
+    </div> {% endcomment %}
+
+    </div>
+  </nav>
+
+  <button
+    id="sidebar-console-toggle"
+    class="btn nav-link navbar-toggle d-flex position-absolute text-secondary"
+    style="left:0; top:72px; width:unset; background: transparent;"
+    role="button"
+    type="button"
+    onclick="cannlytics.ui.showSidebar();"
+    data-bs-toggle="tooltip"
+    data-bs-placement="right"
+    title="Show the sidebar"
+  >
+    {% icon "sidebar" width="16px" height="16px" %}
+  </button>
+
+</html>

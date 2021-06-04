@@ -30,7 +30,7 @@ Create a secret with:
 
 ```shell
 gcloud secrets create \
-  cannlytics_console_settings \
+  console_settings \
   --replication-policy automatic
 ```
 
@@ -42,7 +42,7 @@ PROJECTNUM=$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumbe
 CLOUDRUN=${PROJECTNUM}-compute@developer.gserviceaccount.com
 
 gcloud secrets add-iam-policy-binding \
-  cannlytics_console_settings \
+  console_settings \
   --member serviceAccount:${CLOUDRUN} \
   --role roles/secretmanager.secretAccessor
 ```
@@ -60,7 +60,7 @@ echo SECRET_KEY=\"$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 50 
 echo DEBUG=\"True\" >> .env
 echo EMAIL_HOST_USER=\"email\" >> .env
 echo EMAIL_HOST_PASSWORD=\"password\" >> .env
-gcloud secrets versions add cannlytics_console_settings --data-file .env
+gcloud secrets versions add console_settings --data-file .env
 rm .env
 
 ```
@@ -76,7 +76,7 @@ Update your IAM policy:
 You can confirm that the secret was created or updated with:
 
 ```shell
-gcloud secrets versions list cannlytics_console_settings
+gcloud secrets versions list console_settings
 ```
 
 Helpful resources:

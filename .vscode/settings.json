@@ -92,6 +92,7 @@
     "heatmap",
     "hmac",
     "hmacs",
+    "inkscape",
     "inlinehilite",
     "keegan",
     "keychain",
@@ -147,7 +148,8 @@
     "urandom",
     "uslugify",
     "uuid",
-    "uuidv"
+    "uuidv",
+    "wsgi"
   ],
   "yaml.customTags": [
     "!ref"

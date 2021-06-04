@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<!-- 500 Page -->
+<!-- Created 4/27/2021 -->
+<!-- Updated 4/28/2021 -->
+{% extends "console/pages/account/base_sign_in.html" %}
+{% block title %}500 | Cannlytics{% endblock %}
+{% block login_form %}
+  <div class="text-center">
+    <p class="h6 font-weight-light serif text-center mt-5 mb-4" style="line-height:2;">
+      An error occured on our end. Could you please
+      report this occurance to support@cannlytics.com?
+    </p>
+    <div class="simple-flex justify-content-center">
+      <button
+        class="btn bg-gradient-green text-white"
+        style="width: 191px;"
+        type="button"
+        onclick="cannlytics.settings.reportError({ 'status_code': 500, 'version': {{ APP_VERSION_NUMBER }} });"
+      >
+        Report Error
+      </button>
+    </div>
+    <p class="fs-6 font-weight-light serif text-center my-4" style="line-height:2;">
+      You can use the following links to
+      try to get to where you need to go.
+    </p>
+    <button
+      class="btn btn-link text-dark"
+      type="button"
+      onclick="goBack()"
+    >
+      Back
+    </button>
+    <a
+      class="btn btn-link text-dark"
+      type="button"
+      href="/"
+    >
+      Home
+    </a>
+    <a
+      class="btn btn-link text-dark"
+      type="button"
+      href="/account/sign-in"
+    >
+      Login
+    </a>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    function goBack() {
+      window.history.back();
+    }
+  </script>
+
+{% endblock %}
+
+</html>

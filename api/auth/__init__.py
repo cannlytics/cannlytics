@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-cannlytics_api.auth
+api.auth
 ~~~~~~~~~~~~~~~~~~~
 Authentication API endpoints.
 """

@@ -17,8 +17,8 @@ from rest_framework.response import Response
 
 # Internal imports
 from cannlytics.firebase import create_log, get_collection
-from cannlytics_api.auth import auth
-from cannlytics_console.settings import (
+from api.auth import auth
+from console.settings import (
     DEFAULT_FROM_EMAIL,
     LIST_OF_EMAIL_RECIPIENTS,
 )
@@ -63,11 +63,11 @@ def errors(request):
         # text = f"A user with the email address {user_email} would like to join your organization, \
         #     {organization}. Do you want to add this user to your organization's team? Please \
         #     reply YES or NO to confirm."
-        # # Optional: Find new home's for endpoints in cannlytics_api and cannlytics_website
+        # # Optional: Find new home's for endpoints in api and cannlytics_website
         # confirm_link = f'https://console.cannlytics.com/api/organizations/confirm?hash={owner_hmac}&member={user_hmac}'
         # decline_link = f'https://console.cannlytics.com/api/organizations/decline?hash={owner_hmac}&member={user_hmac}'
         # unsubscribe_link = f'https://console.cannlytics.com/api/unsubscribe?hash={owner_hmac}'
-        # html_message = render_to_string('templates/cannlytics_console/emails/action_email_template.html', {
+        # html_message = render_to_string('templates/console/emails/action_email_template.html', {
         #     'recipient': org_email,
         #     'paragraphs': paragraphs,
         #     'primary_action': 'Confirm',

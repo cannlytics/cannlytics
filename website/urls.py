@@ -16,7 +16,7 @@ urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('contact/', views.ContactView.as_view(), name='contact'),
     path('community/', views.CommunityView.as_view(), name='community'),
-    path('api/', include('cannlytics_api.urls'), name='api'),
+    path('api/', include('api.urls'), name='api'),
     path('docs/', include('cannlytics_docs.urls'), name='docs'),
     path('labs/', views.CommunityView.as_view(), name='labs'),  # Redundant
     path('labs/new/', views.NewLabView.as_view()),

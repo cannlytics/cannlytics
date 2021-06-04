@@ -1,8 +1,8 @@
 /**
- * Cannlytics Console (v1.0.0): clients.js
- * Licensed under GPLv3 (https://github.com/cannlytics/cannlytics_console/blob/main/LICENSE)
+ * Clients JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 12/3/2020
+ * Updated: 6/3/2021
  */
 
 export class Clients {

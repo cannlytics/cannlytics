@@ -1,7 +1,7 @@
 /**
  * --------------------------------------------------------------------------
  * Cannlytics (v1.0.0): intake.js
- * Licensed under GPLv3 (https://github.com/cannlytics/cannlytics_console/blob/main/LICENSE)
+ * Licensed under GPLv3 (https://github.com/cannlytics/console/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 

@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<!--
+  Clients Page | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 12/17/2020
+  Updated: 5/5/2021
+-->
+{% extends "console/console.html" %}
+{% block console_body %}
+
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header -->
+    <!-- Optional: Dynamically render tabs -->
+    <div class="col pt-3 pb-2 mb-3">
+      <h1 class="fs-5 mb-0 lh-base mb-3">Clients</h1>
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'records' %}active{% endif %}"
+            aria-current="{% if section == 'records' %}page{% endif %}"
+            href="/clients/records"
+          >
+            Records
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'marketing' %}active{% endif %}"
+            aria-current="{% if section == 'marketing' %}page{% endif %}"
+            href="/clients/marketing"
+          >
+            Marketing
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'notifications' %}active{% endif %}"
+            aria-current="{% if section == 'notifications' %}page{% endif %}"
+            href="/clients/notifications"
+          >
+            Notifications
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'logs' %}active{% endif %}"
+            aria-current="{% if section == 'logs' %}page{% endif %}"
+            href="/clients/logs"
+          >
+            Logs
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Dynamic section -->
+    <section>
+      {% block section %}{% endblock %}
+    </section>
+
+    <!-- Clients JavaScript -->
+    {% comment %} {% block console_js %}
+      <script>
+        cannlytics.clients.initialize();
+      </script>
+    {% endblock console_js %} {% endcomment %}
+
+  </main>
+
+{% endblock %}
+</html>

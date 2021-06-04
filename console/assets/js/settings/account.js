@@ -1,8 +1,8 @@
 /**
- * account.js | Cannlytics Console (v1.0.0)
- * Licensed under GPLv3 (https://github.com/cannlytics/cannlytics_console/blob/main/LICENSE)
+ * Account JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 1/2/2021
+ * Updated: 6/3/2021
  */
 
 

@@ -1,6 +1,5 @@
 /**
  * Dashboard JavaScript | Cannlytics Console
- * Licensed under GPLv3 (https://github.com/cannlytics/cannlytics_console/blob/main/LICENSE)
  * Author: Keegan Skeate
  * Created: 12/3/2020
  * Updated: 5/2/2021

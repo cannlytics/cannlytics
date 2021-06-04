@@ -11,14 +11,14 @@ from django.views.generic.base import TemplateView
 from django.http import HttpResponse
 
 # Internal imports
-from cannlytics_console.state import layout
-from cannlytics_console.utils import (
+from console.state import layout
+from console.utils import (
     get_screen_specific_data,
     get_screen_specific_state,
     get_user_context,
 )
 
-BASE = 'cannlytics_console'
+BASE = 'console'
 
 #-----------------------------------------------------------------------
 # Main view

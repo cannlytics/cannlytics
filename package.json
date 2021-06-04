@@ -2,7 +2,11 @@
   "name": "cannlytics",
   "version": "0.0.4",
   "description": "The Cannlytics Platform, including the website, console, documentation, and tools.",
-  "keywords": ["cannabis", "analytics", "python"],
+  "keywords": [
+    "cannabis",
+    "analytics",
+    "python"
+  ],
   "homepage": "https://cannlytics.com",
   "bugs": {
     "url": "https://github.com/cannlytics/cannlytics/issues",

@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from cannlytics_api.auth import authenticate_request
+from api.auth import authenticate_request
 
 
 @api_view(['GET', 'POST'])

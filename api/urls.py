@@ -11,14 +11,14 @@ from rest_framework import urlpatterns
 from rest_framework.urlpatterns import format_suffix_patterns
 
 # Internal imports
-from cannlytics_api import views
-from cannlytics_api.auth import auth
-from cannlytics_api.areas import areas
-from cannlytics_api.inventory import inventory
-from cannlytics_api.organizations import organizations
-from cannlytics_api.users import users
+from api import views
+from api.auth import auth
+from api.areas import areas
+from api.inventory import inventory
+from api.organizations import organizations
+from api.users import users
 
-app_name = 'cannlytics_api' # pylint: disable=invalid-name
+app_name = 'api' # pylint: disable=invalid-name
 
 urlpatterns = [
     path('', views.index, name='index'),

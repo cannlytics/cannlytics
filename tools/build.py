@@ -1,6 +1,7 @@
 """
-Post-Build | Cannlytics
+Build Functions | Cannlytics
 Created: 4/18/2021
+Updated: 5/31/2021
 Resources:
     https://stackoverflow.com/questions/30312715/run-command-after-webpack-build
 """
@@ -12,7 +13,7 @@ import os
 from bs4 import BeautifulSoup
 
 # Django directories.
-APP = 'cannlytics_console'
+APP = 'console'
 MODULE_DIR = f'{APP}/plugins/cannlytics'
 STATIC_DIR = f'./{APP}/static/{APP}/'
 TEMPLATE_DIR = f'./{APP}/templates/{APP}/'
@@ -109,3 +110,4 @@ if __name__ == '__main__':
 
     clean_bundle_folder(f'./{APP}/static/' + MODULE_DIR)
     get_webpack_hashes()
+    # TODO: Update version number in Readme.md

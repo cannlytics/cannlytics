@@ -1,8 +1,8 @@
 /**
  * User Interface JavaScript | Cannlytics Console
- * Licensed under GPLv3 (https://github.com/cannlytics/cannlytics_console/blob/main/LICENSE)
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 5/2/2021
+ * Updated: 6/3/2021
  */
 
 export const ui = {

@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<!--
+  Areas | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 4/24/2021
+  Updated: 5/7/2021
+-->
+{% extends "console/console.html" %}
+{% load static icon %}
+{% block console_css %}
+
+  <!-- Page-specific CSS -->
+  <link rel="stylesheet" href="{% static 'console/css/areas/areas.css' %}">
+
+{% endblock %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- TODO: Notification if user has no organization -->
+    {% if not organization %}
+      An organization is required to create areas.
+    {% endif %}
+
+    <!-- Header-->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="fs-5 mb-0 lh-base">Areas</h1>
+    </div>
+
+    <!-- Body -->
+    <div class="">
+
+      <!-- Table -->
+      <div id="clients-table" class="ag-theme-alpine-dark" style="height: 600px; width:100%;"></div>
+      
+
+    </div>
+
+  </main>
+
+{% endblock console_body %}
+{% block console_js %}
+
+  <!-- Page-specific JavaScript -->
+  <script src="{% static 'console/js/areas/areas.js' %}"></script>
+
+{% endblock console_js %}
+</html>

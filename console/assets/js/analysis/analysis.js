@@ -1,8 +1,8 @@
 /**
  * Cannlytics Console (v1.0.0): analysis.js
- * Licensed under GPLv3 (https://github.com/cannlytics/cannlytics_console/blob/main/LICENSE)
  * Author: Keegan Skeate
  * Created: 12/3/2020
+ * Updated: 6/3/2021
  */
 // import Chart from 'chart.js';
 // import "chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js";

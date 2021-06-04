@@ -21,7 +21,7 @@ const TerserPlugin = require("terser-webpack-plugin");
 const exec = require('child_process').exec;
 const nodeExternals = require('webpack-node-externals');
 const path = require('path');
-const appName = 'cannlytics_console';
+const appName = 'console';
 
 module.exports = env => {
   return {
@@ -110,7 +110,7 @@ module.exports = env => {
       {
         apply: (compiler) => {
           compiler.hooks.afterEmit.tap('AfterEmitPlugin', (data) => {
-            exec('python tools.build.py', (err, stdout, stderr) => {
+            exec('python tools/build.py', (err, stdout, stderr) => {
               if (stdout) process.stdout.write(stdout);
               if (stderr) process.stderr.write(stderr);
             });
