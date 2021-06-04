@@ -18,7 +18,7 @@ except ImportError:
 
 os.environ.setdefault(
     'DJANGO_SETTINGS_MODULE',
-    'cannlytics_console.settings'
+    'console.settings'
 )
 
 application = Cling(get_wsgi_application())

@@ -1,8 +1,10 @@
+# Cannlytics Platform Requirements
+
 # To ensure app dependencies are ported from your
 # virtual environment/host machine into your container,
 # run 'pip freeze > requirements.txt' in the terminal to overwrite this file.
 
-# cannlytics==0.0.2
+beautifulsoup4==4.9.3
 coreapi
 dj_static==0.0.6
 django==3.2
@@ -17,13 +19,15 @@ google-cloud-secret-manager==1.0.0
 gunicorn==20.0.4
 Markdown==3.2.2
 markdown-markup-emoji==0.2.2 # FIXME: Not working
+mkdocstrings==0.15.0
 PyJWT==2.1.0
 python-decouple==3.3
 psycopg2-binary==2.8.5
+requests==2.25.1
 ulid-py==1.1.0
 xhtml2pdf==0.2.5
 
-# Docs (TODO: Split up requirements?)
+# Optional documentation requirements.
 # git+https://github.com/facelessuser/pymdown-lexers.git
 # mkdocs-git-revision-date-localized-plugin
 # mkdocs-minify-plugin

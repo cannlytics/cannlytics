@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<!-- Settings -->
+<!-- Created 12/21/2020 -->
+{% extends "console/console.html" %}
+{% load icon %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header-->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="fs-5 mb-0 lh-base">Settings</h1>
+    </div>
+
+    <!-- Body -->
+    <div class="col">
+
+      <!-- General settings table -->
+      <!-- TODO: Render with a for-loop -->
+      <div class="list-group col-md-6 py-3">
+        <a
+          href="/settings/account"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+          aria-current="true"
+        >
+          Account
+          {% icon "chevron-right" %}
+        </a>
+        <a
+          href="/settings/api"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+          aria-current="true"
+        >
+          API
+          {% icon "chevron-right" %}
+        </a>
+        <a
+          href="/settings/notifications"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+          aria-current="true"
+        >
+          Notifications
+          {% icon "chevron-right" %}
+        </a>
+        <a
+          href="/settings/organizations"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+          aria-current="true"
+        >
+          <div>
+            Organizations <span class="primary-icon ml-2" data-feather="alert-circle"></span>
+          </div>
+          <!-- TODO: Alert to add organization if no organization -->
+          {% icon "chevron-right" %}
+        </a>
+        <a
+          href="/settings/team"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+          aria-current="true"
+        >
+          Team
+          {% icon "chevron-right" %}
+        </a>
+        <a
+          href="/settings/theme"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+          aria-current="true"
+        >
+          Theme
+          {% icon "chevron-right" %}
+        </a>
+      </div>
+
+    </div><!-- End of body -->
+
+  </main>
+{% endblock console_body %}
+</html>

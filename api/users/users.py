@@ -19,7 +19,7 @@ from cannlytics.firebase import (
     update_document,
 )
 from cannlytics.utils import utils
-from cannlytics_api.auth import auth
+from api.auth import auth
 
 
 #-----------------------------------------------------------------------

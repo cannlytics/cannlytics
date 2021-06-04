@@ -33,6 +33,34 @@ python manage.py collectstatic
 
 You can configure static files to be served from [Firebase Storage](https://firebase.google.com/docs/storage) instead of from [Firebase Hosting](https://firebase.google.com/docs/hosting) in `personal_website/settings.py`.
 
+You will also want to create an `.env` file with the following variables.
+
+```txt
+DEBUG=True
+SECRET_KEY=django-secret-key
+
+DATABASE_URL=postgres://USERNAME:PASSWORD\!@//cloudsql/PROJECT_ID:REGION:DB_NAME/DB
+
+EMAIL_HOST_USER=your.email@mail.com
+EMAIL_HOST_PASSWORD=password
+
+PROJECT_ID=xyz
+REGION=us-central1
+GS_BUCKET_NAME={PROJECT_ID}.appspot.com
+GCS_SA={PROJECT_NUMBER}-compute@developer.gserviceaccount.com
+GOOGLE_APPLICATION_CREDENTIALS=path-to-firebase-credentials
+GOOGLE_ANALYTICS_KEY=123
+
+FIREBASE_API_KEY=abc
+FIREBASE_AUTH_DOMAIN=PROJECT_ID.firebaseapp.com
+FIREBASE_DATABASE_URL=https://PROJECT_ID.firebaseio.com
+FIREBASE_PROJECT_ID=PROJECT_ID
+FIREBASE_STORAGE_BUCKET=PROJECT_ID.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=123
+FIREBASE_APP_ID=1:123:web:abc
+FIREBASE_MEASUREMENT_ID=G-abc
+```
+
 
 ## Running
 

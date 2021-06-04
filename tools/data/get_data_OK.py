@@ -6,9 +6,10 @@ Contact: <keegan@cannlytics.com>
 Created: 5/27/2021
 Updated: 5/30/2021
 License: MIT License <https://opensource.org/licenses/MIT>
-Resources:
+Data Sources:
     - [Medical Marijuana Excise Tax](https://oklahomastate.opengov.com/transparency#/33894/accountType=revenues&embed=n&breakdown=types&currentYearAmount=cumulative&currentYearPeriod=months&graph=bar&legendSort=desc&month=5&proration=false&saved_view=105742&selection=A49C34CEBF1D01A1738CB89828C9274D&projections=null&projectionType=null&highlighting=null&highlightingVariance=null&year=2021&selectedDataSetIndex=null&fiscal_start=earliest&fiscal_end=latest)
     - [List of Licensed Businesses](https://oklahoma.gov/omma/businesses/list-of-businesses.html)
+Resources:
     - [SQ788](https://www.sos.ok.gov/documents/questions/788.pdf)
     - [How to Extract Text from a PDF](https://stackoverflow.com/questions/34837707/how-to-extract-text-from-a-pdf-file/63518022#63518022)
 """
@@ -165,10 +166,12 @@ TAX_RATE = 7
 
 
 def download_website_pdfs(url, destination):
-    """Download all PDFS from a given website to a given folder.
+    """Download all PDFs from a given website to a given folder.
     Args:
         url (str): The website that contains the PDFs.
         destination (str): The destination for the PDFS.
+    Returns:
+        files (list): A list of where all PDFs were downloaded.
     """
     files = []
     if not os.path.exists(destination): os.mkdir(destination)
@@ -189,6 +192,8 @@ def parse_licensee_records(file_name):
     Args:
         url (str): The website that contains the PDFs.
         destination (str): The destination for the PDFS.
+    Returns:
+        records (list(list)): A list of lists of values for each licensee.
     """
     records = []
     with fitz.open(file_name) as doc:
@@ -210,6 +215,8 @@ def clean_licensee_records(records):
     """Clean a list of lists of licensee records into a DataFrame.
     Args:
         records (list(list)): A list of a list of record values.
+    Returns:
+        data (DataFrame): A DataFrame of licensee records.
     """
     data = pd.DataFrame(records, columns=COLUMNS)
     data['trade_name'] = data['trade_name'].str.replace('Trade Name: ', '')
@@ -227,13 +234,13 @@ if __name__ == '__main__':
         directory = r'C:\Users\keega\Documents\cannlytics\data\state_data\OK'
 
     # Download all licensee lists to a new folder in the directory.
-    date = datetime.now().strftime('%Y-%m-%d')
+    date = datetime.now().isoformat()[:10]
     licensee_folder = os.path.join(directory, date)
     licensee_files = []
     for url in LICENSEE_LISTS:
         files = download_website_pdfs(url, licensee_folder)
         licensee_files += files
-    
+
     # Parse and clean all licensee data.
     frames = []
     for file_name in licensee_files:
@@ -244,44 +251,65 @@ if __name__ == '__main__':
         frames.append(data)
     licensees = pd.concat(frames)
     
-    # Save and upload data
-    licensses.to_excel('')
-    
+    # Save the data.
+    licensees.to_excel(f'.datasets/licensees_OK_{date}.xlsx')
+
+    # TODO: Upload licensees data.
     
     # Read Oklahoma tax data.
-    # file_name = 'Oklahoma Data Snapshot - 5-29-2021'
-    # ext = 'csv'
-    # raw_excise_tax_data = pd.read_csv(
-    #     f'{directory}/{file_name}.{ext}',
-    #     skiprows=4
-    # )
+    file_name = 'Oklahoma Data Snapshot - 6-2-2021'
+    ext = 'csv'
+    raw_excise_tax_data = pd.read_csv(
+        f'{directory}/{file_name}.{ext}',
+        skiprows=4
+    )
     
     # # Format excise tax.
-    # excise_tax = []
-    # raw_excise_tax = raw_excise_tax_data.iloc[1].to_dict()
-    # for key, value in raw_excise_tax.items():
-    #     if 'Actual' in key:
-    #         timestring = key.replace(' Actual', '')
-    #         parts = timestring.replace(' ', '-').split('-')
-    #         month_name = parts[0]
-    #         # FIXME: Format date dynamically
-            
-    #         # year = parts[1]
-    #         # day = parts[2]
-    #         month = MONTHS[month_name]
-    #         if month < 6:
-    #             year = '2021'
-    #         else:
-    #             year = '2020'
-    #         excise_tax.append({
-    #             'date': f'{year}-{month}',
-    #             'excise_tax': int(value.strip().replace(',', '')),
-    #         })
+    excise_tax = []
+    raw_excise_tax = raw_excise_tax_data.iloc[1].to_dict()
+    for key, value in raw_excise_tax.items():
+        if 'Actual' in key:
+            timestring = key.replace(' Actual', '')
+            parts = timestring.replace(' ', '-').split('-')
+            month_name = parts[0]
+            # FIXME: Format year dynamically.
+            month = MONTHS[month_name]
+            if month < 6:
+                year = '2021'
+            else:
+                year = '2020'
+            excise_tax.append({
+                'date': f'{year}-{month}',
+                'excise_tax': int(value.strip().replace(',', '')),
+            })
     
-    # data = pd.DataFrame(excise_tax)
-    # data = data.set_index(pd.to_datetime(data['date']))
-    # data['sales'] =  data.excise_tax * 100 / TAX_RATE
-    # data.plot()
+    revenue_data = pd.DataFrame(excise_tax)
+    revenue_data = revenue_data.set_index(pd.to_datetime(revenue_data['date']))
+    
+    revenue_data['revenue'] = revenue_data['excise_tax'].diff() * 100 / TAX_RATE
+    revenue_data.revenue.plot()
 
-    # TODO: Calculate average revenue per retailer
+    # Add a time index.
+    revenue_data['t'] = range(0, len(revenue_data))
 
+    # Save the revenue data.
+    revenue_data.to_excel(f'.datasets/revenue_OK_{date}.xlsx')
+
+    # TODO: Upload the revenue data.
+
+    # Calculate rate of growth (trend).
+    import statsmodels.api as sm
+
+    # Run a regression of total revenue on time, where t = 0, 1, ... T.
+    model = sm.formula.ols(formula='revenue ~ t', data=revenue_data)
+    regression = model.fit()
+    print(regression.summary())
+
+    # Plot the trend with total revenue.
+    revenue_data['trend'] = regression.predict()
+    revenue_data[['revenue', 'trend']].plot()
+
+    # Calculate estimated revenue per dispensary per month.
+    dispensaries = licensees.loc[licensees.license_type == 'dispensaries']
+    number_of_dispensaries = len(dispensaries)
+    revenue_data['revenue_per_dispensary'] = revenue_data['revenue'] / number_of_dispensaries

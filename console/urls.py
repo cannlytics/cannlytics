@@ -11,13 +11,13 @@ from django.urls import include, path
 
 
 # Internal imports
-from cannlytics_console import views
+from console import views
 
-app_name = 'cannlytics_console' # pylint: disable=invalid-name
+app_name = 'console' # pylint: disable=invalid-name
 urlpatterns = [
     path('', views.ConsoleView.as_view(), name='index'),
     path('account/<slug:page>', views.LoginView.as_view(), name='auth'),
-    path('api/', include('cannlytics_api.urls'), name='api'),
+    path('api/', include('api.urls'), name='api'),
     # HACK: Handle livereload during development.
     path('livereload', views.no_content),
     # TODO: Merge website links as /about or redirect common pages
@@ -27,9 +27,9 @@ urlpatterns = [
 ]
 
 # Error pages.
-handler404 = 'cannlytics_console.views.handler404'
-handler500 = 'cannlytics_console.views.handler500'
+handler404 = 'console.views.handler404'
+handler500 = 'console.views.handler500'
 
 # Optional: Add 403 and 400 pages
-# handler403 = 'cannlytics_console.views.my_custom_permission_denied_view'
-# handler400 = 'cannlytics_console.views.my_custom_bad_request_view'
+# handler403 = 'console.views.my_custom_permission_denied_view'
+# handler400 = 'console.views.my_custom_bad_request_view'

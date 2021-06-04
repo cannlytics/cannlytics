@@ -1,8 +1,8 @@
 /**
- * app.js | Cannlytics Console
- * Licensed under GPLv3 (https://github.com/cannlytics/cannlytics_console/blob/main/LICENSE)
+ * App JavaScript | Cannlytics Console
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 12/7/2020
+ * Updated: 6/3/2021
  */
 import { auth, signOut } from '../firebase.js';
 import { authRequest } from '../utils.js';

@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<!-- Traceability -->
+<!-- Created: 12/18/2020 -->
+<!-- Updated: 5/4/2021 -->
+{% extends "console/console.html" %}
+{% load icon %}
+{% block console_body %}
+
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header-->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="fs-5 mb-0 lh-base">Traceability</h1>
+    </div>
+
+    <!-- Body -->
+    <div class="col">
+
+    <!-- Traceability Provider -->
+    <div class="col-md-4">
+      <label for="inputTraceabilityProvider" class="form-label">Traceability Provider</label>
+      <select id="inputTraceabilityProvider" class="form-select">
+        <option selected>Select</option>
+        <option>Leaf Data Systems</option>
+        <option>Metrc</option>
+      </select>
+    </div>
+
+    </div><!-- End of body -->
+
+  </main>
+
+{% endblock console_body %}
+</html>

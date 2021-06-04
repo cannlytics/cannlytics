@@ -8,6 +8,7 @@ Cannlytics strives to provide public state cannabis data. State data is collecte
   * https://www.commerce.alaska.gov/web/amco/MarijuanaRegulations.aspx
   * https://www.commerce.alaska.gov/web/Portals/9/pub/MCB/StatutesAndRegulations/AS17.38.pdf
   * https://www.commerce.alaska.gov/web/Portals/9/pub/MCB/StatutesAndRegulations/CannabisTesting.pdf
+  * http://tax.alaska.gov/programs/programs/reports/index.aspx?60000
 
 - [Arkansas](https://cannlytics.com/data/ar)
   * [Arkansas Medical Marijuana Resources](https://www.healthy.arkansas.gov/programs-services/topics/medical-marijuana-resources)

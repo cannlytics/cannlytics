@@ -73,6 +73,7 @@
     "cloudsql",
     "coas",
     "collectstatic",
+    "coreapi",
     "csrf",
     "csrftoken",
     "daygrid",
@@ -91,6 +92,7 @@
     "heatmap",
     "hmac",
     "hmacs",
+    "inkscape",
     "inlinehilite",
     "keegan",
     "keychain",
@@ -146,7 +148,8 @@
     "urandom",
     "uslugify",
     "uuid",
-    "uuidv"
+    "uuidv",
+    "wsgi"
   ],
   "yaml.customTags": [
     "!ref"

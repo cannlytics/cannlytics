@@ -29,10 +29,10 @@ from django.template import base
 # Project variables
 # ------------------------------------------------------------#
 PRODUCTION = False
-PROJECT_NAME = 'cannlytics_console'
-ROOT_URLCONF = 'cannlytics_console.urls'
-SETTINGS_NAME = 'cannlytics_console_settings'
-WSGI_APPLICATION = 'cannlytics_console.core.wsgi.application'
+PROJECT_NAME = 'console'
+ROOT_URLCONF = 'console.urls'
+SETTINGS_NAME = 'console_settings'
+WSGI_APPLICATION = 'console.core.wsgi.application'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # sys.path.insert(0, os.path.join(BASE_DIR))
@@ -75,9 +75,9 @@ if PRODUCTION:
 # ------------------------------------------------------------#
 INSTALLED_APPS = [
     'cannlytics',
-    # 'cannlytics_api.apps.CannlyticsAPIConfig',
-    'cannlytics_api',
-    'cannlytics_console',
+    # 'api.apps.CannlyticsAPIConfig',
+    'api',
+    'console',
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -104,7 +104,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'cannlytics_console.core.middleware.AppendOrRemoveSlashMiddleware',
+    'console.core.middleware.AppendOrRemoveSlashMiddleware',
 ]
 
 # ------------------------------------------------------------#
@@ -124,7 +124,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'cannlytics_console/templates'),
+            os.path.join(BASE_DIR, 'console/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -133,7 +133,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'cannlytics_console.core.context_processors.selected_settings', # Adds select settings to the context.
+                'console.core.context_processors.selected_settings', # Adds select settings to the context.
             ],
         },
     },
@@ -219,7 +219,7 @@ LIST_OF_EMAIL_RECIPIENTS = [env('EMAIL_HOST_USER')]
 # ------------------------------------------------------------#
 
 # List of directories where Django will also look for static files
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'cannlytics_console/static'),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'console/static'),)
 
 # The directory from where files are served. (web accessible folder)
 STATIC_ROOT = os.path.abspath(

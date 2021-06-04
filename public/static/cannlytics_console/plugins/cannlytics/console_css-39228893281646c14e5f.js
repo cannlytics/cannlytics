@@ -82,20 +82,20 @@ var cannlytics =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./cannlytics_console/assets/css/console.scss");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./console/assets/css/console.scss");
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ "./cannlytics_console/assets/css/console.scss":
+/***/ "./console/assets/css/console.scss":
 /*!****************************************************!*\
-  !*** ./cannlytics_console/assets/css/console.scss ***!
+  !*** ./console/assets/css/console.scss ***!
   \****************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ __webpack_exports__[\"default\"] = (__webpack_require__.p + \"./plugins/cannlytics/console-5b821adadd4bc3430f536ac85cec71be.css\");\n\n//# sourceURL=webpack://cannlytics/./cannlytics_console/assets/css/console.scss?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ __webpack_exports__[\"default\"] = (__webpack_require__.p + \"./plugins/cannlytics/console-5b821adadd4bc3430f536ac85cec71be.css\");\n\n//# sourceURL=webpack://cannlytics/./console/assets/css/console.scss?");
 
 /***/ })
 

@@ -11,8 +11,8 @@ from django.utils.crypto import get_random_string
 
 # Internal imports
 from cannlytics.firebase import get_document, get_collection, get_user
-from cannlytics_api.auth import auth
-from cannlytics_console.state import data, material
+from api.auth import auth
+from console.state import data, material
 
 
 #----------------------------------------------#

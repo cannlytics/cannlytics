@@ -1,8 +1,8 @@
 /**
  * Errors JavaScript | Cannlytics Console
- * Licensed under GPLv3 (https://github.com/cannlytics/cannlytics_console/blob/main/LICENSE)
  * Author: Keegan Skeate
  * Created: 4/28/2021
+ * Updated: 6/3/2021
  */
 
 import { authRequest } from '../utils.js';

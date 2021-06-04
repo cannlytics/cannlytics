@@ -24,8 +24,8 @@ from cannlytics.firebase import (
     get_document,
     update_document,
 )
-from cannlytics_api.auth import auth
-from cannlytics_console.settings import (
+from api.auth import auth
+from console.settings import (
     DEFAULT_FROM_EMAIL,
     LIST_OF_EMAIL_RECIPIENTS,
 )
@@ -154,11 +154,11 @@ def base(request, format=None):
 #     # TODO: Generate confirm, decline, and unsubscribe links with HMACs from user's uid and owner's uid.
 #     user_hmac = ''
 #     owner_hmac = ''
-#     # Optional: Find new home's for endpoints in cannlytics_api and cannlytics_website
+#     # Optional: Find new home's for endpoints in api and cannlytics_website
 #     confirm_link = f'https://console.cannlytics.com/api/organizations/confirm?hash={owner_hmac}&member={user_hmac}'
 #     decline_link = f'https://console.cannlytics.com/api/organizations/decline?hash={owner_hmac}&member={user_hmac}'
 #     unsubscribe_link = f'https://console.cannlytics.com/api/unsubscribe?hash={owner_hmac}'
-#     html_message = render_to_string('templates/cannlytics_console/emails/action_email_template.html', {
+#     html_message = render_to_string('templates/console/emails/action_email_template.html', {
 #         'recipient': org_email,
 #         'paragraphs': paragraphs,
 #         'primary_action': 'Confirm',

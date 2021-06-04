@@ -77,4 +77,4 @@ docs/build
 .firebasesrc
 
 # Ignore datasets created or retrived with data tools.
-tools/data/.datasets
+*.datasets

@@ -72,7 +72,7 @@ DEBUG = env("DEBUG")
 INSTALLED_APPS = [
     "cannlytics_website",
     "cannlytics_docs.apps.CannlyticsDocsConfig",
-    "cannlytics_api.apps.CannlyticsAPIConfig",
+    "api.apps.CannlyticsAPIConfig",
     "crispy_forms",
     "django.contrib.admin",
     "django.contrib.auth",
