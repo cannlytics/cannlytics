@@ -30,7 +30,7 @@ Create a secret with:
 
 ```shell
 gcloud secrets create \
-  console_settings \
+  lims_settings \
   --replication-policy automatic
 ```
 
@@ -42,7 +42,7 @@ PROJECTNUM=$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumbe
 CLOUDRUN=${PROJECTNUM}-compute@developer.gserviceaccount.com
 
 gcloud secrets add-iam-policy-binding \
-  console_settings \
+  lims_settings \
   --member serviceAccount:${CLOUDRUN} \
   --role roles/secretmanager.secretAccessor
 ```
@@ -50,17 +50,17 @@ gcloud secrets add-iam-policy-binding \
 Then create your environment variables and save them to the secret:
 
 ```shell
-APP_ID=cannlytics-console
+APP_ID=abraxas-labs-lims
 REGION=us-central1
 DJPASS="$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 30 | head -n 1)"
-GS_BUCKET_NAME=cannlytics-console.appspot.com
+GS_BUCKET_NAME=abraxas-labs-lims.appspot.com
 echo DATABASE_URL=\"postgres://djuser:${DJPASS}@//cloudsql/${APP_ID}:${REGION}:cannlytics-sql/cannlytics-sql-database\" > .env
 echo GS_BUCKET_NAME=\"${GS_BUCKET_NAME}\" >> .env
 echo SECRET_KEY=\"$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 50 | head -n 1)\" >> .env
-echo DEBUG=\"True\" >> .env
+echo DEBUG=\"False\" >> .env
 echo EMAIL_HOST_USER=\"email\" >> .env
 echo EMAIL_HOST_PASSWORD=\"password\" >> .env
-gcloud secrets versions add console_settings --data-file .env
+gcloud secrets versions add lims_settings --data-file .env
 rm .env
 
 ```
@@ -76,7 +76,7 @@ Update your IAM policy:
 You can confirm that the secret was created or updated with:
 
 ```shell
-gcloud secrets versions list console_settings
+gcloud secrets versions list lims_settings
 ```
 
 Helpful resources:
