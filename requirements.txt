@@ -17,8 +17,8 @@ firebase_admin==4.3.0
 google-auth==1.20.1
 google-cloud-secret-manager==1.0.0
 gunicorn==20.0.4
-Markdown==3.2.2
-markdown-markup-emoji==0.2.2 # FIXME: Not working
+Markdown==3.3.4
+# markdown-markup-emoji==0.2.2 # FIXME: Not working
 mkdocstrings==0.15.0
 PyJWT==2.1.0
 python-crontab

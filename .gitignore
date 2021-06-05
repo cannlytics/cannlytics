@@ -74,7 +74,7 @@ docs/build
 
 # Ignore Firebase source control
 # https://firebase.google.com/docs/cli/#source_control_aliases
-.firebasesrc
+.firebaserc
 
 # Ignore datasets created or retrived with data tools.
 *.datasets

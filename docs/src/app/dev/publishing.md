@@ -50,10 +50,10 @@ gcloud secrets add-iam-policy-binding \
 Then create your environment variables and save them to the secret:
 
 ```shell
-APP_ID=abraxas-labs-lims
+APP_ID=your-lims
 REGION=us-central1
 DJPASS="$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 30 | head -n 1)"
-GS_BUCKET_NAME=abraxas-labs-lims.appspot.com
+GS_BUCKET_NAME=your-lims.appspot.com
 echo DATABASE_URL=\"postgres://djuser:${DJPASS}@//cloudsql/${APP_ID}:${REGION}:cannlytics-sql/cannlytics-sql-database\" > .env
 echo GS_BUCKET_NAME=\"${GS_BUCKET_NAME}\" >> .env
 echo SECRET_KEY=\"$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 50 | head -n 1)\" >> .env
@@ -92,8 +92,8 @@ The publishing process contains three steps:
 You can build your container image using Cloud Build by running the following command from the directory containing the Dockerfile:
 
 ```shell
-set PROJECT_ID=cannlytics
-set APP_ID=cannlytics-console
+set PROJECT_ID=your-lims
+set APP_ID=your_lims
 python manage.py collectstatic --noinput
 gcloud builds submit --tag gcr.io/%PROJECT_ID%/%APP_ID%
 ```
@@ -112,7 +112,7 @@ gcloud run deploy %PROJECT_ID% --image gcr.io/%PROJECT_ID%/%APP_ID% --region %RE
 You can retrieve the service URL with:
 
 ```shell
-gcloud run services describe cannltics-console \
+gcloud run services describe your-lims \
   --platform managed \
   --region $REGION  \
   --format "value(status.url)"
@@ -129,7 +129,7 @@ npm install -g firebase-tools
 Afterwards, you can login to Firebase in the command line with:
 
 ```shell
-firebase login
+firebase login --reauth
 ```
 
 Then, you can deploy the site with:

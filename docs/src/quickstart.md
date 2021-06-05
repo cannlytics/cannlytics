@@ -51,3 +51,35 @@ FIREBASE_MEASUREMENT_ID=G-abc
 ```
 GOOGLE_APPLICATION_CREDENTIALS=path/to/your/service/account.json
 ```
+
+## Firebase Hosting
+
+Create a `.firebasesrc` in the root directory with your Firebase hosting reference. For example
+
+```json
+{
+  "projects": {
+    "default": "your-lims"
+  },
+  "targets": {
+    "your-lims": {
+      "hosting": {
+        "docs": [
+          "your-docs"
+        ],
+        "dev": [
+          "your-dev"
+        ],
+        "production": [
+          "your-lims"
+        ]
+      }
+    }
+  }
+}
+```
+
+### Required Google permissions
+
+* gcloud.builds.submit
+* storage.objects.get
