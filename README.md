@@ -320,13 +320,13 @@ The build process contains three steps:
 Build your container image using [Cloud Build] by running the following command from the directory containing the Dockerfile:
 
 ```shell
-gcloud builds submit --tag gcr.io/cannlytics/cannlytics
+gcloud builds submit --tag gcr.io/your-lims/cannlytics
 ```
 
 2. Deploy the container image to Cloud Run.
 
 ```shell
-gcloud beta run deploy cannlytics-website --image gcr.io/cannlytics/cannlytics-website --region us-central1 --allow-unauthenticated --service-account=${GCS_SA}
+gcloud beta run deploy your-lims --image gcr.io/your-lims/cannlytics --region us-central1 --allow-unauthenticated --service-account=${GCS_SA}
 ```
 
 3. Direct hosting requests to the containerized app.
