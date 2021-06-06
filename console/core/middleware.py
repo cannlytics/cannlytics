@@ -25,7 +25,7 @@ class AppendOrRemoveSlashMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         """Returns a redirect if adding/removing a slash is appropriate. This
-        works in the same way as the default APPEND_SLASH behaviour but in
+        works in the same way as the default APPEND_SLASH behavior but in
         either direction."""
 
         # Check if the url is valid

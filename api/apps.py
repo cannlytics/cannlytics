@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class CannlyticsAPIConfig(AppConfig):
+class APIConfig(AppConfig):
     name = "api"

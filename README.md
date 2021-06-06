@@ -18,14 +18,14 @@ Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software de
 
 ## Introduction <a name="introduction"></a>
 
-The `cannlytics` package is the core module implementing cannabis analytics logic. The `cannlytics` module handles [database interactions](#data), [file management](#storage), [authentication and authorization](#authentication), traceability, data importing and exporting, and the logic for all workflows, such as certificate creation, item transfers, and publishing results. The `api` is the interface between the user's application and the cannabis analytics logic of `cannlytics`. The `console` is the user application where user's can interface with the infrastructure, such as the database, and utilize the cannabis analytics logic. The `docs` provide information about the project and the `website` provides people with information about cannabis analytics. 
+The `cannlytics` package is the core module implementing cannabis analytics logic. The `cannlytics` module handles [database interactions](#data), [file management](#storage), [authentication and authorization](#authentication), traceability, data importing and exporting, and the logic for all workflows, such as certificate creation, item transfers, and publishing results. The `api` is the interface between the user application and the cannabis analytics logic of `cannlytics`. The `console` is the user application where user's can interface with the infrastructure, such as the database, and utilize the cannabis analytics logic. The `docs` provide information about the project and the `website` provides people with information about cannabis analytics. 
 
 ## Installation <a name="installation"></a>
 
-Cannlytics is an open box and transparent. You do not have to guess about the software used or how your logic is implemented. Our philosophy is that **open source** and **free** solutions are the best ([**free** as in **free** speech, not as in *free beer*](http://www.gnu.org/philosophy/free-sw.html)). See the [installation guide](/installation) for complete instructions. The installation instructions will guide you through:
+Cannlytics is an open box and transparent. You do not have to guess about the software used or how your logic is implemented. Our philosophy is that **open source** and **free** solutions are the best ([**free** as in **free** speech, not as in *free beer*](http://www.gnu.org/philosophy/free-sw.html)). In brief, installation entails:
 
 1. [Cloning the repository.](#cloning-the-repository)
-2. [Setting your account credentials.](#setting-your-account-credentials)
+2. [Setting your Firebase account credentials.](#setting-your-account-credentials)
 3. [Installing project dependencies and development tools.](#installing-dependencies)
 
 ### 1. Cloning the repository <a name="cloning-the-repository"></a>
@@ -38,7 +38,7 @@ git clone https://github.com/cannlytics/cannlytics.git
 
 ### 2. Setting your account credentials <a name="setting-your-account-credentials"></a>
 
-When you are ready to begin development or publish the Cannlytics web app, then you will need to setup your credentials. You will need to [create a Firebase account](https://console.firebase.google.com/) and project before you begin. We recommend choosing a project name that is in kebab-case so that you can safely use the project name for many namespaces throughout the project, for example `your-lims`.
+When you are ready to begin development or publish the Cannlytics web app, then you will need to setup your credentials. You will need to [create a Firebase account](https://console.firebase.google.com/) and start a project before you begin. We recommend choosing a project name that is in kebab-case so that you can safely use the project name for many namespaces throughout the project, for example `your-lims`.
 
 2.1. First, create an `.env` file at the project's root.
 
@@ -61,16 +61,16 @@ print(generated_secret_key)
 SECRET_KEY=xyz
 ```
 
-2.3 Next, navigate to your Firebase project settings, find your Firebase project configuration, and set your Firebase configuration in your `.env` file.
+2.3 Next, [add a Firebase web app](https://firebase.google.com/docs/web/setup). We recommend using the same namespace you chose for your project, for example `your-lims`, and setting up [Firebase Hosting] with your app. Once you have created a web app, navigate to your Firebase project settings, find your Firebase app Config, and set your Firebase configuration in your `.env` file.
 
 ```shell
 # .env
 
 FIREBASE_API_KEY=xyz
-FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-FIREBASE_DATABASE_URL=https://your-project.firebaseio.com
-FIREBASE_PROJECT_ID=your-project
-FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+FIREBASE_AUTH_DOMAIN=your-lims.firebaseapp.com
+FIREBASE_DATABASE_URL=https://your-lims.firebaseio.com
+FIREBASE_PROJECT_ID=your-lims
+FIREBASE_STORAGE_BUCKET=your-lims.appspot.com
 FIREBASE_MESSAGING_SENDER_ID=123
 FIREBASE_APP_ID=123
 FIREBASE_MEASUREMENT_ID=G-abc
@@ -93,7 +93,7 @@ EMAIL_HOST_PASSWORD=your-app-password
 GOOGLE_APPLICATION_CREDENTIALS=path/to/your/service/account.json
 ```
 
-2.6. Finish by creating a `.firebasesrc` in the root directory with your Firebase hosting references. For example
+2.6. Finish by creating a `.firebasesrc` in the root directory with your [Firebase Hosting] references. For example
 
 ```json
 {
@@ -136,13 +136,13 @@ Cannlytics is built and depends on the following software and services, so you w
 
 ## Architecture <a name="architecture"></a>
 
-Cannlytics is built with [Python] and leverages the [Django] framework. Cannlytics utilizes [Firebase](https://firebase.google.com/) for user authentication with [Firebase Authentication], a [Firestore] NoSQL database for real-time data management, [Firebase Storage] for file storage, and hosted with [Firebase Hosting]. Cannlytics uses a number of [Google Cloud](https://console.cloud.google.com/) backend services, including:
+Cannlytics is built with [Python] and leverages the [Django] framework. Cannlytics utilizes [Firebase] for user authentication with [Firebase Authentication], a [Firestore] NoSQL database for real-time data management, [Firebase Storage] for file storage, and hosted with [Firebase Hosting]. Cannlytics uses a number of [Google Cloud](https://console.cloud.google.com/) backend services, including:
 
-  * [Cloud Build](https://cloud.google.com/build) to containerize the app.
-  * [Cloud Registry](https://cloud.google.com/container-registry) to upload the app to storage.
-  * [Cloud Run](https://firebase.google.com/docs/hosting/cloud-run) to run the app as a stateless container.
-  * [Cloud Storage](https://cloud.google.com/storage) for file storage.
-  * [Cloud Secret Manager](https://cloud.google.com/secret-manager/) for storing configurations and keeping secrets secret.
+  * [Cloud Build] to containerize the app.
+  * [Cloud Registry] to upload the app to storage.
+  * [Cloud Run] to run the app as a stateless container.
+  * [Cloud Storage] for file storage.
+  * [Cloud Secret Manager] for storing configurations and keeping secrets secret.
     <!-- * *Optional* [Cloud SQL](https://cloud.google.com/sql) can be utilized if desired. -->
 
 The architecture of the Cannlytics app is as follows.
@@ -204,15 +204,6 @@ The architecture of the Cannlytics app is as follows.
 └── webpack.config.js # JavaScript and CSS bundle configuration.
 ```
 
-[Dart]: https://dart.dev/guides
-[Django]: https://www.djangoproject.com/
-[Firebase Authentication]: https://firebase.google.com/docs/auth
-[Firebase Hosting]: https://firebase.google.com/docs/hosting
-[Firebase Storage]: https://firebase.google.com/docs/storage
-[Firestore]: https://firebase.google.com/docs/firestore
-[Futter]: https://flutter.dev/docs
-[Python]: https://www.python.org/
-
   <!-- The Cannlytics Engine has a user interface that is built with [Flutter] and [Dart] with a backend powered by [Python]. -->
 
 <!-- Leaf and Metrc links -->
@@ -228,7 +219,7 @@ Development can happen in many avenues. Frequent, small scope pull requests are 
 
 ### Authentication <a name="authentication"></a>
 
-Below is a diagram that depicts how Cannlytics leverages [Firebase Authentication](https://firebase.google.com/docs/auth) to authorize user requests.
+Below is a diagram that depicts how Cannlytics leverages [Firebase Authentication] to authorize user requests.
 
 ![Authentication on Google App Engine using Firebase](./public/static/images/diagrams/firebase_auth_diagram.svg)
 
@@ -242,9 +233,21 @@ Cannlytics operates with a NoSQL database, [Firestore] by default. You can conce
 
 * [Django Database API](https://docs.djangoproject.com/en/3.1/topics/db/queries/) -->
 
-### Storage <a name="storage"></a>
+### File Storage <a name="storage"></a>
 
-Cannlytics utilizes [Firebase Storage](https://firebase.google.com/docs/storage) ( a.k.a Google Cloud Storage) for most storage solutions. For help with storing static files, see [serving static files on App Engine](https://cloud.google.com/appengine/docs/standard/python3/serving-static-files)
+Cannlytics utilizes [Firebase Storage] ( a.k.a Google Cloud Storage) for most storage solutions. For help with storing static files, see [serving static files on App Engine](https://cloud.google.com/appengine/docs/standard/python3/serving-static-files). You can gather all supporting files, located in each app's `static` directory, into the `public/static` directory with:
+
+```shell
+python manage.py collectstatic --noinput
+```
+
+or
+
+```shell
+npm run collectstatic
+```
+
+You can configure static files to be served from [Firebase Storage] instead of from [Firebase Hosting] in `console/settings.py`.
 
 ### Documentation
 
@@ -290,7 +293,7 @@ npm run publish-docs
 
 Please see [the testing guide](https://cannlyitcs.com/docs/testing) for full documentation on Cannlytics software testing. Generally, you can run tests for an app, e.g. `app_name` as follows.
 
-```
+```shell
 python manage.py test app_name
 ```
 
@@ -304,7 +307,7 @@ docker push gcr.io/cannlytics/cannlytics
 
 ## Publishing <a name="publishing"></a>
 
-See [the publishing guide](https://cannlytics.com/publishing) for complete instructions on how to publish the Cannlytics Engine for use. After setup, publishing is done with one command:
+See [the publishing guide](docs/src/app/dev/publishing.md) for complete instructions on how to publish the Cannlytics Engine for use. After setup, publishing is done with one command:
 
 ```shell
 npm run publish
@@ -314,38 +317,29 @@ The build process contains three steps:
 
 1. Containerize the app and upload it to Container Registry.
 
-Build your container image using Cloud Build by running the following command from the directory containing the Dockerfile:
+Build your container image using [Cloud Build] by running the following command from the directory containing the Dockerfile:
 
-`gcloud builds submit --tag gcr.io/cannlytics/cannlytics-website`
+```shell
+gcloud builds submit --tag gcr.io/cannlytics/cannlytics
+```
 
 2. Deploy the container image to Cloud Run.
 
-`gcloud beta run deploy cannlytics-website --image gcr.io/cannlytics/cannlytics-website --region us-central1 --allow-unauthenticated --service-account=${GCS_SA}`
+```shell
+gcloud beta run deploy cannlytics-website --image gcr.io/cannlytics/cannlytics-website --region us-central1 --allow-unauthenticated --service-account=${GCS_SA}
+```
 
 3. Direct hosting requests to the containerized app.
 
-This step provides access to this containerized app from a [Firebase Hosting](https://firebase.google.com/docs/hosting) URL, so the app can generate dynamic content for the Firebase-hosted site.
+This step provides access to this containerized app from a [Firebase Hosting] URL, so the app can generate dynamic content for the Firebase-hosted site.
 
-`firebase deploy --only hosting:production`
-
-<!-- ## Administration <a name="administration"></a>
-
-*Admin Site*
-
-* Get an admin password with `gcloud secrets versions access latest --secret admin_password && echo ""`
-
-*User Authentication*
-
-Helpful resources:
-
-* [Django Admin Tutorial](https://docs.djangoproject.com/en/3.1/intro/tutorial07/)
-* [Authenticating end users](https://cloud.google.com/run/docs/authenticating/end-users)
-* [Authentication](https://cloud.google.com/run/docs/authenticating/public)
-* [Google Cloud Authentication](https://google-auth.readthedocs.io/en/latest/user-guide.html) -->
+```shell
+firebase deploy --only hosting:production
+```
 
 ## Contributing <a name="contributing"></a>
 
-Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](/docs/markdown/about/contributing.md) to get started. Anyone is welcome to contribute anything. Email <dev@cannlytics.com> for a quick onboarding. Currently, the Cannlytics Console would love:
+Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](docs/src/about/dev/contributing.md) to get started. Anyone is welcome to contribute anything. Email <dev@cannlytics.com> for a quick onboarding. Currently, the Cannlytics Console would love:
 
 * Art;
 * More code;
@@ -363,6 +357,18 @@ Contributions are always welcome! You are encouraged to submit issues, functiona
 * [The Python Runtime for the App Engine Flexible Environment](https://cloud.google.com/appengine/docs/flexible/python/runtime)
 * [Quick start for Python in the App Engine Flexible Environment](https://cloud.google.com/appengine/docs/flexible/python/quickstart#windows)
 
+[Django]: https://www.djangoproject.com/
+[Cloud Build]: (https://cloud.google.com/build)
+[Cloud Registry]: (https://cloud.google.com/container-registry)
+[Cloud Run]: (https://firebase.google.com/docs/hosting/cloud-run)
+[Cloud Storage]: (https://cloud.google.com/storage)
+[Cloud Secret Manager]: (https://cloud.google.com/secret-manager/)
+[Firebase]: (https://firebase.google.com/)
+[Firebase Authentication]: https://firebase.google.com/docs/auth
+[Firebase Hosting]: https://firebase.google.com/docs/hosting
+[Firebase Storage]: https://firebase.google.com/docs/storage
+[Firestore]: https://firebase.google.com/docs/firestore
+[Python]: https://www.python.org/
 
 ## License <a name="license"></a>
 
