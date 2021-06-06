@@ -1,19 +1,30 @@
 # <img height="32" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics Console
+<!-- TODO: FIx reference to calyx image -->
 
 ![version](https://img.shields.io/badge/version-0.0.4-brightgreen)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cannlytics/cannlytics-console/fork)
 
-Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software designed to make your data and information accessible. Cannlytics' mission is to make cannabis analysis **simple** and **easy** through data accessibility. We believe that everyone in the cannabis industry should be able to access rich, valuable data quickly and easily and that you will be better off for it. This documentation covers the Cannlytics architecture and how to build, develop, and publish the Cannlytics platform. You can view the platform live at <https://console.cannlytics.com> and the documentation at <https://docs.cannlytics.com>.
+Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software designed to make your data and information accessible. Cannlytics makes cannabis analysis **simple** and **easy** through data accessibility. We believe that everyone in the cannabis industry should be able to access rich, valuable data quickly and easily and that you will be better off for it. This documentation covers the Cannlytics architecture and how to build, develop, and publish the Cannlytics platform. You can view the platform live at <https://console.cannlytics.com> and the documentation at <https://docs.cannlytics.com>.
 
 - [Introduction](#introduction)
 - [Installation](#installation)
 - [Architecture](#architecture)
 - [Development](#development)
+  * [Authentication](#authentication)
+  * [Data](#data)
+  * [File Storage](#storage)
+  * [Email](#email)
+  * [Webpack](#webpack)
+  * [Views](#views)
+  * [Templates](#templates)
+  * [Style](#style)
+  * [Text](#text)
+- [Testing](#testing)
 - [Publishing](#publishing)
 - [Contributing](#contributing)
 - [Resources](#resources)
 - [License](#license)
-<!-- - [Testing](#testing) -->
+<!-- -  -->
 <!-- - [Administration](#administration) -->
 
 ## Introduction <a name="introduction"></a>
@@ -157,21 +168,21 @@ The architecture of the Cannlytics app is as follows.
 |   └── storage.rules # File storage access control and validation.
 ├── api
 │   ├── {endpoint}
-│       └── {endpoint}.py # Implementation of specific API endpoints.
+│   |   └── {endpoint}.py # Implementation of specific API endpoints.
 │   ├── urls.py # Defined API endpoints.
 |   └── views.py # Implementation of general API endpoints.
 ├── cannlytics
 │   ├── lims # All LIMS logic.
 │   ├── traceability
-│       ├── leaf # Leaf Data Systems API module.
-|       └── metrc # Metrc API module.
+│   |   ├── leaf # Leaf Data Systems API module.
+|   |   └── metrc # Metrc API module.
 │   ├── utils # General utility functions.
 │   ├── firebase.py # Firebase module.
 |   └── models.py # Main data entities.
 ├── console
 │   ├── assets
-│       ├── css # Core style, minified and bundled.
-│       └── js # JavaScript bundled into a `cannlytics` module.
+│   |   ├── css # Core style, minified and bundled.
+│   |   └── js # JavaScript bundled into a `cannlytics` module.
 │   ├── core # Required Django configuration.
 │   ├── static/console # Static files, like images.
 │   ├── templates/console # User interface templates.
@@ -217,6 +228,18 @@ Development can happen in many avenues. Frequent, small scope pull requests are 
 2. Work on a solution for your most-pressing problem.
 3. [Create a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) for your changes to be reviewed and merged into the project upon approval or for you to receive feedback on how your changes can be approved.
 
+The simplest way to run the app is to open a command line from the project's root directory and run:
+
+```shell
+python manage.py runserver
+```
+
+You can also leverage [django-livereload-server](https://github.com/tjwalch/django-livereload-server) for hot-reloading while you develop.
+
+```shell
+npm run start
+```
+
 ### Authentication <a name="authentication"></a>
 
 Below is a diagram that depicts how Cannlytics leverages [Firebase Authentication] to authorize user requests.
@@ -249,7 +272,52 @@ npm run collectstatic
 
 You can configure static files to be served from [Firebase Storage] instead of from [Firebase Hosting] in `console/settings.py`.
 
-### Documentation
+### Email <a name="email"></a>
+
+If you are sending email with Gmail, then you can follow these steps.
+
+- Navigate to [Gmail](mail.google.com), click your profile, and click manage your google account.
+- Navigate to the [security tab](https://myaccount.google.com/security).
+- Enable 2-step verification and then click on App passwords.
+- Select Mail for app and enter a custom name for device.
+- Click generate and Gmail will generate an app password. Copy this app password to a text file and save it where it is secure and will not be uploaded to a public repository, for example save the password in the `.admin` directory.
+
+After you have created your app password, set your Gmail email and app password as environment variables, `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` respectively.
+
+```shell
+echo EMAIL_HOST_USER=\"youremail@gmail.com\" >> .env
+echo EMAIL_HOST_PASSWORD=\"your-app-password\" >> .env
+gcloud secrets versions add cannlytics_settings --data-file .env
+```
+
+### Webpack <a name="webpack"></a>
+
+Note that [Webpack]() is utilized for bundling CSS and JavaScript. The JavaScript bundle is a JavaScript module and is callable from the user interface with the `cannlytics` namespace.
+
+### Views <a name="views"></a>
+
+Views are Python functions that describe the data to be presented. [Django describes views](https://docs.djangoproject.com/en/3.1/intro/tutorial03/#write-views-that-actually-do-something) in the following quote.
+
+> "Your view can read records from a database, or not. It can use a template system such as Django's – or a third-party Python template system – or not. It can generate a PDF file, output XML, create a ZIP file on the fly, anything you want, using whatever Python libraries you want."
+
+## Templates <a name="templates"></a>
+
+Templates are Django HTML files that describe how the data is presented. Default Django templates can be found in your Anaconda/Python directory in `Lib\site-packages\django\contrib\admin\templates\admin`.
+
+### Style <a name="style"></a>
+
+Style distinguishes one site from another. You are free and encouraged to modify the style to create a site that is uniquely yours. See [style.md](style.md) for a guide on the personal website's style.
+
+
+### Text Material <a name="text"></a>
+
+All text material is either stored in JSON in `state.py` or written in Markdown in `docs` directories.
+
+Resources:
+
+* [`python-markdown` Extensions](https://python-markdown.github.io/extensions/)
+
+## Documentation <a name="documentation"></a>
 
 Documentation for the project is written in [Markdown](https://guides.github.com/features/mastering-markdown/). In brief, you can run the docs locally with:
 
@@ -289,20 +357,26 @@ And publish the documentation:
 npm run publish-docs
 ```
 
-### Testing <a name="testing"></a>
+## Testing <a name="testing"></a>
 
-Please see [the testing guide](https://cannlyitcs.com/docs/testing) for full documentation on Cannlytics software testing. Generally, you can run tests for an app, e.g. `app_name` as follows.
+You can check for errors detectable by Django with:
 
 ```shell
-python manage.py test app_name
+python manage.py check
 ```
 
-You can also build the platform from scratch with the idea to rent for purposes such as software testing:
+You can run tests for a specific app with.
 
 ```shell
-docker build . --tag gcr.io/cannlytics/cannlytics
+python manage.py test your_app_name
+```
+
+You can also build the platform in a docker container for your specific purposes:
+
+```shell
+docker build . --tag gcr.io/your-lims/cannlytics
 gcloud auth configure-docker
-docker push gcr.io/cannlytics/cannlytics
+docker push gcr.io/your-lims/cannlytics
 ```
 
 ## Publishing <a name="publishing"></a>
@@ -320,13 +394,13 @@ The build process contains three steps:
 Build your container image using [Cloud Build] by running the following command from the directory containing the Dockerfile:
 
 ```shell
-gcloud builds submit --tag gcr.io/cannlytics/cannlytics
+gcloud builds submit --tag gcr.io/your-lims/cannlytics
 ```
 
 2. Deploy the container image to Cloud Run.
 
 ```shell
-gcloud beta run deploy cannlytics-website --image gcr.io/cannlytics/cannlytics-website --region us-central1 --allow-unauthenticated --service-account=${GCS_SA}
+gcloud beta run deploy your-lims --image gcr.io/your-lims/cannlytics --region us-central1 --allow-unauthenticated --service-account=${GCS_SA}
 ```
 
 3. Direct hosting requests to the containerized app.

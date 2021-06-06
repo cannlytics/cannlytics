@@ -188,7 +188,15 @@ firebase deploy --only firestore:rules
 
 ## Monitoring
 
-You can view logs for your deployment in the Cloud run console at https://console.cloud.google.com/run/detail/us-central1/your-project/logs?project=your-project
+You can now monitor your app with the following tools.
+
+| Resource | Description |
+| ---------- | ------------ |
+| [Cloud Run Console](https://console.cloud.google.com/run) | Manage your app's container. |
+| [Logs Explorer](https://console.cloud.google.com/logs) | Realtime logs for your app. |
+| [Error Reporting](https://console.cloud.google.com/errors) | Provides detailed historic errors that occurred when running your app. |
+
+
 
 ## (Optional) Setup a Custom Domain
 
@@ -203,7 +211,8 @@ You now have a simple, yet complex, website running on Cloud Run, which will aut
 
 ## Helpful Resources
 
-- [Django on Cloud Run](https://codelabs.developers.google.com/codelabs/cloud-run-django/index.html#7)
+- [Running Django on Cloud Run](https://cloud.google.com/python/django/run#gcloud)
+- [Django on Cloud Run Code Lab](https://codelabs.developers.google.com/codelabs/cloud-run-django/index.html#7)
 - [Granting permissions](https://cloud.google.com/container-registry/docs/access-control#grant)
 - [Permission Denied - GCP Cloud Resource Manager setIamPolicy](https://stackoverflow.com/questions/53163115/permission-denied-gcp-cloud-resource-manager-setiampolicy)
 - [Secret manager access denied despite correct roles for service account](https://stackoverflow.com/questions/62444867/secret-manager-access-denied-despite-correct-roles-for-service-account)
