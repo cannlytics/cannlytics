@@ -2,23 +2,27 @@
 Data Models | Cannlytics
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 5/8/2021
-Updated: 5/11/2021
+Updated: 6/5/2021
 
 Data schema of the Cannlytics platform.
 """
 
+# Standard imports
+from dataclasses import dataclass
+# from dataclasses import field
+from datetime import datetime, timedelta
+from typing import Optional
+# from typing import Any, List
+
+# External imports
 # pylint: disable=no-member
 import ulid
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Any, List, Optional
-from uuid import uuid4
 
 
 @dataclass
-class Document:
+class Model:
     """Firestore document model."""
-    id: str = ulid.new().str.lower()
+    uid: str = ulid.new().str.lower()
     ref: str = ''
 
     @classmethod
@@ -36,7 +40,7 @@ class Document:
         # Use the native arguments to create the class.
         ret = cls(**native_args)
 
-        # Add the arguments by hand.
+        # Add the arguments to the model.
         for new_name, new_val in new_args.items():
             setattr(ret, new_name, new_val)
 
@@ -46,11 +50,9 @@ class Document:
         """Returns the model's properties as a dictionary."""
         return vars(self).copy()
 
-    # Optional: Implement from_json, to_json or use dataclass_json
-
 
 @dataclass
-class Analysis(Document):
+class Analysis(Model):
     """Analyses represent scientific tests, such as cannabinoid
     analysis and pesticide screening. An analysis may contain
     multiple analytes, specific compound or substances that are
@@ -60,7 +62,7 @@ class Analysis(Document):
 
 
 @dataclass
-class APIKey(Document):
+class APIKey(Model):
     """A representation of an API key HMAC data."""
     _collection = 'admin/api/api_key_hmacs'
     created_at: datetime = datetime.now()
@@ -73,7 +75,7 @@ class APIKey(Document):
 
 
 @dataclass
-class Analyte(Document):
+class Analyte(Model):
     """An analyte is a specific measurement, such as the concentration
     of THCA, CBDV, or piperonyl butoxide. An analyte can have many
     supporting fields, such as lowest order of detection (LOD),
@@ -83,7 +85,7 @@ class Analyte(Document):
 
 
 @dataclass
-class Area(Document):
+class Area(Model):
     """An abstract area that your organization uses in your workflow.
     Areas represent distinct places at your facility(ies).
     Areas are abstract units where you can store inventory,
@@ -104,14 +106,14 @@ class Area(Document):
 
 
 @dataclass
-class Calculation(Document):
+class Calculation(Model):
     """A calculation is applied to measurements to determine final
     results, such as applying dilution factor, etc."""
     _collection = 'organizations/%s/calculations'
 
 
 @dataclass
-class Certificate(Document):
+class Certificate(Model):
     """A certificate displaying the final results for analyses of a
     sample, a CoA. The CoA consists of a template and a reference to the
     generated PDF."""
@@ -119,7 +121,7 @@ class Certificate(Document):
 
 
 @dataclass
-class Client(Document):
+class Client(Model):
     """Clients, or contacts in the case of non-laboratory users, are
     other organizations that you work with. Your clients exist as
     organizations in the decentralized community, a network of
@@ -129,7 +131,7 @@ class Client(Document):
 
 
 @dataclass
-class Batch(Document):
+class Batch(Model):
     """A group of samples. A batch does not depend on the client or the
     project of the sample."""
     _collection = 'organizations/%s/batches'
@@ -137,7 +139,7 @@ class Batch(Document):
 
 
 @dataclass
-class Inventory(Document):
+class Inventory(Model):
     """Inventory is any physical item that an organization may have at
     their facility(ies), such as cannabis flower, supplies, or
     instruments. Inventory can be assigned to a specific area to make
@@ -147,27 +149,27 @@ class Inventory(Document):
 
 
 @dataclass
-class Invoice(Document):
+class Invoice(Model):
     """Invoices are incoming or outgoing bills that you want to manage
     in the Cannlytics platform."""
     _collection = 'organizations/%s/invoices'
 
 
 @dataclass
-class Measurements(Document):
+class Measurements(Model):
     """An amount measured by an analyst or scientific instrument. A
     calculation is applied to the measurement to get the final result."""
     _collection = 'organizations/%s/measurements'
 
 
 @dataclass
-class Organization(Document):
+class Organization(Model):
     """The place where work happens."""
     _collection = 'organizations/%s'
 
 
 @dataclass
-class OrganizationSettings(Document):
+class OrganizationSettings(Model):
     """An organizations's primary settings."""
     _collection = 'organizations/%s/settings'
     traceability_provider: str = ''
@@ -175,27 +177,27 @@ class OrganizationSettings(Document):
 
 
 @dataclass
-class Price(Document):
+class Price(Model):
     """A price for an analysis or group of analyses."""
     _collection = 'organizations/%s/prices'
     public: bool = False
 
 
 @dataclass
-class Project(Document):
+class Project(Model):
     """A group of samples for a specific client."""
     _collection = 'organizations/%s/projects'
     status: str = ''
 
 
 @dataclass
-class Reports(Document):
+class Reports(Model):
     """."""
     _collection = 'organizations/%s/reports'
 
 
 @dataclass
-class Results(Document):
+class Results(Model):
     """The final result for an analyte of an analysis after the
     appropriate calculation has been applied to the analyte's
     measurement."""
@@ -203,7 +205,7 @@ class Results(Document):
 
 
 @dataclass
-class Sample(Document):
+class Sample(Model):
     """A sample sent by a client organization to a lab organization
     for the lab to perform analyses on the sample and return results
     and a certificate to the client. Measurements will be made for the
@@ -216,7 +218,7 @@ class Sample(Document):
 
 
 @dataclass
-class Template(Document):
+class Template(Model):
     """Templates for generating documents, such as invoices and
     certificates."""
     _collection = 'organizations/%s/transfers'
@@ -224,7 +226,7 @@ class Template(Document):
 
 
 @dataclass
-class Transfer(Document):
+class Transfer(Model):
     """A group of samples or inventory being transferred between
     two organizations."""
     _collection = 'organizations/%s/transfers'
@@ -232,26 +234,25 @@ class Transfer(Document):
 
 
 @dataclass
-class User(Document):
+class User(Model):
     """The person performing the work."""
     _collection = 'users/%s'
 
 
 @dataclass
-class UserSettings(Document):
+class UserSettings(Model):
     """An organizations's primary settings."""
     _collection = 'users/%s/settings'
     public: bool = False
 
 
 @dataclass
-class Regulation(Document):
+class Regulation(Model):
     """."""
     _collection = 'regulations'
 
 
 @dataclass
-class Workflow(Document):
+class Workflow(Model):
     """An abstract series of actions performed on a set trigger."""
     _collection = 'organizations/%s/workflows'
-

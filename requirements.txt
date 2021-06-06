@@ -12,17 +12,22 @@ django-crispy-forms==1.11.2
 django-environ==0.4.5
 django-feather==0.2.6
 django-livereload-server
-django-storages[google]==1.9.1
+django-storages[google]==1.11.1
+djangorestframework==3.12.4
+django-robohash-svg==0.9.5
 firebase_admin==4.3.0
-google-auth==1.20.1
-google-cloud-secret-manager==1.0.0
-gunicorn==20.0.4
-Markdown==3.2.2
-markdown-markup-emoji==0.2.2 # FIXME: Not working
+google-auth==1.30.0
+google-cloud-secret-manager==2.4.0
+gunicorn==20.1.0
+Markdown==3.3.4
+# markdown-markup-emoji==0.2.2 # FIXME: Not working
 mkdocstrings==0.15.0
+# pandas==1.2.4
+pandas==1.2.1
 PyJWT==2.1.0
+python-crontab
 python-decouple==3.3
-psycopg2-binary==2.8.5
+psycopg2-binary==2.8.6
 requests==2.25.1
 ulid-py==1.1.0
 xhtml2pdf==0.2.5

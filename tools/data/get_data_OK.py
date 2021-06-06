@@ -257,14 +257,16 @@ if __name__ == '__main__':
     # TODO: Upload licensees data.
     
     # Read Oklahoma tax data.
-    file_name = 'Oklahoma Data Snapshot - 6-2-2021'
+    # Downloaded from:
+    # https://oklahomastate.opengov.com/transparency#/33894/accountType=revenues&embed=n&breakdown=types&currentYearAmount=cumulative&currentYearPeriod=months&graph=bar&legendSort=desc&month=5&proration=false&saved_view=105742&selection=A49C34CEBF1D01A1738CB89828C9274D&projections=null&projectionType=null&highlighting=null&highlightingVariance=null&year=2021&selectedDataSetIndex=null&fiscal_start=earliest&fiscal_end=latest
+    file_name = f'Oklahoma Data Snapshot {date}'
     ext = 'csv'
     raw_excise_tax_data = pd.read_csv(
         f'{directory}/{file_name}.{ext}',
         skiprows=4
     )
     
-    # # Format excise tax.
+    # Format excise tax.
     excise_tax = []
     raw_excise_tax = raw_excise_tax_data.iloc[1].to_dict()
     for key, value in raw_excise_tax.items():
@@ -283,10 +285,13 @@ if __name__ == '__main__':
                 'excise_tax': int(value.strip().replace(',', '')),
             })
     
+    # Set a date index.
     revenue_data = pd.DataFrame(excise_tax)
     revenue_data = revenue_data.set_index(pd.to_datetime(revenue_data['date']))
     
+    # Calculate the total revenue.
     revenue_data['revenue'] = revenue_data['excise_tax'].diff() * 100 / TAX_RATE
+    revenue_data['revenue'].iloc[0] = revenue_data['excise_tax'][0] * 100 / TAX_RATE
     revenue_data.revenue.plot()
 
     # Add a time index.

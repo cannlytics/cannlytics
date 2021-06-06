@@ -2,7 +2,7 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-
+import environ
 
 def main():
     """Run administrative tasks."""
@@ -10,6 +10,16 @@ def main():
         'DJANGO_SETTINGS_MODULE',
         'console.settings'
     )
+
+    # Set Google Application credentials.
+    try:
+        env = environ.Env()
+        env.read_env('.env')
+        credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
+    except:
+        print('Could not set GOOGLE_APPLICATION_CREDENTIALS')
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

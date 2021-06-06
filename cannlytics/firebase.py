@@ -42,7 +42,11 @@ try:
     from google.cloud.firestore_v1.collection import CollectionReference
 except:
     pass
-from pandas import notnull, read_csv, read_excel, DataFrame, Series
+try:
+    from pandas import notnull, read_csv, read_excel, DataFrame, Series
+except:
+    # FIXME: pandas has problems with Django on Cloud Run
+    pass
 # from uuid import uuid4
 
 # ------------------------------------------------------------#

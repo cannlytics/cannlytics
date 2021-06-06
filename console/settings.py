@@ -1,7 +1,12 @@
 """
-Django Settings with Environment Variables
+Django Settings with Environment Variables | Cannlytics Console
 
-Description: Django settings secured by Google Cloud Secret Manager.
+Author: Keegan Skeate <keegan@cannlytics.com>
+Created: 6/5/2021
+Updated: 6/5/2021
+Description:
+    Django settings secured by Google Cloud Secret Manager.
+
 References:
     https://docs.djangoproject.com/en/3.1/topics/settings/
     https://docs.djangoproject.com/en/3.1/ref/settings/
@@ -11,33 +16,37 @@ References:
 
 # Standard imports
 import json
+import io
 import os
 import re
-# import sys
 
 # External imports
 import environ
+import google.auth
+from google.cloud import secretmanager as sm
 from django.template import base
 
-# TODO: Prepare for production
-# Caching
+# TODO: Caching for production 
 # https://docs.djangoproject.com/en/3.2/ref/templates/api/#django.template.loaders.cached.Loader
-# Hashing
+
+# TODO: Hashing for production
 # https://docs.djangoproject.com/en/3.2/ref/contrib/staticfiles/#manifeststaticfilesstorage
+
+# ------------------------------------------------------------#
+# Ensure PRODUCTION is set to True when publishing!
+# ------------------------------------------------------------#
+PRODUCTION = True
 
 # ------------------------------------------------------------#
 # Project variables
 # ------------------------------------------------------------#
-PRODUCTION = False
 PROJECT_NAME = 'console'
 ROOT_URLCONF = 'console.urls'
-SETTINGS_NAME = 'console_settings'
-WSGI_APPLICATION = 'console.core.wsgi.application'
+SETTINGS_NAME = 'cannlytics_settings'
+WSGI_APPLICATION = 'console.wsgi.application'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# sys.path.insert(0, os.path.join(BASE_DIR))
-
-# Set the version number.
+# Get the version number.
 with open(os.path.join(BASE_DIR, 'package.json')) as v_file:
     package = json.loads(v_file.read())
     APP_VERSION_NUMBER = package['version']
@@ -46,38 +55,65 @@ with open(os.path.join(BASE_DIR, 'package.json')) as v_file:
 # Environment variables.
 # Pulling django-environ settings file, stored in Secret Manager.
 # ------------------------------------------------------------#
-env_file = os.path.join(BASE_DIR, '.env')
-if not os.path.isfile('.env'):
-    import google.auth
-    from google.cloud import secretmanager as sm
 
-    _, project = google.auth.default()
-    if project:
-        client = sm.SecretManagerServiceClient()
-        path = client.secret_version_path(project, SETTINGS_NAME, 'latest')
-        payload = client.access_secret_version(path).payload.data.decode('UTF-8')
-        with open(env_file, 'w') as f:
-            f.write(payload)
-env = environ.Env()
-env.read_env(env_file)
-SECRET_KEY = env('SECRET_KEY')
-DEBUG = env('DEBUG')
+# Set Google Cloud credentials.
+# env = environ.Env()
+# env.read_env(os.path.join(BASE_DIR, '.env'))
+# credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
+# os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 
+try:
+    env_file = os.path.join(BASE_DIR, '.env')
+    if not os.path.isfile('.env'):
+        import google.auth
+        from google.cloud import secretmanager as sm
+
+        _, project = google.auth.default()
+        if project:
+            client = sm.SecretManagerServiceClient()
+            # path = client.secret_version_path(project, SETTINGS_NAME, 'latest')
+            name = f"projects/{project}/secrets/{SETTINGS_NAME}/versions/latest"
+            payload = client.access_secret_version(name=name).payload.data.decode('UTF-8')
+            with open(env_file, 'w') as f:
+                f.write(payload)
+
+    env = environ.Env()
+    env.read_env(io.StringIO(payload))
+    # env.read_env(env_file)
+
+    # Setting this value from django-environ
+    SECRET_KEY = env('SECRET_KEY')
+
+    # Default false. True allows default landing pages to be visible.
+    DEBUG = env('DEBUG')
+
+except:
+    # Create a default secret key for development.
+    # https://stackoverflow.com/questions/4664724/distributing-django-projects-with-unique-secret-keys
+    env = environ.Env()
+    try:
+        from console.secret_key import SECRET_KEY
+    except ImportError:
+        from console.utils import generate_secret_key
+        SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
+        SECRET_KEY = generate_secret_key(os.path.join(SETTINGS_DIR, 'secret_key.py'))
+    
+    # SECRET_KEY = SECRET_KEY
+
+# Ensure Debug is False in production.
 if PRODUCTION:
     DEBUG = False
-
-# DEV: MONKEY
-# DEBUG = False
 
 # ------------------------------------------------------------#
 # Apps
 # https://docs.djangoproject.com/en/3.1/ref/applications/
 # ------------------------------------------------------------#
 INSTALLED_APPS = [
-    'cannlytics',
-    # 'api.apps.CannlyticsAPIConfig',
     'api',
+    'cannlytics',
     'console',
+    # 'api.apps.APIConfig',
+    # 'cannlytics',
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -154,6 +190,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # ------------------------------------------------------------#
 # Authentication
+# Optional: Setup custom authentication backend with Firebase.
 # https://www.oscaralsing.com/firebase-authentication-in-django/
 # ------------------------------------------------------------#
 # AUTHENTICATION_BACKENDS = []
@@ -180,9 +217,8 @@ USE_TZ = True
 # ------------------------------------------------------------#
 ALLOWED_HOSTS = [
     '*',
-    'console.cannlytics.com',
-    'cannlytics-console.web.app',
-    'cannlytics-console-deeuhexjlq-uc.a.run.app',
+    'https://your-lims.web.app/',
+    'https://your-lims-r5qsqmdnla-uc.a.run.app/',
 ]
 
 if not PRODUCTION:
@@ -231,18 +267,25 @@ STATIC_URL = '/static/'
 
 # ------------------------------------------------------------#
 # Google Cloud Storage alternative for serving static files
+# Uncomment lines 237-267 to setup Firebase Storage.
 # ------------------------------------------------------------#
 
-# Setup Google Cloud Storage for Django.
+# # Setup Google Cloud Storage for Django.
 # # https://django-storages.readthedocs.io/en/latest/backends/gcloud.html
 # INSTALLED_APPS += ['storages'] # for django-storages
 
 # # Define static storage via django-storages[google]
-# GOOGLE_APPLICATION_CREDENTIALS = env('GOOGLE_APPLICATION_CREDENTIALS')
+# try:
+#     GOOGLE_APPLICATION_CREDENTIALS = env('GOOGLE_APPLICATION_CREDENTIALS')
+# except:
+#     pass
 
 # # Set the default storage and bucket name in your settings.py file:
 # DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-# GS_BUCKET_NAME = env('GS_BUCKET_NAME')
+# try:
+#     GS_BUCKET_NAME = env('GS_BUCKET_NAME')
+# except:
+#     pass
 
 # # To allow django-admin collectstatic to automatically
 # # put your static files in your bucket:
@@ -251,19 +294,19 @@ STATIC_URL = '/static/'
 # # Specify file permissions.
 # GS_DEFAULT_ACL = 'publicRead'
 
-# Tell Django the base url to access the static files. Think of this as the 'prefix' of the URL
-# to where your static files are. Note that if you browse through your bucket and happen to see a
-# URL such as 'https://storage.cloud.google.com/<your_bucket_name>/someFileYouHaveUploaded', such
-# URL requires that whoever accesses it should be currently logged-in with their Google accounts. If
-# you want your static files to be publicly accessible by anyone whether they are logged-in or not,
-# use the link 'https://storage.googleapis.com/<your_bucket_name>/someFileYouHaveUploaded' instead.
-# STATIC_URL = 'https://storage.googleapis.com/cannlytics.appspot.com/'
+# # Tell Django the base url to access the static files. Think of this as the 'prefix' of the URL
+# # to where your static files are. Note that if you browse through your bucket and happen to see a
+# # URL such as 'https://storage.cloud.google.com/<your_bucket_name>/someFileYouHaveUploaded', such
+# # URL requires that whoever accesses it should be currently logged-in with their Google accounts. If
+# # you want your static files to be publicly accessible by anyone whether they are logged-in or not,
+# # use the link 'https://storage.googleapis.com/<your_bucket_name>/someFileYouHaveUploaded' instead.
+# STATIC_URL = 'https://storage.googleapis.com/your-lims.appspot.com/'
 
-# If the command 'collectstatic' is invoked, tell Django where to place all the collected static
-# files from all the directories included in STATICFILES_DIRS. Be aware that configuring it with a
-# path outside your /home/me means that you need to have permissions to write to that folder later
-# on when you invoke 'collectstatic', so you might need to login as root first or run it as sudo.
-# STATIC_ROOT = 'https://storage.googleapis.com/cannlytics.appspot.com/public/static/'
+# # If the command 'collectstatic' is invoked, tell Django where to place all the collected static
+# # files from all the directories included in STATICFILES_DIRS. Be aware that configuring it with a
+# # path outside your /home/me means that you need to have permissions to write to that folder later
+# # on when you invoke 'collectstatic', so you might need to login as root first or run it as sudo.
+# STATIC_ROOT = 'https://storage.googleapis.com/your-lims.appspot.com/public/static/'
 
 # ------------------------------------------------------------#
 # Sessions
