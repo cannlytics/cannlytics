@@ -62,26 +62,27 @@
         </a>
         <h3 id="userName" class="mb-1 fs-5">{{ user.display_name }}</h3>
         <h5 id="userEmail" class="mb-0 fs-6 text-secondary">{{ user.email }}</h5>
-      </div>
 
-      <!-- Sign-up / sign-in for anonymous users -->
-      <!-- Optional: Sign-up in dialog -->
-      {% if not user %}
-      <div id="anonymous-signup" class="d-flex align-items-center ps-2">
-        <a
-          class="btn btn-sm bg-gradient-orange text-white text-no-wrap me-1"
-          href="/account/sign-up"
-        >
-          Sign up
-        </a>
-        <a
-          class="btn btn-sm bg-gradient-green text-white text-no-wrap ms-1"
-          href="/account/sign-in"
-        >
-          Sign in
-        </a>
+        <!-- Sign-up / sign-in for anonymous users -->
+        <!-- Optional: Sign-up in dialog -->
+        {% if not user %}
+        <div id="anonymous-signup" class="d-flex align-items-center ps-2">
+          <a
+            class="btn btn-sm bg-gradient-orange text-white text-no-wrap me-1"
+            href="/account/sign-up"
+          >
+            Sign up
+          </a>
+          <a
+            class="btn btn-sm bg-gradient-green text-white text-no-wrap ms-1"
+            href="/account/sign-in"
+          >
+            Sign in
+          </a>
+        </div>
+        {% endif %}
+
       </div>
-      {% endif %}
 
     </div>
     <li><hr class="dropdown-divider"></li>

@@ -127,7 +127,7 @@ class Client(Model):
     organizations in the decentralized community, a network of
     federated servers that communicate with each other."""
     _collection = 'organizations/%s/clients'
-    additional_fields: list = []
+    # additional_fields: list = []
     name: str = ''
 
 

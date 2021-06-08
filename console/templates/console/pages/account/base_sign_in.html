@@ -10,7 +10,7 @@
   {% load static %}
   {% block title %}Console | Cannlytics{% endblock %}
   {% block page_css %}
- <link href="{% static 'console/plugins/cannlytics/login-38e61e8ae57ee99a023c.css'%}" id="login_css" rel="stylesheet" type="text/css"/>
+ <link href="{% static 'console/plugins/cannlytics/login-b47691dc8fbff9ccb8d6.css'%}" id="login_css" rel="stylesheet" type="text/css"/>
  {% endblock %}
   {% block page %}
  
@@ -22,7 +22,7 @@
  
   <!-- Auth template -->
  <div class="login py-0" style="min-height:100vh; height:100vh">
-  <div class="d-flex w-100 h-100">
+  <div class="d-flex w-100" style="min-height:100%">
    
   <!-- Decorative background -->
    <div class="col-7 d-none d-lg-flex justify-content-center align-items-center bg-decorative">
@@ -50,11 +50,15 @@
       
   <!-- Policies -->
       <a class="text-dark fs-6" href="https://cannlytics.com/privacy-policy">
-       Privacy Policy
+       <small>
+        Privacy Policy
+       </small>
       </a>
       |
       <a class="text-dark fs-6" href="https://cannlytics.com/terms-of-service">
-       Terms of Service
+       <small>
+        Terms of Service
+       </small>
       </a>
      </div>
     </form>
