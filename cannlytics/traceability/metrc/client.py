@@ -20,36 +20,37 @@ from .utils import format_params
 class Client(object):
     """An instance of this class communicates with
     the Metrc API.
-    
-    Args:
-
-        vendor_api_key (str): Required Metrc API key, obtained from Metrc
-            upon successful certification. The vendor API key is the
-            software provider's secret used in every instance, regardless
-            of location or licensee.
-
-        user_api_key (str): Required user secret obtained
-            from a licensee's Metrc user interface. The user's permissions
-            determine the level of access to the Metrc API.
-
-        primary_license (str): A license to use if no license is provided
-            on individual requests.
-
-        state (str): The state of the licensee, Oklahoma (ok) by default.
-
-    Example:
-
-    ```py
-    track = metrc.Client(
-        vendor_api_key='abc',
-        user_api_key='xyz',
-        primary_license='123',
-        state='ok'
-    )
-    ```
     """
 
     def __init__(self, vendor_api_key, user_api_key, primary_license='', state='ok', test=False):
+        """Initialize a Metrc API client.
+        Args:
+
+            vendor_api_key (str): Required Metrc API key, obtained from Metrc
+                upon successful certification. The vendor API key is the
+                software provider's secret used in every instance, regardless
+                of location or licensee.
+
+            user_api_key (str): Required user secret obtained
+                from a licensee's Metrc user interface. The user's permissions
+                determine the level of access to the Metrc API.
+
+            primary_license (str): A license to use if no license is provided
+                on individual requests.
+
+            state (str): The state of the licensee, Oklahoma (ok) by default.
+
+        Example:
+
+        ```py
+        track = metrc.Client(
+            vendor_api_key='abc',
+            user_api_key='xyz',
+            primary_license='123',
+            state='ok'
+        )
+        ```
+        """
         self.user_api_key = user_api_key
         self.vendor_api_key = vendor_api_key
         self.primary_license = primary_license

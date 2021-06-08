@@ -1,4 +1,4 @@
-# <img width="20" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics Console
+# <img height="32" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics Console
 <!-- TODO: FIx reference to calyx image -->
 
 ![version](https://img.shields.io/badge/version-0.0.5-brightgreen)
@@ -57,6 +57,7 @@ When you are ready to begin development or publish the Cannlytics web app, then 
 
 ```py
 # tools/quickstart.py
+
 from django.utils.crypto import get_random_string
 
 # Generate a secret key for your project.
@@ -67,6 +68,7 @@ print(generated_secret_key)
 
 ```shell
 # .env
+
 SECRET_KEY=xyz
 ```
 
@@ -74,6 +76,7 @@ SECRET_KEY=xyz
 
 ```shell
 # .env
+
 FIREBASE_API_KEY=xyz
 FIREBASE_AUTH_DOMAIN=your-lims.firebaseapp.com
 FIREBASE_DATABASE_URL=https://your-lims.firebaseio.com
@@ -88,6 +91,7 @@ FIREBASE_MEASUREMENT_ID=G-abc
 
 ```shell
 # .env
+
 EMAIL_HOST_USER=admin@your-company.com
 EMAIL_HOST_PASSWORD=your-app-password
 ```
@@ -96,6 +100,7 @@ EMAIL_HOST_PASSWORD=your-app-password
 
 ```shell
 # .env
+
 GOOGLE_APPLICATION_CREDENTIALS=path/to/your/service/account.json
 ```
 
@@ -239,7 +244,7 @@ npm run start
 
 Below is a diagram that depicts how Cannlytics leverages [Firebase Authentication] to authorize user requests.
 
-![Authentication on Google App Engine using Firebase](https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fdiagrams%2Ffirebase_auth_diagram.png?alt=media&token=ca0afc16-4829-4785-abb0-695304de802c)
+![Authentication on Google App Engine using Firebase](./public/static/images/diagrams/firebase_auth_diagram.svg)
 
 Original image: [How to authenticate users on Google App Engine using Firebase](https://cloud.google.com/blog/products/gcp/how-to-authenticate-users-on-google-app-engine-using-firebase)
 
@@ -287,7 +292,7 @@ gcloud secrets versions add cannlytics_settings --data-file .env
 
 ### Webpack <a name="webpack"></a>
 
-Note that [Webpack](https://webpack.js.org/) is utilized for bundling CSS and JavaScript. The JavaScript bundle is a JavaScript module and is callable from the user interface with the `cannlytics` namespace.
+Note that [Webpack]() is utilized for bundling CSS and JavaScript. The JavaScript bundle is a JavaScript module and is callable from the user interface with the `cannlytics` namespace.
 
 ### Views <a name="views"></a>
 

@@ -23,14 +23,14 @@ site_name: Cannlytics
 site_url: https://cannlytics.com/docs
 site_author: Keegan Skeate
 site_description: >-
-  Cannlytics is a user-friendly interface to quickly transfer laboratory samples,
-  perform analyses, collect and review results,
-  manage certificates of analysis (CoAs), and crunch statistics
-  to your ❤️'s content.
+  Cannlytics is simple, easy-to-use, end-to-end cannabis analytics software
+  designed to make data and information accessible. We believe that everyone in the
+  cannabis industry should be able to access rich, valuable data quickly and easily and
+  that everyone, especially yourself, will be better off for it.
 
 # Repository
 repo_name: Cannlytics
-repo_url: https://github.com/cannlytics/cannlytics-engine
+repo_url: https://github.com/cannlytics/cannlytics
 edit_uri: ""
 
 # Copyright
@@ -61,14 +61,14 @@ theme:
         name: Switch to light mode
   font:
     text: Lora
-    # text: Source Serif Pro
     code: Roboto Mono
   features:
     - navigation.tabs
     - navigation.tracking
-    #   - navigation.sections
+    # Optional: Explore additional features.
+    # - navigation.sections
     # - navigation.instant
-  # FIXME: Custom 404 page.
+  # Optional: Custom 404 page.
   # static_templates:
   #   - partials/404.html
   
@@ -76,57 +76,145 @@ theme:
 # Site map
 nav:
   - Home: index.md
-  - App:
-    - Getting Started: app/get-started.md
-    - Authentication: app/authentication.md
-    - Analysis:
-      - Analyses: app/analyses.md
-      - Analytes: app/analytes.md
-      - Instruments: app/instruments.md
-      - Regulations: app/regulations.md
-      - Limits: app/limits.md
-      - Labs: app/labs.md
-      - Samples: app/samples.md
-      - Results: app/results.md
-    - Clients: app/clients.md
-    - Transfers: app/transfers.md
-    - Inventory: app/inventory.md
-    - Invoices: app/invoices.md
-    - Traceability: app/traceability.md
-    - Settings: app/settings.md
-    - Website and Portal:
-      - Installation: website/installation.md
-      - Development: website/development.md
-      - Publishing: website/publishing.md
-    - Development:
-      - Installation: app/installation.md
-      - Development: app/development.md
-      - Publishing: app/publishing.md
-  - API:
-    - Getting Started: api/get-started.md
-    - Authentication: api/authentication.md
-    - Development:
-      - Installation: api/dev/installation.md
-      - Development: api/dev/development.md
-      - Publishing: api/dev/publishing.md
-  - Python SDK:
-    - Getting Started: sdk/get-started.md
-    - Firebase Module: sdk/firebase/firebase.md
-    - Leaf Data Systems Module: sdk/traceability/leaf.md
-    - LIMS Module: sdk/lims/lims.md
-    - Metrc Module: sdk/traceability/metrc.md
-    - Development:
-      - Installation: sdk/dev/installation.md
-      - Development: sdk/dev/development.md
-      - Publishing: sdk/dev/publishing.md
+
+  # About
+  #------------
   - About:
-    - Contributing &amp; Support: about/contributing.md
-    - Development: about/development.md
-    - Release Notes:
-        - '0.0.3': about/releases/0.0.3.md
-    - License: about/license.md
+    - Introduction: about/about.md
+    - Getting started: about/get-started.md
+    - Development:
+      - Contributing: about/dev/contributing.md
+      - Development: about/dev/development.md
+      - Roadmap: about/dev/roadmap.md
+    - Philosophy: about/company/philosophy.md   
+    - Story: about/company/story.md
+    - Support: about/company/support.md
+    - License: about/licenses/license.md
     - Frequently Asked Questions: about/faq.md
-    - Support: about/support.md
+    - Privacy policy: about/legal/privacy-policy.md
+    - Security policy: about/legal/security-policy.md
+    - Terms of service: about/legal/terms-of-service.md
+
+  # API
+  #------------
+  # - API:
+  #   - Getting Started: api/get-started.md
+  #   - Authentication: api/authentication.md
+  #   - Development:
+  #     - Installation: api/dev/installation.md
+  #     - Development: api/dev/development.md
+  #     - Publishing: api/dev/publishing.md
+  #   - Endpoints:
+  #     - Analysis: api/endpoints/analysis.md
+  #     - Authentication: api/endpoints/auth.md
+  #     - Clients: api/endpoints/clients.md
+  #     - Inventory: api/endpoints/inventory.md
+  #     - Invoices: api/endpoints/invoices.md
+  #     - Logistics: api/endpoints/logistics.md
+  #     - Organizations: api/endpoints/organizations.md
+  #     - Settings: api/endpoints/settings.md
+  #     - Stats: api/endpoints/stats.md
+  #     - Transfers: api/endpoints/transfers.md
+  #     - Users: api/endpoints/users.md
+  #     - Utils: api/endpoints/utils.md
+  
+  # Console
+  #------------
+  - Console:
+    - Getting Started: about/quickstart.md
+    - Authentication:
+      - Sign Up: console/lims/auth/sign_up.md
+      # console/lims/auth/authentication.md
+    - Analysis:
+      - Analyses: console/lims/analysis/analyses.md
+      - Analytes: console/lims/analysis/analytes.md
+      - Areas: console/lims/analytes.md
+      - Data Collection: console/lims/data/data_collection.md
+      - Data Review: console/lims/analysis/data_review.md
+      - Instruments: console/lims/instruments/instruments.md
+      - Regulations: console/regulations.md
+      - Limits: console/limits.md
+      - Labs: console/labs.md
+      - Samples: console/samples.md
+      - Results: console/results.md
+    # - Organizations: console/lims/organizations/organizations.md
+    - Transfers: console/lims/transfers.md
+    # - Inventory: console/inventory.md
+    # - Invoices: console/invoices.md
+    # - Traceability: console/traceability.md
+    # - Settings: console/settings.md
+    # - Statistics:
+    #   - console/statistics/statistics.md
+    # - Development:
+    #   - Installation: console/installation.md
+    #   - Development: console/development.md
+    #   - Publishing: console/publishing.md
+    # - Workflow:
+    #   - Analysis: console/workflow/analysis.md
+    #   - Areas: console/workflow/areas.md
+    #   - Clients: console/workflow/clients.md
+    #   - Instruments: console/workflow/instruments.md
+    #   - Inventory: console/workflow/inventory.md
+    #   - Invoices: console/workflow/invoices.md
+    #   - Organizations: console/workflow/organizations.md
+    #   - Results: console/workflow/results.md
+    #   - Samples: console/workflow/samples.md
+    #   - Settings: console/workflow/settings.md
+    #   - Statistics: console/workflow/statistics.md
+    #   - Templates: console/workflow/templates.md
+    #   - Traceability: console/workflow/traceability.md
+    #   - Transfers: console/workflow/transfers.md
+    #   - Workflow: console/workflow/workflow.md
+  
+  # Website
+  #------------
+  # - Website:
+  #   - Getting Started: website/README.md
+  #   - Administration: website/administration.md
+  #   - Animation: website/animation.md
+  #   - Architecture: website/architecture.md
+  #   - Art: website/art.md
+  #   - Attributions: website/attributions.md
+  #   - Bugs: website/bugs.md
+  #   - Contributing: website/contributing.md
+  #   - Data:
+  #     - Architecture: data/data_architecture.md
+  #     - Data Collection: data/data_collection.md
+  #     - Data Sources: data/data_sources.md
+  #     - Schemas: data/data_schemas.md
+  #   - Development:
+  #     - Installation: website/installation.md
+  #     - Development: website/development.md
+  #     - Publishing: website/publishing.md
+  #   - Donations: website/donations.md
+  #   - Events: website/events.md
+  #   - Examples: website/examples.md
+  #   - Firebase: website/firebase.md
+  #   - Fun: website/fun.md
+  #   - Get started: website/get-started.md
+  #   - Inspiration: website/inspiration.md
+  #   - Sitemap: website/sitemap.md
+  #   - Software: website/software.md
+  #   - Style: website/style.md
+  #   - Websites: website/websites.md
+  
+  # Developers
+  #------------
+  # - Developers:
+  #   - Getting Started: cannlytics/get-started.md
+  #   - Firebase Module:
+  #     - Introduction: cannlytics/firebase/firebase.md
+  #     - Cloud Functions: cannlytics/firebase/cloud_functions.md
+  #     - Firestore: cannlytics/firebase/firestore_schema.md
+  #   - Leaf Data Systems Module: cannlytics/traceability/leaf.md
+  #   - LIMS Module: cannlytics/lims/lims.md
+  #   - Metrc Module: cannlytics/traceability/metrc.md
+  #   - Development:
+  #     - Installation: cannlytics/dev/installation.md
+  #     - Development: cannlytics/dev/development.md
+  #     - Publishing: cannlytics/dev/publishing.md
+  #     - Packaging: cannlytics/dev/packaging.md
+  #     - Bugs: cannlytics/dev/bugs.md
 
 # Extensions
 markdown_extensions:
@@ -177,7 +265,7 @@ markdown_extensions:
       social_url_shorthand: true
       social_url_shortener: true
       user: cannlytics
-      repo: cannlytics-engine
+      repo: cannlytics
       # normalize_issue_symbols: true
   - pymdownx.tilde:
   - pymdownx.caret:
@@ -236,10 +324,10 @@ plugins:
   - minify:
       minify_html: true
 
-# Google Analytics
+# Optional: Setup Google Analytics
 # google_analytics:
 #   - !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
 #   - auto
 
-# FIXME: Specify development server
+# Optional: Specify a development server
 # dev_addr: '0.0.0.0:4200'

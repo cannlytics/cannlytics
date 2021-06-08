@@ -25,10 +25,11 @@ def format_time_filter(start, stop, field):
 
 def get_time_string(past=0, future=0, tz='local'):
     """Get a human readable time.
+    # TODO: Set time in timezone of state (e.g. {'state': 'OK'} -> CDT)
     Args:
         past (int): Number of minutes in the past to get a timestamp.
         future (int): Number of minutes into the future to get a timestamp.
-        # TODO: Set time in timezone of state (e.g. {'state': 'OK'} -> CDT)
+        tz (string): Unimplemented timezone option.
     """
     now = datetime.now()
     now += timedelta(minutes=future)

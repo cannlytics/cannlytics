@@ -750,12 +750,12 @@ def create_log(ref, claims, action, log_type, key, changes=None):
     update_document(f'{ref}/{log_id}', log_entry)
 
 
-def get_keywords(name):
+def get_keywords(string):
     """Get keywords for a given string.
     Args:
         string (str): A string to get keywords for.
     """
-    keywords = name.lower().split(' ')
+    keywords = string.lower().split(' ')
     keywords = [x.strip() for x in keywords if x]
     keywords = list(set(keywords))
     return keywords
