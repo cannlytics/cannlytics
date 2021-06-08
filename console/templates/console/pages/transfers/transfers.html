@@ -32,6 +32,33 @@
       {% block section %}{% endblock %}
     </section>
 
+    <!-- Body -->
+    <div class="analysis">
+
+      <!-- Table -->
+      <div class="card my-3">
+        <div class="card-body">
+          <h2 class="h6 mb-3 text-dark">Transfers</h2>
+          <div class="table-responsive">
+
+            <!-- Placeholder if no records -->
+            {% if True %}
+              {% include "console/components/placeholders/placeholder.html" with
+                placeholder=transfers.placeholder
+                only
+              %}
+
+            <!-- Client records table -->
+            {% else %}
+              <div id="transfers-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
+            {% endif %}
+
+          </div>
+        </div>
+      </div><!-- End of the table -->
+
+    </div><!-- End of the body -->
+
     <!-- Logistics JavaScript -->
     {% comment %} {% block console_js %}
       <script>

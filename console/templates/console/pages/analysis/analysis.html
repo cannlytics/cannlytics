@@ -1,50 +1,48 @@
 <!doctype html>
 <html>
-  <!-- Analysis -->
-  <!-- Created 12/17/2020 -->
-  <!-- https://stackoverflow.com/questions/40534715/how-to-embed-matplotlib-graph-in-django-webpage -->
-  <!-- https://medium.com/@mdhv.kothari99/matplotlib-into-django-template-5def2e159997 -->
-  {% extends "console/console.html" %}
-  {% block console_body %}
+<!--
+  Analysis Page | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 12/17/2020
+  Updated: 6/8/2021
+-->
+{% extends "console/console.html" %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
-    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="fs-5 mb-0 lh-base">Analysis</h1>
+    </div>
 
-      <!-- Header -->
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="fs-5 mb-0 lh-base">Analysis</h1>
-      </div>
-    
-      <!-- Concentration plot -->
-      {% comment %} <div style="width:400px;">
-        <canvas class="my-4" id="graph-concentrations" width="400" height="380"></canvas>
-      </div> {% endcomment %}
-      <div class="row">
-        <div class="col">
-          <!-- Analyses table -->
-          {% include "console/pages/analysis/analyses_table.html" %}
+    <!-- Body -->
+    <div class="analysis">
+
+      <!-- Table -->
+      <div class="card my-3">
+        <div class="card-body">
+          <h2 class="h6 mb-3 text-dark">Analysis</h2>
+          <div class="table-responsive">
+
+            <!-- Placeholder if no records -->
+            {% if True %}
+              {% include "console/components/placeholders/placeholder.html" with
+                placeholder=analysis.placeholder
+                only
+              %}
+
+            <!-- Client records table -->
+            {% else %}
+              <div id="analysis-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
+            {% endif %}
+
+          </div>
         </div>
-        <div class="col">
-          <!-- Instruments table -->
-          {% include "console/pages/instruments/instruments_table.html" %}
-        </div>
-      </div>
+      </div><!-- End of the table -->
 
-      <!-- Extractions table -->
-      {% include "console/pages/analysis/extractions_table.html" %}
+    </div>
 
-      <!-- Calculations table -->
-      {% include "console/pages/analysis/calculations_table.html" %}
+  </main>
 
-    </main>
-
-  {% endblock console_body %}
-
-  <!-- Analysis JavaScript -->
-  {% block console_js %}
-    {% comment %} <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script> {% endcomment %}
-    {% comment %} <script src="{% static 'console/plugins/chartjs/chartjs-chart-matrix.min.js' %}"></script> {% endcomment %}
-    <script>
-      {% comment %} cannlytics.analysis.initialize(); {% endcomment %}
-    </script>
-  {% endblock console_js %}
+{% endblock console_body %}
 </html>

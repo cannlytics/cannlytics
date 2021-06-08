@@ -18,6 +18,57 @@ data = {}
 docs = {}
 
 material = {
+    "account": {
+        "breadcrumbs": [
+            {"title": "Settings", "url": "settings"},
+            {"title": "Account", "active": True},
+        ],
+        "fields": [
+            {"type": "email", "key": "email", "title": "Email"},
+            {"type": "text", "key": "name", "title": "Name"},
+            {"type": "text", "key": "position", "title": "Position"},
+            {"type": "text", "key": "location", "title": "Location"},
+            # {"type": "text", "key": "linkedin", "title": "LinkedIn"},
+            {"type": "text", "key": "license", "title": "License"},
+        ],
+        "options": [
+            {"title": "Change your password", "url": "/account/password-reset"},
+            {"title": "Set your pin", "url": "/settings/account/pin"},
+            {"title": "Set your signature", "url": "/settings/account/signature"},
+        ],
+    },
+    "analysis": {
+        "placeholder": {
+            "action": "Create an analysis",
+            "height": "200px",
+            "image": "console/images/illustrations/outline/lab_analyst_prep.svg",
+            "title": "Create your first analysis",
+            "message": "Create a scientific analysis, a set of analytes or tests to perform for an organization, including internal analyses for your organizations.",
+            "url": "./analysis/new",
+        },
+    },
+    "analyses": {
+        "breadcrumbs": [
+            {"title": "Analysis", "url": "/analysis"},
+            {"title": "Analyses", "active": True},
+        ],
+        "fields": [
+            {"type": "text", "key": "name", "title": "Name"},
+            {"type": "text", "key": "instrument", "title": "Instrument"},
+            {"type": "text", "key": "analytes", "title": "Analytes"},
+        ],
+        "options": [],
+    },
+    "areas": {
+        "placeholder": {
+            "action": "Create an area",
+            "height": "200px",
+            "image": "console/images/illustrations/outline/lab_books.svg",
+            "title": "Create your first area",
+            "message": "Organize your company and facilities into logical areas so you can easily manage the location of your physical items.",
+            "url": "./organizations/new",
+        },
+    },
     "dashboard": {
         "cards": [
             {
@@ -50,12 +101,12 @@ material = {
                 "description": "Manage inventory, items, packages, and more.",
                 "image_path": "console/images/icons/multi-tone/records.png",
             },
-            {
-                "path": "invoices",
-                "title": "Invoices",
-                "description": "Manage laboratory invoices.",
-                "image_path": "console/images/icons/multi-tone/documents.png",
-            },
+            # {
+            #     "path": "invoices",
+            #     "title": "Invoices",
+            #     "description": "Manage laboratory invoices.",
+            #     "image_path": "console/images/icons/multi-tone/documents.png",
+            # },
             {
                 "path": "samples",
                 "title": "Samples",
@@ -143,18 +194,6 @@ material = {
             # },
         ],
     },
-    "analyses": {
-        "breadcrumbs": [
-            {"title": "Analysis", "url": "/analysis"},
-            {"title": "Analyses", "active": True},
-        ],
-        "fields": [
-            {"type": "text", "key": "name", "title": "Name"},
-            {"type": "text", "key": "instrument", "title": "Instrument"},
-            {"type": "text", "key": "analytes", "title": "Analytes"},
-        ],
-        "options": [],
-    },
     "instruments": {
         "breadcrumbs": [
             {"title": "Analysis", "url": "/analysis"},
@@ -166,25 +205,24 @@ material = {
             {"type": "text", "key": "data_path", "title": "Data path"},
         ],
         "options": [],
+        "placeholder": {
+            "action": "Connect an instrument",
+            "height": "200px",
+            "image": "console/images/illustrations/outline/lab.svg",
+            "title": "Connect your first instrument",
+            "message": "Connect your scientific instruments to ease your data collection.",
+            "url": "./instruments/new",
+        },
     },
-    "account": {
-        "breadcrumbs": [
-            {"title": "Settings", "url": "settings"},
-            {"title": "Account", "active": True},
-        ],
-        "fields": [
-            {"type": "email", "key": "email", "title": "Email"},
-            {"type": "text", "key": "name", "title": "Name"},
-            {"type": "text", "key": "position", "title": "Position"},
-            {"type": "text", "key": "location", "title": "Location"},
-            # {"type": "text", "key": "linkedin", "title": "LinkedIn"},
-            {"type": "text", "key": "license", "title": "License"},
-        ],
-        "options": [
-            {"title": "Change your password", "url": "/account/password-reset"},
-            {"title": "Set your pin", "url": "/settings/account/pin"},
-            {"title": "Set your signature", "url": "/settings/account/signature"},
-        ],
+    "inventory": {
+        "placeholder": {
+            "action": "Add an inventory item",
+            "height": "200px",
+            "image": "console/images/illustrations/outline/lab_reagents.svg",
+            "title": "Add your first inventory item",
+            "message": "Track your inventory through your analysis workflow.",
+            "url": "./inventory/new",
+        },
     },
     "organizations": {
         "breadcrumbs": [
@@ -221,6 +259,26 @@ material = {
             {"title": "Pin", "active": True},
         ],
     },
+    "results": {
+        "placeholder": {
+            "action": "Calculate your first result",
+            "height": "200px",
+            "image": "console/images/illustrations/outline/lab_reagents.svg",
+            "title": "Calculate your first result",
+            "message": "Calculate your first result given analyses performed and data collected.",
+            "url": "./results/new",
+        },
+    },
+    "samples": {
+        "placeholder": {
+            "action": "Create a sample",
+            "height": "200px",
+            "image": "console/images/illustrations/outline/lab_reagents.svg",
+            "title": "Create your first laboratory sample",
+            "message": "Create laboratory samples which can be part of organization specific projects or multi-organization batches for analysis.",
+            "url": "./samples/new",
+        },
+    },
     "signature": {
         "breadcrumbs": [
             {"title": "Settings", "url": "/settings"},
@@ -234,6 +292,26 @@ material = {
             {"title": "Templates", "active": True},
         ],
     },
+    "transfers": {
+        "placeholder": {
+            "action": "Create an inventory transfer",
+            "height": "200px",
+            "image": "console/images/illustrations/outline/lab_reagents.svg",
+            "title": "Create your first inventory transfer",
+            "message": "Create a transfer of inventory items from one organization to another.",
+            "url": "./samples/new",
+        },
+    },
+    # "traceability": {
+    #     "placeholder": {
+    #         "action": "Create an inventory transfer",
+    #         "height": "200px",
+    #         "image": "console/images/illustrations/outline/lab_reagents.svg",
+    #         "title": "Create your first inventory transfer",
+    #         "message": "Create a transfer of inventory items from one organization to another.",
+    #         "url": "./samples/new",
+    #     },
+    # },
     "calendar": {
         "placeholder": {
             "action": "Schedule your first transfer",
@@ -350,13 +428,13 @@ layout = {
                 "slug": "inventory",
                 "user_type": "*",
             },
-            {
-                "title": "Invoices",
-                "url": "/invoices",
-                "icon": "credit-card",
-                "slug": "invoices",
-                "user_type": "*",
-            },
+            # {
+            #     "title": "Invoices",
+            #     "url": "/invoices",
+            #     "icon": "credit-card",
+            #     "slug": "invoices",
+            #     "user_type": "*",
+            # },
             {
                 "title": "Organizations",
                 "url": "/organizations",

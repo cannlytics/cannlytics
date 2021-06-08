@@ -16,16 +16,31 @@
     </div>
 
     <!-- Body -->
-    <div class="col">
+    <div class="analysis">
 
       <!-- Table -->
-      <div
-        id="organizations-table"
-        class="ag-theme-alpine"
-        style="height: 400px; width:100%%;"
-      ></div>
+      <div class="card my-3">
+        <div class="card-body">
+          <h2 class="h6 mb-3 text-dark">Organizations</h2>
+          <div class="table-responsive">
 
-    </div><!-- End of body -->
+            <!-- Placeholder if no records -->
+            {% if True %}
+              {% include "console/components/placeholders/placeholder.html" with
+                placeholder=organizations.placeholder
+                only
+              %}
+
+            <!-- Client records table -->
+            {% else %}
+              <div id="organizations-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
+            {% endif %}
+
+          </div>
+        </div>
+      </div><!-- End of the table -->
+
+    </div><!-- End of the body -->
 
   </main>
 
