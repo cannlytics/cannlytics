@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<!--
+  Projects | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 4/24/2021
+  Updated: 6/8/2021
+-->
+{% extends "console/console.html" %}
+{% load static icon %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- TODO: Notification if user has no organization -->
+    {% if not organization %}
+      <div class="alert alert-info d-flex mt-3" role="alert">
+        {% icon 'alert-triangle' height="16" width="16"%} &nbsp;
+        An organization is required to create projects. &nbsp;
+        <a href="/organizations/new">Create or join an organization</a>.
+      </div>
+    {% endif %}
+
+    <!-- Header-->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="fs-5 mb-0 lh-base">Projects</h1>
+    </div>
+
+    <!-- Body -->
+    <div class="projects">
+
+      <!-- Table -->
+      <div class="card my-3">
+        <div class="card-body">
+          <h2 class="h6 mb-3 text-dark">Projects</h2>
+          <div class="table-responsive">
+
+            <!-- Placeholder if no records -->
+            {% if True %}
+              {% include "console/components/placeholders/placeholder.html" with
+                placeholder=projects.placeholder
+                only
+              %}
+
+            <!-- Client records table -->
+            {% else %}
+              <div id="projects-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
+            {% endif %}
+
+          </div>
+        </div>
+      </div><!-- End of the table -->
+
+    </div>
+  </main>
+{% endblock console_body %}
+{% block console_js %}{% endblock console_js %}
+</html>

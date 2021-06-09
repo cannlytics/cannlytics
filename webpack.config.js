@@ -24,9 +24,13 @@ const path = require('path');
 const appName = 'console';
 
 module.exports = env => {
+
+  // Get production state, specified in package.json
+  const production = (env.production === 'True') ? true : false;
+
   return {
-    mode: env.production ? 'production' : 'development',
-    devtool: env.production ? 'source-map' : 'eval',
+    mode: production ? 'production' : 'development',
+    devtool: production ? 'source-map' : 'eval',
     devServer: {
       writeToDisk: true, // Write files to disk in dev mode, so that Django can serve the assets.
     },

@@ -14,7 +14,7 @@
 // import timeGridPlugin from '@fullcalendar/timegrid';
 // import listPlugin from '@fullcalendar/list';
 
-export const logistics = {
+export const transfers = {
 
   initialize() {
     console.log('Initializing logistics..')

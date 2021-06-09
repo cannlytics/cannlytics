@@ -58,6 +58,14 @@ material = {
             {"type": "text", "key": "analytes", "title": "Analytes"},
         ],
         "options": [],
+        "placeholder": {
+            "action": "Create an analysis",
+            "height": "200px",
+            "image": "console/images/illustrations/outline/lab_analyst_prep.svg",
+            "title": "Create your first analysis",
+            "message": "Create a scientific analysis, a set of analytes or tests to perform for an organization, including internal analyses for your organizations.",
+            "url": "./analysis/new",
+        },
     },
     "areas": {
         "placeholder": {
@@ -72,9 +80,9 @@ material = {
     "dashboard": {
         "cards": [
             {
-                "path": "analysis",
-                "title": "Analysis",
-                "description": "Manage analyses.",
+                "path": "analyses",
+                "title": "Analyses",
+                "description": "Manage analyses, analytes, and boundaries.",
                 "image_path": "console/images/icons/multi-tone/certificate-flask.png",
             },
             {
@@ -86,13 +94,13 @@ material = {
             {
                 "path": "clients",
                 "title": "Contacts",
-                "description": "Manage laboratory clients.",
+                "description": "Manage laboratory clients, vendors, and relations.",
                 "image_path": "console/images/icons/multi-tone/clients.png",
             },
             {
                 "path": "instruments",
                 "title": "Instruments",
-                "description": "Manage laboratory instruments.",
+                "description": "Manage scientific instruments.",
                 "image_path": "console/images/icons/multi-tone/instrument.png",
             },
             {
@@ -108,10 +116,16 @@ material = {
             #     "image_path": "console/images/icons/multi-tone/documents.png",
             # },
             {
-                "path": "samples",
-                "title": "Samples",
-                "description": "Manage laboratory samples.",
-                "image_path": "console/images/icons/multi-tone/vials.png",
+                "path": "organizations",
+                "title": "Organizations",
+                "description": "Manage your company and team.",
+                "image_path": "console/images/icons/two-tone/two_tone_client_folder.png",
+            },
+            {
+                "path": "projects",
+                "title": "Projects",
+                "description": "Manage your internal and external projects.",
+                "image_path": "console/images/icons/multi-tone/folder.png",
             },
             {
                 "path": "results",
@@ -120,10 +134,10 @@ material = {
                 "image_path": "console/images/icons/multi-tone/certificate.png",
             },
             {
-                "path": "organizations",
-                "title": "Organizations",
-                "description": "Manage your company.",
-                "image_path": "console/images/icons/two-tone/two_tone_client_folder.png",
+                "path": "samples",
+                "title": "Samples",
+                "description": "Manage laboratory samples.",
+                "image_path": "console/images/icons/multi-tone/vials.png",
             },
             {
                 "path": "transfers",
@@ -131,12 +145,12 @@ material = {
                 "description": "Manage sample transfers.",
                 "image_path": "console/images/icons/two-tone/two_tone_clock.png",
             },
-            {
-                "path": "stats",
-                "title": "Statistics",
-                "description": "Manage laboratory statistics.",
-                "image_path": "console/images/icons/two-tone/two_tone_graph.png",
-            },
+            # {
+            #     "path": "stats",
+            #     "title": "Statistics",
+            #     "description": "Manage laboratory statistics.",
+            #     "image_path": "console/images/icons/two-tone/two_tone_graph.png",
+            # },
             {
                 "path": "traceability",
                 "title": "Traceability",
@@ -251,6 +265,16 @@ material = {
             {"type": "text", "key": "zip_code", "title": "Zip Code", "secondary": True},
             {"type": "text", "key": "external_id", "title": "External ID", "secondary": True},
         ],
+    },
+    "projects": {
+        "placeholder": {
+            "action": "Create a project",
+            "height": "200px",
+            "image": "console/images/illustrations/outline/lab_tablet.svg",
+            "title": "Create your first project",
+            "message": "Begin analyses by creating a project, a collection of an organization's samples.",
+            "url": "./projects/new",
+        },
     },
     "pin": {
         "breadcrumbs": [
@@ -380,16 +404,29 @@ layout = {
                 "user_type": "*",
             },
             {
-                "title": "Analysis",
-                "url": "/analysis",
-                "icon": "edit",
-                "slug": "analysis",
+                "title": "Analyses",
+                "url": "/analyses",
+                # "icon": "edit",
+                "slug": "analyses",
                 "user_type": "*",
+                "seperator": True,
+                "nested": [
+                    {
+                        "slug": "manage",
+                        "title": "Manage",
+                        "url": "/analyses/manage",
+                    },
+                    {
+                        "slug": "analyte",
+                        "title": "Analytes",
+                        "url": "/analyses/analytes",
+                    },
+                ],
             },
             {
                 "title": "Areas",
                 "url": "/areas",
-                "icon": "grid",
+                # "icon": "grid",
                 "slug": "areas",
                 "user_type": "*",
             },
@@ -403,14 +440,14 @@ layout = {
             {
                 "title": "Contacts",
                 "url": "/clients/records",
-                "icon": "users",
+                # "icon": "users",
                 "slug": "clients",
                 "user_type": '*',
             },
             {
                 "title": "Instruments",
                 "url": "/instruments",
-                "icon": "server",
+                # "icon": "server",
                 "slug": "instruments",
                 "user_type": "*",
             },
@@ -424,9 +461,21 @@ layout = {
             {
                 "title": "Inventory",
                 "url": "/inventory",
-                "icon": "archive",
+                # "icon": "archive",
                 "slug": "inventory",
                 "user_type": "*",
+                "nested": [
+                    {
+                        "slug": "items",
+                        "title": "Items",
+                        "url": "/inventory/items",
+                    },
+                    {
+                        "slug": "orders",
+                        "title": "Orders",
+                        "url": "/inventory/orders",
+                    },
+                ],
             },
             # {
             #     "title": "Invoices",
@@ -438,9 +487,17 @@ layout = {
             {
                 "title": "Organizations",
                 "url": "/organizations",
-                "icon": "briefcase",
+                # "icon": "briefcase",
                 "slug": "organizations",
                 "user_type": "*",
+            },
+            {
+                "title": "Projects",
+                "url": "/projects",
+                # "icon": "folder",
+                "slug": "projects",
+                "user_type": "*",
+                "nested": [],
             },
             {
                 "title": "Purchases",
@@ -450,18 +507,47 @@ layout = {
                 "user_type": ["consumer"],
             },
             {
-                "title": "Samples",
-                "url": "/samples",
-                "icon": "edit-2",
-                "slug": "samples",
-                "user_type": "*",
-            },
-            {
                 "title": "Results",
                 "url": "/results",
-                "icon": "award",
+                # "icon": "award",
                 "slug": "results",
                 "user_type": "*",
+                "nested": [
+                    {
+                        "slug": "manage",
+                        "title": "Manage",
+                        "url": "/results/manage",
+                    },
+                    {
+                        "slug": "coas",
+                        "title": "CoAs",
+                        "url": "/results/coas",
+                    },
+                    {
+                        "slug": "import",
+                        "title": "Import",
+                        "url": "/results/import",
+                    },
+                ],
+            },
+            {
+                "title": "Samples",
+                "url": "/samples",
+                # "icon": "edit-2",
+                "slug": "samples",
+                "user_type": "*",
+                "nested": [
+                    {
+                        "slug": "manage",
+                        "title": "Manage",
+                        "url": "/samples/manage",
+                    },
+                    {
+                        "slug": "batch",
+                        "title": "Batch",
+                        "url": "/samples/batch",
+                    },
+                ],
             },
             {
                 "title": "Stats",
@@ -474,9 +560,26 @@ layout = {
             {
                 "title": "Transfers",
                 "url": "/transfers",
-                "icon": "navigation",
+                # "icon": "navigation",
                 "slug": "transfers",
                 "user_type": '*',
+                "nested": [
+                    {
+                        "slug": "incoming",
+                        "title": "Incoming",
+                        "url": "/transers/incoming",
+                    },
+                    {
+                        "slug": "outgoing",
+                        "title": "Outgoing",
+                        "url": "/transfers/outgoing",
+                    },
+                    {
+                        "slug": "logistics",
+                        "title": "Logistics",
+                        "url": "/transfers/analyses",
+                    },
+                ],
             },
             {
                 "title": "Traceability",
@@ -484,6 +587,7 @@ layout = {
                 "icon": "share-2",
                 "slug": "traceability",
                 "user_type": "*",
+                "seperator": True
             },
             {
                 "title": "Settings",
