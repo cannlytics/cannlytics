@@ -4,7 +4,7 @@ State Variables | Cannlytics Console
 Author: Keegan Skeate
 Company: Cannlytics
 Created: 10/15/2020
-Updated: 5/5/2021
+Updated: 6/9/2021
 
 Relatively static state variables for extra context on each page/screen.
 The idea is to separate the material from the templates,
@@ -38,33 +38,20 @@ material = {
         ],
     },
     "analysis": {
-        "placeholder": {
-            "action": "Create an analysis",
-            "height": "200px",
-            "image": "console/images/illustrations/outline/lab_analyst_prep.svg",
-            "title": "Create your first analysis",
-            "message": "Create a scientific analysis, a set of analytes or tests to perform for an organization, including internal analyses for your organizations.",
-            "url": "./analysis/new",
-        },
-    },
-    "analyses": {
         "breadcrumbs": [
-            {"title": "Analysis", "url": "/analysis"},
-            {"title": "Analyses", "active": True},
-        ],
-        "fields": [
-            {"type": "text", "key": "name", "title": "Name"},
-            {"type": "text", "key": "instrument", "title": "Instrument"},
-            {"type": "text", "key": "analytes", "title": "Analytes"},
+            {"title": "Analyses", "url": "/analyses"},
+            {"title": "Analysis", "active": True},
         ],
         "options": [],
+    },
+    "analyses": {
         "placeholder": {
             "action": "Create an analysis",
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_analyst_prep.svg",
             "title": "Create your first analysis",
             "message": "Create a scientific analysis, a set of analytes or tests to perform for an organization, including internal analyses for your organizations.",
-            "url": "./analysis/new",
+            "url": "./analyses/analysis?new=true",
         },
     },
     "areas": {
@@ -74,7 +61,7 @@ material = {
             "image": "console/images/illustrations/outline/lab_books.svg",
             "title": "Create your first area",
             "message": "Organize your company and facilities into logical areas so you can easily manage the location of your physical items.",
-            "url": "./organizations/new",
+            "url": "./areas/area?new=true",
         },
     },
     "dashboard": {
@@ -225,7 +212,7 @@ material = {
             "image": "console/images/illustrations/outline/lab.svg",
             "title": "Connect your first instrument",
             "message": "Connect your scientific instruments to ease your data collection.",
-            "url": "./instruments/new",
+            "url": "./instruments/instruments?new=true",
         },
     },
     "inventory": {
@@ -235,7 +222,7 @@ material = {
             "image": "console/images/illustrations/outline/lab_reagents.svg",
             "title": "Add your first inventory item",
             "message": "Track your inventory through your analysis workflow.",
-            "url": "./inventory/new",
+            "url": "./inventory/item?new=true",
         },
     },
     "organizations": {
@@ -249,7 +236,7 @@ material = {
             "image": "console/images/illustrations/chemistry_scientist.svg",
             "title": "Create or join an organization",
             "message": "Add team members to your organization or join an organization to begin collaborating.",
-            "url": "./organizations/new",
+            "url": "./organizations/organization?new=true",
         },
         "fields": [
             {"type": "text", "key": "organization", "title": "Organization"},
@@ -273,7 +260,7 @@ material = {
             "image": "console/images/illustrations/outline/lab_tablet.svg",
             "title": "Create your first project",
             "message": "Begin analyses by creating a project, a collection of an organization's samples.",
-            "url": "./projects/new",
+            "url": "./projects/project?new=true",
         },
     },
     "pin": {
@@ -290,7 +277,7 @@ material = {
             "image": "console/images/illustrations/outline/lab_reagents.svg",
             "title": "Calculate your first result",
             "message": "Calculate your first result given analyses performed and data collected.",
-            "url": "./results/new",
+            "url": "./results/result?new=true",
         },
     },
     "samples": {
@@ -300,7 +287,7 @@ material = {
             "image": "console/images/illustrations/outline/lab_reagents.svg",
             "title": "Create your first laboratory sample",
             "message": "Create laboratory samples which can be part of organization specific projects or multi-organization batches for analysis.",
-            "url": "./samples/new",
+            "url": "./samples/sample?new=true",
         },
     },
     "signature": {
@@ -315,6 +302,14 @@ material = {
             {"title": "Intake", "url": "intake"},
             {"title": "Templates", "active": True},
         ],
+        "placeholder": {
+            "action": "Create a template",
+            "height": "200px",
+            "image": "console/images/illustrations/outline/lab_desktop.svg",
+            "title": "Create your first template",
+            "message": "Create a template for creating invoices, certificates, and other forms.",
+            "url": "./templates/template?new=true",
+        },
     },
     "transfers": {
         "placeholder": {
@@ -323,7 +318,7 @@ material = {
             "image": "console/images/illustrations/outline/lab_reagents.svg",
             "title": "Create your first inventory transfer",
             "message": "Create a transfer of inventory items from one organization to another.",
-            "url": "./samples/new",
+            "url": "./transfers/transfer?new=true",
         },
     },
     # "traceability": {

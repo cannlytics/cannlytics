@@ -12,10 +12,11 @@ function randomValues(count, min, max) {
   return Array.from({length: count}).map(() => Math.random() * delta + min);
 }
 
-export const analysis = {
+export const analyses = {
 
   initialize() {
-    this.drawGraphs();
+    console.log('TODO: Initialize analyses...!')
+    // this.drawGraphs();
   },
 
   drawGraphs() {

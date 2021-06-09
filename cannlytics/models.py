@@ -9,10 +9,8 @@ Data schema of the Cannlytics platform.
 
 # Standard imports
 from dataclasses import dataclass
-# from dataclasses import field
 from datetime import datetime, timedelta
-from typing import Optional
-# from typing import Any, List
+from typing import Optional, List
 
 # External imports
 # pylint: disable=no-member
@@ -58,7 +56,12 @@ class Analysis(Model):
     multiple analytes, specific compound or substances that are
     being measured."""
     _collection = 'organizations/%s/analysis'
+    analytes: list = List
     public: bool = False
+    name: str = ''
+    key: str = ''
+
+
 
 
 @dataclass
@@ -121,12 +124,12 @@ class Certificate(Model):
 
 
 @dataclass
-class Client(Model):
-    """Clients, or contacts in the case of non-laboratory users, are
-    other organizations that you work with. Your clients exist as
+class Contact(Model):
+    """Contacts in the case of non-laboratory users, are
+    other organizations that you work with. Your contacts exist as
     organizations in the decentralized community, a network of
     federated servers that communicate with each other."""
-    _collection = 'organizations/%s/clients'
+    _collection = 'organizations/%s/contacts'
     # additional_fields: list = []
     name: str = ''
 
@@ -140,8 +143,8 @@ class Batch(Model):
 
 
 @dataclass
-class Inventory(Model):
-    """Inventory is any physical item that an organization may have at
+class Item(Model):
+    """Any physical inventory item that an organization may have at
     their facility(ies), such as cannabis flower, supplies, or
     instruments. Inventory can be assigned to a specific area to make
     locating the inventory item easier."""
@@ -157,9 +160,9 @@ class Invoice(Model):
 
 
 @dataclass
-class Measurements(Model):
-    """An amount measured by an analyst or scientific instrument. A
-    calculation is applied to the measurement to get the final result."""
+class Measurement(Model):
+    """A measurement is an amount measured by an analyst or scientific instrument.
+    A calculation is applied to the measurement to get the final result."""
     _collection = 'organizations/%s/measurements'
 
 
@@ -192,7 +195,7 @@ class Project(Model):
 
 
 @dataclass
-class Reports(Model):
+class Report(Model):
     """."""
     _collection = 'organizations/%s/reports'
 
@@ -257,3 +260,27 @@ class Regulation(Model):
 class Workflow(Model):
     """An abstract series of actions performed on a set trigger."""
     _collection = 'organizations/%s/workflows'
+
+
+model_plurals = {
+    'analyses': Analysis,
+    'analytes': Analyte,
+    'areas': Area,
+    'calculations': Calculation,
+    'coas': Certificate,
+    'contacts': Contact,
+    'batches': Batch,
+    'inventory': Item,
+    'invoices': Invoice,
+    'measurements': Measurement,
+    'organizations': Organization,
+    'prices': Price,
+    'projects': Project,
+    'results': Results,
+    'samples': Sample,
+    'templates': Template,
+    'transfers': Transfer,
+    'users': User,
+    'regulations': Regulation,
+    'workflows': Workflow,
+}

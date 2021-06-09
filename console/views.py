@@ -13,8 +13,9 @@ from django.http import HttpResponse
 # Internal imports
 from console.state import layout
 from console.utils import (
-    get_screen_specific_data,
-    get_screen_specific_state,
+    get_model_context,
+    get_page_data,
+    get_page_context,
     get_user_context,
 )
 
@@ -57,9 +58,15 @@ class ConsoleView(TemplateView):
         can be returned depending on the page."""
         context = super().get_context_data(**kwargs)
         context['sidebar'] = layout['sidebar']
-        context = get_screen_specific_state(self.kwargs, context)
-        context = get_screen_specific_data(self.kwargs, context)
+        context['screen'] = kwargs.get('screen', 'dashboard')
+        context['section'] = kwargs.get('section', '')
+        context['unit'] = kwargs.get('unit', '')
+        context = get_page_context(self.kwargs, context)
+        context = get_page_data(self.kwargs, context)
         context = get_user_context(self.request, context)
+        context = get_model_context(context)
+        # Optional: Get user-defined fields for each model.
+        print('Context fields:', context.get('fields'))
         return context
 
 

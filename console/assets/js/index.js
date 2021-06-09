@@ -5,7 +5,7 @@
  * Updated: 4/25/2021
  */
 
-import { analysis } from './analysis/analysis.js'
+import { analyses } from './analyses/analyses.js'
 import { api } from './api/api.js';
 import { app } from './app/app.js';
 import { auth } from './auth/auth.js';
@@ -19,7 +19,7 @@ import { theme } from './settings/theme.js';
 import { ui } from './ui/ui.js';
 
 export {
-  analysis,
+  analyses,
   api,
   app,
   auth,
