@@ -450,6 +450,9 @@ body.dark .light-green-fade {
   flex-direction: column;
   align-items: center;
 }
+.flipped {
+  transform: rotate(180deg);
+}
 .hidden-item {
   display: none !important;
 }

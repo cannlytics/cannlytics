@@ -2,8 +2,9 @@
  * User Interface JavaScript | Cannlytics Console
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 5/2/2021
- * Updated: 6/3/2021
+ * Updated: 6/10/2021
  */
+ import { hasClass } from '../utils.js';
 
 export const ui = {
 
@@ -28,6 +29,22 @@ export const ui = {
     sidebar.classList.remove('d-none');
     sidebar.classList.add('d-md-block');
     sidebarToggle.classList.add('d-md-none');
+  },
+
+
+  toggleSidebarNestedNav(section) {
+    /*
+     * Toggle nested navigation in the sidebar.
+     */
+    const items = document.getElementById(`${section}-items`);
+    const toggle = document.getElementById(`${section}-toggle`);
+    if (hasClass(items, 'show')) {
+      items.classList.remove('show');
+      toggle.classList.remove('flipped');
+    } else {
+      items.classList.add('show');
+      toggle.classList.add('flipped');
+    }
   },
 
 

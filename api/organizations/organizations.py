@@ -1,6 +1,7 @@
 """
 Organizations API Views | Cannlytics API
 Created: 4/25/2021
+Updated: 6/10/2021
 Description: API to interface with organizations.
 """
 
@@ -36,8 +37,12 @@ def organizations(request, format=None, org_id=None):
         ```
     """
 
-    claims = auth.authenticate_request(request)
+    print('Requested org:', org_id)
+
+    # claims = auth.authenticate_request(request)
+    claims = auth.verify_session(request)
     uid = claims['uid']
+    print('User:', uid)
 
     # Get organization(s).
     if request.method == 'GET':
@@ -72,12 +77,12 @@ def organizations(request, format=None, org_id=None):
         return Response(organizations, content_type='application/json')
 
     # Create or update an organization.
-    elif request.method == 'POST':        
+    elif request.method == 'POST':
 
         # Get the posted data.
         organization = {}
         data = loads(request.body.decode('utf-8'))
-        org_id = data.get('id')
+        org_id = data.get('uid')
         if org_id:
 
             # TODO: If a user has org_id in their team claims,
@@ -205,108 +210,3 @@ def organizations(request, format=None, org_id=None):
     # def staff():
     #     """Get, create, or update information about an organization's staff."""
     #     return NotImplementedError
-
-
-# #----------------------------------------------#
-# # Lab endpoints
-# #----------------------------------------------#
-
-# @api_view(['GET'])
-# def lab(request, format=None):
-#     """Get or update information about a lab."""
-
-#     # Query labs.
-#     if request.method == 'GET':
-#         limit = request.query_params.get('limit', None)
-#         order_by = request.query_params.get('order_by', 'state')
-#         # TODO: Get any filters from dict(request.query_params)
-#         labs = get_collection('labs', order_by=order_by, limit=limit, filters=[])
-#         return Response({ 'data': labs}, content_type='application/json')
-
-
-# @api_view(['GET', 'POST'])
-# def labs(request, format=None):
-#     """Get or update information about labs."""
-
-#     # Query labs.
-#     if request.method == 'GET':
-#         limit = request.query_params.get('limit', None)
-#         order_by = request.query_params.get('order_by', 'state')
-#         # TODO: Get any filters from dict(request.query_params)
-#         labs = get_collection('labs', order_by=order_by, limit=limit, filters=[])
-#         return Response({ 'data': labs}, content_type='application/json')
-
-#     # Update a lab given a valid Firebase token.
-#     elif request.method == 'POST':
-
-#         # Check token.
-#         try:
-#             claims = auth.authenticate(request)
-#         except:
-#             return Response({'error': 'Could not auth.authenticate.'}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # Get the posted lab data.
-#         lab = request.data
-#         org_id = lab['id']
-#         lab['slug'] = slugify(lab['name'])
-
-#         # TODO: Handle adding labs.
-#         # Create uuid, latitude, and longitude, other fields?
-
-#         # Determine any changes.
-#         existing_data = get_document(f'labs/{org_id}')
-#         changes = []
-#         for key, after in lab:
-#             before = existing_data[key]
-#             if before != after:
-#                 changes.append({'key': key, 'before': before, 'after': after})
-
-#         # Get a timestamp.
-#         timestamp = datetime.now().isoformat()
-#         lab['updated_at'] = timestamp
-
-#         # Create a change log.
-#         log_entry = {
-#             'action': 'Updated lab data.',
-#             'type': 'change',
-#             'created_at': lab['updated_at'],
-#             'user': claims['uid'],
-#             'user_name': claims['display_name'],
-#             'user_email': claims['email'],
-#             'photo_url': claims['photo_url'],
-#             'changes': changes,
-#         }
-#         update_document(f'labs/{org_id}/logs/{timestamp}', log_entry)
-
-#         # Update the lab.
-#         update_document(f'labs/{org_id}', lab)
-
-#         return Response(log_entry, status=status.HTTP_201_CREATED)
-
-
-# @api_view(['GET', 'POST'])
-# def lab_logs(request, org_id, format=None):
-#     """Get or create lab logs."""
-
-#     if request.method == 'GET':
-#         data = get_collection(f'labs/{org_id}/logs')
-#         return Response({ 'data': data}, content_type='application/json')
-
-#     elif request.method == 'POST':
-#         # TODO: Create a log.
-#         return Response({ 'data': 'Under construction'}, content_type='application/json')
-
-
-# @api_view(['GET', 'POST'])
-# def lab_analyses(request, org_id, format=None):
-#     """
-#     Get or update (TODO) lab analyses.
-#     """
-
-#     if request.method == 'GET':
-#         data = get_collection(f'labs/{org_id}/analyses')
-#         return Response({ 'data': data}, content_type='application/json')
-
-#     elif request.method == 'POST':
-#         # TODO: Create an analysis.
-#         return Response({ 'data': 'Under construction'}, content_type='application/json')

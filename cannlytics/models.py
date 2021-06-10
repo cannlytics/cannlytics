@@ -2,13 +2,13 @@
 Data Models | Cannlytics
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 5/8/2021
-Updated: 6/5/2021
+Updated: 6/9/2021
 
 Data schema of the Cannlytics platform.
 """
 
 # Standard imports
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Optional, List
 
@@ -20,6 +20,8 @@ import ulid
 @dataclass
 class Model:
     """Firestore document model."""
+    created_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now()
     uid: str = ulid.new().str.lower()
     ref: str = ''
 
@@ -57,18 +59,16 @@ class Analysis(Model):
     being measured."""
     _collection = 'organizations/%s/analysis'
     analytes: list = List
+    analyte_count: int = 0
     public: bool = False
     name: str = ''
     key: str = ''
-
-
 
 
 @dataclass
 class APIKey(Model):
     """A representation of an API key HMAC data."""
     _collection = 'admin/api/api_key_hmacs'
-    created_at: datetime = datetime.now()
     expiration_at: datetime = datetime.now() + timedelta(365)
     name: str = ''
     # permissions: field(default_factory=list) = []
@@ -85,6 +85,13 @@ class Analyte(Model):
     lowest order of quantification (LOQ), regulatory limit and more."""
     _collection = 'organizations/%s/analytes'
     public: bool = False
+    name: str = ''
+    key: str = ''
+    limit: Optional[float] = None
+    lod: Optional[float] = None
+    loq: Optional[float] = None
+    units: Optional[str] = ''
+    calculation_id: str = ''
 
 
 @dataclass
@@ -95,11 +102,9 @@ class Area(Model):
     plants, samples, instruments, or whatever you please."""
     _collection = 'organizations/%s/areas'
     active: bool = True
-    created_at: datetime = datetime.now()
     name: str = ''
     area_type: str = 'General'
     type_id: str = ''
-    updated_at: datetime = datetime.now()
     quarantine: bool = False
     external_id: str = ''
     for_batches: Optional[bool] = False
@@ -113,6 +118,7 @@ class Calculation(Model):
     """A calculation is applied to measurements to determine final
     results, such as applying dilution factor, etc."""
     _collection = 'organizations/%s/calculations'
+    formula: str = ''
 
 
 @dataclass
@@ -121,6 +127,8 @@ class Certificate(Model):
     sample, a CoA. The CoA consists of a template and a reference to the
     generated PDF."""
     _collection = 'organizations/%s/certificates'
+    template_storage_ref: str = ''
+    template_version: str = ''
 
 
 @dataclass
@@ -130,8 +138,20 @@ class Contact(Model):
     organizations in the decentralized community, a network of
     federated servers that communicate with each other."""
     _collection = 'organizations/%s/contacts'
-    # additional_fields: list = []
+    additional_fields: List = field(default_factory=list)
     name: str = ''
+    email: str = ''
+    phone_number: str = ''
+    phone_number_formatted: str = ''
+    address_formatted: str = ''
+    street: str = ''
+    city: str = ''
+    county: str = ''
+    state: str = ''
+    zip_code: str = ''
+    latitude: float = 0.0
+    longitude: float = 0.0
+    people: List = field(default_factory=list)
 
 
 @dataclass
@@ -140,6 +160,7 @@ class Batch(Model):
     project of the sample."""
     _collection = 'organizations/%s/batches'
     status: str = ''
+    sample_count: int = 0
 
 
 @dataclass
@@ -149,7 +170,66 @@ class Item(Model):
     instruments. Inventory can be assigned to a specific area to make
     locating the inventory item easier."""
     _collection = 'organizations/%s/inventory'
+    admin_method: str = ''
+    approved: str = ''
+    approved_at: datetime = None
+    area_id: str = ''
+    category_name: str = ''
+    category_type: str = ''
+    description: str = ''
+    dose: float = 0.0
+    dose_number: int = 0
+    dose_units: str = ''
     item_type: str = ''
+    moved_at: datetime = None
+    name: str = ''
+    quantity: float = 0.0
+    quantity_type: str = ''
+    serving_size: float = 0.0
+    supply_duration_days: int = 0
+    status: str = ''
+    strain_id: str = ''
+    strain_name: str = ''
+    units: str = ''
+    volume: float = 0.0
+    volume_units: str = ''
+    weight: float = 0.0
+    weight_units: str = ''
+
+@dataclass
+class InventoryType(Model):
+    """The type for any physical inventory item."""
+    _collection = 'organizations/%s/inventory_types'
+    admin_method: str = ''
+    brand: str = ''
+    name: str = ''
+    category_type: str = ''
+    quantity_type: str = ''
+    strain_required: bool = False
+    #  "Name": "Buds",
+    # "ProductCategoryType": "Buds",
+    # "QuantityType": "WeightBased",
+    # "RequiresStrain": true,
+    # "RequiresItemBrand": false,
+    # "RequiresAdministrationMethod": false,
+    # "RequiresUnitCbdPercent": false,
+    # "RequiresUnitCbdContent": false,
+    # "RequiresUnitCbdContentDose": false,
+    # "RequiresUnitThcPercent": false,
+    # "RequiresUnitThcContent": false,
+    # "RequiresUnitThcContentDose": false,
+    # "RequiresUnitVolume": false,
+    # "RequiresUnitWeight": false,
+    # "RequiresServingSize": false,
+    # "RequiresSupplyDurationDays": false,
+    # "RequiresNumberOfDoses": false,
+    # "RequiresPublicIngredients": false,
+    # "RequiresDescription": false,
+    # "RequiresProductPhotos": 0,
+    # "RequiresLabelPhotos": 0,
+    # "RequiresPackagingPhotos": 0,
+    # "CanContainSeeds": true,
+    # "CanBeRemediated": true
 
 
 @dataclass
@@ -157,6 +237,7 @@ class Invoice(Model):
     """Invoices are incoming or outgoing bills that you want to manage
     in the Cannlytics platform."""
     _collection = 'organizations/%s/invoices'
+    analyses: List = field(default_factory=list)
 
 
 @dataclass
@@ -170,6 +251,23 @@ class Measurement(Model):
 class Organization(Model):
     """The place where work happens."""
     _collection = 'organizations/%s'
+    name: str = ''
+    dba: str = ''
+    credentialed_date: str = ''
+    license_number: str = ''
+    license_numbers: List = field(default_factory=list)
+    license_type: str = ''
+    team: List = field(default_factory=list)
+
+
+@dataclass
+class License(Model):
+    """A state-issued cannabis license."""
+    _collection = 'organizations/%s/licenses'
+    expiration_date: str = ''
+    license_number: str = ''
+    license_type: str = ''
+    start_date: str = ''
 
 
 @dataclass
@@ -185,6 +283,8 @@ class Price(Model):
     """A price for an analysis or group of analyses."""
     _collection = 'organizations/%s/prices'
     public: bool = False
+    price: float = 0
+    currency: str = 'USD'
 
 
 @dataclass
@@ -192,6 +292,7 @@ class Project(Model):
     """A group of samples for a specific client."""
     _collection = 'organizations/%s/projects'
     status: str = ''
+    sample_count: int = 0
 
 
 @dataclass
@@ -206,6 +307,22 @@ class Results(Model):
     appropriate calculation has been applied to the analyte's
     measurement."""
     _collection = 'organizations/%s/results'
+    analysis: str = ''
+    analysis_status: str = ''
+    sample_id: str = ''
+    package_id: str = ''
+    package_label: str = ''
+    product_name: str = ''
+    sample_type: str = ''
+    tested_at: datetime = None
+    voided_at: datetime = None
+    released: bool = False
+    released_at: datetime = None
+    status: str = ''
+    result: float = 0.0
+    units: str = ''
+    notes: str = ''
+    non_mandatory: bool = False
 
 
 @dataclass
@@ -219,6 +336,8 @@ class Sample(Model):
     point the lab can make the results and certificate accessible to the
     client."""
     _collection = 'organizations/%s/samples'
+    batch_id: str = ''
+    project_id: str = ''
 
 
 @dataclass
@@ -227,6 +346,8 @@ class Template(Model):
     certificates."""
     _collection = 'organizations/%s/transfers'
     status: str = ''
+    storage_ref: str = ''
+    version: str = ''
 
 
 @dataclass
@@ -235,12 +356,30 @@ class Transfer(Model):
     two organizations."""
     _collection = 'organizations/%s/transfers'
     status: str = ''
+    departed_at: datetime = datetime.now()
+    arrived_at: datetime = datetime.now()
+    transfer_type: str = ''
+    sample_count: int = 0
+    sender: str = ''
+    sender_org_id: str = ''
+    receiver: str = ''
+    receiver_org_id: str = ''
+    transporter: str = ''
 
 
 @dataclass
 class User(Model):
     """The person performing the work."""
     _collection = 'users/%s'
+    email: str = ''
+    license_number: str = ''
+    linked_in_url: str = ''
+    name: str = ''
+    phone_number: str = ''
+    phone_number_formatted: str = ''
+    signature_storage_ref: str = ''
+    signed_in: bool = False
+    signed_in_at: datetime = None
 
 
 @dataclass

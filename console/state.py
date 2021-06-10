@@ -24,10 +24,11 @@ material = {
             {"title": "Account", "active": True},
         ],
         "fields": [
-            {"type": "email", "key": "email", "title": "Email"},
             {"type": "text", "key": "name", "title": "Name"},
             {"type": "text", "key": "position", "title": "Position"},
-            {"type": "text", "key": "location", "title": "Location"},
+            {"type": "email", "key": "email", "title": "Email"},
+            {"type": "text", "key": "phone_number", "title": "Phone"},
+            # {"type": "text", "key": "location", "title": "Location"},
             # {"type": "text", "key": "linkedin", "title": "LinkedIn"},
             {"type": "text", "key": "license", "title": "License"},
         ],
@@ -63,137 +64,6 @@ material = {
             "message": "Organize your company and facilities into logical areas so you can easily manage the location of your physical items.",
             "url": "./areas/area?new=true",
         },
-    },
-    "dashboard": {
-        "cards": [
-            {
-                "path": "analyses",
-                "title": "Analyses",
-                "description": "Manage analyses, analytes, and boundaries.",
-                "image_path": "console/images/icons/multi-tone/certificate-flask.png",
-            },
-            {
-                "path": "areas",
-                "title": "Areas",
-                "description": "Manage facilities and locations.",
-                "image_path": "console/images/icons/multi-tone/lab.png",
-            },
-            {
-                "path": "clients",
-                "title": "Contacts",
-                "description": "Manage laboratory clients, vendors, and relations.",
-                "image_path": "console/images/icons/multi-tone/clients.png",
-            },
-            {
-                "path": "instruments",
-                "title": "Instruments",
-                "description": "Manage scientific instruments.",
-                "image_path": "console/images/icons/multi-tone/instrument.png",
-            },
-            {
-                "path": "inventory",
-                "title": "Inventory",
-                "description": "Manage inventory, items, packages, and more.",
-                "image_path": "console/images/icons/multi-tone/records.png",
-            },
-            # {
-            #     "path": "invoices",
-            #     "title": "Invoices",
-            #     "description": "Manage laboratory invoices.",
-            #     "image_path": "console/images/icons/multi-tone/documents.png",
-            # },
-            {
-                "path": "organizations",
-                "title": "Organizations",
-                "description": "Manage your company and team.",
-                "image_path": "console/images/icons/two-tone/two_tone_client_folder.png",
-            },
-            {
-                "path": "projects",
-                "title": "Projects",
-                "description": "Manage your internal and external projects.",
-                "image_path": "console/images/icons/multi-tone/folder.png",
-            },
-            {
-                "path": "results",
-                "title": "Results",
-                "description": "Manage laboratory results.",
-                "image_path": "console/images/icons/multi-tone/certificate.png",
-            },
-            {
-                "path": "samples",
-                "title": "Samples",
-                "description": "Manage laboratory samples.",
-                "image_path": "console/images/icons/multi-tone/vials.png",
-            },
-            {
-                "path": "transfers",
-                "title": "Transfers",
-                "description": "Manage sample transfers.",
-                "image_path": "console/images/icons/two-tone/two_tone_clock.png",
-            },
-            # {
-            #     "path": "stats",
-            #     "title": "Statistics",
-            #     "description": "Manage laboratory statistics.",
-            #     "image_path": "console/images/icons/two-tone/two_tone_graph.png",
-            # },
-            {
-                "path": "traceability",
-                "title": "Traceability",
-                "description": "Manage traceability integration and view audit logs.",
-                "image_path": "console/images/icons/multi-tone/certificate-access.png",
-            },
-            {
-                "path": "settings",
-                "title": "Settings",
-                "description": "Manage your user and organization settings.",
-                "image_path": "console/images/icons/two-tone/two_tone_gears.png",
-            },
-            # Plants, Harvests *Cultivator*
-            # Sales (Transactions | Receipts) *Cultivator* *Processor* *Retailer*
-        ],
-        "welcome_message": {
-            "title": "Welcome to your new laboratory platform!", # 🚀
-            "message": "Get started with simple and easy cannabis analytics.",
-        },
-        "organization_choices": [
-            {
-                "action": "Get started",
-                "title": "🥼 For Labs",
-                "description": "Start your lab workflow, manage your lab data, and issue your certificates. Start or join a lab.",
-                "image": "console/images/illustrations/outline/lab_tablet.svg",
-                "type": "lab",
-            },
-            # {
-            #     "action": "Begin now",
-            #     "title": "🌳 For Cultivators / Processors",
-            #     "description": "Start managing your lab results now. Start or join as a producer/processor to begin.",
-            #     "image": "console/images/illustrations/outline/lab_tablet.svg",
-            #     "type": "producer",
-            # },
-            # {
-            #     "action": "Explore for free",
-            #     "title": "📦 For Retailers",
-            #     "description": "Access lab data for your products quickly and easily. Begin today.",
-            #     "image": "console/images/illustrations/outline/lab_tablet.svg",
-            #     "type": "retailer",
-            # },
-            # {
-            #     "action": "Learn more",
-            #     "title": "🛍️ For Consumers",
-            #     "description": "Track your consumption. Log purchases, see your usage stats, and get lab data.",
-            #     "image": "console/images/illustrations/outline/lab_tablet.svg",
-            #     "type": "consumer",
-            # },
-            # {
-            #     "action": "Dive in",
-            #     "title": "🤝 For Everyone Else",
-            #     "description": "For all software integrators, researchers, and data seekers. Cannlytics has something for you.",
-            #     "image": "console/images/illustrations/outline/lab_desktop.svg",
-            #     "type": "integrator",
-            # },
-        ],
     },
     "instruments": {
         "breadcrumbs": [
@@ -389,6 +259,137 @@ material = {
 
 
 layout = {
+    "dashboard": {
+        "cards": [
+            {
+                "path": "analyses",
+                "title": "Analyses",
+                "description": "Manage analyses, analytes, and boundaries.",
+                "image_path": "console/images/icons/multi-tone/certificate-flask.png",
+            },
+            {
+                "path": "areas",
+                "title": "Areas",
+                "description": "Manage facilities and locations.",
+                "image_path": "console/images/icons/multi-tone/lab.png",
+            },
+            {
+                "path": "clients",
+                "title": "Contacts",
+                "description": "Manage laboratory clients, vendors, and relations.",
+                "image_path": "console/images/icons/multi-tone/clients.png",
+            },
+            {
+                "path": "instruments",
+                "title": "Instruments",
+                "description": "Manage scientific instruments.",
+                "image_path": "console/images/icons/multi-tone/instrument.png",
+            },
+            {
+                "path": "inventory",
+                "title": "Inventory",
+                "description": "Manage inventory, items, packages, and more.",
+                "image_path": "console/images/icons/multi-tone/records.png",
+            },
+            # {
+            #     "path": "invoices",
+            #     "title": "Invoices",
+            #     "description": "Manage laboratory invoices.",
+            #     "image_path": "console/images/icons/multi-tone/documents.png",
+            # },
+            {
+                "path": "organizations",
+                "title": "Organizations",
+                "description": "Manage your company and team.",
+                "image_path": "console/images/icons/two-tone/two_tone_client_folder.png",
+            },
+            {
+                "path": "projects",
+                "title": "Projects",
+                "description": "Manage your internal and external projects.",
+                "image_path": "console/images/icons/multi-tone/folder.png",
+            },
+            {
+                "path": "results",
+                "title": "Results",
+                "description": "Manage laboratory results.",
+                "image_path": "console/images/icons/multi-tone/certificate.png",
+            },
+            {
+                "path": "samples",
+                "title": "Samples",
+                "description": "Manage laboratory samples.",
+                "image_path": "console/images/icons/multi-tone/vials.png",
+            },
+            {
+                "path": "transfers",
+                "title": "Transfers",
+                "description": "Manage sample transfers.",
+                "image_path": "console/images/icons/two-tone/two_tone_clock.png",
+            },
+            # {
+            #     "path": "stats",
+            #     "title": "Statistics",
+            #     "description": "Manage laboratory statistics.",
+            #     "image_path": "console/images/icons/two-tone/two_tone_graph.png",
+            # },
+            {
+                "path": "traceability",
+                "title": "Traceability",
+                "description": "Manage traceability integration and view audit logs.",
+                "image_path": "console/images/icons/multi-tone/certificate-access.png",
+            },
+            {
+                "path": "settings",
+                "title": "Settings",
+                "description": "Manage your user and organization settings.",
+                "image_path": "console/images/icons/two-tone/two_tone_gears.png",
+            },
+            # Plants, Harvests *Cultivator*
+            # Sales (Transactions | Receipts) *Cultivator* *Processor* *Retailer*
+        ],
+        "welcome_message": {
+            "title": "Welcome to your new laboratory platform!", # 🚀
+            "message": "Get started with simple and easy cannabis analytics.",
+        },
+        "organization_choices": [
+            {
+                "action": "Get started",
+                "title": "🥼 For Labs",
+                "description": "Start your lab workflow, manage your lab data, and issue your certificates. Start or join a lab.",
+                "image": "console/images/illustrations/outline/lab_tablet.svg",
+                "type": "lab",
+            },
+            # {
+            #     "action": "Begin now",
+            #     "title": "🌳 For Cultivators / Processors",
+            #     "description": "Start managing your lab results now. Start or join as a producer/processor to begin.",
+            #     "image": "console/images/illustrations/outline/lab_tablet.svg",
+            #     "type": "producer",
+            # },
+            # {
+            #     "action": "Explore for free",
+            #     "title": "📦 For Retailers",
+            #     "description": "Access lab data for your products quickly and easily. Begin today.",
+            #     "image": "console/images/illustrations/outline/lab_tablet.svg",
+            #     "type": "retailer",
+            # },
+            # {
+            #     "action": "Learn more",
+            #     "title": "🛍️ For Consumers",
+            #     "description": "Track your consumption. Log purchases, see your usage stats, and get lab data.",
+            #     "image": "console/images/illustrations/outline/lab_tablet.svg",
+            #     "type": "consumer",
+            # },
+            # {
+            #     "action": "Dive in",
+            #     "title": "🤝 For Everyone Else",
+            #     "description": "For all software integrators, researchers, and data seekers. Cannlytics has something for you.",
+            #     "image": "console/images/illustrations/outline/lab_desktop.svg",
+            #     "type": "integrator",
+            # },
+        ],
+    },
     "sidebar": {
         "lab_index": [
             {
@@ -492,7 +493,13 @@ layout = {
                 # "icon": "folder",
                 "slug": "projects",
                 "user_type": "*",
-                "nested": [],
+                "nested": [
+                    {
+                        "slug": "manage",
+                        "title": "Manage",
+                        "url": "/results/manage",
+                    },
+                ],
             },
             {
                 "title": "Purchases",

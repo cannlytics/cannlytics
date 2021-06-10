@@ -58,9 +58,12 @@ class ConsoleView(TemplateView):
         can be returned depending on the page."""
         context = super().get_context_data(**kwargs)
         context['sidebar'] = layout['sidebar']
-        context['screen'] = kwargs.get('screen', 'dashboard')
+        context['screen'] = kwargs.get('screen', '')
         context['section'] = kwargs.get('section', '')
         context['unit'] = kwargs.get('unit', '')
+        if not context['screen']:
+            context['screen'] = 'dashboard'
+            context['dashboard'] = layout['dashboard']
         context = get_page_context(self.kwargs, context)
         context = get_page_data(self.kwargs, context)
         context = get_user_context(self.request, context)

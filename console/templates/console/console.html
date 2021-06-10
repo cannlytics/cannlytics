@@ -58,15 +58,16 @@
         Resend
         -->
         
-        <!-- Side Navigation -->
-        <!-- Optional: Custom sidebars -->
-        {% include "console/layout/sidebar.html" with
-          screen=screen
-          sidebar=sidebar
-          user=user
-          organization=organization
-          only
-        %}
+        <!-- Side Navigation | For users with organizations -->
+        {% if organization %}
+          {% include "console/layout/sidebar.html" with
+            screen=screen
+            sidebar=sidebar
+            user=user
+            organization=organization
+            only
+          %}
+        {% endif %}
 
         <!-- Dynamic Body -->
         {% block console_body %}{% endblock console_body %}

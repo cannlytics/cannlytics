@@ -41,10 +41,14 @@ urlpatterns = [
         path('', areas.areas),
         path('/<uuid:area_id>', areas.areas),
     ])),
-    path('clients', include([
+    path('batches', include([
+        path('', views.index),
+        path('/<uuid:batch_id>', views.index),
+    ])),
+    path('contacts', include([
         path('', views.index),
         path('/<uuid:org_id>', views.index),
-        path('/<uuid:org_id>/contacts', views.index),
+        path('/<uuid:org_id>/people', views.index),
     ])),
     path('inventory', include([
         path('', views.index),
@@ -57,6 +61,10 @@ urlpatterns = [
     path('invoices', include([
         path('', views.index),
         path('/<uuid:invoice_id>', views.index),
+    ])),
+    path('projects', include([
+        path('', views.index),
+        path('/<uuid:project_id>', views.index),
     ])),
     path('users', include([
         path('', users.users),

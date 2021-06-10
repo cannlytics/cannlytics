@@ -4,7 +4,7 @@
   Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 11/26/2020 Thanksgiving
-  Updated: 5/5/2021
+  Updated: 6/10/2021
 -->
 {% extends "console/console.html" %}
 {% block console_body %}
@@ -12,7 +12,7 @@
   <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mx-auto">
 
     <!-- Show main dashboard given a user -->
-    {% if user %}
+    {% if user and organization %}
       <div class="row">
 
       <!-- Dashboard cards -->
@@ -94,7 +94,7 @@
 
     <!-- Show new user message -->
     {% else %}
-    <div class="mx-5" style="max-width:760px;">
+    <div class="mx-auto" style="max-width:760px;">
 
       <!-- Welcome message (Only show to new users) -->
       <div class="mt-5">
