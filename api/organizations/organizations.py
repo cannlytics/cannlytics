@@ -66,14 +66,21 @@ def organizations(request, format=None, org_id=None):
 
         # TODO: Get query parameters.
         keyword = request.query_params.get('name')
-        print('Query by name:', keyword)
-        query = {'key': 'name', 'operation': '==', 'value': keyword}
-        docs = get_collection(model_type, filters=[query])
+        if keyword:
+            print('Query by name:', keyword)
+            query = {'key': 'name', 'operation': '==', 'value': keyword}
+            docs = get_collection(model_type, filters=[query])
 
-        # TODO: Check if user is in organization's team, otherwise,
+        # Get all of a user's organizations
+        else:
+            query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
+            docs = get_collection(model_type, filters=[query])
+
+        # Optional: Get list of other organizations.
+        # Check if user is in organization's team, otherwise,
         # only return publically available information.
 
-        # TODO: Try to get the organization (facility) from Metrc.
+        # Optional: Try to get facility data from Metrc.
         # facilities = track.get_facilities()
 
         return Response(docs, content_type='application/json')

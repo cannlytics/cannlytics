@@ -3,7 +3,7 @@
 <!--
   Organizations Page | Cannlytics Console
   Created: 4/26/2021
-  Updated: 6/8/2021
+  Updated: 6/11/2021
 -->
 {% extends "console/console.html" %}
 {% load icon %}
@@ -18,22 +18,29 @@
     <!-- Body -->
     <div class="analysis">
 
-      <!-- Table -->
+      <!-- Card -->
       <div class="card my-3">
         <div class="card-body">
           <h2 class="h6 mb-3 text-dark">Organizations</h2>
-          <div class="table-responsive">
+          <div class="table-responsive">           
+            {% if organizations %}
 
-            <!-- Placeholder if no records -->
-            {% if not organizations %}
+              <!-- Data Grid -->
+              <div class="row">
+              {% for org in organizations %}
+                <div class="card col-3 col-sm-1 col-md-2">
+                  {% icon 'briefcase' class="fs-6" %}<h4>{{ org.name }}</h4>
+                  <h5>{{ org.website }}</h5>
+                </div>
+              {% endfor %}
+              </div>
+
+            {% else %}
+              <!-- Placeholder -->
               {% include "console/components/placeholders/placeholder.html" with
                 placeholder=organizations.placeholder
                 only
               %}
-
-            <!-- Client records table -->
-            {% else %}
-              <div id="organizations-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
             {% endif %}
 
           </div>
@@ -51,8 +58,8 @@
   <!-- JavaScript -->
   <script type="text/javascript" charset="utf-8">
 
-    // TODO: Get current organizations.
-    // cannlytics.inventory.initializeAreas();
+    // Initialize user interface.
+    // cannlytics.organizations.initialize();
 
   </script>
 

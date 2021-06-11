@@ -4,7 +4,12 @@
  * Created: 6/9/2021
  * Updated: 6/11/2021
  */
+ import { api } from '../api/api.js';
+ import { theme } from '../settings/theme.js';
+ import { changePhotoURL, storageErrors } from '../firebase.js';
+ import { authRequest, hasClass, Password, serializeForm, slugify, showNotification } from '../utils.js';
 
+ 
  export const organizations = {
 
   initialize() {
@@ -12,13 +17,63 @@
      * Initialize the organizations user interface.
      */
     console.log('Initializing organizations!')
+    this.getOrganizations('organizations-table');
   },
 
 
-  getOrganizations() {
+  getOrganizations(tableId) {
     /*
-     * 
+     * Get and display a user's organizations.
      */
+    // TODO: Specify the columns.
+    // address: ""
+    // city: ""
+    // country: ""
+    // email: ""
+    // external_id: ""
+    // linkedin: ""
+    // name: "Cannlytics"
+    // owner: "v86tNoemQzgrnMvlWq6mxCASg523"
+    // phone: ""
+    // public: "false"
+    // state: ""
+    // team: ["v86tNoemQzgrnMvlWq6mxCASg523"]
+    // trade_name: ""
+    // uid: "cannlytics"
+    // website: ""
+    // zip_code: ""
+    const columnDefs = [
+      { field: 'name', sortable: true, filter: true },
+      { field: 'email', sortable: true, filter: true },
+      { field: 'phone', sortable: true, filter: true }
+    ];
+
+    // Specify the table options.
+    const gridOptions = {
+      columnDefs: columnDefs,
+      pagination: true,
+      rowSelection: 'multiple',
+      suppressRowClickSelection: false,
+      // singleClickEdit: true,
+      // onRowClicked: event => console.log('A row was clicked'),
+      onGridReady: event => theme.toggleTheme(theme.getTheme()),
+    };
+
+    // Get the data and render the table.
+    api.getOrganizations().then((data) => {
+      console.log('Table data:', data); // DEV:
+      const eGridDiv = document.querySelector(`#${tableId}`);
+      new agGrid.Grid(eGridDiv, gridOptions);
+      gridOptions.api.setRowData(data);
+    })
+    .catch((error) => {
+      console.log('Error:', error);
+    });
+
+    // TODO: Attach export functionality
+    //function exportTableData() {
+    //  gridOptions.api.exportDataAsCsv();
+    //}
   },
 
 
