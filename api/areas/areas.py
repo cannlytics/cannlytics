@@ -12,18 +12,18 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from api.auth import authenticate_request
+from api.auth import auth
 
 
 @api_view(['GET', 'POST'])
 def areas(request, format=None):
     """Get or update information about a areas / locations."""
 
-    if request.method == 'GET':
+    # Authenticate the user.
+    claims = auth.verify_session(request)
+    uid = claims['uid']
 
-        # TODO: Authenticate the user
-        user = authenticate_request(request)
-        print('User:', user)
+    if request.method == 'GET':
 
         org_id = ''
         ref = '/organizations/%s/areas'

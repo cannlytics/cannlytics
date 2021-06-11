@@ -1,23 +1,29 @@
 /**
- * Cannlytics Console (v1.0.0): analysis.js
+ * Analysis JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 12/3/2020
- * Updated: 6/3/2021
+ * Updated: 6/11/2021
  */
 // import Chart from 'chart.js';
 // import "chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js";
+
+import { api } from '../api/api.js';
+
 
 function randomValues(count, min, max) {
   const delta = max - min;
   return Array.from({length: count}).map(() => Math.random() * delta + min);
 }
 
+
 export const analyses = {
+
 
   initialize() {
     console.log('TODO: Initialize analyses...!')
     // this.drawGraphs();
   },
+
 
   drawGraphs() {
     var ctx = document.getElementById('graph-concentrations');
@@ -73,5 +79,45 @@ export const analyses = {
       ]
     }]
   },
+
+
+  getAnalyses() {
+    /*
+     * Get all analyses for an organization.
+     */
+    // TODO: Get the data and fill it into an AG Grid table!
+    api.getAnalyses(data);
+  },
+
+
+  saveAnalysis() {
+    /*
+     * Create or update an analysis.
+     */
+    // TODO: Serialize the analysis data!
+    const data = {}
+    api.createAnalyses(data);
+  },
+
+
+  deleteAnalysis() {
+    /*
+     * Delete an analysis.
+     */
+    // TODO: Serialize the analysis data!
+    const data = {}
+    api.createAnalyses(data);
+  },
+
+
+  exportAnalyses() {
+    /*
+     * Export all Analyses to Excel.
+     */
+    // TODO: Serialize the analysis data!
+    const data = {}
+    api.createAnalyses(data);
+  },
+
 
 }

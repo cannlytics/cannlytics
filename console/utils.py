@@ -118,17 +118,25 @@ def get_user_context(request, context):
         context (dict): Page context updated with any user-specific context.
     """
     user = {}
+
+    # Get fields from authentication.
     user_claims = auth.verify_session(request)
+    uid = user_claims.get('uid')
     if user_claims:
         user_email = user_claims.get('email', '')
         user = {
             'email_verified': user_claims.get('email_verified', False),
             'display_name': user_claims.get('name', ''),
             'photo_url': user_claims.get('picture', f'https://robohash.org/{user_email}?set=set5'),
-            'uid': user_claims.get('uid'),
+            'uid': uid,
             'email': user_email,
         }
-    context.update({'user': user})
+
+    #  Get a user's data and organizations from Firestore.
+    query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
+    user_data = get_document(f'users/{uid}')
+    context['organizations'] = get_collection('organizations', filters=[query])
+    context.update({'user': {**user_data, **user}})
     return context
 
 

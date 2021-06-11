@@ -25,7 +25,7 @@
           <div class="table-responsive">
 
             <!-- Placeholder if no records -->
-            {% if True %}
+            {% if not organizations %}
               {% include "console/components/placeholders/placeholder.html" with
                 placeholder=organizations.placeholder
                 only

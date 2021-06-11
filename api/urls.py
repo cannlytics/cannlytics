@@ -85,6 +85,10 @@ urlpatterns = [
         path('', views.index),
         path('/<uuid:sample_id>', views.index),
     ])),
+    path('tests', include([ # Alternatively measurements / calculations
+        path('', views.index),
+        path('/<uuid:test_id>', views.index),
+    ])),
     path('transfers', include([
         path('', views.index),
         path('/<uuid:sample_id>', views.index),

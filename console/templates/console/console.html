@@ -39,6 +39,7 @@
       navbar=navbar
       version=APP_VERSION_NUMBER
       user=user
+      organizations=organizations
       only
     %}
 
@@ -59,7 +60,7 @@
         -->
         
         <!-- Side Navigation | For users with organizations -->
-        {% if organization %}
+        {% if organizations %}
           {% include "console/layout/sidebar.html" with
             screen=screen
             sidebar=sidebar

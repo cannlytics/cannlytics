@@ -2,6 +2,7 @@
  * API Interface | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 4/24/2021
+ * Updated: 6/11/2021
  * Description: The `api` object interfaces with the Cannlytics API to send
  * and retrieve data to and from the back-end, where data is processed and
  * stored in the Firestore database and Metrc API.
@@ -16,43 +17,43 @@ export const api = {
   Analyses
   ----------------------------------------------------------------------------*/
  
-  getAnalyses: (params) => authRequest('/api/analysis', null, { params }),
-  createAnalysis: (data) => authRequest('/api/analysis', data),
-  updateAnalysis: (data) => authRequest('/api/analysis', data),
-  deleteAnalysis: (data) => authRequest('/api/analysis', data, { delete: true }),
+  getAnalyses: (params) => authRequest('/api/analyses', null, { params }),
+  createAnalyses: (data) => authRequest('/api/analyses', data),
+  updateAnalyses: (data) => authRequest('/api/analyses', data),
+  deleteAnalyses: (data) => authRequest('/api/analyses', data, { delete: true }),
 
   /*----------------------------------------------------------------------------
   Analytes
   ----------------------------------------------------------------------------*/
  
   getAnalytes: (params) => authRequest('/api/analytes', null, { params }),
-  createAnalyte: (data) => authRequest('/api/analytes', data),
-  updateAnalyte: (data) => authRequest('/api/analytes', data),
-  deleteAnalyte: (data) => authRequest('/api/analytes', data, { delete: true }),
+  createAnalytes: (data) => authRequest('/api/analytes', data),
+  updateAnalytes: (data) => authRequest('/api/analytes', data),
+  deleteAnalytes: (data) => authRequest('/api/analytes', data, { delete: true }),
 
   /*----------------------------------------------------------------------------
   Areas
   ----------------------------------------------------------------------------*/
  
   getAreas: (params) => authRequest('/api/areas', null, { params }),
-  createArea: (data) => authRequest('/api/areas', data),
-  updateArea: (data) => authRequest('/api/areas', data),
-  deleteArea: (data) => authRequest('/api/areas', data, { delete: true }),
+  createAreas: (data) => authRequest('/api/areas', data),
+  updateAreas: (data) => authRequest('/api/areas', data),
+  deleteAreas: (data) => authRequest('/api/areas', data, { delete: true }),
 
   /*----------------------------------------------------------------------------
-  Clients
+  Contacts
   ----------------------------------------------------------------------------*/
  
-  getClients: (params) => authRequest('/api/clients', null, { params }),
-  createClient: (data) => authRequest('/api/clients', data),
-  updateClient: (data) => authRequest('/api/clients', data),
-  deleteClient: (data) => authRequest('/api/clients', data, { delete: true }),
+  getContacts: (params) => authRequest('/api/contacts', null, { params }),
+  createContacts: (data) => authRequest('/api/contacts', data),
+  updateContacts: (data) => authRequest('/api/contacts', data),
+  deleteContacts: (data) => authRequest('/api/contacts', data, { delete: true }),
 
-  // Client contacts.
-  getClientContacts: (orgId) => authRequest(`/api/clients/${orgId}/contacts`),
-  createClientContact: (orgId, data) => authRequest(`/api/clients/${orgId}/contacts`, data),
-  updateClientContact: (orgId, data) => authRequest(`/api/clients/${orgId}/contacts`, data),
-  deleteClientContact: (orgId, data) => authRequest(`/api/clients/${orgId}/contacts`, data, { delete: true }),
+  // Contact contacts.
+  getContactPeople: (orgId) => authRequest(`/api/contacts/${orgId}/people`),
+  createContactPeople: (orgId, data) => authRequest(`/api/contacts/${orgId}/people`, data),
+  updateContactPeople: (orgId, data) => authRequest(`/api/contacts/${orgId}/people`, data),
+  deleteContactPeople: (orgId, data) => authRequest(`/api/contacts/${orgId}/people`, data, { delete: true }),
 
   /*----------------------------------------------------------------------------
   Inventory
@@ -99,13 +100,31 @@ export const api = {
   ----------------------------------------------------------------------------*/
  
   getOrganizations: (params) => authRequest('/api/organizations', null, { params }),
-  createOrganization: (data) => authRequest('/api/organizations', data),
-  updateOrganization: (data) => authRequest('/api/organizations', data),
-  deleteOrganization: (data) => authRequest('/api/organizations', data, { delete: true }),
+  createOrganizations: (data) => authRequest('/api/organizations', data),
+  updateOrganizations: (data) => authRequest('/api/organizations', data),
+  deleteOrganizations: (data) => authRequest('/api/organizations', data, { delete: true }),
 
   // Organization settings.
   getOrganizationSettings: (orgId) => authRequest(`/api/organizations/${orgId}/settings`),
   updateOrganizationSettings: (orgId, data) => authRequest(`/api/organizations/${orgId}/settings`, data),
+
+  /*----------------------------------------------------------------------------
+  Projects
+  ----------------------------------------------------------------------------*/
+ 
+  getProjects: (params) => authRequest('/api/projects', null, { params }),
+  createProjects: (data) => authRequest('/api/projects', data),
+  updateProjects: (data) => authRequest('/api/projects', data),
+  deleteProjects: (data) => authRequest('/api/projects', data, { delete: true }),
+
+  /*----------------------------------------------------------------------------
+  Results
+  ----------------------------------------------------------------------------*/
+ 
+  getResults: (params) => authRequest('/api/results', null, { params }),
+  createResults: (data) => authRequest('/api/results', data),
+  updateResults: (data) => authRequest('/api/results', data),
+  deleteResults: (data) => authRequest('/api/results', data, { delete: true }),
 
   /*----------------------------------------------------------------------------
   Samples

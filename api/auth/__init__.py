@@ -11,4 +11,4 @@ __author__ = 'Keegan Skeate'
 __contact__ = 'keegan@cannlytics.com'
 
 
-from .auth import authenticate_request
+# from .auth import authenticate_request

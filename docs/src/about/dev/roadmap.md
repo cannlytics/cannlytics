@@ -15,6 +15,23 @@ Cannlytics has planted a seed with the open source Cannlytics LIMS. Please recom
 | Traceability | Integration with state traceability systems, such as Metrc. | 🟡 In-progress |
 | Help        | Provide minimal support options, including a feedback form. | ✔️ Completed |
 
+The following components need to be completed.
+
+| Model | UI | JavaScript | API | Logic |
+| -- | -- | -------- | --- | ----- |
+| Analyses |    |    |    |    |
+| Areas |    |    |    |    |
+| Contacts |    |    |    |    |
+| Instruments |    |    |    |    |
+| Inventory |    |    |    |    |
+| Organizations |    |    |    |    |
+| Projects |    |    |    |    |
+| Samples |    |    |    |    |
+| Transfers |    |    |    |    |
+| Traceability |    |    |    |    |
+| Settings |    |    |    |    |
+| Help |    |    |    |    |
+
 ## 🌱 Cultivators / Processors
 
 | Package     | Details               | Status         |

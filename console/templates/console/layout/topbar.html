@@ -57,8 +57,7 @@
       </a>
 
       <!-- Website Link -->
-      <!-- TODO: Fancy tooltip -->
-      <a
+      {% comment %} <a
         class="nav-link text-secondary navbar-toggle d-flex px-2"
         href="https://get.cannlytics.com"
         target="_blank"
@@ -67,21 +66,20 @@
         title="Website"
       >
         {% icon "globe" width="21px" height="21px" %}
-      </a>
+      </a> {% endcomment %}
 
-    </div>
-
-    <!-- Organization Choice -->
-    <!-- TODO: Dynamically render up to 3 of user's organizations -->
-    <!-- TODO: Show organization if already created -->
-    {% if organization %}
+          <!-- Organization Choice -->
+    {% if organizations %}
       {% include "console/components/menus/organization_menu.html" %}
     {% endif %}
 
+    </div>
+
+
+
     <!-- Search -->
     <!-- col-12 col-lg-auto me-lg-3 d-flex align-items-center -->
-    <!--  -->
-    <form
+    {% comment %} <form
       class="d-flex flex-grow-1 nav-search-form ps-sm-2"
       role="search"
     >
@@ -102,7 +100,7 @@
       >
         {% icon "search" height="16" width="16" class="text-secondary" %}
       </button>
-    </form>
+    </form> {% endcomment %}
 
     <!-- Options -->
     <ul id="console-options" class="navbar-nav float-end">      

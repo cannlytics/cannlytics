@@ -6,7 +6,7 @@
  */
 
 import { auth, changePhotoURL, storageErrors } from '../firebase.js';
-import { authRequest, hasClass, Password, serializeForm, showNotification } from '../utils.js';
+import { authRequest, hasClass, Password, serializeForm, slugify, showNotification } from '../utils.js';
 
 export const dashboard = {
 
@@ -24,7 +24,8 @@ export const dashboard = {
           authRequest('/api/users').then((data) => initializeGetStartedProfileUI(data));
         }
         else if (stage === 'organization') {
-          authRequest('/api/organizations/1').then((data) => initializeGetStartedOrganizationUI(data));
+          initializeGetStartedOrganizationUI({});
+          // authRequest('/api/organizations/${orgId}').then((data) => initializeGetStartedOrganizationUI(data));
         }
       }
     });
@@ -64,23 +65,29 @@ export const dashboard = {
   },
 
 
-  saveOrganization() {
+  saveOrganization(orgType) {
     /*
      * Save's a user's organization choice.
      */
+    // FIXME:
     const elements = document.getElementById('create-organization-form').elements;
     const data = {};
     for (let i = 0 ; i < elements.length ; i++) {
       const item = elements.item(i);
-      data[item.name] = item.value;
+      if (item.name) data[item.name] = item.value;
     }
-    authRequest('/api/organizations', data).then((response) => {
+    const orgId = slugify(data['name'])
+    console.log('Org ID:', orgId);
+    console.log('Data to upload:', data);
+    authRequest(`/api/organizations`, data).then((response) => {
       console.log('Saved org:', response);
-      // TODO: Show better messages?
-      if (response.success) {
-        showNotification('Organization request sent', response.message, { type: 'success' });
-      } else {
+      // TODO: Show better error messages.
+      // TODO: Tell user if organization name is already taken
+      if (response.error) {
         showNotification('Organization request failed', response.message, { type: 'error' });
+      } else {
+        // showNotification('Organization request sent', response.message, { type: 'success' });
+        document.location.href = `/get-started/support/?from=${orgType}`;
       }
     });
   },
@@ -90,7 +97,6 @@ export const dashboard = {
     /*
      * Save's a user's data.
      */
-    // FIXME:
     const user = auth.currentUser;
     const data = serializeForm('user-form');
     data.type = type;
@@ -212,6 +218,7 @@ function uploadUserPhoto() {
   /*
    * Upload a user's photo through the API.
    */
+  // FIXME:
   if (this.files.length) {
     showNotification('Uploading photo', 'Uploading your profile picture...', { type: 'wait' });
     changePhotoURL(this.files[0]).then((downloadURL) => {
@@ -232,14 +239,14 @@ function uploadOrgPhoto(orgId) {
    * Upload a photo for an organization through the API.
    */
   if (this.files.length) {
+
+    // Show a notification.
     showNotification('Uploading photo', 'Uploading your organization picture...', { type: 'wait' });
     
-    // TODO: Fill the photo into the UI.
+    // Fill the photo into the UI.
     changePhotoURL(this.files[0]).then((downloadURL) => {
       authRequest('/api/organizations', { photo_url: downloadURL, uid: orgId });
-      // document.getElementById('user-photo-url').src = downloadURL;
-      // document.getElementById('userPhotoNav').src = downloadURL;
-      // document.getElementById('userPhotoMenu').src = downloadURL;
+      document.getElementById('org-photo-url').src = downloadURL;
       showNotification('Uploading photo complete', 'Successfully uploaded organization picture.', { type: 'success' });
     }).catch((error) => {
       showNotification('Photo Change Error', storageErrors[error.code], { type: 'error' });
@@ -281,20 +288,14 @@ function initializeGetStartedOrganizationUI(data) {
    * Initialize the get-started organization section.
    */
 
-  // TODO: Set the organization's photo.
-  // try {
-  //   if (data.photo_url) document.getElementById('user-photo-url').src = data.photo_url;
-  // } catch (error) {}
-  console.log('Organization data:', data);
-
   // Populate form.
-  const { elements } = document.querySelector('form')
-  for (const [ key, value ] of Object.entries(data)) {
-    const field = elements.namedItem(key)
-    try {
-      field && (field.value = value);
-    } catch(error) {}
-  }
+  // const { elements } = document.querySelector('form')
+  // for (const [ key, value ] of Object.entries(data)) {
+  //   const field = elements.namedItem(key)
+  //   try {
+  //     field && (field.value = value);
+  //   } catch(error) {}
+  // }
 
   // Attach functionality.
   const fileElem = document.getElementById('selectPhotoUrl');

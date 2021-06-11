@@ -36,6 +36,18 @@ export const app = {
 
   },
 
+
+  changeActiveOrganization(orgId) {
+    /*
+     * Change the active organization for the user.
+     */
+    // TODO:
+    console.log('Change organizations:', orgId);
+    const message = 'Sorry, we have not yet implemented the functionality for a user to have multiple organizations.'
+    showNotification('Not implemented', message, { type: 'error' });
+  },
+
+  
   signOut: signOut,
 
   
