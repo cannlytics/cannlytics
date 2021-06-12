@@ -68,8 +68,6 @@ class ConsoleView(TemplateView):
         context = get_page_data(self.kwargs, context)
         context = get_user_context(self.request, context)
         context = get_model_context(context)
-        # Optional: Get user-defined fields for each model.
-        print('Orgs:', context.get('organizations'))
         return context
 
 

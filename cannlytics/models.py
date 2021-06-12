@@ -60,9 +60,11 @@ class Analysis(Model):
     _collection = 'organizations/%s/analysis'
     analytes: list = List
     analyte_count: int = 0
-    public: bool = False
-    name: str = ''
     key: str = ''
+    name: str = ''
+    panel: bool = False
+    price: float = 0.0
+    public: bool = False
 
 
 @dataclass

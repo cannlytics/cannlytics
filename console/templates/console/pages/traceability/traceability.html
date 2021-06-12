@@ -9,25 +9,43 @@
 
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
-    <!-- Header-->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="fs-5 mb-0 lh-base">Traceability</h1>
+    <!-- Header -->
+    <!-- TODO: Hide tabs that are not relevant to organization type -->
+    <div class="col pt-3 pb-2 mb-3">
+      <h1 class="fs-5 mb-0 lh-base mb-3">Traceability</h1>
+      <ul class="nav nav-tabs">
+        {% for tab in traceability.tabs %}
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == tab.section %}active{% endif %}"
+            aria-current="{% if section == tab.section %}page{% endif %}"
+            href="/traceability/{{ tab.section }}"
+          >
+            {{ tab.name }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
     </div>
 
     <!-- Body -->
-    <div class="col">
+    <!-- Dynamic section -->
+    <section>
+      {% block section %}{% endblock %}
+    </section>
+
+    <!-- TODO: Traceability dashboard if no section -->
+
 
     <!-- Traceability Provider -->
-    <div class="col-md-4">
+    {% comment %} <div class="col-md-4">
       <label for="inputTraceabilityProvider" class="form-label">Traceability Provider</label>
       <select id="inputTraceabilityProvider" class="form-select">
         <option selected>Select</option>
         <option>Leaf Data Systems</option>
         <option>Metrc</option>
       </select>
-    </div>
-
-    </div><!-- End of body -->
+    </div> {% endcomment %}
 
   </main>
 

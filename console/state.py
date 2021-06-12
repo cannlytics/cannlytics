@@ -191,16 +191,85 @@ material = {
             "url": "./transfers/transfer?new=true",
         },
     },
-    # "traceability": {
-    #     "placeholder": {
-    #         "action": "Create an inventory transfer",
-    #         "height": "200px",
-    #         "image": "console/images/illustrations/outline/lab_reagents.svg",
-    #         "title": "Create your first inventory transfer",
-    #         "message": "Create a transfer of inventory items from one organization to another.",
-    #         "url": "./samples/new",
-    #     },
-    # },
+    "traceability": {
+        "tabs": [
+            {
+                "name": "Employees",
+                "section": "employees",
+                "url": "/traceability/employees",
+            },
+            {
+                "name": "Facilities",
+                "section": "facilities",
+                "url": "/traceability/facilities",
+            },
+            {
+                "name": "Harvests",
+                "section": "harvests",
+                "url": "/traceability/harvests",
+            },
+            {
+                "name": "Items",
+                "section": "items",
+                "url": "/traceability/items",
+            },
+            {
+                "name": "Lab Tests",
+                "section": "lab-tests",
+                "url": "/traceability/lab-tests",
+            },
+            {
+                "name": "Locations",
+                "section": "locations",
+                "url": "/traceability/locations",
+            },
+            {
+                "name": "Packages",
+                "section": "packages",
+                "url": "/traceability/packages",
+            },
+            {
+                "name": "Patients",
+                "section": "patients",
+                "url": "/traceability/patients",
+            },
+            {
+                "name": "Plant Batches",
+                "section": "plant-batches",
+                "url": "/traceability/plant-batches",
+            },
+            {
+                "name": "Plants",
+                "section": "plants",
+                "url": "/traceability/plants",
+            },
+            {
+                "name": "Sales",
+                "section": "sales",
+                "url": "/traceability/sales",
+            },
+            {
+                "name": "Strains",
+                "section": "strains",
+                "url": "/traceability/strains",
+            },
+            {
+                "name": "Transfers",
+                "section": "transfers",
+                "url": "/traceability/transfers",
+            },
+            {
+                "name": "Units",
+                "section": "units",
+                "url": "/traceability/units",
+            },
+            {
+                "name": "Settings",
+                "section": "settings",
+                "url": "/traceability/settings",
+            },
+        ],
+    },
     "calendar": {
         "placeholder": {
             "action": "Schedule your first transfer",

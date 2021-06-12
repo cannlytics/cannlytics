@@ -34,17 +34,17 @@ def get_model_context(context):
     """
     model = model_plurals.get(context['screen'])
     if not model:
+        # model = getattr(models, utils.camelcase(context['section']))
         return context
-    # model = getattr(models, utils.camelcase(context['section']))
     model_type_hints = get_type_hints(model)
     field_names = [field.name for field in fields(model)]
-    context['fields'] = {}
+    context['model'] = {'fields': {}}
     for name in field_names:
-        t = model_type_hints[name]
+        hint = model_type_hints[name]
         try:
-            context['fields'][name] = t.__name__
+            context['model']['fields'][name] = hint.__name__
         except AttributeError:
-            context['fields'][name] = t.__args__[0].__name__
+            context['model']['fields'][name] = hint.__args__[0].__name__
     return context
 
 

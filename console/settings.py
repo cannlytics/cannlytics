@@ -93,10 +93,10 @@ except:
 # Ensure PRODUCTION is set to True in your .env when publishing!
 # ------------------------------------------------------------#
 PRODUCTION = env('PRODUCTION')
-print('Production status:', PRODUCTION)
 if PRODUCTION == 'True':
     DEBUG = False
 else:
+    print('DEVELOPMENT MODE')
     DEBUG = True
 
 # ------------------------------------------------------------#

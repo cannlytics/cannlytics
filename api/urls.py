@@ -1,7 +1,7 @@
 """
 URLs | Cannlytics API
 Created: 4/21/2021
-Updated: 4/25/2021
+Updated: 6/12/2021
 Description: API URLs to interface with cannabis analytics.
 """
 
