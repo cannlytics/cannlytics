@@ -2,7 +2,7 @@
  * Analysis JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 12/3/2020
- * Updated: 6/11/2021
+ * Updated: 6/12/2021
  */
 // import Chart from 'chart.js';
 // import "chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js";
@@ -22,6 +22,47 @@ export const analyses = {
   initialize() {
     console.log('TODO: Initialize analyses...!')
     // this.drawGraphs();
+  },
+
+
+  drawAnalysesTable() {
+    /*
+     * Render the analyses table.
+     */
+
+    const columnDefs = [
+      { field: 'name', sortable: true, filter: true },
+      { field: 'email', sortable: true, filter: true },
+      { field: 'phone', sortable: true, filter: true }
+    ];
+
+    // Specify the table options.
+    // const gridOptions = {
+    //   columnDefs: columnDefs,
+    //   pagination: true,
+    //   rowSelection: 'multiple',
+    //   suppressRowClickSelection: false,
+    //   // singleClickEdit: true,
+    //   // onRowClicked: event => console.log('A row was clicked'),
+    //   onGridReady: event => theme.toggleTheme(theme.getTheme()),
+    // };
+
+    // Get the data and render the table.
+    // api.getOrganizations().then((data) => {
+    //   console.log('Table data:', data); // DEV:
+    //   const eGridDiv = document.querySelector(`#${tableId}`);
+    //   new agGrid.Grid(eGridDiv, gridOptions);
+    //   gridOptions.api.setRowData(data);
+    // })
+    // .catch((error) => {
+    //   console.log('Error:', error);
+    // });
+
+    // TODO: Attach export functionality
+    //function exportTableData() {
+    //  gridOptions.api.exportDataAsCsv();
+    //}
+
   },
 
 

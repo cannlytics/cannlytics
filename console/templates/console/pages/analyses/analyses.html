@@ -1,15 +1,17 @@
 <!doctype html>
 <html>
-<!-- Analyses -->
-<!-- URL: analysis/analyses -->
-<!-- Created 1/13/2021 -->
+<!--
+  Analyses | Cannlytics Console
+  Created 1/13/2021
+  Updated: 6/12/2021
+  TODO:
+   - Allow for labs to choose to make their analyses public,
+    so that producers can search for analyses.
+-->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block console_body %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-
-  <!-- Inspiration -->
-  <!-- https://bbbootstrap.com/snippets/bootstrap-5-myprofile-90806631 -->
 
     <!-- Header -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -50,9 +52,9 @@
 <!-- Analyses JavaScript -->
 {% block console_js %}
 
-<script>
-  cannlytics.analyses.initialize();
-</script>
+  <script>
+    cannlytics.analyses.initialize();
+  </script>
 
 {% endblock console_js %}
 </html>

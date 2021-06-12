@@ -117,7 +117,7 @@ def organizations(request, format=None, org_id=None):
             doc['uid'] = slugify(data['name'])
             doc['team'] = [uid]
             doc['owner'] = uid            
-        
+
         # TODO: Posted API keys should be stored as secrets.
         # Each organization can have multiple licenses.
         # https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets#secretmanager-create-secret-python
@@ -161,10 +161,22 @@ def confirm_join_organization():
     # to join the organization.
     # update_custom_claims(new_team_member_uid, claims={'owner': [org_id]})
     return NotImplementedError
-    
+
 
 def decline_join_organization():
     """Decline a user's request to join an organization."""
+    return NotImplementedError
+
+
+def leave_organization():
+    """Let a user remove themselves from an organization's team.
+    An owner cannot leave their own organization, instead they must
+    either promote a new owner or delete the organization"""
+    return NotImplementedError
+
+
+def promote_organization_owner():
+    """Promote a new owner to an organization."""
     return NotImplementedError
 
 

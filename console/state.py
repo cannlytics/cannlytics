@@ -406,18 +406,18 @@ layout = {
                 "slug": "analyses",
                 "user_type": "*",
                 "seperator": True,
-                "nested": [
-                    {
-                        "slug": "manage",
-                        "title": "Manage",
-                        "url": "/analyses/manage",
-                    },
-                    {
-                        "slug": "analyte",
-                        "title": "Analytes",
-                        "url": "/analyses/analytes",
-                    },
-                ],
+                # "nested": [
+                #     {
+                #         "slug": "manage",
+                #         "title": "Manage Analyses",
+                #         "url": "/analyses/manage",
+                #     },
+                #     {
+                #         "slug": "analyte",
+                #         "title": "Manage Analytes",
+                #         "url": "/analyses/analytes",
+                #     },
+                # ],
             },
             {
                 "title": "Areas",
@@ -435,9 +435,9 @@ layout = {
             # },
             {
                 "title": "Contacts",
-                "url": "/clients/records",
+                "url": "/contacts",
                 # "icon": "users",
-                "slug": "clients",
+                "slug": "contacts",
                 "user_type": '*',
             },
             {
@@ -461,16 +461,16 @@ layout = {
                 "slug": "inventory",
                 "user_type": "*",
                 "nested": [
-                    {
-                        "slug": "items",
-                        "title": "Items",
-                        "url": "/inventory/items",
-                    },
-                    {
-                        "slug": "orders",
-                        "title": "Orders",
-                        "url": "/inventory/orders",
-                    },
+                    # {
+                    #     "slug": "items",
+                    #     "title": "Inventory items",
+                    #     "url": "/inventory/items",
+                    # },
+                    # {
+                    #     "slug": "orders",
+                    #     "title": "Inventory orders",
+                    #     "url": "/inventory/orders",
+                    # },
                 ],
             },
             # {
@@ -496,8 +496,8 @@ layout = {
                 "nested": [
                     {
                         "slug": "manage",
-                        "title": "Manage",
-                        "url": "/results/manage",
+                        "title": "Manage projects",
+                        "url": "/projects/manage",
                     },
                 ],
             },
@@ -516,19 +516,24 @@ layout = {
                 "user_type": "*",
                 "nested": [
                     {
-                        "slug": "manage",
-                        "title": "Manage",
-                        "url": "/results/manage",
+                        "slug": "tests",
+                        "title": "Tests",
+                        "url": "/results/tests",
+                    },
+                    {
+                        "slug": "calculations",
+                        "title": "Calculations",
+                        "url": "/results/calculations",
                     },
                     {
                         "slug": "coas",
-                        "title": "CoAs",
+                        "title": "CoA Generation",
                         "url": "/results/coas",
                     },
                     {
                         "slug": "import",
-                        "title": "Import",
-                        "url": "/results/import",
+                        "title": "Review",
+                        "url": "/results/coa-review",
                     },
                 ],
             },
@@ -541,14 +546,14 @@ layout = {
                 "nested": [
                     {
                         "slug": "manage",
-                        "title": "Manage",
+                        "title": "Manage samples",
                         "url": "/samples/manage",
                     },
-                    {
-                        "slug": "batch",
-                        "title": "Batch",
-                        "url": "/samples/batch",
-                    },
+                    # {
+                    #     "slug": "batch",
+                    #     "title": "Batch",
+                    #     "url": "/samples/batch",
+                    # },
                 ],
             },
             {
@@ -568,12 +573,12 @@ layout = {
                 "nested": [
                     {
                         "slug": "incoming",
-                        "title": "Incoming",
+                        "title": "Incoming transfers",
                         "url": "/transers/incoming",
                     },
                     {
                         "slug": "outgoing",
-                        "title": "Outgoing",
+                        "title": "Outgoing transfers",
                         "url": "/transfers/outgoing",
                     },
                     {

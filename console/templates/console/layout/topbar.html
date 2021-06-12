@@ -14,30 +14,11 @@
     class="navbar navbar-expand flex-md-nowrap justify-content-between border-bottom px-0 py-0"
   >
 
-    <!-- Menu toggle -->
-    <!-- FIXME: Show sidebar toggle on small screens
-      data-bs-toggle="collapse"
-      data-bs-target="#sidebarMenu"
-      aria-controls="sidebarMenu"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-      d-md-none
-    -->
-    {% comment %} <a
-      id="navbar-menu-button"
-      class="nav-link navbar-toggle d-flex pe-0 py-0"
-      href="#"
-      role="button"
-      type="button"
-      onclick="cannlytics.ui.showSidebar();"
-    >
-      {% icon "menu" class="text-secondary" width="21px" height="21px" %}
-    </a> {% endcomment %}
-
     <!-- Logo -->
-    <div class="navbar-brand d-none d-md-flex align-items-center col-md-3 col-lg-2 me-0 ps-2 pe-0 px-md-3">
+    <div class="navbar-brand d-flex d-md-flex align-items-center col-md-3 col-lg-2 me-0 ps-2 pe-0 px-md-3">
       <a
         href="/"
+        class="d-none d-md-flex"
         data-bs-toggle="tooltip"
         data-bs-placement="bottom"
         title="Dashboard"
@@ -68,10 +49,35 @@
         {% icon "globe" width="21px" height="21px" %}
       </a> {% endcomment %}
 
-          <!-- Organization Choice -->
+    <!-- Organization Choice -->
     {% if organizations %}
       {% include "console/components/menus/organization_menu.html" %}
     {% endif %}
+
+    <!-- Menu toggle -->
+    <!-- FIXME: Show sidebar toggle on small screens
+      data-bs-toggle="collapse"
+      data-bs-target="#sidebarMenu"
+      aria-controls="sidebarMenu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+      d-md-none
+
+      onclick="cannlytics.ui.showSidebar();"
+    -->
+    <a
+      id="navbar-menu-button"
+      class="nav-link navbar-toggle d-flex d-md-none px-2 py-0"
+      href="#"
+      role="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#sidebar-menu"
+      aria-controls="sidebar-menu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      {% icon "menu" class="text-secondary" width="21px" height="21px" %}
+    </a>
 
     </div>
 

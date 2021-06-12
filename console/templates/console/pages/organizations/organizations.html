@@ -12,10 +12,98 @@
 
     <!-- Header-->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="fs-5 mb-0 lh-base">Organizations</h1>
+      <h1 class="fs-5 mb-0 lh-base text-dark">Organizations</h1>
+      <div>
+        <a
+          class="btn btn-sm btn-outline-dark mx-2 "
+          type="button"
+          href="/organizations/organization?join=true"
+        >
+          Join an Organization
+        </a>
+        <a
+          class="btn btn-sm bg-gradient-green text-white"
+          type="button"
+          href="/organizations/organization?new=true"
+        >
+          New Organization
+        </a>
+      </div>
     </div>
 
-    <!-- Body -->
+    {% if organizations %}
+
+      <!-- Data Grid -->
+      <div class="row px-3 my-4">
+      {% for org in organizations %}
+        <div class="card bg-transparent col col-sm-1 col-md-2 p-3" style="width:400px; height:150px;">
+
+          <!-- Card header -->
+          <div class="d-flex justify-content-between">
+            <div class="d-flex align-itemx-center">
+              <div class="icon-container me-2">
+                {% include 'console/components/icons/people.svg' %}
+              </div>
+              <h4 class="fs-5 text-dark">{{ org.name }}</h4>
+            </div>
+
+            <!-- Options -->
+            <div class="btn-group dropstart">
+              <a role="button" class="nav-link dropdown-toggle simple-dropdown p-0" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="icon-container action">
+                  {% include 'console/components/icons/dialpad.svg' %}
+                </div>
+              </a>
+              <ul class="dropdown-menu shadow">
+                <li><a class="dropdown-item" href="/cannlytics/{{ org.uid }}/team">Add team member</a></li>
+                <li><a class="dropdown-item" href="/cannlytics/{{ org.uid }}">Edit organization</a></li>
+                <li><a class="dropdown-item" href="/cannlytics/{{ org.uid }}/settings">Organization ettings</a></li>
+              </ul>
+            </div>
+
+          </div>
+
+          <!-- Card body -->
+          <div class="card-body bg-transparent p-0">
+
+            <!-- Badges -->
+            {% if org.support == 'Enterprise' %}
+              <span class="badge rounded-pill bg-primary">Enterprise</span>
+            {% elif org.support == 'Pro' %}
+              <span class="badge rounded-pill bg-warning text-dark">Pro</span>
+            {% else %}
+              <span class="badge rounded-pill bg-gradient-green text-white">Free</span>
+            {% endif %}
+
+            <!-- Card Stats -->
+            <div class="row h-100 text-dark align-items-center">
+              <div class="col-4 mb-3">
+                {% if org.total_projects %}{{ org.total_projects }}{% else %}0{% endif %} Projects
+              </div>
+              <div class="col-4 mb-3">
+                {% if org.total_samples %}{{ org.total_samples }}{% else %}0{% endif %} Samples
+              </div>
+              <div class="col-4 mb-3">
+                {% if org.total_contacts %}{{ org.total_contacts }}{% else %}0{% endif %} Contacts
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+
+    {% else %}
+
+      <!-- Placeholder -->
+      {% include "console/components/placeholders/placeholder.html" with
+        placeholder=organizations.placeholder
+        only
+      %}
+
+    {% endif %}
+
+    {% comment %} <!-- Body -->
     <div class="analysis">
 
       <!-- Card -->
@@ -47,7 +135,7 @@
         </div>
       </div><!-- End of the table -->
 
-    </div><!-- End of the body -->
+    </div><!-- End of the body --> {% endcomment %}
 
   </main>
 

@@ -248,6 +248,9 @@ body.dark .nav-search-form .feather:hover {
   Menus
 ---------------------------------------------------------------------------*/
 
+.simple-dropdown::before {
+  content: none !important;
+}
 .simple-dropdown::after {
   content: none !important;
 }

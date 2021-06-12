@@ -13,10 +13,12 @@ export const ui = {
      * Hides the console sidebar.
      */
     const sidebar = document.getElementById('sidebar-menu');
-    const sidebarToggle = document.getElementById('sidebar-console-toggle');
+    // const sidebarToggle = document.getElementById('sidebar-console-toggle');
+    const navbarToggle = document.getElementById('navbar-menu-button');
     sidebar.classList.add('d-none');
     sidebar.classList.remove('d-md-block');
-    sidebarToggle.classList.remove('d-md-none');
+    // sidebarToggle.classList.remove('d-md-none');
+    navbarToggle.classList.remove('d-md-none');
   },
 
 

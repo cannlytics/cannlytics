@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from api.auth import auth
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'DELETE'])
 def areas(request, format=None):
     """Get or update information about a areas / locations."""
 
@@ -81,7 +81,7 @@ def areas(request, format=None):
 
         return Response({'data': []})
 
-    elif request.method == 'Delete':
+    elif request.method == 'DELETE':
 
         # TODO: Archive the area data and delete from Metrc.
 

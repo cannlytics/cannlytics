@@ -17,7 +17,7 @@
       data-bs-toggle="dropdown"
       aria-expanded="false"
     >
-      <span id="userOrganization" class="brand-font fs-6">
+      <span id="current-organization" class="brand-font fs-6">
         {{ organizations.0.name }}
       </span>
     </a>
@@ -28,8 +28,8 @@
       {% for org in organizations %}
       <li>
         <a
-          class="dropdown-item"
-          onclick="cannlytics.app.changeActiveOrganization('{{ org.uid }}')"
+          class="app-action dropdown-item"
+          onclick="cannlytics.organizations.changeActiveOrganization('{{ org.uid }}')"
         >
           {{ org.name }}
         </a>
@@ -38,7 +38,7 @@
       <li class="border-top pt-2 mt-2">
         <a
           class="dropdown-item"
-          href="/settings/organizations"
+          href="/organizations/organization?new=true"
         >
           <small>Start or join an organization</small>
         </a>

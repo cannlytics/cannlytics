@@ -130,6 +130,23 @@ class Certificate(Model):
     template_storage_ref: str = ''
     template_version: str = ''
 
+    def approve(self):
+        """Approve a CoA after it has been reviewed, signing the
+        approval line on the CoA. Approval requires `qa` claims.
+        The CoA reference is updated with the signed CoA version."""
+        return NotImplementedError
+
+    def create_pdf(self):
+        """Create a PDF representation of the CoA, with blank review
+        and approve lines. """
+        return NotImplementedError
+    
+    def review(self):
+        """Review a certificate after it has been created. The CoA
+        reference is updated with the signed CoA version."""
+        return NotImplementedError
+    
+
 
 @dataclass
 class Contact(Model):
@@ -230,6 +247,22 @@ class InventoryType(Model):
     # "RequiresPackagingPhotos": 0,
     # "CanContainSeeds": true,
     # "CanBeRemediated": true
+
+
+@dataclass
+class Instrument(Model):
+    """A scientific instrument that produces measurements. Instrument
+    data is collected through data files, processed with routine
+    automation or data importing."""
+    _collection = 'instruments/%s'
+    name: str = ''
+    calibrated_at: datetime = None
+    calibrated_by: str = ''
+    data_path: str = ''
+
+    def create_maintenance_log(self):
+        """Create a maintenance log."""
+        return NotImplementedError
 
 
 @dataclass

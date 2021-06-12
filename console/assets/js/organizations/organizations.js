@@ -21,6 +21,15 @@
   },
 
 
+  changeActiveOrganization(orgId) {
+    /*
+     * Change the active organization for the user.
+     */
+    // TODO: Move orgId to beginning of user's list and refresh.
+    console.log('Change organizations:', orgId);
+  },
+
+
   getOrganizations(tableId) {
     /*
      * Get and display a user's organizations.
