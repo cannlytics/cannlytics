@@ -535,7 +535,7 @@ class Client(object):
         Args:
             external_id (str): A free-form external ID.
             global_id (str): The `global_id` of a disposal.
-            type (str): The primary category of the inventory type.
+            inventory_type (str): The primary category of the inventory type.
                 Values include immature_plant, mature_plant,
                 harvest_materials, intermediate_product,
                 end_product, waste

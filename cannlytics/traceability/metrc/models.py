@@ -167,7 +167,7 @@ class Facility(Model):
     def update_locations(self, ids, names, types=[]):
         """Update locations at the facility.
         Args:
-            uids (list): A list of location IDs.
+            ids (list): A list of location IDs.
             names (list): A list of location names.
             types (list): A list of location types:
                 `default`, `planting`, or `packing`.

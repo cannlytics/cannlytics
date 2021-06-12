@@ -1,8 +1,6 @@
 # Issues
 
-### Discovered Bugs <a name="bugs"></a>
-
-Below is a running list of existing and solved issues. See [bugs](https://cannlytics.com/bugs) for a full list of bugs and issues that you may encounter. Below are noteworthy bugs that you may encounter and their solutions.
+Below is a running list of existing and solved issues that you may encounter and their solutions.
 
 - [Error: Can't Use Google Cloud Storage in Google Cloud Functions](https://stackoverflow.com/questions/52249978/write-to-google-cloud-storage-from-cloud-function-python/52250030)
 

@@ -1,0 +1,23 @@
+<!-- Card -->
+      <div class="card my-3">
+        <div class="card-body">
+          <h2 class="h6 mb-3 text-dark">Organizations</h2>
+          <div class="table-responsive">           
+            {% if organizations %}
+              <!-- Table -->
+              <div
+                id="organizations-table"
+                class="ag-theme-alpine-dark"
+                style="height:600px; width:100%;"
+              ></div>
+            {% else %}
+              <!-- Placeholder -->
+              {% include "console/components/placeholders/placeholder.html" with
+                placeholder=organizations.placeholder
+                only
+              %}
+            {% endif %}
+
+          </div>
+        </div>
+      </div><!-- End of the table -->

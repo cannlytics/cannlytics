@@ -6,18 +6,47 @@ Created: 11/26/2020
 Updated: 4/21/2021
 """
 
+# Standard imports
+from typing import get_type_hints
+
 # External imports
+from dataclasses import fields
 from django.utils.crypto import get_random_string
 
 # Internal imports
 from cannlytics.firebase import get_document, get_collection, get_user
+from cannlytics.models import model_plurals
+from cannlytics.utils import utils
 from api.auth import auth
 from console.state import data, material
-
 
 #----------------------------------------------#
 # Page rendering helpers
 #----------------------------------------------#
+
+def get_model_context(context):
+    """Get model context based on the current page and section.
+    Args:
+        request (request): The request object.
+        context (dict): A dictionary of existing page context.
+    Returns
+        context (dict): The context updated with any model context.
+    """
+    model = model_plurals.get(context['screen'])
+    if not model:
+        return context
+    # model = getattr(models, utils.camelcase(context['section']))
+    model_type_hints = get_type_hints(model)
+    field_names = [field.name for field in fields(model)]
+    context['fields'] = {}
+    for name in field_names:
+        t = model_type_hints[name]
+        try:
+            context['fields'][name] = t.__name__
+        except AttributeError:
+            context['fields'][name] = t.__args__[0].__name__
+    return context
+
 
 def get_page(request, default=''):
     """Get a page name given a request.
@@ -33,7 +62,7 @@ def get_page(request, default=''):
     return page
 
 
-def get_screen_specific_data(kwargs, context):
+def get_page_data(kwargs, context):
     """Get all screen-specific data from Firestore.
     Args:
         kwargs (dict): A dictionary of keywords and their values.
@@ -41,12 +70,10 @@ def get_screen_specific_data(kwargs, context):
     Returns
         context (dict): The context updated with any screen-specific data.
     """
-    screen = kwargs.get('screen', 'dashboard')
-    section = kwargs.get('section', '')
-    if section:
-        screen_data = data.get(section)
+    if context['section']:
+        screen_data = data.get(context['section'])
     else:
-        screen_data = data.get(screen)
+        screen_data = data.get(context['screen'])
     if screen_data is None:
         return context
     documents = screen_data.get('documents')
@@ -66,7 +93,7 @@ def get_screen_specific_data(kwargs, context):
     return context
 
 
-def get_screen_specific_state(kwargs, context):
+def get_page_context(kwargs, context):
     """Get screen-specific material.
     Args:
         kwargs (dict): A dictionary of keywords and their values.
@@ -74,7 +101,7 @@ def get_screen_specific_state(kwargs, context):
     Returns
         context (dict): The context updated with any screen-specific state.
     """
-    kwargs['screen'] = kwargs.get('screen', 'dashboard')
+    # kwargs['screen'] = kwargs.get('screen', 'dashboard')
     for value in kwargs.values():
         screen_material = material.get(value)
         key = value.replace('-', '_')
@@ -91,17 +118,25 @@ def get_user_context(request, context):
         context (dict): Page context updated with any user-specific context.
     """
     user = {}
+
+    # Get fields from authentication.
     user_claims = auth.verify_session(request)
+    uid = user_claims.get('uid')
     if user_claims:
         user_email = user_claims.get('email', '')
         user = {
             'email_verified': user_claims.get('email_verified', False),
             'display_name': user_claims.get('name', ''),
             'photo_url': user_claims.get('picture', f'https://robohash.org/{user_email}?set=set5'),
-            'uid': user_claims.get('uid'),
+            'uid': uid,
             'email': user_email,
         }
-    context.update({'user': user})
+
+    #  Get a user's data and organizations from Firestore.
+    query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
+    user_data = get_document(f'users/{uid}')
+    context['organizations'] = get_collection('organizations', filters=[query])
+    context.update({'user': {**user_data, **user}})
     return context
 
 

@@ -9,6 +9,7 @@ Resources:
 import json
 import time
 import os
+from shutil import copyfile
 
 from bs4 import BeautifulSoup
 
@@ -108,6 +109,13 @@ def clean_bundle_folder(folder, history=300):
 
 if __name__ == '__main__':
 
+    # Remove old Webpack bundles.
     clean_bundle_folder(f'./{APP}/static/' + MODULE_DIR)
+
+    # Fill Webpack hashes into templates.
     get_webpack_hashes()
+
     # TODO: Update version number in Readme.md
+
+    # Copy the Readme to the docs directory.
+    # copyfile('README.md', 'docs/src/about/dev/development.md')

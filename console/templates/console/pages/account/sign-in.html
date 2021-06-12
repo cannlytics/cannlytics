@@ -5,7 +5,6 @@
   Created: 2/18/2021
   Updated: 5/16/2021
 -->
-<!--  -->
 {% extends "./base_sign_in.html" %}
 {% load static %}
 {% block login_form %}
@@ -71,15 +70,7 @@
   </div>
 
   <!-- Reset password or sign up -->
-  <div class="d-flex justify-content-between w-100">
-    <div class="d-flex align-items-center">
-      <a
-        href="./password-reset"
-        class="text-dark fs-6"
-      >
-        Lost your password? Get a new one &rarr;
-      </a>
-    </div>
+  <div class="d-flex justify-content-end w-100">
     <button
       id="sign-in-button"
       class="ms-1 btn bg-gradient-green text-white"
@@ -118,17 +109,27 @@
  {% endcomment %}
 
   <!-- Sign up -->
-  <div class="d-flex align-items-center justify-content-center" style="margin-top:6rem;">
-    <p class="text-center h6 font-weight-light">
-        Are you new to Cannlytics?
-        <a class="text-dark" href="./sign-up">
-          <b>Sign up</b>
+  <div class="d-flex align-items-center justify-content-center">
+    <div
+      class="d-flex flex-column align-items-start justify-content-center"
+      style="margin-top:6rem;"
+    >
+      <p class="text-center text-small fs-6 font-weight-light">
+        <small>Are you new to Cannlytics?</small>
+        <a class="text-dark text-small fs6" href="./sign-up">
+          <small><b>Sign up &rarr;</b></small>
         </a>
-        or
-        <a class="text-dark" href="/?type=test">
-          <b>test it out 🧪</b>
+      </p>
+      <p class="text-center text-small fs-6 font-weight-light mb-1">
+        <small>Lost your password?</small>
+        <a
+          href="./password-reset"
+          class="text-dark text-small fs-6"
+        >
+          <small><b>Get a new one &rarr;</b></small>
         </a>
-    </p>
+      </p>
+    </div>
   </div>
 
 {% endblock %}

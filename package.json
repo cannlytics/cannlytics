@@ -1,6 +1,6 @@
 {
   "name": "cannlytics",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "The Cannlytics Platform, including the website, console, documentation, and tools.",
   "keywords": [
     "cannabis",
@@ -24,10 +24,10 @@
   },
   "scripts": {
     "start": "npm-run-all --parallel livereload dev webpack",
-    "webpack": "webpack-dev-server --env development",
+    "webpack": "webpack-dev-server --env production=False",
     "livereload": "python manage.py livereload --ignore-static-dirs",
     "dev": "python manage.py runserver",
-    "build": "webpack --env production",
+    "build": "webpack --env production=True",
     "collectstatic": "python manage.py collectstatic --noinput",
     "publish": "npm run container && npm run cloud && npm run deploy",
     "container": "npm run collectstatic && gcloud builds submit --tag gcr.io/your-lims/cannlytics",

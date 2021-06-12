@@ -131,6 +131,9 @@ body.dark .brand-font {
 .medium-text {
   font-size: 1.15rem;
 }
+.tiny-text {
+  font-size: 0.8rem;
+}
 
 /*--------------------------------------------------------------------------
   Markdown Text
@@ -447,6 +450,9 @@ body.dark .light-green-fade {
   flex-direction: column;
   align-items: center;
 }
+.flipped {
+  transform: rotate(180deg);
+}
 .hidden-item {
   display: none !important;
 }
@@ -626,6 +632,18 @@ body.dark .nav-tabs .nav-link.active {
 }
 .feather.small {
   width: 16px;
+}
+.icon-container svg {
+  fill: #777 !important;
+}
+.icon-container.action svg:hover {
+  fill: #1a1a1a !important;
+}
+body.dark .icon-container svg {
+  fill: #ccc !important;
+}
+body.dark .icon-container.action svg:hover {
+  fill: #fff !important;
 }
 
 /*--------------------------------------------------------------------------
@@ -1113,6 +1131,14 @@ body.dark .text-muted {
 }
 
 /* Dark actions */
+body.dark .btn-outline-dark {
+  border-color: #ccc;
+  color: #ccc;
+}
+body.dark .btn-outline-dark:hover {
+  border-color: #fff;
+  color: #fff;
+}
 body.dark .btn-outline-primary {
   border-color: #50fa7b;
   color: #50fa7b;

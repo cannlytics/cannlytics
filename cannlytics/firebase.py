@@ -393,6 +393,29 @@ def create_custom_claims(uid, email=None, claims=None):
     auth.set_custom_user_claims(uid, claims)
 
 
+def update_custom_claims(uid, email=None, claims=None):
+    """Update custom claims for a user.
+    The new custom claims will propagate to the user's ID token the
+    next time a new one is issued.
+    Args:
+        uid (str): A user's ID.
+        email (str): A user's email.
+        claims (dict): A dictionary of the user's custom claims.
+    """
+    if email:
+        user = auth.get_user_by_email(email)
+        uid = user.uid
+    existing_claims = get_custom_claims(uid)
+    if existing_claims:
+        existing_owner = existing_claims.get('owner', [])
+    else:
+        existing_claims = {}
+        existing_owner = []
+    current_owner = claims.get('owner', [])
+    claims['owner'] = list(set(existing_owner + current_owner))
+    auth.set_custom_user_claims(uid, {**existing_claims, **claims})
+
+
 def get_custom_claims(name):
     """Get custom claims for a user.
     Args:
@@ -750,12 +773,12 @@ def create_log(ref, claims, action, log_type, key, changes=None):
     update_document(f'{ref}/{log_id}', log_entry)
 
 
-def get_keywords(name):
+def get_keywords(string):
     """Get keywords for a given string.
     Args:
         string (str): A string to get keywords for.
     """
-    keywords = name.lower().split(' ')
+    keywords = string.lower().split(' ')
     keywords = [x.strip() for x in keywords if x]
     keywords = list(set(keywords))
     return keywords

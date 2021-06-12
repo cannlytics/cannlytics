@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+<!--
+  Alert notification | Cannlytics Console
+  Created: 6/11/2021
+  Updated: 6/11/2021
+-->
+{% load icon %}
+<div class="alert alert-info d-flex mt-3" role="alert">
+  {% icon 'alert-triangle' height="16" width="16"%} &nbsp;
+  {{ alert_message }} &nbsp;
+  <a href="{{ alert_link }}">{{ alert_action }}</a>.
+</div>
+</html>

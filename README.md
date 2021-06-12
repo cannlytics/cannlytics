@@ -1,7 +1,7 @@
-# <img height="32" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics Console
+# <img width="20" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics Console
 <!-- TODO: FIx reference to calyx image -->
 
-![version](https://img.shields.io/badge/version-0.0.4-brightgreen)
+![version](https://img.shields.io/badge/version-0.0.5-brightgreen)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cannlytics/cannlytics-console/fork)
 
 Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software designed to make your data and information accessible. Cannlytics makes cannabis analysis **simple** and **easy** through data accessibility. We believe that everyone in the cannabis industry should be able to access rich, valuable data quickly and easily and that you will be better off for it. This documentation covers the Cannlytics architecture and how to build, develop, and publish the Cannlytics platform. You can view the platform live at <https://console.cannlytics.com> and the documentation at <https://docs.cannlytics.com>.
@@ -57,7 +57,6 @@ When you are ready to begin development or publish the Cannlytics web app, then 
 
 ```py
 # tools/quickstart.py
-
 from django.utils.crypto import get_random_string
 
 # Generate a secret key for your project.
@@ -68,7 +67,6 @@ print(generated_secret_key)
 
 ```shell
 # .env
-
 SECRET_KEY=xyz
 ```
 
@@ -76,7 +74,6 @@ SECRET_KEY=xyz
 
 ```shell
 # .env
-
 FIREBASE_API_KEY=xyz
 FIREBASE_AUTH_DOMAIN=your-lims.firebaseapp.com
 FIREBASE_DATABASE_URL=https://your-lims.firebaseio.com
@@ -91,7 +88,6 @@ FIREBASE_MEASUREMENT_ID=G-abc
 
 ```shell
 # .env
-
 EMAIL_HOST_USER=admin@your-company.com
 EMAIL_HOST_PASSWORD=your-app-password
 ```
@@ -100,7 +96,6 @@ EMAIL_HOST_PASSWORD=your-app-password
 
 ```shell
 # .env
-
 GOOGLE_APPLICATION_CREDENTIALS=path/to/your/service/account.json
 ```
 
@@ -244,7 +239,7 @@ npm run start
 
 Below is a diagram that depicts how Cannlytics leverages [Firebase Authentication] to authorize user requests.
 
-![Authentication on Google App Engine using Firebase](./public/static/images/diagrams/firebase_auth_diagram.svg)
+![Authentication on Google App Engine using Firebase](https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fdiagrams%2Ffirebase_auth_diagram.png?alt=media&token=ca0afc16-4829-4785-abb0-695304de802c)
 
 Original image: [How to authenticate users on Google App Engine using Firebase](https://cloud.google.com/blog/products/gcp/how-to-authenticate-users-on-google-app-engine-using-firebase)
 
@@ -292,7 +287,7 @@ gcloud secrets versions add cannlytics_settings --data-file .env
 
 ### Webpack <a name="webpack"></a>
 
-Note that [Webpack]() is utilized for bundling CSS and JavaScript. The JavaScript bundle is a JavaScript module and is callable from the user interface with the `cannlytics` namespace.
+Note that [Webpack](https://webpack.js.org/) is utilized for bundling CSS and JavaScript. The JavaScript bundle is a JavaScript module and is callable from the user interface with the `cannlytics` namespace.
 
 ### Views <a name="views"></a>
 
@@ -319,33 +314,28 @@ Resources:
 
 ## Documentation <a name="documentation"></a>
 
-Documentation for the project is written in [Markdown](https://guides.github.com/features/mastering-markdown/). In brief, you can run the docs locally with:
-
-```shell
-npm run docs
-```
-
-Building the documentation locally requires installing [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) with [Docker](https://www.docker.com/get-started).
+Documentation for the project is written in [Markdown](https://guides.github.com/features/mastering-markdown/). Building the documentation locally requires installing [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and [Docker](https://www.docker.com/get-started). The configuration for the documentation is contained within `mkdocs.yml`. You can serve the documentation locally by first pulling and building the Material for MKDocs image:
 
 ```shell
 docker pull squidfunk/mkdocs-material
-```
-
-You will need to build the documentation's container:
-
-```shell
 docker build -t squidfunk/mkdocs-material docs
 ```
 
-So you can preview the documentation as you write:
+Once setup, you can preview the documentation as you write:
 
 ```shell
 docker run --rm -it -p 8000:8000 -v "%cd%":/docs squidfunk/mkdocs-material
 ```
 
-* [Quick note - how to fix django-livereload-server import error](https://gist.github.com/hangtwenty/f53b3867db1e33780505ccafd8d2eef0)
+or
 
-Finally, you can build the documentation:
+```shell
+npm run docs
+```
+
+> Note that there is [a namespace conflict between `django-livereload-server` and `livereload`](https://gist.github.com/hangtwenty/f53b3867db1e33780505ccafd8d2eef0), so you need to be careful when and where you install Python requirements. If you run into a `django-livereload-server` import error, first check that `PRODUCTION = False` in your `console/settings.py` and then follow [these instructions](https://gist.github.com/hangtwenty/f53b3867db1e33780505ccafd8d2eef0) to uninstall `livereload` and reinstall  `django-livereload-server`.
+
+When you are ready, you can build the documentation:
 
 ```shell
 npm run build-docs

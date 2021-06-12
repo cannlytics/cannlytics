@@ -177,3 +177,18 @@ export function showNotification(title, message, options) {
   const toast = new bootstrap.Toast(toastEl, { delay: options.delay || 4000 });
   toast.show()
 }
+
+/*---------------------------------------------------------------------
+ UI Helpers
+ --------------------------------------------------------------------*/
+
+export function slugify(text) {
+  /*
+   * Turn a string to a slug.
+   * Reference: https://stackoverflow.com/questions/1053902/how-to-convert-a-title-to-a-url-slug-in-jquery
+   */
+  return text
+    .toLowerCase()
+    .replace(/[^\w ]+/g,'')
+    .replace(/ +/g,'-');
+}

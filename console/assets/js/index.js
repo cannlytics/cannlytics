@@ -5,27 +5,29 @@
  * Updated: 4/25/2021
  */
 
-import { analysis } from './analysis/analysis.js'
+import { analyses } from './analyses/analyses.js'
 import { api } from './api/api.js';
 import { app } from './app/app.js';
 import { auth } from './auth/auth.js';
 import { dashboard } from './dashboard/dashboard.js';
 import { intake } from './intake/intake.js';
 import { inventory } from './inventory/inventory.js';
-import { logistics } from './logistics/logistics.js';
+import { organizations } from './organizations/organizations.js';
+import { transfers } from './transfers/transfers.js';
 import { settings } from './settings/settings.js';
 import { theme } from './settings/theme.js';
 import { ui } from './ui/ui.js';
 
 export {
-  analysis,
+  analyses,
   api,
   app,
   auth,
   dashboard,
   intake,
   inventory,
-  logistics,
+  organizations,
+  transfers,
   settings,
   theme,
   ui,

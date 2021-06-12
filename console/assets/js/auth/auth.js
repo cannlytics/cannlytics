@@ -204,6 +204,16 @@ export const auth = {
         document.getElementById('sign-up-loading-button').classList.add('d-none');
       });;
   },
+
+
+  testSignIn() {
+    /*
+     * Sign the user into a test account
+     */
+    document.getElementById('login-email').value = 'test@cannlytics.com';
+    document.getElementById('login-password').value = 'sandbox';
+    this.signIn();
+  },
   
   
   verifyUser() {

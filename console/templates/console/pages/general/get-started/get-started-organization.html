@@ -152,14 +152,14 @@
         <!-- Public / private choice -->
         <div class="mb-3">
           <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="publicOptions" id="public-choice" value="public" checked>
+            <input class="form-check-input" type="radio" name="public" id="public-choice" value="true">
             <label class="form-check-label" for="public-choice">
               Public {% icon "globe" width="16px" height="16px" %}<br>
               <small class="text-secondary">Appears in search results.</small>
             </label>
           </div>
           <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="publicOptions" id="private-choice" value="private">
+            <input class="form-check-input" type="radio" name="public" id="private-choice" value="false" checked>
             <label class="form-check-label" for="private-choice">
               Private {% icon "lock" width="16px" height="16px" %}<br>
               <small class="text-secondary">Only visible to you.</small>
@@ -458,7 +458,7 @@
     </a>
     <a
       class="btn bg-gradient-green text-white btn-sm"
-      onclick="cannlytics.dashboard.saveOrganization();"
+      onclick="cannlytics.dashboard.saveOrganization('{{ request.GET.type }}');"
     >
       Next
     </a>

@@ -8,7 +8,13 @@
 
   <!-- Title -->
   {% block title %}
-    {% if screen %}{{ screen|title }}{% else %}Dashboard{% endif %} | Cannlytics
+    {% if unit %}
+      {{ unit|title }}
+    {% elif section %}
+      {{ section|title }}
+    {% elif screen %}
+      {{ screen|title }}
+    {% else %}Dashboard{% endif %} | Cannlytics
   {% endblock %}
 
   <!-- Console header -->
@@ -29,10 +35,11 @@
     </script>
 
     <!-- Top Navigation -->
-    {% include "console/layout/top_navigation.html" with
+    {% include "console/layout/topbar.html" with
       navbar=navbar
       version=APP_VERSION_NUMBER
       user=user
+      organizations=organizations
       only
     %}
 
@@ -52,15 +59,16 @@
         Resend
         -->
         
-        <!-- Side Navigation -->
-        <!-- Optional: Custom sidebars -->
-        {% include "console/layout/side_navigation.html" with
-          screen=screen
-          sidebar=sidebar
-          user=user
-          organization=organization
-          only
-        %}
+        <!-- Side Navigation | For users with organizations -->
+        {% if organizations %}
+          {% include "console/layout/sidebar.html" with
+            screen=screen
+            sidebar=sidebar
+            user=user
+            organization=organization
+            only
+          %}
+        {% endif %}
 
         <!-- Dynamic Body -->
         {% block console_body %}{% endblock console_body %}

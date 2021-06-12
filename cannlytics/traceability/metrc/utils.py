@@ -73,7 +73,7 @@ def encode_pdf(filename):
     Args:
         filename (str): The full file path of a PDF to encode.
     Returns:
-        A string encoded in base-64.
+        (str): A string encoded in base-64.
     """
     with open(filename, 'rb') as pdf:
         return b64encode(pdf.read())

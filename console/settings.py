@@ -3,7 +3,7 @@ Django Settings with Environment Variables | Cannlytics Console
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 6/5/2021
-Updated: 6/5/2021
+Updated: 6/8/2021
 Description:
     Django settings secured by Google Cloud Secret Manager.
 
@@ -26,16 +26,11 @@ import google.auth
 from google.cloud import secretmanager as sm
 from django.template import base
 
-# TODO: Caching for production 
+# Optional: Caching for production.
 # https://docs.djangoproject.com/en/3.2/ref/templates/api/#django.template.loaders.cached.Loader
 
-# TODO: Hashing for production
+# Optional: Hashing for production.
 # https://docs.djangoproject.com/en/3.2/ref/contrib/staticfiles/#manifeststaticfilesstorage
-
-# ------------------------------------------------------------#
-# Ensure PRODUCTION is set to True when publishing!
-# ------------------------------------------------------------#
-PRODUCTION = True
 
 # ------------------------------------------------------------#
 # Project variables
@@ -56,12 +51,13 @@ with open(os.path.join(BASE_DIR, 'package.json')) as v_file:
 # Pulling django-environ settings file, stored in Secret Manager.
 # ------------------------------------------------------------#
 
-# Set Google Cloud credentials.
+# Set Google Cloud credentials. (Is this needed?)
 # env = environ.Env()
 # env.read_env(os.path.join(BASE_DIR, '.env'))
 # credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
 # os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 
+# Load secrets stored as environment variables.
 try:
     env_file = os.path.join(BASE_DIR, '.env')
     if not os.path.isfile('.env'):
@@ -79,13 +75,8 @@ try:
 
     env = environ.Env()
     env.read_env(io.StringIO(payload))
-    # env.read_env(env_file)
-
-    # Setting this value from django-environ
     SECRET_KEY = env('SECRET_KEY')
-
-    # Default false. True allows default landing pages to be visible.
-    DEBUG = env('DEBUG')
+    # DEBUG = env('DEBUG') # TODO: Set PRODUCTION in Secret Manager secret.
 
 except:
     # Create a default secret key for development.
@@ -97,12 +88,16 @@ except:
         from console.utils import generate_secret_key
         SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
         SECRET_KEY = generate_secret_key(os.path.join(SETTINGS_DIR, 'secret_key.py'))
-    
-    # SECRET_KEY = SECRET_KEY
 
-# Ensure Debug is False in production.
-if PRODUCTION:
+# ------------------------------------------------------------#
+# Ensure PRODUCTION is set to True in your .env when publishing!
+# ------------------------------------------------------------#
+PRODUCTION = env('PRODUCTION')
+print('Production status:', PRODUCTION)
+if PRODUCTION == 'True':
     DEBUG = False
+else:
+    DEBUG = True
 
 # ------------------------------------------------------------#
 # Apps
@@ -112,8 +107,6 @@ INSTALLED_APPS = [
     'api',
     'cannlytics',
     'console',
-    # 'api.apps.APIConfig',
-    # 'cannlytics',
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -147,7 +140,7 @@ MIDDLEWARE = [
 # Livereload
 # https://github.com/tjwalch/django-livereload-server
 # ------------------------------------------------------------#
-if not PRODUCTION:
+if PRODUCTION == 'False':
     INSTALLED_APPS.insert(0, 'livereload')
     MIDDLEWARE.insert(0, 'livereload.middleware.LiveReloadScript')
     MIDDLEWARE_CLASSES = 'livereload.middleware.LiveReloadScript'
@@ -216,12 +209,12 @@ USE_TZ = True
 # https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/web_application_security
 # ------------------------------------------------------------#
 ALLOWED_HOSTS = [
-    '*',
-    'https://your-lims.web.app/',
-    'https://your-lims-r5qsqmdnla-uc.a.run.app/',
+    env('CUSTOM_DOMAIN'),
+    env('FIREBASE_HOSTING_URL'),
+    env('CLOUD_RUN_URL')
 ]
 
-if not PRODUCTION:
+if PRODUCTION == 'False':
     ALLOWED_HOSTS.extend(['*', 'localhost:8000', '127.0.0.1'])
 
 SECURE_SSL_REDIRECT = False
