@@ -9,11 +9,46 @@
 
 {% block section %}
 
-  <!-- TODO: Employees Table -->
+  <!-- Employees Table -->
+  <div class="card my-3">
+    <div class="card-body">
+      <h2 class="h6 mb-3 text-dark">Employees</h2>
+      <div class="table-responsive">
 
+        <!-- Placeholder if no data -->
+        {% if True %}
+          {% include "console/components/placeholders/table_placeholder.html" with
+            height='200px'
+            image='console/images/illustrations/outline/lab_microbiologist.svg'
+            message='No employees were found for your active license.'
+            title='No Employees Found'
+            url='/traceability/employees/employee?new=true'
+            only
+          %}
+
+        <!-- AG Grid Table -->
+        {% else %}
+          <div
+            id="employees-table"
+            class="ag-theme-alpine-dark d-none"
+            style="height: 600px; width:100%;"
+          ></div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div><!-- End of the table -->
 
   <!-- TODO: Employee detail -->
   
-
 {% endblock section %}
+
+<!-- JavaScript -->
+{% block console_js %}
+
+  <script>
+    cannlytics.traceability.getEmployees('employees-table');
+  </script>
+
+{% endblock console_js %}
 </html>
