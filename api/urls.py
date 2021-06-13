@@ -80,7 +80,7 @@ urlpatterns = [
     ])),
     path('organizations', include([
         path('', organizations.organizations),
-        path('/org_id>', organizations.organizations),
+        path('/<org_id>', organizations.organizations),
         path('/<org_id>/settings', organizations.organizations),
         # TODO: Handle with post requests?
         # path('/<org_id>/join/', organizations.join_organization),

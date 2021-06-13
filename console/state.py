@@ -82,7 +82,7 @@ material = {
             "image": "console/images/illustrations/outline/lab.svg",
             "title": "Connect your first instrument",
             "message": "Connect your scientific instruments to ease your data collection.",
-            "url": "./instruments/instruments?new=true",
+            "url": "./instruments/instrument?new=true",
         },
     },
     "inventory": {
@@ -197,37 +197,43 @@ material = {
                 "name": "Lab Tests",
                 "section": "lab-tests",
                 "url": "/traceability/lab-tests",
-                "description": "Details of each individual lab test performed on submitted packages.",
+                "description": "Manage details for each individual lab test performed on submitted packages.",
             },
             {
                 "name": "Items",
                 "section": "items",
                 "url": "/traceability/items",
+                "description": "View items that are used to track your inventory at a given facility.",
             },
             {
                 "name": "Packages",
                 "section": "packages",
                 "url": "/traceability/packages",
+                "description": "Manage your packages, groups of cannabis items.",
             },
             {
                 "name": "Strains",
                 "section": "strains",
                 "url": "/traceability/strains",
+                "description": "View your cannabis strains, varieties, and classifications.",
             },
             {
                 "name": "Employees",
                 "section": "employees",
                 "url": "/traceability/employees",
+                "description": "View your organization's employees or team members.",
             },
-            {
-                "name": "Facilities",
-                "section": "facilities",
-                "url": "/traceability/facilities",
-            },
+            # {
+            #     "name": "Facilities",
+            #     "section": "facilities",
+            #     "url": "/traceability/facilities",
+            #     "description": "",
+            # },
             {
                 "name": "Locations",
                 "section": "locations",
                 "url": "/traceability/locations",
+                "description": "Manage your locations used track packages and items.",
             },
             
             # Optional: Show by user type ("user_type": "*",)
@@ -260,16 +266,19 @@ material = {
                 "name": "Transfers",
                 "section": "transfers",
                 "url": "/traceability/transfers",
+                "description": "Manage your records of packages moving from one licensee to another.",
             },
-            {
-                "name": "Units",
-                "section": "units",
-                "url": "/traceability/units",
-            },
+            # {
+            #     "name": "Units",
+            #     "section": "units",
+            #     "url": "/traceability/units",
+            #     "description": "",
+            # },
             {
                 "name": "Settings",
                 "section": "settings",
                 "url": "/traceability/settings",
+                "description": "Manage the settings of your interface to your traceability system.",
             },
         ],
     },
@@ -646,7 +655,7 @@ layout = {
                     {
                         "slug": "incoming",
                         "title": "Incoming transfers",
-                        "url": "/transers/incoming",
+                        "url": "/transfers/incoming",
                     },
                     {
                         "slug": "outgoing",

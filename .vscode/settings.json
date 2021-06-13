@@ -135,6 +135,7 @@
     "pytest",
     "quickstart",
     "reauth",
+    "rfid",
     "roadmap",
     "robohash",
     "roboto",

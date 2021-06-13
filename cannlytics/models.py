@@ -299,10 +299,10 @@ class Organization(Model):
 class License(Model):
     """A state-issued cannabis license."""
     _collection = 'organizations/%s/licenses'
+    active_date: str = ''
     expiration_date: str = ''
     license_number: str = ''
     license_type: str = ''
-    start_date: str = ''
 
 
 @dataclass

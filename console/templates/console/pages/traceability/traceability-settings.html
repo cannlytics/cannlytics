@@ -3,10 +3,14 @@
 <!--
   Traceability Settings Page | Cannlytics Console
   Created: 6/12/2021
-  Updated: 6/12/2021
+  Updated: 6/13/2021
 -->
 {% extends "console/pages/traceability/traceability.html" %}
 {% load icon %}
+{% comment %} {% block console_css %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
+{% endblock console_css %} {% endcomment %}
 {% block section %}
 
   <h1 class="fs-5 mb-0 lh-base text-dark">Provider</h1>
@@ -25,8 +29,7 @@
   <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Credentials</h1>
   <h2 class="fs-6 lh-base text-secondary mb-3">Securely save your API keys through Google Secret Manager.</h2>
 
-  <!-- Add licenses -->
-  <!-- TODO: Ability for user to securely save API keys through Google Secret Manager -->
+  <!-- Add licenses | Ability for user to securely save API keys through Google Secret Manager -->
   {% if not organizations.0.licenses %}
     <div class="my-3">
       <button
@@ -69,7 +72,7 @@
                   <option value="retailer">Retailer</option>
                   <option value="other">Other</option>
                 </select>
-                <!-- TODO: Let user specify type if other -->
+                <!-- Optional: Let user specify type if other -->
                 <input
                   type="text"
                   class="form-control form-control-sm d-none"
@@ -88,7 +91,7 @@
                   <!-- <option value="other">Other</option> -->
                 </select>
               </div>
-              <!-- TODO: Only show API key if state is Oklahoma -->
+              <!-- Optional: Only show API key if state is verified by Cannlytics -->
               <div class="col-md-3">
                 <label class="form-label">
                   User API Key
@@ -107,6 +110,7 @@
                   class="form-control form-control-sm"
                   id="license-type-other-1"
                   name="user_api_key"
+                  type="password"
                 >
               </div>
               <div class="col-md-1">
@@ -132,7 +136,7 @@
         </a>
         <button
           class="btn btn-sm bg-gradient-green text-white"
-          onclick="cannlytics.traceability.saveLicenses();"
+          onclick="cannlytics.traceability.saveLicenses('{{ organizations.0.uid }}');"
         >
           Save
         </button>
@@ -142,24 +146,19 @@
   
   {% else %}
 
-    <!-- TODO: List an organizations licenses -->
-    {% comment %} {% for license in organizations.0.licenses %}{% endfor %} {% endcomment %}
-
-    <!-- Data Grid -->
+    <!-- Data Grid | List any organizations licenses -->
     <div class="row px-3 my-4">
       {% for item in organizations.0.licenses %}
-        <div class="card bg-transparent col col-sm-1 col-md-2 p-3" style="width:200px; height:75px;">
+        <div class="card bg-transparent col col-sm-1 col-md-2 p-3" style="width:400px;">
 
           <!-- Card header -->
           <div class="d-flex justify-content-between">
             <div class="d-flex align-items-center">
-              <div class="icon-container me-2">
-                {% include 'console/components/icons/people.svg' %}
-              </div>
-              <h4 class="fs-5 text-dark">{{ item.name }}</h4>
+              <h4 class="fs-5 text-dark">License - {{ item.license_number }}</h4>
             </div>
 
             <!-- Options -->
+            <!-- FIXME: Setup edit / delete pages | delete page needs to log a reason from the user -->
             <div class="btn-group dropstart">
               <a role="button" class="nav-link dropdown-toggle simple-dropdown p-0" data-bs-toggle="dropdown" aria-expanded="false">
                 <div class="icon-container action">
@@ -167,8 +166,22 @@
                 </div>
               </a>
               <ul class="dropdown-menu shadow">
-                <li><a class="dropdown-item" href="/cannlytics/{{ item.license_number }}/team">Edit license</a></li>
-                <li><a class="dropdown-item" href="/cannlytics/{{ item.license_number }}/delete">Delete license</a></li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="/cannlytics/{{ item.license_number }}/team"
+                  >
+                    Edit license
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="/cannlytics/{{ item.license_number }}/delete"
+                  >
+                    Delete license
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -178,29 +191,29 @@
           <div class="card-body bg-transparent p-0">
 
             <!-- Badges -->
-            <!-- Optional: Show expired if badge is no longer valid -->
-            {% comment %} {% if org.support == 'Enterprise' %}
-              <span class="badge rounded-pill bg-danger">Expired</span>
-            {% endif %} {% endcomment %}
+            {% comment %} <span class="badge rounded-pill bg-info">{{ item.license_type|title }}</span> {% endcomment %}
 
-            <!-- Card Stats -->
-            <!--
-              name
-              start_date
-              expiration_date
-              license_type
-            -->
-            {% comment %} <div class="row h-100 text-dark align-items-center">
-              <div class="col-4 mb-3">
-                {% if org.total_projects %}{{ org.total_projects }}{% else %}0{% endif %} Projects
+            <!-- Data block -->
+            <div class="col h-100 text-dark align-items-start py-3">
+              <!-- Optional: Add active_at and expiration_at fields and save functionality -->
+              {% comment %} <div>Active date:
+                {% if item.active_at %}
+                  {{ item.active_at }}
+                {% else %}
+                  <input
+                    id="active-at-input"
+                    type="text"
+                    class=""
+                    name="active_at"
+                    data-provide="datepicker"
+                    data-date-start-date="-0d"
+                  >
+                {% endif %}
               </div>
-              <div class="col-4 mb-3">
-                {% if org.total_samples %}{{ org.total_samples }}{% else %}0{% endif %} Samples
-              </div>
-              <div class="col-4 mb-3">
-                {% if org.total_contacts %}{{ org.total_contacts }}{% else %}0{% endif %} Contacts
-              </div>
-            </div> {% endcomment %}
+              <div>Expiration date: {{ item.expiration_at }}</div> {% endcomment %}
+              <div>License type: {{ item.license_type|title }}</div>
+              <div>State: {{ item.state }}</div>
+            </div>
 
           </div>
         </div>
@@ -216,6 +229,11 @@
 
 
   <!-- Optional: Let the user choose which tabs to show? -->
+
+
+  <!-- TODO: Display GET /unitsofmeasure/v1/active in a bootstrap table -->
+  <!-- Try to get from Firestore, Ggt from Metrc if not in Firestore,
+  save in Firestore. Option for use to re-sync with Metrc. -->
   
 
 {% endblock section %}

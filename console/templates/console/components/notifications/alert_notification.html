@@ -6,9 +6,9 @@
   Updated: 6/11/2021
 -->
 {% load icon %}
-<div class="alert alert-info d-flex mt-3" role="alert">
+<div class="alert alert-info d-flex mt-3 mb-0" role="alert">
   {% icon 'alert-triangle' height="16" width="16"%} &nbsp;
-  {{ alert_message }} &nbsp;
-  <a href="{{ alert_link }}">{{ alert_action }}</a>.
+  {{ message }} &nbsp;
+  <a href="{{ link }}">{{ action }}</a>.
 </div>
 </html>

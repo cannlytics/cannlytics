@@ -19,6 +19,7 @@ from cannlytics.firebase import (
     add_secret_version,
     create_secret,
     create_log,
+    get_custom_claims,
     get_collection,
     get_document,
     create_id,
@@ -50,6 +51,8 @@ def organizations(request, format=None, org_id=None):
     _, project_id = google.auth.default()
     claims = auth.verify_session(request)
     uid = claims['uid']
+    custom_claims = get_custom_claims(uid)
+    print('Custom Claims:', custom_claims)
 
     # Get organization(s).
     if request.method == 'GET':
@@ -73,12 +76,20 @@ def organizations(request, format=None, org_id=None):
         keyword = request.query_params.get('name')
         if keyword:
             print('Query by name:', keyword)
-            query = {'key': 'name', 'operation': '==', 'value': keyword}
+            query = {
+                'key': 'name',
+                'operation': '==',
+                'value': keyword
+            }
             docs = get_collection(model_type, filters=[query])
 
         # Get all of a user's organizations
         else:
-            query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
+            query = {
+                'key': 'team',
+                'operation': 'array_contains',
+                'value': uid
+            }
             docs = get_collection(model_type, filters=[query])
 
         # Optional: Get list of other organizations.
@@ -105,7 +116,9 @@ def organizations(request, format=None, org_id=None):
                 return Response({'error': True, 'message': message}, status=400)
 
             org_id = doc['uid']
-            if org_id not in claims.get('team', []) and org_id not in claims.get('owner', []):
+            team_list = custom_claims.get('team', [])
+            owner_list = custom_claims.get('owner', [])
+            if uid not in team_list and org_id not in owner_list:
                 message = 'You do not currently belong to this organization. Request to join before continuing.'
                 return Response({'error': True, 'message': message}, status=400)
 
@@ -114,18 +127,26 @@ def organizations(request, format=None, org_id=None):
             if uid != doc['owner']:
                 data['team'] = doc['team']
             
-            # Posted API keys are stored as secrets.
-            licenses = doc.get('licenses')
-            if doc.get('licenses'):
-                licenses = []
-                for license_data in licenses:
+            # Store posted API keys as secrets.
+            new_licenses = data.get('licenses')
+            if new_licenses:
+                licenses = doc.get('licenses', [])
+                for license_data in new_licenses:
                     license_number = license_data['license_number']
                     secret_id = f'{license_number}_secret'
                     try:
-                        create_secret(project_id, secret_id, secret)
+                        create_secret(
+                            project_id,
+                            secret_id,
+                            license_data['user_api_key']
+                        )
                     except:
                         pass
-                    secret = add_secret_version(project_id, secret_id, secret)
+                    secret = add_secret_version(
+                        project_id,
+                        secret_id,
+                        license_data['user_api_key']
+                    )
                     version_id = secret.split('/')[-1]
                     license_data['user_api_key_secret'] = {
                         'project_id': project_id,
@@ -140,14 +161,14 @@ def organizations(request, format=None, org_id=None):
         # All organizations have a unique `org_id`.
         else:
             doc = {}
-            # doc['id'] = create_id()
             doc['uid'] = slugify(data['name'])
             doc['team'] = [uid]
             doc['owner'] = uid            
 
         # Create or update the organization in Firestore.
         entry = {**data, **doc}
-        update_document(f'{model_type}/{uid}', entry)
+        print('Entry:', entry)
+        update_document(f'{model_type}/{org_id}', entry)
 
         # TEST: On organization creation, the creating user get custom claims.
         update_custom_claims(uid, claims={'owner': [org_id]})

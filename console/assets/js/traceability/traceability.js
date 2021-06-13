@@ -54,33 +54,82 @@ export const traceability = {
   },
 
 
-  saveLicenses() {
+  getItems(tableId) {
+    /*
+     * Get items from the Metrc API, through the Cannlytics API,
+     * and render the data in a table.
+     */
+
+  },
+
+
+  getLabTests(tableId) {
+    /*
+     * Get lab tests from the Metrc API, through the Cannlytics API,
+     * and render the data in a table.
+     */
+
+  },
+
+
+  getLocations(tableId) {
+    /*
+     * Get locations from the Metrc API, through the Cannlytics API,
+     * and render the data in a table.
+     */
+
+  },
+
+
+  getPackages(tableId) {
+    /*
+     * Get packages from the Metrc API, through the Cannlytics API,
+     * and render the data in a table.
+     */
+
+  },
+
+
+  getStrains(tableId) {
+    /*
+     * Get strains from the Metrc API, through the Cannlytics API,
+     * and render the data in a table.
+     */
+
+  },
+
+
+  getTransfers(tableId) {
+    /*
+     * Get transfers from the Metrc API, through the Cannlytics API,
+     * and render the data in a table.
+     */
+
+  },
+
+
+  saveLicenses(orgId) {
     /*
      * Save an organization's licenses.
      */
     console.log('TODO: Save licenses!');
 
     // Get the licenses data.
+    // Optional: Split license data rows more elegantly.
     const elements = document.getElementById('licenses-form').elements;
     const licenses = [];
     let data = {};
     for (let i = 0 ; i < elements.length ; i++) {
       const item = elements.item(i);
-      if (item.name) {
-        console.log(item.name, item.value);
-        data[item.name] = item.value;
-      }
-      // Split license data rows.
-      // Optional: More elegantly split license data.
+      if (item.name) data[item.name] = item.value;
       if (item.name === 'user_api_key') {
         licenses.push(data);
         data = {};
       }
     }
-    console.log('Data', licenses);
 
     // Post the data.
-    authRequest(`/api/organizations`, {'licenses': licenses}).then((response) => {
+    authRequest(`/api/organizations/${orgId}`, {'licenses': licenses}).then((response) => {
       console.log('Saved licenses:', response);
       // TODO: Show better error messages.
       // TODO: Tell user if organization name is already taken
