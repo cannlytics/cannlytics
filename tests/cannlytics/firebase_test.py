@@ -9,7 +9,7 @@ from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
 
 import sys
-sys.path.append('..')
+sys.path.append('../..')
 from cannlytics import firebase # pylint: disable=import-error
 
 
@@ -203,6 +203,50 @@ def test_auth():
 
 
 #------------------------------------------------------------#
+# Secret Manager
+#------------------------------------------------------------#
+
+def test_secret_manager():
+    """Test Secret Manager by creating a secret, updating the version
+    of the secret, then deleting the secret."""
+
+    # Initialize Firebase
+    env = environ.Env()
+    env.read_env('../../.env')
+    credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
+    firebase.initialize_firebase()
+
+    # Mock license.
+    license_data = {
+        'license_number': 'test',
+        'license_type': 'lab',
+        'state': 'OK',
+        'user_api_key': '123',
+    }
+    license_number = license_data['license_number']
+    user_api_key = license_data['user_api_key']
+
+    # Create a secret.
+    project_id = 'cannlytics'
+    secret_id = f'{license_number}-secret'
+    try:
+        version_id = firebase.create_secret(project_id, secret_id, user_api_key)
+        print(version_id)
+    except: # AlreadyExists error
+        pass # Secret may already be created.
+
+    # Add the secret's secret data.
+    version_id = firebase.add_secret_version(project_id, secret_id, user_api_key)
+    print(version_id)
+
+    # Get the secret.
+    # In production the secret ID and version ID are stored with the license data.
+    user_api_key = firebase.access_secret_version(project_id, secret_id, version_id)
+    print(user_api_key)
+    assert user_api_key == license_data['user_api_key']
+
+#------------------------------------------------------------#
 # Misc
 #------------------------------------------------------------#
 
@@ -218,3 +262,7 @@ def test_snake_case():
     key = firebase.snake_case('% Dev. from the mean')
     assert key == 'percent_dev_from_the_mean'
 
+
+if __name__ == '__main__':
+
+    test_secret_manager()

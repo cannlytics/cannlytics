@@ -108,6 +108,19 @@ def organizations(request, format=None, org_id=None):
             # can edit the organization's team.
             if uid != doc['owner']:
                 data['team'] = doc['team']
+            
+            # TODO: Posted API keys should be stored as secrets.
+            # Each organization can have multiple licenses.
+            # https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets#secretmanager-create-secret-python
+            licenses = doc.get('licenses')
+            if doc.get('licenses'):
+                print('TODO: Handle licenses:', licenses)
+                licenses = []
+                for license_data in licenses:
+                    # TODO: Save user_api_key as a secret and store secret ID
+                    del license_data['user_api_key']
+                    licenses.append(license_data)
+
 
         # Create organization if it doesn't exist
         # All organizations have a unique `org_id`.
@@ -117,10 +130,6 @@ def organizations(request, format=None, org_id=None):
             doc['uid'] = slugify(data['name'])
             doc['team'] = [uid]
             doc['owner'] = uid            
-
-        # TODO: Posted API keys should be stored as secrets.
-        # Each organization can have multiple licenses.
-        # https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets#secretmanager-create-secret-python
 
         # Create or update the organization in Firestore.
         entry = {**data, **doc}

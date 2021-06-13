@@ -302,14 +302,14 @@ material = {
     },
     "records": {
         "placeholder": {
-            "action": "Add a client",
+            "action": "Add a contact",
             "height": "200px",
             "image": "console/images/illustrations/chemistry_scientist.svg",
-            "title": "Add your first client",
-            "message": "Add a client to begin providing analyses.",
+            "title": "Add your first contact",
+            "message": "Add a contact to begin providing analyses.",
             "url": "records/new",
         },
-        "client": {
+        "contact": {
             "breadcrumbs": [
                 {"title": "Clients", "url": "/records"},
                 {"title": "Client", "active": True},
@@ -343,7 +343,7 @@ layout = {
                 "image_path": "console/images/icons/multi-tone/lab.png",
             },
             {
-                "path": "clients",
+                "path": "contacts",
                 "title": "Contacts",
                 "description": "Manage laboratory clients, vendors, and relations.",
                 "image_path": "console/images/icons/multi-tone/clients.png",
