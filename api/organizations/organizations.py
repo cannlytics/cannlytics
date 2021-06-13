@@ -6,6 +6,7 @@ Description: API to interface with organizations.
 """
 
 # External imports
+import google.auth
 from django.utils.text import slugify
 from json import loads
 from rest_framework import status
@@ -14,6 +15,9 @@ from rest_framework.response import Response
 
 # Internal imports
 from cannlytics.firebase import (
+    access_secret_version,
+    add_secret_version,
+    create_secret,
     create_log,
     get_collection,
     get_document,
@@ -21,6 +25,7 @@ from cannlytics.firebase import (
     update_custom_claims,
     update_document,
 )
+from cannlytics.traceability.metrc import authorize
 from api.auth import auth #pylint: disable=import-error
 
 
@@ -40,11 +45,11 @@ def organizations(request, format=None, org_id=None):
         ```
     """
 
-    print('Requested org:', org_id)
+    # Get endpoint variables.
     model_type = 'organizations'
+    _, project_id = google.auth.default()
     claims = auth.verify_session(request)
     uid = claims['uid']
-    print('User:', uid)
 
     # Get organization(s).
     if request.method == 'GET':
@@ -109,18 +114,27 @@ def organizations(request, format=None, org_id=None):
             if uid != doc['owner']:
                 data['team'] = doc['team']
             
-            # TODO: Posted API keys should be stored as secrets.
-            # Each organization can have multiple licenses.
-            # https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets#secretmanager-create-secret-python
+            # Posted API keys are stored as secrets.
             licenses = doc.get('licenses')
             if doc.get('licenses'):
-                print('TODO: Handle licenses:', licenses)
                 licenses = []
                 for license_data in licenses:
-                    # TODO: Save user_api_key as a secret and store secret ID
+                    license_number = license_data['license_number']
+                    secret_id = f'{license_number}_secret'
+                    try:
+                        create_secret(project_id, secret_id, secret)
+                    except:
+                        pass
+                    secret = add_secret_version(project_id, secret_id, secret)
+                    version_id = secret.split('/')[-1]
+                    license_data['user_api_key_secret'] = {
+                        'project_id': project_id,
+                        'secret_id': secret_id,
+                        'version_id': version_id,
+                    }
                     del license_data['user_api_key']
                     licenses.append(license_data)
-
+                doc['licenses'] = licenses
 
         # Create organization if it doesn't exist
         # All organizations have a unique `org_id`.
@@ -161,6 +175,61 @@ def organizations(request, format=None, org_id=None):
 
         return Response({'error': 'not_implemented'}, content_type='application/json')
 
+#-----------------------------------------------------------------------
+# Organization team and employees
+#-----------------------------------------------------------------------
+
+@api_view(['GET', 'POST'])
+def team(request):
+    """Get, create, or update information about an organization's team."""
+    return NotImplementedError
+
+
+@api_view(['GET'])
+def employees(request):
+    """Get a licenses employees from Metrc.
+    Args:
+        request (HTTPRequest): A `djangorestframework` request.
+    """
+
+    # Authenticate the user.
+    claims = auth.verify_session(request)
+    if not claims:
+        message = 'Authentication failed. Please use the console or provide a valid API key.'
+        return Response({'error': True, 'message': message}, status=403)
+    _, project_id = google.auth.default()
+    license_number = request.query_params.get('name')
+
+    # Optional: Figure out how to pre-initialize a Metrc client.
+
+    # Get Vendor API key using secret manager.
+    # TODO: Determine where to store project_id, secret_id, and version_id.
+    vendor_api_key = access_secret_version(
+        project_id=project_id,
+        secret_id='metrc_vendor_api_key',
+        version_id='1'
+    )
+
+    # TODO: Get user API key using secret manager.
+    user_api_key = access_secret_version(
+        project_id=project_id,
+        secret_id=f'{license_number}_secret',
+        version_id='1'
+    )
+
+    # Create a Metrc client.
+    track = authorize(vendor_api_key, user_api_key)
+
+    # Make a request to the Metrc API.
+    data = track.get_employees(license_number=license_number)
+
+    # Return the requested data.
+    return Response(data, content_type='application/json')
+
+
+#-----------------------------------------------------------------------
+# Organization actions
+#-----------------------------------------------------------------------
 
 # TODO: Implement organization actions:
 
@@ -245,9 +314,3 @@ def join_organization(request):
 
     message = f'Request to join {organization} sent to the owner.'
     return Response({'success': True, 'message': message}, content_type='application/json')
-
-
-@api_view(['GET', 'POST'])
-def team():
-    """Get, create, or update information about an organization's team."""
-    return NotImplementedError

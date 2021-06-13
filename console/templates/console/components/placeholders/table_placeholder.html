@@ -1,6 +1,29 @@
-<!-- Talbe Placeholder -->
-<ul>
-  {% for item in team %}
-    <li> {{ item }} </li>
-  {% endfor %}
-</ul>
+<!doctype html>
+<html>
+<!--
+  Table Placeholder | Cannlytics Console
+  Created: 12/28/2020
+  Updated: 6/13/2021
+-->
+{% load static %}
+<div class="card-body text-center">
+  <img
+    src="{% static image %}"
+    style="height:{{ height }}"
+  >
+  <h2 class="h4 text-dark mt-3 mb-1">
+    {{ title }}
+  </h2>
+  <p class="text-muted lh-sm mx-auto" style="max-width:540px;">
+    <small>{{ message }}</small>
+  </p>
+  {% if action %}
+    <a
+      class="btn bg-gradient-green text-white my-3"
+      href="{{ url }}"
+    >
+      {{ action }}
+    </a>
+  {% endif %}
+</div>
+</html>

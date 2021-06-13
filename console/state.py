@@ -194,6 +194,27 @@ material = {
     "traceability": {
         "tabs": [
             {
+                "name": "Lab Tests",
+                "section": "lab-tests",
+                "url": "/traceability/lab-tests",
+                "description": "Details of each individual lab test performed on submitted packages.",
+            },
+            {
+                "name": "Items",
+                "section": "items",
+                "url": "/traceability/items",
+            },
+            {
+                "name": "Packages",
+                "section": "packages",
+                "url": "/traceability/packages",
+            },
+            {
+                "name": "Strains",
+                "section": "strains",
+                "url": "/traceability/strains",
+            },
+            {
                 "name": "Employees",
                 "section": "employees",
                 "url": "/traceability/employees",
@@ -204,55 +225,37 @@ material = {
                 "url": "/traceability/facilities",
             },
             {
-                "name": "Harvests",
-                "section": "harvests",
-                "url": "/traceability/harvests",
-            },
-            {
-                "name": "Items",
-                "section": "items",
-                "url": "/traceability/items",
-            },
-            {
-                "name": "Lab Tests",
-                "section": "lab-tests",
-                "url": "/traceability/lab-tests",
-            },
-            {
                 "name": "Locations",
                 "section": "locations",
                 "url": "/traceability/locations",
             },
-            {
-                "name": "Packages",
-                "section": "packages",
-                "url": "/traceability/packages",
-            },
-            {
-                "name": "Patients",
-                "section": "patients",
-                "url": "/traceability/patients",
-            },
-            {
-                "name": "Plant Batches",
-                "section": "plant-batches",
-                "url": "/traceability/plant-batches",
-            },
-            {
-                "name": "Plants",
-                "section": "plants",
-                "url": "/traceability/plants",
-            },
-            {
-                "name": "Sales",
-                "section": "sales",
-                "url": "/traceability/sales",
-            },
-            {
-                "name": "Strains",
-                "section": "strains",
-                "url": "/traceability/strains",
-            },
+            
+            # Optional: Show by user type ("user_type": "*",)
+            # {
+            #     "name": "Harvests",
+            #     "section": "harvests",
+            #     "url": "/traceability/harvests",
+            # },
+            # {
+            #     "name": "Patients",
+            #     "section": "patients",
+            #     "url": "/traceability/patients",
+            # },
+            # {
+            #     "name": "Plant Batches",
+            #     "section": "plant-batches",
+            #     "url": "/traceability/plant-batches",
+            # },
+            # {
+            #     "name": "Plants",
+            #     "section": "plants",
+            #     "url": "/traceability/plants",
+            # },
+            # {
+            #     "name": "Sales",
+            #     "section": "sales",
+            #     "url": "/traceability/sales",
+            # },
             {
                 "name": "Transfers",
                 "section": "transfers",

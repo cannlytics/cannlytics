@@ -135,7 +135,7 @@ def get_user_context(request, context):
     #  Get a user's data and organizations from Firestore.
     query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
     user_data = get_document(f'users/{uid}')
-    context['organizations'] = get_collection('organizations', filters=[query])
+    # context['organizations'] = get_collection('organizations', filters=[query])
     context.update({'user': {**user_data, **user}})
     return context
 

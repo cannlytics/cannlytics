@@ -188,7 +188,7 @@ def test_auth():
 
     # Get user.
     user = firebase.get_user(email)
-    
+
     # Get all users.
     all_users = firebase.get_users()
     assert isinstance(all_users, list) == True
@@ -232,18 +232,16 @@ def test_secret_manager():
     secret_id = f'{license_number}-secret'
     try:
         version_id = firebase.create_secret(project_id, secret_id, user_api_key)
-        print(version_id)
     except: # AlreadyExists error
         pass # Secret may already be created.
 
     # Add the secret's secret data.
-    version_id = firebase.add_secret_version(project_id, secret_id, user_api_key)
-    print(version_id)
+    secret = firebase.add_secret_version(project_id, secret_id, user_api_key)
+    version_id = secret.split('/')[-1]
 
     # Get the secret.
     # In production the secret ID and version ID are stored with the license data.
     user_api_key = firebase.access_secret_version(project_id, secret_id, version_id)
-    print(user_api_key)
     assert user_api_key == license_data['user_api_key']
 
 #------------------------------------------------------------#

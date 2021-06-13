@@ -8,7 +8,6 @@ Description: API URLs to interface with cannabis analytics.
 # External imports
 from django.urls import include, path
 from rest_framework import urlpatterns
-from rest_framework.urlpatterns import format_suffix_patterns
 
 # Internal imports
 from api import views
@@ -24,6 +23,7 @@ from api.projects import projects
 from api.results import results
 from api.samples import samples
 from api.transfers import transfers
+from api.traceability import traceability
 from api.users import users
 
 app_name = 'api' # pylint: disable=invalid-name
@@ -98,16 +98,16 @@ urlpatterns = [
     #     path('/<uuid:test_id>', tests.tests),
     # ])),
     path('transfers', include([
-        path('', views.index),
-        path('/<uuid:transfer_id>', views.index),
+        path('', transfers.transfers),
+        path('/<uuid:transfer_id>', transfers.transfers),
+    ])),
+    path('traceability', include([
+        # path('', views.index),
+        path('/employees', traceability.employees),
+        path('/employees/<license_number>', traceability.employees),
     ])),
     path('regulations', views.regulations),
     path('create-key', auth.create_api_key),
     path('delete-key', auth.delete_api_key),
     path('get-keys', auth.get_api_key_hmacs),
 ]
-
-# Add optional format suffixes to the URLs,
-# so users can explicitely specify a formatm e.g. .json.
-# https://www.django-rest-framework.org/tutorial/2-requests-and-responses/
-# urlpatterns = format_suffix_patterns(urlpatterns)

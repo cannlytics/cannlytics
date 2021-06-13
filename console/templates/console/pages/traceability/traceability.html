@@ -34,10 +34,69 @@
       {% block section %}{% endblock %}
     </section>
 
-    <!-- TODO: Traceability dashboard if no section -->
+    <!-- TODO: Traceability data grid dashboard if no section selected -->
+    {% if not section %}
+      <div class="row px-3 my-4">
+        {% for item in traceability.tabs %}
+          <a href="{{ item.url }}" class="d-flex col col-sm-1 col-md-2 m-2 p-0" style="width:300px; height:115px;">
+          <div class="card bg-transparent p-3 m-0" style="width:300px; height:115px;">
 
+            <!-- Card header -->
+            <div class="d-flex justify-content-between">
+              <div class="d-flex align-items-center">
+                <h4 class="fs-5 text-dark">{{ item.name }}</h4>
+              </div>
 
-    
+              <!-- Options -->
+              {% comment %} <div class="btn-group dropstart">
+                <a role="button" class="nav-link dropdown-toggle simple-dropdown p-0" data-bs-toggle="dropdown" aria-expanded="false">
+                  <div class="icon-container action">
+                    {% include 'console/components/icons/dialpad.svg' %}
+                  </div>
+                </a>
+                <ul class="dropdown-menu shadow">
+                  <li><a class="dropdown-item" href="/cannlytics/{{ org.uid }}/team">Add team member</a></li>
+                  <li><a class="dropdown-item" href="/cannlytics/{{ org.uid }}">Edit organization</a></li>
+                  <li><a class="dropdown-item" href="/cannlytics/{{ org.uid }}/settings">Organization ettings</a></li>
+                </ul>
+              </div> {% endcomment %}
+
+            </div>
+
+            <!-- Card body -->
+            <div class="card-body bg-transparent p-0">
+              <p class="text-secondary fs-6">
+                <small>{{ item.description }}</small>
+              </p>
+              <!-- Badges -->
+              {% comment %} {% if org.support == 'Enterprise' %}
+                <span class="badge rounded-pill bg-primary">Enterprise</span>
+              {% elif org.support == 'Pro' %}
+                <span class="badge rounded-pill bg-warning text-dark">Pro</span>
+              {% else %}
+                <span class="badge rounded-pill bg-gradient-green text-white">Free</span>
+              {% endif %} {% endcomment %}
+
+              <!-- Card Stats -->
+              {% comment %} <div class="row h-100 text-dark align-items-center">
+                <div class="col-4 mb-3">
+                  {% if org.total_projects %}{{ org.total_projects }}{% else %}0{% endif %} Projects
+                </div>
+                <div class="col-4 mb-3">
+                  {% if org.total_samples %}{{ org.total_samples }}{% else %}0{% endif %} Samples
+                </div>
+                <div class="col-4 mb-3">
+                  {% if org.total_contacts %}{{ org.total_contacts }}{% else %}0{% endif %} Contacts
+                </div>
+              </div> {% endcomment %}
+
+            </div><!-- End of the card body-->
+          </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
 
   </main>
 

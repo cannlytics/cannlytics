@@ -583,7 +583,8 @@ def add_secret_version(project_id, secret_id, payload):
     client = secretmanager.SecretManagerServiceClient()
 
     # Build the resource name of the parent secret.
-    parent = client.secret_path(project_id, secret_id)
+    # parent = client.secret_path(project_id, secret_id)
+    parent = f'projects/{project_id}/secrets/{secret_id}'
 
     # Convert the string payload into a bytes. This step can be omitted if you
     # pass in bytes instead of a str for the payload argument.
