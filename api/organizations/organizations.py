@@ -5,10 +5,12 @@ Updated: 6/10/2021
 Description: API to interface with organizations.
 """
 
+# Standard imports
+from json import loads
+
 # External imports
 import google.auth
 from django.utils.text import slugify
-from json import loads
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -22,7 +24,6 @@ from cannlytics.firebase import (
     get_custom_claims,
     get_collection,
     get_document,
-    create_id,
     update_custom_claims,
     update_document,
 )
@@ -126,8 +127,9 @@ def organizations(request, format=None, org_id=None):
             # can edit the organization's team.
             if uid != doc['owner']:
                 data['team'] = doc['team']
-            
+
             # Store posted API keys as secrets.
+            # FIXME: Update licenses if they are being edited.
             new_licenses = data.get('licenses')
             if new_licenses:
                 licenses = doc.get('licenses', [])
@@ -163,7 +165,7 @@ def organizations(request, format=None, org_id=None):
             doc = {}
             doc['uid'] = slugify(data['name'])
             doc['team'] = [uid]
-            doc['owner'] = uid            
+            doc['owner'] = uid
 
         # Create or update the organization in Firestore.
         entry = {**data, **doc}

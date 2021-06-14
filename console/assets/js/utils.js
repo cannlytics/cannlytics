@@ -16,14 +16,12 @@ export const authRequest = (endpoint, data, options) => new Promise((resolve, re
    * Make an authorized GET or POST request by
    * getting the user's ID token and exchanging it for a session cookie.
    */
-  getUserToken().then((idToken) => {
-    apiRequest(endpoint, data, options, idToken)
-      .then((data) => {
-        resolve(data);
-      });
-  }).catch((error) => {
-    reject(error);
-  });
+  getUserToken()
+    .then((idToken) => {
+      apiRequest(endpoint, data, options, idToken)
+        .then((data) => resolve(data));
+    })
+    .catch((error) => reject(error));
 });
 
 
@@ -53,6 +51,7 @@ export const apiRequest = (endpoint, data, options, idToken = null) => new Promi
       endpoint.search = new URLSearchParams(options.params).toString();
     }
   }
+  console.log('URL:', endpoint);
   fetch(endpoint, headers)
     .then(response => response.json())
     .then((data) => {

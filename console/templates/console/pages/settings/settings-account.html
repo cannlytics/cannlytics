@@ -78,21 +78,20 @@
     </div>
 
     <!-- Options -->
+    <!-- TODO: Implement reset and save functionality-->
     <button
       type="button"
-      class="btn btn-primary btn-sm"
-      style="width:8rem;"
-      onclick="cannlytics.settings.saveAccount()"
+      class="btn btn-sm btn-secondary"
+      onclick="cannlytics.settings.exportAccount()"
     >
-      Save
+      Reset
     </button>
     <button
       type="button"
-      class="btn btn-secondary btn-sm"
-      style="width:8rem;"
-      onclick="cannlytics.settings.exportAccount()"
+      class="btn btn-sm bg-gradient-green text-white"
+      onclick="cannlytics.settings.saveAccount()"
     >
-      Export
+      Save
     </button>
 
     <!-- TODO: Implement set pin and set signature functionality -->

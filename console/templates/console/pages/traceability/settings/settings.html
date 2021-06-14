@@ -12,6 +12,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
 {% endblock console_css %} {% endcomment %}
 {% block section %}
+<div class="p-3">
 
   <h1 class="fs-5 mb-0 lh-base text-dark">Provider</h1>
 
@@ -169,7 +170,7 @@
                 <li>
                   <a
                     class="dropdown-item"
-                    href="/cannlytics/{{ item.license_number }}/team"
+                    href="/traceability/settings/edit-license?license={{ item.license_number }}&license_type={{ item.license_type }}&state={{ item.state }}"
                   >
                     Edit license
                   </a>
@@ -177,7 +178,7 @@
                 <li>
                   <a
                     class="dropdown-item"
-                    href="/cannlytics/{{ item.license_number }}/delete"
+                    href="/traceability/settings/delete-license?license={{ item.license_number }}&license_type={{ item.license_type }}&state={{ item.state }}"
                   >
                     Delete license
                   </a>
@@ -235,7 +236,7 @@
   <!-- Try to get from Firestore, Ggt from Metrc if not in Firestore,
   save in Firestore. Option for use to re-sync with Metrc. -->
   
-
+</div>
 {% endblock section %}
 {% block console_js %}
   <script>

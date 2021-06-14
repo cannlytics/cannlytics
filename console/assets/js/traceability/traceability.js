@@ -8,7 +8,64 @@
 import { authRequest, showNotification } from '../utils.js';
 import { theme } from '../settings/theme.js';
 
+/*---------------------------------------------------------------------
+ Locations
+ --------------------------------------------------------------------*/
+
+const locations = {
+
+  getLocations(tableId, orgId, licenseNumber, versionId) {
+    /*
+     * Get locations from the Metrc API, through the Cannlytics API,
+     * and render the data in a table.
+     */
+    const query = `license=${licenseNumber}&org_id=${orgId}&version_id=${versionId}`;
+    const url = `/api/traceability/locations?${query}`;
+    authRequest(url).then((data) => {
+      console.log('Table data:', data); // DEV:
+      // TODO: Render the table
+      // const eGridDiv = document.querySelector(`#${tableId}`);
+      // new agGrid.Grid(eGridDiv, gridOptions);
+      // gridOptions.api.setRowData(data);
+    });
+  },
+
+  createLocation() {
+    /* Create a given location. */
+
+  },
+
+  updateLocation() {
+    /* Update a given location. */
+
+  },
+
+  deleteLocation() {
+    /* Delete a given location. */
+
+  },
+
+  saveLocation() {
+    /* Create or update a given location. */
+  },
+
+  exportLocations() {
+    /* Export locations data to Excel (.xlsx or .csv). */
+  },
+
+  importLocations() {
+    /* Import locations data from Excel (.xlsx or .csv). */
+  },
+
+};
+
+/*---------------------------------------------------------------------
+ Main object
+ --------------------------------------------------------------------*/
+
 export const traceability = {
+
+  ...locations,
 
   initialize() {
     console.log('Initializing traceability...');
@@ -63,21 +120,19 @@ export const traceability = {
   },
 
 
-  getLabTests(tableId) {
+  getLabTests(tableId, orgId, licenseNumber, versionId) {
     /*
      * Get lab tests from the Metrc API, through the Cannlytics API,
      * and render the data in a table.
      */
-
-  },
-
-
-  getLocations(tableId) {
-    /*
-     * Get locations from the Metrc API, through the Cannlytics API,
-     * and render the data in a table.
-     */
-
+    const query = `license=${licenseNumber}&org_id=${orgId}&version_id=${versionId}`;
+    const url = `/api/traceability/lab-tests?${query}`;
+    authRequest(url).then((data) => {
+      console.log('Table data:', data); // DEV:
+      // const eGridDiv = document.querySelector(`#${tableId}`);
+      // new agGrid.Grid(eGridDiv, gridOptions);
+      // gridOptions.api.setRowData(data);
+    });
   },
 
 
@@ -105,6 +160,37 @@ export const traceability = {
      * and render the data in a table.
      */
 
+  },
+
+
+  deleteLicenseValidation(orgId, licenseNumber) {
+    /*
+     * Validate that a reason is present before deleting a license.
+     */
+    const deletionReason = document.getElementById('license-deletion-reason-input').value;
+    if (!deletionReason) {
+      const message = 'A deletion reason is required for quality control.'
+      showNotification('Deletion reason required', message, { type: 'error' });
+      return;
+    }
+    deleteLicense(orgId, licenseNumber, deletionReason);
+  },
+
+
+  deleteLicense(orgId, licenseNumber, message) {
+    /*
+     * Delete a license from an organization's data, saving a deletion reason.
+     */
+    const url = `/api/traceability/delete-license?license=${licenseNumber}&org_id=${orgId}`;
+    authRequest(url, {deletion_reason: message}).then((response) => {
+      if (response.error) {
+        // Optional: Show better error messages.
+        showNotification('Deleting license failed', response.message, { type: 'error' });
+      } else {
+        window.location.href = '/traceability/settings';
+        // Optional: Show success message
+      }
+    });
   },
 
 
