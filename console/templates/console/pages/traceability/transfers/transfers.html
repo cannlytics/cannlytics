@@ -3,39 +3,49 @@
 <!--
   Traceability Transfers Page | Cannlytics Console
   Created: 6/13/2021
-  Updated: 6/13/2021
+  Updated: 6/14/2021
+  TODO:
+    - Create, update, delete transfers
+    * Get by start, end dates.
+    * Filter by transfer type: incoming, outgoing, rejected
+    * Search by UID for a transfer.
+    * Get transfer packages.
+    * Get transfer types.
+    * Get package statuses.
+    * Get transporter.
+    * Get transporter details.
+    * Get, create, update, delete transfer templates.
 -->
 {% extends "console/pages/traceability/traceability.html" %}
 
 {% block section %}
 
   <!-- Table -->
-  <div class="card my-3">
-    <div class="card-body">
-      <h2 class="h6 mb-3 text-dark">Transfers</h2>
-      <div class="table-responsive">
+  <div class="my-3 px-3">
+    <h2 class="h6 mb-3 text-dark">Transfers</h2>
+    <div class="table-responsive">
 
-        <!-- Placeholder if no data -->
-        {% if True %}
-          {% include "console/components/placeholders/table_placeholder.html" with
-            height='200px'
-            image='console/images/icons/multi-tone/certificate-flask.svg'
-            message='No transfers were found for your active license.'
-            title='No Transfers Found'
-            url='/traceability/transfers/transfer?new=true'
-            only
-          %}
-
-        <!-- AG Grid Table -->
-        {% else %}
-          <div
-            id="transfers-table"
-            class="ag-theme-alpine-dark d-none"
-            style="height: 600px; width:100%;"
-          ></div>
-        {% endif %}
-
+      <!-- Placeholder if no data -->
+      <div id="data-placeholder">
+        {% include "console/components/placeholders/table_placeholder.html" with
+          height='200px'
+          image='console/images/icons/multi-tone/certificate-flask.svg'
+          message='No transfers were found for your active license.'
+          title='No Transfers Found'
+          url='/traceability/transfers/transfer?new=true'
+          only
+        %}
       </div>
+
+      <!-- AG Grid Table -->
+      <div id="data-table" class="d-none">
+        <div
+          id="transfers-table"
+          class="ag-theme-alpine-dark"
+          style="height: 326px; width:100%;"
+        ></div>
+      </div>
+
     </div>
   </div><!-- End of the table -->
 
@@ -47,7 +57,12 @@
 {% block console_js %}
 
   <script>
-    cannlytics.traceability.getTransfers('transfers-table');
+    cannlytics.traceability.getTransfers(
+      'transfers-table',
+      '{{ organizations.0.uid }}',
+      '{{ organizations.0.licenses.0.license_number }}',
+      '{{ organizations.0.licenses.0.user_api_key_secret.version_id }}',
+    );
   </script>
 
 {% endblock console_js %}

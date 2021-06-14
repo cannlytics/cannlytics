@@ -67,7 +67,7 @@ class Client(object):
             endpoint,
             data=None,
             params=None,
-            verbose=False,
+            verbose=True,
     ):
         """Make a request to the Metrc API."""
         url = self.base + endpoint
@@ -389,7 +389,10 @@ class Client(object):
         try:
             return Location(self, response, license_number)
         except AttributeError:
-            return [Location(self, x, license_number) for x in response]
+            try:
+                return [Location(self, x, license_number) for x in response]
+            except:
+                return response
 
 
     def create_locations(self, data, license_number=''):

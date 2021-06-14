@@ -3,45 +3,43 @@
 <!--
   Traceability Locations Page | Cannlytics Console
   Created: 6/13/2021
-  Updated: 6/13/2021
+  Updated: 6/14/2021
 -->
 {% extends "console/pages/traceability/traceability.html" %}
 
 {% block section %}
 
   <!-- Table -->
-  <div class="card my-3">
-    <div class="card-body">
-      <h2 class="h6 mb-3 text-dark">Locations</h2>
-      <div class="table-responsive">
+  <div class="my-3 px-3">
+    <h2 class="h6 mb-3 text-dark">Locations</h2>
+    <div class="table-responsive">
 
-        <!-- No Data Placeholder -->
-        <div id="no-data-placeholder">
-          {% include "console/components/placeholders/table_placeholder.html" with
-            height='200px'
-            image='console/images/illustrations/outline/lab.svg'
-            message='No locations were found for your active license.'
-            title='No Locations Found'
-            url='/traceability/locations/locations?new=true'
-            only
-          %}
-        </div>
+      <!-- Optional: Show loading container -->
 
-        <!-- AG Grid Table -->
-        <div id="data-table" class="d-none">
-          <div
-            id="locations-table"
-            class="ag-theme-alpine-dark d-none"
-            style="height: 600px; width:100%;"
-          ></div>
-        </div>
-
+      <!-- No Data Placeholder -->
+      <div id="data-placeholder">
+        {% include "console/components/placeholders/table_placeholder.html" with
+          height='200px'
+          image='console/images/illustrations/outline/lab.svg'
+          message='No locations were found for your active license.'
+          title='No Locations Found'
+          url='/traceability/locations/locations?new=true'
+          only
+        %}
       </div>
+
+      <!-- AG Grid Table -->
+      <div id="data-table" class="d-none">
+        <div
+          id="locations-table"
+          class="ag-theme-alpine-dark"
+          style="height: 326px; width:100%;"
+        ></div>
+      </div>
+
     </div>
   </div><!-- End of the table -->
 
-  <!-- TODO: Detail section or page -->
-  
 {% endblock section %}
 
 <!-- JavaScript -->
@@ -52,7 +50,7 @@
       'locations-table',
       '{{ organizations.0.uid }}',
       '{{ organizations.0.licenses.0.license_number }}',
-      '{{ organizations.0.licenses.0.version_id }}',
+      '{{ organizations.0.licenses.0.user_api_key_secret.version_id }}',
     );
   </script>
 

@@ -4,6 +4,12 @@
   Traceability Lab Tests Page | Cannlytics Console
   Created: 6/13/2021
   Updated: 6/14/2021
+  TODO:
+    * Get analyses
+    * Get lab statuses
+    * Get units of measurement
+    * Upload CoAs
+    * Release lab results
 -->
 {% extends "console/pages/traceability/traceability.html" %}
 {% block section %}
@@ -16,7 +22,7 @@
 
         <!-- No Data Placeholder -->
         <!-- TODO: Only show placeholder if there is no data -->
-        <div id="no-data-placeholder">
+        <div id="data-placeholder">
           {% include "console/components/placeholders/table_placeholder.html" with
             height='200px'
             image='console/images/illustrations/outline/lab_books.svg'
@@ -31,8 +37,8 @@
         <div id="data-table" class="d-none">
           <div
             id="lab-tests-table"
-            class="ag-theme-alpine-dark d-none"
-            style="height: 600px; width:100%;"
+            class="ag-theme-alpine-dark"
+            style="height: 326px; width:100%;"
           ></div>
         </div>
 
@@ -52,7 +58,7 @@
       'lab-tests-table',
       '{{ organizations.0.uid }}',
       '{{ organizations.0.licenses.0.license_number }}',
-      '{{ organizations.0.licenses.0.version_id }}',
+      '{{ organizations.0.licenses.0.user_api_key_secret.version_id }}',
     );
   </script>
 

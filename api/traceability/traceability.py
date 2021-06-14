@@ -80,10 +80,11 @@ def employees(request):
     track = initialize_metrc(project_id, license_number, version_id)
 
     # Make a request to the Metrc API.
-    data = track.get_employees(license_number=license_number)
+    objs = track.get_employees(license_number=license_number)
+    data = [obj.to_dict() for obj in objs]
 
     # Return the requested data.
-    return Response(data, content_type='application/json')
+    return Response({'data': data}, content_type='application/json')
 
 
 @api_view(['GET', 'POST'])
@@ -109,8 +110,10 @@ def items(request):
 
     # Get data.
     if request.method == 'GET':
-        data = track.get_items(license_number=license_number)
-        return Response(data, content_type='application/json')
+        objs = track.get_items(license_number=license_number)
+        data = [obj.to_dict() for obj in objs]
+        print('Retrieved the data:', data)
+        return Response({'data': data}, content_type='application/json')
 
     # TODO: Create / update items.
 
@@ -138,9 +141,11 @@ def lab_tests(request):
 
     # Get lab results.
     if request.method == 'GET':
-        data = track.get_lab_results(license_number=license_number)
-        return Response(data, content_type='application/json')
-    
+        # FIXME:
+        objs = track.get_lab_results(uid='13215', license_number=license_number)
+        data = [obj.to_dict() for obj in objs]
+        return Response({'data': data}, content_type='application/json')
+
     # TODO: Post results
 
 
@@ -152,7 +157,7 @@ def locations(request):
     claims = auth.verify_session(request)
     if not claims:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-    
+
     # Get the parameters.
     _, project_id = google.auth.default()
     license_number = request.query_params.get('license')
@@ -167,9 +172,11 @@ def locations(request):
 
     # Get data.
     if request.method == 'GET':
-        data = track.get_locations(license_number=license_number)
-        return Response(data, content_type='application/json')
-    
+        objs = track.get_locations(license_number=license_number)
+        data = [obj.to_dict() for obj in objs]
+        print('Retrieved the data:', data)
+        return Response({'data': data}, content_type='application/json')
+
     # TODO: Create / update locations.
 
     # TODO: Delete locations.
@@ -183,7 +190,7 @@ def packages(request):
     claims = auth.verify_session(request)
     if not claims:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-    
+
     # Get the parameters.
     _, project_id = google.auth.default()
     license_number = request.query_params.get('license')
@@ -198,9 +205,10 @@ def packages(request):
 
     # Get data.
     if request.method == 'GET':
-        data = track.get_packages(license_number=license_number)
-        return Response(data, content_type='application/json')
-    
+        objs = track.get_packages(license_number=license_number, action='inactive')
+        data = [obj.to_dict() for obj in objs]
+        return Response({'data': data}, content_type='application/json')
+
     # TODO: Create / update packages.
 
     # TODO: Delete packages.
@@ -214,7 +222,7 @@ def strains(request):
     claims = auth.verify_session(request)
     if not claims:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-    
+
     # Get the parameters.
     _, project_id = google.auth.default()
     license_number = request.query_params.get('license')
@@ -229,9 +237,10 @@ def strains(request):
 
     # Get data.
     if request.method == 'GET':
-        data = track.get_strains(license_number=license_number)
-        return Response(data, content_type='application/json')
-    
+        objs = track.get_strains(license_number=license_number)
+        data = [obj.to_dict() for obj in objs]
+        return Response({'data': data}, content_type='application/json')
+
     # TODO: Create / update strains.
 
     # TODO: Delete strains.
@@ -245,7 +254,7 @@ def transfers(request):
     claims = auth.verify_session(request)
     if not claims:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-    
+
     # Get the parameters.
     _, project_id = google.auth.default()
     license_number = request.query_params.get('license')
@@ -266,8 +275,10 @@ def transfers(request):
         # license_number=''
         # start=''
         # end=''
-        data = track.get_transfers(license_number=license_number)
-        return Response(data, content_type='application/json')
+        objs = track.get_transfers(license_number=license_number)
+        data = [obj.to_dict() for obj in objs]
+        print('Retrieved the data:', data)
+        return Response({'data': data}, content_type='application/json')
     
     # TODO: Create / update transfers.
 

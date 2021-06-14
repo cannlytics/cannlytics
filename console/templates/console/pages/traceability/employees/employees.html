@@ -3,7 +3,7 @@
 <!--
   Traceability Employees Page | Cannlytics Console
   Created: 6/12/2021
-  Updated: 6/13/2021
+  Updated: 6/14/2021
 -->
 {% extends "console/pages/traceability/traceability.html" %}
 
@@ -16,7 +16,7 @@
       <div class="table-responsive">
 
         <!-- Placeholder if no data -->
-        {% if True %}
+        <div id="data-placeholder">
           {% include "console/components/placeholders/table_placeholder.html" with
             height='200px'
             image='console/images/illustrations/outline/lab_microbiologist.svg'
@@ -25,29 +25,33 @@
             url='/traceability/employees/employee?new=true'
             only
           %}
+        </div>
 
         <!-- AG Grid Table -->
-        {% else %}
+        <div id="data-table" class="d-none">
           <div
             id="employees-table"
-            class="ag-theme-alpine-dark d-none"
-            style="height: 600px; width:100%;"
+            class="ag-theme-alpine-dark"
+            style="height: 326px; width:100%;"
           ></div>
-        {% endif %}
+        </div>
 
       </div>
     </div>
   </div><!-- End of the table -->
 
-  <!-- TODO: Employee detail -->
-  
 {% endblock section %}
 
 <!-- JavaScript -->
 {% block console_js %}
 
   <script>
-    cannlytics.traceability.getEmployees('employees-table');
+    cannlytics.traceability.getEmployees(
+      'employees-table',
+      '{{ organizations.0.uid }}',
+      '{{ organizations.0.licenses.0.license_number }}',
+      '{{ organizations.0.licenses.0.user_api_key_secret.version_id }}',
+    );
   </script>
 
 {% endblock console_js %}
