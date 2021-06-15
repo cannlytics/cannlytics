@@ -92,7 +92,10 @@ except:
 # ------------------------------------------------------------#
 # Ensure PRODUCTION is set to True in your .env when publishing!
 # ------------------------------------------------------------#
-PRODUCTION = env('PRODUCTION')
+try:
+    PRODUCTION = env('PRODUCTION')
+except:
+    PRODUCTION = 'False'
 if PRODUCTION == 'True':
     DEBUG = False
 else:
@@ -208,11 +211,19 @@ USE_TZ = True
 # Security
 # https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/web_application_security
 # ------------------------------------------------------------#
-ALLOWED_HOSTS = [
-    env('CUSTOM_DOMAIN'),
-    env('FIREBASE_HOSTING_URL'),
-    env('CLOUD_RUN_URL')
-]
+ALLOWED_HOSTS = []
+try:
+    ALLOWED_HOSTS.append(env('CUSTOM_DOMAIN'),)
+except:
+    pass
+try:
+    ALLOWED_HOSTS.append(env('FIREBASE_HOSTING_URL'),)
+except:
+    pass
+try:
+    ALLOWED_HOSTS.append(env('CLOUD_RUN_URL'),)
+except:
+    pass
 
 if PRODUCTION == 'False':
     ALLOWED_HOSTS.extend(['*', 'localhost:8000', '127.0.0.1'])
@@ -234,13 +245,17 @@ DATABASES = {
 # Email
 # https://docs.djangoproject.com/en/3.1/topics/email/
 # ------------------------------------------------------------#
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = '587'
+
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = env('EMAIL_HOST_USER')
-LIST_OF_EMAIL_RECIPIENTS = [env('EMAIL_HOST_USER')]
+try:
+    EMAIL_HOST = env('EMAIL_HOST')
+    EMAIL_PORT = env('EMAIL_PORT')
+    EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+    DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+    LIST_OF_EMAIL_RECIPIENTS = [EMAIL_HOST_USER]
+except:
+    print('Warning: Email not entirely configured.')
 
 # ------------------------------------------------------------#
 # Static files (CSS, JavaScript, Images)
