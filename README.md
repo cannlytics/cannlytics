@@ -316,21 +316,31 @@ Resources:
 * [`python-markdown` Extensions](https://python-markdown.github.io/extensions/)
 
 ### Docker <a name="Docker"></a>
-```
+
+First, create a `docker.env` file in the project's root directory using the variables found in `.env.example`. You can [build the application in a Docker container image](https://docs.docker.com/get-started/02_our_app/#build-the-apps-container-image) with:
+
+```shell
 # build docker image
 docker build -t cannlytics .
+```
 
+You can register the container with:
+
+```shell
 # docker push to container registry. 
 docker push cannlytics 
+```
 
+You can [run the application container](https://docs.docker.com/get-started/02_our_app/#start-an-app-container) locally with:
+
+```shell
 # run docker
 docker run -dp 8080:8080 --env-file docker.env cannlytics
-
 ```
 
-or with docker compose:
+Finally, you can quickly run the container, or multiple containers, with:
 
-```
+```shell
 # bring up containers
 docker-compose up -d
 
@@ -339,7 +349,6 @@ docker-compose down
 
 # logs
 docker-compose logs
-
 ```
 
 ## Documentation <a name="documentation"></a>
