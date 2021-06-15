@@ -130,10 +130,11 @@ if __name__ == '__main__' and False:
     
     # Get created location
     cultivation= None
-    locations = track.get_locations(action='active', license_number=cultivator.license_number)
+    locations = track.get_locations(action='active', license_number=license_number)
     for location in locations:
-        if location.name == cultivation_original_name:
-            cultivation = location
+        print(location.name)
+        # if location.name == cultivation_original_name:
+        #     cultivation = location
 
     # Update the name of the location using: POST /locations/v1/update
     cultivator.update_locations([cultivation.uid], [cultivation_name])
