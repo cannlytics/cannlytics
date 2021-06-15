@@ -535,66 +535,89 @@ def create_user_secret(uid):
 
 # ------------------------------------------------------------#
 # Secret Management
+# 'Secret Manager Admin' permissions needed for service account.
 # https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets
 # ------------------------------------------------------------#
 
 
-# def create_user_secret(uid, project_id, secret_id):
-#     """Create a new secret with the given name. A secret is a logical wrapper
-#     around a collection of secret versions. Secret versions hold the actual
-#     secret material.
-#     Args:
-#         uid (str): A user's ID.
-#     """
-#     # Import the Secret Manager client library.
-#     from google.cloud import secretmanager
+def create_secret(project_id, secret_id, secret):
+    """Create a new secret with the given name. A secret is a logical wrapper
+    around a collection of secret versions. Secret versions hold the actual
+    secret material.
+    Args:
+        project_id (str): The project associated with the secret.
+        secret_id (str): An ID for the secret.
+        secret (str): The secret data.
+    """
+    # Import the Secret Manager client library.
+    from google.cloud import secretmanager
 
-#     # Create the Secret Manager client.
-#     client = secretmanager.SecretManagerServiceClient()
+    # Create the Secret Manager client.
+    client = secretmanager.SecretManagerServiceClient()
 
-#     # Build the resource name of the parent project.
-#     parent = f"projects/{project_id}"
+    # Build the resource name of the parent project.
+    parent = f'projects/{project_id}'
 
-#     # Create the secret.
-#     response = client.create_secret(
-#         request={
-#             "parent": parent,
-#             "secret_id": secret_id,
-#             "secret": {"replication": {"automatic": {}}},
-#         }
-#     )
+    # Create the secret.
+    response = client.create_secret(parent, secret_id, {"replication": {"automatic": {}}})
 
-#     # Print the new secret name.
-#     print("Created secret: {}".format(response.name))
+    # Return the new secret version name.
+    return response.name
 
 
-# def add_secret_version(project_id, secret_id, payload):
-#     """
-#     Add a new secret version to the given secret with the provided payload.
-#     A secret version contains the actual contents of a secret. A secret version can be enabled, disabled, or destroyed. To change the contents of a secret, you create a new version.
-#     Adding a secret version requires the Secret Manager Admin role (roles/secretmanager.admin) on the secret, project, folder, or organization. Roles can't be granted on a secret version.
-#     """
+def add_secret_version(project_id, secret_id, payload):
+    """
+    Add a new secret version to the given secret with the provided payload.
+    A secret version contains the actual contents of a secret.
+    A secret version can be enabled, disabled, or destroyed.
+    To change the contents of a secret, you create a new version.
+    Adding a secret version requires the Secret Manager Admin role
+    (roles/secretmanager.admin) on the secret, project, folder, or organization.
+    Roles can't be granted on a secret version.
+    """
 
-#     # Import the Secret Manager client library.
-#     from google.cloud import secretmanager
+    # Import the Secret Manager client library.
+    from google.cloud import secretmanager
 
-#     # Create the Secret Manager client.
-#     client = secretmanager.SecretManagerServiceClient()
+    # Create the Secret Manager client.
+    client = secretmanager.SecretManagerServiceClient()
 
-#     # Build the resource name of the parent secret.
-#     parent = client.secret_path(project_id, secret_id)
+    # Build the resource name of the parent secret.
+    # parent = client.secret_path(project_id, secret_id)
+    parent = f'projects/{project_id}/secrets/{secret_id}'
 
-#     # Convert the string payload into a bytes. This step can be omitted if you
-#     # pass in bytes instead of a str for the payload argument.
-#     payload = payload.encode("UTF-8")
+    # Convert the string payload into a bytes. This step can be omitted if you
+    # pass in bytes instead of a str for the payload argument.
+    payload = payload.encode('UTF-8')
 
-#     # Add the secret version.
-#     response = client.add_secret_version(
-#         request={"parent": parent, "payload": {"data": payload}}
-#     )
+    # Add the secret version.
+    response = client.add_secret_version(parent, {'data': payload})
 
-#     # Print the new secret version name.
-#     print("Added secret version: {}".format(response.name))
+    # Return the new secret version name.
+    return response.name
+
+
+def access_secret_version(project_id, secret_id, version_id):
+    """
+    Access the payload for a given secret version if one exists. The version
+    can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
+    """
+
+    # Import the Secret Manager client library.
+    from google.cloud import secretmanager
+
+    # Create the Secret Manager client.
+    client = secretmanager.SecretManagerServiceClient()
+
+    # Build the resource name of the secret version.
+    name = f'projects/{project_id}/secrets/{secret_id}/versions/{version_id}'
+
+    # Access the secret version.
+    response = client.access_secret_version(name)
+
+    # Return the secret.
+    # WARNING: Do not print the secret in a production environment.
+    return response.payload.data.decode('UTF-8')
 
 
 # def get_user_secret(uid):

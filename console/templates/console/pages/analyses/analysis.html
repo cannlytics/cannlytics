@@ -17,7 +17,7 @@
     %}
 
     <!-- Body -->
-    <div class="analysis">
+    <form class="analysis">
 
       <!-- Image -->
       <div class="col-md-6 text-center py-3 order-md-2">
@@ -35,47 +35,110 @@
         </button>
       </div>
 
+      <!-- Public / private choice -->
+      <div class="mb-3">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="public" id="public-choice" value="true">
+          <label class="form-check-label" for="public-choice">
+            Public {% icon "globe" width="16px" height="16px" %}<br>
+            <small class="text-secondary">Appears in search results.</small>
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="public" id="private-choice" value="false" checked>
+          <label class="form-check-label" for="private-choice">
+            Private {% icon "lock" width="16px" height="16px" %}<br>
+            <small class="text-secondary">Only visible to you.</small>
+          </label>
+        </div>
+      </div>
+
       <!-- Fields -->
       <div class="col-md-6">
-        <form>
-          {% for item in fields %}        
+        {% for item in fields %}        
+          <div class="row mb-3">
+
+            <!-- Field label -->
+            <label
+              for="input-{{ item.key }}"
+              class="col-sm-2 col-form-label col-form-label-sm"
+            >
+              {{ item.title }}
+            </label>
+
+            <!-- Field input -->
+            <div class="col-sm-10">
+              {% if item.group %}
+                <div class="input-group input-group-sm">
+                  <div class="input-group-text">{{ item.group }}</div>
+                  <input
+                    type="{{ item.type }}"
+                    class="form-control form-control-sm"
+                    id="input-{{ item.key }}"
+                  >
+                </div>
+              {% else %}
+                <input
+                  type="{{ item.type }}"
+                  class="form-control form-control-sm"
+                  id="input-{{ item.key }}"
+                  spellcheck="false"
+                >
+              {% endif %}
+            </div>
+
+          </div>
+        {% endfor %}
+      </div><!-- End of fields -->
+
+      <!-- TODO: Apply additional user-defined fields-->
+      <!-- Extra Fields-->
+      {% comment %} <div id="extra-analysis-fields" class="d-none">
+        {% for item in analysis.fields %}
+          {% if item.secondary %}
             <div class="row mb-3">
 
               <!-- Field label -->
               <label
                 for="input-{{ item.key }}"
-                class="col-sm-2 col-form-label col-form-label-sm"
+                class="col-sm-3 col-form-label col-form-label-sm"
               >
                 {{ item.title }}
               </label>
 
               <!-- Field input -->
-              <div class="col-sm-10">
-                {% if item.group %}
-                  <div class="input-group input-group-sm">
-                    <div class="input-group-text">{{ item.group }}</div>
-                    <input
-                      type="{{ item.type }}"
-                      class="form-control form-control-sm"
-                      id="input-{{ item.key }}"
-                    >
-                  </div>
-                {% else %}
-                  <input
-                    type="{{ item.type }}"
-                    class="form-control form-control-sm"
-                    id="input-{{ item.key }}"
-                    spellcheck="false"
-                  >
-                {% endif %}
+              <div class="col-sm-9">
+                <input
+                  type="{{ item.type }}"
+                  class="form-control form-control-sm"
+                  id="input-{{ item.key }}"
+                  spellcheck="false"
+                  name="{{ item.key }}"
+                >
               </div>
 
             </div>
-          {% endfor %}
-        </form>
-      </div><!-- End of fields -->
+          {% endif %}
+        {% endfor %}
+      </div> {% endcomment %}
 
-    </div>
+      <!-- Show advanced fields -->
+      <a
+        id="extra-analysis-fields-show"
+        class="nav-link text-secondary app-action d-inline-block"
+        onclick="toggleAnalysisFields();"
+      >
+        {% icon 'chevrons-down' hegiht="16px" width="16px" %} Show more
+      </a>
+      <a
+        id="extra-analysis-fields-hide"
+        class="nav-link text-secondary app-action d-inline-block d-none"
+        onclick="toggleAnalysisFields();"
+      >
+        {% icon 'chevrons-up' hegiht="16px" width="16px" %} Show less
+      </a>
+
+    </form>
 
     <!-- TODO: User-defined Fields -->
 
@@ -122,10 +185,24 @@
 
 <!-- JavaScript -->
 {% block console_js %}
+  <script>
 
-<script>
-  // cannlytics.analyses.initializeAnalysis();
-</script>
+    // Initialize the UI.
+    // cannlytics.analyses.initializeAnalysis('{{ section }}');
+  
+    // Enable tooltips.
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
 
+    // Toggle extra organization fields
+    function toggleAnalysisFields() {
+      cannlytics.ui.toggleElementClass('extra-analysis-fields', 'd-none');
+      cannlytics.ui.toggleElementClass('extra-analysis-fields-hide', 'd-none');
+      cannlytics.ui.toggleElementClass('extra-analysis-fields-show', 'd-none');
+    }
+
+  </script>
 {% endblock console_js %}
 </html>

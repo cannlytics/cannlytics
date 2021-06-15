@@ -28,11 +28,11 @@ class Model(object):
     """Base class for all Metrc models."""
 
     def __init__(
-        self,
-        client,
-        context,
-        license_number='',
-        function=camel_to_snake
+            self,
+            client,
+            context,
+            license_number='',
+            function=camel_to_snake
     ):
         """Initialize the model, setting keys as properties."""
         self.client = client
@@ -141,7 +141,7 @@ class Facility(Model):
         response = self.client.get_locations(uid=uid, action=action, license_number=self.license_number)
         return response
 
-    def create_locations(self, names, types=[]):
+    def create_locations(self, names, types):
         """Create locations at the facility.
         Args:
             names (list): A list of location names.
@@ -263,6 +263,7 @@ class Strain(Model):
 
     @classmethod
     def create_from_json(cls, client, json):
+        """Initiate a class instance from a dictionary."""
         obj = cls(client, json)
         obj.create()
         return obj
@@ -358,6 +359,7 @@ class Item(Model):
 
     @classmethod
     def create_from_json(cls, client, license_number, json):
+        """Initiate a class instance from a dictionary."""
         new_obj = cls(client, json, license_number)
         new_obj.create(license_number)
         return new_obj
@@ -562,26 +564,26 @@ class Harvest(Model):
 
     B. Weight – The plant is weighed individually in its entirety after being cut from
     root ball (stem, stalk, bud/flower, leaves, trim leaves, etc.).
-    
+
     C. Waste – This can be recorded using multiple entries but must be reported
     within three days of destruction.
-    
+
     D. Package – Package and tag the product from the Harvest Batch (Fresh
     Cannabis Plant, Flower, Leaf or Kief). These packages must be strain
     specific.
-    
+
     E. Transfer – Licensee must create transfer manifest to move product to a
     Processor, Distributor, or Manufacturer.
-    
+
     F. Finish – When the Harvest Batch (HB) has been fully packaged, there should
     be remaining wet weight to account for moisture loss. Selecting Finish
     Harvest will attribute any remaining weight to moisture loss.
-    
+
     6. A Harvest Batch package of Flower, Leaf, Kief or Fresh Cannabis Plant can only
     be created from the Harvested Tab using a single strain from plants harvested at
     the same time.
     """
-    
+
     def create_packages(self, data):
         """Create packages from a harvest.
         Args:
@@ -612,12 +614,11 @@ class Harvest(Model):
             'ActualDate': get_timestamp()
         }
         self.client.remove_waste([data], license_number=self._license)
-    
+
     def finish(self):
         """Finish a harvest."""
         data = {'Id': self.uid, 'ActualDate': get_timestamp()}
         self.client.finish_harvests([data], license_number=self._license)
-    
 
     def unfinish(self):
         """Unfinish a harvest."""
@@ -640,7 +641,7 @@ class Harvest(Model):
 
 class Package(Model):
     """A class that represents a cannabis package.
-    
+
     Immature plants and seeds can be packaged by a nursery and
     transported by a distributor to a cultivator,
     distributor or retailer for sale.
@@ -701,11 +702,11 @@ class Package(Model):
         self.client.manage_packages([{'Label': self.label}], action='unfinish', license_number=self._license)
 
     def adjust(
-        self,
-        weight,
-        note='',
-        reason='Mandatory State Destruction',
-        uom='Grams'
+            self,
+            weight,
+            note='',
+            reason='Mandatory State Destruction',
+            uom='Grams'
     ):
         """Adjust the package.
         Args:
@@ -747,6 +748,7 @@ class Patient(Model):
 
     @classmethod
     def create_from_json(cls, client, json):
+        """Initiate a class instance from a dictionary."""
         obj = cls(client, json)
         obj.create()
         return obj
@@ -832,6 +834,7 @@ class PlantBatch(Model):
 
     @classmethod
     def create_from_json(cls, client, license_number, json):
+        """Initiate a class instance from a dictionary."""
         new_obj = cls(client, json, license_number)
         new_obj.create(license_number)
         return new_obj
@@ -886,6 +889,7 @@ class LabResult(Model):
 
     @classmethod
     def create_from_json(cls, client, license_number, json):
+        """Initiate a class instance from a dictionary."""
         new_obj = cls(client, json, license_number)
         new_obj.post(license_number)
         return new_obj
@@ -961,6 +965,7 @@ class Transfer(Model):
 
     @classmethod
     def create_from_json(cls, client, json):
+        """Initiate a class instance from a dictionary."""
         obj = cls(client, json)
         obj.create()
         return obj
@@ -1003,6 +1008,7 @@ class TransferTemplate(Model):
 
     @classmethod
     def create_from_json(cls, client, json):
+        """Initiate a class instance from a dictionary."""
         obj = cls(client, json)
         obj.create()
         return obj
@@ -1082,6 +1088,7 @@ class Transaction(Model):
 
     @classmethod
     def create_from_json(cls, client, json):
+        """Initiate a class instance from a dictionary."""
         obj = cls(client, json)
         obj.create()
         return obj
@@ -1149,6 +1156,7 @@ class Receipt(Model):
 
     @classmethod
     def create_from_json(cls, client, json):
+        """Initiate a class instance from a dictionary."""
         obj = cls(client, json)
         obj.create()
         return obj
@@ -1171,44 +1179,38 @@ class Receipt(Model):
         self.client.delete_receipt(self.id, self._license)
 
 
+class Waste(Model):
+    """A class that represents cannabis waste.
+    
+    A harvest batch is created and given a
+    unique Harvest Name when plants
+    or plant material are harvested.
 
+    Plant waste must be recorded within three business days of destruction. In Metrc
+    plant waste can be recorded by Immature Plant Lot, Flowering Plant or by
+    Location.
+    2. Waste can also be recorded by Harvest Batch. See Metrc User Guide for details.
+    3. When recording Flowering Plant waste, the waste from multiple plants can be
+    recorded as a single waste event but the flowering plants contributing to the
+    waste must be individually identified.
+    4. If a plant is no longer viable, the waste must be recorded prior to recording its
+    destruction.
+    5. The reason for the waste must be identified using the Waste Reasons defined by
+    the State of California as listed in Exhibit 38 below. Use of some Waste
+    Reasons may be limited to certain license types, as determined by the State.
 
+    """
+    pass
 
 #------------------------
 # Unused | Needed?
 #------------------------
 
-# class Driver(Model):
-#     """A class that represents a cannabis transfer driver."""
-#     pass
+class Driver(Model):
+    """A class that represents a cannabis transfer driver."""
+    pass
 
 
-# class Vehicle(Model):
-#     """A class that represents a cannabis transfer driver."""
-#     pass
-
-
-# class Waste(Model):
-#     """A class that represents a cannabis waste.
-    
-#     A harvest batch is created and given a
-#     unique Harvest Name when plants
-#     or plant material are harvested.
-
-#     Plant waste must be recorded within three business days of destruction. In Metrc
-#     plant waste can be recorded by Immature Plant Lot, Flowering Plant or by
-#     Location.
-#     2. Waste can also be recorded by Harvest Batch. See Metrc User Guide for details.
-#     3. When recording Flowering Plant waste, the waste from multiple plants can be
-#     recorded as a single waste event but the flowering plants contributing to the
-#     waste must be individually identified.
-#     4. If a plant is no longer viable, the waste must be recorded prior to recording its
-#     destruction.
-#     5. The reason for the waste must be identified using the Waste Reasons defined by
-#     the State of California as listed in Exhibit 38 below. Use of some Waste
-#     Reasons may be limited to certain license types, as determined by the State.
-
-#     """
-
-#     pass
-
+class Vehicle(Model):
+    """A class that represents a cannabis transfer driver."""
+    pass

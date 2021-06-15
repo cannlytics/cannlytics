@@ -60,9 +60,11 @@ class Analysis(Model):
     _collection = 'organizations/%s/analysis'
     analytes: list = List
     analyte_count: int = 0
-    public: bool = False
-    name: str = ''
     key: str = ''
+    name: str = ''
+    panel: bool = False
+    price: float = 0.0
+    public: bool = False
 
 
 @dataclass
@@ -297,10 +299,10 @@ class Organization(Model):
 class License(Model):
     """A state-issued cannabis license."""
     _collection = 'organizations/%s/licenses'
+    active_date: str = ''
     expiration_date: str = ''
     license_number: str = ''
     license_type: str = ''
-    start_date: str = ''
 
 
 @dataclass

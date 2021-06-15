@@ -1,14 +1,13 @@
 """
 URLs | Cannlytics API
 Created: 4/21/2021
-Updated: 4/25/2021
+Updated: 6/12/2021
 Description: API URLs to interface with cannabis analytics.
 """
 
 # External imports
 from django.urls import include, path
 from rest_framework import urlpatterns
-from rest_framework.urlpatterns import format_suffix_patterns
 
 # Internal imports
 from api import views
@@ -24,6 +23,7 @@ from api.projects import projects
 from api.results import results
 from api.samples import samples
 from api.transfers import transfers
+from api.traceability import traceability
 from api.users import users
 
 app_name = 'api' # pylint: disable=invalid-name
@@ -80,7 +80,7 @@ urlpatterns = [
     ])),
     path('organizations', include([
         path('', organizations.organizations),
-        path('/org_id>', organizations.organizations),
+        path('/<org_id>', organizations.organizations),
         path('/<org_id>/settings', organizations.organizations),
         # TODO: Handle with post requests?
         # path('/<org_id>/join/', organizations.join_organization),
@@ -98,16 +98,28 @@ urlpatterns = [
     #     path('/<uuid:test_id>', tests.tests),
     # ])),
     path('transfers', include([
-        path('', views.index),
-        path('/<uuid:transfer_id>', views.index),
+        path('', transfers.transfers),
+        path('/<uuid:transfer_id>', transfers.transfers),
+    ])),
+    path('traceability', include([
+        path('/delete-license', traceability.delete_license),
+        path('/employees', traceability.employees),
+        path('/employees/<license_number>', traceability.employees),
+        path('/items', traceability.items),
+        path('/items/<item_id>', traceability.items),
+        path('/lab-tests', traceability.lab_tests),
+        path('/lab-tests/<test_id>', traceability.lab_tests),
+        path('/locations', traceability.locations),
+        path('/locations/<area_id>', traceability.locations),
+        path('/packages', traceability.packages),
+        path('/packages/<package_id>', traceability.packages),
+        path('/strains', traceability.strains),
+        path('/strains/<strain_id>', traceability.strains),
+        path('/transfers', traceability.transfers),
+        path('/transfers/<transfer_id>', traceability.transfers),
     ])),
     path('regulations', views.regulations),
     path('create-key', auth.create_api_key),
     path('delete-key', auth.delete_api_key),
     path('get-keys', auth.get_api_key_hmacs),
 ]
-
-# Add optional format suffixes to the URLs,
-# so users can explicitely specify a formatm e.g. .json.
-# https://www.django-rest-framework.org/tutorial/2-requests-and-responses/
-# urlpatterns = format_suffix_patterns(urlpatterns)

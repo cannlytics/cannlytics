@@ -13,6 +13,7 @@ import { dashboard } from './dashboard/dashboard.js';
 import { intake } from './intake/intake.js';
 import { inventory } from './inventory/inventory.js';
 import { organizations } from './organizations/organizations.js';
+import { traceability } from './traceability/traceability.js';
 import { transfers } from './transfers/transfers.js';
 import { settings } from './settings/settings.js';
 import { theme } from './settings/theme.js';
@@ -27,6 +28,7 @@ export {
   intake,
   inventory,
   organizations,
+  traceability,
   transfers,
   settings,
   theme,

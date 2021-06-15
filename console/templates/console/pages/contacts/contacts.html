@@ -17,13 +17,13 @@
     <!-- Header -->
     <!-- Optional: Dynamically render tabs -->
     <div class="col pt-3 pb-2 mb-3">
-      <h1 class="fs-5 mb-0 lh-base mb-3">Clients</h1>
+      <h1 class="fs-5 mb-0 lh-base mb-3">Contacts</h1>
       <ul class="nav nav-tabs">
         <li class="nav-item">
           <a
             class="nav-link {% if section == 'records' %}active{% endif %}"
             aria-current="{% if section == 'records' %}page{% endif %}"
-            href="/clients/records"
+            href="/contacts/records"
           >
             Records
           </a>
@@ -32,7 +32,7 @@
           <a
             class="nav-link {% if section == 'marketing' %}active{% endif %}"
             aria-current="{% if section == 'marketing' %}page{% endif %}"
-            href="/clients/marketing"
+            href="/contacts/marketing"
           >
             Marketing
           </a>
@@ -41,7 +41,7 @@
           <a
             class="nav-link {% if section == 'notifications' %}active{% endif %}"
             aria-current="{% if section == 'notifications' %}page{% endif %}"
-            href="/clients/notifications"
+            href="/contacts/notifications"
           >
             Notifications
           </a>
@@ -50,7 +50,7 @@
           <a
             class="nav-link {% if section == 'logs' %}active{% endif %}"
             aria-current="{% if section == 'logs' %}page{% endif %}"
-            href="/clients/logs"
+            href="/contacts/logs"
           >
             Logs
           </a>
@@ -66,7 +66,7 @@
     <!-- Clients JavaScript -->
     {% comment %} {% block console_js %}
       <script>
-        cannlytics.clients.initialize();
+        cannlytics.contacts.initialize();
       </script>
     {% endblock console_js %} {% endcomment %}
 

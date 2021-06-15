@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<!--
+  Traceability Employee Page | Cannlytics Console
+  Created: 6/14/2021
+  Updated: 6/14/2021
+-->
+{% extends "console/pages/traceability/traceability.html" %}
+{% load icon %}
+{% block section %}
+
+  <!-- Header -->
+  <div class="px-3">
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-3">Employee {{ request.GET.id }}</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">
+      Manage information for the traceability system.
+    </h2>
+  </div>
+
+  <!-- Fields -->
+  <div class="mb-4 px-3">
+
+    <!-- Form -->
+    <!-- TODO: Render appropriate fields -->
+    <form id="employee-form">
+      <div class="col-6">
+
+        <!-- Field -->
+        <div class="d-flex row-md-3 mb-3">
+          <label class="form-label col-3 d-flex align-items-center mb-0">
+            Name
+          </label>
+          <input
+            type="text"
+            class="form-control form-control-sm col-8"
+            name="full_name"
+            disabled
+          >
+        </div>
+
+        <!-- Field -->
+        <div class="d-flex row-md-3 mb-3">
+          <label class="form-label col-3 d-flex align-items-center mb-0">
+            License Number
+          </label>
+          <input
+            type="text"
+            class="form-control form-control-sm col-8"
+            name="license.number"
+            disabled
+          >
+        </div>
+
+        <!-- Field -->
+        <div class="d-flex row-md-3 mb-3">
+          <label class="form-label col-3 d-flex align-items-center mb-0">
+            License Type
+          </label>
+          <input
+            type="text"
+            class="form-control form-control-sm col-8"
+            name="license.license_type"
+            disabled
+          >
+        </div>
+
+        <!-- Field -->
+        <div class="d-flex row-md-3 mb-3">
+          <label class="form-label col-3 d-flex align-items-center mb-0">
+            Start Date
+          </label>
+          <input
+            type="text"
+            class="form-control form-control-sm col-8"
+            name="license.start_date"
+            disabled
+          >
+        </div>
+
+        <!-- Field -->
+        <div class="d-flex row-md-3 mb-3">
+          <label class="form-label col-3 d-flex align-items-center mb-0">
+            End Date
+          </label>
+          <input
+            type="text"
+            class="form-control form-control-sm col-8"
+            name="license.end_date"
+            disabled
+          >
+        </div>
+
+      </div>
+    </form>
+
+    <!-- TODO: Allow the user to reset or save -->
+    <!-- Options -->
+    <div class="mt-3">
+      <a
+        class="btn btn-sm btn-secondary me-1"
+        href="/traceability/employees"
+      >
+        Back
+      </a>
+    </div>
+
+  </div><!-- End of license fields -->
+
+{% endblock section %}
+
+<!-- JavaScript -->
+{% block console_js %}
+  <script>
+    cannlytics.traceability.viewObject('employee');
+  </script>
+{% endblock console_js %}
+
+</html>

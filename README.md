@@ -100,6 +100,8 @@ EMAIL_HOST_PASSWORD=your-app-password
 GOOGLE_APPLICATION_CREDENTIALS=path/to/your/service/account.json
 ```
 
+You will need to grant your service key *Secret Manager Admin* permissions in [Cloud IAM Admin](https://console.cloud.google.com/iam-admin/iam).
+
 2.6. Finish by creating a `.firebasesrc` in the root directory with your [Firebase Hosting] references. For example
 
 ```json

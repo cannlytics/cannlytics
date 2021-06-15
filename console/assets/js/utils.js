@@ -16,14 +16,12 @@ export const authRequest = (endpoint, data, options) => new Promise((resolve, re
    * Make an authorized GET or POST request by
    * getting the user's ID token and exchanging it for a session cookie.
    */
-  getUserToken().then((idToken) => {
-    apiRequest(endpoint, data, options, idToken)
-      .then((data) => {
-        resolve(data);
-      });
-  }).catch((error) => {
-    reject(error);
-  });
+  getUserToken()
+    .then((idToken) => {
+      apiRequest(endpoint, data, options, idToken)
+        .then((data) => resolve(data));
+    })
+    .catch((error) => reject(error));
 });
 
 
@@ -53,6 +51,7 @@ export const apiRequest = (endpoint, data, options, idToken = null) => new Promi
       endpoint.search = new URLSearchParams(options.params).toString();
     }
   }
+  console.log('URL:', endpoint);
   fetch(endpoint, headers)
     .then(response => response.json())
     .then((data) => {
@@ -143,6 +142,27 @@ export const Password = {
   return data
 }
 
+export function formSerialize(form) {
+  /* Get data from a form. */
+  const data = new FormData(form);
+  //https://stackoverflow.com/a/44033425/1869660
+  return new URLSearchParams(data).toString();
+}
+
+export function formDeserialize(form, data) {
+  /* Populate a form given data. */
+  const entries = (new URLSearchParams(data)).entries();
+  for(const [key, val] of entries) {
+      //http://javascript-coder.com/javascript-form/javascript-form-value.phtml
+      const input = form.elements[key];
+      if (input) {
+        switch(input.type) {
+            case 'checkbox': input.checked = !!val; break;
+            default:         input.value = val;     break;
+        }
+      }
+  }
+}
 
 /*---------------------------------------------------------------------
  UI Helpers

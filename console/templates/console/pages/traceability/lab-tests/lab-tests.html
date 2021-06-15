@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<!--
+  Traceability Lab Tests Page | Cannlytics Console
+  Created: 6/13/2021
+  Updated: 6/14/2021
+  TODO:
+    * Get analyses
+    * Get lab statuses
+    * Get units of measurement
+    * Upload CoAs
+    * Release lab results
+-->
+{% extends "console/pages/traceability/traceability.html" %}
+{% block section %}
+
+  <!-- Table -->
+  <div class="card my-3">
+    <div class="card-body">
+      <h2 class="h6 mb-3 text-dark">Lab Tests</h2>
+      <div class="table-responsive">
+
+        <!-- No Data Placeholder -->
+        <!-- TODO: Only show placeholder if there is no data -->
+        <div id="data-placeholder">
+          {% include "console/components/placeholders/table_placeholder.html" with
+            height='200px'
+            image='console/images/illustrations/outline/lab_books.svg'
+            message='No lab tests were found for your active license.'
+            title='No Lab Tests Found'
+            url='/traceability/lab-tests/lab-test?new=true'
+            only
+          %}
+        </div>
+
+        <!-- AG Grid Table -->
+        <div id="data-table" class="d-none">
+          <div
+            id="lab-tests-table"
+            class="ag-theme-alpine-dark"
+            style="height: 326px; width:100%;"
+          ></div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- End of the table -->
+
+  <!-- TODO: Detail section or page -->
+  
+{% endblock section %}
+
+<!-- JavaScript -->
+{% block console_js %}
+
+  <script>
+    cannlytics.traceability.getLabTests(
+      'lab-tests-table',
+      '{{ organizations.0.uid }}',
+      '{{ organizations.0.licenses.0.license_number }}',
+      '{{ organizations.0.licenses.0.user_api_key_secret.version_id }}',
+    );
+  </script>
+
+{% endblock console_js %}
+</html>

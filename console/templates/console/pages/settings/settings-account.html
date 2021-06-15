@@ -1,15 +1,14 @@
 <!doctype html>
 <html>
-<!-- Account -->
-<!-- URL: settings/account -->
-<!-- Created 12/9/2020 -->
+<!--
+  Account Management Page | Cannlytics Console
+  Created: 12/9/2020
+  Updated: 6/13/2021
+-->
 {% extends "console/console.html" %}
 {% load static icon %}
 {% block console_body %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-
-  <!-- Inspiration -->
-  <!-- https://bbbootstrap.com/snippets/bootstrap-5-myprofile-90806631 -->
   
     <!-- Header -->
     {% include "console/components/notifications/breadcrumbs_dynamic.html" with
@@ -79,22 +78,23 @@
     </div>
 
     <!-- Options -->
+    <!-- TODO: Implement reset and save functionality-->
     <button
       type="button"
-      class="btn btn-primary btn-sm"
-      style="width:8rem;"
+      class="btn btn-sm btn-secondary"
+      onclick="cannlytics.settings.exportAccount()"
+    >
+      Reset
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm bg-gradient-green text-white"
       onclick="cannlytics.settings.saveAccount()"
     >
       Save
     </button>
-    <button
-      type="button"
-      class="btn btn-secondary btn-sm"
-      style="width:8rem;"
-      onclick="cannlytics.settings.exportAccount()"
-    >
-      Export
-    </button>
+
+    <!-- TODO: Implement set pin and set signature functionality -->
 
     <!-- Other Account options -->
     <h2 class="h6 mt-5 mb-0">Other account options</h2>

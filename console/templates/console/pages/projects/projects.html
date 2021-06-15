@@ -11,15 +11,6 @@
 {% block console_body %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
-    <!-- TODO: Notification if user has no organization -->
-    {% if not organization %}
-      <div class="alert alert-info d-flex mt-3" role="alert">
-        {% icon 'alert-triangle' height="16" width="16"%} &nbsp;
-        An organization is required to create projects. &nbsp;
-        <a href="/organizations/new">Create or join an organization</a>.
-      </div>
-    {% endif %}
-
     <!-- Header-->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
       <h1 class="fs-5 mb-0 lh-base">Projects</h1>

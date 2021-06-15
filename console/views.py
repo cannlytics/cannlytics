@@ -11,6 +11,8 @@ from django.views.generic.base import TemplateView
 from django.http import HttpResponse
 
 # Internal imports
+from api.auth import auth
+from cannlytics.firebase import get_collection, get_document
 from console.state import layout
 from console.utils import (
     get_model_context,
@@ -43,9 +45,11 @@ class ConsoleView(TemplateView):
         unit = self.kwargs.get('unit', section)
         return [
             f'{BASE}/pages/{screen}/{unit}.html',
+            f'{BASE}/pages/{screen}/{section}/{unit}.html',
             f'{BASE}/pages/{screen}/{screen}-{section}-{unit}.html',
             f'{BASE}/pages/{screen}/{section}.html',
             f'{BASE}/pages/{screen}/{screen}-{section}.html',
+            f'{BASE}/pages/{screen}/{section}/{section}.html',
             f'{BASE}/pages/{screen}/{screen}.html',
             f'{BASE}/pages/general/{screen}/{screen}-{section}.html',
             f'{BASE}/pages/general/{screen}/{section}.html',
@@ -66,11 +70,26 @@ class ConsoleView(TemplateView):
             context['dashboard'] = layout['dashboard']
         context = get_page_context(self.kwargs, context)
         context = get_page_data(self.kwargs, context)
-        context = get_user_context(self.request, context)
-        context = get_model_context(context)
-        # Optional: Get user-defined fields for each model.
-        print('Orgs:', context.get('organizations'))
+        # context = get_user_context(self.request, context)
+        # context = get_model_context(context)
+        context['organizations'] = self.request.session['organizations']
+        context['user'] = self.request.session['user']
         return context
+
+    def get(self, request, *args, **kwargs):
+        """Get data before rendering context. The session is verified
+        if there is not a user ID (`uid`) in the session. Data collected
+        includes: user, organizations."""
+        uid = request.session.get('uid')
+        if not uid:
+            user_claims = auth.verify_session(request)
+            uid = user_claims.get('uid')
+            request.session['uid'] = uid
+        query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
+        organizations = get_collection('organizations', filters=[query])
+        request.session['organizations'] = organizations
+        request.session['user'] = get_document(f'users/{uid}')
+        return super().get(request, *args, **kwargs)
 
 
 #-----------------------------------------------------------------------

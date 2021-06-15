@@ -4,6 +4,7 @@ Metrc Integration Test | Cannlytics
 Author: Keegan Skeate
 Contact: keegan@cannlytics.com
 Created: Mon Mar 29 14:18:18 2021
+Updated: 6/14/2021
 License: MIT License
 
 Description:
@@ -35,7 +36,7 @@ from time import sleep
 
 # Import cannlytics locally for testing.
 import sys
-sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath('../../../'))
 from cannlytics import firebase as fb
 from cannlytics.traceability import metrc # pylint: disable=no-name-in-module, import-error
 from cannlytics.traceability.metrc.exceptions import MetrcAPIError # pylint: disable=no-name-in-module, import-error
@@ -66,7 +67,7 @@ if __name__ == '__main__':
     today = current_time[:10]
 
     # Initialize Firebase.
-    config = dotenv_values('../../.env')
+    config = dotenv_values('../../../.env')
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config['GOOGLE_APPLICATION_CREDENTIALS']
     db = fb.initialize_firebase()
 

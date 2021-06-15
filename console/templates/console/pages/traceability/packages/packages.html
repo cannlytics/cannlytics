@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<!--
+  Traceability Packages Page | Cannlytics Console
+  Created: 6/13/2021
+  Updated: 6/14/2021
+  TODO:
+    - Search by UID for a package.
+    - Search by label for a package.
+    - Filter by types: active, inactive, onhold
+    - Get supplemental data: types, adjust/reasons
+    * Create a package
+    * Change package items
+    * Update package item locations
+    * Manage packages (adjust, finish, unfinish, remediate)
+    * Update package note
+-->
+{% extends "console/pages/traceability/traceability.html" %}
+
+{% block section %}
+
+  <!-- Table -->
+  <div class="my-3 px-3">
+    <h2 class="h6 mb-3 text-dark">Packages</h2>
+    <div class="table-responsive">
+
+      <!-- Placeholder if no data -->
+      <div id="data-placeholder">
+        {% include "console/components/placeholders/table_placeholder.html" with
+          height='200px'
+          image='console/images/illustrations/outline/lab_reagents.svg'
+          message='No packages were found for your active license.'
+          title='No Packages Found'
+          url='/traceability/packages/packages?new=true'
+          only
+        %}
+      </div>
+
+      <!-- AG Grid Table -->
+      <div id="data-table" class="d-none">
+        <div
+          id="packages-table"
+          class="ag-theme-alpine-dark"
+          style="height: 326px; width:100%;"
+        ></div>
+      </div>
+
+    </div>
+  </div><!-- End of the table -->
+
+{% endblock section %}
+
+<!-- JavaScript -->
+{% block console_js %}
+
+  <script>
+    cannlytics.traceability.getPackages(
+      'packages-table',
+      '{{ organizations.0.uid }}',
+      '{{ organizations.0.licenses.0.license_number }}',
+      '{{ organizations.0.licenses.0.user_api_key_secret.version_id }}',
+    );
+  </script>
+
+{% endblock console_js %}
+</html>
