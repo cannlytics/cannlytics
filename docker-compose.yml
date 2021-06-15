@@ -1,0 +1,11 @@
+#version: "3.9"
+version: "3.3"
+services:
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - docker.env
+  # redis:
+  #   image: "redis:alpine"

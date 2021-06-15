@@ -323,7 +323,20 @@ docker push cannlytics
 
 # run docker
 docker run -dp 8080:8080 --env-file docker.env cannlytics
-# 
+
+```
+
+or with docker compose:
+
+```
+# bring up containers
+docker-compose up -d
+
+# bring down
+docker-compose down
+
+# logs
+docker-compose logs
 
 ```
 
