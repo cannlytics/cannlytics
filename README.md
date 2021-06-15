@@ -19,6 +19,7 @@ Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software de
   * [Templates](#templates)
   * [Style](#style)
   * [Text](#text)
+  * [Docker](#Docker)
 - [Testing](#testing)
 - [Publishing](#publishing)
 - [Contributing](#contributing)
@@ -311,6 +312,20 @@ All text material is either stored in JSON in `state.py` or written in Markdown 
 Resources:
 
 * [`python-markdown` Extensions](https://python-markdown.github.io/extensions/)
+
+### Docker <a name="Docker"></a>
+```
+# build docker image
+docker build -t cannlytics .
+
+# docker push to container registry. 
+docker push cannlytics 
+
+# run docker
+docker run -dp 8080:8080 --env-file docker.env cannlytics
+# 
+
+```
 
 ## Documentation <a name="documentation"></a>
 
