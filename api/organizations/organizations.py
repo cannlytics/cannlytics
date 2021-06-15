@@ -163,7 +163,8 @@ def organizations(request, format=None, org_id=None):
         # All organizations have a unique `org_id`.
         else:
             doc = {}
-            doc['uid'] = slugify(data['name'])
+            org_id = slugify(data['name'])
+            doc['uid'] = org_id
             doc['team'] = [uid]
             doc['owner'] = uid
 
