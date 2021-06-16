@@ -110,7 +110,7 @@ def items(request):
 
     # Get data.
     if request.method == 'GET':
-        objs = track.get_items(license_number=license_number)
+        objs = track.get_items(license_number=license_number, uid='243821')
         data = [obj.to_dict() for obj in objs]
         print('Retrieved the data:', data)
         return Response({'data': data}, content_type='application/json')
@@ -205,8 +205,11 @@ def packages(request):
 
     # Get data.
     if request.method == 'GET':
-        objs = track.get_packages(license_number=license_number, action='inactive')
-        data = [obj.to_dict() for obj in objs]
+        objs = track.get_packages(license_number=license_number, label='1A40E0100001BD1000000327')
+        try:
+            data = [obj.to_dict() for obj in objs]
+        except TypeError:
+            data = [objs.to_dict()]
         return Response({'data': data}, content_type='application/json')
 
     # TODO: Create / update packages.
@@ -275,7 +278,7 @@ def transfers(request):
         # license_number=''
         # start=''
         # end=''
-        objs = track.get_transfers(license_number=license_number)
+        objs = track.get_transfers(license_number=license_number, uid='0000071448')
         data = [obj.to_dict() for obj in objs]
         print('Retrieved the data:', data)
         return Response({'data': data}, content_type='application/json')

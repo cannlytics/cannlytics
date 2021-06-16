@@ -71,6 +71,36 @@
    {% endcomment %}
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous">
   </script>
+  
+  <!-- DEV: Keep Python GUI Alive -->
+  
+  <!-- https://github.com/ClimenteA/flaskwebgui -->
+  {% comment %}
+  <script>
+   async function getRequest(url='') {
+        const response = await fetch(url, {
+          method: 'GET', 
+          cache: 'no-cache'
+        })
+        return response.json()
+    }
+      
+    document.addEventListener('DOMContentLoaded', function() {
+
+    let url = document.location
+    let route = "/keep-server-alive"
+    let interval_request = 3 * 1000 //sec
+
+    function keep_alive_server(){
+        getRequest(url + route)
+        .then(data => console.log(data))
+    }
+
+    setInterval(keep_alive_server, interval_request)()
+
+    })
+  </script>
+  {% endcomment %}
  </body>
 </html>
 {% block page_js %}{% endblock page_js %}

@@ -84,7 +84,10 @@ class ConsoleView(TemplateView):
         if not uid:
             user_claims = auth.verify_session(request)
             uid = user_claims.get('uid')
-            request.session['uid'] = uid
+            if not uid:
+                request.session['organizations'] = []
+                request.session['user'] = {}
+                return super().get(request, *args, **kwargs)
         query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
         organizations = get_collection('organizations', filters=[query])
         request.session['organizations'] = organizations

@@ -227,15 +227,9 @@ def clean_licensee_records(records):
 
 if __name__ == '__main__':
 
-    # Dynamic data directory.
-    try:
-        directory = sys.argv[1]
-    except IndexError:
-        directory = r'C:\Users\keega\Documents\cannlytics\data\state_data\OK'
-
     # Download all licensee lists to a new folder in the directory.
     date = datetime.now().isoformat()[:10]
-    licensee_folder = os.path.join(directory, date)
+    licensee_folder = os.path.join('.datasets', date)
     licensee_files = []
     for url in LICENSEE_LISTS:
         files = download_website_pdfs(url, licensee_folder)
@@ -262,7 +256,7 @@ if __name__ == '__main__':
     file_name = f'Oklahoma Data Snapshot {date}'
     ext = 'csv'
     raw_excise_tax_data = pd.read_csv(
-        f'{directory}/{file_name}.{ext}',
+        f'.datasets/{file_name}.{ext}',
         skiprows=4
     )
     
