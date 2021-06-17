@@ -51,8 +51,8 @@ class ConsoleView(TemplateView):
             f'{BASE}/pages/{screen}/{screen}-{section}.html',
             f'{BASE}/pages/{screen}/{section}/{section}.html',
             f'{BASE}/pages/{screen}/{screen}.html',
-            f'{BASE}/pages/general/{screen}/{screen}-{section}.html',
-            f'{BASE}/pages/general/{screen}/{section}.html',
+            f'{BASE}/pages/misc/{screen}/{screen}-{section}.html',
+            f'{BASE}/pages/misc/{screen}/{section}.html',
         ]
 
     def get_context_data(self, **kwargs):
@@ -117,14 +117,14 @@ class LoginView(TemplateView):
 def handler404(request, *args, **argv): #pylint: disable=unused-argument
     """Handle missing pages."""
     status_code = 404
-    template = f'{BASE}/pages/general/error-pages/{status_code}.html'
+    template = f'{BASE}/pages/general/errors/{status_code}.html'
     return render(request, template, {}, status=status_code)
 
 
 def handler500(request, *args, **argv): #pylint: disable=unused-argument
     """Handle internal errors."""
     status_code = 500
-    template = f'{BASE}/pages/general/error-pages/{status_code}.html'
+    template = f'{BASE}/pages/general/errors/{status_code}.html'
     return render(request, template, {}, status=status_code)
 
 
