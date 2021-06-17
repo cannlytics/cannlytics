@@ -34,8 +34,8 @@ material = {
         ],
         "options": [
             {"title": "Change your password", "url": "/account/password-reset"},
-            {"title": "Set your pin", "url": "/settings/account/pin"},
-            {"title": "Set your signature", "url": "/settings/account/signature"},
+            # {"title": "Set your pin", "url": "/settings/account/pin"},
+            # {"title": "Set your signature", "url": "/settings/account/signature"},
         ],
     },
     "analysis": {

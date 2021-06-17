@@ -1,3 +1,3 @@
-# 
+# Invoices Endpoint `/api/invoices`
 
 

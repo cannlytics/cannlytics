@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Feb  6 18:38:45 2021
-
-@author: keega
+LIMS Module | Cannlytics
+Author: Keegan Skeate <keegan@cannlytics.com>
+Created: 2/6/2021
+Updated: 6/17/2021
 """
-
-def initialize_lims():
-    """Initialize LIMS."""

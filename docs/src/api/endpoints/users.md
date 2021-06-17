@@ -1,3 +1,2 @@
-# 
-
+## Users Endpoint `/api/users`
 

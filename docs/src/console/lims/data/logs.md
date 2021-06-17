@@ -1,6 +1,6 @@
 # Log Data
 
-The Cannlytics engine is built to provide true traceability. Two core principles of the Cannlytics philosophy are:
+Logs are an important part of the quality control system. Cannlytics is built to provide true traceability. Two core principles of our philosophy are:
 
 1. Never throw away data.
 2. Archive everything.
@@ -9,4 +9,4 @@ Cannlytics logs provide an immutable ledger. Every action involving data is know
 
 The key is a well-structured database. Leveraging a NoSQL database, Cannlytics is able to store a phenomenal number of logs and extraordinarily low cost. The value of the data, having traceable, rich lab results, far outweighs the cost of the lightweight data storage. You have access to rich logs that can be used to discover trends, outliers, abnormalities, and other non-obvious relationships.
 
-If you opt into Cannlytcs logging, then your logs can be used for statistics in your reports.
+If you opt into Cannlytics logging, then your logs can be used for statistics in your reports.

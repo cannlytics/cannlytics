@@ -36,7 +36,7 @@ CONFIG = {
                 {
                     "name": "",
                     "key": "",
-                    "instrument_key": "",
+                    "import_key": "",
                     "loq": 0,
                     "limit": 0,
                 }

@@ -1,0 +1,3 @@
+# Projects Endpoint `/api/projects`
+
+
