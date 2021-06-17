@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 
 # Django directories.
 APP = 'console'
+DEVELOPMENT_FILE = 'docs/src/developers/development.md'
 MODULE_DIR = f'{APP}/plugins/cannlytics'
 STATIC_DIR = f'./{APP}/static/{APP}/'
 TEMPLATE_DIR = f'./{APP}/templates/{APP}/'
@@ -118,4 +119,4 @@ if __name__ == '__main__':
     # TODO: Update version number in Readme.md
 
     # Copy the Readme to the docs directory.
-    copyfile('README.md', 'docs/src/cannlytics/dev/development.md')
+    copyfile('README.md', DEVELOPMENT_FILE)

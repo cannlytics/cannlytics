@@ -1,18 +1,18 @@
 {
   "projects": {
-    "default": "your-lims"
+    "default": "cannlytics"
   },
   "targets": {
-    "your-lims": {
+    "cannlytics": {
       "hosting": {
         "docs": [
-          "your-docs"
+          "cannlytics-docs"
         ],
         "dev": [
-          "your-dev"
+          "cannlytics-dev"
         ],
         "production": [
-          "your-lims"
+          "cannlytics-console"
         ]
       }
     }

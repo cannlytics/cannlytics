@@ -7,7 +7,7 @@
 
 import { auth, changePhotoURL, storageErrors } from '../firebase.js';
 import { authRequest, hasClass, Password, serializeForm, slugify, showNotification } from '../utils.js';
-import { uploadUserPhoto } from '../settings/user.js';
+// import { uploadUserPhoto } from '../settings/user.js';
 
 export const dashboard = {
 
@@ -211,23 +211,23 @@ function signUp(email) {
 }
 
 // Moved to settings/user.js
-// function uploadUserPhoto() {
-//   /*
-//    * Upload a user's photo through the API.
-//    */
-//   if (this.files.length) {
-//     showNotification('Uploading photo', 'Uploading your profile picture...', { type: 'wait' });
-//     changePhotoURL(this.files[0]).then((downloadURL) => {
-//       authRequest('/api/users', { photo_url: downloadURL });
-//       document.getElementById('user-photo-url').src = downloadURL;
-//       document.getElementById('userPhotoNav').src = downloadURL;
-//       document.getElementById('userPhotoMenu').src = downloadURL;
-//       showNotification('Uploading photo complete', 'Successfully uploaded your profile picture.', { type: 'success' });
-//     }).catch((error) => {
-//       showNotification('Photo Change Error', storageErrors[error.code], { type: 'error' });
-//     });
-//   }
-// }
+function uploadUserPhoto() {
+  /*
+   * Upload a user's photo through the API.
+   */
+  if (this.files.length) {
+    showNotification('Uploading photo', 'Uploading your profile picture...', { type: 'wait' });
+    changePhotoURL(this.files[0]).then((downloadURL) => {
+      authRequest('/api/users', { photo_url: downloadURL });
+      document.getElementById('user-photo-url').src = downloadURL;
+      document.getElementById('userPhotoNav').src = downloadURL;
+      document.getElementById('userPhotoMenu').src = downloadURL;
+      showNotification('Uploading photo complete', 'Successfully uploaded your profile picture.', { type: 'success' });
+    }).catch((error) => {
+      showNotification('Photo Change Error', storageErrors[error.code], { type: 'error' });
+    });
+  }
+}
 
 
 function uploadOrgPhoto(orgId) {
