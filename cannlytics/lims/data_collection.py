@@ -97,4 +97,8 @@ def import_agilent_gc_terpenes(file_name):
 
     return samples
 
-print(import_agilent_gc_terpenes('/Users/alienfoo/Documents/DataSets/cannlytics/cannlytics/lims/REPORT01.xls'))
+# This is the same as residual solvents, added the function in case it needs to be customized
+def import_agilent_cannbinoids(file_name):
+    return import_agilent_gc_residual_solvments(file_name)
+
+print(import_agilent_cannbinoids('/Users/alienfoo/Documents/DataSets/cannlytics/cannlytics/lims/cannabinoid.xls'))
