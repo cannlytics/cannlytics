@@ -79,3 +79,4 @@ docs/build
 
 # Ignore datasets created or retrived with data tools.
 *.datasets
+.DS_Store
