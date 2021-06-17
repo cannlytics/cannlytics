@@ -1,1 +1,1 @@
-# Installing Cannlytics
+# Installation

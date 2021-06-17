@@ -136,7 +136,7 @@ material = {
     "pin": {
         "breadcrumbs": [
             {"title": "Settings", "url": "/settings"},
-            {"title": "Account", "url": "/settings/account"},
+            {"title": "User Settings", "url": "/settings/user"},
             {"title": "Pin", "active": True},
         ],
     },
@@ -163,7 +163,7 @@ material = {
     "signature": {
         "breadcrumbs": [
             {"title": "Settings", "url": "/settings"},
-            {"title": "Account", "url": "/settings/account"},
+            {"title": "User Settings", "url": "/settings/user"},
             {"title": "Signature", "active": True},
         ],
     },

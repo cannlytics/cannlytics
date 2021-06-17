@@ -24,7 +24,7 @@
         {
           "source": "**",
           "run": {
-            "serviceId": "your-lims",
+            "serviceId": "cannlytics",
             "region": "us-central1"
           }
         }
@@ -43,21 +43,21 @@
         {
           "source": "!/sitemap",
           "run": {
-            "serviceId": "your-lims",
+            "serviceId": "cannlytics",
             "region": "us-central1"
           }
         },
         {
           "source": "!/static",
           "run": {
-            "serviceId": "your-lims",
+            "serviceId": "cannlytics",
             "region": "us-central1"
           }
         },
         {
           "source": "**",
           "run": {
-            "serviceId": "your-lims",
+            "serviceId": "cannlytics",
             "region": "us-central1"
           }
         }

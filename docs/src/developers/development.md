@@ -11,15 +11,15 @@ Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software de
 - [Architecture](#architecture)
 - [Development](#development)
   * [Authentication](#authentication)
+  * [Running the project for development](#running)
   * [Data](#data)
   * [File Storage](#storage)
   * [Email](#email)
-  * [Webpack](#webpack)
   * [Views](#views)
   * [Templates](#templates)
   * [Style](#style)
   * [Text](#text)
-  * [Docker](#Docker)
+  * [Building and running the project with Docker](#docker)
 - [Testing](#testing)
 - [Publishing](#publishing)
 - [Contributing](#contributing)
@@ -154,7 +154,13 @@ Cannlytics is built with [Python] and leverages the [Django] framework. Cannlyti
   * [Cloud Secret Manager] for storing configurations and keeping secrets secret.
     <!-- * *Optional* [Cloud SQL](https://cloud.google.com/sql) can be utilized if desired. -->
 
-The architecture of the Cannlytics app is as follows.
+Cannlytics generally follows a model-template-view (MTV) architectural pattern, where:
+
+* The **model** is Django, the engine that sends requests to views.
+* The **views** are Python functions that describe the data to be presented.
+* The **templates** are Django HTML files that describe how the data is presented.
+
+Cannlytics favors a [domain-style code structure](https://stackoverflow.com/questions/40233657/ddd-what-is-proper-code-structure) for apps and material that will be edited frequently and a [ducks-style code structure](https://www.etatvasoft.com/insights/react-design-patterns-and-structures-of-redux-and-flux/) for concepts within the apps. Ducks 🦆 can inherit properties if needed and are encouraged to be individualized and self-contained as possible. The architecture of the Cannlytics app is as follows.
 
 ```bash
 ├── .admin
@@ -246,6 +252,44 @@ Below is a diagram that depicts how Cannlytics leverages [Firebase Authenticatio
 
 Original image: [How to authenticate users on Google App Engine using Firebase](https://cloud.google.com/blog/products/gcp/how-to-authenticate-users-on-google-app-engine-using-firebase)
 
+### Running the project for development <a name="running"></a>
+
+Hot-reloading is an important tool of development. You can use `django-livereload-server`, which uses both [python-livereload](https://github.com/lepture/python-livereload) and [django-livereload](https://github.com/Fantomas42/django-livereload), for smooth reloading. You can install [django-live-reload-server](https://github.com/tjwalch/django-livereload-server) with:
+
+```shell
+pip install django-livereload-server
+```
+
+You can start hot-reloading by starting the `livereload` server:
+
+```shell
+python manage.py livereload
+```
+
+In another console, you start the Django development server as usual:
+
+```shell
+python manage.py runserver
+```
+
+You can build the static assets, JavaScript and CSS, utilizing [Webpack](https://webpack.js.org/). The JavaScript bundle is a JavaScript module and is callable from the user interface with the `cannlytics` namespace. You can run the build for development with:
+
+```shell
+webpack-dev-server --env production=False
+```
+
+or
+
+```shell
+npm run webpack
+```
+
+It is an inconvenience to run multiple consoles, but a major convenience to have smooth hot-reloading. So, [`npm-run-all`](https://www.npmjs.com/package/npm-run-all) is used to run multiple servers in the same console for smooth development. When you are setup, you can run the project for development simply with:
+
+```shell
+npm run start
+```
+
 ### Data <a name="data"></a>
 
 Cannlytics operates with a NoSQL database, [Firestore] by default. You can conceptualize every entity as a JSON object called a document. A group of documents is a collection. Every document is required to be a member of a collection.
@@ -288,10 +332,6 @@ echo EMAIL_HOST_PASSWORD=\"your-app-password\" >> .env
 gcloud secrets versions add cannlytics_settings --data-file .env
 ```
 
-### Webpack <a name="webpack"></a>
-
-Note that [Webpack](https://webpack.js.org/) is utilized for bundling CSS and JavaScript. The JavaScript bundle is a JavaScript module and is callable from the user interface with the `cannlytics` namespace.
-
 ### Views <a name="views"></a>
 
 Views are Python functions that describe the data to be presented. [Django describes views](https://docs.djangoproject.com/en/3.1/intro/tutorial03/#write-views-that-actually-do-something) in the following quote.
@@ -304,8 +344,33 @@ Templates are Django HTML files that describe how the data is presented. Default
 
 ### Style <a name="style"></a>
 
-Style distinguishes one site from another. You are free and encouraged to modify the style to create a site that is uniquely yours.
-<!-- See [style.md](style.md) for a guide on the personal website's style. -->
+Style distinguishes one site from another. You are free and encouraged to modify the style to create a site that is uniquely yours. See [style.md](style.md) for a guide on the personal website's style. [Bootstrap](https://getbootstrap.com/docs/4.5/getting-started/introduction/) is used for styling templates. You can install Bootstrap with:
+
+```shell
+npm install bootstrap
+npm install style-loader --save
+```
+
+The main Cannlytics colors are:
+
+* Cannlytics Orange: #ff5733
+* Cannlytics Light Orange: #ffa600
+* Cannlytics Dark Orange: #e53a23
+* Cannlytics Green: #45B649
+* Cannlytics Light Green: #96e6a1
+* Cannlytics Dark Green: #3f7f34
+* Cannlytics Darkest Green: #104607
+
+The main Cannlytics fonts are:
+
+* [Libre Franklin (Headlines)](https://fonts.google.com/specimen/Libre+Franklin)
+* [Libre Baskerville (Body)](https://fonts.google.com/specimen/Libre+Baskerville)
+* [Montserrat](https://fonts.google.com/specimen/Montserrat?query=Montserrat)
+
+Useful open source icon sets include:
+
+- [Feather Icons](https://feathericons.com/)
+- [Material Icons](https://fonts.google.com/icons)
 
 
 ### Text Material <a name="text"></a>
@@ -316,7 +381,7 @@ Resources:
 
 * [`python-markdown` Extensions](https://python-markdown.github.io/extensions/)
 
-### Docker <a name="Docker"></a>
+### Building and running the project with Docker <a name="docker"></a>
 
 First, create a `docker.env` file in the project's root directory using the variables found in `.env.example`. You can [build the application in a Docker container image](https://docs.docker.com/get-started/02_our_app/#build-the-apps-container-image) with:
 
@@ -411,7 +476,7 @@ docker push gcr.io/your-lims/cannlytics
 
 ## Publishing <a name="publishing"></a>
 
-See [the publishing guide](publishing.md) for complete instructions on how to publish the Cannlytics Engine for use. After setup, publishing is done with one command:
+See [the publishing guide](docs/src/app/dev/publishing.md) for complete instructions on how to publish the Cannlytics Engine for use. After setup, publishing is done with one command:
 
 ```shell
 npm run publish
@@ -443,7 +508,7 @@ firebase deploy --only hosting:production
 
 ## Contributing <a name="contributing"></a>
 
-Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](contributing.md) to get started. Anyone is welcome to contribute anything. Email <dev@cannlytics.com> for a quick onboarding. Currently, the Cannlytics Console would love:
+Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](docs/src/about/dev/contributing.md) to get started. Anyone is welcome to contribute anything. Email <dev@cannlytics.com> for a quick onboarding. Currently, the Cannlytics Console would love:
 
 * Art;
 * More code;
