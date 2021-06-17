@@ -1,3 +1,2 @@
-# 
-
+# Inventory Endpoint `/api/inventory`
 

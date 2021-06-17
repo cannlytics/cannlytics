@@ -1,11 +1,12 @@
 {
   "name": "cannlytics",
-  "version": "0.0.5",
-  "description": "The Cannlytics Platform, including the website, console, documentation, and tools.",
+  "version": "0.0.6",
+  "description": "Cannlytics includes a LIMS, a console, documentation, a website, and vast amount of tools for cannabis analytics.",
   "keywords": [
     "cannabis",
     "analytics",
-    "python"
+    "python",
+    "LIMS"
   ],
   "homepage": "https://cannlytics.com",
   "bugs": {

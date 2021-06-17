@@ -1,12 +1,13 @@
 /**
  * Dashboard JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Author: Keegan Skeate <keegan@cannlytics.com>
  * Created: 12/3/2020
  * Updated: 6/10/2021
  */
 
 import { auth, changePhotoURL, storageErrors } from '../firebase.js';
 import { authRequest, hasClass, Password, serializeForm, slugify, showNotification } from '../utils.js';
+import { uploadUserPhoto } from '../settings/user.js';
 
 export const dashboard = {
 
@@ -25,7 +26,6 @@ export const dashboard = {
         }
         else if (stage === 'organization') {
           initializeGetStartedOrganizationUI({});
-          // authRequest('/api/organizations/${orgId}').then((data) => initializeGetStartedOrganizationUI(data));
         }
       }
     });
@@ -69,7 +69,6 @@ export const dashboard = {
     /*
      * Save's a user's organization choice.
      */
-    // FIXME:
     const elements = document.getElementById('create-organization-form').elements;
     const data = {};
     for (let i = 0 ; i < elements.length ; i++) {
@@ -77,15 +76,13 @@ export const dashboard = {
       if (item.name) data[item.name] = item.value;
     }
     const orgId = slugify(data['name'])
-    console.log('Org ID:', orgId);
-    console.log('Data to upload:', data);
     authRequest(`/api/organizations`, data).then((response) => {
-      console.log('Saved org:', response);
-      // TODO: Show better error messages.
-      // TODO: Tell user if organization name is already taken
+      // Optional: Show better error messages.
+      // Optional: Tell user if organization name is already taken
       if (response.error) {
         showNotification('Organization request failed', response.message, { type: 'error' });
       } else {
+        // Optional: Navigate straight to the dash if the user requested to join an organization.
         // showNotification('Organization request sent', response.message, { type: 'success' });
         document.location.href = `/get-started/support/?from=${orgType}`;
       }
@@ -105,7 +102,7 @@ export const dashboard = {
         document.location.href = `/get-started/organization/?from=${type}`;
       }).catch((error) => {
         showNotification('Sign up error', error.message, { type: 'error' });
-        // TODO: Show error class if invalid (.is-invalid)
+        // Optional: Show error class (.is-invalid) if invalid
       });
     } else {
       if (data.email !== user.email) {
@@ -157,13 +154,13 @@ export const dashboard = {
   },
 
 
-  chooseUserPhoto() {
-    /*
-     * Choose a file to upload.
-     */
-    const fileSelect = document.getElementById('userPhotoUrl');
-    fileSelect.click();
-  },
+  // chooseUserPhoto() {
+  //   /*
+  //    * Choose a file to upload.
+  //    */
+  //   const fileSelect = document.getElementById('userPhotoUrl');
+  //   fileSelect.click();
+  // },
 
 
   choosePhoto() {
@@ -213,25 +210,24 @@ function signUp(email) {
   // var password = document.getElementById('login-password').value;
 }
 
-
-function uploadUserPhoto() {
-  /*
-   * Upload a user's photo through the API.
-   */
-  // FIXME:
-  if (this.files.length) {
-    showNotification('Uploading photo', 'Uploading your profile picture...', { type: 'wait' });
-    changePhotoURL(this.files[0]).then((downloadURL) => {
-      authRequest('/api/users', { photo_url: downloadURL });
-      document.getElementById('user-photo-url').src = downloadURL;
-      document.getElementById('userPhotoNav').src = downloadURL;
-      document.getElementById('userPhotoMenu').src = downloadURL;
-      showNotification('Uploading photo complete', 'Successfully uploaded your profile picture.', { type: 'success' });
-    }).catch((error) => {
-      showNotification('Photo Change Error', storageErrors[error.code], { type: 'error' });
-    });
-  }
-}
+// Moved to settings/user.js
+// function uploadUserPhoto() {
+//   /*
+//    * Upload a user's photo through the API.
+//    */
+//   if (this.files.length) {
+//     showNotification('Uploading photo', 'Uploading your profile picture...', { type: 'wait' });
+//     changePhotoURL(this.files[0]).then((downloadURL) => {
+//       authRequest('/api/users', { photo_url: downloadURL });
+//       document.getElementById('user-photo-url').src = downloadURL;
+//       document.getElementById('userPhotoNav').src = downloadURL;
+//       document.getElementById('userPhotoMenu').src = downloadURL;
+//       showNotification('Uploading photo complete', 'Successfully uploaded your profile picture.', { type: 'success' });
+//     }).catch((error) => {
+//       showNotification('Photo Change Error', storageErrors[error.code], { type: 'error' });
+//     });
+//   }
+// }
 
 
 function uploadOrgPhoto(orgId) {
@@ -239,11 +235,7 @@ function uploadOrgPhoto(orgId) {
    * Upload a photo for an organization through the API.
    */
   if (this.files.length) {
-
-    // Show a notification.
     showNotification('Uploading photo', 'Uploading your organization picture...', { type: 'wait' });
-    
-    // Fill the photo into the UI.
     changePhotoURL(this.files[0]).then((downloadURL) => {
       authRequest('/api/organizations', { photo_url: downloadURL, uid: orgId });
       document.getElementById('org-photo-url').src = downloadURL;
@@ -287,15 +279,6 @@ function initializeGetStartedOrganizationUI(data) {
   /*
    * Initialize the get-started organization section.
    */
-
-  // Populate form.
-  // const { elements } = document.querySelector('form')
-  // for (const [ key, value ] of Object.entries(data)) {
-  //   const field = elements.namedItem(key)
-  //   try {
-  //     field && (field.value = value);
-  //   } catch(error) {}
-  // }
 
   // Attach functionality.
   const fileElem = document.getElementById('selectPhotoUrl');

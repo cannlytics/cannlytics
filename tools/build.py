@@ -118,4 +118,4 @@ if __name__ == '__main__':
     # TODO: Update version number in Readme.md
 
     # Copy the Readme to the docs directory.
-    # copyfile('README.md', 'docs/src/about/dev/development.md')
+    copyfile('README.md', 'docs/src/cannlytics/dev/development.md')

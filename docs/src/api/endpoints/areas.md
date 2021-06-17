@@ -1,0 +1,3 @@
+# Areas Endpoint `/api/areas`
+
+

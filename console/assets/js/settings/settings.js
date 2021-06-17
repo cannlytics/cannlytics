@@ -2,11 +2,11 @@
  * Settings JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 12/3/2020
- * Updated: 5/11/2021
+ * Updated: 6/17/2021
  */
 
 import { auth, db } from '../firebase.js';
-import { accountSettings } from './account.js';
+import { userSettings } from './user.js';
 import { errorSettings } from './errors.js';
 import { apiRequest, serializeForm, showNotification } from '../utils.js';
 import { ui } from '../ui/ui.js';
@@ -96,72 +96,72 @@ const apiSettings = {
 }
 
 
-const orgSettings = {
+// const organizationSettings = {
 
-  newOrganization() {
-    // const id = uuidv4();
-    // TODO:
-    console.log('Create new org');
-  },
+//   newOrganization() {
+//     // const id = uuidv4();
+//     // TODO:
+//     console.log('Create new org');
+//   },
 
-  addOrganization(data) {
-    /* 
-    * Add an organizations.
-    */
-    const collection = db.collection('organizations');
-    return collection.add(data);
-  },
+//   addOrganization(data) {
+//     /* 
+//     * Add an organizations.
+//     */
+//     const collection = db.collection('organizations');
+//     return collection.add(data);
+//   },
 
-  getOrganizations() {
-    /* 
-    * Get all of a user's organizations.
-    */
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        // console.log(user.uid);
-        // TODO: Get all of a users/{id} org_id's.
-        // TODO: Get all organizations/{id} documents for org_id's.
-        console.log('Get all organizations for user id:', user.uid);
-        // const query = db.collection('organizations').limit(50);
-        // query.onSnapshot(snapshot => {
-        //   if (!snapshot.size) return render();
-        //   snapshot.docChanges.forEach(change => {
-        //     if (change.type === 'added') {
-        //       render(change.doc);
-        //     }
-        //     else if (change.type === 'removed') {
-        //       document.getElementById(change.doc.id).remove();
-        //     }
-        //   });
-        // });
-      }
-    });
-  //  idbStore.get('user').then((data) => {
-  //   console.log('IDB User:', data);
-  //   console.log('Getting organizations!');
-  //  });
-  },
+//   getOrganizations() {
+//     /* 
+//     * Get all of a user's organizations.
+//     */
+//     auth.onAuthStateChanged((user) => {
+//       if (user) {
+//         // console.log(user.uid);
+//         // TODO: Get all of a users/{id} org_id's.
+//         // TODO: Get all organizations/{id} documents for org_id's.
+//         console.log('Get all organizations for user id:', user.uid);
+//         // const query = db.collection('organizations').limit(50);
+//         // query.onSnapshot(snapshot => {
+//         //   if (!snapshot.size) return render();
+//         //   snapshot.docChanges.forEach(change => {
+//         //     if (change.type === 'added') {
+//         //       render(change.doc);
+//         //     }
+//         //     else if (change.type === 'removed') {
+//         //       document.getElementById(change.doc.id).remove();
+//         //     }
+//         //   });
+//         // });
+//       }
+//     });
+//   //  idbStore.get('user').then((data) => {
+//   //   console.log('IDB User:', data);
+//   //   console.log('Getting organizations!');
+//   //  });
+//   },
 
-  archiveOrganizations() {
-    /* 
-    * Archive one of a user's organizations.
-    */
-   // TODO: Add to archived organizations.
-    const collection = firebase.firestore().collection('ships');
-    return collection.doc(id).delete()
-      .catch(function(error) {
-        console.error('Error removing document: ', error);
-      });
-  },
+//   archiveOrganizations() {
+//     /* 
+//     * Archive one of a user's organizations.
+//     */
+//    // TODO: Add to archived organizations.
+//     const collection = firebase.firestore().collection('ships');
+//     return collection.doc(id).delete()
+//       .catch(function(error) {
+//         console.error('Error removing document: ', error);
+//       });
+//   },
 
-  updateOrganization() {
-    /* 
-    * Update a user's organizations.
-    */
-    // TODO:
-  },
+//   updateOrganization() {
+//     /* 
+//     * Update a user's organizations.
+//     */
+//     // TODO:
+//   },
 
-}
+// }
 
 
 const coreSettings = {
@@ -172,6 +172,7 @@ const coreSettings = {
     */
     // TODO:
   },
+
 
   sendFeedback() {
     /*
@@ -199,13 +200,19 @@ const coreSettings = {
       }).catch((error) => {
         showNotification('Error sending feedback', error.message, { type: 'error' });
       });
-  }
+  },
+
 
 };
+
+/*------------------------------------------------------------------------------
+ * Module export
+ *----------------------------------------------------------------------------*/
 
 export const settings = {
   ...apiSettings,
   ...coreSettings,
-  ...accountSettings,
   ...errorSettings,
+  // ...organizationSettings,
+  ...userSettings,
 };

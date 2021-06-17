@@ -1,1 +1,0 @@
-# Cannlytics Python SDK Development

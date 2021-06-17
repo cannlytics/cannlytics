@@ -4,7 +4,6 @@ Metrc Integration Test | Cannlytics
 Author: Keegan Skeate
 Contact: keegan@cannlytics.com
 Created: Mon Mar 29 14:18:18 2021
-Updated: 6/14/2021
 License: MIT License
 
 Description:
@@ -54,7 +53,7 @@ from cannlytics.traceability.metrc.models import ( # pylint: disable=no-name-in-
 )
 
 
-if __name__ == '__main__':
+if __name__ == '__main__' and False:
 
     #------------------------------------------------------------------
     # Initialization

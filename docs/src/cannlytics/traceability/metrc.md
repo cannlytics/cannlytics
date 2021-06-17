@@ -41,9 +41,3 @@ track = metrc.authorize(vendor_api_key, user_api_key)
 ```
 
 The client is powerful and capable of performing all actions. Models with certain convenience actions implemented are returned by `GET` requests or are initialized from JSON as an argument to the class or with a `create_from_json` method. The `create_from_json` method also creates a record in Metrc. 
-
-::: cannlytics.traceability.metrc
-    rendering:
-      show_root_toc_entry: true
-      show_root_heading: true
-      show_source: true
