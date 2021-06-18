@@ -20,7 +20,7 @@
     <form class="analysis">
 
       <!-- Image -->
-      <div class="col-md-6 text-center py-3 order-md-2">
+      <div class="col col-md-5 mx-3 mb-3 order-md-2">
         <img
           src="{{ navbar.default_logo_url }}"
           style="height:200px;"
@@ -33,24 +33,6 @@
         >
           {% icon "image" %}
         </button>
-      </div>
-
-      <!-- Public / private choice -->
-      <div class="mb-3">
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="public" id="public-choice" value="true">
-          <label class="form-check-label" for="public-choice">
-            Public {% icon "globe" width="16px" height="16px" %}<br>
-            <small class="text-secondary">Appears in search results.</small>
-          </label>
-        </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="public" id="private-choice" value="false" checked>
-          <label class="form-check-label" for="private-choice">
-            Private {% icon "lock" width="16px" height="16px" %}<br>
-            <small class="text-secondary">Only visible to you.</small>
-          </label>
-        </div>
       </div>
 
       <!-- Fields -->
@@ -177,7 +159,8 @@
       {% endfor %}
     </div><!-- End of other options -->
 
-    </div>
+  <!-- TODO: Analytes table -->
+
 
   </main>
 
