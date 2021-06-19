@@ -285,6 +285,16 @@ class Client(object):
         url = METRC_ITEMS_URL % uid
         params = format_params(license_number=license_number)
         return self.request('delete', url, params=params)
+    
+
+    def get_item_categories(self, license_number=''):
+        """Get all item categories.
+        Args:
+            license_number (str): A specific license number.
+        """
+        url = METRC_ITEMS_URL % 'categories'
+        params = format_params(license_number=license_number)
+        return self.request('get', url, params=params)
 
 
     #------------------------------------------------------------------
@@ -437,6 +447,8 @@ class Client(object):
             label='',
             action='active',
             license_number='',
+            start='',
+            end='',
     ):
         """Get package(s).
         Args:
@@ -445,6 +457,8 @@ class Client(object):
             license_number (str): A specific license number.
             action (str): `active`, `onhold`, `inactive`, `types`,
                 `adjust/reasons`,
+            start (str): Optional ISO date to restrict earliest modified transfers.
+            end (str): Optional ISO date to restrict latest modified transfers.
         """
         if uid:
             url = METRC_PACKAGES_URL % uid
@@ -452,7 +466,7 @@ class Client(object):
             url = METRC_PACKAGES_URL % label
         else:
             url = METRC_PACKAGES_URL % action
-        params = format_params(license_number=license_number)
+        params = format_params(license_number=license_number, start=start, end=end)
         response = self.request('get', url, params=params)
         try:
             return Package(self, response, license_number)
@@ -546,6 +560,16 @@ class Client(object):
         url = METRC_PACKAGES_URL % 'change/note'
         params = format_params(license_number=license_number)
         return self.request('put', url, data=data, params=params)
+    
+
+    def get_package_types(self, license_number=''):
+        """Get all facilities.
+        Args:
+            license_number (str): A specific license number.
+        """
+        url = METRC_PACKAGES_URL % 'types'
+        params = format_params(license_number=license_number)
+        return self.request('get', url, params=params)
 
 
     #------------------------------------------------------------------

@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<!--
+  Get Started Page - Profile | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 2/20/2021
+  Updated: 5/5/2021
+-->
+{% extends "./get-started.html" %}
+{% load static icon %}
+{% block unit %}
+
+  <!-- Header -->
+  <div class="mt-5">
+    <div class="simple-flex position-absolute end-0 me-5">
+      <div class="fs-5 text-dark me-2">1/3</div>
+      <a
+        class="btn btn-sm btn-light text-dark"
+        href="/get-started/organization/?from={{ request.GET.type }}"
+      >
+        Skip
+      </a>
+    </div>
+    <h1 class="fs-2">Get started</h1>
+    <p class="fs-6 text-secondary">Get setup to be as productive as possible.<p>
+  </div>
+
+  <!-- Account form-->  
+  <h1 class="h3 mt-5 mb-3">1. Create your profile</h1>
+  <form id="user-form" class="row mb-3">
+
+    <!-- User image -->
+    <div class="col-lg-6 text-center py-3 order-lg-2">
+      <img
+        src="{% if user.photo_url %}{{ user.photo_url }}{% else %}{% static "console/images/account/default-dark.png" %}{% endif %}"
+        style="height:200px;"
+        class="rounded-circle pe-1"
+        id="user-photo-url"
+      >
+      <input type="file" id="userPhotoUrl" multiple accept="image/*" class="visually-hidden">
+      <button
+        class="btn btn-sm position-absolute text-dark"
+        onclick="cannlytics.dashboard.chooseUserPhoto()"
+        type="button"
+      >
+        {% icon "image" %}
+      </button>
+    </div>
+
+    <!-- Account fields -->
+    <div class="col-lg-6">
+      {% for item in get_started.user.fields %}        
+        <div class="row mb-3">
+
+          <!-- Field label -->
+          <label
+            for="input-{{ item.key }}"
+            class="col-sm-2 col-form-label col-form-label-sm fs-6 pe-2"
+          >
+            {{ item.title }}
+          </label>
+
+          <!-- Field input -->
+          <!-- TODO: Show error on email if invalid or no email (.is-invalid) -->
+          <div class="col-sm-10">
+            <input
+              type="{{ item.type }}"
+              class="form-control form-control-sm"
+              id="input-{{ item.key }}"
+              spellcheck="false"
+              name="{{ item.key }}"
+            >
+          </div>
+
+        </div>
+      {% endfor %}
+
+      <!-- Optional: Show advanced fields conditional on user type (lab | producer | retailer | consumer | integrator)-->
+      <!-- Advanced fields -->
+      {% comment %} <a class="text-danger fs-6 my-3">{%icon 'plus' height="18px" width="18px" %} Advanced options</a> {% endcomment %}
+
+      <!-- Signature upload -->
+
+      <!-- Terms -->
+      {% comment %} <div class="form-check">
+        <input id="login-terms-accepted" class="form-check-input" type="checkbox" value="">
+        <label class="form-check-label fs-6" for="login-terms-accepted">
+          Do you agree to our 
+          <a href="https://docs.cannlytics.com/about/terms-of-service/" class="fw-bold text-dark" target="_blank">terms of service</a>
+          and that you have read our
+          <a href="https://docs.cannlytics.com/about/privacy-policy/" class="fw-bold text-dark" target="_blank">privacy policy</a>
+          and
+          <a href="https://docs.cannlytics.com/about/security-policy" class="fw-bold text-dark" target="_blank">security policy</a>?
+        </label>
+      </div> {% endcomment %}
+
+    </div><!-- End of account fields -->
+
+  </form><!-- End of account form -->
+
+  <!-- Options -->
+  <div class="mb-5">
+    <a class="btn btn-secondary btn-sm" href="/">Back</a>
+    <a
+      class="btn bg-gradient-green text-white btn-sm"
+      onclick="cannlytics.dashboard.saveUserData('{{ request.GET.type }}');"
+    >
+      Next
+    </a>
+  </div>
+
+{% endblock %}
+{% block console_js %}
+  <script>
+    cannlytics.dashboard.initializeGetStarted('profile');
+  </script>
+{% endblock console_js %}
+</html>

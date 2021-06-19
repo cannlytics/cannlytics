@@ -1,7 +1,10 @@
 <!doctype html>
 <html>
-<!-- Settings -->
-<!-- Created 12/21/2020 -->
+<!--
+  Settings | Cannlytics Console
+  Created: 12/21/2020
+  Updated: 6/18/2021
+-->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block console_body %}
@@ -16,67 +19,18 @@
     <div class="col">
 
       <!-- General settings table -->
-      <!-- TODO: Render with a for-loop -->
+      <!-- Optional: Alert to add organization if no organization -->
       <div class="list-group col-md-6 py-3">
-        <a
-          href="/settings/account"
-          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-          aria-current="true"
-        >
-          Account
-          {% icon "chevron-right" %}
-        </a>
-        <a
-          href="/settings/api"
-          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-          aria-current="true"
-        >
-          API
-          {% icon "chevron-right" %}
-        </a>
-        <a
-          href="/settings/data-collection"
-          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-          aria-current="true"
-        >
-          Data collection
-          {% icon "chevron-right" %}
-        </a>
-        <a
-          href="/settings/notifications"
-          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-          aria-current="true"
-        >
-          Notifications
-          {% icon "chevron-right" %}
-        </a>
-        <a
-          href="/settings/organizations"
-          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-          aria-current="true"
-        >
-          <div>
-            Organizations <span class="primary-icon ml-2" data-feather="alert-circle"></span>
-          </div>
-          <!-- TODO: Alert to add organization if no organization -->
-          {% icon "chevron-right" %}
-        </a>
-        <a
-          href="/settings/team"
-          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-          aria-current="true"
-        >
-          Team
-          {% icon "chevron-right" %}
-        </a>
-        <a
-          href="/settings/theme"
-          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-          aria-current="true"
-        >
-          Theme
-          {% icon "chevron-right" %}
-        </a>
+        {% for item in settings.options %}
+          <a
+            href="{{ item.url }}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+            aria-current="true"
+          >
+            {{ item.title }}
+            {% icon "chevron-right" height="18px" width="18px" %}
+          </a>
+        {% endfor %}
       </div>
 
     </div><!-- End of body -->

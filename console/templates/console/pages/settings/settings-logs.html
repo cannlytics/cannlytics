@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<!--
+  Logs Page | Cannlytics Console
+  Created: 12/9/2020
+  Updated: 6/18/2021
+-->
+{% extends "console/console.html" %}
+{% load static %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+  {% include 'console/components/placeholders/under_construction.html' %}
+
+    <!-- Organization logs table -->
+    <div class="my-3 px-3">
+      <h2 class="h6 mb-3 text-dark">Organization Logs</h2>
+      <div class="table-responsive">
+
+        <!-- AG Grid Table -->
+        <div id="data-table">
+          <div
+            id="organization-logs-table"
+            class="ag-theme-alpine-dark"
+            style="height: 326px; width:100%;"
+          ></div>
+        </div>
+
+      </div>
+    </div><!-- End of the table -->
+
+
+  <!-- User logs table -->
+  <div class="my-3 px-3">
+    <h2 class="h6 mb-3 text-dark">User Logs</h2>
+    <div class="table-responsive">
+
+      <!-- AG Grid Table -->
+      <div id="data-table">
+        <div
+          id="user-logs-table"
+          class="ag-theme-alpine-dark"
+          style="height: 326px; width:100%;"
+        ></div>
+      </div>
+
+    </div>
+  </div><!-- End of the table -->
+
+  </main>
+{% endblock %}
+
+<!-- JavaScript -->
+{% block console_js %}
+  <script>
+    cannlytics.settings.getOrganizationLogs();
+    cannlytics.settings.getUserLogs();
+  </script>
+{% endblock %}
+
+</html>

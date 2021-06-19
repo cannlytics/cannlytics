@@ -30,7 +30,7 @@ Create a secret with:
 
 ```shell
 gcloud secrets create \
-  cannlytics_settings \
+  cannlytics_platform_settings \
   --replication-policy automatic
 ```
 
@@ -42,7 +42,7 @@ PROJECTNUM=$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumbe
 CLOUDRUN=${PROJECTNUM}-compute@developer.gserviceaccount.com
 
 gcloud secrets add-iam-policy-binding \
-  cannlytics_settings \
+  cannlytics_platform_settings \
   --member serviceAccount:${CLOUDRUN} \
   --role roles/secretmanager.secretAccessor
 ```
@@ -56,7 +56,7 @@ PROJECTNUM=$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumbe
 CLOUDBUILD=${PROJECTNUM}@cloudbuild.gserviceaccount.com
 
 gcloud secrets add-iam-policy-binding \
-  cannlytics_settings \
+  cannlytics_platform_settings \
   --member serviceAccount:${CLOUDBUILD} \
   --role roles/secretmanager.secretAccessor
 ```
@@ -69,7 +69,7 @@ GS_BUCKET_NAME=${PROJECT_ID}-media
 gsutil mb -l ${REGION} gs://${GS_BUCKET_NAME}
 ```
 
-Then create your environment variables and save them to the secret:
+Then create your environment variables and save them to the secret in the [Secret Manager console](https://console.cloud.google.com/security/secret-manager) or with:
 
 ```shell
 APP_ID=cannlytics
@@ -90,13 +90,13 @@ rm .env
 Update your IAM policy:
 
 ```shell
-gcloud beta run services add-iam-policy-binding --region=us-central1 --member=allUsers --role=roles/run.invoker your-lims
+gcloud beta run services add-iam-policy-binding --region=us-central1 --member=allUsers --role=roles/run.invoker cannlytics
 ```
 
 You can confirm that the secret was created or updated with:
 
 ```shell
-gcloud secrets versions list cannlytics_settings
+gcloud secrets versions list cannlytics_platform_settings
 ```
 
 Helpful resources:

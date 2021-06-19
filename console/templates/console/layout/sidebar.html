@@ -36,11 +36,11 @@
     {% endif %} {% endcomment %}
 
     <!-- Index -->
-    <ul class="nav flex-column pt-2">
+    <ul class="nav flex-column pt-3">
       {% for item in sidebar.lab_index %}
         {% if user.type in item.user_type or item.user_type == '*' %}
           <!-- Navigation item -->
-          <li class="nav-item px-2 mb-1 {% if item.seperator %}border-top pt-2 mt-1{% endif %}">
+          <li class="nav-item px-2 {% if item.seperator %}border-top pt-2 mt-1{% endif %}{% if item.major %} mb-1{% endif %}">
             <a
               class="app-action nav-link d-flex {% if item.nested %} justify-content-between {% endif %} py-1 px-3 {% if item.slug == screen %}active{% endif %}"
               {% if item.nested %}
@@ -69,7 +69,7 @@
             >
               <ul class="list-group sub-menu">
                 {% for sub_item in item.nested %}
-                <li class="nav-item px-2 mb-1 ps-4 {% if sub_item.slug == unit and item.product == section %}active{% endif %}">
+                <li class="nav-item px-2 ps-4 {% if sub_item.slug == unit and item.product == section %}active{% endif %}">
                   <a
                     class="nav-link d-flex py-1 px-3"
                     href="{{ sub_item.url }}"

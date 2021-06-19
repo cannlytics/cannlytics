@@ -129,12 +129,12 @@
 
       <!-- Add license button -->
       <div>
-        <a
+        <button
           class="btn btn-sm btn-secondary"
-          onclick="cannlytics.ui.addListItem('license')"
+          onclick="cannlytics.ui.addListItem(event, 'license')"
         >
           Add a license
-        </a>
+        </button>
         <button
           class="btn btn-sm bg-gradient-green text-white"
           onclick="cannlytics.traceability.saveLicenses('{{ organizations.0.uid }}');"
@@ -150,7 +150,11 @@
     <!-- Data Grid | List any organizations licenses -->
     <div class="row px-3 my-4">
       {% for item in organizations.0.licenses %}
-        <div class="card bg-transparent col col-sm-1 col-md-2 p-3" style="width:400px;">
+        <div class="card shade-hover col col-sm-1 col-md-2 p-3" style="width:400px;">
+        <a
+          class="card-block stretched-link text-decoration-none"
+          href="/traceability/settings/edit-license?license={{ item.license_number }}&license_type={{ item.license_type }}&state={{ item.state }}"
+        >
 
           <!-- Card header -->
           <div class="d-flex justify-content-between">
@@ -217,6 +221,8 @@
             </div>
 
           </div>
+
+        </a>
         </div>
       {% endfor %}
     </div>

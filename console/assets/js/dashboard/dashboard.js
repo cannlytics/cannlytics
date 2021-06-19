@@ -7,7 +7,7 @@
 
 import { auth, changePhotoURL, storageErrors } from '../firebase.js';
 import { authRequest, hasClass, Password, serializeForm, slugify, showNotification } from '../utils.js';
-import { uploadUserPhoto } from '../settings/user.js';
+// import { uploadUserPhoto } from '../settings/user.js';
 
 export const dashboard = {
 
@@ -96,10 +96,11 @@ export const dashboard = {
      */
     const user = auth.currentUser;
     const data = serializeForm('user-form');
+    const baseURL = window.location.origin;
     data.type = type;
     if (user === null) {
       signUp(data.email).then(() => {
-        document.location.href = `/get-started/organization/?from=${type}`;
+        document.location.href = `${baseURL}/get-started/organization/?from=${type}`;
       }).catch((error) => {
         showNotification('Sign up error', error.message, { type: 'error' });
         // Optional: Show error class (.is-invalid) if invalid
@@ -112,7 +113,7 @@ export const dashboard = {
         user.updateProfile({ displayName: data.name });
       }
       authRequest('/api/users', data).then(() => {
-        document.location.href = `/get-started/organization/?from=${type}`;
+        document.location.href = `${baseURL}/get-started/organization/?from=${type}`;
       });
     }
   },
@@ -211,23 +212,23 @@ function signUp(email) {
 }
 
 // Moved to settings/user.js
-// function uploadUserPhoto() {
-//   /*
-//    * Upload a user's photo through the API.
-//    */
-//   if (this.files.length) {
-//     showNotification('Uploading photo', 'Uploading your profile picture...', { type: 'wait' });
-//     changePhotoURL(this.files[0]).then((downloadURL) => {
-//       authRequest('/api/users', { photo_url: downloadURL });
-//       document.getElementById('user-photo-url').src = downloadURL;
-//       document.getElementById('userPhotoNav').src = downloadURL;
-//       document.getElementById('userPhotoMenu').src = downloadURL;
-//       showNotification('Uploading photo complete', 'Successfully uploaded your profile picture.', { type: 'success' });
-//     }).catch((error) => {
-//       showNotification('Photo Change Error', storageErrors[error.code], { type: 'error' });
-//     });
-//   }
-// }
+function uploadUserPhoto() {
+  /*
+   * Upload a user's photo through the API.
+   */
+  if (this.files.length) {
+    showNotification('Uploading photo', 'Uploading your profile picture...', { type: 'wait' });
+    changePhotoURL(this.files[0]).then((downloadURL) => {
+      authRequest('/api/users', { photo_url: downloadURL });
+      document.getElementById('user-photo-url').src = downloadURL;
+      document.getElementById('userPhotoNav').src = downloadURL;
+      document.getElementById('userPhotoMenu').src = downloadURL;
+      showNotification('Uploading photo complete', 'Successfully uploaded your profile picture.', { type: 'success' });
+    }).catch((error) => {
+      showNotification('Photo Change Error', storageErrors[error.code], { type: 'error' });
+    });
+  }
+}
 
 
 function uploadOrgPhoto(orgId) {

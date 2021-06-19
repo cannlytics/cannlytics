@@ -1,8 +1,9 @@
 # <img width="20" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics
 <!-- TODO: FIx reference to calyx image -->
 
-![version](https://img.shields.io/badge/version-0.0.6-brightgreen)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cannlytics/cannlytics/fork)
+![version](https://img.shields.io/badge/version-0.0.6-darkgreen)
+[![License: MIT](https://img.shields.io/badge/License-MIT-darkgreen.svg)](https://opensource.org/licenses/MIT)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)](https://github.com/cannlytics/cannlytics/fork)
 
 Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software designed to make your data and information accessible. Cannlytics makes cannabis analysis **simple** and **easy** through data accessibility. We believe that everyone in the cannabis industry should be able to access rich, valuable data quickly and easily and that you will be better off for it. This documentation covers the Cannlytics architecture and how to build, develop, and publish the Cannlytics platform. You can view the platform live at <https://console.cannlytics.com> and the documentation at <https://docs.cannlytics.com>.
 
@@ -476,10 +477,17 @@ docker push gcr.io/your-lims/cannlytics
 
 ## Publishing <a name="publishing"></a>
 
-See [the publishing guide](docs/src/app/dev/publishing.md) for complete instructions on how to publish the Cannlytics Engine for use. After setup, publishing is done with one command:
+See [the publishing guide](docs/src/app/dev/publishing.md) for complete instructions on how to publish Cannlytics for production. The guide is based on the [Running Django on Cloud Run guide](https://cloud.google.com/python/django/run#windows). After setup, publishing is done with one command:
 
 ```shell
 npm run publish
+```
+
+If you need to change accounts or projects, then you can use:
+
+```shell
+gcloud config set account `ACCOUNT`
+gcloud config set project `PROJECT ID`
 ```
 
 The build process contains three steps:
@@ -541,10 +549,8 @@ Contributions are always welcome! You are encouraged to submit issues, functiona
 
 ## License <a name="license"></a>
 
-**Cannlytics** Copyright (C) 2020-2021 Cannlytics and Cannlytics Contributors.
+**Cannlytics** Copyright (©) 2020-2021 Cannlytics and Cannlytics Contributors.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+[MIT License](https://opensource.org/licenses/MIT)
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Made with 🧡

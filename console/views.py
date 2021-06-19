@@ -2,10 +2,11 @@
 Console Views | Cannlytics
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 12/18/2020
-Updated: 5/10/2021
+Updated: 6/19/2021
 """
 
 # External imports
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic.base import TemplateView
 from django.http import HttpResponse
@@ -15,10 +16,9 @@ from api.auth import auth
 from cannlytics.firebase import get_collection, get_document
 from console.state import layout
 from console.utils import (
-    get_model_context,
+    # get_model_context,
     get_page_data,
     get_page_context,
-    get_user_context,
 )
 
 BASE = 'console'
@@ -51,8 +51,8 @@ class ConsoleView(TemplateView):
             f'{BASE}/pages/{screen}/{screen}-{section}.html',
             f'{BASE}/pages/{screen}/{section}/{section}.html',
             f'{BASE}/pages/{screen}/{screen}.html',
-            f'{BASE}/pages/general/{screen}/{screen}-{section}.html',
-            f'{BASE}/pages/general/{screen}/{section}.html',
+            f'{BASE}/pages/misc/{screen}/{screen}-{section}.html',
+            f'{BASE}/pages/misc/{screen}/{section}.html',
         ]
 
     def get_context_data(self, **kwargs):
@@ -70,24 +70,31 @@ class ConsoleView(TemplateView):
             context['dashboard'] = layout['dashboard']
         context = get_page_context(self.kwargs, context)
         context = get_page_data(self.kwargs, context)
-        # context = get_user_context(self.request, context)
         # context = get_model_context(context)
+        # Hot-fix for organizations namespace clash in context!
+        if context['screen'] == 'organizations':
+            context['organization_context'] = context['organizations']
         context['organizations'] = self.request.session['organizations']
         context['user'] = self.request.session['user']
         return context
 
     def get(self, request, *args, **kwargs):
-        """Get data before rendering context. The session is verified
-        if there is not a user ID (`uid`) in the session. Data collected
-        includes: user, organizations."""
-        uid = request.session.get('uid')
-        if not uid:
+        """Get data before rendering context. Any existing user data is
+        retrieved. If there is no user data in the session, the the
+        request is verified. If the request is unauthenticated, then
+        the user is redirected to the sign in page. If the user is
+        authenticated, then the user's data and organization data is
+        added to the session."""
+        user = request.session.get('user')
+        if user:
+            uid = user['uid']
+        else:
             user_claims = auth.verify_session(request)
             uid = user_claims.get('uid')
             if not uid:
                 request.session['organizations'] = []
                 request.session['user'] = {}
-                return super().get(request, *args, **kwargs)
+                return HttpResponseRedirect('/account/sign-in')
         query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
         organizations = get_collection('organizations', filters=[query])
         request.session['organizations'] = organizations
@@ -117,14 +124,14 @@ class LoginView(TemplateView):
 def handler404(request, *args, **argv): #pylint: disable=unused-argument
     """Handle missing pages."""
     status_code = 404
-    template = f'{BASE}/pages/general/error-pages/{status_code}.html'
+    template = f'{BASE}/pages/general/errors/{status_code}.html'
     return render(request, template, {}, status=status_code)
 
 
 def handler500(request, *args, **argv): #pylint: disable=unused-argument
     """Handle internal errors."""
     status_code = 500
-    template = f'{BASE}/pages/general/error-pages/{status_code}.html'
+    template = f'{BASE}/pages/general/errors/{status_code}.html'
     return render(request, template, {}, status=status_code)
 
 

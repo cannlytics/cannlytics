@@ -7,8 +7,7 @@
  import { api } from '../api/api.js';
  import { theme } from '../settings/theme.js';
  import { changePhotoURL, storageErrors } from '../firebase.js';
- import { authRequest, hasClass, Password, serializeForm, slugify, showNotification } from '../utils.js';
-
+ import { authRequest, formDeserialize, hasClass, Password, serializeForm, slugify, showNotification } from '../utils.js';
  
  export const organizations = {
 
@@ -148,7 +147,8 @@
         showNotification('Organization request failed', response.message, { type: 'error' });
       } else {
         // showNotification('Organization request sent', response.message, { type: 'success' });
-        document.location.href = `/get-started/support/?from=${orgType}`;
+        const baseURL = window.location.origin;
+        document.location.href = `${baseURL}/get-started/support/?from=${orgType}`;
       }
     });
   },
@@ -172,6 +172,22 @@
       });
     }
   },
+
+
+  viewOrganization(orgId) {
+    /*
+     * View an organization on navigation.
+     */
+    authRequest(`/api/organizations/${orgId}`).then((response) => {
+      if (response.data) {
+        console.log('Retrieved data:', response.data);
+        formDeserialize(document.forms['organization-form'], response.data);
+      } else {
+        console.log(response);
+      }
+    });
+    
+  }
 
 
 }

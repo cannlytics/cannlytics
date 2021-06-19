@@ -85,6 +85,35 @@ body:not(.dark) .btn-secondary:active {
   border-color: #6c757d;
 }
 
+/* Small light buttons */
+.btn-sm-light {
+  padding: 3px 12px;
+  font-size: 12px;
+  border: 1px solid rgb(27 31 35 / 15%);
+  line-height: 20px;
+  background-color: #fafbfc;
+  transition: .2s cubic-bezier(.3, 0, .5, 1);
+  transition-property: color,background-color,border-color;
+}
+.btn-md-light {
+  padding: 4px 8px;
+  font-size: 14px;
+  line-height: 21px;
+}
+.btn-sm-light:hover {
+  background-color: #f3f4f6;
+  border-color: rgb(27 31 35 / 15%);
+}
+body.dark .btn-sm-light {
+  background-color: #30363d;
+  border-color: #8b949e;
+  color: #c9d1d9;
+}
+body.dark .btn-sm-light:hover {
+  background-color: #282e33;
+  border-color: #6e7681;
+}
+
 .text-link {
   color: #e53a23 !important;
 }
@@ -304,6 +333,10 @@ body.dark .nav-search-form .feather:hover {
 .breadcrumb-item,
 .breadcrumb-item .action {
   color: #1a1a1a !important;
+}
+.breadcrumb-item .action:hover {
+  color: #198754 !important;
+  text-decoration: underline !important;
 }
 body.dark .breadcrumb-item,
 body.dark .breadcrumb-item .action {

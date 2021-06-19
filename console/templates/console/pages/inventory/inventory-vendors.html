@@ -12,7 +12,7 @@
   <!-- https://bbbootstrap.com/snippets/bootstrap-5-myprofile-90806631 -->
   
     <!-- Header -->
-    {% include "console/components/notifications/breadcrumbs_dynamic.html" with
+    {% include "console/components/links/breadcrumbs_dynamic.html" with
       breadcrumbs=analyses.breadcrumbs
     %}
 
@@ -106,7 +106,7 @@
           aria-current="true"
         >
           {{ item.title }}
-          {% icon "chevron-right" %}
+          {% icon "chevron-right" height="18px" width="18px" %}
         </a>
       {% endfor %}
     </div>

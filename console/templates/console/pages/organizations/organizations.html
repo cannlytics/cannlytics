@@ -3,11 +3,20 @@
 <!--
   Organizations Page | Cannlytics Console
   Created: 4/26/2021
-  Updated: 6/11/2021
+  Updated: 6/18/2021
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block console_body %}
+
+  <!-- Display detail page given a section -->
+  {% if section != '' %}
+
+    {% include './organization.html' with organization_context=organization_context %}
+
+  {% else %}
+
+  <!-- Main -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->
@@ -15,7 +24,7 @@
       <h1 class="fs-5 mb-0 lh-base text-dark">Organizations</h1>
       <div>
         <a
-          class="btn btn-sm btn-outline-dark mx-2 "
+          class="btn btn-sm btn-sm-light btn-md-light mx-2 "
           type="button"
           href="/organizations/organization?join=true"
         >
@@ -36,7 +45,11 @@
       <!-- Data Grid -->
       <div class="row px-3 mb-4">
       {% for org in organizations %}
-        <div class="card bg-transparent border-secondary rounded-3 col col-sm-1 col-md-2 p-3" style="width:400px; height:150px;">
+        <div
+          class="card shade-hover border-secondary rounded-3 app-action col col-sm-1 col-md-2 p-3"
+          style="width:400px; height:150px;"
+        >
+        <a class="card-block stretched-link text-decoration-none" href="/organizations/{{ org.uid }}">
 
           <!-- Card header -->
           <div class="d-flex justify-content-between">
@@ -89,6 +102,8 @@
             </div>
 
           </div>
+
+        </a>
         </div>
       {% endfor %}
       </div>
@@ -97,60 +112,72 @@
 
       <!-- Placeholder -->
       {% include "console/components/placeholders/placeholder.html" with
-        placeholder=organizations.placeholder
+        placeholder=organization_context.placeholder
         only
       %}
 
     {% endif %}
 
-    {% comment %} <!-- Body -->
-    <div class="analysis">
-
-      <!-- Card -->
-      <div class="card my-3">
-        <div class="card-body">
-          <h2 class="h6 mb-3 text-dark">Organizations</h2>
-          <div class="table-responsive">           
-            {% if organizations %}
-
-              <!-- Data Grid -->
-              <div class="row">
-              {% for org in organizations %}
-                <div class="card col-3 col-sm-1 col-md-2">
-                  {% icon 'briefcase' class="fs-6" %}<h4>{{ org.name }}</h4>
-                  <h5>{{ org.website }}</h5>
-                </div>
-              {% endfor %}
-              </div>
-
-            {% else %}
-              <!-- Placeholder -->
-              {% include "console/components/placeholders/placeholder.html" with
-                placeholder=organizations.placeholder
-                only
-              %}
-            {% endif %}
-
-          </div>
-        </div>
-      </div><!-- End of the table -->
-
-    </div><!-- End of the body --> {% endcomment %}
-
   </main>
+  {% endif %}
 
 {% endblock console_body %}
-
 {% block console_js %}
+  <script>
 
-  <!-- JavaScript -->
-  <script type="text/javascript" charset="utf-8">
+    // Initialize the UI (using context from Django).
+    if ('{{ section }}' !== '') cannlytics.organizations.viewOrganization('{{ section }}');
+  
+    // Enable tooltips.
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
 
-    // Initialize user interface.
-    // cannlytics.organizations.initialize();
+    // Toggle extra organization fields
+    function toggleOrganizationFields() {
+      cannlytics.ui.toggleElementClass('extra-organization-fields', 'd-none');
+      cannlytics.ui.toggleElementClass('extra-organization-fields-hide', 'd-none');
+      cannlytics.ui.toggleElementClass('extra-organization-fields-show', 'd-none');
+    }
+
+    // Toggle add license fields
+    function toggleLicenseFields(event) {
+      event.preventDefault();
+      cannlytics.ui.toggleElementClass('license-fields', 'd-none');
+      cannlytics.ui.toggleElementClass('license-fields-show', 'd-none');
+    }
+
+    // Toggle add license fields
+    function toggleTeamMemberFields(event) {
+      event.preventDefault();
+      cannlytics.ui.toggleElementClass('team-member-fields', 'd-none');
+      cannlytics.ui.toggleElementClass('team-member-fields-show', 'd-none');
+    }
+
+    // FIXME: Only show user API Key for Oklahoma.
+    // $('.license-state-selection').change(function() {
+    //   console.log($(this).val());
+    //   if ($(this).val() === 'OK') {
+    //     $('.user-api-key').removeClass('d-none');
+    //   } else {
+    //     $('.user-api-key').addClass('d-none');
+    //   }
+    // });
+
+    // Optional: Show other when other license type is selected
+    // https://stackoverflow.com/questions/18992839/hide-show-content-if-some-option-is-selected-with-bootstrap
+    // $('#pasveids').on('change', function(e){
+    //   if(e.val == 'Value if clicked on other') {
+    //       $('#hiddenevent').attr('type', 'text');
+    //       $('#pasveids').attr('name', '');
+    //       $('#hiddenevent').attr('name', 'eventtype');
+    //   } else {
+    //       $('#hiddenevent').attr('type', 'hidden');
+    //       $('#pasveids').attr('name', 'eventtype');
+    //   }
+    // });
 
   </script>
-
 {% endblock console_js %}
-
 </html>

@@ -18,26 +18,6 @@ data = {}
 docs = {}
 
 material = {
-    "account": {
-        "breadcrumbs": [
-            {"title": "Settings", "url": "settings"},
-            {"title": "Account", "active": True},
-        ],
-        "fields": [
-            {"type": "text", "key": "name", "title": "Name"},
-            {"type": "text", "key": "position", "title": "Position"},
-            {"type": "email", "key": "email", "title": "Email"},
-            {"type": "text", "key": "phone_number", "title": "Phone"},
-            # {"type": "text", "key": "location", "title": "Location"},
-            # {"type": "text", "key": "linkedin", "title": "LinkedIn"},
-            {"type": "text", "key": "license", "title": "License"},
-        ],
-        "options": [
-            {"title": "Change your password", "url": "/account/password-reset"},
-            # {"title": "Set your pin", "url": "/settings/account/pin"},
-            # {"title": "Set your signature", "url": "/settings/account/signature"},
-        ],
-    },
     "analysis": {
         "breadcrumbs": [
             {"title": "Analyses", "url": "/analyses"},
@@ -129,14 +109,14 @@ material = {
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_tablet.svg",
             "title": "Create your first project",
-            "message": "Begin analyses by creating a project, a collection of an organization's samples.",
+            "message": "Begin analyses by creating a project, a collection of an organization's samples and their analyses.",
             "url": "./projects/project?new=true",
         },
     },
     "pin": {
         "breadcrumbs": [
             {"title": "Settings", "url": "/settings"},
-            {"title": "Account", "url": "/settings/account"},
+            {"title": "User Settings", "url": "/settings/user"},
             {"title": "Pin", "active": True},
         ],
     },
@@ -163,7 +143,7 @@ material = {
     "signature": {
         "breadcrumbs": [
             {"title": "Settings", "url": "/settings"},
-            {"title": "Account", "url": "/settings/account"},
+            {"title": "User Settings", "url": "/settings/user"},
             {"title": "Signature", "active": True},
         ],
     },
@@ -193,18 +173,12 @@ material = {
     },
     "traceability": {
         "tabs": [
-            {
-                "name": "Lab Tests",
-                "section": "lab-tests",
-                "url": "/traceability/lab-tests",
-                "description": "Manage details for each individual lab test performed on submitted packages.",
-            },
-            {
-                "name": "Items",
-                "section": "items",
-                "url": "/traceability/items",
-                "description": "View items that are used to track your inventory at a given facility.",
-            },
+            # {
+            #     "name": "Items",
+            #     "section": "items",
+            #     "url": "/traceability/items",
+            #     "description": "View items that are used to track your inventory at a given facility.",
+            # },
             {
                 "name": "Packages",
                 "section": "packages",
@@ -212,17 +186,23 @@ material = {
                 "description": "Manage your packages, groups of cannabis items.",
             },
             {
-                "name": "Strains",
-                "section": "strains",
-                "url": "/traceability/strains",
-                "description": "View your cannabis strains, varieties, and classifications.",
+                "name": "Lab Tests",
+                "section": "lab-tests",
+                "url": "/traceability/lab-tests",
+                "description": "Manage details for each individual lab test performed on submitted packages.",
             },
-            {
-                "name": "Employees",
-                "section": "employees",
-                "url": "/traceability/employees",
-                "description": "View your organization's employees or team members.",
-            },
+            # {
+            #     "name": "Strains",
+            #     "section": "strains",
+            #     "url": "/traceability/strains",
+            #     "description": "View your cannabis strains, varieties, and classifications.",
+            # },
+            # {
+            #     "name": "Employees",
+            #     "section": "employees",
+            #     "url": "/traceability/employees",
+            #     "description": "View your organization's employees or team members.",
+            # },
             # {
             #     "name": "Facilities",
             #     "section": "facilities",
@@ -282,60 +262,89 @@ material = {
             },
         ],
     },
-    "calendar": {
-        "placeholder": {
-            "action": "Schedule your first transfer",
-            "height": "200px",
-            "image": "console/images/illustrations/chemistry_scientist.svg",
-            "title": "Awaiting your first transfer",
-            "message": "Once you begin receiving transfers, your pickups and sample dropoffs will appear here.",
-            "url": "settings/organizations/new",
-        },
-    },
-    "logistics": {
-        "tabs": [
-            {"name": "Calendar", "section": "calendar", "url": "/logistics/calendar"},
-            {"name": "Logs", "section": "logs", "url": "/logistics/logs"},
-            {
-                "name": "Analytics",
-                "section": "analytics",
-                "url": "/logistics/analytics",
-            },
-            {"name": "Map", "section": "map", "url": "/logistics/map"},
+    "settings": {
+        "options": [
+            {"title": "API", "url": "/settings/api"},
+            {"title": "Data collection", "url": "/settings/data-collection"},
+            {"title": "Logs", "url": "/settings/logs"},
+            {"title": "Notifications", "url": "/settings/notifications"},
+            {"title": "Organization settings", "url": "/settings/organizations"},
+            {"title": "Theme", "url": "/settings/theme"},
+            {"title": "User Settings", "url": "/settings/user"},
         ],
-        "placeholder": {
-            "action": "Begin analysis for analytics",
-            "height": "200px",
-            "image": "console/images/illustrations/chemistry_scientist.svg",
-            "title": "Start your first analysis",
-            "message": "Begin conducting analyses to unlock your analytics.",
-            "url": "settings/organizations/new",
-        },
+        "user_breadcrumbs": [
+            {"title": "Settings", "url": "settings"},
+            {"title": "User Settings", "active": True},
+        ],
+        "user_fields": [
+            {"type": "text", "key": "name", "title": "Name"},
+            {"type": "text", "key": "position", "title": "Position"},
+            {"type": "email", "key": "email", "title": "Email"},
+            {"type": "text", "key": "phone_number", "title": "Phone"},
+            # {"type": "text", "key": "location", "title": "Location"},
+            # {"type": "text", "key": "linkedin", "title": "LinkedIn"},
+            {"type": "text", "key": "license", "title": "License"},
+        ],
+        "user_options": [
+            {"title": "Change your password", "url": "/account/password-reset"},
+            # {"title": "Set your pin", "url": "/settings/account/pin"},
+            # {"title": "Set your signature", "url": "/settings/account/signature"},
+        ],
     },
-    "records": {
-        "placeholder": {
-            "action": "Add a contact",
-            "height": "200px",
-            "image": "console/images/illustrations/chemistry_scientist.svg",
-            "title": "Add your first contact",
-            "message": "Add a contact to begin providing analyses.",
-            "url": "records/new",
-        },
-        "contact": {
-            "breadcrumbs": [
-                {"title": "Clients", "url": "/records"},
-                {"title": "Client", "active": True},
-            ],
-            "fields": [
-                {"type": "email", "key": "email", "title": "Email"},
-                {"type": "text", "key": "name", "title": "Name"},
-                {"type": "text", "key": "linkedin", "title": "LinkedIn"},
-                {"type": "text", "key": "position", "title": "Position"},
-                {"type": "text", "key": "location", "title": "Location"},
-            ],
-            "options": [],
-        },
-    },
+    # "calendar": {
+    #     "placeholder": {
+    #         "action": "Schedule your first transfer",
+    #         "height": "200px",
+    #         "image": "console/images/illustrations/chemistry_scientist.svg",
+    #         "title": "Awaiting your first transfer",
+    #         "message": "Once you begin receiving transfers, your pickups and sample dropoffs will appear here.",
+    #         "url": "settings/organizations/new",
+    #     },
+    # },
+    # "logistics": {
+    #     "tabs": [
+    #         {"name": "Calendar", "section": "calendar", "url": "/logistics/calendar"},
+    #         {"name": "Logs", "section": "logs", "url": "/logistics/logs"},
+    #         {
+    #             "name": "Analytics",
+    #             "section": "analytics",
+    #             "url": "/logistics/analytics",
+    #         },
+    #         {"name": "Map", "section": "map", "url": "/logistics/map"},
+    #     ],
+    #     "placeholder": {
+    #         "action": "Begin analysis for analytics",
+    #         "height": "200px",
+    #         "image": "console/images/illustrations/chemistry_scientist.svg",
+    #         "title": "Start your first analysis",
+    #         "message": "Begin conducting analyses to unlock your analytics.",
+    #         "url": "settings/organizations/new",
+    #     },
+    # },
+    # "records": {
+    #     "placeholder": {
+    #         "action": "Add a contact",
+    #         "height": "200px",
+    #         "image": "console/images/illustrations/chemistry_scientist.svg",
+    #         "title": "Add your first contact",
+    #         "message": "Add a contact to begin providing analyses.",
+    #         "url": "records/new",
+    #     },
+    #     "contact": {
+    #         "breadcrumbs": [
+    #             {"title": "Clients", "url": "/records"},
+    #             {"title": "Client", "active": True},
+    #         ],
+    #         "fields": [
+    #             {"type": "email", "key": "email", "title": "Email"},
+    #             {"type": "text", "key": "name", "title": "Name"},
+    #             {"type": "text", "key": "linkedin", "title": "LinkedIn"},
+    #             {"type": "text", "key": "position", "title": "Position"},
+    #             {"type": "text", "key": "location", "title": "Location"},
+    #         ],
+    #         "options": [],
+    #     },
+    # },
 }
 
 
@@ -479,6 +488,7 @@ layout = {
                 "icon": "grid",
                 "slug": "",
                 "user_type": "*",
+                "major": True,
             },
             {
                 "title": "Analyses",
@@ -499,6 +509,12 @@ layout = {
                 #         "url": "/analyses/analytes",
                 #     },
                 # ],
+            },
+            {
+                "title": "Analytes",
+                "url": "/analytes",
+                "slug": "analytes",
+                "user_type": "*",
             },
             {
                 "title": "Areas",
@@ -562,6 +578,12 @@ layout = {
             #     "user_type": "*",
             # },
             {
+                "title": "Measurements",
+                "url": "/measurements",
+                "slug": "measurements",
+                "user_type": "*",
+            },
+            {
                 "title": "Organizations",
                 "url": "/organizations",
                 # "icon": "briefcase",
@@ -574,13 +596,13 @@ layout = {
                 # "icon": "folder",
                 "slug": "projects",
                 "user_type": "*",
-                "nested": [
-                    {
-                        "slug": "manage",
-                        "title": "Manage projects",
-                        "url": "/projects/manage",
-                    },
-                ],
+                # "nested": [
+                #     {
+                #         "slug": "manage",
+                #         "title": "Manage projects",
+                #         "url": "/projects/manage",
+                #     },
+                # ],
             },
             {
                 "title": "Purchases",
@@ -595,28 +617,28 @@ layout = {
                 # "icon": "award",
                 "slug": "results",
                 "user_type": "*",
-                "nested": [
-                    {
-                        "slug": "tests",
-                        "title": "Tests",
-                        "url": "/results/tests",
-                    },
-                    {
-                        "slug": "calculations",
-                        "title": "Calculations",
-                        "url": "/results/calculations",
-                    },
-                    {
-                        "slug": "coas",
-                        "title": "CoA Generation",
-                        "url": "/results/coas",
-                    },
-                    {
-                        "slug": "import",
-                        "title": "Review",
-                        "url": "/results/coa-review",
-                    },
-                ],
+                # "nested": [
+                #     {
+                #         "slug": "tests",
+                #         "title": "Tests",
+                #         "url": "/results/tests",
+                #     },
+                #     {
+                #         "slug": "calculations",
+                #         "title": "Calculations",
+                #         "url": "/results/calculations",
+                #     },
+                #     {
+                #         "slug": "coas",
+                #         "title": "CoA Generation",
+                #         "url": "/results/coas",
+                #     },
+                #     {
+                #         "slug": "import",
+                #         "title": "Review",
+                #         "url": "/results/coa-review",
+                #     },
+                # ],
             },
             {
                 "title": "Samples",
@@ -624,18 +646,18 @@ layout = {
                 # "icon": "edit-2",
                 "slug": "samples",
                 "user_type": "*",
-                "nested": [
-                    {
-                        "slug": "manage",
-                        "title": "Manage samples",
-                        "url": "/samples/manage",
-                    },
-                    # {
-                    #     "slug": "batch",
-                    #     "title": "Batch",
-                    #     "url": "/samples/batch",
-                    # },
-                ],
+                # "nested": [
+                #     {
+                #         "slug": "manage",
+                #         "title": "Manage samples",
+                #         "url": "/samples/manage",
+                #     },
+                #     # {
+                #     #     "slug": "batch",
+                #     #     "title": "Batch",
+                #     #     "url": "/samples/batch",
+                #     # },
+                # ],
             },
             {
                 "title": "Stats",
@@ -651,23 +673,23 @@ layout = {
                 # "icon": "navigation",
                 "slug": "transfers",
                 "user_type": '*',
-                "nested": [
-                    {
-                        "slug": "incoming",
-                        "title": "Incoming transfers",
-                        "url": "/transfers/incoming",
-                    },
-                    {
-                        "slug": "outgoing",
-                        "title": "Outgoing transfers",
-                        "url": "/transfers/outgoing",
-                    },
-                    {
-                        "slug": "logistics",
-                        "title": "Logistics",
-                        "url": "/transfers/analyses",
-                    },
-                ],
+                # "nested": [
+                #     {
+                #         "slug": "incoming",
+                #         "title": "Incoming transfers",
+                #         "url": "/transfers/incoming",
+                #     },
+                #     {
+                #         "slug": "outgoing",
+                #         "title": "Outgoing transfers",
+                #         "url": "/transfers/outgoing",
+                #     },
+                #     {
+                #         "slug": "logistics",
+                #         "title": "Logistics",
+                #         "url": "/transfers/analyses",
+                #     },
+                # ],
             },
             {
                 "title": "Traceability",
@@ -675,7 +697,8 @@ layout = {
                 "icon": "share-2",
                 "slug": "traceability",
                 "user_type": "*",
-                "seperator": True
+                "seperator": True,
+                "major": True,
             },
             {
                 "title": "Settings",
@@ -683,6 +706,7 @@ layout = {
                 "icon": "settings",
                 "slug": "settings",
                 "user_type": "*",
+                "major": True,
             },
             {
                 "title": "Help",
@@ -690,13 +714,14 @@ layout = {
                 "icon": "help-circle",
                 "slug": "help",
                 "user_type": "*",
+                "major": True,
             },
         ],
     },
 }
 
 material["get-started"] = {
-    "account": {"fields": material["account"]["fields"]},
+    "user": {"fields": material["settings"]["user_fields"]},
     "organization": {"fields": material["organizations"]["fields"]},
     "pricing_tiers": [
         {

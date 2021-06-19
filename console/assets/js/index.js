@@ -2,7 +2,7 @@
  * Cannlytics Console JavaScript Module
  * Author: Keegan Skeate
  * Created: 12/3/2020
- * Updated: 4/25/2021
+ * Updated: 6/18/2021
  */
 
 import { analyses } from './analyses/analyses.js'
@@ -13,10 +13,13 @@ import { dashboard } from './dashboard/dashboard.js';
 import { intake } from './intake/intake.js';
 import { inventory } from './inventory/inventory.js';
 import { organizations } from './organizations/organizations.js';
-import { traceability } from './traceability/traceability.js';
-import { transfers } from './transfers/transfers.js';
+import { projects } from './projects/projects.js';
+import { results } from './results/results.js';
+import { samples } from './samples/samples.js';
 import { settings } from './settings/settings.js';
 import { theme } from './settings/theme.js';
+import { traceability } from './traceability/traceability.js';
+import { transfers } from './transfers/transfers.js';
 import { ui } from './ui/ui.js';
 
 export {
@@ -28,6 +31,9 @@ export {
   intake,
   inventory,
   organizations,
+  projects,
+  results,
+  samples,
   traceability,
   transfers,
   settings,

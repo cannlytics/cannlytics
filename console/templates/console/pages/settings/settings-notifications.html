@@ -1,18 +1,22 @@
 <!doctype html>
 <html>
-<!-- Notifications -->
-<!-- URL: settings/notifications -->
-<!-- Created 12/8/2020 -->
+<!--
+  Notifications | Cannlytics Console
+  Created: 12/8/2020
+  Updated: 6/18/2021
+-->
 {% extends "console/console.html" %}
 {% block console_body %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->
-    {% include "console/components/notifications/breadcrumbs.html" with
+    {% include "console/components/links/breadcrumbs.html" with
       base_page="Settings"
       base_page_url="/settings"
       current_page="Notifications"
     %}
+
+    {% include 'console/components/placeholders/under_construction.html' %}
 
     <!-- Body -->
     <div class="col">
@@ -33,7 +37,8 @@
       </div>
 
       <!-- Notifications Table -->
-      <h1 class="h4 mt-5">Notifications</h1>
+
+
       <!-- TODO: List of checkboxes -->
       <!-- 
         Email Notifications
