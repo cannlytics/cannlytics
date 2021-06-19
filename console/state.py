@@ -511,6 +511,12 @@ layout = {
                 # ],
             },
             {
+                "title": "Analytes",
+                "url": "/analytes",
+                "slug": "analytes",
+                "user_type": "*",
+            },
+            {
                 "title": "Areas",
                 "url": "/areas",
                 # "icon": "grid",
@@ -572,6 +578,12 @@ layout = {
             #     "user_type": "*",
             # },
             {
+                "title": "Measurements",
+                "url": "/measurements",
+                "slug": "measurements",
+                "user_type": "*",
+            },
+            {
                 "title": "Organizations",
                 "url": "/organizations",
                 # "icon": "briefcase",
@@ -584,13 +596,13 @@ layout = {
                 # "icon": "folder",
                 "slug": "projects",
                 "user_type": "*",
-                "nested": [
-                    {
-                        "slug": "manage",
-                        "title": "Manage projects",
-                        "url": "/projects/manage",
-                    },
-                ],
+                # "nested": [
+                #     {
+                #         "slug": "manage",
+                #         "title": "Manage projects",
+                #         "url": "/projects/manage",
+                #     },
+                # ],
             },
             {
                 "title": "Purchases",
@@ -605,28 +617,28 @@ layout = {
                 # "icon": "award",
                 "slug": "results",
                 "user_type": "*",
-                "nested": [
-                    {
-                        "slug": "tests",
-                        "title": "Tests",
-                        "url": "/results/tests",
-                    },
-                    {
-                        "slug": "calculations",
-                        "title": "Calculations",
-                        "url": "/results/calculations",
-                    },
-                    {
-                        "slug": "coas",
-                        "title": "CoA Generation",
-                        "url": "/results/coas",
-                    },
-                    {
-                        "slug": "import",
-                        "title": "Review",
-                        "url": "/results/coa-review",
-                    },
-                ],
+                # "nested": [
+                #     {
+                #         "slug": "tests",
+                #         "title": "Tests",
+                #         "url": "/results/tests",
+                #     },
+                #     {
+                #         "slug": "calculations",
+                #         "title": "Calculations",
+                #         "url": "/results/calculations",
+                #     },
+                #     {
+                #         "slug": "coas",
+                #         "title": "CoA Generation",
+                #         "url": "/results/coas",
+                #     },
+                #     {
+                #         "slug": "import",
+                #         "title": "Review",
+                #         "url": "/results/coa-review",
+                #     },
+                # ],
             },
             {
                 "title": "Samples",
@@ -634,18 +646,18 @@ layout = {
                 # "icon": "edit-2",
                 "slug": "samples",
                 "user_type": "*",
-                "nested": [
-                    {
-                        "slug": "manage",
-                        "title": "Manage samples",
-                        "url": "/samples/manage",
-                    },
-                    # {
-                    #     "slug": "batch",
-                    #     "title": "Batch",
-                    #     "url": "/samples/batch",
-                    # },
-                ],
+                # "nested": [
+                #     {
+                #         "slug": "manage",
+                #         "title": "Manage samples",
+                #         "url": "/samples/manage",
+                #     },
+                #     # {
+                #     #     "slug": "batch",
+                #     #     "title": "Batch",
+                #     #     "url": "/samples/batch",
+                #     # },
+                # ],
             },
             {
                 "title": "Stats",
@@ -661,23 +673,23 @@ layout = {
                 # "icon": "navigation",
                 "slug": "transfers",
                 "user_type": '*',
-                "nested": [
-                    {
-                        "slug": "incoming",
-                        "title": "Incoming transfers",
-                        "url": "/transfers/incoming",
-                    },
-                    {
-                        "slug": "outgoing",
-                        "title": "Outgoing transfers",
-                        "url": "/transfers/outgoing",
-                    },
-                    {
-                        "slug": "logistics",
-                        "title": "Logistics",
-                        "url": "/transfers/analyses",
-                    },
-                ],
+                # "nested": [
+                #     {
+                #         "slug": "incoming",
+                #         "title": "Incoming transfers",
+                #         "url": "/transfers/incoming",
+                #     },
+                #     {
+                #         "slug": "outgoing",
+                #         "title": "Outgoing transfers",
+                #         "url": "/transfers/outgoing",
+                #     },
+                #     {
+                #         "slug": "logistics",
+                #         "title": "Logistics",
+                #         "url": "/transfers/analyses",
+                #     },
+                # ],
             },
             {
                 "title": "Traceability",

@@ -68,7 +68,7 @@ docker.env
 *.sqlite3
 
 # Ignore Webpack hashes
-console/static/console/webpack-stats.json
+*webpack-stats.json
 
 # Ignore documentation build
 docs/build

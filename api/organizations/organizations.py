@@ -53,7 +53,6 @@ def organizations(request, format=None, org_id=None):
     claims = auth.verify_session(request)
     uid = claims['uid']
     custom_claims = get_custom_claims(uid)
-    print('Custom Claims:', custom_claims)
 
     # Get organization(s).
     if request.method == 'GET':
@@ -66,12 +65,12 @@ def organizations(request, format=None, org_id=None):
                 message = 'No organization exists with the given ID.'
                 return Response({'error': True, 'message': message}, status=404)
             elif organization['public']:
-                return Response(organization, content_type='application/json')
+                return Response({'data': organization}, content_type='application/json')
             elif uid not in organization['team']:
                 message = 'This is a private organization and you are not a team member. Request to join before continuing.'
                 return Response({'error': True, 'message': message}, status=400)
             else:
-                return Response(organization, content_type='application/json')
+                return Response({'data': organization}, content_type='application/json')
 
         # TODO: Get query parameters.
         keyword = request.query_params.get('name')
@@ -100,7 +99,7 @@ def organizations(request, format=None, org_id=None):
         # Optional: Try to get facility data from Metrc.
         # facilities = track.get_facilities()
 
-        return Response(docs, content_type='application/json')
+        return Response({'data': docs}, content_type='application/json')
 
     # Create or update an organization.
     elif request.method == 'POST':
@@ -191,7 +190,7 @@ def organizations(request, format=None, org_id=None):
             changes=changes
         )
 
-        return Response(entry, content_type='application/json')
+        return Response({'data': entry}, content_type='application/json')
 
     elif request.method == 'DELETE':
 
@@ -248,7 +247,7 @@ def employees(request):
     data = track.get_employees(license_number=license_number)
 
     # Return the requested data.
-    return Response(data, content_type='application/json')
+    return Response({'data': data}, content_type='application/json')
 
 
 #-----------------------------------------------------------------------

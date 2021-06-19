@@ -167,9 +167,10 @@ export const website = {
       if (this.readyState === 4) {
         var jsonResponse = JSON.parse(this.responseText);
         var success = jsonResponse.message.success;
+        var baseURL = window.location.origin;
         if (success) {
           emailInput.value = '';
-          document.location.href = '/subscribed';
+          document.location.href = `${baseURL}/subscribed`;
         }
         else {
           // FIXME: Show success dismiss-able alert

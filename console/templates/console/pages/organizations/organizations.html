@@ -12,7 +12,7 @@
   <!-- Display detail page given a section -->
   {% if section != '' %}
 
-    {% include './organization.html' %}
+    {% include './organization.html' with organization_context=organization_context %}
 
   {% else %}
 
@@ -24,7 +24,7 @@
       <h1 class="fs-5 mb-0 lh-base text-dark">Organizations</h1>
       <div>
         <a
-          class="btn btn-sm btn-outline-dark mx-2 "
+          class="btn btn-sm btn-sm-light btn-md-light mx-2 "
           type="button"
           href="/organizations/organization?join=true"
         >
@@ -112,7 +112,7 @@
 
       <!-- Placeholder -->
       {% include "console/components/placeholders/placeholder.html" with
-        placeholder=organizations.placeholder
+        placeholder=organization_context.placeholder
         only
       %}
 
@@ -122,5 +122,62 @@
   {% endif %}
 
 {% endblock console_body %}
+{% block console_js %}
+  <script>
 
+    // Initialize the UI (using context from Django).
+    if ('{{ section }}' !== '') cannlytics.organizations.viewOrganization('{{ section }}');
+  
+    // Enable tooltips.
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Toggle extra organization fields
+    function toggleOrganizationFields() {
+      cannlytics.ui.toggleElementClass('extra-organization-fields', 'd-none');
+      cannlytics.ui.toggleElementClass('extra-organization-fields-hide', 'd-none');
+      cannlytics.ui.toggleElementClass('extra-organization-fields-show', 'd-none');
+    }
+
+    // Toggle add license fields
+    function toggleLicenseFields(event) {
+      event.preventDefault();
+      cannlytics.ui.toggleElementClass('license-fields', 'd-none');
+      cannlytics.ui.toggleElementClass('license-fields-show', 'd-none');
+    }
+
+    // Toggle add license fields
+    function toggleTeamMemberFields(event) {
+      event.preventDefault();
+      cannlytics.ui.toggleElementClass('team-member-fields', 'd-none');
+      cannlytics.ui.toggleElementClass('team-member-fields-show', 'd-none');
+    }
+
+    // FIXME: Only show user API Key for Oklahoma.
+    // $('.license-state-selection').change(function() {
+    //   console.log($(this).val());
+    //   if ($(this).val() === 'OK') {
+    //     $('.user-api-key').removeClass('d-none');
+    //   } else {
+    //     $('.user-api-key').addClass('d-none');
+    //   }
+    // });
+
+    // Optional: Show other when other license type is selected
+    // https://stackoverflow.com/questions/18992839/hide-show-content-if-some-option-is-selected-with-bootstrap
+    // $('#pasveids').on('change', function(e){
+    //   if(e.val == 'Value if clicked on other') {
+    //       $('#hiddenevent').attr('type', 'text');
+    //       $('#pasveids').attr('name', '');
+    //       $('#hiddenevent').attr('name', 'eventtype');
+    //   } else {
+    //       $('#hiddenevent').attr('type', 'hidden');
+    //       $('#pasveids').attr('name', 'eventtype');
+    //   }
+    // });
+
+  </script>
+{% endblock console_js %}
 </html>

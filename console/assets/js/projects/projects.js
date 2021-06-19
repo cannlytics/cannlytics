@@ -17,7 +17,7 @@ export const projects = {
   },
 
 
-  getProjects(orgId, licenseNumber, versionId = '1') {
+  getProjects(orgId, licenseNumber, versionId = 'latest') {
     /*
      * Get projects.
      */
@@ -58,7 +58,7 @@ export const projects = {
   },
 
 
-  deleteProject(projectId, orgId, licenseNumber, versionId = '1') {
+  deleteProject(projectId, orgId, licenseNumber, versionId = 'latest') {
     /*
      * Delete a project.
      */

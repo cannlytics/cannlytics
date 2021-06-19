@@ -347,12 +347,12 @@
       </ol>
 
       <!-- Add license button -->
-      <a
+      <button
         class="nav-link text-secondary app-action d-inline-block"
-        onclick="cannlytics.ui.addListItem('license')"
+        onclick="cannlytics.ui.addListItem(event, 'license')"
       >
         {% icon 'plus' hegiht="16px" width="16px" %} Add a license
-      </a>
+      </button>
 
     </div><!-- End of license fields -->
 
@@ -437,12 +437,12 @@
       </ol>
 
       <!-- Add team member button -->
-      <a
+      <button
         class="nav-link text-secondary app-action d-inline-block"
-        onclick="cannlytics.ui.addListItem('team-member')"
+        onclick="cannlytics.ui.addListItem(event, 'team-member')"
       >
         {% icon 'plus' hegiht="16px" width="16px" %} Add a team member
-      </a>
+      </button>
 
     </div><!-- End of team member fields -->
 

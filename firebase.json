@@ -12,25 +12,6 @@
       "public": "docs/build"
     },
     {
-      "target": "dev",
-      "public": "public",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**",
-        "**/development/**"
-      ],
-      "rewrites": [
-        {
-          "source": "**",
-          "run": {
-            "serviceId": "cannlytics",
-            "region": "us-central1"
-          }
-        }
-      ]
-    },
-    {
       "target": "production",
       "public": "public",
       "ignore": [
@@ -43,21 +24,40 @@
         {
           "source": "!/sitemap",
           "run": {
-            "serviceId": "cannlytics",
+            "serviceId": "cannlytics-console",
             "region": "us-central1"
           }
         },
         {
           "source": "!/static",
           "run": {
-            "serviceId": "cannlytics",
+            "serviceId": "cannlytics-console",
             "region": "us-central1"
           }
         },
         {
           "source": "**",
           "run": {
-            "serviceId": "cannlytics",
+            "serviceId": "cannlytics-console",
+            "region": "us-central1"
+          }
+        }
+      ]
+    },
+    {
+      "target": "dev",
+      "public": "public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**",
+        "**/development/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "run": {
+            "serviceId": "cannlytics-console",
             "region": "us-central1"
           }
         }

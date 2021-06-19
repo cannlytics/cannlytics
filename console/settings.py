@@ -23,7 +23,7 @@ import re
 # External imports
 import environ
 import google.auth
-from google.cloud import secretmanager as sm
+from google.cloud import secretmanager
 from django.template import base
 
 # Optional: Caching for production.
@@ -37,7 +37,7 @@ from django.template import base
 # ------------------------------------------------------------#
 PROJECT_NAME = 'console'
 ROOT_URLCONF = 'console.urls'
-SETTINGS_NAME = 'cannlytics_settings'
+SETTINGS_NAME = 'cannlytics_platform_settings'
 WSGI_APPLICATION = 'console.wsgi.application'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -58,36 +58,63 @@ with open(os.path.join(BASE_DIR, 'package.json')) as v_file:
 # os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 
 # Load secrets stored as environment variables.
+# try:
+# env_file = os.path.join(BASE_DIR, '.env')
+# if not os.path.isfile('.env'):
+#     import google.auth
+#     from google.cloud import secretmanager as sm
+
+#     _, project = google.auth.default()
+#     if project:
+#         client = sm.SecretManagerServiceClient()
+#         # path = client.secret_version_path(project, SETTINGS_NAME, 'latest')
+#         name = f"projects/{project}/secrets/{SETTINGS_NAME}/versions/latest"
+#         payload = client.access_secret_version(name=name).payload.data.decode('UTF-8')
+#         with open(env_file, 'w') as f:
+#             f.write(payload)
+
+# env = environ.Env(DEBUG=(bool, False))
+# env.read_env(io.StringIO(payload))
+# SECRET_KEY = env('SECRET_KEY')
+# # DEBUG = env('DEBUG')
+
+env = environ.Env(DEBUG=(bool, False))
+env_file = os.path.join(BASE_DIR, '.env')
+
+# Attempt to load the Project ID into the environment, safely failing on error.
 try:
-    env_file = os.path.join(BASE_DIR, '.env')
-    if not os.path.isfile('.env'):
-        import google.auth
-        from google.cloud import secretmanager as sm
+    _, os.environ['GOOGLE_CLOUD_PROJECT'] = google.auth.default()
+except google.exceptions.DefaultCredentialsError:
+    pass
 
-        _, project = google.auth.default()
-        if project:
-            client = sm.SecretManagerServiceClient()
-            # path = client.secret_version_path(project, SETTINGS_NAME, 'latest')
-            name = f"projects/{project}/secrets/{SETTINGS_NAME}/versions/latest"
-            payload = client.access_secret_version(name=name).payload.data.decode('UTF-8')
-            with open(env_file, 'w') as f:
-                f.write(payload)
+# Use a local secret file, if provided.
+if os.path.isfile(env_file):
+    env.read_env(env_file)
 
-    env = environ.Env()
+# Retrieve the .env from Secret Manager.
+elif os.environ.get('GOOGLE_CLOUD_PROJECT', None):
+    project_id = os.environ.get('GOOGLE_CLOUD_PROJECT')
+    client = secretmanager.SecretManagerServiceClient()
+    settings_name = os.environ.get('SETTINGS_NAME', SETTINGS_NAME)
+    name = f'projects/{project_id}/secrets/{settings_name}/versions/latest'
+    payload = client.access_secret_version(name=name).payload.data.decode('UTF-8')
     env.read_env(io.StringIO(payload))
-    SECRET_KEY = env('SECRET_KEY')
-    # DEBUG = env('DEBUG') # TODO: Set PRODUCTION in Secret Manager secret.
+else:
+    raise Exception('No local .env or GOOGLE_CLOUD_PROJECT detected. No secrets found.')
 
-except:
-    # Create a default secret key for development.
-    # https://stackoverflow.com/questions/4664724/distributing-django-projects-with-unique-secret-keys
-    env = environ.Env()
-    try:
-        from console.secret_key import SECRET_KEY
-    except ImportError:
-        from console.utils import generate_secret_key
-        SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
-        SECRET_KEY = generate_secret_key(os.path.join(SETTINGS_DIR, 'secret_key.py'))
+# Access the secret key.
+SECRET_KEY = env('SECRET_KEY')
+
+# except:
+#     # Create a default secret key for development.
+#     # https://stackoverflow.com/questions/4664724/distributing-django-projects-with-unique-secret-keys
+#     env = environ.Env(DEBUG=(bool, False))
+#     try:
+#         from console.secret_key import SECRET_KEY
+#     except ImportError:
+#         from console.utils import generate_secret_key
+#         SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
+#         SECRET_KEY = generate_secret_key(os.path.join(SETTINGS_DIR, 'secret_key.py'))
 
 # ------------------------------------------------------------#
 # Ensure PRODUCTION is set to True in your .env when publishing!
@@ -95,11 +122,12 @@ except:
 try:
     PRODUCTION = env('PRODUCTION')
 except:
-    PRODUCTION = 'False'
+    PRODUCTION = 'True'
+    DEBUG = False
 if PRODUCTION == 'True':
     DEBUG = False
 else:
-    print('DEVELOPMENT MODE')
+    print('\n-------------\nDEVELOPMENT MODE\n-------------\n')
     DEBUG = True
 
 # ------------------------------------------------------------#
@@ -165,7 +193,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'console.core.context_processors.selected_settings', # Adds select settings to the context.
+                'console.core.context_processors.selected_settings',
             ],
         },
     },
@@ -211,19 +239,23 @@ USE_TZ = True
 # Security
 # https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/web_application_security
 # ------------------------------------------------------------#
-ALLOWED_HOSTS = []
-try:
-    ALLOWED_HOSTS.append(env('CUSTOM_DOMAIN'),)
-except:
-    pass
-try:
-    ALLOWED_HOSTS.append(env('FIREBASE_HOSTING_URL'),)
-except:
-    pass
-try:
-    ALLOWED_HOSTS.append(env('CLOUD_RUN_URL'),)
-except:
-    pass
+ALLOWED_HOSTS = [
+    '*',
+    'https://console.cannlytics.com',
+    'https://cannlytics-console-deeuhexjlq-uc.a.run.app',
+]
+# try:
+#     ALLOWED_HOSTS.append(env('CUSTOM_DOMAIN'),)
+# except:
+#     pass
+# try:
+#     ALLOWED_HOSTS.append(env('FIREBASE_HOSTING_URL'),)
+# except:
+#     pass
+# try:
+#     ALLOWED_HOSTS.append(env('CLOUD_RUN_URL'),)
+# except:
+#     pass
 
 if PRODUCTION == 'False':
     ALLOWED_HOSTS.extend(['*', 'localhost:8000', '127.0.0.1'])
@@ -248,13 +280,17 @@ DATABASES = {
 
 EMAIL_USE_TLS = True
 try:
-    EMAIL_HOST = env('EMAIL_HOST')
-    EMAIL_PORT = env('EMAIL_PORT')
     EMAIL_HOST_USER = env('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+    EMAIL_HOST = env('EMAIL_HOST')
+    EMAIL_PORT = env('EMAIL_PORT')
     DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
     LIST_OF_EMAIL_RECIPIENTS = [EMAIL_HOST_USER]
 except:
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    DEFAULT_FROM_EMAIL = EMAIL_HOST
+    LIST_OF_EMAIL_RECIPIENTS = [EMAIL_HOST_USER]
     print('Warning: Email not entirely configured.')
 
 # ------------------------------------------------------------#
@@ -334,9 +370,9 @@ APPEND_SLASH = False
 # https://stackoverflow.com/questions/49110044/django-template-tag-on-multiple-line
 base.tag_re = re.compile(base.tag_re.pattern, re.DOTALL)
 
-# Host static documentation.
-DOCS_DIR = os.path.join(BASE_DIR, f'{PROJECT_NAME}/static/{PROJECT_NAME}/docs')
-DOCS_STATIC_NAMESPACE = os.path.basename(DOCS_DIR)
+# Optional: Host static documentation.
+# DOCS_DIR = os.path.join(BASE_DIR, f'{PROJECT_NAME}/static/{PROJECT_NAME}/docs')
+# DOCS_STATIC_NAMESPACE = os.path.basename(DOCS_DIR)
 
 # Optional: Re-write to read docs directory directly.
 # MKDOCS_CONFIG = os.path.join(BASE_DIR, 'mkdocs.yml')

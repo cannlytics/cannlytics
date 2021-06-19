@@ -477,10 +477,17 @@ docker push gcr.io/your-lims/cannlytics
 
 ## Publishing <a name="publishing"></a>
 
-See [the publishing guide](docs/src/app/dev/publishing.md) for complete instructions on how to publish the Cannlytics Engine for use. After setup, publishing is done with one command:
+See [the publishing guide](docs/src/app/dev/publishing.md) for complete instructions on how to publish Cannlytics for production. The guide is based on the [Running Django on Cloud Run guide](https://cloud.google.com/python/django/run#windows). After setup, publishing is done with one command:
 
 ```shell
 npm run publish
+```
+
+If you need to change accounts or projects, then you can use:
+
+```shell
+gcloud config set account `ACCOUNT`
+gcloud config set project `PROJECT ID`
 ```
 
 The build process contains three steps:

@@ -96,10 +96,11 @@ export const dashboard = {
      */
     const user = auth.currentUser;
     const data = serializeForm('user-form');
+    const baseURL = window.location.origin;
     data.type = type;
     if (user === null) {
       signUp(data.email).then(() => {
-        document.location.href = `/get-started/organization/?from=${type}`;
+        document.location.href = `${baseURL}/get-started/organization/?from=${type}`;
       }).catch((error) => {
         showNotification('Sign up error', error.message, { type: 'error' });
         // Optional: Show error class (.is-invalid) if invalid
@@ -112,7 +113,7 @@ export const dashboard = {
         user.updateProfile({ displayName: data.name });
       }
       authRequest('/api/users', data).then(() => {
-        document.location.href = `/get-started/organization/?from=${type}`;
+        document.location.href = `${baseURL}/get-started/organization/?from=${type}`;
       });
     }
   },

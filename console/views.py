@@ -72,6 +72,9 @@ class ConsoleView(TemplateView):
         context = get_page_data(self.kwargs, context)
         # context = get_user_context(self.request, context)
         # context = get_model_context(context)
+        # FIXME: Hot-fix for organizations namespace clash in context!
+        if context['screen'] == 'organizations':
+            context['organization_context'] = context['organizations']
         context['organizations'] = self.request.session['organizations']
         context['user'] = self.request.session['user']
         return context
@@ -92,6 +95,7 @@ class ConsoleView(TemplateView):
         organizations = get_collection('organizations', filters=[query])
         request.session['organizations'] = organizations
         request.session['user'] = get_document(f'users/{uid}')
+        # TODO: If no user navigate to login.
         return super().get(request, *args, **kwargs)
 
 

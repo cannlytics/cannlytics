@@ -50,13 +50,14 @@ export const ui = {
   },
 
 
-  addListItem(type) {
+  addListItem(event, type) {
     /*
      * Adds a list item of input fields to the UI by
      * cloning the primary list item and clearing its fields.
      * The delete button is shown and wired-up.
      * The tooltip is removed.
      */
+    event.preventDefault();
     var ul = document.getElementById(`${type}-list`);
     var li = document.getElementById(`primary-${type}`).cloneNode(true);
     var id = `${type}-${ul.children.length + 1}`;

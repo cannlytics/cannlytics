@@ -11,7 +11,9 @@ import { errorSettings } from './errors.js';
 import { apiRequest, formDeserialize, serializeForm, showNotification } from '../utils.js';
 import { ui } from '../ui/ui.js';
 
+
 const apiSettings = {
+
 
   createAPIKey() {
     /* 
@@ -27,10 +29,12 @@ const apiSettings = {
     });
   },
 
+
   deleteAPIKey() {
     /* 
     * Delete an API key.
     */
+    // FIXME:
     const data = serializeForm('api-key-form');
     // ui.showLoadingButton('create-api-key-button');
     apiRequest('/api/delete-key', data).then((response) => {
@@ -45,6 +49,7 @@ const apiSettings = {
     //   ui.hideLoadingButton('create-api-key-button');
     // });
   },
+
 
   getAPIKeys(uid) {
     /* 
@@ -85,6 +90,7 @@ const apiSettings = {
     // });
   },
 
+
   renderAPIKey(change) {
     /* 
     * Get all of a user's API key information.
@@ -96,6 +102,7 @@ const apiSettings = {
       console.log('Remove row from table:', change.doc.id);
     }
   },
+
 
   selectAPIKey(data) {
     /*
@@ -186,6 +193,21 @@ const apiSettings = {
 
 
 const coreSettings = {
+
+
+  getOrganizationLogs(orgId) {
+    /* 
+    * Record time and user of any activity.
+    */
+  },
+
+
+  getUserLogs(orgId) {
+    /* 
+    * Record time and user of any activity.
+    */
+  },
+
 
   logAction() {
     /* 

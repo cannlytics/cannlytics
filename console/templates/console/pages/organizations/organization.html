@@ -4,98 +4,25 @@
   Organization Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/8/2021
-  Updated: 6/8/2021
+  Updated: 6/19/2021
 -->
 {% load icon %}
 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
   <!-- Header -->
-  {% include "console/components/links/breadcrumbs_dynamic.html" with
-    breadcrumbs=account.breadcrumbs
+  {% include "console/components/links/breadcrumbs.html" with
+    base_page='Organizations'
+    base_page_url='/organizations'
+    current_page=section
   %}
 
-  <!-- TODO: Float profile picture to the left-->
-  <!-- Change profile picture icon button on top right of picture -->
-  <div class="row mb-3">
+  <!-- TODO: Organization form -->  
+  {% include "console/pages/organizations/organization_form.html" with
+    organization_context=organization_context
+  %}
 
-    <!-- User image -->
-    <div class="col-md-6 text-center py-3 order-md-2">
-      <img
-        src="{{ navbar.default_logo_url }}"
-        style="height:200px;"
-        class="pe-1"
-        id="userPhoto"
-      >
-      <button
-        class="btn btn-sm position-absolute text-dark"
-        onclick="cannlytics.settings.uploadAccountPhoto()"
-      >
-        {% icon "image" %}
-      </button>
-    </div>
-
-    <!-- Account fields -->
-    <div class="col-md-6">
-      <form>
-        {% for item in account.fields %}        
-          <div class="row mb-3">
-
-            <!-- Field label -->
-            <label
-              for="input-{{ item.key }}"
-              class="col-sm-2 col-form-label col-form-label-sm"
-            >
-              {{ item.title }}
-            </label>
-
-            <!-- Field input -->
-            <div class="col-sm-10">
-              {% if item.group %}
-                <div class="input-group input-group-sm">
-                  <div class="input-group-text">{{ item.group }}</div>
-                  <input
-                    type="{{ item.type }}"
-                    class="form-control form-control-sm"
-                    id="input-{{ item.key }}"
-                  >
-                </div>
-              {% else %}
-                <input
-                  type="{{ item.type }}"
-                  class="form-control form-control-sm"
-                  id="input-{{ item.key }}"
-                  spellcheck="false"
-                >
-              {% endif %}
-            </div>
-
-          </div>
-        {% endfor %}
-      </form>
-    </div><!-- End of account fields -->
-
-  </div>
-
-  <!-- Options -->
-  <button
-    type="button"
-    class="btn btn-primary btn-sm"
-    style="width:8rem;"
-    onclick="cannlytics.settings.saveAccount()"
-  >
-    Save
-  </button>
-  <button
-    type="button"
-    class="btn btn-secondary btn-sm"
-    style="width:8rem;"
-    onclick="cannlytics.settings.exportAccount()"
-  >
-    Export
-  </button>
-
-  <!-- Other Account options -->
-  <h2 class="h6 mt-5 mb-0">Other account options</h2>
+  <!-- Other options -->
+  {% comment %} <h2 class="h6 mt-5 mb-0">Other account options</h2>
   <div class="list-group col-md-6 py-3">
     {% for item in account.options %}   
       <a
@@ -107,7 +34,7 @@
         {% icon "chevron-right" height="18px" width="18px" %}
       </a>
     {% endfor %}
-  </div>
+  </div> {% endcomment %}
 
   <!-- TODO: List permissions -->
   <!--

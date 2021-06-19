@@ -17,7 +17,7 @@ export const samples = {
   },
  
  
-  getSamples(orgId, licenseNumber, versionId = '1') {
+  getSamples(orgId, licenseNumber, versionId = 'latest') {
     /*
     * Get samples.
     */
@@ -58,7 +58,7 @@ export const samples = {
   },
 
 
-  deleteSample(sampleId, orgId, licenseNumber, versionId = '1') {
+  deleteSample(sampleId, orgId, licenseNumber, versionId = 'latest') {
     /*
     * Delete a sample.
     */

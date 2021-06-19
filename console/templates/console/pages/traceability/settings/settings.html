@@ -129,12 +129,12 @@
 
       <!-- Add license button -->
       <div>
-        <a
+        <button
           class="btn btn-sm btn-secondary"
-          onclick="cannlytics.ui.addListItem('license')"
+          onclick="cannlytics.ui.addListItem(event, 'license')"
         >
           Add a license
-        </a>
+        </button>
         <button
           class="btn btn-sm bg-gradient-green text-white"
           onclick="cannlytics.traceability.saveLicenses('{{ organizations.0.uid }}');"

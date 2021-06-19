@@ -24,10 +24,11 @@
   <script>
     var count = 10;
     var countdownElement = document.getElementById('navigation-countdown');
+    var baseURL = window.location.origin;
     setInterval(function() {
       count -= 1
       countdownElement.textContent = count.toString();
-      if (count === 0) document.location.href = '/account/sign-in';
+      if (count === 0) document.location.href = `${baseURL}/account/sign-in`;
     }, 1000);
   </script>
 

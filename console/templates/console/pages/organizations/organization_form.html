@@ -1,0 +1,354 @@
+<!doctype html>
+<html>
+<!--
+  Organization Form | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 6/19/2021
+  Updated: 6/19/2021
+
+  Parameters:
+    optional_class
+-->
+{% load static icon %}
+
+  <!-- Organization Form (hidden by default) -->
+  <form id="organization-form" class="mb-3 {{ optional_class }}">
+    <div class="row">
+
+      <!-- Organization image -->
+      <div class="col-md-6 text-center py-3 mb-3 p-md-0 order-md-2">
+        <p class="text-left fs-5 mb-3">
+          <small>Choose an image for your organization, up to 5MB.</small>
+        </p>
+        <img
+          src="{% static 'console/images/account/default.png' %}"
+          style="height:200px;"
+          class="pe-1"
+          id="org-photo-url"
+        >
+        <input
+          id="selectPhotoUrl"
+          type="file"
+          accept="image/*"
+          class="visually-hidden"
+          multiple
+        >
+        <button
+          class="btn btn-sm position-absolute text-dark"
+          onclick="cannlytics.dashboard.choosePhoto()"
+          type="button"
+        >
+          {% icon "image" %}
+        </button>
+      </div>
+
+      <!-- Organization fields -->
+      <div class="col-md-6">
+        <p class="text-left fw-bold fs-5 mb-3" style="max-width:540px;">
+          <small>Setup your organization for maximum impact.</small>
+        </p>
+
+        <!-- Public / private choice -->
+        <div class="mb-3">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="public" id="public-choice" value="true">
+            <label class="form-check-label" for="public-choice">
+              Public {% icon "globe" width="16px" height="16px" %}<br>
+              <small class="text-secondary">Appears in search results.</small>
+            </label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="public" id="private-choice" value="false" checked>
+            <label class="form-check-label" for="private-choice">
+              Private {% icon "lock" width="16px" height="16px" %}<br>
+              <small class="text-secondary">Only visible to you.</small>
+            </label>
+          </div>
+        </div>
+
+        <!-- Primary Fields -->
+        {% for item in organization_context.fields %}
+          {% if not item.secondary %}
+            <div class="row mb-3">
+
+              <!-- Field label -->
+              <label
+                for="input-{{ item.key }}"
+                class="col-sm-3 col-form-label col-form-label-sm"
+              >
+                {{ item.title }}
+              </label>
+
+              <!-- Field input -->
+              <div class="col-sm-9">
+                <input
+                  type="{{ item.type }}"
+                  class="form-control form-control-sm"
+                  id="input-{{ item.key }}"
+                  spellcheck="false"
+                  name="{{ item.key }}"
+                >
+              </div>
+
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        <!-- Extra Fields-->
+        <div id="extra-organization-fields" class="d-none">
+          {% for item in organization_context.fields %}
+            {% if item.secondary %}
+              <div class="row mb-3">
+
+                <!-- Field label -->
+                <label
+                  for="input-{{ item.key }}"
+                  class="col-sm-3 col-form-label col-form-label-sm"
+                >
+                  {{ item.title }}
+                </label>
+
+                <!-- Field input -->
+                <div class="col-sm-9">
+                  <input
+                    type="{{ item.type }}"
+                    class="form-control form-control-sm"
+                    id="input-{{ item.key }}"
+                    spellcheck="false"
+                    name="{{ item.key }}"
+                  >
+                </div>
+
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Show advanced fields -->
+        <a
+          id="extra-organization-fields-show"
+          class="nav-link text-secondary app-action d-inline-block"
+          onclick="toggleOrganizationFields();"
+        >
+          {% icon 'chevrons-down' hegiht="16px" width="16px" %} Show more
+        </a>
+        <a
+          id="extra-organization-fields-hide"
+          class="nav-link text-secondary app-action d-inline-block d-none"
+          onclick="toggleOrganizationFields();"
+        >
+          {% icon 'chevrons-up' hegiht="16px" width="16px" %} Show less
+        </a>
+          
+      </div><!-- End of organization fields -->
+
+      </div>
+    <div>
+
+    <!-- TODO: Render licenses if Org has licenses -->
+    <!-- onclick="toggleLicenseFields(event);" -->
+    <!-- Add licenses -->
+    <div class="my-4">
+      <p class="text-left fw-bold fs-5 mb-3">
+        <small>Manage your organization's licenses.</small>
+      </p>
+      <a
+        id="license-fields-show"
+        class="btn btn-sm btn-sm-light"
+        href="/traceability/settings"
+      >
+        Manage state-issued license
+      </a>
+    </div>
+
+    {% comment %} <!-- License fields -->
+    <div id="license-fields" class="d-none">
+      <ol id="license-list" class="bold-list">
+        <li id="primary-license" class="mb-3">
+          <div class="row g-4">
+            <div class="col-md-3">
+              <label class="form-label">License</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+              >
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">License Type</label>
+              <select
+                class="form-select form-select-sm"
+                aria-label="License type"
+              >
+                <option selected></option>
+                <!-- Optional: Dynamic license types-->
+                <option value="lab">Lab</option>
+                <option value="producer-cultivator">Cultivator</option>
+                <option value="producer-processor">Processor</option>
+                <option value="retailer">Retailer</option>
+                <option value="other">Other</option>
+              </select>
+              <!-- TODO: Let user specify type if other -->
+              <input
+                type="text"
+                class="form-control form-control-sm d-none"
+                placeholder="Please specify..."
+              >
+            </div>
+            
+            <!-- <div class="col-md-3">
+              <label class="form-label">Please specify</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                id="license-type-other-1"
+              >
+            </div> -->
+            <div class="col-md-2">
+              <label class="form-label">State</label>
+              <select
+                class="form-select form-select-sm license-state-selection"
+                aria-label="License type"
+              >
+                <option selected></option>
+                <!-- TODO: Dynamically list states -->
+                <option value="OK">Oklahoma</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <!-- TODO: Only show API key if state is Oklahoma -->
+            <div class="col-md-3">
+              <label class="form-label">
+                User API Key
+                <button
+                  type="button"
+                  class="btn btn-tooltip-help"
+                  data-bs-toggle="tooltip"
+                  data-bs-html="true"
+                  title="Integration with Metrc requires your user's API key, which only you can generate and obtain. This API key is tied directly to your Metrc user account (not the company or facility), and everything your software does is tied to your user's API Key. Your software will, however, be limited by the permissions granted to your user within Metrc.<br><br>Your user API key is encrypted and protected in accordance with our <a href='https://docs.cannlytics.com/about/security-policy' target='_blank'>security policy</a>.<br><br>Please see the <a href='https://api-ok.metrc.com/Documentation#getting-started_user_api_key' target='_blank'>Metrc documentation</a> for more information."
+                >
+                  {% icon 'help-circle' width="18px" height="18px" class="text-secondary" %}
+                </button>
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                id="license-type-other-1"
+              >
+            </div>
+            <div class="col-md-1">
+              <button
+                class="btn btn-link text-danger"
+                onclick="toggleLicenseFields(event);"
+              >
+                {% icon 'trash-2' hegiht="16px" width="16px" %}
+              </button>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <!-- Add license button -->
+      <a
+        class="nav-link text-secondary app-action d-inline-block"
+        onclick="cannlytics.ui.addListItem('license')"
+      >
+        {% icon 'plus' hegiht="16px" width="16px" %} Add a license
+      </a>
+
+    </div><!-- End of license fields --> {% endcomment %}
+
+    <!-- TODO: Render team members -->
+
+    <!-- Add team members -->
+    <div class="my-4">
+      <p class="text-left fw-bold fs-5 mb-3" style="max-width:540px;">
+        <small>Add your organization's team members. <br>🚧 UNDER DEVELOPMENT 🚧</small>
+      </p>
+      <button
+        id="team-member-fields-show"
+        class="btn btn-sm btn-sm-light"
+        onclick="toggleTeamMemberFields(event);"
+      >
+        Add team member
+      </button>
+    </div>
+
+    <!-- Team member fields -->
+    <div id="team-member-fields" class="d-none">
+      <ol id="team-member-list" class="bold-list">
+        <li id="primary-team-member" class="mb-3">
+          <div class="row g-4">
+            <div class="col-md-3">
+              <label for="team-member-name-1" class="form-label">Name</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+              >
+            </div>
+            <div class="col-md-3">
+              <label for="team-member-email-1" class="form-label">Email</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+              >
+            </div>
+            <!-- Optional: Advanced options, such as position -->
+            <!--<div class="col-md-3">
+              <label for="team-member-position-1" class="form-label">Position</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+              >
+            </div>-->
+            <div class="col-md-3">
+              <label for="team-member-permissions-1" class="form-label">
+                Permissions
+                <button
+                  type="button"
+                  class="btn btn-tooltip-help"
+                  data-bs-toggle="tooltip"
+                  data-bs-html="true"
+                  title="<code>CTRL + click</code> to select multiple permissions. <code>Staff</code> permissions are required for most organization operations."
+                >
+                  {% icon 'help-circle' width="18px" height="18px" class="text-secondary" %}
+                </button>
+              </label>
+              <select
+                class="form-select form-select-sm"
+                aria-label="License type"
+                id="team-member-permissions-1"
+                multiple
+              >
+                <!-- TODO: Dynamic permission types-->
+                <option selected value="staff">Staff</option>
+                <option value="admin">Admin</option>
+                <option value="qa">QA</option>
+                <option value="billing">Billing</option>
+                <option value="scheduling">Scheduling</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <button
+                class="btn btn-link text-danger"
+                onclick="toggleTeamMemberFields(event);"
+              >
+                {% icon 'trash-2' hegiht="16px" width="16px" %}
+              </button>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <!-- Add team member button -->
+      <button
+        class="btn btn-sm btn-sm-light"
+        onclick="cannlytics.ui.addListItem(event, 'team-member')"
+      >
+        Add a team member
+      </button>
+
+    </div><!-- End of team member fields -->
+
+  </form><!-- End of organization form -->
+
+</html>

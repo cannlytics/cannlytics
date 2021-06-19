@@ -13,6 +13,9 @@
         ],
         "production": [
           "cannlytics-console"
+        ],
+        "website": [
+          "cannlytics-website"
         ]
       }
     }

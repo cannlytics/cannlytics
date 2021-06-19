@@ -17,36 +17,41 @@
     </div>
 
     <!-- Body -->
-    <div class="projects">
+    <div class="card my-3">
+      <div class="card-body">
 
-      <!-- Table -->
-      <div class="my-3 px-3">
-        <h2 class="h6 mb-3 text-dark">Projects</h2>
-        <div class="table-responsive">
+        <!-- Table -->
+        <div class="my-3 px-3">
+          <h2 class="h6 mb-3 text-dark">Projects</h2>
+          <div class="table-responsive">
 
-          <!-- Placeholder if no data -->
-          <div id="data-placeholder">
-            {% include "console/components/placeholders/table_placeholder.html" with
-              height='200px'
-              image='console/images/illustrations/outline/lab_dekstop.svg'
-              message="No current projects, you're all caught up."
-              title='No Current Projects'
-              url='/projects/project?new=true'
-              only
-            %}
+            <!-- Placeholder if no data -->
+            <div id="data-placeholder">
+              {% include "console/components/placeholders/table_placeholder.html" with
+                action='Create a project'
+                height='200px'
+                image='console/images/illustrations/outline/lab_books.svg'
+                message="No current projects, you're all caught up."
+                title='No Current Projects'
+                url='/projects/project?new=true'
+                only
+              %}
+            </div>
+
+            <!-- AG Grid Table -->
+            <div id="data-table" class="d-none">
+              <div
+                id="projects-table"
+                class="ag-theme-alpine-dark"
+                style="height: 326px; width:100%;"
+              ></div>
+            </div>
+
           </div>
-
-          <!-- AG Grid Table -->
-          <div id="data-table" class="d-none">
-            <div
-              id="projects-table"
-              class="ag-theme-alpine-dark"
-              style="height: 326px; width:100%;"
-            ></div>
-          </div>
-
-        </div>
-      </div><!-- End of the table -->
+        </div><!-- End of the table -->
+      
+      </div>
+    </div>
 
     </div>
   </main>

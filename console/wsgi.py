@@ -21,4 +21,7 @@ os.environ.setdefault(
     'console.settings'
 )
 
-application = Cling(get_wsgi_application())
+try:
+    application = Cling(get_wsgi_application())
+except:
+    application = get_wsgi_application()

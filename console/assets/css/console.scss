@@ -95,6 +95,11 @@ body:not(.dark) .btn-secondary:active {
   transition: .2s cubic-bezier(.3, 0, .5, 1);
   transition-property: color,background-color,border-color;
 }
+.btn-md-light {
+  padding: 4px 8px;
+  font-size: 14px;
+  line-height: 21px;
+}
 .btn-sm-light:hover {
   background-color: #f3f4f6;
   border-color: rgb(27 31 35 / 15%);

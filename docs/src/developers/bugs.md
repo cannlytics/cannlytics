@@ -2,6 +2,12 @@
 
 A non-exhaustive list of encountered bugs and their solutions.
 
+- [AppEngine warning - OpenBLAS WARNING - could not determine the L2 cache size on this system](https://stackoverflow.com/questions/55016899/appengine-warning-openblas-warning-could-not-determine-the-l2-cache-size-on)
+
+- [Firebase hosting deployment failing](https://stackoverflow.com/questions/57911225/firebase-hosting-deployment-failing) at `hosting: uploading new files [5/128]` with error `Error: Task xyz failed: retries exhausted after 6 attempts`. Quick solution: Delete the hidden folder in you project root directory `.firebase/hosting.*.cache`.
+
+- When running `npm run publish` to create the container for Cloud Run, the program keeps retying, for example `Retrying in 12 seconds`. In this case, there is a container naming issue. Ensure `gcloud run deploy APP-NAME` matches the image tag `gcr.io/PROJECT/APP-NAME`.
+
 - [Visual Studio Code - Target of URI doesn't exist 'package:flutter/material.dart'](https://stackoverflow.com/questions/44909653/visual-studio-code-target-of-uri-doesnt-exist-packageflutter-material-dart) - This error usually is not an actual error and is shown when 2 different projects are open.
 
 - [FlatButton - This class is deprecated, please use TextButton instead.](https://api.flutter.dev/flutter/material/TextButton-class.html)
