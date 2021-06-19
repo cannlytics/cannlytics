@@ -101,4 +101,48 @@ def import_agilent_gc_terpenes(file_name):
 def import_agilent_cannbinoids(file_name):
     return import_agilent_gc_residual_solvments(file_name)
 
-print(import_agilent_cannbinoids('/Users/alienfoo/Documents/DataSets/cannlytics/cannlytics/lims/cannabinoid.xls'))
+def import_metals(file_name):
+
+    import pandas as pd
+
+    # read in the log sheet and summary sheets seperately to parsing easier
+    log_df = pd.read_excel(file_name, sheet_name = 'Log')
+    summary_df = pd.read_excel(file_name, sheet_name = 'Quant Summary')
+
+    # drop the rows that do not contain sample ids
+    log_df.dropna(subset = ['Sample Mass (g)'], inplace = True)
+
+    # rename columns to make parsing clearer
+    summary_df.rename(columns = {'Analysis':'analyte','-':'mass'}, inplace = True)
+
+    # get list of samples
+    sample_ids = log_df['Sample ID'].tolist()
+
+    samples = []
+    measurements = {}
+
+
+    for sample_id in sample_ids:
+        sample = {}
+        sample[ 'sample_id' ] = sample_id
+        sample['sample_mass'] = log_df[log_df['Sample ID'] == sample_id]['Sample Mass (g)'].values[0]
+        sample['sample_dilution'] = log_df[log_df['Sample ID'] == sample_id]['Sample Dilution'].values[0]
+
+        analytes = []
+        measurements['measurements'] = analytes
+        index  = summary_df.index[(summary_df['analyte'] == 'ID:') & (summary_df['mass'] == sample_id)].tolist()
+        for offset in range(index[0] + 20, index[0] + 27):
+            analyte = {}
+            analyte['analyte'] = summary_df.iloc[offset].analyte
+            analyte['measurement'] = summary_df.iloc[offset+9].mass
+            analytes.append(analyte)
+    
+        samples.append(sample)
+        samples.append(measurements)
+    
+    return samples
+
+
+
+
+
