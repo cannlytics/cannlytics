@@ -6,186 +6,183 @@
   Created: 6/8/2021
   Updated: 6/8/2021
 -->
-{% extends "console/console.html" %}
 {% load icon %}
-{% block console_body %}
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
-    <!-- Header -->
-    {% include "console/components/notifications/breadcrumbs_dynamic.html" with
-      breadcrumbs=account.breadcrumbs
-    %}
+  <!-- Header -->
+  {% include "console/components/links/breadcrumbs_dynamic.html" with
+    breadcrumbs=account.breadcrumbs
+  %}
 
-    <!-- TODO: Float profile picture to the left-->
-    <!-- Change profile picture icon button on top right of picture -->
-    <div class="row mb-3">
+  <!-- TODO: Float profile picture to the left-->
+  <!-- Change profile picture icon button on top right of picture -->
+  <div class="row mb-3">
 
-      <!-- User image -->
-      <div class="col-md-6 text-center py-3 order-md-2">
-        <img
-          src="{{ navbar.default_logo_url }}"
-          style="height:200px;"
-          class="pe-1"
-          id="userPhoto"
-        >
-        <button
-          class="btn btn-sm position-absolute text-dark"
-          onclick="cannlytics.settings.uploadAccountPhoto()"
-        >
-          {% icon "image" %}
-        </button>
-      </div>
+    <!-- User image -->
+    <div class="col-md-6 text-center py-3 order-md-2">
+      <img
+        src="{{ navbar.default_logo_url }}"
+        style="height:200px;"
+        class="pe-1"
+        id="userPhoto"
+      >
+      <button
+        class="btn btn-sm position-absolute text-dark"
+        onclick="cannlytics.settings.uploadAccountPhoto()"
+      >
+        {% icon "image" %}
+      </button>
+    </div>
 
-      <!-- Account fields -->
-      <div class="col-md-6">
-        <form>
-          {% for item in account.fields %}        
-            <div class="row mb-3">
+    <!-- Account fields -->
+    <div class="col-md-6">
+      <form>
+        {% for item in account.fields %}        
+          <div class="row mb-3">
 
-              <!-- Field label -->
-              <label
-                for="input-{{ item.key }}"
-                class="col-sm-2 col-form-label col-form-label-sm"
-              >
-                {{ item.title }}
-              </label>
+            <!-- Field label -->
+            <label
+              for="input-{{ item.key }}"
+              class="col-sm-2 col-form-label col-form-label-sm"
+            >
+              {{ item.title }}
+            </label>
 
-              <!-- Field input -->
-              <div class="col-sm-10">
-                {% if item.group %}
-                  <div class="input-group input-group-sm">
-                    <div class="input-group-text">{{ item.group }}</div>
-                    <input
-                      type="{{ item.type }}"
-                      class="form-control form-control-sm"
-                      id="input-{{ item.key }}"
-                    >
-                  </div>
-                {% else %}
+            <!-- Field input -->
+            <div class="col-sm-10">
+              {% if item.group %}
+                <div class="input-group input-group-sm">
+                  <div class="input-group-text">{{ item.group }}</div>
                   <input
                     type="{{ item.type }}"
                     class="form-control form-control-sm"
                     id="input-{{ item.key }}"
-                    spellcheck="false"
                   >
-                {% endif %}
-              </div>
-
+                </div>
+              {% else %}
+                <input
+                  type="{{ item.type }}"
+                  class="form-control form-control-sm"
+                  id="input-{{ item.key }}"
+                  spellcheck="false"
+                >
+              {% endif %}
             </div>
-          {% endfor %}
-        </form>
-      </div><!-- End of account fields -->
 
-    </div>
+          </div>
+        {% endfor %}
+      </form>
+    </div><!-- End of account fields -->
 
-    <!-- Options -->
-    <button
-      type="button"
-      class="btn btn-primary btn-sm"
-      style="width:8rem;"
-      onclick="cannlytics.settings.saveAccount()"
-    >
-      Save
-    </button>
-    <button
-      type="button"
-      class="btn btn-secondary btn-sm"
-      style="width:8rem;"
-      onclick="cannlytics.settings.exportAccount()"
-    >
-      Export
-    </button>
+  </div>
 
-    <!-- Other Account options -->
-    <h2 class="h6 mt-5 mb-0">Other account options</h2>
-    <div class="list-group col-md-6 py-3">
-      {% for item in account.options %}   
-        <a
-          href="{{ item.url }}"
-          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-          aria-current="true"
-        >
-          {{ item.title }}
-          {% icon "chevron-right" height="18px" width="18px" %}
-        </a>
-      {% endfor %}
-    </div>
+  <!-- Options -->
+  <button
+    type="button"
+    class="btn btn-primary btn-sm"
+    style="width:8rem;"
+    onclick="cannlytics.settings.saveAccount()"
+  >
+    Save
+  </button>
+  <button
+    type="button"
+    class="btn btn-secondary btn-sm"
+    style="width:8rem;"
+    onclick="cannlytics.settings.exportAccount()"
+  >
+    Export
+  </button>
 
-    <!-- TODO: List permissions -->
-    <!--
-      E.g.
-      {'hire_date': '2020-11-17',
-      'is_owner': True,
-      'is_manager': True,
-      'occupations': [],
-      'name': 'AK PERCEPTIVE TESTING LABS, LLC',
-      'alias': 'OK Testing A',
-      'display_name': 'OK Testing A',
-      'credentialed_date': '2020-11-17',
-      'support_activation_date': None,
-      'support_expiration_date': None,
-      'support_last_paid_date': None,
-      'facility_type': {'is_medical': True,
-        'is_retail': False,
-        'is_hemp': False,
-        'restrict_harvest_plant_restore_time_hours': None,
-        'total_member_patients_allowed': None,
-        'can_grow_plants': False,
-        'can_create_opening_balance_plant_batches': False,
-        'can_tag_plant_batches': False,
-        'can_assign_locations_to_plant_batches': False,
-        'plants_require_patient_affiliation': False,
-        'plant_batches_can_contain_mother_plants': False,
-        'can_update_plant_strains': False,
-        'can_track_vegetative_plants': False,
-        'can_create_immature_plant_packages_from_plants': False,
-        'can_package_vegetative_plants': False,
-        'can_package_waste': False,
-        'can_report_harvest_schedules': False,
-        'can_submit_harvests_for_testing': False,
-        'can_require_harvest_sample_lab_test_batches': False,
-        'can_create_opening_balance_packages': False,
-        'can_create_derived_packages': True,
-        'can_assign_locations_to_packages': True,
-        'can_update_locations_on_packages': True,
-        'packages_require_patient_affiliation': False,
-        'can_create_trade_sample_packages': False,
-        'can_donate_packages': False,
-        'can_submit_packages_for_testing': True,
-        'can_create_process_validation_packages': False,
-        'can_require_package_sample_lab_test_batches': True,
-        'can_request_product_remediation': False,
-        'can_remediate_packages_with_failed_lab_results': False,
-        'can_infuse_products': False,
-        'can_test_packages': True,
-        'can_transfer_from_external_facilities': False,
-        'can_sell_to_consumers': False,
-        'can_sell_to_patients': False,
-        'can_sell_to_external_patients': False,
-        'can_sell_to_caregivers': False,
-        'advanced_sales': False,
-        'sales_require_patient_number': False,
-        'sales_require_external_patient_number': False,
-        'sales_require_external_patient_identification_method': False,
-        'sales_require_caregiver_number': False,
-        'sales_require_caregiver_patient_number': False,
-        'can_deliver_sales_to_consumers': False,
-        'sales_delivery_require_consumer_id': False,
-        'can_deliver_sales_to_patients': False,
-        'sales_delivery_require_patient_number': False,
-        'sales_delivery_require_recipient_name': False,
-        'can_have_member_patients': False,
-        'can_report_patient_check_ins': False,
-        'can_specify_patient_sales_limit_exemption': False,
-        'can_report_patients_adverse_responses': False,
-        'can_report_strain_properties': True},
-      'license': {'number': '6a-X0001',
-        'start_date': '2013-06-28',
-        'end_date': '2020-12-28',
-        'license_type': 'Testing Laboratory'}}
+  <!-- Other Account options -->
+  <h2 class="h6 mt-5 mb-0">Other account options</h2>
+  <div class="list-group col-md-6 py-3">
+    {% for item in account.options %}   
+      <a
+        href="{{ item.url }}"
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+        aria-current="true"
+      >
+        {{ item.title }}
+        {% icon "chevron-right" height="18px" width="18px" %}
+      </a>
+    {% endfor %}
+  </div>
 
-    -->
+  <!-- TODO: List permissions -->
+  <!--
+    E.g.
+    {'hire_date': '2020-11-17',
+    'is_owner': True,
+    'is_manager': True,
+    'occupations': [],
+    'name': 'AK PERCEPTIVE TESTING LABS, LLC',
+    'alias': 'OK Testing A',
+    'display_name': 'OK Testing A',
+    'credentialed_date': '2020-11-17',
+    'support_activation_date': None,
+    'support_expiration_date': None,
+    'support_last_paid_date': None,
+    'facility_type': {'is_medical': True,
+      'is_retail': False,
+      'is_hemp': False,
+      'restrict_harvest_plant_restore_time_hours': None,
+      'total_member_patients_allowed': None,
+      'can_grow_plants': False,
+      'can_create_opening_balance_plant_batches': False,
+      'can_tag_plant_batches': False,
+      'can_assign_locations_to_plant_batches': False,
+      'plants_require_patient_affiliation': False,
+      'plant_batches_can_contain_mother_plants': False,
+      'can_update_plant_strains': False,
+      'can_track_vegetative_plants': False,
+      'can_create_immature_plant_packages_from_plants': False,
+      'can_package_vegetative_plants': False,
+      'can_package_waste': False,
+      'can_report_harvest_schedules': False,
+      'can_submit_harvests_for_testing': False,
+      'can_require_harvest_sample_lab_test_batches': False,
+      'can_create_opening_balance_packages': False,
+      'can_create_derived_packages': True,
+      'can_assign_locations_to_packages': True,
+      'can_update_locations_on_packages': True,
+      'packages_require_patient_affiliation': False,
+      'can_create_trade_sample_packages': False,
+      'can_donate_packages': False,
+      'can_submit_packages_for_testing': True,
+      'can_create_process_validation_packages': False,
+      'can_require_package_sample_lab_test_batches': True,
+      'can_request_product_remediation': False,
+      'can_remediate_packages_with_failed_lab_results': False,
+      'can_infuse_products': False,
+      'can_test_packages': True,
+      'can_transfer_from_external_facilities': False,
+      'can_sell_to_consumers': False,
+      'can_sell_to_patients': False,
+      'can_sell_to_external_patients': False,
+      'can_sell_to_caregivers': False,
+      'advanced_sales': False,
+      'sales_require_patient_number': False,
+      'sales_require_external_patient_number': False,
+      'sales_require_external_patient_identification_method': False,
+      'sales_require_caregiver_number': False,
+      'sales_require_caregiver_patient_number': False,
+      'can_deliver_sales_to_consumers': False,
+      'sales_delivery_require_consumer_id': False,
+      'can_deliver_sales_to_patients': False,
+      'sales_delivery_require_patient_number': False,
+      'sales_delivery_require_recipient_name': False,
+      'can_have_member_patients': False,
+      'can_report_patient_check_ins': False,
+      'can_specify_patient_sales_limit_exemption': False,
+      'can_report_patients_adverse_responses': False,
+      'can_report_strain_properties': True},
+    'license': {'number': '6a-X0001',
+      'start_date': '2013-06-28',
+      'end_date': '2020-12-28',
+      'license_type': 'Testing Laboratory'}}
 
-  </main>
-{% endblock console_body %}
+  -->
+
+</main>
 </html>

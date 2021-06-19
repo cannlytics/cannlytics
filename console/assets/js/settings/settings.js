@@ -8,7 +8,7 @@
 import { auth, db } from '../firebase.js';
 import { userSettings } from './user.js';
 import { errorSettings } from './errors.js';
-import { apiRequest, serializeForm, showNotification } from '../utils.js';
+import { apiRequest, formDeserialize, serializeForm, showNotification } from '../utils.js';
 import { ui } from '../ui/ui.js';
 
 const apiSettings = {
@@ -18,22 +18,32 @@ const apiSettings = {
     * Create an API key.
     */
     const data = serializeForm('new-api-key-form');
-    console.log('Creating API key...', data);
     ui.showLoadingButton('create-api-key-button');
     apiRequest('/api/create-key', data).then((response) => {
-      // TODO: Add new key to the table!
-      console.log(response);
+      // Optional: Add new key to the table and show the table without reloading!
+      window.location.reload(); 
     }).finally(() => {
       ui.hideLoadingButton('create-api-key-button');
     });
   },
 
-  deleteAPIKey(data) {
+  deleteAPIKey() {
     /* 
     * Delete an API key.
     */
-    console.log('Deleting API key...', data);
-    // TODO: Post name of key that needs to be deleted.
+    const data = serializeForm('api-key-form');
+    // ui.showLoadingButton('create-api-key-button');
+    apiRequest('/api/delete-key', data).then((response) => {
+      if (response.error) {
+        showNotification('Error deleting API key', response.message, { type: 'error' });
+        return;
+      }
+      // Optional: Add new key to the table and show the table without reloading!
+      window.location.reload(); 
+    });
+    // .finally(() => {
+    //   ui.hideLoadingButton('create-api-key-button');
+    // });
   },
 
   getAPIKeys(uid) {
@@ -92,6 +102,17 @@ const apiSettings = {
      * Select an API key from the table.
      */
   },
+
+
+  viewAPIKey() {
+    /*
+     * Render a project's data when navigating to a project page.
+     */
+    const data = JSON.parse(localStorage.getItem('api-key'));
+    formDeserialize(document.forms['api-key-form'], data);
+    console.log(data);
+  },
+
 
 }
 

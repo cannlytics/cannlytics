@@ -110,17 +110,21 @@ def create_api_key(request, *args, **argv): #pylint: disable=unused-argument
     code = sha256_hmac(app_secret, api_key)
     post_data = loads(request.body.decode('utf-8'))
     now = datetime.now()
-    expiration_date = datetime.fromisoformat(post_data['expiration'])
-    if expiration_date - now > timedelta(365):
-        expiration_date = now + timedelta(365)
+    expiration_at = post_data['expiration_at']
+    try:
+        expiration_at = datetime.fromisoformat(expiration_at)
+    except:
+        expiration_at = datetime.strptime(expiration_at, '%m/%d/%Y')
+    if expiration_at - now > timedelta(365):
+        expiration_at = now + timedelta(365)
     key_data = {
         'created_at': now.isoformat(),
-        'expiration_at': expiration_date.isoformat(),
+        'expiration_at': expiration_at.isoformat(),
         'name': post_data['name'],
         'permissions': post_data['permissions'],
         'uid': uid,
         'user_email': user_claims['email'],
-        'user_name': user_claims['name'],
+        'user_name': user_claims.get('name', 'No Name'),
     }
     update_document(f'admin/api/api_key_hmacs/{code}', key_data)
     update_document(f'users/{uid}/api_key_hmacs/{code}', key_data)
@@ -133,14 +137,26 @@ def delete_api_key(request, *args, **argv): #pylint: disable=unused-argument
     Args:
         request (HTTPRequest): A request to get the user's API key.
     """
-    authorization = request.META['HTTP_AUTHORIZATION']
-    api_key = authorization.split(' ')[-1]
-    app_secret = get_document('admin/api')['app_secret_key']
-    code = sha256_hmac(app_secret, api_key)
-    key_data = get_document(f'admin/api/api_key_hmacs/{code}')
-    uid = key_data['uid']
-    delete_document(f'admin/api/api_key_hmacs/{code}')
-    delete_document(f'users/{uid}/api_key_hmacs/{code}')
+    user_claims = verify_session(request)
+    uid = user_claims['uid']
+    post_data = loads(request.body.decode('utf-8'))
+
+    # FIXME: Get the name of the desired key to delete.
+
+    # Delete the key from the users API keys.
+
+    # Remove the key HMAC by created_at time.
+
+    # authorization = request.META['HTTP_AUTHORIZATION']
+    # api_key = authorization.split(' ')[-1]
+    # app_secret = get_document('admin/api')['app_secret_key']
+    # code = sha256_hmac(app_secret, api_key)
+    # key_data = get_document(f'admin/api/api_key_hmacs/{code}')
+    # uid = key_data['uid']
+    # delete_document(f'admin/api/api_key_hmacs/{code}')
+    # delete_document(f'users/{uid}/api_key_hmacs/{code}')
+    # return JsonResponse({'status': 'success'})
+    return JsonResponse({'error': True, 'message': 'Delete API key not yet implemented, will be implemented shortly.'})
 
 
 def get_api_key_hmacs(request, *args, **argv): #pylint: disable=unused-argument

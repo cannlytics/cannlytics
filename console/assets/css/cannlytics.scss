@@ -258,8 +258,8 @@ a.text-secondary:hover {
 svg.text-secondary:hover {
   stroke: #000 !important;
 }
-body.dark a.text-secondary small,
 body.dark p.text-secondary,
+body.dark small,
 body.dark svg.text-secondary {
   color: #ccc !important;
 }
@@ -1451,6 +1451,15 @@ body.dark .modal-content {
 
 .shadow-hover:hover {
   box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+.shade-hover:hover {
+  background-color: #f8f9fa;
+}
+body.dark .card.shade-hover {
+  background-color: #323443 !important;
+}
+body.dark .shade-hover:hover {
+  background-color: #44475a !important;
 }
 
 /*--------------------------------------------------------------------------

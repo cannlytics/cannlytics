@@ -141,8 +141,8 @@ def lab_tests(request):
 
     # Get lab results.
     if request.method == 'GET':
-        # FIXME:
-        objs = track.get_lab_results(uid='13215', license_number=license_number)
+        # FIXME: Get a longer list of lab results from Firestore
+        objs = track.get_lab_results(uid='185436', license_number=license_number)
         data = [obj.to_dict() for obj in objs]
         return Response({'data': data}, content_type='application/json')
 
@@ -205,7 +205,8 @@ def packages(request):
 
     # Get data.
     if request.method == 'GET':
-        objs = track.get_packages(license_number=license_number, label='1A40E0100001BD1000000327')
+        # FIXME: Get a longer list of packages from Firestore?
+        objs = track.get_packages(license_number=license_number, start='2021-06-04', end='2021-06-05')
         try:
             data = [obj.to_dict() for obj in objs]
         except TypeError:
@@ -278,7 +279,8 @@ def transfers(request):
         # license_number=''
         # start=''
         # end=''
-        objs = track.get_transfers(license_number=license_number, uid='0000071448')
+        # FIXME: Get transfers by specified date range? Or get longer list from Firestore.
+        objs = track.get_transfers(license_number=license_number, start='2021-06-04', end='2021-06-05')
         data = [obj.to_dict() for obj in objs]
         print('Retrieved the data:', data)
         return Response({'data': data}, content_type='application/json')

@@ -41,7 +41,7 @@
     <div class="d-flex px-3 py-1">
 
       <!-- Profile menu image -->
-      <a href="/settings/account">
+      <a href="/settings/user">
         <img
           id="userPhotoMenu"
           src="{% if user.photo_url %}{{ user.photo_url }}{% else %}{% static "console/images/account/default-dark.png" %}{% endif %}"
@@ -58,12 +58,12 @@
       <div class="d-flex flex-column justify-content-center ps-2">
         <a
           id="personalize-account"
-          class="text-link {% if user.display_name %}d-none{% endif %}"
-          href="/settings/account"
+          class="text-link {% if user.name %}d-none{% endif %}"
+          href="/settings/user"
         >
           Personalize your account &rarr;
         </a>
-        <h3 id="userName" class="mb-1 fs-5">{{ user.display_name }}</h3>
+        <h3 id="userName" class="mb-1 fs-5">{{ user.name }}</h3>
         <h5 id="userEmail" class="mb-0 fs-6 text-secondary">{{ user.email }}</h5>
 
         <!-- Sign-up / sign-in for anonymous users -->
@@ -91,7 +91,7 @@
     <li><hr class="dropdown-divider"></li>
 
     <!-- Account -->
-    <li><a class="dropdown-item" href="/settings/account">Your account</a></li>
+    <li><a class="dropdown-item" href="/settings/user">Your account</a></li>
 
     <!-- Change theme -->
     {% comment %} <li>

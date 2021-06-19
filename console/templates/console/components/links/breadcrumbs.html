@@ -1,15 +1,21 @@
 <!doctype html>
 <html>
-  <!-- Bradcrumbs -->
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+<!--
+  Breadcrumbs
+  Parameters:
+    base_page
+    base_page_url
+    current_page
+-->
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 border-bottom">
     <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
       <ol class="breadcrumb bg-transparent p-0 mb-0">
-        <li class="breadcrumb-item fs-5">
+        <li class="breadcrumb-item fs-6 lh-sm">
           <a class="action" href="{{ base_page_url }}">
             {{ base_page }}
           </a>
         </li>
-        <li class="breadcrumb-item active fs-5" aria-current="page">
+        <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
           {{ current_page }}
         </li>
       </ol>

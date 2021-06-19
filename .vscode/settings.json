@@ -178,5 +178,6 @@
     "!ref"
   ],
   "npm-scripts.showStartNotification": false,
-  "todo-tree.tree.showBadges": false
+  "todo-tree.tree.showBadges": false,
+  "python.pythonPath": "C:\\Anaconda\\python.exe"
 }

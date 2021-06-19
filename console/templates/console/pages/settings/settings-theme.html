@@ -9,17 +9,19 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->
-    {% include "console/components/notifications/breadcrumbs.html" with
+    {% include "console/components/links/breadcrumbs.html" with
       base_page="Settings"
       base_page_url="/settings"
       current_page="Theme"
     %}
 
+    {% include 'console/components/placeholders/under_construction.html' %}
+
     <!-- Body -->
     <div class="col">
 
       <!-- Notification Settings -->
-      <h2 class="h6 my-3">Theme Options</h2>
+      {% comment %} <h2 class="h6 my-3">Theme Options</h2>
       <div class="form-check">
         <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
         <label class="form-check-label" for="flexRadioDefault1">
@@ -31,7 +33,7 @@
         <label class="form-check-label" for="flexRadioDefault2">
           Dracula
         </label>
-      </div>
+      </div> {% endcomment %}
 
       <!-- TODO: Choose Icon/Organization -->
 

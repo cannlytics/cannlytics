@@ -99,7 +99,7 @@ export const ui = {
   },
 
 
-  hideLoadingButton() {
+  hideLoadingButton(buttonId) {
     /*
      * Hide a by-default hidden loading button given the ID of its button counterpart.
      */

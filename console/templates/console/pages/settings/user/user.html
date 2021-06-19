@@ -11,8 +11,8 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-5">
   
     <!-- Header -->
-    {% include "console/components/notifications/breadcrumbs_dynamic.html" with
-      breadcrumbs=account.breadcrumbs
+    {% include "console/components/links/breadcrumbs_dynamic.html" with
+      breadcrumbs=settings.user_breadcrumbs
     %}
 
     <!-- Profile picture -->
@@ -29,33 +29,34 @@
           </label>
           <div class="col d-flex justify-content-end">
             <button
-              class="btn btn-sm btn-secondary"
-              onclick="cannlytics.settings.uploadAccountPhoto()"
+              class="btn btn-sm btn-sm-light"
+              onclick="cannlytics.settings.chooseUserPhoto()"
             >
               Upload Photo
             </button>
           </div>
         </div>
-        <div class="text-center py-3 order-md-2 border rounded">
+        <div class="text-center order-md-2 border rounded">
           <img
             src="{% if user.photo_url %}{{ user.photo_url }}{% else %}{% static "console/images/account/default-dark.png" %}{% endif %}"
             style="height:200px;"
             class="pe-1"
-            id="userPhotoUrl"
+            id="user-photo-url"
           >
+          <input type="file" id="userPhotoUrl" multiple accept="image/*" class="visually-hidden">
         </div>
       </div>
 
       <!-- Account fields -->
       <div class="col-md-6">
         <form id="user-form">
-          {% for item in account.fields %}        
+          {% for item in settings.user_fields %}        
             <div class="row mb-3">
 
               <!-- Field label -->
               <label
                 for="input-{{ item.key }}"
-                class="col-sm-2 col-form-label col-form-label-sm"
+                class="col-md-4 col-sm-2 col-lg-2 col-form-label col-form-label-sm"
               >
                 {{ item.title }}
               </label>
@@ -79,7 +80,7 @@
         <div class="d-flex justify-content-end">
           <button
             type="button"
-            class="btn btn-sm btn-secondary me-1"
+            class="btn btn-sm btn-sm-light me-2"
             onclick="cannlytics.settings.resetAccountForm()"
           >
             Reset
@@ -99,46 +100,50 @@
 
     <!-- Pin Management -->
     <!-- TODO: Require re-authentication before changing a users pin -->
-    <div class="col-md-6">
+    <div class="col-md-6 px-3">
       <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Pin</h1>
       <h2 class="fs-6 lh-base text-secondary mb-3">
         <small>Your pin is used as a second factor of authentication for secure actions, such as signing documents.</small>
       </h2>
       <a
-        class="btn btn-sm btn-secondary"
-        href="/settings/account/pin"
+        class="btn btn-sm btn-sm-light"
+        href="/settings/user/pin"
       >
         Set your pin
       </a>
     </div>
 
     <!-- Signature Management -->
-    <div class="col-md-6">
+    <div class="col-md-6 px-3">
       <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Signature</h1>
       <h2 class="fs-6 lh-base text-secondary mb-3">
         <small>If you will be signing documents, such as CoAs, then you can add your signature to securely sign using your pin.</small>
       </h2>
+      <!-- TODO: Indicate when user already has a signature -->
+      <!-- TODO: Show change signature button if user already has a signature -->
       <a
-        class="btn btn-sm btn-secondary"
-        href="/settings/account/signature"
+        class="btn btn-sm btn-sm-light"
+        href="/settings/user/signature"
       >
         Set your signature
       </a>
     </div>
 
     <!-- Other Account options -->
-    <h2 class="h6 mt-5 mb-0">Other account options</h2>
-    <div class="list-group col-md-6 py-3">
-      {% for item in account.options %}   
-        <a
-          href="{{ item.url }}"
-          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-          aria-current="true"
-        >
-          {{ item.title }}
-          {% icon "chevron-right" height="18px" width="18px" %}
-        </a>
-      {% endfor %}
+    <div class="col-md-6 px-3">
+      <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Other account options</h1>
+      <div class="list-group col-md-6 py-3">
+        {% for item in settings.user_options %}   
+          <a
+            href="{{ item.url }}"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+            aria-current="true"
+          >
+            {{ item.title }}
+            {% icon "chevron-right" height="18px" width="18px" %}
+          </a>
+        {% endfor %}
+      </div>
     </div>
 
   </main>
