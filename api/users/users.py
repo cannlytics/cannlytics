@@ -46,6 +46,7 @@ def users(request):
             # Get the user's ID.
             post_data = loads(request.body.decode('utf-8'))
             uid = claims['uid']
+            post_data['uid'] = uid
 
             # Update the user's data, create a log, and return the data.
             try:

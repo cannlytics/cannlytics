@@ -18,13 +18,6 @@ data = {}
 docs = {}
 
 material = {
-    "analysis": {
-        "breadcrumbs": [
-            {"title": "Analyses", "url": "/analyses"},
-            {"title": "Analysis", "active": True},
-        ],
-        "options": [],
-    },
     "analyses": {
         "placeholder": {
             "action": "Create an analysis",
@@ -33,6 +26,23 @@ material = {
             "title": "Create your first analysis",
             "message": "Create a scientific analysis, a set of analytes or tests to perform for an organization, including internal analyses for your organizations.",
             "url": "./analyses/analysis?new=true",
+        },
+    },
+    "analysis": {
+        "breadcrumbs": [
+            {"title": "Analyses", "url": "/analyses"},
+            {"title": "Analysis", "active": True},
+        ],
+        "options": [],
+    },
+    "analytes": {
+        "placeholder": {
+            "action": "Create an analyte",
+            "height": "200px",
+            "image": "console/images/icons/two-tone/two_tone_atom.svg",
+            "title": "Create your first analyte",
+            "message": "Add analytes for analyses, a set of analytes constitutes an analysis.",
+            "url": "./analytes/analyte?new=true",
         },
     },
     "areas": {
@@ -734,7 +744,7 @@ material["get-started"] = {
                 "All software",
                 "All community material",
                 "GitHub Issues",
-                "$5/mo. back-end services",
+                "Email support",
             ],
         },
         {
@@ -745,9 +755,9 @@ material["get-started"] = {
             "url": "/contact",
             "attributes": [
                 "Metrc integration",
-                "Remote support",
+                "Access to development builds",
                 "Priority GitHub Issues",
-                "$500/mo. back-end services",
+                "Remote support",
             ],
         },
         {
@@ -758,9 +768,9 @@ material["get-started"] = {
             "url": "/contact",
             "attributes": [
                 "Custom installation",
-                "On-site support",
+                "Access to internal tools",
                 "Early access to new features",
-                "Unlimited back-end services",
+                "3 on-site support days / year",
             ],
         },
     ],

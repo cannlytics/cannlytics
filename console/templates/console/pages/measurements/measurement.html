@@ -1,9 +1,9 @@
 <!doctype html>
 <html>
 <!--
-  Project Page | Cannlytics Console
-  Created: 6/18/2021
-  Updated: 6/18/2021
+  Measurement Page | Cannlytics Console
+  Created: 6/19/2021
+  Updated: 6/19/2021
 -->
 {% extends "console/console.html" %}
 {% load icon %}
@@ -12,9 +12,9 @@
 
   <!-- Header -->
   <div class="px-3">
-    <h1 class="fs-5 lh-base text-dark mb-0 mt-3">Project {{ request.GET.id }}</h1>
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-3">Measurement {{ request.GET.id }}</h1>
     <h2 class="fs-6 lh-base text-secondary mb-3">
-      Manage projects for your organization and your organization's contacts.
+      Manage measurements for analytes in your analyses.
     </h2>
   </div>
 
@@ -22,13 +22,13 @@
   <div class="mb-4 px-3">
 
     <!-- Form -->
-    <form id="project-form">
+    <form id="measurement-form">
       <div class="col-6">
 
         <!-- Field -->
         <div class="d-flex row-md-3 mb-3">
           <label class="form-label col-3 d-flex align-items-center mb-0">
-            Project ID
+            Measurement ID
           </label>
           <input
             type="text"
@@ -47,7 +47,7 @@
     <div class="mt-3">
       <a
         class="btn btn-sm btn-sm-light btn-md-light me-2"
-        href="/projects"
+        href="/measurements"
       >
         Back
       </a>
