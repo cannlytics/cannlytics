@@ -24,18 +24,19 @@ def get_sample_name(df):
 
 
 def get_compound_df(df):
-    """ rename the columns in the Compound sheet to match the required names
-    for simplicty make a copy of the Compound sheet
-    handle NaN values
+    """ Rename the columns in the Compound sheet to match the required
+    names. For simplicity, make a copy of the Compound sheet to
+    handle NaN values.
     Args:
         df (DataFrame): A DataFrame.
     Returns:
         (dict): 
     """
-    df['Compound'].rename(columns = {'Name':'analyte', 'Amount':'measurement'}, inplace = True)
+    columns = {'Name':'analyte', 'Amount': 'measurement'}
+    df['Compound'].rename(columns=columns, inplace=True)
     df_compound = df['Compound'].copy()
     df_compound.loc[(df_compound.analyte.isnull()) & (df_compound.measurement > 0), 'analyte'] = 'wildcard'
-    df_compound.dropna(subset = ['analyte'], inplace = True)
+    df_compound.dropna(subset = ['analyte'], inplace=True)
     return df_compound
 
 
@@ -65,11 +66,11 @@ def clean_special_characters(df, column_name):
     return df
 
 
-def import_agilent_gc_residual_solvments(file_name):
-    """read in all the excel sheets at one time
-    get the sample name
-    get and cleanup the compound df from the compound sheet
-    add the analyte names and measurements to an array of dictionaries and add that to the main array
+def import_agilent_gc_residual_solvents(file_name):
+    """Read in all the excel sheets at one time, get the sample name,
+    get and cleanup the compound df from the compound sheet,
+    add the analyte names and measurements to an array of dictionaries,
+    and add that to the main array.
     Args:
         df (DataFrame): A DataFrame.
     Returns:
@@ -83,11 +84,10 @@ def import_agilent_gc_residual_solvments(file_name):
 
 
 def import_agilent_gc_terpenes(file_name):
-    """read in all the excel sheets at one time
-    get the sample name
-    get and cleanup the compound df from the compound sheet
-    replace special characters
-    add the analyte names and measurements to an array of dictionaries and add that to the main array
+    """Read in all the excel sheets at one time, get the sample name,
+    get and cleanup the compound df from the compound sheet,
+    replace special characters, add the analyte names and measurements
+    to an array of dictionaries, and add that to the main array.
     Args:
         df (DataFrame): A DataFrame.
     Returns:
@@ -101,18 +101,17 @@ def import_agilent_gc_terpenes(file_name):
     return samples
 
 
-def import_agilent_cannbinoids(file_name):
-    """This is the same as residual solvents, added the function
-    in case it needs to be customized.
+def import_agilent_cannabinoids(file_name):
+    """This is the same as residual solvents routine.
     Args:
         df (DataFrame): A DataFrame.
     Returns:
         (dict): 
     """
-    return import_agilent_gc_residual_solvments(file_name)
+    return import_agilent_gc_residual_solvents(file_name)
 
 
-def import_metals(file_name):
+def import_heavy_metals(file_name):
     """
     Args:
         df (DataFrame): A DataFrame.
@@ -120,17 +119,17 @@ def import_metals(file_name):
         (dict): 
     """
 
-    # read in the log sheet and summary sheets seperately to parsing easier
+    # Read in the log sheet and summary sheets seperately to parsing easier.
     log_df = pd.read_excel(file_name, sheet_name = 'Log')
     summary_df = pd.read_excel(file_name, sheet_name = 'Quant Summary')
 
-    # drop the rows that do not contain sample ids
+    # Drop the rows that do not contain sample ids.
     log_df.dropna(subset = ['Sample Mass (g)'], inplace = True)
 
-    # rename columns to make parsing clearer
+    # Rename columns to make parsing clearer.
     summary_df.rename(columns = {'Analysis':'analyte','-':'mass'}, inplace = True)
 
-    # get list of samples
+    # Get list of samples.
     sample_ids = log_df['Sample ID'].tolist()
 
     # Parse measurements.
@@ -150,8 +149,8 @@ def import_metals(file_name):
             analyte['analyte'] = summary_df.iloc[offset].analyte
             analyte['measurement'] = summary_df.iloc[offset+9].mass
             analytes.append(analyte)
-    
+
         samples.append(sample)
         samples.append(measurements)
-    
+
     return samples
