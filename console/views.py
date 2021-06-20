@@ -72,35 +72,57 @@ class ConsoleView(TemplateView):
         context = get_page_data(self.kwargs, context)
         # context = get_model_context(context)
         # Hot-fix for organizations namespace clash in context!
-        if context['screen'] == 'organizations':
-            context['organization_context'] = context['organizations']
-        context['organizations'] = self.request.session['organizations']
-        context['user'] = self.request.session['user']
+        # if context['screen'] == 'organizations':
+        #     context['organization_context'] = context['organizations']
+        # context['organizations'] = self.request.session['organizations']
+        # context['user'] = self.request.session['user']
         return context
 
-    def get(self, request, *args, **kwargs):
-        """Get data before rendering context. Any existing user data is
-        retrieved. If there is no user data in the session, the the
-        request is verified. If the request is unauthenticated, then
-        the user is redirected to the sign in page. If the user is
-        authenticated, then the user's data and organization data is
-        added to the session."""
-        user = request.session.get('user')
-        try:
-            uid = user['uid']
-        except:
-            user_claims = auth.verify_session(request)
-            uid = user_claims.get('uid')
-        finally:
-            if not uid:
-                request.session['organizations'] = []
-                request.session['user'] = {}
-                return HttpResponseRedirect('/account/sign-in')
-        query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
-        organizations = get_collection('organizations', filters=[query])
-        request.session['organizations'] = organizations
-        request.session['user'] = get_document(f'users/{uid}')
-        return super().get(request, *args, **kwargs)
+    # def get(self, request, *args, **kwargs):
+    #     """Get data before rendering context. Any existing user data is
+    #     retrieved. If there is no user data in the session, the the
+    #     request is verified. If the request is unauthenticated, then
+    #     the user is redirected to the sign in page. If the user is
+    #     authenticated, then the user's data and organization data is
+    #     added to the session."""
+    #     user = request.session.get('user', {})
+    #     try:
+    #         user = auth.verify_session(request)
+    #     except:
+    #         pass
+
+    #     # print('User in session:', user)
+    #     # try:
+    #     #     if not user:
+    #     #         # FIXME:
+    #     #         # user = auth.verify_session(request)
+    #     #         # user = auth.authenticate_request(request)
+    #     #         print('User verified from request:', user)
+    #     #         if user:
+    #     #             request.session['user'] = user
+    #     #         else:
+    #     #             print('User not detected from request!')
+    #     #             request.session['organizations'] = []
+    #     #             request.session['user'] = {}
+    #                 # return HttpResponseRedirect('/account/sign-in')
+    #     try:
+    #         if user:
+    #             uid = user['uid']
+    #             query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
+    #             organizations = get_collection('organizations', filters=[query])
+    #             request.session['organizations'] = organizations
+    #         else:
+    #             request.session['organizations'] = []
+    #             request.session['user'] = {}
+    #     except:
+    #         print('Error adding user + organization data to the session.')
+    #         pass
+    #         # Optional: Redirect if no user.
+    #         # return HttpResponseRedirect('/account/sign-in')
+    #     # except:
+    #     #     pass
+    #     # request.session['user'] = get_document(f'users/{uid}')
+    #     return super().get(request, *args, **kwargs)
 
 
 #-----------------------------------------------------------------------
@@ -125,14 +147,14 @@ class LoginView(TemplateView):
 def handler404(request, *args, **argv): #pylint: disable=unused-argument
     """Handle missing pages."""
     status_code = 404
-    template = f'{BASE}/pages/general/errors/{status_code}.html'
+    template = f'{BASE}/pages/misc/errors/{status_code}.html'
     return render(request, template, {}, status=status_code)
 
 
 def handler500(request, *args, **argv): #pylint: disable=unused-argument
     """Handle internal errors."""
     status_code = 500
-    template = f'{BASE}/pages/general/errors/{status_code}.html'
+    template = f'{BASE}/pages/misc/errors/{status_code}.html'
     return render(request, template, {}, status=status_code)
 
 

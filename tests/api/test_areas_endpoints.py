@@ -1,10 +1,10 @@
 """
-API Test | Cannlytics API
+API Test - Areas Endpoint | Cannlytics API
 
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
 Created: 5/7/2021
-Updated: 5/7/2021
+Updated: 6/19/2021
 License: MIT License <https://opensource.org/licenses/MIT>
 
 """
@@ -15,10 +15,12 @@ import pytest
 import requests
 
 import sys
-sys.path.append('../../')
+sys.path.append('../../../')
 from cannlytics import firebase
 
-BASE = 'http://127.0.0.1:8000/api/'
+# BASE = 'http://127.0.0.1:8000/api/'
+BASE = 'https://console.cannlytics.com/api/'
+
 REQUESTS = [
     {
          'endpoint': 'areas',
@@ -56,7 +58,7 @@ TOKEN = None
 
 # Initialize Firebase
 env = environ.Env()
-env.read_env('../../.env')
+env.read_env('../../../.env')
 credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 db = firebase.initialize_firebase()

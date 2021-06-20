@@ -76,7 +76,7 @@
       class="ms-1 btn bg-gradient-green text-white"
       style="max-width:250px;"
       type="button"
-      onclick="cannlytics.auth.signIn()"
+      onclick="cannlytics.auth.signIn(event)"
     >
       Sign In
     </button>
@@ -136,7 +136,7 @@
     var node = document.getElementById('login-password');
     node.addEventListener('keyup', function(event) {
       if (event.key === 'Enter') {
-        cannlytics.auth.signIn();
+        cannlytics.auth.signIn(event);
       }
     });
   </script>

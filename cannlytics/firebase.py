@@ -167,7 +167,12 @@ def initialize_firebase():
         (Firestore client): A Firestore database instance.
     """
     try:
-        initialize_app()
+        # FIXME: Fails in production
+        print('Initializing Firebase with default credentials...')
+        # import os
+        app = initialize_app()
+        creds = app.credential.get_credential()
+        print('Initialized Firebase with:', creds.service_account_email)
     except ValueError:
         pass
     return firestore.client()

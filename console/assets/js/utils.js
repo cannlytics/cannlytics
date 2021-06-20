@@ -18,6 +18,7 @@ export const authRequest = (endpoint, data, options) => new Promise((resolve, re
    */
   getUserToken()
     .then((idToken) => {
+      console.log('Request with token:', idToken);
       apiRequest(endpoint, data, options, idToken)
         .then((data) => resolve(data));
     })
@@ -51,7 +52,8 @@ export const apiRequest = (endpoint, data, options, idToken = null) => new Promi
       endpoint.search = new URLSearchParams(options.params).toString();
     }
   }
-  console.log('URL:', endpoint);
+  const url = window.location.origin + endpoint;
+  console.log('URL:', url);
   fetch(endpoint, headers)
     .then(response => response.json())
     .then((data) => {

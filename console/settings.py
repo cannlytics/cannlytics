@@ -33,7 +33,6 @@ from django.template import base
 # Define project namespaces.
 PROJECT_NAME = 'console'
 ROOT_URLCONF = 'console.urls'
-SETTINGS_NAME = 'cannlytics_platform_settings'
 WSGI_APPLICATION = 'console.core.wsgi.application'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -65,7 +64,7 @@ if os.path.isfile(env_file):
 elif os.environ.get('GOOGLE_CLOUD_PROJECT', None):
     project_id = os.environ.get('GOOGLE_CLOUD_PROJECT')
     client = secretmanager.SecretManagerServiceClient()
-    settings_name = os.environ.get('SETTINGS_NAME', SETTINGS_NAME)
+    settings_name = env('SETTINGS_NAME')
     name = f'projects/{project_id}/secrets/{settings_name}/versions/latest'
     payload = client.access_secret_version(name=name).payload.data.decode('UTF-8')
     env.read_env(io.StringIO(payload))
@@ -179,19 +178,21 @@ USE_TZ = True
 # ------------------------------------------------------------#
 
 # Specify allowed domains depending on production or development status.
-ALLOWED_HOSTS = []
-try:
-    ALLOWED_HOSTS.append(env('CUSTOM_DOMAIN'),)
-except:
-    pass
-try:
-    ALLOWED_HOSTS.append(env('FIREBASE_HOSTING_URL'),)
-except:
-    pass
-try:
-    ALLOWED_HOSTS.append(env('CLOUD_RUN_URL'),)
-except:
-    pass
+ALLOWED_HOSTS = ['*']
+
+# FIXME: Restrict domains in production.
+# try:
+#     ALLOWED_HOSTS.append(env('CUSTOM_DOMAIN'))
+# except:
+#     pass
+# try:
+#     ALLOWED_HOSTS.append(env('FIREBASE_HOSTING_URL'))
+# except:
+#     pass
+# try:
+#     ALLOWED_HOSTS.append(env('CLOUD_RUN_URL'))
+# except:
+#     pass
 
 if PRODUCTION == 'False':
     ALLOWED_HOSTS.extend(['*', 'localhost:8000', '127.0.0.1'])
@@ -269,6 +270,12 @@ STATIC_URL = '/static/'
 # Enable Django's session engine for storing user sessions.
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 
+# Whether to expire the session when the user closes their browser.
+# SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# The age of session cookies, in seconds.
+# SESSION_COOKIE_AGE = 900
+
 # ------------------------------------------------------------#
 # Customization
 # ------------------------------------------------------------#
@@ -279,3 +286,7 @@ APPEND_SLASH = False
 # Allow Django template tags to span multiple lines.
 # https://stackoverflow.com/questions/49110044/django-template-tag-on-multiple-line
 base.tag_re = re.compile(base.tag_re.pattern, re.DOTALL)
+
+# Specificy how long user sessions should last.
+# Optional: Allow users to define their desired session length.
+USER_SESSION_DURATION_MINUTES = 15

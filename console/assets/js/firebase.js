@@ -94,13 +94,13 @@ function signOut() {
    * Sign a user out of Firebase and clear the session.
    */
   try {
-    const baseURL = window.location.origin;
     firebase.auth().currentUser.getIdToken().then((idToken) => {
       const headers = new Headers({
         'Content-Type': 'text/plain',
         'Authorization': `Bearer ${idToken}`,
       });
       fetch('/api/auth/sign-out', { headers }).then(() => {
+        const baseURL = window.location.origin;
         firebase.auth().signOut().then(() => {
           document.location.href = `${baseURL}/account/sign-out`;
         }).catch((error) => {
@@ -109,6 +109,7 @@ function signOut() {
       });
     })
   } catch(error) {
+    const baseURL = window.location.origin;
     document.location.href = `${baseURL}/account/sign-out`;
   }
 }

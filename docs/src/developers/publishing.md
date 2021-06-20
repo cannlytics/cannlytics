@@ -30,7 +30,7 @@ Create a secret with:
 
 ```shell
 gcloud secrets create \
-  cannlytics_platform_settings \
+  cannlytics_lims_settings \
   --replication-policy automatic
 ```
 
@@ -42,7 +42,7 @@ PROJECTNUM=$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumbe
 CLOUDRUN=${PROJECTNUM}-compute@developer.gserviceaccount.com
 
 gcloud secrets add-iam-policy-binding \
-  cannlytics_platform_settings \
+  cannlytics_lims_settings \
   --member serviceAccount:${CLOUDRUN} \
   --role roles/secretmanager.secretAccessor
 ```
@@ -56,7 +56,7 @@ PROJECTNUM=$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumbe
 CLOUDBUILD=${PROJECTNUM}@cloudbuild.gserviceaccount.com
 
 gcloud secrets add-iam-policy-binding \
-  cannlytics_platform_settings \
+  cannlytics_lims_settings \
   --member serviceAccount:${CLOUDBUILD} \
   --role roles/secretmanager.secretAccessor
 ```
@@ -87,16 +87,16 @@ rm .env
 
 > Set `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` with your email and [app password](https://dev.to/abderrahmanemustapha/how-to-send-email-with-django-and-gmail-in-production-the-right-way-24ab). If you do not plan to use Django's email interface, then you exclude `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD`.
 
-Update your IAM policy:
-
-```shell
-gcloud beta run services add-iam-policy-binding --region=us-central1 --member=allUsers --role=roles/run.invoker cannlytics
-```
-
 You can confirm that the secret was created or updated with:
 
 ```shell
-gcloud secrets versions list cannlytics_platform_settings
+gcloud secrets versions list cannlytics_lims_settings
+```
+
+Finally, update your IAM policy for all project users to invoke cloud run:
+
+```shell
+gcloud beta run services add-iam-policy-binding --region=us-central1 --member=allUsers --role=roles/run.invoker your-lims
 ```
 
 Helpful resources:

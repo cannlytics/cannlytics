@@ -2,6 +2,12 @@
 
 A non-exhaustive list of encountered bugs and their solutions.
 
+- **Current** [InsufficientPermissionError] after initializing Firebase in a production environment. Leads:
+
+  * Possible solution: <https://github.com/firebase/firebase-functions/issues/679>
+  * Proposed workaround: <https://github.com/firebase/firebase-js-sdk/issues/1958>
+  * Helpful reading: <https://stackoverflow.com/questions/55016899/appengine-warning-openblas-warning-could-not-determine-the-l2-cache-size-on>
+
 - [AppEngine warning - OpenBLAS WARNING - could not determine the L2 cache size on this system](https://stackoverflow.com/questions/55016899/appengine-warning-openblas-warning-could-not-determine-the-l2-cache-size-on)
 
 - [Firebase hosting deployment failing](https://stackoverflow.com/questions/57911225/firebase-hosting-deployment-failing) at `hosting: uploading new files [5/128]` with error `Error: Task xyz failed: retries exhausted after 6 attempts`. Quick solution: Delete the hidden folder in you project root directory `.firebase/hosting.*.cache`.
