@@ -132,5 +132,14 @@
     </div>
   </div>
 
+  <script>
+    var node = document.getElementById('login-password');
+    node.addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        cannlytics.auth.signIn();
+      }
+    });
+  </script>
+
 {% endblock %}
 </html>

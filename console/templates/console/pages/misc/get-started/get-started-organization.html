@@ -30,7 +30,7 @@
     <h1 class="h3 mb-0">2. Setup your organization</h1>
     <button
       id="cancel-organization-choice"
-      class="btn btn-sm btn-light text-dark d-none"
+      class="btn btn-sm btn-sm-light d-none"
       onclick="cannlytics.dashboard.showOrganizationForm()"
     >
       Cancel
@@ -86,7 +86,8 @@
 
   <!-- Join an Organization Form (hidden by default) -->
   <form id="join-organization-form" class="col-md-6 mb-5 d-none">
-    <p class="card-text fs-5 mb-3">
+    <h1 class="fs-5 mb-0 lh-base text-dark">Join an organization</h1>
+    <p class="card-text fs-6 text-secondary mb-3">
       <small>Request to join an existing organization owned by someone else.
       The owner of the organization will receive an email with the choice to
       onboard you onto the organization's team.</small>
@@ -95,14 +96,14 @@
       <input
         type="text"
         id="join-organization-input"
-        class="form-control"
+        class="form-control form-control-sm"
         placeholder="Organization name"
         aria-label="Organization name"
         aria-describedby="join-organization-button"
       >
       <button
         id="join-organization-button"
-        class="btn bg-gradient-green text-white"
+        class="btn btn-sm bg-gradient-green text-white"
         type="button"
         onclick="cannlytics.dashboard.joinOrganizationRequest()"
       >
@@ -253,7 +254,7 @@
       </p>
       <button
         id="license-fields-show"
-        class="btn btn-sm btn-secondary"
+        class="btn btn-sm btn-sm-light"
         onclick="toggleLicenseFields(event);"
       >
         Add state-issued license
@@ -363,7 +364,7 @@
       </p>
       <button
         id="team-member-fields-show"
-        class="btn btn-sm btn-secondary"
+        class="btn btn-sm btn-sm-light"
         onclick="toggleTeamMemberFields(event);"
       >
         Add team member
@@ -451,7 +452,7 @@
   <!-- Options -->
   <div class="mb-5 my-5">
     <a
-      class="btn btn-secondary btn-sm"
+      class="btn btn-sm btn-sm-light btn-md-light me-2"
       href="/{% if request.GET.from %}get-started/profile/?type={{ request.GET.from }}{% endif %}"
     >
       Back

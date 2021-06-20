@@ -147,7 +147,9 @@ export const auth = {
     document.getElementById('sign-in-button').classList.add('d-none');
     document.getElementById('sign-in-loading-button').classList.remove('d-none');
     firebase.auth().signInWithEmailAndPassword(email, password).then(user => {
-      return authRequest('/api/auth/authenticate');
+      return authRequest('/api/auth/authenticate').then(() => {
+        window.location.href = window.location.origin;
+      });
     }).then(() => {
       // TODO: Determine if it's okay to stay signed in.
       // The Firestore docs show to sign out when using session cookies,
@@ -155,7 +157,7 @@ export const auth = {
       // It is still nice to be able to interact with Firestore from client-side JavaScript.
       // return firebase.auth().signOut();
     }).then(() => {
-      window.location.assign('/');
+      window.location.href = window.location.origin;
     })
     .catch((error) => {
       showNotification('Sign in error', error.message, { type: 'error' });
@@ -191,7 +193,7 @@ export const auth = {
       .then(() => {
         apiRequest('/api/users', { email, photo_url: `https://robohash.org/${email}?set=set5` })
             .then(() => {
-              window.location.assign('/account/sign-up-complete');
+              window.location.href = window.location.origin;
             })
         // DEV: Don't send verification email in development.
         // this.verifyUser();

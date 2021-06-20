@@ -1,10 +1,10 @@
 <!doctype html>
 <html>
 <!--
-  Analysis Page | Cannlytics Console
+  Analyte Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
-  Created: 12/17/2020
-  Updated: 6/8/2021
+  Created: 6/19/2020
+  Updated: 6/19/2021
 -->
 {% extends "console/console.html" %}
 {% load icon %}
@@ -13,11 +13,11 @@
 
     <!-- Header -->
     {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=analysis.breadcrumbs
+      breadcrumbs=analytes.breadcrumbs
     %}
 
     <!-- Body -->
-    <form class="analysis">
+    <form class="analyte-form">
 
       <!-- Image -->
       <div class="col col-md-5 mx-3 mb-3 order-md-2">
@@ -77,7 +77,7 @@
 
       <!-- TODO: Apply additional user-defined fields-->
       <!-- Extra Fields-->
-      {% comment %} <div id="extra-analysis-fields" class="d-none">
+      {% comment %} <div id="extra-fields" class="d-none">
         {% for item in analysis.fields %}
           {% if item.secondary %}
             <div class="row mb-3">
@@ -108,16 +108,16 @@
 
       <!-- Show advanced fields -->
       <a
-        id="extra-analysis-fields-show"
+        id="extra-fields-show"
         class="nav-link text-secondary app-action d-inline-block"
-        onclick="toggleAnalysisFields();"
+        onclick="toggleExtraFields();"
       >
         {% icon 'chevrons-down' hegiht="16px" width="16px" %} Show more
       </a>
       <a
-        id="extra-analysis-fields-hide"
+        id="extra-fields-hide"
         class="nav-link text-secondary app-action d-inline-block d-none"
-        onclick="toggleAnalysisFields();"
+        onclick="toggleExtraFields();"
       >
         {% icon 'chevrons-up' hegiht="16px" width="16px" %} Show less
       </a>
@@ -182,10 +182,10 @@
     });
 
     // Toggle extra organization fields
-    function toggleAnalysisFields() {
-      cannlytics.ui.toggleElementClass('extra-analysis-fields', 'd-none');
-      cannlytics.ui.toggleElementClass('extra-analysis-fields-hide', 'd-none');
-      cannlytics.ui.toggleElementClass('extra-analysis-fields-show', 'd-none');
+    function toggleExtraFields() {
+      cannlytics.ui.toggleElementClass('extra-fields', 'd-none');
+      cannlytics.ui.toggleElementClass('extra-fields-hide', 'd-none');
+      cannlytics.ui.toggleElementClass('extra-fields-show', 'd-none');
     }
 
   </script>

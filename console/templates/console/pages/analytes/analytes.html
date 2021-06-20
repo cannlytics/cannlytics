@@ -1,12 +1,15 @@
 <!doctype html>
 <html>
 <!--
-  Analyses | Cannlytics Console
-  Created 1/13/2021
-  Updated: 6/12/2021
+  Analytes Page | Cannlytics Console
+  Created 6/19/2021
+  Updated: 6/19/2021
   TODO:
-   - Allow for labs to choose to make their analyses public,
-    so that producers can search for analyses.
+   - Allow for labs to choose to make their analytes public,
+    so that clients can find analytes they want to analyze.
+  
+  Fields:
+    CAS
 -->
 {% extends "console/console.html" %}
 {% load icon %}
@@ -15,28 +18,28 @@
 
     <!-- Header -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="fs-5 mb-0 lh-base">Analyses</h1>
+      <h1 class="fs-5 mb-0 lh-base">Analytes</h1>
     </div>
 
     <!-- Body -->
-    <div class="analyses">
+    <div class="analytes">
 
       <!-- Table -->
       <div class="card my-3">
         <div class="card-body">
-          <h2 class="h6 mb-3 text-dark">Analyses</h2>
+          <h2 class="h6 mb-3 text-dark">Analytes</h2>
           <div class="table-responsive">
 
             <!-- Placeholder if no records -->
             {% if True %}
               {% include "console/components/placeholders/placeholder.html" with
-                placeholder=analyses.placeholder
+                placeholder=analytes.placeholder
                 only
               %}
 
             <!-- Client records table -->
             {% else %}
-              <div id="analyses-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
+              <div id="analytes-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
             {% endif %}
 
           </div>
@@ -49,12 +52,12 @@
   </main>
 {% endblock console_body %}
 
-<!-- Analyses JavaScript -->
-{% block console_js %}
+<!-- JavaScript -->
+{% comment %} {% block console_js %}
 
   <script>
     cannlytics.analyses.initialize();
   </script>
 
-{% endblock console_js %}
+{% endblock console_js %} {% endcomment %}
 </html>

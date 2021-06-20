@@ -86,11 +86,12 @@ class ConsoleView(TemplateView):
         authenticated, then the user's data and organization data is
         added to the session."""
         user = request.session.get('user')
-        if user:
+        try:
             uid = user['uid']
-        else:
+        except:
             user_claims = auth.verify_session(request)
             uid = user_claims.get('uid')
+        finally:
             if not uid:
                 request.session['organizations'] = []
                 request.session['user'] = {}

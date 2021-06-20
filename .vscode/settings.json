@@ -15,6 +15,7 @@
     "**/__pycache__": true,
     "**/__init__.py": false,
   },
+  "git.countBadge": "off",
   "git.enabled": true,
   "git.enableSmartCommit": true,
   "git.confirmSync": false,

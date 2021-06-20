@@ -57,9 +57,9 @@ export const dashboard = {
      */
     const cards = document.getElementsByClassName('support-card');
     for (let i = 0; i < cards.length; i++) {
-      cards[i].classList.remove('border-success');
+      cards[i].classList.remove('border-success', 'shadow');
       if (cards[i].id === `tier${tier}`) {
-        cards[i].classList.add('border-success');
+        cards[i].classList.add('border-success', 'shadow');
       }
     }
   },
