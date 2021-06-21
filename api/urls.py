@@ -30,10 +30,6 @@ app_name = 'api' # pylint: disable=invalid-name
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('auth', include([
-        path('/authenticate', auth.authenticate),
-        path('/sign-out', auth.logout),
-    ])),
     path('analyses', include([
         path('', analyses.analyses),
         path('/<uuid:analysis_id>', analyses.analyses),

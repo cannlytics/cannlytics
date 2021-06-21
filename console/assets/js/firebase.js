@@ -99,7 +99,7 @@ function signOut() {
         'Content-Type': 'text/plain',
         'Authorization': `Bearer ${idToken}`,
       });
-      fetch('/api/auth/sign-out', { headers }).then(() => {
+      fetch('/logout', { headers }).then(() => {
         const baseURL = window.location.origin;
         firebase.auth().signOut().then(() => {
           document.location.href = `${baseURL}/account/sign-out`;

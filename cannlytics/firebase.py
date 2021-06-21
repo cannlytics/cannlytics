@@ -2,7 +2,7 @@
 Firebase Module | Cannlytics
 Author: Keegan Skeate <contact@cannlytics.com>
 Created: 2/7/2021
-Updated: 5/4/2021
+Updated: 6/4212021
 
 Resources:
 
@@ -31,7 +31,7 @@ db = initialize_firebase()
 ```
 """
 import ulid
-from datetime import datetime
+from datetime import datetime, timedelta
 from os import listdir
 from os.path import isfile, join
 from re import sub, findall
@@ -167,12 +167,7 @@ def initialize_firebase():
         (Firestore client): A Firestore database instance.
     """
     try:
-        # FIXME: Fails in production
-        print('Initializing Firebase with default credentials...')
-        # import os
-        app = initialize_app()
-        creds = app.credential.get_credential()
-        print('Initialized Firebase with:', creds.service_account_email)
+        initialize_app()
     except ValueError:
         pass
     return firestore.client()
@@ -443,12 +438,43 @@ def create_custom_token(uid='', email=None, claims=None):
     return auth.create_custom_token(uid, claims)
 
 
+def create_session_cookie(id_token, expires_in=None):
+    """Create a session cookie.
+    Args:
+        id_token (str): A user ID token passed from the client.
+        expires_in (timedelta): The time until the session will expire.
+    """
+    if expires_in is None:
+        expires_in = timedelta(days=7)
+    return auth.create_session_cookie(id_token, expires_in=expires_in)
+
+
+def revoke_refresh_tokens(token):
+    """Revoke a user's refresh token.
+    Args:
+        token (str): The refresh token to authenticate a user.
+    """
+    return auth.revoke_refresh_tokens(token)
+
+
 def verify_token(token):
     """Verify a user's custom token.
     Args:
         token (str): The custom token to authenticate a user.
     """
     return auth.verify_id_token(token)
+
+
+def verify_session_cookie(session_cookie, check_revoked=True, app=None):
+    """Verify a user's session cookie.
+    Args:
+        session_cookie (str): A session cookie to authenticate a user.
+    """
+    return auth.verify_session_cookie(
+        session_cookie,
+        check_revoked=check_revoked,
+        app=app,
+    )
 
 
 def get_user(name):

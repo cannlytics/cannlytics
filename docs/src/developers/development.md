@@ -523,6 +523,12 @@ Contributions are always welcome! You are encouraged to submit issues, functiona
 * More documentation;
 * Ideas.
 
+### Contributors
+
+- Charles Rice <charles@ufosoftwarellc.com>
+- Carlos Krefft <carlos@krefft.org>
+- Keegan Skeate <keegan@cannlytics.com>
+
 ## Resources <a name="resources"></a>
 
 * [Django Philosophy](https://docs.djangoproject.com/en/3.1/misc/design-philosophies)

@@ -14,6 +14,7 @@ from django.core.wsgi import get_wsgi_application
 try:
     from dj_static import Cling
 except ImportError:
+    print('Could not import dj_static')
     pass
 
 os.environ.setdefault(

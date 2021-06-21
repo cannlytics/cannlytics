@@ -2,12 +2,11 @@
  * Dashboard JavaScript | Cannlytics Console
  * Author: Keegan Skeate <keegan@cannlytics.com>
  * Created: 12/3/2020
- * Updated: 6/10/2021
+ * Updated: 6/21/2021
  */
 
 import { auth, changePhotoURL, storageErrors } from '../firebase.js';
 import { authRequest, hasClass, Password, serializeForm, slugify, showNotification } from '../utils.js';
-// import { uploadUserPhoto } from '../settings/user.js';
 
 export const dashboard = {
 
@@ -153,15 +152,6 @@ export const dashboard = {
       document.getElementById('cancel-organization-choice').classList.add('d-none');
     }
   },
-
-
-  // chooseUserPhoto() {
-  //   /*
-  //    * Choose a file to upload.
-  //    */
-  //   const fileSelect = document.getElementById('userPhotoUrl');
-  //   fileSelect.click();
-  // },
 
 
   choosePhoto() {

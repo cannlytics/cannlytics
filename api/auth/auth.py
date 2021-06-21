@@ -1,7 +1,7 @@
 """
 Authentication Views | Cannlytics API
 Created: 1/22/2021
-Updated: 5/10/2021
+Updated: 6/21/2021
 
 Authentication mechanisms for the Cannlytics API, including API key
 utility functions, request authentication and verification helpers,
@@ -11,39 +11,29 @@ and the authentication endpoints.
 # Standard imports
 from json import loads
 from secrets import token_urlsafe
-from time import time
 
 # External imports
 import hmac
-import firebase_admin
 from hashlib import sha256
 from datetime import datetime, timedelta
 from django.http.response import JsonResponse
-# from firebase_admin import auth, exceptions, initialize_app
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
 
 # Internal imports
-from console.settings import USER_SESSION_DURATION_MINUTES
 from cannlytics.firebase import (
-    create_log,
-    delete_document,
     get_collection,
     get_custom_claims,
     get_document,
     initialize_firebase,
     update_document,
+    verify_session_cookie,
+    verify_token,
 )
 
-# FIXME: 
 # Initialize Firebase.
-# try:
-#     app = firebase_admin.initialize_app()
-#     creds = app.credential.get_credential()
-#     print('Initialized Firebase with:', creds.service_account_email)
-# except ValueError:
-#     pass
+try:
+    initialize_firebase()
+except ValueError:
+    pass
 
 #-----------------------------------------------------------------------
 # Core Authentication Mechanism
@@ -59,26 +49,16 @@ def authenticate_request(request):
         claims (dict): A dictionary of the user's custom claims, including
             the user's `uid`.
     """
-    print('Authenticating request...')
+    claims = {}
     try:
-        print('Trying HTTP_AUTHORIZATION type...')
         authorization = request.META['HTTP_AUTHORIZATION']
-        print('Authorization:', authorization)
         token = authorization.split(' ').pop()
-        print('Found token from HTTP_AUTHORIZATION', token)
+        claims = verify_token(token)
     except:
-        print('Trying Django type...')
-        authorization = request.headers.get('Authorization', '')
-        print('Authorization:', authorization)
-        token = authorization.split(' ').pop()
-        print('Found token from Authorization', token)
-    try:
-        claims = firebase_admin.auth.verify_id_token(token)
-    except: # auth.InvalidIdTokenError
         try:
             claims = get_user_from_api_key(token)
         except:
-            claims = {}
+            pass
     return claims
 
 
@@ -95,137 +75,11 @@ def verify_session(request):
         claims (dict): A dictionary of the user's custom claims, including
             the user's `uid`.
     """
-    print('Verifying session...')
-    session_cookie = request.COOKIES.get('session')
-    print('Session cookie:', session_cookie)
-    if not session_cookie:
-        return {}
     try:
-        print('Verifying cooking through GCloud...')
-        return firebase_admin.auth.verify_session_cookie(session_cookie, check_revoked=True)
-    except firebase_admin.auth.InvalidSessionCookieError:
+        session_cookie = request.COOKIES.get('__session')
+        return verify_session_cookie(session_cookie, check_revoked=True)
+    except:
         return {}
-
-
-#-----------------------------------------------------------------------
-# API Authentication Endpoints
-#-----------------------------------------------------------------------
-
-@api_view(['GET'])
-def authenticate(request):
-    """Generate a session cookie for a user from an ID token sent via
-    HTTP authorization bearer token."""
-
-    # message = 'NOT IMPLEMENTED'
-    # response = Response({'error': True, 'message': message}, content_type='application/json')
-    # return response
-
-    # # Get the user's ID token from the authorization header.
-    # auth_header = request.META['HTTP_AUTHORIZATION']
-    # id_token = auth_header.split(' ')[-1]
-
-    # # Ensure that cookies are set only on recently signed in users,
-    # # by checking the auth_time of the ID token before creating a cookie.
-    # # Only create a session if the user signed in within the last 5 minutes.
-    # # try:
-    # decoded_claims = firebase_admin.auth.verify_id_token(id_token)
-    # uid = decoded_claims['uid']
-    # print('User from claims:', decoded_claims)
-    # if time() - decoded_claims['auth_time'] < 5 * 60:
-
-    #     # Begin formatting response.
-    #     response = Response({'status': 'success'}, content_type='application/json')
-
-    #     # Set expiration for session cookie.
-    #     # expires_in = timedelta(minutes=USER_SESSION_DURATION_MINUTES)
-    #     expires_in = timedelta(days=7)
-    #     expires = datetime.now() + expires_in
-
-    #     # FIXME: Ideally use Firebase issues session cookie.
-    #     # InsufficientPermissionError: The credential used to initialize the SDK has insufficient permissions to perform the requested operation.
-    #     # print('Trying to initialize Firebase')
-    #     # initialize_firebase()
-    #     # session_cookie = firebase_admin.auth.create_session_cookie(id_token, expires_in=expires_in)
-    #     # print('Session cookie:', session_cookie)
-
-    #     # Add session cookie.
-        
-    #     # response.set_cookie(
-    #     #     key='session',
-    #     #     value=uid,
-    #     #     expires=expires,
-    #     #     httponly=True,
-    #     #     secure=True,
-    #     # )
-    #     # request.session['user'] = decoded_claims
-    #     create_log(
-    #         ref=f'users/{uid}/logs',
-    #         claims=decoded_claims,
-    #         action='Signed in.',
-    #         log_type='auth',
-    #         key='login'
-    #     )
-    #     update_document(f'users/{uid}', {'signed_in': True})
-    #     print('Signed in user okay.')
-    #     return response
-    
-    # else:
-    #     message = 'Invalid authentication time.'
-    #     response = Response({'error': True, 'message': message}, content_type='application/json')
-
-
-        # Otherwise, the user did not sign in recently. To guard against
-        # ID token theft, re-authentication is required.
-        # print('Recent sign in required.')
-    #     return Response(
-    #         {'status': 'error', 'message': 'Recent sign in required.'},
-    #         content_type='application/json',
-    #         status=status.HTTP_401_UNAUTHORIZED
-    #     )
-    # except auth.InvalidIdTokenError:
-    #     print('Invalid ID token.')
-    #     return Response(
-    #         {'status': 'error', 'message': 'Invalid ID token.'},
-    #         content_type='application/json',
-    #         status=status.HTTP_401_UNAUTHORIZED
-    #     )
-    # except exceptions.FirebaseError:
-    #     print('Failed to create a session cookie.')
-    #     return Response(
-    #         {'status': 'error', 'message': 'Failed to create a session cookie.'},
-    #         content_type='application/json',
-    #         status=status.HTTP_401_UNAUTHORIZED
-    #     )
-
-@api_view(['GET'])
-def logout(request):
-    """End a user's session."""
-    session_cookie = request.COOKIES.get('session')
-    try:
-        decoded_claims = firebase_admin.auth.verify_session_cookie(session_cookie)
-        uid = decoded_claims['uid']
-        create_log(
-            ref=f'users/{uid}/logs',
-            claims=decoded_claims,
-            action='Signed out.',
-            log_type='auth',
-            key='logout'
-        )
-        update_document(f'users/{uid}', {'signed_in': False})
-        firebase_admin.auth.revoke_refresh_tokens(decoded_claims['sub'])
-        response = Response(
-            {'status': 'success'},
-            content_type='application/json'
-        )
-        response.set_cookie('session', expires=0)
-        print('Successfully logged out, cookie expired.')
-        return response
-    except firebase_admin.auth.InvalidSessionCookieError:
-        return Response(
-            {'success': 'error', 'message': 'Invalid session cookie.'},
-            content_type='application/json',
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
 
 
 #-----------------------------------------------------------------------

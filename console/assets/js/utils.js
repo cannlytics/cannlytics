@@ -2,7 +2,7 @@
  * Utility JavaScript | Cannlytics Console
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 2/21/2021
- * Updated: 5/9/2021
+ * Updated: 6/21/2021
  */
 
 import { getUserToken } from './firebase.js';
@@ -18,9 +18,9 @@ export const authRequest = (endpoint, data, options) => new Promise((resolve, re
    */
   getUserToken()
     .then((idToken) => {
-      console.log('Request with token:', idToken);
       apiRequest(endpoint, data, options, idToken)
-        .then((data) => resolve(data));
+        .then((data) => resolve(data))
+        .catch((error) => reject(error));
     })
     .catch((error) => reject(error));
 });
@@ -38,30 +38,30 @@ export const apiRequest = (endpoint, data, options, idToken = null) => new Promi
     'Authorization': `Bearer ${idToken}`,
     'X-CSRFToken': csrftoken,
   });
-  const headers = { headers: headerAuth, mode: 'same-origin', method: 'GET' };
+  const init = {
+    headers: headerAuth,
+    // credentials: 'include',
+    // mode: 'same-origin',
+    method: 'GET',
+  };
   if (data) {
-    headers.method = 'POST';
-    headers.body = JSON.stringify(data);
+    init.method = 'POST';
+    init.body = JSON.stringify(data);
   }
   if (options) {
     if (options.delete) {
-      headers.method = 'DELETE';
+      init.method = 'DELETE';
     }
     if (options.params) {
       endpoint = new URL(endpoint)
       endpoint.search = new URLSearchParams(options.params).toString();
     }
   }
-  const url = window.location.origin + endpoint;
-  console.log('URL:', url);
-  fetch(endpoint, headers)
+  fetch(window.location.origin + endpoint, init)
     .then(response => response.json())
-    .then((data) => {
-      resolve(data);
-    })
-    .catch((error) => {
-      reject(error);
-    });
+    .catch((error) => reject(error))
+    .then((data) => resolve(data))
+    .catch((error) => reject(error));
 });
 
 

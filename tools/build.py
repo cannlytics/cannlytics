@@ -116,7 +116,8 @@ if __name__ == '__main__':
     # Fill Webpack hashes into templates.
     get_webpack_hashes()
 
-    # TODO: Update version number in Readme.md
+    # TODO: Update version number in README.md and setup.py
+    # from a single source of truth (package.json).
 
     # Copy the Readme to the docs directory.
     copyfile('README.md', DEVELOPMENT_FILE)
