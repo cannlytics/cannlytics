@@ -1,7 +1,7 @@
 """
 Authentication Views | Cannlytics API
 Created: 1/22/2021
-Updated: 5/10/2021
+Updated: 6/21/2021
 
 Authentication mechanisms for the Cannlytics API, including API key
 utility functions, request authentication and verification helpers,
@@ -11,31 +11,27 @@ and the authentication endpoints.
 # Standard imports
 from json import loads
 from secrets import token_urlsafe
-from time import time
 
 # External imports
 import hmac
 from hashlib import sha256
 from datetime import datetime, timedelta
 from django.http.response import JsonResponse
-from firebase_admin import auth, exceptions, initialize_app
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
 
 # Internal imports
 from cannlytics.firebase import (
-    create_log,
-    delete_document,
     get_collection,
     get_custom_claims,
     get_document,
+    initialize_firebase,
     update_document,
+    verify_session_cookie,
+    verify_token,
 )
 
 # Initialize Firebase.
 try:
-    initialize_app()
+    initialize_firebase()
 except ValueError:
     pass
 
@@ -53,15 +49,17 @@ def authenticate_request(request):
         claims (dict): A dictionary of the user's custom claims, including
             the user's `uid`.
     """
-    authorization = request.META['HTTP_AUTHORIZATION']
-    token = authorization.split(' ')[-1]
-    user_claims = get_user_from_api_key(token)
-    if not user_claims:
+    claims = {}
+    try:
+        authorization = request.META['HTTP_AUTHORIZATION']
+        token = authorization.split(' ').pop()
+        claims = verify_token(token)
+    except:
         try:
-            user_claims = auth.verify_id_token(token)
-        except auth.InvalidIdTokenError:
-            user_claims = {}
-    return user_claims
+            claims = get_user_from_api_key(token)
+        except:
+            pass
+    return claims
 
 
 def verify_session(request):
@@ -77,12 +75,10 @@ def verify_session(request):
         claims (dict): A dictionary of the user's custom claims, including
             the user's `uid`.
     """
-    session_cookie = request.COOKIES.get('session')
-    if not session_cookie:
-        return {}
     try:
-        return auth.verify_session_cookie(session_cookie, check_revoked=True)
-    except auth.InvalidSessionCookieError:
+        session_cookie = request.COOKIES.get('__session')
+        return verify_session_cookie(session_cookie, check_revoked=True)
+    except:
         return {}
 
 
@@ -202,96 +198,3 @@ def sha256_hmac(secret, message):
     byte_key = bytes(secret, 'UTF-8')
     payload = message.encode()
     return hmac.new(byte_key, payload, sha256).hexdigest()
-
-
-#-----------------------------------------------------------------------
-# API Authentication Endpoints
-#-----------------------------------------------------------------------
-
-@api_view(['GET'])
-def authenticate(request):
-    """Generate a session cookie for a user from an ID token sent via
-    HTTP authorization bearer token."""
-
-    # Get the user's ID token from the authorization header.
-    auth_header = request.META['HTTP_AUTHORIZATION']
-    id_token = auth_header.split(' ')[-1]
-
-    # Ensure that cookies are set only on recently signed in users,
-    # by checking the auth_time of the ID token before creating a cookie.
-    # Only create a session if the user signed in within the last 5 minutes.
-    try:
-        decoded_claims = auth.verify_id_token(id_token)
-        if time() - decoded_claims['auth_time'] < 5 * 60:
-            # Optional: Make expiration_time_of_session a setting variable.
-            expires_in = timedelta(days=7)
-            expires = datetime.now() + expires_in
-            session_cookie = auth.create_session_cookie(id_token, expires_in=expires_in)
-            response = Response({'status': 'success'}, content_type='application/json')
-            response.set_cookie(
-                key='session',
-                value=session_cookie,
-                expires=expires,
-                httponly=True,
-                secure=True,
-            )
-            uid = decoded_claims['uid']
-            create_log(
-                ref=f'users/{uid}/logs',
-                claims=decoded_claims,
-                action='Signed in.',
-                log_type='auth',
-                key='login'
-            )
-            update_document(f'users/{uid}', {'signed_in': True})
-            return response
-
-        # Otherwise, the user did not sign in recently. To guard against
-        # ID token theft, re-authentication is required.
-        return Response(
-            {'status': 'error', 'message': 'Recent sign in required.'},
-            content_type='application/json',
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-    except auth.InvalidIdTokenError:
-        return Response(
-            {'status': 'error', 'message': 'Invalid ID token.'},
-            content_type='application/json',
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-    except exceptions.FirebaseError:
-        return Response(
-            {'status': 'error', 'message': 'Failed to create a session cookie.'},
-            content_type='application/json',
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-
-@api_view(['GET'])
-def logout(request):
-    """End a user's session."""
-    session_cookie = request.COOKIES.get('session')
-    try:
-        decoded_claims = auth.verify_session_cookie(session_cookie)
-        uid = decoded_claims['uid']
-        create_log(
-            ref=f'users/{uid}/logs',
-            claims=decoded_claims,
-            action='Signed out.',
-            log_type='auth',
-            key='logout'
-        )
-        update_document(f'users/{uid}', {'signed_in': False})
-        auth.revoke_refresh_tokens(decoded_claims['sub'])
-        response = Response(
-            {'status': 'success'},
-            content_type='application/json'
-        )
-        response.set_cookie('session', expires=0)
-        print('Successfully logged out, cookie expired.')
-        return response
-    except auth.InvalidSessionCookieError:
-        return Response(
-            {'success': 'error', 'message': 'Invalid session cookie.'},
-            content_type='application/json',
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )

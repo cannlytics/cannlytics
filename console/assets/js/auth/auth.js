@@ -11,21 +11,6 @@ import { apiRequest, authRequest, showNotification } from '../utils.js';
 export const auth = {
 
 
-  initialize() {
-    /*
-     * Initialize Firebase, waiting for the user to sign in successfully to
-     * programmatically login the user and route them to the dashboard.
-     */
-    // try {
-    //   firebase.initializeApp();
-    // } catch(error) {
-    //   // Firebase already initialized.
-    // }
-    // FIXME: Navigate to dashboard if redirecting from Google sign-in.
-    // this.googleSignInRedirect();
-  },
-
-
   currentUser() { return firebase.auth().currentUser },
 
 
@@ -138,27 +123,34 @@ export const auth = {
   },
 
 
-  signIn() {
+  signIn(event) {
     /*
      * Sign in a user.
      */
+    event.preventDefault();
     var email = document.getElementById('login-email').value;
     var password = document.getElementById('login-password').value;
     document.getElementById('sign-in-button').classList.add('d-none');
     document.getElementById('sign-in-loading-button').classList.remove('d-none');
-    firebase.auth().signInWithEmailAndPassword(email, password).then(user => {
-      return authRequest('/api/auth/authenticate').then(() => {
+    firebase.auth().signInWithEmailAndPassword(email, password).then((user) => {
+      // Optional: Handle error more elegantly.
+      return authRequest('/login').then((response) => {
+        window.location.href = window.location.origin;
+      })
+      .catch((error) => {
         window.location.href = window.location.origin;
       });
-    }).then(() => {
-      // TODO: Determine if it's okay to stay signed in.
-      // The Firestore docs show to sign out when using session cookies,
-      // but this means all requests to Firestore have to go through the API.
-      // It is still nice to be able to interact with Firestore from client-side JavaScript.
-      // return firebase.auth().signOut();
-    }).then(() => {
-      window.location.href = window.location.origin;
     })
+    // Optional: Determine if it's okay to stay signed in.
+    // The Firestore docs show to sign out when using session cookies,
+    // but this means that all requests to Firestore have to go through the API.
+    // It is still nice to be able to interact with Firestore from client-side JavaScript.
+    // .then(() => {
+    //   // return firebase.auth().signOut();
+    // }).then(() => {
+    //   // window.location.href = window.location.origin;
+    //   // window.location.assign('/');
+    // })
     .catch((error) => {
       showNotification('Sign in error', error.message, { type: 'error' });
     }).finally(() => {
@@ -188,14 +180,14 @@ export const auth = {
     // FIXME: Ensure sign-up works with user sessions.
     firebase.auth().createUserWithEmailAndPassword(email, password)
       .then(() => {
-        return authRequest('/api/auth/authenticate');
+        return authRequest('/login');
       })
       .then(() => {
         apiRequest('/api/users', { email, photo_url: `https://robohash.org/${email}?set=set5` })
             .then(() => {
               window.location.href = window.location.origin;
             })
-        // DEV: Don't send verification email in development.
+        // Optional: Implement user verification and don't send emails in development.
         // this.verifyUser();
       })
       .catch((error) => {
@@ -205,16 +197,6 @@ export const auth = {
         document.getElementById('sign-up-button').classList.remove('d-none');
         document.getElementById('sign-up-loading-button').classList.add('d-none');
       });;
-  },
-
-
-  testSignIn() {
-    /*
-     * Sign the user into a test account
-     */
-    document.getElementById('login-email').value = 'test@cannlytics.com';
-    document.getElementById('login-password').value = 'sandbox';
-    this.signIn();
   },
   
   

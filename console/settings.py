@@ -1,17 +1,12 @@
 """
-Django Settings with Environment Variables | Cannlytics Console
+Django Settings | Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 6/5/2021
-Updated: 6/18/2021
+Updated: 6/21/2021
+License: MIT License
 Description:
     Django settings secured by Google Cloud Secret Manager.
-
-References:
-    https://docs.djangoproject.com/en/3.1/topics/settings/
-    https://docs.djangoproject.com/en/3.1/ref/settings/
-    https://cloud.google.com/secret-manager/docs/overview
-    https://codelabs.developers.google.com/codelabs/cloud-run-django
 """
 
 # Standard imports
@@ -33,8 +28,7 @@ from django.template import base
 # Define project namespaces.
 PROJECT_NAME = 'console'
 ROOT_URLCONF = 'console.urls'
-SETTINGS_NAME = 'cannlytics_platform_settings'
-WSGI_APPLICATION = 'console.core.wsgi.application'
+WSGI_APPLICATION = 'console.wsgi.application'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Get the version number.
@@ -45,6 +39,8 @@ with open(os.path.join(BASE_DIR, 'package.json')) as v_file:
 # ------------------------------------------------------------#
 # Environment variables.
 # Pulling django-environ settings file, stored in Secret Manager.
+# Docs: https://cloud.google.com/secret-manager/docs/overview
+# Example: https://codelabs.developers.google.com/codelabs/cloud-run-django
 # ------------------------------------------------------------#
 
 # Load secrets stored as environment variables.
@@ -65,7 +61,7 @@ if os.path.isfile(env_file):
 elif os.environ.get('GOOGLE_CLOUD_PROJECT', None):
     project_id = os.environ.get('GOOGLE_CLOUD_PROJECT')
     client = secretmanager.SecretManagerServiceClient()
-    settings_name = os.environ.get('SETTINGS_NAME', SETTINGS_NAME)
+    settings_name = env('SETTINGS_NAME')
     name = f'projects/{project_id}/secrets/{settings_name}/versions/latest'
     payload = client.access_secret_version(name=name).payload.data.decode('UTF-8')
     env.read_env(io.StringIO(payload))
@@ -179,19 +175,21 @@ USE_TZ = True
 # ------------------------------------------------------------#
 
 # Specify allowed domains depending on production or development status.
-ALLOWED_HOSTS = []
-try:
-    ALLOWED_HOSTS.append(env('CUSTOM_DOMAIN'),)
-except:
-    pass
-try:
-    ALLOWED_HOSTS.append(env('FIREBASE_HOSTING_URL'),)
-except:
-    pass
-try:
-    ALLOWED_HOSTS.append(env('CLOUD_RUN_URL'),)
-except:
-    pass
+ALLOWED_HOSTS = ['*']
+
+# FIXME: Restrict domains in production.
+# try:
+#     ALLOWED_HOSTS.append(env('CUSTOM_DOMAIN'))
+# except:
+#     pass
+# try:
+#     ALLOWED_HOSTS.append(env('FIREBASE_HOSTING_URL'))
+# except:
+#     pass
+# try:
+#     ALLOWED_HOSTS.append(env('CLOUD_RUN_URL'))
+# except:
+#     pass
 
 if PRODUCTION == 'False':
     ALLOWED_HOSTS.extend(['*', 'localhost:8000', '127.0.0.1'])
@@ -268,6 +266,12 @@ STATIC_URL = '/static/'
 
 # Enable Django's session engine for storing user sessions.
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
+# Whether to expire the session when the user closes their browser.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# The age of session cookies, in seconds.
+SESSION_COOKIE_AGE = 900
 
 # ------------------------------------------------------------#
 # Customization

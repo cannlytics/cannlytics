@@ -59,7 +59,44 @@
       </button>
     </div>
 
-  </div><!-- End of license fields -->
+  </div><!-- End of fields -->
+
+  <!-- Table container -->
+    <div class="card my-3">
+      <div class="card-body">
+
+        <!-- Table -->
+        <div class="my-3 px-3">
+          <h2 class="h6 mb-3 text-dark">Samples</h2>
+          <div class="table-responsive">
+
+            <!-- Placeholder if no data -->
+            <div id="data-placeholder">
+              {% include "console/components/placeholders/table_placeholder.html" with
+                action='Add a sample'
+                height='100px'
+                image='console/images/icons/two-tone/two_tone_bottle.svg'
+                message="No samples for this project. Start adding samples to create a group of samples for a specific organization."
+                title='No Samples Added'
+                url='/projects/{{ request.GET.id }}/samples/sample?new=true'
+                only
+              %}
+            </div>
+
+            <!-- AG Grid Table -->
+            <div id="data-table" class="d-none">
+              <div
+                id="samples-table"
+                class="ag-theme-alpine-dark"
+                style="height: 326px; width:100%;"
+              ></div>
+            </div>
+
+          </div>
+        </div><!-- End of the table -->
+      
+      </div>
+    </div><!-- End of table container -->
 
   <!-- Danger zone -->
   {% if request.GET.id %}

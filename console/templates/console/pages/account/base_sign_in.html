@@ -4,13 +4,14 @@
   <!--
     Login Template | Cannlytics Console
     Created: 11/26/2020 Thanksgiving
+    Updated: 6/21/2021
     Hashes filled by build.py
   -->
  {% extends "console/base.html" %}
   {% load static %}
   {% block title %}Console | Cannlytics{% endblock %}
   {% block page_css %}
- <link href="{% static 'console/plugins/cannlytics/login-e20bcf659200e6a37adf.css'%}" id="login_css" rel="stylesheet" type="text/css"/>
+ <link href="{% static 'console/plugins/cannlytics/login-0cecb313f917e00be048.css'%}" id="login_css" rel="stylesheet" type="text/css"/>
  {% endblock %}
   {% block page %}
  
@@ -77,11 +78,6 @@
  
   <!-- JavaScript -->
  {% block page_js %}
- {% comment %}
- <script>
-  cannlytics.auth.initialize();
- </script>
- {% endcomment %}
  <script src="{% static 'console/plugins/particlesjs/particles.js' %}" type="text/javascript">
  </script>
  <script type="text/javascript">

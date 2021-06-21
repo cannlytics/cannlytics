@@ -1,7 +1,7 @@
 # <img width="20" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics
 <!-- TODO: FIx reference to calyx image -->
 
-![version](https://img.shields.io/badge/version-0.0.6-darkgreen)
+![version](https://img.shields.io/badge/version-0.0.7-darkgreen)
 [![License: MIT](https://img.shields.io/badge/License-MIT-darkgreen.svg)](https://opensource.org/licenses/MIT)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)](https://github.com/cannlytics/cannlytics/fork)
 
@@ -523,6 +523,12 @@ Contributions are always welcome! You are encouraged to submit issues, functiona
 * More documentation;
 * Ideas.
 
+### Contributors
+
+- Charles Rice <charles@ufosoftwarellc.com>
+- Carlos Krefft <carlos@krefft.org>
+- Keegan Skeate <keegan@cannlytics.com>
+
 ## Resources <a name="resources"></a>
 
 * [Django Philosophy](https://docs.djangoproject.com/en/3.1/misc/design-philosophies)
@@ -553,4 +559,4 @@ Contributions are always welcome! You are encouraged to submit issues, functiona
 
 [MIT License](https://opensource.org/licenses/MIT)
 
-Made with 🧡
+Made with 🧡 and <a href="https://opencollective.com/cannlytics-company">your good will</a>.

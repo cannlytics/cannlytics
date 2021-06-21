@@ -1,6 +1,6 @@
 {
   "name": "cannlytics",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Cannlytics includes a LIMS, a console, documentation, a website, and vast amount of tools for cannabis analytics.",
   "keywords": [
     "cannabis",
@@ -31,8 +31,8 @@
     "build": "webpack --env production=True",
     "collectstatic": "python manage.py collectstatic --noinput",
     "publish": "npm run container && npm run cloud && npm run deploy",
-    "container": "npm run collectstatic && gcloud builds submit --tag gcr.io/cannlytics/cannlytics-console",
-    "cloud": "gcloud run deploy cannlytics-console --image gcr.io/cannlytics/cannlytics-console --region us-central1 --allow-unauthenticated --platform managed --memory 2Gi --cpu 2",
+    "container": "npm run collectstatic && gcloud builds submit --tag gcr.io/cannlytics/cannlytics-lims",
+    "cloud": "gcloud run deploy cannlytics-lims --image gcr.io/cannlytics/cannlytics-lims --set-env-vars SETTINGS_NAME=cannlytics_platform_settings --region us-central1 --allow-unauthenticated --platform managed --memory 2Gi --cpu 2",
     "deploy": "firebase deploy --project cannlytics --only hosting:production",
     "lint": "python manage.py check",
     "install-docs": "docker build -t squidfunk/mkdocs-material docs",

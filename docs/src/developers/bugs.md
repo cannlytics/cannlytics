@@ -2,6 +2,19 @@
 
 A non-exhaustive list of encountered bugs and their solutions.
 
+- **Current** [InsufficientPermissionError] after initializing Firebase in a production environment. Leads:
+
+  * Possible solution: <https://github.com/firebase/firebase-functions/issues/679>
+  * Proposed workaround: <https://github.com/firebase/firebase-js-sdk/issues/1958>
+  * Helpful reading: <https://stackoverflow.com/questions/55016899/appengine-warning-openblas-warning-could-not-determine-the-l2-cache-size-on>
+  * Promising: <https://stackoverflow.com/questions/24488891/gunicorn-errors-haltserver-haltserver-worker-failed-to-boot-3-django>
+  * Long shot: <https://stackoverflow.com/questions/64585380/firebase-authentication-unknown-error-while-making-a-remote-service-call>
+  * Similar issue: <https://github.com/jotes/django-cookies-samesite/issues/19>
+  * Potential fix: <https://github.com/jotes/django-cookies-samesite>
+  * **Solution**: Assign permissions in IAM console (see the installation guide).
+
+- [Firebase Hosting strip all cookies except for `__session`.](https://stackoverflow.com/a/58719953/5021266) Also see [this issue](https://stackoverflow.com/questions/57450648/how-to-use-multiple-cookies-in-firebase-hosting-cloud-run?noredirect=1&lq=1). Simple fix: use `__session` cookie instead of `session` cookie.
+
 - [AppEngine warning - OpenBLAS WARNING - could not determine the L2 cache size on this system](https://stackoverflow.com/questions/55016899/appengine-warning-openblas-warning-could-not-determine-the-l2-cache-size-on)
 
 - [Firebase hosting deployment failing](https://stackoverflow.com/questions/57911225/firebase-hosting-deployment-failing) at `hosting: uploading new files [5/128]` with error `Error: Task xyz failed: retries exhausted after 6 attempts`. Quick solution: Delete the hidden folder in you project root directory `.firebase/hosting.*.cache`.
