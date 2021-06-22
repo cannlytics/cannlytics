@@ -114,6 +114,10 @@ material = {
         ],
     },
     "projects": {
+        "breadcrumbs": [
+            {"title": "Projects", "url": "/projects"},
+            {"title": "Project", "active": True},
+        ],
         "fields": [
             {"key": "project_id", "name": "Project ID"},
             {"key": "client", "name": "Client"},
