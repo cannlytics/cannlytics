@@ -2,6 +2,10 @@
 
 A non-exhaustive list of encountered bugs and their solutions.
 
+- Access to fetch at `<pdf-url>` from origin 'http://127.0.0.1:8000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
+
+  * Potential solution: <https://stackoverflow.com/a/58153018/5021266>
+
 - **Current** [InsufficientPermissionError] after initializing Firebase in a production environment. Leads:
 
   * Possible solution: <https://github.com/firebase/firebase-functions/issues/679>

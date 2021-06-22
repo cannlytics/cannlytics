@@ -114,6 +114,15 @@ material = {
         ],
     },
     "projects": {
+        "fields": [
+            {"key": "project_id", "name": "Project ID"},
+            {"key": "client", "name": "Client"},
+            {"key": "received_at", "name": "Received At", "type": "datetime"},
+            {"key": "created_at", "name": "Created At", "type": "datetime"},
+            {"key": "created_by", "name": "Created By", "class": "field-sm"},
+            {"key": "transfer_ids", "name": "Transfer IDs", "type": "text"},
+            {"key": "notes", "name": "Notes", "type": "textarea"},
+        ],
         "placeholder": {
             "action": "Create a project",
             "height": "200px",

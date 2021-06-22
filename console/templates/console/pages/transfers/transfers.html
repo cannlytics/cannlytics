@@ -1,8 +1,10 @@
 <!doctype html>
 <html>
-  <!-- Transfers -->
-  <!-- Created: 5/4/2021 -->
-  <!-- Updated: 5/4/2021 -->
+<!--
+  Transfers Page | Cannlytics
+  Created: 5/4/2021
+  Updated: 6/21/2021
+-->
 {% extends "console/console.html" %}
 {% load static %}
 {% block console_body %}
@@ -10,9 +12,26 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    <div class="col pt-3 pb-2 mb-3">
-      <h1 class="fs-5 mb-0 lh-base mb-3">Transfers</h1>
-      <ul class="nav nav-tabs">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="fs-5 mb-0 lh-base">Transfers</h1>
+      <div>
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.settings.importData('transfers');"
+        >
+          Import
+        </button>
+        <button
+          class="btn btn-sm-light btn-md-light"
+          onclick="cannlytics.settings.exportData('transfers');"
+        >
+          Export
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    {% comment %} <ul class="nav nav-tabs">
       {% for item in logistics.tabs %}
         <li class="nav-item">
           <a
@@ -24,8 +43,7 @@
           </a>
         </li>
       {% endfor %}
-      </ul>
-    </div>
+    </ul> {% endcomment %}
 
     <!-- Dynamic section -->
     <section>

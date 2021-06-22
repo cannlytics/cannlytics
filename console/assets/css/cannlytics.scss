@@ -674,6 +674,9 @@ ul {
 .form-group {
   margin-bottom: 1rem;
 }
+.form-control {
+  border-color: #777;
+}
 .form-control:focus {
   border-color: #96e6a1;
   box-shadow: 0 0 0 0.2rem #96e6a140;
@@ -814,6 +817,15 @@ body.dark footer .form-control {
 
 .form-control[readonly] {
   background-color: unset;
+}
+
+/* Form fields */
+
+.field-sm {
+  max-width: 120px;
+}
+.field-md {
+  max-width: 240px;
 }
 
 /*--------------------------------------------------------------------------

@@ -161,4 +161,30 @@ export const analyses = {
   },
 
 
+  importAnalyses() {
+    /*
+     * Import a data file (.csv or .xlsx) of data.
+     */
+    // TODO:
+  },
+
+
+  exportAnalytes() {
+    /*
+     * Export all data to Excel.
+     */
+    // TODO: Serialize the analysis data!
+    const data = {}
+    api.createAnalyses(data);
+  },
+
+
+  importAnalytes() {
+    /*
+     * Import a data file (.csv or .xlsx) of data.
+     */
+    // TODO:
+  },
+
+
 }

@@ -14,6 +14,20 @@
     <!-- Header-->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
       <h1 class="fs-5 mb-0 lh-base">Measurements</h1>
+      <div>
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.settings.importData('measurements');"
+        >
+          Import
+        </button>
+        <button
+          class="btn btn-sm-light btn-md-light"
+          onclick="cannlytics.settings.exportData('measurements');"
+        >
+          Export
+        </button>
+      </div>
     </div>
 
     <!-- Body -->

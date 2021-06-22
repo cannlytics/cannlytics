@@ -195,6 +195,24 @@ const apiSettings = {
 const coreSettings = {
 
 
+  exportData(model) {
+    /*
+     * Export given collection data to Excel.
+     */
+    // TODO: Serialize the analysis data!
+    const data = {}
+    // api.createAnalyses(data);
+  },
+
+
+  importData(model) {
+    /*
+     * Import a data file (.csv or .xlsx) to Firestore for a given model type.
+     */
+    // TODO:
+  },
+
+
   getOrganizationLogs(orgId) {
     /* 
     * Record time and user of any activity.

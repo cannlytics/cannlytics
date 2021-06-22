@@ -96,9 +96,6 @@ class ConsoleView(TemplateView):
                 context['organization_context'] = context['organizations']
             context['organizations'] = organizations
             context['user'] = user_data
-        # else:
-        #     context['organizations'] = []
-        #     context['user'] = {}
         return context
 
     # Optional: Test if get is faster.
@@ -176,9 +173,9 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
             return HttpResponse(status=401)
         initialize_firebase()
         session_cookie = create_session_cookie(token)
-        # FIXME: Return proper json
+        # TEST: Ensure that the request succeeds on the client!
         # response = HttpResponse(status=204)
-        response = JsonResponse('{"success": true}', status=204)
+        response = JsonResponse({"success": True}, status=204)
         response.set_cookie(
             key='__session',
             value=session_cookie,

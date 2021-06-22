@@ -3,48 +3,34 @@
 <!--
   Project Page | Cannlytics Console
   Created: 6/18/2021
-  Updated: 6/18/2021
+  Updated: 6/21/2021
+  TODO:
+    - Allow the user to reset, save (update and create), and delete.
+    - Render additional fields, ability to add an additional field.
+    - Load sample types.
+    - Use a table instead of a list.
 -->
 {% extends "console/console.html" %}
 {% load icon %}
+{% block console_css %}
+  <!-- Bootstrap Datepicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
+{% endblock console_css %}
 {% block console_body %}
 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
   <!-- Header -->
-  <div class="px-3">
-    <h1 class="fs-5 lh-base text-dark mb-0 mt-3">Project {{ request.GET.id }}</h1>
-    <h2 class="fs-6 lh-base text-secondary mb-3">
-      Manage projects for your organization and your organization's contacts.
-    </h2>
-  </div>
+  <div class="d-flex justify-content-between">
+    <div class="px-3">
+      <h1 class="fs-5 lh-base text-dark mb-0 mt-3">Project {{ request.GET.id }}</h1>
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        Manage projects for your organization and your organization's contacts.
+      </h2>
+    </div>
 
-  <!-- Fields -->
-  <div class="mb-4 px-3">
-
-    <!-- Form -->
-    <form id="project-form">
-      <div class="col-6">
-
-        <!-- Field -->
-        <div class="d-flex row-md-3 mb-3">
-          <label class="form-label col-3 d-flex align-items-center mb-0">
-            Project ID
-          </label>
-          <input
-            type="text"
-            class="form-control form-control-sm col-8"
-            name="project_id"
-            style="max-width:120px;"
-            disabled
-          >
-        </div>
-
-      </div>
-    </form>
-
-    <!-- TODO: Allow the user to reset, save (update and create), and delete -->
-    <!-- Options -->
-    <div class="mt-3">
+    <!-- Options (back, save) -->
+    <div class="d-flex align-items-center">
       <a
         class="btn btn-sm btn-sm-light btn-md-light me-2"
         href="/projects"
@@ -58,10 +44,240 @@
         Save
       </button>
     </div>
+  </div>
+
+  <!-- Fields -->
+  <div class="mb-4 px-3">
+
+    <!-- Form -->
+    <form id="project-form">
+
+      <!-- Dynamic fields -->
+      <div class="col col-md-10 col-lg-6">
+
+        {% for field in projects.fields %}
+
+          <!-- Text Field -->
+          {% if not field.type or field.type == 'text' %}
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label col-form-label-sm">
+                {{ field.name }}
+              </label>
+              <div class="col-sm-9">
+                <input
+                  type="text"
+                  id="input_{{ field.key }}"
+                  class="form-control form-control-sm {{ field.class }}"
+                  name="{{ field.key }}"
+                  spellcheck="{{ field.spellcheck }}"
+                  style="{{ field.style }}"
+                >
+              </div>
+            </div>
+
+          <!-- Date (date) -->
+          {% elif field.type == 'date' %}
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label col-form-label-sm">
+                {{ field.name }}
+              </label>
+              <div class="col-sm-9">
+                <input
+                  id="input_{{ field.key }}"
+                  type="text"
+                  class="form-control form-control-sm"
+                  name="{{ field.key }}"
+                  data-provide="datepicker"
+                  data-date-start-date="-0d"
+                >
+              </div>
+            </div>
+
+          <!-- Date and time (datetime) -->
+          {% elif field.type == 'datetime' %}
+            <div class="row mb-3">
+              <label class="col-sm-3 col-form-label col-form-label-sm">
+                {{ field.name }}
+              </label>
+              <div class="col-sm-3">
+                <input
+                  id="input_{{ field.key }}_date"
+                  type="text"
+                  class="form-control form-control-sm"
+                  name="{{ field.key }}"
+                  data-provide="datepicker"
+                  data-date-start-date="-0d"
+                >
+              </div>
+              <div class="col-sm-3">
+                <input
+                  id="input_{{ field.key }}_time"
+                  type="time"
+                  class="form-control form-control-sm"
+                  name="{{ field.key }}_time"
+                  data-provide="text"
+                >
+              </div>
+            </div>
+
+          <!-- Textareas (textarea) -->
+          {% elif field.type == 'textarea' %}
+          <div class="form-floating">
+            <textarea
+              class="form-control"
+              placeholder=""
+              id="input_{{ field.key }}"
+              style="height:250px"
+            ></textarea>
+            <label for="input_{{ field.key }}">
+              {{ field.name }}
+            </label>
+          </div>
+
+          <!-- Checkboxes (bool) -->
+          {% elif field.type == 'bool' %}
+          <div class="form-check">
+            <input
+              id="input_{{ field.key }}"
+              class="form-check-input"
+              type="checkbox"
+            >
+            <label class="form-check-label fs-6" for="input_{{ field.key }}">
+              {{ field.name }}
+            </label>
+          </div>
+
+          <!-- Select (select + options + selected) | Select Multiple (select + multiple) -->
+          {% elif field.type == 'select' %}
+          <div class="col-md-3">
+            <label class="form-label">{{ field.name }}</label>
+            <select
+              class="form-select form-select-sm"
+              aria-label="{{ field.name }}"
+              {% if field.multiple %}multiple{% endif %}
+            >
+              {% for option in field.options %}
+                <option
+                  value="{{ option.key }}"
+                  {% if option.key == field.selected %}selected{% endif %}
+                >
+                  {{ option.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- TODO: Handle lists -->
+          <!-- Hard: https://stackoverflow.com/questions/19908215/adding-user-input-to-a-list-of-text-items-on-a-html-page/42950658 -->
+
+          {% endif %}
+
+        {% endfor %}
+
+      </div><!-- End of dynamic fields -->
+
+      <!-- Show additional fields -->
+      <div id="additional-fields" class="my-3">
+        <button
+          id="additonal-fields-show"
+          class="btn btn-sm btn-sm-light"
+          onclick="toggleFields(event, 'additional');"
+        >
+          {% icon 'chevrons-down' hegiht="16px" width="16px" %} Show additional fields
+        </button>
+        <button
+          id="additonal-fields-hide"
+          class="nav-link text-secondary app-action d-inline-block d-none"
+          onclick="toggleFields(event, 'additional');"
+        >
+          {% icon 'chevrons-up' hegiht="16px" width="16px" %} Hide additional fields
+        </button>
+      </div><!-- End of additional fields-->
+
+      <!-- TODO: Render additional fields -->
+
+      <!-- TODO: Add Field -->
+      <!-- Show a blank name, key, type, for the additional field -->
+
+    </form>
 
   </div><!-- End of fields -->
 
-  <!-- Table container -->
+  <!-- TODO: Try to implement add samples with AG-Grid table -->
+
+  <!-- Add samples form -->
+  <div class="my-5 px-3">
+    <p class="text-left fw-bold fs-5 mb-3" style="max-width:540px;">
+      <small>Samples</small>
+    </p>
+    <div id="samples-fields-show">
+    <button
+      class="btn btn-sm btn-sm-light"
+      onclick="toggleFields(event, 'samples');"
+    >
+      Add sample
+    </button>
+    </div>
+  </div>
+  <div id="samples-fields" class="d-none mb-5">
+    <ol id="samples-list" class="bold-list">
+      <li id="primary-samples" class="mb-3">
+        <div class="row g-4">
+          <div class="col-md-3">
+            <label class="form-label">Sample ID</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              name="sample_id"
+            >
+          </div>
+          <div class="col-md-3">
+            <label for="samples-email-1" class="form-label">Sample Name</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              name="sample_name"
+            >
+          </div>
+          <div class="col-md-3">
+            <label for="samples-type-1" class="form-label">
+              Sample Type
+            </label>
+            <select
+              class="form-select form-select-sm"
+              aria-label="Sample type"
+              id="sample-type-1"
+              multiple
+            >
+              <!-- TODO: Dynamic types-->
+              <option selected value="buds">Buds</option>
+              <option value="concentrate">Concentrate</option>
+              <option value="edible">Edible</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <button
+              class="btn btn-link text-danger"
+              onclick="toggleFields(event, 'samples');"
+            >
+              {% icon 'trash-2' hegiht="16px" width="16px" %}
+            </button>
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <!-- Add team member button -->
+    <button
+      class="btn btn-sm btn-sm-light"
+      onclick="cannlytics.ui.addListItem(event, 'samples')"
+    >
+      Add a sample
+    </button>
+
+  </div><!-- End of samples form -->
+
+  {% comment %} <!-- Table container -->
     <div class="card my-3">
       <div class="card-body">
 
@@ -96,9 +312,9 @@
         </div><!-- End of the table -->
       
       </div>
-    </div><!-- End of table container -->
+    </div><!-- End of table container --> {% endcomment %}
 
-  <!-- Danger zone -->
+  <!-- Danger zone (delete) -->
   {% if request.GET.id %}
   <div class="card bg-transparent border-danger my-5 mx-3">
     <div class="card-body text-dark">
@@ -128,7 +344,33 @@
 <!-- JavaScript -->
 {% block console_js %}
   <script>
+
+    // Load the project's data.
     cannlytics.projects.viewProject();
+
+    // Render any date pickers.
+    $('.datepicker').datepicker({
+      format: 'mm/dd/yyyy',
+    });
+
+    // Enable tooltips.
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Toggle additional fields
+    function toggleFields(event, key) {
+      event.preventDefault();
+      cannlytics.ui.toggleElementClass(`${key}-fields`, 'd-none');
+      cannlytics.ui.toggleElementClass(`${key}-fields-show`, 'd-none');
+      try {
+        cannlytics.ui.toggleElementClass(`${key}-fields-hide`, 'd-none');
+      } catch (error) {
+        // No hide toggle.
+      }
+    }
+
   </script>
 {% endblock console_js %}
 
