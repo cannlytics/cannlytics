@@ -2,7 +2,7 @@
 Data Models | Cannlytics
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 5/8/2021
-Updated: 6/9/2021
+Updated: 6/22/2021
 
 Data schema of the Cannlytics platform.
 """
@@ -87,6 +87,7 @@ class Analyte(Model):
     lowest order of quantification (LOQ), regulatory limit and more."""
     _collection = 'organizations/%s/analytes'
     public: bool = False
+    formula: str = ''
     name: str = ''
     key: str = ''
     limit: Optional[float] = None
@@ -104,11 +105,11 @@ class Area(Model):
     plants, samples, instruments, or whatever you please."""
     _collection = 'organizations/%s/areas'
     active: bool = True
-    name: str = ''
     area_type: str = 'General'
-    type_id: str = ''
-    quarantine: bool = False
+    area_type_id: str = ''
     external_id: str = ''
+    name: str = ''
+    quarantine: bool = False
     for_batches: Optional[bool] = False
     for_plants: Optional[bool] = False
     for_harvests: Optional[bool] = False
@@ -193,6 +194,7 @@ class Item(Model):
     approved: str = ''
     approved_at: datetime = None
     area_id: str = ''
+    area_name: str = ''
     category_name: str = ''
     category_type: str = ''
     description: str = ''
@@ -257,10 +259,14 @@ class Instrument(Model):
     data is collected through data files, processed with routine
     automation or data importing."""
     _collection = 'instruments/%s'
+    area_id: str = ''
+    area_name: str = ''
     name: str = ''
     calibrated_at: datetime = None
     calibrated_by: str = ''
     data_path: str = ''
+    description: str = ''
+    notes: str = ''
 
     def create_maintenance_log(self):
         """Create a maintenance log."""
@@ -344,10 +350,10 @@ class Results(Model):
     _collection = 'organizations/%s/results'
     analysis: str = ''
     analysis_status: str = ''
-    sample_id: str = ''
     package_id: str = ''
     package_label: str = ''
     product_name: str = ''
+    sample_id: str = ''
     sample_type: str = ''
     tested_at: datetime = None
     voided_at: datetime = None
@@ -372,7 +378,14 @@ class Sample(Model):
     client."""
     _collection = 'organizations/%s/samples'
     batch_id: str = ''
+    created_at: datetime = None
+    created_by: str = ''
+    photo_ref: str = ''
+    photo_url: str = ''
     project_id: str = ''
+    updated_at: datetime = None
+    updated_by: str = ''
+    notes: str = ''
 
 
 @dataclass

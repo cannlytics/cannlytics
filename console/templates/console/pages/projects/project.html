@@ -25,12 +25,12 @@
     breadcrumbs=projects.breadcrumbs
   %}
 
-  <!-- Header -->
+  <!-- Title -->
   <div class="d-flex justify-content-between">
     <div class="px-3">
       <h1 class="fs-5 lh-base text-dark mb-0 mt-3">Project {{ request.GET.id }}</h1>
       <h2 class="fs-6 lh-base text-secondary mb-3">
-        Manage projects for your organization and your organization's contacts.
+        Manage project for your organization and your organization's contacts.
       </h2>
     </div>
 
@@ -44,21 +44,24 @@
       </button>
       <button
         class="btn btn-sm bg-gradient-green text-white"
-        onclick="cannlytics.api.save('project');"
+        onclick="cannlytics.api.save('projects', '{{ request.GET.id }}');"
       >
         Save
       </button>
     </div>
-  </div>
+  </div><!-- End of title -->
 
   <!-- Fields -->
   <div class="mb-4 px-3">
 
     <!-- Form -->
-    <form id="project-form">
+    <form id="projects-form">
 
       <!-- Dynamic fields -->
-      <div class="col col-md-10 col-lg-6">
+      {% include "console/comonents/forms/dynamic_form.html" with
+        fields=projects.fields
+      %}
+      {% comment %} <div class="col col-md-10 col-lg-6">
 
         {% for field in projects.fields %}
 
@@ -179,25 +182,27 @@
 
         {% endfor %}
 
-      </div><!-- End of dynamic fields -->
+      </div><!-- End of dynamic fields --> {% endcomment %}
 
       <!-- Show additional fields -->
-      <div id="additional-fields" class="my-3">
+      {% include "console/comonents/forms/additional_fields.html" %}
+
+      {% comment %} <div id="additional-fields" class="my-3">
         <button
           id="additonal-fields-show"
           class="btn btn-sm btn-sm-light"
-          onclick="toggleFields(event, 'additional');"
+          onclick="cannlytics.ui.toggleFields(event, 'additional');"
         >
           {% icon 'chevrons-down' hegiht="16px" width="16px" %} Show additional fields
         </button>
         <button
           id="additonal-fields-hide"
           class="nav-link text-secondary app-action d-inline-block d-none"
-          onclick="toggleFields(event, 'additional');"
+          onclick="cannlytics.ui.toggleFields(event, 'additional');"
         >
           {% icon 'chevrons-up' hegiht="16px" width="16px" %} Hide additional fields
         </button>
-      </div><!-- End of additional fields-->
+      </div><!-- End of additional fields--> {% endcomment %}
 
       <!-- TODO: Render additional fields -->
 
@@ -218,7 +223,7 @@
     <div id="samples-fields-show">
     <button
       class="btn btn-sm btn-sm-light"
-      onclick="toggleFields(event, 'samples');"
+      onclick="cannlytics.ui.toggleFields(event, 'samples');"
     >
       Add sample
     </button>
@@ -263,7 +268,7 @@
           <div class="col-md-3">
             <button
               class="btn btn-link text-danger"
-              onclick="toggleFields(event, 'samples');"
+              onclick="cannlytics.ui.toggleFields(event, 'samples');"
             >
               {% icon 'trash-2' hegiht="16px" width="16px" %}
             </button>
@@ -321,26 +326,11 @@
 
   <!-- Danger zone (delete) -->
   {% if request.GET.id %}
-  <div class="card bg-transparent border-danger my-5 mx-3">
-    <div class="card-body text-dark">
-      <div class="d-flex">
-        <div class="col"> 
-          <h5 class="card-title fs-6">Delete this project</h5>
-          <p class="card-text fs-6">
-            <small>Once deleted, it will be gone forever. Please be certain.</small>
-          </p>
-        </div>
-        <div class="d-flex align-items-center">
-          <button
-            onclick="cannlytics.api.delete('project', '{{ request.GET.id }}');"
-            class="btn btn-sm btn-light text-danger"
-          >
-            <b>Delete project</b>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+    {% include "console/comonents/forms/delete_option.html" with
+      model="projects"
+      model_singular="project"
+      id=request.GET.id
+    %}
   {% endif %}
 
 </main>
@@ -351,30 +341,13 @@
   <script>
 
     // Load the project's data.
-    cannlytics.projects.viewProject();
+    cannlytics.projects.viewObject('project');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({
-      format: 'mm/dd/yyyy',
-    });
+    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
     // Enable tooltips.
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
-
-    // Toggle additional fields
-    function toggleFields(event, key) {
-      event.preventDefault();
-      cannlytics.ui.toggleElementClass(`${key}-fields`, 'd-none');
-      cannlytics.ui.toggleElementClass(`${key}-fields-show`, 'd-none');
-      try {
-        cannlytics.ui.toggleElementClass(`${key}-fields-hide`, 'd-none');
-      } catch (error) {
-        // No hide toggle.
-      }
-    }
+    cannlytics.ui.enableTooltips();
 
   </script>
 {% endblock console_js %}

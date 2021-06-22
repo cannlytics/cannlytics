@@ -68,7 +68,7 @@
     };
 
     // Get the data and render the table.
-    api.getOrganizations().then((data) => {
+    api.get('organizations').then((data) => {
       console.log('Table data:', data); // DEV:
       const eGridDiv = document.querySelector(`#${tableId}`);
       new agGrid.Grid(eGridDiv, gridOptions);

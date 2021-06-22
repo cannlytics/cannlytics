@@ -70,5 +70,51 @@
     </div>
   </main>
 {% endblock console_body %}
-{% block console_js %}{% endblock console_js %}
+
+<!-- JavaScript -->
+{% block console_js %}
+
+  <script>
+
+    // Get data from the API.
+    cannlytics.api.get('projects', null, { params: { limit: 100 } })
+      .then(function(response) {
+
+        var data = response.data;
+        console.log('DEV: Render data:', data);
+        if (!data) return;
+
+        // Show the table.
+        document.getElementById('data-placeholder').classList.add('d-none');
+        document.getElementById('data-table').classList.remove('d-none');
+
+        // Define the columns for the table.
+        const columnDefs = [
+          { field: 'project_id', headerName: 'Project ID', sortable: true, filter: true },
+        ];
+
+        // Specify the table options.
+        const gridOptions = {
+          columnDefs: columnDefs,
+          pagination: true,
+          paginationAutoPageSize: true,
+          suppressRowClickSelection: false,
+          onRowClicked: event => cannlytics.ui.openObject(
+            'projects',
+            'project',
+            event,
+          ),
+          onGridReady: event => cannlytics.theme.toggleTheme(cannlytics.theme.getTheme()),
+        };
+
+        // Render the table
+        const eGridDiv = document.querySelector('projects-table');
+        new agGrid.Grid(eGridDiv, gridOptions);
+        gridOptions.api.setRowData(data);
+
+      });
+
+  </script>
+
+{% endblock console_js %}
 </html>

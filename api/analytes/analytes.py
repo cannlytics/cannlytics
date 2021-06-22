@@ -16,18 +16,16 @@ from api.auth import auth
 
 
 @api_view(['GET', 'POST', 'DELETE'])
-def analyses(request, format=None, analysis_id=None):
-    """Get, create, or update information about cannabis analyses."""
+def analytes(request, format=None, analyte_id=None):
+    """Get, create, or update information about cannabis analysis analytes."""
 
-    print('Requested analysis:', analysis_id)
-    model_type = 'analyses'
+    print('Requested analyte:', analyte_id)
+    model_type = 'analyte'
     claims = auth.verify_session(request)
     uid = claims['uid']
     print('User:', uid)
 
     if request.method == 'GET':
-        # TODO: Implement filters!
-        # data = get_collection(f"labs/{org_id}/analyses")
         return Response({'error': 'not_implemented'}, content_type='application/json')
 
     elif request.method == 'POST':

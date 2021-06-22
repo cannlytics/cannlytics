@@ -23,7 +23,7 @@ export const api = {
     single object if an ID is specified. Pass params in options to filter the data. */
     const modelType = model.replace(/^./, string[0].toUpperCase());
     if (id) return authRequest(`/api/${model}/${id}`);
-    return authRequest(`/api/${model}`, data);
+    return authRequest(`/api/${model}`, null, options);
   },
 
 
@@ -37,13 +37,13 @@ export const api = {
   },
 
 
-  save(model) {
+  save(model, id) {
     /* Create an entry in the database if it does not exist,
     otherwise update the entry. */
     const form = document.getElementById(`${model}-form`);
     const data = formDeserialize(form);
     console.log('TODO: save data:', data);
-    return authRequest(`/api/${model}`, data);
+    return authRequest(`/api/${model}/${id}`, data);
   },
 
 

@@ -123,6 +123,9 @@ MIDDLEWARE = [
     'console.core.middleware.AppendOrRemoveSlashMiddleware',
 ]
 
+# FIXME: Enable CORS for PDFs
+# https://stackoverflow.com/questions/28046422/django-cors-headers-not-work
+
 # ------------------------------------------------------------#
 # Livereload
 # https://github.com/tjwalch/django-livereload-server

@@ -4,9 +4,85 @@
  * Created: 5/2/2021
  * Updated: 6/10/2021
  */
- import { hasClass } from '../utils.js';
+import { hasClass } from '../utils.js';
+
+
+const formHelpers = {
+
+
+  toggleFields(event, key) {
+    /*
+     * Hide or show additional form fields.
+     */
+    event.preventDefault();
+    this.toggleElementClass(`${key}-fields`, 'd-none');
+    this.toggleElementClass(`${key}-fields-show`, 'd-none');
+    try {
+      this.toggleElementClass(`${key}-fields-hide`, 'd-none');
+    } catch (error) {
+      // No element to hide the form.
+    }
+  },
+
+
+};
+
+
+const initHelpers = {
+
+
+  enableTooltips() {
+    /*
+     * Enable all tooltips on a page.
+     */
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+    return tooltipList;
+  },
+
+
+};
+
+
+const navigationHelpers = {
+
+
+  openObject(model, modelSingular, data) {
+    /*
+     * Navigate a selected object detail page, saving its data in local storage.
+     * It is assumed that data has a field named as the singular modal name +
+     * an underscore + the literal 'id'. If no ID is provided, then navigate to
+     * a new page.
+     */
+    let id = 'new';
+    const objectId = data[`${modelSingular}_id`];
+    if (objectId) id = objectId;
+    localStorage.setItem(modelSingular, JSON.stringify(data));
+    window.location.href = `/${model}/${id}`;
+  },
+
+
+  viewObject(modelSingular) {
+    /*
+     * View an object's data from local storage when navigating to a detail page.
+     */
+    const data = JSON.parse(localStorage.getItem(modelSingular));
+    formDeserialize(document.forms[`${modelSingular}-form`], data)
+    console.log('DEV: Observation data:', data);
+  },
+
+
+};
+
 
 export const ui = {
+
+  ...formHelpers,
+  ...initHelpers,
+  ...navigationHelpers,
+
 
   hideSidebar() {
     /*
@@ -109,4 +185,4 @@ export const ui = {
   },
 
 
-}
+};

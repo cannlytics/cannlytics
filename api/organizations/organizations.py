@@ -32,7 +32,7 @@ from api.auth import auth #pylint: disable=import-error
 
 
 @api_view(['GET', 'POST'])
-def organizations(request, format=None, org_id=None):
+def organizations(request, format=None, organization_id=None):
     """Get, create, or update organizations.
     E.g.
         ```
@@ -57,10 +57,10 @@ def organizations(request, format=None, org_id=None):
     # Get organization(s).
     if request.method == 'GET':
 
-        # Get org_id parameter
-        if org_id:
-            print('Query organizations by ID:', org_id)
-            organization = get_document(f'{model_type}/{org_id}')
+        # Get organization_id parameter
+        if organization_id:
+            print('Query organizations by ID:', organization_id)
+            organization = get_document(f'{model_type}/{organization_id}')
             if not organization:
                 message = 'No organization exists with the given ID.'
                 return Response({'error': True, 'message': message}, status=404)
@@ -106,19 +106,19 @@ def organizations(request, format=None, org_id=None):
 
         # Update an organization with the posted data if there is an ID.
         data = loads(request.body.decode('utf-8'))
-        if org_id:
+        if organization_id:
 
             # Return an error if the organization already exists
             # and the user is not part of the organization's team.
-            doc = get_document(f'{model_type}/{org_id}')
+            doc = get_document(f'{model_type}/{organization_id}')
             if not doc:
                 message = 'No data exists for the given ID.'
                 return Response({'error': True, 'message': message}, status=400)
 
-            org_id = doc['uid']
+            organization_id = doc['uid']
             team_list = custom_claims.get('team', [])
             owner_list = custom_claims.get('owner', [])
-            if uid not in team_list and org_id not in owner_list:
+            if uid not in team_list and organization_id not in owner_list:
                 message = 'You do not currently belong to this organization. Request to join before continuing.'
                 return Response({'error': True, 'message': message}, status=400)
 
@@ -159,25 +159,25 @@ def organizations(request, format=None, org_id=None):
                 doc['licenses'] = licenses
 
         # Create organization if it doesn't exist
-        # All organizations have a unique `org_id`.
+        # All organizations have a unique `organization_id`.
         else:
             doc = {}
-            org_id = slugify(data['name'])
-            doc['uid'] = org_id
+            organization_id = slugify(data['name'])
+            doc['uid'] = organization_id
             doc['team'] = [uid]
             doc['owner'] = uid
 
         # Create or update the organization in Firestore.
         entry = {**data, **doc}
         print('Entry:', entry)
-        update_document(f'{model_type}/{org_id}', entry)
+        update_document(f'{model_type}/{organization_id}', entry)
 
         # TEST: On organization creation, the creating user get custom claims.
-        update_custom_claims(uid, claims={'owner': [org_id]})
+        update_custom_claims(uid, claims={'owner': [organization_id]})
 
         # TODO:  Owners can add other users to the team and
         # the receiving user then gets the claims.
-        # team: [org_id, ...]
+        # team: [organization_id, ...]
 
         # Create activity log.
         changes = [data]
@@ -194,7 +194,7 @@ def organizations(request, format=None, org_id=None):
 
     elif request.method == 'DELETE':
 
-        # TODO: Only user's with org_id in owner claim can delete the organization.
+        # TODO: Only user's with organization_id in owner claim can delete the organization.
 
         return Response({'error': 'not_implemented'}, content_type='application/json')
 
@@ -260,7 +260,7 @@ def confirm_join_organization():
     """Confirm a user's request to join an organization."""
     # new_team_member_uid # TODO: Get the ID of the user requesting
     # to join the organization.
-    # update_custom_claims(new_team_member_uid, claims={'owner': [org_id]})
+    # update_custom_claims(new_team_member_uid, claims={'owner': [organization_id]})
     return NotImplementedError
 
 
