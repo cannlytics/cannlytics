@@ -51,12 +51,12 @@ material = {
             {"key": "analyte_id", "label": "Analyte ID"},
             {"key": "name", "label": "Name"},
             {"key": "key", "label": "Key"},
-            {"key": "public", "label": "Public", "type": "bool"},
             {"key": "limit", "label": "Limit", "type": "number"},
             {"key": "lod", "label": "LOD", "type": "number"},
             {"key": "loq", "label": "LOQ", "type": "number"},
             {"key": "units", "label": "Units", "type": "text"},
             {"key": "formula", "label": "Formula", "type": "text"},
+            {"key": "public", "label": "Public", "type": "bool"},
         ],
         "placeholder": {
             "action": "Create an analyte",
@@ -75,10 +75,10 @@ material = {
         "fields": [
             {"key": "area_id", "label": "Area ID"},
             {"key": "name", "label": "Name"},
-            {"key": "active", "label": "Active", "type": "bool"},
             {"key": "area_type", "label": "Area Type"},
             {"key": "area_type_id", "label": "Area Type ID"},
             {"key": "external_id", "label": "External ID"},
+            {"key": "active", "label": "Active", "type": "bool"},
             {"key": "quarantine", "label": "Quarantine", "type": "bool"},
         ],
         "placeholder": {
@@ -128,8 +128,8 @@ material = {
         "fields": [
             {"key": "name", "label": "Name"},
             {"key": "data_path", "label": "Data path"},
-            {"key": "area_id", "label": "area_id"},
-            {"key": "area_name", "label": "area_name"},
+            {"key": "area_id", "label": "Area ID"},
+            {"key": "area_name", "label": "Area Name"},
             {"key": "calibrated_at", "label": "Calibrated At", "type": "datetime"},
             {"key": "calibrated_by", "label": "Calibrated By", "class": "form-sm"},
             {"key": "description", "label": "Description", "type": "textarea"},

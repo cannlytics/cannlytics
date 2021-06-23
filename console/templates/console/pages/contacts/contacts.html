@@ -11,8 +11,65 @@
 -->
 {% extends "console/console.html" %}
 {% block console_body %}
+{% if section %}
 
+  <!-- Detail page -->
+  <!-- FIXME: Pass model ID -->
+  {% include "console/pages/contacts/contact.html" with id="" %}
+
+{% else %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="fs-5 mb-0 lh-base">Contacts</h1>
+      <div>
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.settings.importData('contacts');"
+        >
+          Import
+        </button>
+        <button
+          class="btn btn-sm-light btn-md-light"
+          onclick="cannlytics.settings.exportData('contacts');"
+        >
+          Export
+        </button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="contacts">
+
+      <!-- Table -->
+      <div class="card my-3">
+        <div class="card-body">
+          <h2 class="h6 mb-3 text-dark">Contacts</h2>
+          <div class="table-responsive">
+
+            <!-- Placeholder if no records -->
+            {% if True %}
+              {% include "console/components/placeholders/placeholder.html" with
+                placeholder=contacts.placeholder
+                only
+              %}
+
+            <!-- Table -->
+            {% else %}
+              <div id="contacts-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
+            {% endif %}
+
+          </div>
+        </div>
+      </div><!-- End of the table -->
+
+    </div><!-- End of the body -->
+    
+
+  </main>
+
+  {% comment %} <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
     <!-- Optional: Dynamically render tabs -->
@@ -61,7 +118,7 @@
     <!-- Dynamic section -->
     <section>
       {% block section %}{% endblock %}
-    </section>
+    </section> {% endcomment %}
 
     <!-- Clients JavaScript -->
     {% comment %} {% block console_js %}
@@ -71,6 +128,7 @@
     {% endblock console_js %} {% endcomment %}
 
   </main>
+{% endif %}
 
 {% endblock %}
 </html>

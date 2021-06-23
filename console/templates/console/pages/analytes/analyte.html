@@ -4,7 +4,9 @@
   Analyte Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2020
-  Updated: 6/19/2021
+  Updated: 6/22/2021
+  FIXME:
+  - Pass IDs appropriately.
 -->
 {% load icon %}
 {% block console_css %}
@@ -22,153 +24,42 @@
       breadcrumbs=analytes.breadcrumbs
     %}
 
-    <!-- Body -->
-    <form class="analyte-form">
+    <!-- Title -->
+    {% include "console/components/forms/form_title.html" with
+      id=id
+      model='analytes'
+      model_singular='analyte'
+      description="Manage analyte details to prepare the analyte for analysis."
+      options=True
+      export=id
+    %}
 
-      <!-- Image -->
-      <div class="col col-md-5 mx-3 mb-3 order-md-2">
-        <img
-          src="{{ navbar.default_logo_url }}"
-          style="height:200px;"
-          class="pe-1"
-          id="userPhoto"
-        >
-        <button
-          class="btn btn-sm position-absolute text-dark"
-          onclick="cannlytics.settings.uploadAccountPhoto()"
-        >
-          {% icon "image" %}
-        </button>
-      </div>
+    <!-- Fields -->
+    <div class="mb-4 px-3">
 
-      <!-- Fields -->
-      <div class="col-md-6">
-        {% for item in fields %}        
-          <div class="row mb-3">
+      <!-- Form -->
+      <form id="analyte-form">
 
-            <!-- Field label -->
-            <label
-              for="input-{{ item.key }}"
-              class="col-sm-2 col-form-label col-form-label-sm"
-            >
-              {{ item.title }}
-            </label>
+        <!-- Dynamic fields -->
+        {% include "console/components/forms/dynamic_form.html" with
+          fields=analytes.fields
+        %}
 
-            <!-- Field input -->
-            <div class="col-sm-10">
-              {% if item.group %}
-                <div class="input-group input-group-sm">
-                  <div class="input-group-text">{{ item.group }}</div>
-                  <input
-                    type="{{ item.type }}"
-                    class="form-control form-control-sm"
-                    id="input-{{ item.key }}"
-                  >
-                </div>
-              {% else %}
-                <input
-                  type="{{ item.type }}"
-                  class="form-control form-control-sm"
-                  id="input-{{ item.key }}"
-                  spellcheck="false"
-                >
-              {% endif %}
-            </div>
+        <!-- Show additional fields -->
+        {% include "console/components/forms/additional_fields.html" %}
 
-          </div>
-        {% endfor %}
-      </div><!-- End of fields -->
+      </form>
 
-      <!-- TODO: Allow QA users to upload SOP -->
-
-      <!-- TODO: Apply additional user-defined fields-->
-      <!-- Extra Fields-->
-      {% comment %} <div id="extra-fields" class="d-none">
-        {% for item in analysis.fields %}
-          {% if item.secondary %}
-            <div class="row mb-3">
-
-              <!-- Field label -->
-              <label
-                for="input-{{ item.key }}"
-                class="col-sm-3 col-form-label col-form-label-sm"
-              >
-                {{ item.title }}
-              </label>
-
-              <!-- Field input -->
-              <div class="col-sm-9">
-                <input
-                  type="{{ item.type }}"
-                  class="form-control form-control-sm"
-                  id="input-{{ item.key }}"
-                  spellcheck="false"
-                  name="{{ item.key }}"
-                >
-              </div>
-
-            </div>
-          {% endif %}
-        {% endfor %}
-      </div> {% endcomment %}
-
-      <!-- Show advanced fields -->
-      <a
-        id="extra-fields-show"
-        class="nav-link text-secondary app-action d-inline-block"
-        onclick="toggleExtraFields();"
-      >
-        {% icon 'chevrons-down' hegiht="16px" width="16px" %} Show more
-      </a>
-      <a
-        id="extra-fields-hide"
-        class="nav-link text-secondary app-action d-inline-block d-none"
-        onclick="toggleExtraFields();"
-      >
-        {% icon 'chevrons-up' hegiht="16px" width="16px" %} Show less
-      </a>
-
-    </form>
-
-    <!-- TODO: User-defined Fields -->
-
-    <!-- Options -->
-    <div>
-      <button
-        type="button"
-        class="btn btn-primary btn-sm"
-        style="width:8rem;"
-        onclick="cannlytics.settings.saveAccount()"
-      >
-        Save
-      </button>
-      <button
-        type="button"
-        class="btn btn-sm btn-sm-light btn-md-light me-2"
-        style="width:8rem;"
-        onclick="cannlytics.settings.exportAccount()"
-      >
-        Export
-      </button>
-    </div><!-- End of options -->
-
-    <!-- Other options -->
-    <h2 class="h6 mt-5 mb-0">Other analysis options</h2>
-    <div class="list-group col-md-6 py-3">
-      {% for item in instruments.options %}   
-        <a
-          href="{{ item.url }}"
-          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-          aria-current="true"
-        >
-          {{ item.title }}
-          {% icon "chevron-right" height="18px" width="18px" %}
-        </a>
-      {% endfor %}
-    </div><!-- End of other options -->
-
-  <!-- TODO: Analytes table -->
-
+    </div><!-- End of fields -->
+    
+    <!-- Danger zone (delete) -->
+    {% if id %}
+      {% include "console/components/forms/delete_option.html" with
+        id=id
+        model="analytes"
+        model_singular="analyte"
+      %}
+    {% endif %}
 
   </main>
 
@@ -178,21 +69,14 @@
 {% block console_js %}
   <script>
 
-    // Initialize the UI.
-    // cannlytics.analyses.initializeAnalysis('{{ section }}');
-  
-    // Enable tooltips.
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
+    // Load the data into the user interface.
+    cannlytics.ui.viewObject('analyte');
 
-    // Toggle extra organization fields
-    function toggleExtraFields() {
-      cannlytics.ui.toggleElementClass('extra-fields', 'd-none');
-      cannlytics.ui.toggleElementClass('extra-fields-hide', 'd-none');
-      cannlytics.ui.toggleElementClass('extra-fields-show', 'd-none');
-    }
+    // Render any date pickers.
+    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+
+    // FIXME: Enable tooltips.
+    // cannlytics.ui.enableTooltips();
 
   </script>
 {% endblock console_js %}

@@ -1,41 +1,26 @@
 <!doctype html>
 <html>
 <!--
-  Analysis Page | Cannlytics Console
+  Contact Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
-  Created: 12/17/2020
+  Created: 6/22/2021
   Updated: 6/22/2021
-  TODO:
-    - Allow the user to reset, save (update and create), and delete.
-    - Render additional fields, ability to add an additional field.
-    - Load existing analytes.
-    - Use a table instead of a list to display analytes.
-  FIXME:
-    - Pass IDs appropriately.
 -->
-{% comment %} {% extends "console/console.html" %} {% endcomment %}
 {% load icon %}
-{% block console_css %}
-
-  <!-- Bootstrap Datepicker -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
-
-{% endblock console_css %}
 {% block console_body %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
     {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=analyses.breadcrumbs
+      breadcrumbs=contacts.breadcrumbs
     %}
 
     <!-- Title -->
     {% include "console/components/forms/form_title.html" with
       id=id
-      model='analyses'
-      model_singular='analysis'
-      description="Manage analysis and its analytes."
+      model='contacts'
+      model_singular='contact'
+      description="Manage contacts, organizations that you work with."
       options=True
       export=id
     %}
@@ -44,11 +29,11 @@
     <div class="mb-4 px-3">
 
       <!-- Form -->
-      <form id="analysis-form">
+      <form id="contact-form">
 
         <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
-          fields=analyses.fields
+          fields=contacts.fields
         %}
 
         <!-- Show additional fields -->
@@ -65,13 +50,12 @@
     {% if id %}
       {% include "console/components/forms/delete_option.html" with
         id=id
-        model="analyses"
-        model_singular="analysis"
+        model="contacts"
+        model_singular="contact"
       %}
-    {% endif %}    
+    {% endif %}
 
   </main>
-
 {% endblock console_body %}
 
 <!-- JavaScript -->
@@ -79,7 +63,7 @@
   <script>
 
     // Load the data into the user interface.
-    cannlytics.ui.viewObject('analysis');
+    cannlytics.ui.viewObject('contact');
 
     // Render any date pickers.
     $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
