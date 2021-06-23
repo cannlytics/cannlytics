@@ -4,16 +4,37 @@
   Projects | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 4/24/2021
-  Updated: 6/8/2021
+  Updated: 6/22/2021
 -->
 {% extends "console/console.html" %}
 {% load static icon %}
 {% block console_body %}
+{% if section %}
+
+  <!-- Detail page -->
+  <!-- FIXME: Pass model ID -->
+  {% include "console/pages/projects/project.html" with id="" %}
+
+{% else %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
       <h1 class="fs-5 mb-0 lh-base">Projects</h1>
+      <div>
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.settings.importData('projects');"
+        >
+          Import
+        </button>
+        <button
+          class="btn btn-sm-light btn-md-light"
+          onclick="cannlytics.settings.exportData('projects');"
+        >
+          Export
+        </button>
+      </div>
     </div>
 
     <!-- Body -->
@@ -33,7 +54,7 @@
                 image='console/images/illustrations/outline/lab_books.svg'
                 message="No current projects, you're all caught up."
                 title='No Current Projects'
-                url='/projects/project?new=true'
+                url='/projects/new'
                 only
               %}
             </div>
@@ -55,6 +76,53 @@
 
     </div>
   </main>
+{% endif %}
 {% endblock console_body %}
-{% block console_js %}{% endblock console_js %}
+
+<!-- JavaScript -->
+{% block console_js %}
+{% if not section %}
+  <script>
+
+    // Get data from the API.
+    cannlytics.api.get('projects', null, { params: { limit: 100 } })
+      .then(function(response) {
+
+        var data = response.data;
+        console.log('DEV: Render data:', data);
+        if (!data) return;
+
+        // Show the table.
+        document.getElementById('data-placeholder').classList.add('d-none');
+        document.getElementById('data-table').classList.remove('d-none');
+
+        // Define the columns for the table.
+        const columnDefs = [
+          { field: 'project_id', headerName: 'Project ID', sortable: true, filter: true },
+        ];
+
+        // Specify the table options.
+        const gridOptions = {
+          columnDefs: columnDefs,
+          pagination: true,
+          paginationAutoPageSize: true,
+          suppressRowClickSelection: false,
+          onRowClicked: event => cannlytics.ui.openObject(
+            'projects',
+            'project',
+            event,
+          ),
+          onGridReady: event => cannlytics.theme.toggleTheme(cannlytics.theme.getTheme()),
+        };
+
+        // Render the table
+        const eGridDiv = document.querySelector('projects-table');
+        new agGrid.Grid(eGridDiv, gridOptions);
+        gridOptions.api.setRowData(data);
+
+      });
+
+  </script>
+{% endif %}
+{% endblock console_js %}
 </html>

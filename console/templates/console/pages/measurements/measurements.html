@@ -4,16 +4,37 @@
   Measurements Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2021
-  Updated: 6/19/2021
+  Updated: 6/22/2021
 -->
 {% extends "console/console.html" %}
 {% load static icon %}
 {% block console_body %}
+{% if section %}
+
+  <!-- Detail page -->
+  <!-- FIXME: Pass model ID -->
+  {% include "console/pages/measurements/measurement.html" with id="" %}
+
+{% else %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
       <h1 class="fs-5 mb-0 lh-base">Measurements</h1>
+      <div>
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.settings.importData('measurements');"
+        >
+          Import
+        </button>
+        <button
+          class="btn btn-sm-light btn-md-light"
+          onclick="cannlytics.settings.exportData('measurements');"
+        >
+          Export
+        </button>
+      </div>
     </div>
 
     <!-- Body -->
@@ -33,7 +54,7 @@
                 image='console/images/illustrations/outline/lab_books.svg'
                 message="No current measurements, you're all caught up."
                 title='No Current Measurements'
-                url='/measurements/measurement?new=true'
+                url='/measurements/new'
                 only
               %}
             </div>
@@ -55,6 +76,8 @@
 
     </div>
   </main>
+{% endif %}
+
 {% endblock console_body %}
-{% block console_js %}{% endblock console_js %}
+
 </html>

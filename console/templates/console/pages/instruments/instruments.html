@@ -1,20 +1,43 @@
 <!doctype html>
 <html>
-<!-- Instruments -->
-<!-- URL: analysis/instruments -->
-<!-- Created 1/13/2021 -->
+<!--
+  Instruments | Cannlytics Console
+  Created: 1/13/2021
+  Updated: 6/22/2021
+-->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block console_body %}
+{% if section %}
+
+  <!-- Detail page -->
+  <!-- FIXME: Pass model ID -->
+  {% include "console/pages/instruments/instrument.html" with id="" %}
+
+{% else %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
   
     <!-- Header -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
       <h1 class="fs-5 mb-0 lh-base">Instruments</h1>
+      <div>
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.settings.importData('instruments');"
+        >
+          Import
+        </button>
+        <button
+          class="btn btn-sm-light btn-md-light"
+          onclick="cannlytics.settings.exportData('instruments');"
+        >
+          Export
+        </button>
+      </div>
     </div>
 
     <!-- Body -->
-    <div class="analysis">
+    <div class="instruments">
 
       <!-- Table -->
       <div class="card my-3">
@@ -41,5 +64,6 @@
     </div><!-- End of the body -->
 
   </main>
+{% endif %}
 {% endblock console_body %}
 </html>

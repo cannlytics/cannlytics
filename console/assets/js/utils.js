@@ -201,8 +201,17 @@ export function showNotification(title, message, options) {
 }
 
 /*---------------------------------------------------------------------
- UI Helpers
+ Text Helpers
  --------------------------------------------------------------------*/
+
+export function capitalize(string) {
+  /*
+   * Capitalize the first letter of a given string.
+   * Reference: https://www.geeksforgeeks.org/how-to-make-first-letter-of-a-string-uppercase-in-javascript/
+   */
+  return string.replace(/^./, string[0].toUpperCase());
+}
+
 
 export function slugify(text) {
   /*

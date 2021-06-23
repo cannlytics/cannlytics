@@ -6,18 +6,23 @@
 {% block title %}Logged Out | Cannlytics{% endblock %}
 {% block login_form %}
   <div class="text-center">
-    <p class="h6 font-weight-light serif text-center mt-5 mb-4">
-      You have been logged out. Navigating home in
-      <span id="navigation-countdown">10</span>...
-    </p>
+
+    <!-- Message -->
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Signed Out</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">
+    You have been logged out.<br>Navigating home in <span id="navigation-countdown">10</span>...
+    </h2>
+
+    <!-- Option -->
     <a
-      class="btn bg-gradient-green text-white"
+      class="btn btn-sm bg-gradient-green text-white"
       style="width: 191px;"
       type="button"
       href="/account/sign-in"
     >
       Sign In
     </a>
+
   </div>
 
   <!-- Redirect to login JavaScript -->

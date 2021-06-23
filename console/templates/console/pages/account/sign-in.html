@@ -31,18 +31,22 @@
     }
   </style>
 
+  <!-- Message -->
+  <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Account Sign In</h1>
+  <h2 class="fs-6 lh-base text-secondary mb-3">Sign into your user account.</h2>
+
   <!-- Email -->
-  <div class="mt-5 mb-3 row">
+  <div class="mb-3 row">
     <label
       for="login-email"
-      class="col-sm-2 col-form-label pe-2 fs-6"
+      class="col-sm-2 col-form-label col-form-label-sm pe-2"
     >
       Email
     </label>
     <div class="col-sm-10">
       <input
         type="email"
-        class="form-control"
+        class="form-control form-control-sm"
         id="login-email"
         required
         autofocus
@@ -55,14 +59,14 @@
   <div class="mb-3 row">
     <label
       for="login-password"
-      class="col-sm-2 col-form-label pe-2 fs-6"
+      class="col-sm-2 col-form-label col-form-label-sm pe-2"
     >
       Password
     </label>
     <div class="col-sm-10">
       <input
         type="password"
-        class="form-control"
+        class="form-control form-control-sm"
         id="login-password"
         required
       >
@@ -70,17 +74,17 @@
   </div>
 
   <!-- Reset password or sign up -->
-  <div class="d-flex justify-content-end w-100">
+  <div class="d-flex justify-content-end w-100 mt-3">
     <button
       id="sign-in-button"
-      class="ms-1 btn bg-gradient-green text-white"
+      class="ms-1 btn btn-sm bg-gradient-green text-white"
       style="max-width:250px;"
       type="button"
       onclick="cannlytics.auth.signIn(event)"
     >
       Sign In
     </button>
-    <button id="sign-in-loading-button" class="ms-1 btn bg-gradient-green text-white d-none" style="width:77px;" type="button" disabled>
+    <button id="sign-in-loading-button" class="ms-1 btn btn-sm bg-gradient-green text-white d-none" style="width:77px;" type="button" disabled>
       <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
     </button>
   </div>
@@ -132,6 +136,7 @@
     </div>
   </div>
 
+  <!-- JavaScript to add actions to inputs -->
   <script>
     var node = document.getElementById('login-password');
     node.addEventListener('keyup', function(event) {

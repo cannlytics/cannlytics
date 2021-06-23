@@ -11,11 +11,32 @@
 {% extends "console/console.html" %}
 {% load icon %}
 {% block console_body %}
+{% if section %}
+
+  <!-- Detail page -->
+  <!-- FIXME: Pass model ID -->
+  {% include "console/pages/analyses/analysis.html" with id="" %}
+
+{% else %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
       <h1 class="fs-5 mb-0 lh-base">Analyses</h1>
+      <div>
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.settings.importData('analyses');"
+        >
+          Import
+        </button>
+        <button
+          class="btn btn-sm-light btn-md-light"
+          onclick="cannlytics.settings.exportData('analyses');"
+        >
+          Export
+        </button>
+      </div>
     </div>
 
     <!-- Body -->
@@ -34,7 +55,7 @@
                 only
               %}
 
-            <!-- Client records table -->
+            <!-- AG-Grid Table -->
             {% else %}
               <div id="analyses-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
             {% endif %}
@@ -44,9 +65,10 @@
       </div><!-- End of the table -->
 
     </div><!-- End of the body -->
-    
 
   </main>
+{% endif %}
+
 {% endblock console_body %}
 
 <!-- Analyses JavaScript -->

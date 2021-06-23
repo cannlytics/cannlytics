@@ -8,6 +8,7 @@ beautifulsoup4==4.9.3
 coreapi
 dj_static==0.0.6
 django==3.2
+# django-cors-headers==3.7.0
 django-environ==0.4.5
 django-feather==0.2.6
 django-livereload-server

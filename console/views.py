@@ -2,14 +2,14 @@
 Console Views | Cannlytics
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 12/18/2020
-Updated: 6/21/2021
+Updated: 6/23/2021
 """
 
 # External imports
+from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.views.generic.base import TemplateView
-from django.http import HttpResponse
 
 # Internal imports
 from api.auth import auth
@@ -26,7 +26,6 @@ from cannlytics.firebase import (
 )
 from console.state import layout
 from console.utils import (
-    # get_model_context,
     get_page_data,
     get_page_context,
 )
@@ -78,77 +77,36 @@ class ConsoleView(TemplateView):
         if not context['screen']:
             context['screen'] = 'dashboard'
             context['dashboard'] = layout['dashboard']
+        elif context['screen'] == 'organizations':
+            context['organization_context'] = context['organizations']
         context = get_page_context(self.kwargs, context)
-        context = get_page_data(self.kwargs, context)
-
-        # Optional: Get model fields?
-        # context = get_model_context(context)
-
-        # Get user and organization data.
-        # Optional: Test if get is faster
-        user = auth.verify_session(self.request)
-        if user:
-            uid = user['uid']
-            query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
-            organizations = get_collection('organizations', filters=[query])
-            user_data = get_document(f'users/{uid}')
-            if context['screen'] == 'organizations':
-                context['organization_context'] = context['organizations']
-            context['organizations'] = organizations
-            context['user'] = user_data
-        # else:
-        #     context['organizations'] = []
-        #     context['user'] = {}
+        context = get_page_data(self.kwargs, context)        
+        context['organizations'] = self.request.session['organizations']
+        context['user'] = self.request.session['user']
+        # context = get_model_context(context) # Optional: Get model fields?
         return context
 
-    # Optional: Test if get is faster.
-    # def get(self, request, *args, **kwargs):
-    #     """Get data before rendering context. Any existing user data is
-    #     retrieved. If there is no user data in the session, the the
-    #     request is verified. If the request is unauthenticated, then
-    #     the user is redirected to the sign in page. If the user is
-    #     authenticated, then the user's data and organization data is
-    #     added to the session."""
-    #     user = request.session.get('user', {})
-    #     print('User in get session:', user)
-    #     return super().get(request, *args, **kwargs)
-        # try:
-        #     user = auth.verify_session(request)
-        # except:
-        #     pass
-
-        # print('User in session:', user)
-        # try:
-        #     if not user:
-        #         # FIXME:
-        #         # user = auth.verify_session(request)
-        #         # user = auth.authenticate_request(request)
-        #         print('User verified from request:', user)
-        #         if user:
-        #             request.session['user'] = user
-        #         else:
-        #             print('User not detected from request!')
-        #             request.session['organizations'] = []
-        #             request.session['user'] = {}
-                    # return HttpResponseRedirect('/account/sign-in')
-        # try:
-        #     if user:
-        #         uid = user['uid']
-        #         query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
-        #         organizations = get_collection('organizations', filters=[query])
-        #         request.session['organizations'] = organizations
-        #     else:
-        #         request.session['organizations'] = []
-        #         request.session['user'] = {}
-        # except:
-        #     print('Error adding user + organization data to the session.')
-        #     pass
-            # Optional: Redirect if no user.
-            # return HttpResponseRedirect('/account/sign-in')
-        # except:
-        #     pass
-        # request.session['user'] = get_document(f'users/{uid}')
-        # return super().get(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        """Get data before rendering context. Any existing user data is
+        retrieved. If there is no user data in the session, the the
+        request is verified. If the request is unauthenticated, then
+        the user is redirected to the sign in page. If the user is
+        authenticated, then the user's data and organization data is
+        added to the session."""
+        # Optional: Get user / organization from session if present?
+        # If so, update session if user / organization fields change.
+        user = auth.verify_session(request)
+        if not user:
+            request.session['organizations'] = []
+            request.session['user'] = {}
+            return HttpResponseRedirect('/account/sign-in')
+        uid = user['uid']
+        query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
+        organizations = get_collection('organizations', filters=[query])
+        user_data = get_document(f'users/{uid}')
+        request.session['organizations'] = organizations
+        request.session['user'] = user_data
+        return super().get(request, *args, **kwargs)
 
 
 #-----------------------------------------------------------------------
@@ -168,7 +126,9 @@ class LoginView(TemplateView):
 
 
 def login(request, *args, **argv): #pylint: disable=unused-argument
-    """Functional view to create a user session."""
+    """Functional view to create a user session.
+    FIXME: Ensure that the request succeeds on the client!
+    """
     try:
         authorization = request.headers.get('Authorization', '')
         token = authorization.split(' ').pop()
@@ -176,9 +136,7 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
             return HttpResponse(status=401)
         initialize_firebase()
         session_cookie = create_session_cookie(token)
-        # FIXME: Return proper json
-        # response = HttpResponse(status=204)
-        response = JsonResponse('{"success": true}', status=204)
+        response = JsonResponse({"success": True}, status=204)
         response.set_cookie(
             key='__session',
             value=session_cookie,
@@ -186,7 +144,6 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
             # httponly=True, # TODO: Explore httponly option
             # secure=True, # TODO: Explore secure option
         )
-        # Optional: Test impact of logging on speed.
         claims = verify_token(token)
         uid = claims['uid']
         create_log(
@@ -203,10 +160,11 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
 
 
 def logout(request, *args, **argv): #pylint: disable=unused-argument
-    """Functional view to remove a user session."""
+    """Functional view to remove a user session.
+    FIXME: Ensure that the request succeeds on the client!
+    """
     try:
         session_cookie = request.COOKIES.get('__session')
-        # Optional: Test impact of logging on speed.
         claims = verify_session_cookie(session_cookie)
         uid = claims['uid']
         create_log(
@@ -242,6 +200,10 @@ def handler500(request, *args, **argv): #pylint: disable=unused-argument
     template = f'{BASE}/pages/misc/errors/{status_code}.html'
     return render(request, template, {}, status=status_code)
 
+
+#-----------------------------------------------------------------------
+# Helper views
+#-----------------------------------------------------------------------
 
 def no_content(request, *args, **argv): #pylint: disable=unused-argument
     """Return an empty response when needed, such as for a ping."""

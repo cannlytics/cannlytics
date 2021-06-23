@@ -553,6 +553,7 @@ export const traceability = {
     console.log('Observation data:', data);
   },
 
+
   deleteLicenseValidation(orgId, licenseNumber) {
     /*
      * Validate that a reason is present before deleting a license.

@@ -1,18 +1,75 @@
 <!doctype html>
 <html>
-  <!-- Transfers -->
-  <!-- Created: 5/4/2021 -->
-  <!-- Updated: 5/4/2021 -->
+<!--
+  Transfers Page | Cannlytics
+  Created: 5/4/2021
+  Updated: 6/23/2021
+-->
 {% extends "console/console.html" %}
 {% load static %}
 {% block console_body %}
+{% if section %}
 
+  <!-- Detail page -->
+  <!-- FIXME: Pass model ID -->
+  {% include "console/pages/transfers/transfer.html" with id="" %}
+
+{% else %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    <div class="col pt-3 pb-2 mb-3">
-      <h1 class="fs-5 mb-0 lh-base mb-3">Transfers</h1>
-      <ul class="nav nav-tabs">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="fs-5 mb-0 lh-base">Transfers</h1>
+      <div>
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.settings.importData('transfers');"
+        >
+          Import
+        </button>
+        <button
+          class="btn btn-sm-light btn-md-light"
+          onclick="cannlytics.settings.exportData('transfers');"
+        >
+          Export
+        </button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="card my-3">
+      <div class="card-body">
+
+        <!-- Table -->
+        <div class="my-3 px-3">
+          <h2 class="h6 mb-3 text-dark">Transfers</h2>
+          <div class="table-responsive">
+
+            <!-- Placeholder if no data -->
+            <div id="data-placeholder">
+              {% include "console/components/placeholders/placeholder.html" with
+                placeholder=transfers.placeholder
+                only
+              %}
+            </div>
+
+            <!-- AG Grid Table -->
+            <div id="data-table" class="d-none">
+              <div
+                id="projects-table"
+                class="ag-theme-alpine-dark"
+                style="height: 326px; width:100%;"
+              ></div>
+            </div>
+
+          </div>
+        </div><!-- End of the table -->
+      
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    {% comment %} <ul class="nav nav-tabs">
       {% for item in logistics.tabs %}
         <li class="nav-item">
           <a
@@ -24,10 +81,9 @@
           </a>
         </li>
       {% endfor %}
-      </ul>
-    </div>
+    </ul> {% endcomment %}
 
-    <!-- Dynamic section -->
+    {% comment %} <!-- Dynamic section -->
     <section>
       {% block section %}{% endblock %}
     </section>
@@ -57,16 +113,11 @@
         </div>
       </div><!-- End of the table -->
 
-    </div><!-- End of the body -->
-
-    <!-- Logistics JavaScript -->
-    {% comment %} {% block console_js %}
-      <script>
-        cannlytics.logistics.initialize();
-      </script>
-    {% endblock console_js %} {% endcomment %}
+    </div><!-- End of the body --> {% endcomment %}
 
   </main>
+{% endif %}
 
 {% endblock %}
+
 </html>

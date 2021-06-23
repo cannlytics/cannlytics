@@ -4,7 +4,7 @@
   Inventory Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 12/18/2020
-  Updated: 5/5/2021
+  Updated: 6/22/2021
 -->
 <!-- Fields:
 
@@ -19,9 +19,62 @@
 {% extends "console/console.html" %}
 {% block console_body %}
 
+{% if section %}
+
+  <!-- Detail page -->
+  <!-- FIXME: Pass model ID -->
+  {% include "console/pages/inventory/item.html" with id="" %}
+
+{% else %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="fs-5 mb-0 lh-base">Inventory</h1>
+      <div>
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.settings.importData('inventory');"
+        >
+          Import
+        </button>
+        <button
+          class="btn btn-sm-light btn-md-light"
+          onclick="cannlytics.settings.exportData('inventory');"
+        >
+          Export
+        </button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="inventory">
+
+      <!-- Table -->
+      <div class="card my-3">
+        <div class="card-body">
+          <h2 class="h6 mb-3 text-dark">Inventory</h2>
+          <div class="table-responsive">
+
+            <!-- Placeholder if no records -->
+            {% if True %}
+              {% include "console/components/placeholders/placeholder.html" with
+                placeholder=inventory.placeholder
+                only
+              %}
+
+            <!-- AG-Grid Table -->
+            {% else %}
+              <div id="inventory-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
+            {% endif %}
+
+          </div>
+        </div>
+      </div><!-- End of the table -->
+
+    </div><!-- End of the body -->
+
+    {% comment %} <!-- Header -->
     <!-- Optional: Dynamically render tabs -->
     <div class="col pt-3 pb-2 mb-3">
       <h1 class="fs-5 mb-0 lh-base mb-3">Inventory</h1>
@@ -68,9 +121,10 @@
     <!-- Dynamic section -->
     <section>
       {% block section %}{% endblock %}
-    </section>
+    </section> {% endcomment %}
 
   </main>
+{% endif %}
 
 {% endblock console_body %}
 

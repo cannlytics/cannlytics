@@ -1,7 +1,7 @@
 /**
- * firebase.js | Cannlytics Website
+ * Firebase JavaScript | Cannlytics Console
  * Created: 12/22/2020
- * Updated: 5/9/2021
+ * Updated: 6/23/2021
  */
 
 // Initialize Firebase
@@ -28,7 +28,7 @@ const GoogleAuthProvider = firebase.auth.GoogleAuthProvider;
 
 
 /*
- * Auth interface
+ * Authentication tools
  */
 
 
@@ -87,32 +87,6 @@ const getUserToken = (refresh=false) => new Promise((resolve, reject) => {
     });
   }
 });
-
-
-function signOut() {
-  /*
-   * Sign a user out of Firebase and clear the session.
-   */
-  try {
-    firebase.auth().currentUser.getIdToken().then((idToken) => {
-      const headers = new Headers({
-        'Content-Type': 'text/plain',
-        'Authorization': `Bearer ${idToken}`,
-      });
-      fetch('/logout', { headers }).then(() => {
-        const baseURL = window.location.origin;
-        firebase.auth().signOut().then(() => {
-          document.location.href = `${baseURL}/account/sign-out`;
-        }).catch((error) => {
-          document.location.href = `${baseURL}/account/sign-out`;
-        }); 
-      });
-    })
-  } catch(error) {
-    const baseURL = window.location.origin;
-    document.location.href = `${baseURL}/account/sign-out`;
-  }
-}
 
 
 /*
@@ -186,7 +160,7 @@ const updateDocument = (path, data) => new Promise((resolve) => {
 
 
 /*
- * Storage interface
+ * Storage tools
  */
 
 
@@ -215,7 +189,6 @@ export {
   GoogleAuthProvider,
   changePhotoURL,
   getUserToken,
-  signOut,
   getDocument,
   updateDocument,
   getCollection,

@@ -109,4 +109,21 @@ export const projects = {
   },
 
 
+  importProjects() {
+    /*
+     * Import a data file (.csv or .xlsx) of project data.
+     */
+    // TODO:
+  },
+
+
+
+  exportProjects() {
+    /*
+     * Import a data file (.csv or .xlsx) of project data.
+     */
+    // TODO:
+  },
+
+
 };

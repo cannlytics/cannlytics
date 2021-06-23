@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<!--
+  Contact Page | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 6/22/2021
+  Updated: 6/22/2021
+-->
+{% load icon %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header -->
+    {% include "console/components/links/breadcrumbs_dynamic.html" with
+      breadcrumbs=contacts.breadcrumbs
+    %}
+
+    <!-- Title -->
+    {% include "console/components/forms/form_title.html" with
+      id=id
+      model='contacts'
+      model_singular='contact'
+      description="Manage contacts, organizations that you work with."
+      options=True
+      export=id
+    %}
+
+    <!-- Fields -->
+    <div class="mb-4 px-3">
+
+      <!-- Form -->
+      <form id="contact-form">
+
+        <!-- Dynamic fields -->
+        {% include "console/components/forms/dynamic_form.html" with
+          fields=contacts.fields
+        %}
+
+        <!-- Show additional fields -->
+        {% include "console/components/forms/additional_fields.html" %}
+
+      </form>
+
+    </div><!-- End of fields -->
+
+    <!-- TODO: Try to implement add analytes with AG-Grid table -->
+    
+
+    <!-- Danger zone (delete) -->
+    {% if id %}
+      {% include "console/components/forms/delete_option.html" with
+        id=id
+        model="contacts"
+        model_singular="contact"
+      %}
+    {% endif %}
+
+  </main>
+{% endblock console_body %}
+
+<!-- JavaScript -->
+{% block console_js %}
+  <script>
+
+    // Load the data into the user interface.
+    cannlytics.ui.viewObject('contact');
+
+    // Render any date pickers.
+    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+
+    // FIXME: Enable tooltips.
+    // cannlytics.ui.enableTooltips();
+
+  </script>
+{% endblock console_js %}
+
+</html>

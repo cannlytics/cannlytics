@@ -4,7 +4,7 @@ State Variables | Cannlytics Console
 Author: Keegan Skeate
 Company: Cannlytics
 Created: 10/15/2020
-Updated: 6/9/2021
+Updated: 6/22/2021
 
 Relatively static state variables for extra context on each page/screen.
 The idea is to separate the material from the templates,
@@ -12,58 +12,128 @@ with the hope of better-maintained code.
 
 Optional: Turn into models and save in database.
 """
+# pylint:disable=line-too-long
 
+# Page-specific supplementary data.
 data = {}
-
+collections = {}
 docs = {}
 
+# Page-specific context.
 material = {
     "analyses": {
-        "placeholder": {
-            "action": "Create an analysis",
-            "height": "200px",
-            "image": "console/images/illustrations/outline/lab_analyst_prep.svg",
-            "title": "Create your first analysis",
-            "message": "Create a scientific analysis, a set of analytes or tests to perform for an organization, including internal analyses for your organizations.",
-            "url": "./analyses/analysis?new=true",
-        },
-    },
-    "analysis": {
         "breadcrumbs": [
             {"title": "Analyses", "url": "/analyses"},
             {"title": "Analysis", "active": True},
         ],
-        "options": [],
+        "fields": [
+            {"key": "analysis_id", "label": "Analysis ID"},
+            {"key": "name", "label": "Name"},
+            {"key": "key", "label": "Key"},
+            {"key": "price", "label": "Price", "type": "text"}, # Optional: currency
+            {"key": "public", "label": "Public", "type": "bool"},
+        ],
+        "placeholder": {
+            "action": "Create an analysis",
+            "height": "200px",
+            "image": "console/images/illustrations/outline/lab_microbiologist.svg",
+            "title": "Create your first analysis",
+            "message": "Create a scientific analysis, a set of analytes or tests to perform for an organization, including internal analyses for your organizations.",
+            "url": "./analyses/new",
+        },
     },
     "analytes": {
+        "breadcrumbs": [
+            {"title": "Analytes", "url": "/analytes"},
+            {"title": "Analyte", "active": True},
+        ],
+        "fields": [
+            {"key": "analyte_id", "label": "Analyte ID"},
+            {"key": "name", "label": "Name"},
+            {"key": "key", "label": "Key"},
+            {"key": "limit", "label": "Limit", "type": "number", "class":"field-sm"},
+            {"key": "lod", "label": "LOD", "type": "number", "class":"field-sm"},
+            {"key": "loq", "label": "LOQ", "type": "number", "class":"field-sm"},
+            {"key": "units", "label": "Units", "type": "text", "class":"field-sm"},
+            {"key": "formula", "label": "Calculation Formula", "type": "text"},
+            {"key": "public", "label": "Public", "type": "bool"},
+        ],
         "placeholder": {
             "action": "Create an analyte",
             "height": "200px",
             "image": "console/images/icons/two-tone/two_tone_atom.svg",
             "title": "Create your first analyte",
             "message": "Add analytes for analyses, a set of analytes constitutes an analysis.",
-            "url": "./analytes/analyte?new=true",
+            "url": "./analytes/new",
         },
     },
     "areas": {
+        "breadcrumbs": [
+            {"title": "Areas", "url": "/areas"},
+            {"title": "Area", "active": True},
+        ],
+        "fields": [
+            {"key": "area_id", "label": "Area ID"},
+            {"key": "name", "label": "Name"},
+            {"key": "area_type", "label": "Area Type"},
+            {"key": "area_type_id", "label": "Area Type ID"},
+            {"key": "external_id", "label": "External ID"},
+            {"key": "active", "label": "Active", "type": "bool"},
+            {"key": "quarantine", "label": "Quarantine", "type": "bool"},
+        ],
         "placeholder": {
             "action": "Create an area",
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_books.svg",
             "title": "Create your first area",
             "message": "Organize your company and facilities into logical areas so you can easily manage the location of your physical items.",
-            "url": "./areas/area?new=true",
+            "url": "./areas/new",
+        },
+    },
+    "contacts": {
+        "breadcrumbs": [
+            {"title": "Contacts", "url": "/contacts"},
+            {"title": "Contacts", "active": True},
+        ],
+        "fields": [
+            {"key": "organization_id", "label": "Organization ID"},
+            {"key": "organization", "label": "Organization"},
+            {"key": "address", "label": "Address"},
+            {"key": "street", "label": "Street"},
+            {"key": "city", "label": "City"},
+            {"key": "county", "label": "County"},
+            {"key": "state", "label": "State", "class": "form-sm"},
+            {"key": "zip_code", "label": "Zip"},
+            {"key": "latitude", "label": "Latitude", "type": "number", "class": "form-sm"},
+            {"key": "longitude", "label": "Longitude", "type": "number", "class": "form-sm"},
+            {"key": "email", "label": "Email", "type": "email"},
+            {"key": "Phone", "label": "Phone Number", "type": "tel"},
+            {"key": "website", "label": "Website"},
+            # {"key": "linkedin", "label": "LinkedIn"},
+        ],
+        "placeholder": {
+            "action": "Add a contact",
+            "height": "200px",
+            "image": "console/images/illustrations/chemistry_scientist.svg",
+            "title": "Add your first contact",
+            "message": "Add a contact to begin providing analyses for other organizations.",
+            "url": "./contacts/new",
         },
     },
     "instruments": {
         "breadcrumbs": [
-            {"title": "Analysis", "url": "/analysis"},
-            {"title": "Instruments", "active": True},
+            {"title": "Instruments", "url": "/instruments"},
+            {"title": "Instrument", "active": True},
         ],
         "fields": [
-            {"type": "text", "key": "name", "title": "Name"},
-            {"type": "text", "key": "analyes", "title": "Analyses"},
-            {"type": "text", "key": "data_path", "title": "Data path"},
+            {"key": "name", "label": "Name"},
+            {"key": "data_path", "label": "Data path"},
+            {"key": "area_id", "label": "Area ID"},
+            {"key": "area_name", "label": "Area Name"},
+            {"key": "calibrated_at", "label": "Calibrated At", "type": "datetime"},
+            {"key": "calibrated_by", "label": "Calibrated By", "class": "field-sm"},
+            {"key": "description", "label": "Description", "type": "textarea"},
+            {"key": "notes", "label": "Notes", "type": "textarea"},
         ],
         "options": [],
         "placeholder": {
@@ -72,17 +142,83 @@ material = {
             "image": "console/images/illustrations/outline/lab.svg",
             "title": "Connect your first instrument",
             "message": "Connect your scientific instruments to ease your data collection.",
-            "url": "./instruments/instrument?new=true",
+            "url": "./instruments/new",
         },
     },
     "inventory": {
+        "breadcrumbs": [
+            {"title": "Inventory", "url": "/inventory"},
+            {"title": "Item", "active": True},
+        ],
+        "fields": [
+            {"key": "name", "label": "Name"},
+            {"key": "item_type", "label": "Item Type", "type": "text"},
+            {"key": "quantity", "label": "Quantity", "type": "text"},
+            {"key": "quantity_type", "label": "Quantity Type", "type": "text"},
+            {"key": "admin_method", "label": "Admin Method", "type": ""},
+            {"key": "approved", "label": "Approved", "type": ""},
+            {"key": "approved_at", "label": "Approved At", "type": "datetime"},
+            {"key": "moved_at", "label": "Moved At", "type": "datetime"},
+            {"key": "area_id", "label": "Area ID", "type": ""},
+            {"key": "area_name", "label": "Area Name", "type": ""},
+            {"key": "category_name", "label": "Category Name", "type": ""},
+            {"key": "category_type", "label": "Category Type", "type": ""},
+            {"key": "strain_name", "label": "Strain Name"},
+            {"key": "status", "label": "Status", "type": ""},
+            {"key": "description", "label": "Description", "type": "textarea"},
+            {"key": "dose", "label": "Dose", "type": "number", "class": "field-sm"},
+            {"key": "dose_number", "label": "Dose Number", "type": "number", "class": "field-sm"},
+            {"key": "dose_units", "label": "Dose Units", "type": "text", "class": "field-sm"},
+            {"key": "serving_size", "label": "Serving Size", "type": "number", "class": "field-sm"},
+            {"key": "supply_duration_days", "label": "Supplay Duration in Days", "type": "number", "class": "field-sm"},
+            {"key": "units", "label": "Units", "class": "field-sm"},
+            {"key": "volume", "label": "Volume", "type": "number", "class": "field-sm"},
+            {"key": "volume_units", "label": "Volume Units", "class": "field-sm"},
+            {"key": "weight", "label": "Weight", "type": "number", "class": "field-sm"},
+            {"key": "weight_units", "label": "Weight Units", "class": "field-sm"},
+        ],
         "placeholder": {
             "action": "Add an inventory item",
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_reagents.svg",
             "title": "Add your first inventory item",
             "message": "Track your inventory through your analysis workflow.",
-            "url": "./inventory/item?new=true",
+            "url": "./inventory/new",
+        },
+    },
+    "measurements": {
+        "breadcrumbs": [
+            {"title": "Measurements", "url": "/measurements"},
+            {"title": "Measurement", "active": True},
+        ],
+        "fields": [
+            {"key": "measurement_id", "label": "Measurement ID"},
+            {"key": "sample_id", "label": "Sample ID"},
+            {"key": "product_name", "label": "Product Name"},
+            {"key": "sample_type", "label": "Sample Type"},
+            {"key": "created_at", "label": "Created At", "type": "datetime"},
+            {"key": "created_by", "label": "Created By", "class": "field-sm"},
+            {"key": "sample_weight", "label": "Sample Weight", "type": "number", "class": "field-sm"},
+            {"key": "units", "label": "Units", "class": "field-sm"},
+            {"key": "dilution_factor", "label": "Dilution Factor", "type": "number", "class": "field-sm"},
+            {"key": "measurement", "label": "Measurement", "type": "number", "class": "field-sm"},
+            {"key": "measurement_units", "label": "Measurement Units", "class": "field-sm"},
+            {"key": "instrument_id", "label": "Instrument ID"},
+            {"key": "instrument", "label": "Instrument"},
+            {"key": "analyte_id", "label": "Analyte ID"},
+            {"key": "analyte", "label": "Analyte"},
+            {"key": "analysis_id", "label": "Analysis ID"},
+            {"key": "analysis", "label": "Analysis"},
+
+            {"key": "notes", "label": "Notes", "type": "textarea"},
+        ],
+        "placeholder": {
+            "action": "Add a measurement",
+            "height": "200px",
+            "image": "console/images/icons/two-tone/two_tone_stats.svg",
+            "title": "Add your first measurement",
+            "message": "Do your analyses by adding measurements, inputs for analyte formulas to calculate final results.",
+            "url": "./measurements/new",
         },
     },
     "organizations": {
@@ -90,99 +226,192 @@ material = {
             {"title": "Settings", "url": "settings"},
             {"title": "Organizations", "active": True},
         ],
+        "fields": [
+            {"key": "name", "label": "Name"},
+            {"key": "trade_name", "label": "Trade Name (DBA)"},
+            {"key": "website", "label": "Website"},
+            {"type": "email", "key": "email", "label": "Email"},
+            {"key": "phone", "label": "Phone"},
+            {"key": "linkedin", "label": "LinkedIn"},
+            {"key": "address", "label": "Address", "secondary": True},
+            {"key": "city", "label": "City", "secondary": True},
+            {"key": "state", "label": "State", "secondary": True},
+            {"key": "country", "label": "Country", "secondary": True},
+            {"key": "zip_code", "label": "Zip Code", "secondary": True},
+            {"key": "external_id", "label": "External ID", "secondary": True},
+        ],
         "placeholder": {
             "action": "Start an organization",
             "height": "200px",
             "image": "console/images/illustrations/chemistry_scientist.svg",
             "title": "Create or join an organization",
             "message": "Add team members to your organization or join an organization to begin collaborating.",
-            "url": "./organizations/organization?new=true",
+            "url": "./organizations/new",
         },
-        "fields": [
-            {"type": "text", "key": "name", "title": "Name"},
-            {"type": "text", "key": "trade_name", "title": "Trade Name (DBA)"},
-            {"type": "text", "key": "website", "title": "Website"},
-            {"type": "email", "key": "email", "title": "Email"},
-            {"type": "text", "key": "phone", "title": "Phone"},
-            {"type": "text", "key": "linkedin", "title": "LinkedIn"},
-            {"type": "text", "key": "address", "title": "Address", "secondary": True},
-            {"type": "text", "key": "city", "title": "City", "secondary": True},
-            {"type": "text", "key": "state", "title": "State", "secondary": True},
-            {"type": "text", "key": "country", "title": "Country", "secondary": True},
-            {"type": "text", "key": "zip_code", "title": "Zip Code", "secondary": True},
-            {"type": "text", "key": "external_id", "title": "External ID", "secondary": True},
-        ],
     },
     "projects": {
+        "breadcrumbs": [
+            {"title": "Projects", "url": "/projects"},
+            {"title": "Project", "active": True},
+        ],
+        "fields": [
+            {"key": "project_id", "label": "Project ID"},
+            {"key": "organization", "label": "Organization"},
+            {"key": "transfer_ids", "label": "Transfer IDs", "type": "text"},
+            {"key": "received_at", "label": "Received At", "type": "datetime"},
+            {"key": "created_at", "label": "Created At", "type": "datetime"},
+            {"key": "created_by", "label": "Created By", "class": "field-sm"},
+            {"key": "notes", "label": "Notes", "type": "textarea"},
+        ],
         "placeholder": {
             "action": "Create a project",
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_tablet.svg",
             "title": "Create your first project",
             "message": "Begin analyses by creating a project, a collection of an organization's samples and their analyses.",
-            "url": "./projects/project?new=true",
+            "url": "./projects/new",
         },
     },
-    "pin": {
-        "breadcrumbs": [
-            {"title": "Settings", "url": "/settings"},
-            {"title": "User Settings", "url": "/settings/user"},
-            {"title": "Pin", "active": True},
-        ],
-    },
     "results": {
+        "breadcrumbs": [
+            {"title": "Results", "url": "/results"},
+            {"title": "Results", "active": True},
+        ],
+        "fields": [
+            {"key": "result_id", "label": "Result ID"},
+            {"key": "result", "label": "Result", "type": "number"},
+            {"key": "formula", "label": "Formula", "type": "formula"},
+            {"key": "sample_id", "label": "Sample ID"},
+            {"key": "package_id", "label": "Package ID"},
+            {"key": "package_label", "label": "Package Label"},
+            {"key": "product_name", "label": "Product Name"},
+            {"key": "sample_type", "label": "Sample Type"},
+            {"key": "status", "label": "Status"},
+            {"key": "units", "label": "Units", "class": "field-sm"},
+            {"key": "reviewed_at", "label": "Reviewed At", "type": "datetime"},
+            {"key": "reviewed_by", "label": "Reviewed By", "class": "field-sm"},
+            {"key": "approved_at", "label": "Approved At", "type": "datetime"},
+            {"key": "approved_by", "label": "Approved By", "class": "field-sm"},
+            {"key": "tested_at", "label": "Tested At", "type": "datetime"},
+            {"key": "voided_at", "label": "Voided At", "type": "datetime"}, # TODO: Only show given a value
+            {"key": "released_at", "label": "Released At", "type": "datetime"},
+            {"key": "notes", "label": "Notes", "type": "textarea"},
+            {"key": "non_mandatory", "label": "Non-mandatory", "type": "bool"},
+            {"key": "released", "label": "Released", "type": "bool"},
+
+        ],
         "placeholder": {
             "action": "Calculate your first result",
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_reagents.svg",
             "title": "Calculate your first result",
             "message": "Calculate your first result given analyses performed and data collected.",
-            "url": "./results/result?new=true",
+            "url": "./results/new",
         },
     },
     "samples": {
+        "breadcrumbs": [
+            {"title": "Samples", "url": "/samples"},
+            {"title": "Samples", "active": True},
+        ],
+        "fields": [
+            {"key": "photo_url", "label": "Photo", "type": "image"},
+            {"key": "sample_id", "label": "Sample ID"},
+            {"key": "project_id", "label": "Project ID"},
+            {"key": "batch_id", "label": "Batch ID"},
+            {"key": "created_at", "label": "Created At", "type": "datetime"},
+            {"key": "created_by", "label": "Created By", "class": "field-sm"},
+            {"key": "updated_at", "label": "Updated At", "type": "datetime"},
+            {"key": "updated_by", "label": "Updated By", "class": "field-sm"},
+            {"key": "coa_url", "label": "CoA URL", "type": "text"},
+            {"key": "notes", "label": "Notes", "type": "textarea"},
+        ],
         "placeholder": {
             "action": "Create a sample",
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_reagents.svg",
             "title": "Create your first laboratory sample",
             "message": "Create laboratory samples which can be part of organization specific projects or multi-organization batches for analysis.",
-            "url": "./samples/sample?new=true",
-        },
-    },
-    "signature": {
-        "breadcrumbs": [
-            {"title": "Settings", "url": "/settings"},
-            {"title": "User Settings", "url": "/settings/user"},
-            {"title": "Signature", "active": True},
-        ],
-    },
-    "templates": {
-        "breadcrumbs": [
-            {"title": "Intake", "url": "intake"},
-            {"title": "Templates", "active": True},
-        ],
-        "placeholder": {
-            "action": "Create a template",
-            "height": "200px",
-            "image": "console/images/illustrations/outline/lab_desktop.svg",
-            "title": "Create your first template",
-            "message": "Create a template for creating invoices, certificates, and other forms.",
-            "url": "./templates/template?new=true",
+            "url": "./samples/new",
         },
     },
     "transfers": {
+        "breadcrumbs": [
+            {"title": "Transfers", "url": "/transfers"},
+            {"title": "Transfer", "active": True},
+        ],
+        "fields": [
+            {"key": "transfer_id", "label": "Transfer ID"},
+            {"key": "transfer_type", "label": "Transfer Type"},
+            {"key": "transfer_url", "label": "Manifest Photo", "type": "image"},
+            {"key": "status", "label": "Status"},
+            {"key": "departed_at", "label": "Departed At", "type": "datetime"},
+            {"key": "arrived_at", "label": "Arrived By", "type": "datetime"},
+            {"key": "sample_count", "label": "Sample Count", "type": "number", "class": "field-sm"},
+            {"key": "sender", "label": "Sender"},
+            {"key": "sender_org_id", "label": "Sender Organization ID"},
+            {"key": "receiver", "label": "Receiver"},
+            {"key": "receiver_org_id", "label": "Receiver Organization ID"},
+            {"key": "transporter", "label": "Transporter"},
+        ],
+        "metrc_fields": [
+            {"key": "actual_arrival_date_time", "label": "Actual Arrival Date Time"},
+            {"key": "actual_departure_date_time", "label": "Actual Departure Date Time"},
+            {"key": "actual_return_arrival_date_time", "label": "Actual Return Arrival Date Time"},
+            {"key": "actual_return_departure_date_time", "label": "Actual Return Departure Date Time"},
+            {"key": "contains_donation", "label": "Contains Donation"},
+            {"key": "contains_plant_package", "label": "Contains Plant Package"},
+            {"key": "contains_product_package", "label": "Contains Product Package"},
+            {"key": "contains_product_requires_remediation", "label": "Contains Product Requires Remediation"},
+            {"key": "contains_remediated_product_package", "label": "Contains Remediated Product Package"},
+            {"key": "contains_testing_sample", "label": "Contains Testing Sample"},
+            {"key": "contains_trade_sample", "label": "Contains Trade Sample"},
+            {"key": "created_by_user_name", "label": "Created By User Name"},
+            {"key": "created_date_time", "label": "Created Date Time"},
+            {"key": "delivery_count", "label": "Delivery Count"},
+            {"key": "delivery_id", "label": "Delivery Id"},
+            {"key": "delivery_package_count", "label": "Delivery Package Count"},
+            {"key": "delivery_received_package_count", "label": "Delivery Received Package Count"},
+            {"key": "driver_name", "label": "Driver Name"},
+            {"key": "driver_occupational_license_number", "label": "Driver Occupational License Number"},
+            {"key": "driver_vehicle_license_number","label": "Driver Vehicle License Number"},
+            {"key": "estimated_arrival_date_time", "label": "Estimated Arrival Date Time"},
+            {"key": "estimated_departure_date_time", "label": "Estimated Departure Date Time"},
+            {"key": "estimated_return_arrival_date_time", "label": "Estimated Return Arrival Date Time"},
+            {"key": "estimated_return_departure_date_time", "label": "Estimated Return Departure Date Time"},
+            {"key": "id", "label": "Id"},
+            {"key": "last_modified", "label": "Last Modified"},
+            {"key": "manifest_number", "label": "Manifest Number"},
+            {"key": "name", "label": "Name"},
+            {"key": "package_count", "label": "Package Count"},
+            {"key": "received_date_time", "label": "Received Date Time"},
+            {"key": "received_delivery_count", "label": "Received Delivery Count"},
+            {"key": "received_package_count", "label": "Received Package Count"},
+            {"key": "recipient_facility_license_number", "label": "Recipient Facility License Number"},
+            {"key": "recipient_facility_name", "label": "Recipient Facility Name"},
+            {"key": "shipment_license_type", "label": "Shipment License Type"},
+            {"key": "shipment_transaction_type", "label": "Shipment Transaction Type"},
+            {"key": "shipment_type_name", "label": "Shipment Type Name"},
+            {"key": "shipper_facility_license_number", "label": "Shipper Facility License Number"},
+            {"key": "shipper_facility_name", "label": "Shipper Facility Name"},
+            {"key": "transporter_facility_license_number", "label": "Transporter Facility License Number"},
+            {"key": "transporter_facility_name", "label": "Transporter Facility Name"},
+            {"key": "vehicle_license_plate_number", "label": "Vehicle License Plate Number"},
+            {"key": "vehicle_make", "label": "Vehicle Make"},
+            {"key": "vehicle_model", "label": "Vehicle Model"},
+        ],
         "placeholder": {
             "action": "Create an inventory transfer",
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_reagents.svg",
             "title": "Create your first inventory transfer",
             "message": "Create a transfer of inventory items from one organization to another.",
-            "url": "./transfers/transfer?new=true",
+            "url": "./transfers/new",
         },
     },
     "traceability": {
         "tabs": [
+            # TODO: Show traceability tabs by organization type (e.g. "org_type": "*",)
             # {
             #     "name": "Items",
             #     "section": "items",
@@ -225,8 +454,6 @@ material = {
                 "url": "/traceability/locations",
                 "description": "Manage your locations used track packages and items.",
             },
-            
-            # Optional: Show by user type ("user_type": "*",)
             # {
             #     "name": "Harvests",
             #     "section": "harvests",
@@ -287,77 +514,52 @@ material = {
             {"title": "User Settings", "active": True},
         ],
         "user_fields": [
-            {"type": "text", "key": "name", "title": "Name"},
-            {"type": "text", "key": "position", "title": "Position"},
-            {"type": "email", "key": "email", "title": "Email"},
-            {"type": "text", "key": "phone_number", "title": "Phone"},
-            # {"type": "text", "key": "location", "title": "Location"},
-            # {"type": "text", "key": "linkedin", "title": "LinkedIn"},
-            {"type": "text", "key": "license", "title": "License"},
+            {"key": "name", "label": "Name"},
+            {"key": "position", "label": "Position"},
+            {"type": "email", "key": "email", "label": "Email"},
+            {"key": "phone_number", "label": "Phone"},
+            {"key": "license", "label": "License"},
         ],
         "user_options": [
             {"title": "Change your password", "url": "/account/password-reset"},
-            # {"title": "Set your pin", "url": "/settings/account/pin"},
-            # {"title": "Set your signature", "url": "/settings/account/signature"},
         ],
     },
-    # "calendar": {
-    #     "placeholder": {
-    #         "action": "Schedule your first transfer",
-    #         "height": "200px",
-    #         "image": "console/images/illustrations/chemistry_scientist.svg",
-    #         "title": "Awaiting your first transfer",
-    #         "message": "Once you begin receiving transfers, your pickups and sample dropoffs will appear here.",
-    #         "url": "settings/organizations/new",
-    #     },
+
+    # Drafts:
+
+    # "pin": {
+    #     "breadcrumbs": [
+    #         {"title": "Settings", "url": "/settings"},
+    #         {"title": "User Settings", "url": "/settings/user"},
+    #         {"title": "Pin", "active": True},
+    #     ],
     # },
-    # "logistics": {
-    #     "tabs": [
-    #         {"name": "Calendar", "section": "calendar", "url": "/logistics/calendar"},
-    #         {"name": "Logs", "section": "logs", "url": "/logistics/logs"},
-    #         {
-    #             "name": "Analytics",
-    #             "section": "analytics",
-    #             "url": "/logistics/analytics",
-    #         },
-    #         {"name": "Map", "section": "map", "url": "/logistics/map"},
+    # "signature": {
+    #     "breadcrumbs": [
+    #         {"title": "Settings", "url": "/settings"},
+    #         {"title": "User Settings", "url": "/settings/user"},
+    #         {"title": "Signature", "active": True},
+    #     ],
+    # },
+    # "templates": {
+    #     "breadcrumbs": [
+    #         {"title": "Intake", "url": "intake"},
+    #         {"title": "Templates", "active": True},
     #     ],
     #     "placeholder": {
-    #         "action": "Begin analysis for analytics",
+    #         "action": "Create a template",
     #         "height": "200px",
-    #         "image": "console/images/illustrations/chemistry_scientist.svg",
-    #         "title": "Start your first analysis",
-    #         "message": "Begin conducting analyses to unlock your analytics.",
-    #         "url": "settings/organizations/new",
+    #         "image": "console/images/illustrations/outline/lab_desktop.svg",
+    #         "title": "Create your first template",
+    #         "message": "Create a template for creating invoices, certificates, and other forms.",
+    #         "url": "./templates/new",
     #     },
     # },
-    # "records": {
-    #     "placeholder": {
-    #         "action": "Add a contact",
-    #         "height": "200px",
-    #         "image": "console/images/illustrations/chemistry_scientist.svg",
-    #         "title": "Add your first contact",
-    #         "message": "Add a contact to begin providing analyses.",
-    #         "url": "records/new",
-    #     },
-    #     "contact": {
-    #         "breadcrumbs": [
-    #             {"title": "Clients", "url": "/records"},
-    #             {"title": "Client", "active": True},
-    #         ],
-    #         "fields": [
-    #             {"type": "email", "key": "email", "title": "Email"},
-    #             {"type": "text", "key": "name", "title": "Name"},
-    #             {"type": "text", "key": "linkedin", "title": "LinkedIn"},
-    #             {"type": "text", "key": "position", "title": "Position"},
-    #             {"type": "text", "key": "location", "title": "Location"},
-    #         ],
-    #         "options": [],
-    #     },
-    # },
+
 }
 
 
+# Context for general layout.
 layout = {
     "dashboard": {
         "cards": [

@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     'api',
     'cannlytics',
     'console',
+    # 'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -111,6 +112,7 @@ INSTALLED_APPS = [
 
 # Define middleware that is executed by Django.
 MIDDLEWARE = [
+    # 'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -120,6 +122,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'console.core.middleware.AppendOrRemoveSlashMiddleware',
 ]
+
+# FIXME: Enable CORS for PDFs
+# https://stackoverflow.com/questions/28046422/django-cors-headers-not-work
 
 # ------------------------------------------------------------#
 # Livereload
@@ -272,6 +277,20 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # The age of session cookies, in seconds.
 SESSION_COOKIE_AGE = 900
+
+
+# ------------------------------------------------------------#
+# Cross-Origin Resource Sharing (CORS)
+# Not working!
+# https://github.com/adamchainz/django-cors-headers#configuration
+# ------------------------------------------------------------#
+
+# CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOW_CREDENTIALS = False
+# CORS_ALLOWED_ORIGIN_REGEXES = [
+#     r"^https://firebasestorage$",
+#     r"^https://firebasestorage\.googleapis\.com/v0/b/\w+\.appspot.com$",
+# ]
 
 # ------------------------------------------------------------#
 # Customization
