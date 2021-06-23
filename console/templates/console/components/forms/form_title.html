@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<!--
+  Form Title | Cannlytics
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 6/22/2021
+  Updated: 6/22/2021
+
+  Params:
+    id
+    model
+    model_singular
+    description (optional)
+    options (bool | optional)
+    export (bool | optional)
+-->
+<div class="d-flex justify-content-between">
+  <div class="px-3">
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-3">
+     {{ model_singular|title }}
+     {{ id }}
+    </h1>
+    {% if description %}
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        {{ description }}
+      </h2>
+    {% endif %}
+  </div>
+
+  <!-- Options (back, save) -->
+  {% if options %}
+    <div class="d-flex align-items-center">
+      {% if export %}
+        <button
+          class="btn btn-sm btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.settings.exportData('{{ model }}', '{{ id }}');"
+        >
+          Export
+        </button>
+      {% endif %}
+      <button
+        class="btn btn-sm bg-gradient-green text-white"
+        onclick="cannlytics.api.save('{{ model }}', '{{ id }}');"
+      >
+        Save
+      </button>
+    </div>
+  {% endif %}
+
+</div>
+
+</html>

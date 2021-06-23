@@ -92,14 +92,14 @@
     <!-- Checkboxes (bool) -->
     {% elif field.type == 'bool' %}
     <div class="form-check">
+      <label class="form-check-label" for="input_{{ field.key }}">
+        {{ field.label }}
+      </label>
       <input
         id="input_{{ field.key }}"
         class="form-check-input"
         type="checkbox"
       >
-      <label class="form-check-label fs-6" for="input_{{ field.key }}">
-        {{ field.label }}
-      </label>
     </div>
 
     <!-- Select (select + options + selected) | Select Multiple (select + multiple) -->

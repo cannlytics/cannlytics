@@ -58,7 +58,7 @@
     <form id="projects-form">
 
       <!-- Dynamic fields -->
-      {% include "console/comonents/forms/dynamic_form.html" with
+      {% include "console/components/forms/dynamic_form.html" with
         fields=projects.fields
       %}
       {% comment %} <div class="col col-md-10 col-lg-6">
@@ -185,7 +185,7 @@
       </div><!-- End of dynamic fields --> {% endcomment %}
 
       <!-- Show additional fields -->
-      {% include "console/comonents/forms/additional_fields.html" %}
+      {% include "console/components/forms/additional_fields.html" %}
 
       {% comment %} <div id="additional-fields" class="my-3">
         <button
@@ -326,7 +326,7 @@
 
   <!-- Danger zone (delete) -->
   {% if request.GET.id %}
-    {% include "console/comonents/forms/delete_option.html" with
+    {% include "console/components/forms/delete_option.html" with
       model="projects"
       model_singular="project"
       id=request.GET.id

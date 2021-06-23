@@ -30,8 +30,8 @@ material = {
             {"key": "analysis_id", "label": "Analysis ID"},
             {"key": "name", "label": "Name"},
             {"key": "key", "label": "Key"},
-            {"key": "public", "label": "Public", "type": "bool"},
             {"key": "price", "label": "Price", "type": "text"}, # Optional: currency
+            {"key": "public", "label": "Public", "type": "bool"},
         ],
         "placeholder": {
             "action": "Create an analysis",

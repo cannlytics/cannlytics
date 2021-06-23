@@ -11,6 +11,13 @@
 {% extends "console/console.html" %}
 {% load icon %}
 {% block console_body %}
+{% if section %}
+
+  <!-- Detail page -->
+  <!-- FIXME: Pass model ID -->
+  {% include "console/pages/analyses/analysis.html" with id="" %}
+
+{% else %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
@@ -61,6 +68,8 @@
     
 
   </main>
+{% endif %}
+
 {% endblock console_body %}
 
 <!-- Analyses JavaScript -->

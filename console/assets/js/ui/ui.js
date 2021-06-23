@@ -4,7 +4,7 @@
  * Created: 5/2/2021
  * Updated: 6/10/2021
  */
-import { hasClass } from '../utils.js';
+import { formDeserialize, hasClass } from '../utils.js';
 
 
 const formHelpers = {
@@ -33,7 +33,8 @@ const initHelpers = {
 
   enableTooltips() {
     /*
-     * Enable all tooltips on a page.
+     * FIXME: Enable all tooltips on a page.
+     * Uncaught ReferenceError: bootstrap is not defined
      */
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
