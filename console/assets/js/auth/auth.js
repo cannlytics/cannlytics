@@ -2,7 +2,7 @@
  * Authentication JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 12/4/2020
- * Updated: 5/9/2021
+ * Updated: 6/23/2021
  */
 
 import { apiRequest, authRequest, showNotification } from '../utils.js';
@@ -160,10 +160,11 @@ export const auth = {
   },
   
   
-  signUp() {
+  signUp(event) {
     /*
      * Sign up a user.
      */
+    event.preventDefault();
     const terms = document.getElementById('login-terms-accepted');
     if (!terms.checked) {
       const message = 'Please agree with our terms of service and read our privacy policy to create an account.';
@@ -180,16 +181,22 @@ export const auth = {
     // FIXME: Ensure sign-up works with user sessions.
     firebase.auth().createUserWithEmailAndPassword(email, password)
       .then(() => {
-        return authRequest('/login');
+        // Optional: Handle error more elegantly.
+        return authRequest('/login').then((response) => {
+          this.postSignUp(email);
+        })
+        .catch((error) => {
+          this.postSignUp(email);
+        });
       })
-      .then(() => {
-        apiRequest('/api/users', { email, photo_url: `https://robohash.org/${email}?set=set5` })
-            .then(() => {
-              window.location.href = window.location.origin;
-            })
-        // Optional: Implement user verification and don't send emails in development.
-        // this.verifyUser();
-      })
+      // .then(() => {
+      //   apiRequest('/api/users', { email, photo_url: `https://robohash.org/${email}?set=set5` })
+      //       .then(() => {
+      //         window.location.href = window.location.origin;
+      //       })
+      //   // Optional: Implement user verification and don't send emails in development.
+      //   // this.verifyUser();
+      // })
       .catch((error) => {
         showNotification('Sign up error', error.message, { type: 'error' });
       })
@@ -197,6 +204,33 @@ export const auth = {
         document.getElementById('sign-up-button').classList.remove('d-none');
         document.getElementById('sign-up-loading-button').classList.add('d-none');
       });;
+  },
+
+
+  postSignUp(email) {
+    /*
+     * Post sign-up routine.
+     */
+    const data = { email, photo_url: `https://robohash.org/${email}?set=set5` };
+    apiRequest('/api/users', data)
+      .then(() => {
+        window.location.href = window.location.origin;
+      });
+  },
+
+
+  signOut() {
+    /*
+    * Sign a user out of Firebase and clear the session.
+    */
+    const baseURL = window.location.origin;
+    authRequest('/logout')
+      .then((response) => {
+        document.location.href = `${baseURL}/account/sign-out`;
+      })
+      .catch((error) => {
+        document.location.href = `${baseURL}/account/sign-out`;
+      });
   },
   
   

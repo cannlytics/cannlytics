@@ -2,10 +2,8 @@
  * App JavaScript | Cannlytics Console
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 12/7/2020
- * Updated: 6/3/2021
+ * Updated: 6/23/2021
  */
-import { auth, signOut } from '../firebase.js';
-import { authRequest } from '../utils.js';
 
 
 export const app = {
@@ -36,10 +34,7 @@ export const app = {
 
   },
 
-  
-  signOut: signOut,
 
-  
   search() {
     /*
      * General search function to query the entire app and return the most
@@ -83,30 +78,30 @@ function setGetParameter(paramName, paramValue)
 }
 
 
-function initializeUserUI(user) {
-  /*
-   * Setup user's UI based on their preferences and claims.
-   */
-  const organization = user.organization || 'Cannlytics';
-  const navPhoto = document.getElementById('userPhotoNav');
-  const menuPhoto = document.getElementById('userPhotoMenu');
-  if (user.photoURL) {
-    navPhoto.src = user.photoURL;
-    menuPhoto.src = user.photoURL;
-  }
-  else {
-    const robohash = `https://robohash.org/${user.email}?set=set5`;
-    navPhoto.src = robohash;
-    menuPhoto.src = robohash;
-  }
-  document.getElementById('anonymous-signup').classList.add('d-none');
-  document.getElementById('userEmail').textContent = user.email;
-  document.getElementById('userName').textContent = user.displayName;
-  // TODO: Show Personalize your account button
-  if (!user.displayName) {
-    document.getElementById('personalize-account').classList.remove('d-none');
-  }
-  document.title = `${document.title.split('|')[0]} | ${organization}`;
-  if (document.title.startsWith('|')) document.title = `Dashboard ${document.title}`;
-}
+// function initializeUserUI(user) {
+//   /*
+//    * Setup user's UI based on their preferences and claims.
+//    */
+//   const organization = user.organization || 'Cannlytics';
+//   const navPhoto = document.getElementById('userPhotoNav');
+//   const menuPhoto = document.getElementById('userPhotoMenu');
+//   if (user.photoURL) {
+//     navPhoto.src = user.photoURL;
+//     menuPhoto.src = user.photoURL;
+//   }
+//   else {
+//     const robohash = `https://robohash.org/${user.email}?set=set5`;
+//     navPhoto.src = robohash;
+//     menuPhoto.src = robohash;
+//   }
+//   document.getElementById('anonymous-signup').classList.add('d-none');
+//   document.getElementById('userEmail').textContent = user.email;
+//   document.getElementById('userName').textContent = user.displayName;
+//   // TODO: Show Personalize your account button
+//   if (!user.displayName) {
+//     document.getElementById('personalize-account').classList.remove('d-none');
+//   }
+//   document.title = `${document.title.split('|')[0]} | ${organization}`;
+//   if (document.title.startsWith('|')) document.title = `Dashboard ${document.title}`;
+// }
 

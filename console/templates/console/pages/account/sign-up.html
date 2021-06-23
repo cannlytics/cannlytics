@@ -8,21 +8,25 @@
 
     <!-- Message -->
     <p class="font-weight-light mb-4 fs-6 mt-5">
-      Sign up with a secure email and password.
+      
     </p>
+
+    <!-- Message -->
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Create an Account</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">Sign up with a secure email and password.</h2>
 
     <!-- Email -->
     <div class="mb-3 row">
       <label
         for="login-email"
-        class="col-sm-2 col-form-label fs-6"
+        class="col-sm-2 col-form-label col-form-label-sm"
       >
         Email
       </label>
       <div class="col-sm-10">
         <input
           type="email"
-          class="form-control"
+          class="form-control form-control-sm"
           id="login-email"
           required
           autofocus
@@ -35,7 +39,7 @@
     <div class="mb-3 row">
       <label
         for="login-password"
-        class="col-sm-2 col-form-label fs-6"
+        class="col-sm-2 col-form-label col-form-label-sm"
       >
         Password
       </label>
@@ -43,7 +47,7 @@
         <input
           autocomplete="new-password"
           type="password"
-          class="form-control"
+          class="form-control form-control-sm"
           id="login-password"
           required
         >
@@ -66,18 +70,18 @@
     <!-- TODO: Add reCaptcha -->
 
     <!-- Sign up -->
-    <div class="d-flex justify-content-end w-100 mt-4">
+    <div class="d-flex justify-content-end w-100 mt-3">
       <div>
         <button
           id="sign-up-button"
-          class="ms-1 btn bg-gradient-green text-white"
+          class="ms-1 btn btn-sm bg-gradient-green text-white"
           style="max-width:250px;"
           type="button"
-          onclick="cannlytics.auth.signUp()"
+          onclick="cannlytics.auth.signUp(event)"
         >
           Sign Up
         </button>
-        <button id="sign-up-loading-button" class="ms-1 btn bg-gradient-green text-white d-none" style="width:77px;" type="button" disabled>
+        <button id="sign-up-loading-button" class="ms-1 btn btn-sm bg-gradient-green text-white d-none" style="width:77px;" type="button" disabled>
           <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
         </button>
       </div>
@@ -95,6 +99,16 @@
         </p>
       </div>
     </div>
+
+    <!-- JavaScript to add actions to inputs -->
+    <script>
+      var node = document.getElementById('login-password');
+      node.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+          cannlytics.auth.signUp(event);
+        }
+      });
+    </script>
 
   {% endblock %}
 </html>
