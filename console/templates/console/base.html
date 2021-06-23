@@ -27,7 +27,7 @@
   
   <!-- Title -->
   <title>
-   {% block title %}Cannlytics{% endblock %}
+   {% block title %}Cannlytics{% endblock title %}
   </title>
   
   <!-- Bootstrap Stylesheet -->
@@ -40,7 +40,7 @@
   <!-- Cannlytics stylesheets -->
   <link href="{% static 'console/plugins/cannlytics/cannlytics-96d262d0f5e9b87f4b39.css'%}" id="cannlytics_css" rel="stylesheet" type="text/css"/>
   <link href="{% static 'console/plugins/cannlytics/console-96d262d0f5e9b87f4b39.css'%}" id="console_css" rel="stylesheet" type="text/css"/>
-  {% block page_css %}{% endblock %}
+  {% block page_css %}{% endblock page_css %}
   
   <!-- Firebase JavaScript -->
   <script src="https://www.gstatic.com/firebasejs/8.2.6/firebase-app.js">
@@ -62,7 +62,7 @@
   
   <!-- Dynamic Page -->
   <div id="page">
-   {% block page %}{% endblock %}
+   {% block page %}{% endblock page %}
   </div>
   
   <!-- JavaScript -->

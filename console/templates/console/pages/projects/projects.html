@@ -4,11 +4,18 @@
   Projects | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 4/24/2021
-  Updated: 6/8/2021
+  Updated: 6/22/2021
 -->
 {% extends "console/console.html" %}
 {% load static icon %}
 {% block console_body %}
+{% if section %}
+
+  <!-- Detail page -->
+  <!-- FIXME: Pass model ID -->
+  {% include "console/pages/projects/project.html" with id="" %}
+
+{% else %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->
@@ -47,7 +54,7 @@
                 image='console/images/illustrations/outline/lab_books.svg'
                 message="No current projects, you're all caught up."
                 title='No Current Projects'
-                url='/projects/project?new=true'
+                url='/projects/new'
                 only
               %}
             </div>
@@ -69,11 +76,12 @@
 
     </div>
   </main>
+{% endif %}
 {% endblock console_body %}
 
 <!-- JavaScript -->
 {% block console_js %}
-
+{% if not section %}
   <script>
 
     // Get data from the API.
@@ -115,6 +123,6 @@
       });
 
   </script>
-
+{% endif %}
 {% endblock console_js %}
 </html>

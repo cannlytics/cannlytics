@@ -1,11 +1,10 @@
 <!doctype html>
 <html>
 <!--
-  Measurement Page | Cannlytics Console
-  Created: 6/19/2021
+  Inventory Item Page | Cannlytics Console
+  Created 6/22/2020
   Updated: 6/22/2021
 -->
-{% load icon %}
 {% block console_css %}
 
   <!-- Bootstrap Datepicker -->
@@ -14,32 +13,33 @@
 
 {% endblock console_css %}
 {% block console_body %}
-<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
-  <!-- Header -->
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header -->
     {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=measurements.breadcrumbs
+      breadcrumbs=inventory.breadcrumbs
     %}
 
     <!-- Title -->
     {% include "console/components/forms/form_title.html" with
       id=id
-      model='measurements'
-      model_singular='measurement'
-      description="Manage measurements of analytes in your analyses."
+      model='item'
+      model_singular='inventory'
+      description="Manage inventory items."
       options=True
       export=id
     %}
 
-  <!-- Fields -->
+    <!-- Fields -->
     <div class="mb-4 px-3">
 
       <!-- Form -->
-      <form id="measurement-form">
+      <form id="instrument-form">
 
         <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
-          fields=measurements.fields
+          fields=inventory.fields
         %}
 
         <!-- Show additional fields -->
@@ -56,12 +56,13 @@
     {% if id %}
       {% include "console/components/forms/delete_option.html" with
         id=id
-        model="measurements"
-        model_singular="measurement"
+        model="inventory"
+        model_singular="item"
       %}
     {% endif %}
+    
+  </main>
 
-</main>
 {% endblock console_body %}
 
 <!-- JavaScript -->
@@ -69,7 +70,7 @@
   <script>
 
     // Load the data into the user interface.
-    cannlytics.ui.viewObject('measurement');
+    cannlytics.ui.viewObject('item');
 
     // Render any date pickers.
     $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });

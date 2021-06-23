@@ -13,7 +13,7 @@
   {% for field in fields %}
 
     <!-- Text Field -->
-    {% if not field.type or field.type == 'text' %}
+    {% if not field.type or field.type == 'text' or field.type == 'number' or field.type == 'email' or field.type == 'tel' %}
       <div class="row mb-3">
         <label class="col-sm-3 col-form-label col-form-label-sm">
           {{ field.label }}
@@ -26,6 +26,7 @@
             name="{{ field.key }}"
             spellcheck="{{ field.spellcheck }}"
             style="{{ field.style }}"
+            type="{{ field.type }}"
           >
         </div>
       </div>
@@ -77,7 +78,7 @@
 
     <!-- Textareas (textarea) -->
     {% elif field.type == 'textarea' %}
-    <div class="form-floating">
+    <div class="form-floating mb-3">
       <textarea
         class="form-control"
         placeholder=""

@@ -4,11 +4,18 @@
   Measurements Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2021
-  Updated: 6/19/2021
+  Updated: 6/22/2021
 -->
 {% extends "console/console.html" %}
 {% load static icon %}
 {% block console_body %}
+{% if section %}
+
+  <!-- Detail page -->
+  <!-- FIXME: Pass model ID -->
+  {% include "console/pages/measurements/measurement.html" with id="" %}
+
+{% else %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->
@@ -47,7 +54,7 @@
                 image='console/images/illustrations/outline/lab_books.svg'
                 message="No current measurements, you're all caught up."
                 title='No Current Measurements'
-                url='/measurements/measurement?new=true'
+                url='/measurements/new'
                 only
               %}
             </div>
@@ -69,6 +76,8 @@
 
     </div>
   </main>
+{% endif %}
+
 {% endblock console_body %}
-{% block console_js %}{% endblock console_js %}
+
 </html>

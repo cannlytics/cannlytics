@@ -1,9 +1,17 @@
 <!doctype html>
 <html>
 <!--
-  Measurement Page | Cannlytics Console
-  Created: 6/19/2021
+  Result Page | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 6/22/2021
   Updated: 6/22/2021
+  TODO:
+    - Allow the user to reset, save (update and create), and delete.
+    - Render additional fields, ability to add an additional field.
+    - Load existing measurements.
+    - Use a table instead of a list to display measurements.
+  FIXME:
+    - Pass IDs appropriately.
 -->
 {% load icon %}
 {% block console_css %}
@@ -14,32 +22,32 @@
 
 {% endblock console_css %}
 {% block console_body %}
-<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
-  <!-- Header -->
+    <!-- Header -->
     {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=measurements.breadcrumbs
+      breadcrumbs=results.breadcrumbs
     %}
 
     <!-- Title -->
     {% include "console/components/forms/form_title.html" with
       id=id
-      model='measurements'
-      model_singular='measurement'
-      description="Manage measurements of analytes in your analyses."
+      model='results'
+      model_singular='result'
+      description="Manage results for samples, calculated from measurements for given analytes in an analysis."
       options=True
       export=id
     %}
 
-  <!-- Fields -->
+    <!-- Fields -->
     <div class="mb-4 px-3">
 
       <!-- Form -->
-      <form id="measurement-form">
+      <form id="result-form">
 
         <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
-          fields=measurements.fields
+          fields=results.fields
         %}
 
         <!-- Show additional fields -->
@@ -56,12 +64,13 @@
     {% if id %}
       {% include "console/components/forms/delete_option.html" with
         id=id
-        model="measurements"
-        model_singular="measurement"
+        model="results"
+        model_singular="result"
       %}
     {% endif %}
 
-</main>
+  </main>
+
 {% endblock console_body %}
 
 <!-- JavaScript -->
@@ -69,7 +78,7 @@
   <script>
 
     // Load the data into the user interface.
-    cannlytics.ui.viewObject('measurement');
+    cannlytics.ui.viewObject('result');
 
     // Render any date pickers.
     $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
