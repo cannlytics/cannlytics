@@ -27,8 +27,9 @@
               >
 
                 <!-- Card image -->
-                <div class="row g-0">
-                  <div class="col-md-4 align-items-center justify-content-center d-flex py-3">
+                <div class="">
+
+                  <div class="float-start p-3">
                     <img
                         class="ma-2"
                         src="{% static item.image_path %}"
@@ -37,13 +38,13 @@
                   </div>
 
                   <!-- Card body -->
-                  <div class="col-md-8">
+                  <div class="col">
                     <div class="card-body bg-transparent">
-                      <h5 class="card-title text-dark text-no-wrap fs-4 fw-bold mb-2">
+                      <h5 class="card-title text-dark text-no-wrap fs-6 fw-bold mb-2">
                         {{ item.title }}
                       </h5>
                       <p class="card-text text-secondary fs-6 large-line">
-                        <small class="serif">{{ item.description }}</small>
+                        <small class="serif tiny-text">{{ item.description }}</small>
                       </p>
                     </div>
                   </div>

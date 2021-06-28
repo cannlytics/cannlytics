@@ -5,6 +5,8 @@
  * Updated: 6/23/2021
  */
 
+import { auth } from '../firebase.js';
+
 
 export const app = {
 
@@ -12,21 +14,23 @@ export const app = {
     /*
     * Initialize the console.
     */
-    // auth.onAuthStateChanged((user) => {
-    //   console.log('Detected user:', user)
-    //   if (user) {
-    //     // initializeUserUI(user);
-    //     // authRequest('/api/auth/authenticate');
-    //     // TODO: Get user's organizations from Firestore through the API!
-    //     // console.log('Getting user organizations...');
-    //     // authRequest('/api/organizations').then((data) => {
-    //     //   console.log('User organizations:', data);
-    //     // });
-    //     // FIXME: Hot-fix to reload page if sidebar is prompting login.
-    //     // const signInMenu = document.getElementById('sidebar-menu-login');
-    //     // if (signInMenu) location.reload();
-    //   }
-    // });
+    auth.onAuthStateChanged((user) => {
+      console.log('Detected user:', user)
+      if (user) {
+        // initializeUserUI(user);
+        // authRequest('/api/auth/authenticate');
+        // TODO: Get user's organizations from Firestore through the API!
+        // console.log('Getting user organizations...');
+        // authRequest('/api/organizations').then((data) => {
+        //   console.log('User organizations:', data);
+        // });
+        // FIXME: Hot-fix to reload page if sidebar is prompting login.
+        // const signInMenu = document.getElementById('sidebar-menu-login');
+        // if (signInMenu) location.reload();
+      } else {
+        window.location.href = 'https://cannlytics.com';
+      }
+    });
 
     // Enable any and all tooltips.
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

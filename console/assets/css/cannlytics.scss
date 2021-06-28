@@ -1163,9 +1163,10 @@ body.dark .feather-search {
   stroke: #ccc;
 }
 
-/* Dark Cards */
+/* Cards */
 body:not(.dark) .card {
   color: #f5f5f5;
+  border-color: #bbbbbb !important;
 }
 body.dark .card {
   background-color: #1a1a1a;

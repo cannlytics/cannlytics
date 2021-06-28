@@ -63,6 +63,7 @@ if __name__ == '__main__':
         'video_id': 'cannabis-data-science-episode-1',
         'size': '1.21GB',
         'length': '1:03:28',
+        'cover_image_url': '', # TODO: Add a cover image URL.
     }
     video_id = video_data['video_id']
     destination = f'public/cannabis_data_science/videos/{video_id}'
