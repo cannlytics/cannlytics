@@ -224,12 +224,18 @@ export const auth = {
     * Sign a user out of Firebase and clear the session.
     */
     const baseURL = window.location.origin;
+    console.log('Signing out....')
     authRequest('/logout')
       .then((response) => {
-        document.location.href = `${baseURL}/account/sign-out`;
+        console.log(response);
+        document.location.href = `${window.location.origin}/account/sign-out`;
       })
       .catch((error) => {
-        document.location.href = `${baseURL}/account/sign-out`;
+        console.log(error);
+        document.location.href = `${window.location.origin}/account/sign-out`;
+      })
+      .finally(() => {
+        document.location.href = `${window.location.origin}/account/sign-out`;
       });
   },
   

@@ -529,30 +529,6 @@ Contributions are always welcome! You are encouraged to submit issues, functiona
 - Carlos Krefft <carlos@krefft.org>
 - Keegan Skeate <keegan@cannlytics.com>
 
-## Resources <a name="resources"></a>
-
-* [Django Philosophy](https://docs.djangoproject.com/en/3.1/misc/design-philosophies)
-* [Django on Cloud Run](https://codelabs.developers.google.com/codelabs/cloud-run-django)
-* [Firebase Storage in GCF](https://hackersandslackers.com/manage-files-in-google-cloud-storage-with-python/)
-* [Design Tips](https://dribbble.com/stories/2020/04/22/designing-for-conversions-7-ux-tips-ecommerce?utm_campaign=2020-05-05&utm_medium=email&utm_source=courtside-20200505)
-* [Docker Tips](https://twg.io/blog/things-i-wish-i-knew-about-docker-before-i-started-using-it/)
-* [Testing Docker Locally](https://cloud.google.com/run/docs/testing/local)
-* [The Python Runtime for the App Engine Flexible Environment](https://cloud.google.com/appengine/docs/flexible/python/runtime)
-* [Quick start for Python in the App Engine Flexible Environment](https://cloud.google.com/appengine/docs/flexible/python/quickstart#windows)
-
-[Django]: https://www.djangoproject.com/
-[Cloud Build]: (https://cloud.google.com/build)
-[Cloud Registry]: (https://cloud.google.com/container-registry)
-[Cloud Run]: (https://firebase.google.com/docs/hosting/cloud-run)
-[Cloud Storage]: (https://cloud.google.com/storage)
-[Cloud Secret Manager]: (https://cloud.google.com/secret-manager/)
-[Firebase]: (https://firebase.google.com/)
-[Firebase Authentication]: https://firebase.google.com/docs/auth
-[Firebase Hosting]: https://firebase.google.com/docs/hosting
-[Firebase Storage]: https://firebase.google.com/docs/storage
-[Firestore]: https://firebase.google.com/docs/firestore
-[Python]: https://www.python.org/
-
 ## License <a name="license"></a>
 
 **Cannlytics** Copyright (©) 2020-2021 Cannlytics and Cannlytics Contributors.

@@ -4,7 +4,7 @@ VAR Functions | Cannlytics
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
 Created: Wed Apr 14 07:55:43 2021
-License: MIT License
+License: MIT License <https://opensource.org/licenses/MIT>
 
 Description:
 

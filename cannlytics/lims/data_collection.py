@@ -5,6 +5,14 @@ Authors:
   Charles Rice <charles@ufosoftwarellc.com>
 Created: 6/15/2021
 Updated: 6/19/2021
+
+Resources:
+    https://www.programmersought.com/article/6548119734/
+    https://code.tutsplus.com/tutorials/managing-cron-jobs-using-python--cms-28231
+    https://stackoverflow.com/questions/34598568/how-to-schedule-a-python-script-using-cron-job
+    https://stackoverflow.com/questions/39327032/how-to-get-the-latest-file-in-a-folder
+    https://www.w3resource.com/python-exercises/python-basic-exercise-64.php
+    https://stackabuse.com/scheduling-jobs-with-python-crontab
 """
 
 import pandas as pd

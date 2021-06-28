@@ -80,33 +80,47 @@ class ConsoleView(TemplateView):
         elif context['screen'] == 'organizations':
             context['organization_context'] = context['organizations']
         context = get_page_context(self.kwargs, context)
-        context = get_page_data(self.kwargs, context)        
-        context['organizations'] = self.request.session['organizations']
-        context['user'] = self.request.session['user']
+        context = get_page_data(self.kwargs, context)
         # context = get_model_context(context) # Optional: Get model fields?
+        # FIXME: Redirect if no user!
+        user = auth.verify_session(self.request)
+        print('Verified user:', user)
+        if user:
+            uid = user['uid']
+            query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
+            organizations = get_collection('organizations', filters=[query])
+            user_data = get_document(f'users/{uid}')
+            context['organizations'] = organizations
+            context['user'] = user_data
         return context
 
-    def get(self, request, *args, **kwargs):
-        """Get data before rendering context. Any existing user data is
-        retrieved. If there is no user data in the session, the the
-        request is verified. If the request is unauthenticated, then
-        the user is redirected to the sign in page. If the user is
-        authenticated, then the user's data and organization data is
-        added to the session."""
-        # Optional: Get user / organization from session if present?
-        # If so, update session if user / organization fields change.
-        user = auth.verify_session(request)
-        if not user:
-            request.session['organizations'] = []
-            request.session['user'] = {}
-            return HttpResponseRedirect('/account/sign-in')
-        uid = user['uid']
-        query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
-        organizations = get_collection('organizations', filters=[query])
-        user_data = get_document(f'users/{uid}')
-        request.session['organizations'] = organizations
-        request.session['user'] = user_data
-        return super().get(request, *args, **kwargs)
+    # FIXME: Option to redirect if no user | Doesn't work in production!
+    # def get(self, request, *args, **kwargs):
+    #     """Get data before rendering context. Any existing user data is
+    #     retrieved. If there is no user data in the session, the the
+    #     request is verified. If the request is unauthenticated, then
+    #     the user is redirected to the sign in page. If the user is
+    #     authenticated, then the user's data and organization data is
+    #     added to the session."""
+    #     # Optional: Get user / organization from session if present?
+    #     # If so, update session if user / organization fields change.
+    #     user = auth.verify_session(request)
+    #     if not user:
+    #         request.session['organizations'] = []
+    #         request.session['user'] = {}
+    #         # return super().get(request, *args, **kwargs)
+    #         return HttpResponseRedirect('/account/sign-in')
+    #     uid = user['uid']
+    #     query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
+    #     organizations = get_collection('organizations', filters=[query])
+    #     user_data = get_document(f'users/{uid}')
+    #     # request.session['organizations'] = organizations
+    #     # request.session['user'] = user_data
+    #     # return super().get(request, *args, **kwargs)
+    #     context = self.get_context_data()
+    #     context['organizations'] = organizations
+    #     context['user'] = user_data
+    #     return self.render_to_response(context)
 
 
 #-----------------------------------------------------------------------

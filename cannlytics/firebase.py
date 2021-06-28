@@ -2,7 +2,7 @@
 Firebase Module | Cannlytics
 Author: Keegan Skeate <contact@cannlytics.com>
 Created: 2/7/2021
-Updated: 6/4212021
+Updated: 6/27/2021
 
 Resources:
 
@@ -30,6 +30,7 @@ bucket_name = environ.get('FIREBASE_STORAGE_BUCKET')
 db = initialize_firebase()
 ```
 """
+import requests
 import ulid
 from datetime import datetime, timedelta
 from os import listdir
@@ -683,7 +684,25 @@ def access_secret_version(project_id, secret_id, version_id):
 
 # ------------------------------------------------------------#
 # Storage
+# FIXME:
+#     Allow uer to not have to pass bucket_name.
 # ------------------------------------------------------------#
+
+def create_short_url(api_key, long_url, project_name='cannlytics'):
+    """Create a short URL to a specified file."""
+    try:
+        url = f'https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key={api_key}'
+        data= {
+            'dynamicLinkInfo': {
+                'domainUriPrefix': f'https://{project_name}.page.link',
+                'link': long_url,
+            },
+            'suffix': {'option': 'UNGUESSABLE'}
+        }
+        response = requests.post(url, json=data)
+        return response['shortLink']
+    except ConnectionError:
+        raise ConnectionError # Optional: Handle connection errors more elegantly?
 
 
 def download_file(bucket_name, source_blob_name, destination_file_name, verbose=True):
@@ -719,6 +738,21 @@ def download_files(bucket_name, bucket_folder, local_folder, verbose=True):
         blob.download_to_filename(local_folder + '/' + file_name)
         if verbose:
             print(f'{file_name} downloaded from bucket.')
+        
+
+def get_file_url(ref, bucket_name=None, expiration=None):
+    """Return the storage URL of a given file reference.
+    Args:
+        ref (str): The storage location of the file.
+        bucket_name (str): The name of the storage bucket.
+    Returns:
+        (str): The storage URL of the file.
+    """
+    if expiration is None:
+        expiration = datetime.now() + timedelta(days=100 * 365)
+    bucket = storage.bucket(name=bucket_name)
+    blob = bucket.blob(ref)
+    return blob.generate_signed_url(expiration)
 
 
 def upload_file(bucket_name, destination_blob_name, source_file_name, verbose=True):
