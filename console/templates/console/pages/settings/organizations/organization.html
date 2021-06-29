@@ -10,16 +10,22 @@
 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
   <!-- Header -->
+  <!-- Optional: Add settings base breadcrumb -->
   {% include "console/components/links/breadcrumbs.html" with
-    base_page='Organizations'
-    base_page_url='/organizations'
-    current_page=section
+    base_page='Organization settings'
+    base_page_url='/settings/organizations'
+    current_page=unit
   %}
 
   <!-- TODO: Organization form -->  
-  {% include "console/pages/organizations/organization_form.html" with
+  {% include "console/pages/settings/organizations/organization_form.html" with
     organization_context=organization_context
   %}
+
+  <!-- TODO: Data Model Management -->
+
+
+  <!-- TODO: Traceability Management -->
 
   <!-- Other options -->
   {% comment %} <h2 class="h6 mt-5 mb-0">Other account options</h2>
@@ -112,4 +118,12 @@
   -->
 
 </main>
+
+<!-- JavaScript -->
+{% block console_js %}
+  <script>
+    cannlytics.settings.initializeOrganizationForm();
+  </script>
+{% endblock console_js %}
+
 </html>

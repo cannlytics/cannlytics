@@ -74,11 +74,12 @@ class ConsoleView(TemplateView):
         context['screen'] = kwargs.get('screen', '')
         context['section'] = kwargs.get('section', '')
         context['unit'] = kwargs.get('unit', '')
+        organization_context = context.get('organizations')
         if not context['screen']:
             context['screen'] = 'dashboard'
             context['dashboard'] = layout['dashboard']
-        elif context['screen'] == 'organizations':
-            context['organization_context'] = context['organizations']
+        elif organization_context:
+            context['organization_context'] = organization_context
         context = get_page_context(self.kwargs, context)
         context = get_page_data(self.kwargs, context)
         # context = get_model_context(context) # Optional: Get model fields?

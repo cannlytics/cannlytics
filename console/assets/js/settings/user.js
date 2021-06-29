@@ -44,7 +44,6 @@ export const userSettings = {
      * Reset a form with currently saved data, replacing any changes.
      */
     authRequest('/api/users').then((data) => {
-      console.log('User data:', data);
       const userForm = document.forms['user-form'];
       userForm.reset();
       formDeserialize(userForm, data);

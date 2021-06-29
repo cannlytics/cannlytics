@@ -10,9 +10,9 @@
 {% block console_body %}
 
   <!-- Display detail page given a section -->
-  {% if section != '' %}
+  {% if unit != '' %}
 
-    {% include './organization.html' with organization_context=organization_context %}
+    {% include './organization.html' with organization_context=settings.organizations %}
 
   {% else %}
 
@@ -26,14 +26,14 @@
         <a
           class="btn btn-sm btn-sm-light btn-md-light mx-2 "
           type="button"
-          href="/organizations/organization?join=true"
+          href="/settings/organizations/join"
         >
           Join an Organization
         </a>
         <a
           class="btn btn-sm bg-gradient-green text-white"
           type="button"
-          href="/organizations/organization?new=true"
+          href="/settings/organizations/new"
         >
           New Organization
         </a>
@@ -49,7 +49,7 @@
           class="card shade-hover border-secondary rounded-3 app-action col col-sm-1 col-md-2 p-3"
           style="width:400px; height:150px;"
         >
-        <a class="card-block stretched-link text-decoration-none" href="/organizations/{{ org.uid }}">
+        <a class="card-block stretched-link text-decoration-none" href="/settings/organizations/{{ org.uid }}">
 
           <!-- Card header -->
           <div class="d-flex justify-content-between">
@@ -68,9 +68,9 @@
                 </div>
               </a>
               <ul class="dropdown-menu shadow">
-                <li><a class="dropdown-item" href="/cannlytics/{{ org.uid }}/team">Add team member</a></li>
-                <li><a class="dropdown-item" href="/cannlytics/{{ org.uid }}">Edit organization</a></li>
-                <li><a class="dropdown-item" href="/cannlytics/{{ org.uid }}/settings">Organization ettings</a></li>
+                <li><a class="dropdown-item" href="/settings/organizations/{{ org.uid }}/team">Add team member</a></li>
+                <li><a class="dropdown-item" href="/settings/organizations/{{ org.uid }}">Edit organization</a></li>
+                <li><a class="dropdown-item" href="/settings/organizations/{{ org.uid }}/settings">Organization ettings</a></li>
               </ul>
             </div>
 
@@ -126,7 +126,7 @@
   <script>
 
     // Initialize the UI (using context from Django).
-    if ('{{ section }}' !== '') cannlytics.organizations.viewOrganization('{{ section }}');
+    if ('{{ section }}' !== '') cannlytics.settings.viewOrganization('{{ section }}');
   
     // Enable tooltips.
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))

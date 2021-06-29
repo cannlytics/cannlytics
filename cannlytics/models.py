@@ -86,6 +86,7 @@ class Analyte(Model):
     supporting fields, such as lowest order of detection (LOD),
     lowest order of quantification (LOQ), regulatory limit and more."""
     _collection = 'organizations/%s/analytes'
+    cas: str = ''
     public: bool = False
     formula: str = ''
     name: str = ''

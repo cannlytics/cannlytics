@@ -17,10 +17,11 @@
 {% if section %}
 
   <!-- Detail page -->
-  <!-- FIXME: Pass model ID -->
   {% include "console/pages/analytes/analyte.html" with id=section %}
 
 {% else %}
+
+  <!-- List -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->

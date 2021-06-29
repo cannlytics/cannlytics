@@ -6,6 +6,7 @@
  */
 
 import { auth, db } from '../firebase.js';
+import { organizationSettings } from './organizations.js';
 import { userSettings } from './user.js';
 import { errorSettings } from './errors.js';
 import { apiRequest, formDeserialize, serializeForm, showNotification } from '../utils.js';
@@ -276,6 +277,6 @@ export const settings = {
   ...apiSettings,
   ...coreSettings,
   ...errorSettings,
-  // ...organizationSettings,
+  ...organizationSettings,
   ...userSettings,
 };

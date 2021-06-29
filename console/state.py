@@ -59,6 +59,7 @@ material = {
             {"key": "loq", "label": "LOQ", "type": "number", "class":"field-sm"},
             {"key": "units", "label": "Units", "type": "text", "class":"field-sm"},
             {"key": "formula", "label": "Calculation Formula", "type": "text"},
+            {"key": "cas", "label": "CAS Number"},
             {"key": "public", "label": "Public", "type": "bool"},
         ],
         "placeholder": {
@@ -224,34 +225,34 @@ material = {
             "url": "./measurements/new",
         },
     },
-    "organizations": {
-        "breadcrumbs": [
-            {"title": "Settings", "url": "settings"},
-            {"title": "Organizations", "active": True},
-        ],
-        "fields": [
-            {"key": "name", "label": "Name"},
-            {"key": "trade_name", "label": "Trade Name (DBA)"},
-            {"key": "website", "label": "Website"},
-            {"type": "email", "key": "email", "label": "Email"},
-            {"key": "phone", "label": "Phone"},
-            {"key": "linkedin", "label": "LinkedIn"},
-            {"key": "address", "label": "Address", "secondary": True},
-            {"key": "city", "label": "City", "secondary": True},
-            {"key": "state", "label": "State", "secondary": True},
-            {"key": "country", "label": "Country", "secondary": True},
-            {"key": "zip_code", "label": "Zip Code", "secondary": True},
-            {"key": "external_id", "label": "External ID", "secondary": True},
-        ],
-        "placeholder": {
-            "action": "Start an organization",
-            "height": "200px",
-            "image": "console/images/illustrations/chemistry_scientist.svg",
-            "title": "Create or join an organization",
-            "message": "Add team members to your organization or join an organization to begin collaborating.",
-            "url": "./organizations/new",
-        },
-    },
+    # "organizations": {
+    #     "breadcrumbs": [
+    #         {"title": "Settings", "url": "settings"},
+    #         {"title": "Organizations", "active": True},
+    #     ],
+    #     "fields": [
+    #         {"key": "name", "label": "Name"},
+    #         {"key": "trade_name", "label": "Trade Name (DBA)"},
+    #         {"key": "website", "label": "Website"},
+    #         {"type": "email", "key": "email", "label": "Email"},
+    #         {"key": "phone", "label": "Phone"},
+    #         {"key": "linkedin", "label": "LinkedIn"},
+    #         {"key": "address", "label": "Address", "secondary": True},
+    #         {"key": "city", "label": "City", "secondary": True},
+    #         {"key": "state", "label": "State", "secondary": True},
+    #         {"key": "country", "label": "Country", "secondary": True},
+    #         {"key": "zip_code", "label": "Zip Code", "secondary": True},
+    #         {"key": "external_id", "label": "External ID", "secondary": True},
+    #     ],
+    #     "placeholder": {
+    #         "action": "Start an organization",
+    #         "height": "200px",
+    #         "image": "console/images/illustrations/chemistry_scientist.svg",
+    #         "title": "Create or join an organization",
+    #         "message": "Add team members to your organization or join an organization to begin collaborating.",
+    #         "url": "./organizations/new",
+    #     },
+    # },
     "projects": {
         "breadcrumbs": [
             {"title": "Projects", "url": "/projects"},
@@ -413,6 +414,7 @@ material = {
         },
     },
     "traceability": {
+        "provider": "Metrc",
         "tabs": [
             # TODO: Show traceability tabs by organization type (e.g. "org_type": "*",)
             # {
@@ -512,6 +514,38 @@ material = {
             {"title": "Theme", "url": "/settings/theme"},
             {"title": "User Settings", "url": "/settings/user"},
         ],
+        "organizations": {
+            "breadcrumbs": [
+                {"title": "Settings", "url": "settings"},
+                {"title": "Organizations", "active": True},
+            ],
+            "fields": [
+                {"key": "name", "label": "Name"},
+                {"key": "trade_name", "label": "Trade Name (DBA)"},
+                {"key": "website", "label": "Website"},
+                {"type": "email", "key": "email", "label": "Email"},
+                {"key": "phone", "label": "Phone"},
+                {"key": "linkedin", "label": "LinkedIn"},
+                {"key": "address", "label": "Address", "secondary": True},
+                {"key": "city", "label": "City", "secondary": True},
+                {"key": "state", "label": "State", "secondary": True},
+                {"key": "country", "label": "Country", "secondary": True},
+                {"key": "zip_code", "label": "Zip Code", "secondary": True},
+                {"key": "external_id", "label": "External ID", "secondary": True},
+            ],
+            "placeholder": {
+                "action": "Start an organization",
+                "height": "200px",
+                "image": "console/images/illustrations/chemistry_scientist.svg",
+                "title": "Create or join an organization",
+                "message": "Add team members to your organization or join an organization to begin collaborating.",
+                "url": "./organizations/new",
+            },
+        },
+        "organization_breadcrumbs": [
+            {"title": "Settings", "url": "settings"},
+            {"title": "Organization Settings", "active": True},
+        ],
         "user_breadcrumbs": [
             {"title": "Settings", "url": "settings"},
             {"title": "User Settings", "active": True},
@@ -602,12 +636,12 @@ layout = {
             #     "description": "Manage laboratory invoices.",
             #     "image_path": "console/images/icons/multi-tone/documents.png",
             # },
-            {
-                "path": "organizations",
-                "title": "Organizations",
-                "description": "Manage your company and team.",
-                "image_path": "console/images/icons/two-tone/two_tone_client_folder.png",
-            },
+            # {
+            #     "path": "organizations",
+            #     "title": "Organizations",
+            #     "description": "Manage your company and team.",
+            #     "image_path": "console/images/icons/two-tone/two_tone_client_folder.png",
+            # },
             {
                 "path": "projects",
                 "title": "Projects",
@@ -798,13 +832,13 @@ layout = {
                 "slug": "measurements",
                 "user_type": "*",
             },
-            {
-                "title": "Organizations",
-                "url": "/organizations",
-                # "icon": "briefcase",
-                "slug": "organizations",
-                "user_type": "*",
-            },
+            # {
+            #     "title": "Organizations",
+            #     "url": "/organizations",
+            #     # "icon": "briefcase",
+            #     "slug": "organizations",
+            #     "user_type": "*",
+            # },
             {
                 "title": "Projects",
                 "url": "/projects",
@@ -937,7 +971,7 @@ layout = {
 
 material["get-started"] = {
     "user": {"fields": material["settings"]["user_fields"]},
-    "organization": {"fields": material["organizations"]["fields"]},
+    "organization": {"fields": material["settings"]["organizations"]["fields"]},
     "pricing_tiers": [
         {
             "name": "Free",
