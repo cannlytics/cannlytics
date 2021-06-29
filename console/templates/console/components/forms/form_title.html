@@ -30,17 +30,39 @@
   <!-- Options (back, save) -->
   {% if options %}
     <div class="d-flex align-items-center">
+      {% if id %}
+        <button
+          class="btn btn-sm btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.ui.viewObject('{{ model_singular }}');"
+        >
+          Reset
+        </button>
+      {% endif %}
+      {% if not id or id == 'new' %}
+        <button
+          class="btn btn-sm btn-sm-light btn-md-light me-2"
+          onclick="document.getElementById('{{ model_singular }}-form').reset();"
+        >
+          Clear
+        </button>
+        <button
+          class="btn btn-sm btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.app.createID('{{ model }}', '{{ model_singular }}');"
+        >
+          Generate ID
+        </button>
+      {% endif %}
       {% if export %}
         <button
           class="btn btn-sm btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.settings.exportData('{{ model }}', '{{ id }}');"
+          onclick="cannlytics.app.exportData('{{ model }}', '{{ id }}');"
         >
           Export
         </button>
       {% endif %}
       <button
         class="btn btn-sm bg-gradient-green text-white"
-        onclick="cannlytics.api.save('{{ model }}', '{{ id }}');"
+        onclick="cannlytics.app.save('{{ model }}', '{{ model_singular }}');"
       >
         Save
       </button>

@@ -47,7 +47,7 @@ const initHelpers = {
 };
 
 
-const navigationHelpers = {
+export const navigationHelpers = {
 
 
   openObject(model, modelSingular, data) {

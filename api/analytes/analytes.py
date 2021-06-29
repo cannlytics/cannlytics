@@ -1,7 +1,7 @@
 """
 Analytes Endpoint Views | Cannlytics API
 Created: 4/21/2021
-Updated: 6/28/2021
+Updated: 6/29/2021
 
 API to interface with analysis analytes.
 """
@@ -18,6 +18,7 @@ from rest_framework.response import Response
 from api.auth import auth
 from cannlytics.firebase import (
     create_log,
+    delete_document,
     get_collection,
     get_document,
     update_document,
@@ -41,6 +42,13 @@ def analytes(request, format=None, analyte_id=None):
     except KeyError:
         message = 'Your request was not authenticated. Ensure that you have a valid session or API key.'
         return Response({'error': True, 'message': message}, status=401)
+    
+    # Check if the user can work with the data.
+    organization_id = request.query_params.get('organization_id')
+    print('Requested organization:', organization_id)
+    if organization_id not in authorized_ids:
+        message = f'Your must be an owner, quality assurance, or a team member of this organization to manage {model_type}.'
+        return Response({'error': True, 'message': message}, status=403)
 
     # GET analytes.
     if request.method == 'GET':
@@ -50,15 +58,12 @@ def analytes(request, format=None, analyte_id=None):
         limit = request.query_params.get('limit')
         order_by = request.query_params.get('order_by')
         desc = request.query_params.get('desc', False)
-        # Optional: Implement filtered requests.
+        # TODO: Implement filtered requests. For example:
         # name = request.query_params.get('name')
         # if name:
         #     filters.append({'key': 'name', 'operation': '==', 'value': name})
-        organization_id = request.query_params.get('organization_id')
-        print('Requested organization:', organization_id)
 
-        # Get organization_id parameter.
-        organization_id = request.query_params.get('organization_id')
+        # Get organization objects.
         if organization_id:
 
             # Get a singular object if requested.
@@ -87,10 +92,6 @@ def analytes(request, format=None, analyte_id=None):
 
         # Parse the data.
         data = loads(request.body.decode('utf-8'))
-        organization_id = data.get('organization_id')
-        if organization_id not in authorized_ids:
-            message = f'Your must be an owner or team member of this organization to manage {model_type}.'
-            return Response({'error': True, 'message': message}, status=403)
 
         # Add the data to Firestore.
         if isinstance(data, dict):
@@ -105,7 +106,7 @@ def analytes(request, format=None, analyte_id=None):
             return Response({'error': True, 'message': message}, status=400)
 
         # Return the data and success.
-        create_log(f'organizations/{organization_id}/logs', claims, 'Analytes edited.', model_type, f'{model_type}_post', [data])
+        create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} edited.', model_type, f'{model_type}_post', [data])
         return Response({'success': True, 'data': data}, status=200)
 
     # DELETE analytes.
@@ -113,11 +114,27 @@ def analytes(request, format=None, analyte_id=None):
 
         # Parse the data.
         data = loads(request.body.decode('utf-8'))
-        organization_id = data.get('organization_id')
+
+        # Check that the user is an owner or quality assurance.
         if organization_id not in qa and organization_id not in owner:
             message = f'Your must be an owner or quality assurance to delete {model_type}.'
             return Response({'error': True, 'message': message}, status=403)
 
-        # Delete the objects(s).
-        create_log(f'organizations/{organization_id}/logs', claims, 'Analytes edited.', model_type, f'{model_type}_delete', [data])
+
+        # Delete by URL ID.
+        if analyte_id:
+            delete_document(f'organizations/{organization_id}/{model_type}/{analyte_id}')
+        
+        # Delete by using posted ID(s).
+        else:
+            if isinstance(data, dict):
+                doc_id = data[f'{model_type_singular}_id']
+                delete_document(f'organizations/{organization_id}/{model_type}/{doc_id}')
+            elif isinstance(data, list):
+                for item in data:
+                    doc_id = item[f'{model_type_singular}_id']
+                    delete_document(f'organizations/{organization_id}/{model_type}/{doc_id}')
+
+        # Return success status.
+        create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, f'{model_type}_delete', [data])
         return Response({'success': True, 'data': []}, status=200)

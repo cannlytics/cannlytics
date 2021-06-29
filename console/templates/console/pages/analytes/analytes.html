@@ -18,7 +18,7 @@
 
   <!-- Detail page -->
   <!-- FIXME: Pass model ID -->
-  {% include "console/pages/analytes/analyte.html" with id="" %}
+  {% include "console/pages/analytes/analyte.html" with id=section %}
 
 {% else %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
@@ -34,38 +34,40 @@
           Import
         </button>
         <button
-          class="btn btn-sm-light btn-md-light"
+          class="btn btn-sm-light btn-md-light me-2"
           onclick="cannlytics.settings.exportData('analytes');"
         >
           Export
         </button>
+        <a
+          id="new-button"
+          class="btn btn-sm bg-gradient-green text-white"
+          href="/analytes/new"
+        >
+          New
+        </a>
       </div>
     </div>
 
     <!-- Body -->
     <div class="analytes">
 
-      <!-- Table -->
-      <div class="card my-3">
-        <div class="card-body">
-          <h2 class="h6 mb-3 text-dark">Analytes</h2>
-          <div class="table-responsive">
+      <!-- Placeholder if no data -->
+      <div id="data-placeholder">
+        {% include "console/components/placeholders/placeholder.html" with
+          placeholder=analytes.placeholder
+          only
+        %}
+      </div>
 
-            <!-- Placeholder if no records -->
-            {% if True %}
-              {% include "console/components/placeholders/placeholder.html" with
-                placeholder=analytes.placeholder
-                only
-              %}
-
-            <!-- Client records table -->
-            {% else %}
-              <div id="analytes-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
-            {% endif %}
-
-          </div>
-        </div>
-      </div><!-- End of the table -->
+      <!-- AG Grid Table -->
+      <div id="data-table" class="d-none">
+        <div
+          id="analytes-table"
+          class="ag-theme-alpine-dark"
+          style="height: 326px; width:100%;"
+        ></div>
+      </div>
 
     </div><!-- End of the body -->
     
@@ -75,11 +77,13 @@
 {% endblock console_body %}
 
 <!-- JavaScript -->
-{% comment %} {% block console_js %}
+{% block console_js %}
 
-  <script>
-    cannlytics.analyses.initialize();
-  </script>
+  {% if not section %}
+    <script>
+      cannlytics.app.streamData('analytes', 'analyte');
+    </script>
+  {% endif %}
 
-{% endblock console_js %} {% endcomment %}
+{% endblock console_js %}
 </html>

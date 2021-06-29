@@ -4,13 +4,16 @@ State Variables | Cannlytics Console
 Author: Keegan Skeate
 Company: Cannlytics
 Created: 10/15/2020
-Updated: 6/22/2021
+Updated: 6/29/2021
 
 Relatively static state variables for extra context on each page/screen.
 The idea is to separate the material from the templates,
 with the hope of better-maintained code.
 
 Optional: Turn into models and save in database.
+
+TODO: Save data model fields to organization settings so users can add
+custom fields.
 """
 # pylint:disable=line-too-long
 

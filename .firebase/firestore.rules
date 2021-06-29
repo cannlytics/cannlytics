@@ -27,6 +27,18 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
 
+    // Allow users to manage data in their organization.
+    // Only owners and quality assurance can delete.
+    match /organizations/{organizationId}/{document=**} {
+      allow read, create, update:
+          if organizationId in request.auth.token.team
+          || organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+      allow delete:
+          if organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+    }
+
     // Messages:
     //   - Anyone can read.
     //   - Authenticated users can add and edit messages.

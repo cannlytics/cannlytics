@@ -5,6 +5,8 @@
   Organization Menu | Cannlytics Console
   Created: 4/18/2021
   Updated: 6/11/2021
+  TODO:
+    - Allow users to set other organizations as their active organization.
 -->
 {% load icon %}
 <div class="d-md-flex">
@@ -17,9 +19,8 @@
       data-bs-toggle="dropdown"
       aria-expanded="false"
     >
-      <span id="current-organization" class="brand-font fs-6">
-        {{ organizations.0.name }}
-      </span>
+      <span id="current-organization" class="brand-font fs-6">{{ organizations.0.name }}</span>
+      <input id="organization_id" class="visually-hidden" value="{{ organizations.0.organization_id }}">
     </a>
     <ul
       class="dropdown-menu dropdown-menu-left shadow"
@@ -29,7 +30,7 @@
       <li>
         <a
           class="app-action dropdown-item"
-          onclick="cannlytics.organizations.changeActiveOrganization('{{ org.uid }}')"
+          onclick="cannlytics.organizations.changeActiveOrganization('{{ org.organization_id }}')"
         >
           {{ org.name }}
         </a>
