@@ -11,6 +11,7 @@
  
  export const organizationSettings = {
 
+
   chooseOrganizationPhoto() {
     /*
      * Choose a file to upload.
@@ -19,7 +20,8 @@
     fileSelect.click();
   },
 
-  initializeOrganizationsForm() {
+
+  initializeOrganizationsForm(orgId) {
     /*
      * Initialize the organizations user interface.
      */
@@ -27,15 +29,16 @@
     // this.getOrganizations('organizations-table');
     const fileElem = document.getElementById('organization_photo_url');
     fileElem.addEventListener('change', this.uploadOrganizationPhoto, false);
-    this.resetOrganizationsForm();
+    this.resetOrganizationsForm(orgId);
   },
 
 
-  resetOrganizationsForm() {
+  resetOrganizationsForm(orgId) {
     /*
      * Reset a form with currently saved data, replacing any changes.
      */
-    authRequest('/api/organizations').then((data) => {
+    authRequest(`/api/organizations/${orgId}`).then((data) => {
+      console.log('Organization data:', data);
       const form = document.forms['organizations-form'];
       form.reset();
       formDeserialize(form, data);
@@ -196,6 +199,23 @@
       }
     });
   },
+
+
+  saveOrganizationSettings() {
+    /*
+     * Save an organization's settings.
+     */
+    // TODO: Save settings to /organizations/${orgId}/organization_settings
+  },
+
+
+  getOrganizationSettings() {
+    /*
+     * Save an organization's settings.
+     */
+    // TODO: Get settings from /organizations/${orgId}/organization_settings as a promise.
+  },
+
 
   uploadOrgPhoto(orgId) {
     /*

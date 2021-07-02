@@ -11,23 +11,26 @@
 -->
 {% load static icon %}
 
-  <!-- Organization Form (hidden by default) -->
-  <form id="organization-form" class="mb-3 {{ optional_class }}">
-    <div class="row">
+  <!-- Form -->
+  <form id="organization-form" class="my-3 {{ optional_class }}">
+    <div class="row px-3">
 
-      <!-- Organization image -->
-      <div class="col-md-6 text-center py-3 mb-3 p-md-0 order-md-2">
-        <p class="text-left fs-5 mb-3">
-          <small>Choose an image for your organization, up to 5MB.</small>
-        </p>
+      <!-- Image -->
+      <div class="col-md-5 text-center py-3 mx-3 mb-5 p-md-0 order-md-2">
+        <div class="d-flex flex-column align-items-start">
+          <h1 class="fs-5 lh-base text-dark mb-0">Organization image</h1>
+          <h2 class="fs-6 lh-base text-secondary mb-3">
+            <small>Choose an image for your organization, up to 5MB.</small>
+          </h2>
+        </div>
         <img
-          src="{% static 'console/images/account/default.png' %}"
+          src="{% static 'console/images/icons/outline/teamwork.svg' %}"
           style="height:200px;"
           class="pe-1"
-          id="org-photo-url"
+          id="organization_photo_url"
         >
         <input
-          id="selectPhotoUrl"
+          id="organization_photo_url_input"
           type="file"
           accept="image/*"
           class="visually-hidden"
@@ -40,31 +43,14 @@
         >
           {% icon "image" %}
         </button>
-      </div>
+      </div><!-- End of image -->
 
       <!-- Organization fields -->
       <div class="col-md-6">
-        <p class="text-left fw-bold fs-5 mb-3" style="max-width:540px;">
+        <h1 class="fs-5 lh-base text-dark mb-0">Organization details</h1>
+        <h2 class="fs-6 lh-base text-secondary mb-3">
           <small>Setup your organization for maximum impact.</small>
-        </p>
-
-        <!-- Public / private choice -->
-        <div class="mb-3">
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="public" id="public-choice" value="true">
-            <label class="form-check-label" for="public-choice">
-              Public {% icon "globe" width="16px" height="16px" %}<br>
-              <small class="text-secondary">Appears in search results.</small>
-            </label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="public" id="private-choice" value="false" checked>
-            <label class="form-check-label" for="private-choice">
-              Private {% icon "lock" width="16px" height="16px" %}<br>
-              <small class="text-secondary">Only visible to you.</small>
-            </label>
-          </div>
-        </div>
+        </h2>
 
         <!-- Primary Fields -->
         {% for item in organization_context.fields %}
@@ -76,7 +62,7 @@
                 for="input-{{ item.key }}"
                 class="col-sm-3 col-form-label col-form-label-sm"
               >
-                {{ item.title }}
+                {{ item.label }}
               </label>
 
               <!-- Field input -->
@@ -105,7 +91,7 @@
                   for="input-{{ item.key }}"
                   class="col-sm-3 col-form-label col-form-label-sm"
                 >
-                  {{ item.title }}
+                  {{ item.label }}
                 </label>
 
                 <!-- Field input -->
@@ -145,13 +131,110 @@
       </div>
     <div>
 
+    <!-- TODO: Render team members -->
+
+    <!-- Add team members -->
+    <div class="my-5 px-3">
+      {% comment %} <p class="text-left fw-bold fs-5 mb-3" style="max-width:540px;">
+        <small>Add your organization's team members. <br>🚧 UNDER DEVELOPMENT 🚧</small>
+      </p> {% endcomment %}
+      <h1 class="fs-5 lh-base text-dark mb-0">Team</h1>
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        <small>Manage your organization's team.</small>
+      </h2>
+      <button
+        id="team-member-fields-show"
+        class="btn btn-sm btn-sm-light"
+        onclick="toggleTeamMemberFields(event);"
+      >
+        Add team member
+      </button>
+    </div>
+
+    <!-- Team member fields -->
+    <div id="team-member-fields" class="d-none px-3">
+      <ol id="team-member-list" class="bold-list">
+        <li id="primary-team-member" class="mb-3">
+          <div class="row g-4">
+            <div class="col-md-3">
+              <label for="team-member-name-1" class="form-label">Name</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+              >
+            </div>
+            <div class="col-md-3">
+              <label for="team-member-email-1" class="form-label">Email</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+              >
+            </div>
+            <!-- Optional: Advanced options, such as position -->
+            <!--<div class="col-md-3">
+              <label for="team-member-position-1" class="form-label">Position</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+              >
+            </div>-->
+            <div class="col-md-3">
+              <label for="team-member-permissions-1" class="form-label">
+                Permissions
+                <button
+                  type="button"
+                  class="btn btn-tooltip-help"
+                  data-bs-toggle="tooltip"
+                  data-bs-html="true"
+                  title="<code>CTRL + click</code> to select multiple permissions. <code>Staff</code> permissions are required for most organization operations."
+                >
+                  {% icon 'help-circle' width="18px" height="18px" class="text-secondary" %}
+                </button>
+              </label>
+              <select
+                class="form-select form-select-sm"
+                aria-label="License type"
+                id="team-member-permissions-1"
+                multiple
+              >
+                <!-- TODO: Dynamic permission types-->
+                <option selected value="staff">Staff</option>
+                <option value="admin">Admin</option>
+                <option value="qa">QA</option>
+                <option value="billing">Billing</option>
+                <option value="scheduling">Scheduling</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <button
+                class="btn btn-link text-danger"
+                onclick="toggleTeamMemberFields(event);"
+              >
+                {% icon 'trash-2' hegiht="16px" width="16px" %}
+              </button>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <!-- Add team member button -->
+      <button
+        class="btn btn-sm btn-sm-light"
+        onclick="cannlytics.ui.addListItem(event, 'team-member')"
+      >
+        Add a team member
+      </button>
+
+    </div><!-- End of team member fields -->
+
     <!-- TODO: Render licenses if Org has licenses -->
     <!-- onclick="toggleLicenseFields(event);" -->
     <!-- Add licenses -->
-    <div class="my-4">
-      <p class="text-left fw-bold fs-5 mb-3">
+    <div class="my-5 px-3">
+      <h1 class="fs-5 lh-base text-dark mb-0">Licenses</h1>
+      <h2 class="fs-6 lh-base text-secondary mb-3">
         <small>Manage your organization's licenses.</small>
-      </p>
+      </h2>
       <a
         id="license-fields-show"
         class="btn btn-sm btn-sm-light"
@@ -256,98 +339,6 @@
       </a>
 
     </div><!-- End of license fields --> {% endcomment %}
-
-    <!-- TODO: Render team members -->
-
-    <!-- Add team members -->
-    <div class="my-4">
-      <p class="text-left fw-bold fs-5 mb-3" style="max-width:540px;">
-        <small>Add your organization's team members. <br>🚧 UNDER DEVELOPMENT 🚧</small>
-      </p>
-      <button
-        id="team-member-fields-show"
-        class="btn btn-sm btn-sm-light"
-        onclick="toggleTeamMemberFields(event);"
-      >
-        Add team member
-      </button>
-    </div>
-
-    <!-- Team member fields -->
-    <div id="team-member-fields" class="d-none">
-      <ol id="team-member-list" class="bold-list">
-        <li id="primary-team-member" class="mb-3">
-          <div class="row g-4">
-            <div class="col-md-3">
-              <label for="team-member-name-1" class="form-label">Name</label>
-              <input
-                type="text"
-                class="form-control form-control-sm"
-              >
-            </div>
-            <div class="col-md-3">
-              <label for="team-member-email-1" class="form-label">Email</label>
-              <input
-                type="text"
-                class="form-control form-control-sm"
-              >
-            </div>
-            <!-- Optional: Advanced options, such as position -->
-            <!--<div class="col-md-3">
-              <label for="team-member-position-1" class="form-label">Position</label>
-              <input
-                type="text"
-                class="form-control form-control-sm"
-              >
-            </div>-->
-            <div class="col-md-3">
-              <label for="team-member-permissions-1" class="form-label">
-                Permissions
-                <button
-                  type="button"
-                  class="btn btn-tooltip-help"
-                  data-bs-toggle="tooltip"
-                  data-bs-html="true"
-                  title="<code>CTRL + click</code> to select multiple permissions. <code>Staff</code> permissions are required for most organization operations."
-                >
-                  {% icon 'help-circle' width="18px" height="18px" class="text-secondary" %}
-                </button>
-              </label>
-              <select
-                class="form-select form-select-sm"
-                aria-label="License type"
-                id="team-member-permissions-1"
-                multiple
-              >
-                <!-- TODO: Dynamic permission types-->
-                <option selected value="staff">Staff</option>
-                <option value="admin">Admin</option>
-                <option value="qa">QA</option>
-                <option value="billing">Billing</option>
-                <option value="scheduling">Scheduling</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <button
-                class="btn btn-link text-danger"
-                onclick="toggleTeamMemberFields(event);"
-              >
-                {% icon 'trash-2' hegiht="16px" width="16px" %}
-              </button>
-            </div>
-          </div>
-        </li>
-      </ol>
-
-      <!-- Add team member button -->
-      <button
-        class="btn btn-sm btn-sm-light"
-        onclick="cannlytics.ui.addListItem(event, 'team-member')"
-      >
-        Add a team member
-      </button>
-
-    </div><!-- End of team member fields -->
 
   </form><!-- End of organization form -->
 

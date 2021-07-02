@@ -99,6 +99,16 @@ export const userSettings = {
   },
 
 
+  deleteSignature(data) {
+    /* 
+    * Remove a signature from a user.
+    */
+    // TODO:
+    const collection = db.collection('organizations');
+    return collection.add(data);
+  },
+
+
   uploadSignature(data) {
     /* 
     * Upload a signature for a user.
@@ -109,13 +119,20 @@ export const userSettings = {
   },
 
 
-  deleteSignature(data) {
-    /* 
-    * Remove a signature from a user.
-    */
-    // TODO:
-    const collection = db.collection('organizations');
-    return collection.add(data);
+  viewSignature() {
+    /*
+     * Require the user to enter their pin before showing their signature.
+     */
+    // TODO: Ask user to enter their pin in a dialog.
+  },
+
+
+  openSignature() {
+    /*
+     * Open a user's signature after they have successfully entered their pin.
+     */
+    // TODO: Load the image using the signature_ref
+    // TODO: Show the image on the page.
   },
 
 

@@ -12,7 +12,10 @@
   <!-- Display detail page given a section -->
   {% if unit != '' %}
 
-    {% include './organization.html' with organization_context=settings.organizations %}
+    {% include './organization.html' with
+      organization_context=settings.organizations
+      user=user
+    %}
 
   {% else %}
 

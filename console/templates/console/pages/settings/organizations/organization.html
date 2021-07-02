@@ -17,15 +17,95 @@
     current_page=unit
   %}
 
+  <!-- TODO: Save button -->
+
   <!-- TODO: Organization form -->  
   {% include "console/pages/settings/organizations/organization_form.html" with
     organization_context=organization_context
   %}
 
   <!-- TODO: Data Model Management -->
+  <div class="my-5 px-3">
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Data Models</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">
+      <small>Data models are the primary objects for conceptualizing your workflow. In a nutshell,
+      data models are groups of fields and dictate the data points collected.</small>
+    </h2>
+
+    <!-- TODO: Accordian of data models -->
+    <!-- Each data model has editable
+      abbreviation
+      current_count
+      id_schema
+      singular
+      path
+      title
+      description
+      image_path
+      placeholder
+        action, height, image, message, title, url
+      breadcrumbs
+       title, url, active
+      fields
+        key, label, type, class
+    -->
+
+  </div>
 
 
   <!-- TODO: Traceability Management -->
+  <div class="my-5 px-3">
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Traceability</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">
+      <small>Data models are the primary objects for conceptualizing your workflow. In a nutshell,
+      data models are groups of fields and dictate the data points collected.</small>
+    </h2>
+
+    <!-- Traceability provider -->
+    <div class="col-md-4">
+      <label for="inputTraceabilityProvider" class="form-label">Traceability Provider</label>
+      <select id="inputTraceabilityProvider" class="form-select">
+        {% comment %} <option >Select</option> {% endcomment %}
+        {% comment %} <option>Leaf Data Systems</option> {% endcomment %}
+        <option selected>Metrc</option>
+      </select>
+    </div>
+
+    <!-- Traceability endpoints -->
+
+  </div>
+
+  <!-- Visibility (public / private choice) -->
+  <div class="my-5 px-3">
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Visibility</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">
+      <small>Decide whether or not to list your organization for discovery.</small>
+    </h2>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="public" id="public-choice" value="true">
+      <label class="form-check-label" for="public-choice">
+        Public {% icon "globe" width="16px" height="16px" %}<br>
+        <small class="text-secondary">Appears in search results.</small>
+      </label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="public" id="private-choice" value="false" checked>
+      <label class="form-check-label" for="private-choice">
+        Private {% icon "lock" width="16px" height="16px" %}<br>
+        <small class="text-secondary">Only visible to you.</small>
+      </label>
+    </div>
+  </div>
+
+  <!-- TODO: Danger zone (delete organization) -->
+  <!-- TODO: Only show if user is the owner -->
+  {% if unit and unit in user.owner %}
+    {% include "console/components/forms/delete_option.html" with
+      id=unit
+      model="organizations"
+      model_singular="organization"
+    %}
+  {% endif %}
 
   <!-- Other options -->
   {% comment %} <h2 class="h6 mt-5 mb-0">Other account options</h2>
@@ -42,87 +122,12 @@
     {% endfor %}
   </div> {% endcomment %}
 
-  <!-- TODO: List permissions -->
-  <!--
-    E.g.
-    {'hire_date': '2020-11-17',
-    'is_owner': True,
-    'is_manager': True,
-    'occupations': [],
-    'name': 'AK PERCEPTIVE TESTING LABS, LLC',
-    'alias': 'OK Testing A',
-    'display_name': 'OK Testing A',
-    'credentialed_date': '2020-11-17',
-    'support_activation_date': None,
-    'support_expiration_date': None,
-    'support_last_paid_date': None,
-    'facility_type': {'is_medical': True,
-      'is_retail': False,
-      'is_hemp': False,
-      'restrict_harvest_plant_restore_time_hours': None,
-      'total_member_patients_allowed': None,
-      'can_grow_plants': False,
-      'can_create_opening_balance_plant_batches': False,
-      'can_tag_plant_batches': False,
-      'can_assign_locations_to_plant_batches': False,
-      'plants_require_patient_affiliation': False,
-      'plant_batches_can_contain_mother_plants': False,
-      'can_update_plant_strains': False,
-      'can_track_vegetative_plants': False,
-      'can_create_immature_plant_packages_from_plants': False,
-      'can_package_vegetative_plants': False,
-      'can_package_waste': False,
-      'can_report_harvest_schedules': False,
-      'can_submit_harvests_for_testing': False,
-      'can_require_harvest_sample_lab_test_batches': False,
-      'can_create_opening_balance_packages': False,
-      'can_create_derived_packages': True,
-      'can_assign_locations_to_packages': True,
-      'can_update_locations_on_packages': True,
-      'packages_require_patient_affiliation': False,
-      'can_create_trade_sample_packages': False,
-      'can_donate_packages': False,
-      'can_submit_packages_for_testing': True,
-      'can_create_process_validation_packages': False,
-      'can_require_package_sample_lab_test_batches': True,
-      'can_request_product_remediation': False,
-      'can_remediate_packages_with_failed_lab_results': False,
-      'can_infuse_products': False,
-      'can_test_packages': True,
-      'can_transfer_from_external_facilities': False,
-      'can_sell_to_consumers': False,
-      'can_sell_to_patients': False,
-      'can_sell_to_external_patients': False,
-      'can_sell_to_caregivers': False,
-      'advanced_sales': False,
-      'sales_require_patient_number': False,
-      'sales_require_external_patient_number': False,
-      'sales_require_external_patient_identification_method': False,
-      'sales_require_caregiver_number': False,
-      'sales_require_caregiver_patient_number': False,
-      'can_deliver_sales_to_consumers': False,
-      'sales_delivery_require_consumer_id': False,
-      'can_deliver_sales_to_patients': False,
-      'sales_delivery_require_patient_number': False,
-      'sales_delivery_require_recipient_name': False,
-      'can_have_member_patients': False,
-      'can_report_patient_check_ins': False,
-      'can_specify_patient_sales_limit_exemption': False,
-      'can_report_patients_adverse_responses': False,
-      'can_report_strain_properties': True},
-    'license': {'number': '6a-X0001',
-      'start_date': '2013-06-28',
-      'end_date': '2020-12-28',
-      'license_type': 'Testing Laboratory'}}
-
-  -->
-
 </main>
 
 <!-- JavaScript -->
 {% block console_js %}
   <script>
-    cannlytics.settings.initializeOrganizationForm();
+    cannlytics.settings.initializeOrganizationsForm('{{ unit }}');
   </script>
 {% endblock console_js %}
 

@@ -507,11 +507,11 @@ material = {
     "settings": {
         "options": [
             {"title": "API", "url": "/settings/api"},
-            {"title": "Data collection", "url": "/settings/data-collection"},
+            {"title": "Data", "url": "/settings/data"},
             {"title": "Logs", "url": "/settings/logs"},
-            {"title": "Notifications", "url": "/settings/notifications"},
+            # {"title": "Notifications", "url": "/settings/notifications"},
             {"title": "Organization settings", "url": "/settings/organizations"},
-            {"title": "Theme", "url": "/settings/theme"},
+            # {"title": "Theme", "url": "/settings/theme"},
             {"title": "User Settings", "url": "/settings/user"},
         ],
         "organizations": {
@@ -603,8 +603,14 @@ layout = {
             {
                 "path": "analyses",
                 "title": "Analyses",
-                "description": "Manage analyses, analytes, and boundaries.",
+                "description": "Manage analyses, tests for your analytes.",
                 "image_path": "console/images/icons/multi-tone/certificate-flask.png",
+            },
+            {
+                "path": "analytes",
+                "title": "Analytes",
+                "description": "Manage analytes, compounds that you wish to test.",
+                "image_path": "console/images/icons/multi-tone/microscope.png",
             },
             {
                 "path": "areas",

@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<!--
+  Data Settings | Cannlytics Console
+  Created: 12/9/2020
+  Updated: 6/29/2021
+-->
+{% extends "console/console.html" %}
+{% load icon %}
+{% block console_css %}
+
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/kimbie-light.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script>
+  <!-- and it's easy to individually load additional languages -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/languages/python.min.js"></script>
+  <style>
+    div.code {
+      white-space: pre;
+    }
+  </style>
+
+{% endblock console_css %}
+{% block console_body %}
+
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header-->
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Settings"
+      base_page_url="/settings"
+      current_page="Data Collection"
+    %}
+
+    <!-- Body -->
+    <div class="col-md-8">
+      <h1 class="fs-5 lh-base text-dark mb-0">Data collection settings</h1>
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        <small>Configure how any of your automated routines run.</small>
+      </h2>
+
+      <!-- TODO: Metrc (traceability) sync rate selection. -->
+      <div class="row my-3">
+        <label class="col-sm-3 col-form-label col-form-label-sm">
+          Traceability sync rate (minutes)
+          <button
+            type="button"
+            class="btn btn-tooltip-help"
+            data-bs-toggle="tooltip"
+            data-bs-html="true"
+            title="The duration between when your database-served data is reconciled with the traceability system and consistency is established. That is, the time length between when data is ensured to be consistent everywhere in the pipeline. The more frequent reconciliation occurs, the higher the cost. Reconciliation must occur at least once every 24 hours (1,440 minutes)."
+          >
+            {% icon 'help-circle' width="18px" height="18px" class="text-secondary" %}
+          </button>
+        </label>
+        <div class="col-sm-9">
+          <input
+            type="text"
+            id="input_traceability_sync_rate"
+            class="form-control form-control-sm field-sm"
+            name="traceability_sync_rate"
+            type="number"
+            value="60"
+          >
+        </div>
+      </div>
+
+      <!-- TODO: Local data collection rate. -->
+      <div class="row my-3">
+        <label class="col-sm-3 col-form-label col-form-label-sm">
+          Local data collection rate (minutes)
+          <button
+            type="button"
+            class="btn btn-tooltip-help"
+            data-bs-toggle="tooltip"
+            data-bs-html="true"
+            title="The frequency for your locally stored data, such as measurements, to be imported using a data collection tool."
+          >
+            {% icon 'help-circle' width="18px" height="18px" class="text-secondary" %}
+          </button>
+        </label>
+        <div class="col-sm-9">
+          <input
+            type="text"
+            id="input_local_data_collection_rate"
+            class="form-control form-control-sm field-sm"
+            name="local_data_collection_rate"
+            type="number"
+            value="5"
+          >
+        </div>
+      </div>
+
+      <!-- Data Collection routine -->
+      <div id="data_collection_routine">
+
+        <!-- TODO: Display Python snippet code here! -->
+        <pre><code class="python">def fib(n):
+          a, b = 0, 1
+            while a < n:
+              print(a, end=' ')
+              a, b = b, a+b
+              print()
+          fib(1000)</code></pre>
+
+      </div>
+
+      <div class='code python'>
+        from cannlytics import lims
+
+        def data_collection():
+            """Run data collection."""
+            return NotImplementedError
+        
+
+        if __name__ == '__main__':
+
+            # Do work.
+            data_collection()
+      </div>
+
+
+    </div><!-- End of Body -->
+
+  </main>
+
+{% endblock console_body %}
+{% block console_js %}
+  {% comment %} <script>hljs.initHighlightingOnLoad();</script> {% endcomment %}
+  <script>
+    // first, find all the div.code blocks
+    //console.log(hljs);
+    document.querySelectorAll('div.code').forEach(el => {
+      //// then highlight each
+     hljs.highlightBlock(el);
+    });
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.querySelectorAll('pre code').forEach((el) => {
+        hljs.highlightElement(el);
+      });
+    });
+  </script>
+{% endblock %}
+</html>

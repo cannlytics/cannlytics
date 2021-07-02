@@ -92,7 +92,7 @@ class ConsoleView(TemplateView):
             organizations = get_collection('organizations', filters=[query])
             user_data = get_document(f'users/{uid}')
             context['organizations'] = organizations
-            context['user'] = user_data
+            context['user'] = {**user, **user_data}
         return context
 
     # FIXME: Option to redirect if no user | Doesn't work in production!

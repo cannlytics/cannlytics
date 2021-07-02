@@ -119,15 +119,32 @@
       <h2 class="fs-6 lh-base text-secondary mb-3">
         <small>If you will be signing documents, such as CoAs, then you can add your signature to securely sign using your pin.</small>
       </h2>
-      <!-- TODO: Indicate when user already has a signature -->
-      <!-- TODO: Show change signature button if user already has a signature -->
-      <a
-        class="btn btn-sm btn-sm-light"
-        href="/settings/user/signature"
-      >
-        Set your signature
-      </a>
+      {% if user.signature_ref %}
+        <div id="existing-signature">
+          <a class="btn btn-sm-light me-2" href="/settings/user/pin">
+            Change
+          </a>
+          <button class="btn btn-sm-light me-2" onclick="cannlytics.settings.viewSignature();">
+            View
+          </button>
+          <button class="btn btn-sm-light text-danger" onclick="cannlytics.settings.deleteSignature();">
+            Remove
+          </button>
+          <div class="mt-4">
+            {% icon "check" width="18px" height="18px" class="text-success me-1" %}
+            <span class="fs-6 text-success"><small>Signature saved</small></span>
+          </div>
+        </div>
+      {% else %}
+        <a
+          class="btn btn-sm btn-sm-light"
+          href="/settings/user/signature"
+        >
+          Set your signature
+        </a>
+      {% endif %}
     </div>
+    <div id="signature-canvas" class="d-none"></div>
 
     <!-- Other Account options -->
     <div class="col-md-6 px-3">
