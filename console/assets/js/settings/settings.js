@@ -22,7 +22,7 @@ const apiSettings = {
     */
     const data = serializeForm('new-api-key-form');
     ui.showLoadingButton('create-api-key-button');
-    apiRequest('/api/create-key', data).then((response) => {
+    apiRequest('/api/auth/create-key', data).then((response) => {
       // Optional: Add new key to the table and show the table without reloading!
       window.location.reload(); 
     }).finally(() => {
@@ -38,7 +38,7 @@ const apiSettings = {
     // FIXME:
     const data = serializeForm('api-key-form');
     // ui.showLoadingButton('create-api-key-button');
-    apiRequest('/api/delete-key', data).then((response) => {
+    apiRequest('/api/auth/delete-key', data).then((response) => {
       if (response.error) {
         showNotification('Error deleting API key', response.message, { type: 'error' });
         return;
@@ -59,7 +59,7 @@ const apiSettings = {
     console.log('Getting all API keys...', uid);
     // FIXME: Get from /api/get_api_key_hmacs instead
     return new Promise((resolve, reject) => {
-      apiRequest('/api/get-keys').then((response) => {
+      apiRequest('/api/auth/get-keys').then((response) => {
         resolve(response['data']);
       });
       // db.collection('admin').doc('api').collection('api_key_hmacs')

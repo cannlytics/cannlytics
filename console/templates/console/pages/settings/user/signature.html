@@ -1,9 +1,35 @@
 <!doctype html>
 <html>
-<!-- Signature -->
-<!-- URL: settings/account/signature -->
-<!-- Created 1/2/2021 -->
+<!--
+  Signature Page | Cannlytics Console
+  Created: 1/2/2021
+  Updated: 7/2/2021
+-->
 {% extends "console/console.html" %}
+{% block console_css %}
+
+<!-- Signature Pad -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
+<style>
+  .wrapper {
+    position: relative;
+    width: 400px;
+    height: 200px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  .signature-pad {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width:400px;
+    height:200px;
+  }
+</style>
+
+{% endblock console_css %}
 {% block console_body %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
     
@@ -17,10 +43,53 @@
     %}
 
     <!-- Signature Management -->
-    <!-- Upload signature file -->
-    <!-- Draw signature -->
-    <p>TODO: Signature Management</p>
+    <div class="col-md-6 px-3">
+      <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Signature</h1>
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        <small>Your signature will appear on certificates of analysis (CoAs).</small>
+      </h2>
 
+      <!-- Upload signature file -->
+      <button class="btn btn-sm-light">
+        Upload Signuatre
+      </button>
+
+      <!-- Draw signature -->
+      <div class="wrapper">
+        <canvas id="signature-pad" class="signature-pad" width=400 height=200></canvas>
+      </div>
+      <div>
+        <button id="save">Save</button>
+        <button id="clear">Clear</button>
+      </div>
+    
+    </div>
   </main>
 {% endblock console_body %}
+{% block console_js %}
+
+  <script>
+
+    // Create the signature pad.
+    var signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
+      backgroundColor: 'rgba(233, 233, 233, 0)',
+      penColor: 'rgb(0, 0, 0)'
+    });
+    var saveButton = document.getElementById('save');
+    var cancelButton = document.getElementById('clear');
+
+    // Attach save signature functionality.
+    saveButton.addEventListener('click', function (event) {
+      var data = signaturePad.toDataURL('image/png');
+      cannlytics.settings.uploadSignature(data);
+    });
+
+    // Attach cancel functionality.
+    cancelButton.addEventListener('click', function (event) {
+      signaturePad.clear();
+    });
+
+  </script>
+
+{% endblock %}
 </html>

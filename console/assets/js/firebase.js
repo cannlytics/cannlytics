@@ -89,6 +89,16 @@ const getUserToken = (refresh=false) => new Promise((resolve, reject) => {
 });
 
 
+const verifyUserToken = (token) => new Promise((resolve, reject) => {
+  /*
+   * Verify an authentication token for a given user.
+   */
+  auth.signInWithCustomToken(token)
+    .then((userCredential) => resolve(userCredential.user))
+    .catch((error) => reject(error));
+});
+
+
 /*
  * Firestore interface
  */
@@ -154,7 +164,7 @@ const updateDocument = (path, data) => new Promise((resolve) => {
    */
   const ref = getReference(path);
   ref.set(data, { merge: true }).then((doc) => {
-    resolve(doc.data());
+    if (doc) resolve(doc.data());
   });
 });
 
@@ -162,6 +172,31 @@ const updateDocument = (path, data) => new Promise((resolve) => {
 /*
  * Storage tools
  */
+
+const getDownloadURL = (path) => new Promise((resolve, reject) => {
+  /*
+   * Get a download URL for a given file path.
+   */
+  const storageRef = storage.ref();
+  storageRef.child(path).getDownloadURL()
+  .then((url) => resolve(url))
+  .catch((error) => reject(error));
+
+});
+
+
+const uploadImage = (path, data) => new Promise((resolve) => {
+  /*
+   * Upload an image to Firebase Storage given it's full destination path and 
+   * the image as a data URL.
+   */
+  const storageRef = storage.ref();
+  const ref = storageRef.child(path);
+  ref.putString(data, 'data_url').then((snapshot) => {
+    console.log('Uploaded a data_url string!', snapshot);
+    resolve();
+  });
+});
 
 
 const storageErrors = {
@@ -188,8 +223,11 @@ export {
   storageErrors,
   GoogleAuthProvider,
   changePhotoURL,
+  getCollection,
+  getDownloadURL,
   getUserToken,
   getDocument,
   updateDocument,
-  getCollection,
+  uploadImage,
+  verifyUserToken,
 };

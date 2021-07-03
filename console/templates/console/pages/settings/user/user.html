@@ -105,12 +105,37 @@
       <h2 class="fs-6 lh-base text-secondary mb-3">
         <small>Your pin is used as a second factor of authentication for secure actions, such as signing documents.</small>
       </h2>
-      <a
-        class="btn btn-sm btn-sm-light"
-        href="/settings/user/pin"
-      >
-        Set your pin
-      </a>
+      <div >
+        {% if user.pin_created_at %}
+          <a
+            class="btn btn-sm-light me-2"
+            href="/settings/user/pin"
+          >
+            Change
+          </a>
+          <button
+            class="btn btn-sm-light text-danger"
+            onclick="cannlytics.settings.deletePin();"
+          >
+            Void
+          </button>
+        {% else %}
+          <a
+            class="btn btn-sm btn-sm-light"
+            href="/settings/user/pin"
+          >
+            Set your pin
+          </a>
+        {% endif %}
+      </div>
+        {% if user.pin_created_at %}
+          <div class="alert alert-success mt-4">
+            {% icon "check" width="18px" height="18px" class="text-success me-1" %}
+            <span class="fs-6"><small style="color:#198754 !important;">
+              Pin created at {{ user.pin_created_at }}
+            </small></span>
+          </div>
+      {% endif %}
     </div>
 
     <!-- Signature Management -->
@@ -121,18 +146,18 @@
       </h2>
       {% if user.signature_ref %}
         <div id="existing-signature">
-          <a class="btn btn-sm-light me-2" href="/settings/user/pin">
+          <a class="btn btn-sm-light me-2" href="/settings/user/signature">
             Change
           </a>
-          <button class="btn btn-sm-light me-2" onclick="cannlytics.settings.viewSignature();">
+          <button type="button" class="btn btn-sm-light me-2" data-bs-toggle="modal" data-bs-target="#pinModal">
             View
           </button>
           <button class="btn btn-sm-light text-danger" onclick="cannlytics.settings.deleteSignature();">
             Remove
           </button>
-          <div class="mt-4">
+          <div class="alert alert-success mt-4">
             {% icon "check" width="18px" height="18px" class="text-success me-1" %}
-            <span class="fs-6 text-success"><small>Signature saved</small></span>
+            <span class="fs-6"><small style="color:#198754 !important;">Signature saved</small></span>
           </div>
         </div>
       {% else %}
@@ -163,6 +188,12 @@
       </div>
     </div>
 
+    <!-- TODO: Enter pin dialog -->
+    <!-- TODO: Add functionality to button and input -->
+    {% include "console/components/modals/pin_modal.html" with
+      callback="cannlytics.settings.showSignature"
+    %}
+
   </main>
 {% endblock console_body %}
 
@@ -170,6 +201,12 @@
 {% block console_js %}
   <script>
     cannlytics.settings.initializeAccountForm();
+    
+    // Enable popovers
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+      return new bootstrap.Popover(popoverTriggerEl)
+    });
   </script>
 {% endblock console_js %}
 

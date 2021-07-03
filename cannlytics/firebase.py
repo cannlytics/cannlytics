@@ -130,12 +130,10 @@ def delete_field(ref, field):
         ref (str): A document reference.
     """
     # FIXME:
-    # database = firestore.client()
-    # doc = create_reference(database, ref)
-    # update = {}
-    # update[field] = firestore.DELETE_FIELD
-    # doc.update(update)
-    raise NotImplementedError
+    database = firestore.client()
+    doc = create_reference(database, ref)
+    return doc.update({field: firestore.DELETE_FIELD})
+    # raise NotImplementedError
 
 
 def remove_from_array(ref, field, value):
@@ -755,7 +753,7 @@ def get_file_url(ref, bucket_name=None, expiration=None):
     return blob.generate_signed_url(expiration)
 
 
-def upload_file(bucket_name, destination_blob_name, source_file_name, verbose=True):
+def upload_file(bucket_name, destination_blob_name, source_file_name=None, data_url=None):
     """Upload file to Firebase Storage.
     Args:
         bucket_name (str): The name of the storage bucket.
@@ -765,10 +763,10 @@ def upload_file(bucket_name, destination_blob_name, source_file_name, verbose=Tr
     """
     bucket = storage.bucket(name=bucket_name)
     blob = bucket.blob(destination_blob_name)
-    blob.upload_from_filename(source_file_name)
-    if verbose:
-        print('File {} uploaded to {}.'.format(source_file_name, destination_blob_name))
-
+    if source_file_name:
+        blob.upload_from_filename(source_file_name)
+    else:
+        blob.upload_from_string(data_url)
 
 def upload_files(bucket_name, bucket_folder, local_folder, verbose=True):
     """Upload multiple files to Firebase Storage.

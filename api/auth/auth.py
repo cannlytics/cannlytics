@@ -20,14 +20,20 @@ from django.http.response import JsonResponse
 
 # Internal imports
 from cannlytics.firebase import (
+    create_custom_token,
+    delete_document,
+    delete_field,
     get_collection,
     get_custom_claims,
     get_document,
+    get_file_url,
     initialize_firebase,
     update_document,
+    upload_file,
     verify_session_cookie,
     verify_token,
 )
+from console.settings import 
 
 # Initialize Firebase.
 try:
@@ -92,7 +98,7 @@ def verify_session(request):
 
 def create_api_key(request, *args, **argv): #pylint: disable=unused-argument
     """Mint an API key for a user, granting programmatic use at the same
-    level of permission as the uer.
+    level of permission as the user.
     Args:
         request (HTTPRequest): A request to get the user's session.
     Returns:
@@ -198,3 +204,135 @@ def sha256_hmac(secret, message):
     byte_key = bytes(secret, 'UTF-8')
     payload = message.encode()
     return hmac.new(byte_key, payload, sha256).hexdigest()
+
+#-----------------------------------------------------------------------
+# User Pin Utilities
+#-----------------------------------------------------------------------
+
+def create_user_pin(request, *args, **argv): #pylint: disable=unused-argument
+    """Using a pin for a given user, create and store a hash of the `pin:uid`.
+    Args:
+        request (HTTPRequest): A request to get the user's session.
+    Returns:
+        (JsonResponse): A JSON response with a success message.
+    """
+    user_claims = verify_session(request)
+    uid = user_claims['uid']
+    post_data = loads(request.body.decode('utf-8'))
+    pin = post_data['pin']
+    message = f'{pin}:{uid}'
+    app_secret = get_document('admin/api')['app_secret_key']
+    code = sha256_hmac(app_secret, message)
+    post_data = loads(request.body.decode('utf-8'))
+    now = datetime.now()
+    # Optional: Add expiration to pins
+    user_claims['hmac'] = code
+    delete_user_pin(request)
+    update_document(f'admin/api/pin_hmacs/{code}', user_claims)
+    update_document(f'users/{uid}', {'pin_created_at': now.isoformat() })
+    return JsonResponse({'success': True, 'message': 'Pin successfully created.'})
+
+
+def create_signature(request, *args, **argv): #pylint: disable=unused-argument
+    """Save a signature for a user, given their pin.
+    Args:
+        request (HTTPRequest): A request to get the user's session.
+    Returns:
+        (JsonResponse): A JSON response with a success message.
+    """
+    user_claims = verify_session(request)
+    uid = user_claims['uid']
+    post_data = loads(request.body.decode('utf-8'))
+    # pin = post_data['pin']
+    data_url = post_data['data_url']
+    # message = f'{pin}:{uid}'
+    # app_secret = get_document('admin/api')['app_secret_key']
+    # code = sha256_hmac(app_secret, message)
+    # verified_claims = get_document(f'admin/api/pin_hmacs/{code}')
+    # if verified_claims.get('uid') == uid:
+    ref = f'admin/auth/{uid}/user_settings/signature.png'
+    upload_file(, ref, data_url=data_url)
+    url = get_file_url(ref, bucket_name=None)
+    update_document(f'admin/auth/{uid}/user_settings', {
+        'signature_url': url,
+    })
+    return JsonResponse({'success': True, 'message': 'Signature saved.', 'signature_url': url})
+    # else:
+    #     return JsonResponse({'error': True, 'message': 'Invalid pin.'})
+
+
+def delete_signature(request, *args, **argv): #pylint: disable=unused-argument
+    """Delete a user's signature.
+    Args:
+        request (HTTPRequest): A request to get the user's session.
+    Returns:
+        (JsonResponse): A JSON response containing the user's claims.
+    """
+    user_claims = verify_session(request)
+    uid = user_claims['uid']
+    delete_field(f'admin/auth/{uid}/user_settings', 'signature_url')
+    return JsonResponse({'success': True, 'message': 'Signature deleted.'})
+
+
+def delete_user_pin(request, *args, **argv): #pylint: disable=unused-argument
+    """Delete all pins for a given user, removing the data stored with their hash.
+    Args:
+        request (HTTPRequest): A request to get the user's session.
+    Returns:
+        (JsonResponse): A JSON response containing the API key in an
+            `api_key` field.
+    """
+    user_claims = verify_session(request)
+    uid = user_claims['uid']
+    query = {'key': 'uid', 'operation': '==', 'value': uid}
+    existing_pins = get_collection('admin/api/pin_hmacs', filters=[query])
+    for pin in existing_pins:
+        code = pin['hmac']
+        delete_document(f'admin/api/pin_hmacs/{code}')
+    delete_field(f'users/{uid}', 'pin_created_at')
+    return JsonResponse({'success': True, 'message': 'User pin deleted.'})
+
+
+def get_signature(request, *args, **argv): #pylint: disable=unused-argument
+    """Get a user's signature given their pin, using a stored hash of the `pin:uid`.
+    Args:
+        request (HTTPRequest): A request to get the user's session.
+    Returns:
+        (JsonResponse): A JSON response containing the user's claims.
+    """
+    user_claims = verify_session(request)
+    uid = user_claims['uid']
+    post_data = loads(request.body.decode('utf-8'))
+    pin = post_data['pin']
+    message = f'{pin}:{uid}'
+    app_secret = get_document('admin/api')['app_secret_key']
+    code = sha256_hmac(app_secret, message)
+    verified_claims = get_document(f'admin/api/pin_hmacs/{code}')
+    if verified_claims.get('uid') == uid:
+        user_settings = get_document(f'admin/auth/{uid}/user_settings')
+        data_url = user_settings['signature_url']
+        return JsonResponse({'success': True, 'message': 'User verified.', 'data_url': data_url})
+    else:
+        return JsonResponse({'error': True, 'message': 'Invalid pin.'})
+
+
+def verify_user_pin(request, *args, **argv): #pylint: disable=unused-argument
+    """Verify a pin for a given user, using a stored hash of the `pin:uid`.
+    Args:
+        request (HTTPRequest): A request to get the user's session.
+    Returns:
+        (JsonResponse): A JSON response containing the user's claims.
+    """
+    user_claims = verify_session(request)
+    uid = user_claims['uid']
+    post_data = loads(request.body.decode('utf-8'))
+    pin = post_data['pin']
+    message = f'{pin}:{uid}'
+    app_secret = get_document('admin/api')['app_secret_key']
+    code = sha256_hmac(app_secret, message)
+    verified_claims = get_document(f'admin/api/pin_hmacs/{code}')
+    if verified_claims.get('uid') == uid:
+        token = create_custom_token(uid, claims={'pin_verified': True})
+        return JsonResponse({'success': True, 'message': 'User verified.', 'token': token})
+    else:
+        return JsonResponse({'error': True, 'message': 'Invalid pin.'})
