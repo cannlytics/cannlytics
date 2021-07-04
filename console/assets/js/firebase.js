@@ -158,14 +158,16 @@ const getReference = (path) => {
 };
 
 
-const updateDocument = (path, data) => new Promise((resolve) => {
+const updateDocument = (path, data) => new Promise((resolve, reject) => {
   /*
    * Update or create a document in Firestore.
    */
   const ref = getReference(path);
   ref.set(data, { merge: true }).then((doc) => {
     if (doc) resolve(doc.data());
-  });
+    else resolve();
+  })
+  .catch((error) => reject(error));
 });
 
 
@@ -193,8 +195,20 @@ const uploadImage = (path, data) => new Promise((resolve) => {
   const storageRef = storage.ref();
   const ref = storageRef.child(path);
   ref.putString(data, 'data_url').then((snapshot) => {
-    console.log('Uploaded a data_url string!', snapshot);
-    resolve();
+    resolve(snapshot);
+  });
+});
+
+
+const uploadFile = (path, file) => new Promise((resolve) => {
+  /*
+   * Upload an image to Firebase Storage given it's full destination path and 
+   * the image as a data URL.
+   */
+  const storageRef = storage.ref();
+  const ref = storageRef.child(path);
+  ref.put(file).then((snapshot) => {
+    resolve(snapshot);
   });
 });
 
@@ -229,5 +243,6 @@ export {
   getDocument,
   updateDocument,
   uploadImage,
+  uploadFile,
   verifyUserToken,
 };

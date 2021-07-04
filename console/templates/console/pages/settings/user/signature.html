@@ -13,8 +13,8 @@
 <style>
   .wrapper {
     position: relative;
-    width: 400px;
-    height: 200px;
+    width: 420px;
+    height: 175px;
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
@@ -24,14 +24,14 @@
     position: absolute;
     left: 0;
     top: 0;
-    width:400px;
-    height:200px;
+    width: 420px;
+    height: 175px;
   }
 </style>
 
 {% endblock console_css %}
 {% block console_body %}
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4" style="min-height:525px;">
     
     <!-- Header -->
     {% include "console/components/links/breadcrumbs.html" with
@@ -43,24 +43,45 @@
     %}
 
     <!-- Signature Management -->
-    <div class="col-md-6 px-3">
+    <div class="wrapper mx-3">
       <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Signature</h1>
       <h2 class="fs-6 lh-base text-secondary mb-3">
-        <small>Your signature will appear on certificates of analysis (CoAs).</small>
+        <small>Your signature for signing documents,
+        such as certificates of analysis (CoAs).</small>
       </h2>
 
-      <!-- Upload signature file -->
-      <button class="btn btn-sm-light">
-        Upload Signuatre
-      </button>
-
       <!-- Draw signature -->
-      <div class="wrapper">
-        <canvas id="signature-pad" class="signature-pad" width=400 height=200></canvas>
+      <div class="wrapper bg-light border rounded my-4 me-0">
+        <canvas
+          id="signature-pad"
+          class="signature-pad"
+          width=400
+          height=200
+        ></canvas>
       </div>
-      <div>
-        <button id="save">Save</button>
-        <button id="clear">Clear</button>
+
+      <!-- Save and clear options -->
+      <div class="d-flex justify-content-end">
+        <button
+          id="clear-button"
+          class="btn btn-sm-light me-2"
+        >
+          Clear
+        </button>
+        <button
+          id="upload-button"
+          class="btn btn-sm-light me-2"
+          onclick="document.getElementById('signature_input').click();"
+        >
+          Upload Signature
+        </button>
+        <input type="file" id="signature_input" multiple accept="image/*" class="visually-hidden">
+        <button
+          id="save-button"
+          class="btn btn-sm bg-gradient-green text-white"
+        >
+          Save Signature
+        </button>
       </div>
     
     </div>
@@ -75,19 +96,28 @@
       backgroundColor: 'rgba(233, 233, 233, 0)',
       penColor: 'rgb(0, 0, 0)'
     });
-    var saveButton = document.getElementById('save');
-    var cancelButton = document.getElementById('clear');
 
     // Attach save signature functionality.
+    var saveButton = document.getElementById('save-button');
     saveButton.addEventListener('click', function (event) {
       var data = signaturePad.toDataURL('image/png');
-      cannlytics.settings.uploadSignature(data);
+      cannlytics.settings.saveSignature('{{ user.uid }}', data);
     });
 
     // Attach cancel functionality.
+    var cancelButton = document.getElementById('clear-button');
     cancelButton.addEventListener('click', function (event) {
       signaturePad.clear();
     });
+
+    // Function to upload a user's signature
+    function uploadUserSignature(event) {
+      cannlytics.settings.uploadSignature(event, '{{ user.uid }}');
+    }
+
+    // Attach upload image functionality.
+    const fileElem = document.getElementById('signature_input');
+    fileElem.addEventListener('change', uploadUserSignature, false);
 
   </script>
 

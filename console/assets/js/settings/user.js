@@ -5,8 +5,22 @@
  * Updated: 7/3/2021
  */
 
-import { auth, changePhotoURL, storageErrors, updateDocument, uploadImage, verifyUserToken } from '../firebase.js';
-import { authRequest, formDeserialize, serializeForm, showNotification } from '../utils.js';
+import {
+  auth,
+  changePhotoURL,
+  getDownloadURL,
+  storageErrors,
+  updateDocument,
+  uploadImage,
+  uploadFile,
+} from '../firebase.js';
+
+import {
+  authRequest,
+  formDeserialize,
+  serializeForm,
+  showNotification,
+} from '../utils.js';
 
 
 export const userSettings = {
@@ -99,6 +113,7 @@ export const userSettings = {
       if (response.success) {
         document.getElementById('pin_input').value = '';
         showNotification('Pin created', response.message, { type: 'success' });
+        window.location.href = '/settings/user';
       } else {
         showNotification('Invalid pin', response.message, { type: 'error' });
       }
@@ -113,6 +128,7 @@ export const userSettings = {
     authRequest('/api/auth/delete-signature').then((response) => {
       if (response.success) {
         showNotification('Signature deleted', response.message, { type: 'success' });
+        window.location.reload(); // Optional: Hide banner more elegantly.
       } else {
         showNotification('Signature deletion failed', response.message, { type: 'error' });
       }
@@ -127,7 +143,7 @@ export const userSettings = {
     authRequest('/api/auth/delete-pin').then((response) => {
       if (response.success) {
         showNotification('Voided user pin', response.message, { type: 'success' });
-        window,location.reload(); // TODO: Hide banner more elegantly.
+        window,location.reload(); // Optional: Hide banner more elegantly.
       } else {
         showNotification('Voiding pin failed', response.message, { type: 'error' });
       }
@@ -135,30 +151,36 @@ export const userSettings = {
   },
 
 
-  uploadSignature(data) {
+  saveSignature(uid, data) {
     /* 
     * Upload a signature for a user.
     */
-    authRequest('/api/auth/create-signature', { data_url: data }).then((response) => {
-      if (response.success) {
-        showNotification('Signature saved', response.message, { type: 'success' });
-      } else {
-        showNotification('Signature upload failed', response.message, { type: 'error' });
-      }
+    // FIXME: Upload signature through the API.
+    // authRequest('/api/auth/create-signature', { data_url: data }).then((response) => {
+    //   if (response.success) {
+    //     showNotification('Signature saved', response.message, { type: 'success' });
+    //   } else {
+    //     showNotification('Signature upload failed', response.message, { type: 'error' });
+    //   }
+    // });
+    const signatureRef = `users/${uid}/user_settings/signature.png`;
+    uploadImage(signatureRef, data).then((snapshot) => {
+      getDownloadURL(signatureRef).then((url) => {
+        updateDocument(`users/${uid}`, {
+          signature_created_at: new Date().toISOString(),
+          signature_ref: signatureRef,
+          signature_url: url,
+        }).then(() => {
+          showNotification('Signature saved', 'Signature saved with your files.', { type: 'success' });
+          window.location.href = '/settings/user';
+        })
+        .catch((error) => {
+          showNotification('Error saving signature', 'An error occurred when saving your signature.', { type: 'error' });
+        });
+      }).catch((error) => {
+        showNotification('Error uploading signature', 'An error occurred when uploading your signature.', { type: 'error' });
+      });
     });
-    // uploadImage(signatureRef, data)
-    //   .then(() => {
-    //     getDownloadURL(signatureRef).then((url) => {
-    //       console.log('Retrieved download URL:', url)
-    //       updateDocument(`users/${uid}`, {
-    //         signature_ref: signatureRef,
-    //         signature_url: url,
-    //       });
-    //       // Update the UI.
-    //       // var img = document.getElementById('myimg');
-    //       // img.setAttribute('src', url);
-    //     });
-    //   });
   },
 
 
@@ -166,42 +188,59 @@ export const userSettings = {
     /*
      * Require the user to enter their pin before showing their signature.
      */
-    // TODO: Ask user to enter their pin in a dialog.
-    // Get a user's signature image data url given their pin
     event.preventDefault();
     const pin = document.getElementById('pin_input').value;
     authRequest('/api/auth/get-signature', { pin }).then((response) => {
       if (response.success) {
-        // TODO: Show the returned data image URL!
-        console.log(response.signature_url);
+        var modalEl = document.getElementById('pinModal')
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        const signatureEl = document.getElementById('signature-canvas');
+        signatureEl.classList.remove('d-none');
+        signatureEl.src = response.signature_url;
+        document.getElementById('view_button').classList.add('d-none');
+        document.getElementById('hide_button').classList.remove('d-none');
+        modal.hide();
       } else {
         showNotification('Invalid pin', response.message, { type: 'error' });
       }
+    })
+    .catch((error) => {
+      showNotification('Invalid pin', error.message, { type: 'error' });
     });
   },
 
 
-  // showSignature(event) {
-  //   /*
-  //    * Show a user's signature after they have successfully entered their pin.
-  //    */
-  //   // TODO: Load the image using the signature_ref
-  //   // TODO: Show the image on the page.
-  //   // FIXME: Is this secure?
-  //   event.preventDefault();
-  //   const pin = document.getElementById('pin_input').value;
-  //   authRequest('/api/auth/verify-pin', { pin }).then((response) => {
-  //     if (response.success) {
-  //       verifyUserToken(response.token).then((response) => {
-  //         console.log(response);
-  //         // TODO: Securely show signature
-  //       })
-  //       .catch((error) => {
-  //         showNotification('Invalid pin', error.message, { type: 'error' });
-  //       });
-  //     }
-  //   });
-  // },
+  hideSignature() {
+    /*
+     * Hide a signature after it has been shown.
+     */
+    document.getElementById('hide_button').classList.add('d-none');
+    document.getElementById('view_button').classList.remove('d-none');
+    document.getElementById('signature-canvas').classList.add('d-none');
+  },
 
+
+  uploadSignature(event, uid) {
+    /*
+     * Upload an existing signature file to Firebase Storage.
+     */
+    const signatureRef = `users/${uid}/user_settings/signature.png`;
+    if (event.target.files.length) {
+      showNotification('Uploading signature', 'Uploading your signature image...', { type: 'wait' });
+      uploadFile(signatureRef, event.target.files[0]).then((snapshot) => {
+        getDownloadURL(signatureRef).then((url) => {
+          updateDocument(`users/${uid}`, {
+            signature_created_at: new Date().toISOString(),
+            signature_ref: signatureRef,
+            signature_url: url,
+          }).then(() => {
+            showNotification('Signature saved', 'Signature saved with your files.', { type: 'success' });
+            window.location.href = '/settings/user';
+          })
+          .catch((error) => console.log(error));
+        }).catch((error) => console.log(error));
+      });
+    }
+  }
 
 };

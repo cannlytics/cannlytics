@@ -123,7 +123,7 @@ urlpatterns = [
         path('/delete-pin', auth.delete_user_pin),
         path('/delete-signature', auth.delete_signature),
         path('/get-keys', auth.get_api_key_hmacs),
-        path('/get-signature', auth.create_signature),
+        path('/get-signature', auth.get_signature),
         path('/verify-pin', auth.verify_user_pin),
     ])),
 ]
