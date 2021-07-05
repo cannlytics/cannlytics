@@ -239,7 +239,7 @@
   },
 
 
-  saveOrganizationSettings(event) {
+  saveOrganizationSettings(event, orgId) {
     /*
      * Save an organization's settings.
      */
@@ -248,9 +248,9 @@
     const data = serializeForm(form);
     console.log('Organization data:', data);
     // TODO: Save settings to /organizations/${orgId}/organization_settings
-    authRequest('/api/organizations', data).then((response) => {
+    authRequest(`/api/organizations/${orgId}`, data).then((response) => {
       if (response.success) {
-        showNotification('Organization details saved', response.message, { type: 'success' });
+        showNotification('Organization details saved', 'Organization details successfully saved.', { type: 'success' });
       } else {
         showNotification('Failed to save organization details', response.message, { type: 'error' });
       }

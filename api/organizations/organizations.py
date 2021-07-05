@@ -1,7 +1,7 @@
 """
 Organizations API Views | Cannlytics API
 Created: 4/25/2021
-Updated: 6/10/2021
+Updated: 7/5/2021
 Description: API to interface with organizations.
 """
 
@@ -191,7 +191,7 @@ def organizations(request, format=None, organization_id=None):
             doc['owner'] = uid
 
         # Create or update the organization in Firestore.
-        entry = {**data, **doc}
+        entry = {**doc, **data}
         print('Entry:', entry)
         update_document(f'{model_type}/{organization_id}', entry)
 
@@ -213,7 +213,7 @@ def organizations(request, format=None, organization_id=None):
             changes=changes
         )
 
-        return Response({'data': entry}, content_type='application/json')
+        return Response({'data': entry, 'success': True}, content_type='application/json')
 
     elif request.method == 'DELETE':
 
