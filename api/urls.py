@@ -79,6 +79,7 @@ urlpatterns = [
         path('', organizations.organizations),
         path('/<organization_id>', organizations.organizations),
         path('/<organization_id>/settings', organizations.organizations),
+        path('/<organization_id>/team', organizations.organization_team),
         # TODO: Handle join organization with post requests?
         # path('/<organization_id>/join/', organizations.join_organization),
     ])),

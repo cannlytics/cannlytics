@@ -9,7 +9,7 @@ import { auth, db } from '../firebase.js';
 import { organizationSettings } from './organizations.js';
 import { userSettings } from './user.js';
 import { errorSettings } from './errors.js';
-import { apiRequest, formDeserialize, serializeForm, showNotification } from '../utils.js';
+import { apiRequest, deserializeForm, serializeForm, showNotification } from '../utils.js';
 import { ui } from '../ui/ui.js';
 
 
@@ -117,7 +117,7 @@ const apiSettings = {
      * Render a project's data when navigating to a project page.
      */
     const data = JSON.parse(localStorage.getItem('api-key'));
-    formDeserialize(document.forms['api-key-form'], data);
+    deserializeForm(document.forms['api-key-form'], data);
     console.log(data);
   },
 

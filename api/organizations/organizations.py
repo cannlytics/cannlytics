@@ -31,6 +31,29 @@ from cannlytics.traceability.metrc import authorize
 from api.auth import auth #pylint: disable=import-error
 
 
+@api_view(['GET'])
+def organization_team(request, format=None, organization_id=None):
+    """Get team member data for an organization, given an authenticated
+    request from a member of the organization.
+    """
+    claims = auth.verify_session(request)
+    print('Claims:', claims)
+    try:
+        if organization_id in claims['team']:
+            organization_data = get_document(f'organizations/{organization_id}')
+            team_members = []
+            for uid in organization_data['team']:
+                team_member = get_document(f'users/{uid}')
+                team_members.append(team_member)
+            return Response({'data': team_members}, content_type='application/json')
+        else:
+            message = 'You are not a member of the requested organization.'
+            return Response({'error': True, 'message': message}, status=403)
+    except KeyError:
+        message = 'You are not a member of any teams. Try authenticating.'
+        return Response({'error': True, 'message': message}, status=401)
+
+
 @api_view(['GET', 'POST'])
 def organizations(request, format=None, organization_id=None):
     """Get, create, or update organizations.
@@ -173,7 +196,7 @@ def organizations(request, format=None, organization_id=None):
         update_document(f'{model_type}/{organization_id}', entry)
 
         # TEST: On organization creation, the creating user get custom claims.
-        update_custom_claims(uid, claims={'owner': [organization_id]})
+        update_custom_claims(uid, claims={'owner': [organization_id], 'team': [organization_id]})
 
         # TODO:  Owners can add other users to the team and
         # the receiving user then gets the claims.

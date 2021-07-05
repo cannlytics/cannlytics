@@ -505,6 +505,7 @@ material = {
         ],
     },
     "settings": {
+        "fields": {},
         "options": [
             {"title": "API", "url": "/settings/api"},
             {"title": "Data", "url": "/settings/data"},
@@ -521,7 +522,7 @@ material = {
             ],
             "fields": [
                 {"key": "name", "label": "Name"},
-                {"key": "trade_name", "label": "Trade Name (DBA)"},
+                {"key": "trade_name", "label": "Trade Name"},
                 {"key": "website", "label": "Website"},
                 {"type": "email", "key": "email", "label": "Email"},
                 {"key": "phone", "label": "Phone"},
@@ -1020,3 +1021,22 @@ material["get-started"] = {
         },
     ],
 }
+
+# FIXME: Condense state so it does not have to be duplicated in settings.
+material['settings']['traceability'] = material['traceability']
+data_models = [
+    {'title': 'Analyses', 'key': 'analyses'},
+    {'title': 'Analytes', 'key': 'analytes'},
+    {'title': 'Areas', 'key': 'areas'},
+    {'title': 'Contacts', 'key': 'contacts'},
+    {'title': 'Instruments', 'key': 'instruments'},
+    {'title': 'Inventory', 'key': 'inventory'},
+    {'title': 'Measurements', 'key': 'measurements'},
+    {'title': 'Projects', 'key': 'projects'},
+    {'title': 'Results', 'key': 'results'},
+    {'title': 'Samples', 'key': 'samples'},
+    {'title': 'Transfers', 'key': 'transfers'},
+]
+for data_model in data_models:
+    key = data_model['key']
+    material['settings']['fields'][key] = {**data_model, "fields": material[key]['fields']}

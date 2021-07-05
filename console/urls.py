@@ -26,6 +26,8 @@ urlpatterns = [
     path('<slug:screen>', views.ConsoleView.as_view()),
     path('<slug:screen>/<slug:section>', views.ConsoleView.as_view()),
     path('<slug:screen>/<slug:section>/<slug:unit>', views.ConsoleView.as_view()),
+    path('<slug:screen>/<slug:section>/<slug:unit>/<slug:collection>', views.ConsoleView.as_view()),
+    path('<slug:screen>/<slug:section>/<slug:unit>/<slug:collection>/<slug:document>', views.ConsoleView.as_view()),
 ]
 
 # Error pages.

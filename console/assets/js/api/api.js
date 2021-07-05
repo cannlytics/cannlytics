@@ -8,7 +8,7 @@
  * stored in the Firestore database and Metrc API.
  */
 
-// import { authRequest, formDeserialize, serializeForm } from '../utils.js';
+// import { authRequest, deserializeForm, serializeForm } from '../utils.js';
  
 
 export const api = {
@@ -32,7 +32,7 @@ export const api = {
   //   as context if available in a form, otherwise just pass the ID. */
   //   if (id) return authRequest(`/api/${model}/${id}`, null, { delete: true });
   //   const form = document.getElementById(`${model}-form`);
-  //   const data = formDeserialize(form);
+  //   const data = deserializeForm(form);
   //   return authRequest(`/api/${model}`, data, { delete: true });
   // },
 

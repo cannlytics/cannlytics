@@ -2,9 +2,9 @@
  * User Interface JavaScript | Cannlytics Console
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 5/2/2021
- * Updated: 6/10/2021
+ * Updated: 7/4/2021
  */
-import { formDeserialize, hasClass } from '../utils.js';
+import { deserializeForm, hasClass } from '../utils.js';
 
 
 const formHelpers = {
@@ -70,7 +70,7 @@ export const navigationHelpers = {
      * View an object's data from local storage when navigating to a detail page.
      */
     const data = JSON.parse(localStorage.getItem(modelSingular));
-    formDeserialize(document.forms[`${modelSingular}-form`], data)
+    deserializeForm(document.forms[`${modelSingular}-form`], data)
     console.log('DEV: Observation data:', data);
   },
 
@@ -83,6 +83,13 @@ export const ui = {
   ...formHelpers,
   ...initHelpers,
   ...navigationHelpers,
+
+  choosePhoto(id) {
+    /*
+     * Choose a file to upload.
+     */
+    document.getElementById(id).click();
+  },
 
 
   hideSidebar() {
@@ -126,7 +133,6 @@ export const ui = {
     }
   },
 
-
   addListItem(event, type) {
     /*
      * Adds a list item of input fields to the UI by
@@ -134,6 +140,7 @@ export const ui = {
      * The delete button is shown and wired-up.
      * The tooltip is removed.
      */
+    // FIXME: Generalize to handle adding data model fields? Or create a new function.
     event.preventDefault();
     var ul = document.getElementById(`${type}-list`);
     var li = document.getElementById(`primary-${type}`).cloneNode(true);

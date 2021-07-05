@@ -2,12 +2,12 @@
  * Organizations JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 6/9/2021
- * Updated: 6/11/2021
+ * Updated: 7/5/2021
  */
  import { api } from '../api/api.js';
  import { theme } from '../settings/theme.js';
- import { changePhotoURL, storageErrors } from '../firebase.js';
- import { authRequest, formDeserialize, hasClass, Password, serializeForm, slugify, showNotification } from '../utils.js';
+ import { changePhotoURL, getDownloadURL, updateDocument, uploadFile, storageErrors } from '../firebase.js';
+ import { authRequest, deserializeForm, serializeForm, slugify, showNotification } from '../utils.js';
  
  export const organizationSettings = {
 
@@ -16,7 +16,7 @@
     /*
      * Choose a file to upload.
      */
-    const fileSelect = document.getElementById('organization_photo_url');
+    const fileSelect = document.getElementById('organization_photo_url_input');
     fileSelect.click();
   },
 
@@ -25,9 +25,7 @@
     /*
      * Initialize the organizations user interface.
      */
-    console.log('Initializing organization form...');
-    // this.getOrganizations('organizations-table');
-    const fileElem = document.getElementById('organization_photo_url');
+    const fileElem = document.getElementById('organization_photo_url_input');
     fileElem.addEventListener('change', this.uploadOrganizationPhoto, false);
     this.resetOrganizationsForm(orgId);
   },
@@ -37,11 +35,16 @@
     /*
      * Reset a form with currently saved data, replacing any changes.
      */
-    authRequest(`/api/organizations/${orgId}`).then((data) => {
-      console.log('Organization data:', data);
-      const form = document.forms['organizations-form'];
+    authRequest(`/api/organizations/${orgId}`).then((response) => {
+      console.log('Organization data:', response.data);
+      const form = document.forms['organization-form'];
       form.reset();
-      formDeserialize(form, data);
+      deserializeForm(form, response.data);
+      if (response.data.photo_url) {
+        document.getElementById('organization_photo_url').src = response.data.photo_url;
+      } else {
+        document.getElementById('organization_photo_url').src = "/static/console/images/icons/outline/teamwork.svg";
+      }
     });
   },
 
@@ -50,19 +53,28 @@
     /*
      * Upload a organization photo through the API.
      */
+    const orgId = document.getElementById('organization_id_input').value;
     if (this.files.length) {
       showNotification('Uploading image', 'Uploading your organization image...', { type: 'wait' });
-      // changePhotoURL(this.files[0]).then((downloadURL) => {
-      // FIXME: Upload image!
-      showNotification('NOT IMPLEMENTED', 'Implementation coming soon', { type: 'error' });
-      // const orgId = document.getElementById('input_organization_id').value;
-      // authRequest(`/api/organizations/${orgId}`, { photo_url: downloadURL });
-      // document.getElementById('organization_photo_url').src = downloadURL;
-      // const message = 'Successfully uploaded organization image.';
-      // showNotification('Uploading image complete', message, { type: 'success' });
-      // }).catch((error) => {
-      //   showNotification('Photo Change Error', storageErrors[error.code], { type: 'error' });
-      // });
+      const file = this.files[0];
+      const ext = file.name.split('.')[1];
+      const ref = `organizations/${orgId}/organization_settings/logo.${ext}`;
+      uploadFile(ref, file).then((snapshot) => {
+        getDownloadURL(ref).then((url) => {
+          updateDocument(`organizations/${orgId}`, {
+            photo_uploaded_at: new Date().toISOString(),
+            photo_modified_at: file.lastModifiedDate,
+            photo_size: file.size,
+            photo_type: file.type,
+            photo_ref: ref,
+            photo_url: url,
+          }).then(() => {
+            showNotification('Photo saved', 'Organization photo saved with your organization files.', { type: 'success' });
+            document.getElementById('organization_photo_url').src = url;
+          })
+          .catch((error) => showNotification('Photo Change Error', 'Error saving photo.', { type: 'error' }));
+        }).catch((error) => showNotification('Photo Change Error', 'Error uploading photo.', { type: 'error' }));
+      });
     }
   },
 
@@ -132,25 +144,51 @@
   },
 
 
-  updateOrganization() {
+  getTeamMembers(orgId, owner, uid) {
     /*
-     * 
+     * Get team member data.
      */
+    console.log('Owner:', owner);
+    const isOwner = owner === uid;
+    authRequest(`/api/organizations/${orgId}/team`, ).then((response) => {
+      console.log('Team member data:', response.data);
+      response.data.forEach((item) => {
+        addTeamMemberCard('team-member-grid', item, owner, isOwner, orgId);
+      });
+    });
   },
 
 
-  createOrganization() {
-    /*
-     * 
-     */
-  },
+  // updateOrganization() {
+  //   /*
+  //    * 
+  //    */
+  // },
+
+
+  // createOrganization() {
+  //   /*
+  //    * 
+  //    */
+  // },
 
 
   deleteOrganization() {
     /*
      * 
      */
+    // TODO: Make authRequest to delete an organization.
   },
+
+
+  removeTeamMember(uid) {
+    /*
+     * Remove a team member from an organization through the API (owner's only).
+     */
+    // TODO: Make authRequest to remove a team member.
+    console.log('Removing team member:', uid);
+  },
+
 
 
   joinOrganizationRequest() {
@@ -201,11 +239,31 @@
   },
 
 
-  saveOrganizationSettings() {
+  saveOrganizationSettings(event) {
     /*
      * Save an organization's settings.
      */
+    event.preventDefault();
+    const form = document.getElementById('organization-form');
+    const data = serializeForm(form);
+    console.log('Organization data:', data);
     // TODO: Save settings to /organizations/${orgId}/organization_settings
+    authRequest('/api/organizations', data).then((response) => {
+      if (response.success) {
+        showNotification('Organization details saved', response.message, { type: 'success' });
+      } else {
+        showNotification('Failed to save organization details', response.message, { type: 'error' });
+      }
+    });
+  },
+
+
+  saveDataModel(modelType) {
+    /*
+     * Save fields for a given data model type.
+     */
+    // TODO: Save data model fields to /organizations/${orgId}/organization_settings
+    console.log('Saving fields for', modelType);
   },
 
 
@@ -214,6 +272,14 @@
      * Save an organization's settings.
      */
     // TODO: Get settings from /organizations/${orgId}/organization_settings as a promise.
+  },
+
+
+  saveTeam() {
+    /*
+     * Save organization team members and send invites.
+     */
+    // TODO: Invite team members through the API.
   },
 
 
@@ -245,7 +311,7 @@
     authRequest(`/api/organizations/${orgId}`).then((response) => {
       if (response.data) {
         console.log('Retrieved data:', response.data);
-        formDeserialize(document.forms['organization-form'], response.data);
+        deserializeForm(document.forms['organization-form'], response.data);
       } else {
         console.log(response);
       }
@@ -279,4 +345,60 @@ function initializeGetStartedOrganizationUI(data) {
   const fileElem = document.getElementById('selectPhotoUrl');
   fileElem.addEventListener('change', uploadOrgPhoto, false);
 
+}
+
+
+function addTeamMemberCard(gridId, data, owner, isOwner, orgId) {
+  /*
+   * Add a data card to an existing grid.
+   * TODO: Render delete option if owner.
+   */
+  let badge = '';
+  let options = '';
+  let license = '';
+  let phone = '';
+  let position = '';
+  if (data.license) license = `<div>License: ${data.license}</div>`;
+  if (data.phone) phone = `<div>${data.phone}</div>`;
+  if (data.position) position = `<div>${data.position}</div>`;
+  if (owner) {
+    badge = '<span class="badge rounded-pill bg-warning">Owner</span>';
+  } else if (isOwner) {
+    options = `
+  <div class="d-flex align-items-center">
+    <a class="btn btn-sm-light me-2" href="/settings/organizations/${orgId}/team/${data.uid}">
+      Edit
+    </a>
+    <button class="btn btn-sm-light text-danger" onclick="cannlytics.settings.removeTeamMember('${data.uid}')">
+      Remove
+    </button>
+  </div>`
+  }
+  var div = document.getElementById(gridId);
+  div.innerHTML += `
+<div
+  class="card shade-hover border-secondary rounded-3 app-action col col-sm-1 col-md-2 p-3 mb-3"
+  style="width:275px; height:150px;"
+>
+<a class="card-block stretched-link text-decoration-none" href="/settings/organizations/${orgId}/team/${data.uid}">
+  <div class="d-flex justify-content-between">
+    <div class="d-flex align-items-center">
+      <div class="icon-container me-2">
+        <img src="${data.photo_url}" height="50px">
+      </div>
+      <h4 class="fs-5 text-dark">${data.name}</h4>
+    </div>
+    ${options}
+  </div>
+  <div class="card-body bg-transparent p-0">
+    ${badge}
+    <div class="col text-dark align-items-center">
+      ${position}
+      <div>${data.email}</div>
+      ${phone}
+      ${license}
+    </div>
+  </div>
+</a>
+</div>`;
 }

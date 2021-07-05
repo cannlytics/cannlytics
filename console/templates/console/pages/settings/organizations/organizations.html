@@ -129,7 +129,7 @@
   <script>
 
     // Initialize the UI (using context from Django).
-    if ('{{ section }}' !== '') cannlytics.settings.viewOrganization('{{ section }}');
+    // if ('{{ section }}' !== '') cannlytics.settings.viewOrganization('{{ section }}');
   
     // Enable tooltips.
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -138,7 +138,8 @@
     });
 
     // Toggle extra organization fields
-    function toggleOrganizationFields() {
+    function toggleOrganizationFields(event) {
+      event.preventDefault();
       cannlytics.ui.toggleElementClass('extra-organization-fields', 'd-none');
       cannlytics.ui.toggleElementClass('extra-organization-fields-hide', 'd-none');
       cannlytics.ui.toggleElementClass('extra-organization-fields-show', 'd-none');

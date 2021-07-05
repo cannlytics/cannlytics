@@ -48,7 +48,7 @@
       </div>
 
       <!-- Account fields -->
-      <div class="col-md-6">
+      <div class="col-md-6 px-4">
         <form id="user-form">
           {% for item in settings.user_fields %}        
             <div class="row mb-3">
@@ -128,13 +128,16 @@
           </a>
         {% endif %}
       </div>
-        {% if user.pin_created_at %}
-          <div id="pin-saved-banner" class="alert alert-success mt-4">
-            {% icon "check" width="18px" height="18px" class="text-success me-1" %}
-            <span class="fs-6"><small style="color:#198754 !important;">
-              Pin created at {{ user.pin_created_at }}
-            </small></span>
-          </div>
+      <!-- Optional: Format created_at time
+      See: https://stackoverflow.com/questions/33187986/django-templatetags-iso-to-date
+       -->
+      {% if user.pin_created_at %}
+        <div id="pin-saved-banner" class="alert alert-success mt-4">
+          {% icon "check" width="18px" height="18px" class="text-success me-1" %}
+          <span class="fs-6"><small style="color:#198754 !important;">
+            Pin created at {{ user.pin_created_at }}
+          </small></span>
+        </div>
       {% endif %}
     </div>
 

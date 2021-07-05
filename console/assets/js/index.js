@@ -12,7 +12,7 @@ import { auth } from './auth/auth.js';
 import { dashboard } from './dashboard/dashboard.js';
 import { intake } from './intake/intake.js';
 import { inventory } from './inventory/inventory.js';
-import { organizations } from './organizations/organizations.js';
+// import { organizations } from './organizations/organizations.js';
 import { projects } from './projects/projects.js';
 import { results } from './results/results.js';
 import { samples } from './samples/samples.js';
@@ -30,7 +30,7 @@ export {
   dashboard,
   intake,
   inventory,
-  organizations,
+  // organizations,
   projects,
   results,
   samples,

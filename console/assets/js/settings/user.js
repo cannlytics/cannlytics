@@ -17,7 +17,7 @@ import {
 
 import {
   authRequest,
-  formDeserialize,
+  deserializeForm,
   serializeForm,
   showNotification,
 } from '../utils.js';
@@ -56,7 +56,7 @@ export const userSettings = {
     authRequest('/api/users').then((data) => {
       const userForm = document.forms['user-form'];
       userForm.reset();
-      formDeserialize(userForm, data);
+      deserializeForm(userForm, data);
     });
   },
 
@@ -223,6 +223,7 @@ export const userSettings = {
   uploadSignature(event, uid) {
     /*
      * Upload an existing signature file to Firebase Storage.
+     * FIXME: Save to users/${uid}/user_settings/signature
      */
     const signatureRef = `users/${uid}/user_settings/signature.png`;
     if (event.target.files.length) {
