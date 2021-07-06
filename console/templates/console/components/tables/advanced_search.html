@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<!--
+  Advanced Search Component | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 7/6/2020
+  Updated: 7/6/2021
+  Parameters:
+    model
+    model_singular
+-->
+<!-- TODO: Allow users to add multiple queries -->
+<!-- TODO: Show tooltips with allowed queries
+
+Note the following limitations for in, not-in, and array-contains-any:
+
+in, not-in, and array-contains-any support up to 10 comparison values.
+You can use at most one array-contains clause per query. You can't combine array-contains with array-contains-any.
+You can use at most one in, not-in, or array-contains-any clause per query. You can't combine these operators in the same query.
+You can't combine not-in with not equals !=.
+You can't order your query by a field included in an equality (==) or in clause.
+
+In a compound query, range (<, <=, >, >=) and not equals (!=, not-in) comparisons must all filter on the same field.
+You can use at most one array-contains clause per query. You can't combine array-contains with array-contains-any.
+You can use at most one in, not-in, or array-contains-any clause per query. You can't combine in , not-in, and array-contains-any in the same query.
+You can't order your query by a field included in an equality (==) or in clause.
+
+-->
+<button
+  class="btn btn-sm-light btn-md-light my-3"
+  onclick="cannlytics.ui.toggleElementClass('advanced-search-options', 'd-none');"
+>
+  Advanced Search
+</button>
+<div id="advanced-search-options" class="input-group input-group-sm my-3 d-none">
+  <select id="search_parameter" class="custom-select">
+    <option selected></option>
+    <!-- TODO: List fields for given model -->
+    <option value="name">Name</option>
+  </select>
+  <select id="search_operation" class="custom-select">
+    <option selected></option>
+    <option value="==">Equal to</option>
+    <option value=">">Greater than</option>
+    <option value=">=">Greater than or equal to</option>
+    <option value="<">Less than</option>
+    <option value=">=">Less than or equal to</option>
+    <option value="!=">Not equal to</option>
+    <option value="array-contains">Array contains</option>
+    <option value="array-contains-any">Array contains any</option>
+    <option value="in">In array</option>
+    <option value="not-in">Not in array</option>
+  </select>
+  <input
+    id="search_value"
+    type="text"
+    class="form-control form-control-sm"
+    multiple
+  >
+  <div class="input-group-append">
+    <button
+      class="btn btn-sm-light btn-md-light"
+      type="button"
+      onclick="cannlytics.app.advancedSearch();"
+    >
+      Search
+    </button>
+  </div>
+</div>
+</html>

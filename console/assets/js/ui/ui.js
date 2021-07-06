@@ -4,10 +4,49 @@
  * Created: 5/2/2021
  * Updated: 7/4/2021
  */
-import { deserializeForm, hasClass } from '../utils.js';
+import { deserializeForm, getCookie, hasClass } from '../utils.js';
 
 
 const formHelpers = {
+
+
+  submitForm(inputId, url) {
+    /*
+     * FIXME: Submit a form without refreshing the page.
+     */
+    var selectedFile = $(`#${inputId}`).files[0];
+    var fd = new FormData();
+    fd.append('file', selectedFile);
+    $.ajax({
+      method: 'POST', 
+      url: url,
+      data: fd, 
+      headers: {
+        'Content-Type': undefined, 
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      cache: false, 
+      processData: false
+    })
+    .done(function(data) {
+      alert(data)
+    });
+  },
+
+
+  submitFormWithoutRefresh(formId, url) {
+    /*
+     * FIXME: Submit a form without refreshing the page.
+     */
+    $(`#${formId}`).on('submit', function(e) {
+      e.preventDefault();
+      $.ajax({
+          type:'POST',
+          url: url,
+          data: { csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() },
+        });
+      });
+  },
 
 
   toggleFields(event, key) {

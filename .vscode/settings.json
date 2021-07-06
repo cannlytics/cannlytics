@@ -81,6 +81,7 @@
     "collectstatic",
     "coreapi",
     "csrf",
+    "csrfmiddlewaretoken",
     "csrftoken",
     "daygrid",
     "djpass",
@@ -129,6 +130,7 @@
     "objs",
     "octicons",
     "onhold",
+    "openpyxl",
     "pdfs",
     "piperonyl",
     "plex",
@@ -158,6 +160,7 @@
     "setuptools",
     "skeate",
     "smartsymbols",
+    "spreadsheetml",
     "sqladmin",
     "squidfunk",
     "staticfiles",
@@ -176,7 +179,9 @@
     "uslugify",
     "uuid",
     "uuidv",
-    "wsgi"
+    "wsgi",
+    "xlsxwriter",
+    "xlwings"
   ],
   "yaml.customTags": [
     "!ref"

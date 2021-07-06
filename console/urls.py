@@ -1,7 +1,7 @@
 """
 URLs | Cannlytics
 Created: 4/18/2021
-Updated: 4/30/2021
+Updated: 7/6/2021
 Resources: https://docs.djangoproject.com/en/3.2/topics/http/urls/
 """
 
@@ -18,11 +18,11 @@ urlpatterns = [
     path('', views.ConsoleView.as_view(), name='index'),
     path('account/<slug:page>', views.LoginView.as_view(), name='auth'),
     path('api/', include('api.urls'), name='api'),
-    # HACK: Handle livereload during development.
+    path('download', views.download_csv_data),
+    path('import', views.import_data, name='import_data'),
     path('livereload', views.no_content),
     path('login', views.login),
     path('logout', views.logout),
-    # TODO: Merge website links as /about or redirect common pages
     path('<slug:screen>', views.ConsoleView.as_view()),
     path('<slug:screen>/<slug:section>', views.ConsoleView.as_view()),
     path('<slug:screen>/<slug:section>/<slug:unit>', views.ConsoleView.as_view()),

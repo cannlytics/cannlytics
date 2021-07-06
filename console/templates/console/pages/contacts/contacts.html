@@ -4,20 +4,24 @@
   Contacts Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 12/17/2020
-  Updated: 6/12/2021
+  Updated: 7/5/2021
   TODO:
     - The ability to import contact records from .csv or .xlsx fields.
     - The ability to export contact records to .csv or .xlsx.
+  Wishlist:
+    - Marketing, notifications, logs
 -->
 {% extends "console/console.html" %}
+{% load icon %}
 {% block console_body %}
 {% if section %}
 
   <!-- Detail page -->
-  <!-- FIXME: Pass model ID -->
-  {% include "console/pages/contacts/contact.html" with id="" %}
+  {% include "console/pages/contacts/contact.html" with id=section %}
 
 {% else %}
+
+  <!-- List -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
@@ -36,99 +40,50 @@
         >
           Export
         </button>
+        <a
+          id="new-button"
+          class="btn btn-sm bg-gradient-green text-white"
+          href="/contacts/new"
+        >
+          New
+        </a>
       </div>
     </div>
 
     <!-- Body -->
     <div class="contacts">
 
-      <!-- Table -->
-      <div class="card my-3">
-        <div class="card-body">
-          <h2 class="h6 mb-3 text-dark">Contacts</h2>
-          <div class="table-responsive">
+      <!-- Placeholder if no data -->
+      <div id="data-placeholder">
+        {% include "console/components/placeholders/placeholder.html" with
+          placeholder=contacts.placeholder
+          only
+        %}
+      </div>
 
-            <!-- Placeholder if no records -->
-            {% if True %}
-              {% include "console/components/placeholders/placeholder.html" with
-                placeholder=contacts.placeholder
-                only
-              %}
-
-            <!-- Table -->
-            {% else %}
-              <div id="contacts-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
-            {% endif %}
-
-          </div>
-        </div>
-      </div><!-- End of the table -->
+      <!-- AG Grid Table -->
+      <div id="data-table" class="d-none">
+        <div
+          id="contacts-table"
+          class="ag-theme-alpine-dark"
+          style="height: 326px; width:100%;"
+        ></div>
+      </div>
 
     </div><!-- End of the body -->
-    
-
-  </main>
-
-  {% comment %} <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-
-    <!-- Header -->
-    <!-- Optional: Dynamically render tabs -->
-    <div class="col pt-3 pb-2 mb-3">
-      <h1 class="fs-5 mb-0 lh-base mb-3">Contacts</h1>
-      <ul class="nav nav-tabs">
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'records' %}active{% endif %}"
-            aria-current="{% if section == 'records' %}page{% endif %}"
-            href="/contacts/records"
-          >
-            Records
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'marketing' %}active{% endif %}"
-            aria-current="{% if section == 'marketing' %}page{% endif %}"
-            href="/contacts/marketing"
-          >
-            Marketing
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'notifications' %}active{% endif %}"
-            aria-current="{% if section == 'notifications' %}page{% endif %}"
-            href="/contacts/notifications"
-          >
-            Notifications
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'logs' %}active{% endif %}"
-            aria-current="{% if section == 'logs' %}page{% endif %}"
-            href="/contacts/logs"
-          >
-            Logs
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Dynamic section -->
-    <section>
-      {% block section %}{% endblock %}
-    </section> {% endcomment %}
-
-    <!-- Clients JavaScript -->
-    {% comment %} {% block console_js %}
-      <script>
-        cannlytics.contacts.initialize();
-      </script>
-    {% endblock console_js %} {% endcomment %}
 
   </main>
 {% endif %}
+{% endblock console_body %}
 
-{% endblock %}
+<!-- JavaScript -->
+{% block console_js %}
+
+  {% if not section %}
+    <script>
+      cannlytics.app.streamData('contacts', 'contact');
+    </script>
+  {% endif %}
+
+{% endblock console_js %}
 </html>

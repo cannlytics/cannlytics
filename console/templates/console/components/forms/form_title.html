@@ -30,32 +30,31 @@
   <!-- Options (back, save) -->
   {% if options %}
     <div class="d-flex align-items-center">
-      {% if id %}
+      {% if id and id != 'new' %}
         <button
           class="btn btn-sm btn-sm-light btn-md-light me-2"
           onclick="cannlytics.ui.viewObject('{{ model_singular }}');"
         >
           Reset
         </button>
-      {% endif %}
-      {% if not id or id == 'new' %}
-        <button
-          class="btn btn-sm btn-sm-light btn-md-light me-2"
-          onclick="document.getElementById('{{ model_singular }}-form').reset();"
-        >
-          Clear
-        </button>
+      {% elif not id or id == 'new' %}
         <button
           class="btn btn-sm btn-sm-light btn-md-light me-2"
           onclick="cannlytics.app.createID('{{ model }}', '{{ model_singular }}');"
         >
           Generate ID
         </button>
+        <button
+          class="btn btn-sm btn-sm-light btn-md-light me-2"
+          onclick="document.getElementById('{{ model_singular }}-form').reset();"
+        >
+          Clear
+        </button>
       {% endif %}
       {% if export %}
         <button
           class="btn btn-sm btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.app.exportData('{{ model }}', '{{ id }}');"
+          onclick="cannlytics.app.exportData('{{ model_singular }}', '{{ id }}');"
         >
           Export
         </button>

@@ -4,18 +4,22 @@ Created: 1/22/2021
 
 API to interface with cannabis analytics.
 """
+# Standard imports
+import io
 
 # External imports
 from datetime import datetime
 from json import loads
 
 # External imports
+from django.http import HttpResponse
 from django.core.mail import send_mail
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from xlsxwriter.workbook import Workbook
 
 # Internal imports
 from cannlytics.firebase import (

@@ -102,17 +102,17 @@ material = {
         "fields": [
             {"key": "organization_id", "label": "Organization ID"},
             {"key": "organization", "label": "Organization"},
+            {"key": "email", "label": "Email", "type": "email"},
+            {"key": "Phone", "label": "Phone Number", "type": "tel"},
+            {"key": "website", "label": "Website"},
             {"key": "address", "label": "Address"},
             {"key": "street", "label": "Street"},
             {"key": "city", "label": "City"},
             {"key": "county", "label": "County"},
-            {"key": "state", "label": "State", "class": "form-sm"},
-            {"key": "zip_code", "label": "Zip"},
-            {"key": "latitude", "label": "Latitude", "type": "number", "class": "form-sm"},
-            {"key": "longitude", "label": "Longitude", "type": "number", "class": "form-sm"},
-            {"key": "email", "label": "Email", "type": "email"},
-            {"key": "Phone", "label": "Phone Number", "type": "tel"},
-            {"key": "website", "label": "Website"},
+            {"key": "state", "label": "State", "class": "field-sm"},
+            {"key": "zip_code", "label": "Zip", "class": "field-sm"},
+            {"key": "latitude", "label": "Latitude", "type": "number", "class": "field-sm"},
+            {"key": "longitude", "label": "Longitude", "type": "number", "class": "field-sm"},
             # {"key": "linkedin", "label": "LinkedIn"},
         ],
         "placeholder": {
@@ -155,6 +155,7 @@ material = {
             {"title": "Item", "active": True},
         ],
         "fields": [
+            {"key": "item_id", "label": "Item ID"}, # Optional: inventory_id is preferred but bug in app.js createID
             {"key": "name", "label": "Name"},
             {"key": "item_type", "label": "Item Type", "type": "text"},
             {"key": "quantity", "label": "Quantity", "type": "text"},
@@ -505,7 +506,6 @@ material = {
         ],
     },
     "settings": {
-        "fields": {},
         "options": [
             {"title": "API", "url": "/settings/api"},
             {"title": "Data", "url": "/settings/data"},
@@ -1024,19 +1024,126 @@ material["get-started"] = {
 
 # FIXME: Condense state so it does not have to be duplicated in settings.
 material['settings']['traceability'] = material['traceability']
+
+# Optional: Add data model fields
+# abbreviation
+# current_count
+# id_schema
+# singular
+# path
+# title
+# description
+# image_path
+# placeholder
+#     action, height, image, message, title, url
+# breadcrumbs
+#     title, url, active
 data_models = [
-    {'title': 'Analyses', 'key': 'analyses'},
-    {'title': 'Analytes', 'key': 'analytes'},
-    {'title': 'Areas', 'key': 'areas'},
-    {'title': 'Contacts', 'key': 'contacts'},
-    {'title': 'Instruments', 'key': 'instruments'},
-    {'title': 'Inventory', 'key': 'inventory'},
-    {'title': 'Measurements', 'key': 'measurements'},
-    {'title': 'Projects', 'key': 'projects'},
-    {'title': 'Results', 'key': 'results'},
-    {'title': 'Samples', 'key': 'samples'},
-    {'title': 'Transfers', 'key': 'transfers'},
+    {
+        'abbreviation': 'AN',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Analyses',
+        'key': 'analyses',
+        'singular': 'analysis',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'AT',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Analytes',
+        'key': 'analytes',
+        'singular': 'analyte',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'AR',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Areas',
+        'key': 'areas',
+        'singular': 'area',
+        'sortable': True,
+        'filter': True
+    },
+    {
+        'abbreviation': 'CT',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Contacts',
+        'key': 'contacts',
+        'singular': 'contact',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'IS',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Instruments',
+        'key': 'instruments',
+        'singular': 'instrument',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'IN',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Inventory',
+        'key': 'inventory',
+        'singular': 'item',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'MT',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Measurements',
+        'key': 'measurements',
+        'singular': 'measurement',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'P',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Projects',
+        'key': 'projects',
+        'singular': 'project',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'R',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Results',
+        'key': 'results',
+        'singular': 'result',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'S',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Samples',
+        'key': 'samples',
+        'singular': 'sample',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'TR',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Transfers',
+        'key': 'transfers',
+        'singular': 'transfer',
+        'sortable': True,
+        'filter': True,
+    },
 ]
+material['data_models'] = {}
 for data_model in data_models:
     key = data_model['key']
-    material['settings']['fields'][key] = {**data_model, "fields": material[key]['fields']}
+    material['data_models'][key] = {
+        **data_model,
+        "image_path": material[key]['placeholder']['image'],
+        "fields": material[key]['fields']
+    }

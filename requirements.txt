@@ -21,6 +21,7 @@ google-cloud-secret-manager==2.5.0
 gunicorn==20.1.0
 Markdown==3.3.4
 mkdocstrings==0.15.0
+openpyxl==2.5.1
 pandas==1.2.1
 PyJWT==2.1.0
 python-crontab
@@ -29,3 +30,4 @@ psycopg2-binary==2.8.6
 requests==2.25.1
 ulid-py==1.1.0
 xhtml2pdf==0.2.5
+XlsxWriter==1.4.4

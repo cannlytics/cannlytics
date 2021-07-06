@@ -5,11 +5,17 @@ Created: 12/18/2020
 Updated: 6/23/2021
 """
 
+# Standard imports
+import csv
+from json import dumps, loads
+
 # External imports
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.views.generic.base import TemplateView
+from django.views.generic.base import TemplateView, View
+from xlsxwriter.workbook import Workbook
+import openpyxl
 
 # Internal imports
 from api.auth import auth
@@ -24,6 +30,7 @@ from cannlytics.firebase import (
     verify_session_cookie,
     verify_token,
 )
+from cannlytics.utils.utils import snake_case
 from console.state import layout
 from console.utils import (
     get_page_data,
@@ -175,9 +182,7 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
 
 
 def logout(request, *args, **argv): #pylint: disable=unused-argument
-    """Functional view to remove a user session.
-    FIXME: Ensure that the request succeeds on the client!
-    """
+    """Functional view to remove a user session."""
     try:
         session_cookie = request.COOKIES.get('__session')
         claims = verify_session_cookie(session_cookie)
@@ -219,6 +224,79 @@ def handler500(request, *args, **argv): #pylint: disable=unused-argument
 #-----------------------------------------------------------------------
 # Helper views
 #-----------------------------------------------------------------------
+
+def download_csv_data(request):
+    """Download posted data as a CSV file.
+    TODO: Pull requested data again (by ID) instead of using posted data.
+    TODO: Limit the size / rate of downloads (tie to account usage / billing).
+    """
+    session_cookie = request.COOKIES.get('__session')
+    claims = verify_session_cookie(session_cookie)
+    if not claims: 
+        return HttpResponse(status=401)
+    data = loads(request.body.decode('utf-8'))['data']
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="download.csv"'
+    writer = csv.writer(response)
+    writer.writerow(list(data[0].keys()))
+    for item in data:
+        writer.writerow(list(item.values()))
+    return response
+
+
+def import_data(request):
+    """Import data from an Excel worksheet for a given data model.
+    TODO: Limit the size / rate of downloads (tie to account usage / billing).
+    """
+    # Authenticate the user.
+    session_cookie = request.COOKIES.get('__session')
+    claims = verify_session_cookie(session_cookie)
+    if not claims: 
+        return HttpResponse(status=401)
+
+    # Get the requested import parameters.
+    model = request.GET.get('model')
+    org_id = request.GET.get('organization_id')
+    excel_file = request.FILES['excel_file']
+    # Optional: Validations here to check extension and file size.
+
+    # Authorize that the user is part of the organization.
+    if org_id not in claims.get('team', []):
+        return HttpResponse(status=403)
+
+    # Get singular from data models.
+    data_model = get_document(f'organizations/{org_id}/data_models/{model}')
+    model_singular = data_model['singular']
+
+    # TODO: Handle .csv imports.
+
+    # Get the worksheet.
+    workbook = openpyxl.load_workbook(excel_file)
+    sheetnames = workbook.sheetnames
+    for sheetname in sheetnames:
+        if sheetname == model or sheetname == 'Upload':
+            worksheet = workbook[sheetname]
+
+    # Read the imported data.
+    excel_data = list()
+    for row in worksheet.iter_rows():
+        row_data = list()
+        for cell in row:
+            row_data.append(str(cell.value))
+        excel_data.append(row_data)
+
+    # Save imported data to Firestore.
+    keys = [snake_case(key) for key in excel_data[0]]
+    data = [dict(zip(keys, values)) for values in excel_data[1:]]
+    for item in data:
+        doc_id = item.get(f'{model_singular}_id', 'uid')
+        update_document(f'organizations/{org_id}/{model}/{doc_id}', item)
+
+    # FIXME: Submit form without refresh
+    # return JsonResponse({'data': data, 'success': True}, status=200)
+    # return HttpResponse(dumps(data), content_type='application/json')
+    return HttpResponseRedirect(f'/{model}')
+
 
 def no_content(request, *args, **argv): #pylint: disable=unused-argument
     """Return an empty response when needed, such as for a ping."""

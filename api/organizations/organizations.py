@@ -190,13 +190,22 @@ def organizations(request, format=None, organization_id=None):
             doc['team'] = [uid]
             doc['owner'] = uid
 
+            # All organizations start with the standard data models.
+            data_models = get_collection('public/state/data_models')
+            for data_model in data_models:
+                key = data_model['key']
+                update_document(f'{model_type}/{organization_id}/data_models/{key}', data_model)
+
         # Create or update the organization in Firestore.
         entry = {**doc, **data}
         print('Entry:', entry)
         update_document(f'{model_type}/{organization_id}', entry)
 
-        # TEST: On organization creation, the creating user get custom claims.
-        update_custom_claims(uid, claims={'owner': [organization_id], 'team': [organization_id]})
+        # On organization creation, the creating user get custom claims.
+        update_custom_claims(uid, claims={
+            'owner': [organization_id],
+            'team': [organization_id]
+        })
 
         # TODO:  Owners can add other users to the team and
         # the receiving user then gets the claims.

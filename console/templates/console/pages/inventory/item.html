@@ -3,29 +3,42 @@
 <!--
   Inventory Item Page | Cannlytics Console
   Created 6/22/2020
-  Updated: 6/22/2021
+  Updated: 7/6/2021
+  TODO:
+    - Item image
 -->
+{% load icon %}
+
+<!-- CSS -->
 {% block console_css %}
 
   <!-- Bootstrap Datepicker -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
 
+  <!-- XLSX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.min.js" crossorigin="anonymous"></script>
+
 {% endblock console_css %}
+
+<!-- Body -->
 {% block console_body %}
 
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=inventory.breadcrumbs
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Inventory"
+      base_page_url="/inventory"
+      current_page=id
     %}
+
 
     <!-- Title -->
     {% include "console/components/forms/form_title.html" with
       id=id
-      model='item'
-      model_singular='inventory'
+      model='inventory'
+      model_singular='item'
       description="Manage inventory items."
       options=True
       export=id
@@ -35,7 +48,7 @@
     <div class="mb-4 px-3">
 
       <!-- Form -->
-      <form id="instrument-form">
+      <form id="item-form">
 
         <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
@@ -48,9 +61,6 @@
       </form>
 
     </div><!-- End of fields -->
-
-    <!-- TODO: Try to implement add analytes with AG-Grid table -->
-    
 
     <!-- Danger zone (delete) -->
     {% if id %}
@@ -74,9 +84,6 @@
 
     // Render any date pickers.
     $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // FIXME: Enable tooltips.
-    // cannlytics.ui.enableTooltips();
 
   </script>
 {% endblock console_js %}

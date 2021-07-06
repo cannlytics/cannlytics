@@ -2,11 +2,11 @@
  * App JavaScript | Cannlytics Console
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 12/7/2020
- * Updated: 6/29/2021
+ * Updated: 7/6/2021
  */
 
-import { auth, db } from '../firebase.js';
-import { authRequest, serializeForm, showNotification } from '../utils.js';
+import { auth, db, getDocument, getUserToken } from '../firebase.js';
+import { authRequest, getCookie, serializeForm, showNotification } from '../utils.js';
 import { navigationHelpers } from '../ui/ui.js';
 import { theme } from '../settings/theme.js';
 
@@ -92,35 +92,55 @@ export const app = {
   Data display functions
   ----------------------------------------------------------------------------*/
 
+  limit: 10,
   tableHidden: true,
   gridOptions: {},
 
 
-  drawTable(model, modelSingular, data) {
-    /*
-     * Render a data table in the user interface.
-     */
+  changeLimit(event) {
+    /* Change the limit for streamData. */
+    this.limit = event.target.value;
+     // FIXME: Refresh the table?
+     // streamData(model, modelSingular, orgId)
+  },
+
+
+  drawPlaceholder() {
+    /* Render a no-data placeholder in the user interface. */
+    document.getElementById('loading-placeholder').classList.add('d-none');
+    document.getElementById('data-table').classList.add('d-none');
+    document.getElementById('data-placeholder').classList.remove('d-none');
+    this.tableHidden = true;
+  },
+
+
+  async drawTable(model, modelSingular, orgId, data) {
+    /* Render a data table in the user interface. */
 
     // Render the table if it's the first time that it's shown.
     if (this.tableHidden) {
 
       // Hide the placeholder and show the table.
+      document.getElementById('loading-placeholder').classList.add('d-none');
       document.getElementById('data-placeholder').classList.add('d-none');
       document.getElementById('data-table').classList.remove('d-none');
       this.tableHidden = false;
   
-      // TODO: Get data model fields from organization settings.
-      const columnDefs = [
-        { field: 'analyte_id', sortable: true, filter: true },
-        { field: 'key', sortable: true, filter: true },
-        { field: 'limit', sortable: true, filter: true }
-      ];
+      // Get data model fields from organization settings.
+      const dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
+      console.log('Data Model:', dataModel);
+      const columnDefs = dataModel.fields.map(function(e) { 
+        return { headerName: e.label, field: e.key, sortable: true, filter: true };
+      });
   
       // Specify the table options.
       this.gridOptions = {
         columnDefs: columnDefs,
+        defaultColDef: { flex: 1,  minWidth: 175 },
         pagination: true,
         paginationAutoPageSize: true,
+        rowClass: 'app-action',
+        rowSelection: 'single',
         suppressRowClickSelection: false,
         onRowClicked: event => navigationHelpers.openObject(model, modelSingular, event.data),
         onGridReady: event => theme.toggleTheme(theme.getTheme()),
@@ -138,35 +158,29 @@ export const app = {
 
     }
 
-    // Optional: Attach export functionality
-    //function exportTableData() {
-    //  gridOptions.api.exportDataAsCsv();
-    //}
   },
 
 
-  streamData(model, modelSingular) {
+  streamData(model, modelSingular, orgId) {
     /*
      * Stream data, listening for any changes.
      */
-    // TODO: Get parameters from the user interface.
-    const limit = 10;
+    // Optional: Get parameters (desc, orderBy) from the user interface.
+    // TODO: Implement search with filters, e.g. .where("state", "==", "OK")
     const desc = false;
     const orderBy = null;
-    const orgId = document.getElementById('organization_id').value;
     let ref = db.collection('organizations').doc(orgId).collection(model);
-    if (limit) ref = ref.limit(limit);
+    if (this.limit) ref = ref.limit(this.limit);
     if (orderBy && desc) ref = ref.orderBy(orderBy, 'desc');
     else if (orderBy) ref = ref.orderBy(orderBy);
-    // Optional: Add filters.
-    // .where("state", "==", "CA")
     ref.onSnapshot((querySnapshot) => {
       const data = [];
       querySnapshot.forEach((doc) => {
         data.push(doc.data());
       });
-      console.log('Data:', data);
-      if (data) this.drawTable(model, modelSingular, data);
+      console.log('Table data:', data);
+      if (data.length) this.drawTable(model, modelSingular, orgId, data);
+      else this.drawPlaceholder();
     });
   },
   
@@ -201,29 +215,66 @@ export const app = {
   },
 
 
-  exportData(model, id = null) {
+  async exportData(modelSingular, id = null) {
     /*
      * Export given collection data to Excel.
      */
-    // TODO: Serialize the analysis data!
-    console.log('TODO: export data for', model, id);
-    const data = {}
-    // api.createAnalyses(data);
+    const data = serializeForm(`${modelSingular}-form`);
+    const idToken = await getUserToken();
+    const csrftoken = getCookie('csrftoken');
+    const headerAuth = new Headers({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`,
+      'X-CSRFToken': csrftoken,
+    });
+    const init = {
+      headers: headerAuth,
+      method: 'POST',
+      body: JSON.stringify({ data: [data] }),
+    };
+    const fileName = (id) ? id : modelSingular;
+    const response = await fetch(window.location.origin + '/download', init);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.style = 'display: none';
+    link.setAttribute('download', fileName + '.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(blob);
   },
 
 
-  importData(model) {
+  exportDataTable(model) {
     /*
-     * Import a data file (.csv or .xlsx) to Firestore for a given model type.
+     * Export a data table as a CSV file.
      */
-    // TODO:
-    console.log('TODO: import data:', model);
+    this.gridOptions.api.exportDataAsCsv({
+      fileName: `${model}.csv`,
+    });
   },
+
+
+  // importData(model) {
+  //   /*
+  //    * Import a data file (.csv or .xlsx) to Firestore for a given model type.
+  //    */
+  //   // TODO:
+  //   console.log('TODO: import data:', model);
+  // },
 
 
   /*----------------------------------------------------------------------------
   UNDER DEVELOPMENT
   ----------------------------------------------------------------------------*/
+
+
+  advancedSearch() {
+    /* Add advanced search parameters for streaming data. */
+  },
+
 
   search() {
     /*
