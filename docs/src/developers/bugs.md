@@ -2,6 +2,23 @@
 
 A non-exhaustive list of encountered bugs and their solutions.
 
+- [No 'Access-Control-Allow-Origin' header is present on the requested resource—when trying to get data from a REST API](https://stackoverflow.com/questions/43871637/no-access-control-allow-origin-header-is-present-on-the-requested-resource-whe). Solution: Create a file
+  ```json
+  [
+    {
+      "origin": ["*"],
+      "method": ["GET"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+  ```
+  and deploy the rules with:
+  ```shell
+  gsutil cors set cors.json gs://<your-cloud-storage-bucket>
+  ```
+
+- [Error: PostCSS plugin autoprefixer requires PostCSS 8. Update PostCSS or downgrade this plugin](https://stackoverflow.com/questions/64057023/error-postcss-plugin-autoprefixer-requires-postcss-8-update-postcss-or-downgra). Solution: `npm i postcss`.
+
 - Access to fetch at `<pdf-url>` from origin 'http://127.0.0.1:8000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
 
   * Potential solution: <https://stackoverflow.com/a/58153018/5021266>

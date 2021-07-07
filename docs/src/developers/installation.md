@@ -79,6 +79,24 @@ Create a `.firebasesrc` in the root directory with your Firebase hosting referen
 }
 ```
 
+For downloading files from Firebase Storage, you should set your CORS rules. If you don't want any domain-based restrictions (the most common scenario), then copy the following JSON to a file named `cors.json`:
+
+```json
+[
+  {
+    "origin": ["*"],
+    "method": ["GET"],
+    "maxAgeSeconds": 3600
+  }
+]
+```
+
+Then deploy the rules with:
+
+```shell
+gsutil cors set cors.json gs://<your-cloud-storage-bucket>
+```
+
 ### Required Google permissions
 
 * gcloud.builds.submit

@@ -258,25 +258,29 @@ export const app = {
   },
 
 
-  async downloadWorksheet(model) {
+  async downloadWorksheet(orgId, model) {
     /*
      * Download a worksheet to facilitate importing data.
      */
-    const idToken = await getUserToken();
-    const csrftoken = getCookie('csrftoken');
-    const headerAuth = new Headers({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${idToken}`,
-      'X-CSRFToken': csrftoken,
-    });
-    const init = { headers: headerAuth, method: 'GET' };
-    const response = await fetch(this.dataModel.worksheet_url, init);
+    if (!this.dataModel.worksheet_url) {
+      this.dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
+    }
+    // const idToken = await getUserToken();
+    // const csrftoken = getCookie('csrftoken');
+    // const headerAuth = new Headers({
+    //   'Content-Type': 'application/json',
+    //   'Authorization': `Bearer ${idToken}`,
+    //   'X-CSRFToken': csrftoken,
+    //   'mode': 'no-cors',
+    // });
+    // const init = { headers: headerAuth, method: 'GET' };
+    const response = await fetch(this.dataModel.worksheet_url);
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.style = 'display: none';
-    link.setAttribute('download', fileName + '.csv');
+    link.setAttribute('download', `${model}_worksheet.xlsm`);
     document.body.appendChild(link);
     link.click();
     link.parentNode.removeChild(link);
