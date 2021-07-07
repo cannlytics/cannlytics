@@ -819,6 +819,10 @@ body.dark footer .form-control {
   background-color: unset;
 }
 
+.btn-group .dropdown-toggle::after {
+  vertical-align: center !important;
+}
+
 /* Form fields */
 
 .field-tiny {

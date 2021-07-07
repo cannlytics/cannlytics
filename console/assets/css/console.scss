@@ -54,6 +54,9 @@ body {
   position: relative;
   overflow: hidden;
 }
+body.dark .linear-background {
+  background: linear-gradient(90deg,#eeeeee30 8%,#dddddd30 18%,#eeeeee30 33%);
+}
 
 /*--------------------------------------------------------------------------
   Actions

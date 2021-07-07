@@ -49,7 +49,7 @@ if __name__ == '__main__':
     db = firebase.initialize_firebase()
     api_key = firebase.get_document('admin/firebase')['web_api_key']
     bucket_name = env('FIREBASE_STORAGE_BUCKET')
-    
+
     # Upload a video to Firebase storage, saving the metadata to Firestore.
     video_dir =  env('VIDEO_DIR')
     file_name = 'cannabis-data-science-episode-1'

@@ -73,9 +73,15 @@
           aria-expanded="false"
         >
         </button>
-        <ul class="dropdown-menu py-0" aria-labelledby="import_options">
+        <ul
+          class="dropdown-menu shadow py-0"
+          aria-labelledby="import_options"
+        >
           <li>
-            <a class="dropdown-item fs-6" href="#">
+            <a
+              class="app-action dropdown-item fs-6"
+              onclick="cannlytics.app.downloadWorksheet('{{ model }}');"
+            >
               <small>Download worksheet</small>
             </a>
           </li>

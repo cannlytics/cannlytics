@@ -92,6 +92,7 @@ export const app = {
   Data display functions
   ----------------------------------------------------------------------------*/
 
+  dataModel: {},
   limit: 10,
   tableHidden: true,
   gridOptions: {},
@@ -127,9 +128,9 @@ export const app = {
       this.tableHidden = false;
   
       // Get data model fields from organization settings.
-      const dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
-      console.log('Data Model:', dataModel);
-      const columnDefs = dataModel.fields.map(function(e) { 
+      this.dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
+      console.log('Data Model:', this.dataModel);
+      const columnDefs = this.dataModel.fields.map(function(e) { 
         return { headerName: e.label, field: e.key, sortable: true, filter: true };
       });
   
@@ -256,6 +257,31 @@ export const app = {
     });
   },
 
+
+  async downloadWorksheet(model) {
+    /*
+     * Download a worksheet to facilitate importing data.
+     */
+    const idToken = await getUserToken();
+    const csrftoken = getCookie('csrftoken');
+    const headerAuth = new Headers({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`,
+      'X-CSRFToken': csrftoken,
+    });
+    const init = { headers: headerAuth, method: 'GET' };
+    const response = await fetch(this.dataModel.worksheet_url, init);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.style = 'display: none';
+    link.setAttribute('download', fileName + '.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(blob);
+  },
 
   // importData(model) {
   //   /*

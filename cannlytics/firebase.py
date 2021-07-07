@@ -630,7 +630,7 @@ def create_short_url(api_key, long_url, project_name='cannlytics'):
             'suffix': {'option': 'UNGUESSABLE'}
         }
         response = requests.post(url, json=data)
-        return response['shortLink']
+        return response.json()['shortLink']
     except ConnectionError:
         raise ConnectionError # Optional: Handle connection errors more elegantly?
 

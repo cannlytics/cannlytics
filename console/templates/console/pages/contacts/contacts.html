@@ -4,7 +4,7 @@
   Contacts Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 12/17/2020
-  Updated: 7/5/2021
+  Updated: 7/6/2021
   TODO:
     - The ability to import contact records from .csv or .xlsx fields.
     - The ability to export contact records to .csv or .xlsx.
@@ -13,6 +13,7 @@
 -->
 {% extends "console/console.html" %}
 {% load icon %}
+{% block title %}{% if section %}{{ section }} | {% endif %}Contacts | Cannlytics {% endblock title %}
 {% block console_body %}
 {% if section %}
 
@@ -25,36 +26,25 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="fs-5 mb-0 lh-base">Contacts</h1>
-      <div>
-        <button
-          class="btn btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.settings.importData('contacts');"
-        >
-          Import
-        </button>
-        <button
-          class="btn btn-sm-light btn-md-light"
-          onclick="cannlytics.settings.exportData('contacts');"
-        >
-          Export
-        </button>
-        <a
-          id="new-button"
-          class="btn btn-sm bg-gradient-green text-white"
-          href="/contacts/new"
-        >
-          New
-        </a>
-      </div>
-    </div>
+    {% include "console/components/tables/table_options.html" with
+      model='contacts'
+      model_singular='contact'
+    %}
 
     <!-- Body -->
     <div class="contacts">
 
-      <!-- Placeholder if no data -->
-      <div id="data-placeholder">
+      <!-- Loading placeholder -->
+      <div id="loading-placeholder">
+        {% include "console/components/placeholders/loading_placeholder.html" with
+          height='326px'
+          width='100%'
+          only
+        %}
+      </div>
+
+      <!-- No-data Placeholder -->
+      <div id="data-placeholder" class="d-none">
         {% include "console/components/placeholders/placeholder.html" with
           placeholder=contacts.placeholder
           only
@@ -63,6 +53,7 @@
 
       <!-- AG Grid Table -->
       <div id="data-table" class="d-none">
+        <!-- TODO: Advanced search -->
         <div
           id="contacts-table"
           class="ag-theme-alpine-dark"
@@ -81,7 +72,7 @@
 
   {% if not section %}
     <script>
-      cannlytics.app.streamData('contacts', 'contact');
+      cannlytics.app.streamData('contacts', 'contact', '{{ organizations.0.organization_id }}');
     </script>
   {% endif %}
 

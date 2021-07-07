@@ -1,8 +1,12 @@
-<!-- Placeholder -->
-<!-- Created 12/28/2020 -->
+<!doctype html>
+<html>
+<!--
+  Placeholder | Cannlytics Console
+  Created: 12/28/2020
+  Updated: 7/6/2021
+-->
 {% load static %}
-
-<div class="card-body text-center">
+<div class="card-body text-center mt-3">
   <a href="{{ placeholder.url }}">
     <img
       src="{% static placeholder.image %}"
@@ -12,13 +16,14 @@
   <h2 class="h4 text-dark mt-3 mb-1">
     {{ placeholder.title }}
   </h2>
-  <p class="text-muted lh-sm mx-auto" style="max-width:540px;">
+  <p class="text-muted lh-sm mx-auto" style="max-width:475px;">
     <small>{{ placeholder.message }}</small>
   </p>
   <a
-    class="btn bg-gradient-green text-white my-3"
+    class="btn btn-sm bg-gradient-green text-white my-3"
     href="{{ placeholder.url }}"
   >
     {{ placeholder.action }}
   </a>
 </div>
+</html>

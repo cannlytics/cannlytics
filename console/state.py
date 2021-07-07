@@ -120,7 +120,7 @@ material = {
             "height": "200px",
             "image": "console/images/illustrations/chemistry_scientist.svg",
             "title": "Add your first contact",
-            "message": "Add a contact to begin providing analyses for other organizations.",
+            "message": "Add a contact to begin providing analyses for other organizations. Contacts are any other organization you interact with, such as your clients, vendors, and partners.",
             "url": "./contacts/new",
         },
     },

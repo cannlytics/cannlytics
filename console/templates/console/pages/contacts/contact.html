@@ -4,7 +4,7 @@
   Contact Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
-  Updated: 7/5/2021
+  Updated: 7/6/2021
 -->
 {% load icon %}
 
@@ -22,8 +22,10 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=contacts.breadcrumbs
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Contacts"
+      base_page_url="/contacts"
+      current_page=id
     %}
 
     <!-- Title -->
@@ -54,8 +56,7 @@
 
     </div><!-- End of fields -->
 
-    <!-- TODO: Try to implement add analytes with AG-Grid table -->
-    
+    <!-- TODO: Try to implement add people with AG-Grid table -->
 
     <!-- Danger zone (delete) -->
     {% if id %}
@@ -78,9 +79,6 @@
 
     // Render any date pickers.
     $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // FIXME: Enable tooltips.
-    // cannlytics.ui.enableTooltips();
 
   </script>
 {% endblock console_js %}
