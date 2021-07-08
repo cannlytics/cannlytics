@@ -15,7 +15,10 @@
 {% if section %}
 
   <!-- Detail page -->
-  {% include "console/pages/analyses/analysis.html" with id=section %}
+  {% include "console/pages/analyses/analysis.html" with
+    id=section
+    data_model=data_model
+  %}
 
 {% else %}
 

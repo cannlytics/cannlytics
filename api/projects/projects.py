@@ -22,8 +22,8 @@ def projects(request, format=None, project_id=None):
 
     # Initialize and authenticate.
     model_id = project_id
-    model_type = 'measurements'
-    model_type_singular = 'measurement'
+    model_type = 'projects'
+    model_type_singular = 'project'
     claims = auth.verify_session(request)
     try:
         uid = claims['uid']
@@ -50,7 +50,7 @@ def projects(request, format=None, project_id=None):
     elif request.method == 'POST':
         data = update_object(request, claims, model_type, model_type_singular, organization_id)
         if data:
-            Response({'success': True, 'data': data}, status=200)
+            return Response({'success': True, 'data': data}, status=200)
         else:
             message = 'Data not recognized. Please post either a singular object or an array of objects.'
             return Response({'error': True, 'message': message}, status=400)

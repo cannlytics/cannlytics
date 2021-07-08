@@ -50,7 +50,7 @@ def measurements(request, format=None, measurement_id=None):
     elif request.method == 'POST':
         data = update_object(request, claims, model_type, model_type_singular, organization_id)
         if data:
-            Response({'success': True, 'data': data}, status=200)
+            return Response({'success': True, 'data': data}, status=200)
         else:
             message = 'Data not recognized. Please post either a singular object or an array of objects.'
             return Response({'error': True, 'message': message}, status=400)

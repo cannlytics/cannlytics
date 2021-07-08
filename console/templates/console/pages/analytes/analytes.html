@@ -3,13 +3,11 @@
 <!--
   Analytes Page | Cannlytics Console
   Created 6/19/2021
-  Updated: 6/19/2021
+  Updated: 7/8/2021
   TODO:
-   - Allow for labs to choose to make their analytes public,
-    so that clients can find analytes they want to analyze.
-  
-  Fields:
-    CAS
+   - Implement functionality to allow labs to choose to
+     make their analytes public, so that clients can
+     find analytes that they may want to test for in their samples.
 -->
 {% extends "console/console.html" %}
 {% load icon %}
@@ -18,7 +16,10 @@
 {% if section %}
 
   <!-- Detail page -->
-  {% include "console/pages/analytes/analyte.html" with id=section %}
+  {% include "console/pages/analytes/analyte.html" with
+    id=section
+    data_model=data_model
+  %}
 
 {% else %}
 
@@ -26,36 +27,25 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="fs-5 mb-0 lh-base">Analytes</h1>
-      <div>
-        <button
-          class="btn btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.settings.importData('analytes');"
-        >
-          Import
-        </button>
-        <button
-          class="btn btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.settings.exportData('analytes');"
-        >
-          Export
-        </button>
-        <a
-          id="new-button"
-          class="btn btn-sm bg-gradient-green text-white"
-          href="/analytes/new"
-        >
-          New
-        </a>
-      </div>
-    </div>
+    {% include "console/components/tables/table_options.html" with
+      model='analytes'
+      model_singular='analyte'
+    %}
 
     <!-- Body -->
     <div class="analytes">
 
-      <!-- Placeholder if no data -->
-      <div id="data-placeholder">
+      <!-- Loading placeholder -->
+      <div id="loading-placeholder">
+        {% include "console/components/placeholders/loading_placeholder.html" with
+          height='326px'
+          width='100%'
+          only
+        %}
+      </div>
+
+      <!-- No-data Placeholder -->
+      <div id="data-placeholder" class="d-none">
         {% include "console/components/placeholders/placeholder.html" with
           placeholder=analytes.placeholder
           only
@@ -64,6 +54,7 @@
 
       <!-- AG Grid Table -->
       <div id="data-table" class="d-none">
+        <!-- TODO: Advanced search -->
         <div
           id="analytes-table"
           class="ag-theme-alpine-dark"
@@ -72,7 +63,6 @@
       </div>
 
     </div><!-- End of the body -->
-    
 
   </main>
 {% endif %}
@@ -83,7 +73,7 @@
 
   {% if not section %}
     <script>
-      cannlytics.app.streamData('analytes', 'analyte');
+      cannlytics.app.streamData('analytes', 'analyte', '{{ organizations.0.organization_id }}');
     </script>
   {% endif %}
 

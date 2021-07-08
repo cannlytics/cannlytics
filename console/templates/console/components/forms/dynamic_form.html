@@ -4,8 +4,7 @@
   Dynamic Form | Cannlytics
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
-  Updated: 6/22/2021
-
+  Updated: 7/8/2021
   Params:
     fields
 -->
@@ -81,9 +80,10 @@
     {% elif field.type == 'textarea' %}
     <div class="form-floating mb-3">
       <textarea
+        id="input_{{ field.key }}"
+        name="{{ field.key }}"
         class="form-control"
         placeholder=""
-        id="input_{{ field.key }}"
         style="height:250px"
       ></textarea>
       <label for="input_{{ field.key }}">
@@ -99,6 +99,7 @@
       </label>
       <input
         id="input_{{ field.key }}"
+        name="{{ field.key }}"
         class="form-check-input"
         type="checkbox"
       >
@@ -109,6 +110,7 @@
     <div class="col-md-3">
       <label class="form-label">{{ field.label }}</label>
       <select
+        name="{{ field.key }}"
         class="form-select form-select-sm"
         aria-label="{{ field.label }}"
         {% if field.multiple %}multiple{% endif %}

@@ -84,7 +84,7 @@ material = {
     },
     "contacts": {
         "fields": [
-            {"key": "organization_id", "label": "Organization ID"},
+            {"key": "contact_id", "label": "Contact ID"},
             {"key": "organization", "label": "Organization"},
             {"key": "email", "label": "Email", "type": "email"},
             {"key": "Phone", "label": "Phone Number", "type": "tel"},
@@ -110,6 +110,7 @@ material = {
     },
     "instruments": {
         "fields": [
+            {"key": "instrument_id", "label": "Instrument ID"},
             {"key": "name", "label": "Name"},
             {"key": "data_path", "label": "Data path"},
             {"key": "area_id", "label": "Area ID"},
@@ -248,14 +249,14 @@ material = {
     "results": {
         "fields": [
             {"key": "result_id", "label": "Result ID"},
-            {"key": "result", "label": "Result", "type": "number"},
             {"key": "formula", "label": "Formula", "type": "formula"},
             {"key": "sample_id", "label": "Sample ID"},
             {"key": "package_id", "label": "Package ID"},
             {"key": "package_label", "label": "Package Label"},
             {"key": "product_name", "label": "Product Name"},
             {"key": "sample_type", "label": "Sample Type"},
-            {"key": "status", "label": "Status"},
+            {"key": "result", "label": "Result", "type": "number", "class": "field-sm"},
+            {"key": "status", "label": "Status", "class": "field-sm"},
             {"key": "units", "label": "Units", "class": "field-sm"},
             {"key": "reviewed_at", "label": "Reviewed At", "type": "datetime"},
             {"key": "reviewed_by", "label": "Reviewed By", "class": "field-sm"},
@@ -280,7 +281,6 @@ material = {
     },
     "samples": {
         "fields": [
-            {"key": "photo_url", "label": "Photo", "type": "image"},
             {"key": "sample_id", "label": "Sample ID"},
             {"key": "project_id", "label": "Project ID"},
             {"key": "batch_id", "label": "Batch ID"},
@@ -290,6 +290,7 @@ material = {
             {"key": "updated_by", "label": "Updated By", "class": "field-sm"},
             {"key": "coa_url", "label": "CoA URL", "type": "text"},
             {"key": "notes", "label": "Notes", "type": "textarea"},
+            {"key": "photo_url", "label": "Photo", "type": "image"},
         ],
         "placeholder": {
             "action": "Create a sample",
@@ -362,11 +363,11 @@ material = {
             {"key": "vehicle_model", "label": "Vehicle Model"},
         ],
         "placeholder": {
-            "action": "Create an inventory transfer",
+            "action": "Create an transfer",
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_reagents.svg",
-            "title": "Create your first inventory transfer",
-            "message": "Create a transfer of inventory items from one organization to another.",
+            "title": "Create your first transfer",
+            "message": "Create a transfer of inventory items, such as lab samples, from one organization to another.",
             "url": "./transfers/new",
         },
     },
@@ -981,18 +982,10 @@ material["get-started"] = {
 material['settings']['traceability'] = material['traceability']
 
 # Optional: Add data model fields
-# abbreviation
 # current_count
-# id_schema
-# singular
-# path
-# title
 # description
-# image_path
 # placeholder
 #     action, height, image, message, title, url
-# breadcrumbs
-#     title, url, active
 data_models = [
     {
         'abbreviation': 'AN',

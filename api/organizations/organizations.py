@@ -369,3 +369,60 @@ def join_organization(request):
 
     message = f'Request to join {organization} sent to the owner.'
     return Response({'success': True, 'message': message}, content_type='application/json')
+
+# def join_organization(request):
+#     """Send the owner of an organization a request for a user to join."""
+
+#     # Identify the user.
+#     claims = auth.authenticate(request)
+#     uid = claims['uid']
+#     user_email = claims['email']
+#     post_data = loads(request.body.decode('utf-8'))
+#     organization = post_data.get('organization')
+
+#     # Return an error if the organization doesn't exist.
+#     query = {'key': 'organization', 'operation': '==', 'value': organization}
+#     organizations = get_collection('organizations', filters=[query])
+#     if not organizations:
+#         message = 'Organization does not exist. Please check the organization name and try again.'
+#         return Response({'success': False, 'message': message}, status=400)
+
+#     # Send the owner an email requesting to add the user to the organization's team.
+#     org_email = organizations[0]['email']
+#     text = f"A user with the email address {user_email} would like to join your organization, \
+#         {organization}. Do you want to add this user to your organization's team? Please \
+#         reply YES or NO to confirm."
+#     paragraphs = []
+#     # TODO: Generate confirm, decline, and unsubscribe links with HMACs from user's uid and owner's uid.
+#     user_hmac = ''
+#     owner_hmac = ''
+#     # Optional: Find new home's for endpoints in api and cannlytics_website
+#     confirm_link = f'https://console.cannlytics.com/api/organizations/confirm?hash={owner_hmac}&member={user_hmac}'
+#     decline_link = f'https://console.cannlytics.com/api/organizations/decline?hash={owner_hmac}&member={user_hmac}'
+#     unsubscribe_link = f'https://console.cannlytics.com/api/unsubscribe?hash={owner_hmac}'
+#     html_message = render_to_string('templates/console/emails/action_email_template.html', {
+#         'recipient': org_email,
+#         'paragraphs': paragraphs,
+#         'primary_action': 'Confirm',
+#         'primary_link': confirm_link,
+#         'secondary_action': 'Decline',
+#         'secondary_link': decline_link,
+#         'unsubscribe_link': unsubscribe_link,
+#     })
+
+#     # TODO: Skip sending email if owner is unsubscribed.
+#     send_mail(
+#         subject="Request to join your organization's team.",
+#         message=text,
+#         from_email=DEFAULT_FROM_EMAIL,
+#         recipient_list=LIST_OF_EMAIL_RECIPIENTS,
+#         fail_silently=False,
+#         html_message=html_message
+#     )
+
+#     # Create activity logs.
+#     create_log(f'users/{uid}/logs', claims, 'Requested to join an organization.', 'users', 'user_data', [post_data])
+#     create_log(f'organization/{uid}/logs', claims, 'Request from a user to join the organization.', 'organizations', 'organization_data', [post_data])
+
+#     message = f'Request to join {organization} sent to the owner.'
+#     return Response({'success': True, 'message': message}, content_type='application/json')

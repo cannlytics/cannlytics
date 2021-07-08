@@ -4,7 +4,7 @@
   Areas | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 4/24/2021
-  Updated: 7/7/2021
+  Updated: 7/8/2021
 -->
 {% extends "console/console.html" %}
 {% load icon %}
@@ -13,7 +13,10 @@
 {% if section %}
 
   <!-- Detail page -->
-  {% include "console/pages/areas/area.html" with id=section %}
+  {% include "console/pages/areas/area.html" with
+    id=section
+    data_model=data_model
+  %}
 
 {% else %}
 
@@ -21,57 +24,53 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="fs-5 mb-0 lh-base">Areas</h1>
-      <div>
-        <button
-          class="btn btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.settings.importData('areas');"
-        >
-          Import
-        </button>
-        <button
-          class="btn btn-sm-light btn-md-light"
-          onclick="cannlytics.settings.exportData('areas');"
-        >
-          Export
-        </button>
-      </div>
-    </div>
+    {% include "console/components/tables/table_options.html" with
+      model='areas'
+      model_singular='area'
+    %}
 
     <!-- Body -->
     <div class="areas">
 
-      <!-- Table -->
-      <div class="card my-3">
-        <div class="card-body">
-          <h2 class="h6 mb-3 text-dark">Areas</h2>
-          <div class="table-responsive">
+      <!-- Loading placeholder -->
+      <div id="loading-placeholder">
+        {% include "console/components/placeholders/loading_placeholder.html" with
+          height='326px'
+          width='100%'
+          only
+        %}
+      </div>
 
-            <!-- Placeholder if no records -->
-            {% if True %}
-              {% include "console/components/placeholders/placeholder.html" with
-                placeholder=areas.placeholder
-                only
-              %}
+      <!-- No-data Placeholder -->
+      <div id="data-placeholder" class="d-none">
+        {% include "console/components/placeholders/placeholder.html" with
+          placeholder=areas.placeholder
+          only
+        %}
+      </div>
 
-            <!-- Client records table -->
-            {% else %}
-              <div id="areas-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
-            {% endif %}
-
-          </div>
-        </div>
-      </div><!-- End of the table -->
+      <!-- AG Grid Table -->
+      <div id="data-table" class="d-none">
+        <!-- TODO: Advanced search -->
+        <div
+          id="areas-table"
+          class="ag-theme-alpine-dark"
+          style="height: 326px; width:100%;"
+        ></div>
+      </div>
 
     </div>
   </main>
 {% endif %}
 {% endblock console_body %}
+<!-- JavaScript -->
 {% block console_js %}
 
-  <!-- Page-specific JavaScript -->
-  <!-- <script src="{% static 'console/js/areas/areas.js' %}"></script> -->
+  {% if not section %}
+    <script>
+      cannlytics.app.streamData('areas', 'area', '{{ organizations.0.organization_id }}');
+    </script>
+  {% endif %}
 
 {% endblock console_js %}
 </html>

@@ -2,27 +2,24 @@
 Console Views | Cannlytics
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 12/18/2020
-Updated: 6/23/2021
+Updated: 7/8/2021
 """
 
 # Standard imports
 import csv
-from json import dumps, loads
+from json import loads
 
 # External imports
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.views.generic.base import TemplateView, View
-from xlsxwriter.workbook import Workbook
+from django.views.generic.base import TemplateView
 import openpyxl
 
 # Internal imports
-from api.auth import auth
 from cannlytics.firebase import (
     create_log,
     create_session_cookie,
-    get_collection,
     get_document,
     initialize_firebase,
     update_document,
@@ -35,6 +32,7 @@ from console.state import layout
 from console.utils import (
     get_page_data,
     get_page_context,
+    get_user_context,
 )
 
 BASE = 'console'
@@ -62,7 +60,6 @@ class ConsoleView(TemplateView):
         return [
             f'{BASE}/pages/{screen}/{unit}.html',
             f'{BASE}/pages/{screen}/{section}/{unit}.html',
-            f'{BASE}/pages/{screen}/{screen}-{section}-{unit}.html',
             f'{BASE}/pages/{screen}/{section}.html',
             f'{BASE}/pages/{screen}/{screen}-{section}.html',
             f'{BASE}/pages/{screen}/{section}/{section}.html',
@@ -89,46 +86,9 @@ class ConsoleView(TemplateView):
             context['organization_context'] = organization_context
         context = get_page_context(self.kwargs, context)
         context = get_page_data(self.kwargs, context)
-        # context = get_model_context(context) # Optional: Get model fields?
-        # FIXME: Redirect if no user!
-        user = auth.verify_session(self.request)
-        print('Verified user:', user)
-        if user:
-            uid = user['uid']
-            query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
-            organizations = get_collection('organizations', filters=[query])
-            user_data = get_document(f'users/{uid}')
-            context['organizations'] = organizations
-            context['user'] = {**user, **user_data}
+        context = get_user_context(self.request, context)
+        # FIXME: Redirect to the sign in page if there is no user!
         return context
-
-    # FIXME: Option to redirect if no user | Doesn't work in production!
-    # def get(self, request, *args, **kwargs):
-    #     """Get data before rendering context. Any existing user data is
-    #     retrieved. If there is no user data in the session, the the
-    #     request is verified. If the request is unauthenticated, then
-    #     the user is redirected to the sign in page. If the user is
-    #     authenticated, then the user's data and organization data is
-    #     added to the session."""
-    #     # Optional: Get user / organization from session if present?
-    #     # If so, update session if user / organization fields change.
-    #     user = auth.verify_session(request)
-    #     if not user:
-    #         request.session['organizations'] = []
-    #         request.session['user'] = {}
-    #         # return super().get(request, *args, **kwargs)
-    #         return HttpResponseRedirect('/account/sign-in')
-    #     uid = user['uid']
-    #     query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
-    #     organizations = get_collection('organizations', filters=[query])
-    #     user_data = get_document(f'users/{uid}')
-    #     # request.session['organizations'] = organizations
-    #     # request.session['user'] = user_data
-    #     # return super().get(request, *args, **kwargs)
-    #     context = self.get_context_data()
-    #     context['organizations'] = organizations
-    #     context['user'] = user_data
-    #     return self.render_to_response(context)
 
 
 #-----------------------------------------------------------------------
@@ -162,7 +122,7 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
         response.set_cookie(
             key='__session',
             value=session_cookie,
-            # expires=expires, # TODO: Set expiration time.
+            # expires=expires, # Optional: Set expiration time.
             # httponly=True, # TODO: Explore httponly option
             # secure=True, # TODO: Explore secure option
         )
@@ -209,16 +169,14 @@ def logout(request, *args, **argv): #pylint: disable=unused-argument
 
 def handler404(request, *args, **argv): #pylint: disable=unused-argument
     """Handle missing pages."""
-    status_code = 404
-    template = f'{BASE}/pages/misc/errors/{status_code}.html'
-    return render(request, template, {}, status=status_code)
+    template = f'{BASE}/pages/misc/errors/404.html'
+    return render(request, template, {}, status=404)
 
 
 def handler500(request, *args, **argv): #pylint: disable=unused-argument
     """Handle internal errors."""
-    status_code = 500
-    template = f'{BASE}/pages/misc/errors/{status_code}.html'
-    return render(request, template, {}, status=status_code)
+    template = f'{BASE}/pages/misc/errors/500.html'
+    return render(request, template, {}, status=500)
 
 
 #-----------------------------------------------------------------------

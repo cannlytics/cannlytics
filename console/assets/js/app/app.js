@@ -2,7 +2,7 @@
  * App JavaScript | Cannlytics Console
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 12/7/2020
- * Updated: 7/6/2021
+ * Updated: 7/8/2021
  */
 
 import { auth, db, getDocument, getUserToken } from '../firebase.js';
@@ -70,14 +70,14 @@ export const app = {
   },
 
 
-  save(model, modelSingular) {
+  save(model, modelSingular, abbreviation) {
     /* Create an entry in the database if it does not exist,
     otherwise update the entry. */
     // FIXME: Delete old entry if ID changes.
     document.getElementById('form-save-button').classList.add('d-none');
     document.getElementById('form-save-loading-button').classList.remove('d-none');
     let id = document.getElementById(`input_${modelSingular}_id`).value;
-    if (!id) id = this.createID(model, modelSingular);
+    if (!id) id = this.createID(model, modelSingular, abbreviation);
     const data = serializeForm(`${modelSingular}-form`);
     const orgId = document.getElementById('organization_id').value;
     console.log('TODO: save data:', model, modelSingular, orgId, data,);
@@ -122,6 +122,7 @@ export const app = {
   },
 
 
+  // TODO: Pass data model directly
   async drawTable(model, modelSingular, orgId, data) {
     /* Render a data table in the user interface. */
 
@@ -196,28 +197,12 @@ export const app = {
   Utility functions
   ----------------------------------------------------------------------------*/
 
-  createID(model, modelSingular) {
+  createID(model, modelSingular, abbreviation) {
     /* Create a unique ID. */
-    console.log('Create ID...', modelSingular);
-    // TODO: Get organization settings and assign ID based on data model ID schema.
-    const modelAbbreviations = {
-      'analyses': 'AN',
-      'analytes': 'AT',
-      'areas': 'A',
-      'contacts': 'C',
-      'instruments': 'IS',
-      'inventory': 'IN',
-      'measurements': 'M',
-      'projects': 'P',
-      'samples': 'S',
-      'transfers': 'TR'
-    };
-    const abbreviation = modelAbbreviations[model]
     const date = new Date().toISOString().substring(0, 10);
-    const dateString = date.replaceAll('-', '');
+    const dateString = date.replaceAll('-', '').slice(2);
     const id = `${abbreviation}${dateString}-`
     // TODO: Save next available counter in organization settings instead of using random bit!
-    console.log(id);
     document.getElementById(`input_${modelSingular}_id`).value = id;
     return id;
   },
@@ -265,6 +250,7 @@ export const app = {
   },
 
 
+  // TODO: Pass data model directly
   async downloadWorksheet(orgId, model) {
     /*
      * Download a worksheet to facilitate importing data.
@@ -272,15 +258,6 @@ export const app = {
     if (!this.dataModel.worksheet_url) {
       this.dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
     }
-    // const idToken = await getUserToken();
-    // const csrftoken = getCookie('csrftoken');
-    // const headerAuth = new Headers({
-    //   'Content-Type': 'application/json',
-    //   'Authorization': `Bearer ${idToken}`,
-    //   'X-CSRFToken': csrftoken,
-    //   'mode': 'no-cors',
-    // });
-    // const init = { headers: headerAuth, method: 'GET' };
     const response = await fetch(this.dataModel.worksheet_url);
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
@@ -293,14 +270,6 @@ export const app = {
     link.parentNode.removeChild(link);
     window.URL.revokeObjectURL(blob);
   },
-
-  // importData(model) {
-  //   /*
-  //    * Import a data file (.csv or .xlsx) to Firestore for a given model type.
-  //    */
-  //   // TODO:
-  //   console.log('TODO: import data:', model);
-  // },
 
 
   /*----------------------------------------------------------------------------
@@ -338,7 +307,9 @@ export const app = {
 ----------------------------------------------------------------------------*/
 
 function setGetParameter(paramName, paramValue) {
-  /* Add query parameter to the URL. */
+  /*
+   * Add query parameter to the URL.
+   */
   var url = window.location.href;
   var hash = location.hash;
   url = url.replace(hash, '');

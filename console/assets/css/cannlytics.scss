@@ -258,9 +258,11 @@ a.text-secondary:hover {
 svg.text-secondary:hover {
   stroke: #000 !important;
 }
+body.dark h2.text-secondary,
 body.dark p.text-secondary,
 body.dark small,
-body.dark svg.text-secondary {
+body.dark svg.text-secondary,
+body.dark .toast-body.text-secondary {
   color: #ccc !important;
 }
 body.dark a.text-secondary small:hover {

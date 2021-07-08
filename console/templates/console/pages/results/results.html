@@ -4,15 +4,18 @@
   Results Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/5/2021
-  Updated: 7/7/2021
+  Updated: 7/8/2021
 -->
 {% extends "console/console.html" %}
-{% block title %}{% if section %}{{ section }} | {% endif %}Results | Cannlytics {% endblock title %}
+{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Results | Cannlytics {% endblock title %}
 {% block console_body %}
 {% if section %}
 
   <!-- Detail page -->
-  {% include "console/pages/analyses/analysis.html" with id=section %}
+  {% include "console/pages/results/result.html" with
+    id=section
+    data_model=data_model
+  %}
 
 {% else %}
 

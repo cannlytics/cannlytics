@@ -1,7 +1,8 @@
 """
 URLs | Cannlytics API
+Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/21/2021
-Updated: 6/12/2021
+Updated: 7/8/2021
 Description: API URLs to interface with cannabis analytics.
 """
 
@@ -56,7 +57,7 @@ urlpatterns = [
     ])),
     path('instruments', include([
         path('', instruments.instruments),
-        path('/<instruments_id>', instruments.instruments),
+        path('/<instrument_id>', instruments.instruments),
     ])),
     path('invoices', include([
         path('', invoices.invoices),
@@ -80,8 +81,7 @@ urlpatterns = [
         path('/<organization_id>', organizations.organizations),
         path('/<organization_id>/settings', organizations.organizations),
         path('/<organization_id>/team', organizations.organization_team),
-        # TODO: Handle join organization with post requests?
-        # path('/<organization_id>/join/', organizations.join_organization),
+        path('/<organization_id>/join/', organizations.join_organization),
     ])),
     path('results', include([
         path('', results.results),
@@ -112,10 +112,9 @@ urlpatterns = [
         path('/transfers', traceability.transfers),
         path('/transfers/<transfer_id>', traceability.transfers),
     ])),
-    path('regulations', views.regulations),
-    # path('create-key', auth.create_api_key),
-    # path('delete-key', auth.delete_api_key),
-    # path('get-keys', auth.get_api_key_hmacs),
+    # path('data', include([
+    #     path('/regulations', views.regulations),
+    # ])),
     path('auth', include([
         path('/create-key', auth.create_api_key),
         path('/create-pin', auth.create_user_pin),

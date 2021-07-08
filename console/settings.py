@@ -1,9 +1,9 @@
 """
-Django Settings | Cannlytics
+Django Settings | Cannlytics Console
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 6/5/2021
-Updated: 6/21/2021
+Updated: 7/8/2021
 License: MIT License
 Description:
     Django settings secured by Google Cloud Secret Manager.

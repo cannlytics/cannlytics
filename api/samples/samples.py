@@ -16,7 +16,7 @@ from api.auth import auth
 from api.api import get_objects, update_object, delete_object
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'DELETE'])
 def samples(request, format=None, sample_id=None):
     """Get, create, or update laboratory samples."""
 
@@ -50,7 +50,7 @@ def samples(request, format=None, sample_id=None):
     elif request.method == 'POST':
         data = update_object(request, claims, model_type, model_type_singular, organization_id)
         if data:
-            Response({'success': True, 'data': data}, status=200)
+            return Response({'success': True, 'data': data}, status=200)
         else:
             message = 'Data not recognized. Please post either a singular object or an array of objects.'
             return Response({'error': True, 'message': message}, status=400)

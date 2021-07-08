@@ -27,6 +27,7 @@
 
     <!-- Title -->
     {% include "console/components/forms/form_title.html" with
+      abbreviation=data_model.abbreviation
       id=id
       model='measurements'
       model_singular='measurement'
@@ -35,23 +36,14 @@
       export=id
     %}
 
-  <!-- Fields -->
+    <!-- Form -->
     <div class="mb-4 px-3">
-
-      <!-- Form -->
       <form id="measurement-form">
-
-        <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
           fields=measurements.fields
         %}
-
-        <!-- Show additional fields -->
-        {% include "console/components/forms/additional_fields.html" %}
-
       </form>
-
-    </div><!-- End of fields -->
+    </div>
 
     <!-- TODO: Try to implement add analytes with AG-Grid table -->
     

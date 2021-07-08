@@ -8,12 +8,15 @@
 -->
 {% extends "console/console.html" %}
 {% load static icon %}
-{% block title %}{% if section %}{{ section }} | {% endif %}Projects | Cannlytics {% endblock title %}
+{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Projects | Cannlytics {% endblock title %}
 {% block console_body %}
 {% if section %}
 
   <!-- Detail page -->
-  {% include "console/pages/projects/project.html" with id=section %}
+  {% include "console/pages/projects/project.html" with
+    id=section
+    data_model=data_model
+  %}
 
 {% else %}
 

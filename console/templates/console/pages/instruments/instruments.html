@@ -7,12 +7,15 @@
 -->
 {% extends "console/console.html" %}
 {% load icon %}
-{% block title %}{% if section %}{{ section }} | {% endif %}Instruments | Cannlytics {% endblock title %}
+{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Instruments | Cannlytics {% endblock title %}
 {% block console_body %}
 {% if section %}
 
   <!-- Detail page -->
-  {% include "console/pages/analyses/analysis.html" with id=section %}
+  {% include "console/pages/instruments/instrument.html" with
+    id=section
+    data_model=data_model
+  %}
 
 {% else %}
 

@@ -31,6 +31,12 @@
   <!-- Options (back, save) -->
   {% if options %}
     <div class="d-flex align-items-center">
+      <button
+        class="btn btn-sm-light btn-md-light btn-set-width me-2"
+        onclick="document.getElementById('{{ model_singular }}-form').reset();"
+      >
+        Clear
+      </button>
       {% if id and id != 'new' %}
         <button
           class="btn btn-sm-light btn-md-light me-2"
@@ -41,15 +47,9 @@
       {% elif not id or id == 'new' %}
         <button
           class="btn btn-sm-light btn-md-light btn-set-width text-no-wrap me-2"
-          onclick="cannlytics.app.createID('{{ model }}', '{{ model_singular }}');"
+          onclick="cannlytics.app.createID('{{ model }}', '{{ model_singular }}', '{{ abbreviation }}');"
         >
           New ID
-        </button>
-        <button
-          class="btn btn-sm-light btn-md-light btn-set-width me-2"
-          onclick="document.getElementById('{{ model_singular }}-form').reset();"
-        >
-          Clear
         </button>
       {% endif %}
       {% if id and id != 'new' %}
@@ -63,7 +63,7 @@
       <button
         id="form-save-button"
         class="btn btn-sm btn-set-width bg-gradient-green text-white"
-        onclick="cannlytics.app.save('{{ model }}', '{{ model_singular }}');"
+        onclick="cannlytics.app.save('{{ model }}', '{{ model_singular }}', '{{ abbreviation }}');"
       >
         Save
       </button>

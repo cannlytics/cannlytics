@@ -1,7 +1,7 @@
 """
 API Functions | Cannlytics API
 Created: 7/7/2021
-Updated: 7/7/2021
+Updated: 7/8/2021
 
 API to interface with laboratory data models.
 """
@@ -33,6 +33,7 @@ def get_objects(request, authorized_ids, organization_id, model_id, model_type):
     Returns:
         (list): A list of dictionaries of the data retrieved.
     """
+    docs = []
     filters = []
     limit = request.query_params.get('limit')
     order_by = request.query_params.get('order_by')
@@ -50,7 +51,6 @@ def get_objects(request, authorized_ids, organization_id, model_id, model_type):
             ref = f'organizations/{organization_id}/{model_type}'
             docs = get_collection(ref, limit=limit, order_by=order_by, desc=desc, filters=filters)
     else:
-        docs = []
         for _id in authorized_ids:
             ref = f'organizations/{_id}/{model_type}'
             docs += get_collection(ref, limit=limit, order_by=order_by, desc=desc, filters=filters)
@@ -81,7 +81,7 @@ def update_object(request, claims, model_type, model_type_singular, organization
             update_document(f'organizations/{organization_id}/{model_type}/{doc_id}', item)
     else:
         return []
-    create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} edited.', model_type, f'{model_type}_post', [data])
+    create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} edited.', model_type, doc_id, [data])
     return data
 
 
@@ -95,13 +95,15 @@ def delete_object(request, claims, model_id, model_type, model_type_singular, or
         return False
     if model_id:
         delete_document(f'organizations/{organization_id}/{model_type}/{model_id}')
+        create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, model_id, [data])
     else:
         if isinstance(data, dict):
             doc_id = data[f'{model_type_singular}_id']
             delete_document(f'organizations/{organization_id}/{model_type}/{doc_id}')
+            create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, doc_id, [data])
         elif isinstance(data, list):
             for item in data:
                 doc_id = item[f'{model_type_singular}_id']
                 delete_document(f'organizations/{organization_id}/{model_type}/{doc_id}')
-    create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, f'{model_type}_delete', [data])
+                create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, doc_id, [data])
     return True
