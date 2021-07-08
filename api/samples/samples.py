@@ -1,50 +1,64 @@
 """
 Samples Views | Cannlytics API
 Created: 4/21/2021
+Updated: 7/7/2021
 
 API to interface with laboratory samples.
 """
+# pylint:disable=line-too-long
 
-from rest_framework import status
+# External imports
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-
-@api_view(['GET', 'POST'])
-def batches(request, format=None):
-    """Get, create, or update laboratory sample batches."""
-
-    if request.method == 'GET':
-        return Response({'error': 'not_implemented'}, content_type='application/json')
-
-    elif request.method == 'POST':
-
-        return Response({'error': 'not_implemented'}, content_type='application/json')
-
-        # Return an error if no author is specified.
-        # error_message = 'Unknown error, please notify <support@cannlytics.com>'
-        # return Response(
-        #     {'error': error_message},
-        #     content_type='application/json',
-        #     status=status.HTTP_400_BAD_REQUEST
-        # )
+# Internal imports
+from api.auth import auth
+from api.api import get_objects, update_object, delete_object
 
 
 @api_view(['GET', 'POST'])
-def samples(request, format=None):
+def samples(request, format=None, sample_id=None):
     """Get, create, or update laboratory samples."""
 
+    # Initialize and authenticate.
+    model_id = sample_id
+    model_type = 'samples'
+    model_type_singular = 'sample'
+    claims = auth.verify_session(request)
+    try:
+        uid = claims['uid']
+        owner = claims.get('owner', [])
+        team = claims.get('team', [])
+        qa = claims.get('qa', [])
+        authorized_ids = owner + team + qa
+    except KeyError:
+        message = 'Your request was not authenticated. Ensure that you have a valid session or API key.'
+        return Response({'error': True, 'message': message}, status=401)
+
+    # Authorize that the user can work with the data.
+    organization_id = request.query_params.get('organization_id')
+    if organization_id not in authorized_ids:
+        message = f'Your must be an owner, quality assurance, or a team member of this organization to manage {model_type}.'
+        return Response({'error': True, 'message': message}, status=403)
+
+    # GET data.
     if request.method == 'GET':
-        return Response({'error': 'not_implemented'}, content_type='application/json')
+        docs = get_objects(request, authorized_ids, organization_id, model_id, model_type)
+        return Response({'success': True, 'data': docs}, status=200)
 
+    # POST data.
     elif request.method == 'POST':
+        data = update_object(request, claims, model_type, model_type_singular, organization_id)
+        if data:
+            Response({'success': True, 'data': data}, status=200)
+        else:
+            message = 'Data not recognized. Please post either a singular object or an array of objects.'
+            return Response({'error': True, 'message': message}, status=400)
 
-        return Response({'error': 'not_implemented'}, content_type='application/json')
-
-        # Return an error if no author is specified.
-        # error_message = 'Unknown error, please notify <support@cannlytics.com>'
-        # return Response(
-        #     {'error': error_message},
-        #     content_type='application/json',
-        #     status=status.HTTP_400_BAD_REQUEST
-        # )
+    # DELETE data.
+    elif request.method == 'DELETE':
+        success = delete_object(request, claims, model_id, model_type, model_type_singular, organization_id, owner, qa)
+        if not success:
+            message = f'Your must be an owner or quality assurance to delete {model_type}.'
+            return Response({'error': True, 'message': message}, status=403)
+        return Response({'success': True, 'data': []}, status=200)

@@ -4,7 +4,7 @@
   Analysis Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 12/17/2020
-  Updated: 6/22/2021
+  Updated: 7/7/2021
   TODO:
     - Allow the user to reset, save (update and create), and delete.
     - Render additional fields, ability to add an additional field.
@@ -13,7 +13,6 @@
   FIXME:
     - Pass IDs appropriately.
 -->
-{% comment %} {% extends "console/console.html" %} {% endcomment %}
 {% load icon %}
 {% block console_css %}
 
@@ -26,8 +25,10 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=analyses.breadcrumbs
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Analyses"
+      base_page_url="/analyses"
+      current_page=id
     %}
 
     <!-- Title -->
@@ -40,29 +41,19 @@
       export=id
     %}
 
-    <!-- Fields -->
-    <div class="mb-4 px-3">
-
-      <!-- Form -->
+    <!-- Form -->
+    <div class="my-4 px-3">
       <form id="analysis-form">
-
-        <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
           fields=analyses.fields
         %}
-
-        <!-- Show additional fields -->
-        {% include "console/components/forms/additional_fields.html" %}
-
       </form>
-
-    </div><!-- End of fields -->
+    </div>
 
     <!-- TODO: Try to implement add analytes with AG-Grid table -->
-    
 
     <!-- Danger zone (delete) -->
-    {% if id %}
+    {% if id and id != 'new' %}
       {% include "console/components/forms/delete_option.html" with
         id=id
         model="analyses"
@@ -84,10 +75,6 @@
     // Render any date pickers.
     $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
-    // FIXME: Enable tooltips.
-    // cannlytics.ui.enableTooltips();
-
   </script>
 {% endblock console_js %}
-
 </html>

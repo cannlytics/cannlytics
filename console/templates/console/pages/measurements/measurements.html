@@ -4,80 +4,73 @@
   Measurements Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2021
-  Updated: 6/22/2021
+  Updated: 7/7/2021
 -->
 {% extends "console/console.html" %}
 {% load static icon %}
+{% block title %}{% if section %}{{ section }} | {% endif %}Measurements | Cannlytics {% endblock title %}
 {% block console_body %}
 {% if section %}
 
   <!-- Detail page -->
-  <!-- FIXME: Pass model ID -->
-  {% include "console/pages/measurements/measurement.html" with id="" %}
+  {% include "console/pages/measurements/measurement.html" with id=section %}
 
 {% else %}
+
+  <!-- List -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="fs-5 mb-0 lh-base">Measurements</h1>
-      <div>
-        <button
-          class="btn btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.settings.importData('measurements');"
-        >
-          Import
-        </button>
-        <button
-          class="btn btn-sm-light btn-md-light"
-          onclick="cannlytics.settings.exportData('measurements');"
-        >
-          Export
-        </button>
-      </div>
-    </div>
+    {% include "console/components/tables/table_options.html" with
+      model='measurements'
+      model_singular='measurement'
+    %}
 
     <!-- Body -->
-    <div class="card my-3">
-      <div class="card-body">
+    <div class="measurements">
 
-        <!-- Table -->
-        <div class="my-3 px-3">
-          <h2 class="h6 mb-3 text-dark">Measurements</h2>
-          <div class="table-responsive">
-
-            <!-- Placeholder if no data -->
-            <div id="data-placeholder">
-              {% include "console/components/placeholders/table_placeholder.html" with
-                action='Create a new measurement'
-                height='200px'
-                image='console/images/illustrations/outline/lab_books.svg'
-                message="No current measurements, you're all caught up."
-                title='No Current Measurements'
-                url='/measurements/new'
-                only
-              %}
-            </div>
-
-            <!-- AG Grid Table -->
-            <div id="data-table" class="d-none">
-              <div
-                id="measurements-table"
-                class="ag-theme-alpine-dark"
-                style="height: 326px; width:100%;"
-              ></div>
-            </div>
-
-          </div>
-        </div><!-- End of the table -->
-      
+      <!-- Loading placeholder -->
+      <div id="loading-placeholder">
+        {% include "console/components/placeholders/loading_placeholder.html" with
+          height='326px'
+          width='100%'
+          only
+        %}
       </div>
-    </div>
 
-    </div>
+      <!-- No-data Placeholder -->
+      <div id="data-placeholder" class="d-none">
+        {% include "console/components/placeholders/placeholder.html" with
+          placeholder=measurements.placeholder
+          only
+        %}
+      </div>
+
+      <!-- AG Grid Table -->
+      <div id="data-table" class="d-none">
+        <!-- TODO: Advanced search -->
+        <div
+          id="measurements-table"
+          class="ag-theme-alpine-dark"
+          style="height: 326px; width:100%;"
+        ></div>
+      </div>
+
+    </div><!-- End of the body -->
+    
   </main>
 {% endif %}
 
 {% endblock console_body %}
 
+<!-- JavaScript -->
+{% block console_js %}
+
+  {% if not section %}
+    <script>
+      cannlytics.app.streamData('measurements', 'measurement', '{{ organizations.0.organization_id }}');
+    </script>
+  {% endif %}
+
+{% endblock console_js %}
 </html>

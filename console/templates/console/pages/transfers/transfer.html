@@ -4,7 +4,7 @@
   Transfer Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2020
-  Updated: 6/23/2021
+  Updated: 7/7/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -18,8 +18,10 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=transfers.breadcrumbs
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Transfers"
+      base_page_url="/transfers"
+      current_page=id
     %}
 
     <!-- Title -->
@@ -43,12 +45,23 @@
           fields=transfers.fields
         %}
 
-        <!-- Show additional fields -->
-        {% include "console/components/forms/additional_fields.html" %}
+        <!-- TODO: Show additional fields (traceability fields) -->
+        {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
 
       </form>
 
     </div><!-- End of fields -->
+
+    <!-- TODO: Try to implement add samples with AG-Grid table -->
+
+    <!-- Danger zone (delete) -->
+    {% if id and id != 'new' %}
+      {% include "console/components/forms/delete_option.html" with
+        id=id
+        model="transfers"
+        model_singular="transfer"
+      %}
+    {% endif %}
 
 
   </main>
@@ -59,14 +72,11 @@
 {% block console_js %}
   <script>
 
-    // Load the project's data.
-    cannlytics.ui.viewObject('project');
+    // Load the data into the user interface.
+    cannlytics.ui.viewObject('transfer');
 
     // Render any date pickers.
     $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // Enable tooltips.
-    // cannlytics.ui.enableTooltips();
 
   </script>
 {% endblock console_js %}

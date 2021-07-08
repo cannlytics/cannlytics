@@ -3,7 +3,7 @@
 <!--
   Breadcrumbs
   Created: 7/1/2021
-  Updated: 7/1/2021
+  Updated: 7/7/2021
   Parameters:
     base_page
     base_page_url
@@ -27,9 +27,15 @@
           </li>
         {% endif %}
         <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
-          {{ current_page }}
+          {% if current_page == 'new' %}New{% else %}{{ current_page }}{% endif %}
         </li>
       </ol>
     </nav>
+    <a
+      class="btn btn-sm-light btn-md-light"
+      onclick="window.history.back();"
+    >
+      Back
+    </a>
   </div>
 </html>

@@ -4,24 +4,20 @@
   Areas | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 4/24/2021
-  Updated: 6/22/2021
+  Updated: 7/7/2021
 -->
 {% extends "console/console.html" %}
-{% load static icon %}
-{% block console_css %}
-
-  <!-- Page-specific CSS -->
-  {% comment %} <link rel="stylesheet" href="{% static 'console/css/areas/areas.css' %}"> {% endcomment %}
-
-{% endblock %}
+{% load icon %}
+{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Areas | Cannlytics {% endblock title %}
 {% block console_body %}
 {% if section %}
 
   <!-- Detail page -->
-  <!-- FIXME: Pass model ID -->
-  {% include "console/pages/areas/area.html" with id="" %}
+  {% include "console/pages/areas/area.html" with id=section %}
 
 {% else %}
+
+  <!-- List -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->

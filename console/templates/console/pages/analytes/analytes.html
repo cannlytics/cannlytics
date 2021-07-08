@@ -13,6 +13,7 @@
 -->
 {% extends "console/console.html" %}
 {% load icon %}
+{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Analyses | Cannlytics {% endblock title %}
 {% block console_body %}
 {% if section %}
 

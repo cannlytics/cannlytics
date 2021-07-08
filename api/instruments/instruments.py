@@ -1,7 +1,7 @@
 """
-Areas Endpoint Views | Cannlytics API
+Instruments Endpoint Views | Cannlytics API
 Created: 4/21/2021
-Updated: 6/28/2021
+Updated: 7/7/2021
 
 API to interface with scientific instruments.
 """
@@ -29,6 +29,8 @@ from cannlytics.firebase import (
 def instruments(request, format=None, instrument_id=None):
     """Get, create, or update instrument information."""
 
+    # Initialize and authenticate.
+    model_id = instrument_id
     model_type = 'instruments'
     model_type_singular = 'instrument'
     claims = auth.verify_session(request)
@@ -63,9 +65,9 @@ def instruments(request, format=None, instrument_id=None):
         if organization_id:
 
             # Get a singular object if requested.
-            if instrument_id:
-                print('Requested:', instrument_id)
-                ref = f'organizations/{organization_id}/{model_type}/{instrument_id}'
+            if model_id:
+                print('Requested:', model_id)
+                ref = f'organizations/{organization_id}/{model_type}/{model_id}'
                 docs = get_document(ref)
 
             # Get objects for a given organization.

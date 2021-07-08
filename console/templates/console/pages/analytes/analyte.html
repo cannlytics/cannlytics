@@ -4,13 +4,9 @@
   Analyte Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2020
-  Updated: 6/22/2021
-  FIXME:
-  - Pass IDs appropriately.
+  Updated: 7/7/2021
 -->
 {% load icon %}
-
-<!-- CSS -->
 {% block console_css %}
 
   <!-- Bootstrap Datepicker -->
@@ -18,14 +14,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
 
 {% endblock console_css %}
-
-<!-- Body -->
 {% block console_body %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=analytes.breadcrumbs
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Analytes"
+      base_page_url="/analytes"
+      current_page=id
     %}
 
     <!-- Title -->
@@ -49,15 +45,12 @@
           fields=analytes.fields
         %}
 
-        <!-- Show additional fields -->
-        {% include "console/components/forms/additional_fields.html" %}
-
       </form>
 
     </div><!-- End of fields -->
     
     <!-- Danger zone (delete) -->
-    {% if id %}
+    {% if id and id != 'new' %}
       {% include "console/components/forms/delete_option.html" with
         id=id
         model="analytes"
@@ -78,9 +71,6 @@
 
     // Render any date pickers.
     $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // FIXME: Enable tooltips.
-    // cannlytics.ui.enableTooltips();
 
   </script>
 {% endblock console_js %}

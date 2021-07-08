@@ -4,7 +4,7 @@ State Variables | Cannlytics Console
 Author: Keegan Skeate
 Company: Cannlytics
 Created: 10/15/2020
-Updated: 6/29/2021
+Updated: 7/7/2021
 
 Relatively static state variables for extra context on each page/screen.
 The idea is to separate the material from the templates,
@@ -25,15 +25,11 @@ docs = {}
 # Page-specific context.
 material = {
     "analyses": {
-        "breadcrumbs": [
-            {"title": "Analyses", "url": "/analyses"},
-            {"title": "Analysis", "active": True},
-        ],
         "fields": [
             {"key": "analysis_id", "label": "Analysis ID"},
             {"key": "name", "label": "Name"},
             {"key": "key", "label": "Key"},
-            {"key": "price", "label": "Price", "type": "text"}, # Optional: currency
+            {"key": "price", "label": "Price", "type": "text", "class": "field-sm"}, # Optional: currency
             {"key": "public", "label": "Public", "type": "bool"},
         ],
         "placeholder": {
@@ -41,25 +37,21 @@ material = {
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_microbiologist.svg",
             "title": "Create your first analysis",
-            "message": "Create a scientific analysis, a set of analytes or tests to perform for an organization, including internal analyses for your organizations.",
+            "message": "Create a scientific analysis, a set of analytes or tests to collect measurements for to get results.",
             "url": "./analyses/new",
         },
     },
     "analytes": {
-        "breadcrumbs": [
-            {"title": "Analytes", "url": "/analytes"},
-            {"title": "Analyte", "active": True},
-        ],
         "fields": [
             {"key": "analyte_id", "label": "Analyte ID"},
             {"key": "name", "label": "Name"},
             {"key": "key", "label": "Key"},
-            {"key": "limit", "label": "Limit", "type": "number", "class":"field-sm"},
-            {"key": "lod", "label": "LOD", "type": "number", "class":"field-sm"},
-            {"key": "loq", "label": "LOQ", "type": "number", "class":"field-sm"},
+            {"key": "formula", "label": "Results Formula", "type": "text"},
+            {"key": "limit", "label": "Limit", "type": "number", "class":"field-sm text-end"},
+            {"key": "lod", "label": "LOD", "type": "number", "class":"field-sm text-end"},
+            {"key": "loq", "label": "LOQ", "type": "number", "class":"field-sm text-end"},
             {"key": "units", "label": "Units", "type": "text", "class":"field-sm"},
-            {"key": "formula", "label": "Calculation Formula", "type": "text"},
-            {"key": "cas", "label": "CAS Number"},
+            {"key": "cas", "label": "CAS Number", "class":"field-sm"},
             {"key": "public", "label": "Public", "type": "bool"},
         ],
         "placeholder": {
@@ -72,10 +64,6 @@ material = {
         },
     },
     "areas": {
-        "breadcrumbs": [
-            {"title": "Areas", "url": "/areas"},
-            {"title": "Area", "active": True},
-        ],
         "fields": [
             {"key": "area_id", "label": "Area ID"},
             {"key": "name", "label": "Name"},
@@ -95,10 +83,6 @@ material = {
         },
     },
     "contacts": {
-        "breadcrumbs": [
-            {"title": "Contacts", "url": "/contacts"},
-            {"title": "Contacts", "active": True},
-        ],
         "fields": [
             {"key": "organization_id", "label": "Organization ID"},
             {"key": "organization", "label": "Organization"},
@@ -125,10 +109,6 @@ material = {
         },
     },
     "instruments": {
-        "breadcrumbs": [
-            {"title": "Instruments", "url": "/instruments"},
-            {"title": "Instrument", "active": True},
-        ],
         "fields": [
             {"key": "name", "label": "Name"},
             {"key": "data_path", "label": "Data path"},
@@ -150,10 +130,6 @@ material = {
         },
     },
     "inventory": {
-        "breadcrumbs": [
-            {"title": "Inventory", "url": "/inventory"},
-            {"title": "Item", "active": True},
-        ],
         "fields": [
             {"key": "item_id", "label": "Item ID"}, # Optional: inventory_id is preferred but bug in app.js createID
             {"key": "name", "label": "Name"},
@@ -192,10 +168,6 @@ material = {
         },
     },
     "measurements": {
-        "breadcrumbs": [
-            {"title": "Measurements", "url": "/measurements"},
-            {"title": "Measurement", "active": True},
-        ],
         "fields": [
             {"key": "measurement_id", "label": "Measurement ID"},
             {"key": "sample_id", "label": "Sample ID"},
@@ -255,10 +227,6 @@ material = {
     #     },
     # },
     "projects": {
-        "breadcrumbs": [
-            {"title": "Projects", "url": "/projects"},
-            {"title": "Project", "active": True},
-        ],
         "fields": [
             {"key": "project_id", "label": "Project ID"},
             {"key": "organization", "label": "Organization"},
@@ -278,10 +246,6 @@ material = {
         },
     },
     "results": {
-        "breadcrumbs": [
-            {"title": "Results", "url": "/results"},
-            {"title": "Results", "active": True},
-        ],
         "fields": [
             {"key": "result_id", "label": "Result ID"},
             {"key": "result", "label": "Result", "type": "number"},
@@ -315,10 +279,6 @@ material = {
         },
     },
     "samples": {
-        "breadcrumbs": [
-            {"title": "Samples", "url": "/samples"},
-            {"title": "Samples", "active": True},
-        ],
         "fields": [
             {"key": "photo_url", "label": "Photo", "type": "image"},
             {"key": "sample_id", "label": "Sample ID"},
@@ -341,10 +301,6 @@ material = {
         },
     },
     "transfers": {
-        "breadcrumbs": [
-            {"title": "Transfers", "url": "/transfers"},
-            {"title": "Transfer", "active": True},
-        ],
         "fields": [
             {"key": "transfer_id", "label": "Transfer ID"},
             {"key": "transfer_type", "label": "Transfer Type"},
@@ -593,7 +549,6 @@ material = {
     #         "url": "./templates/new",
     #     },
     # },
-
 }
 
 

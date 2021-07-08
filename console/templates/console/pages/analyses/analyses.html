@@ -3,66 +3,60 @@
 <!--
   Analyses | Cannlytics Console
   Created 1/13/2021
-  Updated: 6/12/2021
+  Updated: 7/7/2021
   TODO:
    - Allow for labs to choose to make their analyses public,
     so that producers can search for analyses.
 -->
 {% extends "console/console.html" %}
 {% load icon %}
+{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Analyses | Cannlytics {% endblock title %}
 {% block console_body %}
 {% if section %}
 
   <!-- Detail page -->
-  <!-- FIXME: Pass model ID -->
-  {% include "console/pages/analyses/analysis.html" with id="" %}
+  {% include "console/pages/analyses/analysis.html" with id=section %}
 
 {% else %}
+
+  <!-- List -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="fs-5 mb-0 lh-base">Analyses</h1>
-      <div>
-        <button
-          class="btn btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.settings.importData('analyses');"
-        >
-          Import
-        </button>
-        <button
-          class="btn btn-sm-light btn-md-light"
-          onclick="cannlytics.settings.exportData('analyses');"
-        >
-          Export
-        </button>
-      </div>
-    </div>
+    {% include "console/components/tables/table_options.html" with
+      model='analyses'
+      model_singular='analysis'
+    %}
 
     <!-- Body -->
     <div class="analyses">
 
-      <!-- Table -->
-      <div class="card my-3">
-        <div class="card-body">
-          <h2 class="h6 mb-3 text-dark">Analyses</h2>
-          <div class="table-responsive">
+      <!-- Loading placeholder -->
+      <div id="loading-placeholder">
+        {% include "console/components/placeholders/loading_placeholder.html" with
+          height='326px'
+          width='100%'
+          only
+        %}
+      </div>
 
-            <!-- Placeholder if no records -->
-            {% if True %}
-              {% include "console/components/placeholders/placeholder.html" with
-                placeholder=analyses.placeholder
-                only
-              %}
+      <!-- No-data Placeholder -->
+      <div id="data-placeholder" class="d-none">
+        {% include "console/components/placeholders/placeholder.html" with
+          placeholder=analyses.placeholder
+          only
+        %}
+      </div>
 
-            <!-- AG-Grid Table -->
-            {% else %}
-              <div id="analyses-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
-            {% endif %}
-
-          </div>
-        </div>
-      </div><!-- End of the table -->
+      <!-- AG Grid Table -->
+      <div id="data-table" class="d-none">
+        <!-- TODO: Advanced search -->
+        <div
+          id="analyses-table"
+          class="ag-theme-alpine-dark"
+          style="height: 326px; width:100%;"
+        ></div>
+      </div>
 
     </div><!-- End of the body -->
 
@@ -71,12 +65,14 @@
 
 {% endblock console_body %}
 
-<!-- Analyses JavaScript -->
+<!-- JavaScript -->
 {% block console_js %}
 
-  <script>
-    cannlytics.analyses.initialize();
-  </script>
+  {% if not section %}
+    <script>
+      cannlytics.app.streamData('analyses', 'analysis', '{{ organizations.0.organization_id }}');
+    </script>
+  {% endif %}
 
 {% endblock console_js %}
 </html>

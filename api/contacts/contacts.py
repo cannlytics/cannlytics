@@ -31,6 +31,7 @@ def contacts(request, format=None, contact_id=None):
     """Get, create, update, and delete organization contact information."""
 
     # Initialize and authenticate.
+    model_id = contact_id
     model_type = 'contacts'
     model_type_singular = 'contact'
     claims = auth.verify_session(request)
@@ -67,9 +68,9 @@ def contacts(request, format=None, contact_id=None):
         if organization_id:
 
             # Get a singular object if requested.
-            if contact_id:
-                print('Requested:', contact_id)
-                ref = f'organizations/{organization_id}/{model_type}/{contact_id}'
+            if model_id:
+                print('Requested:', model_id)
+                ref = f'organizations/{organization_id}/{model_type}/{model_id}'
                 docs = get_document(ref)
 
             # Get objects for a given organization.
@@ -120,8 +121,8 @@ def contacts(request, format=None, contact_id=None):
 
 
         # Delete by URL ID.
-        if contact_id:
-            delete_document(f'organizations/{organization_id}/{model_type}/{contact_id}')
+        if model_id:
+            delete_document(f'organizations/{organization_id}/{model_type}/{model_id}')
         
         # Delete by using posted ID(s).
         else:

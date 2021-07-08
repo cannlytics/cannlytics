@@ -1,7 +1,7 @@
 """
 Analytes Endpoint Views | Cannlytics API
 Created: 4/21/2021
-Updated: 6/29/2021
+Updated: 7/7/2021
 
 API to interface with analysis analytes.
 """
@@ -28,7 +28,7 @@ from cannlytics.firebase import (
 @api_view(['GET', 'POST', 'DELETE'])
 def analytes(request, format=None, analyte_id=None):
     """Get, create, or update information about cannabis analysis analytes."""
-
+    model_id = analyte_id
     model_type = 'analytes'
     model_type_singular = 'analyte'
     claims = auth.verify_session(request)
@@ -67,9 +67,9 @@ def analytes(request, format=None, analyte_id=None):
         if organization_id:
 
             # Get a singular object if requested.
-            if analyte_id:
-                print('Requested analyte:', analyte_id)
-                ref = f'organizations/{organization_id}/{model_type}/{analyte_id}'
+            if model_id:
+                print('Requested analyte:', model_id)
+                ref = f'organizations/{organization_id}/{model_type}/{model_id}'
                 docs = get_document(ref)
 
             # Get objects for a given organization.
@@ -122,8 +122,8 @@ def analytes(request, format=None, analyte_id=None):
 
 
         # Delete by URL ID.
-        if analyte_id:
-            delete_document(f'organizations/{organization_id}/{model_type}/{analyte_id}')
+        if model_id:
+            delete_document(f'organizations/{organization_id}/{model_type}/{model_id}')
         
         # Delete by using posted ID(s).
         else:

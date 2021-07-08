@@ -3,7 +3,7 @@
 <!--
   Project Page | Cannlytics Console
   Created: 6/18/2021
-  Updated: 6/22/2021
+  Updated: 7/7/2021
   TODO:
     - Allow the user to reset, save (update and create), and delete.
     - Render additional fields, ability to add an additional field.
@@ -22,9 +22,11 @@
 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
   <!-- Header -->
-  {% include "console/components/links/breadcrumbs_dynamic.html" with
-    breadcrumbs=projects.breadcrumbs
-  %}
+  {% include "console/components/links/breadcrumbs.html" with
+      base_page="Projects"
+      base_page_url="/projects"
+      current_page=id
+    %}
 
   <!-- Title -->
   {% include "console/components/forms/form_title.html" with
@@ -46,9 +48,6 @@
       {% include "console/components/forms/dynamic_form.html" with
         fields=projects.fields
       %}
-
-      <!-- Show additional fields -->
-      {% include "console/components/forms/additional_fields.html" %}
 
     </form>
 
@@ -118,7 +117,7 @@
     </li>
   </ol>
 
-  <!-- Add team member button -->
+  <!-- Add list item button -->
   <button
     class="btn btn-sm btn-sm-light"
     onclick="cannlytics.ui.addListItem(event, 'samples')"
@@ -145,7 +144,7 @@
               image='console/images/icons/two-tone/two_tone_bottle.svg'
               message="No samples for this project. Start adding samples to create a group of samples for a specific organization."
               title='No Samples Added'
-              url='/projects/{{ request.GET.id }}/samples/new'
+              url='/projects/{{ id }}/samples/new'
               only
             %}
           </div>
@@ -166,11 +165,11 @@
   </div><!-- End of table container --> {% endcomment %}
 
   <!-- Danger zone (delete) -->
-  {% if request.GET.id %}
+  {% if id and id != 'new' %}
     {% include "console/components/forms/delete_option.html" with
       model="projects"
       model_singular="project"
-      id=request.GET.id
+      id=id
     %}
   {% endif %}
 
@@ -186,9 +185,6 @@
 
     // Render any date pickers.
     $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // Enable tooltips.
-    // cannlytics.ui.enableTooltips();
 
   </script>
 {% endblock console_js %}

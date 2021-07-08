@@ -1,7 +1,7 @@
 """
 Areas Endpoint Views | Cannlytics API
 Created: 5/8/2021
-Updated: 6/28/2021
+Updated: 7/7/2021
 
 API to interface with organization areas.
 """
@@ -26,9 +26,11 @@ from cannlytics.firebase import (
 
 
 @api_view(['GET', 'POST', 'DELETE'])
-def areas(request, format=None, analyte_id=None):
+def areas(request, format=None, area_id=None):
     """Get, create, or update information about organization areas."""
 
+    # Initialize and authenticate.
+    model_id = area_id
     model_type = 'areas'
     model_type_singular = 'area'
     claims = auth.verify_session(request)
@@ -63,9 +65,9 @@ def areas(request, format=None, analyte_id=None):
         if organization_id:
 
             # Get a singular object if requested.
-            if analyte_id:
-                print('Requested analyte:', analyte_id)
-                ref = f'organizations/{organization_id}/{model_type}/{analyte_id}'
+            if model_id:
+                print('Requested analyte:', model_id)
+                ref = f'organizations/{organization_id}/{model_type}/{model_id}'
                 docs = get_document(ref)
 
             # Get objects for a given organization.
@@ -118,7 +120,7 @@ def areas(request, format=None, analyte_id=None):
         if organization_id not in qa and organization_id not in owner:
             message = f'Your must be an owner or quality assurance to delete {model_type}.'
             return Response({'error': True, 'message': message}, status=403)
-        
+
         # Delete the objects(s).
         if isinstance(data, dict):
             doc_id = data[f'{model_type_singular}_id']

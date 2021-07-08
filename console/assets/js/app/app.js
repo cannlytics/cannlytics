@@ -73,10 +73,13 @@ export const app = {
   save(model, modelSingular) {
     /* Create an entry in the database if it does not exist,
     otherwise update the entry. */
+    // FIXME: Delete old entry if ID changes.
+    document.getElementById('form-save-button').classList.add('d-none');
+    document.getElementById('form-save-loading-button').classList.remove('d-none');
+    let id = document.getElementById(`input_${modelSingular}_id`).value;
+    if (!id) id = this.createID(model, modelSingular);
     const data = serializeForm(`${modelSingular}-form`);
     const orgId = document.getElementById('organization_id').value;
-    const id = document.getElementById(`input_${modelSingular}_id`).value;
-    if (!id) id = this.createID(modelSingular);
     console.log('TODO: save data:', model, modelSingular, orgId, data,);
     authRequest(`/api/${model}/${id}?organization_id=${orgId}`, data)
       .then((response) => {
@@ -85,6 +88,10 @@ export const app = {
       })
       .catch((error) => {
         showNotification('Error saving data', error.message, { type: 'error' });
+      })
+      .finally(() => {
+        document.getElementById('form-save-loading-button').classList.add('d-none');
+        document.getElementById('form-save-button').classList.remove('d-none');
       });
   },
 

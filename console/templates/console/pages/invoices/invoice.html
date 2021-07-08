@@ -1,14 +1,11 @@
 <!doctype html>
 <html>
 <!--
-  Contact Page | Cannlytics Console
-  Author: Keegan Skeate <keegan@cannlytics.com>
-  Created: 6/22/2021
-  Updated: 7/6/2021
+  Invoice Page | Cannlytics Console
+  Created: 7/7/2021
+  Updated: 7/7/2021
 -->
 {% load icon %}
-
-<!-- CSS -->
 {% block console_css %}
 
   <!-- Bootstrap Datepicker -->
@@ -16,55 +13,56 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
 
 {% endblock console_css %}
-
-<!-- Body -->
 {% block console_body %}
+  
+  <!-- List -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
     {% include "console/components/links/breadcrumbs.html" with
-      base_page="Contacts"
-      base_page_url="/contacts"
+      base_page="Invoices"
+      base_page_url="/invoices"
       current_page=id
     %}
 
     <!-- Title -->
     {% include "console/components/forms/form_title.html" with
       id=id
-      model='contacts'
-      model_singular='contact'
-      description="Manage contacts, organizations that you work with."
+      model='invoices'
+      model_singular='invoice'
+      description="Manage invoices for your projects."
       options=True
       export=id
     %}
 
-    <!-- Fields -->
+  <!-- Fields -->
     <div class="mb-4 px-3">
 
       <!-- Form -->
-      <form id="contact-form">
+      <form id="invoices-form">
 
         <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
-          fields=contacts.fields
+          fields=invoices.fields
         %}
 
       </form>
 
     </div><!-- End of fields -->
 
-    <!-- TODO: Try to implement add people with AG-Grid table -->
+    <!-- TODO: Try to implement add analytes with AG-Grid table -->
+    
 
     <!-- Danger zone (delete) -->
     {% if id and id != 'new' %}
       {% include "console/components/forms/delete_option.html" with
         id=id
-        model="contacts"
-        model_singular="contact"
+        model="invoices"
+        model_singular="invoice"
       %}
     {% endif %}
 
-  </main>
+</main>
 {% endblock console_body %}
 
 <!-- JavaScript -->
@@ -72,7 +70,7 @@
   <script>
 
     // Load the data into the user interface.
-    cannlytics.ui.viewObject('contact');
+    cannlytics.ui.viewObject('invoice');
 
     // Render any date pickers.
     $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });

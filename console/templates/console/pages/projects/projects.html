@@ -4,83 +4,75 @@
   Projects | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 4/24/2021
-  Updated: 6/22/2021
+  Updated: 7/7/2021
 -->
 {% extends "console/console.html" %}
 {% load static icon %}
+{% block title %}{% if section %}{{ section }} | {% endif %}Projects | Cannlytics {% endblock title %}
 {% block console_body %}
 {% if section %}
 
   <!-- Detail page -->
-  <!-- FIXME: Pass model ID -->
-  {% include "console/pages/projects/project.html" with id="" %}
+  {% include "console/pages/projects/project.html" with id=section %}
 
 {% else %}
+
+  <!-- List -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="fs-5 mb-0 lh-base">Projects</h1>
-      <div>
-        <button
-          class="btn btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.settings.importData('projects');"
-        >
-          Import
-        </button>
-        <button
-          class="btn btn-sm-light btn-md-light"
-          onclick="cannlytics.settings.exportData('projects');"
-        >
-          Export
-        </button>
-      </div>
+    {% include "console/components/tables/table_options.html" with
+      model='projects'
+      model_singular='project'
+    %}
+
+  <!-- Body -->
+  <div class="projects">
+
+    <!-- Loading placeholder -->
+    <div id="loading-placeholder">
+      {% include "console/components/placeholders/loading_placeholder.html" with
+        height='326px'
+        width='100%'
+        only
+      %}
     </div>
 
-    <!-- Body -->
-    <div class="card my-3">
-      <div class="card-body">
-
-        <!-- Table -->
-        <div class="my-3 px-3">
-          <h2 class="h6 mb-3 text-dark">Projects</h2>
-          <div class="table-responsive">
-
-            <!-- Placeholder if no data -->
-            <div id="data-placeholder">
-              {% include "console/components/placeholders/table_placeholder.html" with
-                action='Create a project'
-                height='200px'
-                image='console/images/illustrations/outline/lab_books.svg'
-                message="No current projects, you're all caught up."
-                title='No Current Projects'
-                url='/projects/new'
-                only
-              %}
-            </div>
-
-            <!-- AG Grid Table -->
-            <div id="data-table" class="d-none">
-              <div
-                id="projects-table"
-                class="ag-theme-alpine-dark"
-                style="height: 326px; width:100%;"
-              ></div>
-            </div>
-
-          </div>
-        </div><!-- End of the table -->
-      
-      </div>
+    <!-- No-data Placeholder -->
+    <div id="data-placeholder" class="d-none">
+      {% include "console/components/placeholders/placeholder.html" with
+        placeholder=projects.placeholder
+        only
+      %}
     </div>
 
+    <!-- AG Grid Table -->
+    <div id="data-table" class="d-none">
+      <!-- TODO: Advanced search -->
+      <div
+        id="projects-table"
+        class="ag-theme-alpine-dark"
+        style="height: 326px; width:100%;"
+      ></div>
     </div>
+
+  </div><!-- End of the body -->
+    
   </main>
 {% endif %}
 {% endblock console_body %}
 
 <!-- JavaScript -->
 {% block console_js %}
+
+  {% if not section %}
+    <script>
+      cannlytics.app.streamData('projects', 'project', '{{ organizations.0.organization_id }}');
+    </script>
+  {% endif %}
+
+{% endblock console_js %}
+{% comment %} {% block console_js %}
 {% if not section %}
   <script>
 
@@ -124,5 +116,5 @@
 
   </script>
 {% endif %}
-{% endblock console_js %}
+{% endblock console_js %} {% endcomment %}
 </html>

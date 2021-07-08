@@ -3,7 +3,7 @@
 <!--
   Measurement Page | Cannlytics Console
   Created: 6/19/2021
-  Updated: 6/22/2021
+  Updated: 7/7/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -14,11 +14,15 @@
 
 {% endblock console_css %}
 {% block console_body %}
-<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  
+  <!-- List -->
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
-  <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=measurements.breadcrumbs
+    <!-- Header -->
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Measurements"
+      base_page_url="/measurements"
+      current_page=id
     %}
 
     <!-- Title -->
@@ -53,7 +57,7 @@
     
 
     <!-- Danger zone (delete) -->
-    {% if id %}
+    {% if id and id != 'new' %}
       {% include "console/components/forms/delete_option.html" with
         id=id
         model="measurements"
@@ -73,9 +77,6 @@
 
     // Render any date pickers.
     $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // FIXME: Enable tooltips.
-    // cannlytics.ui.enableTooltips();
 
   </script>
 {% endblock console_js %}
