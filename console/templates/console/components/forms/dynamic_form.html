@@ -4,16 +4,26 @@
   Dynamic Form | Cannlytics
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
-  Updated: 7/8/2021
+  Updated: 7/9/2021
   Params:
     fields
+    disabled (optional)
 -->
 <div class="col col-md-10 col-lg-6">
   {% for field in fields %}
 
+    {% if field.hidden %}
+
+      <!-- Hidden fields -->
+      <input
+        id="input_{{ field.key }}"
+        class="visually-hidden"
+        name="{{ field.key }}"
+      />
+
     <!-- Text Field -->
     <!-- FIXME: {{ field.spellcheck }} -->
-    {% if not field.type or field.type == 'text' or field.type == 'number' or field.type == 'email' or field.type == 'tel' %}
+    {% elif not field.type or field.type == 'text' or field.type == 'number' or field.type == 'email' or field.type == 'tel' %}
       <div class="row mb-3">
         <label class="col-sm-3 col-form-label col-form-label-sm">
           {{ field.label }}
@@ -27,11 +37,13 @@
             spellcheck="false"
             style="{{ field.style }}"
             type="{{ field.type }}"
+            {% if field.disabled or disabled %}disabled{% endif %}
           >
         </div>
       </div>
 
     <!-- Date (date) -->
+    <!-- data-date-start-date="-0d" -->
     {% elif field.type == 'date' %}
       <div class="row mb-3">
         <label class="col-sm-3 col-form-label col-form-label-sm">
@@ -44,12 +56,13 @@
             class="form-control form-control-sm"
             name="{{ field.key }}"
             data-provide="datepicker"
-            data-date-start-date="-0d"
+            {% if field.disabled or disabled %}disabled{% endif %}
           >
         </div>
       </div>
 
     <!-- Date and time (datetime) -->
+    <!-- data-date-start-date="-0d" -->
     {% elif field.type == 'datetime' %}
       <div class="row mb-3">
         <label class="col-sm-3 col-form-label col-form-label-sm">
@@ -62,7 +75,12 @@
             class="form-control form-control-sm"
             name="{{ field.key }}"
             data-provide="datepicker"
-            data-date-start-date="-0d"
+            data-date-autoclose="true"
+            data-date-format="yyyy-mm-dd"
+            data-date-format-to-display="mm/dd/yy"
+            data-date-format-to-value="yyyy-mm-dd"
+            data-date-today-highlight="true"
+            {% if field.disabled or disabled %}disabled{% endif %}
           >
         </div>
         <div class="col-sm-3">
@@ -72,6 +90,7 @@
             class="form-control form-control-sm"
             name="{{ field.key }}_time"
             data-provide="text"
+            {% if field.disabled or disabled %}disabled{% endif %}
           >
         </div>
       </div>
@@ -85,6 +104,7 @@
         class="form-control"
         placeholder=""
         style="height:250px"
+        {% if field.disabled or disabled %}disabled{% endif %}
       ></textarea>
       <label for="input_{{ field.key }}">
         {{ field.label }}
@@ -102,6 +122,7 @@
         name="{{ field.key }}"
         class="form-check-input"
         type="checkbox"
+        {% if field.disabled or disabled %}disabled{% endif %}
       >
     </div>
 
@@ -114,6 +135,7 @@
         class="form-select form-select-sm"
         aria-label="{{ field.label }}"
         {% if field.multiple %}multiple{% endif %}
+        {% if field.disabled or disabled %}disabled{% endif %}
       >
         {% for option in field.options %}
           <option

@@ -9,15 +9,42 @@ API to interface with laboratory data models.
 
 # Standard imports
 from json import loads
+from re import sub
 
 # Internal imports
 from cannlytics.firebase import (
+    add_to_array,
     create_log,
     delete_document,
     get_collection,
     get_document,
     update_document,
 )
+
+
+def delete_object(request, claims, model_id, model_type, model_type_singular, organization_id, owner, qa):
+    """Delete an object through the API.
+    Parse the data. Check that the user is an owner or quality assurance.
+    Delete by URL ID if given. Otherwise delete by using posted ID(s).
+    """
+    data = loads(request.body.decode('utf-8'))
+    if organization_id not in qa and organization_id not in owner:
+        return False
+    if model_id:
+        delete_document(f'organizations/{organization_id}/{model_type}/{model_id}')
+        create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, model_id, [data])
+    else:
+        if isinstance(data, dict):
+            doc_id = data[f'{model_type_singular}_id']
+            delete_document(f'organizations/{organization_id}/{model_type}/{doc_id}')
+            create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, doc_id, [data])
+        elif isinstance(data, list):
+            for item in data:
+                doc_id = item[f'{model_type_singular}_id']
+                delete_document(f'organizations/{organization_id}/{model_type}/{doc_id}')
+                create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, doc_id, [data])
+    return True
+
 
 def get_objects(request, authorized_ids, organization_id, model_id, model_type):
     """Read object(s) through the API.
@@ -35,7 +62,7 @@ def get_objects(request, authorized_ids, organization_id, model_id, model_type):
     """
     docs = []
     filters = []
-    limit = request.query_params.get('limit')
+    limit = request.query_params.get('limit', 1000)
     order_by = request.query_params.get('order_by')
     desc = request.query_params.get('desc', False)
     # TODO: Implement filtered requests. For example:
@@ -81,29 +108,19 @@ def update_object(request, claims, model_type, model_type_singular, organization
             update_document(f'organizations/{organization_id}/{model_type}/{doc_id}', item)
     else:
         return []
-    create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} edited.', model_type, doc_id, [data])
+    update_totals(model_type, organization_id, doc_id)
+    if model_type != 'logs':
+        create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} edited.', model_type, doc_id, [data])
     return data
 
 
-def delete_object(request, claims, model_id, model_type, model_type_singular, organization_id, owner, qa):
-    """Delete an object through the API.
-    Parse the data. Check that the user is an owner or quality assurance.
-    Delete by URL ID if given. Otherwise delete by using posted ID(s).
-    """
-    data = loads(request.body.decode('utf-8'))
-    if organization_id not in qa and organization_id not in owner:
-        return False
-    if model_id:
-        delete_document(f'organizations/{organization_id}/{model_type}/{model_id}')
-        create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, model_id, [data])
-    else:
-        if isinstance(data, dict):
-            doc_id = data[f'{model_type_singular}_id']
-            delete_document(f'organizations/{organization_id}/{model_type}/{doc_id}')
-            create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, doc_id, [data])
-        elif isinstance(data, list):
-            for item in data:
-                doc_id = item[f'{model_type_singular}_id']
-                delete_document(f'organizations/{organization_id}/{model_type}/{doc_id}')
-                create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, doc_id, [data])
-    return True
+def update_totals(model_type, organization_id, doc_id):
+    """Update the total count of a given model type for the day
+    the document ID was created."""
+    digits = sub('[^0-9]', '', doc_id)
+    year = digits[:2]
+    month = digits[2:4]
+    day = digits[4:6]
+    date = f'20{year}-{month}-{day}'
+    ref = f'organizations/{organization_id}/stats/organization_settings/daily_totals/{date}'
+    add_to_array(ref, f'total_{model_type}', doc_id)

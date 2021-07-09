@@ -47,7 +47,7 @@
       {% elif not id or id == 'new' %}
         <button
           class="btn btn-sm-light btn-md-light btn-set-width text-no-wrap me-2"
-          onclick="cannlytics.app.createID('{{ model }}', '{{ model_singular }}', '{{ abbreviation }}');"
+          onclick="cannlytics.app.createID('{{ model }}', '{{ model_singular }}', null, '{{ abbreviation }}');"
         >
           New ID
         </button>

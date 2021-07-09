@@ -29,3 +29,8 @@ if __name__ == '__main__':
     for key, data_model in state.material['data_models'].items():
         firebase.update_document(f'public/state/data_models/{key}', data_model)
         firebase.update_document(f'organizations/test-company/data_models/{key}', data_model)
+    
+    # Upload traceability settings to Firestore.
+    # traceability = state.material['traceability']
+    # firebase.update_document('public/state/traceability/traceability_settings', traceability)
+    # firebase.update_document('organizations/test-company/traceability/traceability_settings', traceability)

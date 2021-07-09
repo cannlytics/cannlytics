@@ -16,13 +16,13 @@
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Contacts | Cannlytics {% endblock title %}
 {% block console_body %}
 {% if section %}
-
-  <!-- Detail page -->
-  {% include "console/pages/contacts/contact.html" with
-    id=section
-    data_model=data_model
-  %}
-
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+    {% include "console/pages/contacts/contact.html" with
+      id=section
+      data_model=data_model
+    %}
+    {% block unit %}{% endblock unit %}
+  </main>
 {% else %}
 
   <!-- List -->

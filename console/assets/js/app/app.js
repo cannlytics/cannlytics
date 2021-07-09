@@ -2,11 +2,11 @@
  * App JavaScript | Cannlytics Console
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 12/7/2020
- * Updated: 7/8/2021
+ * Updated: 7/9/2021
  */
 
 import { auth, db, getDocument, getUserToken } from '../firebase.js';
-import { authRequest, getCookie, serializeForm, showNotification } from '../utils.js';
+import { authRequest, deserializeForm, getCookie, serializeForm, showNotification } from '../utils.js';
 import { navigationHelpers } from '../ui/ui.js';
 import { theme } from '../settings/theme.js';
 
@@ -54,6 +54,7 @@ export const app = {
     document.getElementById('deletion-reason').classList.add('d-none');
   },
 
+
   delete(model, id) {
     /* Delete an entry from the database, passing the whole object
     as context if available in a form, otherwise just pass the ID. */
@@ -70,24 +71,28 @@ export const app = {
   },
 
 
-  save(model, modelSingular, abbreviation) {
+  async save(model, modelSingular, abbreviation) {
     /* Create an entry in the database if it does not exist,
     otherwise update the entry. */
     // FIXME: Delete old entry if ID changes.
+    const orgId = document.getElementById('organization_id').value;
     document.getElementById('form-save-button').classList.add('d-none');
     document.getElementById('form-save-loading-button').classList.remove('d-none');
+    console.log(`input_${modelSingular}_id`);
     let id = document.getElementById(`input_${modelSingular}_id`).value;
-    if (!id) id = this.createID(model, modelSingular, abbreviation);
+    if (!id) id = await this.createID(model, modelSingular, orgId, abbreviation);
     const data = serializeForm(`${modelSingular}-form`);
-    const orgId = document.getElementById('organization_id').value;
-    console.log('TODO: save data:', model, modelSingular, orgId, data,);
+    console.log('Model:', model);
+    console.log('URL:', `/api/${model}/${id}?organization_id=${orgId}`);
     authRequest(`/api/${model}/${id}?organization_id=${orgId}`, data)
       .then((response) => {
         const message = 'Data saved. You can safely navigate pages.'
         showNotification('Data saved', message, { type: 'success' });
+        return response;
       })
       .catch((error) => {
         showNotification('Error saving data', error.message, { type: 'error' });
+        return error;
       })
       .finally(() => {
         document.getElementById('form-save-loading-button').classList.add('d-none');
@@ -101,20 +106,25 @@ export const app = {
 
   dataModel: {},
   limit: 10,
+  logLimit: 10,
   tableHidden: true,
   gridOptions: {},
 
 
   changeLimit(event) {
-    /* Change the limit for streamData. */
+    /*
+     * Change the limit for streamData.
+     */
     this.limit = event.target.value;
      // FIXME: Refresh the table?
      // streamData(model, modelSingular, orgId)
   },
 
 
-  drawPlaceholder() {
-    /* Render a no-data placeholder in the user interface. */
+  renderPlaceholder() {
+    /*
+     * Render a no-data placeholder in the user interface.
+     */
     document.getElementById('loading-placeholder').classList.add('d-none');
     document.getElementById('data-table').classList.add('d-none');
     document.getElementById('data-placeholder').classList.remove('d-none');
@@ -122,9 +132,10 @@ export const app = {
   },
 
 
-  // TODO: Pass data model directly
-  async drawTable(model, modelSingular, orgId, data) {
-    /* Render a data table in the user interface. */
+  renderTable(model, modelSingular, data, dataModel) {
+    /*
+     * Render a data table in the user interface.
+     */
 
     // Render the table if it's the first time that it's shown.
     if (this.tableHidden) {
@@ -136,9 +147,7 @@ export const app = {
       this.tableHidden = false;
   
       // Get data model fields from organization settings.
-      this.dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
-      console.log('Data Model:', this.dataModel);
-      const columnDefs = this.dataModel.fields.map(function(e) { 
+      const columnDefs = dataModel.fields.map(function(e) { 
         return { headerName: e.label, field: e.key, sortable: true, filter: true };
       });
   
@@ -149,6 +158,7 @@ export const app = {
         pagination: true,
         paginationAutoPageSize: true,
         rowClass: 'app-action',
+        rowHeight: 25,
         rowSelection: 'single',
         suppressRowClickSelection: false,
         onRowClicked: event => navigationHelpers.openObject(model, modelSingular, event.data),
@@ -170,14 +180,16 @@ export const app = {
   },
 
 
-  streamData(model, modelSingular, orgId) {
+  async streamData(model, modelSingular, orgId) {
     /*
      * Stream data, listening for any changes.
      */
     // Optional: Get parameters (desc, orderBy) from the user interface.
     // TODO: Implement search with filters, e.g. .where("state", "==", "OK")
+    // TODO: Pass dataModel from template.
     const desc = false;
     const orderBy = null;
+    this.dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
     let ref = db.collection('organizations').doc(orgId).collection(model);
     if (this.limit) ref = ref.limit(this.limit);
     if (orderBy && desc) ref = ref.orderBy(orderBy, 'desc');
@@ -188,24 +200,82 @@ export const app = {
         data.push(doc.data());
       });
       console.log('Table data:', data);
-      if (data.length) this.drawTable(model, modelSingular, orgId, data);
-      else this.drawPlaceholder();
+      if (data.length) this.renderTable(model, modelSingular, data, this.dataModel);
+      else this.renderPlaceholder();
     });
   },
+
+
+  async streamLogs(model, modelId, orgId, filterBy='key', orderBy='created_at', start='', end='') {
+    /*
+     * Stream logs, listening for any changes.
+     */
+    if (!start) start = new Date(new Date().setDate(new Date().getDate()-1)).toISOString().substring(0, 10);
+    if (!end) {
+      end = new Date()
+      end.setUTCHours(23, 59, 59, 999);
+      end = end.toISOString();
+    }
+    const dataModel = await getDocument(`organizations/${orgId}/data_models/logs`);
+    dataModel.fields = dataModel.fields.filter(function(obj) {
+      return !(['log_id', 'changes', 'user'].includes(obj.key));
+    });
+    console.log('Start:', start);
+    console.log('End:', end);
+    db.collection('organizations').doc(orgId).collection('logs')
+      .where(filterBy, '==', modelId)
+      .where(orderBy, '>=', start)
+      .where(orderBy, '<=', end)
+      .orderBy(orderBy, 'desc')
+      .limit(this.logLimit)
+      .onSnapshot((querySnapshot) => {
+        const data = [];
+        querySnapshot.forEach((doc) => {
+          const values = doc.data();
+          values.changes = JSON.stringify(values.changes);
+          // FIXME: Split up date and time for filling into the form.
+          console.log(values.created_at);
+          data.push(values);
+        });
+        console.log('Logs:', data);
+        if (data.length) this.renderTable('contact-logs', 'log', data, dataModel);
+        else this.renderPlaceholder();
+      });
+  },
+
   
   /*----------------------------------------------------------------------------
   Utility functions
   ----------------------------------------------------------------------------*/
 
-  createID(model, modelSingular, abbreviation) {
-    /* Create a unique ID. */
+  async createID(model, modelSingular, orgId, abbreviation) {
+    /*
+     * Create a unique ID.
+     */
+    if (!orgId) orgId = document.getElementById('organization_id').value;
+    const currentCount = await this.getCurrentCount(model, orgId) + 1;
     const date = new Date().toISOString().substring(0, 10);
     const dateString = date.replaceAll('-', '').slice(2);
-    const id = `${abbreviation}${dateString}-`
-    // TODO: Save next available counter in organization settings instead of using random bit!
+    const id = `${abbreviation}${dateString}-${currentCount}`
     document.getElementById(`input_${modelSingular}_id`).value = id;
     return id;
   },
+
+
+  getCurrentCount: (modelType, orgId) => new Promise((resolve, reject) => {
+    /*
+     * Get the current count for a given data model.
+     */
+    const date = new Date().toISOString().substring(0, 10);
+    const ref = `organizations/${orgId}/stats/organization_settings/daily_totals/${date}`;
+    console.log('Ref:', ref);
+    getDocument(ref).then((data) => {
+      const total = data[`total_${modelType}`];
+      if (total) resolve(total.length)
+      else resolve(0);
+    })
+    .catch((error) => reject(error));
+  }),
 
 
   async exportData(modelSingular, id = null) {
@@ -290,23 +360,12 @@ export const app = {
     // TODO: Implement search by ID for all data models, plus granular search.
     console.log('Searching...');
     const searchTerms = document.getElementById('navigation-search').value;
-    // const urlParams = new URLSearchParams(window.location.search);
-    // urlParams.set('q', searchTerms);
-    // window.location.search = urlParams;
-    // window.location.href = '/search';
-    setGetParameter('q', searchTerms)
-    // const query = URLSearchParams(window.location.search).get('q');
-    // console.log(query);
+    setURLParameter('q', searchTerms)
   },
 
 }
 
-
-/*----------------------------------------------------------------------------
-  Local functions
-----------------------------------------------------------------------------*/
-
-function setGetParameter(paramName, paramValue) {
+function setURLParameter(paramName, paramValue) {
   /*
    * Add query parameter to the URL.
    */

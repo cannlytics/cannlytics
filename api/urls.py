@@ -25,6 +25,7 @@ from api.organizations import organizations
 from api.projects import projects
 from api.results import results
 from api.samples import samples
+from api.settings import settings
 from api.transfers import transfers
 from api.traceability import traceability
 from api.users import users
@@ -62,6 +63,10 @@ urlpatterns = [
     path('invoices', include([
         path('', invoices.invoices),
         path('/<invoice_id>', invoices.invoices),
+    ])),
+    path('logs', include([
+        path('', settings.logs),
+        path('/<log_id>', settings.logs),
     ])),
     path('measurements', include([
         path('', measurements.measurements),

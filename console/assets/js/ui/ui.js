@@ -89,6 +89,14 @@ const initHelpers = {
 export const navigationHelpers = {
 
 
+  navigateUp(url) {
+    /* 
+     * Remove the last directory in URL, navigating up.
+     */
+    window.location.href = window.location.href.substring(0, url.lastIndexOf('/'));
+  },
+
+
   openObject(model, modelSingular, data) {
     /*
      * Navigate a selected object detail page, saving its data in local storage.
@@ -100,7 +108,7 @@ export const navigationHelpers = {
     const objectId = data[`${modelSingular}_id`];
     if (objectId) id = objectId;
     localStorage.setItem(modelSingular, JSON.stringify(data));
-    window.location.href = `/${model}/${id}`;
+    window.location.href = `${window.location.href}/${id}`;
   },
 
 

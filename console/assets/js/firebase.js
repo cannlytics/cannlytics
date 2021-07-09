@@ -139,7 +139,7 @@ const getDocument = (path) => new Promise((resolve) => {
    */
   const ref = getReference(path);
   ref.get().then((doc) => {
-    resolve(doc.data());
+    resolve(doc.data() || {});
   });
 });
 

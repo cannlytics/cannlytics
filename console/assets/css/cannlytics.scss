@@ -679,6 +679,16 @@ ul {
 .form-control {
   border-color: #777;
 }
+.form-control-light {
+  border-color: rgba(27,31,35,.15);
+}
+.input-group-text {
+  background-color: #fafbfc;
+}
+body.dark .input-group-text {
+  color: #ccc;
+  background-color: #30363d;
+}
 .form-control:focus {
   border-color: #96e6a1;
   box-shadow: 0 0 0 0.2rem #96e6a140;

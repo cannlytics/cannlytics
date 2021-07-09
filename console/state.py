@@ -4,16 +4,13 @@ State Variables | Cannlytics Console
 Author: Keegan Skeate
 Company: Cannlytics
 Created: 10/15/2020
-Updated: 7/7/2021
+Updated: 7/9/2021
 
 Relatively static state variables for extra context on each page/screen.
 The idea is to separate the material from the templates,
 with the hope of better-maintained code.
-
-Optional: Turn into models and save in database.
-
-TODO: Save data model fields to organization settings so users can add
-custom fields.
+The data models are stored in an organizations settings, so that
+each organization can customize the data points that they collect.
 """
 # pylint:disable=line-too-long
 
@@ -57,7 +54,7 @@ material = {
         "placeholder": {
             "action": "Create an analyte",
             "height": "200px",
-            "image": "console/images/icons/two-tone/two_tone_atom.svg",
+            "image": "console/images/icons/outline/lab_microscope.svg",
             "title": "Create your first analyte",
             "message": "Add analytes for analyses, a set of analytes constitutes an analysis.",
             "url": "./analytes/new",
@@ -199,34 +196,6 @@ material = {
             "url": "./measurements/new",
         },
     },
-    # "organizations": {
-    #     "breadcrumbs": [
-    #         {"title": "Settings", "url": "settings"},
-    #         {"title": "Organizations", "active": True},
-    #     ],
-    #     "fields": [
-    #         {"key": "name", "label": "Name"},
-    #         {"key": "trade_name", "label": "Trade Name (DBA)"},
-    #         {"key": "website", "label": "Website"},
-    #         {"type": "email", "key": "email", "label": "Email"},
-    #         {"key": "phone", "label": "Phone"},
-    #         {"key": "linkedin", "label": "LinkedIn"},
-    #         {"key": "address", "label": "Address", "secondary": True},
-    #         {"key": "city", "label": "City", "secondary": True},
-    #         {"key": "state", "label": "State", "secondary": True},
-    #         {"key": "country", "label": "Country", "secondary": True},
-    #         {"key": "zip_code", "label": "Zip Code", "secondary": True},
-    #         {"key": "external_id", "label": "External ID", "secondary": True},
-    #     ],
-    #     "placeholder": {
-    #         "action": "Start an organization",
-    #         "height": "200px",
-    #         "image": "console/images/illustrations/chemistry_scientist.svg",
-    #         "title": "Create or join an organization",
-    #         "message": "Add team members to your organization or join an organization to begin collaborating.",
-    #         "url": "./organizations/new",
-    #     },
-    # },
     "projects": {
         "fields": [
             {"key": "project_id", "label": "Project ID"},
@@ -374,91 +343,120 @@ material = {
     "traceability": {
         "provider": "Metrc",
         "tabs": [
-            # TODO: Show traceability tabs by organization type (e.g. "org_type": "*",)
-            # {
-            #     "name": "Items",
-            #     "section": "items",
-            #     "url": "/traceability/items",
-            #     "description": "View items that are used to track your inventory at a given facility.",
-            # },
+            {
+                "name": "Items",
+                "section": "items",
+                "url": "/traceability/items",
+                "description": "View items that are used to track your inventory at a given facility.",
+                "org_types": ["producer", "retailer"],
+                "selected": False,
+            },
             {
                 "name": "Packages",
                 "section": "packages",
                 "url": "/traceability/packages",
                 "description": "Manage your packages, groups of cannabis items.",
+                "org_types": ["lab", "producer", "retailer"],
+                "selected": True,
             },
             {
                 "name": "Lab Tests",
                 "section": "lab-tests",
                 "url": "/traceability/lab-tests",
                 "description": "Manage details for each individual lab test performed on submitted packages.",
+                "org_types": ["lab", "producer", "retailer"],
+                "selected": True,
             },
-            # {
-            #     "name": "Strains",
-            #     "section": "strains",
-            #     "url": "/traceability/strains",
-            #     "description": "View your cannabis strains, varieties, and classifications.",
-            # },
-            # {
-            #     "name": "Employees",
-            #     "section": "employees",
-            #     "url": "/traceability/employees",
-            #     "description": "View your organization's employees or team members.",
-            # },
-            # {
-            #     "name": "Facilities",
-            #     "section": "facilities",
-            #     "url": "/traceability/facilities",
-            #     "description": "",
-            # },
+            {
+                "name": "Strains",
+                "section": "strains",
+                "url": "/traceability/strains",
+                "description": "View your cannabis strains, varieties, and classifications.",
+                "org_types": ["producer", "retailer"],
+                "selected": False,
+            },
+            {
+                "name": "Employees",
+                "section": "employees",
+                "url": "/traceability/employees",
+                "description": "View your organization's employees or team members.",
+                "org_types": [],
+                "selected": False,
+            },
+            {
+                "name": "Facilities",
+                "section": "facilities",
+                "url": "/traceability/facilities",
+                "description": "",
+                "org_types": [],
+                "selected": False,
+            },
             {
                 "name": "Locations",
                 "section": "locations",
                 "url": "/traceability/locations",
                 "description": "Manage your locations used track packages and items.",
+                "org_types": ["lab", "producer", "retailer"],
+                "selected": True,
             },
-            # {
-            #     "name": "Harvests",
-            #     "section": "harvests",
-            #     "url": "/traceability/harvests",
-            # },
-            # {
-            #     "name": "Patients",
-            #     "section": "patients",
-            #     "url": "/traceability/patients",
-            # },
-            # {
-            #     "name": "Plant Batches",
-            #     "section": "plant-batches",
-            #     "url": "/traceability/plant-batches",
-            # },
-            # {
-            #     "name": "Plants",
-            #     "section": "plants",
-            #     "url": "/traceability/plants",
-            # },
-            # {
-            #     "name": "Sales",
-            #     "section": "sales",
-            #     "url": "/traceability/sales",
-            # },
+            {
+                "name": "Harvests",
+                "section": "harvests",
+                "url": "/traceability/harvests",
+                "org_types": ["producer"],
+                "selected": False,
+            },
+            {
+                "name": "Patients",
+                "section": "patients",
+                "url": "/traceability/patients",
+                "org_types": ["retailer"],
+                "selected": False,
+            },
+            {
+                "name": "Plant Batches",
+                "section": "plant-batches",
+                "url": "/traceability/plant-batches",
+                "org_types": ["producer"],
+                "selected": False,
+            },
+            {
+                "name": "Plants",
+                "section": "plants",
+                "url": "/traceability/plants",
+                "org_types": ["producer"],
+                "selected": False,
+            },
+            {
+                "name": "Sales",
+                "section": "sales",
+                "url": "/traceability/sales",
+                "org_types": ["retailer"],
+                "selected": False,
+            },
             {
                 "name": "Transfers",
                 "section": "transfers",
                 "url": "/traceability/transfers",
                 "description": "Manage your records of packages moving from one licensee to another.",
+                "org_types": ["lab", "producer", "retailer"],
+                "selected": True,
             },
-            # {
-            #     "name": "Units",
-            #     "section": "units",
-            #     "url": "/traceability/units",
-            #     "description": "",
-            # },
+            {
+                "name": "Units",
+                "section": "units",
+                "url": "/traceability/units",
+                "description": "",
+                "org_types": [],
+                "selected": False,
+            },
             {
                 "name": "Settings",
                 "section": "settings",
                 "url": "/traceability/settings",
                 "description": "Manage the settings of your interface to your traceability system.",
+                "org_types": ["lab", "producer", "retailer", "integrator"],
+                "selected": True,
             },
         ],
     },
@@ -519,37 +517,28 @@ material = {
             {"title": "Change your password", "url": "/account/password-reset"},
         ],
     },
-
-    # Drafts:
-
-    # "pin": {
-    #     "breadcrumbs": [
-    #         {"title": "Settings", "url": "/settings"},
-    #         {"title": "User Settings", "url": "/settings/user"},
-    #         {"title": "Pin", "active": True},
-    #     ],
-    # },
-    # "signature": {
-    #     "breadcrumbs": [
-    #         {"title": "Settings", "url": "/settings"},
-    #         {"title": "User Settings", "url": "/settings/user"},
-    #         {"title": "Signature", "active": True},
-    #     ],
-    # },
-    # "templates": {
-    #     "breadcrumbs": [
-    #         {"title": "Intake", "url": "intake"},
-    #         {"title": "Templates", "active": True},
-    #     ],
-    #     "placeholder": {
-    #         "action": "Create a template",
-    #         "height": "200px",
-    #         "image": "console/images/illustrations/outline/lab_desktop.svg",
-    #         "title": "Create your first template",
-    #         "message": "Create a template for creating invoices, certificates, and other forms.",
-    #         "url": "./templates/new",
-    #     },
-    # },
+    "logs": {
+        "placeholder": {
+            # "action": "Log an action",
+            "height": "200px",
+            "image": "console/images/icons/multi-tone/documents.svg",
+            "title": "No logs in this period",
+            "message": "You can create a custom log for traceability or quality control purposes or try expanding your search.",
+            "url": "../new",
+        },
+        "fields": [
+            {"key": "created_at", "label": "Time", "type": "datetime", "class": "field-sm"},
+            {"key": "log_id", "label": "Log ID", "disabled": True, "hidden": True},
+            {"key": "action", "label": "Action"},
+            {"key": "changes", "label": "Changes", "type": "textarea"},
+            {"key": "user", "label": "User ID", "disabled": True},
+            {"key": "user_email", "label": "User email", "disabled": True},
+            {"key": "user_name", "label": "User name", "disabled": True},
+            {"key": "user_photo_url", "label": "User photo", "disabled": True},
+            {"key": "type", "label": "Type", "class": "field-sm", "disabled": True},
+            {"key": "key", "label": "Key", "class": "field-sm", "disabled": True},
+        ],
+    },
 }
 
 
@@ -593,18 +582,6 @@ layout = {
                 "description": "Manage inventory, items, packages, and more.",
                 "image_path": "console/images/icons/multi-tone/records.png",
             },
-            # {
-            #     "path": "invoices",
-            #     "title": "Invoices",
-            #     "description": "Manage laboratory invoices.",
-            #     "image_path": "console/images/icons/multi-tone/documents.png",
-            # },
-            # {
-            #     "path": "organizations",
-            #     "title": "Organizations",
-            #     "description": "Manage your company and team.",
-            #     "image_path": "console/images/icons/two-tone/two_tone_client_folder.png",
-            # },
             {
                 "path": "projects",
                 "title": "Projects",
@@ -629,12 +606,6 @@ layout = {
                 "description": "Manage sample transfers.",
                 "image_path": "console/images/icons/two-tone/two_tone_clock.png",
             },
-            # {
-            #     "path": "stats",
-            #     "title": "Statistics",
-            #     "description": "Manage laboratory statistics.",
-            #     "image_path": "console/images/icons/two-tone/two_tone_graph.png",
-            # },
             {
                 "path": "traceability",
                 "title": "Traceability",
@@ -647,8 +618,7 @@ layout = {
                 "description": "Manage your user and organization settings.",
                 "image_path": "console/images/icons/two-tone/two_tone_gears.png",
             },
-            # Plants, Harvests *Cultivator*
-            # Sales (Transactions | Receipts) *Cultivator* *Processor* *Retailer*
+
         ],
         "welcome_message": {
             "title": "Welcome to your new laboratory platform!", # 🚀
@@ -662,34 +632,34 @@ layout = {
                 "image": "console/images/illustrations/outline/lab_tablet.svg",
                 "type": "lab",
             },
-            # {
-            #     "action": "Begin now",
-            #     "title": "🌳 For Cultivators / Processors",
-            #     "description": "Start managing your lab results now. Start or join as a producer/processor to begin.",
-            #     "image": "console/images/illustrations/outline/lab_tablet.svg",
-            #     "type": "producer",
-            # },
-            # {
-            #     "action": "Explore for free",
-            #     "title": "📦 For Retailers",
-            #     "description": "Access lab data for your products quickly and easily. Begin today.",
-            #     "image": "console/images/illustrations/outline/lab_tablet.svg",
-            #     "type": "retailer",
-            # },
-            # {
-            #     "action": "Learn more",
-            #     "title": "🛍️ For Consumers",
-            #     "description": "Track your consumption. Log purchases, see your usage stats, and get lab data.",
-            #     "image": "console/images/illustrations/outline/lab_tablet.svg",
-            #     "type": "consumer",
-            # },
-            # {
-            #     "action": "Dive in",
-            #     "title": "🤝 For Everyone Else",
-            #     "description": "For all software integrators, researchers, and data seekers. Cannlytics has something for you.",
-            #     "image": "console/images/illustrations/outline/lab_desktop.svg",
-            #     "type": "integrator",
-            # },
+            {
+                "action": "Begin now",
+                "title": "🌳 For Cultivators / Processors",
+                "description": "Start managing your lab results now. Start or join as a producer/processor to begin.",
+                "image": "console/images/illustrations/outline/lab_tablet.svg",
+                "type": "producer",
+            },
+            {
+                "action": "Explore for free",
+                "title": "📦 For Retailers",
+                "description": "Access lab data for your products quickly and easily. Begin today.",
+                "image": "console/images/illustrations/outline/lab_tablet.svg",
+                "type": "retailer",
+            },
+            {
+                "action": "Learn more",
+                "title": "🛍️ For Consumers",
+                "description": "Track your consumption. Log purchases, see your usage stats, and get lab data.",
+                "image": "console/images/illustrations/outline/lab_tablet.svg",
+                "type": "consumer",
+            },
+            {
+                "action": "Dive in",
+                "title": "🤝 For Everyone Else",
+                "description": "For all software integrators, researchers, and data seekers. Cannlytics has something for you.",
+                "image": "console/images/illustrations/outline/lab_desktop.svg",
+                "type": "integrator",
+            },
         ],
     },
     "sidebar": {
@@ -705,7 +675,6 @@ layout = {
             {
                 "title": "Analyses",
                 "url": "/analyses",
-                # "icon": "edit",
                 "slug": "analyses",
                 "user_type": "*",
                 "seperator": True,
@@ -731,42 +700,24 @@ layout = {
             {
                 "title": "Areas",
                 "url": "/areas",
-                # "icon": "grid",
                 "slug": "areas",
                 "user_type": "*",
             },
-            # {
-            #     "title": "Clients",
-            #     "url": "/clients/records",
-            #     "icon": "users",
-            #     "slug": "clients",
-            #     "user_type": "lab",
-            # },
             {
                 "title": "Contacts",
                 "url": "/contacts",
-                # "icon": "users",
                 "slug": "contacts",
                 "user_type": '*',
             },
             {
                 "title": "Instruments",
                 "url": "/instruments",
-                # "icon": "server",
                 "slug": "instruments",
                 "user_type": "*",
             },
-            # {
-            #     "title": "Logistics",
-            #     "url": "/intake",
-            #     "icon": "log-in",
-            #     "slug": "intake",
-            #     "user_type": "*",
-            # },
             {
                 "title": "Inventory",
                 "url": "/inventory",
-                # "icon": "archive",
                 "slug": "inventory",
                 "user_type": "*",
                 "nested": [
@@ -795,17 +746,9 @@ layout = {
                 "slug": "measurements",
                 "user_type": "*",
             },
-            # {
-            #     "title": "Organizations",
-            #     "url": "/organizations",
-            #     # "icon": "briefcase",
-            #     "slug": "organizations",
-            #     "user_type": "*",
-            # },
             {
                 "title": "Projects",
                 "url": "/projects",
-                # "icon": "folder",
                 "slug": "projects",
                 "user_type": "*",
                 # "nested": [
@@ -826,7 +769,6 @@ layout = {
             {
                 "title": "Results",
                 "url": "/results",
-                # "icon": "award",
                 "slug": "results",
                 "user_type": "*",
                 # "nested": [
@@ -855,7 +797,6 @@ layout = {
             {
                 "title": "Samples",
                 "url": "/samples",
-                # "icon": "edit-2",
                 "slug": "samples",
                 "user_type": "*",
                 # "nested": [
@@ -882,7 +823,6 @@ layout = {
             {
                 "title": "Transfers",
                 "url": "/transfers",
-                # "icon": "navigation",
                 "slug": "transfers",
                 "user_type": '*',
                 # "nested": [
@@ -1083,6 +1023,15 @@ data_models = [
         'label': 'Transfers',
         'key': 'transfers',
         'singular': 'transfer',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'L',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Logs',
+        'key': 'logs',
+        'singular': 'log',
         'sortable': True,
         'filter': True,
     },

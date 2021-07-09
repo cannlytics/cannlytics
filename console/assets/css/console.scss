@@ -542,6 +542,12 @@ body:not(.dark) .ag-row-hover {
   font-family: 'agGridAlpine' !important;
 }
 
+/* Tight Tables */
+.ag-cell,
+.ag-cell-wrapper.ag-row-group {
+  line-height: 25px !important;
+}
+
 /* Dark tables */
 body.dark .card-header {
   border-bottom-color: rgba(255, 255, 255,.125);
@@ -601,6 +607,9 @@ body.dark .form-control {
   background: #333644;
   border-color: #9b9ca3;
   color: #ccc;
+}
+body.dark .form-control:disabled {
+  background: #4E5265;
 }
 
 /* Dark Cards */

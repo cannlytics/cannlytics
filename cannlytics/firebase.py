@@ -68,7 +68,7 @@ def add_to_array(ref, field, value):
     """
     database = firestore.client()
     doc = create_reference(database, ref)
-    doc.update({field: ArrayUnion([value])})
+    doc.set({field: ArrayUnion([value])}, merge=True)
 
 
 def create_document(ref, values):
@@ -135,7 +135,7 @@ def delete_field(ref, field):
     """
     database = firestore.client()
     doc = create_reference(database, ref)
-    return doc.update({field: DELETE_FIELD})
+    return doc.set({field: DELETE_FIELD}, merge=True)
 
 
 def remove_from_array(ref, field, value):
@@ -147,7 +147,7 @@ def remove_from_array(ref, field, value):
     """
     database = firestore.client()
     doc = create_reference(database, ref)
-    doc.update({field: ArrayRemove([value])})
+    doc.set({field: ArrayRemove([value])}, merge=True)
 
 
 def increment_value(ref, field, amount=1):
@@ -159,7 +159,7 @@ def increment_value(ref, field, amount=1):
     """
     database = firestore.client()
     doc = create_reference(database, ref)
-    doc.update({field: Increment(amount)})
+    doc.set({field: Increment(amount)}, merge=True)
 
 
 def initialize_firebase():
@@ -778,6 +778,7 @@ def create_log(ref, claims, action, log_type, key, changes=None):
         'type': log_type,
         'key': key,
         'created_at': timestamp,
+        'log_id': log_id,
         'user': claims.get('uid'),
         'user_name': claims.get('display_name'),
         'user_email': claims.get('email'),

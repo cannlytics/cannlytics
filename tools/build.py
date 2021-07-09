@@ -92,7 +92,7 @@ def get_webpack_hashes():
             print('Updated hashes in %s.' % template)
 
 
-def clean_bundle_folder(folder, history=300):
+def clean_bundle_folder(folder, history=1000):
     """Remove old bundles.
     Args:
         folder (str): The path to the directory to clean old files.
