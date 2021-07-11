@@ -4,12 +4,12 @@
  * Created: 6/9/2021
  * Updated: 7/5/2021
  */
- import { api } from '../api/api.js';
- import { theme } from '../settings/theme.js';
- import { changePhotoURL, getDownloadURL, updateDocument, uploadFile, storageErrors } from '../firebase.js';
- import { authRequest, deserializeForm, serializeForm, slugify, showNotification } from '../utils.js';
- 
- export const organizationSettings = {
+import { api } from '../api/api.js';
+import { theme } from '../settings/theme.js';
+import { changePhotoURL, getDownloadURL, updateDocument, uploadFile, storageErrors } from '../firebase.js';
+import { authRequest, deserializeForm, serializeForm, slugify, showNotification } from '../utils.js';
+
+export const organizationSettings = {
 
 
   chooseOrganizationPhoto() {

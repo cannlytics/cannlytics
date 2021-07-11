@@ -68,7 +68,7 @@
     <script>
 
       // Stream logs.
-      cannlytics.app.streamLogs('contacts', '{{ section }}', '{{ organizations.0.organization_id }}');
+      cannlytics.app.streamLogs('contact', '{{ section }}', '{{ organizations.0.organization_id }}');
 
       // Set the initial date.
       document.getElementById('logs_start').value = new Date(new Date().setDate(new Date().getDate()-1)).toISOString().substring(0, 10);
@@ -96,7 +96,7 @@
           start = $('#logs_start').datepicker('getDate').toISOString();
           
         }
-        cannlytics.app.streamLogs('contacts', '{{ section }}', '{{ organizations.0.organization_id }}', 'key', 'created_at', start, end);
+        cannlytics.app.streamLogs('contact', '{{ section }}', '{{ organizations.0.organization_id }}', 'key', 'created_at', start, end);
       });
 
     </script>

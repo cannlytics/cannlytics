@@ -3,14 +3,20 @@
 <!--
   Contact Files Page | Cannlytics Console
   Created: 12/17/2020
-  Updated: 7/9/2021
+  Updated: 7/11/2021
+  Parameters:
+    model
+    model_singular
+    organizations
+    section
+    user
 -->
-{% extends "console/pages/contacts/contacts.html" %}
 {% block unit %}
 
+  <!-- Part page -->
   {% if part %}
     {% include "console/pages/settings/files/file.html" with
-      model_singular='contact'
+      model_singular=model_singular
     %}
   {% else %}
 
@@ -20,10 +26,10 @@
       <!-- Title -->
       <div class="px-3">
         <h1 class="fs-6 lh-base text-dark mb-0">
-          {% if part == 'new' %}New File{% else %}File {{ part }}{% endif %}
+          {% if part == 'new' %}New File{% else %}Files {{ part }}{% endif %}
         </h1>
         <h2 class="fs-6 lh-base text-secondary mb-3">
-          <small>Manage files for your organizational contact.</small>
+          <small>Manage supplementary files.</small>
         </h2>
       </div>
 
@@ -60,10 +66,6 @@
 
     <!-- No-data Placeholder -->
     <div id="data-placeholder" class="d-none">
-      {% comment %} {% include "console/components/placeholders/placeholder.html" with
-        placeholder=logs.placeholder
-        only
-      %} {% endcomment %}
       {% include "console/components/placeholders/table_placeholder.html" with
         height='200px'
         image='console/images/icons/two-tone/two_tone_client_folder.svg'
@@ -77,7 +79,7 @@
     <div id="data-table" class="d-none">
       <!-- TODO: Advanced search -->
       <div
-        id="contact-files-table"
+        id="{{ model_singular }}-files-table"
         class="ag-theme-alpine-dark"
         style="height: 366px; width:100%;"
       ></div>
@@ -94,13 +96,18 @@
     <script>
 
       // Stream file data.
-      cannlytics.app.streamFiles('contacts', 'contact', '{{ section }}', '{{ organizations.0.organization_id }}');
+      cannlytics.app.streamFiles(
+        '{{ model }}',
+        '{{ model_singular }}',
+        '{{ section }}',
+        '{{ organizations.0.organization_id }}',
+      );
 
       // Upload chosen file.
       function uploadChosenFile(event) {
         cannlytics.app.uploadModelFile(event, {
-          model: 'contacts',
-          modelSingular: 'contact',
+          model: '{{ model }}',
+          modelSingular: '{{ model_singular }}',
           modelId: '{{ section }}',
           orgId: '{{ organizations.0.organization_id }}',
           userId: '{{ user.uid }}',

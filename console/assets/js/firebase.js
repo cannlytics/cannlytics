@@ -1,7 +1,7 @@
 /**
  * Firebase JavaScript | Cannlytics Console
  * Created: 12/22/2020
- * Updated: 6/23/2021
+ * Updated: 7/11/2021
  */
 
 // Initialize Firebase
@@ -26,11 +26,10 @@ const storage = firebase.storage();
 const { firestore } = firebase;
 const GoogleAuthProvider = firebase.auth.GoogleAuthProvider;
 
-
-/*
- * Authentication tools
- */
-
+ 
+/*----------------------------------------------------------------------------
+  Authentication interface
+  ----------------------------------------------------------------------------*/
 
 const changePhotoURL = (file) => new Promise((resolve, reject) => {
   /* 
@@ -99,10 +98,9 @@ const verifyUserToken = (token) => new Promise((resolve, reject) => {
 });
 
 
-/*
- * Firestore interface
- */
-
+/*----------------------------------------------------------------------------
+  Firestore interface
+  ----------------------------------------------------------------------------*/
 
 const getCollection = (
   path,
@@ -171,9 +169,20 @@ const updateDocument = (path, data) => new Promise((resolve, reject) => {
 });
 
 
-/*
- * Storage tools
- */
+
+const deleteDocument = (path) => new Promise((resolve, reject) => {
+  /*
+   * Delete a document from Firestore.
+   */
+  const ref = getReference(path);
+  ref.delete().then(() => resolve())
+    .catch((error) => reject(error));
+});
+
+
+/*----------------------------------------------------------------------------
+  Storage interface
+  ----------------------------------------------------------------------------*/
 
 const getDownloadURL = (path) => new Promise((resolve, reject) => {
   /*
@@ -187,6 +196,7 @@ const getDownloadURL = (path) => new Promise((resolve, reject) => {
 });
 
 
+// TODO: Combine uploadImage with uploadFile
 const uploadImage = (path, data) => new Promise((resolve) => {
   /*
    * Upload an image to Firebase Storage given it's full destination path and 
@@ -200,17 +210,48 @@ const uploadImage = (path, data) => new Promise((resolve) => {
 });
 
 
-const uploadFile = (path, file) => new Promise((resolve) => {
+const uploadFile = (path, file) => new Promise((resolve, reject) => {
   /*
    * Upload an image to Firebase Storage given it's full destination path and 
    * the image as a data URL.
    */
   const storageRef = storage.ref();
   const ref = storageRef.child(path);
-  ref.put(file).then((snapshot) => {
-    resolve(snapshot);
-  });
+  ref.put(file).then((snapshot) => resolve(snapshot))
+    .catch((error) => reject(error));
 });
+
+
+const deleteFile = (path) => new Promise((resolve, reject) => {
+  /*
+   * Upload an image to Firebase Storage given it's full destination path and 
+   * the image as a data URL.
+   */
+  const storageRef = storage.ref();
+  const ref = storageRef.child(path);
+  ref.delete().then(() => resolve())
+    .catch((error) => reject(error));
+});
+
+
+const downloadFile = async (ref, fileName) => {
+  /*
+   * Download a file given a path or a URL.
+   */
+  console.log(ref, fileName);
+  if (!ref.startsWith('http')) ref = await getDownloadURL(ref);
+  const response = await fetch(ref);
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.style = 'display: none';
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+  link.parentNode.removeChild(link);
+  window.URL.revokeObjectURL(blob);
+};
 
 
 const storageErrors = {
@@ -237,6 +278,9 @@ export {
   storageErrors,
   GoogleAuthProvider,
   changePhotoURL,
+  deleteDocument,
+  deleteFile,
+  downloadFile,
   getCollection,
   getDownloadURL,
   getUserToken,

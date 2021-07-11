@@ -39,5 +39,17 @@ service firebase.storage {
           || organizationId in request.auth.token.owner;
     }
 
+    // Allow organization members to read and create files.
+    // Only owners and quality assurance can change or delete files.
+    match /organizations/{organizationId}/{dataModel}/{modelId}/files/{file=**} {
+    	allow read, create:
+          if organizationId in request.auth.token.team
+          || organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+      allow delete, update:
+          if organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+    }
+
   }
 }

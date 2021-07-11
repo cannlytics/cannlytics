@@ -519,12 +519,10 @@ material = {
     },
     "logs": {
         "placeholder": {
-            # "action": "Log an action",
             "height": "200px",
             "image": "console/images/icons/multi-tone/documents.svg",
             "title": "No logs in this period",
             "message": "You can create a custom log for traceability or quality control purposes or try expanding your search.",
-            "url": "../new",
         },
         "fields": [
             {"key": "created_at", "label": "Time", "type": "datetime", "class": "field-sm"},
@@ -537,6 +535,26 @@ material = {
             {"key": "user_photo_url", "label": "User photo", "disabled": True},
             {"key": "type", "label": "Type", "class": "field-sm", "disabled": True},
             {"key": "key", "label": "Key", "class": "field-sm", "disabled": True},
+        ],
+    },
+    "files": {
+        "placeholder": {
+            "height": "200px",
+            "image": "console/images/icons/multi-tone/documents.svg",
+            "title": "No logs in this period",
+            "message": "You can create a custom log for traceability or quality control purposes or try expanding your search.",
+        },
+        "fields": [
+            {"key": "file_id", "label": "File ID", "disabled": True, "hidden": True},
+            {"key": "name", "label": "Name", "disabled": True},
+            {"key": "uploaded_at", "label": "Uploaded At", "type": "datetime", "class": "field-sm", "disabled": True},
+            {"key": "uploaded_by", "label": "Uploaded By", "disabled": True},
+            {"key": "content_type", "label": "File Type", "disabled": True},
+            {"key": "file_size", "label": "File Size", "disabled": True},
+            {"key": "version", "label": "Version", "class": "field-sm", "disabled": True},
+            {"key": "type", "label": "Type", "class": "field-sm", "disabled": True},
+            {"key": "key", "label": "Key", "class": "field-sm", "disabled": True},
+            {"key": "pinned", "label": "Pin File", "type": "bool", "onchange": "pinFile"},
         ],
     },
 }
@@ -1032,6 +1050,15 @@ data_models = [
         'label': 'Logs',
         'key': 'logs',
         'singular': 'log',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'F',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Files',
+        'key': 'files',
+        'singular': 'file',
         'sortable': True,
         'filter': True,
     },

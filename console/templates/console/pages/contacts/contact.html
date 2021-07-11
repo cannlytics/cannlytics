@@ -16,86 +16,95 @@
 {% endblock console_css %}
 {% block console_body %}
 
-    <!-- Header -->
-    {% include "console/components/links/breadcrumbs.html" with
-      base_page="Contacts"
-      base_page_url="/contacts"
-      current_page=id
+  <!-- Header -->
+  {% include "console/components/links/breadcrumbs.html" with
+    base_page="Contacts"
+    base_page_url="/contacts"
+    current_page=id
+  %}
+
+  <!-- Tabs -->
+  {% if id and id != 'new' %}
+    <ul class="nav nav-tabs mt-3">
+      <li class="nav-item">
+        <a
+          class="nav-link {% if not unit %}active{% endif %}"
+          aria-current="page"
+          href="/contacts/{{ id }}"
+        >
+          Fields
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if unit == 'logs' %}active{% endif %}"
+          href="/contacts/{{ id }}/logs"
+        >
+          Logs
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link {% if unit == 'files' %}active{% endif %}"
+          href="/contacts/{{ id }}/files"
+        >
+          Files
+        </a>
+      </li>
+    </ul>
+  {% endif %}
+
+  <!-- Unit page -->
+  {% if unit == 'files' %}
+    {% include "console/pages/settings/files/files.html" with
+      model='contacts'
+      model_singular='contact'
+      organizations=organizations
+      section=section
+      user=user
+    %}
+  {% elif unit == 'logs' %}
+    {% block unit %}{% endblock unit %}
+  {% else %}
+
+    <!-- Title -->
+    {% include "console/components/forms/form_title.html" with
+      abbreviation=data_model.abbreviation
+      id=id
+      model='contacts'
+      model_singular='contact'
+      description="Manage details, logs, and files for your organizational contacts."
+      options=True
+      export=id
     %}
 
-    <!-- Tabs -->
-    {% if id and id != 'new' %}
-      <ul class="nav nav-tabs mt-3">
-        <li class="nav-item">
-          <a
-            class="nav-link {% if not unit %}active{% endif %}"
-            aria-current="page"
-            href="/contacts/{{ id }}"
-          >
-            Fields
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if unit == 'logs' %}active{% endif %}"
-            href="/contacts/{{ id }}/logs"
-          >
-            Logs
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if unit == 'files' %}active{% endif %}"
-            href="/contacts/{{ id }}/files"
-          >
-            Files
-          </a>
-        </li>
-      </ul>
-    {% endif %}
+    <!-- Fields -->
+    <div class="mb-4 px-3">
 
-    {% if unit %}
-      {% block unit %}{% endblock unit %}
-    {% else %}
+      <!-- Form -->
+      <form id="contact-form">
 
-      <!-- Title -->
-      {% include "console/components/forms/form_title.html" with
-        abbreviation=data_model.abbreviation
-        id=id
-        model='contacts'
-        model_singular='contact'
-        description="Manage contacts, organizations that you work with."
-        options=True
-        export=id
-      %}
-
-      <!-- Fields -->
-      <div class="mb-4 px-3">
-
-        <!-- Form -->
-        <form id="contact-form">
-
-          <!-- Dynamic fields -->
-          {% include "console/components/forms/dynamic_form.html" with
-            fields=contacts.fields
-          %}
-
-        </form>
-
-      </div><!-- End of fields -->
-
-      <!-- TODO: Try to implement add people with AG-Grid table -->
-
-      <!-- Danger zone (delete) -->
-      {% if id and id != 'new' %}
-        {% include "console/components/forms/delete_option.html" with
-          id=id
-          model="contacts"
-          model_singular="contact"
+        <!-- Dynamic fields -->
+        {% include "console/components/forms/dynamic_form.html" with
+          fields=contacts.fields
         %}
-      {% endif %}
-    
+
+      </form>
+
+    </div><!-- End of fields -->
+
+    <!-- TODO: Try to implement add people with AG-Grid table -->
+
+    <!-- Danger zone (delete) -->
+    {% if id and id != 'new' %}
+      {% include "console/components/forms/delete_option.html" with
+        id=id
+        model="contacts"
+        model_singular="contact"
+      %}
     {% endif %}
+  
+  {% endif %}
 
 {% endblock console_body %}
 
@@ -106,16 +115,6 @@
 
     // Load the data into the user interface.
     cannlytics.ui.viewObject('contact');
-
-    // Render any date pickers.
-    {% comment %} $('.datepicker').datepicker({
-      autoclose: true,
-      format: {
-        toDisplay: 'mm/dd/yyyy',
-        toValue: 'yyyy-mm-dd',
-      },
-      todayHighlight: true,
-    }); {% endcomment %}
 
   </script>
 {% endif %}

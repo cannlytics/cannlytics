@@ -5,8 +5,25 @@
  * Updated: 7/9/2021
  */
 
-import { auth, db, getDocument, getUserToken } from '../firebase.js';
-import { authRequest, deserializeForm, getCookie, serializeForm, showNotification } from '../utils.js';
+import {
+  auth,
+  db,
+  deleteDocument,
+  deleteFile,
+  getDocument,
+  getDownloadURL,
+  getUserToken,
+  updateDocument,
+  uploadFile,
+} from '../firebase.js';
+import {
+  authRequest,
+  deserializeForm,
+  formatBytes,
+  getCookie,
+  serializeForm,
+  showNotification,
+} from '../utils.js';
 import { navigationHelpers } from '../ui/ui.js';
 import { theme } from '../settings/theme.js';
 
@@ -31,7 +48,7 @@ export const app = {
   },
 
   /*----------------------------------------------------------------------------
-  C.R.U.D. (General create, read, update, and delete)
+  Create, read, update, and delete
   ----------------------------------------------------------------------------*/
 
   get(model, id=null, options={}) {
@@ -78,12 +95,9 @@ export const app = {
     const orgId = document.getElementById('organization_id').value;
     document.getElementById('form-save-button').classList.add('d-none');
     document.getElementById('form-save-loading-button').classList.remove('d-none');
-    console.log(`input_${modelSingular}_id`);
     let id = document.getElementById(`input_${modelSingular}_id`).value;
     if (!id) id = await this.createID(model, modelSingular, orgId, abbreviation);
     const data = serializeForm(`${modelSingular}-form`);
-    console.log('Model:', model);
-    console.log('URL:', `/api/${model}/${id}?organization_id=${orgId}`);
     authRequest(`/api/${model}/${id}?organization_id=${orgId}`, data)
       .then((response) => {
         const message = 'Data saved. You can safely navigate pages.'
@@ -101,12 +115,13 @@ export const app = {
   },
 
   /*----------------------------------------------------------------------------
-  Data display functions
+  Data tables
   ----------------------------------------------------------------------------*/
 
   dataModel: {},
-  limit: 10,
-  logLimit: 10,
+  limit: 1000,
+  logLimit: 1000,
+  fileLimit: 1000,
   tableHidden: true,
   gridOptions: {},
 
@@ -118,6 +133,70 @@ export const app = {
     this.limit = event.target.value;
      // FIXME: Refresh the table?
      // streamData(model, modelSingular, orgId)
+  },
+
+
+  // TODO: Pass data model directly
+  async downloadWorksheet(orgId, model) {
+    /*
+     * Download a worksheet to facilitate importing data.
+     */
+    if (!this.dataModel.worksheet_url) {
+      this.dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
+    }
+    const response = await fetch(this.dataModel.worksheet_url);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.style = 'display: none';
+    link.setAttribute('download', `${model}_worksheet.xlsm`);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(blob);
+  },
+
+
+  async exportData(modelSingular, id = null) {
+    /*
+     * Export given collection data to Excel.
+     */
+    const data = serializeForm(`${modelSingular}-form`);
+    const idToken = await getUserToken();
+    const csrftoken = getCookie('csrftoken');
+    const headerAuth = new Headers({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`,
+      'X-CSRFToken': csrftoken,
+    });
+    const init = {
+      headers: headerAuth,
+      method: 'POST',
+      body: JSON.stringify({ data: [data] }),
+    };
+    const fileName = (id) ? id : modelSingular;
+    const response = await fetch(window.location.origin + '/download', init);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.style = 'display: none';
+    link.setAttribute('download', fileName + '.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(blob);
+  },
+
+
+  exportDataTable(model) {
+    /*
+     * Export a data table as a CSV file.
+     */
+    this.gridOptions.api.exportDataAsCsv({
+      fileName: `${model}.csv`,
+    });
   },
 
 
@@ -180,6 +259,27 @@ export const app = {
   },
 
 
+  searchData(event, model, modelSingular) {
+    /*
+     * Search a data model.
+     */
+    console.log('Search', model, 'for', event.target.value);
+    let ref = db.collection('organizations').doc(orgId).collection(model);
+    if (this.limit) ref = ref.limit(this.limit);
+    if (orderBy && desc) ref = ref.orderBy(orderBy, 'desc');
+    else if (orderBy) ref = ref.orderBy(orderBy);
+    ref.onSnapshot((querySnapshot) => {
+      const data = [];
+      querySnapshot.forEach((doc) => {
+        data.push(doc.data());
+      });
+      console.log('Table data:', data);
+      if (data.length) this.renderTable(model, modelSingular, data, this.dataModel);
+      else this.renderPlaceholder();
+    });
+  },
+
+
   async streamData(model, modelSingular, orgId) {
     /*
      * Stream data, listening for any changes.
@@ -238,12 +338,133 @@ export const app = {
           data.push(values);
         });
         console.log('Logs:', data);
-        if (data.length) this.renderTable('contact-logs', 'log', data, dataModel);
+        if (data.length) this.renderTable(`${model}-logs`, 'log', data, dataModel);
         else this.renderPlaceholder();
       });
   },
 
+  /*----------------------------------------------------------------------------
+  Files
+  ----------------------------------------------------------------------------*/
+
+
+  async streamFiles(model, modelSingular, modelId, orgId, orderBy='uploaded_at') {
+    /*
+     * Stream data about files for a given data model.
+     */
+    const dataModel = await getDocument(`organizations/${orgId}/data_models/files`);
+    dataModel.fields = dataModel.fields.filter(function(obj) {
+      return !(obj.hidden);
+    });
+    db.collection('organizations')
+      .doc(orgId)
+      .collection(model)
+      .doc(modelId)
+      .collection('files')
+      .orderBy(orderBy, 'desc')
+      .limit(this.fileLimit)
+      .onSnapshot((querySnapshot) => {
+        const data = [];
+        querySnapshot.forEach((doc) => {
+          const values = doc.data();
+          data.push(values);
+        });
+        console.log('Files:', data);
+        if (data.length) this.renderTable(`${modelSingular}-files`, 'file', data, dataModel);
+        else this.renderPlaceholder();
+      });
+  },
+
+
+  async uploadModelFile(event, params) {
+    /*
+     * Upload a file to Firebase Storage for a given data model,
+     * saving the file information through the API.
+     */
+    // Optional: Upload files through the API instead
+    const { model, modelSingular, modelId, orgId, userId, userName, userEmail, photoUrl } = params;
+    const { files } = event.target;    
+    if (files.length) {
+      const [ file ] = files;
+      const name = file.name;
+      const fileRef =  `organizations/${orgId}/${model}/${modelId}/files/${name}`;
+      const [ docRef ] = fileRef.split('.');
+      showNotification('Uploading image', formatBytes(file.size), { type: 'wait' });
+      const fileId = await this.createID(model, modelSingular, orgId, 'F');
+      const version = await this.getFileVersion(fileRef) + 1;
+      uploadFile(fileRef, file).then((snapshot) => {
+        getDownloadURL(fileRef).then((url) => {
+          updateDocument(docRef, {
+            content_type: file.type,
+            file_id: fileId,
+            file_size: file.size,
+            key: modelId,
+            modified_at: file.lastModifiedDate,
+            name: name,
+            uploaded_at: new Date().toISOString(),
+            uploaded_by: userName,
+            user: userId,
+            user_email: userEmail,
+            user_name: userName,
+            user_photo_url: photoUrl,
+            ref: fileRef,
+            type: model,
+            url: url,
+            version: version,
+            // Optional: Create short link
+          }).then(() => {
+            showNotification('File saved', `File saved to your ${model} under ${modelId}.`, { type: 'success' });
+            // document.getElementById('organization_photo_url').src = url;
+          })
+          .catch((error) => {
+            console.log(error);
+            showNotification('Upload Error', 'Error saving file data.', { type: 'error' })
+          });
+        }).catch((error) => showNotification('Upload Error', 'Error uploading file.', { type: 'error' }));
+      });
+    }
+  },
+
+
+  async deleteModelFile(event, params) {
+    /*
+     * Remove a file from storage and delete the file's data from Firestore.
+     */
+    const name = document.getElementById('input_name').value;
+    const { model, modelSingular, modelId, orgId } = params;
+    const fileRef =  `organizations/${orgId}/${model}/${modelId}/files/${name}`;
+    const [ docRef ] = fileRef.split('.');
+    await deleteFile(fileRef);
+    await deleteDocument(docRef);
+    showNotification('File deleted', 'File removed and file data deleted.', { type: 'success' });
+    window.location.href = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+  },
+
+
+  async getFileVersion(fileRef) {
+    /*
+     * Get the version of a given file, if it exists.
+     */
+    console.log('Getting file version:', fileRef);
+    const data = await getDocument(fileRef)
+    console.log('Found file data:', data);
+    return data.version || 0;
+  },
+
+
+  pinFile(event, params) {
+    /*
+     * Pin a given file.
+     */
+    const pinned = event.target.checked;
+    const name = document.getElementById('input_name').value;
+    const { model, modelSingular, modelId, orgId } = params;
+    const fileRef =  `organizations/${orgId}/${model}/${modelId}/files/${name}`;
+    const [ docRef ] = fileRef.split('.');
+    updateDocument(docRef, { pinned });
+  },
   
+
   /*----------------------------------------------------------------------------
   Utility functions
   ----------------------------------------------------------------------------*/
@@ -257,7 +478,11 @@ export const app = {
     const date = new Date().toISOString().substring(0, 10);
     const dateString = date.replaceAll('-', '').slice(2);
     const id = `${abbreviation}${dateString}-${currentCount}`
-    document.getElementById(`input_${modelSingular}_id`).value = id;
+    try {
+      document.getElementById(`input_${modelSingular}_id`).value = id;
+    } catch(error) {
+      // No input to fill in.
+    }
     return id;
   },
 
@@ -276,70 +501,6 @@ export const app = {
     })
     .catch((error) => reject(error));
   }),
-
-
-  async exportData(modelSingular, id = null) {
-    /*
-     * Export given collection data to Excel.
-     */
-    const data = serializeForm(`${modelSingular}-form`);
-    const idToken = await getUserToken();
-    const csrftoken = getCookie('csrftoken');
-    const headerAuth = new Headers({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${idToken}`,
-      'X-CSRFToken': csrftoken,
-    });
-    const init = {
-      headers: headerAuth,
-      method: 'POST',
-      body: JSON.stringify({ data: [data] }),
-    };
-    const fileName = (id) ? id : modelSingular;
-    const response = await fetch(window.location.origin + '/download', init);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.style = 'display: none';
-    link.setAttribute('download', fileName + '.csv');
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
-    window.URL.revokeObjectURL(blob);
-  },
-
-
-  exportDataTable(model) {
-    /*
-     * Export a data table as a CSV file.
-     */
-    this.gridOptions.api.exportDataAsCsv({
-      fileName: `${model}.csv`,
-    });
-  },
-
-
-  // TODO: Pass data model directly
-  async downloadWorksheet(orgId, model) {
-    /*
-     * Download a worksheet to facilitate importing data.
-     */
-    if (!this.dataModel.worksheet_url) {
-      this.dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
-    }
-    const response = await fetch(this.dataModel.worksheet_url);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.style = 'display: none';
-    link.setAttribute('download', `${model}_worksheet.xlsm`);
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
-    window.URL.revokeObjectURL(blob);
-  },
 
 
   /*----------------------------------------------------------------------------
@@ -364,6 +525,8 @@ export const app = {
   },
 
 }
+
+
 
 function setURLParameter(paramName, paramValue) {
   /*

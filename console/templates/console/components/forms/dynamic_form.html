@@ -123,6 +123,7 @@
         class="form-check-input"
         type="checkbox"
         {% if field.disabled or disabled %}disabled{% endif %}
+        {% if field.onchange %}onchange="{{ field.onchange }}(event);"{% endif %}
       >
     </div>
 

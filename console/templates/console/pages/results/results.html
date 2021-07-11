@@ -4,18 +4,21 @@
   Results Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/5/2021
-  Updated: 7/8/2021
+  Updated: 7/10/2021
 -->
 {% extends "console/console.html" %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Results | Cannlytics {% endblock title %}
 {% block console_body %}
-{% if section %}
+{% if section and section != 'logs' and section != 'files' and section != 'certifiates' %}
 
   <!-- Detail page -->
-  {% include "console/pages/results/result.html" with
-    id=section
-    data_model=data_model
-  %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+    {% include "console/pages/results/result.html" with
+      id=section
+      data_model=data_model
+    %}
+    {% block unit %}{% endblock unit %}
+  </main>
 
 {% else %}
 
@@ -23,40 +26,100 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    {% include "console/components/tables/table_options.html" with
-      model='results'
-      model_singular='result'
-    %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+      <h1 class="fs-5 mb-0 lh-base">Results</h1>
+    </div>
 
     <!-- Body -->
     <div class="results">
 
-      <!-- Loading placeholder -->
-      <div id="loading-placeholder">
-        {% include "console/components/placeholders/loading_placeholder.html" with
-          height='326px'
-          width='100%'
-          only
-        %}
-      </div>
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mt-3">
+        <li class="nav-item">
+          <a
+            class="nav-link {% if not section %}active{% endif %}"
+            aria-current="page"
+            href="/results"
+          >
+            List
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'logs' %}active{% endif %}"
+            href="/results/logs"
+          >
+            Logs
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'files' %}active{% endif %}"
+            href="/results/files"
+          >
+            Files
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'certifiates' %}active{% endif %}"
+            href="/results/certificates"
+          >
+            Certificates
+          </a>
+        </li>
+      </ul>
 
-      <!-- No-data Placeholder -->
-      <div id="data-placeholder" class="d-none">
-        {% include "console/components/placeholders/placeholder.html" with
-          placeholder=results.placeholder
-          only
-        %}
-      </div>
+      {% if section == 'logs' %}
+        <!-- TODO: All contacts logs -->
+        Contact
 
-      <!-- AG Grid Table -->
-      <div id="data-table" class="d-none">
-        <!-- TODO: Advanced search -->
-        <div
-          id="results-table"
-          class="ag-theme-alpine-dark"
-          style="height: 326px; width:100%;"
-        ></div>
-      </div>
+      {% elif section == 'files' %}
+
+        <!-- TODO: All contacts files -->
+        Files here!
+
+      {% elif section == 'certificates' %}
+
+        <!-- TODO: All contacts files -->
+        Files here!
+
+      {% else %}
+
+        <!-- Options -->
+        {% include "console/components/tables/simple_table_options.html" with
+          model='results'
+          model_singular='result'
+        %}
+
+        <!-- Loading placeholder -->
+        <div id="loading-placeholder">
+          {% include "console/components/placeholders/loading_placeholder.html" with
+            height='326px'
+            width='100%'
+            only
+          %}
+        </div>
+
+        <!-- No-data Placeholder -->
+        <div id="data-placeholder" class="d-none">
+          {% include "console/components/placeholders/placeholder.html" with
+            placeholder=results.placeholder
+            only
+          %}
+        </div>
+
+        <!-- AG Grid Table -->
+        <div id="data-table" class="d-none">
+          <!-- TODO: Advanced search -->
+          <div
+            id="results-table"
+            class="ag-theme-alpine-dark"
+            style="height: 326px; width:100%;"
+          ></div>
+        </div>
+
+      {% endif %}
 
     </div><!-- End of the body -->
 

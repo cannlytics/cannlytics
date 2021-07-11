@@ -45,6 +45,18 @@ service cloud.firestore {
           if organizationId in request.auth.token.qa
           || organizationId in request.auth.token.owner;
     }
+
+    // Allow organization members to read and create file data.
+    // Only owners and quality assurance can change or delete file data.
+    match /organizations/{organizationId}/{dataModel}/{modelId}/files/{file=**} {
+    	allow read, create:
+          if organizationId in request.auth.token.team
+          || organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+      allow delete, update:
+          if organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+    }
     
     // Allow organization members to read the daily totals.
     match /organizations/{organizationId}/stats/organization_settings/daily_totals/{date} {

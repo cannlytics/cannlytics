@@ -17,14 +17,14 @@
 
   <!-- Title -->
   <div class="px-3">
-    <h1 class="fs-5 lh-base text-dark mb-0 mt-3">
+    <h1 class="fs-6 lh-base text-dark mb-0 mt-3">
       {% if id == 'new' %}New{% endif %}
       {{ model_singular|title }}
       {% if id != 'new' %}{{ id }}{% endif %}
     </h1>
     {% if description %}
       <h2 class="fs-6 lh-base text-secondary mb-3">
-        {{ description }}
+        <small>{{ description }}</small>
       </h2>
     {% endif %}
   </div>

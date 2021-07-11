@@ -27,20 +27,22 @@ You can't order your query by a field included in an equality (==) or in clause.
 
 -->
 <button
-  class="btn btn-sm-light btn-md-light my-3"
-  onclick="cannlytics.ui.toggleElementClass('advanced-search-options', 'd-none');"
+  id="advanced-search-button"
+  class="btn btn-sm-light btn-md-light mb-3"
+  onclick="cannlytics.ui.toggleElementClass('advanced-search-options', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-button', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-cancel', 'd-none');"
 >
   Advanced Search
 </button>
-<div id="advanced-search-options" class="input-group input-group-sm my-3 d-none">
-  <select id="search_parameter" class="custom-select">
-    <option selected></option>
+<div id="advanced-search-options" class="input-group input-group-sm w-50 mb-3 d-none">
+  <select id="search_parameter" class="form-select form-select-sm">
+    {% comment %} <option selected></option> {% endcomment %}
     <!-- TODO: List fields for given model -->
-    <option value="name">Name</option>
+    {% for field in data_model.fields %}
+      <option value="{{ field.key }}">{{ field.label }}</option>
+    {% endfor %}
   </select>
-  <select id="search_operation" class="custom-select">
-    <option selected></option>
-    <option value="==">Equal to</option>
+  <select id="search_operation" class="form-select form-select-sm">
+    <option selected value="==">Equal to</option>
     <option value=">">Greater than</option>
     <option value=">=">Greater than or equal to</option>
     <option value="<">Less than</option>
@@ -54,7 +56,7 @@ You can't order your query by a field included in an equality (==) or in clause.
   <input
     id="search_value"
     type="text"
-    class="form-control form-control-sm"
+    class="form-control form-control-sm form-control-light"
     multiple
   >
   <div class="input-group-append">
@@ -67,4 +69,12 @@ You can't order your query by a field included in an equality (==) or in clause.
     </button>
   </div>
 </div>
+<!-- FIXME: Reset the table after a search -->
+<button
+  id="advanced-search-cancel"
+  class="btn btn-sm-light btn-md-light d-none mb-3"
+  onclick="cannlytics.ui.toggleElementClass('advanced-search-options', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-button', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-cancel', 'd-none');"
+>
+  Clear Search
+</button>
 </html>
