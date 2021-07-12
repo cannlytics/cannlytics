@@ -4,7 +4,7 @@
   Contact Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
-  Updated: 7/6/2021
+  Updated: 7/11/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -54,7 +54,7 @@
     </ul>
   {% endif %}
 
-  <!-- Unit page -->
+  <!-- Files page -->
   {% if unit == 'files' %}
     {% include "console/pages/settings/files/files.html" with
       model='contacts'
@@ -63,8 +63,17 @@
       section=section
       user=user
     %}
+  
+  <!-- Logs page -->
   {% elif unit == 'logs' %}
-    {% block unit %}{% endblock unit %}
+    {% include "console/pages/settings/logs/logs.html" with
+      model='contacts'
+      model_singular='contact'
+      organizations=organizations
+      section=section
+      user=user
+    %}
+
   {% else %}
 
     <!-- Title -->

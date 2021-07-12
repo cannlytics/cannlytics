@@ -66,7 +66,7 @@
     </ul>
   {% endif %}
 
-  <!-- Unit page -->
+  <!-- Files page -->
   {% if unit == 'files' %}
     {% include "console/pages/settings/files/files.html" with
       model='results'
@@ -75,6 +75,21 @@
       section=section
       user=user
     %}
+  
+  <!-- Certificate page -->
+  {% elif unit == 'certificate' %}
+
+
+  <!-- Logs page -->
+  {% elif unit == 'logs' %}
+    {% include "console/pages/settings/logs/logs.html" with
+      model='results'
+      model_singular='result'
+      organizations=organizations
+      section=section
+      user=user
+    %}
+
   {% else %}
 
     <!-- Title -->
@@ -131,7 +146,8 @@
     cannlytics.ui.viewObject('result');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+    // FIXME:
+    //$('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endif %}

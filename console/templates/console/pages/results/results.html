@@ -34,41 +34,11 @@
     <div class="results">
 
       <!-- Tabs -->
-      <ul class="nav nav-tabs mt-3">
-        <li class="nav-item">
-          <a
-            class="nav-link {% if not section %}active{% endif %}"
-            aria-current="page"
-            href="/results"
-          >
-            List
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'logs' %}active{% endif %}"
-            href="/results/logs"
-          >
-            Logs
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'files' %}active{% endif %}"
-            href="/results/files"
-          >
-            Files
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'certifiates' %}active{% endif %}"
-            href="/results/certificates"
-          >
-            Certificates
-          </a>
-        </li>
-      </ul>
+      {% include "console/components/forms/form_tabs.html" with
+        model="inventory"
+        extra="Certificates"
+        extra_path="certificates"
+      %}
 
       {% if section == 'logs' %}
         <!-- TODO: All contacts logs -->
@@ -82,7 +52,7 @@
       {% elif section == 'certificates' %}
 
         <!-- TODO: All contacts files -->
-        Files here!
+        Certificates here!
 
       {% else %}
 

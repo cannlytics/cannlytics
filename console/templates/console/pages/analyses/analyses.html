@@ -12,13 +12,15 @@
 {% load icon %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Analyses | Cannlytics {% endblock title %}
 {% block console_body %}
-{% if section %}
+{% if section and section not in 'logs,files' %}
 
   <!-- Detail page -->
-  {% include "console/pages/analyses/analysis.html" with
-    id=section
-    data_model=data_model
-  %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+    {% include "console/pages/analyses/analysis.html" with
+      id=section
+      data_model=data_model
+    %}
+  </main>
 
 {% else %}
 
@@ -26,40 +28,75 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    {% include "console/components/tables/table_options.html" with
-      model='analyses'
-      model_singular='analysis'
-    %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+      <h1 class="fs-5 mb-0 lh-base">Analyses</h1>
+    </div>
 
     <!-- Body -->
     <div class="analyses">
 
-      <!-- Loading placeholder -->
-      <div id="loading-placeholder">
-        {% include "console/components/placeholders/loading_placeholder.html" with
-          height='326px'
-          width='100%'
-          only
-        %}
-      </div>
+      <!-- Tabs -->
+      {% include "console/components/forms/form_tabs.html" with
+        model="analyses"
+      %}
 
-      <!-- No-data Placeholder -->
-      <div id="data-placeholder" class="d-none">
-        {% include "console/components/placeholders/placeholder.html" with
-          placeholder=analyses.placeholder
-          only
+      <!-- Logs -->
+      {% if section == 'logs' %}
+        {% include "console/pages/settings/logs/logs.html" with
+          model='inventory'
+          model_singular='item'
+          organizations=organizations
+          section=section
+          user=user
         %}
-      </div>
 
-      <!-- AG Grid Table -->
-      <div id="data-table" class="d-none">
-        <!-- TODO: Advanced search -->
-        <div
-          id="analyses-table"
-          class="ag-theme-alpine-dark"
-          style="height: 326px; width:100%;"
-        ></div>
-      </div>
+      <!-- Files -->
+      {% elif section == 'files' %}
+        {% include "console/pages/settings/files/files.html" with
+          model='inventory'
+          model_singular='item'
+          organizations=organizations
+          section=section
+          user=user
+        %}
+
+      <!-- Table -->
+      {% else %}
+
+        <!-- Options -->
+        {% include "console/components/tables/simple_table_options.html" with
+          model='inventory'
+          model_singular='item'
+        %}
+
+        <!-- Loading placeholder -->
+        <div id="loading-placeholder">
+          {% include "console/components/placeholders/loading_placeholder.html" with
+            height='326px'
+            width='100%'
+            only
+          %}
+        </div>
+
+        <!-- No-data Placeholder -->
+        <div id="data-placeholder" class="d-none">
+          {% include "console/components/placeholders/placeholder.html" with
+            placeholder=analyses.placeholder
+            only
+          %}
+        </div>
+
+        <!-- AG Grid Table -->
+        <div id="data-table" class="d-none">
+          <!-- TODO: Advanced search -->
+          <div
+            id="analyses-table"
+            class="ag-theme-alpine-dark"
+            style="height: 326px; width:100%;"
+          ></div>
+        </div>
+
+      {% endif %}
 
     </div><!-- End of the body -->
 

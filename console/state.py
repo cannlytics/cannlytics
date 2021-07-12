@@ -547,7 +547,7 @@ material = {
         "fields": [
             {"key": "file_id", "label": "File ID", "disabled": True, "hidden": True},
             {"key": "name", "label": "Name", "disabled": True},
-            {"key": "uploaded_at", "label": "Uploaded At", "type": "datetime", "class": "field-sm", "disabled": True},
+            {"key": "uploaded_at", "label": "Uploaded At", "type": "datetime", "disabled": True},
             {"key": "uploaded_by", "label": "Uploaded By", "disabled": True},
             {"key": "content_type", "label": "File Type", "disabled": True},
             {"key": "file_size", "label": "File Size", "disabled": True},

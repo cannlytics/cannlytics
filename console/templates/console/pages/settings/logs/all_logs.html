@@ -1,16 +1,24 @@
 <!doctype html>
 <html>
 <!--
-  Contacts Logs Page | Cannlytics Console
+  Logs Page | Cannlytics Console
   Created: 12/17/2020
-  Updated: 7/9/2021
+  Updated: 7/11/2021
+  Parameters:
+    model
+    model_singular
+    section
+  FIXME:
+    If no logs are found in the timeframe,
+    load the past 100 logs and set the start
+    of the range to the earliest log.
 -->
-{% extends "console/pages/contacts/contacts.html" %}
 {% block unit %}
 
+<!-- Log Page -->
 {% if part %}
   {% include "console/pages/settings/logs/log.html" with
-    model_singular='contact'
+    model_singular=model_singular
   %}
 {% else %}
 
@@ -18,9 +26,9 @@
   {% include "console/components/forms/object_logs_title.html" with
     abbreviation=data_model.abbreviation
     id=section
-    model='contacts'
-    model_singular='contact'
-    description="Manage contacts, organizations that you work with."
+    model=model
+    model_singular=model_singular
+    description="View and create activity logs for traceability and quality control."
     user=user
   %}
 
@@ -35,10 +43,6 @@
 
   <!-- No-data Placeholder -->
   <div id="data-placeholder" class="d-none">
-    {% comment %} {% include "console/components/placeholders/placeholder.html" with
-      placeholder=logs.placeholder
-      only
-    %} {% endcomment %}
     {% include "console/components/placeholders/table_placeholder.html" with
       height='200px'
       image='console/images/icons/multi-tone/documents.svg'
@@ -52,7 +56,7 @@
   <div id="data-table" class="d-none">
     <!-- TODO: Advanced search -->
     <div
-      id="contact-logs-table"
+      id="{{ model_singular }}-logs-table"
       class="ag-theme-alpine-dark"
       style="height: 366px; width:100%;"
     ></div>
@@ -68,7 +72,7 @@
     <script>
 
       // Stream logs.
-      cannlytics.app.streamLogs('contact', '{{ section }}', '{{ organizations.0.organization_id }}');
+      cannlytics.app.streamLogs('{{ model_singular }}', '{{ section }}', '{{ organizations.0.organization_id }}');
 
       // Set the initial date.
       document.getElementById('logs_start').value = new Date(new Date().setDate(new Date().getDate()-1)).toISOString().substring(0, 10);
@@ -96,7 +100,7 @@
           start = $('#logs_start').datepicker('getDate').toISOString();
           
         }
-        cannlytics.app.streamLogs('contact', '{{ section }}', '{{ organizations.0.organization_id }}', 'key', 'created_at', start, end);
+        cannlytics.app.streamLogs('{{ model_singular }}', '{{ section }}', '{{ organizations.0.organization_id }}', 'key', 'created_at', start, end);
       });
 
     </script>
