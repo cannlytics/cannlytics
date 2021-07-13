@@ -23,6 +23,7 @@ urlpatterns = [
     path('livereload', views.no_content),
     path('login', views.login),
     path('logout', views.logout),
+    path('send-feedback', views.send_feedback),
     path('<slug:screen>', views.ConsoleView.as_view()),
     path('<slug:screen>/<slug:section>', views.ConsoleView.as_view()),
     path('<slug:screen>/<slug:section>/<slug:unit>', views.ConsoleView.as_view()),

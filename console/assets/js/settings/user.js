@@ -242,6 +242,13 @@ export const userSettings = {
         }).catch((error) => console.log(error));
       });
     }
-  }
+  },
+
+  // DRAFT
+  getUserLogs(orgId) {
+    /* 
+    * Record time and user of any activity.
+    */
+  },
 
 };

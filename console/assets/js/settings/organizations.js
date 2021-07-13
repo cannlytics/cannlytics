@@ -3,6 +3,8 @@
  * Author: Keegan Skeate
  * Created: 6/9/2021
  * Updated: 7/5/2021
+ * TODO:
+ *  - Refactor code
  */
 import { api } from '../api/api.js';
 import { theme } from '../settings/theme.js';

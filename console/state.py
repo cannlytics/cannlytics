@@ -640,7 +640,7 @@ layout = {
         ],
         "welcome_message": {
             "title": "Welcome to your new laboratory platform!", # 🚀
-            "message": "Get started with simple and easy cannabis analytics.",
+            "message": "Get started with cannabis analytics in 5 minutes.",
         },
         "organization_choices": [
             {

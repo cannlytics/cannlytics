@@ -2,7 +2,7 @@
 Console Views | Cannlytics
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 12/18/2020
-Updated: 7/8/2021
+Updated: 7/13/2021
 """
 
 # Standard imports
@@ -10,6 +10,7 @@ import csv
 from json import loads
 
 # External imports
+from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -28,6 +29,7 @@ from cannlytics.firebase import (
     verify_token,
 )
 from cannlytics.utils.utils import snake_case
+from console.settings import DEFAULT_FROM_EMAIL, LIST_OF_EMAIL_RECIPIENTS
 from console.state import layout
 from console.utils import (
     get_page_data,
@@ -87,7 +89,7 @@ class ConsoleView(TemplateView):
         context = get_page_context(self.kwargs, context)
         context = get_page_data(self.kwargs, context)
         context = get_user_context(self.request, context)
-        # FIXME: Redirect to the sign in page if there is no user!
+        # Optional: Redirect to the sign in page if there is no user!
         return context
 
 
@@ -109,7 +111,7 @@ class LoginView(TemplateView):
 
 def login(request, *args, **argv): #pylint: disable=unused-argument
     """Functional view to create a user session.
-    FIXME: Ensure that the request succeeds on the client!
+    Optional: Ensure that the request succeeds on the client!
     """
     try:
         authorization = request.headers.get('Authorization', '')
@@ -118,7 +120,7 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
             return HttpResponse(status=401)
         initialize_firebase()
         session_cookie = create_session_cookie(token)
-        response = JsonResponse({"success": True}, status=204)
+        response = JsonResponse({'success': True}, status=204)
         response.set_cookie(
             key='__session',
             value=session_cookie,
@@ -164,23 +166,7 @@ def logout(request, *args, **argv): #pylint: disable=unused-argument
 
 
 #-----------------------------------------------------------------------
-# Error views
-#-----------------------------------------------------------------------
-
-def handler404(request, *args, **argv): #pylint: disable=unused-argument
-    """Handle missing pages."""
-    template = f'{BASE}/pages/misc/errors/404.html'
-    return render(request, template, {}, status=404)
-
-
-def handler500(request, *args, **argv): #pylint: disable=unused-argument
-    """Handle internal errors."""
-    template = f'{BASE}/pages/misc/errors/500.html'
-    return render(request, template, {}, status=500)
-
-
-#-----------------------------------------------------------------------
-# Helper views
+# Data views
 #-----------------------------------------------------------------------
 
 def download_csv_data(request):
@@ -256,6 +242,54 @@ def import_data(request):
     return HttpResponseRedirect(f'/{model}')
 
 
+#-----------------------------------------------------------------------
+# Error views
+#-----------------------------------------------------------------------
+
+def handler404(request, *args, **argv): #pylint: disable=unused-argument
+    """Handle missing pages."""
+    template = f'{BASE}/pages/misc/errors/404.html'
+    return render(request, template, {}, status=404)
+
+
+def handler500(request, *args, **argv): #pylint: disable=unused-argument
+    """Handle internal errors."""
+    template = f'{BASE}/pages/misc/errors/500.html'
+    return render(request, template, {}, status=500)
+
+
+#-----------------------------------------------------------------------
+# Misc views
+#-----------------------------------------------------------------------
+
 def no_content(request, *args, **argv): #pylint: disable=unused-argument
     """Return an empty response when needed, such as for a ping."""
     return HttpResponse(status=204)
+
+
+#-----------------------------------------------------------------------
+# Email views
+#-----------------------------------------------------------------------
+
+def send_feedback(request, *args, **argv): #pylint: disable=unused-argument
+    """Send feedback from the console to the Cannlytics admin with email."""
+    data = loads(request.body.decode('utf-8'))['data']
+    name = data['name']
+    subject = data['subject']
+    message = data['message']
+    sender = data['email']
+    recipients = LIST_OF_EMAIL_RECIPIENTS
+    if not sender:
+        sender = DEFAULT_FROM_EMAIL
+    text = 'New feedback on the Cannlytics Console'
+    text += '\n\n{0}'.format(message)
+    if name is not None:
+        text += '\n\nFrom,\n' + str(name)
+    send_mail(
+        subject=subject.strip(),
+        message=text,
+        from_email=sender,
+        recipient_list=recipients,
+        fail_silently=False,
+    )
+    return JsonResponse({'success': True}, status=204)

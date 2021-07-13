@@ -99,14 +99,14 @@
 
       <!-- Welcome message (Only show to new users) -->
       <div class="mt-5">
-        <h1 class="fs-2">{{ dashboard.welcome_message.title }}</h1>
+        <h1 class="fs-3">{{ dashboard.welcome_message.title }}</h1>
         <p class="fs-6 card-text text-secondary">{{ dashboard.welcome_message.message }}<p>
 
       </div>
 
       <!-- Get started cards -->
-      <h1 class="fs-5 mb-0 lh-base mt-4 mb-3">Get started with Cannlytics in 5 minutes.</h1>
-      <div class="row row-cols-1 row-cols-lg-2 g-4 mb-5">
+      {% comment %} <h1 class="fs-6 mb-0 lh-base mt-4 mb-3">Get started with Cannlytics in 5 minutes.</h1> {% endcomment %}
+      <div class="row row-cols-1 row-cols-lg-2 g-4 mt-3 mb-5">
         {% for item in dashboard.organization_choices %}
           <div class="col-6 my-3">
             <div
@@ -117,24 +117,12 @@
                 class="card-block stretched-link text-decoration-none"
                 href="/get-started/profile?type={{ item.type }}"
               >
-                {% comment %} <img src="{% static item.image %}"
-                  width="150px"
-                  class="float-end p-2"
-                > {% endcomment %}
                 <div class="card-body">
                   <h5 class="card-title text-dark fs-5">{{ item.title }}</h5>
-                  <p class="card-text text-secondary fs-5">
-                    <small>{{ item.description }}</small>
+                  <p class="card-text text-secondary fs-6">
+                    <small class="serif tiny-text">{{ item.description }}</small>
                   </p>
                 </div>
-                {% comment %} <div class="card-footer no-border">
-                  <a
-                    class="text-danger fs-6 pt-3"
-                    href="/get-started/profile?type={{ item.type }}"
-                  >
-                    {{ item.action }} &rarr;
-                  </a>
-                </div> {% endcomment %}
               </a>
             </div>
           </div>
