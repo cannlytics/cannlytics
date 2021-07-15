@@ -2,10 +2,10 @@
  * Dashboard JavaScript | Cannlytics Console
  * Author: Keegan Skeate <keegan@cannlytics.com>
  * Created: 12/3/2020
- * Updated: 6/21/2021
+ * Updated: 7/15/2021
  */
 
-import { auth, changePhotoURL, storageErrors } from '../firebase.js';
+import { auth, changePhotoURL, getDocument, storageErrors } from '../firebase.js';
 import { authRequest, hasClass, Password, serializeForm, slugify, showNotification } from '../utils.js';
 
 export const dashboard = {
@@ -35,6 +35,7 @@ export const dashboard = {
     /*
      * Send the owner of an organization a request for a user to join.
      */
+    // FIXME:
     const organization = document.getElementById('join-organization-input').value;
     if (!organization) {
       showNotification('Organization required', 'Enter an organization name.', { type: 'error' });
@@ -47,20 +48,6 @@ export const dashboard = {
         showNotification('Organization request failed', response.message, { type: 'error' });
       }
     });
-  },
-
-
-  selectSupportTier(tier) {
-    /*
-     * Add selected indicator to support choices.
-     */
-    const cards = document.getElementsByClassName('support-card');
-    for (let i = 0; i < cards.length; i++) {
-      cards[i].classList.remove('border-success', 'shadow');
-      if (cards[i].id === `tier${tier}`) {
-        cards[i].classList.add('border-success', 'shadow');
-      }
-    }
   },
 
 
@@ -85,6 +72,9 @@ export const dashboard = {
         // showNotification('Organization request sent', response.message, { type: 'success' });
         document.location.href = `/get-started/support/?from=${orgType}`;
       }
+    })
+    .catch((error) => {
+      showNotification('Organization required', 'An organization is required for workflow.', { type: 'error' });
     });
   },
 
@@ -98,6 +88,10 @@ export const dashboard = {
     const baseURL = window.location.origin;
     data.type = type;
     if (user === null) {
+      if (!data.email) {
+        showNotification('Sign up error', 'Email required. Your email is private and used for verification and optional notifications only.', { type: 'error' });
+        return;
+      }
       signUp(data.email).then(() => {
         document.location.href = `${baseURL}/get-started/organization/?from=${type}`;
       }).catch((error) => {
@@ -105,6 +99,10 @@ export const dashboard = {
         // Optional: Show error class (.is-invalid) if invalid
       });
     } else {
+      if (!data.email) {
+        showNotification('Sign up error', 'Email required. Your email is private and used for verification and optional notifications only.', { type: 'error' });
+        return;
+      }
       if (data.email !== user.email) {
         user.updateEmail(data.email);
       }
@@ -118,19 +116,51 @@ export const dashboard = {
   },
 
 
-  saveSupport() {
+  selectSupportTier(tier) {
     /*
-     * Save's a user's support option.
+     * Add selected indicator to support choices.
      */
-    let tier = 'Free';
     const cards = document.getElementsByClassName('support-card');
     for (let i = 0; i < cards.length; i++) {
-      if (hasClass(cards[i], 'border-success')) {
-        tier = cards[i].id.replace('tier', '');
+      cards[i].classList.remove('border-success', 'gold-shadow');
+      if (cards[i].id === `tier${tier}`) {
+        cards[i].classList.add('border-success', 'gold-shadow');
+        document.getElementById('input_tier').value = tier;
       }
     }
-    authRequest('/api/users', { support: tier }).then(() => {
-      document.location.href = '/';
+    document.getElementById('paypal-button-container').innerHTML = '';
+  },
+
+
+  saveSupport() {
+    /*
+     * Get PayPal subscription ID.
+     */
+    return new Promise((resolve, reject) => {
+      const tier = document.getElementById('input_tier').value;
+      if (!tier) {
+        const message = 'Please choose a level of support. Free is an option.';
+        showNotification('Select your level of support.', message, { type: 'error' });
+        reject();
+      }
+      getDocument(`public/subscriptions/subscription_plans/${tier}`).then((data) => {
+        resolve(data);
+      });
+    });
+  },
+
+
+  subscribe(subscription) {
+    /*
+     * Save a user's subscription data to Firestore.
+     */
+    authRequest('/src/subscribe', subscription).then((response) => {
+      if (response.success) {
+        showNotification('Subscribed', response.message, { type: 'success' });
+        window.location.href = '/';
+      } else {
+        showNotification('Unable to subscribe', response.message, { type: 'error' });
+      }
     });
   },
 
@@ -268,11 +298,9 @@ function initializeGetStartedProfileUI(data) {
 
 function initializeGetStartedOrganizationUI(data) {
   /*
-   * Initialize the get-started organization section.
+   * Initialize the get-started organization section,
+   * attaching functionality.
    */
-
-  // Attach functionality.
   const fileElem = document.getElementById('selectPhotoUrl');
   fileElem.addEventListener('change', uploadOrgPhoto, false);
-
 }

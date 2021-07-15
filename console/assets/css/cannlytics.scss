@@ -1482,7 +1482,7 @@ body.dark .modal-content {
 ---------------------------------------------------------------------------*/
 
 .shadow-hover:hover {
-  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
 }
 .shade-hover:hover {
   background-color: #f8f9fa;
@@ -1493,6 +1493,10 @@ body.dark .card.shade-hover {
 body.dark .shade-hover:hover {
   background-color: #44475a !important;
 }
+.gold-shadow {
+  box-shadow: 0 .75rem 1rem #BF953F !important;
+}
+  // border-color: linear-gradient(to bottom right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
 
 /*--------------------------------------------------------------------------
   Alerts

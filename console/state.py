@@ -601,6 +601,12 @@ layout = {
                 "image_path": "console/images/icons/multi-tone/records.png",
             },
             {
+                "path": "measurements",
+                "title": "Measurements",
+                "description": "Manage measurements by analysts and from your instruments.",
+                "image_path": "console/images/icons/two-tone/two_tone_stats.png",
+            },
+            {
                 "path": "projects",
                 "title": "Projects",
                 "description": "Manage your internal and external projects.",
@@ -639,7 +645,7 @@ layout = {
 
         ],
         "welcome_message": {
-            "title": "Welcome to your new laboratory platform!", # 🚀
+            "title": "Welcome to your new cannabis analytics platform!", # 🚀
             "message": "Get started with cannabis analytics in 5 minutes.",
         },
         "organization_choices": [
@@ -656,6 +662,7 @@ layout = {
                 "description": "Start managing your lab results now. Start or join as a producer/processor to begin.",
                 "image": "console/images/illustrations/outline/lab_tablet.svg",
                 "type": "producer",
+                "disabled": True,
             },
             {
                 "action": "Explore for free",
@@ -663,6 +670,7 @@ layout = {
                 "description": "Access lab data for your products quickly and easily. Begin today.",
                 "image": "console/images/illustrations/outline/lab_tablet.svg",
                 "type": "retailer",
+                "disabled": True,
             },
             {
                 "action": "Learn more",
@@ -670,6 +678,7 @@ layout = {
                 "description": "Track your consumption. Log purchases, see your usage stats, and get lab data.",
                 "image": "console/images/illustrations/outline/lab_tablet.svg",
                 "type": "consumer",
+                "disabled": True,
             },
             {
                 "action": "Dive in",
@@ -677,6 +686,7 @@ layout = {
                 "description": "For all software integrators, researchers, and data seekers. Cannlytics has something for you.",
                 "image": "console/images/illustrations/outline/lab_desktop.svg",
                 "type": "integrator",
+                "disabled": True,
             },
         ],
     },

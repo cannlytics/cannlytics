@@ -2,18 +2,19 @@
 Console Views | Cannlytics
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 12/18/2020
-Updated: 7/13/2021
+Updated: 7/14/2021
 """
 
 # Standard imports
 import csv
+from datetime import datetime
 from json import loads
 
 # External imports
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic.base import TemplateView
 import openpyxl
 
@@ -89,7 +90,6 @@ class ConsoleView(TemplateView):
         context = get_page_context(self.kwargs, context)
         context = get_page_data(self.kwargs, context)
         context = get_user_context(self.request, context)
-        # Optional: Redirect to the sign in page if there is no user!
         return context
 
 
@@ -195,7 +195,7 @@ def import_data(request):
     # Authenticate the user.
     session_cookie = request.COOKIES.get('__session')
     claims = verify_session_cookie(session_cookie)
-    if not claims: 
+    if not claims:
         return HttpResponse(status=401)
 
     # Get the requested import parameters.
@@ -293,3 +293,32 @@ def send_feedback(request, *args, **argv): #pylint: disable=unused-argument
         fail_silently=False,
     )
     return JsonResponse({'success': True}, status=204)
+
+
+def subscribe(request):
+    """
+    Subscribe a user to the Cannlytics platform,
+    sending them an email with the ability to unsubscribe.
+    """
+    data = loads(request.body.decode('utf-8'))
+    session_cookie = request.COOKIES.get('__session')
+    claims = verify_session_cookie(session_cookie)
+    data = {**data, ** claims}
+    uid = claims['uid']
+    user_email = claims['email']
+    now = datetime.now()
+    iso_time = now.isoformat()
+    data['created_at'] = iso_time
+    data['updated_at'] = iso_time
+    update_document(f'admin/paypal/paypal_subscriptions/{uid}', data)
+    # Optional: Send HTML message.
+    # template_url = "cannlytics_website/emails/newsletter_subscription_thank_you.html"
+    send_mail(
+        subject='You are now subscribed to Cannlytics, congratulations!',
+        message='Congratulations,\n\nWelcome to the Cannlytics platform. You can hit the docs at docs.cannlytics.com or begin testing the functionality.\n\nYou will receive notifications for important updates and changes.\n\nAlways here to help,\nThe Cannlytics Team',
+        from_email="contact@cannlytics.com",
+        recipient_list=[user_email],
+        fail_silently=False,
+        # html_message = render_to_string(template_url, {"context": "values"}) # Optional: Send HTML email
+    )
+    return JsonResponse({'success': True}, safe=False)

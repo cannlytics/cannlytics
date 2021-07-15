@@ -4,30 +4,29 @@
   Get Started - Organization | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 2/20/2021
-  Updated: 5/5/2021
+  Updated: 7/14/2021
 -->
 {% extends "./get-started.html" %}
 {% load static icon %}
 {% block unit %}
 
   <!-- Header -->
-  <div class="mt-5">
-    <div class="simple-flex position-absolute end-0 me-5">
-      <div class="fs-5 text-dark me-2">2/3</div>
-      <a
-        class="btn btn-sm btn-light text-dark"
-        href="/get-started/support/"
-      >
-        Skip
-      </a>
+  <div class="d-flex justify-content-between mt-5">
+    <div class="col">
+      <h1 class="fs-2">Setup your organization</h1>
+      <p class="fs-6 text-secondary">Get setup with an organization to maximize your productivity.<p>
     </div>
-    <h1 class="fs-2">Your first organization</h1>
-    <p class="fs-6 text-secondary">Get setup with an organization to maximize your productivity.<p>
+    <div class="fs-5 text-dark me-2">2/3</div>
   </div>
 
   <!-- Instructions -->
   <div class="col-md-6 d-flex justify-content-between align-items-center mt-5 mb-3">
-    <h1 class="h3 mb-0">2. Setup your organization</h1>
+    <div class="col">
+      <h1 class="fs-5 mb-0">2. Setup your organization</h1>
+      <p class="fs-6 text-secondary">
+        <small>Organizations faciliate your workflow and make teamwork possible.</small>
+      </p>
+    </div>
     <button
       id="cancel-organization-choice"
       class="btn btn-sm btn-sm-light d-none"
@@ -39,7 +38,7 @@
 
   <!-- Action cards -->
   <div id="organization-choice" class="row row-cols-1 row-cols-lg-2 g-4 mt-3 mb-5">
-    <div class="col my-3">
+    {% comment %} <div class="col my-3">
       <div
         class="card h-100 bg-transparent border-secondary rounded-3 shadow-hover px-0 py-2"
       >
@@ -53,13 +52,13 @@
           >
           <div class="card-body">
             <h5 class="card-title text-dark fs-5">Join an organization</h5>
-            <p class="card-text text-secondary fs-5">
+            <p class="card-text text-secondary fs-6">
               <small>Request to join an existing organization owned by someone else.</small>
             </p>
           </div>
         </a>
       </div>
-    </div>
+    </div> {% endcomment %}
     <div class="col my-3">
       <div
         class="card h-100 bg-transparent border-secondary rounded-3 shadow-hover px-0 py-2"
@@ -74,7 +73,7 @@
           >
           <div class="card-body">
             <h5 class="card-title text-dark fs-5">Create an organization</h5>
-            <p class="card-text text-secondary fs-5">
+            <p class="card-text text-secondary fs-6">
               <small>Start a new organization. You will be the owner and
               can invite team members.</small>
             </p>
@@ -86,7 +85,7 @@
 
   <!-- Join an Organization Form (hidden by default) -->
   <form id="join-organization-form" class="col-md-6 mb-5 d-none">
-    <h1 class="fs-5 mb-0 lh-base text-dark">Join an organization</h1>
+    <h1 class="fs-6 fw-bold mb-0 lh-base text-dark">Join an organization</h1>
     <p class="card-text fs-6 text-secondary mb-3">
       <small>Request to join an existing organization owned by someone else.
       The owner of the organization will receive an email with the choice to
@@ -294,15 +293,6 @@
                 placeholder="Please specify..."
               >
             </div>
-            
-            <!-- <div class="col-md-3">
-              <label class="form-label">Please specify</label>
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                id="license-type-other-1"
-              >
-            </div> -->
             <div class="col-md-2">
               <label class="form-label">State</label>
               <select
@@ -349,7 +339,7 @@
 
       <!-- Add license button -->
       <button
-        class="nav-link text-secondary app-action d-inline-block"
+        class="btn btn-sm-light"
         onclick="cannlytics.ui.addListItem(event, 'license')"
       >
         {% icon 'plus' hegiht="16px" width="16px" %} Add a license
@@ -390,14 +380,6 @@
                 class="form-control form-control-sm"
               >
             </div>
-            <!-- Optional: Advanced options, such as position -->
-            <!--<div class="col-md-3">
-              <label for="team-member-position-1" class="form-label">Position</label>
-              <input
-                type="text"
-                class="form-control form-control-sm"
-              >
-            </div>-->
             <div class="col-md-3">
               <label for="team-member-permissions-1" class="form-label">
                 Permissions
@@ -439,7 +421,7 @@
 
       <!-- Add team member button -->
       <button
-        class="nav-link text-secondary app-action d-inline-block"
+        class="btn btn-sm-light"
         onclick="cannlytics.ui.addListItem(event, 'team-member')"
       >
         {% icon 'plus' hegiht="16px" width="16px" %} Add a team member
@@ -452,7 +434,7 @@
   <!-- Options -->
   <div class="mb-5 my-5">
     <a
-      class="btn btn-sm btn-sm-light btn-md-light me-2"
+      class="btn btn-sm-light btn-md-light me-2"
       href="/{% if request.GET.from %}get-started/profile/?type={{ request.GET.from }}{% endif %}"
     >
       Back
@@ -465,7 +447,7 @@
     </a>
   </div>
 
-{% endblock %}
+{% endblock unit %}
 {% block console_js %}
   <script>
 
@@ -498,29 +480,6 @@
       cannlytics.ui.toggleElementClass('team-member-fields', 'd-none');
       cannlytics.ui.toggleElementClass('team-member-fields-show', 'd-none');
     }
-
-    // FIXME: Only show user API Key for Oklahoma.
-    // $('.license-state-selection').change(function() {
-    //   console.log($(this).val());
-    //   if ($(this).val() === 'OK') {
-    //     $('.user-api-key').removeClass('d-none');
-    //   } else {
-    //     $('.user-api-key').addClass('d-none');
-    //   }
-    // });
-
-    // Optional: Show other when other license type is selected
-    // https://stackoverflow.com/questions/18992839/hide-show-content-if-some-option-is-selected-with-bootstrap
-    // $('#pasveids').on('change', function(e){
-    //   if(e.val == 'Value if clicked on other') {
-    //       $('#hiddenevent').attr('type', 'text');
-    //       $('#pasveids').attr('name', '');
-    //       $('#hiddenevent').attr('name', 'eventtype');
-    //   } else {
-    //       $('#hiddenevent').attr('type', 'hidden');
-    //       $('#pasveids').attr('name', 'eventtype');
-    //   }
-    // });
 
   </script>
 {% endblock console_js %}
