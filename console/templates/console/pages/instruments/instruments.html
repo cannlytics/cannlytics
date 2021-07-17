@@ -3,13 +3,13 @@
 <!--
   Instruments | Cannlytics Console
   Created: 1/13/2021
-  Updated: 7/7/2021
+  Updated: 7/15/2021
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Instruments | Cannlytics {% endblock title %}
 {% block console_body %}
-{% if section %}
+{% if section and section not in 'logs,files,certifiates' %}
 
   <!-- Detail page -->
   {% include "console/pages/instruments/instrument.html" with
@@ -23,40 +23,75 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
   
     <!-- Header -->
-    {% include "console/components/tables/table_options.html" with
-      model='instruments'
-      model_singular='instrument'
-    %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+      <h1 class="fs-5 mb-0 lh-base">Instruments</h1>
+    </div>
 
     <!-- Body -->
     <div class="instruments">
 
-      <!-- Loading placeholder -->
-      <div id="loading-placeholder">
-        {% include "console/components/placeholders/loading_placeholder.html" with
-          height='326px'
-          width='100%'
-          only
-        %}
-      </div>
+      <!-- Tabs -->
+      {% include "console/components/forms/form_tabs.html" with
+        model="instruments"
+      %}
 
-      <!-- No-data Placeholder -->
-      <div id="data-placeholder" class="d-none">
-        {% include "console/components/placeholders/placeholder.html" with
-          placeholder=instruments.placeholder
-          only
+      <!-- Logs -->
+      {% if section == 'logs' %}
+        {% include "console/pages/settings/logs/logs.html" with
+          model='instruments'
+          model_singular='instrument'
+          organizations=organizations
+          section=section
+          user=user
         %}
-      </div>
 
-      <!-- AG Grid Table -->
-      <div id="data-table" class="d-none">
-        <!-- TODO: Advanced search -->
-        <div
-          id="instruments-table"
-          class="ag-theme-alpine-dark"
-          style="height: 326px; width:100%;"
-        ></div>
-      </div>
+      <!-- Files -->
+      {% elif section == 'files' %}
+        {% include "console/pages/settings/files/files.html" with
+          model='instruments'
+          model_singular='instrument'
+          organizations=organizations
+          section=section
+          user=user
+        %}
+
+      <!-- Table -->
+      {% else %}
+
+        <!-- Options -->
+        {% include "console/components/tables/simple_table_options.html" with
+          model='instruments'
+          model_singular='instrument'
+        %}
+
+        <!-- Loading placeholder -->
+        <div id="loading-placeholder">
+          {% include "console/components/placeholders/loading_placeholder.html" with
+            height='326px'
+            width='100%'
+            only
+          %}
+        </div>
+
+        <!-- No-data Placeholder -->
+        <div id="data-placeholder" class="d-none">
+          {% include "console/components/placeholders/placeholder.html" with
+            placeholder=instruments.placeholder
+            only
+          %}
+        </div>
+
+        <!-- AG Grid Table -->
+        <div id="data-table" class="d-none">
+          <!-- TODO: Advanced search -->
+          <div
+            id="instruments-table"
+            class="ag-theme-alpine-dark"
+            style="height: 326px; width:100%;"
+          ></div>
+        </div>
+
+      {% endif %}
 
     </div><!-- End of the body -->
 

@@ -138,7 +138,10 @@ export const auth = {
         window.location.href = window.location.origin;
       })
       .catch((error) => {
-        window.location.href = window.location.origin;
+        console.log(error);
+        // window.location.href = window.location.origin;
+        const message = 'Platform down for maintenance. Thank you for your patience.'
+        showNotification('Sign in error', message, { type: 'error' });
       });
     })
     // Optional: Determine if it's okay to stay signed in.

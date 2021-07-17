@@ -4,7 +4,7 @@
   Result Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
-  Updated: 7/11/2021
+  Updated: 7/15/2021
   TODO:
     - Render additional fields, ability to add an additional field.
     - Load existing measurements.
@@ -29,41 +29,12 @@
 
   <!-- Tabs -->
   {% if id and id != 'new' %}
-    <ul class="nav nav-tabs mt-3">
-      <li class="nav-item">
-        <a
-          class="nav-link {% if not unit %}active{% endif %}"
-          aria-current="page"
-          href="/results/{{ id }}"
-        >
-          Fields
-        </a>
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {% if unit == 'logs' %}active{% endif %}"
-          href="/results/{{ id }}/logs"
-        >
-          Logs
-        </a>
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {% if unit == 'files' %}active{% endif %}"
-          href="/results/{{ id }}/files"
-        >
-          Files
-        </a>
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {% if unit == 'certificate' %}active{% endif %}"
-          href="/results/{{ id }}/certificate"
-        >
-          Certificate
-        </a>
-      </li>
-    </ul>
+    {% include "console/components/forms/form_tabs.html" with
+        id=id
+        model="results"
+        extra="Certificate"
+        extra_path="certificate"
+      %}
   {% endif %}
 
   <!-- Files page -->
@@ -103,27 +74,19 @@
       export=id
     %}
 
-    <!-- Fields -->
+    <!-- Form -->
     <div class="mb-4 px-3">
-
-      <!-- Form -->
       <form id="result-form">
-
-        <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
           fields=results.fields
         %}
-
         <!-- TODO: Show additional fields (traceability fields) -->
         {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
-
       </form>
-
     </div><!-- End of fields -->
 
     <!-- TODO: Try to implement add analytes with AG-Grid table -->
     
-
     <!-- Danger zone (delete) -->
     {% if id and id != 'new' %}
       {% include "console/components/forms/delete_option.html" with

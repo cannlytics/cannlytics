@@ -10,10 +10,11 @@ Tools to help manage transfers of laboratory samples.
 """
 
 
-def receive_transfer():
+def receive_transfer(transfer_id):
     """
     Receive a transfer of laboratory samples.
     """
+    packages = track.get_packages(license_number=cultivator.license_number)
     return NotImplementedError
 
 

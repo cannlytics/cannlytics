@@ -2,11 +2,8 @@
 General Utility Functions
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 11/26/2020
-Updated: 7/8/2021
+Updated: 7/17/2021
 """
-
-# External imports
-from django.utils.crypto import get_random_string
 
 # Internal imports
 from api.auth import auth

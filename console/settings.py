@@ -28,7 +28,7 @@ from django.template import base
 # Define project namespaces.
 PROJECT_NAME = 'console'
 ROOT_URLCONF = 'console.urls'
-WSGI_APPLICATION = 'console.wsgi.application'
+WSGI_APPLICATION = 'console.core.wsgi.application'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Get the version number.

@@ -4,7 +4,7 @@ Authors:
   Keegan Skeate <keegan@cannlytics.com>
   Charles Rice <charles@ufosoftwarellc.com>
 Created: 6/15/2021
-Updated: 6/19/2021
+Updated: 7/15/2021
 
 Resources:
     https://www.programmersought.com/article/6548119734/
@@ -14,8 +14,49 @@ Resources:
     https://www.w3resource.com/python-exercises/python-basic-exercise-64.php
     https://stackabuse.com/scheduling-jobs-with-python-crontab
 """
-
 import pandas as pd
+import xlwings as xw
+
+from cannlytics.utils.utils import snake_case
+from cannlytics.firebase import update_document
+
+
+def import_data_model(directory):
+    """Import analyses to Firestore from a .csv or .xlsx file.
+    Args:
+        filename (str): The full filename of a data file.
+    """
+    analyses = pd.read_excel(directory + 'analyses.xlsx')
+    analytes = pd.read_excel(directory + 'analytes.xlsx')
+    for index, analysis in analyses.iterrows():
+        analyte_data = []
+        analyte_names = analysis.analyte_keys.split(', ')
+        for analyte_key in analyte_names:
+            analyte_item = analytes.loc[analytes.key == analyte_key]
+            analyte_data.append(analyte_item.to_dict(orient='records'))
+        analyses.at[index, 'analytes'] = analyte_data 
+    analyses_data = analyses.to_dict(orient='records')
+    for index, values in analyses_data.iterrows():
+        doc_id = str(values.key)
+        doc_data = values.to_dict()
+        ref = ''
+        update_document(ref, doc_data)
+        # doc_data = data.to_dict(orient='index')
+        # data_ref = create_reference(db, ref)
+        # data_ref.document(doc_id).set(doc_data, merge=True)
+        # data_ref.set(doc_data, merge=True)
+
+    return NotImplementedError
+
+
+def import_measurements():
+    """Import measurements taken by scientific instruments.
+    Args:
+
+    Returns:
+    """
+
+    print('Receive a transfer...')
 
 
 def get_sample_name(df):
@@ -162,3 +203,26 @@ def import_heavy_metals(file_name):
         samples.append(measurements)
 
     return samples
+
+
+#-----------------------------------------------------------------------
+# Helper functions
+#-----------------------------------------------------------------------
+
+def import_worksheet(filename, sheetname, range_start='A1'):
+    """Read the data from a given worksheet.
+    Args:
+        filename (str): The name of the Excel file to read.
+        range_start (str): Optional starting cell.
+    Returns:
+        list(dict): A list of dictionaries.
+    """
+    app = xw.App(visible=False)
+    book = xw.Book(filename)
+    sheet = book.sheets(sheetname)
+    excel_data = sheet.range(range_start).expand('table').value
+    keys = [snake_case(key) for key in excel_data[0]]
+    data = [dict(zip(keys, values)) for values in excel_data[1:]]
+    book.close()
+    app.quit()
+    return data

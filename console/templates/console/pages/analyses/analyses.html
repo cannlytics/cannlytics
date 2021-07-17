@@ -3,7 +3,7 @@
 <!--
   Analyses | Cannlytics Console
   Created 1/13/2021
-  Updated: 7/7/2021
+  Updated: 7/15/2021
   TODO:
    - Allow for labs to choose to make their analyses public,
     so that producers can search for analyses.
@@ -43,8 +43,8 @@
       <!-- Logs -->
       {% if section == 'logs' %}
         {% include "console/pages/settings/logs/logs.html" with
-          model='inventory'
-          model_singular='item'
+          model='analyses'
+          model_singular='analysis'
           organizations=organizations
           section=section
           user=user
@@ -53,8 +53,8 @@
       <!-- Files -->
       {% elif section == 'files' %}
         {% include "console/pages/settings/files/files.html" with
-          model='inventory'
-          model_singular='item'
+          model='analyses'
+          model_singular='analysis'
           organizations=organizations
           section=section
           user=user
@@ -65,8 +65,8 @@
 
         <!-- Options -->
         {% include "console/components/tables/simple_table_options.html" with
-          model='inventory'
-          model_singular='item'
+          model='analyses'
+          model_singular='analysis'
         %}
 
         <!-- Loading placeholder -->

@@ -4,7 +4,7 @@
   Contact Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
-  Updated: 7/11/2021
+  Updated: 7/15/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -25,33 +25,10 @@
 
   <!-- Tabs -->
   {% if id and id != 'new' %}
-    <ul class="nav nav-tabs mt-3">
-      <li class="nav-item">
-        <a
-          class="nav-link {% if not unit %}active{% endif %}"
-          aria-current="page"
-          href="/contacts/{{ id }}"
-        >
-          Fields
-        </a>
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {% if unit == 'logs' %}active{% endif %}"
-          href="/contacts/{{ id }}/logs"
-        >
-          Logs
-        </a>
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link {% if unit == 'files' %}active{% endif %}"
-          href="/contacts/{{ id }}/files"
-        >
-          Files
-        </a>
-      </li>
-    </ul>
+    {% include "console/components/forms/form_tabs.html" with
+        id=id
+        model="contacts"
+      %}
   {% endif %}
 
   <!-- Files page -->
@@ -87,20 +64,14 @@
       export=id
     %}
 
-    <!-- Fields -->
+    <!-- Form -->
     <div class="mb-4 px-3">
-
-      <!-- Form -->
       <form id="contact-form">
-
-        <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
           fields=contacts.fields
         %}
-
       </form>
-
-    </div><!-- End of fields -->
+    </div>
 
     <!-- TODO: Try to implement add people with AG-Grid table -->
 

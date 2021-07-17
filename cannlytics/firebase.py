@@ -462,7 +462,7 @@ def verify_token(token):
     return auth.verify_id_token(token)
 
 
-def verify_session_cookie(session_cookie, check_revoked=True, app=None):
+def verify_session_cookie(session_cookie, check_revoked=True, app=None): # FIXME: Don't hardcode
     """Verify a user's session cookie.
     Args:
         session_cookie (str): A session cookie to authenticate a user.

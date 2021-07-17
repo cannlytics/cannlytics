@@ -4,7 +4,7 @@
   Sample Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
-  Updated: 6/22/2021
+  Updated: 7/15/2021
   TODO:
     - Allow the user to reset, save (update and create), and delete.
     - Render additional fields, ability to add an additional field.
@@ -31,41 +31,67 @@
       current_page=id
     %}
 
-    <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      abbreviation=data_model.abbreviation
-      id=id
-      model='samples'
-      model_singular='sample'
-      description="Manage samples for projects commissioned by your contacts."
-      options=True
-      export=id
-    %}
+    <!-- Tabs -->
+    {% if id and id != 'new' %}
+      {% include "console/components/forms/form_tabs.html" with
+          id=id
+          model="samples"
+        %}
+    {% endif %}
 
-    <!-- Fields -->
-    <div class="mb-4 px-3">
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='samples'
+        model_singular='sample'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+    
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='samples'
+        model_singular='sample'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='samples'
+        model_singular='sample'
+        description="Manage samples for projects commissioned by your contacts."
+        options=True
+        export=id
+      %}
 
       <!-- Form -->
-      <form id="sample-form">
+      <div class="mb-4 px-3">
+        <form id="sample-form">
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=samples.fields
+          %}
+        </form>
+      </div>
 
-        <!-- Dynamic fields -->
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=samples.fields
+      <!-- TODO: Try to implement add analytes with AG-Grid table -->
+
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="samples"
+          model_singular="sample"
         %}
+      {% endif %}
 
-      </form>
-
-    </div><!-- End of fields -->
-
-    <!-- TODO: Try to implement add analytes with AG-Grid table -->
-
-    <!-- Danger zone (delete) -->
-    {% if id and id != 'new' %}
-      {% include "console/components/forms/delete_option.html" with
-        id=id
-        model="samples"
-        model_singular="sample"
-      %}
     {% endif %}
 
   </main>
@@ -80,7 +106,7 @@
     cannlytics.ui.viewObject('sample');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}

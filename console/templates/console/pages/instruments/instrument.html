@@ -3,10 +3,9 @@
 <!--
   Instrument Page | Cannlytics Console
   Created 12/17/2020
-  Updated: 7/7/2021
+  Updated: 7/15/2021
 
   Fields:
-
     Calibration
     Certification
     Location
@@ -14,6 +13,7 @@
     type
     Validation
 -->
+{% load icon %}
 {% block console_css %}
 
   <!-- Bootstrap Datepicker -->
@@ -32,44 +32,76 @@
       current_page=id
     %}
 
-    <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      abbreviation=data_model.abbreviation
-      id=id
-      model='instruments'
-      model_singular='instrument'
-      description="Manage instruments used in analysis."
-      options=True
-      export=id
-    %}
-
-    <!-- Fields -->
-    <div class="mb-4 px-3">
-
-      <!-- Form -->
-      <form id="instrument-form">
-
-        <!-- Dynamic fields -->
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=instruments.fields
-        %}
-
-      </form>
-
-    </div><!-- End of fields -->
-
-    <!-- TODO: Try to implement add analytes with AG-Grid table -->
-    
-
-    <!-- Danger zone (delete) -->
+    <!-- Tabs -->
     {% if id and id != 'new' %}
-      {% include "console/components/forms/delete_option.html" with
-        id=id
-        model="instruments"
-        model_singular="instrument"
-      %}
+      {% include "console/components/forms/form_tabs.html" with
+          id=id
+          model="instruments"
+        %}
     {% endif %}
+
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='inventory'
+        model_singular='item'
+        organizations=organizations
+        section=section
+        user=user
+      %}
     
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='inventory'
+        model_singular='item'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='instruments'
+        model_singular='instrument'
+        description="Manage instruments used in analysis."
+        options=True
+        export=id
+      %}
+
+      <!-- Fields -->
+      <div class="mb-4 px-3">
+
+        <!-- Form -->
+        <form id="instrument-form">
+
+          <!-- Dynamic fields -->
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=instruments.fields
+          %}
+
+        </form>
+
+      </div><!-- End of fields -->
+
+      <!-- TODO: Try to implement add analytes with AG-Grid table -->
+      
+
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="instruments"
+          model_singular="instrument"
+        %}
+      {% endif %}
+
+    {% endif %}
+
   </main>
 
 {% endblock console_body %}
@@ -82,7 +114,7 @@
     cannlytics.ui.viewObject('instrument');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}

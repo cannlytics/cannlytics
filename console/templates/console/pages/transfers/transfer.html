@@ -4,7 +4,7 @@
   Transfer Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2020
-  Updated: 7/7/2021
+  Updated: 7/15/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -24,46 +24,69 @@
       current_page=id
     %}
 
-    <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      abbreviation=data_model.abbreviation
-      id=id
-      model='transfers'
-      model_singular='transfer'
-      description="Manage transfers of samples sent for analysis."
-      options=True
-      export=id
-    %}
-
-    <!-- Fields -->
-    <div class="mb-4 px-3">
-
-      <!-- Form -->
-      <form id="transfer-form">
-
-        <!-- Dynamic fields -->
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=transfers.fields
-        %}
-
-        <!-- TODO: Show additional fields (traceability fields) -->
-        {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
-
-      </form>
-
-    </div><!-- End of fields -->
-
-    <!-- TODO: Try to implement add samples with AG-Grid table -->
-
-    <!-- Danger zone (delete) -->
+    <!-- Tabs -->
     {% if id and id != 'new' %}
-      {% include "console/components/forms/delete_option.html" with
+      {% include "console/components/forms/form_tabs.html" with
         id=id
         model="transfers"
-        model_singular="transfer"
       %}
     {% endif %}
 
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='transfers'
+        model_singular='transfer'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+    
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='transfers'
+        model_singular='transfer'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='transfers'
+        model_singular='transfer'
+        description="Manage transfers of samples sent for analysis."
+        options=True
+        export=id
+      %}
+
+      <!-- Form -->
+      <div class="mb-4 px-3">
+        <form id="transfer-form">
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=transfers.fields
+          %}
+          <!-- TODO: Show additional fields (traceability fields) -->
+          {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
+        </form>
+      </div>
+      <!-- TODO: Try to implement add samples with AG-Grid table -->
+
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="transfers"
+          model_singular="transfer"
+        %}
+      {% endif %}
+
+    {% endif %}
 
   </main>
 
@@ -77,7 +100,7 @@
     cannlytics.ui.viewObject('transfer');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}

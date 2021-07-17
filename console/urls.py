@@ -1,43 +1,44 @@
 """
-URLs | Cannlytics
+URLs | Cannlytics Console
 Created: 4/18/2021
-Updated: 7/6/2021
+Updated: 7/17/2021
 Resources: https://docs.djangoproject.com/en/3.2/topics/http/urls/
 """
+# pylint:disable=invalid-name,unused-import
 
 # External imports
 from django.conf.urls import handler404, handler500
 from django.urls import include, path
 
-
 # Internal imports
-from console import views
+from console.views import (
+    auth,
+    data,
+    email,
+    main,
+)
 
-app_name = 'console' # pylint: disable=invalid-name
+app_name = 'console'
 urlpatterns = [
-    path('', views.ConsoleView.as_view(), name='index'),
-    path('account/<slug:page>', views.LoginView.as_view(), name='auth'),
+    path('', main.ConsoleView.as_view(), name='index'),
+    path('account/<slug:page>', auth.LoginView.as_view(), name='auth'),
     path('api/', include('api.urls'), name='api'),
-    path('download', views.download_csv_data),
-    path('import', views.import_data, name='import_data'),
-    path('livereload', views.no_content),
-    path('login', views.login),
-    path('logout', views.logout),
-    path('send-feedback', views.send_feedback),
+    path('download', data.download_csv_data),
+    path('import', data.import_data, name='import_data'),
+    path('livereload', main.no_content),
+    path('login', auth.login),
+    path('logout', auth.logout),
+    path('send-feedback', email.send_feedback),
     path('src', include([
-        path('/subscribe', views.subscribe),
+        path('/subscribe', email.subscribe),
     ])),
-    path('<slug:screen>', views.ConsoleView.as_view()),
-    path('<slug:screen>/<slug:section>', views.ConsoleView.as_view()),
-    path('<slug:screen>/<slug:section>/<slug:unit>', views.ConsoleView.as_view()),
-    path('<slug:screen>/<slug:section>/<slug:unit>/<slug:part>', views.ConsoleView.as_view()),
-    path('<slug:screen>/<slug:section>/<slug:unit>/<slug:part>/<slug:piece>', views.ConsoleView.as_view()),
+    path('<slug:screen>', main.ConsoleView.as_view()),
+    path('<slug:screen>/<slug:section>', main.ConsoleView.as_view()),
+    path('<slug:screen>/<slug:section>/<slug:unit>', main.ConsoleView.as_view()),
+    path('<slug:screen>/<slug:section>/<slug:unit>/<slug:part>', main.ConsoleView.as_view()),
+    path('<slug:screen>/<slug:section>/<slug:unit>/<slug:part>/<slug:piece>', main.ConsoleView.as_view()),
 ]
 
 # Error pages.
-handler404 = 'console.views.handler404'
-handler500 = 'console.views.handler500'
-
-# Optional: Add 403 and 400 pages
-# handler403 = 'console.views.my_custom_permission_denied_view'
-# handler400 = 'console.views.my_custom_bad_request_view'
+handler404 = 'console.views.main.handler404'
+handler500 = 'console.views.main.handler500'

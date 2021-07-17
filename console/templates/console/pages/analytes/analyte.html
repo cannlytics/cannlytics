@@ -4,7 +4,7 @@
   Analyte Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2020
-  Updated: 7/7/2021
+  Updated: 7/15/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -24,39 +24,71 @@
       current_page=id
     %}
 
-    <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      abbreviation=data_model.abbreviation
-      id=id
-      model='analytes'
-      model_singular='analyte'
-      description="Manage analyte details to prepare the analyte for analysis."
-      options=True
-      export=id
-    %}
-
-    <!-- Fields -->
-    <div class="mb-4 px-3">
-
-      <!-- Form -->
-      <form id="analyte-form">
-
-        <!-- Dynamic fields -->
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=analytes.fields
-        %}
-
-      </form>
-
-    </div><!-- End of fields -->
-    
-    <!-- Danger zone (delete) -->
+    <!-- Tabs -->
     {% if id and id != 'new' %}
-      {% include "console/components/forms/delete_option.html" with
-        id=id
-        model="analytes"
-        model_singular="analyte"
+      {% include "console/components/forms/form_tabs.html" with
+          id=id
+          model="analytes"
+        %}
+    {% endif %}
+
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='inventory'
+        model_singular='item'
+        organizations=organizations
+        section=section
+        user=user
       %}
+    
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='inventory'
+        model_singular='item'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='analytes'
+        model_singular='analyte'
+        description="Manage analyte details to prepare the analyte for analysis."
+        options=True
+        export=id
+      %}
+
+      <!-- Fields -->
+      <div class="mb-4 px-3">
+
+        <!-- Form -->
+        <form id="analyte-form">
+
+          <!-- Dynamic fields -->
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=analytes.fields
+          %}
+
+        </form>
+
+      </div><!-- End of fields -->
+      
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="analytes"
+          model_singular="analyte"
+        %}
+      {% endif %}
+
     {% endif %}
 
   </main>
@@ -71,7 +103,7 @@
     cannlytics.ui.viewObject('analyte');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}

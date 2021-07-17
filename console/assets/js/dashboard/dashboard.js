@@ -70,7 +70,8 @@ export const dashboard = {
       } else {
         // Optional: Navigate straight to the dash if the user requested to join an organization.
         // showNotification('Organization request sent', response.message, { type: 'success' });
-        document.location.href = `/get-started/support/?from=${orgType}`;
+        const baseURL = window.location.origin;
+        document.location.href = `${baseURL}/get-started/support?from=${orgType}`;
       }
     })
     .catch((error) => {
@@ -93,7 +94,7 @@ export const dashboard = {
         return;
       }
       signUp(data.email).then(() => {
-        document.location.href = `${baseURL}/get-started/organization/?from=${type}`;
+        document.location.href = `${baseURL}/get-started/organization?from=${type}`;
       }).catch((error) => {
         showNotification('Sign up error', error.message, { type: 'error' });
         // Optional: Show error class (.is-invalid) if invalid
@@ -110,7 +111,7 @@ export const dashboard = {
         user.updateProfile({ displayName: data.name });
       }
       authRequest('/api/users', data).then(() => {
-        document.location.href = `${baseURL}/get-started/organization/?from=${type}`;
+        document.location.href = `${baseURL}/get-started/organization?from=${type}`;
       });
     }
   },

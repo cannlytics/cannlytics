@@ -4,13 +4,13 @@
   Projects | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 4/24/2021
-  Updated: 7/7/2021
+  Updated: 7/15/2021
 -->
 {% extends "console/console.html" %}
 {% load static icon %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Projects | Cannlytics {% endblock title %}
 {% block console_body %}
-{% if section %}
+{% if section and section not in 'logs,files' %}
 
   <!-- Detail page -->
   {% include "console/pages/projects/project.html" with
@@ -24,42 +24,77 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header-->
-    {% include "console/components/tables/table_options.html" with
-      model='projects'
-      model_singular='project'
-    %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+      <h1 class="fs-5 mb-0 lh-base">Projects</h1>
+    </div>
 
-  <!-- Body -->
-  <div class="projects">
+    <!-- Body -->
+    <div class="projects">
 
-    <!-- Loading placeholder -->
-    <div id="loading-placeholder">
-      {% include "console/components/placeholders/loading_placeholder.html" with
-        height='326px'
-        width='100%'
-        only
+      <!-- Tabs -->
+      {% include "console/components/forms/form_tabs.html" with
+        model="projects"
       %}
-    </div>
 
-    <!-- No-data Placeholder -->
-    <div id="data-placeholder" class="d-none">
-      {% include "console/components/placeholders/placeholder.html" with
-        placeholder=projects.placeholder
-        only
-      %}
-    </div>
+      <!-- Logs -->
+      {% if section == 'logs' %}
+        {% include "console/pages/settings/logs/logs.html" with
+          model='projects'
+          model_singular='project'
+          organizations=organizations
+          section=section
+          user=user
+        %}
 
-    <!-- AG Grid Table -->
-    <div id="data-table" class="d-none">
-      <!-- TODO: Advanced search -->
-      <div
-        id="projects-table"
-        class="ag-theme-alpine-dark"
-        style="height: 326px; width:100%;"
-      ></div>
-    </div>
+      <!-- Files -->
+      {% elif section == 'files' %}
+        {% include "console/pages/settings/files/files.html" with
+          model='projects'
+          model_singular='project'
+          organizations=organizations
+          section=section
+          user=user
+        %}
 
-  </div><!-- End of the body -->
+      <!-- Table -->
+      {% else %}
+
+        <!-- Options -->
+        {% include "console/components/tables/simple_table_options.html" with
+          model='projects'
+          model_singular='project'
+        %}
+
+        <!-- Loading placeholder -->
+        <div id="loading-placeholder">
+          {% include "console/components/placeholders/loading_placeholder.html" with
+            height='326px'
+            width='100%'
+            only
+          %}
+        </div>
+
+        <!-- No-data Placeholder -->
+        <div id="data-placeholder" class="d-none">
+          {% include "console/components/placeholders/placeholder.html" with
+            placeholder=projects.placeholder
+            only
+          %}
+        </div>
+
+        <!-- AG Grid Table -->
+        <div id="data-table" class="d-none">
+          <!-- TODO: Advanced search -->
+          <div
+            id="projects-table"
+            class="ag-theme-alpine-dark"
+            style="height: 326px; width:100%;"
+          ></div>
+        </div>
+
+      {% endif %}
+
+    </div><!-- End of the body -->
     
   </main>
 {% endif %}
@@ -75,49 +110,4 @@
   {% endif %}
 
 {% endblock console_js %}
-{% comment %} {% block console_js %}
-{% if not section %}
-  <script>
-
-    // Get data from the API.
-    cannlytics.api.get('projects', null, { params: { limit: 100 } })
-      .then(function(response) {
-
-        var data = response.data;
-        console.log('DEV: Render data:', data);
-        if (!data) return;
-
-        // Show the table.
-        document.getElementById('data-placeholder').classList.add('d-none');
-        document.getElementById('data-table').classList.remove('d-none');
-
-        // Define the columns for the table.
-        const columnDefs = [
-          { field: 'project_id', headerName: 'Project ID', sortable: true, filter: true },
-        ];
-
-        // Specify the table options.
-        const gridOptions = {
-          columnDefs: columnDefs,
-          pagination: true,
-          paginationAutoPageSize: true,
-          suppressRowClickSelection: false,
-          onRowClicked: event => cannlytics.ui.openObject(
-            'projects',
-            'project',
-            event,
-          ),
-          onGridReady: event => cannlytics.theme.toggleTheme(cannlytics.theme.getTheme()),
-        };
-
-        // Render the table
-        const eGridDiv = document.querySelector('projects-table');
-        new agGrid.Grid(eGridDiv, gridOptions);
-        gridOptions.api.setRowData(data);
-
-      });
-
-  </script>
-{% endif %}
-{% endblock console_js %} {% endcomment %}
 </html>

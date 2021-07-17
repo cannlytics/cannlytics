@@ -4,7 +4,7 @@
   Area Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/7/2021
-  Updated: 7/8/2021
+  Updated: 7/15/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -24,45 +24,76 @@
       current_page=id
     %}
 
-    <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      abbreviation=data_model.abbreviation
-      id=id
-      model='areas'
-      model_singular='area'
-      description="Manage areas, where instruments, samples, and items are located."
-      options=True
-      export=id
-    %}
-
-    <!-- Fields -->
-    <div class="mb-4 px-3">
-
-      <!-- Form -->
-      <form id="area-form">
-
-        <!-- Dynamic fields -->
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=areas.fields
-        %}
-
-        <!-- TODO: Show additional fields (traceability location fields) -->
-        {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
-
-      </form>
-
-    </div><!-- End of fields -->
-
-    <!-- TODO: Try to implement add analytes with AG-Grid table -->
-    
-
-    <!-- Danger zone (delete) -->
+    <!-- Tabs -->
     {% if id and id != 'new' %}
-      {% include "console/components/forms/delete_option.html" with
-        id=id
-        model="areas"
-        model_singular="area"
+      {% include "console/components/forms/form_tabs.html" with
+          id=id
+          model="areas"
+        %}
+    {% endif %}
+
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='inventory'
+        model_singular='item'
+        organizations=organizations
+        section=section
+        user=user
       %}
+    
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='inventory'
+        model_singular='item'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='areas'
+        model_singular='area'
+        description="Manage areas, where instruments, samples, and items are located."
+        options=True
+        export=id
+      %}
+
+      <!-- Fields -->
+      <div class="mb-4 px-3">
+
+        <!-- Form -->
+        <form id="area-form">
+
+          <!-- Dynamic fields -->
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=areas.fields
+          %}
+
+          <!-- TODO: Show additional fields (traceability location fields) -->
+          {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
+
+        </form>
+
+      </div><!-- End of fields -->
+
+      <!-- TODO: Try to implement add analytes with AG-Grid table -->
+
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="areas"
+          model_singular="area"
+        %}
+      {% endif %}
+
     {% endif %}
 
   </main>
@@ -76,7 +107,7 @@
     cannlytics.ui.viewObject('area');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}

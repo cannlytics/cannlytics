@@ -17,10 +17,7 @@ except ImportError:
     print('Could not import dj_static')
     pass
 
-os.environ.setdefault(
-    'DJANGO_SETTINGS_MODULE',
-    'console.settings'
-)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'console.settings')
 
 try:
     application = Cling(get_wsgi_application())

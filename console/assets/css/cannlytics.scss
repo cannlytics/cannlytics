@@ -246,6 +246,12 @@ body.dark .markdown a:hover {
 .text-dark {
   color: #1a1a1a !important;
 }
+.simple-icon {
+  fill: #1a1a1a;
+}
+body.dark .simple-icon {
+  fill: #ccc;
+}
 .text-secondary-on-light {
   color: #ccc !important;
 }

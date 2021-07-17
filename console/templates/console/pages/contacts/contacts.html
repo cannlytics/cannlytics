@@ -4,7 +4,7 @@
   Contacts Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 12/17/2020
-  Updated: 7/6/2021
+  Updated: 7/15/2021
   TODO:
     - The ability to import contact records from .csv or .xlsx fields.
     - The ability to export contact records to .csv or .xlsx.
@@ -15,7 +15,7 @@
 {% load icon %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Contacts | Cannlytics {% endblock title %}
 {% block console_body %}
-{% if section and section != 'logs' and section != 'files' %}
+{% if section and section not in 'logs,files' %}
 
   <!-- Detail page -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
@@ -40,43 +40,31 @@
     <div class="contacts">
 
       <!-- Tabs -->
-      <ul class="nav nav-tabs mt-3">
-        <li class="nav-item">
-          <a
-            class="nav-link {% if not section %}active{% endif %}"
-            aria-current="page"
-            href="/contacts"
-          >
-            List
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'logs' %}active{% endif %}"
-            href="/contacts/logs"
-          >
-            Logs
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'files' %}active{% endif %}"
-            href="/contacts/files"
-          >
-            Files
-          </a>
-        </li>
-      </ul>
+      {% include "console/components/forms/form_tabs.html" with
+        model="contacts"
+      %}
 
+      <!-- Logs -->
       {% if section == 'logs' %}
-        <!-- TODO: All contacts logs -->
-        Contact
+        {% include "console/pages/settings/logs/logs.html" with
+          model='contacts'
+          model_singular='contact'
+          organizations=organizations
+          section=section
+          user=user
+        %}
 
+      <!-- Files -->
       {% elif section == 'files' %}
+        {% include "console/pages/settings/files/files.html" with
+          model='contacts'
+          model_singular='contact'
+          organizations=organizations
+          section=section
+          user=user
+        %}
 
-        <!-- TODO: All contacts files -->
-        Files here!
-
+      <!-- Table -->
       {% else %}
 
         <!-- Options -->

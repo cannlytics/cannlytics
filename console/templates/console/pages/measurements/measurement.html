@@ -3,7 +3,7 @@
 <!--
   Measurement Page | Cannlytics Console
   Created: 6/19/2021
-  Updated: 7/7/2021
+  Updated: 7/15/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -25,36 +25,68 @@
       current_page=id
     %}
 
-    <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      abbreviation=data_model.abbreviation
-      id=id
-      model='measurements'
-      model_singular='measurement'
-      description="Manage measurements of analytes in your analyses."
-      options=True
-      export=id
-    %}
-
-    <!-- Form -->
-    <div class="mb-4 px-3">
-      <form id="measurement-form">
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=measurements.fields
-        %}
-      </form>
-    </div>
-
-    <!-- TODO: Try to implement add analytes with AG-Grid table -->
-    
-
-    <!-- Danger zone (delete) -->
+    <!-- Tabs -->
     {% if id and id != 'new' %}
-      {% include "console/components/forms/delete_option.html" with
-        id=id
-        model="measurements"
-        model_singular="measurement"
+      {% include "console/components/forms/form_tabs.html" with
+          id=id
+          model="measurements"
+        %}
+    {% endif %}
+
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='measurements'
+        model_singular='measurement'
+        organizations=organizations
+        section=section
+        user=user
       %}
+    
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='measurements'
+        model_singular='measurement'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='measurements'
+        model_singular='measurement'
+        description="Manage measurements of analytes in your analyses."
+        options=True
+        export=id
+      %}
+
+      <!-- Form -->
+      <div class="mb-4 px-3">
+        <form id="measurement-form">
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=measurements.fields
+          %}
+        </form>
+      </div>
+
+      <!-- TODO: Try to implement add analytes with AG-Grid table -->
+      
+
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="measurements"
+          model_singular="measurement"
+        %}
+      {% endif %}
+
     {% endif %}
 
 </main>
@@ -68,7 +100,7 @@
     cannlytics.ui.viewObject('measurement');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}

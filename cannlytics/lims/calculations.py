@@ -13,6 +13,20 @@ import numpy as np
 import re
 import random
 
+
+def calculate_results():
+    """Calculate results by using analyte formula and
+    instrument / analyst measurements.
+    Calculate results by using analyte formula and
+    instrument / analyst measurements.
+    Args:
+
+    Returns:
+    """
+
+    print('Calculating results..')
+
+
 # Prepare testing dataset
 tags = np.array(['tag'+str(i) for i in np.random.randint(10, size=200)])  # randomly generate tag list
 vals = np.random.randint(20, size=200)  # generate a list of random integers

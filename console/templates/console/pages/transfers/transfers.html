@@ -3,13 +3,13 @@
 <!--
   Transfers Page | Cannlytics
   Created: 5/4/2021
-  Updated: 7/8/2021
+  Updated: 7/15/2021
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Transfers | Cannlytics {% endblock title %}
 {% block console_body %}
-{% if section %}
+{% if section and section not in 'logs,files' %}
 
   <!-- Detail page -->
   {% include "console/pages/transfers/transfer.html" with
@@ -23,40 +23,75 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    {% include "console/components/tables/table_options.html" with
-      model='transfers'
-      model_singular='transfer'
-    %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+      <h1 class="fs-5 mb-0 lh-base">Transfers</h1>
+    </div>
 
     <!-- Body -->
     <div class="transfers">
 
-      <!-- Loading placeholder -->
-      <div id="loading-placeholder">
-        {% include "console/components/placeholders/loading_placeholder.html" with
-          height='326px'
-          width='100%'
-          only
-        %}
-      </div>
+      <!-- Tabs -->
+      {% include "console/components/forms/form_tabs.html" with
+        model="transfers"
+      %}
 
-      <!-- No-data Placeholder -->
-      <div id="data-placeholder" class="d-none">
-        {% include "console/components/placeholders/placeholder.html" with
-          placeholder=transfers.placeholder
-          only
+      <!-- Logs -->
+      {% if section == 'logs' %}
+        {% include "console/pages/settings/logs/logs.html" with
+          model='transfers'
+          model_singular='transfer'
+          organizations=organizations
+          section=section
+          user=user
         %}
-      </div>
 
-      <!-- AG Grid Table -->
-      <div id="data-table" class="d-none">
-        <!-- TODO: Advanced search -->
-        <div
-          id="transfers-table"
-          class="ag-theme-alpine-dark"
-          style="height: 326px; width:100%;"
-        ></div>
-      </div>
+      <!-- Files -->
+      {% elif section == 'files' %}
+        {% include "console/pages/settings/files/files.html" with
+          model='transfers'
+          model_singular='transfer'
+          organizations=organizations
+          section=section
+          user=user
+        %}
+
+      <!-- Table -->
+      {% else %}
+
+        <!-- Options -->
+        {% include "console/components/tables/simple_table_options.html" with
+          model='transfers'
+          model_singular='transfer'
+        %}
+
+        <!-- Loading placeholder -->
+        <div id="loading-placeholder">
+          {% include "console/components/placeholders/loading_placeholder.html" with
+            height='326px'
+            width='100%'
+            only
+          %}
+        </div>
+
+        <!-- No-data Placeholder -->
+        <div id="data-placeholder" class="d-none">
+          {% include "console/components/placeholders/placeholder.html" with
+            placeholder=transfers.placeholder
+            only
+          %}
+        </div>
+
+        <!-- AG Grid Table -->
+        <div id="data-table" class="d-none">
+          <!-- TODO: Advanced search -->
+          <div
+            id="transfers-table"
+            class="ag-theme-alpine-dark"
+            style="height: 326px; width:100%;"
+          ></div>
+        </div>
+
+      {% endif %}
 
     </div><!-- End of the body -->
 
