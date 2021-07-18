@@ -43,8 +43,8 @@
     <!-- Files page -->
     {% if unit == 'files' %}
       {% include "console/pages/settings/files/files.html" with
-        model='inventory'
-        model_singular='item'
+        model='instruments'
+        model_singular='instrument'
         organizations=organizations
         section=section
         user=user
@@ -53,8 +53,8 @@
     <!-- Logs page -->
     {% elif unit == 'logs' %}
       {% include "console/pages/settings/logs/logs.html" with
-        model='inventory'
-        model_singular='item'
+        model='instruments'
+        model_singular='instrument'
         organizations=organizations
         section=section
         user=user
@@ -73,20 +73,14 @@
         export=id
       %}
 
-      <!-- Fields -->
+      <!-- Form -->
       <div class="mb-4 px-3">
-
-        <!-- Form -->
         <form id="instrument-form">
-
-          <!-- Dynamic fields -->
           {% include "console/components/forms/dynamic_form.html" with
-            fields=instruments.fields
+            fields=data_model.fields
           %}
-
         </form>
-
-      </div><!-- End of fields -->
+      </div>
 
       <!-- TODO: Try to implement add analytes with AG-Grid table -->
       

@@ -65,9 +65,9 @@ material = {
         "fields": [
             {"key": "area_id", "label": "Area ID"},
             {"key": "name", "label": "Name"},
-            {"key": "area_type", "label": "Area Type"},
-            {"key": "area_type_id", "label": "Area Type ID"},
-            {"key": "external_id", "label": "External ID"},
+            {"key": "area_type", "label": "Area Type", "type": "select", "options": [{"key": "Default", "label": "Default"}, {"key": "Planting", "label": "Planting"}, {"key": "Packing", "label": "Packing"}], "selected": "Default"},
+            # {"key": "area_type_id", "label": "Area Type ID", "type": "select", "options": [{"key": "1", "label": "1"}, {"key": "2", "label": "2"}, {"key": "3", "label": "3"}], "selected": "1"},
+            # {"key": "external_id", "label": "External ID"},
             {"key": "active", "label": "Active", "type": "bool"},
             {"key": "quarantine", "label": "Quarantine", "type": "bool"},
         ],

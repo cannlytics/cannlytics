@@ -69,20 +69,14 @@
       export=id
     %}
 
-    <!-- Fields -->
+    <!-- Form -->
     <div class="mb-4 px-3">
-
-      <!-- Form -->
       <form id="project-form">
-
-        <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
-          fields=projects.fields
+          fields=data_model.fields
         %}
-
       </form>
-
-    </div><!-- End of fields -->
+    </div>
 
   <!-- TODO: Try to implement add samples with AG-Grid table -->
 

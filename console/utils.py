@@ -103,5 +103,4 @@ def get_user_context(request, context):
         context['user'] = {**claims, **user_data}
         if organizations:
             context = get_model_context(context, organizations[0]['organization_id'])
-            print('Data model:', context['data_model'])
     return context

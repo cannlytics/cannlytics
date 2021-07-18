@@ -13,12 +13,6 @@ TODO:
 """
 from cannlytics.firebase import get_document, update_document
 
-def approve_coa():
-    """
-    Creates a certificate of analysis.
-    """
-
-    return NotImplementedError
 
 
 def create_coa():
@@ -104,6 +98,15 @@ def merge_coas():
     # Create short link.
     # Create QR code.
     # Re-upload the PDF.
+    return NotImplementedError
+
+
+
+def approve_coa():
+    """
+    Creates a certificate of analysis.
+    """
+
     return NotImplementedError
 
 

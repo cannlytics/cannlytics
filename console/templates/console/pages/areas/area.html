@@ -35,8 +35,8 @@
     <!-- Files page -->
     {% if unit == 'files' %}
       {% include "console/pages/settings/files/files.html" with
-        model='inventory'
-        model_singular='item'
+        model='areas'
+        model_singular='area'
         organizations=organizations
         section=section
         user=user
@@ -45,8 +45,8 @@
     <!-- Logs page -->
     {% elif unit == 'logs' %}
       {% include "console/pages/settings/logs/logs.html" with
-        model='inventory'
-        model_singular='item'
+        model='areas'
+        model_singular='area'
         organizations=organizations
         section=section
         user=user
@@ -73,7 +73,7 @@
 
           <!-- Dynamic fields -->
           {% include "console/components/forms/dynamic_form.html" with
-            fields=areas.fields
+            fields=data_model.fields
           %}
 
           <!-- TODO: Show additional fields (traceability location fields) -->

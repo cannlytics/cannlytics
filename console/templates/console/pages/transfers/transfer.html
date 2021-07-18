@@ -69,7 +69,7 @@
       <div class="mb-4 px-3">
         <form id="transfer-form">
           {% include "console/components/forms/dynamic_form.html" with
-            fields=transfers.fields
+            fields=data_model.fields
           %}
           <!-- TODO: Show additional fields (traceability fields) -->
           {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}

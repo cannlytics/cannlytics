@@ -78,7 +78,7 @@
     <div class="mb-4 px-3">
       <form id="result-form">
         {% include "console/components/forms/dynamic_form.html" with
-          fields=results.fields
+          fields=data_model.fields
         %}
         <!-- TODO: Show additional fields (traceability fields) -->
         {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}

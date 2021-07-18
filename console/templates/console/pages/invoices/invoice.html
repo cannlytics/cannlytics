@@ -35,24 +35,17 @@
       export=id
     %}
 
-  <!-- Fields -->
+    <!-- Form -->
     <div class="mb-4 px-3">
-
-      <!-- Form -->
       <form id="invoices-form">
-
-        <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
-          fields=invoices.fields
+          fields=data_model.fields
         %}
-
       </form>
-
-    </div><!-- End of fields -->
+    </div>
 
     <!-- TODO: Try to implement add analytes with AG-Grid table -->
     
-
     <!-- Danger zone (delete) -->
     {% if id and id != 'new' %}
       {% include "console/components/forms/delete_option.html" with
@@ -73,7 +66,7 @@
     cannlytics.ui.viewObject('invoice');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}

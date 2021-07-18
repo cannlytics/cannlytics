@@ -67,7 +67,7 @@
     <div class="mb-4 px-3">
       <form id="item-form">
         {% include "console/components/forms/dynamic_form.html" with
-          fields=inventory.fields
+          fields=data_model.fields
         %}
         <!-- TODO: Show additional fields (traceability fields) -->
         {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}

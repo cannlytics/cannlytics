@@ -129,24 +129,28 @@
 
     <!-- Select (select + options + selected) | Select Multiple (select + multiple) -->
     {% elif field.type == 'select' %}
-    <div class="col-md-3">
-      <label class="form-label">{{ field.label }}</label>
-      <select
-        name="{{ field.key }}"
-        class="form-select form-select-sm"
-        aria-label="{{ field.label }}"
-        {% if field.multiple %}multiple{% endif %}
-        {% if field.disabled or disabled %}disabled{% endif %}
-      >
-        {% for option in field.options %}
-          <option
-            value="{{ option.key }}"
-            {% if option.key == field.selected %}selected{% endif %}
-          >
-            {{ option.name }}
-          </option>
-        {% endfor %}
-      </select>
+    <div class="row mb-3">
+      <label class="col-sm-3 col-form-label col-form-label-sm">
+        {{ field.label }}
+      </label>
+      <div class="col-sm-9">
+        <select
+          name="{{ field.key }}"
+          class="form-select form-select-sm {{ field.class }}"
+          aria-label="{{ field.label }}"
+          {% if field.multiple %}multiple{% endif %}
+          {% if field.disabled or disabled %}disabled{% endif %}
+        >
+          {% for option in field.options %}
+            <option
+              value="{{ option.key }}"
+              {% if option.key == field.selected %}selected{% endif %}
+            >
+              {{ option.label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
 
     <!-- TODO: Handle numbers (number) | Do integers (int) need to be handled differently? -->
