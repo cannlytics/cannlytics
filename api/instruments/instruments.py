@@ -24,7 +24,7 @@ def instruments(request, format=None, instrument_id=None):
     model_id = instrument_id
     model_type = 'instruments'
     model_type_singular = 'instrument'
-    claims = auth.verify_session(request)
+    claims = auth.authenticate_request(request)
     try:
         uid = claims['uid']
         owner = claims.get('owner', [])
@@ -38,7 +38,7 @@ def instruments(request, format=None, instrument_id=None):
     # Authorize that the user can work with the data.
     organization_id = request.query_params.get('organization_id')
     if organization_id not in authorized_ids:
-        message = f'Your must be an owner, quality assurance, or a team member of this organization to manage {model_type}.'
+        message = f'Your must be an owner, quality assurance, or a team member of this organization to manage {model_type}. Please be ensure to include a organization_id parameter in your query.'
         return Response({'error': True, 'message': message}, status=403)
 
     # GET data.

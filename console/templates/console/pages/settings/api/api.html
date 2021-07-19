@@ -4,14 +4,17 @@
   API Settings | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/9/2021
-  Updated: 5/12/2021
+  Updated: 7/19/2021
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block title %}API | Cannlytics {% endblock title %}
 {% block console_css %}
+
+  <!-- Bootstrap Datepicker -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
+
 {% endblock console_css %}
 {% block console_body %}
 
@@ -42,7 +45,7 @@
         <!-- Table -->
 
           <!-- TODO: API key management -->
-          <div id="key-table" style="height:500px; width:100%;" class="ag-theme-alpine"></div>
+          <div id="key-table" style="height:350px; width:100%;" class="ag-theme-alpine"></div>
 
       </div><!-- End of column -->
 
@@ -74,7 +77,7 @@
               <div class="row mb-3">
                 <label
                   for="input-key-name"
-                  class="col-sm-3 col-form-label col-form-label-sm fs-6 pe-2 text-dark text-no-wrap"
+                  class="col-sm-3 col-form-label col-form-label-sm pe-2 text-dark text-no-wrap"
                 >
                   Key name
                 </label>
@@ -91,7 +94,7 @@
               <div class="row mb-3">
                 <label
                   for="input-expiration-at"
-                  class="col-sm-3 col-form-label col-form-label-sm fs-6 pe-2 text-dark text-no-wrap"
+                  class="col-sm-3 col-form-label col-form-label-sm pe-2 text-dark text-no-wrap"
                 >
                   Expiration
                 </label>
@@ -109,7 +112,7 @@
               <div class="row mb-3">
                 <label
                   for="input-permissions"
-                  class="col-sm-3 col-form-label col-form-label-sm fs-6 pe-2 text-dark text-no-wrap"
+                  class="col-sm-3 col-form-label col-form-label-sm pe-2 text-dark text-no-wrap"
                 >
                   Permissions
                 </label>
@@ -133,7 +136,7 @@
             <!-- Create button -->
             <div class="d-flex justify-content-end">
               <button
-                class="btn btn-sm btn-light text-dark me-2"
+                class="btn btn-sm btn-sm-light text-dark me-2"
                 onclick="hideNewKeyForm()"
               >
                 Cancel
@@ -154,39 +157,54 @@
           </div><!-- End of fields -->
         </div><!-- End of create key card -->
 
-        <!-- TODO: Key created success card -->
-        {% comment %} <p class="fs-6 text-secondary">
-          <small>
-            We strongly recommend that you encrypt your API keys in your data store
-            and in memory when working with them, except when you need to access them
-            to interface with the API.
-            Your API key is observable if you use HTTP, so,
-            please use HTTPS when you make requests to the Cannlytics API.
-            Cannlytics does not store API keys, so, lost API keys are not recoverable
-            In this case, or given any other anomalous activity, it is recommended
-            that you void your old API key and create a new API key.
-
-          </small>
-        </p> {% endcomment %}
-
-        <!-- Key information card -->
-        <!-- TODO: Create and style key form / data block -->
+        <!-- Key created card -->
         <div
-          id="key-information-card"
-          class="card h-100 bg-transparent border-secondary rounded-3 px-2 py-2 d-none"
-          style="max-width: 375px;"
+          id="key-created-card"
+          class="card bg-transparent border-secondary rounded-3 px-2 py-2 d-none"
+          style="max-width: 600px;"
         >
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h1 class="fs-5 mb-0 lh-base">Key Information</h1>
-            <button
-              class="btn btn-sm btn-danger text-white"
-              onclick="cannlytics.settings.deleteAPIKey();"
-            >
-              Delete
-            </button>
+          <div class="simple-flex border-bottom pb-2 mb-3">
+            <h4 class="fs-5 text-dark mb-0">API Key Created</h4>
           </div>
-
-        </div><!-- End of key information -->
+          <div class="col pb-2">
+            <h1 class="fs-6 lh-base text-dark mb-0">You can store your API key now</h1>
+            <p class="fs-6 text-secondary mb-3">
+              <small>
+                Your API key is not stored in any other place and cannot be retrieved or re-created.
+                We strongly recommend that you encrypt your API keys in your data store
+                and in memory when working with them, except when you need to access them
+                to interface with the API.
+                Your API key is observable if you use HTTP, so,
+                please use HTTPS when you use the API.
+              </small>
+            </p>
+            <div class="my-3 row">
+              <label
+                for="api-key"
+                class="col-sm-1 col-form-label col-form-label-sm text-dark"
+              >
+                Key
+              </label>
+              <div class="col-sm-11">
+                <input
+                  id="api-key"
+                  type="text"
+                  readonly
+                  class="form-control form-control-sm"
+                  value="long-string-long-string-long-string-long-string"
+                >
+              </div>
+            </div>
+            <div class="d-flex justify-content-start">
+              <button
+                class="btn btn-sm btn-sm-light text-dark me-2"
+                onclick="closeKeyCreatedForm();"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
 
       </div><!-- End of options -->
 
@@ -200,16 +218,24 @@
   <script type="text/javascript" charset="utf-8">
 
     // Render the date picker.
-    $('.datepicker').datepicker({
-      format: 'mm/dd/yyyy',
-    });
+    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+
+
+    function closeKeyCreatedForm() {
+      /*
+       * Close the key created form.
+       */
+      document.getElementById('key-created-card').classList.add('d-none');
+      document.getElementById('api-key').value = '';
+      window.location.reload();
+    }
+
 
     function showNewKeyForm() {
       /*
        * Show the add new key form and hide the key information form.
        */
       document.getElementById('new-key-card').classList.remove('d-none');
-      document.getElementById('key-information-card').classList.add('d-none');
       document.getElementById('key-table-container').classList.add('d-none');
     }
 
@@ -220,7 +246,6 @@
        */
       document.getElementById('new-key-card').classList.add('d-none');
       document.getElementById('key-table-container').classList.remove('d-none');
-      // document.getElementById('key-information-card').classList.remove('d-none');
     }
 
     
@@ -245,10 +270,9 @@
     // Specify the table options.
     const gridOptions = {
       columnDefs: columnDefs,
-      defaultColDef: {
-        flex: 1,
-        minWidth: 100,
-      },
+      defaultColDef: { flex: 1,  minWidth: 100 },
+      rowClass: 'app-action',
+      rowHeight: 25,
       rowSelection: 'single',
       onSelectionChanged: onSelectionChanged,
       overlayLoadingTemplate: `

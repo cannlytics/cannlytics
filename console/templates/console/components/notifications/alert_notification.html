@@ -3,13 +3,12 @@
 <!--
   Alert notification | Cannlytics Console
   Created: 6/11/2021
-  Updated: 6/11/2021
-  FIXME: Color on dark
+  Updated: 7/18/2021
 -->
 {% load icon %}
 <div class="alert alert-info d-flex mt-3 mb-0" role="alert">
   {% icon 'alert-triangle' height="16" width="16"%} &nbsp;
-  <small>{{ message }}</small> &nbsp;
-  <a href="{{ link }}">{{ action }}</a>.
+  <small style="#1a1a1a !important">{{ message }}&nbsp;
+  <a href="{{ link }}">{{ action }}</a></small> .
 </div>
 </html>

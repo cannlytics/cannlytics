@@ -18,8 +18,10 @@ export const apiSettings = {
     const data = serializeForm('new-api-key-form');
     ui.showLoadingButton('create-api-key-button');
     apiRequest('/api/auth/create-key', data).then((response) => {
-      // Optional: Add new key to the table and show the table without reloading!
-      window.location.reload(); 
+      console.log('Response:', response);
+      document.getElementById('new-key-card').classList.add('d-none');
+      document.getElementById('key-created-card').classList.remove('d-none');
+      document.getElementById('api-key').value = response.api_key;
     }).finally(() => {
       ui.hideLoadingButton('create-api-key-button');
     });
