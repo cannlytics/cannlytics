@@ -1,7 +1,7 @@
 """
 Samples Views | Cannlytics API
 Created: 4/21/2021
-Updated: 7/7/2021
+Updated: 7/19/2021
 
 API to interface with laboratory samples.
 """
@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from api.auth import auth
+from api.auth.auth import authenticate_request
 from api.api import get_objects, update_object, delete_object
 
 
@@ -24,7 +24,7 @@ def samples(request, format=None, sample_id=None):
     model_id = sample_id
     model_type = 'samples'
     model_type_singular = 'sample'
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     try:
         uid = claims['uid']
         owner = claims.get('owner', [])

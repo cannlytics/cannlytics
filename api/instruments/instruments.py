@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from api.auth import auth
+from api.auth.auth import authenticate_request
 from api.api import get_objects, update_object, delete_object
 
 
@@ -24,7 +24,7 @@ def instruments(request, format=None, instrument_id=None):
     model_id = instrument_id
     model_type = 'instruments'
     model_type_singular = 'instrument'
-    claims = auth.authenticate_request(request)
+    claims = authenticate_request(request)
     try:
         uid = claims['uid']
         owner = claims.get('owner', [])

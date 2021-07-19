@@ -84,6 +84,6 @@ data = {
     'instrument_id': 'TEST',
 }
 url = f'{BASE}/instruments?organization_id={ORG_ID}'
-response = requests.post(url, json=data, headers=HEADERS)
+response = requests.delete(url, json=data, headers=HEADERS)
 assert response.status_code == 200
 print('Deleted instrument:', response.json()['data'])

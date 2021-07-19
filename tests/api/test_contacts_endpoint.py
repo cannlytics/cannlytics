@@ -1,5 +1,5 @@
 """
-Areas API Endpoint Test | Cannlytics API
+Test Contacts API Endpoint | Cannlytics API
 
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
@@ -10,9 +10,6 @@ License: MIT License <https://opensource.org/licenses/MIT>
 import os
 import requests
 from dotenv import load_dotenv
-
-# Define the endpoint.
-ENDPOINT = 'areas'
 
 # Test using development server.
 BASE = 'http://127.0.0.1:8000/api'
@@ -33,15 +30,26 @@ HEADERS = {
 # Identify the organization that you are working with.
 ORG_ID = 'test-company'
 
+# Define the endpoint.
+ENDPOINT = 'contacts'
+
 #------------------------------------------------------------------------------
-# Create an analyte.
+# Create a contact.
 #------------------------------------------------------------------------------
 data = {
-    'active': True,
-    'area_id': 'area-51',
-    'area_type': 'Default',
-    'name': 'Area 51',
-    'quarantine': True
+    'address': '',
+    'city': '',
+    'contact_id': 'TEST',
+    'county': '',
+    'email': '',
+    'latitude': '',
+    'longitude': '',
+    'organization': 'Cannlytics Test Contact',
+    'phone': '',
+    'state': '',
+    'street': '',
+    'website': '',
+    'zip_code': ''
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -49,7 +57,7 @@ assert response.status_code == 200
 print('Created:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Get analyte.
+# Get contacts.
 #------------------------------------------------------------------------------
 organization_id = 'test-company'
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
@@ -59,11 +67,12 @@ data = response.json()['data']
 print('Found:', len(data))
 
 #------------------------------------------------------------------------------
-# Update an analyte.
+# Update a contact.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
-    'active': False,
+    'contact_id': 'TEST',
+    'city': 'Tulsa',
+    'state': 'OK',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -71,10 +80,10 @@ assert response.status_code == 200
 print('Updated:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Delete an analyte.
+# Delete a contact.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
+    'contact_id': 'TEST',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.delete(url, json=data, headers=HEADERS)

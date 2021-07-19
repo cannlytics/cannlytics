@@ -1,7 +1,7 @@
 """
 Traceability API Views | Cannlytics API
 Created: 6/13/2021
-Updated: 6/14/2021
+Updated: 7/19/2021
 Description: API to interface with the Metrc API.
 """
 
@@ -23,7 +23,7 @@ from cannlytics.firebase import (
     update_document
 )
 from cannlytics.traceability.metrc import authorize
-from api.auth import auth #pylint: disable=import-error
+from api.auth.auth import authenticate_request #pylint: disable=import-error
 
 
 AUTH_ERROR = 'Authentication failed. Please login to the console or \
@@ -69,7 +69,7 @@ def employees(request):
     """Get employees for a given license number."""
 
     # Authenticate the user.
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     if not claims:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
     _, project_id = google.auth.default()
@@ -92,7 +92,7 @@ def items(request):
     """Get, update, and delete items for a given license number."""
 
     # Authenticate the user.
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     if not claims:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
 
@@ -125,7 +125,7 @@ def lab_tests(request):
     """Get lab tests for a given license number."""
 
     # Authenticate the user.
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     if not claims:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
     _, project_id = google.auth.default()
@@ -154,7 +154,7 @@ def locations(request):
     """Get, update, and delete locations for a given license number."""
 
     # Authenticate the user.
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     if not claims:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
 
@@ -187,7 +187,7 @@ def packages(request):
     """Get, update, and delete packages for a given license number."""
 
     # Authenticate the user.
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     if not claims:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
 
@@ -223,7 +223,7 @@ def strains(request):
     """Get, update, and delete strains for a given license number."""
 
     # Authenticate the user.
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     if not claims:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
 
@@ -255,7 +255,7 @@ def transfers(request):
     """Get, update, and delete transfers for a given license number."""
 
     # Authenticate the user.
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     if not claims:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
 
@@ -299,7 +299,7 @@ def delete_license(request, *args, **argv): #pylint: disable=unused-argument
 
     # Authenticate the user.
     _, project_id = google.auth.default()
-    user_claims = auth.verify_session(request)
+    user_claims = authenticate_request(request)
     data = loads(request.body.decode('utf-8'))
     deletion_reason = data.get('deletion_reason', 'No deletion reason.')
     license_number = request.query_params.get('license')

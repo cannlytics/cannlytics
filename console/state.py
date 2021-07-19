@@ -102,7 +102,7 @@ material = {
             {"key": "contact_id", "label": "Contact ID"},
             {"key": "organization", "label": "Organization"},
             {"key": "email", "label": "Email", "type": "email"},
-            {"key": "Phone", "label": "Phone Number", "type": "tel"},
+            {"key": "phone", "label": "Phone Number", "type": "tel"},
             {"key": "website", "label": "Website"},
             {"key": "address", "label": "Address"},
             {"key": "street", "label": "Street"},

@@ -1,5 +1,5 @@
 """
-Areas API Endpoint Test | Cannlytics API
+Transfers API Endpoint Test | Cannlytics API
 
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
@@ -12,7 +12,7 @@ import requests
 from dotenv import load_dotenv
 
 # Define the endpoint.
-ENDPOINT = 'areas'
+ENDPOINT = 'transfers'
 
 # Test using development server.
 BASE = 'http://127.0.0.1:8000/api'
@@ -34,14 +34,22 @@ HEADERS = {
 ORG_ID = 'test-company'
 
 #------------------------------------------------------------------------------
-# Create an analyte.
+# Create a transfer.
 #------------------------------------------------------------------------------
 data = {
-    'active': True,
-    'area_id': 'area-51',
-    'area_type': 'Default',
-    'name': 'Area 51',
-    'quarantine': True
+    'arrived_at': '',
+    'arrived_at_time': '',
+    'departed_at': '',
+    'departed_at_time': '',
+    'receiver': '',
+    'receiver_org_id': '',
+    'sample_count': '',
+    'sender': '',
+    'sender_org_id': '',
+    'status': '',
+    'transfer_id': 'heart-of-gold',
+    'transfer_type': 'Delivery',
+    'transporter': '',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -49,7 +57,7 @@ assert response.status_code == 200
 print('Created:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Get analyte.
+# Get transfers.
 #------------------------------------------------------------------------------
 organization_id = 'test-company'
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
@@ -59,11 +67,12 @@ data = response.json()['data']
 print('Found:', len(data))
 
 #------------------------------------------------------------------------------
-# Update an analyte.
+# Update a transfer.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
-    'active': False,
+    'transfer_id': 'heart-of-gold',
+    'transporter': 'Wyley',
+    'notes': "He's a good guy."
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -71,10 +80,10 @@ assert response.status_code == 200
 print('Updated:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Delete an analyte.
+# Delete a transfer.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
+    'transfer_id': 'heart-of-gold',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.delete(url, json=data, headers=HEADERS)

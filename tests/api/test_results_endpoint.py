@@ -1,5 +1,5 @@
 """
-Areas API Endpoint Test | Cannlytics API
+Results API Endpoint Test | Cannlytics API
 
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
@@ -12,7 +12,7 @@ import requests
 from dotenv import load_dotenv
 
 # Define the endpoint.
-ENDPOINT = 'areas'
+ENDPOINT = 'results'
 
 # Test using development server.
 BASE = 'http://127.0.0.1:8000/api'
@@ -34,14 +34,33 @@ HEADERS = {
 ORG_ID = 'test-company'
 
 #------------------------------------------------------------------------------
-# Create an analyte.
+# Create a result.
 #------------------------------------------------------------------------------
 data = {
-    'active': True,
-    'area_id': 'area-51',
-    'area_type': 'Default',
-    'name': 'Area 51',
-    'quarantine': True
+    'approved_at': '',
+    'approved_at_time': '',
+    'approved_by': '',
+    'non_mandatory': 'on',
+    'notes': '',
+    'package_id': '',
+    'package_label': '',
+    'product_name': '',
+    'released': 'on',
+    'released_at': '',
+    'released_at_time': '',
+    'result': '',
+    'result_id': 'RESULT-1',
+    'reviewed_at': '',
+    'reviewed_at_time': '',
+    'reviewed_by': '',
+    'sample_id': '',
+    'sample_type': '',
+    'status': '',
+    'tested_at': '',
+    'tested_at_time': '',
+    'units': '',
+    'voided_at': '',
+    'voided_at_time': ''
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -49,7 +68,7 @@ assert response.status_code == 200
 print('Created:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Get analyte.
+# Get results.
 #------------------------------------------------------------------------------
 organization_id = 'test-company'
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
@@ -59,11 +78,11 @@ data = response.json()['data']
 print('Found:', len(data))
 
 #------------------------------------------------------------------------------
-# Update an analyte.
+# Update a result.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
-    'active': False,
+    'result_id': 'RESULT-1',
+    'notes': 'Now is better than never!',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -71,10 +90,10 @@ assert response.status_code == 200
 print('Updated:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Delete an analyte.
+# Delete a result.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
+    'result_id': 'RESULT-1',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.delete(url, json=data, headers=HEADERS)

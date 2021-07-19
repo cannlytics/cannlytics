@@ -1,7 +1,7 @@
 """
 Users Views | Cannlytics API
 Created: 1/22/2021
-Updated: 6/10/2021
+Updated: 7/19/2021
 
 API interface for Cannlytics users to manage their personal information.
 """
@@ -13,13 +13,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 # Internal imports
+from api.auth.auth import authenticate_request
 from cannlytics.firebase import (
     create_log,
     get_document,
     update_document,
 )
 from cannlytics.utils import utils
-from api.auth import auth
 
 
 #-----------------------------------------------------------------------
@@ -33,7 +33,7 @@ def users(request):
     try:
 
         # Authenticate the user.
-        claims = auth.verify_session(request)
+        claims = authenticate_request(request)
 
         # Get user data.
         if request.method == 'GET':

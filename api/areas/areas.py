@@ -15,7 +15,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from api.auth import auth
+from api.auth.auth import authenticate_request
 from api.api import get_objects, update_object, delete_object
 
 @api_view(['GET', 'POST', 'DELETE'])
@@ -26,7 +26,7 @@ def areas(request, format=None, area_id=None):
     model_id = area_id
     model_type = 'areas'
     model_type_singular = 'area'
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     try:
         uid = claims['uid']
         owner = claims.get('owner', [])

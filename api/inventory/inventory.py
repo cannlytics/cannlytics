@@ -15,7 +15,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from api.auth import auth
+from api.auth.auth import authenticate_request
 from cannlytics.firebase import (
     create_log,
     delete_document,
@@ -32,7 +32,7 @@ def inventory(request, format=None, inventory_id=None):
     # Initialize and authenticate.
     model_type = 'inventory'
     model_type_singular = 'item'
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     try:
         uid = claims['uid']
         owner = claims.get('owner', [])

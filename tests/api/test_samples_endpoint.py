@@ -1,5 +1,5 @@
 """
-Areas API Endpoint Test | Cannlytics API
+Samples API Endpoint Test | Cannlytics API
 
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
@@ -12,7 +12,7 @@ import requests
 from dotenv import load_dotenv
 
 # Define the endpoint.
-ENDPOINT = 'areas'
+ENDPOINT = 'samples'
 
 # Test using development server.
 BASE = 'http://127.0.0.1:8000/api'
@@ -34,14 +34,20 @@ HEADERS = {
 ORG_ID = 'test-company'
 
 #------------------------------------------------------------------------------
-# Create an analyte.
+# Create an inventory item.
 #------------------------------------------------------------------------------
 data = {
-    'active': True,
-    'area_id': 'area-51',
-    'area_type': 'Default',
-    'name': 'Area 51',
-    'quarantine': True
+    'batch_id': '',
+    'coa_url': '',
+    'created_at': '07/19/2021',
+    'created_at_time': '',
+    'created_by': 'KLS',
+    'notes': '',
+    'project_id': 'TEST',
+    'sample_id': 'SAMPLE-1',
+    'updated_at': '07/19/2021',
+    'updated_at_time': '',
+    'updated_by': ''
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -49,7 +55,7 @@ assert response.status_code == 200
 print('Created:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Get analyte.
+# Get inventory.
 #------------------------------------------------------------------------------
 organization_id = 'test-company'
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
@@ -59,11 +65,11 @@ data = response.json()['data']
 print('Found:', len(data))
 
 #------------------------------------------------------------------------------
-# Update an analyte.
+# Update an inventory item.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
-    'active': False,
+    'sample_id': 'SAMPLE-1',
+    'batch_id': 'Night Crew Batch 86',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -71,10 +77,10 @@ assert response.status_code == 200
 print('Updated:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Delete an analyte.
+# Delete an inventory item.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
+    'sample_id': 'SAMPLE-1',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.delete(url, json=data, headers=HEADERS)

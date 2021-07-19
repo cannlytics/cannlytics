@@ -98,6 +98,7 @@ def update_object(request, claims, model_type, model_type_singular, organization
     Returns:
         (list): A list of dictionaries of the data posted.
     """
+    # FIXME: Handle missing model ID.
     data = loads(request.body.decode('utf-8'))
     if isinstance(data, dict):
         doc_id = data[f'{model_type_singular}_id']

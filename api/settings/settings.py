@@ -1,29 +1,18 @@
 """
 Settings | Cannlytics API
 Created: 1/22/2021
-Updated: 4/27/2021
+Updated: 7/19/2021
 Description: API to interface with a user's or organization's settings.
 """
 # pylint:disable=line-too-long
 
-# Standard imports
-from json import loads
-
 # External imports
-from cannlytics.utils.utils import get_timestamp
-from django.core.mail import send_mail
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from cannlytics.firebase import create_log, get_collection
-from api.auth import auth
-from api.api import get_objects, update_object, delete_object
-from console.settings import (
-    DEFAULT_FROM_EMAIL,
-    LIST_OF_EMAIL_RECIPIENTS,
-)
+from api.auth.auth import authenticate_request
+from api.api import get_objects, update_object
 
 #-----------------------------------------------------------------------
 # Logs
@@ -37,7 +26,7 @@ def logs(request, format=None, log_id=None):
     model_id = log_id
     model_type = 'logs'
     model_type_singular = 'log'
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     try:
         uid = claims['uid']
         owner = claims.get('owner', [])

@@ -1,7 +1,7 @@
 """
 Organizations API Views | Cannlytics API
 Created: 4/25/2021
-Updated: 7/5/2021
+Updated: 7/19/2021
 Description: API to interface with organizations.
 """
 
@@ -28,7 +28,7 @@ from cannlytics.firebase import (
     update_document,
 )
 from cannlytics.traceability.metrc import authorize
-from api.auth import auth #pylint: disable=import-error
+from api.auth.auth import authenticate_request #pylint: disable=import-error
 
 
 @api_view(['GET'])
@@ -36,7 +36,7 @@ def organization_team(request, format=None, organization_id=None, user_id=None):
     """Get team member data for an organization, given an authenticated
     request from a member of the organization.
     """
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     print('Claims:', claims)
     try:
         if organization_id in claims['team']:
@@ -76,7 +76,7 @@ def organizations(request, format=None, organization_id=None):
     # Get endpoint variables.
     model_type = 'organizations'
     _, project_id = google.auth.default()
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     print('Claims:', claims)
     uid = claims['uid']
     # custom_claims = get_custom_claims(uid)
@@ -254,7 +254,7 @@ def employees(request):
     """
 
     # Authenticate the user.
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     if not claims:
         message = 'Authentication failed. Please use the console or provide a valid API key.'
         return Response({'error': True, 'message': message}, status=403)
@@ -323,7 +323,7 @@ def join_organization(request):
     """Send the owner of an organization a request for a user to join."""
 
     # Identify the user.
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     uid = claims['uid']
     user_email = claims['email']
     post_data = loads(request.body.decode('utf-8'))

@@ -1,5 +1,5 @@
 """
-Areas API Endpoint Test | Cannlytics API
+Projects API Endpoint Test | Cannlytics API
 
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
@@ -12,7 +12,7 @@ import requests
 from dotenv import load_dotenv
 
 # Define the endpoint.
-ENDPOINT = 'areas'
+ENDPOINT = 'projects'
 
 # Test using development server.
 BASE = 'http://127.0.0.1:8000/api'
@@ -34,14 +34,18 @@ HEADERS = {
 ORG_ID = 'test-company'
 
 #------------------------------------------------------------------------------
-# Create an analyte.
+# Create a project.
 #------------------------------------------------------------------------------
 data = {
-    'active': True,
-    'area_id': 'area-51',
-    'area_type': 'Default',
-    'name': 'Area 51',
-    'quarantine': True
+    'created_at': '07/19/2021',
+    'created_at_time': '16:20',
+    'created_by': 'KLS',
+    'notes': '',
+    'organization': 'Cannlytics',
+    'project_id': 'TEST',
+    'received_at': '07/19/2021',
+    'received_at_time': '4:20',
+    'transfer_ids': ''
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -49,7 +53,7 @@ assert response.status_code == 200
 print('Created:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Get analyte.
+# Get projects.
 #------------------------------------------------------------------------------
 organization_id = 'test-company'
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
@@ -59,11 +63,11 @@ data = response.json()['data']
 print('Found:', len(data))
 
 #------------------------------------------------------------------------------
-# Update an analyte.
+# Update a project.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
-    'active': False,
+    'project_id': 'TEST',
+    'notes': 'Too cool for school.',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -71,10 +75,10 @@ assert response.status_code == 200
 print('Updated:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Delete an analyte.
+# Delete a project.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
+    'project_id': 'TEST',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.delete(url, json=data, headers=HEADERS)

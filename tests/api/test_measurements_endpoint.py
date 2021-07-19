@@ -1,5 +1,5 @@
 """
-Areas API Endpoint Test | Cannlytics API
+Measurements API Endpoint Test | Cannlytics API
 
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
@@ -12,7 +12,7 @@ import requests
 from dotenv import load_dotenv
 
 # Define the endpoint.
-ENDPOINT = 'areas'
+ENDPOINT = 'measurements'
 
 # Test using development server.
 BASE = 'http://127.0.0.1:8000/api'
@@ -37,11 +37,25 @@ ORG_ID = 'test-company'
 # Create an analyte.
 #------------------------------------------------------------------------------
 data = {
-    'active': True,
-    'area_id': 'area-51',
-    'area_type': 'Default',
-    'name': 'Area 51',
-    'quarantine': True
+    'analysis': '',
+    'analysis_id': '',
+    'analyte': '',
+    'analyte_id': '',
+    'created_at': '',
+    'created_at_time': '',
+    'created_by': '',
+    'dilution_factor': '',
+    'instrument': '',
+    'instrument_id': '',
+    'measurement': '',
+    'measurement_id': 'M-5',
+    'measurement_units': '',
+    'notes': '',
+    'product_name': '',
+    'sample_id': 'S2',
+    'sample_type': '',
+    'sample_weight': '',
+    'units': ''
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -62,8 +76,8 @@ print('Found:', len(data))
 # Update an analyte.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
-    'active': False,
+    'measurement_id': 'M-5',
+    'notes': 'Be careful what you measure.',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.post(url, json=data, headers=HEADERS)
@@ -74,7 +88,7 @@ print('Updated:', response.json()['data'])
 # Delete an analyte.
 #------------------------------------------------------------------------------
 data = {
-    'area_id': 'area-51',
+    'measurement_id': 'M-5',
 }
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
 response = requests.delete(url, json=data, headers=HEADERS)

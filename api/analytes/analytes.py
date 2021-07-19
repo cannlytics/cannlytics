@@ -15,7 +15,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from api.auth import auth
+from api.auth.auth import authenticate_request
 from cannlytics.firebase import (
     create_log,
     delete_document,
@@ -31,8 +31,7 @@ def analytes(request, format=None, analyte_id=None):
     model_id = analyte_id
     model_type = 'analytes'
     model_type_singular = 'analyte'
-    claims = auth.verify_session(request)
-    print('Verified claims:', claims)
+    claims = authenticate_request(request)
     try:
         uid = claims['uid']
         owner = claims.get('owner', [])

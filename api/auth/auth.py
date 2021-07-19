@@ -1,7 +1,7 @@
 """
 Authentication Views | Cannlytics API
 Created: 1/22/2021
-Updated: 6/21/2021
+Updated: 7/19/2021
 
 Authentication mechanisms for the Cannlytics API, including API key
 utility functions, request authentication and verification helpers,
@@ -34,13 +34,11 @@ from cannlytics.firebase import (
     update_document,
     upload_file,
     verify_session_cookie,
-    verify_token,
 )
 
 # Initialize Firebase.
 try:
     initialize_firebase()
-    # BUCKET_NAME = environ.get('FIREBASE_STORAGE_BUCKET')
     BUCKET_NAME = environ.get('FIREBASE_STORAGE_BUCKET', None)
 except ValueError:
     pass
@@ -60,29 +58,16 @@ def authenticate_request(request):
             the user's `uid`.
     """
     claims = {}
-    # try:
-    #     authorization = request.META['HTTP_AUTHORIZATION']
-    #     token = authorization.split(' ').pop()
-    #     claims = verify_token(token)
-    # except:
-    #     try:
-    #         claims = get_user_from_api_key(token)
-    #     except:
-    #         pass
-    # return claims
     try:
         session_cookie = request.COOKIES.get('__session')
         claims = verify_session_cookie(session_cookie, check_revoked=True)
-        print('Found user through session:', claims)
     except:
-        # try:
-        authorization = request.META['HTTP_AUTHORIZATION']
-        print('Authorization:', authorization)
-        token = authorization.split(' ').pop()
-        claims = get_user_from_api_key(token)
-        print('Found user from token:', claims)
-        # except:
-        #     claims = {}
+        try:
+            authorization = request.META['HTTP_AUTHORIZATION']
+            key = authorization.split(' ').pop()
+            claims = get_user_from_api_key(key)
+        except:
+            claims = {}
     return claims
 
 
@@ -205,14 +190,11 @@ def get_user_from_api_key(api_key):
         (dict): Any user data found, with an empty dictionary if there
             is no user found.
     """
-    print('API Key:', api_key)
     app_secret = get_document('admin/api')['app_secret_key']
     code = sha256_hmac(app_secret, api_key)
-    print('Code:', code)
     key_data = get_document(f'admin/api/api_key_hmacs/{code}')
-    print('Key Data:', key_data)
     uid = key_data['uid']
-    user_claims = get_custom_claims(uid) # FIXME:
+    user_claims = get_custom_claims(uid)
     user_claims['permissions'] = key_data['permissions']
     user_claims['uid'] = uid
     return user_claims

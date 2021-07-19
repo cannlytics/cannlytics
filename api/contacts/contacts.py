@@ -13,7 +13,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from api.auth import auth
+from api.auth.auth import authenticate_request
 from api.api import get_objects, update_object, delete_object
 
 
@@ -25,7 +25,7 @@ def contacts(request, format=None, contact_id=None):
     model_id = contact_id
     model_type = 'contacts'
     model_type_singular = 'contact'
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     try:
         uid = claims['uid']
         owner = claims.get('owner', [])
@@ -35,7 +35,7 @@ def contacts(request, format=None, contact_id=None):
     except KeyError:
         message = 'Your request was not authenticated. Ensure that you have a valid session or API key.'
         return Response({'error': True, 'message': message}, status=401)
-    
+
     # Authorize that the user can work with the data.
     organization_id = request.query_params.get('organization_id')
     if organization_id not in authorized_ids:
