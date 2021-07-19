@@ -102,16 +102,11 @@ const verifyUserToken = (token) => new Promise((resolve, reject) => {
   Firestore interface
   ----------------------------------------------------------------------------*/
 
-const getCollection = (
-  path,
-  limit=null,
-  orderBy=null,
-  desc=false,
-  filters=[],
-) => new Promise((resolve) => {
+const getCollection = (path, params) => new Promise((resolve) => {
   /*
    * Get documents from a collection in Firestore.
    */
+  const { desc, filters=[], limit, orderBy } = params;
   let ref = getReference(path);
   filters.forEach((filter) => {
     ref = ref.where(filter.key, filter.operation, filter.value);
@@ -121,13 +116,18 @@ const getCollection = (
   if (limit) ref = ref.limit(limit);
   ref.get().then((snapshot) => {
     const docs = [];
+    if (!snapshot) {
+      resolve();
+      return;
+    }
     snapshot.forEach((doc) => {
       docs.push(doc.data());
     });
     resolve(docs);
-  }).catch((error) => {
-    console.log('Error getting documents: ', error);
-  });
+  })
+  // .catch((error) => {
+  //   console.log('Error getting documents: ', error);
+  // });
 });
 
 

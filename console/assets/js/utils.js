@@ -59,12 +59,13 @@ export const apiRequest = (endpoint, data, options, idToken = null) => new Promi
   }
   fetch(window.location.origin + endpoint, init)
     .then(response => {
-      try {
-        responseData = response.json();
-        return responseData;
-      } catch(error) {
-        return response;
-      }
+      // try {
+      //   responseData = response.json();
+      //   return responseData;
+      // } catch(error) {
+      //   return response;
+      // }
+      return response.json();
     })
     .catch((error) => reject(error))
     .then((data) => resolve(data))

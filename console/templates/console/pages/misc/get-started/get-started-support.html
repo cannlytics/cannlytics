@@ -125,7 +125,7 @@
             return actions.subscription.create({ 'plan_id': planID });
           },
           onApprove: function(data, actions) {
-            var subscription = { ...data, ...{ 'plan_id': planID } };
+            var subscription = { ...data, ...response };
             cannlytics.dashboard.subscribe(subscription);
           },
           onError: function (error) {

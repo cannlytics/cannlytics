@@ -1,0 +1,151 @@
+<!doctype html>
+<html>
+<!--
+  Team Member Page | Cannlytics Console
+  Created: 7/18/2021
+  Updated: 7/18/2021
+-->
+{% load static icon %}
+{% block console_body %}
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+  <!-- Breadcrumbs -->
+  {% include "console/components/links/breadcrumbs.html" with
+    base_page='Settings'
+    base_page_url='/settings'
+    nested_page="Organization settings"
+    nested_page_url="/settings/organizations"
+    extra_page=unit
+    extra_page_url="../"
+    current_page='Team'
+  %}
+
+  <!-- Tabs -->
+  <!-- TODO: Details | Logs | Training | Files -->
+  <!-- TODO: Only show logs and training to admin and qa. -->
+
+  <!-- Title -->
+  <h1 class="fs-5 lh-base text-dark mb-0 mb-3">Team Member</h1>
+
+  <div class="row mb-3">
+
+    <!-- User image -->
+    <div class="col col-md-5 order-md-2 mx-3 mb-3">
+      <div class="border rounded mb-3" style="width:200px;">
+        <img
+          src="{% static "console/images/account/default-dark.png" %}"
+          style="width:200px;"
+          class="pe-1"
+          id="user-photo-url"
+        />
+      </div>
+    </div>
+  
+    <!-- Form -->
+    <div class="col px-4">
+      <form id="team-member-form">
+        {% include "console/components/forms/dynamic_form.html" with
+          fields=settings.user_fields
+          disabled=True
+          narrow=True
+        %}
+      </form>
+    </div>
+
+  </div>
+
+  <!-- TODO: Logs -->
+  <h1 class="fs-5 lh-base text-dark mb-0 mt-5">User Logs</h1>
+  <h2 class="fs-6 lh-base text-secondary mb-3">View activity logs for traceability and quality control.</h2>
+  <div class="bg-light p-2 my-3 w-25 text-center border border-warning text-warning" style="border-style:dashed !important;">
+    Under Development
+  </div>
+    {% comment %} {% include "console/pages/settings/logs/logs.html" with
+      model='results'
+      model_singular='result'
+      organizations=organizations
+      section=section
+      user=user
+    %} {% endcomment %}
+    
+    <!-- Loading placeholder -->
+  {% comment %} <div id="loading-placeholder">
+    {% include "console/components/placeholders/loading_placeholder.html" with
+      height='366px'
+      width='100%'
+      only
+    %}
+  </div> {% endcomment %}
+
+  <!-- No-data Placeholder -->
+  {% comment %} <div id="data-placeholder" class="d-none">
+    {% include "console/components/placeholders/table_placeholder.html" with
+      height='200px'
+      image='console/images/icons/multi-tone/documents.svg'
+      message='You can create a custom log for traceability or quality control purposes or try expanding your search.'
+      title='No logs in this period'
+      only
+    %}
+  </div> {% endcomment %}
+
+  <!-- AG Grid Table -->
+  {% comment %} <div id="data-table" class="d-none">
+    <!-- TODO: Advanced search -->
+    <div
+      id="user-logs-table"
+      class="ag-theme-alpine-dark"
+      style="height: 366px; width:100%;"
+    ></div>
+  </div> {% endcomment %}
+
+
+  <!-- TODO: Files -->
+  {% comment %} <div id="team-member-files">
+    {% include "console/pages/settings/files/files.html" with
+      model='team'
+      model_singular='team-member'
+      organizations=organizations
+      section=piece
+      user=user
+    %}
+  </div> {% endcomment %}
+  {% if unit in user.owner %}
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Files</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">Manage team member files.</h2>
+    <div class="bg-light p-2 my-3 w-25 text-center border border-warning text-warning" style="border-style:dashed !important;">
+      Under Development
+    </div>
+  {% endif %}
+
+
+  <!-- TODO: Training -->
+  {% if unit in user.owner %}
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Training</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">View team member training for operations.</h2>
+    <div class="bg-light p-2 my-3 w-25 text-center border border-warning text-warning" style="border-style:dashed !important;">
+      Under Development
+    </div>
+  {% endif %}
+
+
+</main>
+{% endblock console_body %}
+
+{% block console_js %}
+  <script>
+
+    // Get Team member data.
+    cannlytics.settings.getTeamMember('{{ organizations.0.organization_id }}', '{{  piece }}');
+
+    // Get team member logs.
+    cannlytics.settings.getTeamMemberLogs('{{ organizations.0.organization_id }}', '{{  piece }}');
+
+    // Optional: Get team member files.
+
+    // Optional: Get team member training.
+
+  </script>
+
+{% endblock console_js %}
+
+</html>

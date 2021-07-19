@@ -26,6 +26,10 @@ def import_worksheet_data(model_type):
     """A function called from Excel to import data by ID
     from Firestore into the Excel workbook."""
     book = xw.Book.caller()
+    try:
+        sheet = book.sheets('Sheet1')
+    except:
+        sheet = book.sheets.active
     
     # TODO: Show status message.
     

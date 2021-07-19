@@ -53,15 +53,25 @@ def get_page_data(kwargs, context):
         screen_data = data.get(context['screen'])
     if screen_data is None:
         return context
+    print('Screen data:', screen_data)
     documents = screen_data.get('documents')
     collections = screen_data.get('collections')
+    organizations = context.get('organizations')
+    if organizations:
+        organization_id = organizations[0]['organization_id']
     if documents:
         for item in documents:
-            context[item['name']] = get_document(item['ref'])
+            ref = item['ref']
+            ref = ref.replace('{organization_id}', organization_id)
+            print('Getting document:', ref)
+            context[item['key']] = get_document(ref)
     if collections:
         for item in collections:
-            context[item['name']] = get_collection(
-                item['ref'],
+            ref = item['ref']
+            ref = ref.replace('{organization_id}', organization_id)
+            print('Getting collection:', ref)
+            context[item['key']] = get_collection(
+                ref,
                 limit=item.get('limit'),
                 order_by=item.get('order_by'),
                 desc=item.get('desc'),

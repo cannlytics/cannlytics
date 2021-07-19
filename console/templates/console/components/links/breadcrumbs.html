@@ -8,6 +8,8 @@
     base_page
     base_page_url
     current_page
+    extra_page (optional)
+    extra_page_url (optional)
     nested_page (optional)
     nested_page_url (optional)
 -->
@@ -24,6 +26,13 @@
           <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
             <a class="action" href="{{ nested_page_url }}">
               {{ nested_page }}
+            </a>
+          </li>
+        {% endif %}
+        {% if extra_page %}
+          <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
+            <a class="action" href="{{ extra_page_url }}">
+              {{ extra_page }}
             </a>
           </li>
         {% endif %}

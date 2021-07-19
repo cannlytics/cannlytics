@@ -15,9 +15,26 @@ each organization can customize the data points that they collect.
 # pylint:disable=line-too-long
 
 # Page-specific supplementary data.
-data = {}
-collections = {}
-docs = {}
+data = {
+    "settings": {
+        "documents": [
+            {"key": "traceability_settings", "ref": "organizations/{organization_id}/organization_settings/traceability_settings"},
+        ],
+        "collections": [
+            {"key": "data_models", "ref": "organizations/{organization_id}/data_models"},
+        ],
+    }
+}
+collections = {
+    "/settings/organizations": [
+        {"key": "data_models", "ref": "organizations/{organization_id}/data_models"},
+    ]
+}
+docs = {
+    "/settings/organizations": [
+        {"key": "traceability_settings", "ref": "organizations/{organization_id}/organization_settings/traceability_settings"},
+    ],
+}
 
 # Page-specific context.
 material = {
@@ -902,9 +919,9 @@ layout = {
     },
 }
 
-material["get-started"] = {
-    "user": {"fields": material["settings"]["user_fields"]},
-    "organization": {"fields": material["settings"]["organizations"]["fields"]},
+material['get-started'] = {
+    "user": {"fields": material['settings']['user_fields']},
+    "organization": {"fields": material['settings']['organizations']['fields']},
     "pricing_tiers": [
         {
             "name": "Free",
@@ -950,6 +967,7 @@ material["get-started"] = {
 
 # FIXME: Condense state so it does not have to be duplicated in settings.
 material['settings']['traceability'] = material['traceability']
+material['settings']['subscriptions'] = material['get-started']['pricing_tiers']
 
 # Optional: Add data model fields
 # current_count
@@ -1083,3 +1101,6 @@ for data_model in data_models:
         "image_path": material[key]['placeholder']['image'],
         "fields": material[key]['fields']
     }
+
+# TODO: Make obsolete by referencing an organization's data models in Firestore.
+material['settings']['data_models'] = material['data_models']

@@ -2,13 +2,9 @@
  * Organizations JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 6/9/2021
- * Updated: 7/5/2021
- * TODO:
- *  - Refactor code
+ * Updated: 7/18/2021
  */
-import { api } from '../api/api.js';
-import { theme } from '../settings/theme.js';
-import { changePhotoURL, getDownloadURL, updateDocument, uploadFile, storageErrors } from '../firebase.js';
+import { changePhotoURL, getDownloadURL, getCollection, getDocument, updateDocument, uploadFile, storageErrors } from '../firebase.js';
 import { authRequest, deserializeForm, serializeForm, slugify, showNotification } from '../utils.js';
 
 export const organizationSettings = {
@@ -38,7 +34,6 @@ export const organizationSettings = {
      * Reset a form with currently saved data, replacing any changes.
      */
     authRequest(`/api/organizations/${orgId}`).then((response) => {
-      console.log('Organization data:', response.data);
       const form = document.forms['organization-form'];
       form.reset();
       deserializeForm(form, response.data);
@@ -90,94 +85,85 @@ export const organizationSettings = {
   },
 
 
-  getOrganizations(tableId) {
+  toggleTraceabilityEndpoint(event) {
     /*
-     * Get and display a user's organizations.
+     * Toggle a traceability endpoint on or off for a given organization.
      */
-    // TODO: Specify the columns.
-    // address: ""
-    // city: ""
-    // country: ""
-    // email: ""
-    // external_id: ""
-    // linkedin: ""
-    // name: "Cannlytics"
-    // owner: "v86tNoemQzgrnMvlWq6mxCASg523"
-    // phone: ""
-    // public: "false"
-    // state: ""
-    // team: ["v86tNoemQzgrnMvlWq6mxCASg523"]
-    // trade_name: ""
-    // uid: "cannlytics"
-    // website: ""
-    // zip_code: ""
-    const columnDefs = [
-      { field: 'name', sortable: true, filter: true },
-      { field: 'email', sortable: true, filter: true },
-      { field: 'phone', sortable: true, filter: true }
-    ];
+    const endpoint = event.target.id.split('_')[1];
+    const { checked } = event.target;
+    console.log('Toggling traceability endpoint:', endpoint, checked);
 
-    // Specify the table options.
-    const gridOptions = {
-      columnDefs: columnDefs,
-      pagination: true,
-      rowSelection: 'multiple',
-      suppressRowClickSelection: false,
-      // singleClickEdit: true,
-      // onRowClicked: event => console.log('A row was clicked'),
-      onGridReady: event => theme.toggleTheme(theme.getTheme()),
-    };
-
-    // Get the data and render the table.
-    api.get('organizations').then((data) => {
-      console.log('Table data:', data); // DEV:
-      const eGridDiv = document.querySelector(`#${tableId}`);
-      new agGrid.Grid(eGridDiv, gridOptions);
-      gridOptions.api.setRowData(data);
-    })
-    .catch((error) => {
-      console.log('Error:', error);
-    });
-
-    // TODO: Attach export functionality
-    //function exportTableData() {
-    //  gridOptions.api.exportDataAsCsv();
-    //}
   },
 
 
-  getTeamMembers(orgId, owner, uid) {
+  getSubscription() {
+    /*
+     * Get an organization's subscription data.
+     */
+    const orgId = document.getElementById('organization_id').value;
+    return new Promise(async (resolve) => {
+      const data = await getDocument(`organizations/${orgId}/organization_settings/subscription`);
+      resolve(data);
+    });
+  },
+
+
+  getTeamMembers(orgId, owner, uid, render=true) {
     /*
      * Get team member data.
      */
-    console.log('Owner:', owner);
     const isOwner = owner === uid;
     authRequest(`/api/organizations/${orgId}/team`, ).then((response) => {
-      console.log('Team member data:', response.data);
       response.data.forEach((item) => {
-        addTeamMemberCard('team-member-grid', item, owner, isOwner, orgId);
+        if (render) addTeamMemberCard('team-member-grid', item, owner, isOwner, orgId);
       });
     });
   },
 
 
-  // updateOrganization() {
-  //   /*
-  //    * 
-  //    */
-  // },
+  getTeamMember(orgId, userId) {
+    /*
+     * Get a team member's data.
+     */
+    authRequest(`/api/organizations/${orgId}/team/${userId}`, ).then((response) => {
+      response.data.forEach((item) => {
+        deserializeForm(document.forms['team-member-form'], item);
+        if (item.photo_url) document.getElementById('user-photo-url').src = item.photo_url;
+      });
+    });
+  },
 
 
-  // createOrganization() {
-  //   /*
-  //    * 
-  //    */
-  // },
+  getTraceabilitySettings() {
+    /*
+     * Get an organization's traceability settings.
+     */
+    const orgId = document.getElementById('organization_id').value;
+    return new Promise(async (resolve) => {
+      const data = await getDocument(`organizations/${orgId}/organization_settings/traceability_settings`);
+      resolve(data);
+    });
+  },
+
+
+  async getTeamMemberLogs(orgId, userId) {
+    /*
+     * Get logs for a given team member.
+     */
+    console.log('User id:', userId);
+    const data = await getCollection(`organizations/${orgId}/logs`, {
+      desc: true,
+      filters: [{'key': 'user', 'operation': '==', 'value': userId}],
+      limit: 100, // TODO: Adjust limit
+      orderBy: 'created_at',
+    });
+    console.log('Team member logs:', data);
+  },
 
 
   deleteOrganization() {
     /*
-     * 
+     * Delete (archive) an organization.
      */
     // TODO: Make authRequest to delete an organization.
   },
@@ -216,7 +202,6 @@ export const organizationSettings = {
     /*
      * Save's a user's organization choice.
      */
-    // FIXME:
     const elements = document.getElementById('create-organization-form').elements;
     const data = {};
     for (let i = 0 ; i < elements.length ; i++) {
@@ -224,16 +209,12 @@ export const organizationSettings = {
       if (item.name) data[item.name] = item.value;
     }
     const orgId = slugify(data['name'])
-    console.log('Org ID:', orgId);
-    console.log('Data to upload:', data);
     authRequest(`/api/organizations`, data).then((response) => {
-      console.log('Saved org:', response);
-      // TODO: Show better error messages.
+      // Optional: Show better error messages.
       // TODO: Tell user if organization name is already taken
       if (response.error) {
         showNotification('Organization request failed', response.message, { type: 'error' });
       } else {
-        // showNotification('Organization request sent', response.message, { type: 'success' });
         const baseURL = window.location.origin;
         document.location.href = `${baseURL}/get-started/support/?from=${orgType}`;
       }
@@ -248,14 +229,16 @@ export const organizationSettings = {
     event.preventDefault();
     const form = document.getElementById('organization-form');
     const data = serializeForm(form);
-    console.log('Organization data:', data);
-    // TODO: Save settings to /organizations/${orgId}/organization_settings
+    document.getElementById('save-button').classList.add('d-none');
+    document.getElementById('save-button-loading').classList.remove('d-none');
     authRequest(`/api/organizations/${orgId}`, data).then((response) => {
       if (response.success) {
         showNotification('Organization details saved', 'Organization details successfully saved.', { type: 'success' });
       } else {
         showNotification('Failed to save organization details', response.message, { type: 'error' });
       }
+      document.getElementById('save-button-loading').classList.add('d-none');
+      document.getElementById('save-button').classList.remove('d-none');
     });
   },
 
@@ -329,27 +312,6 @@ export const organizationSettings = {
  * UI Management
  */
 
-function initializeGetStartedOrganizationUI(data) {
-  /*
-   * Initialize the get-started organization section.
-   */
-
-  // Populate form.
-  // const { elements } = document.querySelector('form')
-  // for (const [ key, value ] of Object.entries(data)) {
-  //   const field = elements.namedItem(key)
-  //   try {
-  //     field && (field.value = value);
-  //   } catch(error) {}
-  // }
-
-  // Attach functionality.
-  const fileElem = document.getElementById('selectPhotoUrl');
-  fileElem.addEventListener('change', uploadOrgPhoto, false);
-
-}
-
-
 function addTeamMemberCard(gridId, data, owner, isOwner, orgId) {
   /*
    * Add a data card to an existing grid.
@@ -379,8 +341,8 @@ function addTeamMemberCard(gridId, data, owner, isOwner, orgId) {
   var div = document.getElementById(gridId);
   div.innerHTML += `
 <div
-  class="card shade-hover border-secondary rounded-3 app-action col col-sm-1 col-md-2 p-3 mb-3"
-  style="width:275px; height:150px;"
+  class="card shade-hover border-secondary rounded-3 app-action col col-sm-1 col-md-2 p-3 mb-3 h-100"
+  style="width:275px;"
 >
 <a class="card-block stretched-link text-decoration-none" href="/settings/organizations/${orgId}/team/${data.uid}">
   <div class="d-flex justify-content-between">
@@ -388,17 +350,20 @@ function addTeamMemberCard(gridId, data, owner, isOwner, orgId) {
       <div class="icon-container me-2">
         <img src="${data.photo_url}" height="50px">
       </div>
-      <h4 class="fs-5 text-dark">${data.name}</h4>
+      <div class="col">
+        <h4 class="fs-5 text-dark">${data.name}</h4>
+        <div class="text-dark">${data.email}</div>
+      </div>
     </div>
     ${options}
   </div>
   <div class="card-body bg-transparent p-0">
     ${badge}
-    <div class="col text-dark align-items-center">
-      ${position}
-      <div>${data.email}</div>
-      ${phone}
-      ${license}
+    <div class="col text-dark align-items-center">`;
+  if (position) div.innerHTML += `<span>${position}</span>`;
+  if (phone) div.innerHTML += `<span>${position}</span>`;
+  if (license) div.innerHTML += `<span>${position}</span>`;
+  div.innerHTML += `
     </div>
   </div>
 </a>

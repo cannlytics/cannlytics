@@ -4,8 +4,7 @@
   Organization Form | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2021
-  Updated: 7/4/2021
-
+  Updated: 7/18/2021
   Parameters:
     optional_class
 -->
@@ -16,6 +15,7 @@
     <div class="row px-3">
 
       <!-- Image -->
+      <!-- Optional: Show loading container -->
       <div class="col-md-5 text-center py-3 mx-3 mb-5 p-md-0 order-md-2">
         <div class="d-flex flex-column align-items-start">
           <h1 class="fs-5 lh-base text-dark mb-0">Organization image</h1>
@@ -23,7 +23,6 @@
             <small>Choose an image for your organization, up to 5MB.</small>
           </h2>
         </div>
-        <!-- TODO: Show loading... -->
         <img
           src=""
           style="height:200px;"
@@ -127,10 +126,14 @@
             {% icon 'chevrons-up' hegiht="16px" width="16px" %} Show less
           </button>
           <button
-            class="btn btn-sm bg-gradient-green text-white"
+            id="save-button"
+            class="btn btn-sm btn-set-width bg-gradient-green text-white"
             onclick="cannlytics.settings.saveOrganizationSettings(event, '{{ organization_id }}');"
           >
             Save
+          </button>
+          <button id="save-button-loading" class="ms-1 btn btn-sm btn-set-width bg-gradient-green text-white d-none" type="button" disabled>
+            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
           </button>
         </div>
           
@@ -139,7 +142,7 @@
       </div>
     <div>
 
-    <!-- Add team members -->
+    <!-- Team members -->
     <div class="my-5 px-3">
       <h1 class="fs-5 lh-base text-dark mb-0">Team</h1>
       <h2 class="fs-6 lh-base text-secondary mb-3">
@@ -176,14 +179,6 @@
                 class="form-control form-control-sm"
               >
             </div>
-            <!-- Optional: Advanced options, such as position -->
-            <!--<div class="col-md-3">
-              <label for="team-member-position-1" class="form-label">Position</label>
-              <input
-                type="text"
-                class="form-control form-control-sm"
-              >
-            </div>-->
             <div class="col-md-3">
               <label for="team-member-permissions-1" class="form-label">
                 Permissions
@@ -203,7 +198,7 @@
                 id="team-member-permissions-1"
                 multiple
               >
-                <!-- TODO: Dynamic permission types-->
+                <!-- Optional: Dynamic permission types-->
                 <option selected value="staff">Staff</option>
                 <option value="admin">Admin</option>
                 <option value="qa">QA</option>

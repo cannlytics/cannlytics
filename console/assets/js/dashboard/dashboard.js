@@ -151,14 +151,15 @@ export const dashboard = {
   },
 
 
-  subscribe(subscription) {
+  subscribe(subscription, redirect=true) {
     /*
      * Save a user's subscription data to Firestore.
      */
-    authRequest('/src/subscribe', subscription).then((response) => {
+    const orgId = document.getElementById('organization_id').value;
+    authRequest(`/src/subscribe?organization_id=${orgId}`, subscription).then((response) => {
       if (response.success) {
         showNotification('Subscribed', response.message, { type: 'success' });
-        window.location.href = '/';
+        if (redirect) window.location.href = '/';
       } else {
         showNotification('Unable to subscribe', response.message, { type: 'error' });
       }

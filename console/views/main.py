@@ -11,7 +11,7 @@ from django.shortcuts import render
 from django.views.generic.base import TemplateView
 
 # Internal imports
-from console.settings import PROJECT_NAME
+from console.settings import PROJECT_NAME as BASE
 from console.state import layout
 from console.utils import (
     get_page_data,
@@ -32,7 +32,8 @@ class ConsoleView(TemplateView):
 
     def get_template_names(self):
         """Get the screen's template based on the URL path, where the
-        URL is segmented as 'https://{base}/{screen}/{section}/{unit}/{part}.
+        URL is segmented as:
+            'https://{base}/{screen}/{section}/{unit}/{part}/{piece}.
         A number of page template paths are tried, trying to match a unit
         first, then section, then a screen-section, finally a screen.
         Screen-sections and sections are also search for in a general folder.
@@ -41,14 +42,14 @@ class ConsoleView(TemplateView):
         section = self.kwargs.get('section', screen)
         unit = self.kwargs.get('unit', section)
         return [
-            f'{PROJECT_NAME}/pages/{screen}/{unit}.html',
-            f'{PROJECT_NAME}/pages/{screen}/{section}/{unit}.html',
-            f'{PROJECT_NAME}/pages/{screen}/{section}.html',
-            f'{PROJECT_NAME}/pages/{screen}/{screen}-{section}.html',
-            f'{PROJECT_NAME}/pages/{screen}/{section}/{section}.html',
-            f'{PROJECT_NAME}/pages/{screen}/{screen}.html',
-            f'{PROJECT_NAME}/pages/misc/{screen}/{screen}-{section}.html',
-            f'{PROJECT_NAME}/pages/misc/{screen}/{section}.html',
+            f'{BASE}/pages/{screen}/{unit}.html',
+            f'{BASE}/pages/{screen}/{section}/{unit}.html',
+            f'{BASE}/pages/{screen}/{section}.html',
+            f'{BASE}/pages/{screen}/{screen}-{section}.html',
+            f'{BASE}/pages/{screen}/{section}/{section}.html',
+            f'{BASE}/pages/{screen}/{screen}.html',
+            f'{BASE}/pages/misc/{screen}/{screen}-{section}.html',
+            f'{BASE}/pages/misc/{screen}/{section}.html',
         ]
 
     def get_context_data(self, **kwargs):
@@ -68,8 +69,8 @@ class ConsoleView(TemplateView):
         elif organization_context:
             context['organization_context'] = organization_context
         context = get_page_context(self.kwargs, context)
-        context = get_page_data(self.kwargs, context)
-        context = get_user_context(self.request, context)
+        context = get_user_context(self.request, context) # Broken
+        # context = get_page_data(self.kwargs, context)
         return context
 
 
@@ -79,13 +80,13 @@ class ConsoleView(TemplateView):
 
 def handler404(request, *args, **argv): #pylint: disable=unused-argument
     """Handle missing pages."""
-    template = f'{PROJECT_NAME}/pages/misc/errors/404.html'
+    template = f'{BASE}/pages/misc/errors/404.html'
     return render(request, template, {}, status=404)
 
 
 def handler500(request, *args, **argv): #pylint: disable=unused-argument
     """Handle internal errors."""
-    template = f'{PROJECT_NAME}/pages/misc/errors/500.html'
+    template = f'{BASE}/pages/misc/errors/500.html'
     return render(request, template, {}, status=500)
 
 

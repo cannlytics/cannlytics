@@ -666,6 +666,11 @@ ul {
   list-style: none;
   line-height: 1;
 }
+.three-by-three {
+  -webkit-column-count: 3;
+  -moz-column-count: 3;
+  column-count: 3;
+}
 
 /*--------------------------------------------------------------------------
   Tables
@@ -805,6 +810,19 @@ body.dark .input-group-text {
 .custom-checkbox .custom-control-input:active ~ .custom-control-label::before {
   background-color: #96e6a1;
 }
+.form-select:active,
+.form-select:hover {
+  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem #45B64940;
+}
+.form-select option:hover {
+  background-color: #45B64940 !important;
+}
+button[data-toggle="dropdown"].btn-default,
+button[data-toggle="dropdown"]:hover {
+background-color: white !important;
+color: #2c3e50 !important;
+border: 2px solid #dce4ec;
+}
 
 /* Radio Groups */
 .form-check-input:checked {
@@ -851,6 +869,21 @@ body.dark footer .form-control {
 }
 .field-md {
   max-width: 240px;
+}
+
+/* Accordions */
+.accordion-button:not(.collapsed) {
+  color: #0BA67F;
+}
+body.dark .accordion-button:not(.collapsed) {
+  color: #50fa7b;
+}
+.accordion-button:focus {
+  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem #45B64940;
+  border-color: #45B64940;
+}
+body.dark .accordian-item {
+  border-color: #ccc;
 }
 
 /*--------------------------------------------------------------------------

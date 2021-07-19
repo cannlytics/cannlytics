@@ -8,8 +8,9 @@
   Params:
     fields
     disabled (optional)
+    narrow (optional)
 -->
-<div class="col col-md-10 col-lg-6">
+<div class="col {% if not narrow %}col-md-10 col-lg-6{% endif %}">
   {% for field in fields %}
 
     {% if field.hidden %}

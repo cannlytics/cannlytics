@@ -5,9 +5,8 @@
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 7/5/2021
   Updated: 7/5/2021
-
   Parameters:
-    fields
+    data_models
 -->
 <!-- Each data model should have editable:
     abbreviation
@@ -27,11 +26,13 @@
   -->
 {% load icon %}
 <div class="col my-5 px-3">
-  <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Data Models</h1>
-  <h2 class="fs-6 lh-base text-secondary mb-3">
-    <small>Data models are the primary objects for conceptualizing your workflow. In a nutshell,
-    data models are groups of fields and dictate the data points collected.</small>
-  </h2>
+  <div class="col-md-6">
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Data Models</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">
+      <small>Data models are the primary objects for conceptualizing your workflow. In a nutshell,
+      data models are groups of fields and dictate the data points collected.</small>
+    </h2>
+  </div>
 
   <!-- Field selection -->
   <!-- TODO: If select then show:
@@ -45,23 +46,23 @@
   -->
   <!-- Optional: Allow field lists to be re-aranged! -->
   <div class="accordion" id="data_fields_accordian">
-    {% for key, values in fields.items %}
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="{{ values.key }}_data_fields">
+    {% for key, values in data_models.items %}
+      <div class="accordion-item bg-transparent border boder-secondary">
+        <h6 class="accordion-header fs-6" id="{{ values.key }}_data_fields">
           <button
-            class="accordion-button bg-light"
+            class="accordion-button bg-transparent collapsed px-3 py-2"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#{{ values.key }}_data_fields_collapse"
             aria-expanded="true"
             aria-controls="{{ values.key }}_data_fields_collapse"
           >
-            {{ values.title }}
+            <small>{{ values.label }}</small>
           </button>
-        </h2>
+        </h6>
         <div
           id="{{ values.key }}_data_fields_collapse"
-          class="accordion-collapse collapse show bg-transparent"
+          class="accordion-collapse collapse bg-transparent"
           aria-labelledby="{{ values.key }}_data_fields"
           data-bs-parent="#data_fields_accordian"
         >
@@ -137,7 +138,7 @@
                 Add field
               </button>
               <button
-                class="btn btn-sm bg-gradient-green text-white"
+                class="btn btn-sm btn-set-width bg-gradient-green text-white"
                 onclick="cannlytics.settings.saveDataModel('{{ values.key }}');"
               >
                 Save

@@ -56,6 +56,7 @@ def subscribe(request):
     data = loads(request.body.decode('utf-8'))
     session_cookie = request.COOKIES.get('__session')
     claims = verify_session_cookie(session_cookie)
+    org_id = request.GET.get('organization_id')
     data = {**data, ** claims}
     uid = claims['uid']
     user_email = claims['email']
@@ -63,7 +64,8 @@ def subscribe(request):
     iso_time = now.isoformat()
     data['created_at'] = iso_time
     data['updated_at'] = iso_time
-    update_document(f'admin/paypal/paypal_subscriptions/{uid}', data)
+    update_document(f'admin/paypal/paypal_subscriptions/{org_id}', data)
+    update_document(f'organizations/{org_id}/organization_settings/subscription', data)
     # Optional: Send HTML message.
     # template_url = "cannlytics_website/emails/newsletter_subscription_thank_you.html"
     send_mail(

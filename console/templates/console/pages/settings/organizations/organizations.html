@@ -3,14 +3,20 @@
 <!--
   Organizations Page | Cannlytics Console
   Created: 4/26/2021
-  Updated: 6/18/2021
+  Updated: 7/18/2021
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block console_body %}
 
   <!-- Display detail page given a section -->
-  {% if unit != '' %}
+  {% if part == 'team' %}
+    {% include './team-member.html' with
+      organization_context=settings.organizations
+      user=user
+    %}
+
+  {% elif unit != '' %}
 
     {% include './organization.html' with
       organization_context=settings.organizations
@@ -127,10 +133,7 @@
 {% endblock console_body %}
 {% block console_js %}
   <script>
-
-    // Initialize the UI (using context from Django).
-    // if ('{{ section }}' !== '') cannlytics.settings.viewOrganization('{{ section }}');
-  
+ 
     // Enable tooltips.
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -158,29 +161,6 @@
       cannlytics.ui.toggleElementClass('team-member-fields', 'd-none');
       cannlytics.ui.toggleElementClass('team-member-fields-show', 'd-none');
     }
-
-    // FIXME: Only show user API Key for Oklahoma.
-    // $('.license-state-selection').change(function() {
-    //   console.log($(this).val());
-    //   if ($(this).val() === 'OK') {
-    //     $('.user-api-key').removeClass('d-none');
-    //   } else {
-    //     $('.user-api-key').addClass('d-none');
-    //   }
-    // });
-
-    // Optional: Show other when other license type is selected
-    // https://stackoverflow.com/questions/18992839/hide-show-content-if-some-option-is-selected-with-bootstrap
-    // $('#pasveids').on('change', function(e){
-    //   if(e.val == 'Value if clicked on other') {
-    //       $('#hiddenevent').attr('type', 'text');
-    //       $('#pasveids').attr('name', '');
-    //       $('#hiddenevent').attr('name', 'eventtype');
-    //   } else {
-    //       $('#hiddenevent').attr('type', 'hidden');
-    //       $('#pasveids').attr('name', 'eventtype');
-    //   }
-    // });
 
   </script>
 {% endblock console_js %}

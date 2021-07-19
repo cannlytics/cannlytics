@@ -86,7 +86,8 @@ urlpatterns = [
         path('/<organization_id>', organizations.organizations),
         path('/<organization_id>/settings', organizations.organizations),
         path('/<organization_id>/team', organizations.organization_team),
-        path('/<organization_id>/join/', organizations.join_organization),
+        path('/<organization_id>/team/<user_id>', organizations.organization_team),
+        path('/<organization_id>/join', organizations.join_organization),
     ])),
     path('results', include([
         path('', results.results),

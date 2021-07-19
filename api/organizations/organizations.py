@@ -32,7 +32,7 @@ from api.auth import auth #pylint: disable=import-error
 
 
 @api_view(['GET'])
-def organization_team(request, format=None, organization_id=None):
+def organization_team(request, format=None, organization_id=None, user_id=None):
     """Get team member data for an organization, given an authenticated
     request from a member of the organization.
     """
@@ -41,8 +41,11 @@ def organization_team(request, format=None, organization_id=None):
     try:
         if organization_id in claims['team']:
             organization_data = get_document(f'organizations/{organization_id}')
+            team = organization_data['team']
             team_members = []
-            for uid in organization_data['team']:
+            if user_id:
+                team = [user_id]
+            for uid in team:
                 team_member = get_document(f'users/{uid}')
                 team_members.append(team_member)
             return Response({'data': team_members}, content_type='application/json')
@@ -74,8 +77,9 @@ def organizations(request, format=None, organization_id=None):
     model_type = 'organizations'
     _, project_id = google.auth.default()
     claims = auth.verify_session(request)
+    print('Claims:', claims)
     uid = claims['uid']
-    custom_claims = get_custom_claims(uid)
+    # custom_claims = get_custom_claims(uid)
 
     # Get organization(s).
     if request.method == 'GET':
@@ -83,17 +87,18 @@ def organizations(request, format=None, organization_id=None):
         # Get organization_id parameter
         if organization_id:
             print('Query organizations by ID:', organization_id)
-            organization = get_document(f'{model_type}/{organization_id}')
-            if not organization:
+            data = get_document(f'{model_type}/{organization_id}')
+            print('Found data:', data)
+            if not data:
                 message = 'No organization exists with the given ID.'
                 return Response({'error': True, 'message': message}, status=404)
-            elif organization['public']:
-                return Response({'data': organization}, content_type='application/json')
-            elif uid not in organization['team']:
+            elif data['public']:
+                return Response({'data': data}, status=200)
+            elif uid not in data['team']:
                 message = 'This is a private organization and you are not a team member. Request to join before continuing.'
                 return Response({'error': True, 'message': message}, status=400)
             else:
-                return Response({'data': organization}, content_type='application/json')
+                return Response({'data': data}, status=200)
 
         # TODO: Get query parameters.
         keyword = request.query_params.get('name')
@@ -105,6 +110,7 @@ def organizations(request, format=None, organization_id=None):
                 'value': keyword
             }
             docs = get_collection(model_type, filters=[query])
+            return Response({'data': docs}, status=200)
 
         # Get all of a user's organizations
         else:
@@ -114,6 +120,7 @@ def organizations(request, format=None, organization_id=None):
                 'value': uid
             }
             docs = get_collection(model_type, filters=[query])
+            return Response({'data': docs}, status=200)
 
         # Optional: Get list of other organizations.
         # Check if user is in organization's team, otherwise,
@@ -122,7 +129,6 @@ def organizations(request, format=None, organization_id=None):
         # Optional: Try to get facility data from Metrc.
         # facilities = track.get_facilities()
 
-        return Response({'data': docs}, content_type='application/json')
 
     # Create or update an organization.
     elif request.method == 'POST':
@@ -139,8 +145,8 @@ def organizations(request, format=None, organization_id=None):
                 return Response({'error': True, 'message': message}, status=400)
 
             organization_id = doc['uid']
-            team_list = custom_claims.get('team', [])
-            owner_list = custom_claims.get('owner', [])
+            team_list = claims.get('team', [])
+            owner_list = claims.get('owner', [])
             if uid not in team_list and organization_id not in owner_list:
                 message = 'You do not currently belong to this organization. Request to join before continuing.'
                 return Response({'error': True, 'message': message}, status=400)

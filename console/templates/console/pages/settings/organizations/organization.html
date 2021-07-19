@@ -4,35 +4,43 @@
   Organization Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/8/2021
-  Updated: 7/4/2021
-  TODO:
+  Updated: 7/18/2021
+  Optional:
     - Show detailed team member information (their logs, training, etc.)
 -->
 {% load icon %}
+
+{% if unit and unit in user.owner %}
+  <!-- Load PayPal SDK if it's the owner of the organization -->
+  {% load get_env %}
+  {% block console_css %}
+    <script src="https://www.paypal.com/sdk/js?client-id={{ 'PAYPAL_CLIENT_ID'|get_env }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+  {% endblock console_css %}
+{% endif %}
+
 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
   <!-- Header -->
-  <!-- Optional: Add settings base breadcrumb -->
   {% include "console/components/links/breadcrumbs.html" with
-    base_page='Organization settings'
-    base_page_url='/settings/organizations'
+    base_page='Settings'
+    base_page_url='/settings'
+    nested_page="Organization settings"
+    nested_page_url="/settings/organizations"
     current_page=unit
   %}
   <input id="organization_id_input" type="text" class="visually-hidden" value="{{ unit }}">
 
-  <!-- TODO: Save button -->
-
-  <!-- TODO: Organization form -->  
+  <!-- Organization form -->  
   {% include "console/pages/settings/organizations/organization_form.html" with
     organization_context=organization_context
     organization_id=unit
     user=user
   %}
 
-  <!-- TODO: Data Model Management -->
-  {% comment %} {% include "console/pages/settings/organizations/data_models.html" with
-    fields=settings.fields
-  %} {% endcomment %}
+  <!-- Data Model Management -->
+  {% include "console/pages/settings/organizations/data_models.html" with
+    data_models=settings.data_models
+  %}
 
   <!-- Traceability Management -->
   <div class="col-md-6 my-5 px-3">
@@ -58,12 +66,13 @@
 
     <!-- Traceability endpoints -->
     <!-- TODO: Setup functionality and incorporate into \traceability tabs -->
+    <!-- TODO: Make checked conditional on organization's traceability -->
     <label
       class="col-md-4 col-sm-2 col-lg-2 col-form-label col-form-label-sm"
     >
       Endpoints
     </label>
-    <div class="ps-3">
+    <div class="ps-3 three-by-three">
       {% for item in settings.traceability.tabs %}
         <div class="form-check">
           <label class="form-check-label" for="input_{{ item.section }}">
@@ -73,12 +82,12 @@
             id="input_{{ item.section }}"
             class="form-check-input"
             type="checkbox"
-            checked
+            {% if item.selected %}checked{% endif %}
+            onchange="cannlytics.settings.toggleTraceabilityEndpoint(event);"
           >
         </div>
       {% endfor %}
     </div>
-
   </div>
 
   <!-- FIXME: Render licenses if Org has licenses -->
@@ -97,102 +106,6 @@
       Manage state-issued license
     </a>
   </div>
-
-  {% comment %} <!-- License fields -->
-  <div id="license-fields" class="d-none">
-    <ol id="license-list" class="bold-list">
-      <li id="primary-license" class="mb-3">
-        <div class="row g-4">
-          <div class="col-md-3">
-            <label class="form-label">License</label>
-            <input
-              type="text"
-              class="form-control form-control-sm"
-            >
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">License Type</label>
-            <select
-              class="form-select form-select-sm"
-              aria-label="License type"
-            >
-              <option selected></option>
-              <!-- Optional: Dynamic license types-->
-              <option value="lab">Lab</option>
-              <option value="producer-cultivator">Cultivator</option>
-              <option value="producer-processor">Processor</option>
-              <option value="retailer">Retailer</option>
-              <option value="other">Other</option>
-            </select>
-            <!-- TODO: Let user specify type if other -->
-            <input
-              type="text"
-              class="form-control form-control-sm d-none"
-              placeholder="Please specify..."
-            >
-          </div>
-          
-          <!-- <div class="col-md-3">
-            <label class="form-label">Please specify</label>
-            <input
-              type="text"
-              class="form-control form-control-sm"
-              id="license-type-other-1"
-            >
-          </div> -->
-          <div class="col-md-2">
-            <label class="form-label">State</label>
-            <select
-              class="form-select form-select-sm license-state-selection"
-              aria-label="License type"
-            >
-              <option selected></option>
-              <!-- TODO: Dynamically list states -->
-              <option value="OK">Oklahoma</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <!-- TODO: Only show API key if state is Oklahoma -->
-          <div class="col-md-3">
-            <label class="form-label">
-              User API Key
-              <button
-                type="button"
-                class="btn btn-tooltip-help"
-                data-bs-toggle="tooltip"
-                data-bs-html="true"
-                title="Integration with Metrc requires your user's API key, which only you can generate and obtain. This API key is tied directly to your Metrc user account (not the company or facility), and everything your software does is tied to your user's API Key. Your software will, however, be limited by the permissions granted to your user within Metrc.<br><br>Your user API key is encrypted and protected in accordance with our <a href='https://docs.cannlytics.com/about/security-policy' target='_blank'>security policy</a>.<br><br>Please see the <a href='https://api-ok.metrc.com/Documentation#getting-started_user_api_key' target='_blank'>Metrc documentation</a> for more information."
-              >
-                {% icon 'help-circle' width="18px" height="18px" class="text-secondary" %}
-              </button>
-            </label>
-            <input
-              type="text"
-              class="form-control form-control-sm"
-              id="license-type-other-1"
-            >
-          </div>
-          <div class="col-md-1">
-            <button
-              class="btn btn-link text-danger"
-              onclick="toggleLicenseFields(event);"
-            >
-              {% icon 'trash-2' hegiht="16px" width="16px" %}
-            </button>
-          </div>
-        </div>
-      </li>
-    </ol>
-
-    <!-- Add license button -->
-    <a
-      class="nav-link text-secondary app-action d-inline-block"
-      onclick="cannlytics.ui.addListItem('license')"
-    >
-      {% icon 'plus' hegiht="16px" width="16px" %} Add a license
-    </a>
-
-  </div><!-- End of license fields --> {% endcomment %}
 
   <!-- Visibility (public / private choice) -->
   <div class="my-5 px-3">
@@ -216,30 +129,19 @@
     </div>
   </div>
 
-  <!-- TODO: Danger zone (delete organization) -->
-  <!-- TODO: Only show if user is the owner -->
+  <!-- Admin -->
   {% if unit and unit in user.owner %}
+
+    <!-- Subscription -->
+    {% include "console/pages/settings/organizations/subscription.html" %}
+
+    <!-- Delete -->
     {% include "console/components/forms/delete_option.html" with
       id=unit
       model="organizations"
       model_singular="organization"
     %}
   {% endif %}
-
-  <!-- Other options -->
-  {% comment %} <h2 class="h6 mt-5 mb-0">Other account options</h2>
-  <div class="list-group col-md-6 py-3">
-    {% for item in account.options %}   
-      <a
-        href="{{ item.url }}"
-        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-        aria-current="true"
-      >
-        {{ item.title }}
-        {% icon "chevron-right" height="18px" width="18px" %}
-      </a>
-    {% endfor %}
-  </div> {% endcomment %}
 
 </main>
 
@@ -258,14 +160,56 @@
     );
 
     function removeField(event) {
-      /*
-       * Remove data model field.
-       */
+      /* Remove data model field. */
       // TODO: Implement
       console.log(event);
     }
 
   </script>
+
+  {% if unit and unit in user.owner %}
+  <script>
+
+    // Get the subscription plan if it's the owner.
+    cannlytics.settings.getSubscription(function(response) {
+      document.getElementById('input_tier').value = response['name'];
+    });
+
+    function changeSubscription() {
+      /*
+       * Change subscription, getting subscription plan ID and rendering a PayPal button.
+       */
+      cannlytics.dashboard.saveSupport().then(function(response) {
+        document.getElementById('paypal-button-container').innerHTML = '';
+        var planID = response['plan_id'];
+        if (planID === 'free') {
+          cannlytics.dashboard.subscribe({ 'plan_id': planID }, false);
+          return;
+        }
+        paypal.Buttons({
+          style: {
+              shape: 'rect',
+              color: 'silver',
+              layout: 'horizontal',
+              label: 'subscribe',
+          },
+          createSubscription: function(data, actions) {
+            return actions.subscription.create({ 'plan_id': planID });
+          },
+          onApprove: function(data, actions) {
+            var subscription = { ...data, ...response };
+            cannlytics.dashboard.subscribe(subscription);
+          },
+          onError: function (error) {
+            alert('Uknown error subscribing. Please contact contact@cannlytics.com. Thank you for your patience and we will deliver you support.');
+          },
+        }).render('#paypal-button-container');
+      });
+    }
+
+  </script>
+  {% endif %}
+
 {% endblock console_js %}
 
 </html>

@@ -110,7 +110,7 @@ def import_data(request):
     if ext not in ['csv', 'xlsx', 'xlsm']:
         return JsonResponse({'error': True, 'message': 'Expected a .csv, .xlsx, or .xlsm file.'}, status=406)
     if org_id not in claims.get('team', []):
-        return HttpResponse(status=403)
+        return HttpResponse({'error': True, 'message': 'You are not a member of this organization.'}, status=403)
 
     # Read the data from Excel.
     excel_data = read_worksheet(excel_file)
