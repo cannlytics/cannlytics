@@ -3,13 +3,31 @@ Result Calculation | Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 6/23/2021
-Updated: 7/15/2021
+Updated: 7/19/2021
 License: MIT License <https://opensource.org/licenses/MIT>
 
 Use analyte limits and formulas and instrument measurements to calculate
 final results for analyses.
 """
+# External imports
+from smtplib import SMTP
+
+# Internal imports
 from cannlytics.traceability.metrc.utils import encode_pdf
+
+
+def calculate_results():
+    """Calculate results by using analyte formula and
+    instrument / analyst measurements.
+    Calculate results by using analyte formula and
+    instrument / analyst measurements.
+    Args:
+
+    Returns:
+    """
+
+    print('Calculating results..')
+
 
 def post_results():
     """
@@ -87,6 +105,27 @@ def release_results():
     and the state traceability system.
     """
     return NotImplementedError
+
+
+def email_results():
+    """
+    Email results to their recipients with email or text message.
+    """
+    return NotImplementedError
+
+
+def text_results():
+    """
+    Text results to their recipients with email or text message.
+    """
+    server = SMTP('smtp.gmail.com', 587 )
+    server.starttls()
+    server.login('xxxxx@gmail.com', 'xxxxxxxxxx')
+    from_mail = 'xxxxxxxxx@gmail.com'
+    to = '9xxxxxxx@tmomail.net'
+    body = '<body>'
+    message = ('From: %s\r\n' % from_mail + 'To: %s\r\n' % to + 'Subject: %s\r\n' % '' + '\r\n' + body)
+    server.sendmail(from_mail, to, message)
 
 
 def send_results():

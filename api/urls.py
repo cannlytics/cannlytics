@@ -2,7 +2,7 @@
 URLs | Cannlytics API
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/21/2021
-Updated: 7/8/2021
+Updated: 7/19/2021
 Description: API URLs to interface with cannabis analytics.
 """
 
@@ -16,6 +16,7 @@ from api.analyses import analyses
 from api.analytes import analytes
 from api.areas import areas
 from api.auth import auth
+from api.certificates import certificates
 from api.contacts import contacts
 from api.instruments import instruments
 from api.inventory import inventory
@@ -45,6 +46,11 @@ urlpatterns = [
     path('areas', include([
         path('', areas.areas),
         path('/<area_id>', areas.areas),
+    ])),
+    path('certificates', include([
+        path('/generate', certificates.generate_coas),
+        path('/review', certificates.generate_coas),
+        path('/approve', certificates.generate_coas),
     ])),
     path('contacts', include([
         path('', contacts.contacts),
@@ -92,6 +98,10 @@ urlpatterns = [
     path('results', include([
         path('', results.results),
         path('/<result_id>', results.results),
+        path('/calculate', results.calculate_results),
+        path('/post', results.post_results),
+        path('/release', results.release_results),
+        path('/send', results.send_results),
     ])),
     path('samples', include([
         path('', samples.samples),
@@ -100,6 +110,7 @@ urlpatterns = [
     path('transfers', include([
         path('', transfers.transfers),
         path('/<transfer_id>', transfers.transfers),
+        path('/receive', transfers.receive_transfers),
     ])),
     path('traceability', include([
         path('/delete-license', traceability.delete_license),

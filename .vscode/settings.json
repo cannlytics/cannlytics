@@ -87,6 +87,7 @@
     "daygrid",
     "djpass",
     "dockerignore",
+    "dotenv",
     "escapeall",
     "esmodules",
     "favicon",

@@ -64,6 +64,12 @@ def transfers(request, format=None, transfer_id=None):
         return Response({'success': True, 'data': []}, status=200)
 
 
+@api_view(['POST'])
+def receive_transfers(request):
+    """Receive incoming transfers."""
+    return NotImplementedError
+
+
 #-----------------------------------------------------------------------
 # Draft functionality
 #-----------------------------------------------------------------------

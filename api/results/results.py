@@ -63,6 +63,31 @@ def results(request, format=None, result_id=None):
             return Response({'error': True, 'message': message}, status=403)
         return Response({'success': True, 'data': []}, status=200)
 
+
+@api_view(['POST'])
+def calculate_results(request):
+    """Receive incoming transfers."""
+    return NotImplementedError
+
+
+@api_view(['POST'])
+def post_results(request):
+    """Receive incoming transfers."""
+    return NotImplementedError
+
+
+@api_view(['POST'])
+def release_results(request):
+    """Receive incoming transfers."""
+    return NotImplementedError
+
+
+@api_view(['POST'])
+def send_results(request):
+    """Receive incoming transfers."""
+    return NotImplementedError
+
+
     #------------------------------------------------------------------
     # Lab results ✓
     #------------------------------------------------------------------
