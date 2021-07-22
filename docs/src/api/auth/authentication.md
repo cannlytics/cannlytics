@@ -38,3 +38,21 @@ Cannlytics leverages Firebase Auth for [server-side session cookie management](h
 - The ability to revoke session cookies immediately if token theft is suspected.
 
 Client requests are sent with a hash-based message authentication code (HMAC) [in case HTTPS is defeated](https://hackernoon.com/improve-the-security-of-api-keys-v5kp3wdu). Request authorization time is checked before issuing a client session cookie, minimizing the window of attack in case an ID token is stolen. After sign-in, all access-protected views check the session cookie and verify it before serving restricted content based on the user's custom claims.
+
+## API Requests
+
+You can make requests through the API passing your API key as a bearer token in the authorization header. Below is an example in Python reading an API key from a local `.env` file.
+
+```py
+from dotenv import load_dotenv
+
+# Load your API key.
+load_dotenv('.env')
+API_KEY = os.getenv('CANNLYTICS_API_KEY')
+
+# Pass your API key through the authorization header as a bearer token.
+HEADERS = {
+    'Authorization': 'Bearer %s' % API_KEY,
+    'Content-type': 'application/json',
+}
+```

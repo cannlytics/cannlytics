@@ -1,17 +1,29 @@
 /*--------------------------------------------------------------------------
-  Docs Style | Cannlytics
+  Docs Style | Cannlytics Docs
+  Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 4/30/2021
+  Updated: 7/22/2021
 ---------------------------------------------------------------------------*/
-
-.md-announce__inner {
-  margin: .4rem auto !important;
-}
 
 /*--------------------------------------------------------------------------
   Colors
 ---------------------------------------------------------------------------*/
 
-/* TODO: Change selection color */
+/* Selection color */
+::-moz-selection {
+  color: #1a1a1a;
+  background: #96e6a1;
+}
+::selection {
+  color: #1a1a1a;
+  background: #96e6a1;
+}
+body[data-md-color-scheme="slate"] ::-moz-selection {
+  color: #fff;
+}
+body[data-md-color-scheme="slate"] ::selection {
+  color: #fff;
+}
 
 /* Text colors */
 body[data-md-color-scheme="slate"] {
@@ -28,7 +40,7 @@ body[data-md-color-scheme="slate"] .md-nav {
 /* Actions */
 .md-content .md-typeset a {
   color: inherit;
-  border-bottom: 2px solid #00c753;
+  border-bottom: 1px solid #00c753;
   background-size: 100% 200%;
   background-image: linear-gradient(to bottom, #00c75360 50%, transparent 50%);
   -webkit-transition: all .2s;
@@ -41,7 +53,7 @@ body[data-md-color-scheme="slate"] .md-nav {
 }
 body[data-md-color-scheme="slate"] .md-content .md-typeset a {
   color: inherit;
-  border-bottom: 2px solid #fa0;
+  border-bottom: 1px solid #fa0;
   background-size: 100% 200%;
   background-image: linear-gradient(to bottom, rgba(255, 170, 0, 0.3) 50%, transparent 50%);
   -webkit-transition: all .2s;
@@ -53,19 +65,20 @@ body[data-md-color-scheme="slate"] .md-content .md-typeset a:hover {
   background-position: unset;
   color: #d9e1e8;
 }
+.badges {
+  border-bottom: none !important;
+  background: none !important;
+}
 
 /* Nav actions */
 .md-nav__link--active {
-  /* color: #009485 !important; */
   color: inherit !important;
-  /* font-weight: 600; */
 }
 body[data-md-color-scheme="slate"] .md-nav__link--active {
   color: #fa0 !important;
 }
 .md-nav__link--active:hover,
 .md-nav--primary .md-nav__item--active > .md-nav__link {
-  /* color: #ff6e42 !important; */
   color: #00c753 !important;
 }
 body[data-md-color-scheme="slate"] .md-nav__link--active:hover,
@@ -83,14 +96,6 @@ body[data-md-color-scheme="slate"] .md-search-result__more summary {
 .md-search-result__more summary:focus,
 .md-search-result__more summary:hover {
   color: #fa0 !important;
-}
-
-/* Announcement actions */
-.md-announce .md-typeset a {
-  color: #ffa600 !important;
-}
-.md-announce .md-typeset a:hover {
-  color: #ff6e42 !important;
 }
 
 /* Tab colors */
@@ -158,16 +163,44 @@ body[data-md-color-scheme="slate"] .md-tabs {
 }
 
 /*--------------------------------------------------------------------------
-  Footer (Optional: Make footer lighter)
+  Footer
 ---------------------------------------------------------------------------*/
 
-/* body[data-md-color-scheme="default"] .md-footer-meta {
-  background-color: #f8f9fa !important;
+.md-footer {
+  margin-top: 2rem;
+}
+
+body[data-md-color-scheme="default"] .md-footer,
+body[data-md-color-scheme="default"] .md-footer-meta,
+body[data-md-color-scheme="default"] .md-footer__inner {
+  background-color: #eff3f5 !important;
 }
 
 body[data-md-color-scheme="default"] .md-footer-copyright,
 body[data-md-color-scheme="default"] .md-footer-copyright a,
 body[data-md-color-scheme="default"] .md-footer-copyright__highlight,
-body[data-md-color-scheme="default"] .md-footer-social__link svg {
+body[data-md-color-scheme="default"] .md-footer-social__link svg,
+body[data-md-color-scheme="default"] .md-footer__link {
   color: #6c757d !important;
-} */
+}
+
+/*--------------------------------------------------------------------------
+  Announcement
+---------------------------------------------------------------------------*/
+
+body[data-md-color-scheme="default"] .md-announce {
+  background-color: #eff3f5;
+}
+body[data-md-color-scheme="default"] .md-announce__inner {
+  font-size: 0.6rem !important;
+  color: #1a1a1a;
+}
+.md-announce__inner {
+  margin: .4rem auto !important;
+}
+.md-announce .md-typeset a {
+  color: #ef5552!important;
+}
+.md-announce .md-typeset a:hover {
+  color: #ff6e42 !important;
+}

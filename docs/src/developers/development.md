@@ -1,9 +1,11 @@
 # <img width="20" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics
 <!-- TODO: FIx reference to calyx image -->
 
+<p class="badges">
 ![version](https://img.shields.io/badge/version-0.0.7-darkgreen)
 [![License: MIT](https://img.shields.io/badge/License-MIT-darkgreen.svg)](https://opensource.org/licenses/MIT)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)](https://github.com/cannlytics/cannlytics/fork)
+</p>
 
 Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software designed to make your data and information accessible. Cannlytics makes cannabis analysis **simple** and **easy** through data accessibility. We believe that everyone in the cannabis industry should be able to access rich, valuable data quickly and easily and that you will be better off for it. This documentation covers the Cannlytics architecture and how to build, develop, and publish the Cannlytics platform. You can view the platform live at <https://console.cannlytics.com> and the documentation at <https://docs.cannlytics.com>.
 
@@ -219,11 +221,6 @@ Cannlytics favors a [domain-style code structure](https://stackoverflow.com/ques
 ├── requirements.txt # Python requirements.
 └── webpack.config.js # JavaScript and CSS bundle configuration.
 ```
-
-  <!-- The Cannlytics Engine has a user interface that is built with [Flutter] and [Dart] with a backend powered by [Python]. -->
-
-<!-- Leaf and Metrc links -->
-<!-- You can swap out components for others. For example, Cannlytics users can swap out [Leaf] integration for [METRC] integration. Separating your choice of each component from another, Cannlytics frees users to choose combinations that suits them, freeing administrators and developers to focus on their preferred area of specialization. -->
 
 ## Development <a name="development"></a>
 

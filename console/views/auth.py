@@ -6,11 +6,12 @@ Updated: 7/17/2021
 """
 
 # Standard imports
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 
 # External imports
 from django.http import HttpResponse
-from django.http.response import JsonResponse
+from django.http.response import HttpResponseRedirect, JsonResponse
+from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView
 
 # Internal imports
@@ -80,6 +81,11 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
     
     # FIXME: Doesn't pass __session cookie in production.
     return response
+    # return HttpResponseRedirect('/')
+    # return render(request, 'console/pages/dashboard/dashboard.html', {
+    #     'screen': 'dashboard',
+    # }, content_type='application/xhtml+xml')
+    # return redirect('/')
     # except:
     #     return HttpResponse(status=401)
 
