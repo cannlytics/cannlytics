@@ -8,43 +8,81 @@
 }
 
 /*--------------------------------------------------------------------------
-  Actions
+  Colors
 ---------------------------------------------------------------------------*/
 
-/* Context actions */
+/* TODO: Change selection color */
+
+/* Text colors */
+body[data-md-color-scheme="slate"] {
+  color: #9baec8;
+}
+body[data-md-color-scheme="slate"] strong,
+body[data-md-color-scheme="slate"] i,
+body[data-md-color-scheme="slate"] h1,
+body[data-md-color-scheme="slate"] h2,
+body[data-md-color-scheme="slate"] h3,
+body[data-md-color-scheme="slate"] .md-nav {
+  color: #d9e1e8;
+}
+/* Actions */
 .md-content .md-typeset a {
-  color: #ff6e42 !important;
+  color: inherit;
+  border-bottom: 2px solid #00c753;
+  background-size: 100% 200%;
+  background-image: linear-gradient(to bottom, #00c75360 50%, transparent 50%);
+  -webkit-transition: all .2s;
+  -moz-transition: background-position, color .2s;
+  transition: all .2s;
+  background-position: 0 -100%;
 }
 .md-content .md-typeset a:hover {
-  color: #ffa600 !important;
+  background-position: unset;
 }
 body[data-md-color-scheme="slate"] .md-content .md-typeset a {
-  color: #ffa600 !important;
+  color: inherit;
+  border-bottom: 2px solid #fa0;
+  background-size: 100% 200%;
+  background-image: linear-gradient(to bottom, rgba(255, 170, 0, 0.3) 50%, transparent 50%);
+  -webkit-transition: all .2s;
+  -moz-transition: all .2s;
+  transition: all .2s;
+  background-position: 0 -100%;
 }
 body[data-md-color-scheme="slate"] .md-content .md-typeset a:hover {
-  color: #ff6e42 !important;
+  background-position: unset;
+  color: #d9e1e8;
 }
 
 /* Nav actions */
 .md-nav__link--active {
-  color: #009485 !important;
+  /* color: #009485 !important; */
+  color: inherit !important;
+  /* font-weight: 600; */
+}
+body[data-md-color-scheme="slate"] .md-nav__link--active {
+  color: #fa0 !important;
 }
 .md-nav__link--active:hover,
 .md-nav--primary .md-nav__item--active > .md-nav__link {
-  color: #ff6e42 !important;
+  /* color: #ff6e42 !important; */
+  color: #00c753 !important;
 }
 body[data-md-color-scheme="slate"] .md-nav__link--active:hover,
 body[data-md-color-scheme="slate"] .md-nav--primary .md-nav__item--active > .md-nav__link {
-  color: #ffa600 !important;
+  color: #fa0 !important;
 }
 
 /* Search actions */
 .md-search-result__more summary {
-  color: #009485 !important;
+  color: #1a1a1a !important;
+}
+body[data-md-color-scheme="slate"] .md-search-result__more summary {
+  color: #00c753 !important;
 }
 .md-search-result__more summary:focus,
 .md-search-result__more summary:hover {
-  color: #ff6e42 !important;
+  color: #fa0 !important;
 }
 
 /* Announcement actions */
@@ -53,6 +91,12 @@ body[data-md-color-scheme="slate"] .md-nav--primary .md-nav__item--active > .md-
 }
 .md-announce .md-typeset a:hover {
   color: #ff6e42 !important;
+}
+
+/* Tab colors */
+body[data-md-color-scheme="slate"] .md-tabs__link--active,
+body[data-md-color-scheme="slate"] .md-tabs__link:hover {
+  color: #ffa600;
 }
 
 /*--------------------------------------------------------------------------
@@ -66,7 +110,32 @@ body[data-md-color-scheme="slate"] .md-typeset h1 {
   color: rgb(233, 235, 252) !important;
 }
 .md-content__inner p {
-  line-height: 2 !important;
+  line-height: 1.75 !important;
+}
+.md-typeset h1 {
+  font-size: 1.05rem !important;
+}
+.md-typeset h2 {
+  font-size: 1rem !important;
+}
+.md-typeset h3 {
+  font-size: .9rem !important;
+}
+.md-typeset h4 {
+  font-size: .85rem !important;
+}
+.md-typeset h5 {
+  font-size: .8rem !important;
+}
+.md-typeset h6,
+.md-typeset {
+  font-size: .75rem !important;
+}
+.center-text {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
 }
 
 /*--------------------------------------------------------------------------
@@ -86,10 +155,6 @@ body[data-md-color-scheme="slate"] .md-tabs {
 .md-tabs__link--active,
 .md-tabs__link:hover {
   color: #1a1a1a;
-}
-body[data-md-color-scheme="slate"] .md-tabs__link--active,
-body[data-md-color-scheme="slate"] .md-tabs__link:hover {
-  color: #ffa600;
 }
 
 /*--------------------------------------------------------------------------

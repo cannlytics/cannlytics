@@ -35,15 +35,11 @@ Any dispute related in any way to your visit to this website or to products you 
 
 ## Comments, Reviews, and Emails
 
-Visitors may post material as long as it is not obscene, illegal, defamatory, threatening, infringing of intellectual property rights, invasive of privacy or injurious in any other way to third parties. Material has to be free of software viruses, political campaign, and commercial solicitation.
-
-We reserve all rights (but not the obligation) to remove and/or edit such material. When you post your material, you grant Cannlytics non-exclusive, royalty-free and irrevocable right to use, reproduce, publish, modify such material throughout the world in any media.
+Visitors may post material as long as it is not obscene, illegal, defamatory, threatening, infringing of intellectual property rights, invasive of privacy or injurious in any other way to third parties. Material has to be free of software viruses, political campaign, and commercial solicitation. We reserve all rights (but not the obligation) to remove and/or edit such material. When you post your material, you grant Cannlytics non-exclusive, royalty-free and irrevocable right to use, reproduce, publish, modify such material throughout the world in any media.
 
 ## User Account
 
-If you are an owner of an account on this website, you are solely responsible for maintaining the confidentiality of your private user details (username and password). You are responsible for all activities that occur under your account or password.
-
-We reserve all rights to terminate accounts, edit or remove material and cancel orders in their sole discretion.
+If you are an owner of an account on this website, you are solely responsible for maintaining the confidentiality of your private user details (username and password). You are responsible for all activities that occur under your account or password. We reserve all rights to terminate accounts, edit or remove material and cancel orders in their sole discretion.
 
 ## License and Site Access
 

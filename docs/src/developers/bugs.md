@@ -2,6 +2,8 @@
 
 A non-exhaustive list of encountered bugs and their solutions.
 
+- When running `npm run docs` you get an error message including: `docker: error during connect: This error may indicate that the docker daemon is not running`. Simply start [Docker](https://docs.docker.com/engine/reference/commandline/start/).
+
 - [No 'Access-Control-Allow-Origin' header is present on the requested resource—when trying to get data from a REST API](https://stackoverflow.com/questions/43871637/no-access-control-allow-origin-header-is-present-on-the-requested-resource-whe). Solution: Create a file
   ```json
   [

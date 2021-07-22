@@ -75,8 +75,17 @@ def get_objects(request, authorized_ids, organization_id, model_id, model_type):
             ref = f'organizations/{organization_id}/{model_type}/{model_id}'
             docs = get_document(ref)
         else:
-            ref = f'organizations/{organization_id}/{model_type}'
-            docs = get_collection(ref, limit=limit, order_by=order_by, desc=desc, filters=filters)
+            items = request.query_params.get('items')
+            print('Items:', items)
+            if items:
+                docs = []
+                for item in items:
+                    ref = f'organizations/{organization_id}/{model_type}/{item}'
+                    doc = get_document(ref)
+                    docs.append(doc)
+            else:
+                ref = f'organizations/{organization_id}/{model_type}'
+                docs = get_collection(ref, limit=limit, order_by=order_by, desc=desc, filters=filters)
     else:
         for _id in authorized_ids:
             ref = f'organizations/{_id}/{model_type}'

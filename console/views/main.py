@@ -57,6 +57,7 @@ class ConsoleView(TemplateView):
         dynamically from the app's state. The user's permissions
         are verified on every request. User-specific context and data
         can be returned depending on the page."""
+        print('Getting context....')
         context = super().get_context_data(**kwargs)
         context['sidebar'] = layout['sidebar']
         context['screen'] = kwargs.get('screen', '')

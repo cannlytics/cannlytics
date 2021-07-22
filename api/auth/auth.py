@@ -85,9 +85,11 @@ def verify_session(request):
             the user's `uid`.
     """
     try:
-        session_cookie = request.COOKIES.get('__session')
+        # session_cookie = request.COOKIES.get('__session')
+        session_cookie = request.session['__session']
+        print('Verifying session cookie:', session_cookie)
         return verify_session_cookie(session_cookie, check_revoked=True)
-    except:
+    except KeyError:
         return {}
 
 

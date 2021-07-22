@@ -43,25 +43,26 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
     Optional: Ensure that the request succeeds on the client!
     """
     # try:
-    print('Loggin in...')
+    print('Logging in...')
     authorization = request.headers.get('Authorization', '')
     token = authorization.split(' ').pop()
     if not token:
         return HttpResponse(status=401)
     initialize_firebase()
     print('Initialized Firebase')
-    expires_in = timedelta(days=5) # Optional: Let user specify cookie duration?
-    expires = datetime.now() + expires_in
+    # expires_in = timedelta(days=5) # Optional: Let user specify cookie duration?
+    # expires = datetime.now() + expires_in
     session_cookie = create_session_cookie(token)
     response = JsonResponse({'success': True}, status=204)
-    response.set_cookie(
-        key='__session',
-        value=session_cookie,
-        expires=expires, # Optional: Set expiration time.
-        httponly=True, # TODO: Explore httponly option
-        secure=True, # TODO: Explore secure option
-    )
-    response['Cache-Control'] = 'private'
+    # response.set_cookie(
+    #     key='__session',
+    #     value=session_cookie,
+    #     expires=expires, # Optional: Set expiration time.
+    #     httponly=True, # TODO: Explore httponly option
+    #     secure=False, # TODO: Explore secure option
+    # )
+    request.session['__session'] = session_cookie
+    # response['Cache-Control'] = 'private'
     print('Set cookie, updating docs')
     claims = verify_token(token)
     # claims = verify_session_cookie(session_cookie)
@@ -76,6 +77,8 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
     )
     update_document(f'users/{uid}', {'signed_in': True})
     print('Finished signing In')
+    
+    # FIXME: Doesn't pass __session cookie in production.
     return response
     # except:
     #     return HttpResponse(status=401)
@@ -84,7 +87,8 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
 def logout(request, *args, **argv): #pylint: disable=unused-argument
     """Functional view to remove a user session."""
     try:
-        session_cookie = request.COOKIES.get('__session')
+        # session_cookie = request.COOKIES.get('__session')
+        session_cookie = request.session['__session']
         claims = verify_session_cookie(session_cookie)
         uid = claims['uid']
         create_log(

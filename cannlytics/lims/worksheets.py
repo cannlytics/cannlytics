@@ -12,7 +12,7 @@ import os
 
 # External packages.
 from dotenv import load_dotenv
-from pandas import DataFrame
+from pandas import DataFrame, to_datetime
 import requests
 import xlwings as xw
 from xlwings.utils import rgb_to_int
@@ -90,14 +90,15 @@ def import_worksheet_data(model_type):
 
     # Read the IDs.
     id_cell = increment_row(config['table_cell'])
-    ids = worksheet.range(id_cell).options(expand='down').value
+    ids = worksheet.range(id_cell).options(expand='down', ndim=1).value
 
-    # Get Cannlytics API key from .env.
+    # Get your Cannlytics API key from your .env file, location specified
+    # by env_path on the cannlytics.config sheet.
     load_dotenv(config['env_path'])
     api_key = os.getenv('CANNLYTICS_API_KEY')
 
     # Get the worksheet columns.
-    columns = worksheet.range(config['table_cell']).options(expand='right').value
+    columns = worksheet.range(config['table_cell']).options(expand='right', ndim=1).value
     columns = [snake_case(x) for x in columns]
 
     # Get data using model type and ID through the API.
@@ -107,33 +108,51 @@ def import_worksheet_data(model_type):
         'Authorization': 'Bearer %s' % api_key,
         'Content-type': 'application/json',
     }
-    for model_id in ids:
-        if not model_id:
-            continue # Skip empty rows.
-        url = f'{base}/{model_type}/{model_id}?organization_id={org_id}'
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            # Once the data is retrieved, iterate over columns to get values.
+    if len(ids) == 1:
+        url = f'{base}/{model_type}/{ids[0]}?organization_id={org_id}'
+    else:
+        url = f'{base}/{model_type}?organization_id={org_id}&items={str(ids)}'
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        show_status_message(
+            worksheet,
+            coords=config['status_cell'],
+            message='Error importing data.',
+            background=config['error_color']
+        )
+        return
+
+    # Format the values.
+    items = []
+    data = response.json()['data']
+    if not data:
+        show_status_message(
+            worksheet,
+            coords=config['status_cell'],
+            message='No data found.',
+            background=config['error_color']
+        )
+        return
+    try:
+        for item in data:
             values = []
-            data = response.json()['data']
             for column in columns:
-                values.append(data.get(column))
-            worksheet.range(id_cell).value = values
-            id_cell = increment_row(id_cell)
-        else:
-            show_status_message(
-                worksheet,
-                coords=config['status_cell'],
-                message='Error importing %s %s.' % (model_type, model_id),
-                background=config['error_color']
-            )
-            return
+                values.append(item.get(column))
+            items.append(values)
+    except AttributeError:
+        values = []
+        for column in columns:
+            values.append(data.get(column))
+        items = [values]
+
+    # Insert all rows at the same time.
+    worksheet.range(id_cell).value = items
 
     # Show success status message.
     show_status_message(
         worksheet,
         coords=config['status_cell'],
-        message='Imported %s data.' % model_type,
+        message='Imported %i %s.' % (len(ids), model_type),
     )
 
 
@@ -150,24 +169,35 @@ def upload_worksheet_data(model_type):
     show_status_message(
         worksheet,
         coords=config['status_cell'],
-        message='Uploading %s data now...' % model_type,
+        message='Uploading %s data...' % model_type,
         background=config['success_color'],
     )
 
-    # Read table data, cleaning the column names.
+    # Read the table data, cleaning the column names.
     table = worksheet.range(config['table_cell'])
     data = table.options(DataFrame, index=False, expand='table').value
     data.columns = list(map(snake_case, data.columns))
-    show_status_message(
-        worksheet,
-        coords=config['status_cell'],
-        message='Imported data: %i observations' % len(data),
-        background=config['success_color'],
-    )
 
-    # Determine the model type and organization.
+    # Clean columns. (Optional: Clean more efficiently.)
+    for column in data.columns:
+        if column.endswith('_at'):
+            try:
+                data[column] = to_datetime(data[column]).dt.strftime('%Y-%m-%dT%H:%M%:%SZ')
+            except:
+                pass
+    data = data.fillna('')
+
+    # Determine the model type and the organization.
     org_id = worksheet.range(config['org_id_cell']).value
     model_singular = data.columns[0].replace('_id', '')
+    if not org_id:
+        show_status_message(
+            worksheet,
+            coords=config['status_cell'],
+            message='Organization ID required.',
+            background=config['error_color']
+        )
+        return
 
     # Get Cannlytics API key from .env using env_path in config.
     load_dotenv(config['env_path'])
@@ -180,6 +210,7 @@ def upload_worksheet_data(model_type):
     }
     base = config['api_url']
     for _, row in data.iterrows():
+        # Optional: Clean based on data model fields.
         json = row.to_dict()
         doc_id = json[f'{model_singular}_id']
         if not doc_id:
@@ -190,13 +221,13 @@ def upload_worksheet_data(model_type):
             show_status_message(
                 worksheet,
                 coords=config['status_cell'],
-                message='Uploaded %s %s' % (model_type, doc_id),
+                message='Uploaded %s' % doc_id,
             )
         else:
             show_status_message(
                 worksheet,
                 coords=config['status_cell'],
-                message='Error uploading %s %s. Check your internet connection and API key.' % (model_type, doc_id), # pylint:disable=line-too-long
+                message='Error uploading %s. Check your organization, internet connection and API key.' % doc_id, # pylint:disable=line-too-long
                 background=config['error_color']
             )
             return
@@ -205,5 +236,5 @@ def upload_worksheet_data(model_type):
     show_status_message(
         worksheet,
         coords=config['status_cell'],
-        message='Uploaded %s data.' % model_type,
+        message='Uploaded %i %s.' % (len(data), model_type),
     )

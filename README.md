@@ -220,11 +220,6 @@ Cannlytics favors a [domain-style code structure](https://stackoverflow.com/ques
 └── webpack.config.js # JavaScript and CSS bundle configuration.
 ```
 
-  <!-- The Cannlytics Engine has a user interface that is built with [Flutter] and [Dart] with a backend powered by [Python]. -->
-
-<!-- Leaf and Metrc links -->
-<!-- You can swap out components for others. For example, Cannlytics users can swap out [Leaf] integration for [METRC] integration. Separating your choice of each component from another, Cannlytics frees users to choose combinations that suits them, freeing administrators and developers to focus on their preferred area of specialization. -->
-
 ## Development <a name="development"></a>
 
 Development can happen in many avenues. Frequent, small scope pull requests are encouraged. Any contribution, even if it needs future polishing, helps build the project and advance the field of cannabis analytics. In general;

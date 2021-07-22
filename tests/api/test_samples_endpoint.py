@@ -34,7 +34,7 @@ HEADERS = {
 ORG_ID = 'test-company'
 
 #------------------------------------------------------------------------------
-# Create an inventory item.
+# Create a sample.
 #------------------------------------------------------------------------------
 data = {
     'batch_id': '',
@@ -55,7 +55,7 @@ assert response.status_code == 200
 print('Created:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Get inventory.
+# Get samples.
 #------------------------------------------------------------------------------
 organization_id = 'test-company'
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
@@ -65,7 +65,7 @@ data = response.json()['data']
 print('Found:', len(data))
 
 #------------------------------------------------------------------------------
-# Update an inventory item.
+# Update a sample.
 #------------------------------------------------------------------------------
 data = {
     'sample_id': 'SAMPLE-1',
@@ -77,7 +77,7 @@ assert response.status_code == 200
 print('Updated:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Delete an inventory item.
+# Delete a sample.
 #------------------------------------------------------------------------------
 data = {
     'sample_id': 'SAMPLE-1',

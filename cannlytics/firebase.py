@@ -41,6 +41,7 @@ import requests
 import ulid
 from django.utils.crypto import get_random_string
 from firebase_admin import auth, firestore, initialize_app, storage
+from google.cloud import secretmanager
 try:
     from google.cloud.firestore import ArrayUnion, ArrayRemove, Increment
     from google.cloud.firestore_v1.collection import CollectionReference
@@ -52,12 +53,14 @@ try:
 except:
     # FIXME: pandas has problems with Django on Cloud Run
     pass
-# from uuid import uuid4
+
+# Internal imports.
+from cannlytics.utils.utils import snake_case
+
 
 # ------------------------------------------------------------#
 # Firestore
 # ------------------------------------------------------------#
-
 
 def add_to_array(ref, field, value):
     """Add an element to a given field for a given reference.
@@ -345,7 +348,6 @@ def get_id_timestamp(uid):
 # Authentication
 # ------------------------------------------------------------#
 
-
 def create_user(name, email):
     """
     Given user name and email, create an account.
@@ -565,7 +567,6 @@ def delete_user(uid):
 # https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets
 # ------------------------------------------------------------#
 
-
 def create_secret(project_id, secret_id, secret):
     """Create a new secret with the given name. A secret is a logical wrapper
     around a collection of secret versions. Secret versions hold the actual
@@ -575,7 +576,6 @@ def create_secret(project_id, secret_id, secret):
         secret_id (str): An ID for the secret.
         secret (str): The secret data.
     """
-    from google.cloud import secretmanager
     client = secretmanager.SecretManagerServiceClient()
     parent = f'projects/{project_id}'
     response = client.create_secret(parent, secret_id, {"replication": {"automatic": {}}})
@@ -592,7 +592,6 @@ def add_secret_version(project_id, secret_id, payload):
     (roles/secretmanager.admin) on the secret, project, folder, or organization.
     Roles can't be granted on a secret version.
     """
-    from google.cloud import secretmanager
     client = secretmanager.SecretManagerServiceClient()
     parent = f'projects/{project_id}/secrets/{secret_id}'
     payload = payload.encode('UTF-8')
@@ -606,7 +605,6 @@ def access_secret_version(project_id, secret_id, version_id):
     can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
     WARNING: Do not print the secret in a production environment.
     """
-    from google.cloud import secretmanager
     client = secretmanager.SecretManagerServiceClient()
     name = f'projects/{project_id}/secrets/{secret_id}/versions/{version_id}'
     response = client.access_secret_version(name)
@@ -668,7 +666,7 @@ def download_files(bucket_name, bucket_folder, local_folder, verbose=True):
         blob.download_to_filename(local_folder + '/' + file_name)
         if verbose:
             print(f'{file_name} downloaded from bucket.')
-        
+
 
 def get_file_url(ref, bucket_name=None, expiration=None):
     """Return the storage URL of a given file reference.
@@ -734,7 +732,6 @@ def delete_file(bucket_name, blob_name):
     Args:
         bucket_name (str): The name of the storage bucket.
         blob_name (str): The name of the file to delete.
-        verbose (bool): Whether or not to print status.
     """
     bucket = storage.bucket(name=bucket_name)
     bucket.delete_blob(blob_name)
@@ -786,36 +783,3 @@ def create_log(ref, claims, action, log_type, key, changes=None):
         'changes': changes,
     }
     update_document(f'{ref}/{log_id}', log_entry)
-
-
-def get_keywords(string):
-    """Get keywords for a given string.
-    Args:
-        string (str): A string to get keywords for.
-    """
-    keywords = string.lower().split(' ')
-    keywords = [x.strip() for x in keywords if x]
-    keywords = list(set(keywords))
-    return keywords
-
-
-def snake_case(string):
-    """Turn a given string to snake case.
-    Handles CamelCase, replaces known special characters with
-    preferred namespaces, replaces spaces with underscores,
-    and removes all other nuisance characters.
-    Args:
-        s (str): The string to turn to snake case.
-    Returns"
-        (str): A snake case string.
-    """
-    clean_name = string.replace(' ', '_')
-    clean_name = clean_name.replace('&', 'and')
-    clean_name = clean_name.replace('%', 'percent')
-    clean_name = clean_name.replace('#', 'number')
-    clean_name = clean_name.replace('$', 'dollars')
-    clean_name = clean_name.replace('/', '_')
-    clean_name = clean_name.replace(r'\\', '_')
-    clean_name = sub('[!@#$%^&*()[]{};:,./<>?\|`~-=+]', ' ', clean_name)
-    words = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', clean_name)
-    return '_'.join(map(str.lower, words))

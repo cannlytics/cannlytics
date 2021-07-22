@@ -6,6 +6,7 @@
 
 beautifulsoup4==4.9.3
 coreapi==2.3.3
+cryptography==3.4.7
 dj_static==0.0.6
 django==3.2
 django-environ==0.4.5

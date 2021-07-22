@@ -103,7 +103,9 @@ def get_user_context(request, context):
     Returns
         context (dict): Page context updated with any user-specific context.
     """
+    print('Getting user context...')
     claims = auth.verify_session(request)
+    print('Claims:', claims)
     if claims:
         uid = claims['uid']
         query = {'key': 'team', 'operation': 'array_contains', 'value': uid}

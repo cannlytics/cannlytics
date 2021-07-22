@@ -101,6 +101,7 @@ material = {
         "fields": [
             {"key": "contact_id", "label": "Contact ID"},
             {"key": "organization", "label": "Organization"},
+            {"key": "trade_name", "label": "Trade Name"},
             {"key": "email", "label": "Email", "type": "email"},
             {"key": "phone", "label": "Phone Number", "type": "tel"},
             {"key": "website", "label": "Website"},
@@ -272,6 +273,9 @@ material = {
             {"key": "sample_id", "label": "Sample ID"},
             {"key": "project_id", "label": "Project ID"},
             {"key": "batch_id", "label": "Batch ID"},
+            {"key": "sample_name", "label": "Sample Name"},
+            {"key": "strain_name", "label": "Strain Name"},
+            {"key": "sample_type", "label": "Sample Type"},
             {"key": "created_at", "label": "Created At", "type": "datetime"},
             {"key": "created_by", "label": "Created By", "class": "field-sm"},
             {"key": "updated_at", "label": "Updated At", "type": "datetime"},

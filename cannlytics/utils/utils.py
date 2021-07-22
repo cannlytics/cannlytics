@@ -21,6 +21,19 @@ def camelcase(string):
     return key
 
 
+def get_keywords(string):
+    """Get keywords for a given string.
+    Args:
+        string (str): A string to get keywords for.
+    Returns:
+        (list): A list of keywords.
+    """
+    keywords = string.lower().split(' ')
+    keywords = [x.strip() for x in keywords if x]
+    keywords = list(set(keywords))
+    return keywords
+
+
 def get_timestamp(past=0, future=0, time_zone='local'):
     """Get an ISO formatted timestamp.
     Args:

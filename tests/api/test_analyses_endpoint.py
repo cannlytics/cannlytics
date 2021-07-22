@@ -34,7 +34,7 @@ HEADERS = {
 ORG_ID = 'test-company'
 
 #------------------------------------------------------------------------------
-# Create a contact.
+# Create an analysis.
 #------------------------------------------------------------------------------
 data = {
     'analysis_id': 'hemp-analysis',
@@ -52,7 +52,7 @@ assert response.status_code == 200
 print('Created:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Get contacts.
+# Get analyses.
 #------------------------------------------------------------------------------
 organization_id = 'test-company'
 url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
@@ -62,7 +62,7 @@ data = response.json()['data']
 print('Found:', len(data))
 
 #------------------------------------------------------------------------------
-# Update a contact.
+# Update an analysis.
 #------------------------------------------------------------------------------
 data = {
     'analysis_id': 'hemp-analysis',
@@ -74,7 +74,7 @@ assert response.status_code == 200
 print('Updated:', response.json()['data'])
 
 #------------------------------------------------------------------------------
-# Delete a contact.
+# Delete an analysis.
 #------------------------------------------------------------------------------
 data = {
     'analysis_id': 'hemp-analysis',
