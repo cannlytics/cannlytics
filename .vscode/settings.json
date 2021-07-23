@@ -154,6 +154,8 @@
     "pymdownx",
     "pypi",
     "pytest",
+    "pythonpath",
+    "pythonw",
     "quickstart",
     "reauth",
     "rfid",

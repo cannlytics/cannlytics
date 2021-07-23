@@ -6,7 +6,7 @@ Updated: 7/17/2021
 """
 
 # Standard imports
-# from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 
 # External imports
 from django.http import HttpResponse
@@ -51,10 +51,14 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
         return HttpResponse(status=401)
     initialize_firebase()
     print('Initialized Firebase')
-    # expires_in = timedelta(days=5) # Optional: Let user specify cookie duration?
-    # expires = datetime.now() + expires_in
+
+    # Set session cookie in a cookie in the response.
+    expires_in = timedelta(days=5) # Optional: Let user specify cookie duration?
+    expires = datetime.now() + expires_in
     session_cookie = create_session_cookie(token)
-    response = JsonResponse({'success': True}, status=204)
+    # response = JsonResponse({'success': True}, status=204)
+    response = HttpResponse(status=200)
+    response['Set-Cookie'] = f'__session={session_cookie}; Path=/'
     # response.set_cookie(
     #     key='__session',
     #     value=session_cookie,
@@ -62,8 +66,12 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
     #     httponly=True, # TODO: Explore httponly option
     #     secure=False, # TODO: Explore secure option
     # )
+    response['Cache-Control'] = 'public, max-age=300, s-maxage=900'
+    # response.set('Set-Cookie', `__session=${VALUE};`)
+
+    # Save session cookie in the session.
     request.session['__session'] = session_cookie
-    # response['Cache-Control'] = 'private'
+
     print('Set cookie, updating docs')
     claims = verify_token(token)
     # claims = verify_session_cookie(session_cookie)
@@ -93,8 +101,9 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
 def logout(request, *args, **argv): #pylint: disable=unused-argument
     """Functional view to remove a user session."""
     try:
-        # session_cookie = request.COOKIES.get('__session')
-        session_cookie = request.session['__session']
+        session_cookie = request.COOKIES.get('__session')
+        if session_cookie is None:
+            session_cookie = request.session['__session']
         claims = verify_session_cookie(session_cookie)
         uid = claims['uid']
         create_log(
@@ -107,7 +116,12 @@ def logout(request, *args, **argv): #pylint: disable=unused-argument
         update_document(f'users/{uid}', {'signed_in': False})
         revoke_refresh_tokens(claims['sub'])
         response = HttpResponse(status=205)
-        response.set_cookie('__session', expires=0)
+        # response.set_cookie('__session', expires=0)
+        response['Set-Cookie'] = '__session=None; Path=/'
+        response['Cache-Control'] = 'public, max-age=300, s-maxage=900'
         return response
     except:
+        response = HttpResponse(status=205)
+        response['Set-Cookie'] = '__session=None; Path=/'
+        response['Cache-Control'] = 'public, max-age=300, s-maxage=900'
         return HttpResponse(status=401)

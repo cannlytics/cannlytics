@@ -212,7 +212,9 @@ function signUp(email) {
       .then(() => {
         authRequest('/api/users', { email, photo_url: `https://robohash.org/${email}?set=set5` })
           .then((data) => {
-            resolve(data);
+            authRequest('/login').then((response) => {
+              resolve(data);
+            });
           })
           .catch((error) => {
             reject(error);

@@ -1,5 +1,5 @@
 """
-Title | Project
+Generate CoAs | Project
 
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>

@@ -140,8 +140,8 @@ export const auth = {
         console.log(error);
         // Optional: Fix error returned by successful login.
         window.location.href = window.location.origin;
-        const message = 'Platform down for maintenance. Thank you for your patience.'
-        showNotification('Sign in error', message, { type: 'error' });
+        // const message = 'Platform down for maintenance. Thank you for your patience.'
+        // showNotification('Sign in error', message, { type: 'error' });
       });
     })
     // Optional: Determine if it's okay to stay signed in.

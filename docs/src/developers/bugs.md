@@ -36,7 +36,7 @@ A non-exhaustive list of encountered bugs and their solutions.
   * Potential fix: <https://github.com/jotes/django-cookies-samesite>
   * **Solution**: Assign permissions in IAM console (see the installation guide).
 
-- [Firebase Hosting strip all cookies except for `__session`.](https://stackoverflow.com/a/58719953/5021266) Also see [this issue](https://stackoverflow.com/questions/57450648/how-to-use-multiple-cookies-in-firebase-hosting-cloud-run?noredirect=1&lq=1). Simple fix: use `__session` cookie instead of `session` cookie.
+- [Firebase Hosting strip all cookies except for `__session`.](https://stackoverflow.com/a/58719953/5021266) Also see [this issue](https://stackoverflow.com/questions/57450648/how-to-use-multiple-cookies-in-firebase-hosting-cloud-run?noredirect=1&lq=1). Simple fix: use `__session` cookie instead of `session` cookie. Also see [Django cookies and headers](https://stackoverflow.com/questions/15124308/django-cookies-and-headers).
 
 - [AppEngine warning - OpenBLAS WARNING - could not determine the L2 cache size on this system](https://stackoverflow.com/questions/55016899/appengine-warning-openblas-warning-could-not-determine-the-l2-cache-size-on)
 
