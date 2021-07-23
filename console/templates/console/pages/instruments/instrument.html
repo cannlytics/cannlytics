@@ -3,10 +3,9 @@
 <!--
   Instrument Page | Cannlytics Console
   Created 12/17/2020
-  Updated: 6/19/2021
+  Updated: 7/15/2021
 
   Fields:
-
     Calibration
     Certification
     Location
@@ -14,6 +13,7 @@
     type
     Validation
 -->
+{% load icon %}
 {% block console_css %}
 
   <!-- Bootstrap Datepicker -->
@@ -26,50 +26,76 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=instruments.breadcrumbs
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Instruments"
+      base_page_url="/instruments"
+      current_page=id
     %}
 
-    <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      id=id
-      model='instruments'
-      model_singular='instrument'
-      description="Manage instruments used in analysis."
-      options=True
-      export=id
-    %}
+    <!-- Tabs -->
+    {% if id and id != 'new' %}
+      {% include "console/components/forms/form_tabs.html" with
+          id=id
+          model="instruments"
+        %}
+    {% endif %}
 
-    <!-- Fields -->
-    <div class="mb-4 px-3">
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='instruments'
+        model_singular='instrument'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+    
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='instruments'
+        model_singular='instrument'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='instruments'
+        model_singular='instrument'
+        description="Manage instruments used in analysis."
+        options=True
+        export=id
+      %}
 
       <!-- Form -->
-      <form id="instrument-form">
+      <div class="mb-4 px-3">
+        <form id="instrument-form">
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+          %}
+        </form>
+      </div>
 
-        <!-- Dynamic fields -->
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=instruments.fields
+      <!-- TODO: Try to implement add analytes with AG-Grid table -->
+      
+
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="instruments"
+          model_singular="instrument"
         %}
+      {% endif %}
 
-        <!-- Show additional fields -->
-        {% include "console/components/forms/additional_fields.html" %}
-
-      </form>
-
-    </div><!-- End of fields -->
-
-    <!-- TODO: Try to implement add analytes with AG-Grid table -->
-    
-
-    <!-- Danger zone (delete) -->
-    {% if id %}
-      {% include "console/components/forms/delete_option.html" with
-        id=id
-        model="instruments"
-        model_singular="instrument"
-      %}
     {% endif %}
-    
+
   </main>
 
 {% endblock console_body %}
@@ -82,12 +108,8 @@
     cannlytics.ui.viewObject('instrument');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // FIXME: Enable tooltips.
-    // cannlytics.ui.enableTooltips();
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}
-
 </html>

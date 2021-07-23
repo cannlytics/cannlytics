@@ -5,7 +5,7 @@
  * Updated: 6/14/2021
  */
 
-import { authRequest, formDeserialize, showNotification } from '../utils.js';
+import { authRequest, deserializeForm, showNotification } from '../utils.js';
 import { theme } from '../settings/theme.js';
 
 // Optional: Setup Index DB for client-side storage.
@@ -549,7 +549,7 @@ export const traceability = {
      * View the data when navigating to a selected object.
      */
     const data = JSON.parse(localStorage.getItem(type));
-    formDeserialize(document.forms[`${type}-form`], data)
+    deserializeForm(document.forms[`${type}-form`], data)
     console.log('Observation data:', data);
   },
 

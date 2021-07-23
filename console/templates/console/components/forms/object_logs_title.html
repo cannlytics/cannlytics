@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<!--
+  Object Logs Title | Cannlytics
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 7/9/2021
+  Updated: 7/9/2021
+  Params:
+    id
+    model
+    model_singular
+    description (optional)
+    options (bool | optional)
+    export (bool | optional)
+-->
+<div class="d-flex justify-content-between">
+
+  <!-- Title -->
+  <div class="px-3">
+    <h1 class="fs-6 lh-base text-dark mb-0 mt-3">
+      {% if id == 'new' %}New{% endif %}
+      {{ model_singular|title }}
+      {% if id != 'new' %}{{ id }}{% endif %}
+    </h1>
+    {% if description %}
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        <small>{{ description }}</small>
+      </h2>
+    {% endif %}
+  </div>
+
+  <!-- Options -->
+  <div id="logs-options" class="d-flex align-items-center">
+
+    <!-- Date selection -->
+    <div class="input-daterange input-group input-group-sm me-2">
+      <input
+        id="logs_start"
+        type="text"
+        class="input-sm form-control form-control-sm form-control-light"
+        name="logs_start"
+        style="width:70px;"
+      />
+      <div class="input-group-text">to</div>
+      <input
+        id="logs_end"
+        type="text"
+        class="input-sm form-control form-control-sm form-control-light"
+        name="logs_end"
+        style="width:70px;"
+      />
+    </div>
+
+    <!-- Export -->
+    <button
+      class="btn btn-sm-light btn-md-light btn-set-width me-2"
+      onclick="cannlytics.app.exportDataTable('{{ model_singular }}-logs');"
+    >
+      Export
+    </button>
+
+    <!-- New -->
+    <button
+      id="form-new-button"
+      class="btn btn-sm btn-set-width bg-gradient-green text-white"
+      onclick="cannlytics.ui.openObject('{{ model }}', 'log', {'type': '{{ model }}', 'key': '{{ id }}', 'user': '{{ user.uid }}', 'user_email': '{{ user.email }}', 'user_name': '{{ user.name }}', 'user_photo_url': '{{ user.photo_url }}'});"
+    >
+      New
+    </button>
+
+  </div>
+
+</div>
+</html>

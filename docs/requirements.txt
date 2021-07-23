@@ -5,3 +5,4 @@ requests==2.25.1
 ulid-py==1.1.0
 beautifulsoup4==4.9.3
 django==3.2
+# git+https://github.com/cannlytics/cannlytics.git

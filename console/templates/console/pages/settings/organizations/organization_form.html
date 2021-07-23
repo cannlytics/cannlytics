@@ -1,0 +1,241 @@
+<!doctype html>
+<html>
+<!--
+  Organization Form | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 6/19/2021
+  Updated: 7/18/2021
+  Parameters:
+    optional_class
+-->
+{% load static icon %}
+
+  <!-- Form -->
+  <form id="organization-form" class="my-3 {{ optional_class }}">
+    <div class="row px-3">
+
+      <!-- Image -->
+      <!-- Optional: Show loading container -->
+      <div class="col-md-5 text-center py-3 mx-3 mb-5 p-md-0 order-md-2">
+        <div class="d-flex flex-column align-items-start">
+          <h1 class="fs-5 lh-base text-dark mb-0">Organization image</h1>
+          <h2 class="fs-6 lh-base text-secondary mb-3">
+            <small>Choose an image for your organization, up to 5MB.</small>
+          </h2>
+        </div>
+        <img
+          src=""
+          style="height:200px;"
+          class="pe-1"
+          id="organization_photo_url"
+        >
+        <input
+          id="organization_photo_url_input"
+          type="file"
+          accept="image/*"
+          class="visually-hidden"
+        />
+        <button
+          class="btn btn-sm position-absolute text-dark"
+          onclick="document.getElementById('organization_photo_url_input').click();"
+          type="button"
+        >
+          {% icon "image" %}
+        </button>
+      </div><!-- End of image -->
+
+      <!-- Organization fields -->
+      <div class="col-md-6">
+        <h1 class="fs-5 lh-base text-dark mb-0">Organization details</h1>
+        <h2 class="fs-6 lh-base text-secondary mb-3">
+          <small>Setup your organization for maximum impact.</small>
+        </h2>
+
+        <!-- Primary Fields -->
+        {% for item in organization_context.fields %}
+          {% if not item.secondary %}
+            <div class="row mb-3">
+
+              <!-- Field label -->
+              <label
+                for="input-{{ item.key }}"
+                class="col-sm-3 col-form-label col-form-label-sm"
+              >
+                {{ item.label }}
+              </label>
+
+              <!-- Field input -->
+              <div class="col-sm-9">
+                <input
+                  type="{{ item.type }}"
+                  class="form-control form-control-sm"
+                  id="input-{{ item.key }}"
+                  spellcheck="false"
+                  name="{{ item.key }}"
+                >
+              </div>
+
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        <!-- Extra Fields-->
+        <div id="extra-organization-fields" class="d-none">
+          {% for item in organization_context.fields %}
+            {% if item.secondary %}
+              <div class="row mb-3">
+
+                <!-- Field label -->
+                <label
+                  for="input-{{ item.key }}"
+                  class="col-sm-3 col-form-label col-form-label-sm"
+                >
+                  {{ item.label }}
+                </label>
+
+                <!-- Field input -->
+                <div class="col-sm-9">
+                  <input
+                    type="{{ item.type }}"
+                    class="form-control form-control-sm"
+                    id="input-{{ item.key }}"
+                    spellcheck="false"
+                    name="{{ item.key }}"
+                  >
+                </div>
+
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Show advanced fields -->
+        <div class="mt-3">
+          <button
+            id="extra-organization-fields-show"
+            class="btn btn-sm-light me-2"
+            onclick="toggleOrganizationFields(event);"
+          >
+            {% icon 'chevrons-down' hegiht="16px" width="16px" %} Show more
+          </button>
+          <button
+            id="extra-organization-fields-hide"
+            class="btn btn-sm-light d-none me-2"
+            onclick="toggleOrganizationFields(event);"
+          >
+            {% icon 'chevrons-up' hegiht="16px" width="16px" %} Show less
+          </button>
+          <button
+            id="save-button"
+            class="btn btn-sm btn-set-width bg-gradient-green text-white"
+            onclick="cannlytics.settings.saveOrganizationSettings(event, '{{ organization_id }}');"
+          >
+            Save
+          </button>
+          <button id="save-button-loading" class="ms-1 btn btn-sm btn-set-width bg-gradient-green text-white d-none" type="button" disabled>
+            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+          </button>
+        </div>
+          
+      </div><!-- End of organization fields -->
+
+      </div>
+    <div>
+
+    <!-- Team members -->
+    <div class="my-5 px-3">
+      <h1 class="fs-5 lh-base text-dark mb-0">Team</h1>
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        <small>Manage your organization's team.</small>
+      </h2>
+      <div id="team-member-grid"></div>
+      {% if organization_id in user.owner %}
+        <button
+          id="team-member-fields-show"
+          class="btn btn-sm btn-sm-light"
+          onclick="toggleTeamMemberFields(event);"
+        >
+          Add team member
+        </button>
+      {% endif %}
+    </div>
+
+    <!-- Team member fields -->
+    <div id="team-member-fields" class="d-none px-3">
+      <ol id="team-member-list" class="bold-list">
+        <li id="primary-team-member" class="mb-3">
+          <div class="row g-4">
+            <div class="col-md-3">
+              <label for="team-member-name-1" class="form-label">Name</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+              >
+            </div>
+            <div class="col-md-3">
+              <label for="team-member-email-1" class="form-label">Email</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+              >
+            </div>
+            <div class="col-md-3">
+              <label for="team-member-permissions-1" class="form-label">
+                Permissions
+                <button
+                  type="button"
+                  class="btn btn-tooltip-help"
+                  data-bs-toggle="tooltip"
+                  data-bs-html="true"
+                  title="<code>CTRL + click</code> to select multiple permissions. <code>Staff</code> permissions are required for most organization operations."
+                >
+                  {% icon 'help-circle' width="18px" height="18px" class="text-secondary" %}
+                </button>
+              </label>
+              <select
+                class="form-select form-select-sm"
+                aria-label="License type"
+                id="team-member-permissions-1"
+                multiple
+              >
+                <!-- Optional: Dynamic permission types-->
+                <option selected value="staff">Staff</option>
+                <option value="admin">Admin</option>
+                <option value="qa">QA</option>
+                <option value="billing">Billing</option>
+                <option value="scheduling">Scheduling</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <button
+                class="btn btn-link text-danger"
+                onclick="toggleTeamMemberFields(event);"
+              >
+                {% icon 'trash-2' hegiht="16px" width="16px" %}
+              </button>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <!-- Add team member button -->
+      <div class="mt-3">
+        <button
+          class="btn btn-sm btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.ui.addListItem(event, 'team-member')"
+        >
+          Add a team member
+        </button>
+        <button
+          class="btn btn-sm bg-gradient-green text-white"
+          onclick="cannlytics.settings.saveTeam();"
+        >
+          Save and send invites
+        </button>
+      </div>
+
+    </div><!-- End of team member fields -->
+
+  </form><!-- End of organization form -->
+
+</html>

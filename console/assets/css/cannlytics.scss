@@ -246,6 +246,12 @@ body.dark .markdown a:hover {
 .text-dark {
   color: #1a1a1a !important;
 }
+.simple-icon {
+  fill: #1a1a1a;
+}
+body.dark .simple-icon {
+  fill: #ccc;
+}
 .text-secondary-on-light {
   color: #ccc !important;
 }
@@ -258,9 +264,11 @@ a.text-secondary:hover {
 svg.text-secondary:hover {
   stroke: #000 !important;
 }
+body.dark h2.text-secondary,
 body.dark p.text-secondary,
 body.dark small,
-body.dark svg.text-secondary {
+body.dark svg.text-secondary,
+body.dark .toast-body.text-secondary {
   color: #ccc !important;
 }
 body.dark a.text-secondary small:hover {
@@ -658,6 +666,11 @@ ul {
   list-style: none;
   line-height: 1;
 }
+.three-by-three {
+  -webkit-column-count: 3;
+  -moz-column-count: 3;
+  column-count: 3;
+}
 
 /*--------------------------------------------------------------------------
   Tables
@@ -676,6 +689,16 @@ ul {
 }
 .form-control {
   border-color: #777;
+}
+.form-control-light {
+  border-color: rgba(27,31,35,.15);
+}
+.input-group-text {
+  background-color: #fafbfc;
+}
+body.dark .input-group-text {
+  color: #ccc;
+  background-color: #30363d;
 }
 .form-control:focus {
   border-color: #96e6a1;
@@ -787,6 +810,19 @@ ul {
 .custom-checkbox .custom-control-input:active ~ .custom-control-label::before {
   background-color: #96e6a1;
 }
+.form-select:active,
+.form-select:hover {
+  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem #45B64940;
+}
+.form-select option:hover {
+  background-color: #45B64940 !important;
+}
+button[data-toggle="dropdown"].btn-default,
+button[data-toggle="dropdown"]:hover {
+background-color: white !important;
+color: #2c3e50 !important;
+border: 2px solid #dce4ec;
+}
 
 /* Radio Groups */
 .form-check-input:checked {
@@ -819,13 +855,35 @@ body.dark footer .form-control {
   background-color: unset;
 }
 
+.btn-group .dropdown-toggle::after {
+  vertical-align: center !important;
+}
+
 /* Form fields */
 
+.field-tiny {
+  max-width: 61px;
+}
 .field-sm {
   max-width: 102px;
 }
 .field-md {
   max-width: 240px;
+}
+
+/* Accordions */
+.accordion-button:not(.collapsed) {
+  color: #0BA67F;
+}
+body.dark .accordion-button:not(.collapsed) {
+  color: #50fa7b;
+}
+.accordion-button:focus {
+  box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem #45B64940;
+  border-color: #45B64940;
+}
+body.dark .accordian-item {
+  border-color: #ccc;
 }
 
 /*--------------------------------------------------------------------------
@@ -1163,9 +1221,10 @@ body.dark .feather-search {
   stroke: #ccc;
 }
 
-/* Dark Cards */
+/* Cards */
 body:not(.dark) .card {
   color: #f5f5f5;
+  border-color: #bbbbbb !important;
 }
 body.dark .card {
   background-color: #1a1a1a;
@@ -1462,7 +1521,7 @@ body.dark .modal-content {
 ---------------------------------------------------------------------------*/
 
 .shadow-hover:hover {
-  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
 }
 .shade-hover:hover {
   background-color: #f8f9fa;
@@ -1473,6 +1532,10 @@ body.dark .card.shade-hover {
 body.dark .shade-hover:hover {
   background-color: #44475a !important;
 }
+.gold-shadow {
+  box-shadow: 0 .75rem 1rem #BF953F !important;
+}
+  // border-color: linear-gradient(to bottom right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
 
 /*--------------------------------------------------------------------------
   Alerts

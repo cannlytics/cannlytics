@@ -22,8 +22,11 @@ ENV PORT 8080
 # promptly appear in Cloud Logging.
 ENV PYTHONUNBUFFERED True
 
+# Allow xlwings to be installed.
+# ENV INSTALL_ON_LINUX 1
+
 # Run the web service on container startup. Here we use the gunicorn
 # webserver, with one worker process and 8 threads.
 # For environments with multiple CPU cores, increase the number of workers
 # to be equal to the cores available.
-CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 4 --threads 16 --timeout 120 console.wsgi:application
+CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 4 --threads 16 --timeout 120 console.core.wsgi:application

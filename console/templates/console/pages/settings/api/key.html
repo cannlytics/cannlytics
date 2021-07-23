@@ -4,11 +4,21 @@
   API Key Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/18/2021
-  Updated: 6/18/2021
+  Updated: 7/19/2021
 -->
-{% extends "console/pages/traceability/traceability.html" %}
+{% extends "console/console.html" %}
 {% load icon %}
-{% block section %}
+{% block console_body %}
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-5">
+
+  <!-- Header-->
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Settings"
+      base_page_url="/settings"
+      extra_page="API"
+      extra_page_url="/settings/api"
+      current_page="Key"
+    %}
 
   <!-- Header -->
   <div class="px-3">
@@ -81,7 +91,7 @@
         class="btn btn-sm btn-sm-light btn-md-light me-2"
         href="/settings/api"
       >
-        Back
+        Cancel
       </a>
       <button
         class="btn btn-sm btn-danger"
@@ -93,7 +103,8 @@
 
   </div><!-- End of body -->
 
-{% endblock section %}
+</main>
+{% endblock console_body %}
 
 <!-- JavaScript -->
 {% block console_js %}

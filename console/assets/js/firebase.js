@@ -1,7 +1,7 @@
 /**
  * Firebase JavaScript | Cannlytics Console
  * Created: 12/22/2020
- * Updated: 6/23/2021
+ * Updated: 7/11/2021
  */
 
 // Initialize Firebase
@@ -26,11 +26,10 @@ const storage = firebase.storage();
 const { firestore } = firebase;
 const GoogleAuthProvider = firebase.auth.GoogleAuthProvider;
 
-
-/*
- * Authentication tools
- */
-
+ 
+/*----------------------------------------------------------------------------
+  Authentication interface
+  ----------------------------------------------------------------------------*/
 
 const changePhotoURL = (file) => new Promise((resolve, reject) => {
   /* 
@@ -89,21 +88,25 @@ const getUserToken = (refresh=false) => new Promise((resolve, reject) => {
 });
 
 
-/*
- * Firestore interface
- */
+const verifyUserToken = (token) => new Promise((resolve, reject) => {
+  /*
+   * Verify an authentication token for a given user.
+   */
+  auth.signInWithCustomToken(token)
+    .then((userCredential) => resolve(userCredential.user))
+    .catch((error) => reject(error));
+});
 
 
-const getCollection = (
-  path,
-  limit=null,
-  orderBy=null,
-  desc=false,
-  filters=[],
-) => new Promise((resolve) => {
+/*----------------------------------------------------------------------------
+  Firestore interface
+  ----------------------------------------------------------------------------*/
+
+const getCollection = (path, params) => new Promise((resolve) => {
   /*
    * Get documents from a collection in Firestore.
    */
+  const { desc, filters=[], limit, orderBy } = params;
   let ref = getReference(path);
   filters.forEach((filter) => {
     ref = ref.where(filter.key, filter.operation, filter.value);
@@ -113,13 +116,18 @@ const getCollection = (
   if (limit) ref = ref.limit(limit);
   ref.get().then((snapshot) => {
     const docs = [];
+    if (!snapshot) {
+      resolve();
+      return;
+    }
     snapshot.forEach((doc) => {
       docs.push(doc.data());
     });
     resolve(docs);
-  }).catch((error) => {
-    console.log('Error getting documents: ', error);
-  });
+  })
+  // .catch((error) => {
+  //   console.log('Error getting documents: ', error);
+  // });
 });
 
 
@@ -129,7 +137,7 @@ const getDocument = (path) => new Promise((resolve) => {
    */
   const ref = getReference(path);
   ref.get().then((doc) => {
-    resolve(doc.data());
+    resolve(doc.data() || {});
   });
 });
 
@@ -148,20 +156,102 @@ const getReference = (path) => {
 };
 
 
-const updateDocument = (path, data) => new Promise((resolve) => {
+const updateDocument = (path, data) => new Promise((resolve, reject) => {
   /*
    * Update or create a document in Firestore.
    */
   const ref = getReference(path);
   ref.set(data, { merge: true }).then((doc) => {
-    resolve(doc.data());
+    if (doc) resolve(doc.data());
+    else resolve();
+  })
+  .catch((error) => reject(error));
+});
+
+
+
+const deleteDocument = (path) => new Promise((resolve, reject) => {
+  /*
+   * Delete a document from Firestore.
+   */
+  const ref = getReference(path);
+  ref.delete().then(() => resolve())
+    .catch((error) => reject(error));
+});
+
+
+/*----------------------------------------------------------------------------
+  Storage interface
+  ----------------------------------------------------------------------------*/
+
+const getDownloadURL = (path) => new Promise((resolve, reject) => {
+  /*
+   * Get a download URL for a given file path.
+   */
+  const storageRef = storage.ref();
+  storageRef.child(path).getDownloadURL()
+  .then((url) => resolve(url))
+  .catch((error) => reject(error));
+
+});
+
+
+// TODO: Combine uploadImage with uploadFile
+const uploadImage = (path, data) => new Promise((resolve) => {
+  /*
+   * Upload an image to Firebase Storage given it's full destination path and 
+   * the image as a data URL.
+   */
+  const storageRef = storage.ref();
+  const ref = storageRef.child(path);
+  ref.putString(data, 'data_url').then((snapshot) => {
+    resolve(snapshot);
   });
 });
 
 
-/*
- * Storage tools
- */
+const uploadFile = (path, file) => new Promise((resolve, reject) => {
+  /*
+   * Upload an image to Firebase Storage given it's full destination path and 
+   * the image as a data URL.
+   */
+  const storageRef = storage.ref();
+  const ref = storageRef.child(path);
+  ref.put(file).then((snapshot) => resolve(snapshot))
+    .catch((error) => reject(error));
+});
+
+
+const deleteFile = (path) => new Promise((resolve, reject) => {
+  /*
+   * Upload an image to Firebase Storage given it's full destination path and 
+   * the image as a data URL.
+   */
+  const storageRef = storage.ref();
+  const ref = storageRef.child(path);
+  ref.delete().then(() => resolve())
+    .catch((error) => reject(error));
+});
+
+
+const downloadFile = async (ref, fileName) => {
+  /*
+   * Download a file given a path or a URL.
+   */
+  console.log(ref, fileName);
+  if (!ref.startsWith('http')) ref = await getDownloadURL(ref);
+  const response = await fetch(ref);
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.style = 'display: none';
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+  link.parentNode.removeChild(link);
+  window.URL.revokeObjectURL(blob);
+};
 
 
 const storageErrors = {
@@ -188,8 +278,15 @@ export {
   storageErrors,
   GoogleAuthProvider,
   changePhotoURL,
+  deleteDocument,
+  deleteFile,
+  downloadFile,
+  getCollection,
+  getDownloadURL,
   getUserToken,
   getDocument,
   updateDocument,
-  getCollection,
+  uploadImage,
+  uploadFile,
+  verifyUserToken,
 };

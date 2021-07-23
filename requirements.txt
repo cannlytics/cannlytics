@@ -5,10 +5,10 @@
 # run 'pip freeze > requirements.txt' in the terminal to overwrite this file.
 
 beautifulsoup4==4.9.3
-coreapi
+coreapi==2.3.3
+cryptography==3.4.7
 dj_static==0.0.6
 django==3.2
-# django-cors-headers==3.7.0
 django-environ==0.4.5
 django-feather==0.2.6
 django-livereload-server
@@ -21,7 +21,9 @@ google-cloud-secret-manager==2.5.0
 gunicorn==20.1.0
 Markdown==3.3.4
 mkdocstrings==0.15.0
+openpyxl==3.0.7
 pandas==1.2.1
+Pillow==8.3.1
 PyJWT==2.1.0
 python-crontab
 python-decouple==3.3
@@ -29,3 +31,4 @@ psycopg2-binary==2.8.6
 requests==2.25.1
 ulid-py==1.1.0
 xhtml2pdf==0.2.5
+XlsxWriter==1.4.4

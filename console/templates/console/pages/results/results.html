@@ -4,107 +4,118 @@
   Results Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/5/2021
-  Updated: 6/22/2021
+  Updated: 7/15/2021
 -->
 {% extends "console/console.html" %}
+{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Results | Cannlytics {% endblock title %}
 {% block console_body %}
-{% if section %}
+{% if section and section not in 'logs,files,certificates' %}
 
   <!-- Detail page -->
-  <!-- FIXME: Pass model ID -->
-  {% include "console/pages/results/result.html" with id="" %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+    {% include "console/pages/results/result.html" with
+      id=section
+      data_model=data_model
+    %}
+    {% block unit %}{% endblock unit %}
+  </main>
 
 {% else %}
+
+  <!-- List -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
       <h1 class="fs-5 mb-0 lh-base">Results</h1>
-      <div>
-        <button
-          class="btn btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.settings.importData('results');"
-        >
-          Import
-        </button>
-        <button
-          class="btn btn-sm-light btn-md-light"
-          onclick="cannlytics.settings.exportData('results');"
-        >
-          Export
-        </button>
-      </div>
     </div>
 
     <!-- Body -->
     <div class="results">
 
+      <!-- Tabs -->
+      {% include "console/components/forms/form_tabs.html" with
+        model="results"
+        extra="Certificates"
+        extra_path="certificates"
+      %}
+
+      <!-- Logs -->
+      {% if section == 'logs' %}
+        {% include "console/pages/settings/logs/logs.html" with
+          model='results'
+          model_singular='result'
+          organizations=organizations
+          section=section
+          user=user
+        %}
+
+      <!-- Files -->
+      {% elif section == 'files' %}
+        {% include "console/pages/settings/files/files.html" with
+          model='results'
+          model_singular='result'
+          organizations=organizations
+          section=section
+          user=user
+        %}
+
+      <!-- TODO: Certificates -->
+      {% elif section == 'certificates' %}
+      
+
       <!-- Table -->
-      <div class="card my-3">
-        <div class="card-body">
-          <h2 class="h6 mb-3 text-dark">Results</h2>
-          <div class="table-responsive">
+      {% else %}
 
-            <!-- Placeholder if no records -->
-            {% if True %}
-              {% include "console/components/placeholders/placeholder.html" with
-                placeholder=results.placeholder
-                only
-              %}
+        <!-- Options -->
+        {% include "console/components/tables/simple_table_options.html" with
+          model='results'
+          model_singular='result'
+        %}
 
-            <!-- AG-Grid Table -->
-            {% else %}
-              <div id="results-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
-            {% endif %}
-
-          </div>
+        <!-- Loading placeholder -->
+        <div id="loading-placeholder">
+          {% include "console/components/placeholders/loading_placeholder.html" with
+            height='350px'
+            width='100%'
+            only
+          %}
         </div>
-      </div><!-- End of the table -->
+
+        <!-- No-data Placeholder -->
+        <div id="data-placeholder" class="d-none">
+          {% include "console/components/placeholders/placeholder.html" with
+            placeholder=results.placeholder
+            only
+          %}
+        </div>
+
+        <!-- AG Grid Table -->
+        <div id="data-table" class="d-none">
+          <!-- TODO: Advanced search -->
+          <div
+            id="results-table"
+            class="ag-theme-alpine-dark"
+            style="height: 350px; width:100%;"
+          ></div>
+        </div>
+
+      {% endif %}
 
     </div><!-- End of the body -->
-
-    {% comment %} <!-- Header -->
-    <!-- Optional: Dynamically render tabs -->
-    <div class="col pt-3 pb-2 mb-3">
-      <h1 class="fs-5 mb-0 lh-base mb-3">Results</h1>
-      <ul class="nav nav-tabs">
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'records' %}active{% endif %}"
-            aria-current="{% if section == 'records' %}page{% endif %}"
-            href="/invoices/items"
-          >
-            Current
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'marketing' %}active{% endif %}"
-            aria-current="{% if section == 'marketing' %}page{% endif %}"
-            href="/invoices/vendors"
-          >
-            Archive
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if section == 'logs' %}active{% endif %}"
-            aria-current="{% if section == 'logs' %}page{% endif %}"
-            href="/invoices/logs"
-          >
-            Logs
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Dynamic section -->
-    <section>
-      {% block section %}{% endblock %}
-    </section> {% endcomment %}
 
   </main>
 {% endif %}
 {% endblock console_body %}
 
+<!-- JavaScript -->
+{% block console_js %}
+
+  {% if not section %}
+    <script>
+      cannlytics.app.streamData('results', 'result', '{{ organizations.0.organization_id }}');
+    </script>
+  {% endif %}
+
+{% endblock console_js %}
 </html>

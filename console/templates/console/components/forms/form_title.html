@@ -16,13 +16,14 @@
 -->
 <div class="d-flex justify-content-between">
   <div class="px-3">
-    <h1 class="fs-5 lh-base text-dark mb-0 mt-3">
-     {{ model_singular|title }}
-     {{ id }}
+    <h1 class="fs-6 lh-base text-dark mb-0 mt-3">
+      {% if id == 'new' %}New{% endif %}
+      {{ model_singular|title }}
+      {% if id != 'new' %}{{ id }}{% endif %}
     </h1>
     {% if description %}
       <h2 class="fs-6 lh-base text-secondary mb-3">
-        {{ description }}
+        <small>{{ description }}</small>
       </h2>
     {% endif %}
   </div>
@@ -30,19 +31,49 @@
   <!-- Options (back, save) -->
   {% if options %}
     <div class="d-flex align-items-center">
-      {% if export %}
+      <button
+        class="btn btn-sm-light btn-md-light btn-set-width me-2"
+        onclick="document.getElementById('{{ model_singular }}-form').reset();"
+      >
+        Clear
+      </button>
+      {% if id and id != 'new' %}
         <button
-          class="btn btn-sm btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.settings.exportData('{{ model }}', '{{ id }}');"
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="cannlytics.ui.viewObject('{{ model_singular }}');"
+        >
+          Reset
+        </button>
+      {% elif not id or id == 'new' %}
+        <button
+          class="btn btn-sm-light btn-md-light btn-set-width text-no-wrap me-2"
+          onclick="cannlytics.app.createID('{{ model }}', '{{ model_singular }}', null, '{{ abbreviation }}');"
+        >
+          New ID
+        </button>
+      {% endif %}
+      {% if id and id != 'new' %}
+        <button
+          class="btn btn-sm-light btn-md-light btn-set-width me-2"
+          onclick="cannlytics.app.exportData('{{ model_singular }}', '{{ id }}');"
         >
           Export
         </button>
       {% endif %}
       <button
-        class="btn btn-sm bg-gradient-green text-white"
-        onclick="cannlytics.api.save('{{ model }}', '{{ id }}');"
+        id="form-save-button"
+        class="btn btn-sm btn-set-width bg-gradient-green text-white"
+        onclick="cannlytics.app.save('{{ model }}', '{{ model_singular }}', '{{ abbreviation }}');"
       >
         Save
+      </button>
+      <button
+        id="form-save-loading-button"
+        class="btn btn-sm btn-set-width bg-gradient-green text-white d-none"
+        type="button"
+        disabled
+      >
+        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
       </button>
     </div>
   {% endif %}

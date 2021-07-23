@@ -4,33 +4,46 @@ State Variables | Cannlytics Console
 Author: Keegan Skeate
 Company: Cannlytics
 Created: 10/15/2020
-Updated: 6/22/2021
+Updated: 7/9/2021
 
 Relatively static state variables for extra context on each page/screen.
 The idea is to separate the material from the templates,
 with the hope of better-maintained code.
-
-Optional: Turn into models and save in database.
+The data models are stored in an organizations settings, so that
+each organization can customize the data points that they collect.
 """
 # pylint:disable=line-too-long
 
 # Page-specific supplementary data.
-data = {}
-collections = {}
-docs = {}
+data = {
+    "settings": {
+        "documents": [
+            {"key": "traceability_settings", "ref": "organizations/{organization_id}/organization_settings/traceability_settings"},
+        ],
+        "collections": [
+            {"key": "data_models", "ref": "organizations/{organization_id}/data_models"},
+        ],
+    }
+}
+collections = {
+    "/settings/organizations": [
+        {"key": "data_models", "ref": "organizations/{organization_id}/data_models"},
+    ]
+}
+docs = {
+    "/settings/organizations": [
+        {"key": "traceability_settings", "ref": "organizations/{organization_id}/organization_settings/traceability_settings"},
+    ],
+}
 
 # Page-specific context.
 material = {
     "analyses": {
-        "breadcrumbs": [
-            {"title": "Analyses", "url": "/analyses"},
-            {"title": "Analysis", "active": True},
-        ],
         "fields": [
             {"key": "analysis_id", "label": "Analysis ID"},
             {"key": "name", "label": "Name"},
             {"key": "key", "label": "Key"},
-            {"key": "price", "label": "Price", "type": "text"}, # Optional: currency
+            {"key": "price", "label": "Price", "type": "text", "class": "field-sm"}, # Optional: currency
             {"key": "public", "label": "Public", "type": "bool"},
         ],
         "placeholder": {
@@ -38,46 +51,40 @@ material = {
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_microbiologist.svg",
             "title": "Create your first analysis",
-            "message": "Create a scientific analysis, a set of analytes or tests to perform for an organization, including internal analyses for your organizations.",
+            "message": "Create a scientific analysis, a set of analytes or tests to collect measurements for to get results.",
             "url": "./analyses/new",
         },
     },
     "analytes": {
-        "breadcrumbs": [
-            {"title": "Analytes", "url": "/analytes"},
-            {"title": "Analyte", "active": True},
-        ],
         "fields": [
             {"key": "analyte_id", "label": "Analyte ID"},
             {"key": "name", "label": "Name"},
             {"key": "key", "label": "Key"},
-            {"key": "limit", "label": "Limit", "type": "number", "class":"field-sm"},
-            {"key": "lod", "label": "LOD", "type": "number", "class":"field-sm"},
-            {"key": "loq", "label": "LOQ", "type": "number", "class":"field-sm"},
-            {"key": "units", "label": "Units", "type": "text", "class":"field-sm"},
-            {"key": "formula", "label": "Calculation Formula", "type": "text"},
+            {"key": "formula", "label": "Results Formula", "type": "text"},
+            {"key": "limit", "label": "Limit", "type": "number", "class":"field-sm text-end"},
+            {"key": "lod", "label": "LOD", "type": "number", "class":"field-sm text-end"},
+            {"key": "loq", "label": "LOQ", "type": "number", "class":"field-sm text-end"},
+            {"key": "result_units", "label": "Result Units", "type": "text", "class":"field-sm"},
+            {"key": "measurement_units", "label": "Measurement Units", "type": "text", "class":"field-sm"},
+            {"key": "cas", "label": "CAS Number", "class":"field-sm"},
             {"key": "public", "label": "Public", "type": "bool"},
         ],
         "placeholder": {
             "action": "Create an analyte",
             "height": "200px",
-            "image": "console/images/icons/two-tone/two_tone_atom.svg",
+            "image": "console/images/illustrations/outline/lab_microscope.svg",
             "title": "Create your first analyte",
-            "message": "Add analytes for analyses, a set of analytes constitutes an analysis.",
+            "message": "Add analytes for analyses, a set of analytes constitutes an analysis. Analytes can have limits and formulas for calculating results.",
             "url": "./analytes/new",
         },
     },
     "areas": {
-        "breadcrumbs": [
-            {"title": "Areas", "url": "/areas"},
-            {"title": "Area", "active": True},
-        ],
         "fields": [
             {"key": "area_id", "label": "Area ID"},
             {"key": "name", "label": "Name"},
-            {"key": "area_type", "label": "Area Type"},
-            {"key": "area_type_id", "label": "Area Type ID"},
-            {"key": "external_id", "label": "External ID"},
+            {"key": "area_type", "label": "Area Type", "type": "select", "options": [{"key": "Default", "label": "Default"}, {"key": "Planting", "label": "Planting"}, {"key": "Packing", "label": "Packing"}], "selected": "Default"},
+            # {"key": "area_type_id", "label": "Area Type ID", "type": "select", "options": [{"key": "1", "label": "1"}, {"key": "2", "label": "2"}, {"key": "3", "label": "3"}], "selected": "1"},
+            # {"key": "external_id", "label": "External ID"},
             {"key": "active", "label": "Active", "type": "bool"},
             {"key": "quarantine", "label": "Quarantine", "type": "bool"},
         ],
@@ -91,24 +98,21 @@ material = {
         },
     },
     "contacts": {
-        "breadcrumbs": [
-            {"title": "Contacts", "url": "/contacts"},
-            {"title": "Contacts", "active": True},
-        ],
         "fields": [
-            {"key": "organization_id", "label": "Organization ID"},
+            {"key": "contact_id", "label": "Contact ID"},
             {"key": "organization", "label": "Organization"},
+            {"key": "trade_name", "label": "Trade Name"},
+            {"key": "email", "label": "Email", "type": "email"},
+            {"key": "phone", "label": "Phone Number", "type": "tel"},
+            {"key": "website", "label": "Website"},
             {"key": "address", "label": "Address"},
             {"key": "street", "label": "Street"},
             {"key": "city", "label": "City"},
             {"key": "county", "label": "County"},
-            {"key": "state", "label": "State", "class": "form-sm"},
-            {"key": "zip_code", "label": "Zip"},
-            {"key": "latitude", "label": "Latitude", "type": "number", "class": "form-sm"},
-            {"key": "longitude", "label": "Longitude", "type": "number", "class": "form-sm"},
-            {"key": "email", "label": "Email", "type": "email"},
-            {"key": "Phone", "label": "Phone Number", "type": "tel"},
-            {"key": "website", "label": "Website"},
+            {"key": "state", "label": "State", "class": "field-sm"},
+            {"key": "zip_code", "label": "Zip", "class": "field-sm"},
+            {"key": "latitude", "label": "Latitude", "type": "number", "class": "field-sm"},
+            {"key": "longitude", "label": "Longitude", "type": "number", "class": "field-sm"},
             # {"key": "linkedin", "label": "LinkedIn"},
         ],
         "placeholder": {
@@ -116,16 +120,13 @@ material = {
             "height": "200px",
             "image": "console/images/illustrations/chemistry_scientist.svg",
             "title": "Add your first contact",
-            "message": "Add a contact to begin providing analyses for other organizations.",
+            "message": "Add a contact to begin providing analyses for other organizations. Contacts are any other organization you interact with, such as your clients, vendors, and partners.",
             "url": "./contacts/new",
         },
     },
     "instruments": {
-        "breadcrumbs": [
-            {"title": "Instruments", "url": "/instruments"},
-            {"title": "Instrument", "active": True},
-        ],
         "fields": [
+            {"key": "instrument_id", "label": "Instrument ID"},
             {"key": "name", "label": "Name"},
             {"key": "data_path", "label": "Data path"},
             {"key": "area_id", "label": "Area ID"},
@@ -133,7 +134,8 @@ material = {
             {"key": "calibrated_at", "label": "Calibrated At", "type": "datetime"},
             {"key": "calibrated_by", "label": "Calibrated By", "class": "field-sm"},
             {"key": "description", "label": "Description", "type": "textarea"},
-            {"key": "notes", "label": "Notes", "type": "textarea"},
+            {"key": "vendor", "label": "Vendor", "type": "text"},
+            {"key": "instrument_type", "label": "Instrument Type", "type": "text"},
         ],
         "options": [],
         "placeholder": {
@@ -146,11 +148,8 @@ material = {
         },
     },
     "inventory": {
-        "breadcrumbs": [
-            {"title": "Inventory", "url": "/inventory"},
-            {"title": "Item", "active": True},
-        ],
         "fields": [
+            {"key": "item_id", "label": "Item ID"}, # Optional: inventory_id is preferred but bug in app.js createID
             {"key": "name", "label": "Name"},
             {"key": "item_type", "label": "Item Type", "type": "text"},
             {"key": "quantity", "label": "Quantity", "type": "text"},
@@ -187,10 +186,6 @@ material = {
         },
     },
     "measurements": {
-        "breadcrumbs": [
-            {"title": "Measurements", "url": "/measurements"},
-            {"title": "Measurement", "active": True},
-        ],
         "fields": [
             {"key": "measurement_id", "label": "Measurement ID"},
             {"key": "sample_id", "label": "Sample ID"},
@@ -221,39 +216,7 @@ material = {
             "url": "./measurements/new",
         },
     },
-    "organizations": {
-        "breadcrumbs": [
-            {"title": "Settings", "url": "settings"},
-            {"title": "Organizations", "active": True},
-        ],
-        "fields": [
-            {"key": "name", "label": "Name"},
-            {"key": "trade_name", "label": "Trade Name (DBA)"},
-            {"key": "website", "label": "Website"},
-            {"type": "email", "key": "email", "label": "Email"},
-            {"key": "phone", "label": "Phone"},
-            {"key": "linkedin", "label": "LinkedIn"},
-            {"key": "address", "label": "Address", "secondary": True},
-            {"key": "city", "label": "City", "secondary": True},
-            {"key": "state", "label": "State", "secondary": True},
-            {"key": "country", "label": "Country", "secondary": True},
-            {"key": "zip_code", "label": "Zip Code", "secondary": True},
-            {"key": "external_id", "label": "External ID", "secondary": True},
-        ],
-        "placeholder": {
-            "action": "Start an organization",
-            "height": "200px",
-            "image": "console/images/illustrations/chemistry_scientist.svg",
-            "title": "Create or join an organization",
-            "message": "Add team members to your organization or join an organization to begin collaborating.",
-            "url": "./organizations/new",
-        },
-    },
     "projects": {
-        "breadcrumbs": [
-            {"title": "Projects", "url": "/projects"},
-            {"title": "Project", "active": True},
-        ],
         "fields": [
             {"key": "project_id", "label": "Project ID"},
             {"key": "organization", "label": "Organization"},
@@ -273,20 +236,16 @@ material = {
         },
     },
     "results": {
-        "breadcrumbs": [
-            {"title": "Results", "url": "/results"},
-            {"title": "Results", "active": True},
-        ],
         "fields": [
             {"key": "result_id", "label": "Result ID"},
-            {"key": "result", "label": "Result", "type": "number"},
             {"key": "formula", "label": "Formula", "type": "formula"},
             {"key": "sample_id", "label": "Sample ID"},
             {"key": "package_id", "label": "Package ID"},
             {"key": "package_label", "label": "Package Label"},
             {"key": "product_name", "label": "Product Name"},
             {"key": "sample_type", "label": "Sample Type"},
-            {"key": "status", "label": "Status"},
+            {"key": "result", "label": "Result", "type": "number", "class": "field-sm"},
+            {"key": "status", "label": "Status", "class": "field-sm"},
             {"key": "units", "label": "Units", "class": "field-sm"},
             {"key": "reviewed_at", "label": "Reviewed At", "type": "datetime"},
             {"key": "reviewed_by", "label": "Reviewed By", "class": "field-sm"},
@@ -310,21 +269,20 @@ material = {
         },
     },
     "samples": {
-        "breadcrumbs": [
-            {"title": "Samples", "url": "/samples"},
-            {"title": "Samples", "active": True},
-        ],
         "fields": [
-            {"key": "photo_url", "label": "Photo", "type": "image"},
             {"key": "sample_id", "label": "Sample ID"},
             {"key": "project_id", "label": "Project ID"},
             {"key": "batch_id", "label": "Batch ID"},
+            {"key": "sample_name", "label": "Sample Name"},
+            {"key": "strain_name", "label": "Strain Name"},
+            {"key": "sample_type", "label": "Sample Type"},
             {"key": "created_at", "label": "Created At", "type": "datetime"},
             {"key": "created_by", "label": "Created By", "class": "field-sm"},
             {"key": "updated_at", "label": "Updated At", "type": "datetime"},
             {"key": "updated_by", "label": "Updated By", "class": "field-sm"},
             {"key": "coa_url", "label": "CoA URL", "type": "text"},
             {"key": "notes", "label": "Notes", "type": "textarea"},
+            {"key": "photo_url", "label": "Photo", "type": "image"},
         ],
         "placeholder": {
             "action": "Create a sample",
@@ -336,10 +294,6 @@ material = {
         },
     },
     "transfers": {
-        "breadcrumbs": [
-            {"title": "Transfers", "url": "/transfers"},
-            {"title": "Transfer", "active": True},
-        ],
         "fields": [
             {"key": "transfer_id", "label": "Transfer ID"},
             {"key": "transfer_type", "label": "Transfer Type"},
@@ -401,113 +355,175 @@ material = {
             {"key": "vehicle_model", "label": "Vehicle Model"},
         ],
         "placeholder": {
-            "action": "Create an inventory transfer",
+            "action": "Create an transfer",
             "height": "200px",
             "image": "console/images/illustrations/outline/lab_reagents.svg",
-            "title": "Create your first inventory transfer",
-            "message": "Create a transfer of inventory items from one organization to another.",
+            "title": "Create your first transfer",
+            "message": "Create a transfer of inventory items, such as lab samples, from one organization to another.",
             "url": "./transfers/new",
         },
     },
     "traceability": {
+        "provider": "Metrc",
         "tabs": [
-            # TODO: Show traceability tabs by organization type (e.g. "org_type": "*",)
-            # {
-            #     "name": "Items",
-            #     "section": "items",
-            #     "url": "/traceability/items",
-            #     "description": "View items that are used to track your inventory at a given facility.",
-            # },
+            {
+                "name": "Items",
+                "section": "items",
+                "url": "/traceability/items",
+                "description": "View items that are used to track your inventory at a given facility.",
+                "org_types": ["producer", "retailer"],
+                "selected": False,
+            },
             {
                 "name": "Packages",
                 "section": "packages",
                 "url": "/traceability/packages",
                 "description": "Manage your packages, groups of cannabis items.",
+                "org_types": ["lab", "producer", "retailer"],
+                "selected": True,
             },
             {
                 "name": "Lab Tests",
                 "section": "lab-tests",
                 "url": "/traceability/lab-tests",
                 "description": "Manage details for each individual lab test performed on submitted packages.",
+                "org_types": ["lab", "producer", "retailer"],
+                "selected": True,
             },
-            # {
-            #     "name": "Strains",
-            #     "section": "strains",
-            #     "url": "/traceability/strains",
-            #     "description": "View your cannabis strains, varieties, and classifications.",
-            # },
-            # {
-            #     "name": "Employees",
-            #     "section": "employees",
-            #     "url": "/traceability/employees",
-            #     "description": "View your organization's employees or team members.",
-            # },
-            # {
-            #     "name": "Facilities",
-            #     "section": "facilities",
-            #     "url": "/traceability/facilities",
-            #     "description": "",
-            # },
+            {
+                "name": "Strains",
+                "section": "strains",
+                "url": "/traceability/strains",
+                "description": "View your cannabis strains, varieties, and classifications.",
+                "org_types": ["producer", "retailer"],
+                "selected": False,
+            },
+            {
+                "name": "Employees",
+                "section": "employees",
+                "url": "/traceability/employees",
+                "description": "View your organization's employees or team members.",
+                "org_types": [],
+                "selected": False,
+            },
+            {
+                "name": "Facilities",
+                "section": "facilities",
+                "url": "/traceability/facilities",
+                "description": "",
+                "org_types": [],
+                "selected": False,
+            },
             {
                 "name": "Locations",
                 "section": "locations",
                 "url": "/traceability/locations",
                 "description": "Manage your locations used track packages and items.",
+                "org_types": ["lab", "producer", "retailer"],
+                "selected": True,
             },
-            # {
-            #     "name": "Harvests",
-            #     "section": "harvests",
-            #     "url": "/traceability/harvests",
-            # },
-            # {
-            #     "name": "Patients",
-            #     "section": "patients",
-            #     "url": "/traceability/patients",
-            # },
-            # {
-            #     "name": "Plant Batches",
-            #     "section": "plant-batches",
-            #     "url": "/traceability/plant-batches",
-            # },
-            # {
-            #     "name": "Plants",
-            #     "section": "plants",
-            #     "url": "/traceability/plants",
-            # },
-            # {
-            #     "name": "Sales",
-            #     "section": "sales",
-            #     "url": "/traceability/sales",
-            # },
+            {
+                "name": "Harvests",
+                "section": "harvests",
+                "url": "/traceability/harvests",
+                "org_types": ["producer"],
+                "selected": False,
+            },
+            {
+                "name": "Patients",
+                "section": "patients",
+                "url": "/traceability/patients",
+                "org_types": ["retailer"],
+                "selected": False,
+            },
+            {
+                "name": "Plant Batches",
+                "section": "plant-batches",
+                "url": "/traceability/plant-batches",
+                "org_types": ["producer"],
+                "selected": False,
+            },
+            {
+                "name": "Plants",
+                "section": "plants",
+                "url": "/traceability/plants",
+                "org_types": ["producer"],
+                "selected": False,
+            },
+            {
+                "name": "Sales",
+                "section": "sales",
+                "url": "/traceability/sales",
+                "org_types": ["retailer"],
+                "selected": False,
+            },
             {
                 "name": "Transfers",
                 "section": "transfers",
                 "url": "/traceability/transfers",
                 "description": "Manage your records of packages moving from one licensee to another.",
+                "org_types": ["lab", "producer", "retailer"],
+                "selected": True,
             },
-            # {
-            #     "name": "Units",
-            #     "section": "units",
-            #     "url": "/traceability/units",
-            #     "description": "",
-            # },
+            {
+                "name": "Units",
+                "section": "units",
+                "url": "/traceability/units",
+                "description": "",
+                "org_types": [],
+                "selected": False,
+            },
             {
                 "name": "Settings",
                 "section": "settings",
                 "url": "/traceability/settings",
                 "description": "Manage the settings of your interface to your traceability system.",
+                "org_types": ["lab", "producer", "retailer", "integrator"],
+                "selected": True,
             },
         ],
     },
     "settings": {
         "options": [
             {"title": "API", "url": "/settings/api"},
-            {"title": "Data collection", "url": "/settings/data-collection"},
+            {"title": "Data", "url": "/settings/data"},
             {"title": "Logs", "url": "/settings/logs"},
-            {"title": "Notifications", "url": "/settings/notifications"},
+            # {"title": "Notifications", "url": "/settings/notifications"},
             {"title": "Organization settings", "url": "/settings/organizations"},
-            {"title": "Theme", "url": "/settings/theme"},
+            # {"title": "Theme", "url": "/settings/theme"},
             {"title": "User Settings", "url": "/settings/user"},
+        ],
+        "organizations": {
+            "breadcrumbs": [
+                {"title": "Settings", "url": "settings"},
+                {"title": "Organizations", "active": True},
+            ],
+            "fields": [
+                {"key": "name", "label": "Name"},
+                {"key": "trade_name", "label": "Trade Name"},
+                {"key": "website", "label": "Website"},
+                {"type": "email", "key": "email", "label": "Email"},
+                {"key": "phone", "label": "Phone"},
+                {"key": "linkedin", "label": "LinkedIn"},
+                {"key": "address", "label": "Address", "secondary": True},
+                {"key": "city", "label": "City", "secondary": True},
+                {"key": "state", "label": "State", "secondary": True},
+                {"key": "country", "label": "Country", "secondary": True},
+                {"key": "zip_code", "label": "Zip Code", "secondary": True},
+                {"key": "external_id", "label": "External ID", "secondary": True},
+            ],
+            "placeholder": {
+                "action": "Start an organization",
+                "height": "200px",
+                "image": "console/images/illustrations/chemistry_scientist.svg",
+                "title": "Create or join an organization",
+                "message": "Add team members to your organization or join an organization to begin collaborating.",
+                "url": "./organizations/new",
+            },
+        },
+        "organization_breadcrumbs": [
+            {"title": "Settings", "url": "settings"},
+            {"title": "Organization Settings", "active": True},
         ],
         "user_breadcrumbs": [
             {"title": "Settings", "url": "settings"},
@@ -524,38 +540,46 @@ material = {
             {"title": "Change your password", "url": "/account/password-reset"},
         ],
     },
-
-    # Drafts:
-
-    # "pin": {
-    #     "breadcrumbs": [
-    #         {"title": "Settings", "url": "/settings"},
-    #         {"title": "User Settings", "url": "/settings/user"},
-    #         {"title": "Pin", "active": True},
-    #     ],
-    # },
-    # "signature": {
-    #     "breadcrumbs": [
-    #         {"title": "Settings", "url": "/settings"},
-    #         {"title": "User Settings", "url": "/settings/user"},
-    #         {"title": "Signature", "active": True},
-    #     ],
-    # },
-    # "templates": {
-    #     "breadcrumbs": [
-    #         {"title": "Intake", "url": "intake"},
-    #         {"title": "Templates", "active": True},
-    #     ],
-    #     "placeholder": {
-    #         "action": "Create a template",
-    #         "height": "200px",
-    #         "image": "console/images/illustrations/outline/lab_desktop.svg",
-    #         "title": "Create your first template",
-    #         "message": "Create a template for creating invoices, certificates, and other forms.",
-    #         "url": "./templates/new",
-    #     },
-    # },
-
+    "logs": {
+        "placeholder": {
+            "height": "200px",
+            "image": "console/images/icons/multi-tone/documents.svg",
+            "title": "No logs in this period",
+            "message": "You can create a custom log for traceability or quality control purposes or try expanding your search.",
+        },
+        "fields": [
+            {"key": "created_at", "label": "Time", "type": "datetime", "class": "field-sm"},
+            {"key": "log_id", "label": "Log ID", "disabled": True, "hidden": True},
+            {"key": "action", "label": "Action"},
+            {"key": "changes", "label": "Changes", "type": "textarea"},
+            {"key": "user", "label": "User ID", "disabled": True},
+            {"key": "user_email", "label": "User email", "disabled": True},
+            {"key": "user_name", "label": "User name", "disabled": True},
+            {"key": "user_photo_url", "label": "User photo", "disabled": True},
+            {"key": "type", "label": "Type", "class": "field-sm", "disabled": True},
+            {"key": "key", "label": "Key", "class": "field-sm", "disabled": True},
+        ],
+    },
+    "files": {
+        "placeholder": {
+            "height": "200px",
+            "image": "console/images/icons/multi-tone/documents.svg",
+            "title": "No logs in this period",
+            "message": "You can create a custom log for traceability or quality control purposes or try expanding your search.",
+        },
+        "fields": [
+            {"key": "file_id", "label": "File ID", "disabled": True, "hidden": True},
+            {"key": "name", "label": "Name", "disabled": True},
+            {"key": "uploaded_at", "label": "Uploaded At", "type": "datetime", "disabled": True},
+            {"key": "uploaded_by", "label": "Uploaded By", "disabled": True},
+            {"key": "content_type", "label": "File Type", "disabled": True},
+            {"key": "file_size", "label": "File Size", "disabled": True},
+            {"key": "version", "label": "Version", "class": "field-sm", "disabled": True},
+            {"key": "type", "label": "Type", "class": "field-sm", "disabled": True},
+            {"key": "key", "label": "Key", "class": "field-sm", "disabled": True},
+            {"key": "pinned", "label": "Pin File", "type": "bool", "onchange": "pinFile"},
+        ],
+    },
 }
 
 
@@ -566,8 +590,14 @@ layout = {
             {
                 "path": "analyses",
                 "title": "Analyses",
-                "description": "Manage analyses, analytes, and boundaries.",
+                "description": "Manage analyses, tests for your analytes.",
                 "image_path": "console/images/icons/multi-tone/certificate-flask.png",
+            },
+            {
+                "path": "analytes",
+                "title": "Analytes",
+                "description": "Manage analytes, compounds that you wish to test.",
+                "image_path": "console/images/icons/multi-tone/microscope.png",
             },
             {
                 "path": "areas",
@@ -593,17 +623,11 @@ layout = {
                 "description": "Manage inventory, items, packages, and more.",
                 "image_path": "console/images/icons/multi-tone/records.png",
             },
-            # {
-            #     "path": "invoices",
-            #     "title": "Invoices",
-            #     "description": "Manage laboratory invoices.",
-            #     "image_path": "console/images/icons/multi-tone/documents.png",
-            # },
             {
-                "path": "organizations",
-                "title": "Organizations",
-                "description": "Manage your company and team.",
-                "image_path": "console/images/icons/two-tone/two_tone_client_folder.png",
+                "path": "measurements",
+                "title": "Measurements",
+                "description": "Manage measurements by analysts and from your instruments.",
+                "image_path": "console/images/icons/two-tone/two_tone_stats.png",
             },
             {
                 "path": "projects",
@@ -629,12 +653,6 @@ layout = {
                 "description": "Manage sample transfers.",
                 "image_path": "console/images/icons/two-tone/two_tone_clock.png",
             },
-            # {
-            #     "path": "stats",
-            #     "title": "Statistics",
-            #     "description": "Manage laboratory statistics.",
-            #     "image_path": "console/images/icons/two-tone/two_tone_graph.png",
-            # },
             {
                 "path": "traceability",
                 "title": "Traceability",
@@ -647,34 +665,35 @@ layout = {
                 "description": "Manage your user and organization settings.",
                 "image_path": "console/images/icons/two-tone/two_tone_gears.png",
             },
-            # Plants, Harvests *Cultivator*
-            # Sales (Transactions | Receipts) *Cultivator* *Processor* *Retailer*
+
         ],
         "welcome_message": {
-            "title": "Welcome to your new laboratory platform!", # 🚀
-            "message": "Get started with simple and easy cannabis analytics.",
+            "title": "Welcome to your new cannabis analytics platform!", # 🚀
+            "message": "Get started with cannabis analytics in 5 minutes.",
         },
         "organization_choices": [
             {
                 "action": "Get started",
                 "title": "🥼 For Labs",
-                "description": "Start your lab workflow, manage your lab data, and issue your certificates. Start or join a lab.",
+                "description": "Start your lab workflow, manage your lab data, and issue your certificates. Start or join a lab. You can utilize the Cannlytics platform to manage all of your laboratory data and deliver data and certificates blazingly fast. Use your own workflow and data points, while using ready-to-go tools built for cannabis analysis.",
                 "image": "console/images/illustrations/outline/lab_tablet.svg",
                 "type": "lab",
             },
-            # {
-            #     "action": "Begin now",
-            #     "title": "🌳 For Cultivators / Processors",
-            #     "description": "Start managing your lab results now. Start or join as a producer/processor to begin.",
-            #     "image": "console/images/illustrations/outline/lab_tablet.svg",
-            #     "type": "producer",
-            # },
+            {
+                "action": "Begin now",
+                "title": "🌳 For Cultivators, Processors, and Retailers",
+                "description": "Start managing your lab results now. You can utilize the Cannlytics platform to make testing simple, easy, and insightful. Aggregate your data points and leverage statistics to boost your yields. Don't leave money on the table, get and use the laboratory data for tests that you have commissioned.",
+                "image": "console/images/illustrations/outline/lab_tablet.svg",
+                "type": "producer",
+                "disabled": True,
+            },
             # {
             #     "action": "Explore for free",
             #     "title": "📦 For Retailers",
             #     "description": "Access lab data for your products quickly and easily. Begin today.",
             #     "image": "console/images/illustrations/outline/lab_tablet.svg",
             #     "type": "retailer",
+            #     "disabled": True,
             # },
             # {
             #     "action": "Learn more",
@@ -682,14 +701,16 @@ layout = {
             #     "description": "Track your consumption. Log purchases, see your usage stats, and get lab data.",
             #     "image": "console/images/illustrations/outline/lab_tablet.svg",
             #     "type": "consumer",
+            #     "disabled": True,
             # },
-            # {
-            #     "action": "Dive in",
-            #     "title": "🤝 For Everyone Else",
-            #     "description": "For all software integrators, researchers, and data seekers. Cannlytics has something for you.",
-            #     "image": "console/images/illustrations/outline/lab_desktop.svg",
-            #     "type": "integrator",
-            # },
+            {
+                "action": "Dive in",
+                "title": "🤝 For Everyone Else",
+                "description": "We believe that cannabis analytics is for everyone. For all software integrators, researchers, consumers, and data seekers. Cannlytics has something for you. Get your hands on public datasets and explore our catacombs of data.",
+                "image": "console/images/illustrations/outline/lab_desktop.svg",
+                "type": "integrator",
+                "disabled": True,
+            },
         ],
     },
     "sidebar": {
@@ -705,7 +726,6 @@ layout = {
             {
                 "title": "Analyses",
                 "url": "/analyses",
-                # "icon": "edit",
                 "slug": "analyses",
                 "user_type": "*",
                 "seperator": True,
@@ -731,42 +751,24 @@ layout = {
             {
                 "title": "Areas",
                 "url": "/areas",
-                # "icon": "grid",
                 "slug": "areas",
                 "user_type": "*",
             },
-            # {
-            #     "title": "Clients",
-            #     "url": "/clients/records",
-            #     "icon": "users",
-            #     "slug": "clients",
-            #     "user_type": "lab",
-            # },
             {
                 "title": "Contacts",
                 "url": "/contacts",
-                # "icon": "users",
                 "slug": "contacts",
                 "user_type": '*',
             },
             {
                 "title": "Instruments",
                 "url": "/instruments",
-                # "icon": "server",
                 "slug": "instruments",
                 "user_type": "*",
             },
-            # {
-            #     "title": "Logistics",
-            #     "url": "/intake",
-            #     "icon": "log-in",
-            #     "slug": "intake",
-            #     "user_type": "*",
-            # },
             {
                 "title": "Inventory",
                 "url": "/inventory",
-                # "icon": "archive",
                 "slug": "inventory",
                 "user_type": "*",
                 "nested": [
@@ -796,16 +798,8 @@ layout = {
                 "user_type": "*",
             },
             {
-                "title": "Organizations",
-                "url": "/organizations",
-                # "icon": "briefcase",
-                "slug": "organizations",
-                "user_type": "*",
-            },
-            {
                 "title": "Projects",
                 "url": "/projects",
-                # "icon": "folder",
                 "slug": "projects",
                 "user_type": "*",
                 # "nested": [
@@ -826,7 +820,6 @@ layout = {
             {
                 "title": "Results",
                 "url": "/results",
-                # "icon": "award",
                 "slug": "results",
                 "user_type": "*",
                 # "nested": [
@@ -855,7 +848,6 @@ layout = {
             {
                 "title": "Samples",
                 "url": "/samples",
-                # "icon": "edit-2",
                 "slug": "samples",
                 "user_type": "*",
                 # "nested": [
@@ -882,7 +874,6 @@ layout = {
             {
                 "title": "Transfers",
                 "url": "/transfers",
-                # "icon": "navigation",
                 "slug": "transfers",
                 "user_type": '*',
                 # "nested": [
@@ -932,9 +923,9 @@ layout = {
     },
 }
 
-material["get-started"] = {
-    "user": {"fields": material["settings"]["user_fields"]},
-    "organization": {"fields": material["organizations"]["fields"]},
+material['get-started'] = {
+    "user": {"fields": material['settings']['user_fields']},
+    "organization": {"fields": material['settings']['organizations']['fields']},
     "pricing_tiers": [
         {
             "name": "Free",
@@ -977,3 +968,143 @@ material["get-started"] = {
         },
     ],
 }
+
+# FIXME: Condense state so it does not have to be duplicated in settings.
+material['settings']['traceability'] = material['traceability']
+material['settings']['subscriptions'] = material['get-started']['pricing_tiers']
+
+# Optional: Add data model fields
+# current_count
+# description
+# placeholder
+#     action, height, image, message, title, url
+data_models = [
+    {
+        'abbreviation': 'AN',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Analyses',
+        'key': 'analyses',
+        'singular': 'analysis',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'AT',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Analytes',
+        'key': 'analytes',
+        'singular': 'analyte',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'AR',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Areas',
+        'key': 'areas',
+        'singular': 'area',
+        'sortable': True,
+        'filter': True
+    },
+    {
+        'abbreviation': 'CT',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Contacts',
+        'key': 'contacts',
+        'singular': 'contact',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'IS',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Instruments',
+        'key': 'instruments',
+        'singular': 'instrument',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'IN',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Inventory',
+        'key': 'inventory',
+        'singular': 'item',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'MT',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Measurements',
+        'key': 'measurements',
+        'singular': 'measurement',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'P',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Projects',
+        'key': 'projects',
+        'singular': 'project',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'R',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Results',
+        'key': 'results',
+        'singular': 'result',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'S',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Samples',
+        'key': 'samples',
+        'singular': 'sample',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'TR',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Transfers',
+        'key': 'transfers',
+        'singular': 'transfer',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'L',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Logs',
+        'key': 'logs',
+        'singular': 'log',
+        'sortable': True,
+        'filter': True,
+    },
+    {
+        'abbreviation': 'F',
+        'id_schema': '[abbreviation]%y%m%d',
+        'label': 'Files',
+        'key': 'files',
+        'singular': 'file',
+        'sortable': True,
+        'filter': True,
+    },
+]
+material['data_models'] = {}
+for data_model in data_models:
+    key = data_model['key']
+    material['data_models'][key] = {
+        **data_model,
+        "image_path": material[key]['placeholder']['image'],
+        "fields": material[key]['fields']
+    }
+
+# TODO: Make obsolete by referencing an organization's data models in Firestore.
+material['settings']['data_models'] = material['data_models']

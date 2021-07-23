@@ -1,7 +1,8 @@
 """
 URLs | Cannlytics API
+Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/21/2021
-Updated: 6/12/2021
+Updated: 7/19/2021
 Description: API URLs to interface with cannabis analytics.
 """
 
@@ -15,6 +16,7 @@ from api.analyses import analyses
 from api.analytes import analytes
 from api.areas import areas
 from api.auth import auth
+from api.certificates import certificates
 from api.contacts import contacts
 from api.instruments import instruments
 from api.inventory import inventory
@@ -24,6 +26,7 @@ from api.organizations import organizations
 from api.projects import projects
 from api.results import results
 from api.samples import samples
+from api.settings import settings
 from api.transfers import transfers
 from api.traceability import traceability
 from api.users import users
@@ -44,6 +47,11 @@ urlpatterns = [
         path('', areas.areas),
         path('/<area_id>', areas.areas),
     ])),
+    path('certificates', include([
+        path('/generate', certificates.generate_coas),
+        path('/review', certificates.generate_coas),
+        path('/approve', certificates.generate_coas),
+    ])),
     path('contacts', include([
         path('', contacts.contacts),
         path('/<contact_id>', contacts.contacts),
@@ -56,11 +64,15 @@ urlpatterns = [
     ])),
     path('instruments', include([
         path('', instruments.instruments),
-        path('/<instruments_id>', instruments.instruments),
+        path('/<instrument_id>', instruments.instruments),
     ])),
     path('invoices', include([
         path('', invoices.invoices),
         path('/<invoice_id>', invoices.invoices),
+    ])),
+    path('logs', include([
+        path('', settings.logs),
+        path('/<log_id>', settings.logs),
     ])),
     path('measurements', include([
         path('', measurements.measurements),
@@ -79,12 +91,17 @@ urlpatterns = [
         path('', organizations.organizations),
         path('/<organization_id>', organizations.organizations),
         path('/<organization_id>/settings', organizations.organizations),
-        # TODO: Handle join organization with post requests?
-        # path('/<organization_id>/join/', organizations.join_organization),
+        path('/<organization_id>/team', organizations.organization_team),
+        path('/<organization_id>/team/<user_id>', organizations.organization_team),
+        path('/<organization_id>/join', organizations.join_organization),
     ])),
     path('results', include([
         path('', results.results),
         path('/<result_id>', results.results),
+        path('/calculate', results.calculate_results),
+        path('/post', results.post_results),
+        path('/release', results.release_results),
+        path('/send', results.send_results),
     ])),
     path('samples', include([
         path('', samples.samples),
@@ -93,6 +110,7 @@ urlpatterns = [
     path('transfers', include([
         path('', transfers.transfers),
         path('/<transfer_id>', transfers.transfers),
+        path('/receive', transfers.receive_transfers),
     ])),
     path('traceability', include([
         path('/delete-license', traceability.delete_license),
@@ -111,8 +129,18 @@ urlpatterns = [
         path('/transfers', traceability.transfers),
         path('/transfers/<transfer_id>', traceability.transfers),
     ])),
-    path('regulations', views.regulations),
-    path('create-key', auth.create_api_key),
-    path('delete-key', auth.delete_api_key),
-    path('get-keys', auth.get_api_key_hmacs),
+    # path('data', include([
+    #     path('/regulations', views.regulations),
+    # ])),
+    path('auth', include([
+        path('/create-key', auth.create_api_key),
+        path('/create-pin', auth.create_user_pin),
+        path('/create-signature', auth.create_signature),
+        path('/delete-key', auth.delete_api_key),
+        path('/delete-pin', auth.delete_user_pin),
+        path('/delete-signature', auth.delete_signature),
+        path('/get-keys', auth.get_api_key_hmacs),
+        path('/get-signature', auth.get_signature),
+        path('/verify-pin', auth.verify_user_pin),
+    ])),
 ]

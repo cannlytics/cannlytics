@@ -7,7 +7,7 @@
     Author: Keegan Skeate
     Contact: <keegan@cannlytics.com>
     Created: 1/7/2021
-    Updated: 5/4/2021
+    Updated: 7/8/2021
     Hashes filled by build.py
   -->
  <head>
@@ -37,9 +37,18 @@
   <script crossorigin="anonymous" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" src="https://code.jquery.com/jquery-3.5.1.slim.min.js">
   </script>
   
+  <!-- AG Grid Stylesheets -->
+  
+  <!-- FIXME: Ideally load only on pages with tables -->
+  <script src="{% static 'console/plugins/ag-grid/ag-grid-community.min.noStyle.js'%}">
+  </script>
+  <link href="{% static 'console/plugins/ag-grid/ag-grid.min.css'%}" rel="stylesheet" type="text/css"/>
+  <link href="{% static 'console/plugins/ag-grid/ag-theme-alpine.min.css'%}" rel="stylesheet" type="text/css"/>
+  <link href="{% static 'console/plugins/ag-grid/ag-theme-alpine-dark.min.css'%}" rel="stylesheet" type="text/css"/>
+  
   <!-- Cannlytics stylesheets -->
-  <link href="{% static 'console/plugins/cannlytics/cannlytics-3766ba0a1d0bfb9cf77c.css'%}" id="cannlytics_css" rel="stylesheet" type="text/css"/>
-  <link href="{% static 'console/plugins/cannlytics/console-3766ba0a1d0bfb9cf77c.css'%}" id="console_css" rel="stylesheet" type="text/css"/>
+  <link href="{% static 'console/plugins/cannlytics/cannlytics-1cd34589bb91bc8f4c1d.css'%}" id="cannlytics_css" rel="stylesheet" type="text/css"/>
+  <link href="{% static 'console/plugins/cannlytics/console-1cd34589bb91bc8f4c1d.css'%}" id="console_css" rel="stylesheet" type="text/css"/>
   {% block page_css %}{% endblock page_css %}
   
   <!-- Firebase JavaScript -->
@@ -53,7 +62,7 @@
   </script>
   
   <!-- Cannlytics module -->
-  <script id="cannlytics" src="{% static 'console/plugins/cannlytics/cannlytics-3766ba0a1d0bfb9cf77c.js'%}">
+  <script id="cannlytics" src="{% static 'console/plugins/cannlytics/cannlytics-1cd34589bb91bc8f4c1d.js'%}">
   </script>
  </head>
  
@@ -66,41 +75,8 @@
   </div>
   
   <!-- JavaScript -->
-  {% comment %}
-  <script crossorigin="anonymous" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js">
-   {% endcomment %}
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous">
+  <script crossorigin="anonymous" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js">
   </script>
-  
-  <!-- DEV: Keep Python GUI Alive -->
-  
-  <!-- https://github.com/ClimenteA/flaskwebgui -->
-  {% comment %}
-  <script>
-   async function getRequest(url='') {
-        const response = await fetch(url, {
-          method: 'GET', 
-          cache: 'no-cache'
-        })
-        return response.json()
-    }
-      
-    document.addEventListener('DOMContentLoaded', function() {
-
-    let url = document.location
-    let route = "/keep-server-alive"
-    let interval_request = 3 * 1000 //sec
-
-    function keep_alive_server(){
-        getRequest(url + route)
-        .then(data => console.log(data))
-    }
-
-    setInterval(keep_alive_server, interval_request)()
-
-    })
-  </script>
-  {% endcomment %}
  </body>
 </html>
 {% block page_js %}{% endblock page_js %}

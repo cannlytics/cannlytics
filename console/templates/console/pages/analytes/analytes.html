@@ -3,83 +3,114 @@
 <!--
   Analytes Page | Cannlytics Console
   Created 6/19/2021
-  Updated: 6/19/2021
+  Updated: 7/15/2021
   TODO:
-   - Allow for labs to choose to make their analytes public,
-    so that clients can find analytes they want to analyze.
-  
-  Fields:
-    CAS
+   - Implement functionality to allow labs to choose to
+     make their analytes public, so that clients can
+     find analytes that they may want to test for in their samples.
 -->
 {% extends "console/console.html" %}
 {% load icon %}
+{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Analyses | Cannlytics {% endblock title %}
 {% block console_body %}
-{% if section %}
+{% if section and section not in 'logs,files,certifiates' %}
 
   <!-- Detail page -->
-  <!-- FIXME: Pass model ID -->
-  {% include "console/pages/analytes/analyte.html" with id="" %}
+  {% include "console/pages/analytes/analyte.html" with
+    id=section
+    data_model=data_model
+  %}
 
 {% else %}
+
+  <!-- List -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
       <h1 class="fs-5 mb-0 lh-base">Analytes</h1>
-      <div>
-        <button
-          class="btn btn-sm-light btn-md-light me-2"
-          onclick="cannlytics.settings.importData('analytes');"
-        >
-          Import
-        </button>
-        <button
-          class="btn btn-sm-light btn-md-light"
-          onclick="cannlytics.settings.exportData('analytes');"
-        >
-          Export
-        </button>
-      </div>
     </div>
 
     <!-- Body -->
     <div class="analytes">
 
+      <!-- Tabs -->
+      {% include "console/components/forms/form_tabs.html" with
+        model="analytes"
+      %}
+
+      <!-- Logs -->
+      {% if section == 'logs' %}
+        {% include "console/pages/settings/logs/logs.html" with
+          model='analytes'
+          model_singular='analyte'
+          organizations=organizations
+          section=section
+          user=user
+        %}
+
+      <!-- Files -->
+      {% elif section == 'files' %}
+        {% include "console/pages/settings/files/files.html" with
+          model='analytes'
+          model_singular='analyte'
+          organizations=organizations
+          section=section
+          user=user
+        %}
+
       <!-- Table -->
-      <div class="card my-3">
-        <div class="card-body">
-          <h2 class="h6 mb-3 text-dark">Analytes</h2>
-          <div class="table-responsive">
+      {% else %}
 
-            <!-- Placeholder if no records -->
-            {% if True %}
-              {% include "console/components/placeholders/placeholder.html" with
-                placeholder=analytes.placeholder
-                only
-              %}
+        <!-- Options -->
+        {% include "console/components/tables/simple_table_options.html" with
+          model='analytes'
+          model_singular='analyte'
+        %}
 
-            <!-- Client records table -->
-            {% else %}
-              <div id="analytes-table" class="ag-theme-alpine-dark d-none" style="height: 600px; width:100%;"></div>
-            {% endif %}
-
-          </div>
+        <!-- Loading placeholder -->
+        <div id="loading-placeholder">
+          {% include "console/components/placeholders/loading_placeholder.html" with
+            height='350px'
+            width='100%'
+            only
+          %}
         </div>
-      </div><!-- End of the table -->
+
+        <!-- No-data Placeholder -->
+        <div id="data-placeholder" class="d-none">
+          {% include "console/components/placeholders/placeholder.html" with
+            placeholder=analytes.placeholder
+            only
+          %}
+        </div>
+
+        <!-- AG Grid Table -->
+        <div id="data-table" class="d-none">
+          <!-- TODO: Advanced search -->
+          <div
+            id="analytes-table"
+            class="ag-theme-alpine-dark"
+            style="height: 350px; width:100%;"
+          ></div>
+        </div>
+
+      {% endif %}
 
     </div><!-- End of the body -->
-    
 
   </main>
 {% endif %}
 {% endblock console_body %}
 
 <!-- JavaScript -->
-{% comment %} {% block console_js %}
+{% block console_js %}
 
-  <script>
-    cannlytics.analyses.initialize();
-  </script>
+  {% if not section %}
+    <script>
+      cannlytics.app.streamData('analytes', 'analyte', '{{ organizations.0.organization_id }}');
+    </script>
+  {% endif %}
 
-{% endblock console_js %} {% endcomment %}
+{% endblock console_js %}
 </html>

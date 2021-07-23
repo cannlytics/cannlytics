@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<!--
+  Contact Files Page | Cannlytics Console
+  Created: 12/17/2020
+  Updated: 7/11/2021
+  Parameters:
+    model
+    model_singular
+    organizations
+    section
+    user
+-->
+{% block unit %}
+
+  <!-- Part page -->
+  {% if part %}
+    {% include "console/pages/settings/files/file.html" with
+      model_singular=model_singular
+    %}
+  {% else %}
+
+    <!-- Title -->
+    <div class="d-flex justify-content-between mt-3">
+
+      <!-- Title -->
+      <div class="px-3">
+        <h1 class="fs-6 lh-base text-dark mb-0">
+          {% if part == 'new' %}New File{% else %}Files {{ part }}{% endif %}
+        </h1>
+        <h2 class="fs-6 lh-base text-secondary mb-3">
+          <small>Manage supplementary files.</small>
+        </h2>
+      </div>
+
+      <!-- Options -->
+      <div id="file-options" class="d-flex align-items-center">
+
+        <!-- New -->
+        <button
+          id="upload-file-button"
+          class="btn btn-sm btn-set-width bg-gradient-green text-white"
+          onclick="document.getElementById('file_input').click();"
+        >
+          Upload
+        </button>
+        <input
+          id="file_input"
+          type="file"
+          accept="image/*"
+          class="visually-hidden"
+          onchange="uploadChosenFile(event);"
+        />
+      </div>
+
+    </div>
+
+    <!-- Loading placeholder -->
+    <div id="loading-placeholder">
+      {% include "console/components/placeholders/loading_placeholder.html" with
+        height='366px'
+        width='100%'
+        only
+      %}
+    </div>
+
+    <!-- No-data Placeholder -->
+    <div id="data-placeholder" class="d-none">
+      {% include "console/components/placeholders/table_placeholder.html" with
+        height='200px'
+        image='console/images/icons/two-tone/two_tone_client_folder.svg'
+        message='You can add files as necessary.'
+        title='No attached files'
+        only
+      %}
+    </div>
+
+    <!-- AG Grid Table -->
+    <div id="data-table" class="d-none">
+      <!-- TODO: Advanced search -->
+      <div
+        id="{{ model_singular }}-files-table"
+        class="ag-theme-alpine-dark"
+        style="height: 366px; width:100%;"
+      ></div>
+    </div>
+
+  {% endif %}
+
+{% endblock unit %}
+
+<!-- JavaScript -->
+{% block console_js %}
+{% if not part %}
+
+    <script>
+
+      // Stream file data.
+      cannlytics.app.streamFiles(
+        '{{ model }}',
+        '{{ model_singular }}',
+        '{{ section }}',
+        '{{ organizations.0.organization_id }}',
+      );
+
+      // Upload chosen file.
+      function uploadChosenFile(event) {
+        cannlytics.app.uploadModelFile(event, {
+          model: '{{ model }}',
+          modelSingular: '{{ model_singular }}',
+          modelId: '{{ section }}',
+          orgId: '{{ organizations.0.organization_id }}',
+          userId: '{{ user.uid }}',
+          userName: '{{ user.name }}',
+          userEmail: '{{ user.email }}',
+          photoUrl: '{{ user.photo_url }}'
+        });
+      }
+
+    </script>
+
+{% endif %}
+{% endblock console_js %}
+</html>

@@ -4,55 +4,96 @@
   Area Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/7/2021
-  Updated: 6/22/2021
+  Updated: 7/15/2021
 -->
 {% load icon %}
+{% block console_css %}
+
+  <!-- Bootstrap Datepicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
+
+{% endblock console_css %}
 {% block console_body %}
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=areas.breadcrumbs
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Areas"
+      base_page_url="/areas"
+      current_page=id
     %}
 
-    <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      id=id
-      model='areas'
-      model_singular='area'
-      description="Manage areas, where instruments, samples, and items are located."
-      options=True
-      export=id
-    %}
-
-    <!-- Fields -->
-    <div class="mb-4 px-3">
-
-      <!-- Form -->
-      <form id="area-form">
-
-        <!-- Dynamic fields -->
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=areas.fields
+    <!-- Tabs -->
+    {% if id and id != 'new' %}
+      {% include "console/components/forms/form_tabs.html" with
+          id=id
+          model="areas"
         %}
+    {% endif %}
 
-        <!-- Show additional fields -->
-        {% include "console/components/forms/additional_fields.html" %}
-
-      </form>
-
-    </div><!-- End of fields -->
-
-    <!-- TODO: Try to implement add analytes with AG-Grid table -->
-    
-
-    <!-- Danger zone (delete) -->
-    {% if id %}
-      {% include "console/components/forms/delete_option.html" with
-        id=id
-        model="areas"
-        model_singular="area"
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='areas'
+        model_singular='area'
+        organizations=organizations
+        section=section
+        user=user
       %}
+    
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='areas'
+        model_singular='area'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='areas'
+        model_singular='area'
+        description="Manage areas, where instruments, samples, and items are located."
+        options=True
+        export=id
+      %}
+
+      <!-- Fields -->
+      <div class="mb-4 px-3">
+
+        <!-- Form -->
+        <form id="area-form">
+
+          <!-- Dynamic fields -->
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+          %}
+
+          <!-- TODO: Show additional fields (traceability location fields) -->
+          {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
+
+        </form>
+
+      </div><!-- End of fields -->
+
+      <!-- TODO: Try to implement add analytes with AG-Grid table -->
+
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="areas"
+          model_singular="area"
+        %}
+      {% endif %}
+
     {% endif %}
 
   </main>
@@ -66,12 +107,8 @@
     cannlytics.ui.viewObject('area');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // FIXME: Enable tooltips.
-    // cannlytics.ui.enableTooltips();
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}
-
 </html>

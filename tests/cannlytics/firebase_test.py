@@ -1,22 +1,26 @@
 """
 Test Firebase Module
 Created: 1/27/2021
+Updated: 7/20/2021
 """
+# Standard imports.
 import os
+import sys
+
+# External imports.
 import environ
-# import pytest
 from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
 
-import sys
+# Internal imports.
 sys.path.append('../..')
 from cannlytics import firebase # pylint: disable=import-error
+from cannlytics.utils.utils import get_keywords, snake_case # pylint: disable=import-error
 
 
 #------------------------------------------------------------#
 # Test Firestore
 #------------------------------------------------------------#
-    
 
 def test_firestore():
     """Test Firestore functions by managing a test document."""
@@ -30,11 +34,11 @@ def test_firestore():
 
     # Create a collection reference.
     col_ref = firebase.create_reference(db, 'tests')
-    assert isinstance(col_ref, CollectionReference) == True
+    assert isinstance(col_ref, CollectionReference)
 
     # Create a document reference.
     doc_ref = firebase.create_reference(db, 'tests/firebase_test')
-    assert isinstance(doc_ref, DocumentReference) == True
+    assert isinstance(doc_ref, DocumentReference)
 
     # Create a document.
     firebase.update_document('tests/firebase_test', {'user': 'CannBot'})
@@ -71,24 +75,23 @@ def test_firestore():
     ref = 'tests/test_collections/licensees'
     data_file = './assets/data/licensees_partial.csv'
     firebase.import_data(db, ref, data_file)
-    
+
     # TODO: Test import .xlsx data to Firestore.
-    
+
     # TODO: Test import .txt data to Firestore.
-    
+
     # Export data to .csv from Firestore.
     output_csv_file = './assets/data/licensees_test.csv'
     output_xlsx_file = './assets/data/licensees_test.xlsx'
     firebase.export_data(db, ref, output_csv_file)
-    
+
     # Export data to .xlsx from Firestore.
     firebase.export_data(db, ref, output_xlsx_file)
 
 
-
 def test_create_log():
     """Test create a log."""
-    
+
     # Initialize Firebase.
     env = environ.Env()
     env.read_env('../.env')
@@ -110,7 +113,6 @@ def test_create_log():
 #------------------------------------------------------------#
 # Test Firebase Storage
 #------------------------------------------------------------#
-
 
 def test_storage():
     """Test Firebase Storage by managing a test file."""
@@ -142,7 +144,7 @@ def test_storage():
 
     # List all files in the Firebase Storage bucket folder.
     files = firebase.list_files(bucket_name, bucket_folder)
-    assert isinstance(files, list) == True
+    assert isinstance(files, list)
 
     # Download a file from Firebase Storage.
     firebase.download_file(bucket_name, destination_blob_name, download_file_name)
@@ -160,7 +162,6 @@ def test_storage():
 #------------------------------------------------------------#
 # Authentication
 #------------------------------------------------------------#
-
 
 def test_auth():
     """Test Firebase Authentication by managing a user."""
@@ -184,14 +185,14 @@ def test_auth():
 
     # Create custom token.
     token = firebase.create_custom_token(user.uid, email=None, claims=custom_claims)
-    assert isinstance(token, bytes) == True
+    assert isinstance(token, bytes)
 
     # Get user.
     user = firebase.get_user(email)
 
     # Get all users.
     all_users = firebase.get_users()
-    assert isinstance(all_users, list) == True
+    assert isinstance(all_users, list)
 
     # Update user.
     photo_url = f'https://robohash.org/{email}?set=set5'
@@ -248,16 +249,15 @@ def test_secret_manager():
 # Misc
 #------------------------------------------------------------#
 
-
 def test_get_keywords():
     """Test get keywords."""
-    keywords = firebase.get_keywords('Gorilla Glue')
+    keywords = get_keywords('Gorilla Glue')
     assert 'gorilla' in keywords and 'glue' in keywords
 
 
 def test_snake_case():
     """Test string to snake-case."""
-    key = firebase.snake_case('% Dev. from the mean')
+    key = snake_case('% Dev. from the mean')
     assert key == 'percent_dev_from_the_mean'
 
 

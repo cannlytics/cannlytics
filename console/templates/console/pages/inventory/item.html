@@ -3,8 +3,9 @@
 <!--
   Inventory Item Page | Cannlytics Console
   Created 6/22/2020
-  Updated: 6/22/2021
+  Updated: 7/11/2021
 -->
+{% load icon %}
 {% block console_css %}
 
   <!-- Bootstrap Datepicker -->
@@ -14,46 +15,68 @@
 {% endblock console_css %}
 {% block console_body %}
 
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <!-- Header -->
+  {% include "console/components/links/breadcrumbs.html" with
+    base_page="Inventory"
+    base_page_url="/inventory"
+    current_page=id
+  %}
 
-    <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=inventory.breadcrumbs
+  <!-- Tabs -->
+  {% if id and id != 'new' %}
+    {% include "console/components/forms/form_tabs.html" with
+        id=id
+        model="inventory"
+      %}
+  {% endif %}
+
+  <!-- Files page -->
+  {% if unit == 'files' %}
+    {% include "console/pages/settings/files/files.html" with
+      model='inventory'
+      model_singular='item'
+      organizations=organizations
+      section=section
+      user=user
     %}
+  
+  <!-- Logs page -->
+  {% elif unit == 'logs' %}
+    {% include "console/pages/settings/logs/logs.html" with
+      model='inventory'
+      model_singular='item'
+      organizations=organizations
+      section=section
+      user=user
+    %}
+
+  {% else %}
 
     <!-- Title -->
     {% include "console/components/forms/form_title.html" with
+      abbreviation=data_model.abbreviation
       id=id
-      model='item'
-      model_singular='inventory'
+      model='inventory'
+      model_singular='item'
       description="Manage inventory items."
       options=True
       export=id
     %}
 
-    <!-- Fields -->
+    <!-- Form -->
     <div class="mb-4 px-3">
-
-      <!-- Form -->
-      <form id="instrument-form">
-
-        <!-- Dynamic fields -->
+      <form id="item-form">
         {% include "console/components/forms/dynamic_form.html" with
-          fields=inventory.fields
+          fields=data_model.fields
         %}
-
-        <!-- Show additional fields -->
-        {% include "console/components/forms/additional_fields.html" %}
-
+        <!-- TODO: Show additional fields (traceability fields) -->
+        {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
       </form>
 
-    </div><!-- End of fields -->
-
-    <!-- TODO: Try to implement add analytes with AG-Grid table -->
-    
+    </div>
 
     <!-- Danger zone (delete) -->
-    {% if id %}
+    {% if id and id != 'new' %}
       {% include "console/components/forms/delete_option.html" with
         id=id
         model="inventory"
@@ -61,7 +84,7 @@
       %}
     {% endif %}
     
-  </main>
+  {% endif %}
 
 {% endblock console_body %}
 
@@ -73,12 +96,8 @@
     cannlytics.ui.viewObject('item');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // FIXME: Enable tooltips.
-    // cannlytics.ui.enableTooltips();
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}
-
 </html>

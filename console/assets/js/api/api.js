@@ -8,7 +8,7 @@
  * stored in the Firestore database and Metrc API.
  */
 
-import { authRequest, formDeserialize } from '../utils.js';
+// import { authRequest, deserializeForm, serializeForm } from '../utils.js';
  
 
 export const api = {
@@ -18,45 +18,78 @@ export const api = {
   ----------------------------------------------------------------------------*/
 
 
-  get(model, id=null, options={}) {
-    /* Retrieve data from the database, either an array of data objects or a
-    single object if an ID is specified. Pass params in options to filter the data. */
-    const modelType = model.replace(/^./, string[0].toUpperCase());
-    if (id) return authRequest(`/api/${model}/${id}`);
-    return authRequest(`/api/${model}`, null, options);
-  },
+  // get(model, id=null, options={}) {
+  //   /* Retrieve data from the database, either an array of data objects or a
+  //   single object if an ID is specified. Pass params in options to filter the data. */
+  //   const modelType = model.replace(/^./, string[0].toUpperCase());
+  //   if (id) return authRequest(`/api/${model}/${id}`);
+  //   return authRequest(`/api/${model}`, null, options);
+  // },
 
 
-  delete(model, id=null) {
-    /* Delete an entry from the database, passing the whole object
-    as context if available in a form, otherwise just pass the ID. */
-    if (id) return authRequest(`/api/${model}/${id}`, null, { delete: true });
-    const form = document.getElementById(`${model}-form`);
-    const data = formDeserialize(form);
-    return authRequest(`/api/${model}`, data, { delete: true });
-  },
+  // delete(model, id=null) {
+  //   /* Delete an entry from the database, passing the whole object
+  //   as context if available in a form, otherwise just pass the ID. */
+  //   if (id) return authRequest(`/api/${model}/${id}`, null, { delete: true });
+  //   const form = document.getElementById(`${model}-form`);
+  //   const data = deserializeForm(form);
+  //   return authRequest(`/api/${model}`, data, { delete: true });
+  // },
 
 
-  save(model, id) {
-    /* Create an entry in the database if it does not exist,
-    otherwise update the entry. */
-    const form = document.getElementById(`${model}-form`);
-    const data = formDeserialize(form);
-    console.log('TODO: save data:', data);
-    return authRequest(`/api/${model}/${id}`, data);
-  },
+  // save(model, modelSingular) {
+  //   /* Create an entry in the database if it does not exist,
+  //   otherwise update the entry. */
+  //   const data = serializeForm(`${modelSingular}-form`);
+  //   const orgId = document.getElementById('organization_id').value;
+  //   const id = document.getElementById(`input_${modelSingular}_id`).value;
+  //   if (!id) id = this.createID(modelSingular);
+  //   console.log('TODO: save data:', model, modelSingular, orgId, data,);
+  //   return authRequest(`/api/${model}/${id}?organization_id=${orgId}`, data);
+  // },
 
 
-  create(model) {
-    /* Create an entry in the database. (Redundant?) */
-    return this.save(model);
-  },
+  // create(model) {
+  //   /* Create an entry in the database. (Redundant?) */
+  //   return this.save(model);
+  // },
 
 
-  update() {
-    /* Update an entry in the database. (Redundant?) */
-    return this.save(model);
-  },
+  // update() {
+  //   /* Update an entry in the database. (Redundant?) */
+  //   return this.save(model);
+  // },
+
+  /*----------------------------------------------------------------------------
+  Utility functions
+  ----------------------------------------------------------------------------*/
+
+  // createID(modelSingular) {
+  //   /* Create a unique ID. */
+  //   console.log('Create ID...', modelSingular);
+  //   // TODO: Get organization settings and assign ID based on data model ID schema.
+  //   const modelAbbreviations = {
+  //     'analysis': 'AN',
+  //     'analyte': 'AT',
+  //     'area': 'A',
+  //     'contact': 'C',
+  //     'instrument': 'IS',
+  //     'item': 'IN',
+  //     'measurement': 'M',
+  //     'organization': 'O',
+  //     'project': 'P',
+  //     'sample': 'S',
+  //     'transfer': 'TR'
+  //   };
+  //   const abbreviation = modelAbbreviations[modelSingular]
+  //   const date = new Date().toISOString().substring(0, 10);
+  //   const dateString = date.replaceAll('-', '');
+  //   const id = `${abbreviation}${dateString}-`
+  //   // TODO: Save next available counter in organization settings instead of using random bit!
+  //   console.log(id);
+  //   document.getElementById(`input_${modelSingular}_id`).value = id;
+  //   return id;
+  // },
 
 
   /* TODO: REMOVE ANYTHING UNUSED BELOW */

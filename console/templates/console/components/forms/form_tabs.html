@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<!--
+  Form Tabs | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 7/11/2021
+  Updated: 7/11/2021
+  Parameters:
+    id (optional)
+    model
+    extra
+    extra_path
+-->
+<ul class="nav nav-tabs mt-3">
+  <li class="nav-item">
+    <a
+      class="nav-link {% if not section or id and not unit %}active{% endif %}"
+      aria-current="page"
+      href="/{{ model }}{% if id %}/{{ id }}{% endif %}"
+    >
+      List
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if section == 'logs' or unit == 'logs' %}active{% endif %}"
+      href="/{{ model }}{% if id %}/{{ id }}{% endif %}/logs"
+    >
+      Logs
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if section == 'files' or unit == 'files'  %}active{% endif %}"
+      href="/{{ model }}{% if id %}/{{ id }}{% endif %}/files"
+    >
+      Files
+    </a>
+  </li>
+  {% if extra %}
+    <li class="nav-item">
+      <a
+        class="nav-link {% if section == extra_path %}active{% endif %}"
+        href="/{{ model }}{% if id %}/{{ id }}{% endif %}/{{ extra_path }}"
+      >
+        {{ extra }}
+      </a>
+    </li>
+  {% endif %}
+</ul>
+</html>

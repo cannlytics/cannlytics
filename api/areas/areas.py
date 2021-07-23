@@ -1,88 +1,67 @@
 """
-Areas Endpoints | Cannlytics API
+Areas Endpoint Views | Cannlytics API
 Created: 5/8/2021
-Updated: 5/8/2021
+Updated: 7/7/2021
 
-API endpoints to interface with areas.
+API to interface with organization areas.
 """
+# pylint:disable=line-too-long
+
+# Internal imports
+from json import loads
 
 # External imports
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from api.auth import auth
-
+from api.auth.auth import authenticate_request
+from api.api import get_objects, update_object, delete_object
 
 @api_view(['GET', 'POST', 'DELETE'])
-def areas(request, format=None):
-    """Get or update information about a areas / locations."""
+def areas(request, format=None, area_id=None):
+    """Get, create, or update information about organization areas."""
 
-    # Authenticate the user.
-    claims = auth.verify_session(request)
-    uid = claims['uid']
+    # Initialize and authenticate.
+    model_id = area_id
+    model_type = 'areas'
+    model_type_singular = 'area'
+    claims = authenticate_request(request)
+    try:
+        uid = claims['uid']
+        owner = claims.get('owner', [])
+        team = claims.get('team', [])
+        qa = claims.get('qa', [])
+        authorized_ids = owner + team + qa
+    except KeyError:
+        message = 'Your request was not authenticated. Ensure that you have a valid session or API key.'
+        return Response({'error': True, 'message': message}, status=401)
 
+    # Authorize that the user can work with the data.
+    organization_id = request.query_params.get('organization_id')
+    if organization_id not in authorized_ids:
+        message = f'Your must be an owner, quality assurance, or a team member of this organization to manage {model_type}.'
+        return Response({'error': True, 'message': message}, status=403)
+
+    # GET objects.
     if request.method == 'GET':
+        docs = get_objects(request, authorized_ids, organization_id, model_id, model_type)
+        return Response({'success': True, 'data': docs}, status=200)
 
-        org_id = ''
-        ref = '/organizations/%s/areas'
-
-        # TODO: If no organization is specified, get the user's
-        # organizations and get all areas for all licenses.
-
-        # IF the organization is specified, get all areas for all
-        # licenses of the organization.
-
-        # If the organization and license is specified, get all areas
-        # for the given organization's license.
-
-        # If a specific area ID is given, get only that area.
-
-        # If a filter parameter is given, then return only the areas
-        # that match the query.
-        # limit = request.query_params.get('limit', None)
-        # order_by = request.query_params.get('order_by', 'state')
-        # data = get_collection(ref, order_by=order_by, limit=limit, filters=[])
-
-        # Optional: If a user is using traceability, then is there any
-        # need to get location data from the API, or is the data in
-        # Firestore sufficient (given Firestore is syncing with Metrc).
-        # Otherwise, initialize a Metrc client and get areas from Metrc.
-        # traced_location = cultivator.get_locations(uid=cultivation_uid)  
-
-        # # Optional: Get any filters from dict(request.query_params)
-        
-        return Response([{'make': "Subaru", 'model': "WRX", 'price': 21000}])
-    
+    # POST objects.
     elif request.method == 'POST':
 
-        # TODO: Either create or update the area.
+        data = update_object(request, claims, model_type, model_type_singular, organization_id)
+        if data:
+            return Response({'success': True, 'data': data}, status=200)
+        else:
+            message = 'Data not recognized. Please post either a singular object or an array of objects.'
+            return Response({'error': True, 'message': message}, status=400)
 
-            # # Create a new location using: POST /locations/v1/create
-            # cultivation_name = 'MediGrow'
-            # cultivation_original_name = 'medi grow'
-            # cultivator.create_locations([
-            #     cultivation_original_name,
-            #     'Harvest Location',
-            #     'Plant Location',
-            #     'Warehouse',
-            # ])
-            
-            # # Get created location
-            # cultivation= None
-            # locations = track.get_locations(action='active', license_number=cultivator.license_number)
-            # for location in locations:
-            #     if location.name == cultivation_original_name:
-            #         cultivation = location
-
-            # # Update the name of the location using: POST /locations/v1/update
-            # cultivator.update_locations([cultivation.uid], [cultivation_name])
-
-        return Response({'data': []})
-
+    # DELETE objects.
     elif request.method == 'DELETE':
-
-        # TODO: Archive the area data and delete from Metrc.
-
-        return Response({'data': []})
+        success = delete_object(request, claims, model_id, model_type, model_type_singular, organization_id, owner, qa)
+        if not success:
+            message = f'Your must be an owner or quality assurance to delete {model_type}.'
+            return Response({'error': True, 'message': message}, status=403)
+        return Response({'success': True, 'data': []}, status=200)

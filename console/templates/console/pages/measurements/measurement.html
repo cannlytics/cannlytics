@@ -3,7 +3,7 @@
 <!--
   Measurement Page | Cannlytics Console
   Created: 6/19/2021
-  Updated: 6/22/2021
+  Updated: 7/15/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -14,51 +14,79 @@
 
 {% endblock console_css %}
 {% block console_body %}
-<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  
+  <!-- List -->
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
-  <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=measurements.breadcrumbs
+    <!-- Header -->
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Measurements"
+      base_page_url="/measurements"
+      current_page=id
     %}
 
-    <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      id=id
-      model='measurements'
-      model_singular='measurement'
-      description="Manage measurements of analytes in your analyses."
-      options=True
-      export=id
-    %}
+    <!-- Tabs -->
+    {% if id and id != 'new' %}
+      {% include "console/components/forms/form_tabs.html" with
+          id=id
+          model="measurements"
+        %}
+    {% endif %}
 
-  <!-- Fields -->
-    <div class="mb-4 px-3">
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='measurements'
+        model_singular='measurement'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+    
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='measurements'
+        model_singular='measurement'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='measurements'
+        model_singular='measurement'
+        description="Manage measurements of analytes in your analyses."
+        options=True
+        export=id
+      %}
 
       <!-- Form -->
-      <form id="measurement-form">
+      <div class="mb-4 px-3">
+        <form id="measurement-form">
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+          %}
+        </form>
+      </div>
 
-        <!-- Dynamic fields -->
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=measurements.fields
+      <!-- TODO: Try to implement add analytes with AG-Grid table -->
+      
+
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="measurements"
+          model_singular="measurement"
         %}
+      {% endif %}
 
-        <!-- Show additional fields -->
-        {% include "console/components/forms/additional_fields.html" %}
-
-      </form>
-
-    </div><!-- End of fields -->
-
-    <!-- TODO: Try to implement add analytes with AG-Grid table -->
-    
-
-    <!-- Danger zone (delete) -->
-    {% if id %}
-      {% include "console/components/forms/delete_option.html" with
-        id=id
-        model="measurements"
-        model_singular="measurement"
-      %}
     {% endif %}
 
 </main>
@@ -72,10 +100,7 @@
     cannlytics.ui.viewObject('measurement');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // FIXME: Enable tooltips.
-    // cannlytics.ui.enableTooltips();
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}

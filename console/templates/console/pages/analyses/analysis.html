@@ -4,7 +4,7 @@
   Analysis Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 12/17/2020
-  Updated: 6/22/2021
+  Updated: 7/11/2021
   TODO:
     - Allow the user to reset, save (update and create), and delete.
     - Render additional fields, ability to add an additional field.
@@ -13,7 +13,6 @@
   FIXME:
     - Pass IDs appropriately.
 -->
-{% comment %} {% extends "console/console.html" %} {% endcomment %}
 {% load icon %}
 {% block console_css %}
 
@@ -23,15 +22,47 @@
 
 {% endblock console_css %}
 {% block console_body %}
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
-    <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=analyses.breadcrumbs
+  <!-- Header -->
+  {% include "console/components/links/breadcrumbs.html" with
+    base_page="Analyses"
+    base_page_url="/analyses"
+    current_page=id
+  %}
+
+  <!-- Tabs -->
+  {% if id and id != 'new' %}
+    {% include "console/components/forms/form_tabs.html" with
+        id=id
+        model="analyses"
+      %}
+  {% endif %}
+
+  <!-- Files page -->
+  {% if unit == 'files' %}
+    {% include "console/pages/settings/files/files.html" with
+      model='analyses'
+      model_singular='analysis'
+      organizations=organizations
+      section=section
+      user=user
     %}
+  
+  <!-- Logs page -->
+  {% elif unit == 'logs' %}
+    {% include "console/pages/settings/logs/logs.html" with
+      model='analyses'
+      model_singular='analysis'
+      organizations=organizations
+      section=section
+      user=user
+    %}
+
+  {% else %}
 
     <!-- Title -->
     {% include "console/components/forms/form_title.html" with
+      abbreviation=data_model.abbreviation
       id=id
       model='analyses'
       model_singular='analysis'
@@ -40,29 +71,19 @@
       export=id
     %}
 
-    <!-- Fields -->
-    <div class="mb-4 px-3">
-
-      <!-- Form -->
+    <!-- Form -->
+    <div class="my-4 px-3">
       <form id="analysis-form">
-
-        <!-- Dynamic fields -->
         {% include "console/components/forms/dynamic_form.html" with
-          fields=analyses.fields
+          fields=data_model.fields
         %}
-
-        <!-- Show additional fields -->
-        {% include "console/components/forms/additional_fields.html" %}
-
       </form>
-
-    </div><!-- End of fields -->
+    </div>
 
     <!-- TODO: Try to implement add analytes with AG-Grid table -->
-    
 
     <!-- Danger zone (delete) -->
-    {% if id %}
+    {% if id and id != 'new' %}
       {% include "console/components/forms/delete_option.html" with
         id=id
         model="analyses"
@@ -70,7 +91,7 @@
       %}
     {% endif %}
 
-  </main>
+  {% endif %}
 
 {% endblock console_body %}
 
@@ -82,12 +103,8 @@
     cannlytics.ui.viewObject('analysis');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // FIXME: Enable tooltips.
-    // cannlytics.ui.enableTooltips();
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}
-
 </html>

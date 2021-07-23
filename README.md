@@ -1,9 +1,11 @@
 # <img width="20" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics
 <!-- TODO: FIx reference to calyx image -->
 
+<p class="badges">
 ![version](https://img.shields.io/badge/version-0.0.7-darkgreen)
 [![License: MIT](https://img.shields.io/badge/License-MIT-darkgreen.svg)](https://opensource.org/licenses/MIT)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)](https://github.com/cannlytics/cannlytics/fork)
+</p>
 
 Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software designed to make your data and information accessible. Cannlytics makes cannabis analysis **simple** and **easy** through data accessibility. We believe that everyone in the cannabis industry should be able to access rich, valuable data quickly and easily and that you will be better off for it. This documentation covers the Cannlytics architecture and how to build, develop, and publish the Cannlytics platform. You can view the platform live at <https://console.cannlytics.com> and the documentation at <https://docs.cannlytics.com>.
 
@@ -219,11 +221,6 @@ Cannlytics favors a [domain-style code structure](https://stackoverflow.com/ques
 ├── requirements.txt # Python requirements.
 └── webpack.config.js # JavaScript and CSS bundle configuration.
 ```
-
-  <!-- The Cannlytics Engine has a user interface that is built with [Flutter] and [Dart] with a backend powered by [Python]. -->
-
-<!-- Leaf and Metrc links -->
-<!-- You can swap out components for others. For example, Cannlytics users can swap out [Leaf] integration for [METRC] integration. Separating your choice of each component from another, Cannlytics frees users to choose combinations that suits them, freeing administrators and developers to focus on their preferred area of specialization. -->
 
 ## Development <a name="development"></a>
 
@@ -528,30 +525,6 @@ Contributions are always welcome! You are encouraged to submit issues, functiona
 - Charles Rice <charles@ufosoftwarellc.com>
 - Carlos Krefft <carlos@krefft.org>
 - Keegan Skeate <keegan@cannlytics.com>
-
-## Resources <a name="resources"></a>
-
-* [Django Philosophy](https://docs.djangoproject.com/en/3.1/misc/design-philosophies)
-* [Django on Cloud Run](https://codelabs.developers.google.com/codelabs/cloud-run-django)
-* [Firebase Storage in GCF](https://hackersandslackers.com/manage-files-in-google-cloud-storage-with-python/)
-* [Design Tips](https://dribbble.com/stories/2020/04/22/designing-for-conversions-7-ux-tips-ecommerce?utm_campaign=2020-05-05&utm_medium=email&utm_source=courtside-20200505)
-* [Docker Tips](https://twg.io/blog/things-i-wish-i-knew-about-docker-before-i-started-using-it/)
-* [Testing Docker Locally](https://cloud.google.com/run/docs/testing/local)
-* [The Python Runtime for the App Engine Flexible Environment](https://cloud.google.com/appengine/docs/flexible/python/runtime)
-* [Quick start for Python in the App Engine Flexible Environment](https://cloud.google.com/appengine/docs/flexible/python/quickstart#windows)
-
-[Django]: https://www.djangoproject.com/
-[Cloud Build]: (https://cloud.google.com/build)
-[Cloud Registry]: (https://cloud.google.com/container-registry)
-[Cloud Run]: (https://firebase.google.com/docs/hosting/cloud-run)
-[Cloud Storage]: (https://cloud.google.com/storage)
-[Cloud Secret Manager]: (https://cloud.google.com/secret-manager/)
-[Firebase]: (https://firebase.google.com/)
-[Firebase Authentication]: https://firebase.google.com/docs/auth
-[Firebase Hosting]: https://firebase.google.com/docs/hosting
-[Firebase Storage]: https://firebase.google.com/docs/storage
-[Firestore]: https://firebase.google.com/docs/firestore
-[Python]: https://www.python.org/
 
 ## License <a name="license"></a>
 

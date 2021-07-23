@@ -3,7 +3,7 @@
 <!--
   Project Page | Cannlytics Console
   Created: 6/18/2021
-  Updated: 6/22/2021
+  Updated: 7/15/2021
   TODO:
     - Allow the user to reset, save (update and create), and delete.
     - Render additional fields, ability to add an additional field.
@@ -22,156 +22,182 @@
 <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
   <!-- Header -->
-  {% include "console/components/links/breadcrumbs_dynamic.html" with
-    breadcrumbs=projects.breadcrumbs
+  {% include "console/components/links/breadcrumbs.html" with
+    base_page="Projects"
+    base_page_url="/projects"
+    current_page=id
   %}
 
-  <!-- Title -->
-  {% include "console/components/forms/form_title.html" with
-    id=id
-    model='projects'
-    model_singular='project'
-    description="Manage project for your organization and your organization's contacts."
-    options=True
-    export=id
-  %}
+  <!-- Tabs -->
+  {% if id and id != 'new' %}
+    {% include "console/components/forms/form_tabs.html" with
+        id=id
+        model="projects"
+      %}
+  {% endif %}
 
-  <!-- Fields -->
-  <div class="mb-4 px-3">
+  <!-- Files page -->
+  {% if unit == 'files' %}
+    {% include "console/pages/settings/files/files.html" with
+      model='projects'
+      model_singular='project'
+      organizations=organizations
+      section=section
+      user=user
+    %}
+  
+  <!-- Logs page -->
+  {% elif unit == 'logs' %}
+    {% include "console/pages/settings/logs/logs.html" with
+      model='projects'
+      model_singular='project'
+      organizations=organizations
+      section=section
+      user=user
+    %}
+
+  {% else %}
+
+    <!-- Title -->
+    {% include "console/components/forms/form_title.html" with
+      abbreviation=data_model.abbreviation
+      id=id
+      model='projects'
+      model_singular='project'
+      description="Manage project for your organization and your organization's contacts."
+      options=True
+      export=id
+    %}
 
     <!-- Form -->
-    <form id="project-form">
-
-      <!-- Dynamic fields -->
-      {% include "console/components/forms/dynamic_form.html" with
-        fields=projects.fields
-      %}
-
-      <!-- Show additional fields -->
-      {% include "console/components/forms/additional_fields.html" %}
-
-    </form>
-
-  </div><!-- End of fields -->
-
-<!-- TODO: Try to implement add samples with AG-Grid table -->
-
-<!-- Add samples form -->
-<div class="my-5 px-3">
-  <p class="text-left fw-bold fs-5 mb-3" style="max-width:540px;">
-    <small>Samples</small>
-  </p>
-  <div id="samples-fields-show">
-  <button
-    class="btn btn-sm btn-sm-light"
-    onclick="cannlytics.ui.toggleFields(event, 'samples');"
-  >
-    Add sample
-  </button>
-  </div>
-</div>
-<div id="samples-fields" class="d-none mb-5">
-  <ol id="samples-list" class="bold-list">
-    <li id="primary-samples" class="mb-3">
-      <div class="row g-4">
-        <div class="col-md-3">
-          <label class="form-label">Sample ID</label>
-          <input
-            type="text"
-            class="form-control form-control-sm"
-            name="sample_id"
-          >
-        </div>
-        <div class="col-md-3">
-          <label for="samples-email-1" class="form-label">Sample Name</label>
-          <input
-            type="text"
-            class="form-control form-control-sm"
-            name="sample_name"
-          >
-        </div>
-        <div class="col-md-3">
-          <label for="samples-type-1" class="form-label">
-            Sample Type
-          </label>
-          <select
-            class="form-select form-select-sm"
-            aria-label="Sample type"
-            id="sample-type-1"
-            multiple
-          >
-            <!-- TODO: Dynamic types-->
-            <option selected value="buds">Buds</option>
-            <option value="concentrate">Concentrate</option>
-            <option value="edible">Edible</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <button
-            class="btn btn-link text-danger"
-            onclick="cannlytics.ui.toggleFields(event, 'samples');"
-          >
-            {% icon 'trash-2' hegiht="16px" width="16px" %}
-          </button>
-        </div>
-      </div>
-    </li>
-  </ol>
-
-  <!-- Add team member button -->
-  <button
-    class="btn btn-sm btn-sm-light"
-    onclick="cannlytics.ui.addListItem(event, 'samples')"
-  >
-    Add a sample
-  </button>
-
-</div><!-- End of samples form -->
-
-{% comment %} <!-- Table container -->
-  <div class="card my-3">
-    <div class="card-body">
-
-      <!-- Table -->
-      <div class="my-3 px-3">
-        <h2 class="h6 mb-3 text-dark">Samples</h2>
-        <div class="table-responsive">
-
-          <!-- Placeholder if no data -->
-          <div id="data-placeholder">
-            {% include "console/components/placeholders/table_placeholder.html" with
-              action='Add a sample'
-              height='100px'
-              image='console/images/icons/two-tone/two_tone_bottle.svg'
-              message="No samples for this project. Start adding samples to create a group of samples for a specific organization."
-              title='No Samples Added'
-              url='/projects/{{ request.GET.id }}/samples/new'
-              only
-            %}
-          </div>
-
-          <!-- AG Grid Table -->
-          <div id="data-table" class="d-none">
-            <div
-              id="samples-table"
-              class="ag-theme-alpine-dark"
-              style="height: 326px; width:100%;"
-            ></div>
-          </div>
-
-        </div>
-      </div><!-- End of the table -->
-    
+    <div class="mb-4 px-3">
+      <form id="project-form">
+        {% include "console/components/forms/dynamic_form.html" with
+          fields=data_model.fields
+        %}
+      </form>
     </div>
-  </div><!-- End of table container --> {% endcomment %}
 
-  <!-- Danger zone (delete) -->
-  {% if request.GET.id %}
-    {% include "console/components/forms/delete_option.html" with
-      model="projects"
-      model_singular="project"
-      id=request.GET.id
-    %}
+  <!-- TODO: Try to implement add samples with AG-Grid table -->
+
+  <!-- Add samples form -->
+  <div class="my-5 px-3">
+    <p class="text-left fw-bold fs-5 mb-3" style="max-width:540px;">
+      <small>Samples</small>
+    </p>
+    <div id="samples-fields-show">
+    <button
+      class="btn btn-sm btn-sm-light"
+      onclick="cannlytics.ui.toggleFields(event, 'samples');"
+    >
+      Add sample
+    </button>
+    </div>
+  </div>
+  <div id="samples-fields" class="d-none mb-5">
+    <ol id="samples-list" class="bold-list">
+      <li id="primary-samples" class="mb-3">
+        <div class="row g-4">
+          <div class="col-md-3">
+            <label class="form-label">Sample ID</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              name="sample_id"
+            >
+          </div>
+          <div class="col-md-3">
+            <label for="samples-email-1" class="form-label">Sample Name</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              name="sample_name"
+            >
+          </div>
+          <div class="col-md-3">
+            <label for="samples-type-1" class="form-label">
+              Sample Type
+            </label>
+            <select
+              class="form-select form-select-sm"
+              aria-label="Sample type"
+              id="sample-type-1"
+              multiple
+            >
+              <!-- TODO: Dynamic types-->
+              <option selected value="buds">Buds</option>
+              <option value="concentrate">Concentrate</option>
+              <option value="edible">Edible</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <button
+              class="btn btn-link text-danger"
+              onclick="cannlytics.ui.toggleFields(event, 'samples');"
+            >
+              {% icon 'trash-2' hegiht="16px" width="16px" %}
+            </button>
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <!-- Add list item button -->
+    <button
+      class="btn btn-sm btn-sm-light"
+      onclick="cannlytics.ui.addListItem(event, 'samples')"
+    >
+      Add a sample
+    </button>
+
+  </div><!-- End of samples form -->
+
+  {% comment %} <!-- Table container -->
+    <div class="card my-3">
+      <div class="card-body">
+
+        <!-- Table -->
+        <div class="my-3 px-3">
+          <h2 class="h6 mb-3 text-dark">Samples</h2>
+          <div class="table-responsive">
+
+            <!-- Placeholder if no data -->
+            <div id="data-placeholder">
+              {% include "console/components/placeholders/table_placeholder.html" with
+                action='Add a sample'
+                height='100px'
+                image='console/images/icons/two-tone/two_tone_bottle.svg'
+                message="No samples for this project. Start adding samples to create a group of samples for a specific organization."
+                title='No Samples Added'
+                url='/projects/{{ id }}/samples/new'
+                only
+              %}
+            </div>
+
+            <!-- AG Grid Table -->
+            <div id="data-table" class="d-none">
+              <div
+                id="samples-table"
+                class="ag-theme-alpine-dark"
+                style="height: 350px; width:100%;"
+              ></div>
+            </div>
+
+          </div>
+        </div><!-- End of the table -->
+      
+      </div>
+    </div><!-- End of table container --> {% endcomment %}
+
+    <!-- Danger zone (delete) -->
+    {% if id and id != 'new' %}
+      {% include "console/components/forms/delete_option.html" with
+        model="projects"
+        model_singular="project"
+        id=id
+      %}
+    {% endif %}
+
   {% endif %}
 
 </main>
@@ -185,10 +211,7 @@
     cannlytics.ui.viewObject('project');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // Enable tooltips.
-    // cannlytics.ui.enableTooltips();
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}

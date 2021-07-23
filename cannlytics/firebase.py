@@ -2,7 +2,7 @@
 Firebase Module | Cannlytics
 Author: Keegan Skeate <contact@cannlytics.com>
 Created: 2/7/2021
-Updated: 6/4212021
+Updated: 6/27/2021
 
 Resources:
 
@@ -30,16 +30,22 @@ bucket_name = environ.get('FIREBASE_STORAGE_BUCKET')
 db = initialize_firebase()
 ```
 """
-import ulid
+# Standard imports
 from datetime import datetime, timedelta
 from os import listdir
 from os.path import isfile, join
 from re import sub, findall
+
+# External imports
+import requests
+import ulid
 from django.utils.crypto import get_random_string
 from firebase_admin import auth, firestore, initialize_app, storage
+from google.cloud import secretmanager
 try:
     from google.cloud.firestore import ArrayUnion, ArrayRemove, Increment
     from google.cloud.firestore_v1.collection import CollectionReference
+    from google.cloud.firestore_v1.transforms import DELETE_FIELD
 except:
     pass
 try:
@@ -47,12 +53,14 @@ try:
 except:
     # FIXME: pandas has problems with Django on Cloud Run
     pass
-# from uuid import uuid4
+
+# Internal imports.
+from cannlytics.utils.utils import snake_case
+
 
 # ------------------------------------------------------------#
 # Firestore
 # ------------------------------------------------------------#
-
 
 def add_to_array(ref, field, value):
     """Add an element to a given field for a given reference.
@@ -63,7 +71,7 @@ def add_to_array(ref, field, value):
     """
     database = firestore.client()
     doc = create_reference(database, ref)
-    doc.update({field: ArrayUnion([value])})
+    doc.set({field: ArrayUnion([value])}, merge=True)
 
 
 def create_document(ref, values):
@@ -128,13 +136,9 @@ def delete_field(ref, field):
     Args:
         ref (str): A document reference.
     """
-    # FIXME:
-    # database = firestore.client()
-    # doc = create_reference(database, ref)
-    # update = {}
-    # update[field] = firestore.DELETE_FIELD
-    # doc.update(update)
-    raise NotImplementedError
+    database = firestore.client()
+    doc = create_reference(database, ref)
+    return doc.set({field: DELETE_FIELD}, merge=True)
 
 
 def remove_from_array(ref, field, value):
@@ -146,7 +150,7 @@ def remove_from_array(ref, field, value):
     """
     database = firestore.client()
     doc = create_reference(database, ref)
-    doc.update({field: ArrayRemove([value])})
+    doc.set({field: ArrayRemove([value])}, merge=True)
 
 
 def increment_value(ref, field, amount=1):
@@ -158,7 +162,7 @@ def increment_value(ref, field, amount=1):
     """
     database = firestore.client()
     doc = create_reference(database, ref)
-    doc.update({field: Increment(amount)})
+    doc.set({field: Increment(amount)}, merge=True)
 
 
 def initialize_firebase():
@@ -244,7 +248,6 @@ def import_data(db, ref, data_file):
         db (Firestore Client):
         ref (str): A collection or document reference.
         data_file (str): The path to the local data file to upload.
-    
     Wishlist
       - Batch upload
       - Handle types <https://hackersandslackers.com/importing-excel-dates-times-into-pandas/>
@@ -289,19 +292,17 @@ def export_data(db, ref, data_file):
         db (Firestore Client):
         ref (str): A collection or document reference.
         data_file (str): The path to the local data file to upload.
-    
     Wishlist
       - Parse fields that are objects into fields. E.g.
-
-        from pandas.io.json import json_normalize
-        artist_and_track = json_normalize(
-            data=tracks_response['tracks'],
-            record_path='artists',
-            meta=['id'],
-            record_prefix='sp_artist_',
-            meta_prefix='sp_track_',
-            sep='_'
-        )
+            from pandas.io.json import json_normalize
+            artist_and_track = json_normalize(
+                data=tracks_response['tracks'],
+                record_path='artists',
+                meta=['id'],
+                record_prefix='sp_artist_',
+                meta_prefix='sp_track_',
+                sep='_'
+            )
     """
     data_ref = create_reference(db, ref)
     if isinstance(data_ref, CollectionReference):
@@ -347,8 +348,7 @@ def get_id_timestamp(uid):
 # Authentication
 # ------------------------------------------------------------#
 
-
-def create_user(name, email, notification=True):
+def create_user(name, email):
     """
     Given user name and email, create an account.
     If the email is already being used, then nothing is returned.
@@ -364,7 +364,6 @@ def create_user(name, email, notification=True):
     photo_url = f'https://robohash.org/{email}?set=set5'
     try:
         user = auth.create_user(
-            # uid=str(uuid4()),
             uid=create_id(),
             email=email,
             email_verified=False,
@@ -465,7 +464,7 @@ def verify_token(token):
     return auth.verify_id_token(token)
 
 
-def verify_session_cookie(session_cookie, check_revoked=True, app=None):
+def verify_session_cookie(session_cookie, check_revoked=True, app=None): # FIXME: Don't hardcode
     """Verify a user's session cookie.
     Args:
         session_cookie (str): A session cookie to authenticate a user.
@@ -555,13 +554,11 @@ def delete_user(uid):
     auth.delete_user(uid)
 
 
-# TODO: Create user secret
-def create_user_secret(uid):
-    """Delete a user from Firebase.
-    Args:
-        uid (str): A user's ID.
-    """
-    raise NotImplementedError
+# Optional: Implement custom password-reset email.
+# def send_password_reset(email):
+#     """Send a password reset to a user given an email."""
+#     link = auth.generate_password_reset_link(email)
+#     send_custom_email(email, link)
 
 
 # ------------------------------------------------------------#
@@ -569,7 +566,6 @@ def create_user_secret(uid):
 # 'Secret Manager Admin' permissions needed for service account.
 # https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets
 # ------------------------------------------------------------#
-
 
 def create_secret(project_id, secret_id, secret):
     """Create a new secret with the given name. A secret is a logical wrapper
@@ -580,19 +576,9 @@ def create_secret(project_id, secret_id, secret):
         secret_id (str): An ID for the secret.
         secret (str): The secret data.
     """
-    # Import the Secret Manager client library.
-    from google.cloud import secretmanager
-
-    # Create the Secret Manager client.
     client = secretmanager.SecretManagerServiceClient()
-
-    # Build the resource name of the parent project.
     parent = f'projects/{project_id}'
-
-    # Create the secret.
     response = client.create_secret(parent, secret_id, {"replication": {"automatic": {}}})
-
-    # Return the new secret version name.
     return response.name
 
 
@@ -606,25 +592,10 @@ def add_secret_version(project_id, secret_id, payload):
     (roles/secretmanager.admin) on the secret, project, folder, or organization.
     Roles can't be granted on a secret version.
     """
-
-    # Import the Secret Manager client library.
-    from google.cloud import secretmanager
-
-    # Create the Secret Manager client.
     client = secretmanager.SecretManagerServiceClient()
-
-    # Build the resource name of the parent secret.
-    # parent = client.secret_path(project_id, secret_id)
     parent = f'projects/{project_id}/secrets/{secret_id}'
-
-    # Convert the string payload into a bytes. This step can be omitted if you
-    # pass in bytes instead of a str for the payload argument.
     payload = payload.encode('UTF-8')
-
-    # Add the secret version.
     response = client.add_secret_version(parent, {'data': payload})
-
-    # Return the new secret version name.
     return response.name
 
 
@@ -632,58 +603,34 @@ def access_secret_version(project_id, secret_id, version_id):
     """
     Access the payload for a given secret version if one exists. The version
     can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
+    WARNING: Do not print the secret in a production environment.
     """
-
-    # Import the Secret Manager client library.
-    from google.cloud import secretmanager
-
-    # Create the Secret Manager client.
     client = secretmanager.SecretManagerServiceClient()
-
-    # Build the resource name of the secret version.
     name = f'projects/{project_id}/secrets/{secret_id}/versions/{version_id}'
-
-    # Access the secret version.
     response = client.access_secret_version(name)
-
-    # Return the secret.
-    # WARNING: Do not print the secret in a production environment.
     return response.payload.data.decode('UTF-8')
-
-
-# def get_user_secret(uid):
-#     """Delete a user from Firebase.
-#     Args:
-#         uid (str): A user's ID.
-#     """
-#     raise NotImplementedError
-
-
-# def update_user_secret(uid):
-#     """Delete a user from Firebase.
-#     Args:
-#         uid (str): A user's ID.
-#     """
-#     raise NotImplementedError
-
-
-# def delete_user_secret(uid):
-#     """Delete a user from Firebase.
-#     Args:
-#         uid (str): A user's ID.
-#     """
-#     raise NotImplementedError
-
-# Optional: Implement custom email.
-# def send_password_reset(email):
-#     """Send a password reset to a user given an email."""
-#     link = auth.generate_password_reset_link(email)
-#     send_custom_email(email, link)
 
 
 # ------------------------------------------------------------#
 # Storage
+# FIXME: Allow user to not have to pass bucket_name.
 # ------------------------------------------------------------#
+
+def create_short_url(api_key, long_url, project_name='cannlytics'):
+    """Create a short URL to a specified file."""
+    try:
+        url = f'https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key={api_key}'
+        data= {
+            'dynamicLinkInfo': {
+                'domainUriPrefix': f'https://{project_name}.page.link',
+                'link': long_url,
+            },
+            'suffix': {'option': 'UNGUESSABLE'}
+        }
+        response = requests.post(url, json=data)
+        return response.json()['shortLink']
+    except ConnectionError:
+        raise ConnectionError # Optional: Handle connection errors more elegantly?
 
 
 def download_file(bucket_name, source_blob_name, destination_file_name, verbose=True):
@@ -721,7 +668,22 @@ def download_files(bucket_name, bucket_folder, local_folder, verbose=True):
             print(f'{file_name} downloaded from bucket.')
 
 
-def upload_file(bucket_name, destination_blob_name, source_file_name, verbose=True):
+def get_file_url(ref, bucket_name=None, expiration=None):
+    """Return the storage URL of a given file reference.
+    Args:
+        ref (str): The storage location of the file.
+        bucket_name (str): The name of the storage bucket.
+    Returns:
+        (str): The storage URL of the file.
+    """
+    if expiration is None:
+        expiration = datetime.now() + timedelta(days=100 * 365)
+    bucket = storage.bucket(name=bucket_name)
+    blob = bucket.blob(ref)
+    return blob.generate_signed_url(expiration)
+
+
+def upload_file(bucket_name, destination_blob_name, source_file_name=None, data_url=None, content_type='image/jpg'):
     """Upload file to Firebase Storage.
     Args:
         bucket_name (str): The name of the storage bucket.
@@ -731,10 +693,10 @@ def upload_file(bucket_name, destination_blob_name, source_file_name, verbose=Tr
     """
     bucket = storage.bucket(name=bucket_name)
     blob = bucket.blob(destination_blob_name)
-    blob.upload_from_filename(source_file_name)
-    if verbose:
-        print('File {} uploaded to {}.'.format(source_file_name, destination_blob_name))
-
+    if source_file_name:
+        blob.upload_from_filename(source_file_name)
+    else:
+        blob.upload_from_string(data_url, content_type=content_type)
 
 def upload_files(bucket_name, bucket_folder, local_folder, verbose=True):
     """Upload multiple files to Firebase Storage.
@@ -765,18 +727,14 @@ def list_files(bucket_name, bucket_folder):
     return [file.name for file in files if '.' in file.name]
 
 
-def delete_file(bucket_name, bucket_folder, file_name, verbose=True):
+def delete_file(bucket_name, blob_name):
     """Delete file from GCP bucket.
     Args:
         bucket_name (str): The name of the storage bucket.
-        bucket_folder (str): A folder in the storage bucket.
-        file_name (str): The name of the file to delete.
-        verbose (bool): Whether or not to print status.
+        blob_name (str): The name of the file to delete.
     """
     bucket = storage.bucket(name=bucket_name)
-    bucket.delete_blob(bucket_folder + '/' + file_name)
-    if verbose:
-        print(f'{file_name} deleted from bucket.')
+    bucket.delete_blob(blob_name)
 
 
 def rename_file(bucket_name, bucket_folder, file_name, newfile_name, verbose=True):
@@ -799,7 +757,6 @@ def rename_file(bucket_name, bucket_folder, file_name, newfile_name, verbose=Tru
 # Misc
 # ------------------------------------------------------------#
 
-
 def create_log(ref, claims, action, log_type, key, changes=None):
     """Create an activity log.
     Args:
@@ -818,6 +775,7 @@ def create_log(ref, claims, action, log_type, key, changes=None):
         'type': log_type,
         'key': key,
         'created_at': timestamp,
+        'log_id': log_id,
         'user': claims.get('uid'),
         'user_name': claims.get('display_name'),
         'user_email': claims.get('email'),
@@ -825,36 +783,3 @@ def create_log(ref, claims, action, log_type, key, changes=None):
         'changes': changes,
     }
     update_document(f'{ref}/{log_id}', log_entry)
-
-
-def get_keywords(string):
-    """Get keywords for a given string.
-    Args:
-        string (str): A string to get keywords for.
-    """
-    keywords = string.lower().split(' ')
-    keywords = [x.strip() for x in keywords if x]
-    keywords = list(set(keywords))
-    return keywords
-
-
-def snake_case(s):
-    """Turn a given string to snake case.
-    Handles CamelCase, replaces known special characters with
-    preferred namespaces, replaces spaces with underscores,
-    and removes all other nuisance characters.
-    Args:
-        s (str): The string to turn to snake case.
-    Returns"
-        (str): A snake case string.
-    """
-    clean_name = s.replace(' ', '_')
-    clean_name = clean_name.replace('&', 'and')
-    clean_name = clean_name.replace('%', 'percent')
-    clean_name = clean_name.replace('#', 'number')
-    clean_name = clean_name.replace('$', 'dollars')
-    clean_name = clean_name.replace('/', '_')
-    clean_name = clean_name.replace(r'\\', '_')
-    clean_name = sub('[!@#$%^&*()[]{};:,./<>?\|`~-=+]', ' ', clean_name)
-    words = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', clean_name)
-    return '_'.join(map(str.lower, words))

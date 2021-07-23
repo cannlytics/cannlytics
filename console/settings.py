@@ -1,9 +1,9 @@
 """
-Django Settings | Cannlytics
+Django Settings | Cannlytics Console
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 6/5/2021
-Updated: 6/21/2021
+Updated: 7/8/2021
 License: MIT License
 Description:
     Django settings secured by Google Cloud Secret Manager.
@@ -28,7 +28,7 @@ from django.template import base
 # Define project namespaces.
 PROJECT_NAME = 'console'
 ROOT_URLCONF = 'console.urls'
-WSGI_APPLICATION = 'console.wsgi.application'
+WSGI_APPLICATION = 'console.core.wsgi.application'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Get the version number.
@@ -275,8 +275,8 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 # Whether to expire the session when the user closes their browser.
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# The age of session cookies, in seconds.
-SESSION_COOKIE_AGE = 900
+# The age of session cookies, in seconds. (Currently: 5 days)
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 5
 
 
 # ------------------------------------------------------------#

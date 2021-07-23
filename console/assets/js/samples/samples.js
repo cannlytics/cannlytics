@@ -5,7 +5,7 @@
  * Updated: 6/18/2021
  */
 
-import { authRequest, formDeserialize, formSerialize, showNotification } from '../utils.js';
+import { authRequest, deserializeForm, serializeForm, showNotification } from '../utils.js';
 import { theme } from '../settings/theme.js';
  
  
@@ -80,7 +80,7 @@ export const samples = {
     * Create or update a sample.
     */
     const form = document.getElementById('sample-form');
-    const data = formSerialize(form);
+    const data = serializeForm(form);
     authRequest(`/api/samples/${data.sample_id}`, data).then((response) => {
       if (response.error) {
         showNotification('Error saving sample', response.message, { type: 'error' });
@@ -105,7 +105,7 @@ export const samples = {
     * Render a sample's data when navigating to a sample page.
     */
     const data = JSON.parse(localStorage.getItem('sample'));
-    formDeserialize(document.forms['sample-form'], data);
+    deserializeForm(document.forms['sample-form'], data);
   },
 
 

@@ -2,6 +2,25 @@
 
 A non-exhaustive list of encountered bugs and their solutions.
 
+- When running `npm run docs` you get an error message including: `docker: error during connect: This error may indicate that the docker daemon is not running`. Simply start [Docker](https://docs.docker.com/engine/reference/commandline/start/).
+
+- [No 'Access-Control-Allow-Origin' header is present on the requested resource—when trying to get data from a REST API](https://stackoverflow.com/questions/43871637/no-access-control-allow-origin-header-is-present-on-the-requested-resource-whe). Solution: Create a file
+  ```json
+  [
+    {
+      "origin": ["*"],
+      "method": ["GET"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+  ```
+  and deploy the rules with:
+  ```shell
+  gsutil cors set cors.json gs://<your-cloud-storage-bucket>
+  ```
+
+- [Error: PostCSS plugin autoprefixer requires PostCSS 8. Update PostCSS or downgrade this plugin](https://stackoverflow.com/questions/64057023/error-postcss-plugin-autoprefixer-requires-postcss-8-update-postcss-or-downgra). Solution: `npm i postcss`.
+
 - Access to fetch at `<pdf-url>` from origin 'http://127.0.0.1:8000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
 
   * Potential solution: <https://stackoverflow.com/a/58153018/5021266>
@@ -17,7 +36,7 @@ A non-exhaustive list of encountered bugs and their solutions.
   * Potential fix: <https://github.com/jotes/django-cookies-samesite>
   * **Solution**: Assign permissions in IAM console (see the installation guide).
 
-- [Firebase Hosting strip all cookies except for `__session`.](https://stackoverflow.com/a/58719953/5021266) Also see [this issue](https://stackoverflow.com/questions/57450648/how-to-use-multiple-cookies-in-firebase-hosting-cloud-run?noredirect=1&lq=1). Simple fix: use `__session` cookie instead of `session` cookie.
+- [Firebase Hosting strip all cookies except for `__session`.](https://stackoverflow.com/a/58719953/5021266) Also see [this issue](https://stackoverflow.com/questions/57450648/how-to-use-multiple-cookies-in-firebase-hosting-cloud-run?noredirect=1&lq=1). Simple fix: use `__session` cookie instead of `session` cookie. Also see [Django cookies and headers](https://stackoverflow.com/questions/15124308/django-cookies-and-headers).
 
 - [AppEngine warning - OpenBLAS WARNING - could not determine the L2 cache size on this system](https://stackoverflow.com/questions/55016899/appengine-warning-openblas-warning-could-not-determine-the-l2-cache-size-on)
 

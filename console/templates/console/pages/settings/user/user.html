@@ -48,7 +48,7 @@
       </div>
 
       <!-- Account fields -->
-      <div class="col-md-6">
+      <div class="col-md-6 px-4">
         <form id="user-form">
           {% for item in settings.user_fields %}        
             <div class="row mb-3">
@@ -105,12 +105,40 @@
       <h2 class="fs-6 lh-base text-secondary mb-3">
         <small>Your pin is used as a second factor of authentication for secure actions, such as signing documents.</small>
       </h2>
-      <a
-        class="btn btn-sm btn-sm-light"
-        href="/settings/user/pin"
-      >
-        Set your pin
-      </a>
+      <div >
+        {% if user.pin_created_at %}
+          <a
+            class="btn btn-sm-light me-2"
+            href="/settings/user/pin"
+          >
+            Change
+          </a>
+          <button
+            class="btn btn-sm-light text-danger"
+            onclick="cannlytics.settings.deletePin();"
+          >
+            Void
+          </button>
+        {% else %}
+          <a
+            class="btn btn-sm btn-sm-light"
+            href="/settings/user/pin"
+          >
+            Set your pin
+          </a>
+        {% endif %}
+      </div>
+      <!-- Optional: Format created_at time
+      See: https://stackoverflow.com/questions/33187986/django-templatetags-iso-to-date
+       -->
+      {% if user.pin_created_at %}
+        <div id="pin-saved-banner" class="alert alert-success mt-4">
+          {% icon "check" width="18px" height="18px" class="text-success me-1" %}
+          <span class="fs-6"><small style="color:#198754 !important;">
+            Pin created at {{ user.pin_created_at }}
+          </small></span>
+        </div>
+      {% endif %}
     </div>
 
     <!-- Signature Management -->
@@ -119,17 +147,38 @@
       <h2 class="fs-6 lh-base text-secondary mb-3">
         <small>If you will be signing documents, such as CoAs, then you can add your signature to securely sign using your pin.</small>
       </h2>
-      <!-- TODO: Indicate when user already has a signature -->
-      <!-- TODO: Show change signature button if user already has a signature -->
-      <a
-        class="btn btn-sm btn-sm-light"
-        href="/settings/user/signature"
-      >
-        Set your signature
-      </a>
+      {% if user.signature_ref %}
+        <div id="existing-signature">
+          <a class="btn btn-sm-light me-2" href="/settings/user/signature">
+            Change
+          </a>
+          <button id="view_button" type="button" class="btn btn-sm-light me-2" data-bs-toggle="modal" data-bs-target="#pinModal">
+            View
+          </button>
+          <button id="hide_button" type="button" class="btn btn-sm-light d-none me-2" onclick="cannlytics.settings.hideSignature();">
+            Hide
+          </button>
+          <button class="btn btn-sm-light text-danger" onclick="cannlytics.settings.deleteSignature();">
+            Remove
+          </button>
+          <div id="signature-saved-banner" class="alert alert-success mt-4">
+            {% icon "check" width="18px" height="18px" class="text-success me-1" %}
+            <span class="fs-6"><small style="color:#198754 !important;">Signature saved</small></span>
+          </div>
+        </div>
+      {% else %}
+        <a
+          class="btn btn-sm btn-sm-light"
+          href="/settings/user/signature"
+        >
+          Set your signature
+        </a>
+      {% endif %}
     </div>
+    <img id="signature-canvas" class="d-none bg-light border rounded my-4" src="">
 
     <!-- Other Account options -->
+    <!-- TODO: User logs -->
     <div class="col-md-6 px-3">
       <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Other account options</h1>
       <div class="list-group col-md-6 py-3">
@@ -145,6 +194,12 @@
         {% endfor %}
       </div>
     </div>
+
+    <!-- TODO: Enter pin dialog -->
+    <!-- TODO: Add functionality to button and input -->
+    {% include "console/components/modals/pin_modal.html" with
+      callback="cannlytics.settings.viewSignature"
+    %}
 
   </main>
 {% endblock console_body %}

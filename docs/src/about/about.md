@@ -1,13 +1,32 @@
-# About Cannlytics
+# &nbsp;
+
+![Cannlytics Simple Cannabis Analytics](../../assets/images/logos/cannlytics_logo_with_phrase.svg){ align="center" width=330px class="center-text"}
+<div style="margin-bottom:3rem"></div>
+
+Welcome to Cannlytics, simple cannabis analytics, from laboratory software to powerful predictions models for cultivators, processors, and retailers. We believe that **simple**, **easy**, **end-to-end** analytics and **accessible data** provides enormous value to many people. We believe that everyone in the cannabis industry should be able to access extensive, valuable data quickly and easily and that you will be better off for it. So, Cannlytics is here to provide our tools and know-how to provide value to you and in return, if you find value, then you can [contribute](https://opencollective.com/cannlytics-company) to help the value continue to flow. Here you can find information to point you in the right direction for your task at hand. There is a lot of freedom at your fingertips. This documentation covers the Cannlytics platform from end-to-end, for both users and developers. You can view the platform live at [console.cannlytics.com](https://console.cannlytics.com) to start analysis.
 
 ## Overview
 
-Welcome to 🔥 Cannlytics 🔥 Here you can find information to point you in the right direction for your task at hand. There is a lot at your fingertips and you are empowered with freedom. Cannlytics is simple, easy, **end-to-end** cannabis analytics software designed to make your data and information accessible. We believe that everyone in the cannabis industry should be able to access extensive, valuable data **quickly** and **easily** and that you will be better off for it. This documentation covers the Cannlytics platform from end-to-end, for both users and developers. You can view the platform live at [console.cannlytics.com](https://console.cannlytics.com).
+For labs, Cannlytics provides a user-friendly interface to quickly:
 
-<!-- TODO: Links to each workflow documentation -->
-For labs, Cannlytics provides a user-friendly interface to quickly [receive samples](/console/lims/transfers/), [perform analyses](/console/lims/analyses/), [collect](/console/lims/data-collection/) and [review](/console/lims/data/data-review/) results, and [publish certificates of analysis](/console/lims/transfers/) (CoAs). There are also built-in [logistics](/console/lims/logistics/), [client relationship management](/console/lims/clients/) (CRM), [inventory management](/console/lims/inventory/), and [invoicing](/console/lims/invoicing/) tools. Furthermore, Cannlytics provides a [website](/website/dev/get-started/) and a [client portal](/console/dev/get-started/). For everyone, Cannlytics provides cannabis data, statistics, and information. The Cannlytics console allows you to explore analytics for your cannabis products. You can integrate powerful analytics into your current workflow and access your data quickly and easily.
+- [Receive samples](/console/lims/transfers/)
+- [Perform analyses](/console/lims/analyses/)
+- [Collect data](/console/lims/data-collection/) 
+- [Review results](/console/lims/data/data-review/)
+- [Issue certificates of analysis](/console/lims/transfers/)
+
+There are also tools for:
+
+- [Client relationship management](/console/lims/clients/)
+- [Logistics](/console/lims/logistics/)
+- [Inventory management](/console/lims/inventory/)
+- [Invoicing](/console/lims/invoicing/)
+
+Furthermore, Cannlytics provides a [website](/website/dev/get-started/) and a [client portal](/console/dev/get-started/) that you can use. For everyone else, Cannlytics provides cannabis data, statistics, and information. The Cannlytics console allows you to explore analytics for your cannabis products. You can integrate powerful analytics into your current workflow and access your data quickly and easily.
 
 ## What is Cannlytics Story?
+
+![Keegan Skeate](../../assets/images/illustrations/keeganskeate-robohash-human.png){ align=left width=100px}
 
 Cannlytics envisions providing cannabis-testing laboratories around the world with modern, utility-filled, free software. Cannlytics is a spaceship equivalent has been built from the start with true traceability systemically engrained in every In October of 2020, a sole developer, Keegan Skeate, undertook the crafting of the Cannlytics Website to launch the Cannlytics Engine. I would like to help people access lab data easier in the lab, for the lab's clients, for the retailers of the clients, and for the end consumers. My mission is help connect people to their laboratory data. From the time data is generated from a scientific instrument, there is a long pipeline to get the data to the end consumer.
 
@@ -36,7 +55,7 @@ We hope we provide you with a lot of value. If you want to send us a portion of 
 
 Part of the scientific process is presenting your methods to show how you reached your conclusion. Cannlytics takes cannabis testing transparency to the next level, presenting all software for your clients and the public to judge its robustness. At Cannlytics, we believe that if your process is solid, then it should withstand scrutiny. Furthermore, transparency ensures that system security is secure by design.
 
-**Python is Awesome** 🐍
+**Python is Awesome**
 
 Ultimately we believe that technology should be:
 
@@ -56,7 +75,14 @@ Cannlytics vision is that cannabis testing can be done simply, easily, reliably,
 
 ## How to get started?
 
-In the next 5 minutes, you can [create an account](/console/lims/auth/sign-up/), [join your first organization](/console/lims/organizations/), and [analyze your first data point](/console/lims/analysis/). Jump right in with the [quickstart](/console/quickstart/). If you are a user, then:
+In the next 5 minutes, you can:
+
+- [Create an account](/console/lims/auth/sign-up/).
+- [Join your first organization](/console/lims/organizations/).
+- [Analyze your first data point](/console/lims/analysis/).
+- Jump right in with the [quickstart](/console/quickstart/).
+
+If you are a user, then:
 
 1. First, you can create a Cannlytics account at [console.cannlytics.com](https://console.cannlytics.com).
 2. Second, join or create an [organization](/console/lims/organizations/organizations/) after you have signed into your account. You can optionally register for support if you are the owner of an organization.
@@ -64,6 +90,6 @@ In the next 5 minutes, you can [create an account](/console/lims/auth/sign-up/),
 
 If you are a developer, then you probably want to begin with the [development guide](/about/dev/development/).
 
-<!-- or get pointed to the particular piece of information that you're looking for in the index below. -->
 
+<!-- or get pointed to the particular piece of information that you're looking for in the index below. -->
 <!-- TODO: Copy and past `mkdocs.yml` index here -->

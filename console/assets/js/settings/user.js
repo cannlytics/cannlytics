@@ -2,14 +2,32 @@
  * User Settings JavaScript | Cannlytics Console
  * Author: Keegan Skeate <keegan@cannlytics.com>
  * Created: 1/2/2021
- * Updated: 6/17/2021
+ * Updated: 7/3/2021
  */
 
-import { auth, changePhotoURL, storageErrors } from '../firebase.js';
-import { authRequest, formDeserialize, serializeForm, showNotification } from '../utils.js';
+import {
+  auth,
+  changePhotoURL,
+  getDownloadURL,
+  storageErrors,
+  updateDocument,
+  uploadImage,
+  uploadFile,
+} from '../firebase.js';
+
+import {
+  authRequest,
+  deserializeForm,
+  serializeForm,
+  showNotification,
+} from '../utils.js';
 
 
 export const userSettings = {
+
+  /* ---------------------------------------------------------------------------
+   * Account details.
+   ---------------------------------------------------------------------------*/
 
 
   chooseUserPhoto() {
@@ -18,14 +36,6 @@ export const userSettings = {
      */
     const fileSelect = document.getElementById('userPhotoUrl');
     fileSelect.click();
-  },
-
-
-  exportAccount(data) {
-    /* 
-    * TODO: Exports a user's data.
-    */
-    console.log('Export all of a users data to Excel.');
   },
 
 
@@ -44,10 +54,9 @@ export const userSettings = {
      * Reset a form with currently saved data, replacing any changes.
      */
     authRequest('/api/users').then((data) => {
-      console.log('User data:', data);
       const userForm = document.forms['user-form'];
       userForm.reset();
-      formDeserialize(userForm, data);
+      deserializeForm(userForm, data);
     });
   },
 
@@ -90,34 +99,156 @@ export const userSettings = {
     }
   },
 
+  /* ---------------------------------------------------------------------------
+   * Pin and signature management.
+   ---------------------------------------------------------------------------*/
 
-  createPin(data) {
+  createPin(event) {
     /* 
     * Create a pin for a user.
     */
-   // TODO:
-   console.log('Todo: Create a pin!');
-  },
-
-
-  uploadSignature(data) {
-    /* 
-    * Upload a signature for a user.
-    */
-    // TODO:
-    const collection = db.collection('organizations');
-    return collection.add(data);
+    event.preventDefault();
+    const pin = document.getElementById('pin_input').value;
+    authRequest('/api/auth/create-pin', { pin }).then((response) => {
+      if (response.success) {
+        document.getElementById('pin_input').value = '';
+        showNotification('Pin created', response.message, { type: 'success' });
+        window.location.href = '/settings/user';
+      } else {
+        showNotification('Invalid pin', response.message, { type: 'error' });
+      }
+    });
   },
 
 
   deleteSignature(data) {
     /* 
-    * Remove a signature from a user.
+    * Remove a signature from a user's settings.
     */
-    // TODO:
-    const collection = db.collection('organizations');
-    return collection.add(data);
+    authRequest('/api/auth/delete-signature').then((response) => {
+      if (response.success) {
+        showNotification('Signature deleted', response.message, { type: 'success' });
+        window.location.reload(); // Optional: Hide banner more elegantly.
+      } else {
+        showNotification('Signature deletion failed', response.message, { type: 'error' });
+      }
+    });
   },
 
+
+  deletePin() {
+    /* 
+    * Delete all existing pins for a user.
+    */
+    authRequest('/api/auth/delete-pin').then((response) => {
+      if (response.success) {
+        showNotification('Voided user pin', response.message, { type: 'success' });
+        window,location.reload(); // Optional: Hide banner more elegantly.
+      } else {
+        showNotification('Voiding pin failed', response.message, { type: 'error' });
+      }
+    });
+  },
+
+
+  saveSignature(uid, data) {
+    /* 
+    * Upload a signature for a user.
+    */
+    // FIXME: Upload signature through the API.
+    // authRequest('/api/auth/create-signature', { data_url: data }).then((response) => {
+    //   if (response.success) {
+    //     showNotification('Signature saved', response.message, { type: 'success' });
+    //   } else {
+    //     showNotification('Signature upload failed', response.message, { type: 'error' });
+    //   }
+    // });
+    const signatureRef = `users/${uid}/user_settings/signature.png`;
+    uploadImage(signatureRef, data).then((snapshot) => {
+      getDownloadURL(signatureRef).then((url) => {
+        updateDocument(`users/${uid}`, {
+          signature_created_at: new Date().toISOString(),
+          signature_ref: signatureRef,
+          signature_url: url,
+        }).then(() => {
+          showNotification('Signature saved', 'Signature saved with your files.', { type: 'success' });
+          window.location.href = '/settings/user';
+        })
+        .catch((error) => {
+          showNotification('Error saving signature', 'An error occurred when saving your signature.', { type: 'error' });
+        });
+      }).catch((error) => {
+        showNotification('Error uploading signature', 'An error occurred when uploading your signature.', { type: 'error' });
+      });
+    });
+  },
+
+
+  viewSignature(event) {
+    /*
+     * Require the user to enter their pin before showing their signature.
+     */
+    event.preventDefault();
+    const pin = document.getElementById('pin_input').value;
+    authRequest('/api/auth/get-signature', { pin }).then((response) => {
+      if (response.success) {
+        var modalEl = document.getElementById('pinModal')
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        const signatureEl = document.getElementById('signature-canvas');
+        signatureEl.classList.remove('d-none');
+        signatureEl.src = response.signature_url;
+        document.getElementById('view_button').classList.add('d-none');
+        document.getElementById('hide_button').classList.remove('d-none');
+        modal.hide();
+      } else {
+        showNotification('Invalid pin', response.message, { type: 'error' });
+      }
+    })
+    .catch((error) => {
+      showNotification('Invalid pin', error.message, { type: 'error' });
+    });
+  },
+
+
+  hideSignature() {
+    /*
+     * Hide a signature after it has been shown.
+     */
+    document.getElementById('hide_button').classList.add('d-none');
+    document.getElementById('view_button').classList.remove('d-none');
+    document.getElementById('signature-canvas').classList.add('d-none');
+  },
+
+
+  uploadSignature(event, uid) {
+    /*
+     * Upload an existing signature file to Firebase Storage.
+     * FIXME: Save to users/${uid}/user_settings/signature
+     */
+    const signatureRef = `users/${uid}/user_settings/signature.png`;
+    if (event.target.files.length) {
+      showNotification('Uploading signature', 'Uploading your signature image...', { type: 'wait' });
+      uploadFile(signatureRef, event.target.files[0]).then((snapshot) => {
+        getDownloadURL(signatureRef).then((url) => {
+          updateDocument(`users/${uid}`, {
+            signature_created_at: new Date().toISOString(),
+            signature_ref: signatureRef,
+            signature_url: url,
+          }).then(() => {
+            showNotification('Signature saved', 'Signature saved with your files.', { type: 'success' });
+            window.location.href = '/settings/user';
+          })
+          .catch((error) => console.log(error));
+        }).catch((error) => console.log(error));
+      });
+    }
+  },
+
+  // DRAFT
+  getUserLogs(orgId) {
+    /* 
+    * Record time and user of any activity.
+    */
+  },
 
 };

@@ -3,27 +3,31 @@
 <!--
   Traceability Settings Page | Cannlytics Console
   Created: 6/12/2021
-  Updated: 6/13/2021
+  Updated: 7/18/2021
 -->
 {% extends "console/pages/traceability/traceability.html" %}
 {% load icon %}
-{% comment %} {% block console_css %}
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
-{% endblock console_css %} {% endcomment %}
 {% block section %}
 <div class="p-3">
 
-  <h1 class="fs-5 mb-0 lh-base text-dark">Provider</h1>
+  <h1 class="fs-5 mb-0 lh-base text-dark">Traceability Provider</h1>
+  <h2 class="fs-6 lh-base text-secondary mb-3">Select the traceability provider in your state.</h2>
 
   <!-- Traceability Provider -->
   <div class="col-md-4">
-    <label for="inputTraceabilityProvider" class="form-label">Traceability Provider</label>
-    <select id="inputTraceabilityProvider" class="form-select">
-      {% comment %} <option >Select</option> {% endcomment %}
-      {% comment %} <option>Leaf Data Systems</option> {% endcomment %}
-      <option selected>Metrc</option>
-    </select>
+    <div class="row">
+      <label
+        for="inputTraceabilityProvider"
+        class="col-sm-3 col-form-label col-form-label-sm"
+      >
+        Provider
+      </label>
+      <div class="col-sm-9">
+        <select id="inputTraceabilityProvider" class="form-select form-select-sm">
+          <option selected>Metrc</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <!-- Credentials-->
@@ -35,7 +39,7 @@
     <div class="my-3">
       <button
         id="license-fields-show"
-        class="btn btn-sm btn-secondary"
+        class="btn btn-sm btn-sm-light btn-md-light"
         onclick="toggleLicenseFields(event);"
       >
         Add state-issued license
@@ -87,12 +91,11 @@
                   aria-label="License type"
                   name="state"
                 >
-                  <!-- TODO: Dynamically list states where Cannlytics is verified -->
+                  <!-- Optional: Dynamically list states where Cannlytics is verified -->
                   <option value="OK" selected>Oklahoma</option>
                   <!-- <option value="other">Other</option> -->
                 </select>
               </div>
-              <!-- Optional: Only show API key if state is verified by Cannlytics -->
               <div class="col-md-3">
                 <label class="form-label">
                   User API Key
@@ -130,13 +133,13 @@
       <!-- Add license button -->
       <div>
         <button
-          class="btn btn-sm btn-secondary"
+          class="btn btn-sm btn-sm-light btn-md-light"
           onclick="cannlytics.ui.addListItem(event, 'license')"
         >
           Add a license
         </button>
         <button
-          class="btn btn-sm bg-gradient-green text-white"
+          class="btn btn-sm btn-set-width bg-gradient-green text-white"
           onclick="cannlytics.traceability.saveLicenses('{{ organizations.0.uid }}');"
         >
           Save

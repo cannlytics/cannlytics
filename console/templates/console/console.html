@@ -19,10 +19,10 @@
 
   <!-- Console header -->
   {% block page_css %}
-    <script src="{% static 'console/plugins/ag-grid/ag-grid-community.min.noStyle.js'%}"></script>
+    {% comment %} <script src="{% static 'console/plugins/ag-grid/ag-grid-community.min.noStyle.js'%}"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'console/plugins/ag-grid/ag-grid.min.css'%}">
     <link rel="stylesheet" type="text/css" href="{% static 'console/plugins/ag-grid/ag-theme-alpine.min.css'%}">
-    <link rel="stylesheet" type="text/css" href="{% static 'console/plugins/ag-grid/ag-theme-alpine-dark.min.css'%}">
+    <link rel="stylesheet" type="text/css" href="{% static 'console/plugins/ag-grid/ag-theme-alpine-dark.min.css'%}"> {% endcomment %}
     {% block console_css %}{% endblock console_css %}
   {% endblock %}
 

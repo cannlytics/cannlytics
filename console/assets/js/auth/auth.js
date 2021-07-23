@@ -133,12 +133,15 @@ export const auth = {
     document.getElementById('sign-in-button').classList.add('d-none');
     document.getElementById('sign-in-loading-button').classList.remove('d-none');
     firebase.auth().signInWithEmailAndPassword(email, password).then((user) => {
-      // Optional: Handle error more elegantly.
       return authRequest('/login').then((response) => {
         window.location.href = window.location.origin;
       })
       .catch((error) => {
+        console.log(error);
+        // Optional: Fix error returned by successful login.
         window.location.href = window.location.origin;
+        // const message = 'Platform down for maintenance. Thank you for your patience.'
+        // showNotification('Sign in error', message, { type: 'error' });
       });
     })
     // Optional: Determine if it's okay to stay signed in.
@@ -178,7 +181,7 @@ export const auth = {
     const password = document.getElementById('login-password').value;
     document.getElementById('sign-up-button').classList.add('d-none');
     document.getElementById('sign-up-loading-button').classList.remove('d-none');
-    // FIXME: Ensure sign-up works with user sessions.
+    // FIXME: Ensure that sign-up works with user sessions.
     firebase.auth().createUserWithEmailAndPassword(email, password)
       .then(() => {
         // Optional: Handle error more elegantly.
@@ -224,12 +227,18 @@ export const auth = {
     * Sign a user out of Firebase and clear the session.
     */
     const baseURL = window.location.origin;
+    console.log('Signing out....')
     authRequest('/logout')
       .then((response) => {
-        document.location.href = `${baseURL}/account/sign-out`;
+        console.log(response);
+        document.location.href = `${window.location.origin}/account/sign-out`;
       })
       .catch((error) => {
-        document.location.href = `${baseURL}/account/sign-out`;
+        console.log(error);
+        document.location.href = `${window.location.origin}/account/sign-out`;
+      })
+      .finally(() => {
+        document.location.href = `${window.location.origin}/account/sign-out`;
       });
   },
   

@@ -1,22 +1,125 @@
 <!doctype html>
 <html>
-<!-- Signature -->
-<!-- URL: settings/account/signature -->
-<!-- Created 1/2/2021 -->
+<!--
+  Signature Page | Cannlytics Console
+  Created: 1/2/2021
+  Updated: 7/2/2021
+-->
 {% extends "console/console.html" %}
+{% block console_css %}
+
+<!-- Signature Pad -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
+<style>
+  .wrapper {
+    position: relative;
+    width: 420px;
+    height: 175px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  .signature-pad {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 420px;
+    height: 175px;
+  }
+</style>
+
+{% endblock console_css %}
 {% block console_body %}
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4" style="min-height:525px;">
     
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=signature.breadcrumbs
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Settings"
+      base_page_url="/settings"
+      nested_page="User Settings"
+      nested_page_url="/settings/user"
+      current_page="Signature Management"
     %}
 
     <!-- Signature Management -->
-    <!-- Upload signature file -->
-    <!-- Draw signature -->
-    <p>TODO: Signature Management</p>
+    <div class="wrapper mx-3">
+      <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Signature</h1>
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        <small>Your signature for signing documents,
+        such as certificates of analysis (CoAs).</small>
+      </h2>
 
+      <!-- Draw signature -->
+      <div class="wrapper bg-light border rounded my-4 me-0">
+        <canvas
+          id="signature-pad"
+          class="signature-pad"
+          width=400
+          height=200
+        ></canvas>
+      </div>
+
+      <!-- Save and clear options -->
+      <div class="d-flex justify-content-end">
+        <button
+          id="clear-button"
+          class="btn btn-sm-light me-2"
+        >
+          Clear
+        </button>
+        <button
+          id="upload-button"
+          class="btn btn-sm-light me-2"
+          onclick="document.getElementById('signature_input').click();"
+        >
+          Upload Signature
+        </button>
+        <input type="file" id="signature_input" multiple accept="image/*" class="visually-hidden">
+        <button
+          id="save-button"
+          class="btn btn-sm bg-gradient-green text-white"
+        >
+          Save Signature
+        </button>
+      </div>
+    
+    </div>
   </main>
 {% endblock console_body %}
+{% block console_js %}
+
+  <script>
+
+    // Create the signature pad.
+    var signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
+      backgroundColor: 'rgba(233, 233, 233, 0)',
+      penColor: 'rgb(0, 0, 0)'
+    });
+
+    // Attach save signature functionality.
+    var saveButton = document.getElementById('save-button');
+    saveButton.addEventListener('click', function (event) {
+      var data = signaturePad.toDataURL('image/png');
+      cannlytics.settings.saveSignature('{{ user.uid }}', data);
+    });
+
+    // Attach cancel functionality.
+    var cancelButton = document.getElementById('clear-button');
+    cancelButton.addEventListener('click', function (event) {
+      signaturePad.clear();
+    });
+
+    // Function to upload a user's signature
+    function uploadUserSignature(event) {
+      cannlytics.settings.uploadSignature(event, '{{ user.uid }}');
+    }
+
+    // Attach upload image functionality.
+    const fileElem = document.getElementById('signature_input');
+    fileElem.addEventListener('change', uploadUserSignature, false);
+
+  </script>
+
+{% endblock %}
 </html>

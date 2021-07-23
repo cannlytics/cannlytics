@@ -3,7 +3,7 @@
 <!--
   User Menu | Cannlytics Console
   Created: 2/20/2021
-  Updated: 6/10/2021
+  Updated: 7/13/2021
 -->
 {% load static %}
 <li class="nav-item dropdown d-flex align-items-center">
@@ -19,13 +19,13 @@
   >
     <img
       id="userPhotoNav"
-      src="{% if user.photo_url %}{{ user.photo_url }}{% else %}{% static "console/images/account/default-dark.png" %}{% endif %}"
+      src="{% if user.photo_url %}{{ user.photo_url }}{% else %}{% static "console/images/account/user.svg" %}{% endif %}"
       alt="Settings"
       title="Settings"
       width="30"
       height="30"
       class="rounded-circle"
-      style="vertical-align:unset;"
+      style="vertical-align:unset;{% if not user.photo_url %}background:linear-gradient(to bottom right, #ffc371, #ff5f6d);{% endif %}"
       data-bs-html="true"
       data-bs-toggle="tooltip"
       data-bs-placement="bottom"
@@ -41,83 +41,86 @@
     <div class="d-flex px-3 py-1">
 
       <!-- Profile menu image -->
-      <a href="/settings/user">
+      <a href="{% if user.email %}/settings/user{% else %}/account/sign-in{% endif %}">
         <img
           id="userPhotoMenu"
-          src="{% if user.photo_url %}{{ user.photo_url }}{% else %}{% static "console/images/account/default-dark.png" %}{% endif %}"
+          src="{% if user.photo_url %}{{ user.photo_url }}{% else %}{% static "console/images/account/user.svg" %}{% endif %}"
           alt="Account"
           title="Account"
           width="75"
           height="75"
           class="rounded-circle"
-          style="vertical-align:unset;"
+          style="vertical-align:unset;{% if not user.photo_url %}background:linear-gradient(to bottom right, #ffc371, #ff5f6d);{% endif %}"
         >
       </a>
 
       <!-- Profile name and email -->
+      <!-- Sign-up / sign-in for anonymous users -->
+      <!-- Optional: Sign-up in dialog -->
       <div class="d-flex flex-column justify-content-center ps-2">
-        <a
-          id="personalize-account"
-          class="text-link {% if user.name %}d-none{% endif %}"
-          href="/settings/user"
-        >
-          Personalize your account &rarr;
-        </a>
-        <h3 id="userName" class="mb-1 fs-5">{{ user.name }}</h3>
-        <h5 id="userEmail" class="mb-0 fs-6 text-secondary">{{ user.email }}</h5>
-
-        <!-- Sign-up / sign-in for anonymous users -->
-        <!-- Optional: Sign-up in dialog -->
-        {% if not user %}
-        <div id="anonymous-signup" class="d-flex align-items-center ps-2">
+        {% if user.email %}
           <a
-            class="btn btn-sm bg-gradient-orange text-white text-no-wrap me-1"
-            href="/account/sign-up"
+            id="personalize-account"
+            class="text-gradient text-no-wrap ms-2 {% if user.name %}d-none{% endif %}"
+            href="/settings/user"
           >
-            Sign up
+            Setup your account &rarr;
           </a>
-          <a
-            class="btn btn-sm bg-gradient-green text-white text-no-wrap ms-1"
-            href="/account/sign-in"
-          >
-            Sign in
-          </a>
-        </div>
+          <h3 id="userName" class="mb-1 fs-5">{{ user.name }}</h3>
+          <h5 id="userEmail" class="mb-0 fs-6 text-secondary">{{ user.email }}</h5>
+        {% else %}
+          <p class="fs-6 ps-2 pb-2">
+            <small class="">First things first,<br>sign in or sign up.</small>
+          </p>
+          <div id="anonymous-signup" class="d-flex align-items-center ps-2">
+            <a
+              class="btn btn-sm bg-gradient-green text-white text-no-wrap me-2"
+              href="/account/sign-in"
+            >
+              Sign in
+            </a>
+            <a
+              class="btn btn-sm bg-gradient-orange text-white text-no-wrap"
+              href="/account/sign-up"
+            >
+              Sign up
+            </a>
+          </div>
         {% endif %}
-
       </div>
 
     </div>
-    <li><hr class="dropdown-divider"></li>
 
-    <!-- Account -->
-    <li><a class="dropdown-item" href="/settings/user">Your account</a></li>
-
-    <!-- Change theme -->
-    {% comment %} <li>
-      <a
-        class="dropdown-item app-action d-flex justify-content-between"
-        onClick="cannlytics.theme.changeTheme();"
-      >
-        <span>Change theme</span>
-        {% icon "sunset" class="light-only ms-2" %}
-        {% icon "sunrise" class="dark-only ms-2" %}
-      </a>
-    </li> {% endcomment %}
-
-    <!-- Invite a user -->
-    <li><a class="dropdown-item" href="/settings/invite">Invite a user</a></li>
-
-    <!-- Send feedback -->
-    <li><a class="dropdown-item" href="/help/feedback">Send feedback</a></li>
-
-    <!-- Sign out-->
-    <!-- Optional: Don't display if there is no user -->
-    <li>
-      <button class="dropdown-item" onClick="cannlytics.auth.signOut();">
-        Sign Out
-      </button>
-    </li>
+    {% if user.email %}
+      <!-- User Menu-->
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a
+          class="dropdown-item"
+          href="/settings/user"
+        >
+          Your account
+        </a>
+      </li>
+      <!-- Optional: Invite a user -->
+      {% comment %} <li><a class="dropdown-item" href="/settings/invite">Invite a user</a></li> {% endcomment %}
+      <li>
+        <a
+          class="dropdown-item"
+          href="/help/feedback"
+        >
+          Send feedback
+        </a>
+      </li>
+      <li>
+        <button
+          class="dropdown-item"
+          onClick="cannlytics.auth.signOut();"
+        >
+          Sign Out
+        </button>
+      </li>
+    {% endif %}
 
   </ul><!-- End of dropdown menu -->
 </li>

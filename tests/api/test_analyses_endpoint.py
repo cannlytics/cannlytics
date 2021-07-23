@@ -1,99 +1,85 @@
 """
-Test Analayses API Endpoint | Cannlytics API
+Test Analyses API Endpoint | Cannlytics API
 
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
-Created: 6/21/2021
-Updated: 6/21/2021
+Created: 7/19/2021
+Updated: 7/19/2021
 License: MIT License <https://opensource.org/licenses/MIT>
 """
-
 import os
-import environ
-import pytest
 import requests
+from dotenv import load_dotenv
 
-import sys
-sys.path.append('../../../')
-from cannlytics import firebase
+# Define the endpoint.
+ENDPOINT = 'analyses'
 
-# BASE = 'http://127.0.0.1:8000/api/'
-BASE = 'https://console.cannlytics.com/api/'
+# Test using development server.
+BASE = 'http://127.0.0.1:8000/api'
 
-REQUESTS = [
-    {
-         'endpoint': 'areas',
-         'method': 'get',
-         'data': None,
-     },
-    {
-         'endpoint': 'areas',
-         'method': 'POST',
-         'data': {},
-     },
-    {
-         'endpoint': 'areas',
-         'method': 'POST',
-         'data': {},
-     },
-    {
-         'endpoint': 'areas',
-         'method': 'GET',
-         'data': {},
-     },
-    {
-         'endpoint': 'areas',
-         'method': 'DELETE',
-         'data': {},
-     },
-    {
-         'endpoint': 'areas',
-         'method': 'GET',
-         'data': None,
-     },
-]
+# Uncomment to test with production server.
+# BASE = 'https://console.cannlytics.com/api'
 
-TOKEN = None
+# Load your API key.
+load_dotenv('../../.env')
+API_KEY = os.getenv('CANNLYTICS_API_KEY')
 
-# Initialize Firebase
-env = environ.Env()
-env.read_env('../../../.env')
-credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
-db = firebase.initialize_firebase()
-
-# TODO: Test authenticate.
-# if TOKEN is None:
-TOKEN = firebase.create_custom_token(email='dev@cannlytics.com')
-print('Authenticated user:', 'dev@cannlytics.com')
+# Pass your API key through the authorization header as a bearer token.
 HEADERS = {
-    'Authorization': 'Bearer %s'
+    'Authorization': 'Bearer %s' % API_KEY,
+    'Content-type': 'application/json',
 }
 
-r = REQUESTS[0]
-url = BASE + r['endpoint']
-print('Requesting:', url)
-response = getattr(requests, r['method'])(url, data=r['data'], headers=HEADERS)
+# Identify the organization that you are working with.
+ORG_ID = 'test-company'
 
-# @pytest.fixture
-# def target_endpoints():
-#     """Target endpoints."""
-#     return target_endpoints
+#------------------------------------------------------------------------------
+# Create an analysis.
+#------------------------------------------------------------------------------
+data = {
+    'analysis_id': 'hemp-analysis',
+    'analytes': ['cbd', 'cbda', 'thc', 'thca'],
+    'date': '2021-07-19',
+    'initials': 'KLS',
+    'key': 'hemp-analysis',
+    'name': 'Hemp Analysis',
+    'price': '',
+    'public': False
+}
+url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
+response = requests.post(url, json=data, headers=HEADERS)
+assert response.status_code == 200
+print('Created:', response.json()['data'])
 
+#------------------------------------------------------------------------------
+# Get analyses.
+#------------------------------------------------------------------------------
+organization_id = 'test-company'
+url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
+response = requests.get(url, headers=HEADERS)
+assert response.status_code == 200
+data = response.json()['data']
+print('Found:', len(data))
 
-# @pytest.fixture
-# def expected_result():
-#     """Expected result to be returned."""
-#     return [200] * len(REQUESTS)
+#------------------------------------------------------------------------------
+# Update an analysis.
+#------------------------------------------------------------------------------
+data = {
+    'analysis_id': 'hemp-analysis',
+    'price': '$50',
+}
+url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
+response = requests.post(url, json=data, headers=HEADERS)
+assert response.status_code == 200
+print('Updated:', response.json()['data'])
 
-
-# def test_endpoints(target_endpoints, expected_result):
-#     """Request each endpoint, expecting responses with 200 status code."""
-#     metadata = []
-#     for r in REQUESTS:
-#         url = os.path.join(BASE, r['endpoint']) 
-#         response = getattr(requests, r['method'])(url, data=r['data'], headers=HEADERS)
-#         metadata.append(response.status_code)
-#     assert metadata == expected_result
-
-
+#------------------------------------------------------------------------------
+# Delete an analysis.
+#------------------------------------------------------------------------------
+data = {
+    'analysis_id': 'hemp-analysis',
+}
+url = f'{BASE}/{ENDPOINT}?organization_id={ORG_ID}'
+response = requests.delete(url, json=data, headers=HEADERS)
+assert response.status_code == 200
+print('Deleted:', response.json()['data'])

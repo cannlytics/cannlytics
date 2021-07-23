@@ -2,12 +2,51 @@
  * User Interface JavaScript | Cannlytics Console
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 5/2/2021
- * Updated: 6/10/2021
+ * Updated: 7/4/2021
  */
-import { formDeserialize, hasClass } from '../utils.js';
+import { deserializeForm, getCookie, hasClass } from '../utils.js';
 
 
 const formHelpers = {
+
+
+  submitForm(inputId, url) {
+    /*
+     * FIXME: Submit a form without refreshing the page.
+     */
+    var selectedFile = $(`#${inputId}`).files[0];
+    var fd = new FormData();
+    fd.append('file', selectedFile);
+    $.ajax({
+      method: 'POST', 
+      url: url,
+      data: fd, 
+      headers: {
+        'Content-Type': undefined, 
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      cache: false, 
+      processData: false
+    })
+    .done(function(data) {
+      alert(data)
+    });
+  },
+
+
+  submitFormWithoutRefresh(formId, url) {
+    /*
+     * FIXME: Submit a form without refreshing the page.
+     */
+    $(`#${formId}`).on('submit', function(e) {
+      e.preventDefault();
+      $.ajax({
+          type:'POST',
+          url: url,
+          data: { csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() },
+        });
+      });
+  },
 
 
   toggleFields(event, key) {
@@ -47,7 +86,15 @@ const initHelpers = {
 };
 
 
-const navigationHelpers = {
+export const navigationHelpers = {
+
+
+  navigateUp(url) {
+    /* 
+     * Remove the last directory in URL, navigating up.
+     */
+    window.location.href = window.location.href.substring(0, url.lastIndexOf('/'));
+  },
 
 
   openObject(model, modelSingular, data) {
@@ -61,7 +108,7 @@ const navigationHelpers = {
     const objectId = data[`${modelSingular}_id`];
     if (objectId) id = objectId;
     localStorage.setItem(modelSingular, JSON.stringify(data));
-    window.location.href = `/${model}/${id}`;
+    window.location.href = `${window.location.href}/${id}`;
   },
 
 
@@ -70,7 +117,7 @@ const navigationHelpers = {
      * View an object's data from local storage when navigating to a detail page.
      */
     const data = JSON.parse(localStorage.getItem(modelSingular));
-    formDeserialize(document.forms[`${modelSingular}-form`], data)
+    deserializeForm(document.forms[`${modelSingular}-form`], data)
     console.log('DEV: Observation data:', data);
   },
 
@@ -83,6 +130,13 @@ export const ui = {
   ...formHelpers,
   ...initHelpers,
   ...navigationHelpers,
+
+  choosePhoto(id) {
+    /*
+     * Choose a file to upload.
+     */
+    document.getElementById(id).click();
+  },
 
 
   hideSidebar() {
@@ -126,7 +180,6 @@ export const ui = {
     }
   },
 
-
   addListItem(event, type) {
     /*
      * Adds a list item of input fields to the UI by
@@ -134,6 +187,7 @@ export const ui = {
      * The delete button is shown and wired-up.
      * The tooltip is removed.
      */
+    // FIXME: Generalize to handle adding data model fields? Or create a new function.
     event.preventDefault();
     var ul = document.getElementById(`${type}-list`);
     var li = document.getElementById(`primary-${type}`).cloneNode(true);

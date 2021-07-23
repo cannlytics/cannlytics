@@ -11,7 +11,7 @@
   {% load static %}
   {% block title %}Console | Cannlytics{% endblock %}
   {% block page_css %}
- <link href="{% static 'console/plugins/cannlytics/login-3766ba0a1d0bfb9cf77c.css'%}" id="login_css" rel="stylesheet" type="text/css"/>
+ <link href="{% static 'console/plugins/cannlytics/login-1cd34589bb91bc8f4c1d.css'%}" id="login_css" rel="stylesheet" type="text/css"/>
  {% endblock %}
   {% block page %}
  
@@ -33,7 +33,7 @@
    </div>
    
   <!-- Form section -->
-   <div class="col col-lg-5">
+   <div class="col col-lg-5 bg-light">
     <form class="form-login px-5 py-5 mx-auto" style="max-width:540px;">
      {% csrf_token %}
      
@@ -87,6 +87,7 @@
  <script src="{% static 'console/plugins/particlesjs/particles.js' %}" type="text/javascript">
  </script>
  <script type="text/javascript">
+  // Initialize particles.
   particlesJS.load('particles-js', '{% static "console/plugins/particlesjs/particles.json"%}');
  </script>
  {% endblock page_js %}

@@ -5,7 +5,7 @@
  * Updated: 6/18/2021
  */
 
-import { authRequest, formDeserialize, formSerialize, showNotification } from '../utils.js';
+import { authRequest, deserializeForm, serializeForm, showNotification } from '../utils.js';
 import { theme } from '../settings/theme.js';
 
 
@@ -80,7 +80,7 @@ export const projects = {
      * Create or update a project.
      */
     const form = document.getElementById('project-form');
-    const data = formSerialize(form);
+    const data = serializeForm(form);
     authRequest(`/api/projects/${data.project_id}`, data).then((response) => {
       if (response.error) {
         showNotification('Error saving project', response.message, { type: 'error' });
@@ -105,7 +105,7 @@ export const projects = {
      * Render a project's data when navigating to a project page.
      */
     const data = JSON.parse(localStorage.getItem('project'));
-    formDeserialize(document.forms['project-form'], data);
+    deserializeForm(document.forms['project-form'], data);
   },
 
 

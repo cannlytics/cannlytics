@@ -4,16 +4,27 @@
   Dynamic Form | Cannlytics
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
-  Updated: 6/22/2021
-
+  Updated: 7/9/2021
   Params:
     fields
+    disabled (optional)
+    narrow (optional)
 -->
-<div class="col col-md-10 col-lg-6">
+<div class="col {% if not narrow %}col-md-10 col-lg-6{% endif %}">
   {% for field in fields %}
 
+    {% if field.hidden %}
+
+      <!-- Hidden fields -->
+      <input
+        id="input_{{ field.key }}"
+        class="visually-hidden"
+        name="{{ field.key }}"
+      />
+
     <!-- Text Field -->
-    {% if not field.type or field.type == 'text' or field.type == 'number' or field.type == 'email' or field.type == 'tel' %}
+    <!-- FIXME: {{ field.spellcheck }} -->
+    {% elif not field.type or field.type == 'text' or field.type == 'number' or field.type == 'email' or field.type == 'tel' %}
       <div class="row mb-3">
         <label class="col-sm-3 col-form-label col-form-label-sm">
           {{ field.label }}
@@ -24,14 +35,16 @@
             id="input_{{ field.key }}"
             class="form-control form-control-sm {{ field.class }}"
             name="{{ field.key }}"
-            spellcheck="{{ field.spellcheck }}"
+            spellcheck="false"
             style="{{ field.style }}"
             type="{{ field.type }}"
+            {% if field.disabled or disabled %}disabled{% endif %}
           >
         </div>
       </div>
 
     <!-- Date (date) -->
+    <!-- data-date-start-date="-0d" -->
     {% elif field.type == 'date' %}
       <div class="row mb-3">
         <label class="col-sm-3 col-form-label col-form-label-sm">
@@ -44,12 +57,13 @@
             class="form-control form-control-sm"
             name="{{ field.key }}"
             data-provide="datepicker"
-            data-date-start-date="-0d"
+            {% if field.disabled or disabled %}disabled{% endif %}
           >
         </div>
       </div>
 
     <!-- Date and time (datetime) -->
+    <!-- data-date-start-date="-0d" -->
     {% elif field.type == 'datetime' %}
       <div class="row mb-3">
         <label class="col-sm-3 col-form-label col-form-label-sm">
@@ -62,7 +76,12 @@
             class="form-control form-control-sm"
             name="{{ field.key }}"
             data-provide="datepicker"
-            data-date-start-date="-0d"
+            data-date-autoclose="true"
+            data-date-format="yyyy-mm-dd"
+            data-date-format-to-display="mm/dd/yy"
+            data-date-format-to-value="yyyy-mm-dd"
+            data-date-today-highlight="true"
+            {% if field.disabled or disabled %}disabled{% endif %}
           >
         </div>
         <div class="col-sm-3">
@@ -72,6 +91,7 @@
             class="form-control form-control-sm"
             name="{{ field.key }}_time"
             data-provide="text"
+            {% if field.disabled or disabled %}disabled{% endif %}
           >
         </div>
       </div>
@@ -80,10 +100,12 @@
     {% elif field.type == 'textarea' %}
     <div class="form-floating mb-3">
       <textarea
+        id="input_{{ field.key }}"
+        name="{{ field.key }}"
         class="form-control"
         placeholder=""
-        id="input_{{ field.key }}"
         style="height:250px"
+        {% if field.disabled or disabled %}disabled{% endif %}
       ></textarea>
       <label for="input_{{ field.key }}">
         {{ field.label }}
@@ -98,29 +120,38 @@
       </label>
       <input
         id="input_{{ field.key }}"
+        name="{{ field.key }}"
         class="form-check-input"
         type="checkbox"
+        {% if field.disabled or disabled %}disabled{% endif %}
+        {% if field.onchange %}onchange="{{ field.onchange }}(event);"{% endif %}
       >
     </div>
 
     <!-- Select (select + options + selected) | Select Multiple (select + multiple) -->
     {% elif field.type == 'select' %}
-    <div class="col-md-3">
-      <label class="form-label">{{ field.label }}</label>
-      <select
-        class="form-select form-select-sm"
-        aria-label="{{ field.label }}"
-        {% if field.multiple %}multiple{% endif %}
-      >
-        {% for option in field.options %}
-          <option
-            value="{{ option.key }}"
-            {% if option.key == field.selected %}selected{% endif %}
-          >
-            {{ option.name }}
-          </option>
-        {% endfor %}
-      </select>
+    <div class="row mb-3">
+      <label class="col-sm-3 col-form-label col-form-label-sm">
+        {{ field.label }}
+      </label>
+      <div class="col-sm-9">
+        <select
+          name="{{ field.key }}"
+          class="form-select form-select-sm {{ field.class }}"
+          aria-label="{{ field.label }}"
+          {% if field.multiple %}multiple{% endif %}
+          {% if field.disabled or disabled %}disabled{% endif %}
+        >
+          {% for option in field.options %}
+            <option
+              value="{{ option.key }}"
+              {% if option.key == field.selected %}selected{% endif %}
+            >
+              {{ option.label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
 
     <!-- TODO: Handle numbers (number) | Do integers (int) need to be handled differently? -->

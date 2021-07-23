@@ -2,64 +2,83 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // Secure all documents.
-    match /{document=**} {
+    // Secure admin documents.
+    match /admin/{document=**} {
       allow read, write: if false;
     }
-
+    
     // Allow user's to read their own API key information.
     match /admin/api/api_key_hmacs/{code} {
-      allow read: if isSignedIn() && request.auth.uid == resource.data.uid;
+      //allow read: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    
+    // Allow anyone to read the standard data models.
+    match /public/state/data_models/{document=**} {
+    	allow read: if true;
+      allow write: if false;
     }
 
     // Allow anyone to subscribe.
-    match /public/subscribers {
+    // TODO: Make more restrictive
+    // e.g. (request.resource.data.keys().hasOnly(
+    // ['name', 'location', 'city', 'address', 'hours', 'cuisine']))
+    match /public/subscribers/{document=**} {
     	allow read: if false;
       allow write: if true;
     }
 
-    // Allow user's to read and write their records.
+    // Allow user's to read and write their own records.
     match /users/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow users to manage data in their organization.
+    // Only owners and quality assurance can delete.
+    match /organizations/{organizationId}/{document=**} {
+      allow read, create, update:
+          if organizationId in request.auth.token.team
+          || organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+      allow delete:
+          if organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
     }
 
-    // Messages:
-    //   - Anyone can read.
-    //   - Authenticated users can add and edit messages.
-    //   - Validation: Check name is same as auth token and text length below 300 char or that imageUrl is a URL.
-    //   - Deletes are not allowed.
-    match /messages/{messageId} {
-      allow read;
-      allow create, update: if isSignedIn()
-                    && request.resource.data.name == request.auth.token.name
-                    && (request.resource.data.text is string
-                      && request.resource.data.text.size() <= 300
-                      || request.resource.data.imageUrl is string
-                      && request.resource.data.imageUrl.matches('https?://.*'));
-      allow delete: if false;
+    // Allow organization members to read and create file data.
+    // Only owners and quality assurance can change or delete file data.
+    match /organizations/{organizationId}/{dataModel}/{modelId}/files/{file=**} {
+    	allow read, create:
+          if organizationId in request.auth.token.team
+          || organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+      allow delete, update:
+          if organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
     }
+    
+    // Allow organization members to read the daily totals.
+    match /organizations/{organizationId}/stats/organization_settings/daily_totals/{date} {
+    	allow read:
+      	if organizationId in request.auth.token.team
+          || organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+    }
+    
+    
+    // TODO: Allow users to read the details of their team members.
 
-    // FCM Tokens:
-    //   - Anyone can write their token.
-    //   - Reading list of tokens is not allowed.
-    match /fcmTokens/{token} {
-      allow read: if false;
-      allow write;
-    }
+    // Extra (common patterns / objects)
+    // ----------------------------------
+    // request.auth.uid
+    // request.auth.token.admin
+    // request.auth.token.email_verified
+    // request.resource.data.message.size()
+    // request.resource.data.title is string
+    // get(/databases/$(database)/documents/users/$(request.auth.uid)).data.support
+    // request.time < timestamp.date(2020, 7, 10)
+    // request.query.limit <= 10
 
   }
 }
-
-// Common patterns / objects
-// request.auth.uid
-// request.auth.token.admin
-// request.auth.token.email_verified
-// request.resource.data.message.size()
-// request.resource.data.title is string
-// get(/databases/$(database)/documents/users/$(request.auth.uid)).data.support
-// request.time < timestamp.date(2020, 7, 10)
-// request.query.limit <= 10

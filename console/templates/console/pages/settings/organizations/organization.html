@@ -1,0 +1,215 @@
+<!doctype html>
+<html>
+<!--
+  Organization Page | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 6/8/2021
+  Updated: 7/18/2021
+  Optional:
+    - Show detailed team member information (their logs, training, etc.)
+-->
+{% load icon %}
+
+{% if unit and unit in user.owner %}
+  <!-- Load PayPal SDK if it's the owner of the organization -->
+  {% load get_env %}
+  {% block console_css %}
+    <script src="https://www.paypal.com/sdk/js?client-id={{ 'PAYPAL_CLIENT_ID'|get_env }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+  {% endblock console_css %}
+{% endif %}
+
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+  <!-- Header -->
+  {% include "console/components/links/breadcrumbs.html" with
+    base_page='Settings'
+    base_page_url='/settings'
+    nested_page="Organization settings"
+    nested_page_url="/settings/organizations"
+    current_page=unit
+  %}
+  <input id="organization_id_input" type="text" class="visually-hidden" value="{{ unit }}">
+
+  <!-- Organization form -->  
+  {% include "console/pages/settings/organizations/organization_form.html" with
+    organization_context=organization_context
+    organization_id=unit
+    user=user
+  %}
+
+  <!-- Data Model Management -->
+  {% include "console/pages/settings/organizations/data_models.html" with
+    data_models=settings.data_models
+  %}
+
+  <!-- Traceability Management -->
+  <div class="col-md-6 my-5 px-3">
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Traceability</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">
+      <small>Select the traceability provider in your state.</small>
+    </h2>
+
+    <!-- Traceability provider -->
+    <div class="row">
+      <label
+        for="traceability_provider"
+        class="col-md-4 col-sm-2 col-lg-2 col-form-label col-form-label-sm"
+      >
+        Provider
+      </label>
+      <div class="col">
+        <select id="traceability_provider" class="form-select form-select-sm col-md-8">
+        <option selected>Metrc</option>
+      </select>
+      </div>
+    </div>
+
+    <!-- Traceability endpoints -->
+    <!-- TODO: Setup functionality and incorporate into \traceability tabs -->
+    <!-- TODO: Make checked conditional on organization's traceability -->
+    <label
+      class="col-md-4 col-sm-2 col-lg-2 col-form-label col-form-label-sm"
+    >
+      Endpoints
+    </label>
+    <div class="ps-3 three-by-three">
+      {% for item in settings.traceability.tabs %}
+        <div class="form-check">
+          <label class="form-check-label" for="input_{{ item.section }}">
+            {{ item.name }}
+          </label>
+          <input
+            id="input_{{ item.section }}"
+            class="form-check-input"
+            type="checkbox"
+            {% if item.selected %}checked{% endif %}
+            onchange="cannlytics.settings.toggleTraceabilityEndpoint(event);"
+          >
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- FIXME: Render licenses if Org has licenses -->
+  <!-- onclick="toggleLicenseFields(event);" -->
+  <!-- Add licenses -->
+  <div class="my-5 px-3">
+    <h1 class="fs-5 lh-base text-dark mb-0">Licenses</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">
+      <small>Manage your organization's licenses.</small>
+    </h2>
+    <a
+      id="license-fields-show"
+      class="btn btn-sm btn-sm-light"
+      href="/traceability/settings"
+    >
+      Manage state-issued license
+    </a>
+  </div>
+
+  <!-- Visibility (public / private choice) -->
+  <div class="my-5 px-3">
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Visibility</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">
+      <small>Decide whether or not to list your organization for discovery by other users.</small>
+    </h2>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="public" id="public-choice" value="true">
+      <label class="form-check-label" for="public-choice">
+        Public {% icon "globe" width="16px" height="16px" %}<br>
+        <small class="text-secondary">Appears in search results.</small>
+      </label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="public" id="private-choice" value="false" checked>
+      <label class="form-check-label" for="private-choice">
+        Private {% icon "lock" width="16px" height="16px" %}<br>
+        <small class="text-secondary">Only visible to you.</small>
+      </label>
+    </div>
+  </div>
+
+  <!-- Admin -->
+  {% if unit and unit in user.owner %}
+
+    <!-- Subscription -->
+    {% include "console/pages/settings/organizations/subscription.html" %}
+
+    <!-- Delete -->
+    {% include "console/components/forms/delete_option.html" with
+      id=unit
+      model="organizations"
+      model_singular="organization"
+    %}
+  {% endif %}
+
+</main>
+
+<!-- JavaScript -->
+{% block console_js %}
+  <script>
+
+    // Initialize the form.
+    cannlytics.settings.initializeOrganizationsForm('{{ unit }}');
+
+    // Get and display team members.
+    cannlytics.settings.getTeamMembers(
+      '{{ organizations.0.organization_id }}',
+      '{{ organizations.0.owner }}',
+      '{{ user.uid }}'
+    );
+
+    function removeField(event) {
+      /* Remove data model field. */
+      // TODO: Implement
+      console.log(event);
+    }
+
+  </script>
+
+  {% if unit and unit in user.owner %}
+  <script>
+
+    // Get the subscription plan if it's the owner.
+    cannlytics.settings.getSubscription(function(response) {
+      document.getElementById('input_tier').value = response['name'];
+    });
+
+    function changeSubscription() {
+      /*
+       * Change subscription, getting subscription plan ID and rendering a PayPal button.
+       */
+      cannlytics.dashboard.saveSupport().then(function(response) {
+        document.getElementById('paypal-button-container').innerHTML = '';
+        var planID = response['plan_id'];
+        if (planID === 'free') {
+          cannlytics.dashboard.subscribe({ 'plan_id': planID }, false);
+          return;
+        }
+        paypal.Buttons({
+          style: {
+              shape: 'rect',
+              color: 'silver',
+              layout: 'horizontal',
+              label: 'subscribe',
+          },
+          createSubscription: function(data, actions) {
+            return actions.subscription.create({ 'plan_id': planID });
+          },
+          onApprove: function(data, actions) {
+            var subscription = { ...data, ...response };
+            cannlytics.dashboard.subscribe(subscription);
+          },
+          onError: function (error) {
+            alert('Uknown error subscribing. Please contact contact@cannlytics.com. Thank you for your patience and we will deliver you support.');
+          },
+        }).render('#paypal-button-container');
+      });
+    }
+
+  </script>
+  {% endif %}
+
+{% endblock console_js %}
+
+</html>

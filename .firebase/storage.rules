@@ -1,11 +1,23 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    match /{allPaths=**} {
-      // TODO: Make more restrictive
-      allow read: if true;
-      allow write: if request.auth != null;
+  
+    // Function to ensure that the user is signed in.
+    function isSignedIn() {
+      return request.auth != null;
     }
+
+    // Allow anyone to read public files.
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow users to manage their own files.
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
     // Only a user can upload their profile pictures, but anyone can view them.
     // Only allows image uploads that are less than 5MB.
     match /users/{uid}/user_photos/{photos=**} {
@@ -14,5 +26,30 @@ service firebase.storage {
                    && request.resource.contentType.matches('image/.*')
                    && request.auth.uid == uid;
     }
+
+    // Allow people in an organization to manage organization files.
+    // Only owners and quality assurance can delete.
+    match /organizations/{organizationId}/{allPaths=**} {
+      allow read, create, update:
+          if organizationId in request.auth.token.team
+          || organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+      allow delete:
+          if organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+    }
+
+    // Allow organization members to read and create files.
+    // Only owners and quality assurance can change or delete files.
+    match /organizations/{organizationId}/{dataModel}/{modelId}/files/{file=**} {
+    	allow read, create:
+          if organizationId in request.auth.token.team
+          || organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+      allow delete, update:
+          if organizationId in request.auth.token.qa
+          || organizationId in request.auth.token.owner;
+    }
+
   }
 }

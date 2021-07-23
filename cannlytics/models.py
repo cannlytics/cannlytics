@@ -86,6 +86,7 @@ class Analyte(Model):
     supporting fields, such as lowest order of detection (LOD),
     lowest order of quantification (LOQ), regulatory limit and more."""
     _collection = 'organizations/%s/analytes'
+    cas: str = ''
     public: bool = False
     formula: str = ''
     name: str = ''
@@ -313,10 +314,32 @@ class License(Model):
 
 @dataclass
 class OrganizationSettings(Model):
-    """An organizations's primary settings."""
+    """An organizations's primary settings.
+    An organization's `data_models` is the metadata that governs data
+    collection. For example:
+
+    "data_models": {
+        "analytes": {
+            "abbreviation": "AT",
+            "current_count": "0",
+            "fields": [
+                {"key": "analyte_id", "label": "Analyte ID"},
+                .
+                .
+                .
+            ],
+            "id_schema": "{{ abbreviation }}%y%m%d-{{ count }}",
+            "singular": "analyte",
+        },
+        .
+        .
+        .
+    }
+    """
     _collection = 'organizations/%s/settings'
     traceability_provider: str = ''
     public: bool = False
+    # data_models: dict = {}
 
 
 @dataclass

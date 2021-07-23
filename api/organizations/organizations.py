@@ -1,7 +1,7 @@
 """
 Organizations API Views | Cannlytics API
 Created: 4/25/2021
-Updated: 6/10/2021
+Updated: 7/19/2021
 Description: API to interface with organizations.
 """
 
@@ -28,7 +28,33 @@ from cannlytics.firebase import (
     update_document,
 )
 from cannlytics.traceability.metrc import authorize
-from api.auth import auth #pylint: disable=import-error
+from api.auth.auth import authenticate_request #pylint: disable=import-error
+
+
+@api_view(['GET'])
+def organization_team(request, format=None, organization_id=None, user_id=None):
+    """Get team member data for an organization, given an authenticated
+    request from a member of the organization.
+    """
+    claims = authenticate_request(request)
+    print('Claims:', claims)
+    try:
+        if organization_id in claims['team']:
+            organization_data = get_document(f'organizations/{organization_id}')
+            team = organization_data['team']
+            team_members = []
+            if user_id:
+                team = [user_id]
+            for uid in team:
+                team_member = get_document(f'users/{uid}')
+                team_members.append(team_member)
+            return Response({'data': team_members}, content_type='application/json')
+        else:
+            message = 'You are not a member of the requested organization.'
+            return Response({'error': True, 'message': message}, status=403)
+    except KeyError:
+        message = 'You are not a member of any teams. Try authenticating.'
+        return Response({'error': True, 'message': message}, status=401)
 
 
 @api_view(['GET', 'POST'])
@@ -50,9 +76,10 @@ def organizations(request, format=None, organization_id=None):
     # Get endpoint variables.
     model_type = 'organizations'
     _, project_id = google.auth.default()
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
+    print('Claims:', claims)
     uid = claims['uid']
-    custom_claims = get_custom_claims(uid)
+    # custom_claims = get_custom_claims(uid)
 
     # Get organization(s).
     if request.method == 'GET':
@@ -60,17 +87,18 @@ def organizations(request, format=None, organization_id=None):
         # Get organization_id parameter
         if organization_id:
             print('Query organizations by ID:', organization_id)
-            organization = get_document(f'{model_type}/{organization_id}')
-            if not organization:
+            data = get_document(f'{model_type}/{organization_id}')
+            print('Found data:', data)
+            if not data:
                 message = 'No organization exists with the given ID.'
                 return Response({'error': True, 'message': message}, status=404)
-            elif organization['public']:
-                return Response({'data': organization}, content_type='application/json')
-            elif uid not in organization['team']:
+            elif data['public']:
+                return Response({'data': data}, status=200)
+            elif uid not in data['team']:
                 message = 'This is a private organization and you are not a team member. Request to join before continuing.'
                 return Response({'error': True, 'message': message}, status=400)
             else:
-                return Response({'data': organization}, content_type='application/json')
+                return Response({'data': data}, status=200)
 
         # TODO: Get query parameters.
         keyword = request.query_params.get('name')
@@ -82,6 +110,7 @@ def organizations(request, format=None, organization_id=None):
                 'value': keyword
             }
             docs = get_collection(model_type, filters=[query])
+            return Response({'data': docs}, status=200)
 
         # Get all of a user's organizations
         else:
@@ -91,6 +120,7 @@ def organizations(request, format=None, organization_id=None):
                 'value': uid
             }
             docs = get_collection(model_type, filters=[query])
+            return Response({'data': docs}, status=200)
 
         # Optional: Get list of other organizations.
         # Check if user is in organization's team, otherwise,
@@ -99,7 +129,6 @@ def organizations(request, format=None, organization_id=None):
         # Optional: Try to get facility data from Metrc.
         # facilities = track.get_facilities()
 
-        return Response({'data': docs}, content_type='application/json')
 
     # Create or update an organization.
     elif request.method == 'POST':
@@ -116,8 +145,8 @@ def organizations(request, format=None, organization_id=None):
                 return Response({'error': True, 'message': message}, status=400)
 
             organization_id = doc['uid']
-            team_list = custom_claims.get('team', [])
-            owner_list = custom_claims.get('owner', [])
+            team_list = claims.get('team', [])
+            owner_list = claims.get('owner', [])
             if uid not in team_list and organization_id not in owner_list:
                 message = 'You do not currently belong to this organization. Request to join before continuing.'
                 return Response({'error': True, 'message': message}, status=400)
@@ -167,13 +196,22 @@ def organizations(request, format=None, organization_id=None):
             doc['team'] = [uid]
             doc['owner'] = uid
 
+            # All organizations start with the standard data models.
+            data_models = get_collection('public/state/data_models')
+            for data_model in data_models:
+                key = data_model['key']
+                update_document(f'{model_type}/{organization_id}/data_models/{key}', data_model)
+
         # Create or update the organization in Firestore.
-        entry = {**data, **doc}
+        entry = {**doc, **data}
         print('Entry:', entry)
         update_document(f'{model_type}/{organization_id}', entry)
 
-        # TEST: On organization creation, the creating user get custom claims.
-        update_custom_claims(uid, claims={'owner': [organization_id]})
+        # On organization creation, the creating user get custom claims.
+        update_custom_claims(uid, claims={
+            'owner': [organization_id],
+            'team': [organization_id]
+        })
 
         # TODO:  Owners can add other users to the team and
         # the receiving user then gets the claims.
@@ -190,7 +228,7 @@ def organizations(request, format=None, organization_id=None):
             changes=changes
         )
 
-        return Response({'data': entry}, content_type='application/json')
+        return Response({'data': entry, 'success': True}, content_type='application/json')
 
     elif request.method == 'DELETE':
 
@@ -216,7 +254,7 @@ def employees(request):
     """
 
     # Authenticate the user.
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     if not claims:
         message = 'Authentication failed. Please use the console or provide a valid API key.'
         return Response({'error': True, 'message': message}, status=403)
@@ -285,7 +323,7 @@ def join_organization(request):
     """Send the owner of an organization a request for a user to join."""
 
     # Identify the user.
-    claims = auth.verify_session(request)
+    claims = authenticate_request(request)
     uid = claims['uid']
     user_email = claims['email']
     post_data = loads(request.body.decode('utf-8'))
@@ -337,3 +375,60 @@ def join_organization(request):
 
     message = f'Request to join {organization} sent to the owner.'
     return Response({'success': True, 'message': message}, content_type='application/json')
+
+# def join_organization(request):
+#     """Send the owner of an organization a request for a user to join."""
+
+#     # Identify the user.
+#     claims = auth.authenticate(request)
+#     uid = claims['uid']
+#     user_email = claims['email']
+#     post_data = loads(request.body.decode('utf-8'))
+#     organization = post_data.get('organization')
+
+#     # Return an error if the organization doesn't exist.
+#     query = {'key': 'organization', 'operation': '==', 'value': organization}
+#     organizations = get_collection('organizations', filters=[query])
+#     if not organizations:
+#         message = 'Organization does not exist. Please check the organization name and try again.'
+#         return Response({'success': False, 'message': message}, status=400)
+
+#     # Send the owner an email requesting to add the user to the organization's team.
+#     org_email = organizations[0]['email']
+#     text = f"A user with the email address {user_email} would like to join your organization, \
+#         {organization}. Do you want to add this user to your organization's team? Please \
+#         reply YES or NO to confirm."
+#     paragraphs = []
+#     # TODO: Generate confirm, decline, and unsubscribe links with HMACs from user's uid and owner's uid.
+#     user_hmac = ''
+#     owner_hmac = ''
+#     # Optional: Find new home's for endpoints in api and cannlytics_website
+#     confirm_link = f'https://console.cannlytics.com/api/organizations/confirm?hash={owner_hmac}&member={user_hmac}'
+#     decline_link = f'https://console.cannlytics.com/api/organizations/decline?hash={owner_hmac}&member={user_hmac}'
+#     unsubscribe_link = f'https://console.cannlytics.com/api/unsubscribe?hash={owner_hmac}'
+#     html_message = render_to_string('templates/console/emails/action_email_template.html', {
+#         'recipient': org_email,
+#         'paragraphs': paragraphs,
+#         'primary_action': 'Confirm',
+#         'primary_link': confirm_link,
+#         'secondary_action': 'Decline',
+#         'secondary_link': decline_link,
+#         'unsubscribe_link': unsubscribe_link,
+#     })
+
+#     # TODO: Skip sending email if owner is unsubscribed.
+#     send_mail(
+#         subject="Request to join your organization's team.",
+#         message=text,
+#         from_email=DEFAULT_FROM_EMAIL,
+#         recipient_list=LIST_OF_EMAIL_RECIPIENTS,
+#         fail_silently=False,
+#         html_message=html_message
+#     )
+
+#     # Create activity logs.
+#     create_log(f'users/{uid}/logs', claims, 'Requested to join an organization.', 'users', 'user_data', [post_data])
+#     create_log(f'organization/{uid}/logs', claims, 'Request from a user to join the organization.', 'organizations', 'organization_data', [post_data])
+
+#     message = f'Request to join {organization} sent to the owner.'
+#     return Response({'success': True, 'message': message}, content_type='application/json')

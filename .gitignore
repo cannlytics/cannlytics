@@ -1,5 +1,5 @@
 # Logs
-logs
+# logs
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -85,6 +85,7 @@ docs/build
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
 # Distribution / packaging
 .Python
@@ -106,3 +107,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Testing
+tmp/

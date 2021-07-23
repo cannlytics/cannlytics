@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+<!--
+  Data Models Form | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 7/5/2021
+  Updated: 7/5/2021
+  Parameters:
+    data_models
+-->
+<!-- Each data model should have editable:
+    abbreviation
+    current_count
+    id_schema
+    singular
+    path
+    title
+    description
+    image_path
+    placeholder
+      action, height, image, message, title, url
+    breadcrumbs
+      title, url, active
+    fields
+      key, label, type, class
+  -->
+{% load icon %}
+<div class="col my-5 px-3">
+  <div class="col-md-6">
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Data Models</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">
+      <small>Data models are the primary objects for conceptualizing your workflow. In a nutshell,
+      data models are groups of fields and dictate the data points collected.</small>
+    </h2>
+  </div>
+
+  <!-- Field selection -->
+  <!-- TODO: If select then show:
+    options
+    multiple
+    -->
+    <!-- TODO: Support:
+    image
+    list
+    address
+  -->
+  <!-- Optional: Allow field lists to be re-aranged! -->
+  <div class="accordion" id="data_fields_accordian">
+    {% for key, values in data_models.items %}
+      <div class="accordion-item bg-transparent border boder-secondary">
+        <h6 class="accordion-header fs-6" id="{{ values.key }}_data_fields">
+          <button
+            class="accordion-button bg-transparent collapsed px-3 py-2"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#{{ values.key }}_data_fields_collapse"
+            aria-expanded="true"
+            aria-controls="{{ values.key }}_data_fields_collapse"
+          >
+            <small>{{ values.label }}</small>
+          </button>
+        </h6>
+        <div
+          id="{{ values.key }}_data_fields_collapse"
+          class="accordion-collapse collapse bg-transparent"
+          aria-labelledby="{{ values.key }}_data_fields"
+          data-bs-parent="#data_fields_accordian"
+        >
+          <div class="accordion-body bg-transparent">
+
+            <!-- Fields -->
+            <label class="form-label mb-0 me-3 fst-italic text-secondary mb-2">
+              Fields
+            </label>
+            <ol id="{{ values.key }}_fields-list" class="bold-list">
+            {% for field in values.fields %}
+              <li id="{{ values.key }}_fields-list-item" class="mb-0">
+              <div id="field-row" class="row">
+                <div class="col-md-3 d-flex align-items-center mb-2">
+                  <label for="{{ field.key }}_label" class="form-label mb-0 me-3">
+                    Label
+                  </label>
+                  <input
+                    id="{{ field.key }}_label"
+                    type="text"
+                    class="form-control form-control-sm"
+                    value="{{ field.label }}"
+                  >
+                </div>
+                <div class="col-md-3 d-flex align-items-center mb-2">
+                  <label for="{{ field.key }}_key" class="form-label mb-0 me-3">
+                    Key
+                  </label>
+                  <input
+                    id="{{ field.key }}_key"
+                    type="text"
+                    class="form-control form-control-sm"
+                    value="{{ field.key }}"
+                  >
+                </div>
+                <div class="col-md-3 d-flex align-items-center mb-2">
+                  <label for="{{ field.key }}_type" class="form-label mb-0 me-3">
+                    Type
+                  </label>
+                  <select
+                    class="form-select form-select-sm"
+                    aria-label="Data type"
+                    id="{{ field.key }}_type"
+                  >
+                    <option {% if field.type == 'text' %}selected{% endif %} value="text">Text</option>
+                    <option {% if field.type == 'number' %}selected{% endif %} value="number">Number</option>
+                    <option {% if field.type == 'email' %}selected{% endif %} value="email">Email</option>
+                    <option {% if field.type == 'tel' %}selected{% endif %} value="tel">Phone</option>
+                    <option {% if field.type == 'date' %}selected{% endif %} value="date">Date</option>
+                    <option {% if field.type == 'datetime' %}selected{% endif %} value="datetime">Date and time</option>
+                    <option {% if field.type == 'textarea' %}selected{% endif %} value="textarea">Textarea</option>
+                    <option {% if field.type == 'bool' %}selected{% endif %} value="bool">Boolean</option>
+                    <option {% if field.type == 'select' %}selected{% endif %} value="select">Select</option>
+                  </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-center mb-2">
+                  <button
+                    class="btn btn-sm btn-link text-danger"
+                    onclick="cannlytics.ui.removeListItem(event, '{{ values.key }}_fields-list', '{{ values.key }}_fields-list-item');"
+                  >
+                    {% icon 'trash-2' hegiht="16px" width="16px" %}
+                  </button>
+                </div>
+              </div>
+              </li>
+            {% endfor %}
+            </ol>
+            <div class="mt-3">
+              <button
+                class="btn btn-sm-light btn-md-light me-2"
+                onclick="cannlytics.ui.addListItem(event, '{{ values.key }}_fields')"
+              >
+                Add field
+              </button>
+              <button
+                class="btn btn-sm btn-set-width bg-gradient-green text-white"
+                onclick="cannlytics.settings.saveDataModel('{{ values.key }}');"
+              >
+                Save
+              </button>
+            </div>
+            <!-- End of fields -->
+
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+</html>

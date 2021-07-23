@@ -1,30 +1,17 @@
 """
 General Utility Functions
-Author: Keegan Skeate
-Contact: <keegan@cannlytics.com>
+Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 11/26/2020
-Updated: 4/21/2021
+Updated: 7/17/2021
 """
 
-# Standard imports
-from typing import get_type_hints
-
-# External imports
-from dataclasses import fields
-from django.utils.crypto import get_random_string
-
 # Internal imports
-from cannlytics.firebase import get_document, get_collection, get_user
-from cannlytics.models import model_plurals
-from cannlytics.utils import utils
 from api.auth import auth
+from cannlytics.firebase import get_document, get_collection
 from console.state import data, material
 
-#----------------------------------------------#
-# Page rendering helpers
-#----------------------------------------------#
 
-def get_model_context(context):
+def get_model_context(context, organization_id):
     """Get model context based on the current page and section.
     Args:
         request (request): The request object.
@@ -32,19 +19,9 @@ def get_model_context(context):
     Returns
         context (dict): The context updated with any model context.
     """
-    model = model_plurals.get(context['screen'])
-    if not model:
-        # model = getattr(models, utils.camelcase(context['section']))
-        return context
-    model_type_hints = get_type_hints(model)
-    field_names = [field.name for field in fields(model)]
-    context['model'] = {'fields': {}}
-    for name in field_names:
-        hint = model_type_hints[name]
-        try:
-            context['model']['fields'][name] = hint.__name__
-        except AttributeError:
-            context['model']['fields'][name] = hint.__args__[0].__name__
+    model = context['screen']
+    ref = f'organizations/{organization_id}/data_models/{model}'
+    context['data_model'] = get_document(ref)
     return context
 
 
@@ -76,15 +53,25 @@ def get_page_data(kwargs, context):
         screen_data = data.get(context['screen'])
     if screen_data is None:
         return context
+    print('Screen data:', screen_data)
     documents = screen_data.get('documents')
     collections = screen_data.get('collections')
+    organizations = context.get('organizations')
+    if organizations:
+        organization_id = organizations[0]['organization_id']
     if documents:
         for item in documents:
-            context[item['name']] = get_document(item['ref'])
+            ref = item['ref']
+            ref = ref.replace('{organization_id}', organization_id)
+            print('Getting document:', ref)
+            context[item['key']] = get_document(ref)
     if collections:
         for item in collections:
-            context[item['name']] = get_collection(
-                item['ref'],
+            ref = item['ref']
+            ref = ref.replace('{organization_id}', organization_id)
+            print('Getting collection:', ref)
+            context[item['key']] = get_collection(
+                ref,
                 limit=item.get('limit'),
                 order_by=item.get('order_by'),
                 desc=item.get('desc'),
@@ -101,7 +88,6 @@ def get_page_context(kwargs, context):
     Returns
         context (dict): The context updated with any screen-specific state.
     """
-    # kwargs['screen'] = kwargs.get('screen', 'dashboard')
     for value in kwargs.values():
         screen_material = material.get(value)
         key = value.replace('-', '_')
@@ -117,94 +103,16 @@ def get_user_context(request, context):
     Returns
         context (dict): Page context updated with any user-specific context.
     """
-    user = {}
-
-    # Get fields from authentication.
-    user_claims = auth.verify_session(request)
-    uid = user_claims.get('uid')
-    if user_claims:
-        user_email = user_claims.get('email', '')
-        user = {
-            'email_verified': user_claims.get('email_verified', False),
-            'display_name': user_claims.get('name', ''),
-            'photo_url': user_claims.get('picture', f'https://robohash.org/{user_email}?set=set5'),
-            'uid': uid,
-            'email': user_email,
-        }
-
-    #  Get a user's data and organizations from Firestore.
-    query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
-    user_data = get_document(f'users/{uid}')
-    # context['organizations'] = get_collection('organizations', filters=[query])
-    context.update({'user': {**user_data, **user}})
+    print('Getting user context...')
+    claims = auth.verify_session(request)
+    print('Claims:', claims)
+    if claims:
+        uid = claims['uid']
+        query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
+        organizations = get_collection('organizations', filters=[query])
+        user_data = get_document(f'users/{uid}')
+        context['organizations'] = organizations
+        context['user'] = {**claims, **user_data}
+        if organizations:
+            context = get_model_context(context, organizations[0]['organization_id'])
     return context
-
-
-def get_user_specific_state(uid, context):
-    """Get the user-specific UI.
-    Args:
-        uid (str): A user's unique ID.
-        context (dict): A dictionary of existing page context.
-    Returns
-        context (dict): The context updated with any user-specific state.
-    """
-    context['uid'] = uid
-    context['organization'] = {}
-    print('User session:', uid)
-    if not uid:
-        return context
-    # Optional: Attach custom claim context.
-    # claims = get_custom_claims(uid)
-    # possible_claims = ['admin', 'qa']
-    # for claim in possible_claims:
-    #     if claims.get(claim):
-    #         context[claim] = state.get(claim)
-    return context
-
-
-def get_user_specific_data(uid, context):
-    """Get user-specific data.
-    Args:
-        uid (str): A user's unique ID.
-        context (dict): A dictionary of existing page context.
-    Returns
-        context (dict): The context updated with any user-specific state.
-    """
-    context['user'] = get_user(uid)
-    print('User Django side:', context['user'])
-    # TODO: Implement
-    # context['organizations'] = get_user_organizations(uid)
-    context['organizations'] = []
-    return context
-
-
-#----------------------------------------------#
-# Authentication helpers
-#----------------------------------------------#
-
-
-def generate_secret_key(env_file_name):
-    """Generate a Django secret key.
-    Args:
-        env_file_name (str): An .env file to write the secret key.
-    """
-    env_file = open(env_file_name, 'w+')
-    chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
-    generated_secret_key = get_random_string(50, chars)
-    env_file.write('SECRET_KEY = "{}"\n'.format(generated_secret_key))
-    env_file.close()
-    return generated_secret_key
-
-
-#----------------------------------------------#
-# Constants
-#----------------------------------------------#
-
-ROLES = [
-    {'title': 'Analyst', 'key': 'analyst'},
-    {'title': 'Client', 'key': 'client'},
-    {'title': 'Transporter', 'key': 'transporter'},
-    {'title': 'Manager', 'key': 'manager'},
-    {'title': 'Finance', 'key': 'finance'},
-    {'title': 'Stakeholder', 'key': 'stakeholder'},
-]

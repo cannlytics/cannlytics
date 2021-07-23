@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+<!--
+  Organizations Settings | Cannlytics Console
+  Created: 12/9/2020
+  Updated: 6/29/2021
+-->
+{% extends "console/console.html" %}
+{% load static %}
+{% block console_body %}
+{% if unit %}
+
+  <!-- Form -->
+  <form id="organization-settings-form">
+
+    Organization settings here!!!
+
+    <!-- Dynamic fields -->
+    {% comment %} {% include "console/components/forms/dynamic_form.html" with
+      fields=analytes.fields
+    %} {% endcomment %}
+
+    <!-- Show additional fields -->
+
+  </form>
+
+{% else %}
+
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Breadcrumbs -->
+    {% include "console/components/links/breadcrumbs.html" with
+      breadcrumbs=settings.organization_breadcrumbs
+      only
+    %}
+
+    <!-- Body -->
+    <div class="mb-4 px-3">
+
+    <!-- TODO: No organizations placeholder -->
+
+    <!-- TODO: Start an organization -->
+    <!-- Join an organization -->
+
+      <!-- Organizations table -->
+      <div class="card my-3">
+        <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
+          <h2 class="h6 text-dark">Your organizations</h2>
+          <a
+            class="btn btn-sm btn-outline-secondary ml-2"
+            href="./organizations/new"
+          >
+            New
+          </a>
+        </div>
+
+        <!-- TODO: Dynamic placeholder for empty tables -->
+        <!-- TODO: Make reusable -->
+        {% if True %}
+          {% include "console/components/placeholders/placeholder.html" with
+            placeholder=organizations.placeholder
+            only
+          %}
+          {% comment %} <div class="card-body text-center">
+            <a href="/settings/team">
+              <img
+                src="{% static 'console/images/illustrations/chemistry_scientist.svg' %}"
+                style="height:200px;"
+              >
+            </a>
+            <h2 class="h4 text-dark mt-3 mb-1">
+              {{ organizations.new_prompt }}
+            </h2>
+            <p class="text-muted lh-sm">
+              <small>
+                Add team members to your organization
+                or join an organization to begin collaborating.
+              </small>
+            </p>
+            <a class="btn btn-outline-primary my-3" href="/settings/team">
+              Start an organization
+            </a>
+          </div> {% endcomment %}
+
+        <!-- TODO: Populate table dynamically -->
+        {% else %}
+          <div class="card-body">
+            <div class="table-responsive">
+              Table of organizations
+            </div>
+          </div>
+        {% endif %}
+
+      </div><!-- End of organizations table -->
+
+    </div><!-- End of Body -->
+
+  </main>
+
+{% endif %}
+{% endblock %}
+
+<!-- Organizations JavaScript -->
+{% block console_js %}
+  <script>
+    console.log('Organizations page javascript loaded.');
+    cannlytics.settings.getOrganizations();
+  </script>
+{% endblock %}
+
+</html>

@@ -1,156 +1,137 @@
 """
 Inventory Views | Cannlytics API
 Created: 4/21/2021
+Updated: 7/6/2021
 
 API to interface with inventory.
 """
+# pylint:disable=line-too-long
 
-from rest_framework import status
+# Internal imports
+from json import loads
+
+# External imports
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+# Internal imports
+from api.auth.auth import authenticate_request
+from cannlytics.firebase import (
+    create_log,
+    delete_document,
+    get_collection,
+    get_document,
+    update_document,
+)
 
-@api_view(['GET', 'POST'])
-def inventory(request, format=None):
+
+@api_view(['GET', 'POST', 'DELETE'])
+def inventory(request, format=None, inventory_id=None):
     """Get, create, or update inventory."""
 
-    if request.method == 'GET':
-        return Response({'error': 'not_implemented'}, content_type='application/json')
+    # Initialize and authenticate.
+    model_type = 'inventory'
+    model_type_singular = 'item'
+    claims = authenticate_request(request)
+    try:
+        uid = claims['uid']
+        owner = claims.get('owner', [])
+        team = claims.get('team', [])
+        qa = claims.get('qa', [])
+        authorized_ids = owner + team + qa
+    except KeyError:
+        message = 'Your request was not authenticated. Ensure that you have a valid session or API key.'
+        return Response({'error': True, 'message': message}, status=401)
 
+    # Check if the user can work with the data.
+    organization_id = request.query_params.get('organization_id')
+    if organization_id not in authorized_ids:
+        message = f'Your must be an owner, quality assurance, or a team member of this organization to manage {model_type}.'
+        return Response({'error': True, 'message': message}, status=403)
+
+    # GET data.
+    if request.method == 'GET':
+
+        # Get any parameters and filters.
+        filters = []
+        limit = request.query_params.get('limit')
+        order_by = request.query_params.get('order_by')
+        desc = request.query_params.get('desc', False)
+        # TODO: Implement filtered requests. For example:
+        # name = request.query_params.get('name')
+        # if name:
+        #     filters.append({'key': 'name', 'operation': '==', 'value': name})
+
+        # Get organization objects.
+        if organization_id:
+
+            # Get a singular object if requested.
+            if inventory_id:
+                print('Requested:', inventory_id)
+                ref = f'organizations/{organization_id}/{model_type}/{inventory_id}'
+                docs = get_document(ref)
+
+            # Get objects for a given organization.
+            else:
+                ref = f'organizations/{organization_id}/{model_type}'
+                docs = get_collection(ref, limit=limit, order_by=order_by, desc=desc, filters=filters)
+
+        # Get all of the user's data.
+        else:
+            docs = []
+            for _id in authorized_ids:
+                ref = f'organizations/{_id}/{model_type}'
+                docs += get_collection(ref, limit=limit, order_by=order_by, desc=desc, filters=filters)
+
+        # Return the requested data.
+        return Response({'success': True, 'data': docs}, status=200)
+
+    # POST data.
     elif request.method == 'POST':
 
-        return Response({'error': 'not_implemented'}, content_type='application/json')
+        # Parse the data and add the data to Firestore.
+        data = loads(request.body.decode('utf-8'))
+        if isinstance(data, dict):
+            doc_id = data[f'{model_type_singular}_id']
+            update_document(f'organizations/{organization_id}/{model_type}/{doc_id}', data)
+        elif isinstance(data, list):
+            for item in data:
+                doc_id = item[f'{model_type_singular}_id']
+                update_document(f'organizations/{organization_id}/{model_type}/{doc_id}', item)
+        else:
+            message = 'Data not recognized. Please post either a singular object or an array of objects.'
+            return Response({'error': True, 'message': message}, status=400)
 
-        # Return an error if no author is specified.
-        # error_message = 'Unknown error, please notify <support@cannlytics.com>'
-        # return Response(
-        #     {'error': error_message},
-        #     content_type='application/json',
-        #     status=status.HTTP_400_BAD_REQUEST
-        # )
+        # Return the data and success.
+        create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} edited.', model_type, f'{model_type}_post', [data])
+        return Response({'success': True, 'data': data}, status=200)
 
+    # DELETE data.
+    elif request.method == 'DELETE':
 
-#------------------------------------------------------------------
-# Items ✓
-#------------------------------------------------------------------
+        # Parse the data.
+        data = loads(request.body.decode('utf-8'))
 
-# # Create an item using: POST /items/v1/create
-# item_name = 'New Old-Time Moonshine Teenth'
-# item = Item.create_from_json(track, cultivator.license_number, {
-#     'ItemCategory': 'Flower & Buds',
-#     'Name': item_name,
-#     'UnitOfMeasure': 'Ounces',
-#     'Strain': strain_name,
-# })
-
-# # Create additional products for future use.
-# item = Item.create_from_json(track, cultivator.license_number, {
-#     'ItemCategory': 'Shake/Trim',
-#     'Name': 'New Old-Time Moonshine Shake',
-#     'UnitOfMeasure': 'Grams',
-#     'Strain': strain_name,
-# })
+        # Check that the user is an owner or quality assurance.
+        if organization_id not in qa and organization_id not in owner:
+            message = f'Your must be an owner or quality assurance to delete {model_type}.'
+            return Response({'error': True, 'message': message}, status=403)
 
 
-# # Get the item's UID.
-# new_item = None
-# items = track.get_items(license_number=cultivator.license_number)
-# for i in items:
-#     print(i.name, '|', i.product_category_name)
-#     if i.name == item_name:
-#         new_item = i
+        # Delete by URL ID.
+        if inventory_id:
+            delete_document(f'organizations/{organization_id}/{model_type}/{inventory_id}')
+        
+        # Delete by using posted ID(s).
+        else:
+            if isinstance(data, dict):
+                doc_id = data[f'{model_type_singular}_id']
+                delete_document(f'organizations/{organization_id}/{model_type}/{doc_id}')
+            elif isinstance(data, list):
+                for item in data:
+                    doc_id = item[f'{model_type_singular}_id']
+                    delete_document(f'organizations/{organization_id}/{model_type}/{doc_id}')
 
-# # Change the Unit Of Measure Type using: POST /items/v1/update
-# new_item.update(unit_of_measure='Grams')
-
-# # View the item using: GET /Items/v1/{id}
-# traced_item = track.get_items(uid=new_item.id, license_number=cultivator.license_number)
-# print('Successfully created, updated, and retrieved item:')
-# print(traced_item.id, '|', traced_item.unit_of_measure)
-
-# # Create items used for batches.
-# clone = Item.create_from_json(track, cultivator.license_number, {
-#     'ItemCategory': 'Seeds',
-#     'Name': 'New Old-Time Moonshine Mature Plants',
-#     'UnitOfMeasure': 'Each',
-#     'Strain': strain_name,
-# })
-
-# # Get the clone for future use.
-# clone_uid = '12324'
-# clone_item = track.get_items(uid=clone_uid, license_number=cultivator.license_number)
-
-#------------------------------------------------------------------
-# Packages ✓
-#------------------------------------------------------------------
-
-# Step 1 Using the Package created in Harvest Step 1 OR create a
-# package from an existing package that you have found.
-# Create a package from another package using: POST /packages/v1/create
-
-# Get the package created earlier.
-# packs = track.get_packages(license_number=cultivator.license_number)
-# package_id = '13801'
-# traced_package = track.get_packages(
-#     uid=package_id,
-#     license_number=cultivator.license_number
-# )
-
-# new_package_tag = 'YOUR_SECOND_PACKAGE_TAG'
-# new_package_data = {
-#     'Tag': new_package_tag,
-#     'Location': 'Warehouse',
-#     'Item': 'New Old-Time Moonshine Teenth',
-#     'Quantity': 1.75,
-#     'UnitOfMeasure': 'Grams',
-#     # 'PatientLicenseNumber': 'X00001',
-#     'Note': '1st teenth for sale.',
-#     # 'IsProductionBatch': False,
-#     # 'ProductionBatchNumber': None,
-#     # 'IsDonation': False,
-#     # 'ProductRequiresRemediation': False,
-#     # 'UseSameItem': True,
-#     'ActualDate': today,
-#     'Ingredients': [
-#         {
-#             'Package': traced_package.label,
-#             'Quantity': 1.75,
-#             'UnitOfMeasure': 'Grams'
-#         }
-#     ]
-# }
-# traced_package.create_package(new_package_data)
-# new_package = track.get_packages(label=new_package_tag, license_number=cultivator.license_number)
-# print(new_package.last_modified)
-
-# # Step 2 Using the new package created in Packages Step 1
-# # change the item of a package using: POST/packages/v1/change/item
-# new_package.change_item(item_name='New Old-Time Moonshine Kief')
-# new_package = track.get_packages(uid=new_package.id, license_number=cultivator.license_number)
-# print(new_package.last_modified)
-
-# # Step 3 Using the new package created in Packages Step 1
-# # adjust the weight to 0 using: POST/packages/v1/adjust
-# adjustment = {
-#     'Label': new_package_tag,
-#     'Quantity': -1.75,
-#     'UnitOfMeasure': 'Grams',
-#     'AdjustmentReason': 'Drying',
-#     'AdjustmentDate': today,
-#     'ReasonNote': None
-# }
-# new_package.adjust(weight=-1.75, note='Look ma, no weight!')
-# new_package = track.get_packages(uid=new_package.id, license_number=cultivator.license_number)
-# print(new_package.last_modified)
-
-# # Step 4 Using the new package created in Packages Step 1
-# #  Finish a package using: POST/packages/v1/finish
-# new_package.finish()
-# new_package = track.get_packages(uid=new_package.id, license_number=cultivator.license_number)
-# print(new_package.last_modified)
-
-# # Step 5 Using the new package created in Packages Step 1
-# # Unfinish a package using: POST/packages/v1/unfinish
-# new_package.unfinish()
-# new_package = track.get_packages(uid=new_package.id, license_number=cultivator.license_number)
-# print(new_package.last_modified)
+        # Return success status.
+        create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} deleted.', model_type, f'{model_type}_delete', [data])
+        return Response({'success': True, 'data': []}, status=200)

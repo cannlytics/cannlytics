@@ -4,7 +4,7 @@
   Transfer Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2020
-  Updated: 6/23/2021
+  Updated: 7/15/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -18,38 +18,75 @@
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs_dynamic.html" with
-      breadcrumbs=transfers.breadcrumbs
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Transfers"
+      base_page_url="/transfers"
+      current_page=id
     %}
 
-    <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      id=id
-      model='transfers'
-      model_singular='transfer'
-      description="Manage transfers of samples sent for analysis."
-      options=True
-      export=id
-    %}
+    <!-- Tabs -->
+    {% if id and id != 'new' %}
+      {% include "console/components/forms/form_tabs.html" with
+        id=id
+        model="transfers"
+      %}
+    {% endif %}
 
-    <!-- Fields -->
-    <div class="mb-4 px-3">
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='transfers'
+        model_singular='transfer'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+    
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='transfers'
+        model_singular='transfer'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='transfers'
+        model_singular='transfer'
+        description="Manage transfers of samples sent for analysis."
+        options=True
+        export=id
+      %}
 
       <!-- Form -->
-      <form id="transfer-form">
+      <div class="mb-4 px-3">
+        <form id="transfer-form">
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+          %}
+          <!-- TODO: Show additional fields (traceability fields) -->
+          {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
+        </form>
+      </div>
+      <!-- TODO: Try to implement add samples with AG-Grid table -->
 
-        <!-- Dynamic fields -->
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=transfers.fields
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="transfers"
+          model_singular="transfer"
         %}
+      {% endif %}
 
-        <!-- Show additional fields -->
-        {% include "console/components/forms/additional_fields.html" %}
-
-      </form>
-
-    </div><!-- End of fields -->
-
+    {% endif %}
 
   </main>
 
@@ -59,14 +96,11 @@
 {% block console_js %}
   <script>
 
-    // Load the project's data.
-    cannlytics.ui.viewObject('project');
+    // Load the data into the user interface.
+    cannlytics.ui.viewObject('transfer');
 
     // Render any date pickers.
-    $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
-    // Enable tooltips.
-    // cannlytics.ui.enableTooltips();
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}
