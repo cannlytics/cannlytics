@@ -49,13 +49,13 @@ Users are encouraged to have their own kit of Cannlytics, since Cannlytics is a 
 
 **Value for value**
 
-We hope we provide you with a lot of value. If you want to send us a portion of your value so we can continue to provide you with value, then you can <a href="https://www.paypal.com/paypalme/cannlytics">donate to the Cannlytics team</a>.
+We hope that we provide you with a lot of value. If you want to send us a portion of your value so that we can continue to provide you with value, then you can <a href="https://www.paypal.com/paypalme/cannlytics">make a small contribution to the Cannlytics team</a>.
 
 **Transparency**
 
 Part of the scientific process is presenting your methods to show how you reached your conclusion. Cannlytics takes cannabis testing transparency to the next level, presenting all software for your clients and the public to judge its robustness. At Cannlytics, we believe that if your process is solid, then it should withstand scrutiny. Furthermore, transparency ensures that system security is secure by design.
 
-**Python is Awesome**
+**Python is Awesome 🐍**
 
 Ultimately we believe that technology should be:
 
@@ -63,15 +63,19 @@ Ultimately we believe that technology should be:
 - Really easy to learn.
 - Really easy to use.
 - Really easy to install.
-- Easy to read the source code. Code should read like english.
-- Fast to write.
-- Have versatility: automation, web development, etc.
+
+We strive for:
+
+- Simplicity.
+- Easily read source code. Code should read like english.
+- Writing fast. We're perfectionist with deadlines after all!
+- Versatility: automation, web development, etc.
 
 The faster you get the app out the better, because development is an iterative process. The Python core allows for lab teams to build custom workflows directly in the Cannlytics engine. Furthermore, you can superpower your lab with data science and automation.
 
 ## Why Cannlytics?
 
-Cannlytics vision is that cannabis testing can be done simply, easily, reliably, efficiently, and can even be fun by making data accessible from **end-to-end**. We believe that you can automate nuisance tasks and free up your time for science.
+Cannlytics' vision is that cannabis testing can be done simply, easily, reliably, efficiently, and can even be fun by making data accessible from **end-to-end**. We believe that you can automate nuisance tasks and free up your time for science.
 
 ## How to get started?
 
