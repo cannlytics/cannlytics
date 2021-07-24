@@ -119,9 +119,11 @@ body[data-md-color-scheme="slate"] .md-typeset h1 {
 }
 .md-typeset h1 {
   font-size: 1.05rem !important;
+  font-weight: 400;
 }
 .md-typeset h2 {
   font-size: 1rem !important;
+  font-weight: 400;
 }
 .md-typeset h3 {
   font-size: .9rem !important;

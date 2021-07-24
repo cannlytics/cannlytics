@@ -117,6 +117,7 @@
     "inplace",
     "isdigit",
     "iterrows",
+    "jinga",
     "jwts",
     "keegan",
     "keychain",
