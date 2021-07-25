@@ -103,11 +103,11 @@ def get_user_context(request, context):
     Returns
         context (dict): Page context updated with any user-specific context.
     """
-    print('Getting user context...')
+    print('Getting user context by verifying session.')
     claims = auth.verify_session(request)
-    print('Claims:', claims)
     if claims:
         uid = claims['uid']
+        print('User verified from session cookie:', uid)
         query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
         organizations = get_collection('organizations', filters=[query])
         user_data = get_document(f'users/{uid}')

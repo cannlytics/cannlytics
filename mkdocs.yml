@@ -197,6 +197,7 @@ nav:
     - Authentication: api/auth/authentication.md
     - Endpoints:
       - Analyses: api/endpoints/analyses.md
+      - Analytes: api/endpoints/analytes.md
       - Areas: api/endpoints/areas.md
       - Contacts: api/endpoints/contacts.md
       - Instruments: api/endpoints/instruments.md
@@ -215,9 +216,7 @@ nav:
   #------------
   - Users:
     - Getting Started: console/get-started.md
-    - Authentication:
-      - Introduction: console/auth/authentication.md
-      - Sign Up: console/auth/sign_up.md
+    - Authentication: console/auth/authentication.md
     - Analyses: console/lims/analyses/analyses.md
     - Analytes: console/lims/analytes/analytes.md
     - Areas: console/lims/areas/areas.md

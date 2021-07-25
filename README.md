@@ -148,11 +148,11 @@ Cannlytics is built and depends on the following software and services, so you w
 
 Cannlytics is built with [Python] and leverages the [Django] framework. Cannlytics utilizes [Firebase] for user authentication with [Firebase Authentication], a [Firestore] NoSQL database for real-time data management, [Firebase Storage] for file storage, and hosted with [Firebase Hosting]. Cannlytics uses a number of [Google Cloud](https://console.cloud.google.com/) backend services, including:
 
-  * [Cloud Build] to containerize the app.
-  * [Cloud Registry] to upload the app to storage.
-  * [Cloud Run] to run the app as a stateless container.
-  * [Cloud Storage] for file storage.
-  * [Cloud Secret Manager] for storing configurations and keeping secrets secret.
+  * [Cloud Build](https://cloud.google.com/build) to containerize the app.
+  * [Cloud Registry](https://cloud.google.com/container-registry) to upload the app to storage.
+  * [Cloud Run](https://cloud.google.com/run) to run the app as a stateless container.
+  * [Cloud Storage](https://cloud.google.com/storage) for file storage.
+  * [Cloud Secret Manager](https://cloud.google.com/secret-manager) for storing configurations and keeping secrets secret.
     <!-- * *Optional* [Cloud SQL](https://cloud.google.com/sql) can be utilized if desired. -->
 
 Cannlytics generally follows a model-template-view (MTV) architectural pattern, where:
@@ -489,7 +489,7 @@ The build process contains three steps:
 
 1. Containerize the app and upload it to Container Registry.
 
-Build your container image using [Cloud Build] by running the following command from the directory containing the Dockerfile:
+Build your container image using [Cloud Build](https://cloud.google.com/build) by running the following command from the directory containing the Dockerfile:
 
 ```shell
 gcloud builds submit --tag gcr.io/your-lims/cannlytics

@@ -47,7 +47,15 @@ def calculate_results(sample_data, analysis, mass, dilution_factor=40, correctio
 
 
 def create_coa_pdfs(render_file, ws_index_list, output_file, tight=False):
-    """Generate PDFs for rendred CoAs."""
+    """Generate PDFs for rendred CoAs.
+    Args:
+        render_file (str): The path of the rendred workbook.
+        ws_index_list (list): A list of the worksheet indexes to include in the PDF.
+        output_file (str): The name of the output PDF (expected .pdf extension).
+        tight (bool): Optional, default False, choice to scale all pages.
+    Returns:
+        (COM Object): A Microsoft Excel Client to alter later.
+    """
     client = win32com.client.Dispatch('Excel.Application')
     client.Visible = False
     client.ScreenUpdating = False
@@ -298,6 +306,7 @@ def generate_coas(
             # Future: Upload the PDF.        
             # Future: Create download link and short link for the CoA.
             # Future: Upload the CoA data.
+                # - See https://cloud.google.com/functions/docs/writing/http#uploading_files_via_cloud_storage
 
     # Remove temporary files.
     # os.remove(abs_render_file)

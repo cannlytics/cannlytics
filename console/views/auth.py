@@ -60,9 +60,9 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
         response['Set-Cookie'] = f'__session={session_cookie}; Path=/'
         response['Cache-Control'] = 'public, max-age=300, s-maxage=900' # TODO: Set the expiration time
 
-        # Optional: Server-side sessions, preferred over cookies.
         # Save session cookie in the session.
-        # request.session['__session'] = session_cookie
+        # Preferred over cookies (but cookies are still needed for production).
+        request.session['__session'] = session_cookie
 
         # Verify the user, create a log, update the user as signed-in,
         # and return a response with the session cookie.

@@ -1,7 +1,7 @@
 """
 Authentication Views | Cannlytics API
 Created: 1/22/2021
-Updated: 7/19/2021
+Updated: 7/24/2021
 
 Authentication mechanisms for the Cannlytics API, including API key
 utility functions, request authentication and verification helpers,
@@ -85,14 +85,11 @@ def verify_session(request):
             the user's `uid`.
     """
     try:
-        session_cookie = request.session.get('__session')
+        session_cookie = request.COOKIES.get('__session')
         if session_cookie is None:
-            session_cookie = request.COOKIES.get('__session')
-        if session_cookie is None:
-            return {}
-        print('Verifying session cookie:', session_cookie)
+            session_cookie = request.session.get('__session')
         return verify_session_cookie(session_cookie, check_revoked=True)
-    except KeyError:
+    except (KeyError, ValueError) as e:
         return {}
 
 

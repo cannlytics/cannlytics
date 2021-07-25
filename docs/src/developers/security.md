@@ -12,8 +12,6 @@ Keep current with the latest Cannlytics releases. We regularly update Cannlytics
 
 Keep your application's dependencies up to date. Avoid pinning to specific versions for your dependencies and, if you do, make sure that you check periodically to see if your dependencies have had security updates, and update the package accordingly.
 
-## Macaroons
-
-Bearer tokens -> expiry and revocation lists.
-
-https://latacora.micro.blog/a-childs-garden/
+<!-- * [Recommendation for Key Management Part 3: Application-Specific Key Management Guidance](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57Pt3r1.pdf)
+* [NIST Policy on Hash Functions](https://csrc.nist.gov/Projects/Hash-Functions/NIST-Policy-on-Hash-Functions)
+* [Secure Hash Standards](https://csrc.nist.gov/publications/detail/fips/180/4/final) -->

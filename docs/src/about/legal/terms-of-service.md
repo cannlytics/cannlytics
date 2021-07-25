@@ -88,7 +88,7 @@ The word Cannlytics on itself, refers to the Cannlytics software (made by lead d
 
 The Cannlytics software is open source and made by lead developer Keegan Skeate and a large number of other contributors. We would like to thank all of you for the excellent work in making the awesome Cannlytics software. It's highly appreciated and much needed work.
 
-The source code can be found either by using the link in the footer of cannlytics.com or visiting https://github.com/cannlytics. Copyright (c) 2020-2021 Cannlytics & Cannlytics contributors (see AUTHORS.md)
+The source code can be found either by using the link in the footer of cannlytics.com or visiting https://github.com/cannlytics. Copyright (c) 2020-2021 Cannlytics & Cannlytics contributors.
 
 They write the following:
 
@@ -170,6 +170,6 @@ Regarding feedback, we always appreciate feedback or other suggestions, but may 
 
 This document is published under CC BY-SA 4.0. A [Creative Commons Sharealike license](http://creativecommons.org/licenses/by-sa/4.0/), which means you're are welcome to re-purpose it for your own use. Just make sure to replace references to us with ones to you, and if you don't mind we'd appreciate a link to www.cannlytics.com somewhere on your website.
 
-This document was adapted, 2021-07-24, from <https://www.albinsocial.com/>. This document was first adapted, 2021-07-24, from [Automattics Terms of service](https://github.com/Automattic/legalmattic/blob/master/Terms%20of%20Service/WordPress.com/EN-Terms-of-Service.md). Automattic runs a blog and website hosting platform called [WordPress.com](https://wordpress.com/).
+This document was adapted, 2018-10-05, from <https://www.albinsocial.com/>. This document was first adapted, 2021-07-24, from [Automattics Terms of service](https://github.com/Automattic/legalmattic/blob/master/Terms%20of%20Service/WordPress.com/EN-Terms-of-Service.md). Automattic runs a blog and website hosting platform called [WordPress.com](https://wordpress.com/).
 
 This document was updated 2021-07-24.

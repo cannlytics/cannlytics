@@ -49,7 +49,7 @@ Users are encouraged to have their own kit of Cannlytics, since Cannlytics is a 
 
 **Value for value**
 
-We hope that we provide you with a lot of value. If you want to send us a portion of your value so that we can continue to provide you with value, then you can <a href="https://www.paypal.com/paypalme/cannlytics">make a small contribution to the Cannlytics team</a>.
+We hope that we provide you with a lot of value. If you want to send us a portion of your value so that we can continue to provide you with value, then you can <a href="https://opencollective.com/cannlytics-company">make a small contribution to the Cannlytics team</a>.
 
 **Transparency**
 

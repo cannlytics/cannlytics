@@ -77,9 +77,8 @@ def organizations(request, format=None, organization_id=None):
     model_type = 'organizations'
     _, project_id = google.auth.default()
     claims = authenticate_request(request)
-    print('Claims:', claims)
     uid = claims['uid']
-    # custom_claims = get_custom_claims(uid)
+    print('User request to organizations:', uid)
 
     # Get organization(s).
     if request.method == 'GET':
