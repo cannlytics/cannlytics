@@ -43,19 +43,36 @@ Client requests are sent with a hash-based message authentication code (HMAC) [i
 You can make requests through the API passing your API key as a bearer token in the authorization header. Below is an example in Python reading an API key from a local `.env` file.
 
 === "Python"
-  ```py
-  from dotenv import load_dotenv
 
-  # Load your API key.
-  load_dotenv('.env')
-  API_KEY = os.getenv('CANNLYTICS_API_KEY')
+    ```py
 
-  # Pass your API key through the authorization header as a bearer token.
-  HEADERS = {
-      'Authorization': 'Bearer %s' % API_KEY,
-      'Content-type': 'application/json',
-  }
-  ```
+    import os
+    from dotenv import load_dotenv
+
+    # Load your API key.
+    load_dotenv('.env')
+    API_KEY = os.getenv('CANNLYTICS_API_KEY')
+
+    # Pass your API key through the authorization header as a bearer token.
+    HEADERS = {
+        'Authorization': 'Bearer %s' % API_KEY,
+        'Content-type': 'application/json',
+    }
+    ```
+
+
+=== "Node.js"
+
+    ```js
+    const axios = require('axios');
+    require('dotenv').config();
+
+    // Pass API key through the authorization header as a bearer token.
+    const apiKey = process.env.CANNLYTICS_API_KEY;
+    const options = {
+      headers: { 'Authorization' : `Bearer ${apiKey}` }
+    };
+    ```
 
 <!-- DRAFTS -->
 <!-- You can restrict the domains from which your API key can be used. -->

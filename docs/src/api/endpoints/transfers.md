@@ -1,24 +1,26 @@
 # Transfers Endpoint `/api/transfers`
 
-For all requests, you will need to pass an `organization_id` parameter. Ensure that you send requests with your API key in an authorization bearer token. The following examples assume that you are using Python 3.8+
+For all requests, you will need to pass an `organization_id` parameter. Ensure that you send your API key in an authorization bearer token in the headers of your requests.
 
-```py
-import os
-import requests
-from dotenv import load_dotenv
+=== "Python"
 
-#  Pass API key through the authorization header as a bearer token.
-load_dotenv('.env')
-API_KEY = os.getenv('CANNLYTICS_API_KEY')
-HEADERS = {
-    'Authorization': 'Bearer %s' % API_KEY,
-    'Content-type': 'application/json',
-}
+    ```py
+    import os
+    import requests
+    from dotenv import load_dotenv
 
-# Define the API and your organization.
-BASE = 'https://console.cannlytics.com/api'
-ORG_ID = 'test-company'
-```
+    #  Pass API key through the authorization header as a bearer token.
+    load_dotenv('.env')
+    API_KEY = os.getenv('CANNLYTICS_API_KEY')
+    HEADERS = {
+        'Authorization': 'Bearer %s' % API_KEY,
+        'Content-type': 'application/json',
+    }
+
+    # Define the API and your organization.
+    BASE = 'https://console.cannlytics.com/api'
+    ORG_ID = 'test-company'
+    ```
 
 ## Create a transfer
 

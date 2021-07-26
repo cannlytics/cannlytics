@@ -340,7 +340,7 @@ Templates are Django HTML files that describe how the data is presented. Default
 
 ### Style <a name="style"></a>
 
-Style distinguishes one site from another. You are free and encouraged to modify the style to create a site that is uniquely yours. [Bootstrap](https://getbootstrap.com/docs/4.5/getting-started/introduction/) is used for styling templates. You can install Bootstrap with:
+Style distinguishes one site from another. You are free and encouraged to modify the style to create a site that is uniquely yours. See [style.md](style.md) for a guide on the personal website's style. [Bootstrap](https://getbootstrap.com/docs/4.5/getting-started/introduction/) is used for styling templates. You can install Bootstrap with:
 
 ```shell
 npm install bootstrap
@@ -472,7 +472,7 @@ docker push gcr.io/your-lims/cannlytics
 
 ## Publishing <a name="publishing"></a>
 
-See [the publishing guide](./publishing.md) for complete instructions on how to publish Cannlytics for production. The guide is based on the [Running Django on Cloud Run guide](https://cloud.google.com/python/django/run#windows). After setup, publishing is done with one command:
+See [the publishing guide](docs/src/app/dev/publishing.md) for complete instructions on how to publish Cannlytics for production. The guide is based on the [Running Django on Cloud Run guide](https://cloud.google.com/python/django/run#windows). After setup, publishing is done with one command:
 
 ```shell
 npm run publish
@@ -511,7 +511,7 @@ firebase deploy --only hosting:production
 
 ## Contributing <a name="contributing"></a>
 
-Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](./contributing.md) to get started. Anyone is welcome to contribute anything. Email <dev@cannlytics.com> for a quick onboarding. Currently, the Cannlytics Console would love:
+Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](docs/src/about/dev/contributing.md) to get started. Anyone is welcome to contribute anything. Email <dev@cannlytics.com> for a quick onboarding. Currently, the Cannlytics Console would love:
 
 * Art;
 * More code;
