@@ -1,9 +1,9 @@
 """
 Generate CoAs | Cannlytics
 
-Author: Keegan Skeate <keegan@cannlytics.com>
-Created: 7/22/2021
-Updated: 7/23/2021
+Author: Keegan Skeate <keegan@cannlytics.com>  
+Created: 7/22/2021  
+Updated: 7/23/2021  
 License: MIT License <https://opensource.org/licenses/MIT>
 """
 # Standard packages
@@ -15,13 +15,16 @@ from re import sub, findall
 from shutil import copyfile
 
 # External packages
-import openpyxl
-from openpyxl.drawing.image import Image
-import pandas as pd
-# import qrcode
-import win32com.client
-import xlwings as xw
-from xlwings.utils import rgb_to_int
+try:
+    import openpyxl
+    from openpyxl.drawing.image import Image
+    import pandas as pd
+    # import qrcode
+    import win32com.client
+    import xlwings
+    from xlwings.utils import rgb_to_int
+except:
+    pass # FIXME: Docs can't import.
 
 
 def calculate_results(sample_data, analysis, mass, dilution_factor=40, correction_factor=10000):
@@ -361,7 +364,7 @@ def run_generate_coas():
     """Call `generate_coas` from an Excel workbook with xlwings."""
 
     # Initialize the workbook
-    book = xw.Book.caller()
+    book = xlwings.Book.caller()
     worksheet = book.sheets.active
     config_sheet = book.sheets['cannlytics.conf']
     config = get_worksheet_data_block(config_sheet, 'A1', expand='table')

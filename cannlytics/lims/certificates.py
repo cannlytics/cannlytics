@@ -1,9 +1,9 @@
 """
 CoA Generation | Cannlytics
 
-Author: Keegan Skeate <keegan@cannlytics.com>
-Created: 2/6/2021
-Updated: 7/15/2021
+Author: Keegan Skeate <keegan@cannlytics.com>  
+Created: 2/6/2021  
+Updated: 7/15/2021  
 License: MIT LIcense <https://opensource.org/licenses/MIT>
 
 TODO:

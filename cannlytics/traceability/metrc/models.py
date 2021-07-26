@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-cannlytics.traceability.metrc.models
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Metrc Models | Cannlytics
+
 This module contains common Metrc models.
 """
 
@@ -87,11 +87,13 @@ class Model(object):
 
 class Employee(Model):
     """An organization's employee or team member.
-    E.g.
+    Example.
+    ```js
         {
             "FullName": "Keegan Skeate",
             "License": None
         }
+    ```
     """
     pass
 
@@ -100,9 +102,7 @@ class Facility(Model):
     """A Facility represents a building licensed for the growing,
     processing, and/or selling of product. Facilities are created
     and have their permissions determined by a state.
-
-    E.g.
-
+    Example
     ```js
     {
         "HireDate": "0001-01-01",

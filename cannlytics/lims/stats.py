@@ -1,10 +1,10 @@
 """
 Statistics | Cannlytics
 
-Author: Keegan Skeate <keegan@cannlytics.com>
-Created: 6/23/2021
-Updated: 6/23/2021
-License: MIT License <https://opensource.org/licenses/MIT>
+Author: Keegan Skeate <keegan@cannlytics.com>  
+Created: 6/23/2021  
+Updated: 6/23/2021  
+License: MIT License <https://opensource.org/licenses/MIT>  
 
 Calculate statistics on your laboratory performance.
 """

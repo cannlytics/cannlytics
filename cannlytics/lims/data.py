@@ -1,10 +1,11 @@
 """
 Data Collection | Cannlytics
-Authors:
-  Keegan Skeate <keegan@cannlytics.com>
-  Charles Rice <charles@ufosoftwarellc.com>
-Created: 6/15/2021
-Updated: 7/15/2021
+
+Authors:  
+  Keegan Skeate <keegan@cannlytics.com>  
+  Charles Rice <charles@ufosoftwarellc.com>  
+Created: 6/15/2021  
+Updated: 7/15/2021  
 
 Resources:
     https://www.programmersought.com/article/6548119734/
@@ -14,11 +15,18 @@ Resources:
     https://www.w3resource.com/python-exercises/python-basic-exercise-64.php
     https://stackabuse.com/scheduling-jobs-with-python-crontab
 """
-import pandas as pd
-import xlwings as xw
+try:
 
-from cannlytics.utils.utils import snake_case
-from cannlytics.firebase import update_document
+    # External imports
+    import pandas as pd
+    import xlwings
+
+    # Internal imports
+    from cannlytics.utils.utils import snake_case
+    from cannlytics.firebase import update_document
+
+except:
+    pass # FIXME: Docs can't import.
 
 
 def import_data_model(directory):
@@ -217,8 +225,8 @@ def import_worksheet(filename, sheetname, range_start='A1'):
     Returns:
         list(dict): A list of dictionaries.
     """
-    app = xw.App(visible=False)
-    book = xw.Book(filename)
+    app = xlwings.App(visible=False)
+    book = xlwings.Book(filename)
     sheet = book.sheets(sheetname)
     excel_data = sheet.range(range_start).expand('table').value
     keys = [snake_case(key) for key in excel_data[0]]

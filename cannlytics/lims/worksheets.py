@@ -6,19 +6,25 @@ Created: 7/18/2021
 Updated: 7/20/2021
 License: MIT License <https://opensource.org/licenses/MIT>
 """
-# Standard packages
-from ast import literal_eval
-import os
 
-# External packages.
-from dotenv import load_dotenv
-from pandas import DataFrame, to_datetime
-import requests
-import xlwings as xw
-from xlwings.utils import rgb_to_int
+try:
 
-# Internal packages.
-from cannlytics.utils.utils import snake_case
+    # Standard packages
+    from ast import literal_eval
+    import os
+
+    # External packages.
+    from dotenv import load_dotenv
+    from pandas import DataFrame, to_datetime
+    import requests
+    import xlwings
+    from xlwings.utils import rgb_to_int
+
+    # Internal packages.
+    from cannlytics.utils.utils import snake_case
+
+except:
+    pass # FIXME: Docs can't import.
 
 
 def get_data_block(sheet, coords, expand=None):
@@ -68,7 +74,7 @@ def show_status_message(sheet, coords, message, background=None, color=None):
         sheet.range(coords).api.Font.Color = rgb_to_int(literal_eval(color))
 
 
-@xw.sub
+@xlwings.sub
 def import_worksheet_data(model_type):
     """A function called from Excel to import data by ID
     from Firestore into the Excel workbook.
@@ -77,7 +83,7 @@ def import_worksheet_data(model_type):
     """
 
     # Initialize the workbook.
-    book = xw.Book.caller()
+    book = xlwings.Book.caller()
     worksheet = book.sheets.active
     config_sheet = book.sheets['cannlytics.conf']
     config = get_data_block(config_sheet, 'A1', expand='table')
@@ -156,13 +162,13 @@ def import_worksheet_data(model_type):
     )
 
 
-@xw.sub
+@xlwings.sub
 def upload_worksheet_data(model_type):
     """A function called from Excel to import data by ID
     from Firestore into the Excel workbook."""
 
     # Initialize the workbook.
-    book = xw.Book.caller()
+    book = xlwings.Book.caller()
     worksheet = book.sheets.active
     config_sheet = book.sheets['cannlytics.conf']
     config = get_data_block(config_sheet, 'A1', expand='table')

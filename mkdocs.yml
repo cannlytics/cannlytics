@@ -40,6 +40,8 @@ site_dir: docs/build
 theme:
   name: material
   custom_dir: docs/theme
+  # analytics:
+  #   gtag: G-ABC123
 
   # Static files
   static_templates:
@@ -88,15 +90,17 @@ markdown_extensions:
   - markdown.extensions.abbr:
   - markdown.extensions.footnotes:
   - markdown.extensions.md_in_html:
+  - pymdownx.tabbed:
   - pymdownx.superfences:
-      preserve_tabs: true
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-        - name: math
-          class: arithmatex
-          format: !!python/name:pymdownx.arithmatex.fence_mathjax_format
+  # - pymdownx.superfences:
+  #     preserve_tabs: true
+  #     custom_fences:
+  #       - name: mermaid
+  #         class: mermaid
+  #         format: !!python/name:pymdownx.superfences.fence_code_format
+  #       - name: math
+  #         class: arithmatex
+  #         format: !!python/name:pymdownx.arithmatex.fence_mathjax_format
   - pymdownx.highlight:
       extend_pygments_lang:
         - name: php-inline
@@ -137,7 +141,7 @@ markdown_extensions:
   - pymdownx.keys:
       separator: "\uff0b"
   - pymdownx.details:
-  - pymdownx.tabbed:
+  # - pymdownx.tabbed:
   - pymdownx.saneheaders:
 
 # Customization
@@ -156,7 +160,6 @@ extra:
 
 # Plugins
 plugins:
-  # - admonition
   - autorefs
   - search
   - mkdocstrings:
@@ -165,12 +168,17 @@ plugins:
           setup_commands:
             - import sys
             - from unittest.mock import MagicMock as mock
-            - sys.path.append('../../')
+            - sys.path.append('cannlytics')
+            - sys.modules["numpy"] = mock()
             - sys.modules["pandas"] = mock()
             - sys.modules["firebase_admin"] = mock()
             - sys.modules["googlemaps"] = mock()
             - sys.modules["google-cloud"] = mock()
             - sys.modules["google-cloud-firestore"] = mock()
+            - sys.modules["ulid"] = mock()
+            - sys.modules["requests"] = mock()
+            - sys.modules["django"] = mock()
+            - sys.modules["xlwings"] = mock()
   - minify:
       minify_html: true
 
@@ -194,7 +202,7 @@ nav:
   - API:
     - Introduction: api/about.md
     - Getting Started: api/get-started.md
-    - Authentication: api/auth/authentication.md
+    - Authentication: api/authentication.md
     - Endpoints:
       - Analyses: api/endpoints/analyses.md
       - Analytes: api/endpoints/analytes.md
@@ -202,7 +210,8 @@ nav:
       - Contacts: api/endpoints/contacts.md
       - Instruments: api/endpoints/instruments.md
       - Inventory: api/endpoints/inventory.md
-      - Invoices: api/endpoints/invoices.md
+      # - Invoices: api/endpoints/invoices.md
+      - Measurements: api/endpoints/measurements.md
       - Organizations: api/endpoints/organizations.md
       - Projects: api/endpoints/projects.md
       - Results: api/endpoints/results.md
@@ -216,32 +225,32 @@ nav:
   #------------
   - Users:
     - Getting Started: console/get-started.md
-    - Authentication: console/auth/authentication.md
-    - Analyses: console/lims/analyses/analyses.md
-    - Analytes: console/lims/analytes/analytes.md
-    - Areas: console/lims/areas/areas.md
-    - Contacts: console/lims/contacts/contacts.md
+    - Authentication: console/authentication.md
+    - Analyses: console/lims/analyses.md
+    - Analytes: console/lims/analytes.md
+    - Areas: console/lims/areas.md
+    - Contacts: console/lims/contacts.md
     - Data:
       - Overview: console/lims/data/data.md
       - Data Collection: console/lims/data/data_collection.md
       - Data Analysis: console/lims/data/data_analysis.md
       - Data Review: console/lims/data/data_review.md
       - Importing and exporting data: console/lims/data/exports.md
-      - Generating CoAs: console/lims/certificates/generating_coas.md
-      - Posting Results: console/lims/results/posting_results.md
-      - Quality Control: console/lims/review/qc.md
+      - Generating CoAs: console/lims/generating_coas.md
+      - Posting Results: console/lims/posting_results.md
+      - Quality Control: console/lims/qc.md
       - Logs: console/lims/data/logs.md
-    - Instruments: console/lims/instruments/instruments.md
-    - Inventory: console/lims/inventory/inventory.md
-    - Invoices: console/lims/invoices/invoices.md
-    - Organizations: console/lims/organizations/organizations.md
-    - Projects: console/lims/projects/projects.md
-    - Results: console/lims/results/results.md
-    - Samples: console/lims/samples/samples.md
-    - Transfers: console/lims/transfers/transfers.md
-    - Traceability: console/lims/traceability/traceability.md
-    - Worksheets: console/lims/worksheets/worksheets.md
-    - Settings: console/lims/settings/settings.md
+    - Instruments: console/lims/instruments.md
+    - Inventory: console/lims/inventory.md
+    - Invoices: console/lims/invoices.md
+    - Organizations: console/lims/organizations.md
+    - Projects: console/lims/projects.md
+    - Results: console/lims/results.md
+    - Samples: console/lims/samples.md
+    - Transfers: console/lims/transfers.md
+    - Traceability: console/lims/traceability.md
+    - Worksheets: console/lims/worksheets.md
+    - Settings: console/lims/settings.md
   
   # Developers
   #------------
@@ -258,28 +267,26 @@ nav:
     - Bugs: developers/bugs.md
     - Modules:
       - Firebase:
-        - Introduction: cannlytics/firebase/firebase.md
-        - Authentication: cannlytics/firebase/authentication.md
-        - Firestore: cannlytics/firebase/firestore.md
+        - Overview: cannlytics/firebase/firebase.md
         - API reference: cannlytics/firebase/firebase-reference.md
-      - Leaf Data Systems:
-        - Introduction: cannlytics/traceability/leaf.md
-        - API reference: cannlytics/traceability/leaf-reference.md
       - LIMS:
-        - Introduction: cannlytics/lims/lims.md
-        - API reference: cannlytics/lims/lims-reference.md
+        - Overview: cannlytics/lims/lims.md
+        - Calculations: cannlytics/lims/calculations.md
+        - Certificates: cannlytics/lims/certificates.md
+        - Data: cannlytics/lims/data.md
+        - Quality Control: cannlytics/lims/qc.md
+        - Results: cannlytics/lims/results.md
+        - Samples: cannlytics/lims/samples.md
+        - Transfers: cannlytics/lims/transfers.md
+        # FIXME:
+        # - Worksheets: cannlytics/lims/worksheets.md
       - Metrc:
-        - Introduction: cannlytics/traceability/metrc.md
-        - API reference: cannlytics/traceability/metrc-reference.md
-      - Website:
-        - Art: website/art.md
-        - Data:
-          - Architecture: website/data/data_architecture.md
-          - Data Collection: website/data/data_collection.md
-          - Data Sources: website/data/data_sources.md
-          - Schemas: website/data/data_schemas.md
-        - Donations: website/donations.md
-        - Events: website/events.md
-        - Examples: website/examples.md
-        - Fun: website/fun.md
-        - Sitemap: website/sitemap.md   
+        - Overview: cannlytics/traceability/metrc.md
+        - Client: cannlytics/traceability/metrc-client.md
+        - Exceptions: cannlytics/traceability/metrc-exceptions.md
+        - Models: cannlytics/traceability/metrc-models.md
+        - URLs: cannlytics/traceability/metrc-urls.md
+        - Utils: cannlytics/traceability/metrc-utils.md
+      - Utils:
+        - Main Utils: cannlytics/utils/utils.md
+        - Logistics: cannlytics/utils/logistics.md

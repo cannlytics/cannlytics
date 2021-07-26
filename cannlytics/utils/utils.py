@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-cannlytics.traceability..utils.utils
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Utility Functions | Cannlytics
+
 This module contains general cannabis analytics utility functions.
 """
 
@@ -59,7 +59,7 @@ def snake_case(string):
     and removes all other nuisance characters.
     Args:
         string (str): The string to turn to snake case.
-    Returns"
+    Returns:
         (str): A snake case string.
     """
     key = string.replace(' ', '_')

@@ -1,8 +1,9 @@
 """
 Firebase Module | Cannlytics
-Author: Keegan Skeate <contact@cannlytics.com>
-Created: 2/7/2021
-Updated: 6/27/2021
+
+Author: Keegan Skeate <contact@cannlytics.com>  
+Created: 2/7/2021  
+Updated: 7/25/2021  
 
 Resources:
 
@@ -30,33 +31,34 @@ bucket_name = environ.get('FIREBASE_STORAGE_BUCKET')
 db = initialize_firebase()
 ```
 """
-# Standard imports
-from datetime import datetime, timedelta
-from os import listdir
-from os.path import isfile, join
-from re import sub, findall
-
-# External imports
-import requests
-import ulid
-from django.utils.crypto import get_random_string
-from firebase_admin import auth, firestore, initialize_app, storage
-from google.cloud import secretmanager
 try:
-    from google.cloud.firestore import ArrayUnion, ArrayRemove, Increment
-    from google.cloud.firestore_v1.collection import CollectionReference
-    from google.cloud.firestore_v1.transforms import DELETE_FIELD
-except:
-    pass
-try:
-    from pandas import notnull, read_csv, read_excel, DataFrame, Series
-except:
-    # FIXME: pandas has problems with Django on Cloud Run
-    pass
+    # Standard imports
+    from datetime import datetime, timedelta
+    from os import listdir
+    from os.path import isfile, join
 
-# Internal imports.
-from cannlytics.utils.utils import snake_case
+    # External imports
+    import requests
+    import ulid
+    from django.utils.crypto import get_random_string
+    from firebase_admin import auth, firestore, initialize_app, storage
+    from google.cloud import secretmanager
+    try:
+        from google.cloud.firestore import ArrayUnion, ArrayRemove, Increment
+        from google.cloud.firestore_v1.collection import CollectionReference
+        from google.cloud.firestore_v1.transforms import DELETE_FIELD
+    except:
+        pass
+    try:
+        from pandas import notnull, read_csv, read_excel, DataFrame, Series
+    except:
+        # FIXME: pandas has problems with Django on Cloud Run
+        pass
 
+    # Internal imports.
+    from cannlytics.utils.utils import snake_case
+except:
+    pass # FIXME: Ignore import in Docs
 
 # ------------------------------------------------------------#
 # Firestore
@@ -248,9 +250,10 @@ def import_data(db, ref, data_file):
         db (Firestore Client):
         ref (str): A collection or document reference.
         data_file (str): The path to the local data file to upload.
-    Wishlist
-      - Batch upload
-      - Handle types <https://hackersandslackers.com/importing-excel-dates-times-into-pandas/>
+    !!! info "Wishlist"
+        It would be desirable for the following functionality to be implemented:
+        - Batch upload
+        - Handle types <https://hackersandslackers.com/importing-excel-dates-times-into-pandas/>
     """
     try:
         data = read_csv(
@@ -324,7 +327,9 @@ def export_data(db, ref, data_file):
 
 
 def create_id():
-    """Generate a universal ID."""
+    """Generate a universal ID.
+    Returns: A unique, lexicographic ID, a ULID.
+    """
     return ulid.new().str.lower()
 
 
@@ -355,7 +360,6 @@ def create_user(name, email):
     Args:
         name (str): A name for the user.
         email (str): The user's email.
-        notification (bool): Whether to notify the user.
     Returns:
         (tuple): User object, random password
     """
@@ -591,6 +595,12 @@ def add_secret_version(project_id, secret_id, payload):
     Adding a secret version requires the Secret Manager Admin role
     (roles/secretmanager.admin) on the secret, project, folder, or organization.
     Roles can't be granted on a secret version.
+    Args:
+        project_id (str): A Firestore project ID.
+        secret_id (str): An ID for the secret.
+        payload (str): The secret.
+    Returns:
+        (str): The secret version's name.
     """
     client = secretmanager.SecretManagerServiceClient()
     parent = f'projects/{project_id}/secrets/{secret_id}'
@@ -603,7 +613,14 @@ def access_secret_version(project_id, secret_id, version_id):
     """
     Access the payload for a given secret version if one exists. The version
     can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
-    WARNING: Do not print the secret in a production environment.
+    !!! Warning
+        Do not print the secret in a production environment.
+    Args:
+        project_id (str): A Firestore project ID.
+        secret_id (str): An ID for the secret.
+        version_id (str): A version for the secret.
+    Returns:
+        (str): The secret version's name.
     """
     client = secretmanager.SecretManagerServiceClient()
     name = f'projects/{project_id}/secrets/{secret_id}/versions/{version_id}'
@@ -689,7 +706,8 @@ def upload_file(bucket_name, destination_blob_name, source_file_name=None, data_
         bucket_name (str): The name of the storage bucket.
         destination_blob_name (str): The name to save the file as.
         source_file_name (str): The local file name.
-        verbose (bool): Whether or not to print status.
+        data_url (str): The data URL to upload from a string.
+        content_type (str): The content type of the file, when uploading from a string.
     """
     bucket = storage.bucket(name=bucket_name)
     blob = bucket.blob(destination_blob_name)

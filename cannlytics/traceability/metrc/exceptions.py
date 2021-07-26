@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-cannlytics.traceability.metrc.exceptions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Metrc Exceptions | Cannlytics
+
 Exceptions used when interfacing with the Metrc API.
 """
 

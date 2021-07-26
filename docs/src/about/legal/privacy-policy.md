@@ -1,6 +1,4 @@
 # Privacy Policy
-<!-- https://raw.githubusercontent.com/ArthurGareginyan/privacy-policy-template/master/privacy-policy.md -->
-<!-- https://www.meetup.com/privacy/ -->
 
 Cannlytics takes your privacy seriously. To better protect your privacy we provide this privacy policy notice explaining the way your personal information is collected and used.
 
