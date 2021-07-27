@@ -200,8 +200,8 @@ nav:
   # API
   #------------
   - API:
-    - Introduction: api/about.md
-    - Getting Started: api/get-started.md
+    - Overview: api/about.md
+    # - Getting Started: api/get-started.md
     - Authentication: api/authentication.md
     - Endpoints:
       - Analyses: api/endpoints/analyses.md
@@ -231,18 +231,19 @@ nav:
     - Areas: console/lims/areas.md
     - Contacts: console/lims/contacts.md
     - Data:
-      - Overview: console/lims/data/data.md
-      - Data Collection: console/lims/data/data_collection.md
-      - Data Analysis: console/lims/data/data_analysis.md
-      - Data Review: console/lims/data/data_review.md
-      - Importing and exporting data: console/lims/data/exports.md
-      - Generating CoAs: console/lims/generating_coas.md
-      - Posting Results: console/lims/posting_results.md
-      - Quality Control: console/lims/qc.md
+      # FIXME: Touchup
+      # - Overview: console/lims/data/data.md
+      # - Data Collection: console/lims/data/data_collection.md
+      # - Data Analysis: console/lims/data/data_analysis.md
+      # - Data Review: console/lims/data/data_review.md
+      # - Importing and exporting data: console/lims/data/exports.md
+      # - Generating CoAs: console/lims/generating_coas.md
+      # - Posting Results: console/lims/posting_results.md
+      # - Quality Control: console/lims/qc.md
       - Logs: console/lims/data/logs.md
     - Instruments: console/lims/instruments.md
     - Inventory: console/lims/inventory.md
-    - Invoices: console/lims/invoices.md
+    # - Invoices: console/lims/invoices.md
     - Organizations: console/lims/organizations.md
     - Projects: console/lims/projects.md
     - Results: console/lims/results.md
@@ -283,10 +284,7 @@ nav:
       - Metrc:
         - Overview: cannlytics/traceability/metrc.md
         - Client: cannlytics/traceability/metrc-client.md
-        - Exceptions: cannlytics/traceability/metrc-exceptions.md
         - Models: cannlytics/traceability/metrc-models.md
-        - URLs: cannlytics/traceability/metrc-urls.md
-        - Utils: cannlytics/traceability/metrc-utils.md
-      - Utils:
-        - Main Utils: cannlytics/utils/utils.md
-        - Logistics: cannlytics/utils/logistics.md
+      # - Utils:
+      #   - Main Utils: cannlytics/utils/utils.md
+      #   - Logistics: cannlytics/utils/logistics.md

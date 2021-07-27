@@ -6,9 +6,9 @@ Transfers are transferred inventory between organizations, such as samples sent 
 
 <img src="/assets/images/screenshots/screenshot_transfers_form.png"/>
 
-## Transportation
+<!-- ## Transportation
 
 Sample pick up are primary services provided by cannabis-testing laboratories.
 
-## Automated Notifications
+## Automated Notifications -->
 

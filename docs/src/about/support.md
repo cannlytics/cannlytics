@@ -12,7 +12,12 @@ Cannlytics, the organization, is a software support business that exists to crea
 
 ## Contributing
 
+Open source projects take time and money. Help support the project by becoming a sponsor. You can add your support at any tier you feel comfortable with. No amount is too little. We also accept one time contributions via PayPal.
+
+[Open Collective](https://opencollective.com/cannlytics-company){: .md-button .md-button--primary }
+[:fontawesome-brands-paypal: PayPal](https://www.paypal.me/cannlytics){ .md-button}
 <!-- TODO: Links to contributing! -->
+
 
 ## Contacts
 

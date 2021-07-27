@@ -46,7 +46,7 @@ You can create an analyte by posting data that includes it's `analyte_id`. The `
 === "Python"
 
     ```py
-    # Create an analyte
+    # Create an analyte.
 
     data = {
         'analyte_id': 'cbt',
@@ -71,7 +71,7 @@ You can create an analyte by posting data that includes it's `analyte_id`. The `
 === "Node.js"
 
     ```js
-    // Create an analyte
+    // Create an analyte.
 
     let data = {
       analyte_id: 'cbt',
@@ -126,19 +126,22 @@ Expecting a response in the form:
 
     ```js
     {
-      analyte_id: 'cbt',
-      cas: 0,
-      date: '2021-07-16T00:00:00Z',
-      formula: '((measurement]*40*50)/[mass])/10058',
-      initials: 'KLS',
-      key: 'cbt',
-      limit: 100,
-      lod: 1,
-      loq: 1,
-      measurement_units: 'ppm',
-      name: 'CBT',
-      public: false,
-      result_units: 'percent'
+      success: true,
+      data: {
+        analyte_id: 'cbt',
+        cas: 0,
+        date: '2021-07-16T00:00:00Z',
+        formula: '((measurement]*40*50)/[mass])/10058',
+        initials: 'KLS',
+        key: 'cbt',
+        limit: 100,
+        lod: 1,
+        loq: 1,
+        measurement_units: 'ppm',
+        name: 'CBT',
+        public: false,
+        result_units: 'percent'
+      }
     }
     ```
 
@@ -159,26 +162,15 @@ You can get analytes with the following:
 === "Node.js"
 
     ```js
-    {
-      success: true,
-      data: [
-        {
-          date: '2021-07-16T00:00:00Z',
-          key: 'yeast_mold',
-          formula: '((measurement]*40*50)/[mass])/10041',
-          result_units: 'percent',
-          cas: null,
-          measurement_units: 'ppm',
-          analyte_id: 'yeast_mold',
-          limit: 10000,
-          loq: 'NA',
-          initials: 'KLS',
-          name: 'Yeast Mold',
-          public: false,
-          lod: 'NA'
-        }
-      ]
-    }
+    // Get all analytes.
+
+    axios.get(`${base}/analytes?organization_id=${orgId}`, options)
+      .then(response => {
+        console.log(response.data.data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
     ```
 
 Expecting a response in the form:

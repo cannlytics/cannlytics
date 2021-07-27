@@ -18,9 +18,9 @@
   color: #1a1a1a;
   background: #96e6a1;
 }
-body[data-md-color-scheme="slate"] ::-moz-selection {
+/* body[data-md-color-scheme="slate"] ::-moz-selection {
   color: #fff;
-}
+} */
 body[data-md-color-scheme="slate"] ::selection {
   color: #fff;
 }

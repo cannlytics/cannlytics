@@ -1,5 +1,7 @@
 # Traceability Endpoint `/api/traceability`
 
+!!! Warning
+    At this time, traceability integration is only implemented in the [user interface](https://console.cannlytics.com).
 
 <!-- TODO: Describe implemented endpoints: -->
 <!--
