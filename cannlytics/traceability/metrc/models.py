@@ -87,7 +87,6 @@ class Model(object):
 
 class Employee(Model):
     """An organization's employee or team member.
-    Example.
     ```js
         {
             "FullName": "Keegan Skeate",
@@ -102,7 +101,6 @@ class Facility(Model):
     """A Facility represents a building licensed for the growing,
     processing, and/or selling of product. Facilities are created
     and have their permissions determined by a state.
-    Example
     ```js
     {
         "HireDate": "0001-01-01",
@@ -209,7 +207,7 @@ class Facility(Model):
 
 class Location(Model):
     """A class that represents a cannabis-production location.
-    E.g.
+    ```js
         {
             "Id": 1,
             "Name": "Harvest Location",
@@ -220,6 +218,7 @@ class Location(Model):
             "ForHarvests": True,
             "ForPackages": True
         }
+    ```
     """
 
     def __init__(self, client, properties, license_number=''):
@@ -249,7 +248,7 @@ class Location(Model):
 
 class Strain(Model):
     """A class that represents a cannabis strain.
-    E.g.
+    ```js
         {
             "Id": 1,
             "Name": "Old-time Moonshine",
@@ -259,6 +258,7 @@ class Strain(Model):
             "IndicaPercentage": 25.0,
             "SativaPercentage": 75.0
         }
+    ```
     """
 
     @classmethod
@@ -296,7 +296,7 @@ class Item(Model):
     identifies what is in the package and categories
     are used for grouping similar items for reporting purposes.    
     An item will retain its name unless it is re-packaged.
-    E.g.
+    ```js
         {
             "Id": 1,
             "Name": "Buds",
@@ -333,6 +333,7 @@ class Item(Model):
             "Description": null,
             "IsUsed": false
         }
+    ```
     """
 
     RETURNED_VALUES = {
@@ -732,7 +733,7 @@ class Package(Model):
 
 class Patient(Model):
     """A class that represents a cannabis patient.
-    e.g
+    ```js
     {
         'PatientId': 1,
         'LicenseNumber': '000001',
@@ -744,6 +745,7 @@ class Patient(Model):
         'HasSalesLimitExemption': false,
         'OtherFacilitiesCount': 1
     }
+    ```
     """
 
     @classmethod
@@ -774,7 +776,7 @@ class Patient(Model):
 
 class PlantBatch(Model):
     """A class that represents a cannabis plant batch.
-    E.g.
+    ```js
         {
             "Id": 5,
             "Name": "Demo Plant Batch 1",
@@ -808,6 +810,7 @@ class PlantBatch(Model):
             "PatientLicenseNumber": "X00001",
             "ActualDate": "2015-12-15"
         }
+    ```
     """
 
     RETURNED_VALUES = {
@@ -1034,13 +1037,17 @@ class TransferTemplate(Model):
 
 class Transaction(Model):
     """A class that represents a cannabis sale transaction.
-    Get:
+    When you get a transaction you receive an object as follows.
+    ```js
     {
         "SalesDate": "2015-01-08",
         "TotalTransactions": 40,
         "TotalPackages": 40,
         "TotalPrice": 399.6
     }
+    ```
+    A created transaction is as follows.
+    ```js
     {
         "PackageId": 71,
         "PackageLabel": "ABCDEF012345670000010331",
@@ -1075,13 +1082,16 @@ class Transaction(Model):
         "RecordedByUserName": null,
         "LastModified": "0001-01-01T00:00:00+00:00"
     }
-    Post:
+    ```
+    When you update a transaction, you pass the following object.
+    ```js
     {
         "PackageLabel": "ABCDEF012345670000010331",
         "Quantity": 1.0,
         "UnitOfMeasure": "Ounces",
         "TotalAmount": 9.99
     }
+    ```
     """
 
     RETURNED_VALUES = {}
@@ -1114,8 +1124,8 @@ class Receipt(Model):
     Sales are reported to record the transfer of cannabis
     products to a consumer, patient or caregiver.
 
-    Retrived:
-
+    When you request receipts you receive the following object.
+    ```js
     {
         "Id": 1,
         "ReceiptNumber": null,
@@ -1133,9 +1143,10 @@ class Receipt(Model):
         "RecordedByUserName": null,
         "LastModified": "0001-01-01T00:00:00+00:00"
     }
+    ```
 
-    Post:
-
+    When you create a receipt, you pass the following object.
+    ```js
     {
         "SalesDateTime": "2016-10-04T16:44:53.000",
         "SalesCustomerType": "Consumer",
@@ -1151,7 +1162,7 @@ class Receipt(Model):
             }
         ]
     }
-
+    ```
     """
 
     @classmethod
@@ -1200,17 +1211,4 @@ class Waste(Model):
     Reasons may be limited to certain license types, as determined by the State.
 
     """
-    pass
-
-#------------------------
-# Unused | Needed?
-#------------------------
-
-class Driver(Model):
-    """A class that represents a cannabis transfer driver."""
-    pass
-
-
-class Vehicle(Model):
-    """A class that represents a cannabis transfer driver."""
     pass

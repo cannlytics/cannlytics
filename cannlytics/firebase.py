@@ -62,6 +62,7 @@ except:
 
 # ------------------------------------------------------------#
 # Firestore
+# Optional: Pass existing database reference?
 # ------------------------------------------------------------#
 
 def add_to_array(ref, field, value):

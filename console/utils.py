@@ -104,7 +104,11 @@ def get_user_context(request, context):
         context (dict): Page context updated with any user-specific context.
     """
     print('Getting user context by verifying session.')
-    claims = auth.verify_session(request)
+    try:
+        claims = auth.verify_session(request)
+    except:
+        print('Invalid, not present, or expired session cookie.')
+        return context
     if claims:
         uid = claims['uid']
         print('User verified from session cookie:', uid)

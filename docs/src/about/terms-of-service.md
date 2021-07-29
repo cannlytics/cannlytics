@@ -170,6 +170,6 @@ Regarding feedback, we always appreciate feedback or other suggestions, but may 
 
 This document is published under CC BY-SA 4.0. A [Creative Commons Sharealike license](http://creativecommons.org/licenses/by-sa/4.0/), which means you're are welcome to re-purpose it for your own use. Just make sure to replace references to us with ones to you, and if you don't mind we'd appreciate a link to www.cannlytics.com somewhere on your website.
 
-This document was adapted, 2018-10-05, from <https://www.albinsocial.com/>. This document was first adapted, 2021-07-24, from [Automattics Terms of service](https://github.com/Automattic/legalmattic/blob/master/Terms%20of%20Service/WordPress.com/EN-Terms-of-Service.md). Automattic runs a blog and website hosting platform called [WordPress.com](https://wordpress.com/).
+This document was adapted, 2021-07-24, from <https://www.albinsocial.com/>. This document was first adapted, 2018-10-05, from [Automattics Terms of service](https://github.com/Automattic/legalmattic/blob/master/Terms%20of%20Service/WordPress.com/EN-Terms-of-Service.md). Automattic runs a blog and website hosting platform called [WordPress.com](https://wordpress.com/).
 
 This document was updated 2021-07-24.

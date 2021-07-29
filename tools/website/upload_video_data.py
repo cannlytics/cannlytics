@@ -3,7 +3,7 @@ Upload Video Data | Cannlytics Console
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 7/15/2021
-Updated: 7/15/2021
+Updated: 7/29/2021
 License: MIT License <https://opensource.org/licenses/MIT>
 """
 
@@ -15,7 +15,6 @@ import sys
 root = '../../'
 sys.path.append(root)
 from cannlytics import firebase # pylint: disable=import-error
-from console import state
 
 if __name__ == '__main__':
 

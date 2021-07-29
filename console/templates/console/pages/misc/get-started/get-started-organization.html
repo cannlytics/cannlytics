@@ -228,14 +228,14 @@
         <!-- Show advanced fields -->
         <a
           id="extra-organization-fields-show"
-          class="nav-link text-secondary app-action d-inline-block"
+          class="btn btn-sm-light"
           onclick="toggleOrganizationFields();"
         >
           {% icon 'chevrons-down' hegiht="16px" width="16px" %} Show more
         </a>
         <a
           id="extra-organization-fields-hide"
-          class="nav-link text-secondary app-action d-inline-block d-none"
+          class="btn btn-sm-light d-none"
           onclick="toggleOrganizationFields();"
         >
           {% icon 'chevrons-up' hegiht="16px" width="16px" %} Show less
@@ -256,7 +256,7 @@
         class="btn btn-sm btn-sm-light"
         onclick="toggleLicenseFields(event);"
       >
-        Add state-issued license
+        {% icon 'plus' hegiht="16px" width="16px" %} Add state-issued license
       </button>
     </div>
 
@@ -357,7 +357,7 @@
         class="btn btn-sm btn-sm-light"
         onclick="toggleTeamMemberFields(event);"
       >
-        Add team member
+        {% icon 'plus' hegiht="16px" width="16px" %} Add team member
       </button>
     </div>
 

@@ -58,7 +58,7 @@ def organization_team(request, format=None, organization_id=None, user_id=None):
 
 
 @api_view(['GET', 'POST'])
-def organizations(request, format=None, organization_id=None):
+def organizations(request, format=None, organization_id=None, type='lab'):
     """Get, create, or update organizations.
     E.g.
         ```
@@ -191,9 +191,12 @@ def organizations(request, format=None, organization_id=None):
         else:
             doc = {}
             organization_id = slugify(data['name'])
-            doc['uid'] = organization_id
+            doc['organization_id'] = organization_id
             doc['team'] = [uid]
             doc['owner'] = uid
+
+            # Identify created organization type.
+            doc['type'] = type
 
             # All organizations start with the standard data models.
             data_models = get_collection('public/state/data_models')

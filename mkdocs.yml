@@ -192,10 +192,10 @@ nav:
     - Overview: about/about.md
     - FAQ: about/faq.md
     - Support: about/support.md
-    - License: about/legal/licenses/license.md
-    - Privacy policy: about/legal/privacy-policy.md
-    - Security policy: about/legal/security-policy.md
-    - Terms of service: about/legal/terms-of-service.md
+    - License: about/license.md
+    - Privacy policy: about/privacy-policy.md
+    - Security policy: about/security-policy.md
+    - Terms of service: about/terms-of-service.md
 
   # API
   #------------
