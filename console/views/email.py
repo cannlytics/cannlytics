@@ -24,6 +24,30 @@ from console.settings import (
 )
 
 
+def send_results(request, *args, **argv): #pylint: disable=unused-argument
+    """Email certificates from the console to the specified recipients."""
+    data = loads(request.body.decode('utf-8'))['data']
+    name = data['name']
+    subject = data['subject']
+    message = data['message']
+    sender = data['email']
+    recipients = LIST_OF_EMAIL_RECIPIENTS
+    if not sender:
+        sender = DEFAULT_FROM_EMAIL
+    text = 'New feedback on the Cannlytics Console'
+    text += '\n\n{0}'.format(message)
+    if name is not None:
+        text += '\n\nFrom,\n' + str(name)
+    send_mail(
+        subject=subject.strip(),
+        message=text,
+        from_email=sender,
+        recipient_list=recipients,
+        fail_silently=False,
+    )
+    return JsonResponse({'success': True}, status=204)
+
+
 def send_feedback(request, *args, **argv): #pylint: disable=unused-argument
     """Send feedback from the console to the Cannlytics admin with email."""
     data = loads(request.body.decode('utf-8'))['data']

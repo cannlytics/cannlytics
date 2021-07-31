@@ -6,7 +6,7 @@ Created: 7/15/2021
 Updated: 7/29/2021
 License: MIT License <https://opensource.org/licenses/MIT>
 """
-
+from dateutil import parser
 import json
 import environ
 import os
@@ -31,7 +31,14 @@ if __name__ == '__main__':
         data = json.load(f)
 
     # Upload subscription plan data to Firestore.
+    number = 0
     for item in data:
+        number += 1
+        item['number'] = number
+        item['published'] = parser.parse(item['published_at'])
         doc_id = item['video_id']
         ref = f'public/videos/video_data/{doc_id}'
         firebase.update_document(ref, item)
+    
+    # Update video statistics.
+    firebase.update_document('public/videos', {'total_videos': len(data)})

@@ -17,9 +17,10 @@
 >
 
   <!-- Index -->
+  <!-- FIXME: Show tabs conditional on user type -->
   <ul class="nav flex-column pt-3">
-    {% for item in sidebar.lab_index %}
-      {% if user.type in item.user_type or item.user_type == '*' %}
+    {% for item in data_models %}
+      {% if organizations.0.type in item.user_type or item.user_type == '*' %}
         
         <!-- Navigation item -->
         <li class="nav-item px-2 {% if item.seperator %}border-top pt-2 mt-1{% endif %}{% if item.major %} mb-1{% endif %}">

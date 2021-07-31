@@ -3,7 +3,7 @@ Firebase Module | Cannlytics
 
 Author: Keegan Skeate <contact@cannlytics.com>  
 Created: 2/7/2021  
-Updated: 7/25/2021  
+Updated: 7/30/2021  
 
 Resources:
 
@@ -62,7 +62,8 @@ except:
 
 # ------------------------------------------------------------#
 # Firestore
-# Optional: Pass existing database reference?
+# FIXME: Pass existing database reference to functions instead
+# of creating a new `firestore.client()` each time.
 # ------------------------------------------------------------#
 
 def add_to_array(ref, field, value):
@@ -138,10 +139,11 @@ def delete_field(ref, field):
     """Delete a given field from a document.
     Args:
         ref (str): A document reference.
+        field (str): The field to remove from the document.
     """
     database = firestore.client()
     doc = create_reference(database, ref)
-    return doc.set({field: DELETE_FIELD}, merge=True)
+    doc.set({field: DELETE_FIELD}, merge=True)
 
 
 def remove_from_array(ref, field, value):
@@ -296,17 +298,19 @@ def export_data(db, ref, data_file):
         db (Firestore Client):
         ref (str): A collection or document reference.
         data_file (str): The path to the local data file to upload.
-    Wishlist
-      - Parse fields that are objects into fields. E.g.
-            from pandas.io.json import json_normalize
-            artist_and_track = json_normalize(
-                data=tracks_response['tracks'],
-                record_path='artists',
-                meta=['id'],
-                record_prefix='sp_artist_',
-                meta_prefix='sp_track_',
-                sep='_'
-            )
+    !!! info "Wishlist"
+        Parse fields that are objects into fields, similar to below.
+        ```py
+        from pandas.io.json import json_normalize
+        artist_and_track = json_normalize(
+            data=tracks_response['tracks'],
+            record_path='artists',
+            meta=['id'],
+            record_prefix='sp_artist_',
+            meta_prefix='sp_track_',
+            sep='_'
+        )
+        ```
     """
     data_ref = create_reference(db, ref)
     if isinstance(data_ref, CollectionReference):
@@ -329,7 +333,8 @@ def export_data(db, ref, data_file):
 
 def create_id():
     """Generate a universal ID.
-    Returns: A unique, lexicographic ID, a ULID.
+    Returns:
+        (str): A unique, lexicographic ID, a ULID.
     """
     return ulid.new().str.lower()
 
@@ -338,6 +343,8 @@ def create_id_from_datetime(dt):
     """Create an ID from an existing datetime.
     Args:
         dt (datetime): The time to timestamp the ID.
+    Returns:
+        (str): A unique lexicographic ID.
     """
     return ulid.from_timestamp(dt)
 
@@ -346,6 +353,8 @@ def get_id_timestamp(uid):
     """Get the datetime that an ID was created.
     Args:
         uid (str): A unique ID string.
+    Returns:
+        (datetime): The date when a unique lexicographic ID was generated.
     """
     return ulid.from_str(uid).timestamp().datetime
 
@@ -435,6 +444,8 @@ def create_custom_token(uid='', email=None, claims=None):
         uid (str): A user's ID.
         email (str): A user's email.
         claims (dict):  A dictionary of the user's claims.
+    Returns:
+        (dict): A dictionary of custom claims.
     """
     if email:
         user = auth.get_user_by_email(email)
@@ -447,6 +458,8 @@ def create_session_cookie(id_token, expires_in=None):
     Args:
         id_token (str): A user ID token passed from the client.
         expires_in (timedelta): The time until the session will expire.
+    Returns:
+        (bytes): A session cookie in bytes.
     """
     if expires_in is None:
         expires_in = timedelta(days=7)
@@ -465,6 +478,8 @@ def verify_token(token):
     """Verify a user's custom token.
     Args:
         token (str): The custom token to authenticate a user.
+    Returns:
+        (dict): A dictionary of key-value pairs parsed from the decoded JWT.
     """
     return auth.verify_id_token(token)
 
@@ -473,6 +488,8 @@ def verify_session_cookie(session_cookie, check_revoked=True, app=None): # FIXME
     """Verify a user's session cookie.
     Args:
         session_cookie (str): A session cookie to authenticate a user.
+    Returns:
+        (dict): A dictionary of key-value pairs parsed from the decoded JWT.
     """
     return auth.verify_session_cookie(
         session_cookie,
@@ -635,7 +652,14 @@ def access_secret_version(project_id, secret_id, version_id):
 # ------------------------------------------------------------#
 
 def create_short_url(api_key, long_url, project_name='cannlytics'):
-    """Create a short URL to a specified file."""
+    """Create a short URL to a specified file.
+    Args:
+        api_key (str): An API key for Firebase dynamic links.
+        long_url (str): A URL to create a short, dynamic link.
+        project_name (str): The name of the Firebase project, `cannlytics` by default.
+    Returns:
+        (str): A short link to the given URL.
+    """
     try:
         url = f'https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key={api_key}'
         data= {
@@ -691,6 +715,7 @@ def get_file_url(ref, bucket_name=None, expiration=None):
     Args:
         ref (str): The storage location of the file.
         bucket_name (str): The name of the storage bucket.
+        expiration (datetime): The date for when the file link should expire.
     Returns:
         (str): The storage URL of the file.
     """
@@ -740,6 +765,8 @@ def list_files(bucket_name, bucket_folder):
     Args:
         bucket_name (str): The name of the storage bucket.
         bucket_folder (str): A folder in the storage bucket to list files.
+    Returns:
+        (list): A list of file names in the given bucket.
     """
     bucket = storage.bucket(name=bucket_name)
     files = bucket.list_blobs(prefix=bucket_folder)

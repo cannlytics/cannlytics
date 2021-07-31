@@ -146,7 +146,7 @@ Cannlytics is built and depends on the following software and services, so you w
 
 ## Architecture <a name="architecture"></a>
 
-Cannlytics is built with [Python] and leverages the [Django] framework. Cannlytics utilizes [Firebase] for user authentication with [Firebase Authentication], a [Firestore] NoSQL database for real-time data management, [Firebase Storage] for file storage, and hosted with [Firebase Hosting]. Cannlytics uses a number of [Google Cloud](https://console.cloud.google.com/) backend services, including:
+Cannlytics is built with [Python](https://www.python.org/) and leverages the [Django](https://www.djangoproject.com/) framework. Cannlytics utilizes [Firebase](https://firebase.google.com/) for user authentication with [Firebase Authentication](https://firebase.google.com/docs/auth), a [Firestore](https://firebase.google.com/docs/firestore) NoSQL database for real-time data management, [Firebase Storage](https://firebase.google.com/docs/storage) for file storage, and hosted with [Firebase Hosting](https://firebase.google.com/docs/hosting). Cannlytics uses a number of [Google Cloud](https://console.cloud.google.com/) backend services, including:
 
   * [Cloud Build](https://cloud.google.com/build) to containerize the app.
   * [Cloud Registry](https://cloud.google.com/container-registry) to upload the app to storage.
@@ -288,7 +288,7 @@ npm run start
 
 ### Data <a name="data"></a>
 
-Cannlytics operates with a NoSQL database, [Firestore] by default. You can conceptualize every entity as a JSON object called a document. A group of documents is a collection. Every document is required to be a member of a collection.
+Cannlytics operates with a NoSQL database, [Firestore](https://firebase.google.com/docs/firestore) by default. You can conceptualize every entity as a JSON object called a document. A group of documents is a collection. Every document is required to be a member of a collection.
 
 <!-- Resources:
 
@@ -340,7 +340,7 @@ Templates are Django HTML files that describe how the data is presented. Default
 
 ### Style <a name="style"></a>
 
-Style distinguishes one site from another. You are free and encouraged to modify the style to create a site that is uniquely yours. See [style.md](style.md) for a guide on the personal website's style. [Bootstrap](https://getbootstrap.com/docs/4.5/getting-started/introduction/) is used for styling templates. You can install Bootstrap with:
+Style distinguishes one site from another. You are free and encouraged to modify the style to create a site that is uniquely yours. [Bootstrap](https://getbootstrap.com/docs/4.5/getting-started/introduction/) is used for styling templates. You can install Bootstrap with:
 
 ```shell
 npm install bootstrap
@@ -472,7 +472,7 @@ docker push gcr.io/your-lims/cannlytics
 
 ## Publishing <a name="publishing"></a>
 
-See [the publishing guide](docs/src/app/dev/publishing.md) for complete instructions on how to publish Cannlytics for production. The guide is based on the [Running Django on Cloud Run guide](https://cloud.google.com/python/django/run#windows). After setup, publishing is done with one command:
+See [the publishing guide](https://docs.cannlytics.com/developers/publishing/) for complete instructions on how to publish Cannlytics for production. The guide is based on the [Running Django on Cloud Run guide](https://cloud.google.com/python/django/run#windows). After setup, publishing is done with one command:
 
 ```shell
 npm run publish
@@ -511,7 +511,7 @@ firebase deploy --only hosting:production
 
 ## Contributing <a name="contributing"></a>
 
-Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](docs/src/about/dev/contributing.md) to get started. Anyone is welcome to contribute anything. Email <dev@cannlytics.com> for a quick onboarding. Currently, the Cannlytics Console would love:
+Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](https://docs.cannlytics.com/developers/contributing/) to get started. Anyone is welcome to contribute anything. Email <dev@cannlytics.com> for a quick onboarding. Currently, the Cannlytics Console would love:
 
 * Art;
 * More code;

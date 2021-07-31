@@ -12,7 +12,7 @@ from django.views.generic.base import TemplateView
 
 # Internal imports
 from console.settings import PROJECT_NAME as BASE
-from console.state import layout
+from console.state import layout, data_models
 from console.utils import (
     get_page_data,
     get_page_context,
@@ -71,7 +71,12 @@ class ConsoleView(TemplateView):
             context['organization_context'] = organization_context
         context = get_page_context(self.kwargs, context)
         context = get_user_context(self.request, context) # Broken
+        # FIXME: Get data models needed for sidebar / navigation + dashboard.
         # context = get_page_data(self.kwargs, context)
+        # context['data_models'] = list(map(lambda x: x.pop('fields', None), data_models))
+        # context['data_models'] = [d.pop('fields', None) for d in data_models]
+        context['data_models'] = data_models
+        print('Data models:', context['data_models'])
         return context
 
 

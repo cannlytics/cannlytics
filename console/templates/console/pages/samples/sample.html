@@ -36,6 +36,8 @@
       {% include "console/components/forms/form_tabs.html" with
           id=id
           model="samples"
+          extra="CoA"
+          extra_path="coa"
         %}
     {% endif %}
 
@@ -58,6 +60,11 @@
         section=section
         user=user
       %}
+
+    <!-- Certificate page -->
+    {% elif unit == 'coa' %}
+
+      CERTIFICATE HERE
 
     {% else %}
 

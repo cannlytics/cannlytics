@@ -48,7 +48,9 @@ def delete_coa():
     Delete a certificate of analysis from storage.
     """
     # Remove certificate from storage.
+    # delete_file(bucket_name, blob_name)
     # Remove the certificate data.
+    # update_document(ref, {'coa_url': '', 'coa_ref': ''})
     return NotImplementedError
 
 
@@ -106,7 +108,9 @@ def approve_coa():
     """
     Creates a certificate of analysis.
     """
-
+    # Verify the user's pin.
+    # Get the user's signature.
+    # Insert the user's signature on the certificate.
     return NotImplementedError
 
 
@@ -142,3 +146,35 @@ def upload_coa_template():
     # Create a download link for the template.
     # Save the template data.
     return NotImplementedError
+
+
+def create_short_url():
+    """
+    Create a short URL for a CoA link.
+    """
+    return NotImplementedError
+
+
+# def insert_qr_code(sheet, coords, url):
+#     """Insert a QR code into a CoA template.
+#     Args:
+#         sheet (Worksheet): The worksheet to insert the QR Code
+#         ref (str): The location to insert the QR code.
+#         url (str): The URL that the QR code should link.
+#     Returns:
+#     """
+#     qr = qrcode.QRCode(
+#         version=1,
+#         error_correction=qrcode.constants.ERROR_CORRECT_L,
+#         box_size=10,
+#         border=4,
+#     )
+#     qr.add_data(url)
+#     qr.make(fit=True)
+#     img = qr.make_image(fill_color='black', back_color='white')
+#     img.save('qr_code.png')
+#     logo = Image('qr_code.png')
+#     logo.height = 150
+#     logo.width = 150
+#     sheet.add_image(logo, coords)
+#     # workbook.save(filename="hello_world_logo.xlsx")

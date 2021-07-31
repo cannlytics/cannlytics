@@ -2,6 +2,9 @@
 
 A non-exhaustive list of encountered bugs and their solutions.
 
+18. 400 Bad Request after publishing to Cloud Run.
+  > **Solution**: Ensure `ALLOWED_HOSTS` in your `settings.py` has all the permitted domains or is set to `['*']`.
+
 17. When running `npm run docs` you get an error message including: `docker: error during connect: This error may indicate that the docker daemon is not running`.
   > **Solution**: Simply start [Docker](https://docs.docker.com/engine/reference/commandline/start/).
 
