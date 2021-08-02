@@ -10,7 +10,7 @@ License: MIT License <https://opensource.org/licenses/MIT>
 import sys
 
 # Internal imports.
-sys.path.append('../../../../')
+sys.path.append('../../../')
 from cannlytics.lims import generate_coas # pylint: disable=import-error
 
 
