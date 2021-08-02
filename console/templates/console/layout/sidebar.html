@@ -17,7 +17,6 @@
 >
 
   <!-- Index -->
-  <!-- FIXME: Show tabs conditional on user type -->
   <ul class="nav flex-column pt-3">
     {% for item in data_models %}
       {% if organizations.0.type in item.user_type or item.user_type == '*' %}

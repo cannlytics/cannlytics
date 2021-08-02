@@ -50,11 +50,12 @@ data_models = [
     {
         "title": "Analytics",
         "url": "/analytics",
-        "icon": "activity",
-        "slug": "stats",
+        "slug": "analytics",
         "user_type": ["producer", "processor", "retailer",
             "consumer", "integrator"],
         "image_path": "console/images/icons/two-tone/two_tone_graph.png",
+        "description": "Explore rich analytics to better understand your choices and performance.",
+        "seperator": True
     },
     {
         "title": "Analyses",

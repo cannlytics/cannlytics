@@ -70,8 +70,9 @@ class ConsoleView(TemplateView):
         elif organization_context:
             context['organization_context'] = organization_context
         context = get_page_context(self.kwargs, context)
-        context = get_user_context(self.request, context) # Broken
-        # FIXME: Get data models needed for sidebar / navigation + dashboard.
+        context = get_user_context(self.request, context)
+        # Get data models needed for sidebar / navigation + dashboard.
+        # FIXME: Reduce amount of data passed. Drop fields?
         # context = get_page_data(self.kwargs, context)
         # context['data_models'] = list(map(lambda x: x.pop('fields', None), data_models))
         # context['data_models'] = [d.pop('fields', None) for d in data_models]

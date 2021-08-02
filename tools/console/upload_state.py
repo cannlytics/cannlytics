@@ -30,6 +30,8 @@ if __name__ == '__main__':
         firebase.update_document(f'public/state/data_models/{key}', data_model)
         firebase.update_document(f'organizations/test-company/data_models/{key}', data_model)
 
+    # Save all data models, excluding fields, to one document.
+
     # Upload traceability settings to Firestore.
     # traceability = state.material['traceability']
     # firebase.update_document('public/state/traceability/traceability_settings', traceability)

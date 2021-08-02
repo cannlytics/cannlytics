@@ -207,7 +207,10 @@ def get_document(ref):
     if data is None:
         return {}
     else:
-        return data.to_dict()
+        values = data.to_dict()
+        if values is None:
+            return {}
+        return {**{'id': data.id}, **values}
 
 
 def get_collection(ref, limit=None, order_by=None, desc=False, filters=[]):
@@ -243,7 +246,7 @@ def get_collection(ref, limit=None, order_by=None, desc=False, filters=[]):
     query = collection.stream()  # Only handles streams less than 2 mins.
     for doc in query:
         data = doc.to_dict()
-        docs.append(data)
+        docs.append({**{'id': doc.id}, **data})
     return docs
 
 

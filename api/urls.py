@@ -12,6 +12,7 @@ from rest_framework import urlpatterns
 
 # Internal imports
 from api import views
+from api.analytics import analytics
 from api.analyses import analyses
 from api.analytes import analytes
 from api.areas import areas
@@ -35,6 +36,9 @@ app_name = 'api' # pylint: disable=invalid-name
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('analytics', include([
+        path('', analytics.analytics),
+    ])),
     path('analyses', include([
         path('', analyses.analyses),
         path('/<analysis_id>', analyses.analyses),

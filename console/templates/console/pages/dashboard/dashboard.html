@@ -38,7 +38,6 @@
       <div class="row">
 
         <!-- Dashboard cards -->
-        <!-- FIXME: Show dashboard cards conditional on organization type -->
         <div class="row row-cols-2 justify-content-md-start mb-5">
           {% for item in data_models %}
             {% if organizations.0.type in item.user_type or item.user_type == '*' and not item.hidden %}
