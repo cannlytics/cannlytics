@@ -5,7 +5,16 @@
  * Updated: 8/2/2021
  */
 
-import { authRequest, deserializeForm, serializeForm, showNotification } from '../utils.js';
+import {
+  getDownloadURL,
+  updateDocument,
+  uploadFile,
+} from '../firebase.js';
+
+import {
+  authRequest,
+  showNotification,
+} from '../utils.js';
 
 export const results = {
 
@@ -77,11 +86,10 @@ export const results = {
   ----------------------------------------------------------------------------*/
 
 
-  getCoATemplates(orgId=null) {
+  getCoATemplates(orgId) {
     /*
      * Get CoA templates.
      */
-    if (!orgId) orgId = document.getElementById('organization_id_input').value;
     console.log('Getting CoA templates:', orgId);
     return new Promise((resolve, reject) => {
       authRequest(`/api/templates?organization_id=${orgId}`).then((response) => {
@@ -104,20 +112,19 @@ export const results = {
   },
 
 
-  uploadCoATemplate(event, orgId=null) {
+  uploadCoATemplate(event, orgId) {
     /*
      * Upload a CoA template to Firebase Storage.
      */
-    console.log('Uploading CoA template...');
-    if (!orgId) orgId = document.getElementById('organization_id_input').value;
-    if (event.files.length) {
+    console.log('Uploading CoA template...', event);
+    if (event.target.files.length) {
       showNotification('Uploading template', 'Uploading your CoA template...', { type: 'wait' });
-      const file = event.files[0];
+      const file = event.target.files[0];
       const [name] = file.name.split('.');
       const ref = `organizations/${orgId}/templates/${file.name}`;
       uploadFile(ref, file).then((snapshot) => {
         getDownloadURL(ref).then((url) => {
-          // FIXME: Post data to the API.
+          // FIXME: Insufficient permissions. Post data to the API instead.
           updateDocument(`organizations/${orgId}/templates/{name}`, {
             photo_uploaded_at: new Date().toISOString(),
             photo_modified_at: file.lastModifiedDate,

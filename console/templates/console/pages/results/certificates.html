@@ -10,7 +10,7 @@
 {% block section %}
 
   <!-- Table -->
-  <div class="d-flex flex-wrap par-md">
+  <div class="d-flex flex-wrap par-md mb-5">
     <div id="key-table-container" class="col-12">
 
       <!-- Title  -->
@@ -50,7 +50,7 @@
 
     // Function to upload templates.
     function uploadTemplate(event) {
-      cannlytics.results.uploadCoATemplate(event);
+      cannlytics.results.uploadCoATemplate(event, '{{ organizations.0.organization_id }}');
     }
 
     // Attach upload template functionality.
@@ -114,8 +114,9 @@
 
     // Get any template data and provide it to the table via the AG Grid API.
     // Note that the user UID is passed from Django's user session.
-    cannlytics.results.getCoATemplates().then(function(data) {
-      gridOptions.api.setRowData(data);
+    cannlytics.results.getCoATemplates('{{ organizations.0.organization_id }}').then(function(data) {
+      if (data) gridOptions.api.setRowData(data);
+      else gridOptions.api.setRowData([]);
     });
 
   </script>

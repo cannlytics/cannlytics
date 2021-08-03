@@ -33,6 +33,11 @@ def create_coa():
         # then put the units in a footnote beneath. Otherwise,
         # append the units to the result.
 
+        # Wishlist: Add initials of analyst.
+        # Wishlist: Add date and time of analysis.
+        # Wishlist: Add SoP, method, instrument.
+        # Wishlist: Option to add dilution factor to CoA.
+
     # Create PDF in /tmp
 
     # Upload PDF to storage
@@ -114,6 +119,7 @@ def approve_coa():
     # Verify the user's pin.
     # Get the user's signature.
     # Insert the user's signature on the certificate.
+    print('Approving CoA...')
     return NotImplementedError
 
 
@@ -127,6 +133,7 @@ def review_coa():
     # Create the PDF.
     # Upload the PDF to storage.
     # Save the reviewer data.
+    print('Reviewing CoA...')
     return NotImplementedError
 
 
