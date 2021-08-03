@@ -29,6 +29,9 @@ def create_coa():
     # Get template.
 
     # Fill template
+        # - If all of the analyses in a table have the same units,
+        # then put the units in a footnote beneath. Otherwise,
+        # append the units to the result.
 
     # Create PDF in /tmp
 

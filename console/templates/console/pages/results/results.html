@@ -7,7 +7,7 @@
   Updated: 7/15/2021
 -->
 {% extends "console/console.html" %}
-{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Results | Cannlytics {% endblock title %}
+{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Results | Cannlytics{% endblock title %}
 {% block console_body %}
 {% if section and section not in 'logs,files,certificates' %}
 
@@ -60,10 +60,12 @@
           user=user
         %}
 
-      <!-- TODO: Certificates -->
+      <!-- Certificates -->
       {% elif section == 'certificates' %}
       
-        {% include "console/pages/results/parts/certificates.html" %}
+        <!-- FIXME: Try extends? -->
+        {% comment %} {% include "console/pages/results/parts/certificates.html" %} {% endcomment %}
+        {% block section %}{% endblock %}
 
       <!-- Table -->
       {% else %}

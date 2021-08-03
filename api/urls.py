@@ -111,6 +111,10 @@ urlpatterns = [
         path('', samples.samples),
         path('/<sample_id>', samples.samples),
     ])),
+    path('templates', include([
+        path('', results.templates),
+        path('/<template_id>', results.templates),
+    ])),
     path('transfers', include([
         path('', transfers.transfers),
         path('/<transfer_id>', transfers.transfers),

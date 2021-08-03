@@ -5,6 +5,8 @@
  * Updated: 8/2/2021
  */
 
+import { authRequest, deserializeForm, serializeForm, showNotification } from '../utils.js';
+
 export const results = {
 
   /*----------------------------------------------------------------------------
@@ -75,11 +77,22 @@ export const results = {
   ----------------------------------------------------------------------------*/
 
 
-  getCoATemplates() {
+  getCoATemplates(orgId=null) {
     /*
      * Get CoA templates.
      */
-    console.log('Getting CoA template...');
+    if (!orgId) orgId = document.getElementById('organization_id_input').value;
+    console.log('Getting CoA templates:', orgId);
+    return new Promise((resolve, reject) => {
+      authRequest(`/api/templates?organization_id=${orgId}`).then((response) => {
+        if (response.error) {
+          showNotification('Error getting templates', response.message, { type: 'error' });
+          reject(response.error);
+        } else {
+          resolve(response.data);
+        }
+      });
+    });
   },
 
 
@@ -91,11 +104,36 @@ export const results = {
   },
 
 
-  uploadCoATemplate() {
+  uploadCoATemplate(event, orgId=null) {
     /*
      * Upload a CoA template to Firebase Storage.
      */
     console.log('Uploading CoA template...');
+    if (!orgId) orgId = document.getElementById('organization_id_input').value;
+    if (event.files.length) {
+      showNotification('Uploading template', 'Uploading your CoA template...', { type: 'wait' });
+      const file = event.files[0];
+      const [name] = file.name.split('.');
+      const ref = `organizations/${orgId}/templates/${file.name}`;
+      uploadFile(ref, file).then((snapshot) => {
+        getDownloadURL(ref).then((url) => {
+          // FIXME: Post data to the API.
+          updateDocument(`organizations/${orgId}/templates/{name}`, {
+            photo_uploaded_at: new Date().toISOString(),
+            photo_modified_at: file.lastModifiedDate,
+            photo_size: file.size,
+            photo_type: file.type,
+            photo_ref: ref,
+            photo_url: url,
+          }).then(() => {
+            showNotification('Photo saved', 'Organization photo saved with your organization files.', { type: 'success' });
+            document.getElementById('organization_photo_url').src = url;
+          })
+          .catch((error) => showNotification('Photo Change Error', 'Error saving photo.', { type: 'error' }));
+        }).catch((error) => showNotification('Photo Change Error', 'Error uploading photo.', { type: 'error' }));
+      });
+    }
   },
+
 
 };
