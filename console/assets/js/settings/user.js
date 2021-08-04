@@ -166,7 +166,7 @@ export const userSettings = {
     const signatureRef = `users/${uid}/user_settings/signature.png`;
     uploadImage(signatureRef, data).then((snapshot) => {
       getDownloadURL(signatureRef).then((url) => {
-        updateDocument(`users/${uid}`, {
+        updateDocument(`users/${uid}/user_settings/signature`, {
           signature_created_at: new Date().toISOString(),
           signature_ref: signatureRef,
           signature_url: url,

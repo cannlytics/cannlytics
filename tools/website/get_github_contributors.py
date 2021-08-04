@@ -12,6 +12,8 @@ Resources:
     https://pygithub.readthedocs.io/en/latest/examples/MainClass.html#get-user-by-name
 """
 # Standard imports
+import os
+import environ
 import sys
 
 # External imports
@@ -51,7 +53,13 @@ def upload_github_contributors(org_name):
                 update_document(f'contributors/{user.id}', data)
     return users
 
-if __name__ == '__main__':   
+if __name__ == '__main__':
+    
+    # Specify credentials for Firebase.
+    env = environ.Env()
+    env.read_env('../../.env')
+    credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 
     # Save all contributors.
     print('Saving contributors.')

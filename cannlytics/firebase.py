@@ -678,7 +678,7 @@ def create_short_url(api_key, long_url, project_name='cannlytics'):
         raise ConnectionError # Optional: Handle connection errors more elegantly?
 
 
-def download_file(bucket_name, source_blob_name, destination_file_name, verbose=True):
+def download_file(bucket_name, source_blob_name, destination_file_name, verbose=False):
     """Downloads a file from Firebase Storage.
     Args:
         bucket_name (str): The name of the storage bucket.
@@ -695,7 +695,7 @@ def download_file(bucket_name, source_blob_name, destination_file_name, verbose=
         )
 
 
-def download_files(bucket_name, bucket_folder, local_folder, verbose=True):
+def download_files(bucket_name, bucket_folder, local_folder, verbose=False):
     """Download all files in a given Firebase Storage folder.
     Args:
         bucket_name (str): The name of the storage bucket.

@@ -57,10 +57,11 @@ def analytes(request, format=None, analyte_id=None):
         limit = request.query_params.get('limit')
         order_by = request.query_params.get('order_by')
         desc = request.query_params.get('desc', False)
-        # TODO: Implement filtered requests. For example:
-        # name = request.query_params.get('name')
-        # if name:
-        #     filters.append({'key': 'name', 'operation': '==', 'value': name})
+
+        # Handle requests with analysis parameter.
+        analysis = request.query_params.get('analysis')
+        if analysis:
+            filters.append({'key': 'analysis_id', 'operation': '==', 'value': analysis})
 
         # Get organization objects.
         if organization_id:
