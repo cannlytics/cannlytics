@@ -11,10 +11,15 @@ final results for analyses.
 """
 try:
 
+    # Standard imports
+    from datetime import datetime
+
     # External imports
     from smtplib import SMTP
+    from email.mime.multipart import MIMEMultipart
 
     # Internal imports
+    from cannlytics.firebase import get_collection, update_documents
     from cannlytics.traceability.metrc.utils import encode_pdf
 
 except:
@@ -114,38 +119,111 @@ def post_results():
     return NotImplementedError
 
 
-def release_results():
+def release_results(org_id, sample_ids, released_by=None):
     """
     Release completed results to their recipients,
     making them available through the client portal
     and the state traceability system.
+    Args:
+        org_id (str): The ID of the organization releasing results.
+        sample_ids (list): A list of sample IDs to release.
+        released_by (str): Optional ID of the user who released the sample results.
     """
+    refs = []
+    data = []
+    for sample_id in sample_ids:
+        refs.append(f'organizations/{org_id}/samples/{sample_id}')
+        data.append({
+            'released': True,
+            'released_at': datetime.now().isoformat(),
+            'released_by': released_by,
+        })
+    update_documents(refs, data)
+
+
+def email_results(samples, recipients):
+    """Email results to their recipients.
+    Args:
+        samples (list): A list of sample data (dict).
+        recipients (list): A list of recipient emails.
+    Returns:
+        (list) A list of success or fail indicators (bool).
+    """
+
+    # TODO: Format HTML message.
+
+    # TODO: Write email logic.
+    # rcpt = cc.split(",") + bcc.split(",") + [to]
+    # msg = MIMEMultipart('alternative')
+    # msg['Subject'] = "my subject"
+    # msg['To'] = to
+    # msg['Cc'] = cc
+    # msg.attach(my_msg_body)
+    # server = SMTP("localhost") # or your smtp server
+    # server.sendmail(me, rcpt, msg.as_string())
+    # server.quit()
     return NotImplementedError
 
 
-def email_results():
+def text_results(samples, recipients):
     """
-    Email results to their recipients with email or text message.
+    Text results to their recipients.
+    Args:
+        samples (list): A list of sample data (dict).
+        recipients (list): A list of recipient emails.
+    Returns:
+        (list) A list of success or fail indicators (bool).
     """
-    return NotImplementedError
-
-
-def text_results():
-    """
-    Text results to their recipients with email or text message.
-    """
+    # TODO: Get sending email, password, sending address.
     server = SMTP('smtp.gmail.com', 587 )
     server.starttls()
     server.login('xxxxx@gmail.com', 'xxxxxxxxxx')
     from_mail = 'xxxxxxxxx@gmail.com'
-    to = '9xxxxxxx@tmomail.net'
-    body = '<body>'
-    message = ('From: %s\r\n' % from_mail + 'To: %s\r\n' % to + 'Subject: %s\r\n' % '' + '\r\n' + body)
-    server.sendmail(from_mail, to, message)
+
+    # TODO: Format message
+    body = ''
+    for sample in samples:
+        body += '%s: %s\n' % (sample['sample_id'], sample['coa_short_url'])
+
+    # TODO: Send text message to each recipient.
+    successes = []
+    for recipient in recipients:
+        try:
+            to = '9xxxxxxx@tmomail.net'
+            message = (
+                'From: %s\r\n' % from_mail
+                + 'To: %s\r\n' % to
+                # + "CC: %s\r\n" % ",".join(cc)
+                + 'Subject: %s\r\n' % ''
+                + '\r\n' + body)
+            server.sendmail(from_mail, to, message)
+            successes.append(True)
+        except:
+            successes.append(False)
+    return successes
 
 
-def send_results():
+def send_results(org_id, sample_ids, recipients, method='email'):
+    """Send results to their recipients with email or text message.
+    Sample data is retrieved in batches of 10 to use for text or email.
+    Args:
+        org_id (str): The organization sending the results.
+        sample_ids (list): A list of sample IDs for which to send results.
+        recipients (list): A list of recipients, either a list of emails or
+            phone numbers
+        method (str): The method of result delivery, `email` or `text`,
+            with `email` by default.
+    Returns:
+        (list): A list of all success indicators (bool).
     """
-    Send results to their recipients with email or text message.
-    """
-    return NotImplementedError
+    samples = []
+    batches = [sample_ids[i:i+10] for i in range(0, len(sample_ids), 10)]
+    for batch in batches:
+        filters = [{'key': 'sample_id', 'operation': 'in', 'value': batch}]
+        docs = get_collection(f'organizations/{org_id}/samples', filters=filters)
+        samples = [*samples, *docs]
+    if method == 'text':
+        successes = text_results(samples, recipients)
+    else:
+        successes = email_results(samples, recipients)
+    return successes

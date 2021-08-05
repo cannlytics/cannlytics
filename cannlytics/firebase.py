@@ -193,6 +193,29 @@ def update_document(ref, values):
     doc.set(values, merge=True)
 
 
+def update_documents(refs, data):
+    """Batch update documents, up to 420 at a time (to give the 500
+    limit set by Firebase a cushion).
+    Args:
+        refs (list): A list of document paths (str).
+        data (list): A list of document data (dict).
+    """
+    n = 420
+    database = firestore.client()
+    ref_shards = [refs[i:i+n] for i in range(0, len(refs), n)]
+    data_shards = [data[i:i+n] for i in range(0, len(data), n)]
+    for s in range(len(ref_shards)):
+        ref_shard = ref_shards[s]
+        data_shard = data_shards[s]
+        batch = database.batch()
+        for i in range(len(ref_shard)):
+            ref = ref_shard[i]
+            values = data_shard[i]
+            doc = create_reference(database, ref)
+            batch.set(doc, values, merge=True)
+        batch.commit()
+
+
 def get_document(ref):
     """Get a given document.
     Args:

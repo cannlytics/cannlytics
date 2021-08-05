@@ -511,6 +511,7 @@ export const app = {
 
   advancedSearch() {
     /* Add advanced search parameters for streaming data. */
+    // TODO: Implement advanced search.
   },
 
 

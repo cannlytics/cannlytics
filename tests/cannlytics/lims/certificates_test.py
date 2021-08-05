@@ -17,24 +17,24 @@ from cannlytics import firebase
 
 
 EXAMPLE_CONTEXT = {
-    'organization.logo': '',
-    'organization.address': '',
-    'organization.phone': '',
-    'organization.license_number': '',
-    'reviewed_by': '',
-    'approved_by': '',
-    'moisture_content.result': '',
-    'moisture_content.limit': '',
-    'water_activity_rate.result': '',
-    'water_activity_rate.limit': '',
-    'cannabinoids': '',
-    'foreign_matter': '',
-    'terpenes': '',
-    'microbes': '',
-    'heavy_metals': '',
-    'mycotoxins': '',
-    'residual_solvents': '',
-    'pesticides': '',
+    'organization.logo': 'Logo',
+    'organization.address': 'Olympia, Washington',
+    'organization.phone': '(828) 395-3954',
+    'organization.license_number': 'n/a',
+    'reviewed_by': 'KLS',
+    'approved_by': 'KLS',
+    'moisture_content.result': '0',
+    'moisture_content.limit': '0',
+    'water_activity_rate.result': '0',
+    'water_activity_rate.limit': '0',
+    'cannabinoids': '0',
+    'foreign_matter': '0',
+    'terpenes': '0',
+    'microbes': '0',
+    'heavy_metals': '0',
+    'mycotoxins': '0',
+    'residual_solvents': '0',
+    'pesticides': '0',
     'notes': 'If you have any questions concerning this certificate of analysis, then please contact support@cannlytics.com. Abbreviations that may be used include: "nd", not-detected, "n/a", not applicable, "LOQ", lowest order of quantification, "LOD", lowest order of detection, "TNTC", too numerous to count.',
     'current_page': 1,
     'total_pages': 1,
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     # TODO: Create a CoA PDF.
     print('Creating CoA PDF....')
-    pages = ['Template']
+    pages = ['Page 1']
     limits = {}
     coa_template = './coa_template.xlsm'
     coa_data = generate_coas(
