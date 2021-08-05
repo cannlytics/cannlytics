@@ -6,7 +6,7 @@
   Created: 8/2/2021
   Updated: 8/2/2021
 -->
-
+{% load static %}
 {% block console_css %}
 
 <!-- PDF.js -->
@@ -14,14 +14,35 @@
 {% endblock console_css %}
 
   <!-- TODO: Show create CoA PDF if CoA created yet. -->
+  <div class="row my-5 mx-auto px-5">
+
+    <img src="{% static 'console/images/illustrations/outline/lab_tablet.svg' %}"
+      style="width:200px;height:200px;"
+    >
+    <div class="col px-5">
+      <h2 class="h4 text-dark mt-3 mb-1">CoA not yet created</h2>
+      <p class="text-muted lh-sm fs-5" style="max-width:475px;">
+        <small>Create a CoA once measurements have been collected.</small>
+      </p>
+      <button
+        class="btn btn-sm bg-gradient-green text-white my-3"
+        onclick="cannlytics.results.generateCoA();"
+      >
+        Create CoA
+      </button>
+    </div>
+
+  </div>
+
+
   <!-- Loading placeholder -->
-  <div id="loading-placeholder">
+  {% comment %} <div id="loading-placeholder">
     {% include "console/components/placeholders/loading_placeholder.html" with
       height='350px'
       width='100%'
       only
     %}
-  </div>
+  </div> {% endcomment %}
 
   <!-- TODO: Render CoA PDF with pre-release stamp if not reviewed and not approved -->
 
@@ -39,6 +60,15 @@
     <!-- Upload -->
     <!-- Delete -->
       <!-- Require deletion reason -->
+
+<!-- JavaScript -->
+{% block console_js %}
+  <script>
+
+
+
+  </script>
+{% endblock console_js %}
 
 
 </html>

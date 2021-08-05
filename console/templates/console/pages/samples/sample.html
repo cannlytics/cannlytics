@@ -9,9 +9,7 @@
     - Allow the user to reset, save (update and create), and delete.
     - Render additional fields, ability to add an additional field.
     - Load existing measurements.
-    - Use a table instead of a list to display measurements.
-  FIXME:
-    - Pass IDs appropriately.
+    - Use a table instead of a list to display measurements and results.
 -->
 {% load icon %}
 {% block console_css %}
@@ -32,13 +30,58 @@
     %}
 
     <!-- Tabs -->
+    <!-- FIXME: Render dynamically -->
     {% if id and id != 'new' %}
-      {% include "console/components/forms/form_tabs.html" with
+      {% comment %} {% include "console/components/forms/form_tabs.html" with
           id=id
           model="samples"
           extra="CoA"
           extra_path="coa"
-        %}
+        %} {% endcomment %}
+      <ul class="nav nav-tabs mt-3">
+        <li class="nav-item">
+          <a
+            class="nav-link {% if not unit %}active{% endif %}"
+            aria-current="page"
+            href="/samples/{{ id }}"
+          >
+            Details
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if unit == 'results' %}active{% endif %}"
+            aria-current="page"
+            href="/samples/{{ id }}/results"
+          >
+            Measurements and Results
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if unit == 'logs' %}active{% endif %}"
+            href="/samples/{{ id }}/logs"
+          >
+            Logs
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if unit == 'files'  %}active{% endif %}"
+            href="/samples/{{ id }}/files"
+          >
+            Files
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if unit == 'coa' %}active{% endif %}"
+            href="/samples/{{ id }}/coa"
+          >
+            CoA
+          </a>
+        </li>
+      </ul>
     {% endif %}
 
     <!-- Files page -->
@@ -60,6 +103,12 @@
         section=section
         user=user
       %}
+
+    <!-- TODO: Measurements and Review page-->
+    <!-- Add / load measurements. Once measurements are in, create results.
+    The user can the select the final results. -->
+    {% elif unit == 'results' %}
+      MEASUREMENTS AND RESULTS HERE!
 
     <!-- Certificate page -->
     {% elif unit == 'coa' %}
@@ -110,7 +159,27 @@
   <script>
 
     // Load the data into the user interface.
-    cannlytics.ui.viewObject('sample');
+    const unit = '{{ unit }}';
+    const sampleId = '{{ section }}';
+    console.log('Sample:', sampleId);
+    if (!unit) cannlytics.ui.viewObject('sample');
+    else if (unit === 'results') {
+      // TEST: Get measurements
+      cannlytics.api.getMeasurements({ 'sample_id': sampleId }).then(function(data) {
+        // TODO: Render measurements in the UI.
+        console.log('Measurement data:', data);
+      });
+      // TEST: Get results
+      cannlytics.api.getResults({ 'sample_id': sampleId }).then(function(data) {
+        // TODO: Render results in the UI.
+        console.log('Result data:', data);
+      });
+    }
+    try {
+      cannlytics.ui.viewObject('sample');
+    } catch(error) {
+      // Likely a sub-page.
+    }
 
     // Render any date pickers.
     // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });

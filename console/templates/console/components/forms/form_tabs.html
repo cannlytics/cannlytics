@@ -40,7 +40,7 @@
   {% if extra %}
     <li class="nav-item">
       <a
-        class="nav-link {% if section == extra_path %}active{% endif %}"
+        class="nav-link {% if section == extra_path or unit == 'coa' %}active{% endif %}"
         href="/{{ model }}{% if id %}/{{ id }}{% endif %}/{{ extra_path }}"
       >
         {{ extra }}

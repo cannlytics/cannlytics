@@ -62,6 +62,19 @@ export const results = {
      * Generate a CoA PDF.
      */
     console.log('Generating CoA...');
+    return new Promise((resolve, reject) => {
+      const data = {
+
+      };
+      authRequest(`/api/results/generate_coa?organization_id=${orgId}`, data).then((response) => {
+        if (response.error) {
+          showNotification('Error getting templates', response.message, { type: 'error' });
+          reject(response.error);
+        } else {
+          resolve(response.data);
+        }
+      });
+    });
   },
 
 

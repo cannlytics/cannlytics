@@ -21,17 +21,28 @@ except:
     pass # FIXME: Docs can't import.
 
 
-def calculate_results():
-    """Calculate results by using analyte formula and
-    instrument / analyst measurements.
-    Calculate results by using analyte formula and
-    instrument / analyst measurements.
+def calculate_results(sample_data, analysis, mass, dilution_factor=10, correction_factor=10000):
+    """Calculate percentage results given raw results,
+    dilution factor, and analysis type.
     Args:
-
+        sample_data (dict): A dictionary of sample data.
+        analysis (str): An analysis to calculate results for the analysis's analytes.
+        mass (float): The recorded sample mass.
+        dilution_factor (float): The dilution factor for the sample.
+        correction_factor (float): A factor used to appropriately scale values to percentage.
     Returns:
+        (dict): An updated dictionary of sample data.
     """
-
-    print('Calculating results..')
+    # FIXME:
+    # analytes = get_analytes(analysis)
+    analytes = []
+    for analyte in analytes:
+        try:
+            raw_value = float(sample_data[analyte])
+            sample_data[analyte] = ((raw_value * dilution_factor) / mass) / correction_factor
+        except ValueError:
+            continue
+    return sample_data
 
 
 def post_results():

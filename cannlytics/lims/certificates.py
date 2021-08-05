@@ -12,7 +12,16 @@ TODO:
     - Use your own templates or download the started templates and customize them to your heart's galore.
 """
 # Standard imports
+import os
 import environ
+from pathlib import Path
+from shutil import copyfile
+
+# External packages
+import openpyxl
+from openpyxl.drawing.image import Image
+import pandas as pd
+# import qrcode
 
 # Internal imports
 from cannlytics.firebase import (
@@ -20,6 +29,7 @@ from cannlytics.firebase import (
     update_document,
     download_file,
 )
+from cannlytics.utils.utils import snake_case
 
 
 def create_coa():
@@ -234,3 +244,260 @@ def create_short_url():
 #     logo.width = 150
 #     sheet.add_image(logo, coords)
 #     # workbook.save(filename="hello_world_logo.xlsx")
+
+#-----------------------------------------------------------------------
+# FIXME: Generate CoA routine
+#-----------------------------------------------------------------------
+
+def generate_coas(
+        import_files,
+        output_pages,
+        coa_template='./coa_template.xlsm',
+        # render_file='./CoAs/coa_render.xlsm',
+        limits={}
+):
+    """Generate certificates of analysis.
+    Args:
+        import_files (list): A list of files to import.
+        output_pages (list): A list of pages to include in the PDF.
+        coa_template (str): The path of the CoA Template.
+        limits (dict): A dictionary of limits and LOQ for analytes.
+    """
+
+    # Create CoA folder if one does not exist.
+    Path('CoAs').mkdir(parents=True, exist_ok=True)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    # Create a copy of the template.
+    abs_coa_template = os.path.join(dir_path, coa_template)
+    coa_template_copy = abs_coa_template.replace('.xlsm', '_copy.xlsm')
+    copyfile(abs_coa_template, coa_template_copy)
+
+    # Iterate over all import files.
+    for import_file in import_files:
+
+        # Get all sample, results, client, etc. data.
+        # abs_import_file = os.path.join(dir_path, import_file)
+        all_data = pd.read_excel(import_file)
+
+        # Get all the masses.
+        masses = {}
+        for _, row in all_data.iterrows():
+            key = snake_case(row['assay'])
+            masses[key] = row['test_mass']
+
+        # Aggregate all data for a sample
+        data = all_data.groupby('sample_id', as_index=False).first()
+
+        # Fill in sample details.
+        for _, row in data.iterrows():
+
+            # Get sample data as a dictionary.
+            sample_data = {**row.to_dict(), **limits}
+            sample_id = sample_data['sample_id']
+            if not sample_id: # FIXME: Skip nan
+                continue
+
+            # Calculate terpene and cannabinoid results.
+            sample_data = calculate_results(
+                sample_data,
+                analysis='terpenes',
+                mass=masses['terpenes'],
+                dilution_factor=40
+            )
+            sample_data = calculate_results(
+                sample_data,
+                analysis='cannabinoids',
+                mass=masses['potency'],
+                dilution_factor=40*50
+            )
+
+            # Iterate over worksheet pages to fill-in
+            # all occurrences of each reference 1 by 1.
+            template_workbook = openpyxl.load_workbook(coa_template_copy, keep_vba=True)
+            fill_jinja_references(template_workbook, sample_data)
+
+            # FIXME: Get output pages dynamically
+            try:
+                ws_index_list = get_worksheet_indexes(template_workbook, output_pages)
+            except:
+                if len(output_pages) == 3:
+                    ws_index_list = [3, 4, 5]
+                else:
+                    ws_index_list = [3, 4, 5, 6]
+
+            # Save the rendered template, temporarily.
+            abs_render_file = os.path.join(dir_path, f'CoAs/{sample_id}.xlsm')
+            template_workbook.save(abs_render_file)
+
+            # Future: Insert signatures
+            # Future: Insert QR Code
+            # Future: Touch up the CoA.
+                # ws.oddHeader.left.text = "Page &[Page] of &N"
+                # Mark failures as red
+                # a1.font = Font(color="FF0000", italic=True) # the change only affects A1
+
+            # Create a PDF.
+            output_file = f'CoAs/{sample_id}.pdf'
+            # FIXME:
+            excel = create_coa_pdfs(abs_render_file, ws_index_list, output_file)
+
+            # Future: Upload the PDF.        
+            # Future: Create download link and short link for the CoA.
+            # Future: Upload the CoA data.
+                # - See https://cloud.google.com/functions/docs/writing/http#uploading_files_via_cloud_storage
+
+    # Remove temporary files.
+    # os.remove(abs_render_file)
+    os.remove(coa_template_copy)
+
+    # Ensure Excel is visible.
+    excel.ScreenUpdating = True
+    excel.DisplayAlerts = True
+    excel.EnableEvents = True
+
+
+# FIXME: Do it without Excel :(
+def create_coa_pdfs(render_file, ws_index_list, output_file, tight=False):
+    """Generate PDFs for rendred CoAs.
+    Args:
+        render_file (str): The path of the rendred workbook.
+        ws_index_list (list): A list of the worksheet indexes to include in the PDF.
+        output_file (str): The name of the output PDF (expected .pdf extension).
+        tight (bool): Optional, default False, choice to scale all pages.
+    Returns:
+        (COM Object): A Microsoft Excel Client to alter later.
+    """
+    client = win32com.client.Dispatch('Excel.Application')
+    client.Visible = False
+    client.ScreenUpdating = False
+    client.DisplayAlerts = False
+    client.EnableEvents = False
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    input_file = os.path.join(dir_path, render_file)
+    pdf_file = os.path.join(dir_path, output_file)
+    workbook = client.Workbooks.Open(input_file)
+    if tight:
+        print_area = 'A1:G50'
+        for index in ws_index_list:
+            worksheet = workbook.Worksheets[index]
+            worksheet.PageSetup.Zoom = False
+            worksheet.PageSetup.FitToPagesTall = 1
+            worksheet.PageSetup.FitToPagesWide = 1
+            worksheet.PageSetup.PrintArea = print_area
+    try:
+        workbook.WorkSheets(ws_index_list).Select()
+    except:
+        workbook.Worksheets(ws_index_list).Select()
+    workbook.ActiveSheet.ExportAsFixedFormat(0, pdf_file)
+    workbook.Close(False)
+    return client
+
+#-----------------------------------------------------------------------
+# Internal functions
+#-----------------------------------------------------------------------
+
+def fill_jinja_references(workbook, data):
+    """Fill-in Jinga-style references, iterating over all
+    worksheet pages to fill-in all occurrences of each reference 1 by 1.
+    Args:
+        workbook (Workbook): A Workbook object.
+        data (dict): A dictionary of context data.
+    """
+    context = { snake_case(key): values for key, values in data.items() }
+    sheets = workbook.worksheets
+    for sheet in sheets:
+        refs = get_jinja_references(sheet)
+        for key, cells in refs.items():
+            clean_key = snake_case(key)
+            value = context.get(clean_key, 0)
+            for cell in cells:
+                if value:
+                    sheet[cell] = str(value)
+                else:
+                    sheet[cell] = 'MISSING'
+
+
+def get_jinja_references(sheet):
+    """Get Jinja-style references in an Excel worksheet.
+    Args:
+        sheet (Worksheet): A worksheet to get references from.
+    Returns:
+        (dict): A dictionary of variables to find references.
+    """
+    refs = {}
+    for row in sheet.iter_rows():
+        for cell in row:
+            value = cell.value
+            try:
+                if value.startswith('{{'):
+                    ref = cell.column_letter + str(cell.row)
+                    variable = value.replace('{{', '').replace('}}', '').strip()
+                    existing_refs = refs.get(variable, [])
+                    refs[variable] = [*existing_refs, *[ref]]
+                elif value.startswith('{% for'): # Optional: Handle tables
+                    return NotImplementedError
+            except AttributeError:
+                continue
+    return refs
+
+
+def get_worksheet_data(sheet, headers):
+    """Get the data of a worksheet.
+    Args:
+        sheet (Worksheet): An openpyx; Excel file object.
+        headres (list): A list of headers to map the values.
+    Returns:
+        list(dict): A list of dictionaries.
+    """
+    data = []
+    for row in sheet.iter_rows():
+        values = {}
+        for key, cell in zip(headers, row):
+            values[key] = cell.value
+        data.append(values)
+    return data
+
+
+def get_worksheet_data_block(sheet, coords, expand=None):
+    """Get a data block.
+    Args:
+        sheet (Sheet): The worksheet containing the data block.
+        coords (str): The inclusive coordinates of the data block.
+        expand (str): Optionally expand the range of values.
+    Returns
+        (dict): A dictionary of the data in the data block.
+    """
+    data = {}
+    values = sheet.range(coords).options(expand=expand).value
+    for item in values:
+        key = snake_case(item[0])
+        value = item[1]
+        data[key] = value
+    return data
+
+
+def get_worksheet_headers(sheet):
+    """Get the headres of a worksheet.
+    Args:
+        sheet (Worksheet): An openpyx; Excel file object.
+    Returns:
+        headers (list): A list of header strings.
+    """
+    headers = []
+    for cell in sheet[1]:
+        headers.append(cell.value)
+    return headers
+
+
+def get_worksheet_indexes(wb, output_pages):
+    """Get the indexes for a list of sheet names in a given workbook.
+    Args:
+        wb (Workbook): The workbook at hand.
+        pages (list): A list of pages to find indexes.
+    """
+    ws_index_list = []
+    for page in output_pages:
+        index = wb.worksheets.index(wb[page])
+        ws_index_list.append(index + 1)
+    return ws_index_list

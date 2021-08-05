@@ -76,7 +76,18 @@ class ConsoleView(TemplateView):
         # context = get_page_data(self.kwargs, context)
         # context['data_models'] = list(map(lambda x: x.pop('fields', None), data_models))
         # context['data_models'] = [d.pop('fields', None) for d in data_models]
-        context['data_models'] = data_models
+        context['data_models'] = [{
+            'user_type': d.get('user_type'),
+            'major': d.get('major'),
+            'nested': d.get('nested'),
+            'url': d.get('url'),
+            'slug': d.get('slug'),
+            'seperator': d.get('seperator'),
+            'title': d.get('title'),
+            'image_path': d.get('image_path'),
+            'description': d.get('description'),
+            'hidden': d.get('description'),
+        } for d in data_models]
         print('Data models:', context['data_models'])
         return context
 

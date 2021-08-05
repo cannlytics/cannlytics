@@ -78,6 +78,27 @@ def results(request, format=None, result_id=None):
 # Results functional views
 #------------------------------------------------------------------
 
+# @api_view(['POST'])
+# def generate_coas(request):
+#     """Generate CoAs."""
+
+#     # TODO: Get posted samples.
+#         # - Get the results for each sample.
+#         # - If not results, then
+#             # - Get the measurements for each sample
+#             # - Calculate results for each sample
+    
+#         # Get the template
+
+#         # Create the PDF
+
+#         # Generate download link for the PDF
+#         # Optional: create short-link for the CoA.
+
+#     # Return list of certificate data.
+#     return NotImplementedError
+
+
 @api_view(['POST'])
 def calculate_results(request):
     """Receive incoming transfers."""
