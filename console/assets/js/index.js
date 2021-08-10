@@ -10,6 +10,7 @@ import { analytics } from './analytics/analytics.js';
 import { api } from './api/api.js';
 import { app } from './app/app.js';
 import { auth } from './auth/auth.js';
+import { certificates } from './certificates/certificates.js';
 import { dashboard } from './dashboard/dashboard.js';
 import * as firebase from './firebase.js';
 import { intake } from './intake/intake.js';
@@ -30,6 +31,7 @@ export {
   api,
   app,
   auth,
+  certificates,
   dashboard,
   firebase,
   intake,

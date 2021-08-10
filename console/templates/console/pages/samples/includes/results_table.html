@@ -36,6 +36,8 @@
       <!-- Tabs -->
       {% include "console/components/forms/form_tabs.html" with
         model="results"
+        extra="Certificates"
+        extra_path="certificates"
       %}
 
       <!-- Logs -->
@@ -57,6 +59,13 @@
           section=section
           user=user
         %}
+
+      <!-- Certificates -->
+      {% elif section == 'certificates' %}
+      
+        <!-- FIXME: Try extends? -->
+        {% comment %} {% include "console/pages/results/parts/certificates.html" %} {% endcomment %}
+        {% block section %}{% endblock %}
 
       <!-- Table -->
       {% else %}

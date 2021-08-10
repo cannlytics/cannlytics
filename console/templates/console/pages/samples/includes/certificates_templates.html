@@ -4,58 +4,48 @@
   Certificates Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/5/2021
-  Updated: 8/2/2021
+  Updated: 7/15/2021
 -->
-{% extends "console/pages/results/results.html" %}
-{% block section %}
 
-  <!-- Table -->
-  <div class="d-flex flex-wrap par-md mb-5">
+  <div class="d-flex flex-wrap par-md">
+
     <div id="key-table-container" class="col-12">
 
-      <!-- Title  -->
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="fs-5 mb-0 lh-base">CoA Templates</h1>
-        <button
-          id="upload-button"
-          class="btn btn-sm bg-gradient-green text-white"
-          onclick="document.getElementById('file_input').click();"
-        >
-          Upload Template
-        </button>
-        <!-- accept="image/*" -->
-        <input type="file" id="file_input" class="visually-hidden">
-      </div>
+        <!-- Title  -->
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="fs-5 mb-0 lh-base">CoA Templates</h1>
+          <button
+            class="btn btn-sm bg-gradient-green text-white"
+            onclick=""
+          >
+            Upload Template
+          </button>
+        </div>
 
-      <!-- Grid -->
-      <div
-        id="template-table"
-        style="height:350px; width:100%;"
-        class="ag-theme-alpine"
-      ></div>
+        <!-- Table -->
+        <div id="template-table" style="height:350px; width:100%;" class="ag-theme-alpine"></div>
 
-    </div>
-  </div><!-- End of table -->
+    </div><!-- End of column -->
 
-    <!-- TODO: Delete template -->
+  <!-- TODO: User interface to manage templates. -->
 
-    <!-- TODO: View template -->
+  <!-- Upload template. -->
+  {% comment %} <button
+    class="btn btn-sm btn-green-gradient text-white"
+    onclick=""
+  >
+    Upload
+  </button> {% endcomment %}
 
-{% endblock section %}
+  <!-- Template Table-->
 
-<!-- JavaScript -->
+
+
+  <!-- Delete template -->
+
 {% block console_js %}
 
   <script type="text/javascript" charset="utf-8">
-
-    // Function to upload templates.
-    function uploadTemplate(event) {
-      cannlytics.results.uploadCoATemplate(event, '{{ organizations.0.organization_id }}');
-    }
-
-    // Attach upload template functionality.
-    const fileElem = document.getElementById('file_input');
-    fileElem.addEventListener('change', uploadTemplate, false);
 
     
     function onSelectionChanged() {
@@ -115,8 +105,7 @@
     // Get any template data and provide it to the table via the AG Grid API.
     // Note that the user UID is passed from Django's user session.
     cannlytics.results.getCoATemplates('{{ organizations.0.organization_id }}').then(function(data) {
-      if (data) gridOptions.api.setRowData(data);
-      else gridOptions.api.setRowData([]);
+      gridOptions.api.setRowData(data);
     });
 
   </script>

@@ -7,12 +7,16 @@
   Updated: 7/15/2021
   Wishlist:
     - Create measurement worksheet for selected samples.
+    - Ability to upload many sample images at a time, matching
+    images to samples by searching if filename includes sample ID.
+    The unmatched files can be displayed in a table to let the user
+    match them. Then, all matched images can be imported.
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block title %}{% if section %}{{ section }} | {% endif %}Samples | Cannlytics {% endblock title %}
 {% block console_body %}
-{% if section and section not in 'logs,files,certifiates' %}
+{% if section and section not in 'logs,files,certificates' %}
 
   <!-- Detail page -->
   {% include "console/pages/samples/sample.html" with
@@ -22,7 +26,7 @@
 
 {% else %}
 
-  <!-- List -->
+  <!-- Page -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
@@ -36,10 +40,20 @@
       <!-- Tabs -->
       {% include "console/components/forms/form_tabs.html" with
         model="samples"
+        extra='Certificates'
+        extra_path='certificates'
       %}
 
+      <!-- Certificates -->
+      {% if section == 'certificates' %}
+        {% comment %} {% include "console/pages/samples/includes/certificates.html" with
+          organizations=organizations
+          user=user
+        %} {% endcomment %}
+        {% block unit %}{% endblock unit %}
+
       <!-- Logs -->
-      {% if section == 'logs' %}
+      {% elif section == 'logs' %}
         {% include "console/pages/settings/logs/logs.html" with
           model='samples'
           model_singular='sample'

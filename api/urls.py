@@ -53,8 +53,10 @@ urlpatterns = [
     ])),
     path('certificates', include([
         path('/generate', certificates.generate_coas),
-        path('/review', certificates.generate_coas),
-        path('/approve', certificates.generate_coas),
+        path('/review', certificates.review_coas),
+        path('/approve', certificates.approve_coas),
+        path('/post', certificates.post_coas),
+        path('/release', certificates.release_coas),
     ])),
     path('contacts', include([
         path('', contacts.contacts),

@@ -16,6 +16,7 @@ each organization can customize the data points that they collect.
 
 #-----------------------------------------------------------------------
 # Data, page-specific supplementary data. (loaded from Firestore)
+# FIXME: Currently not implemented in views/main.py
 #-----------------------------------------------------------------------
 
 data = {
@@ -26,7 +27,7 @@ data = {
         "collections": [
             {"key": "data_models", "ref": "organizations/{organization_id}/data_models"},
         ],
-    }
+    },
 }
 
 #-----------------------------------------------------------------------
@@ -53,7 +54,7 @@ data_models = [
         "slug": "analytics",
         "user_type": ["producer", "processor", "retailer",
             "consumer", "integrator"],
-        "image_path": "console/images/icons/two-tone/two_tone_graph.png",
+        "image_path": "console/images/icons/two-tone/two_tone_graph.svg",
         "description": "Explore rich analytics to better understand your choices and performance.",
         "seperator": True
     },
@@ -63,7 +64,7 @@ data_models = [
         "slug": "analyses",
         "user_type": "lab",
         "description": "Manage analyses, tests for your analytes.",
-        "image_path": "console/images/icons/multi-tone/certificate-flask.png",
+        "image_path": "console/images/icons/multi-tone/certificate-flask.svg",
         "seperator": True,
         'singular': 'analysis',
         'sortable': True,
@@ -84,7 +85,7 @@ data_models = [
         "slug": "analytes",
         "user_type": "lab",
         "description": "Manage analytes, compounds that you wish to test.",
-        "image_path": "console/images/icons/multi-tone/microscope.png",
+        "image_path": "console/images/icons/multi-tone/microscope.svg",
         'abbreviation': 'AT',
         'id_schema': '[abbreviation]%y%m%d',
         'singular': 'analyte',
@@ -110,7 +111,7 @@ data_models = [
         "slug": "areas",
         "user_type": "*",
         "description": "Manage facilities and locations.",
-        "image_path": "console/images/icons/multi-tone/lab.png",
+        "image_path": "console/images/icons/multi-tone/lab.svg",
         'abbreviation': 'AR',
         'id_schema': '[abbreviation]%y%m%d',
         'singular': 'area',
@@ -132,7 +133,7 @@ data_models = [
         "slug": "contacts",
         "user_type": '*',
         "description": "Manage laboratory clients, vendors, and relations.",
-        "image_path": "console/images/icons/multi-tone/clients.png",
+        "image_path": "console/images/icons/multi-tone/clients.svg",
         'abbreviation': 'CT',
         'id_schema': '[abbreviation]%y%m%d',
         'singular': 'contact',
@@ -162,7 +163,7 @@ data_models = [
         "slug": "instruments",
         "user_type": "lab",
         "description": "Manage scientific instruments.",
-        "image_path": "console/images/icons/multi-tone/instrument.png",
+        "image_path": "console/images/icons/multi-tone/instrument.svg",
         'abbreviation': 'IS',
         'id_schema': '[abbreviation]%y%m%d',
         'singular': 'instrument',
@@ -187,7 +188,7 @@ data_models = [
         "slug": "inventory",
         "user_type": "*",
         "description": "Manage inventory, items, packages, and more.",
-        "image_path": "console/images/icons/multi-tone/records.png",
+        "image_path": "console/images/icons/multi-tone/records.svg",
         'abbreviation': 'IN',
         'id_schema': '[abbreviation]%y%m%d',
         'singular': 'item',
@@ -235,7 +236,7 @@ data_models = [
         "slug": "measurements",
         "user_type": "lab",
         "description": "Manage measurements by analysts and from your instruments.",
-        "image_path": "console/images/icons/two-tone/two_tone_stats.png",
+        "image_path": "console/images/icons/multi-tone/notes.svg",
         'abbreviation': 'MT',
         'id_schema': '[abbreviation]%y%m%d',
         'singular': 'measurement',
@@ -269,7 +270,7 @@ data_models = [
         "slug": "projects",
         "user_type": "*",
         "description": "Manage your internal and external projects.",
-        "image_path": "console/images/icons/multi-tone/folder.png",
+        "image_path": "console/images/icons/multi-tone/folder.svg",
         'abbreviation': 'P',
         'id_schema': '[abbreviation]%y%m%d',
         'singular': 'project',
@@ -298,7 +299,7 @@ data_models = [
         "slug": "results",
         "user_type": "*",
         "description": "Manage laboratory results.",
-        "image_path": "console/images/icons/multi-tone/certificate.png",
+        "image_path": "console/images/icons/multi-tone/certificate.svg",
         'abbreviation': 'R',
         'id_schema': '[abbreviation]%y%m%d',
         'singular': 'result',
@@ -334,7 +335,7 @@ data_models = [
         "slug": "samples",
         "user_type": "*",
         "description": "Manage laboratory samples.",
-        "image_path": "console/images/icons/multi-tone/vials.png",
+        "image_path": "console/images/icons/multi-tone/vials.svg",
         'abbreviation': 'S',
         'id_schema': '[abbreviation]%y%m%d',
         'singular': 'sample',
@@ -362,7 +363,7 @@ data_models = [
         "slug": "transfers",
         "user_type": '*',
         "description": "Manage sample transfers.",
-        "image_path": "console/images/icons/two-tone/two_tone_clock.png",
+        "image_path": "console/images/icons/multi-tone/transmit.svg",
         'abbreviation': 'TR',
         'id_schema': '[abbreviation]%y%m%d',
         'singular': 'transfer',
@@ -438,7 +439,7 @@ data_models = [
         "seperator": True,
         "major": True,
         "description": "Manage traceability integration and view audit logs.",
-        "image_path": "console/images/icons/multi-tone/certificate-access.png",
+        "image_path": "console/images/icons/multi-tone/certificate-access.svg",
     },
     {
         "title": "Settings",
@@ -448,7 +449,7 @@ data_models = [
         "user_type": "*",
         "major": True,
         "description": "Manage your user and organization settings.",
-        "image_path": "console/images/icons/two-tone/two_tone_gears.png",
+        "image_path": "console/images/icons/two-tone/two_tone_gears.svg",
     },
     {
         "title": "Help",

@@ -1,7 +1,7 @@
 """
 Certificates Views | Cannlytics API
 Created: 7/19/2021
-Updated: 8/4/2021
+Updated: 8/9/2021
 
 API to interface with certificates of analysis (CoAs).
 """
@@ -83,9 +83,11 @@ def create_coas(request):
             # output_pages=pages,
             # limits=limits
         )
-
-        # Generate download link for the PDF
-        # Optional: create short-link for the CoA.
+        
+        # Is this done by generate CoAs?
+        # - Generate download link for the PDF
+        # - Create short-link for the CoA.
+        # - Insert QR code on the CoA.
 
     # Return list of certificate data.
     return NotImplementedError
@@ -93,11 +95,49 @@ def create_coas(request):
 
 @api_view(['POST'])
 def review_coas(request):
-    """Review certificates of analysis."""
+    """Review certificates of analysis so that they can be approved
+    and released."""
+
+    # Call generate_coas
+    # - Make sure to fill-in reviewers signature.
+    
+    # Update the sample's certificate_status.
+
     return NotImplementedError
 
 
 @api_view(['POST'])
 def approve_coas(request):
-    """Approve certificates of analysis."""
+    """Approve certificates of analysis for release after they have
+    been reviewed."""
+
+    # Call generate_coas
+    # - Make sure to fill-in approvers signature.
+    
+    # Update the sample's certificate_status.
+
+    return NotImplementedError
+
+
+@api_view(['POST'])
+def post_coas(request):
+    """Post certificates of analysis to the state traceability system."""
+
+    # Get sample IDs.
+
+    # Format data for API requests.
+
+    # Post certificates 1 by 1.
+
+    return NotImplementedError
+
+
+@api_view(['POST'])
+def release_coas(request):
+    """Release certificates of analysis to the client."""
+
+    # Update the certificate_status in Firestore.
+
+    # Send (email and/or text) to the client's recipients.
+
     return NotImplementedError

@@ -215,6 +215,7 @@ export const app = {
   renderTable(model, modelSingular, data, dataModel) {
     /*
      * Render a data table in the user interface.
+     * TODO: Generalize as a utility function.
      */
 
     // Render the table if it's the first time that it's shown.

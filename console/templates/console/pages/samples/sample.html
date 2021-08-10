@@ -36,7 +36,7 @@
           id=id
           model="samples"
           extra="CoA"
-          extra_path="coa"
+          extra_path="certificate"
         %} {% endcomment %}
       <ul class="nav nav-tabs mt-3">
         <li class="nav-item">
@@ -50,11 +50,11 @@
         </li>
         <li class="nav-item">
           <a
-            class="nav-link {% if unit == 'results' %}active{% endif %}"
+            class="nav-link {% if unit == 'review' %}active{% endif %}"
             aria-current="page"
-            href="/samples/{{ id }}/results"
+            href="/samples/{{ id }}/review"
           >
-            Measurements and Results
+            Review
           </a>
         </li>
         <li class="nav-item">
@@ -75,10 +75,10 @@
         </li>
         <li class="nav-item">
           <a
-            class="nav-link {% if unit == 'coa' %}active{% endif %}"
-            href="/samples/{{ id }}/coa"
+            class="nav-link {% if unit == 'certificate' %}active{% endif %}"
+            href="/samples/{{ id }}/certificate"
           >
-            CoA
+            Certificate
           </a>
         </li>
       </ul>
@@ -107,13 +107,13 @@
     <!-- TODO: Measurements and Review page-->
     <!-- Add / load measurements. Once measurements are in, create results.
     The user can the select the final results. -->
-    {% elif unit == 'results' %}
-      MEASUREMENTS AND RESULTS HERE!
+    {% elif unit == 'review' %}
+      {% include "console/pages/samples/includes/review.html" %}
 
     <!-- Certificate page -->
-    {% elif unit == 'coa' %}
+    {% elif unit == 'certificate' %}
 
-      {% include "console/pages/results/certificate.html" %}
+      {% include "console/pages/samples/includes/certificate.html" %}
 
     {% else %}
 

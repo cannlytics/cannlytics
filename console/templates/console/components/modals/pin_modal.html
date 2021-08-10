@@ -81,5 +81,10 @@
       document.getElementById('pin_input').value = '';
     });
 
+    // Auto-focus the pin input on open.
+    modal.addEventListener('shown.bs.modal', function () {
+      document.getElementById('pin_input').focus();
+    });
+
 </script>
 </html>

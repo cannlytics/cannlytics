@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<!--
+  Certificate Page | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 8/2/2021
+  Updated: 8/9/2021
+-->
+{% load static get_env %}
+{% block console_css %}
+  
+  <!-- Adobe PDF Embed API -->
+  <script src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
+
+{% endblock console_css %}
+
+  <!-- Certificate placeholder (if CoA is not yet created). -->
+  <div id="certificate-placeholder" class="row my-5 mx-auto px-2 px-md-5">
+    <img src="{% static 'console/images/illustrations/outline/lab_tablet.svg' %}"
+      style="width:200px;height:200px;"
+      class="mx-auto"
+    >
+    <div class="col px-3 px-md-5">
+      <h2 class="h4 text-dark mt-3 mb-1">CoA not yet created</h2>
+      <p class="text-muted lh-sm fs-5" style="max-width:475px;">
+        <small>Create a CoA once measurements have been collected.</small>
+      </p>
+      <button
+        class="btn btn-sm bg-gradient-green text-white my-3"
+        onclick="cannlytics.certificates.generateCoA();"
+      >
+        Create CoA
+      </button>
+    </div>
+  </div>
+
+  <!-- TODO: Render CoA PDF with pre-release stamp if not reviewed and not approved -->
+    <!-- Review button -->
+      <!-- Require pin, insert signature on the CoA (by re-creating it) -->
+
+  <!-- Certificate d-none -->
+  <div id="certificate-container" class="mt-4">
+
+    <!-- Options -->
+    <!-- TODO: Dynamic options
+      Review
+      Unreview / Approve
+      Unapprove / Post / Release
+    -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mt-4 mb-3">
+      <div class="d-flex align-items-center">
+        <h1 class="fs-5 lh-base text-dark mb-0">
+          Certificate of Analysis
+        </h1>
+      </div>
+      <div class="d-flex align-itemx-center">
+        <button
+          class="btn btn-sm btn-sm-light btn-md-light me-2"
+          data-bs-toggle="modal"
+          data-bs-target="#pinModal"
+        >
+          Unreview
+        </button>
+        <button
+          class="btn btn-sm btn-sm-light btn-md-light me-2"
+          data-bs-toggle="modal"
+          data-bs-target="#pinModal"
+        >
+          Unapprove
+        </button>
+        <button
+          class="btn btn-sm bg-gradient-green text-white"
+          data-bs-toggle="modal"
+          data-bs-target="#pinModal"
+        >
+          Approve
+        </button>
+        <button
+          class="btn btn-sm bg-gradient-green text-white mx-2"
+          data-bs-toggle="modal"
+          data-bs-target="#pinModal"
+        >
+          Post
+        </button>
+        <button
+          class="btn btn-sm bg-gradient-green text-white"
+          data-bs-toggle="modal"
+          data-bs-target="#pinModal"
+        >
+          Release
+        </button>
+      </div>
+    </div>
+
+    <!-- PDF -->
+    <div class="progress mx-auto" style="width: 532px;">
+      <div class="progress-bar border bg-success" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+        Reviewed
+      </div>
+      <div class="progress-bar border bg-light text-secondary" role="progressbar" style="width: 25%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+        Approved
+      </div>
+      <div class="progress-bar border bg-light text-secondary" role="progressbar" style="width: 25%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+        Posted
+      </div>
+      <div class="progress-bar border bg-light text-secondary" role="progressbar" style="width: 25%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+        Released
+      </div>
+    </div>
+    <div
+      id="certifiacte-of-analysis"
+      style="height: 688px; width: 532px;"
+      class="mx-auto mb-5"
+    ></div>
+  
+  </div>
+
+  <!-- TODO: Render CoA PDF with pre-release stamp if reviewed but not approved -->
+    <!-- Approve button -->
+      <!-- Require pin, insert signature on the CoA (by re-creating it) -->
+
+  <!-- TODO: Render CoA PDF if reviewed and approved -->
+    <!-- Send-->
+    <!-- Upload -->
+    <!-- Delete -->
+      <!-- Require deletion reason -->
+  
+
+  <!-- TODO: Post CoA to Metrc -->
+
+  <!-- TODO: Release results (making them available and sending any notifications) -->
+
+
+  <!-- Enter pin dialog -->
+  <!-- TODO: Dynamically add functionality to button and input -->
+  {% include "console/components/modals/pin_modal.html" with
+    callback="cannlytics.certificates.approveCoA"
+  %}
+
+
+<!-- JavaScript-->
+{% comment %} {% block console_js %}
+  <script type="text/javascript">
+    document.addEventListener('adobe_dc_view_sdk.ready', function() {
+      // TODO: Get URL and file name from server on page load.
+      var url = 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Flims%2Ftemplates%2Fexample_coa_template.pdf?alt=media&token=f1e397c7-18cb-4b68-b041-eda4e3ccac35';
+      var fileName = 'test-certificate.pdf';
+      var adobeDCView = new AdobeDC.View({clientId: "{{ 'ADOBE_CLIENT_ID'|get_env }}", divId: 'certifiacte-of-analysis'});
+      var fileInfo = {
+        content:{ location:  { url } },
+        metaData:{ fileName }
+      };
+      var options = {
+        embedMode: 'SIZED_CONTAINER',
+        showLeftHandPanel: true,
+        showPageControls: true,
+      };
+      adobeDCView.previewFile(fileInfo, options);
+    });
+  </script>
+{% endblock console_js %} {% endcomment %}
+
+</html>

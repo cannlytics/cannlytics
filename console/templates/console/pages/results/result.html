@@ -32,8 +32,6 @@
     {% include "console/components/forms/form_tabs.html" with
         id=id
         model="results"
-        extra="Certificate"
-        extra_path="certificate"
       %}
   {% endif %}
 
@@ -46,10 +44,6 @@
       section=section
       user=user
     %}
-  
-  <!-- Certificate page -->
-  {% elif unit == 'certificate' %}
-
 
   <!-- Logs page -->
   {% elif unit == 'logs' %}

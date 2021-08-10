@@ -2,7 +2,7 @@
 Main Views | Cannlytics
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 12/18/2020
-Updated: 7/17/2021
+Updated: 8/9/2021
 """
 
 # External imports
@@ -14,15 +14,10 @@ from django.views.generic.base import TemplateView
 from console.settings import PROJECT_NAME as BASE
 from console.state import layout, data_models
 from console.utils import (
-    get_page_data,
     get_page_context,
     get_user_context,
 )
 
-
-#-----------------------------------------------------------------------
-# Main view
-#-----------------------------------------------------------------------
 
 class ConsoleView(TemplateView):
     """Main view used for most console pages."""
@@ -56,8 +51,8 @@ class ConsoleView(TemplateView):
         """Get context that is used on all pages. The context is retrieved
         dynamically from the app's state. The user's permissions
         are verified on every request. User-specific context and data
-        can be returned depending on the page."""
-        print('Getting context....')
+        can be returned depending on the page. Information about data
+        models is provided to all pages."""
         context = super().get_context_data(**kwargs)
         context['sidebar'] = layout['sidebar']
         context['screen'] = kwargs.get('screen', '')
@@ -71,30 +66,14 @@ class ConsoleView(TemplateView):
             context['organization_context'] = organization_context
         context = get_page_context(self.kwargs, context)
         context = get_user_context(self.request, context)
-        # Get data models needed for sidebar / navigation + dashboard.
-        # FIXME: Reduce amount of data passed. Drop fields?
-        # context = get_page_data(self.kwargs, context)
-        # context['data_models'] = list(map(lambda x: x.pop('fields', None), data_models))
-        # context['data_models'] = [d.pop('fields', None) for d in data_models]
-        context['data_models'] = [{
-            'user_type': d.get('user_type'),
-            'major': d.get('major'),
-            'nested': d.get('nested'),
-            'url': d.get('url'),
-            'slug': d.get('slug'),
-            'seperator': d.get('seperator'),
-            'title': d.get('title'),
-            'image_path': d.get('image_path'),
-            'description': d.get('description'),
-            'hidden': d.get('description'),
-        } for d in data_models]
-        print('Data models:', context['data_models'])
+        context['data_models'] = data_models
+        for item in context['data_models']:
+            try:
+                del item['fields']
+            except KeyError:
+                pass
         return context
 
-
-#-----------------------------------------------------------------------
-# Error views
-#-----------------------------------------------------------------------
 
 def handler404(request, *args, **argv): #pylint: disable=unused-argument
     """Handle missing pages."""
@@ -107,10 +86,6 @@ def handler500(request, *args, **argv): #pylint: disable=unused-argument
     template = f'{BASE}/pages/misc/errors/500.html'
     return render(request, template, {}, status=500)
 
-
-#-----------------------------------------------------------------------
-# Misc views
-#-----------------------------------------------------------------------
 
 def no_content(request, *args, **argv): #pylint: disable=unused-argument
     """Return an empty response when needed, such as for a ping."""

@@ -1,48 +1,46 @@
 <!doctype html>
 <html>
 <!--
-  Results Page | Cannlytics Console
+  Measurements Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
-  Created: 5/5/2021
+  Created: 6/19/2021
   Updated: 7/15/2021
 -->
 {% extends "console/console.html" %}
-{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Results | Cannlytics{% endblock title %}
+{% load static icon %}
+{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Measurements | Cannlytics {% endblock title %}
 {% block console_body %}
-{% if section and section not in 'logs,files,certificates' %}
+{% if section and section not in 'logs,files' %}
 
   <!-- Detail page -->
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-    {% include "console/pages/results/result.html" with
-      id=section
-      data_model=data_model
-    %}
-    {% block unit %}{% endblock unit %}
-  </main>
+  {% include "console/pages/measurements/measurement.html" with
+    id=section
+    data_model=data_model
+  %}
 
 {% else %}
 
   <!-- List -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
-    <!-- Header -->
+    <!-- Header-->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-      <h1 class="fs-5 mb-0 lh-base">Results</h1>
+      <h1 class="fs-5 mb-0 lh-base">Measurements</h1>
     </div>
 
     <!-- Body -->
-    <div class="results">
+    <div class="measurements">
 
       <!-- Tabs -->
       {% include "console/components/forms/form_tabs.html" with
-        model="results"
+        model="measurements"
       %}
 
       <!-- Logs -->
       {% if section == 'logs' %}
         {% include "console/pages/settings/logs/logs.html" with
-          model='results'
-          model_singular='result'
+          model='measurements'
+          model_singular='measurement'
           organizations=organizations
           section=section
           user=user
@@ -51,8 +49,8 @@
       <!-- Files -->
       {% elif section == 'files' %}
         {% include "console/pages/settings/files/files.html" with
-          model='results'
-          model_singular='result'
+          model='measurements'
+          model_singular='measurement'
           organizations=organizations
           section=section
           user=user
@@ -63,8 +61,8 @@
 
         <!-- Options -->
         {% include "console/components/tables/simple_table_options.html" with
-          model='results'
-          model_singular='result'
+          model='measurements'
+          model_singular='measurement'
         %}
 
         <!-- Loading placeholder -->
@@ -79,7 +77,7 @@
         <!-- No-data Placeholder -->
         <div id="data-placeholder" class="d-none">
           {% include "console/components/placeholders/placeholder.html" with
-            placeholder=results.placeholder
+            placeholder=measurements.placeholder
             only
           %}
         </div>
@@ -88,7 +86,7 @@
         <div id="data-table" class="d-none">
           <!-- TODO: Advanced search -->
           <div
-            id="results-table"
+            id="measurements-table"
             class="ag-theme-alpine-dark"
             style="height: 350px; width:100%;"
           ></div>
@@ -97,9 +95,10 @@
       {% endif %}
 
     </div><!-- End of the body -->
-
+    
   </main>
 {% endif %}
+
 {% endblock console_body %}
 
 <!-- JavaScript -->
@@ -107,7 +106,7 @@
 
   {% if not section %}
     <script>
-      cannlytics.app.streamData('results', 'result', '{{ organizations.0.organization_id }}');
+      cannlytics.app.streamData('measurements', 'measurement', '{{ organizations.0.organization_id }}');
     </script>
   {% endif %}
 
