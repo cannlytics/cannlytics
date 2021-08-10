@@ -85,6 +85,7 @@ def automatic_collection(org_id, env_file='.env'):
 
                 # TODO: Read in modified file and parse it according to
                 # the instrument type and analytes.
+                # TODO: Use routines Charles wrote in data.py
 
 
     # Upload data to Firestore.
@@ -95,3 +96,24 @@ def automatic_collection(org_id, env_file='.env'):
     
     # Return the measurements
     return measurements
+
+
+
+#-----------------------------------------------------------------------
+# SCRAP
+#-----------------------------------------------------------------------
+
+# TODO: Automatic data collection cron Job!
+# Resources:
+#     https://www.programmersought.com/article/6548119734/
+#     https://code.tutsplus.com/tutorials/managing-cron-jobs-using-python--cms-28231
+#     https://stackoverflow.com/questions/34598568/how-to-schedule-a-python-script-using-cron-job
+#     https://stackoverflow.com/questions/39327032/how-to-get-the-latest-file-in-a-folder
+#     https://www.w3resource.com/python-exercises/python-basic-exercise-64.php
+#     https://stackabuse.com/scheduling-jobs-with-python-crontab
+# def automated_data_collection():
+#     """CRON job to periodically collect data from scientific instruments."""
+    
+#     print('Getting data from instruments....')
+
+#     return NotImplementedError

@@ -63,7 +63,7 @@ export const certificates = {
   CoA Generation and Review
   ----------------------------------------------------------------------------*/
 
-  generateCoA() {
+  generateCoA(orgId) {
     /*
      * Generate a CoA PDF.
      */
@@ -99,6 +99,38 @@ export const certificates = {
      * Approve a CoA.
      */
     console.log('Reviewing CoA...');
+  },
+
+
+  postCoA() {
+    /*
+     * Post a CoA to the traceability system.
+     */
+    console.log('Reviewing CoA...');
+  },
+
+
+  releaseCoA() {
+    /*
+     * Release a CoA.
+     */
+    console.log('Releasing CoA...');
+  },
+
+
+  unapproveCoA() {
+    /*
+     * Un-approve a CoA.
+     */
+    console.log('Un-approving CoA...');
+  },
+
+
+  unreviewCoA() {
+    /*
+     * Un-review a CoA.
+     */
+    console.log('Un-reviewing CoA...');
   },
 
 

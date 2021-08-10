@@ -39,45 +39,46 @@ def get_page(request, default=''):
     return page
 
 
-def get_page_data(kwargs, context):
-    """Get all screen-specific data from Firestore.
-    Args:
-        kwargs (dict): A dictionary of keywords and their values.
-        context (dict): A dictionary of existing page context.
-    Returns
-        context (dict): The context updated with any screen-specific data.
-    """
-    if context['section']:
-        screen_data = data.get(context['section'])
-    else:
-        screen_data = data.get(context['screen'])
-    if screen_data is None:
-        return context
-    print('Screen data:', screen_data)
-    documents = screen_data.get('documents')
-    collections = screen_data.get('collections')
-    organizations = context.get('organizations')
-    if organizations:
-        organization_id = organizations[0]['organization_id']
-    if documents:
-        for item in documents:
-            ref = item['ref']
-            ref = ref.replace('{organization_id}', organization_id)
-            print('Getting document:', ref)
-            context[item['key']] = get_document(ref)
-    if collections:
-        for item in collections:
-            ref = item['ref']
-            ref = ref.replace('{organization_id}', organization_id)
-            print('Getting collection:', ref)
-            context[item['key']] = get_collection(
-                ref,
-                limit=item.get('limit'),
-                order_by=item.get('order_by'),
-                desc=item.get('desc'),
-                filters=item.get('filters'),
-            )
-    return context
+# Currently unused.
+# def get_page_data(kwargs, context):
+#     """Get all screen-specific data from Firestore.
+#     Args:
+#         kwargs (dict): A dictionary of keywords and their values.
+#         context (dict): A dictionary of existing page context.
+#     Returns
+#         context (dict): The context updated with any screen-specific data.
+#     """
+#     if context['section']:
+#         screen_data = data.get(context['section'])
+#     else:
+#         screen_data = data.get(context['screen'])
+#     if screen_data is None:
+#         return context
+#     print('Screen data:', screen_data)
+#     documents = screen_data.get('documents')
+#     collections = screen_data.get('collections')
+#     organizations = context.get('organizations')
+#     if organizations:
+#         organization_id = organizations[0]['organization_id']
+#     if documents:
+#         for item in documents:
+#             ref = item['ref']
+#             ref = ref.replace('{organization_id}', organization_id)
+#             print('Getting document:', ref)
+#             context[item['key']] = get_document(ref)
+#     if collections:
+#         for item in collections:
+#             ref = item['ref']
+#             ref = ref.replace('{organization_id}', organization_id)
+#             print('Getting collection:', ref)
+#             context[item['key']] = get_collection(
+#                 ref,
+#                 limit=item.get('limit'),
+#                 order_by=item.get('order_by'),
+#                 desc=item.get('desc'),
+#                 filters=item.get('filters'),
+#             )
+#     return context
 
 
 def get_page_context(kwargs, context):
@@ -117,6 +118,7 @@ def get_user_context(request, context):
         user_data = get_document(f'users/{uid}')
         context['organizations'] = organizations
         context['user'] = {**claims, **user_data}
-        if organizations:
-            context = get_model_context(context, organizations[0]['organization_id'])
+    else:
+        context['organizations'] = []
+        context['user'] = {}
     return context

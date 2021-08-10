@@ -14,10 +14,13 @@ from rest_framework.response import Response
 
 # Internal imports
 from api.results.results import calculate_results
-from api.auth.auth import authenticate_request
+from api.auth.auth import authorize_user
 from api.api import get_objects, update_object, delete_object
 from cannlytics.firebase import get_collection, get_document
 from cannlytics.lims.certificates import generate_coas
+
+
+DEFAULT_TEMPLATE = 'public/lims/templates/coa_template.xlsm'
 
 
 @api_view(['POST'])
@@ -25,30 +28,16 @@ def create_coas(request):
     """Generate certificates of analysis."""
 
     # Authenticate the user.
-    claims = authenticate_request(request)
-    try:
-        uid = claims['uid']
-        owner = claims.get('owner', [])
-        team = claims.get('team', [])
-        qa = claims.get('qa', [])
-        authorized_ids = owner + team + qa
-    except KeyError:
-        message = 'Your request was not authenticated. Ensure that you have a valid session or API key.'
-        return Response({'error': True, 'message': message}, status=401)
-
-    # Authorize that the user can work with the organization's data.
-    org_id = request.query_params.get('organization_id')
-    if org_id not in authorized_ids:
-        message = f'Your must be an owner, quality assurance, or a team member of this organization for this operation.'
-        return Response({'error': True, 'message': message}, status=403)
+    claims, status, org_id = authorize_user(request)
+    if status != 200:
+        return Response(claims, status=status)
 
     # Get posted samples.
     posted_data = loads(request.body.decode('utf-8'))
-    sample_ids = posted_data['samples']
+    sample_ids = posted_data['sample_ids']
 
     # Create certificates for each sample.
-    certificates = []
-    templates = {}
+    data = []
     for sample_id in sample_ids:
 
         # Get the sample data.
@@ -73,30 +62,33 @@ def create_coas(request):
         # Define the certificate context.
         context = {**sample_data, **sample_results[0]}
         
-        # Get the template
-        template_name = sample_data.get('coa_template_ref', 'public/lims/templates/coa_template.xlsm')
+        # Get the certificate template.
+        template_name = sample_data.get('coa_template_ref', DEFAULT_TEMPLATE)
 
-        # Create the PDF
+        # Create the PDF, keeping the data.
+        # Efficiency gain: Keep the template in /tmp so they don't have
+        # to be downloaded each iteration.
         certificate = generate_coas(
             context,
             coa_template=template_name,
             # output_pages=pages,
             # limits=limits
         )
-        
-        # Is this done by generate CoAs?
-        # - Generate download link for the PDF
-        # - Create short-link for the CoA.
-        # - Insert QR code on the CoA.
+        data.append(certificate)
 
     # Return list of certificate data.
-    return NotImplementedError
+    return Response({'data': data}, status=200)
 
 
 @api_view(['POST'])
 def review_coas(request):
     """Review certificates of analysis so that they can be approved
     and released."""
+
+    # Authenticate the user.
+    claims, status, org_id = authorize_user(request)
+    if status != 200:
+        return Response(claims, status=status)
 
     # Call generate_coas
     # - Make sure to fill-in reviewers signature.
@@ -111,6 +103,18 @@ def approve_coas(request):
     """Approve certificates of analysis for release after they have
     been reviewed."""
 
+    # Authenticate the user.
+    claims, status, org_id = authorize_user(request)
+    if status != 200:
+        return Response(claims, status=status)
+
+    # Restrict approving certificates to QA and owners.
+    qa = claims.get('qa', [])
+    owner = claims.get('owner', [])
+    if org_id not in owner and org_id not in qa:
+        message = f'Your must be an owner or quality assurance manager of this organization for this operation.'
+        return Response({'error': True, 'message': message}, status=403)
+
     # Call generate_coas
     # - Make sure to fill-in approvers signature.
     
@@ -123,7 +127,21 @@ def approve_coas(request):
 def post_coas(request):
     """Post certificates of analysis to the state traceability system."""
 
+    # Authenticate the user.
+    claims, status, org_id = authorize_user(request)
+    if status != 200:
+        return Response(claims, status=status)
+
+    # Restrict approving certificates to QA and owners.
+    qa = claims.get('qa', [])
+    owner = claims.get('owner', [])
+    if org_id not in owner and org_id not in qa:
+        message = f'Your must be an owner or quality assurance manager of this organization for this operation.'
+        return Response({'error': True, 'message': message}, status=403)
+
     # Get sample IDs.
+    posted_data = loads(request.body.decode('utf-8'))
+    sample_ids = posted_data['sample_ids']
 
     # Format data for API requests.
 
@@ -136,7 +154,24 @@ def post_coas(request):
 def release_coas(request):
     """Release certificates of analysis to the client."""
 
+    # Authenticate the user.
+    claims, status, org_id = authorize_user(request)
+    if status != 200:
+        return Response(claims, status=status)
+
+    # Restrict approving certificates to QA and owners.
+    qa = claims.get('qa', [])
+    owner = claims.get('owner', [])
+    if org_id not in owner and org_id not in qa:
+        message = f'Your must be an owner or quality assurance manager of this organization for this operation.'
+        return Response({'error': True, 'message': message}, status=403)
+
+    # Get the samples.
+    posted_data = loads(request.body.decode('utf-8'))
+    sample_ids = posted_data['sample_ids']
+
     # Update the certificate_status in Firestore.
+    
 
     # Send (email and/or text) to the client's recipients.
 

@@ -11,8 +11,9 @@ Manage your laboratory samples.
 
 def get_sample_pictures():
     """Get sample pictures taken and stored on a lab computer."""
-    pics = []
-    return pics
+    # pics = []
+    # return pics
+    return NotImplementedError
 
 
 if __name__ == '__main__':

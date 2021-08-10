@@ -27,7 +27,9 @@
       </p>
       <button
         class="btn btn-sm bg-gradient-green text-white my-3"
-        onclick="cannlytics.certificates.generateCoA();"
+        data-bs-toggle="modal"
+        data-bs-target="#pinModal"
+        onclick="setCallback('generateCoA')"
       >
         Create CoA
       </button>
@@ -58,6 +60,7 @@
           class="btn btn-sm btn-sm-light btn-md-light me-2"
           data-bs-toggle="modal"
           data-bs-target="#pinModal"
+          onclick="setCallback('unreviewCoA')"
         >
           Unreview
         </button>
@@ -65,6 +68,7 @@
           class="btn btn-sm btn-sm-light btn-md-light me-2"
           data-bs-toggle="modal"
           data-bs-target="#pinModal"
+          onclick="setCallback('unapproveCoA')"
         >
           Unapprove
         </button>
@@ -72,6 +76,7 @@
           class="btn btn-sm bg-gradient-green text-white"
           data-bs-toggle="modal"
           data-bs-target="#pinModal"
+          onclick="setCallback('approveCoA')"
         >
           Approve
         </button>
@@ -79,6 +84,7 @@
           class="btn btn-sm bg-gradient-green text-white mx-2"
           data-bs-toggle="modal"
           data-bs-target="#pinModal"
+          onclick="setCallback('postCoA')"
         >
           Post
         </button>
@@ -86,6 +92,7 @@
           class="btn btn-sm bg-gradient-green text-white"
           data-bs-toggle="modal"
           data-bs-target="#pinModal"
+          onclick="setCallback('releaseCoA')"
         >
           Release
         </button>
@@ -132,15 +139,34 @@
 
 
   <!-- Enter pin dialog -->
-  <!-- TODO: Dynamically add functionality to button and input -->
-  {% include "console/components/modals/pin_modal.html" with
-    callback="cannlytics.certificates.approveCoA"
-  %}
+  <!-- FIXME: Dynamically add functionality to button and input more elegantly -->
+  {% include "console/components/modals/pin_modal.html" with  callback="dynamicCallback" %}
 
 
 <!-- JavaScript-->
-{% comment %} {% block console_js %}
+{% block console_js %}
   <script type="text/javascript">
+
+  var currentCallback = '';
+
+
+  function setCallback(name) {
+    /*
+     * Set the callback to execute.
+     */
+    currentCallback = name;
+    console.log('Set callback:', currentCallback);
+  }
+
+
+  function dynamicCallback() {
+    /*
+     *  Dynamically call appropriate function.
+     */
+    cannlytics.certificates[currentCallback]('{{ organizations.0.organization_id }}');
+  }
+
+  if (false) {
     document.addEventListener('adobe_dc_view_sdk.ready', function() {
       // TODO: Get URL and file name from server on page load.
       var url = 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Flims%2Ftemplates%2Fexample_coa_template.pdf?alt=media&token=f1e397c7-18cb-4b68-b041-eda4e3ccac35';
@@ -157,7 +183,8 @@
       };
       adobeDCView.previewFile(fileInfo, options);
     });
+  }
   </script>
-{% endblock console_js %} {% endcomment %}
+{% endblock console_js %}
 
 </html>

@@ -58,20 +58,23 @@ def increment_row(coords):
     return column + str(row)
 
 
-def show_status_message(sheet, coords, message, background=None, color=None):
-    """Show a status message in an Excel spreadsheet.
+def import_worksheet(filename, sheetname, range_start='A1'):
+    """Read the data from a given worksheet using xlwings.
     Args:
-        sheet (Sheet): The sheet where the status message will be written.
-        coords (str): The location of the status message.
-        message (str): A status message to write to Excel.
-        background (tuple): Optional background color.
-        color (tuple): Optional font color.
+        filename (str): The name of the Excel file to read.
+        range_start (str): Optional starting cell.
+    Returns:
+        list(dict): A list of dictionaries.
     """
-    sheet.range(coords).value = message
-    if background:
-        sheet.range(coords).color = literal_eval(background)
-    if color:
-        sheet.range(coords).api.Font.Color = rgb_to_int(literal_eval(color))
+    app = xlwings.App(visible=False)
+    book = xlwings.Book(filename)
+    sheet = book.sheets(sheetname)
+    excel_data = sheet.range(range_start).expand('table').value
+    keys = [snake_case(key) for key in excel_data[0]]
+    data = [dict(zip(keys, values)) for values in excel_data[1:]]
+    book.close()
+    app.quit()
+    return data
 
 
 @xlwings.sub
@@ -244,3 +247,19 @@ def upload_worksheet_data(model_type):
         coords=config['status_cell'],
         message='Uploaded %i %s.' % (len(data), model_type),
     )
+
+
+def show_status_message(sheet, coords, message, background=None, color=None):
+    """Show a status message in an Excel spreadsheet.
+    Args:
+        sheet (Sheet): The sheet where the status message will be written.
+        coords (str): The location of the status message.
+        message (str): A status message to write to Excel.
+        background (tuple): Optional background color.
+        color (tuple): Optional font color.
+    """
+    sheet.range(coords).value = message
+    if background:
+        sheet.range(coords).color = literal_eval(background)
+    if color:
+        sheet.range(coords).api.Font.Color = rgb_to_int(literal_eval(color))

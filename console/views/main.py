@@ -14,6 +14,7 @@ from django.views.generic.base import TemplateView
 from console.settings import PROJECT_NAME as BASE
 from console.state import layout, data_models
 from console.utils import (
+    get_model_context,
     get_page_context,
     get_user_context,
 )
@@ -66,6 +67,8 @@ class ConsoleView(TemplateView):
             context['organization_context'] = organization_context
         context = get_page_context(self.kwargs, context)
         context = get_user_context(self.request, context)
+        if context['organizations']:
+            context = get_model_context(context, context['organizations'][0]['organization_id'])
         context['data_models'] = data_models
         for item in context['data_models']:
             try:
