@@ -130,6 +130,8 @@ You will need to grant your service key *Secret Manager Admin* permissions in [C
 
 ### 3. Installing project dependencies and development tools <a name="installing-dependencies"></a>
 
+<!-- npm install webpack-dev-server --save-dev -->
+
 Cannlytics is built and depends on the following software and services, so you will need to install or setup each service. We recommend using the latest stable version of each piece of software whenever possible.
 
 * [Python](https://www.python.org/psf/)
