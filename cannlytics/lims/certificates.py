@@ -17,20 +17,24 @@ import environ
 from pathlib import Path
 from shutil import copyfile
 
-# External packages
-import openpyxl
-from openpyxl.drawing.image import Image
-import pandas as pd
-# import qrcode
+try:
 
-# Internal imports
-from cannlytics.firebase import (
-    get_document,
-    update_document,
-    download_file,
-)
-from cannlytics.utils.utils import snake_case
+    # External packages
+    import openpyxl
+    from openpyxl.drawing.image import Image
+    import pandas as pd
+    # import qrcode
 
+    # Internal imports
+    from cannlytics.firebase import (
+        get_document,
+        update_document,
+        download_file,
+    )
+    from cannlytics.utils.utils import snake_case
+
+except:
+    pass
 
 def create_coa():
     """

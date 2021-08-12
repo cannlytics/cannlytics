@@ -77,6 +77,7 @@ data_models = [
             {"key": "key", "label": "Key"},
             {"key": "price", "label": "Price", "type": "text", "class": "field-sm"}, # Optional: currency
             {"key": "public", "label": "Public", "type": "bool"},
+            # TODO: Add analytes (list)
         ],
     },
     {
@@ -121,8 +122,8 @@ data_models = [
             {"key": "area_id", "label": "Area ID"},
             {"key": "name", "label": "Name"},
             {"key": "area_type", "label": "Area Type", "type": "select", "options": [{"key": "Default", "label": "Default"}, {"key": "Planting", "label": "Planting"}, {"key": "Packing", "label": "Packing"}], "selected": "Default"},
-            # {"key": "area_type_id", "label": "Area Type ID", "type": "select", "options": [{"key": "1", "label": "1"}, {"key": "2", "label": "2"}, {"key": "3", "label": "3"}], "selected": "1"},
-            # {"key": "external_id", "label": "External ID"},
+            {"key": "area_type_id", "label": "Area Type ID", "type": "select", "options": [{"key": "1", "label": "1"}, {"key": "2", "label": "2"}, {"key": "3", "label": "3"}], "selected": "1"},
+            {"key": "external_id", "label": "External ID"},
             {"key": "active", "label": "Active", "type": "bool"},
             {"key": "quarantine", "label": "Quarantine", "type": "bool"},
         ],
@@ -154,7 +155,12 @@ data_models = [
             {"key": "zip_code", "label": "Zip", "class": "field-sm"},
             {"key": "latitude", "label": "Latitude", "type": "number", "class": "field-sm"},
             {"key": "longitude", "label": "Longitude", "type": "number", "class": "field-sm"},
-            # {"key": "linkedin", "label": "LinkedIn"},
+            {"key": "billing_address", "label": "Billing Address"},
+            {"key": "billing_city", "label": "City", "class": "field-sm"},
+            {"key": "billing_state", "label": "State", "class": "field-sm"},
+            {"key": "billing_zip_code", "label": "Zip Code", "class": "field-sm"},
+            {"key": "billing_email", "label": "Billing Email"},
+            # TODO: Add people (list)
         ],
     },
     {
@@ -195,7 +201,7 @@ data_models = [
         'sortable': True,
         'filter': True,
         "fields": [
-            {"key": "item_id", "label": "Item ID"}, # Optional: inventory_id is preferred but bug in app.js createID
+            {"key": "item_id", "label": "Item ID"}, # Optional: inventory_id is preferred but bug in app.js createID prevents this.
             {"key": "name", "label": "Name"},
             {"key": "item_type", "label": "Item Type", "type": "text"},
             {"key": "quantity", "label": "Quantity", "type": "text"},
@@ -223,13 +229,37 @@ data_models = [
             {"key": "weight_units", "label": "Weight Units", "class": "field-sm"},
         ],
     },
-    # {
-    #     "title": "Invoices",
-    #     "url": "/invoices",
-    #     "icon": "credit-card",
-    #     "slug": "invoices",
-    #     "user_type": "*",
-    # },
+    {
+        "title": "Invoices",
+        "url": "/invoices",
+        "slug": "invoices",
+        "user_type": "*",
+        "description": "Manage invoices for your laboratory analyses.",
+        "image_path": "console/images/icons/multi-tone/mail.svg",
+        'abbreviation': 'IV',
+        'id_schema': '[abbreviation]%y%m%d',
+        'singular': 'invoice',
+        'sortable': True,
+        'filter': True,
+        "fields": [
+            {"key": "invoice_id", "label": "Invoice ID"},
+            {"key": "organization", "label": "Organization"},
+            {"key": "billing_address", "label": "Billing Address"},
+            {"key": "billing_city", "label": "City", "class": "field-sm"},
+            {"key": "billing_state", "label": "State", "class": "field-sm"},
+            {"key": "billing_zip_code", "label": "Zip Code", "class": "field-sm"},
+            {"key": "billing_email", "label": "Billing Email"},
+            {"key": "status", "label": "Status", "type": "select", "options": [{"key": "unpaid", "label": "Unpaid"}, {"key": "paid", "label": "Paid"}]},
+            {"key": "total", "label": "Total ($)", "type": "number", "class": "field-sm"},
+            {"key": "currency", "label": "Currency", "class": "field-sm"},
+            {"key": "due_at", "label": "Due At", "type": "datetime"},
+            {"key": "created_at", "label": "Created At", "type": "datetime"},
+            {"key": "created_by", "label": "Created By", "class": "field-sm"},
+            {"key": "updated_at", "label": "Updated At", "type": "datetime"},
+            {"key": "notes", "label": "Notes", "type": "textarea"},
+            # TODO: Add analyses (list)
+        ],
+    },
     {
         "title": "Measurements",
         "url": "/measurements",
@@ -245,23 +275,23 @@ data_models = [
         "fields": [
             {"key": "measurement_id", "label": "Measurement ID"},
             {"key": "sample_id", "label": "Sample ID"},
-            {"key": "product_name", "label": "Product Name"},
+            {"key": "sample_name", "label": "Sample Name"},
             {"key": "sample_type", "label": "Sample Type"},
             {"key": "created_at", "label": "Created At", "type": "datetime"},
             {"key": "created_by", "label": "Created By", "class": "field-sm"},
             {"key": "sample_weight", "label": "Sample Weight", "type": "number", "class": "field-sm"},
             {"key": "units", "label": "Units", "class": "field-sm"},
             {"key": "dilution_factor", "label": "Dilution Factor", "type": "number", "class": "field-sm"},
-            {"key": "measurement", "label": "Measurement", "type": "number", "class": "field-sm"},
-            {"key": "measurement_units", "label": "Measurement Units", "class": "field-sm"},
+            # {"key": "measurement", "label": "Measurement", "type": "number", "class": "field-sm"},
+            # {"key": "measurement_units", "label": "Measurement Units", "class": "field-sm"},
             {"key": "instrument_id", "label": "Instrument ID"},
-            {"key": "instrument", "label": "Instrument"},
-            {"key": "analyte_id", "label": "Analyte ID"},
-            {"key": "analyte", "label": "Analyte"},
+            # {"key": "instrument", "label": "Instrument"},
+            # {"key": "analyte_id", "label": "Analyte ID"},
+            # {"key": "analyte", "label": "Analyte"},
             {"key": "analysis_id", "label": "Analysis ID"},
-            {"key": "analysis", "label": "Analysis"},
-
+            # {"key": "analysis", "label": "Analysis"},
             {"key": "notes", "label": "Notes", "type": "textarea"},
+            # TODO: Add metrics (list)
         ],
     },
     {
@@ -284,6 +314,7 @@ data_models = [
             {"key": "created_at", "label": "Created At", "type": "datetime"},
             {"key": "created_by", "label": "Created By", "class": "field-sm"},
             {"key": "notes", "label": "Notes", "type": "textarea"},
+            # TODO: Add samples (list)
         ],
     },
     {
@@ -311,7 +342,7 @@ data_models = [
             {"key": "sample_id", "label": "Sample ID"},
             {"key": "package_id", "label": "Package ID"},
             {"key": "package_label", "label": "Package Label"},
-            {"key": "product_name", "label": "Product Name"},
+            {"key": "sample_name", "label": "Sample Name"},
             {"key": "sample_type", "label": "Sample Type"},
             {"key": "result", "label": "Result", "type": "number", "class": "field-sm"},
             {"key": "status", "label": "Status", "class": "field-sm"},
@@ -353,6 +384,8 @@ data_models = [
             {"key": "updated_at", "label": "Updated At", "type": "datetime"},
             {"key": "updated_by", "label": "Updated By", "class": "field-sm"},
             {"key": "coa_url", "label": "CoA URL", "type": "text"},
+            {"key": "coa_ref", "label": "CoA Ref", "type": "text", "hidden": True},
+            {"key": "coa_status", "label": "CoA Status", "type": "select", "options": [{"key": "unreviewed", "label": "Unreviewed"}, {"key": "reviewed", "label": "Reviewed"}, {"key": "approved", "label": "Approved"}, {"key": "released", "label": "Released"},]},
             {"key": "notes", "label": "Notes", "type": "textarea"},
             {"key": "photo_url", "label": "Photo", "type": "image"},
         ],
@@ -742,6 +775,7 @@ material = {
         ],
     },
     "settings": {
+        # TODO: Add remaining settings.
         "options": [
             {"title": "API", "url": "/settings/api"},
             # {"title": "Data", "url": "/settings/data"},
@@ -887,7 +921,7 @@ material['get-started'] = {
     ],
 }
 
-# FIXME: Condense state so it does not have to be duplicated in settings.
+# FIXME: Condense state so this data does not have to be duplicated.
 material['settings']['traceability'] = material['traceability']
 material['settings']['subscriptions'] = material['get-started']['pricing_tiers']
 
@@ -929,14 +963,3 @@ layout = {
     },
     "sidebar": {},
 }
-
-# TODO: Make obsolete by referencing an organization's data models in Firestore.
-# material['data_models'] = {}
-# for data_model in data_models:
-#     key = data_model['key']
-#     material['data_models'][key] = {
-#         **data_model,
-#         "image_path": material[key]['placeholder']['image'],
-#         "fields": material[key]['fields']
-#     }
-# material['settings']['data_models'] = material['data_models']

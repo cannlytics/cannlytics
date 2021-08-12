@@ -12,15 +12,20 @@ Manage scientific instruments and measurements from the instruments.
 import os
 import environ
 
-# External imports
-import requests
+try:
 
-# Internal imports
-from cannlytics.firebase import (
-    get_collection,
-    initialize_firebase,
-    update_document
-)
+    # External imports
+    import requests
+
+    # Internal imports
+    from cannlytics.firebase import (
+        get_collection,
+        initialize_firebase,
+        update_document
+    )
+
+except:
+    pass
 
 API_BASE = 'https://console.cannlytics.com'
 
