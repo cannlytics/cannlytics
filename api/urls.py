@@ -95,6 +95,7 @@ urlpatterns = [
     ])),
     path('organizations', include([
         path('', organizations.organizations),
+        path('/labs', organizations.labs),
         path('/<organization_id>', organizations.organizations),
         path('/<organization_id>/settings', organizations.organizations),
         path('/<organization_id>/team', organizations.organization_team),

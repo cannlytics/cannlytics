@@ -234,6 +234,7 @@ data_models = [
         "url": "/invoices",
         "slug": "invoices",
         "user_type": "*",
+        "user_permissions": ["billing"],
         "description": "Manage invoices for your laboratory analyses.",
         "image_path": "console/images/icons/multi-tone/mail.svg",
         'abbreviation': 'IV',

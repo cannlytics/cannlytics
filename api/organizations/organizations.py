@@ -32,6 +32,22 @@ from api.auth.auth import authenticate_request #pylint: disable=import-error
 
 
 @api_view(['GET'])
+def labs(request, format=None):
+    """Get laboratory information."""
+    claims = authenticate_request(request)
+
+    # Get organization(s).
+    if request.method == 'GET':
+        state = request.query_params.get('state', 'OK')
+        filters = [
+            {'key': 'state', 'operation': '==', 'value': state}
+            # {'key': 'state', 'operation': '==', 'value': state}
+        ]
+        docs = get_collection('labs', filters=filters)
+        return Response({'data': docs}, status=200)
+
+
+@api_view(['GET'])
 def organization_team(request, format=None, organization_id=None, user_id=None):
     """Get team member data for an organization, given an authenticated
     request from a member of the organization.
@@ -199,6 +215,8 @@ def organizations(request, format=None, organization_id=None, type='lab'):
             doc['type'] = type
 
             # All organizations start with the standard data models.
+            # FIXME: Remove data models that have permissions
+            # if the user does not have sufficient claims.
             data_models = get_collection('public/state/data_models')
             for data_model in data_models:
                 key = data_model['key']

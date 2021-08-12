@@ -72,7 +72,7 @@ def import_data_model(directory):
         # data_ref.document(doc_id).set(doc_data, merge=True)
         # data_ref.set(doc_data, merge=True)
 
-    return NotImplementedError
+    raise NotImplementedError
 
 
 def import_measurements():
@@ -84,7 +84,7 @@ def import_measurements():
 
     print('Importing measurements...')
 
-    return NotImplementedError
+    raise NotImplementedError
 
 
 def get_sample_name(df, sheetname='Sheet1', var='samplename'):
@@ -129,7 +129,7 @@ def import_agilent_gc_residual_solvents(file_name):
     Args:
         df (DataFrame): A DataFrame.
     Returns:
-        (dict): 
+        (dict): A dictionary of sample results.
     """
     df = pd.read_excel(file_name, sheet_name = None)
     samples = get_sample_name(df)
@@ -161,7 +161,7 @@ def import_agilent_cannabinoids(file_name):
     Args:
         df (DataFrame): A DataFrame.
     Returns:
-        (list): A list of measurements (dict).
+        (dict): A dictionary of sample results.
     """
     return import_agilent_gc_residual_solvents(file_name)
 

@@ -1,8 +1,8 @@
 /**
- * Logistics JavaScript | Cannlytics Console
+ * Transfers JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 12/9/2020
- * Updated: 6/3/2021
+ * Updated: 8/12/2021
  * Resources:
  *    https://github.com/fullcalendar/fullcalendar-example-projects/blob/master/webpack/src/main.js
  *    https://fullcalendar.io/docs/handlers
@@ -13,11 +13,13 @@
 // import dayGridPlugin from '@fullcalendar/daygrid';
 // import timeGridPlugin from '@fullcalendar/timegrid';
 // import listPlugin from '@fullcalendar/list';
+import { maps } from './map.js';
 
 export const transfers = {
 
+  ...maps,
+
   initialize() {
-    console.log('Initializing logistics..')
     // this.drawCalendar();
     var script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js';
@@ -88,22 +90,16 @@ export const transfers = {
     });
   },
 
+
   initializeLogs() {
     console.log('Initialize logs...');
   },
+
 
   initializeAnalytics() {
     console.log('Initialize analytics...');
   },
 
-  initializeMap() {
-    var script = document.createElement('script');
-    var API_KEY = 'AIzaSyB-ZjpD7MgK9mMwxQgsyr5wh-4xciJzIHw'; // TODO: Get from Firestore.
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&callback=initMap`;
-    script.defer = true;
-    window.initMap = this.drawMap;
-    document.head.appendChild(script);
-  },
 
   drawCalendar() {
     var calendarEl = document.getElementById('calendar');
@@ -134,6 +130,7 @@ export const transfers = {
     calendar.render();
   },
 
+
   drawMap() {
     var locations = [["USA", 39.8283, -98.5795, 1]]; // TODO: Get location of transfers from Firestore
     var map = new google.maps.Map(document.getElementById('map'), {
@@ -156,5 +153,6 @@ export const transfers = {
       })(marker, i));
     }
   },
+
 
 };

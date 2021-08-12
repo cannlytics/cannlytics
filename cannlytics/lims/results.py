@@ -147,7 +147,7 @@ def email_results(samples, recipients):
         samples (list): A list of sample data (dict).
         recipients (list): A list of recipient emails.
     Returns:
-        (list) A list of success or fail indicators (bool).
+        (list): A list of success or fail indicators (bool).
     """
 
     # TODO: Format HTML message.
@@ -172,7 +172,7 @@ def text_results(samples, recipients):
         samples (list): A list of sample data (dict).
         recipients (list): A list of recipient emails.
     Returns:
-        (list) A list of success or fail indicators (bool).
+        (list): A list of success or fail indicators (bool).
     """
     # TODO: Get sending email, password, sending address.
     server = SMTP('smtp.gmail.com', 587 )

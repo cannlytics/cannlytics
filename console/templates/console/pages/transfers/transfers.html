@@ -9,7 +9,7 @@
 {% load icon %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Transfers | Cannlytics {% endblock title %}
 {% block console_body %}
-{% if section and section not in 'logs,files' %}
+{% if section and section not in 'logs,files,map' %}
 
   <!-- Detail page -->
   {% include "console/pages/transfers/transfer.html" with
@@ -33,10 +33,13 @@
       <!-- Tabs -->
       {% include "console/components/forms/form_tabs.html" with
         model="transfers"
+        extra="Map"
+        extra_path="map"
       %}
 
       <!-- Logs -->
       {% if section == 'logs' %}
+
         {% include "console/pages/settings/logs/logs.html" with
           model='transfers'
           model_singular='transfer'
@@ -47,6 +50,7 @@
 
       <!-- Files -->
       {% elif section == 'files' %}
+
         {% include "console/pages/settings/files/files.html" with
           model='transfers'
           model_singular='transfer'
@@ -54,6 +58,18 @@
           section=section
           user=user
         %}
+
+      <!-- Map -->
+      {% elif section == 'map' %}
+
+        {% comment %} {% include "console/pages/transfers/map/map.html" with
+          model='transfers'
+          model_singular='transfer'
+          organizations=organizations
+          section=section
+          user=user
+        %} {% endcomment %}
+        {% block unit %}{% endblock unit %}
 
       <!-- Table -->
       {% else %}
