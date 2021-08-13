@@ -282,6 +282,17 @@ export const app = {
   },
 
 
+  searchTable() {
+    /*
+     * A general search of a data model table.
+     */
+    // TODO: Iterate over data model fields, query for a match, break if any
+    // documents are found. Prefer to iterate over data model fields in a logical
+    // manner. For example, if the search contains an abbreviation, then we may know
+    // that it is an ID, etc.
+  },
+
+
   async streamData(model, modelSingular, orgId) {
     /*
      * Stream data, listening for any changes.
