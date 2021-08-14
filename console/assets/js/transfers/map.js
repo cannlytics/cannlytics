@@ -7,6 +7,7 @@
  *    https://github.com/fullcalendar/fullcalendar-example-projects/blob/master/webpack/src/main.js
  *    https://fullcalendar.io/docs/handlers
  */
+import { getDocument } from '../firebase.js';
 import { authRequest } from '../utils.js';
 
 
@@ -16,10 +17,9 @@ export const maps = {
 
   map: null,
   points: {},
-
-  // FIXME: Get icons dynamically or locally.
-  markerOrange: 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fmaps%2Fmarkers%2Fmarker-orange.png?alt=media&token=264e0fe3-30db-4dd2-be61-8d6e46e5dcea',
-  markerGreen: 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fmaps%2Fmarkers%2Fmarker-green.png?alt=media&token=0d4813e6-c9c9-4b21-9b4f-b9879750438a',
+  markerOrange: '/static/console/images/maps/marker-orange.svg',
+  markerGreen: '/static/console/images/maps/marker-green.svg',
+  organizations: [],
 
   // Functions
 
@@ -43,6 +43,8 @@ export const maps = {
     // Get all of the labs.
     this.getLabs().then((data) => {
 
+      this.organizations = data;
+
       // Create info windows for each lab.
       var markers = this.createInfoWindows(this.map, oms, data);
 
@@ -51,6 +53,9 @@ export const maps = {
 
       // Wire up search.
       this.setupSearch(this.map);
+
+      // Render list.
+      this.renderLabList(data);
 
     });
     // var script = document.createElement('script');
@@ -81,6 +86,7 @@ export const maps = {
      */
     var logView = this.logView;
     var createWindow = this.createMarkerInfoWindow;
+    var getOrgName = this.getOrganizationName;
     var infoWindow = new google.maps.InfoWindow();
     var markers = [];
     var searchOptions = '';
@@ -127,6 +133,10 @@ export const maps = {
           infoWindow.setContent(content);
           infoWindow.open(map, marker);
 
+          // Open in card instead.
+          document.getElementById('item-selected').classList.remove('d-none');
+          document.getElementById('item-selected').innerHTML = content;
+
           // Optional: Log which labs are viewed.
           // logView(item.id, 'window_views');
         }
@@ -135,7 +145,7 @@ export const maps = {
       // Add marker to list of markers.
       markers.push(marker);
       oms.addMarker(marker);
-      var name = item.trade_name ?? item.name;
+      var name = getOrgName(item);
       this.points[name] = { latitude: item.latitude, longitude: item.longitude };
       searchOptions += `<option value="${name}"/>`;
     });
@@ -169,41 +179,53 @@ export const maps = {
   createMarkerInfoWindow(item) {
     /*
      * Creates a marker info window.
+     * Optional: Ensure image is a valid image.
      */
-    var name = item.trade_name ?? item.name;
-    var content = `<div class="text-dark p-3">`;
+    var image = item.image_url ?? 'static/images/icons/multi-tone/lab.svg';
+    // var name = this.getOrganizationName(item);
+    var name = '';
+    if (item.trade_name && item.trade_name != 'Nan') name = item.trade_name;
+    else name = item.name;
+    var content = `<div class="text-dark p-3 bg-light" style="min-height:320px">`;
     content += `
-      <a href="/labs/${item.slug}/" target="_blank">
-        <img src="${item.image_url}" class="float-start me-3 mb-3" style="max-width:150px;max-height:75px;">
-      </a>
-      <h5 class="fs-4 mb-0">
+      <a href="/labs/${item.slug}/" target="_blank" class="bg-light">
+        <img src="${image}" class="float-start me-3 mb-3" style="max-width:150px;max-height:75px;">
+      </a>`
+    if (name) content += `<h6 class="text-dark mb-0">
         <a class="text-dark serif open-in-new" href="/labs/${item.slug}/">${name}</a>
-      </h5>
-      <p class="fs-6 mb-3">
+      </h6>`
+    content +=
+      `<p class="fs-6 mb-3">
         <small class="text-secondary">${item.formatted_address.replace(', USA', '')}</small>
       </p>
       <div class="d-flex w-100"><p class="fs-6">`;
     if (item.phone) {
-      content += `Phone: <a href="tel:${item.phone_number}">${item.phone}</a><br>`;
+      content += `<small>Phone: <a class="text-link" href="tel:${item.phone_number}">${item.phone}</a></small><br>`;
     } else {
       content += `Phone: <a class="btn btn-sm btn-light" href="/labs/${item.slug}/?edit=true">Recommend a phone number</a><br>`;
     }
     if (item.email) {
-      content += `Email: <a href="mailto:${item.email}">${item.email}</a><br>`;
+      content += `<small>Email: <a class="text-link" href="mailto:${item.email}">${item.email}</a></small><br>`;
     } else {
       content += `Email: <a class="btn btn-sm btn-light" href="/labs/${item.slug}/?edit=true">Recommend an email</a><br>`;
     }
     if (item.website) {
       var url = item.website;
       if (!url.startsWith('https')) url = `https://${url}`;
-      content += `Website: <a href="${url}" target="_blank">${item.website}</a>`;
+      content += `<small>Website: <a class="text-link" href="${url}" target="_blank">${item.website}</a></small>`;
     } else {
       content += `Website: <a class="btn btn-sm btn-light" href="/labs/${item.slug}/?edit=true">Recommend a website</a><br>`;
     }
     content += `</p></div>`;
-    if (item.description) content += `<p class="fs-6 mt-3"><small class="serif">${item.description}</small></p>`
-    content += `</div>`;
+    if (item.description) content += `<p class="fs-6 mt-3"><small class="tiny-text serif">${item.description}</small></p>`
     // TODO: Add analyses with prices
+    // TODO: Add "Transfer Samples" button!
+    content += `<div class="mt-3">
+      <a class="btn btn-sm btn-sm-light" href="/transfers/new?received=${item.slug}">
+        Transfer Samples
+      </a>
+    </div>`;
+    content += `</div>`;
     return content;
   },
 
@@ -229,7 +251,9 @@ export const maps = {
     const point = this.points[value];
     map.panTo(new google.maps.LatLng(point.latitude, point.longitude));
     map.setZoom(15);
-    this.logView(item.id, 'searches');
+    // Optional: Open info window on pan.
+    // Optional: Count the number of searches by lab
+    // this.logView(item.id, 'searches');
   },
 
 
@@ -260,6 +284,73 @@ export const maps = {
       authRequest(url).then((response) => resolve(response.data));
     });
   },
+
+
+  renderLabList(data) {
+    /*
+     * Render all labs as a list.
+     */
+    var div = document.getElementById('lab-list');
+    var content = '';
+    data.forEach((item) => {
+      var image = item.image_url ?? 'static/images/icons/multi-tone/lab.svg';
+      var name = this.getOrganizationName(item);
+      content += `
+      <button
+        class="list-group-item list-group-item-action bg-transparent text-dark"
+        onclick="cannlytics.transfers.selectLab('${item.slug}')"
+      >
+        ${name}
+      </button>`;
+    });
+    div.innerHTML += content;
+  },
+
+
+  selectLab(slug) {
+    /*
+     * Select a lab from the list.
+     */
+    const item = this.findOrganization(slug, this.organizations);
+    const content = this.createMarkerInfoWindow(item);
+    document.getElementById('item-selected').classList.remove('d-none');
+    document.getElementById('item-selected').innerHTML = content;
+    const name = this.getOrganizationName(item);
+    this.panToMarker(this.map, name);
+  },
+
+
+  findOrganization(value, array) {
+    /*
+     * Find an organization's data in memory.
+     */
+    for (var i=0; i < array.length; i++) {
+      if (array[i].slug === value) {
+        return array[i];
+      }
+    }
+  },
+
+
+  getOrganizationName(item) {
+    /*
+     * Get an organization's preferred name.
+     */
+    var name = '';
+    if (item.trade_name && item.trade_name != 'Nan') name = item.trade_name;
+    else name = item.name;
+    return name;
+  },
+
+
+  startTransferSamples() {
+    /*
+     * Begin a new transfer with a selected organization.
+     */
+    // /transfers/new?
+  },
+
+  // TODO: Similar accordian for analyses.
 
 
 };

@@ -32,23 +32,21 @@ from api.auth.auth import authenticate_request #pylint: disable=import-error
 
 
 @api_view(['GET'])
-def labs(request, format=None):
-    """Get laboratory information."""
-    claims = authenticate_request(request)
+def labs(request):
+    """Get laboratory information (public API endpoint)."""
 
     # Get organization(s).
     if request.method == 'GET':
         state = request.query_params.get('state', 'OK')
-        filters = [
-            {'key': 'state', 'operation': '==', 'value': state}
-            # {'key': 'state', 'operation': '==', 'value': state}
-        ]
-        docs = get_collection('labs', filters=filters)
+        filters = []
+        if state:
+            filters.append({'key': 'state', 'operation': '==', 'value': state})
+        docs = get_collection('labs', filters=filters, order_by='name')
         return Response({'data': docs}, status=200)
 
 
 @api_view(['GET'])
-def organization_team(request, format=None, organization_id=None, user_id=None):
+def organization_team(request, organization_id=None, user_id=None):
     """Get team member data for an organization, given an authenticated
     request from a member of the organization.
     """
@@ -74,7 +72,7 @@ def organization_team(request, format=None, organization_id=None, user_id=None):
 
 
 @api_view(['GET', 'POST'])
-def organizations(request, format=None, organization_id=None, type='lab'):
+def organizations(request, organization_id=None, type='lab'):
     """Get, create, or update organizations.
     E.g.
         ```
@@ -284,7 +282,7 @@ def employees(request):
     # Optional: Figure out how to pre-initialize a Metrc client.
 
     # Get Vendor API key using secret manager.
-    # TODO: Determine where to store project_id, secret_id, and version_id.
+    # FIXME: Determine where to store project_id, secret_id, and version_id.
     vendor_api_key = access_secret_version(
         project_id=project_id,
         secret_id='metrc_vendor_api_key',
@@ -313,6 +311,14 @@ def employees(request):
 #-----------------------------------------------------------------------
 
 # TODO: Implement organization actions:
+
+
+def change_primary_organization():
+    """Change the primary organization."""
+    # Get the custom claims
+
+    # Re-create claims with select organization at the front.
+
 
 def confirm_join_organization():
     """Confirm a user's request to join an organization."""

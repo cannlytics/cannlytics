@@ -8,37 +8,22 @@
 {% extends "../transfers.html" %}
 {% load get_env %}
 {% block title %}Map | Transfers | Cannlytics {% endblock title %}
-{% comment %} {% block console_css %}
+{% block console_css %}
   <style>
-    .open-in-new::after {
-      content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
-      margin: 0 3px 0 5px;
-    }
-    .figure-caption a {
-      color: inherit;
-      border-bottom: 1px dashed #000;
-      text-decoration: none;
-    }
-    .figure-caption a:hover {
-      background-color: rgba(229,58,35,.2);
-    }
-    body.dark .gm-style-iw-c,
-    body.dark .gm-style-iw-d {
-      background-color: #343434;
-    }
-    body.dark .gm-style-iw-d a {
-      color: #50fa7b;
-    }
-    body.dark .btn-light {
-      color: #1a1a1a !important;
+    .gm-style-iw, .gm-style-iw-c, .gm-style-iw-d {
+      max-height: 340px !important;
+      max-width: 325px;
     }
     .gm-style .gm-style-iw-c  {
       padding: 0;
     }
+    .gm-style-iw-d {
+      overflow-x: hidden !important;
+    }
   </style>
-{% endblock %} {% endcomment %}
+{% endblock %}
 {% block unit %}
-<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+<main role="main" class="col ml-sm-auto px-md-4">
 
   <!-- Options -->
   <div class="row">
@@ -116,37 +101,62 @@
         Transfer samples
       </button>
 
-
     </div>
 
   </div><!-- End of options -->
 
   <!-- Lab map -->
-  <figure class="figure w-100">
+  <div class="row">
 
-    <!-- Map -->
-    <div id="map" style="height:420px;width:100%;" class="figure-img img-fluid"></div>
+    <figure class="col-md-8 figure">
 
-    <!-- Caption -->
-    <figcaption class="figure-caption" style="max-width:540px;">
-      <h6 class="sans-serif fw-bold mt-3">
-        How Cannlytics sources data
-      </h6>
-      Cannlytics retrieves data through listings on Google Search and
-      Google Maps and from a company's official website. Users can
-      <a href="/labs/">contribute factual information</a> about labs, such as
-      analyses and prices. If you believe that any
-      information is incorrect or should be removed, then please contact
-      <a href="mailto:support@cannlytics.com">support@cannlytics.com</a>.
-      For further information about how Cannlytics sources data, then please
-      see the open source
-      <a href="https://github.com/cannlytics/cannlytics-engine">Cannlytics engine</a>.
-    </figcaption>
+      <!-- Map -->
+      <div id="map" style="height:420px;width:100%;" class="figure-img img-fluid"></div>
 
-  </figure>
+      <!-- Caption -->
+      <figcaption class="figure-caption" style="max-width:540px;">
+        <h6 class="sans-serif fw-bold mt-3">
+          How Cannlytics sources data
+        </h6>
+        Cannlytics retrieves data through listings on Google Search and
+        Google Maps, from a company's official website, or from a company themselves. Users can
+        <a class="text-link" href="/help/feedback">contribute factual information</a> about labs, such as
+        analyses and prices. If you believe that any
+        information is incorrect or should be removed, then please contact
+        <a class="text-link" href="mailto:support@cannlytics.com">support@cannlytics.com</a>.
+        For further information about how Cannlytics sources data, then please
+        see the open source
+        <a class="text-link" href="https://github.com/cannlytics/cannlytics/tree/main/tools">Cannlytics tools</a>.
+      </figcaption>
+
+    </figure>
+
+    <!-- List Column -->
+    <div class="col-md-4 mb-5">
+
+      <!-- Selected -->
+      <div id="item-selected" class="card d-none mb-3">
+
+      </div>
+
+      <!-- List -->
+      <div
+        id="lab-list"
+        class="card list-group bg-transparent px-0"
+        style="max-height:420px; overflow-y:scroll;"
+      >
+        <div class="card-header text-dark bg-light">Labs</div>    
+      </div>
+  
+    </div>
+
+  </div>
 
   <!-- TODO: Transfer samples form -->
   <!-- id="transferDialog" -->
+  {% include "console/components/modals/transfer_modal.html" with
+    callback="cannlytics.settings.viewSignature"
+  %}
 
 </main>
 {% endblock unit %}

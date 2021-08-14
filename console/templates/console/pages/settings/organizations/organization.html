@@ -4,7 +4,7 @@
   Organization Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/8/2021
-  Updated: 7/18/2021
+  Updated: 8/13/2021
   Optional:
     - Show detailed team member information (their logs, training, etc.)
 -->
@@ -90,9 +90,8 @@
     </div>
   </div>
 
-  <!-- FIXME: Render licenses if Org has licenses -->
-  <!-- onclick="toggleLicenseFields(event);" -->
-  <!-- Add licenses -->
+  <!-- Licenses -->
+  <!-- TODO: Render licenses if Org has licenses -->
   <div class="my-5 px-3">
     <h1 class="fs-5 lh-base text-dark mb-0">Licenses</h1>
     <h2 class="fs-6 lh-base text-secondary mb-3">
@@ -114,19 +113,42 @@
       <small>Decide whether or not to list your organization for discovery by other users.</small>
     </h2>
     <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" name="public" id="public-choice" value="true">
+      <input
+        class="form-check-input"
+        type="radio"
+        name="public"
+        id="public-choice"
+        value="true"
+        onchange="cannlytics.settings.changeOrganizationPublicStatus('{{ unit }}');"
+      >
       <label class="form-check-label" for="public-choice">
         Public {% icon "globe" width="16px" height="16px" %}<br>
         <small class="text-secondary">Appears in search results.</small>
       </label>
     </div>
     <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" name="public" id="private-choice" value="false" checked>
+      <input
+        class="form-check-input"
+        type="radio"
+        name="public"
+        id="private-choice"
+        value="false"
+        onchange="cannlytics.settings.changeOrganizationPublicStatus('{{ unit }}');"
+      >
       <label class="form-check-label" for="private-choice">
         Private {% icon "lock" width="16px" height="16px" %}<br>
         <small class="text-secondary">Only visible to you.</small>
       </label>
     </div>
+  </div>
+
+  <!-- Organization Type -->
+  <div class="my-5 px-3">
+    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Organization Type</h1>
+    <h2 class="fs-6 lh-base text-secondary mb-3">
+      <small>Selecting your organization type affects the functionality that may be available to you.</small>
+    </h2>
+
   </div>
 
   <!-- Admin -->
@@ -155,15 +177,14 @@
     // Get and display team members.
     cannlytics.settings.getTeamMembers(
       '{{ organizations.0.organization_id }}',
-      '{{ organizations.0.owner }}',
-      '{{ user.uid }}'
+      {
+        uid: '{{ user.uid }}',
+        owner: '{{ organizations.0.owner }}' || [],
+        qa: '{{ organizations.0.qa }}' || [],
+        billing: '{{ organizations.0.billing }}' || [],
+        staff: '{{ organizations.0.staff }}' || [],
+      }
     );
-
-    function removeField(event) {
-      /* Remove data model field. */
-      // TODO: Implement
-      console.log(event);
-    }
 
   </script>
 

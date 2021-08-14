@@ -75,7 +75,9 @@
           {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
         </form>
       </div>
-      <!-- TODO: Try to implement add samples with AG-Grid table -->
+
+      <!-- TODO: Implement Samples table or list with AG-Grid table -->
+      <div id="transfer-samples-table"></div>
 
       <!-- Danger zone (delete) -->
       {% if id and id != 'new' %}
@@ -101,6 +103,10 @@
 
     // Render any date pickers.
     // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+
+    // TODO: Given parameter, set receiving organization.
+    const receiverId = ;
+    console.log('Receiver:', receiverId);
 
   </script>
 {% endblock console_js %}
