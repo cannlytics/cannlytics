@@ -8,6 +8,7 @@ API to interface with laboratory data models.
 # pylint:disable=line-too-long
 
 # Standard imports
+from datetime import datetime
 from json import loads
 from re import sub
 
@@ -108,13 +109,18 @@ def update_object(request, claims, model_type, model_type_singular, organization
         (list): A list of dictionaries of the data posted.
     """
     # FIXME: Handle missing model ID.
+    updated_at = datetime.now().isoformat()
     data = loads(request.body.decode('utf-8'))
     if isinstance(data, dict):
         doc_id = data[f'{model_type_singular}_id']
+        data['updated_at'] = updated_at
+        data['updated_by'] = claims['uid']
         update_document(f'organizations/{organization_id}/{model_type}/{doc_id}', data)
     elif isinstance(data, list):
         for item in data:
             doc_id = item[f'{model_type_singular}_id']
+            data['updated_at'] = updated_at
+            data['updated_by'] = claims['uid']
             update_document(f'organizations/{organization_id}/{model_type}/{doc_id}', item)
     else:
         return []

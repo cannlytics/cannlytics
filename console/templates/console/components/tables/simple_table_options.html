@@ -4,61 +4,68 @@
   Simple Table Options | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 7/6/2020
-  Updated: 7/9/2021
+  Updated: 8/15/2021
   Parameters:
     data_models
     model
     model_singular
+    limit (optional)
 -->
 <div class="d-flex flex-wrap align-items-center justify-content-between mt-3">
 
   <!-- Search -->
   {% include "./advanced_search.html" %}
-  {% comment %} <div class="input-group input-group-sm mb-3 me-2 w-50">
-    <input
-      type="text"
-      class="form-control form-control-light"
-      placeholder=""
-      aria-label="Table Search"
-      aria-describedby="table_search_input"
-    >
-    <button
-      id="table_search_input"
-      class="btn btn-sm-light btn-md-light"
-      type="button"
-      onclick="cannlytics.app.searchData(event, '{{ model }}', '{{ model_singular }}');"
-    >
-      Search
-    </button>
-  </div> {% endcomment %}
 
   <div class="d-flex align-items-center mb-3">
 
-    <!-- TODO: Option to have date range instead of limit -->
+    <!-- Optional: Criterion selection -->
 
-    <!-- Limit -->
-    <div class="input-group input-group-sm me-2" style="width:unset;">
-      <input
-        id="limit_input"
-        type="number"
-        class="form-control form-control-sm form-control-light field-tiny text-end"
-        aria-label="Limit"
-        aria-describedby="limit-selection"
-        min="0"
-        step="1"
-        oninput="validity.valid||(value='');"
-        value=10
-        onchange="cannlytics.app.changeLimit(event);"
-      >
-      <div class="input-group-append">
-        <span
-          class="input-group-text btn-sm-light btn-md-light"
-          id="limit-selection"
-        >
-          Limit
-        </span>
+    <!-- Date selection -->
+    <div id="date-selection">
+      <div class="input-daterange input-group input-group-sm me-2">
+        <input
+          id="time_start"
+          type="text"
+          class="input-sm form-control form-control-sm form-control-light"
+          name="time_start"
+          style="max-width:120px;"
+        />
+        <div class="input-group-text">to</div>
+        <input
+          id="time_end"
+          type="text"
+          class="input-sm form-control form-control-sm form-control-light"
+          name="time_end"
+          style="max-width:120px;"
+        />
       </div>
     </div>
+
+    <!-- Limit -->
+    {% if limit %}
+      <div class="input-group input-group-sm me-2" style="width:unset;">
+        <input
+          id="limit_input"
+          type="number"
+          class="form-control form-control-sm form-control-light field-tiny text-end"
+          aria-label="Limit"
+          aria-describedby="limit-selection"
+          min="0"
+          step="1"
+          oninput="validity.valid||(value='');"
+          value=10
+          onchange="cannlytics.app.changeLimit(event);"
+        >
+        <div class="input-group-append">
+          <span
+            class="input-group-text btn-sm-light btn-md-light"
+            id="limit-selection"
+          >
+            Limit
+          </span>
+        </div>
+      </div>
+    {% endif %}
 
     <!-- Import -->
     <div class="btn-group btn-group-sm me-2" role="group" aria-label="Data import">
@@ -131,4 +138,27 @@
 
   </div>
 </div>
+
+<!-- JavaScript -->
+<script>
+
+  // Set the initial date.
+  const defaultPeriod = 14;
+  document.getElementById('time_start').value = new Date(new Date().setDate(new Date().getDate() - defaultPeriod)).toISOString().substring(0, 10);
+  document.getElementById('time_end').value = new Date().toISOString().substring(0, 10);
+
+  // Initialize date range selection.
+  $('#date-selection .input-daterange').datepicker({
+    autoclose: true,
+    format: 'yyyy-mm-dd',
+    formatToDisplay: 'mm/dd/yy',
+    formatToValue: 'yyyy-mm-dd',
+  });
+
+  // Add callback to date selection.
+  $('#date-selection .input-daterange').on('changeDate', function(e) {
+    cannlytics.app.streamData('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');
+  });
+</script>
+
 </html>

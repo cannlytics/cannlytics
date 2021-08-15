@@ -248,6 +248,7 @@ export const app = {
   
       // Render the table
       const eGridDiv = document.querySelector(`#${model}-table`);
+      eGridDiv.innerHTML = '';
       new agGrid.Grid(eGridDiv, this.gridOptions);
       this.gridOptions.api.setRowData(data);
 
@@ -293,20 +294,53 @@ export const app = {
   },
 
 
-  async streamData(model, modelSingular, orgId) {
+  async streamData(model, modelSingular, orgId, limit=null) {
     /*
      * Stream data, listening for any changes.
      */
     // Optional: Get parameters (desc, orderBy) from the user interface.
     // TODO: Implement search with filters, e.g. .where("state", "==", "OK")
     // TODO: Pass dataModel from template.
+    console.log('Streaming data....');
     const desc = false;
     const orderBy = null;
     this.dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
     let ref = db.collection('organizations').doc(orgId).collection(model);
-    if (this.limit) ref = ref.limit(this.limit);
-    if (orderBy && desc) ref = ref.orderBy(orderBy, 'desc');
-    else if (orderBy) ref = ref.orderBy(orderBy);
+    // Optional Hot-Fix:
+    // Get a singular observation, if updated_at within time-frame, stick with
+    // time-frameElement, otherwise go with limit.
+    // FIXME: Search by date range (by updated_at) by first. If no observations
+    // are found, then search with a limit (perhaps 10?) and set the start_date
+    // to the earliest updated_at time, if any observations were found.
+    if (!limit) {
+      const startDate = document.getElementById('time_start').value;
+      const endDate = document.getElementById('time_end').value;
+      // FIXME: Adjust the start and end of the range to be inclusive!
+      // const date = e.date.toISOString();
+      // let start = '';
+      // let end = '';
+      // if (e.target.id === 'time_start') {
+      //   start = e.date.toISOString();
+      //   end = $('#time_end').datepicker('getDate');
+      //   end.setUTCHours(23, 59, 59, 999);
+      //   end = end.toISOString();
+      // } else {
+      //   end = e.date;
+      //   end.setUTCHours(23, 59, 59, 999);
+      //   end = end.toISOString();
+      //   start = $('#time_start').datepicker('getDate').toISOString();
+      // }
+      console.log('Start Date:', startDate);
+      console.log('End Date:', endDate);
+      ref = ref.where('updated_at', '>=', startDate);
+      ref = ref.where('updated_at', '<=', endDate);
+      ref = ref.orderBy('updated_at', 'desc');
+    } else {
+      ref = ref.limit(this.limit);
+      ref = ref.orderBy('updated_at', 'desc');
+      // if (orderBy && desc) ref = ref.orderBy(orderBy, 'desc');
+      // else if (orderBy) ref = ref.orderBy(orderBy);
+    }
     ref.onSnapshot((querySnapshot) => {
       const data = [];
       querySnapshot.forEach((doc) => {
@@ -314,6 +348,7 @@ export const app = {
       });
       console.log('Table data:', data);
       if (data.length) this.renderTable(model, modelSingular, data, this.dataModel);
+      // else if (!limit) this.streamData(model, modelSingular, orgId, 100);
       else this.renderPlaceholder();
     });
   },

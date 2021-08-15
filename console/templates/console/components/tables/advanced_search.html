@@ -4,7 +4,7 @@
   Advanced Search Component | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 7/6/2020
-  Updated: 8/12/2021
+  Updated: 8/15/2021
   Parameters:
     model
     model_singular
@@ -26,9 +26,9 @@ You can use at most one in, not-in, or array-contains-any clause per query. You 
 You can't order your query by a field included in an equality (==) or in clause.
 
 -->
-{% load icon %}
+{% load static icon %}
 
-<!-- TODO: Regular search by default, hide when doing advanced search -->
+<!-- Regular search by default, hide when doing advanced search -->
 <div class="d-flex align-items-center justify-content-start flex-grow-1 mb-3">
   <div
     id="default-search"
@@ -61,15 +61,13 @@ You can't order your query by a field included in an equality (==) or in clause.
       class="btn btn-sm-light btn-md-light"
       onclick="cannlytics.ui.toggleElementClass('advanced-search-options', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-button', 'd-none');cannlytics.ui.toggleElementClass('default-search', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-cancel', 'd-none');"
     >
-      Advanced Search
+      {% icon 'filter' width="16px" height="16px" class="text-secondary" %}
     </button>
   </div>
 
   <!-- Advanced Search -->
   <div id="advanced-search-options" class="input-group input-group-sm w-50 mb-3 d-none">
     <select id="search_parameter" class="form-select form-select-sm">
-      {% comment %} <option selected></option> {% endcomment %}
-      <!-- TODO: List fields for given model -->
       {% for field in data_model.fields %}
         <option value="{{ field.key }}">{{ field.label }}</option>
       {% endfor %}
@@ -98,7 +96,7 @@ You can't order your query by a field included in an equality (==) or in clause.
         type="button"
         onclick="cannlytics.app.advancedSearch();"
       >
-        Search
+        {% icon 'search' width="16px" height="16px" class="text-secondary" %}
       </button>
     </div>
   </div>
@@ -109,7 +107,7 @@ You can't order your query by a field included in an equality (==) or in clause.
     class="btn btn-sm-light btn-md-light d-none mb-3 ms-2"
     onclick="cannlytics.ui.toggleElementClass('advanced-search-options', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-button', 'd-none');cannlytics.ui.toggleElementClass('default-search', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-cancel', 'd-none');"
   >
-    Clear Search
+    {% icon 'slash' width="16px" height="16px" class="text-secondary" %}
   </button>
 
 </div>

@@ -3,13 +3,21 @@
 <!--
   Transfers Page | Cannlytics
   Created: 5/4/2021
-  Updated: 7/15/2021
+  Updated: 8/15/2021
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Transfers | Cannlytics {% endblock title %}
+{% block console_css %}
+
+  <!-- Bootstrap Datepicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
+
+{% endblock console_css %}
 {% block console_body %}
-{% if section and section not in 'logs,files,map' %}
+<!-- Optional: Add back logs,files, -->
+{% if section and section not in 'map' %}
 
   <!-- Detail page -->
   {% include "console/pages/transfers/transfer.html" with
@@ -31,13 +39,32 @@
     <div class="transfers">
 
       <!-- Tabs -->
-      {% include "console/components/forms/form_tabs.html" with
+      {% comment %} {% include "console/components/forms/form_tabs.html" with
         model="transfers"
         extra="Map"
         extra_path="map"
-      %}
+      %} {% endcomment %}
+      <ul class="nav nav-tabs mt-3">
+        <li class="nav-item">
+          <a
+            class="nav-link {% if not section %}active{% endif %}"
+            aria-current="page"
+            href="/transfers"
+          >
+            List
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'map' %}active{% endif %}"
+            href="/transfers/map"
+          >
+            Map
+          </a>
+        </li>
+      </ul>
 
-      <!-- Logs -->
+      {% comment %} <!-- Logs -->
       {% if section == 'logs' %}
 
         {% include "console/pages/settings/logs/logs.html" with
@@ -57,10 +84,10 @@
           organizations=organizations
           section=section
           user=user
-        %}
+        %} {% endcomment %}
 
       <!-- Map -->
-      {% elif section == 'map' %}
+      {% if section == 'map' %}
 
         {% comment %} {% include "console/pages/transfers/map/map.html" with
           model='transfers'

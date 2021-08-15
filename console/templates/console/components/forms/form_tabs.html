@@ -21,22 +21,24 @@
       List
     </a>
   </li>
-  <li class="nav-item">
-    <a
-      class="nav-link {% if section == 'logs' or unit == 'logs' %}active{% endif %}"
-      href="/{{ model }}{% if id %}/{{ id }}{% endif %}/logs"
-    >
-      Logs
-    </a>
-  </li>
-  <li class="nav-item">
-    <a
-      class="nav-link {% if section == 'files' or unit == 'files'  %}active{% endif %}"
-      href="/{{ model }}{% if id %}/{{ id }}{% endif %}/files"
-    >
-      Files
-    </a>
-  </li>
+  {% if organizations.0.type == 'lab' %}
+    <li class="nav-item">
+      <a
+        class="nav-link {% if section == 'logs' or unit == 'logs' %}active{% endif %}"
+        href="/{{ model }}{% if id %}/{{ id }}{% endif %}/logs"
+      >
+        Logs
+      </a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link {% if section == 'files' or unit == 'files'  %}active{% endif %}"
+        href="/{{ model }}{% if id %}/{{ id }}{% endif %}/files"
+      >
+        Files
+      </a>
+    </li>
+  {% endif %}
   {% if extra %}
     <li class="nav-item">
       <a
