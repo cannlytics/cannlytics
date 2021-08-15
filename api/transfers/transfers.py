@@ -51,6 +51,7 @@ def transfers(request, format=None, transfer_id=None):
         data = update_object(request, claims, model_type, model_type_singular, organization_id)
         # TODO: Send transfer to the organization.
         # TODO: Notify the receiving organization.
+        # TODO: Post to Metrc if user specifies.
         if data:
             return Response({'success': True, 'data': data}, status=200)
         else:

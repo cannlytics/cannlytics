@@ -15,7 +15,7 @@
 
 {% endblock console_css %}
 {% block console_body %}
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5">
 
     <!-- Header -->
     {% include "console/components/links/breadcrumbs.html" with
@@ -64,6 +64,7 @@
         options=True
         export=id
       %}
+      <!-- action="Send Transfer" -->
 
       <!-- Form -->
       <div class="mb-4 px-3">
@@ -76,8 +77,32 @@
         </form>
       </div>
 
-      <!-- TODO: Implement Samples table or list with AG-Grid table -->
-      <div id="transfer-samples-table"></div>
+      <!-- FIXME: Implement Samples table or list with AG-Grid table -->
+      <div id="transfer-samples-container" class="px-3">
+        <div class="d-flex justify-content-between">
+          <div class="col">
+            <h1 class="fs-6 lh-base text-dark mb-0 mt-3">
+              Samples
+            </h1>
+            <h2 class="fs-6 lh-base text-secondary mb-3">
+              <small>Manage samples included in the transfer.</small>
+            </h2>
+          </div>
+          <div class="d-flex align-items-center">
+            <button class="btn btn-sm-light btn-md-light">
+              Add sample
+            </button>
+          </div>
+        </div>
+
+        <div id="data-table mb-5">
+          <div
+            id="transfer-samples-table"
+            class="ag-theme-alpine-dark"
+            style="height: 350px; width:100%;"
+          ></div>
+        </div>
+      </div>
 
       <!-- Danger zone (delete) -->
       {% if id and id != 'new' %}
@@ -104,9 +129,85 @@
     // Render any date pickers.
     // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
-    // TODO: Given parameter, set receiving organization.
-    const receiverId = ;
-    console.log('Receiver:', receiverId);
+    // TODO: Initialize transfer form (create an ID, etc. )
+
+    // Given parameter, set receiving organization.
+    const receiverId = '{{ request.GET.receiver }}';
+    if (receiverId) {
+      document.getElementById('input_receiver_org_id').value = receiverId;
+      cannlytics.api.getLabs(receiverId).then(function(response) {
+        console.log(response);
+        console.log(response.data);
+        document.getElementById('input_receiver').value = response.data[0].name;
+      });
+    }
+
+
+    /*----------------------
+      Render samples table
+    -----------------------*/
+
+    // TODO: Make table editable.
+
+    {% comment %} function onSelectionChanged() {
+      /*
+       * Show a key's details on selection.
+       */
+      const selectedRows = gridOptions.api.getSelectedRows();
+      localStorage.setItem('template', JSON.stringify(selectedRows[0]));
+      window.location.href = '/results/certificates/template';
+    } {% endcomment %}
+
+    // Specify the table columns.
+    const columnDefs = [
+      { field: 'sample_name', headerName: 'Sample Name' },
+      { field: 'sample_type', headerName: 'Sample Type' },
+      { field: 'weight', headerName: 'Weight' },
+    ];
+
+    // Specify the table options.
+    const gridOptions = {
+      columnDefs: columnDefs,
+      defaultColDef: { flex: 1,  minWidth: 100 },
+      rowClass: 'app-action',
+      rowHeight: 25,
+      rowSelection: 'single',
+      // onSelectionChanged: onSelectionChanged,
+      overlayLoadingTemplate: `
+        <div class="spinner-grow text-success" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      `,
+      overlayNoRowsTemplate: `
+        <div class="card-body bg-transparent text-center" style="max-width:320px;">
+          <img
+            src="/static/console/images/icons/multi-tone/vials.svg"
+            style="width:75px;"
+          >
+          <h2 class="fs-5 text-dark mt-3 mb-1">
+            Add samples to your transfer
+          </h2>
+          <p class="text-secondary fs-6 text-small">
+            <small>Attach as many samples as you need, selecting the analyses that you need for each sample
+            and specifying the details for each sample.
+            </small>
+          </p>
+        </div>
+      `
+    };
+
+    // Render the table.
+    const eGridDiv = document.querySelector('#transfer-samples-table');
+    new agGrid.Grid(eGridDiv, gridOptions);
+    cannlytics.theme.setTableTheme();
+
+    // Get any template data and provide it to the table via the AG Grid API.
+    // Note that the user UID is passed from Django's user session.
+    // FIXME: Set any existing rows?
+    // cannlytics.results.getCoATemplates('{{ organizations.0.organization_id }}').then(function(data) {
+    //   gridOptions.api.setRowData(data);
+    // });
+    gridOptions.api.setRowData([]);
 
   </script>
 {% endblock console_js %}

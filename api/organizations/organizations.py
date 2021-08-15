@@ -37,11 +37,24 @@ def labs(request):
 
     # Get organization(s).
     if request.method == 'GET':
-        state = request.query_params.get('state', 'OK')
         filters = []
+        order_by = None
+
+        # Get a specific organization.
+        organization_id = request.query_params.get('organization_id')
+        print('Organization ID:', organization_id)
+        if organization_id:
+            filters.append({'key': 'slug', 'operation': '==', 'value': organization_id})
+
+        # Get all organizations in a state
+        state = request.query_params.get('state')
         if state:
             filters.append({'key': 'state', 'operation': '==', 'value': state})
-        docs = get_collection('labs', filters=filters, order_by='name')
+            order_by = 'name'
+
+        # Query and return the docs.
+        docs = get_collection('labs', filters=filters, order_by=order_by)
+        print('Returning docs:', docs)
         return Response({'data': docs}, status=200)
 
 

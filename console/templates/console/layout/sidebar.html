@@ -34,7 +34,7 @@
             {% if item.icon %}
               {% icon item.icon class="me-2" height="16" width="16" %}
             {% endif %}
-            {{ item.title }}
+            {{ item.label }}
             {% if item.nested %}
               <div id="{{ item.slug }}-toggle" class="{% if item.slug == screen %}flipped{% endif %}">
                 <img src="{% static 'console/images/layout/arrow_drop_down_light.svg' %}" class="arrow light-only"/>
@@ -57,7 +57,7 @@
                   class="nav-link d-flex py-1 px-3"
                   href="{{ sub_item.url }}"
                 >
-                  <small class="serif">{{ sub_item.title }}</small>
+                  <small class="serif">{{ sub_item.label }}</small>
                 </a>
               </li>
               {% endfor %}

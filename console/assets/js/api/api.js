@@ -117,6 +117,9 @@ export const api = {
   getOrganizationSettings: (orgId) => authRequest(`/api/organizations/${orgId}/settings`),
   updateOrganizationSettings: (orgId, data) => authRequest(`/api/organizations/${orgId}/settings`, data),
 
+  // Get labs
+  getLabs: (id) => authRequest(`/api/organizations/labs?organization_id=${id}`),
+
   /*----------------------------------------------------------------------------
   Measurements
   ----------------------------------------------------------------------------*/

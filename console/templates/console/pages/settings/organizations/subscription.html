@@ -4,42 +4,50 @@
   Subscription Management | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 7/18/2021
-  Updated: 7/18/2021
+  Updated: 8/14/2021
   Params:
     settings
 -->
-<div class="col col-md-6 card bg-transparent my-5 mx-3">
-  <div class="card-body text-dark">
-    <h5 class="card-title fs-6">Subscription Plan</h5>
-    <p class="card-text fs-6">
-      <small>Choose your desired level of support and then make your payment.
-        Your permissions will be updated immediately and your
-        payment will be updated in your next cycle. You will be
-        billed for the highest level of support that you utilize
-        in a given billing cycle.
-      </small>
-    </p>
-    <div class="row my-3">
-      <label class="col-sm-3 col-form-label col-form-label-sm">
-        Subscription
-      </label>
-      <div class="col-sm-9">
-        <select
-          id="input_tier"
-          name="subscription"
-          class="form-select form-select-sm"
-          aria-label="Subscription"
-          onchange="changeSubscription()"
-        >
-          {% for option in settings.subscriptions %}
-            <option value="{{ option.name }}">
-              {{ option.name }} ({{ option.price }})
-            </option>
-          {% endfor %}
-        </select>
-      </div>
+<div class="col col-md-8 col-lg-6 my-5 mx-3">
+
+  <!-- Title -->
+  <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Subscription Plan</h1>
+  <h2 class="fs-6 lh-base text-secondary mb-3">
+    <small>
+      Choose your desired level of support and then make your payment.
+      Your permissions will be updated immediately and your
+      payment will be updated in your next cycle. You will be
+      billed for the highest level of support that you utilize
+      in a given billing cycle.
+    </small>
+  </h2>
+
+  <!-- Input -->
+  <div class="row my-3">
+    <label class="col-sm-3 col-form-label col-form-label-sm">
+      Subscription
+    </label>
+    <div class="col-sm-9">
+      <select
+        id="input_tier"
+        name="subscription"
+        class="form-select form-select-sm"
+        aria-label="Subscription"
+        onchange="changeSubscription()"
+      >
+        {% for option in settings.subscriptions %}
+          <option value="{{ option.name }}">
+            {{ option.name }} ({{ option.price }})
+          </option>
+        {% endfor %}
+      </select>
     </div>
+
+    <!-- PayPal container -->
     <div id="paypal-button-container" class="my-4"></div>
+
   </div>
+
 </div>
+
 </html>

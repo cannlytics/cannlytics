@@ -2,7 +2,7 @@
  * Map JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 8/12/2021
- * Updated: 8/12/2021
+ * Updated: 8/14/2021
  * Resources:
  *    https://github.com/fullcalendar/fullcalendar-example-projects/blob/master/webpack/src/main.js
  *    https://fullcalendar.io/docs/handlers
@@ -25,8 +25,7 @@ export const maps = {
 
   initializeMap() {
     /*
-     * Initialize a market map, showing labs for products and showing contacts
-     * for labs.
+     * Initialize a market map, showing labs for products and showing contacts for labs.
      */
 
     // Draw the map.
@@ -58,11 +57,6 @@ export const maps = {
       this.renderLabList(data);
 
     });
-    // var script = document.createElement('script');
-    // script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&callback=initMap`;
-    // script.defer = true;
-    // window.initMap = this.drawMap;
-    // document.head.appendChild(script);
   },
 
 
@@ -93,7 +87,7 @@ export const maps = {
     data.forEach((item, index) => {
 
       // Alternate marker colors.
-      // TODO: Use green for DEA registered hemp testing laboratories.
+      // Optional: Use green for DEA registered hemp testing laboratories.
       // https://www.ams.usda.gov/rules-regulations/hemp/dea-laboratories
       var icon;
       if (index % 2) icon = this.markerOrange;
@@ -221,7 +215,7 @@ export const maps = {
     // TODO: Add analyses with prices
     // TODO: Add "Transfer Samples" button!
     content += `<div class="mt-3">
-      <a class="btn btn-sm btn-sm-light" href="/transfers/new?received=${item.slug}">
+      <a class="btn btn-sm bg-gradient-green text-white" href="/transfers/new?receiver=${item.slug}">
         Transfer Samples
       </a>
     </div>`;
@@ -343,12 +337,12 @@ export const maps = {
   },
 
 
-  startTransferSamples() {
-    /*
-     * Begin a new transfer with a selected organization.
-     */
-    // /transfers/new?
-  },
+  // startTransferSamples() {
+  //   /*
+  //    * Begin a new transfer with a selected organization.
+  //    */
+  //   // /transfers/new?
+  // },
 
   // TODO: Similar accordian for analyses.
 

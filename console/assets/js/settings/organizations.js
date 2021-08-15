@@ -37,14 +37,15 @@ export const organizationSettings = {
       const form = document.forms['organization-form'];
       form.reset();
       deserializeForm(form, response.data);
-      if (response.data.photo_url) {
-        document.getElementById('organization_photo_url').src = response.data.photo_url;
+      const data = response.data || {};
+      if (data.photo_url) {
+        document.getElementById('organization_photo_url').src = data.photo_url;
       } else {
         document.getElementById('organization_photo_url').src = "/static/console/images/icons/outline/teamwork.svg";
       }
-      if (response.data.public) {
+      if (data.public) {
         document.getElementById('public-choice').checked = true;
-      } else if (response.private) {
+      } else {
         document.getElementById('private-choice').checked = true;
       }
     });
@@ -101,6 +102,21 @@ export const organizationSettings = {
     })
     .catch((error) => {
       showNotification('Error changing status.', error, { type: 'error' });
+    });
+  },
+
+
+  changeOrganizationType(orgId) {
+    /*
+     * Change the organization's type.
+     */
+    const orgType = document.getElementById('input_type').value;
+    authRequest(`/api/organizations/${orgId}`, { type: orgType }).then((response) => {
+      showNotification('Organization type saved', `Your organization is now a ${orgType}. Refresh for changes to take effect.`, { type: 'success' });
+      // Refresh the page.
+    })
+    .catch((error) => {
+      showNotification('Error changing organization type.', error, { type: 'error' });
     });
   },
 
@@ -228,7 +244,8 @@ export const organizationSettings = {
       if (item.name) data[item.name] = item.value;
     }
     const orgId = slugify(data['name'])
-    authRequest(`/api/organizations`, data).then((response) => {
+    console.log('Org ID:', orgId);
+    authRequest(`/api/organizations/${orgId}`, data).then((response) => {
       // Optional: Show better error messages.
       // TODO: Tell user if organization name is already taken
       if (response.error) {

@@ -3,7 +3,7 @@
 <!--
   Map Page | Cannlytics Console
   Created: 8/11/2021
-  Updated: 8/12/2021
+  Updated: 8/14/2021
 -->
 {% extends "../transfers.html" %}
 {% load get_env %}
@@ -23,51 +23,32 @@
   </style>
 {% endblock %}
 {% block unit %}
-<main role="main" class="col ml-sm-auto px-md-4">
+<main role="main" class="col ml-sm-auto">
 
   <!-- Options -->
-  <div class="row">
+  <div class="row row-md-6">
 
-    <!-- Description -->
-    <div class="col-md-7 mb-3">
-
-      <!-- Title -->
-      <h3 class="fs-5 mt-3">Find a lab for transfers</h3>
-      <p class="fs-6 text-secondary">
-        <small>
-          Locate a lab to test your cannabis, browse analyses, and
-          engage with like-minded scientists around the world.
-        </small>
-      </p>
-
-    </div><!-- End of description -->
+    <!-- Title -->
+    <div class="d-flex justify-content-between mt-3">
+      <div class="px-3">
+        <h1 class="fs-6 lh-base text-dark mb-0">
+          Find a lab for transfers
+        </h1>
+        <h2 class="fs-6 lh-base text-secondary mb-3 w-75">
+          <small>Locate a lab to test your cannabis, browse analyses, and
+          engage with like-minded scientists around the world.</small>
+        </h2>
+      </div>
+    </div>
 
     <!-- Options  -->
-    <div class="d-flex align-items-center mb-3 me-2">
-
-      <!-- State selection -->
-      <label class="form-label form-label-sm me-2 mb-0">
-        State
-      </label>
-      <div class="">
-        <select
-          id="state_input"
-          name="state"
-          class="form-select form-select-sm"
-          aria-label="State"
-        >
-          <!-- TODO: Dynamically load all states that Cannlytics operates in. -->
-          <option value="OK" selected >
-            Oklahoma
-          </option>
-        </select>
-      </div>
+    <div class="row d-flex align-items-center justify-content-start mb-3 me-2">
 
       <!-- Search -->
       <!-- TODO: Let people search by analysis and compare prices -->
       <div
         id="search"
-        class="d-flex align-items-center flex-grow-1 nav-search-form ms-4"
+        class="col-md-5 d-flex align-items-center pe-0 mt-3 me-4"
       >
         <label class="form-label form-label-sm me-2 mb-0">
           Search
@@ -75,12 +56,13 @@
         <input
           aria-label="Search"
           id="searchInput"
-          class="nav-search-input form-control form-control-sm"
+          class="nav-search-input form-control form-control-sm w-100"
           placeholder="Search"
           list="searchOptions"
           name="org_id"
           oninput="cannlytics.transfers.onMapSearchInput()"
           type="text"
+          style="width:350px;"
         >
         <datalist id="searchOptions"></datalist>
         <button
@@ -92,16 +74,27 @@
         </button>
       </div><!-- End of search -->
 
-      <!-- Request transfer -->
-      <button
-        class="btn btn-sm bg-gradient-green text-white"
-        data-bs-toggle="modal"
-        data-bs-target="#transferDialog"
-      >
-        Transfer samples
-      </button>
+      <!-- State selection -->
+      <div class="col-md-4 d-flex align-items-center mt-3">
+        <label class="form-label form-label-sm me-2 mb-0">
+          State
+        </label>
+        <div class="">
+          <select
+            id="state_input"
+            name="state"
+            class="form-select form-select-sm"
+            aria-label="State"
+          >
+            <!-- TODO: Dynamically load all states that Cannlytics operates in. -->
+            <option value="OK" selected >
+              Oklahoma
+            </option>
+          </select>
+        </div>
+      </div>
 
-    </div>
+    </div><!-- End of options -->
 
   </div><!-- End of options -->
 
@@ -145,18 +138,13 @@
         class="card list-group bg-transparent px-0"
         style="max-height:420px; overflow-y:scroll;"
       >
-        <div class="card-header text-dark bg-light">Labs</div>    
+        <div class="card-header text-dark bg-light">Labs</div>
+        <!-- TODO: Add analyses list -->  
       </div>
   
-    </div>
+    </div><!-- End of list column -->
 
-  </div>
-
-  <!-- TODO: Transfer samples form -->
-  <!-- id="transferDialog" -->
-  {% include "console/components/modals/transfer_modal.html" with
-    callback="cannlytics.settings.viewSignature"
-  %}
+  </div><!-- End of lab map -->
 
 </main>
 {% endblock unit %}

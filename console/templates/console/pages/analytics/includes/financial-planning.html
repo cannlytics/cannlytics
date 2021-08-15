@@ -1,0 +1,148 @@
+<!-- Title -->
+    <h3 class="fs-5 mt-3">Shift planning / predicting revenue</h3>
+    <p class="fs-6 text-secondary">
+      <small>
+        Estimate the number of shift hours needed to achieve a target output.
+      </small>
+    </p>
+
+    <!-- Description -->
+    <!-- TODO: Clean up description -->
+    <!-- Financial Projections Form -->
+    <p class="par-md fs-6 mt-3">
+      <small>
+        <strong>The idea</strong> is to take information about what you have planted, where, etc.,
+        and simulate your expected costs and revenues. You can leverage existing data that
+        you may already keep to improve the accuracy of the predictions. Given a description of
+        X uncertain inputs, NX random samples are generated, creating a distribution of possible outcomes.
+      </small>
+    </p>
+    <!-- simulating entire crop lifecycles -->
+    <!--
+    Factors:
+      rent
+      electric bills
+      strain
+    Controls:
+      climate control
+      lighting based on volume of space
+      Factors:
+        - timeframe
+        - growth functions
+    -->
+
+    <!-- Form -->
+    <h3 class="fs-5 mt-3">Inputs</h3>
+    <div class="col-md-12 mt-3">
+      <form id="analytics-form">
+
+        <!-- Field -->    
+        <div class="row mb-3">
+          <label
+            for="plant_number"
+            class="col-md-4 col-sm-2 col-lg-2 col-form-label col-form-label-sm"
+          >
+            Number of plants
+          </label>
+          <div class="col-sm-10">
+            <input
+              type="number"
+              class="form-control form-control-sm field-sm"
+              id="plant_number"
+              spellcheck="false"
+              name="plant_number"
+            >
+          </div>
+        </div>
+
+        <!-- Field -->    
+        <div class="row mb-3">
+          <label
+            for="time_per_plant"
+            class="col-md-4 col-sm-2 col-lg-2 col-form-label col-form-label-sm"
+          >
+            Time spent attending to each plant (mins/plant)
+          </label>
+          <div class="col-sm-10">
+            <input
+              type="number"
+              class="form-control form-control-sm field-sm"
+              id="time_per_plant"
+              spellcheck="false"
+              name="time_per_plant"
+            >
+          </div>
+        </div>
+
+        <!-- Field -->    
+        <div class="row mb-3">
+          <label
+            for="shift_length"
+            class="col-md-4 col-sm-2 col-lg-2 col-form-label col-form-label-sm"
+          >
+            Length of employee shift (hours)
+          </label>
+          <div class="col-sm-10">
+            <input
+              type="number"
+              class="form-control form-control-sm field-sm"
+              id="shift_length"
+              spellcheck="false"
+              name="shift_length"
+            >
+          </div>
+        </div>
+
+        <!-- Field -->    
+        <div class="row mb-3">
+          <label
+            for="pay_rate"
+            class="col-md-4 col-sm-2 col-lg-2 col-form-label col-form-label-sm"
+          >
+            Pay rate (dollars/hour)
+          </label>
+          <div class="col-sm-10">
+            <input
+              type="number"
+              class="form-control form-control-sm field-sm"
+              id="pay_rate"
+              spellcheck="false"
+              name="pay_rate"
+            >
+          </div>
+        </div>
+
+      </form>
+    </div><!-- End of fields -->
+
+    <!-- Options -->
+    <div class="d-flex justify-content-start mb-5">
+      <button
+        type="button"
+        class="btn btn-sm-light btn-md-light me-2"
+        onclick="clearForm();"
+      >
+        Clear
+      </button>
+      <button
+        type="button"
+        class="btn btn-sm bg-gradient-green text-white"
+        onclick="cannlytics.analytics.getAnalytics();"
+      >
+        Forecast
+      </button>
+    </div>
+      
+
+    <!-- Output chart -->
+    <div id="output" class="d-none">
+      <h3 class="fs-5 mt-3">Output</h3>
+      <div class="col col-md-5 mx-3 mb-3">
+        <div
+          class="card-body text-center bg-light border mx-auto my-3"
+          style="width:540px; height:175px;"
+        >
+          <span id="output-message" class="text-dark"></span>
+        </div>
+      </div>
+    </div>
