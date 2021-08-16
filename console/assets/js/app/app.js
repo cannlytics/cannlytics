@@ -333,7 +333,7 @@ export const app = {
       console.log('Start Date:', startDate);
       console.log('End Date:', endDate);
       ref = ref.where('updated_at', '>=', startDate);
-      ref = ref.where('updated_at', '<=', endDate);
+      ref = ref.where('updated_at', '<=', `${endDate}T23:59:59`);
       ref = ref.orderBy('updated_at', 'desc');
     } else {
       ref = ref.limit(this.limit);
@@ -343,12 +343,25 @@ export const app = {
     }
     ref.onSnapshot((querySnapshot) => {
       const data = [];
+      let earliest = '';
       querySnapshot.forEach((doc) => {
-        data.push(doc.data());
+        const item = doc.data();
+        if (!earliest || item.updated_at < earliest) earliest = item.updated_at;
+        data.push(item);
       });
       console.log('Table data:', data);
-      if (data.length) this.renderTable(model, modelSingular, data, this.dataModel);
-      // else if (!limit) this.streamData(model, modelSingular, orgId, 100);
+      if (data.length) {
+        this.renderTable(model, modelSingular, data, this.dataModel);
+        // Find earliest date, set date range.
+        console.log('Earliest date:', earliest);
+        try {
+          document.getElementById('time_start').value = earliest.slice(0, 10);
+        } catch (error) {
+          // Date input likely hidden.
+        }
+        // $('#start_date').datepicker('update', earliest.slice(0, 10));
+      }
+      else if (!limit) this.streamData(model, modelSingular, orgId, 100);
       else this.renderPlaceholder();
     });
   },

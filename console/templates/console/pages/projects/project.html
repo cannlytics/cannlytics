@@ -59,22 +59,42 @@
   {% else %}
 
     <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      abbreviation=data_model.abbreviation
-      id=id
-      model='projects'
-      model_singular='project'
-      description="Manage project for your organization and your organization's contacts."
-      options=True
-      export=id
-    %}
+    <!-- FIXME: Hide options more elegantly for non-lab organizations. -->
+    {% if organizations.0.type == 'lab' %}
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='projects'
+        model_singular='project'
+        description="Manage project for your organization and your organization's contacts."
+        options=True
+        export=id
+      %}
+    {% else %}
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='projects'
+        model_singular='project'
+        description="Manage project for your organization and your organization's contacts."
+        options=False
+        export=id
+      %}
+    {% endif %}
 
     <!-- Form -->
     <div class="mb-4 px-3">
       <form id="project-form">
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=data_model.fields
-        %}
+        {% if organizations.0.type == 'lab' %}
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+          %}
+        {% else %}
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+            readonly=True
+          %}
+        {% endif %}
       </form>
     </div>
 
@@ -190,7 +210,7 @@
     </div><!-- End of table container --> {% endcomment %}
 
     <!-- Danger zone (delete) -->
-    {% if id and id != 'new' %}
+    {% if id and id != 'new' and organizations.0.type == 'lab' %}
       {% include "console/components/forms/delete_option.html" with
         model="projects"
         model_singular="project"
@@ -209,9 +229,6 @@
 
     // Load the project's data.
     cannlytics.ui.viewObject('project');
-
-    // Render any date pickers.
-    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
 
   </script>
 {% endblock console_js %}

@@ -10,6 +10,8 @@
     model
     model_singular
     limit (optional)
+    import (optional)
+    action_hidden (optional)
 -->
 <div class="d-flex flex-wrap align-items-center justify-content-between mt-3">
 
@@ -17,29 +19,6 @@
   {% include "./advanced_search.html" %}
 
   <div class="d-flex align-items-center mb-3">
-
-    <!-- Optional: Criterion selection -->
-
-    <!-- Date selection -->
-    <div id="date-selection">
-      <div class="input-daterange input-group input-group-sm me-2">
-        <input
-          id="time_start"
-          type="text"
-          class="input-sm form-control form-control-sm form-control-light"
-          name="time_start"
-          style="max-width:120px;"
-        />
-        <div class="input-group-text">to</div>
-        <input
-          id="time_end"
-          type="text"
-          class="input-sm form-control form-control-sm form-control-light"
-          name="time_end"
-          style="max-width:120px;"
-        />
-      </div>
-    </div>
 
     <!-- Limit -->
     {% if limit %}
@@ -53,7 +32,7 @@
           min="0"
           step="1"
           oninput="validity.valid||(value='');"
-          value=10
+          value={{ limit }}
           onchange="cannlytics.app.changeLimit(event);"
         >
         <div class="input-group-append">
@@ -65,59 +44,30 @@
           </span>
         </div>
       </div>
-    {% endif %}
+    {% else %}
 
-    <!-- Import -->
-    <div class="btn-group btn-group-sm me-2" role="group" aria-label="Data import">
-      <form
-        action="{% url "import_data" %}?model={{ model }}&organization_id={{ organizations.0.organization_id }}"
-        method="post"
-        enctype="multipart/form-data"
-        name="import_form"
-        id="import-form"
-      >
-        {% csrf_token %}
-        <input
-          id="import_input"
-          type="file"
-          class="visually-hidden"
-          title="Upload excel file"
-          name="excel_file"
-          required="required"
-          onchange="document.forms['import-form'].submit();"
-        >
-        <button
-          type="button"
-          class="btn btn-sm-light btn-md-light"
-          onclick="document.getElementById('import_input').click();"
-        >
-          Import
-        </button>
-      </form>
-      <div class="btn-group btn-group-sm" role="group">
-        <button
-          id="import_options"
-          type="button"
-          class="btn btn-sm-light btn-md-light dropdown-toggle"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-        </button>
-        <ul
-          class="dropdown-menu shadow py-0"
-          aria-labelledby="import_options"
-        >
-          <li>
-            <a
-              class="app-action dropdown-item fs-6"
-              onclick="cannlytics.app.downloadWorksheet('{{ organizations.0.organization_id }}', '{{ model }}');"
-            >
-              <small>Download worksheet</small>
-            </a>
-          </li>
-        </ul>
+      <!-- Date selection -->
+      <div id="date-selection">
+        <div class="input-daterange input-group input-group-sm me-2">
+          <input
+            id="time_start"
+            type="text"
+            class="input-sm form-control form-control-sm form-control-light"
+            name="time_start"
+            style="max-width:120px;"
+          />
+          <div class="input-group-text">to</div>
+          <input
+            id="time_end"
+            type="text"
+            class="input-sm form-control form-control-sm form-control-light"
+            name="time_end"
+            style="max-width:120px;"
+          />
+        </div>
       </div>
-    </div>
+
+    {% endif %}
 
     <!-- Export -->
     <button
@@ -127,14 +77,70 @@
       Export
     </button>
 
+    <!-- Import -->
+    {% if organizations.0.type == 'lab' or import %}
+      <div class="btn-group btn-group-sm me-2" role="group" aria-label="Data import">
+        <form
+          action="{% url "import_data" %}?model={{ model }}&organization_id={{ organizations.0.organization_id }}"
+          method="post"
+          enctype="multipart/form-data"
+          name="import_form"
+          id="import-form"
+        >
+          {% csrf_token %}
+          <input
+            id="import_input"
+            type="file"
+            class="visually-hidden"
+            title="Upload excel file"
+            name="excel_file"
+            required="required"
+            onchange="document.forms['import-form'].submit();"
+          >
+          <button
+            type="button"
+            class="btn btn-sm-light btn-md-light"
+            onclick="document.getElementById('import_input').click();"
+          >
+            Import
+          </button>
+        </form>
+        <div class="btn-group btn-group-sm" role="group">
+          <button
+            id="import_options"
+            type="button"
+            class="btn btn-sm-light btn-md-light dropdown-toggle"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+          </button>
+          <ul
+            class="dropdown-menu shadow py-0"
+            aria-labelledby="import_options"
+          >
+            <li>
+              <a
+                class="app-action dropdown-item fs-6"
+                onclick="cannlytics.app.downloadWorksheet('{{ organizations.0.organization_id }}', '{{ model }}');"
+              >
+                <small>Download worksheet</small>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    {% endif %}
+
     <!-- New -->
-    <button
-      id="new-button"
-      class="btn btn-sm bg-gradient-green text-white"
-      onclick="cannlytics.ui.openObject('{{ model }}', '{{ model_singular }}', {});"
-    >
-      New
-    </button>
+    {% if not action_hidden %}
+      <button
+        id="new-button"
+        class="btn btn-sm bg-gradient-green text-white"
+        onclick="cannlytics.ui.openObject('{{ model }}', '{{ model_singular }}', {});"
+      >
+        New
+      </button>
+    {% endif %}
 
   </div>
 </div>

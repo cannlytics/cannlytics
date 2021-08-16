@@ -4,12 +4,118 @@
   Invoices Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/5/2021
-  Updated: 5/5/2021
+  Updated: 8/15/2021
 -->
 {% extends "console/console.html" %}
-{% block console_body %}
+{% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Invoices | Cannlytics{% endblock title %}
+{% block console_css %}
 
+  <!-- Bootstrap Datepicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
+
+{% endblock console_css %}
+{% block console_body %}
+{% if section and section not in 'logs,files' %}
+
+  <!-- Detail page -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+    {% include "console/pages/invoices/invoice.html" with
+      id=section
+      data_model=data_model
+    %}
+    {% block unit %}{% endblock unit %}
+  </main>
+
+{% else %}
+
+  <!-- List -->
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+      <h1 class="fs-5 mb-0 lh-base">Invoices</h1>
+    </div>
+
+    <!-- Body -->
+    <div class="invoices">
+
+      <!-- Tabs -->
+      {% include "console/components/forms/form_tabs.html" with
+        model="invoices"
+      %}
+
+      <!-- Logs -->
+      {% if section == 'logs' %}
+        {% include "console/pages/settings/logs/logs.html" with
+          model='invoices'
+          model_singular='invoice'
+          organizations=organizations
+          section=section
+          user=user
+        %}
+
+      <!-- Files -->
+      {% elif section == 'files' %}
+        {% include "console/pages/settings/files/files.html" with
+          model='invoices'
+          model_singular='invoice'
+          organizations=organizations
+          section=section
+          user=user
+        %}
+
+      <!-- Table -->
+      {% else %}
+
+        <!-- Options -->
+        {% if organizations.0.type == 'lab' %}
+          {% include "console/components/tables/simple_table_options.html" with
+            model='invoices'
+            model_singular='invoice'
+          %}
+        {% else %}
+          {% include "console/components/tables/simple_table_options.html" with
+            model='invoices'
+            model_singular='invoice'
+            action_hidden=True
+          %}
+        {% endif %}
+
+        <!-- Loading placeholder -->
+        <div id="loading-placeholder">
+          {% include "console/components/placeholders/loading_placeholder.html" with
+            height='350px'
+            width='100%'
+            only
+          %}
+        </div>
+
+        <!-- No-data Placeholder -->
+        <div id="data-placeholder" class="d-none">
+          {% include "console/components/placeholders/placeholder.html" with
+            placeholder=invoices.placeholder
+            only
+          %}
+        </div>
+
+        <!-- AG Grid Table -->
+        <div id="data-table" class="d-none">
+          <div
+            id="invoices-table"
+            class="ag-theme-alpine-dark"
+            style="height: 350px; width:100%;"
+          ></div>
+        </div>
+
+      {% endif %}
+
+    </div><!-- End of the body -->
+
+  </main>
+
+  <!-- OLD FIXME: Remove scrap -->
+  {% comment %} <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
     <!-- Optional: Dynamically render tabs -->
@@ -51,8 +157,19 @@
       {% block section %}{% endblock %}
     </section>
 
-  </main>
+  </main> {% endcomment %}
 
 {% endblock console_body %}
+
+<!-- JavaScript -->
+{% block console_js %}
+
+  {% if not section %}
+    <script>
+      cannlytics.app.streamData('invoices', 'invoice', '{{ organizations.0.organization_id }}');
+    </script>
+  {% endif %}
+
+{% endblock console_js %}
 
 </html>

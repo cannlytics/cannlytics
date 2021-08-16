@@ -60,6 +60,9 @@ You can't order your query by a field included in an equality (==) or in clause.
       id="advanced-search-button"
       class="btn btn-sm-light btn-md-light"
       onclick="cannlytics.ui.toggleElementClass('advanced-search-options', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-button', 'd-none');cannlytics.ui.toggleElementClass('default-search', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-cancel', 'd-none');"
+      data-bs-toggle="tooltip"
+      data-bs-placement="top"
+      title="Show advanced search"
     >
       {% icon 'filter' width="16px" height="16px" class="text-secondary" %}
     </button>
@@ -106,6 +109,9 @@ You can't order your query by a field included in an equality (==) or in clause.
     id="advanced-search-cancel"
     class="btn btn-sm-light btn-md-light d-none mb-3 ms-2"
     onclick="cannlytics.ui.toggleElementClass('advanced-search-options', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-button', 'd-none');cannlytics.ui.toggleElementClass('default-search', 'd-none');cannlytics.ui.toggleElementClass('advanced-search-cancel', 'd-none');"
+    data-bs-toggle="tooltip"
+    data-bs-placement="top"
+    title="Show default search"
   >
     {% icon 'slash' width="16px" height="16px" class="text-secondary" %}
   </button>

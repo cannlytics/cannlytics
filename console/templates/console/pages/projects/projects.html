@@ -67,10 +67,18 @@
       {% else %}
 
         <!-- Options -->
-        {% include "console/components/tables/simple_table_options.html" with
-          model='projects'
-          model_singular='project'
-        %}
+        {% if organizations.0.type == 'lab' %}
+          {% include "console/components/tables/simple_table_options.html" with
+            model='projects'
+            model_singular='project'
+          %}
+        {% else %}
+          {% include "console/components/tables/simple_table_options.html" with
+            model='projects'
+            model_singular='project'
+            action_hidden=True
+          %}
+        {% endif %}
 
         <!-- Loading placeholder -->
         <div id="loading-placeholder">
@@ -91,7 +99,6 @@
 
         <!-- AG Grid Table -->
         <div id="data-table" class="d-none">
-          <!-- TODO: Advanced search -->
           <div
             id="projects-table"
             class="ag-theme-alpine-dark"

@@ -73,6 +73,7 @@
         {% include "console/components/tables/simple_table_options.html" with
           model='contacts'
           model_singular='contact'
+          limit=1000
         %}
 
         <!-- Loading placeholder -->
@@ -94,7 +95,6 @@
 
         <!-- AG Grid Table -->
         <div id="data-table" class="d-none">
-          <!-- TODO: Advanced search -->
           <div
             id="contacts-table"
             class="ag-theme-alpine-dark"
@@ -115,7 +115,7 @@
 
   {% if not section %}
     <script>
-      cannlytics.app.streamData('contacts', 'contact', '{{ organizations.0.organization_id }}');
+      cannlytics.app.streamData('contacts', 'contact', '{{ organizations.0.organization_id }}', 1000);
     </script>
   {% endif %}
 

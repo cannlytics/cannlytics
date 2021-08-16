@@ -10,6 +10,8 @@
     model
     extra
     extra_path
+    logs (optional)
+    files (optional)
 -->
 <ul class="nav nav-tabs mt-3">
   <li class="nav-item">
@@ -21,7 +23,7 @@
       List
     </a>
   </li>
-  {% if organizations.0.type == 'lab' %}
+  {% if organizations.0.type == 'lab' or logs %}
     <li class="nav-item">
       <a
         class="nav-link {% if section == 'logs' or unit == 'logs' %}active{% endif %}"
@@ -30,6 +32,8 @@
         Logs
       </a>
     </li>
+  {% endif %}
+  {% if organizations.0.type == 'lab' or files %}
     <li class="nav-item">
       <a
         class="nav-link {% if section == 'files' or unit == 'files'  %}active{% endif %}"

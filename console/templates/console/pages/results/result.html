@@ -58,15 +58,28 @@
   {% else %}
 
     <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      abbreviation=data_model.abbreviation
-      id=id
-      model='results'
-      model_singular='result'
-      description="Manage results for samples, calculated from measurements for given analytes in an analysis."
-      options=True
-      export=id
-    %}
+    <!-- FIXME: Hide "save" button to non-lab users more elegantly -->
+    {% if organizations.0.type == 'lab' %}
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='results'
+        model_singular='result'
+        description="Manage results for samples, calculated from measurements for given analytes in an analysis."
+        options=True
+        export=id
+      %}
+    {% else %}
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='results'
+        model_singular='result'
+        description="Manage results for samples, calculated from measurements for given analytes in an analysis."
+        options=False
+        export=id
+      %}
+    {% endif %}
 
     <!-- Form -->
     <div class="mb-4 px-3">
@@ -82,7 +95,7 @@
     <!-- TODO: Try to implement add analytes with AG-Grid table -->
     
     <!-- Danger zone (delete) -->
-    {% if id and id != 'new' %}
+    {% if id and id != 'new' and organizations.0.type == 'lab' %}
       {% include "console/components/forms/delete_option.html" with
         id=id
         model="results"

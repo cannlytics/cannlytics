@@ -39,12 +39,12 @@
     <div class="transfers">
 
       <!-- Tabs -->
-      {% comment %} {% include "console/components/forms/form_tabs.html" with
+      {% include "console/components/forms/form_tabs.html" with
         model="transfers"
         extra="Map"
         extra_path="map"
-      %} {% endcomment %}
-      <ul class="nav nav-tabs mt-3">
+      %}
+      {% comment %} <ul class="nav nav-tabs mt-3">
         <li class="nav-item">
           <a
             class="nav-link {% if not section %}active{% endif %}"
@@ -62,9 +62,9 @@
             Map
           </a>
         </li>
-      </ul>
+      </ul> {% endcomment %}
 
-      {% comment %} <!-- Logs -->
+      <!-- Logs -->
       {% if section == 'logs' %}
 
         {% include "console/pages/settings/logs/logs.html" with
@@ -84,18 +84,11 @@
           organizations=organizations
           section=section
           user=user
-        %} {% endcomment %}
+        %}
 
       <!-- Map -->
-      {% if section == 'map' %}
+      {% elif section == 'map' %}
 
-        {% comment %} {% include "console/pages/transfers/map/map.html" with
-          model='transfers'
-          model_singular='transfer'
-          organizations=organizations
-          section=section
-          user=user
-        %} {% endcomment %}
         {% block unit %}{% endblock unit %}
 
       <!-- Table -->
@@ -105,6 +98,7 @@
         {% include "console/components/tables/simple_table_options.html" with
           model='transfers'
           model_singular='transfer'
+          import=True
         %}
 
         <!-- Loading placeholder -->
@@ -126,7 +120,6 @@
 
         <!-- AG Grid Table -->
         <div id="data-table" class="d-none">
-          <!-- TODO: Advanced search -->
           <div
             id="transfers-table"
             class="ag-theme-alpine-dark"
