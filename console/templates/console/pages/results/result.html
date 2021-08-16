@@ -84,9 +84,16 @@
     <!-- Form -->
     <div class="mb-4 px-3">
       <form id="result-form">
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=data_model.fields
-        %}
+        {% if organization.0.type == 'lab' %}
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+          %}
+        {% else %}
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+            readonly=True
+          %}
+        {% endif %}
         <!-- TODO: Show additional fields (traceability fields) -->
         {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
       </form>

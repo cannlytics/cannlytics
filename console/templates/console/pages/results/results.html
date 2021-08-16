@@ -20,18 +20,10 @@
 
   <!-- Detail page -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-    {% if organization.0.type != 'lab' %}
-      {% include "console/pages/results/result.html" with
-        id=section
-        data_model=data_model
-        readonly=True
-      %}
-    {% else %}
-      {% include "console/pages/results/result.html" with
-        id=section
-        data_model=data_model
-      %}
-    {% endif %}
+    {% include "console/pages/results/result.html" with
+      id=section
+      data_model=data_model
+    %}
     {% block unit %}{% endblock unit %}
   </main>
 

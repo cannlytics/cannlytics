@@ -3,7 +3,7 @@
 <!--
   Invoice Page | Cannlytics Console
   Created: 7/7/2021
-  Updated: 7/7/2021
+  Updated: 8/16/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -14,40 +14,88 @@
 
 {% endblock console_css %}
 {% block console_body %}
-  
-  <!-- List -->
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
-    <!-- Header -->
-    {% include "console/components/links/breadcrumbs.html" with
-      base_page="Invoices"
-      base_page_url="/invoices"
-      current_page=id
-    %}
+  <!-- Header -->
+  {% include "console/components/links/breadcrumbs.html" with
+    base_page="Invoices"
+    base_page_url="/invoices"
+    current_page=id
+  %}
 
-    <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      id=id
+  <!-- Tabs -->
+  {% if id and id != 'new' %}
+    {% include "console/components/forms/form_tabs.html" with
+        id=id
+        model="invoices"
+      %}
+  {% endif %}
+
+  <!-- Files page -->
+  {% if unit == 'files' %}
+    {% include "console/pages/settings/files/files.html" with
       model='invoices'
       model_singular='invoice'
-      description="Manage invoices for your projects."
-      options=True
-      export=id
+      organizations=organizations
+      section=section
+      user=user
     %}
+
+  <!-- Logs page -->
+  {% elif unit == 'logs' %}
+    {% include "console/pages/settings/logs/logs.html" with
+      model='invoices'
+      model_singular='invoice'
+      organizations=organizations
+      section=section
+      user=user
+    %}
+
+  {% else %}
+
+    <!-- Title -->
+    <!-- FIXME: Hide "save" button to non-lab users more elegantly -->
+    {% if organizations.0.type == 'lab' %}
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='invoices'
+        model_singular='invoice'
+        description="Manage invoices for analyses requested by your contacts."
+        options=True
+        export=id
+      %}
+    {% else %}
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='invoices'
+        model_singular='invoice'
+        description="Manage invoices for analyses requested by your contacts."
+        options=False
+        export=id
+      %}
+    {% endif %}
 
     <!-- Form -->
     <div class="mb-4 px-3">
-      <form id="invoices-form">
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=data_model.fields
-        %}
+      <form id="result-form">
+        {% if organization.0.type == 'lab' %}
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+          %}
+        {% else %}
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+            readonly=True
+          %}
+        {% endif %}
       </form>
     </div>
 
-    <!-- TODO: Try to implement add analytes with AG-Grid table -->
+    <!-- TODO: Analyses / samples AG-Grid table -->
     
     <!-- Danger zone (delete) -->
-    {% if id and id != 'new' %}
+    {% if id and id != 'new' and organizations.0.type == 'lab' %}
       {% include "console/components/forms/delete_option.html" with
         id=id
         model="invoices"
@@ -55,20 +103,20 @@
       %}
     {% endif %}
 
-</main>
+  {% endif %}
+
 {% endblock console_body %}
 
 <!-- JavaScript -->
 {% block console_js %}
+{% if not unit %}
   <script>
 
     // Load the data into the user interface.
     cannlytics.ui.viewObject('invoice');
 
-    // Render any date pickers.
-    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
-
   </script>
+{% endif %}
 {% endblock console_js %}
 
 </html>
