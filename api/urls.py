@@ -61,8 +61,10 @@ urlpatterns = [
     path('contacts', include([
         path('', contacts.contacts),
         path('/<contact_id>', contacts.contacts),
-        path('/<contact_id>/people', contacts.people),
-        path('/<contact_id>/people/<user_id>', contacts.people),
+    ])),
+    path('people', include([
+        path('', contacts.people),
+        path('/<person_id>', contacts.people),
     ])),
     path('inventory', include([
         path('', inventory.inventory),

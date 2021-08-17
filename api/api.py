@@ -108,7 +108,6 @@ def update_object(request, claims, model_type, model_type_singular, organization
     Returns:
         (list): A list of dictionaries of the data posted.
     """
-    # FIXME: Handle missing model ID.
     updated_at = datetime.now().isoformat()
     data = loads(request.body.decode('utf-8'))
     if isinstance(data, dict):
@@ -119,14 +118,18 @@ def update_object(request, claims, model_type, model_type_singular, organization
     elif isinstance(data, list):
         for item in data:
             doc_id = item[f'{model_type_singular}_id']
-            data['updated_at'] = updated_at
-            data['updated_by'] = claims['uid']
+            item['updated_at'] = updated_at
+            item['updated_by'] = claims['uid']
+            print('Saving item:\n', item)
             update_document(f'organizations/{organization_id}/{model_type}/{doc_id}', item)
     else:
         return []
     update_totals(model_type, organization_id, doc_id)
     if model_type != 'logs':
-        create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} edited.', model_type, doc_id, [data])
+        changes = [data]
+        if isinstance(data, list):
+            changes = data
+        create_log(f'organizations/{organization_id}/logs', claims, f'{model_type.title()} edited.', model_type, doc_id, changes)
     return data
 
 

@@ -391,7 +391,7 @@ export const app = {
     newRow[`${modelSingular}_id`] = await this.createID(model, modelSingular, orgId, abbreviation, count);
     rows.push(newRow);
     this.gridOptions.api.setRowData(rows);
-    // TODO: Show save button if rows > 0.
+    document.getElementById('save-table-button').classList.remove('d-none');
   },
 
 
@@ -410,7 +410,6 @@ export const app = {
       entry[idKey] = id;
       postData.push(entry);
     });
-    // TEST: Try to remove the data from Firestore through the API.
     await authRequest(`/api/${model}?organization_id=${orgId}`, postData, { delete: true });
     await this.gridOptions.api.forEachNode((rowNode, index) => {
       if (!idsToDelete.includes(rowNode.data[idKey])) {
@@ -422,31 +421,25 @@ export const app = {
   },
 
 
-  async saveTable(model, modelSingular, orgId) {
+  async saveTable(model, modelSingular, orgId, parentModel, parentModelSingular, parentId) {
     /*
      * Save a sub-model's data, associating the data with the current data
      * model entry using the parent data model's ID.
      */
-    console.log('Saving:', model, modelSingular, orgId);
     const data = [];
     await this.gridOptions.api.forEachNode((rowNode, index) => {
-      // TODO: Save to Firestore through the API.
-      data.push(rowNode);
+      const item = rowNode.data;
+      item[`${parentModelSingular}_id`] = parentId;
+      data.push(item);
     });
-    authRequest(`/api/${model}?organization_id=${orgId}`, { data })
+    authRequest(`/api/${model}?organization_id=${orgId}`, data)
       .then((response) => {
-        const message = `Data saved under ${model} for organization ${orgID}.`;
+        const message = `Data saved under ${model} for organization ${orgId}.`;
         showNotification('Data saved', message, { type: 'success' });
       })
       .catch((error) => {
         showNotification('Error saving data', error.message, { type: 'error' });
       });
-      // .finally(() => {
-      //   document.getElementById('form-save-loading-button').classList.add('d-none');
-      //   document.getElementById('form-save-button').classList.remove('d-none');
-      // });
-    // showNotification('Data saved', `Data saved under ${model} for organization ${orgID}.`, { type: 'success' });
-    // showNotification('Upload Error', 'Error saving file data.', { type: 'error' })
   },
 
 
@@ -454,7 +447,6 @@ export const app = {
     /*
      * Stream data for a sub-model.
      */
-    console.log('Streaming sub model data....');
     const subDataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
     let ref = db.collection('organizations').doc(orgId).collection(model);
     if (!limit) {
@@ -465,7 +457,6 @@ export const app = {
       ref = ref.orderBy('updated_at', 'desc');
     } else {
       ref = ref.limit(limit);
-      // ref = ref.orderBy('updated_at', 'desc');
     }
     ref = ref.where(key, '==', value);
     ref.onSnapshot((querySnapshot) => {
@@ -475,7 +466,6 @@ export const app = {
         data.push(item);
       });
       this.renderSubModelTable(data, subDataModel);
-      // else this.renderPlaceholder();
     });
   },
 
@@ -494,12 +484,6 @@ export const app = {
         deleteButton.classList.add('d-none');
       }
     }
-
-    // function onRowSelected(event) {
-    //   window.alert(
-    //     'row ' + event.node.data.athlete + ' selected = ' + event.node.isSelected()
-    //   );
-    // }
     
     // Specify the table columns according to the data model fields from organization settings.
     const columnDefs = dataModel.fields.map(function(e) {
@@ -509,8 +493,7 @@ export const app = {
 
     // Enable checkbox selection.
     columnDefs[0]['checkboxSelection'] = true;
-    // columnDefs[0]['headerCheckboxSelection'] = true;
-    // columnDefs[0]['rowDrag'] = true;
+    columnDefs[0]['headerCheckboxSelection'] = true;
 
     // Specify the table options.
     this.gridOptions = {
@@ -520,7 +503,6 @@ export const app = {
         minWidth: 200,
         editable: true,
       },
-      // editType: 'fullRow',
       enterMovesDown: true,
       enterMovesDownAfterEdit: true,
       rowClass: 'app-action',
@@ -529,7 +511,6 @@ export const app = {
       singleClickEdit: true,
       suppressRowClickSelection: true,
       onSelectionChanged: onSelectionChanged,
-      // onRowSelected: onRowSelected,
       overlayLoadingTemplate: `
         <div class="spinner-grow text-success" role="status">
           <span class="visually-hidden">Loading...</span>
@@ -553,16 +534,13 @@ export const app = {
 
     // Render the table.
     const eGridDiv = document.querySelector(`#${dataModel.key}-table`);
+    eGridDiv.innerHTML = '';
     new agGrid.Grid(eGridDiv, this.gridOptions);
-    // cannlytics.theme.setTableTheme();
+    window.cannlytics.theme.setTableTheme();
 
-    // TODO:
     // Get any template data and provide it to the table via the AG Grid API.
-    // cannlytics.results.getCoATemplates('{{ organizations.0.organization_id }}').then(function(data) {
-    //   gridOptions.api.setRowData(data);
-    // });
     this.gridOptions.api.setRowData(data);
-
+    if (data.length) document.getElementById('save-table-button').classList.remove('d-none');
   },
 
 
@@ -571,12 +549,6 @@ export const app = {
      * Show delete row button.
      */
     document.getElementById('delete-table-button').classList.remove('d-none')
-  },
-
-  
-  onSelectionChanged(event) {
-    var rowCount = event.api.getSelectedNodes().length;
-    window.alert('selection changed, ' + rowCount + ' rows selected');
   },
 
 

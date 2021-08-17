@@ -10,6 +10,9 @@
     model_singular
     description
     abbreviation
+    parent_model
+    parent_model_singular
+    parent_id
   
   When adding sub-models, entries are created in /organizations/{org_id}/{sub-model} with a unique id
 -->
@@ -34,7 +37,7 @@
       <button
         id="save-table-button"
         class="btn btn-sm bg-gradient-green text-white d-none ms-2"
-        onclick="cannlytics.app.saveTable('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+        onclick="cannlytics.app.saveTable('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}', '{{ parent_model }}', '{{ parent_model_singular }}', '{{ parent_id }}');"
       >
         Save
       </button>

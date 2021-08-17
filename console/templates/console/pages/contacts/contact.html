@@ -75,12 +75,15 @@
       </form>
     </div>
 
-    <!-- TODO: People AG-Grid table -->
+    <!-- People AG-Grid table -->
     {% include "console/components/tables/simple_form_table.html" with
       model="people"
       model_singular="person"
       description="Manage people that are associated with this contact."
       abbreviation="USR"
+      parent_model="contacts"
+      parent_model_singular="contact"
+      parent_id=section
     %}
 
     <!-- Danger zone (delete) -->
