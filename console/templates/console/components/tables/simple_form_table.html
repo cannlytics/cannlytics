@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<!--
+  Simple Form Table | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 8/16/2020
+  Updated: 8/16/2021
+  Parameters:
+    model
+    model_singular
+    description
+    abbreviation
+  
+  When adding sub-models, entries are created in /organizations/{org_id}/{sub-model} with a unique id
+-->
+<div id="{{ model }}-container" class="px-3">
+  <div class="d-flex justify-content-between">
+    <div class="col">
+      <h1 class="fs-6 lh-base text-dark mb-0 mt-3">
+        {{ model|title }}
+      </h1>
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        <small>{{ description }}.</small>
+      </h2>
+    </div>
+    <div class="d-flex align-items-center">
+      
+      <button
+        class="btn btn-sm-light btn-md-light"
+        onclick="cannlytics.app.addTableRow('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}', '{{ abbreviation }}');"
+      >
+        Add {{ model_singular }}
+      </button>
+      <button
+        id="save-table-button"
+        class="btn btn-sm bg-gradient-green text-white d-none ms-2"
+        onclick="cannlytics.app.saveTable('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+      >
+        Save
+      </button>
+      <button
+        id="delete-table-button"
+        class="btn btn-sm btn-danger d-none ms-2"
+        onclick="cannlytics.app.deleteTableRows('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+
+  <div id="data-table mb-5">
+    <div
+      id="{{ model }}-table"
+      class="ag-theme-alpine-dark"
+      style="height: 350px; width:100%;"
+    ></div>
+  </div>
+</div>
+
+</html>

@@ -537,6 +537,28 @@ data_models = [
             {"key": "pinned", "label": "Pin File", "type": "bool", "onchange": "pinFile"},
         ],
     },
+    {
+        'label': 'People',
+        'key': 'people',
+        'singular': 'person',
+        'abbreviation': 'USR',
+        'description': 'Manage people associated with a given contact.',
+        "image_path": "console/images/icons/outline/teamwork.svg",
+        'id_schema': '[abbreviation]%y%m%d',
+        'sortable': True,
+        'filter': True,
+        'hidden': True,
+        "fields": [
+            {"key": "person_id", "label": "Person ID"},
+            {"key": "name", "label": "Name"},
+            {"key": "email", "label": "Email"},
+            {"key": "phone", "label": "Phone"},
+            {"key": "position", "label": "Position"},
+            {"key": "result_recipient", "label": "Result Recipient", "type": "bool"},
+            {"key": "billing_contact", "label": "Billing Contact", "type": "bool"},
+            {"key": "notes", "label": "Notes", "type": "textarea"},
+        ],
+    },
 ]
 
 #-----------------------------------------------------------------------

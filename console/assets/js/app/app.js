@@ -2,7 +2,7 @@
  * App JavaScript | Cannlytics Console
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 12/7/2020
- * Updated: 7/9/2021
+ * Updated: 8/16/2021
  */
 
 import {
@@ -162,6 +162,7 @@ export const app = {
   async exportData(modelSingular, id = null) {
     /*
      * Export given collection data to Excel.
+     * Optional: Also export any sub-model data table.
      */
     const data = serializeForm(`${modelSingular}-form`);
     const idToken = await getUserToken();
@@ -266,7 +267,6 @@ export const app = {
     /*
      * Search a data model.
      */
-    console.log('Search', model, 'for', event.target.value);
     let ref = db.collection('organizations').doc(orgId).collection(model);
     if (this.limit) ref = ref.limit(this.limit);
     if (orderBy && desc) ref = ref.orderBy(orderBy, 'desc');
@@ -276,7 +276,6 @@ export const app = {
       querySnapshot.forEach((doc) => {
         data.push(doc.data());
       });
-      console.log('Table data:', data);
       if (data.length) this.renderTable(model, modelSingular, data, this.dataModel);
       else this.renderPlaceholder();
     });
@@ -296,50 +295,24 @@ export const app = {
 
   async streamData(model, modelSingular, orgId, limit=null) {
     /*
-     * Stream data, listening for any changes.
+     * Stream data, listening for any changes. Search by date range (by updated_at)
+     * by first. If no observations are found, then search with a limit and set
+     * the start_date to the earliest updated_at time, if any observations were found.
      */
     // Optional: Get parameters (desc, orderBy) from the user interface.
-    // TODO: Implement search with filters, e.g. .where("state", "==", "OK")
-    // TODO: Pass dataModel from template.
-    console.log('Streaming data....');
-    const desc = false;
-    const orderBy = null;
+    // Optional: Implement search with filters, e.g. .where("state", "==", "OK")
+    // Optional: Pass dataModel from template.
     this.dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
     let ref = db.collection('organizations').doc(orgId).collection(model);
-    // Optional Hot-Fix:
-    // Get a singular observation, if updated_at within time-frame, stick with
-    // time-frameElement, otherwise go with limit.
-    // FIXME: Search by date range (by updated_at) by first. If no observations
-    // are found, then search with a limit (perhaps 10?) and set the start_date
-    // to the earliest updated_at time, if any observations were found.
     if (!limit) {
       const startDate = document.getElementById('time_start').value;
       const endDate = document.getElementById('time_end').value;
-      // FIXME: Adjust the start and end of the range to be inclusive!
-      // const date = e.date.toISOString();
-      // let start = '';
-      // let end = '';
-      // if (e.target.id === 'time_start') {
-      //   start = e.date.toISOString();
-      //   end = $('#time_end').datepicker('getDate');
-      //   end.setUTCHours(23, 59, 59, 999);
-      //   end = end.toISOString();
-      // } else {
-      //   end = e.date;
-      //   end.setUTCHours(23, 59, 59, 999);
-      //   end = end.toISOString();
-      //   start = $('#time_start').datepicker('getDate').toISOString();
-      // }
-      console.log('Start Date:', startDate);
-      console.log('End Date:', endDate);
       ref = ref.where('updated_at', '>=', startDate);
       ref = ref.where('updated_at', '<=', `${endDate}T23:59:59`);
       ref = ref.orderBy('updated_at', 'desc');
     } else {
-      ref = ref.limit(this.limit);
+      ref = ref.limit(limit);
       ref = ref.orderBy('updated_at', 'desc');
-      // if (orderBy && desc) ref = ref.orderBy(orderBy, 'desc');
-      // else if (orderBy) ref = ref.orderBy(orderBy);
     }
     ref.onSnapshot((querySnapshot) => {
       const data = [];
@@ -349,17 +322,13 @@ export const app = {
         if (!earliest || item.updated_at < earliest) earliest = item.updated_at;
         data.push(item);
       });
-      console.log('Table data:', data);
       if (data.length) {
         this.renderTable(model, modelSingular, data, this.dataModel);
-        // Find earliest date, set date range.
-        console.log('Earliest date:', earliest);
         try {
           document.getElementById('time_start').value = earliest.slice(0, 10);
         } catch (error) {
           // Date input likely hidden.
         }
-        // $('#start_date').datepicker('update', earliest.slice(0, 10));
       }
       else if (!limit) this.streamData(model, modelSingular, orgId, 100);
       else this.renderPlaceholder();
@@ -367,11 +336,11 @@ export const app = {
   },
 
 
-  async streamLogs(model, modelId, orgId, filterBy='key', orderBy='created_at', start='', end='') {
+  async streamLogs(model, modelId, orgId, filterBy='key', orderBy='created_at', start='', end='', period=7) {
     /*
      * Stream logs, listening for any changes.
      */
-    if (!start) start = new Date(new Date().setDate(new Date().getDate()-1)).toISOString().substring(0, 10);
+    if (!start) start = new Date(new Date().setDate(new Date().getDate()-period)).toISOString().substring(0, 10);
     if (!end) {
       end = new Date()
       end.setUTCHours(23, 59, 59, 999);
@@ -381,8 +350,6 @@ export const app = {
     dataModel.fields = dataModel.fields.filter(function(obj) {
       return !(['log_id', 'changes', 'user'].includes(obj.key));
     });
-    console.log('Start:', start);
-    console.log('End:', end);
     db.collection('organizations').doc(orgId).collection('logs')
       .where(filterBy, '==', modelId)
       .where(orderBy, '>=', start)
@@ -394,15 +361,224 @@ export const app = {
         querySnapshot.forEach((doc) => {
           const values = doc.data();
           values.changes = JSON.stringify(values.changes);
-          // FIXME: Split up date and time for filling into the form.
-          console.log(values.created_at);
+          // Optional: Split up date and time for filling into the form.
           data.push(values);
         });
-        console.log('Logs:', data);
         if (data.length) this.renderTable(`${model}-logs`, 'log', data, dataModel);
         else this.renderPlaceholder();
       });
   },
+
+
+  /*----------------------------------------------------------------------------
+  Sub-models
+  ----------------------------------------------------------------------------*/
+
+  async addTableRow(model, modelSingular, orgId, abbreviation) {
+    /*
+     * Add a new, editable row to a data table.
+     */
+    let count = 1;
+    const rows = [];
+    const newRow = {};
+    const columns = this.gridOptions.columnApi.getAllColumns();
+    const keys = columns.map(a => a.colId);
+    keys.forEach((key) => newRow[key] = null)
+    await this.gridOptions.api.forEachNode((rowNode, index) => {
+      rows.push(rowNode.data);
+      count += 1;
+    })
+    newRow[`${modelSingular}_id`] = await this.createID(model, modelSingular, orgId, abbreviation, count);
+    rows.push(newRow);
+    this.gridOptions.api.setRowData(rows);
+    // TODO: Show save button if rows > 0.
+  },
+
+
+  async deleteTableRows(model, modelSingular, orgId) {
+    /*
+     * Delete a row or rows from an editable data table,
+     * trying to remove the data from Firestore.
+     */
+    const rows = []
+    const idKey = `${modelSingular}_id`;
+    const rowsToDelete = this.gridOptions.api.getSelectedRows();
+    const idsToDelete = rowsToDelete.map(a => a[idKey]);
+    const postData = [];
+    idsToDelete.forEach((id) => {
+      const entry = {};
+      entry[idKey] = id;
+      postData.push(entry);
+    });
+    // TEST: Try to remove the data from Firestore through the API.
+    await authRequest(`/api/${model}?organization_id=${orgId}`, postData, { delete: true });
+    await this.gridOptions.api.forEachNode((rowNode, index) => {
+      if (!idsToDelete.includes(rowNode.data[idKey])) {
+        rows.push(rowNode.data);
+      }
+    });
+    this.gridOptions.api.setRowData(rows);
+    document.getElementById('delete-table-button').classList.add('d-none');
+  },
+
+
+  async saveTable(model, modelSingular, orgId) {
+    /*
+     * Save a sub-model's data, associating the data with the current data
+     * model entry using the parent data model's ID.
+     */
+    console.log('Saving:', model, modelSingular, orgId);
+    const data = [];
+    await this.gridOptions.api.forEachNode((rowNode, index) => {
+      // TODO: Save to Firestore through the API.
+      data.push(rowNode);
+    });
+    authRequest(`/api/${model}?organization_id=${orgId}`, { data })
+      .then((response) => {
+        const message = `Data saved under ${model} for organization ${orgID}.`;
+        showNotification('Data saved', message, { type: 'success' });
+      })
+      .catch((error) => {
+        showNotification('Error saving data', error.message, { type: 'error' });
+      });
+      // .finally(() => {
+      //   document.getElementById('form-save-loading-button').classList.add('d-none');
+      //   document.getElementById('form-save-button').classList.remove('d-none');
+      // });
+    // showNotification('Data saved', `Data saved under ${model} for organization ${orgID}.`, { type: 'success' });
+    // showNotification('Upload Error', 'Error saving file data.', { type: 'error' })
+  },
+
+
+  async streamSubModelData(model, modelSingular, orgId, key, value, limit=null) {
+    /*
+     * Stream data for a sub-model.
+     */
+    console.log('Streaming sub model data....');
+    const subDataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
+    let ref = db.collection('organizations').doc(orgId).collection(model);
+    if (!limit) {
+      const startDate = document.getElementById('time_start').value;
+      const endDate = document.getElementById('time_end').value;
+      ref = ref.where('updated_at', '>=', startDate);
+      ref = ref.where('updated_at', '<=', `${endDate}T23:59:59`);
+      ref = ref.orderBy('updated_at', 'desc');
+    } else {
+      ref = ref.limit(limit);
+      // ref = ref.orderBy('updated_at', 'desc');
+    }
+    ref = ref.where(key, '==', value);
+    ref.onSnapshot((querySnapshot) => {
+      const data = [];
+      querySnapshot.forEach((doc) => {
+        const item = doc.data();
+        data.push(item);
+      });
+      this.renderSubModelTable(data, subDataModel);
+      // else this.renderPlaceholder();
+    });
+  },
+
+
+  renderSubModelTable(data, dataModel) {
+    /*
+     * Render a table for data from a sub-model.
+     */
+
+    function onSelectionChanged(event) {
+      var deleteButton = document.getElementById('delete-table-button');
+      var rowCount = event.api.getSelectedNodes().length;
+      if (rowCount > 0) {
+        deleteButton.classList.remove('d-none');
+      } else {
+        deleteButton.classList.add('d-none');
+      }
+    }
+
+    // function onRowSelected(event) {
+    //   window.alert(
+    //     'row ' + event.node.data.athlete + ' selected = ' + event.node.isSelected()
+    //   );
+    // }
+    
+    // Specify the table columns according to the data model fields from organization settings.
+    const columnDefs = dataModel.fields.map(function(e) {
+      const dateColumn = e.key.endsWith('_at') ? 'datePicker' : null;
+      return { headerName: e.label, field: e.key, sortable: true, filter: true, cellEditor: dateColumn };
+    });
+
+    // Enable checkbox selection.
+    columnDefs[0]['checkboxSelection'] = true;
+    // columnDefs[0]['headerCheckboxSelection'] = true;
+    // columnDefs[0]['rowDrag'] = true;
+
+    // Specify the table options.
+    this.gridOptions = {
+      columnDefs: columnDefs,
+      defaultColDef: {
+        flex: 1,
+        minWidth: 200,
+        editable: true,
+      },
+      // editType: 'fullRow',
+      enterMovesDown: true,
+      enterMovesDownAfterEdit: true,
+      rowClass: 'app-action',
+      rowHeight: 25,
+      rowSelection: 'multiple',
+      singleClickEdit: true,
+      suppressRowClickSelection: true,
+      onSelectionChanged: onSelectionChanged,
+      // onRowSelected: onRowSelected,
+      overlayLoadingTemplate: `
+        <div class="spinner-grow text-success" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      `,
+      overlayNoRowsTemplate: `
+        <div class="card-body bg-transparent text-center" style="max-width:320px;">
+          <img
+            src="/static/${dataModel.image_path}"
+            style="width:75px;"
+          >
+          <h2 class="fs-5 text-dark mt-3 mb-1">
+            Add ${dataModel.key}
+          </h2>
+          <p class="text-secondary fs-6 text-small">
+            <small>${dataModel.description}</small>
+          </p>
+        </div>
+      `
+    };
+
+    // Render the table.
+    const eGridDiv = document.querySelector(`#${dataModel.key}-table`);
+    new agGrid.Grid(eGridDiv, this.gridOptions);
+    // cannlytics.theme.setTableTheme();
+
+    // TODO:
+    // Get any template data and provide it to the table via the AG Grid API.
+    // cannlytics.results.getCoATemplates('{{ organizations.0.organization_id }}').then(function(data) {
+    //   gridOptions.api.setRowData(data);
+    // });
+    this.gridOptions.api.setRowData(data);
+
+  },
+
+
+  showDeleteRowsButton() {
+    /*
+     * Show delete row button.
+     */
+    document.getElementById('delete-table-button').classList.remove('d-none')
+  },
+
+  
+  onSelectionChanged(event) {
+    var rowCount = event.api.getSelectedNodes().length;
+    window.alert('selection changed, ' + rowCount + ' rows selected');
+  },
+
 
   /*----------------------------------------------------------------------------
   Files
@@ -475,7 +651,6 @@ export const app = {
             // Optional: Create short link
           }).then(() => {
             showNotification('File saved', `File saved to your ${model} under ${modelId}.`, { type: 'success' });
-            // document.getElementById('organization_photo_url').src = url;
           })
           .catch((error) => {
             console.log(error);
@@ -506,9 +681,7 @@ export const app = {
     /*
      * Get the version of a given file, if it exists.
      */
-    console.log('Getting file version:', fileRef);
     const data = await getDocument(fileRef)
-    console.log('Found file data:', data);
     return data.version || 0;
   },
 
@@ -530,12 +703,12 @@ export const app = {
   Utility functions
   ----------------------------------------------------------------------------*/
 
-  async createID(model, modelSingular, orgId, abbreviation) {
+  async createID(model, modelSingular, orgId, abbreviation, count=1) {
     /*
      * Create a unique ID.
      */
     if (!orgId) orgId = document.getElementById('organization_id').value;
-    const currentCount = await this.getCurrentCount(model, orgId) + 1;
+    const currentCount = await this.getCurrentCount(model, orgId) + count;
     const date = new Date().toISOString().substring(0, 10);
     const dateString = date.replaceAll('-', '').slice(2);
     const id = `${abbreviation}${dateString}-${currentCount}`
@@ -554,7 +727,6 @@ export const app = {
      */
     const date = new Date().toISOString().substring(0, 10);
     const ref = `organizations/${orgId}/stats/organization_settings/daily_totals/${date}`;
-    console.log('Ref:', ref);
     getDocument(ref).then((data) => {
       const total = data[`total_${modelType}`];
       if (total) resolve(total.length)
