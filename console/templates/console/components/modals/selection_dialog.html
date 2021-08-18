@@ -2,8 +2,8 @@
 <html>
 <!--
   Selection Dialog | Cannlytics Console
-  Created: 7/3/2021
-  Updated: 7/3/2021
+  Created: 8/17/2021
+  Updated: 8/17/2021
   Parameters:
     model
     callback
@@ -26,6 +26,8 @@
           <small>Choose the {{ model }} that you need from pre-existing {{ model }}.</small>
         </h2>
 
+        <!-- Optional: Implement search -->
+
         <!-- AG Grid Table -->
         <div id="selection-data-table">
           <div
@@ -39,14 +41,14 @@
         <div class="d-flex justify-content-end px-3 pt-3">
           <button
             type="button"
-            class="btn btn-sm-light btn-md-light me-2"
+            class="btn btn-sm-light btn-md-light btn-set-width me-2"
             data-bs-dismiss="modal"
           >
             Cancel
           </button>
           <button
             type="button"
-            class="btn btn-sm bg-gradient-green text-white"
+            class="btn btn-sm btn-set-width bg-gradient-green text-white"
             onclick="cannlytics.app.selectTableRows();"
             data-bs-dismiss="modal"
           >
@@ -55,7 +57,6 @@
         </div>
 
       </div>
-
     </div>
   </div>
 </div>

@@ -599,7 +599,7 @@ export const app = {
         minWidth: 200,
         editable: true,
       },
-      enterMovesDown: true,
+      // enterMovesDown: true,
       enterMovesDownAfterEdit: true,
       rowClass: 'app-action',
       rowHeight: 25,
