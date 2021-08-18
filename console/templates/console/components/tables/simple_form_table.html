@@ -13,7 +13,8 @@
     parent_model
     parent_model_singular
     parent_id
-  
+    select (optional)
+
   When adding sub-models, entries are created in /organizations/{org_id}/{sub-model} with a unique id
 -->
 <div id="{{ model }}-container" class="px-3">
@@ -23,11 +24,20 @@
         {{ model|title }}
       </h1>
       <h2 class="fs-6 lh-base text-secondary mb-3">
-        <small>{{ description }}.</small>
+        <small>{{ description }}</small>
       </h2>
     </div>
     <div class="d-flex align-items-center">
-      
+      {% if select %}
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          data-bs-toggle="modal"
+          data-bs-target="#selectionModal"
+          onclick="cannlytics.app.loadSelectTable('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+        >
+          Select {{ model_singular }}
+        </button>
+      {% endif %}
       <button
         class="btn btn-sm-light btn-md-light"
         onclick="cannlytics.app.addTableRow('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}', '{{ abbreviation }}');"
@@ -36,14 +46,14 @@
       </button>
       <button
         id="save-table-button"
-        class="btn btn-sm bg-gradient-green text-white d-none ms-2"
+        class="btn btn-sm btn-set-width bg-gradient-green text-white d-none ms-2"
         onclick="cannlytics.app.saveTable('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}', '{{ parent_model }}', '{{ parent_model_singular }}', '{{ parent_id }}');"
       >
         Save
       </button>
       <button
         id="delete-table-button"
-        class="btn btn-sm btn-danger d-none ms-2"
+        class="btn btn-sm btn-set-width btn-danger d-none ms-2"
         onclick="cannlytics.app.deleteTableRows('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
       >
         Delete

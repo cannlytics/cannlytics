@@ -125,6 +125,7 @@ export const app = {
   fileLimit: 1000,
   tableHidden: true,
   gridOptions: {},
+  selectGridOptions: {},
 
 
   changeLimit(event) {
@@ -410,7 +411,11 @@ export const app = {
       entry[idKey] = id;
       postData.push(entry);
     });
-    await authRequest(`/api/${model}?organization_id=${orgId}`, postData, { delete: true });
+    try {
+      authRequest(`/api/${model}?organization_id=${orgId}`, postData, { delete: true });
+    } catch (error) {
+      // Entries may not exist in the database yet.
+    }
     await this.gridOptions.api.forEachNode((rowNode, index) => {
       if (!idsToDelete.includes(rowNode.data[idKey])) {
         rows.push(rowNode.data);
@@ -418,6 +423,96 @@ export const app = {
     });
     this.gridOptions.api.setRowData(rows);
     document.getElementById('delete-table-button').classList.add('d-none');
+  },
+
+
+  loadSelectTable(model, modelSingular, orgId, limit=1000) {
+    /*
+     * Render a table used for selection.
+     */
+    let ref = db.collection('organizations').doc(orgId).collection(model);
+    ref = ref.limit(limit);
+    ref.onSnapshot((querySnapshot) => {
+      const data = [];
+      querySnapshot.forEach((doc) => {
+        const item = doc.data();
+        data.push(item);
+      });
+      this.renderSelectTable(data, model, orgId);
+    });
+  },
+
+
+  async renderSelectTable(data, model, orgId) {
+    /*
+     * Render a selection table.
+     */
+
+    // Specify the table columns according to the data model fields from organization settings.
+    const dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
+    const columnDefs = dataModel.fields.map(function(e) {
+      const dateColumn = e.key.endsWith('_at') ? 'datePicker' : null;
+      return { headerName: e.label, field: e.key, sortable: true, filter: true, cellEditor: dateColumn };
+    });
+
+    // Enable checkbox selection.
+    columnDefs[0]['checkboxSelection'] = true;
+    columnDefs[0]['headerCheckboxSelection'] = true;
+
+    // Specify the table options.
+    this.selectGridOptions = {
+      columnDefs: columnDefs,
+      defaultColDef: {
+        flex: 1,
+        minWidth: 200,
+      },
+      rowClass: 'app-action',
+      rowHeight: 25,
+      rowSelection: 'multiple',
+      singleClickEdit: true,
+      suppressRowClickSelection: true,
+      // onSelectionChanged: onSelectionChanged,
+      overlayLoadingTemplate: `
+        <div class="spinner-grow text-success" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      `,
+      overlayNoRowsTemplate: `
+        <div class="card-body bg-transparent text-center" style="max-width:320px;">
+          <img
+            src="/static/${dataModel.image_path}"
+            style="width:75px;"
+          >
+          <h2 class="fs-5 text-dark mt-3 mb-1">
+            Add ${dataModel.key}
+          </h2>
+          <p class="text-secondary fs-6 text-small">
+            <small>${dataModel.description}</small>
+          </p>
+        </div>
+      `
+    };
+
+    // Render the table.
+    const eGridDiv = document.querySelector(`#${dataModel.key}-selection-table`);
+    eGridDiv.innerHTML = '';
+    new agGrid.Grid(eGridDiv, this.selectGridOptions);
+    window.cannlytics.theme.setTableTheme();
+    this.selectGridOptions.api.setRowData(data);
+
+  },
+
+
+  async selectTableRows() {
+    /*
+     * Select pre-existing entries for the table.
+     */
+    const rows = [];
+    const selected = this.selectGridOptions.api.getSelectedRows();
+    await this.gridOptions.api.forEachNode((rowNode, index) => rows.push(rowNode.data));
+    const data = [...rows, ...selected];
+    this.gridOptions.api.setRowData(data);
+    if (data.length) document.getElementById('save-table-button').classList.remove('d-none');
   },
 
 
@@ -436,6 +531,7 @@ export const app = {
       .then((response) => {
         const message = `Data saved under ${model} for organization ${orgId}.`;
         showNotification('Data saved', message, { type: 'success' });
+        document.getElementById('delete-table-button').classList.add('d-none');
       })
       .catch((error) => {
         showNotification('Error saving data', error.message, { type: 'error' });

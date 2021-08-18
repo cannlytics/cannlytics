@@ -4,14 +4,7 @@
   Analysis Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 12/17/2020
-  Updated: 7/11/2021
-  TODO:
-    - Allow the user to reset, save (update and create), and delete.
-    - Render additional fields, ability to add an additional field.
-    - Load existing analytes.
-    - Use a table instead of a list to display analytes.
-  FIXME:
-    - Pass IDs appropriately.
+  Updated: 8/17/2021
 -->
 {% load icon %}
 {% block console_css %}
@@ -80,7 +73,22 @@
       </form>
     </div>
 
-    <!-- TODO: Analytes with AG-Grid table -->
+    <!-- Analytes with AG-Grid table -->
+    {% include "console/components/tables/simple_form_table.html" with
+      model="analytes"
+      model_singular="analyte"
+      description="Manage analytes that are measured in this analysis."
+      abbreviation="AT"
+      parent_model="analyses"
+      parent_model_singular="analysis"
+      parent_id=section
+      select=True
+    %}
+
+    <!-- Select analytes dialog -->
+    {% include "console/components/modals/selection_dialog.html" with
+      model="analytes"
+    %}
 
     <!-- Danger zone (delete) -->
     {% if id and id != 'new' %}
@@ -102,8 +110,8 @@
     // Load the data into the user interface.
     cannlytics.ui.viewObject('analysis');
 
-    // Render any date pickers.
-    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+    // Stream any sub-model data.
+    cannlytics.app.streamSubModelData('analytes', 'analyte', '{{ organizations.0.organization_id }}', 'analysis_id', '{{ section }}', 1000);
 
   </script>
 {% endblock console_js %}

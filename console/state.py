@@ -85,7 +85,7 @@ data_models = [
         "url": "/analytes",
         "key": "analytes",
         "user_type": "lab",
-        "description": "Manage analytes, compounds that you wish to test.",
+        "description": "Manage analytes, compounds that you wish to measure.",
         "image_path": "console/images/icons/multi-tone/microscope.svg",
         'abbreviation': 'AT',
         'id_schema': '[abbreviation]%y%m%d',
