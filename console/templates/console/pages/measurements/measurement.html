@@ -75,9 +75,23 @@
         </form>
       </div>
 
-      <!-- TODO: Try to implement add analytes with AG-Grid table -->
-      
+      <!-- Results sub-table -->
+      {% include "console/components/tables/simple_form_table.html" with
+        model="results"
+        model_singular="result"
+        description="Manage results that are calculated from this measurement."
+        abbreviation="R"
+        parent_model="measurements"
+        parent_model_singular="measurement"
+        parent_id=section
+        select=True
+      %}
 
+      <!-- Results selection dialog -->
+      {% include "console/components/modals/selection_dialog.html" with
+        model="results"
+      %}
+      
       <!-- Danger zone (delete) -->
       {% if id and id != 'new' %}
         {% include "console/components/forms/delete_option.html" with
@@ -99,8 +113,8 @@
     // Load the data into the user interface.
     cannlytics.ui.viewObject('measurement');
 
-    // Render any date pickers.
-    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+    // Stream any sub-model data.
+    cannlytics.app.streamSubModelData('results', 'result', '{{ organizations.0.organization_id }}', 'measurement_id', '{{ section }}', 1000);
 
   </script>
 {% endblock console_js %}

@@ -1,7 +1,7 @@
 """
 Authentication Views | Cannlytics API
 Created: 1/22/2021
-Updated: 7/19/2021
+Updated: 7/24/2021
 
 Authentication mechanisms for the Cannlytics API, including API key
 utility functions, request authentication and verification helpers,
@@ -47,6 +47,39 @@ except ValueError:
 # Core Authentication Mechanism
 #-----------------------------------------------------------------------
 
+def authorize_user(request):
+    """
+    Authenticate and authorize that the user can work with
+    the organization's data.
+    Args:
+        request: An instance of `django.http.HttpRequest` or
+            `rest_framework.request.Request`.
+    Returns:
+        (dict): A dictionary of the user's claims or an error message.
+        (int): The status code.
+        (str): The organizations ID.
+    """
+    claims = authenticate_request(request)
+    try:
+        uid = claims['uid']
+        owner = claims.get('owner', [])
+        team = claims.get('team', [])
+        qa = claims.get('qa', [])
+        authorized_ids = owner + team + qa
+    except KeyError:
+        message = 'Your request was not authenticated. Ensure that you have a valid session or API key.'
+        return {'error': True, 'message': message}, 401, None
+    try:
+        org_id = request.query_params['organization_id']
+    except KeyError:
+        message = 'An organization_id parameter is required.'
+        return {'error': True, 'message': message}, 403, None
+    if org_id not in authorized_ids:
+        message = f'Your must be an owner, quality assurance, or a team member of this organization for this operation.'
+        return {'error': True, 'message': message}, 403, None
+    return claims, 200, org_id
+
+
 def authenticate_request(request):
     """Authenticate a user given a Firebase token or an API key
     passed in an `Authentication: Bearer <token>` header.
@@ -60,6 +93,8 @@ def authenticate_request(request):
     claims = {}
     try:
         session_cookie = request.COOKIES.get('__session')
+        if session_cookie is None:
+            session_cookie = request.session.get('__session')
         claims = verify_session_cookie(session_cookie, check_revoked=True)
     except:
         try:
@@ -85,14 +120,11 @@ def verify_session(request):
             the user's `uid`.
     """
     try:
-        session_cookie = request.session.get('__session')
+        session_cookie = request.COOKIES.get('__session')
         if session_cookie is None:
-            session_cookie = request.COOKIES.get('__session')
-        if session_cookie is None:
-            return {}
-        print('Verifying session cookie:', session_cookie)
+            session_cookie = request.session.get('__session')
         return verify_session_cookie(session_cookie, check_revoked=True)
-    except KeyError:
+    except (KeyError, ValueError) as e:
         return {}
 
 

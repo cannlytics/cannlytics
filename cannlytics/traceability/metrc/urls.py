@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-cannlytics.traceability.metrc.urls
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Metrc URLs | Cannlytics
+
 Metrc API URLs.
 """
 

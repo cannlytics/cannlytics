@@ -2,7 +2,7 @@
  * Organizations JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 6/9/2021
- * Updated: 7/18/2021
+ * Updated: 8/13/2021
  */
 import { changePhotoURL, getDownloadURL, getCollection, getDocument, updateDocument, uploadFile, storageErrors } from '../firebase.js';
 import { authRequest, deserializeForm, serializeForm, slugify, showNotification } from '../utils.js';
@@ -37,10 +37,16 @@ export const organizationSettings = {
       const form = document.forms['organization-form'];
       form.reset();
       deserializeForm(form, response.data);
-      if (response.data.photo_url) {
-        document.getElementById('organization_photo_url').src = response.data.photo_url;
+      const data = response.data || {};
+      if (data.photo_url) {
+        document.getElementById('organization_photo_url').src = data.photo_url;
       } else {
         document.getElementById('organization_photo_url').src = "/static/console/images/icons/outline/teamwork.svg";
+      }
+      if (data.public) {
+        document.getElementById('public-choice').checked = true;
+      } else {
+        document.getElementById('private-choice').checked = true;
       }
     });
   },
@@ -76,12 +82,42 @@ export const organizationSettings = {
   },
 
 
-  changeActiveOrganization(orgId) {
+  changePrimaryOrganization(orgId) {
     /*
-     * Change the active organization for the user.
+     * Change the primary organization for the user.
      */
     // TODO: Move orgId to beginning of user's list and refresh.
     console.log('Change organizations:', orgId);
+  },
+
+
+  changeOrganizationPublicStatus(orgId) {
+    /*
+     * Change the organization's public status.
+     */
+    const publicChoice = document.getElementById('public-choice').checked;
+    authRequest(`/api/organizations/${orgId}`, { public: publicChoice }).then((response) => {
+      const type = publicChoice ? 'public' : 'private';
+      showNotification('Status saved', `Your organization is now ${type}.`, { type: 'success' });
+    })
+    .catch((error) => {
+      showNotification('Error changing status.', error, { type: 'error' });
+    });
+  },
+
+
+  changeOrganizationType(orgId) {
+    /*
+     * Change the organization's type.
+     */
+    const orgType = document.getElementById('input_type').value;
+    authRequest(`/api/organizations/${orgId}`, { type: orgType }).then((response) => {
+      showNotification('Organization type saved', `Your organization is now a ${orgType}. Refresh for changes to take effect.`, { type: 'success' });
+      // Refresh the page.
+    })
+    .catch((error) => {
+      showNotification('Error changing organization type.', error, { type: 'error' });
+    });
   },
 
 
@@ -108,14 +144,13 @@ export const organizationSettings = {
   },
 
 
-  getTeamMembers(orgId, owner, uid, render=true) {
+  getTeamMembers(orgId, claims, render=true) {
     /*
      * Get team member data.
      */
-    const isOwner = owner === uid;
     authRequest(`/api/organizations/${orgId}/team`, ).then((response) => {
       response.data.forEach((item) => {
-        if (render) addTeamMemberCard('team-member-grid', item, owner, isOwner, orgId);
+        if (render) addTeamMemberCard(orgId, claims, item);
       });
     });
   },
@@ -209,7 +244,8 @@ export const organizationSettings = {
       if (item.name) data[item.name] = item.value;
     }
     const orgId = slugify(data['name'])
-    authRequest(`/api/organizations`, data).then((response) => {
+    console.log('Org ID:', orgId);
+    authRequest(`/api/organizations/${orgId}`, data).then((response) => {
       // Optional: Show better error messages.
       // TODO: Tell user if organization name is already taken
       if (response.error) {
@@ -312,12 +348,12 @@ export const organizationSettings = {
  * UI Management
  */
 
-function addTeamMemberCard(gridId, data, owner, isOwner, orgId) {
+function addTeamMemberCard(orgId, claims, data, gridId='team-member-grid') {
   /*
    * Add a data card to an existing grid.
    * TODO: Render delete option if owner.
    */
-  let badge = '';
+  let badges = '';
   let options = '';
   let license = '';
   let phone = '';
@@ -325,9 +361,8 @@ function addTeamMemberCard(gridId, data, owner, isOwner, orgId) {
   if (data.license) license = `<div>License: ${data.license}</div>`;
   if (data.phone) phone = `<div>${data.phone}</div>`;
   if (data.position) position = `<div>${data.position}</div>`;
-  if (owner) {
-    badge = '<span class="badge rounded-pill bg-warning">Owner</span>';
-  } else if (isOwner) {
+  if (claims.owner.includes(claims.uid)) {
+    badges = '<span class="badge rounded-pill bg-gradient-orange">Owner</span>';
     options = `
   <div class="d-flex align-items-center">
     <a class="btn btn-sm-light me-2" href="/settings/organizations/${orgId}/team/${data.uid}">
@@ -338,8 +373,17 @@ function addTeamMemberCard(gridId, data, owner, isOwner, orgId) {
     </button>
   </div>`
   }
+  if (claims.qa.includes(claims.uid)) {
+    badges = '<span class="badge rounded-pill bg-warning">QA</span>';
+  }
+  if (claims.billing.includes(claims.uid)) {
+    badges = '<span class="badge rounded-pill bg-warning">Billing</span>';
+  }
+  if (claims.staff.includes(claims.uid)) {
+    badges = '<span class="badge rounded-pill bg-gradient-green">Staff</span>';
+  }
   var div = document.getElementById(gridId);
-  div.innerHTML += `
+  var text = `
 <div
   class="card shade-hover border-secondary rounded-3 app-action col col-sm-1 col-md-2 p-3 mb-3 h-100"
   style="width:275px;"
@@ -347,25 +391,22 @@ function addTeamMemberCard(gridId, data, owner, isOwner, orgId) {
 <a class="card-block stretched-link text-decoration-none" href="/settings/organizations/${orgId}/team/${data.uid}">
   <div class="d-flex justify-content-between">
     <div class="d-flex align-items-center">
-      <div class="icon-container me-2">
+      <div class="icon-container float-left align-self-start me-2">
         <img src="${data.photo_url}" height="50px">
       </div>
       <div class="col">
         <h4 class="fs-5 text-dark">${data.name}</h4>
-        <div class="text-dark">${data.email}</div>
-      </div>
+        <div class="text-dark">${data.email}</div>`;
+        if (position) text += `<div class="text-secondary">${position}</div>`;
+        if (phone) text += `<div class="text-secondary">${phone}</div>`;
+        if (license) text += `<div class="text-secondary">${license}</div>`;
+      text += `</div>
     </div>
-    ${options}
   </div>
-  <div class="card-body bg-transparent p-0">
-    ${badge}
-    <div class="col text-dark align-items-center">`;
-  if (position) div.innerHTML += `<span>${position}</span>`;
-  if (phone) div.innerHTML += `<span>${position}</span>`;
-  if (license) div.innerHTML += `<span>${position}</span>`;
-  div.innerHTML += `
-    </div>
+  <div class="card-body bg-transparent mt-2 p-0">
+    ${badges}
   </div>
 </a>
 </div>`;
+div.innerHTML = text;
 }

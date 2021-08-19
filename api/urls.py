@@ -12,6 +12,7 @@ from rest_framework import urlpatterns
 
 # Internal imports
 from api import views
+from api.analytics import analytics
 from api.analyses import analyses
 from api.analytes import analytes
 from api.areas import areas
@@ -35,6 +36,9 @@ app_name = 'api' # pylint: disable=invalid-name
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('analytics', include([
+        path('', analytics.analytics),
+    ])),
     path('analyses', include([
         path('', analyses.analyses),
         path('/<analysis_id>', analyses.analyses),
@@ -49,14 +53,18 @@ urlpatterns = [
     ])),
     path('certificates', include([
         path('/generate', certificates.generate_coas),
-        path('/review', certificates.generate_coas),
-        path('/approve', certificates.generate_coas),
+        path('/review', certificates.review_coas),
+        path('/approve', certificates.approve_coas),
+        path('/post', certificates.post_coas),
+        path('/release', certificates.release_coas),
     ])),
     path('contacts', include([
         path('', contacts.contacts),
         path('/<contact_id>', contacts.contacts),
-        path('/<contact_id>/people', contacts.people),
-        path('/<contact_id>/people/<user_id>', contacts.people),
+    ])),
+    path('people', include([
+        path('', contacts.people),
+        path('/<person_id>', contacts.people),
     ])),
     path('inventory', include([
         path('', inventory.inventory),
@@ -89,6 +97,7 @@ urlpatterns = [
     ])),
     path('organizations', include([
         path('', organizations.organizations),
+        path('/labs', organizations.labs),
         path('/<organization_id>', organizations.organizations),
         path('/<organization_id>/settings', organizations.organizations),
         path('/<organization_id>/team', organizations.organization_team),
@@ -106,6 +115,10 @@ urlpatterns = [
     path('samples', include([
         path('', samples.samples),
         path('/<sample_id>', samples.samples),
+    ])),
+    path('templates', include([
+        path('', results.templates),
+        path('/<template_id>', results.templates),
     ])),
     path('transfers', include([
         path('', transfers.transfers),

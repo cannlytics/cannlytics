@@ -1,6 +1,6 @@
 # Firebase
 
-Cannlytics utilizes Firebase for back-end services. Firebase is initialized with `firebase.initialize_firebase`, which returns a Firestore database instance. A generic example of using the cannlytics package is as follows.
+Cannlytics utilizes Firebase for back-end services. Firebase is initialized with `firebase.initialize_firebase`, which returns a Firestore database instance. Following is a simple example of connecting to the Firestore database.
 
 ```py
 from cannlytics import firebase
@@ -10,9 +10,6 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = ""
 
 # Initialize Firebase
 database = firebase.initialize_firebase()
-
-# Get a document.
-lab = firebase.get_document("labs/cannlytics")
 ```
 
 > You will need to provide credentials for your application by setting the GOOGLE_APPLICATION_CREDENTIALS environment variable.

@@ -7,12 +7,23 @@
   Updated: 7/15/2021
   Wishlist:
     - Create measurement worksheet for selected samples.
+    - Ability to upload many sample images at a time, matching
+    images to samples by searching if filename includes sample ID.
+    The unmatched files can be displayed in a table to let the user
+    match them. Then, all matched images can be imported.
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block title %}{% if section %}{{ section }} | {% endif %}Samples | Cannlytics {% endblock title %}
+{% block console_css %}
+
+  <!-- Bootstrap Datepicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
+
+{% endblock console_css %}
 {% block console_body %}
-{% if section and section not in 'logs,files,certifiates' %}
+{% if section and section not in 'logs,files,certificates' %}
 
   <!-- Detail page -->
   {% include "console/pages/samples/sample.html" with
@@ -22,7 +33,7 @@
 
 {% else %}
 
-  <!-- List -->
+  <!-- Page -->
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
 
     <!-- Header -->
@@ -36,10 +47,17 @@
       <!-- Tabs -->
       {% include "console/components/forms/form_tabs.html" with
         model="samples"
+        extra='Certificates'
+        extra_path='certificates'
       %}
 
+      <!-- Certificates -->
+      {% if section == 'certificates' %}
+
+        {% block unit %}{% endblock unit %}
+
       <!-- Logs -->
-      {% if section == 'logs' %}
+      {% elif section == 'logs' %}
         {% include "console/pages/settings/logs/logs.html" with
           model='samples'
           model_singular='sample'
@@ -65,6 +83,7 @@
         {% include "console/components/tables/simple_table_options.html" with
           model='samples'
           model_singular='sample'
+          import=True
         %}
 
         <!-- Loading placeholder -->
@@ -86,7 +105,6 @@
 
         <!-- AG Grid Table -->
         <div id="data-table" class="d-none">
-          <!-- TODO: Advanced search -->
           <div
             id="samples-table"
             class="ag-theme-alpine-dark"

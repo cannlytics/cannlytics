@@ -10,6 +10,8 @@
     model
     extra
     extra_path
+    logs (optional)
+    files (optional)
 -->
 <ul class="nav nav-tabs mt-3">
   <li class="nav-item">
@@ -21,26 +23,30 @@
       List
     </a>
   </li>
-  <li class="nav-item">
-    <a
-      class="nav-link {% if section == 'logs' or unit == 'logs' %}active{% endif %}"
-      href="/{{ model }}{% if id %}/{{ id }}{% endif %}/logs"
-    >
-      Logs
-    </a>
-  </li>
-  <li class="nav-item">
-    <a
-      class="nav-link {% if section == 'files' or unit == 'files'  %}active{% endif %}"
-      href="/{{ model }}{% if id %}/{{ id }}{% endif %}/files"
-    >
-      Files
-    </a>
-  </li>
+  {% if organizations.0.type == 'lab' or logs %}
+    <li class="nav-item">
+      <a
+        class="nav-link {% if section == 'logs' or unit == 'logs' %}active{% endif %}"
+        href="/{{ model }}{% if id %}/{{ id }}{% endif %}/logs"
+      >
+        Logs
+      </a>
+    </li>
+  {% endif %}
+  {% if organizations.0.type == 'lab' or files %}
+    <li class="nav-item">
+      <a
+        class="nav-link {% if section == 'files' or unit == 'files'  %}active{% endif %}"
+        href="/{{ model }}{% if id %}/{{ id }}{% endif %}/files"
+      >
+        Files
+      </a>
+    </li>
+  {% endif %}
   {% if extra %}
     <li class="nav-item">
       <a
-        class="nav-link {% if section == extra_path %}active{% endif %}"
+        class="nav-link {% if section == extra_path or unit == 'coa' %}active{% endif %}"
         href="/{{ model }}{% if id %}/{{ id }}{% endif %}/{{ extra_path }}"
       >
         {{ extra }}

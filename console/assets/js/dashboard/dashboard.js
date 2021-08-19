@@ -62,7 +62,7 @@ export const dashboard = {
       if (item.name) data[item.name] = item.value;
     }
     const orgId = slugify(data['name'])
-    authRequest(`/api/organizations`, data).then((response) => {
+    authRequest(`/api/organizations?type=${orgType}`, data).then((response) => {
       // Optional: Show better error messages.
       // Optional: Tell user if organization name is already taken
       if (response.error) {

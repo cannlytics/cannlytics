@@ -28,6 +28,8 @@
     {% include "console/components/forms/form_tabs.html" with
         id=id
         model="contacts"
+        logs=True
+        files=True
       %}
   {% endif %}
 
@@ -73,7 +75,16 @@
       </form>
     </div>
 
-    <!-- TODO: Try to implement add people with AG-Grid table -->
+    <!-- People AG-Grid table -->
+    {% include "console/components/tables/simple_form_table.html" with
+      model="people"
+      model_singular="person"
+      description="Manage people that are associated with this contact."
+      abbreviation="USR"
+      parent_model="contacts"
+      parent_model_singular="contact"
+      parent_id=section
+    %}
 
     <!-- Danger zone (delete) -->
     {% if id and id != 'new' %}
@@ -95,6 +106,9 @@
 
     // Load the data into the user interface.
     cannlytics.ui.viewObject('contact');
+
+    // Stream any sub-model data.
+    cannlytics.app.streamSubModelData('people', 'person', '{{ organizations.0.organization_id }}', 'contact_id', '{{ section }}', 1000);
 
   </script>
 {% endif %}

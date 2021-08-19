@@ -4,14 +4,12 @@
   Sample Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
-  Updated: 7/15/2021
+  Updated: 8/17/2021
   TODO:
     - Allow the user to reset, save (update and create), and delete.
     - Render additional fields, ability to add an additional field.
     - Load existing measurements.
-    - Use a table instead of a list to display measurements.
-  FIXME:
-    - Pass IDs appropriately.
+    - Use a table instead of a list to display measurements and results.
 -->
 {% load icon %}
 {% block console_css %}
@@ -32,11 +30,49 @@
     %}
 
     <!-- Tabs -->
+    <!-- Optional: Render dynamically -->
     {% if id and id != 'new' %}
-      {% include "console/components/forms/form_tabs.html" with
+      {% comment %} {% include "console/components/forms/form_tabs.html" with
           id=id
           model="samples"
-        %}
+          extra="CoA"
+          extra_path="certificate"
+        %} {% endcomment %}
+      <ul class="nav nav-tabs mt-3">
+        <li class="nav-item">
+          <a
+            class="nav-link {% if not unit %}active{% endif %}"
+            aria-current="page"
+            href="/samples/{{ id }}"
+          >
+            Details
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if unit == 'logs' %}active{% endif %}"
+            href="/samples/{{ id }}/logs"
+          >
+            Logs
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if unit == 'files'  %}active{% endif %}"
+            href="/samples/{{ id }}/files"
+          >
+            Files
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if unit == 'certificate' %}active{% endif %}"
+            href="/samples/{{ id }}/certificate"
+          >
+            Certificate
+          </a>
+        </li>
+      </ul>
     {% endif %}
 
     <!-- Files page -->
@@ -58,6 +94,17 @@
         section=section
         user=user
       %}
+
+    <!-- Measurements and results review -->
+    <!-- Add / load measurements. Once measurements are in, calculate results.
+    The user can the select the final measurements for results. -->
+    {% elif unit == 'review' %}
+      {% include "console/pages/samples/includes/review.html" %}
+
+    <!-- Certificate page -->
+    {% elif unit == 'certificate' %}
+
+      {% include "console/pages/samples/includes/certificate.html" %}
 
     {% else %}
 
@@ -81,7 +128,35 @@
         </form>
       </div>
 
-      <!-- TODO: Try to implement add analytes with AG-Grid table -->
+      <!-- Measurements sub-table -->
+      {% include "console/components/tables/simple_form_table.html" with
+        model="measurements"
+        model_singular="measurement"
+        description="Manage measurements that have been taken for this sample."
+        abbreviation="MT"
+        parent_model="samples"
+        parent_model_singular="sample"
+        parent_id=section
+        remove_only=True
+        select=False
+      %}
+
+      <!-- Results sub-table -->
+      {% include "console/components/tables/simple_form_table.html" with
+        model="results"
+        model_singular="result"
+        description="Manage results that have been calculated for this sample."
+        abbreviation="R"
+        parent_model="samples"
+        parent_model_singular="sample"
+        parent_id=section
+        select=True
+      %}
+
+      <!-- Results selection dialog -->
+      {% include "console/components/modals/selection_dialog.html" with
+        model="results"
+      %}
 
       <!-- Danger zone (delete) -->
       {% if id and id != 'new' %}
@@ -103,10 +178,33 @@
   <script>
 
     // Load the data into the user interface.
-    cannlytics.ui.viewObject('sample');
+    {% comment %} const unit = '{{ unit }}';
+    const sampleId = '{{ section }}';
+    console.log('Sample:', sampleId);
+    if (!unit) cannlytics.ui.viewObject('sample');
+    else if (unit === 'results') {
+      // TEST: Get measurements
+      cannlytics.api.getMeasurements({ 'sample_id': sampleId }).then(function(data) {
+        // TODO: Render measurements in the UI.
+        console.log('Measurement data:', data);
+      });
+      // TEST: Get results
+      cannlytics.api.getResults({ 'sample_id': sampleId }).then(function(data) {
+        // TODO: Render results in the UI.
+        console.log('Result data:', data);
+      });
+    } {% endcomment %}
 
-    // Render any date pickers.
-    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+    // Load sample data.
+    try {
+      cannlytics.ui.viewObject('sample');
+    } catch(error) {
+      // Likely a sub-page.
+    }
+
+    // Stream any sub-model data.
+    cannlytics.app.streamSubModelData('measurements', 'measurement', '{{ organizations.0.organization_id }}', 'sample_id', '{{ section }}', 1000);
+    cannlytics.app.streamSubModelData('results', 'result', '{{ organizations.0.organization_id }}', 'sample_id', '{{ section }}', 1000);
 
   </script>
 {% endblock console_js %}

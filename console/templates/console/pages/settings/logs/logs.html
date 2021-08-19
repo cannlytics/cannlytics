@@ -75,7 +75,8 @@
       cannlytics.app.streamLogs('{{ model_singular }}', '{{ section }}', '{{ organizations.0.organization_id }}');
 
       // Set the initial date.
-      document.getElementById('logs_start').value = new Date(new Date().setDate(new Date().getDate()-1)).toISOString().substring(0, 10);
+      var period = 7;
+      document.getElementById('logs_start').value = new Date(new Date().setDate(new Date().getDate()-period)).toISOString().substring(0, 10);
       document.getElementById('logs_end').value = new Date().toISOString().substring(0, 10);
 
       // Initialize date range selection.
@@ -84,10 +85,9 @@
         todayHighlight: true
       });
       $('#logs-options .input-daterange').on('changeDate', function(e) {
-        console.log(e.target.id, e.date);
-        const date = e.date.toISOString();
-        let start = '';
-        let end = '';
+        var date = e.date.toISOString();
+        var start = '';
+        var end = '';
         if (e.target.id === 'logs_start') {
           start = e.date.toISOString();
           end = $('#logs_end').datepicker('getDate');
@@ -98,7 +98,6 @@
           end.setUTCHours(23, 59, 59, 999);
           end = end.toISOString();
           start = $('#logs_start').datepicker('getDate').toISOString();
-          
         }
         cannlytics.app.streamLogs('{{ model_singular }}', '{{ section }}', '{{ organizations.0.organization_id }}', 'key', 'created_at', start, end);
       });

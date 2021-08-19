@@ -67,6 +67,7 @@
         {% include "console/components/tables/simple_table_options.html" with
           model='analyses'
           model_singular='analysis'
+          limit=1000
         %}
 
         <!-- Loading placeholder -->
@@ -110,7 +111,7 @@
 
   {% if not section %}
     <script>
-      cannlytics.app.streamData('analyses', 'analysis', '{{ organizations.0.organization_id }}');
+      cannlytics.app.streamData('analyses', 'analysis', '{{ organizations.0.organization_id }}', 1000);
     </script>
   {% endif %}
 

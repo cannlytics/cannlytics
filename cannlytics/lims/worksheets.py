@@ -6,19 +6,25 @@ Created: 7/18/2021
 Updated: 7/20/2021
 License: MIT License <https://opensource.org/licenses/MIT>
 """
-# Standard packages
-from ast import literal_eval
-import os
 
-# External packages.
-from dotenv import load_dotenv
-from pandas import DataFrame, to_datetime
-import requests
-import xlwings as xw
-from xlwings.utils import rgb_to_int
+try:
 
-# Internal packages.
-from cannlytics.utils.utils import snake_case
+    # Standard packages
+    from ast import literal_eval
+    import os
+
+    # External packages.
+    from dotenv import load_dotenv
+    from pandas import DataFrame, to_datetime
+    import requests
+    import xlwings
+    from xlwings.utils import rgb_to_int
+
+    # Internal packages.
+    from cannlytics.utils.utils import snake_case
+
+except:
+    pass # FIXME: Docs can't import.
 
 
 def get_data_block(sheet, coords, expand=None):
@@ -52,23 +58,26 @@ def increment_row(coords):
     return column + str(row)
 
 
-def show_status_message(sheet, coords, message, background=None, color=None):
-    """Show a status message in an Excel spreadsheet.
+def import_worksheet(filename, sheetname, range_start='A1'):
+    """Read the data from a given worksheet using xlwings.
     Args:
-        sheet (Sheet): The sheet where the status message will be written.
-        coords (str): The location of the status message.
-        message (str): A status message to write to Excel.
-        background (tuple): Optional background color.
-        color (tuple): Optional font color.
+        filename (str): The name of the Excel file to read.
+        range_start (str): Optional starting cell.
+    Returns:
+        list(dict): A list of dictionaries.
     """
-    sheet.range(coords).value = message
-    if background:
-        sheet.range(coords).color = literal_eval(background)
-    if color:
-        sheet.range(coords).api.Font.Color = rgb_to_int(literal_eval(color))
+    app = xlwings.App(visible=False)
+    book = xlwings.Book(filename)
+    sheet = book.sheets(sheetname)
+    excel_data = sheet.range(range_start).expand('table').value
+    keys = [snake_case(key) for key in excel_data[0]]
+    data = [dict(zip(keys, values)) for values in excel_data[1:]]
+    book.close()
+    app.quit()
+    return data
 
 
-@xw.sub
+@xlwings.sub
 def import_worksheet_data(model_type):
     """A function called from Excel to import data by ID
     from Firestore into the Excel workbook.
@@ -77,7 +86,7 @@ def import_worksheet_data(model_type):
     """
 
     # Initialize the workbook.
-    book = xw.Book.caller()
+    book = xlwings.Book.caller()
     worksheet = book.sheets.active
     config_sheet = book.sheets['cannlytics.conf']
     config = get_data_block(config_sheet, 'A1', expand='table')
@@ -156,13 +165,13 @@ def import_worksheet_data(model_type):
     )
 
 
-@xw.sub
+@xlwings.sub
 def upload_worksheet_data(model_type):
     """A function called from Excel to import data by ID
     from Firestore into the Excel workbook."""
 
     # Initialize the workbook.
-    book = xw.Book.caller()
+    book = xlwings.Book.caller()
     worksheet = book.sheets.active
     config_sheet = book.sheets['cannlytics.conf']
     config = get_data_block(config_sheet, 'A1', expand='table')
@@ -238,3 +247,19 @@ def upload_worksheet_data(model_type):
         coords=config['status_cell'],
         message='Uploaded %i %s.' % (len(data), model_type),
     )
+
+
+def show_status_message(sheet, coords, message, background=None, color=None):
+    """Show a status message in an Excel spreadsheet.
+    Args:
+        sheet (Sheet): The sheet where the status message will be written.
+        coords (str): The location of the status message.
+        message (str): A status message to write to Excel.
+        background (tuple): Optional background color.
+        color (tuple): Optional font color.
+    """
+    sheet.range(coords).value = message
+    if background:
+        sheet.range(coords).color = literal_eval(background)
+    if color:
+        sheet.range(coords).api.Font.Color = rgb_to_int(literal_eval(color))

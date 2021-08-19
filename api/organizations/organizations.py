@@ -32,7 +32,34 @@ from api.auth.auth import authenticate_request #pylint: disable=import-error
 
 
 @api_view(['GET'])
-def organization_team(request, format=None, organization_id=None, user_id=None):
+def labs(request):
+    """Get laboratory information (public API endpoint)."""
+
+    # Get organization(s).
+    if request.method == 'GET':
+        filters = []
+        order_by = None
+
+        # Get a specific organization.
+        organization_id = request.query_params.get('organization_id')
+        print('Organization ID:', organization_id)
+        if organization_id:
+            filters.append({'key': 'slug', 'operation': '==', 'value': organization_id})
+
+        # Get all organizations in a state
+        state = request.query_params.get('state')
+        if state:
+            filters.append({'key': 'state', 'operation': '==', 'value': state})
+            order_by = 'name'
+
+        # Query and return the docs.
+        docs = get_collection('labs', filters=filters, order_by=order_by)
+        print('Returning docs:', docs)
+        return Response({'data': docs}, status=200)
+
+
+@api_view(['GET'])
+def organization_team(request, organization_id=None, user_id=None):
     """Get team member data for an organization, given an authenticated
     request from a member of the organization.
     """
@@ -58,7 +85,7 @@ def organization_team(request, format=None, organization_id=None, user_id=None):
 
 
 @api_view(['GET', 'POST'])
-def organizations(request, format=None, organization_id=None):
+def organizations(request, organization_id=None, type='lab'):
     """Get, create, or update organizations.
     E.g.
         ```
@@ -77,9 +104,8 @@ def organizations(request, format=None, organization_id=None):
     model_type = 'organizations'
     _, project_id = google.auth.default()
     claims = authenticate_request(request)
-    print('Claims:', claims)
     uid = claims['uid']
-    # custom_claims = get_custom_claims(uid)
+    print('User request to organizations:', uid)
 
     # Get organization(s).
     if request.method == 'GET':
@@ -192,11 +218,16 @@ def organizations(request, format=None, organization_id=None):
         else:
             doc = {}
             organization_id = slugify(data['name'])
-            doc['uid'] = organization_id
+            doc['organization_id'] = organization_id
             doc['team'] = [uid]
             doc['owner'] = uid
 
+            # Identify created organization type.
+            doc['type'] = type
+
             # All organizations start with the standard data models.
+            # FIXME: Remove data models that have permissions
+            # if the user does not have sufficient claims.
             data_models = get_collection('public/state/data_models')
             for data_model in data_models:
                 key = data_model['key']
@@ -264,7 +295,7 @@ def employees(request):
     # Optional: Figure out how to pre-initialize a Metrc client.
 
     # Get Vendor API key using secret manager.
-    # TODO: Determine where to store project_id, secret_id, and version_id.
+    # FIXME: Determine where to store project_id, secret_id, and version_id.
     vendor_api_key = access_secret_version(
         project_id=project_id,
         secret_id='metrc_vendor_api_key',
@@ -293,6 +324,14 @@ def employees(request):
 #-----------------------------------------------------------------------
 
 # TODO: Implement organization actions:
+
+
+def change_primary_organization():
+    """Change the primary organization."""
+    # Get the custom claims
+
+    # Re-create claims with select organization at the front.
+
 
 def confirm_join_organization():
     """Confirm a user's request to join an organization."""

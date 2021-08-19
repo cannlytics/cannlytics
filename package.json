@@ -1,6 +1,6 @@
 {
   "name": "cannlytics",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Cannlytics includes a LIMS, a console, documentation, a website, and vast amount of tools for cannabis analytics.",
   "keywords": [
     "cannabis",
@@ -45,6 +45,7 @@
   "dependencies": {
     "@popperjs/core": "^2.5.3",
     "@primer/octicons": "^11.0.0",
+    "axios": "^0.21.1",
     "bootstrap": "^5.0.0-beta1",
     "chart.js": "^2.9.4",
     "chartjs-chart-box-and-violin-plot": "^2.3.0",

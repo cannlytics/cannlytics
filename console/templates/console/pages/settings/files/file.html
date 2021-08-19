@@ -67,7 +67,7 @@
     <!-- Optional: File preview -->
 
     <!-- Form -->
-    <!-- FIXME: Load files from data models instead of state.py -->
+    <!-- FIXME: Load files data model from Firestore instead of state.py -->
     <div class="mb-4 px-3">
       <form id="file-form">
         {% include "console/components/forms/dynamic_form.html" with
@@ -150,6 +150,7 @@
 
     async function viewFile() {
       /* Open the file in a new tab. */
+      // FIXME: Broken, does not open links (permission error?)
       const fileName = document.getElementById('input_name').value;
       const orgId = '{{ organizations.0.organization_id }}';
       const model = '{{ model }}';

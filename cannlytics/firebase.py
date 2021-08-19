@@ -1,8 +1,9 @@
 """
 Firebase Module | Cannlytics
-Author: Keegan Skeate <contact@cannlytics.com>
-Created: 2/7/2021
-Updated: 6/27/2021
+
+Author: Keegan Skeate <contact@cannlytics.com>  
+Created: 2/7/2021  
+Updated: 7/30/2021  
 
 Resources:
 
@@ -30,36 +31,39 @@ bucket_name = environ.get('FIREBASE_STORAGE_BUCKET')
 db = initialize_firebase()
 ```
 """
-# Standard imports
-from datetime import datetime, timedelta
-from os import listdir
-from os.path import isfile, join
-from re import sub, findall
-
-# External imports
-import requests
-import ulid
-from django.utils.crypto import get_random_string
-from firebase_admin import auth, firestore, initialize_app, storage
-from google.cloud import secretmanager
 try:
-    from google.cloud.firestore import ArrayUnion, ArrayRemove, Increment
-    from google.cloud.firestore_v1.collection import CollectionReference
-    from google.cloud.firestore_v1.transforms import DELETE_FIELD
-except:
-    pass
-try:
-    from pandas import notnull, read_csv, read_excel, DataFrame, Series
-except:
-    # FIXME: pandas has problems with Django on Cloud Run
-    pass
+    # Standard imports
+    from datetime import datetime, timedelta
+    from os import listdir
+    from os.path import isfile, join
 
-# Internal imports.
-from cannlytics.utils.utils import snake_case
+    # External imports
+    import requests
+    import ulid
+    from django.utils.crypto import get_random_string
+    from firebase_admin import auth, firestore, initialize_app, storage
+    from google.cloud import secretmanager
+    try:
+        from google.cloud.firestore import ArrayUnion, ArrayRemove, Increment
+        from google.cloud.firestore_v1.collection import CollectionReference
+        from google.cloud.firestore_v1.transforms import DELETE_FIELD
+    except:
+        pass
+    try:
+        from pandas import notnull, read_csv, read_excel, DataFrame, Series
+    except:
+        # FIXME: pandas has problems with Django on Cloud Run
+        pass
 
+    # Internal imports.
+    from cannlytics.utils.utils import snake_case
+except:
+    pass # FIXME: Ignore import in Docs
 
 # ------------------------------------------------------------#
 # Firestore
+# FIXME: Pass existing database reference to functions instead
+# of creating a new `firestore.client()` each time.
 # ------------------------------------------------------------#
 
 def add_to_array(ref, field, value):
@@ -135,10 +139,11 @@ def delete_field(ref, field):
     """Delete a given field from a document.
     Args:
         ref (str): A document reference.
+        field (str): The field to remove from the document.
     """
     database = firestore.client()
     doc = create_reference(database, ref)
-    return doc.set({field: DELETE_FIELD}, merge=True)
+    doc.set({field: DELETE_FIELD}, merge=True)
 
 
 def remove_from_array(ref, field, value):
@@ -188,6 +193,29 @@ def update_document(ref, values):
     doc.set(values, merge=True)
 
 
+def update_documents(refs, data):
+    """Batch update documents, up to 420 at a time (to give the 500
+    limit set by Firebase a cushion).
+    Args:
+        refs (list): A list of document paths (str).
+        data (list): A list of document data (dict).
+    """
+    n = 420
+    database = firestore.client()
+    ref_shards = [refs[i:i+n] for i in range(0, len(refs), n)]
+    data_shards = [data[i:i+n] for i in range(0, len(data), n)]
+    for s in range(len(ref_shards)):
+        ref_shard = ref_shards[s]
+        data_shard = data_shards[s]
+        batch = database.batch()
+        for i in range(len(ref_shard)):
+            ref = ref_shard[i]
+            values = data_shard[i]
+            doc = create_reference(database, ref)
+            batch.set(doc, values, merge=True)
+        batch.commit()
+
+
 def get_document(ref):
     """Get a given document.
     Args:
@@ -202,7 +230,10 @@ def get_document(ref):
     if data is None:
         return {}
     else:
-        return data.to_dict()
+        values = data.to_dict()
+        if values is None:
+            return {}
+        return {**{'id': data.id}, **values}
 
 
 def get_collection(ref, limit=None, order_by=None, desc=False, filters=[]):
@@ -238,7 +269,7 @@ def get_collection(ref, limit=None, order_by=None, desc=False, filters=[]):
     query = collection.stream()  # Only handles streams less than 2 mins.
     for doc in query:
         data = doc.to_dict()
-        docs.append(data)
+        docs.append({**{'id': doc.id}, **data})
     return docs
 
 
@@ -248,9 +279,10 @@ def import_data(db, ref, data_file):
         db (Firestore Client):
         ref (str): A collection or document reference.
         data_file (str): The path to the local data file to upload.
-    Wishlist
-      - Batch upload
-      - Handle types <https://hackersandslackers.com/importing-excel-dates-times-into-pandas/>
+    !!! info "Wishlist"
+        It would be desirable for the following functionality to be implemented:
+        - Batch upload
+        - Handle types <https://hackersandslackers.com/importing-excel-dates-times-into-pandas/>
     """
     try:
         data = read_csv(
@@ -292,17 +324,19 @@ def export_data(db, ref, data_file):
         db (Firestore Client):
         ref (str): A collection or document reference.
         data_file (str): The path to the local data file to upload.
-    Wishlist
-      - Parse fields that are objects into fields. E.g.
-            from pandas.io.json import json_normalize
-            artist_and_track = json_normalize(
-                data=tracks_response['tracks'],
-                record_path='artists',
-                meta=['id'],
-                record_prefix='sp_artist_',
-                meta_prefix='sp_track_',
-                sep='_'
-            )
+    !!! info "Wishlist"
+        Parse fields that are objects into fields, similar to below.
+        ```py
+        from pandas.io.json import json_normalize
+        artist_and_track = json_normalize(
+            data=tracks_response['tracks'],
+            record_path='artists',
+            meta=['id'],
+            record_prefix='sp_artist_',
+            meta_prefix='sp_track_',
+            sep='_'
+        )
+        ```
     """
     data_ref = create_reference(db, ref)
     if isinstance(data_ref, CollectionReference):
@@ -324,7 +358,10 @@ def export_data(db, ref, data_file):
 
 
 def create_id():
-    """Generate a universal ID."""
+    """Generate a universal ID.
+    Returns:
+        (str): A unique, lexicographic ID, a ULID.
+    """
     return ulid.new().str.lower()
 
 
@@ -332,6 +369,8 @@ def create_id_from_datetime(dt):
     """Create an ID from an existing datetime.
     Args:
         dt (datetime): The time to timestamp the ID.
+    Returns:
+        (str): A unique lexicographic ID.
     """
     return ulid.from_timestamp(dt)
 
@@ -340,6 +379,8 @@ def get_id_timestamp(uid):
     """Get the datetime that an ID was created.
     Args:
         uid (str): A unique ID string.
+    Returns:
+        (datetime): The date when a unique lexicographic ID was generated.
     """
     return ulid.from_str(uid).timestamp().datetime
 
@@ -355,7 +396,6 @@ def create_user(name, email):
     Args:
         name (str): A name for the user.
         email (str): The user's email.
-        notification (bool): Whether to notify the user.
     Returns:
         (tuple): User object, random password
     """
@@ -430,6 +470,8 @@ def create_custom_token(uid='', email=None, claims=None):
         uid (str): A user's ID.
         email (str): A user's email.
         claims (dict):  A dictionary of the user's claims.
+    Returns:
+        (dict): A dictionary of custom claims.
     """
     if email:
         user = auth.get_user_by_email(email)
@@ -442,6 +484,8 @@ def create_session_cookie(id_token, expires_in=None):
     Args:
         id_token (str): A user ID token passed from the client.
         expires_in (timedelta): The time until the session will expire.
+    Returns:
+        (bytes): A session cookie in bytes.
     """
     if expires_in is None:
         expires_in = timedelta(days=7)
@@ -460,6 +504,8 @@ def verify_token(token):
     """Verify a user's custom token.
     Args:
         token (str): The custom token to authenticate a user.
+    Returns:
+        (dict): A dictionary of key-value pairs parsed from the decoded JWT.
     """
     return auth.verify_id_token(token)
 
@@ -468,6 +514,8 @@ def verify_session_cookie(session_cookie, check_revoked=True, app=None): # FIXME
     """Verify a user's session cookie.
     Args:
         session_cookie (str): A session cookie to authenticate a user.
+    Returns:
+        (dict): A dictionary of key-value pairs parsed from the decoded JWT.
     """
     return auth.verify_session_cookie(
         session_cookie,
@@ -591,6 +639,12 @@ def add_secret_version(project_id, secret_id, payload):
     Adding a secret version requires the Secret Manager Admin role
     (roles/secretmanager.admin) on the secret, project, folder, or organization.
     Roles can't be granted on a secret version.
+    Args:
+        project_id (str): A Firestore project ID.
+        secret_id (str): An ID for the secret.
+        payload (str): The secret.
+    Returns:
+        (str): The secret version's name.
     """
     client = secretmanager.SecretManagerServiceClient()
     parent = f'projects/{project_id}/secrets/{secret_id}'
@@ -603,7 +657,14 @@ def access_secret_version(project_id, secret_id, version_id):
     """
     Access the payload for a given secret version if one exists. The version
     can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
-    WARNING: Do not print the secret in a production environment.
+    !!! Warning
+        Do not print the secret in a production environment.
+    Args:
+        project_id (str): A Firestore project ID.
+        secret_id (str): An ID for the secret.
+        version_id (str): A version for the secret.
+    Returns:
+        (str): The secret version's name.
     """
     client = secretmanager.SecretManagerServiceClient()
     name = f'projects/{project_id}/secrets/{secret_id}/versions/{version_id}'
@@ -617,7 +678,14 @@ def access_secret_version(project_id, secret_id, version_id):
 # ------------------------------------------------------------#
 
 def create_short_url(api_key, long_url, project_name='cannlytics'):
-    """Create a short URL to a specified file."""
+    """Create a short URL to a specified file.
+    Args:
+        api_key (str): An API key for Firebase dynamic links.
+        long_url (str): A URL to create a short, dynamic link.
+        project_name (str): The name of the Firebase project, `cannlytics` by default.
+    Returns:
+        (str): A short link to the given URL.
+    """
     try:
         url = f'https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key={api_key}'
         data= {
@@ -633,7 +701,7 @@ def create_short_url(api_key, long_url, project_name='cannlytics'):
         raise ConnectionError # Optional: Handle connection errors more elegantly?
 
 
-def download_file(bucket_name, source_blob_name, destination_file_name, verbose=True):
+def download_file(bucket_name, source_blob_name, destination_file_name, verbose=False):
     """Downloads a file from Firebase Storage.
     Args:
         bucket_name (str): The name of the storage bucket.
@@ -650,7 +718,7 @@ def download_file(bucket_name, source_blob_name, destination_file_name, verbose=
         )
 
 
-def download_files(bucket_name, bucket_folder, local_folder, verbose=True):
+def download_files(bucket_name, bucket_folder, local_folder, verbose=False):
     """Download all files in a given Firebase Storage folder.
     Args:
         bucket_name (str): The name of the storage bucket.
@@ -673,6 +741,7 @@ def get_file_url(ref, bucket_name=None, expiration=None):
     Args:
         ref (str): The storage location of the file.
         bucket_name (str): The name of the storage bucket.
+        expiration (datetime): The date for when the file link should expire.
     Returns:
         (str): The storage URL of the file.
     """
@@ -689,7 +758,8 @@ def upload_file(bucket_name, destination_blob_name, source_file_name=None, data_
         bucket_name (str): The name of the storage bucket.
         destination_blob_name (str): The name to save the file as.
         source_file_name (str): The local file name.
-        verbose (bool): Whether or not to print status.
+        data_url (str): The data URL to upload from a string.
+        content_type (str): The content type of the file, when uploading from a string.
     """
     bucket = storage.bucket(name=bucket_name)
     blob = bucket.blob(destination_blob_name)
@@ -721,6 +791,8 @@ def list_files(bucket_name, bucket_folder):
     Args:
         bucket_name (str): The name of the storage bucket.
         bucket_folder (str): A folder in the storage bucket to list files.
+    Returns:
+        (list): A list of file names in the given bucket.
     """
     bucket = storage.bucket(name=bucket_name)
     files = bucket.list_blobs(prefix=bucket_folder)

@@ -125,7 +125,7 @@ def test_storage():
     firebase.initialize_firebase()
 
     # Define file names.
-    bucket_name = 'cannlytics.appspot.com'
+    bucket_name = env('FIREBASE_STORAGE_BUCKET')
     bucket_folder = 'tests/assets/pdfs'
     destination_blob_name = 'tests/assets/pdfs/pandas_cheat_sheet.pdf'
     local_folder = './assets/pdfs'

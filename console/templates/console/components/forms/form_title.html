@@ -13,6 +13,7 @@
     description (optional)
     options (bool | optional)
     export (bool | optional)
+    action (string  | optional)
 -->
 <div class="d-flex justify-content-between">
   <div class="px-3">
@@ -65,8 +66,8 @@
         class="btn btn-sm btn-set-width bg-gradient-green text-white"
         onclick="cannlytics.app.save('{{ model }}', '{{ model_singular }}', '{{ abbreviation }}');"
       >
-        Save
-      </button>
+        {% if action %}{{ action }}{% else %}Save{% endif %}
+      </button><!-- TODO: Make action text dynamic -->
       <button
         id="form-save-loading-button"
         class="btn btn-sm btn-set-width bg-gradient-green text-white d-none"

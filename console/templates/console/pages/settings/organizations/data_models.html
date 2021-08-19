@@ -25,13 +25,15 @@
       key, label, type, class
   -->
 {% load icon %}
-<div class="col my-5 px-3">
-  <div class="col-md-6">
-    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Data Models</h1>
-    <h2 class="fs-6 lh-base text-secondary mb-3">
-      <small>Data models are the primary objects for conceptualizing your workflow. In a nutshell,
-      data models are groups of fields and dictate the data points collected.</small>
-    </h2>
+<div class="col col-md-8 col-lg-6 my-5 px-3">
+  <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Data Models</h1>
+  <h2 class="fs-6 lh-base text-secondary mb-3">
+    <small>Data models are the primary objects for conceptualizing your workflow. In a nutshell,
+    data models are groups of fields and dictate the data points collected.</small>
+  </h2>
+
+  <div class="d-flex justify-content-start px-3 mb-3">
+    <h1 class="text-warning fs-6">🚧 UNDER DEVELOPMENT 🚧</h1>
   </div>
 
   <!-- Field selection -->
@@ -46,7 +48,7 @@
   -->
   <!-- Optional: Allow field lists to be re-aranged! -->
   <div class="accordion" id="data_fields_accordian">
-    {% for key, values in data_models.items %}
+    {% for values in data_models %}
       <div class="accordion-item bg-transparent border boder-secondary">
         <h6 class="accordion-header fs-6" id="{{ values.key }}_data_fields">
           <button

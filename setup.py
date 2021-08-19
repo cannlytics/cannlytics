@@ -15,7 +15,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 
 setuptools.setup(
     name='cannlytics',
-    version='0.0.7',
+    version='0.0.8',
     author='Cannlytics',
     author_email='contact@cannlytics.com',
     description='Cannlytics is simple, easy-to-use, end-to-end cannabis analytics software designed to make your data and information accessible.',

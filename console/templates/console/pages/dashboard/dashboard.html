@@ -4,7 +4,7 @@
   Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 11/26/2020 Thanksgiving
-  Updated: 7/14/2021
+  Updated: 8/16/2021
 -->
 {% extends "console/console.html" %}
 {% block console_body %}
@@ -23,7 +23,7 @@
         >
           <svg class="simple-icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#ccc"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
         </button>
-        <!-- TODO: Implement stats -->
+        <!-- Optional: Implement stats -->
         {% comment %} <button
           class="btn btn-sm btn-sm-light p-1"
           data-bs-toggle="tooltip"
@@ -39,41 +39,42 @@
 
         <!-- Dashboard cards -->
         <div class="row row-cols-2 justify-content-md-start mb-5">
-          {% for item in dashboard.cards %}
-            <div class="col-6 col-lg-4 my-3">
-              <a href="./{{ item.path }}">
-                <div
-                  class="card h-100 bg-transparent border-secondary rounded-3 shadow-hover px-0 py-2"
-                  style="max-width: 375px;"
-                >
+          {% for item in data_models %}
+            {% if organizations.0.type in item.user_type or item.user_type == '*' %}
+              <div class="col-6 col-lg-4 my-3 {% if item.hidden %}d-none{% endif %}">
+                <a href="./{{ item.key }}">
+                  <div
+                    class="card h-100 bg-transparent border-secondary rounded-3 shadow-hover px-0 py-2"
+                    style="max-width: 375px;"
+                  >
 
-                  <!-- Card image -->
-                  <div class="">
+                    <!-- Card image -->
+                    <div class="">
 
-                    <div class="float-start p-3">
-                      <img
-                          class="ma-2"
-                          src="{% static item.image_path %}"
-                          width="75px"
-                        >
-                    </div>
-
-                    <!-- Card body -->
-                    <div class="col">
-                      <div class="card-body bg-transparent">
-                        <h5 class="card-title text-dark text-no-wrap fs-5 mb-1">
-                          {{ item.title }}
-                        </h5>
-                        <p class="card-text text-secondary fs-6 large-line">
-                          <small class="serif tiny-text">{{ item.description }}</small>
-                        </p>
+                      <div class="float-start p-3">
+                        <img
+                            src="{% static item.image_path %}"
+                            height="50px"
+                          >
                       </div>
-                    </div>
 
+                      <!-- Card body -->
+                      <div class="col">
+                        <div class="card-body bg-transparent">
+                          <h5 class="card-title text-dark text-no-wrap fs-5 mb-1">
+                            {{ item.label }}
+                          </h5>
+                          <p class="card-text text-secondary fs-6 large-line">
+                            <small class="serif tiny-text">{{ item.description }}</small>
+                          </p>
+                        </div>
+                      </div>
+
+                    </div>
                   </div>
-                </div>
-              </a>
-            </div>
+                </a>
+              </div>
+            {% endif %}
           {% endfor %}
         </div><!-- End of cards -->
       </div><!-- End of row -->
@@ -103,7 +104,7 @@
                   href="/get-started/profile?type={{ item.type }}"
                 >
                   <div class="card-body">
-                    <h5 class="card-title text-dark fs-6">{{ item.title }}</h5>
+                    <h5 class="card-title text-dark fs-6">{{ item.label }}</h5>
                     <p class="card-text text-secondary fs-6">
                       <small class="serif tiny-text">{{ item.description }}</small>
                     </p>

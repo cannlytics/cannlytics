@@ -14,7 +14,7 @@ import environ
 import sys
 sys.path.append('../../')
 from cannlytics import firebase # pylint: disable=import-error
-from console import state
+from console.state import data_models
 
 if __name__ == '__main__':
 
@@ -26,9 +26,13 @@ if __name__ == '__main__':
     db = firebase.initialize_firebase()
     
     # Upload state data to Firestore.
-    for key, data_model in state.material['data_models'].items():
-        firebase.update_document(f'public/state/data_models/{key}', data_model)
-        firebase.update_document(f'organizations/test-company/data_models/{key}', data_model)
+    for data_model in data_models:
+        key = data_model['key']
+        if key:
+            firebase.update_document(f'public/state/data_models/{key}', data_model)
+            firebase.update_document(f'organizations/test-company/data_models/{key}', data_model)
+
+    # Save all data models, excluding fields, to one document.
 
     # Upload traceability settings to Firestore.
     # traceability = state.material['traceability']

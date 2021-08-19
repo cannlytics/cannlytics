@@ -26,11 +26,12 @@
       class="dropdown-menu dropdown-menu-left shadow"
       aria-labelledby="navbarLabChoice"
     >
+      <!-- onclick="cannlytics.organizations.changeActiveOrganization('{{ org.organization_id }}')" -->
       {% for org in organizations %}
       <li>
         <a
           class="app-action dropdown-item"
-          onclick="cannlytics.organizations.changeActiveOrganization('{{ org.organization_id }}')"
+          href="/settings/organizations/{{ org.organization_id }}"
         >
           {{ org.name }}
         </a>

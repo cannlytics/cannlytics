@@ -4,7 +4,7 @@
   Organization Form | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2021
-  Updated: 7/18/2021
+  Updated: 8/15/2021
   Parameters:
     optional_class
 -->
@@ -149,7 +149,7 @@
         <small>Manage your organization's team.</small>
       </h2>
       <div id="team-member-grid"></div>
-      {% if organization_id in user.owner %}
+      {% if organization_id in user.owner or organization_id == 'new' %}
         <button
           id="team-member-fields-show"
           class="btn btn-sm btn-sm-light"

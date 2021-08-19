@@ -32,8 +32,6 @@
     {% include "console/components/forms/form_tabs.html" with
         id=id
         model="results"
-        extra="Certificate"
-        extra_path="certificate"
       %}
   {% endif %}
 
@@ -46,10 +44,6 @@
       section=section
       user=user
     %}
-  
-  <!-- Certificate page -->
-  {% elif unit == 'certificate' %}
-
 
   <!-- Logs page -->
   {% elif unit == 'logs' %}
@@ -64,22 +58,42 @@
   {% else %}
 
     <!-- Title -->
-    {% include "console/components/forms/form_title.html" with
-      abbreviation=data_model.abbreviation
-      id=id
-      model='results'
-      model_singular='result'
-      description="Manage results for samples, calculated from measurements for given analytes in an analysis."
-      options=True
-      export=id
-    %}
+    <!-- FIXME: Hide "save" button to non-lab users more elegantly -->
+    {% if organizations.0.type == 'lab' %}
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='results'
+        model_singular='result'
+        description="Manage results for samples, calculated from measurements for given analytes in an analysis."
+        options=True
+        export=id
+      %}
+    {% else %}
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='results'
+        model_singular='result'
+        description="Manage results for samples, calculated from measurements for given analytes in an analysis."
+        options=False
+        export=id
+      %}
+    {% endif %}
 
     <!-- Form -->
     <div class="mb-4 px-3">
       <form id="result-form">
-        {% include "console/components/forms/dynamic_form.html" with
-          fields=data_model.fields
-        %}
+        {% if organization.0.type == 'lab' %}
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+          %}
+        {% else %}
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+            readonly=True
+          %}
+        {% endif %}
         <!-- TODO: Show additional fields (traceability fields) -->
         {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
       </form>
@@ -88,7 +102,7 @@
     <!-- TODO: Try to implement add analytes with AG-Grid table -->
     
     <!-- Danger zone (delete) -->
-    {% if id and id != 'new' %}
+    {% if id and id != 'new' and organizations.0.type == 'lab' %}
       {% include "console/components/forms/delete_option.html" with
         id=id
         model="results"

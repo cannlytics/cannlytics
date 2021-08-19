@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-cannlytics.traceability.metrc.client
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Metrc Client | Cannlytics
+
 This module contains the Client class responsible for
 communicating with the Metrc API.
 """

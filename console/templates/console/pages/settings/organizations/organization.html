@@ -4,7 +4,7 @@
   Organization Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/8/2021
-  Updated: 7/18/2021
+  Updated: 8/14/2021
   Optional:
     - Show detailed team member information (their logs, training, etc.)
 -->
@@ -37,100 +37,142 @@
     user=user
   %}
 
-  <!-- Data Model Management -->
-  {% include "console/pages/settings/organizations/data_models.html" with
-    data_models=settings.data_models
-  %}
+  <!-- Admin -->
+  {% if unit and unit in user.owner %}
 
-  <!-- Traceability Management -->
-  <div class="col-md-6 my-5 px-3">
-    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Traceability</h1>
-    <h2 class="fs-6 lh-base text-secondary mb-3">
-      <small>Select the traceability provider in your state.</small>
-    </h2>
+    <!-- Data Model Management -->
+    <!-- FIXME: Touch up layout and functionality -->
+    {% include "console/pages/settings/organizations/data_models.html" with
+      data_models=data_models
+    %}
 
-    <!-- Traceability provider -->
-    <div class="row">
+    <!-- Traceability Managemvent -->
+    <div class="col-md-6 my-5 px-3">
+      <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Traceability</h1>
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        <small>Select the traceability provider in your state.</small>
+      </h2>
+
+      <!-- Traceability provider -->
+      <div class="row">
+        <label
+          for="traceability_provider"
+          class="col-md-4 col-sm-2 col-lg-2 col-form-label col-form-label-sm"
+        >
+          Provider
+        </label>
+        <div class="col">
+          <select id="traceability_provider" class="form-select form-select-sm col-md-8">
+          <option selected>Metrc</option>
+        </select>
+        </div>
+      </div>
+
+      <!-- Traceability endpoints -->
+      <!-- FIXME: Setup functionality and incorporate into \traceability tabs -->
+      <!-- TODO: Make checked conditional on organization's traceability -->
       <label
-        for="traceability_provider"
         class="col-md-4 col-sm-2 col-lg-2 col-form-label col-form-label-sm"
       >
-        Provider
+        Endpoints
       </label>
-      <div class="col">
-        <select id="traceability_provider" class="form-select form-select-sm col-md-8">
-        <option selected>Metrc</option>
-      </select>
+      <div class="ps-3 three-by-three">
+        {% for item in settings.traceability.tabs %}
+          <div class="form-check">
+            <label class="form-check-label" for="input_{{ item.section }}">
+              {{ item.name }}
+            </label>
+            <input
+              id="input_{{ item.section }}"
+              class="form-check-input"
+              type="checkbox"
+              {% if item.selected %}checked{% endif %}
+              onchange="cannlytics.settings.toggleTraceabilityEndpoint(event);"
+            >
+          </div>
+        {% endfor %}
       </div>
     </div>
 
-    <!-- Traceability endpoints -->
-    <!-- TODO: Setup functionality and incorporate into \traceability tabs -->
-    <!-- TODO: Make checked conditional on organization's traceability -->
-    <label
-      class="col-md-4 col-sm-2 col-lg-2 col-form-label col-form-label-sm"
-    >
-      Endpoints
-    </label>
-    <div class="ps-3 three-by-three">
-      {% for item in settings.traceability.tabs %}
-        <div class="form-check">
-          <label class="form-check-label" for="input_{{ item.section }}">
-            {{ item.name }}
+    <!-- Licenses -->
+    <!-- TODO: Render licenses if Org has licenses -->
+    <div class="my-5 px-3">
+      <h1 class="fs-5 lh-base text-dark mb-0">Licenses</h1>
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        <small>Manage your organization's licenses.</small>
+      </h2>
+      <a
+        id="license-fields-show"
+        class="btn btn-sm btn-sm-light"
+        href="/traceability/settings"
+      >
+        Manage state-issued license
+      </a>
+    </div>
+
+    <!-- Visibility (public / private choice) -->
+    <div class="my-5 px-3">
+      <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Visibility</h1>
+      <h2 class="fs-6 lh-base text-secondary mb-3">
+        <small>Decide whether or not to list your organization for discovery by other users.</small>
+      </h2>
+      <div class="form-check form-check-inline">
+        <input
+          class="form-check-input"
+          type="radio"
+          name="public"
+          id="public-choice"
+          value="true"
+          onchange="cannlytics.settings.changeOrganizationPublicStatus('{{ unit }}');"
+        >
+        <label class="form-check-label" for="public-choice">
+          Public {% icon "globe" width="16px" height="16px" %}<br>
+          <small class="text-secondary">Appears in search results.</small>
+        </label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input
+          class="form-check-input"
+          type="radio"
+          name="public"
+          id="private-choice"
+          value="false"
+          onchange="cannlytics.settings.changeOrganizationPublicStatus('{{ unit }}');"
+        >
+        <label class="form-check-label" for="private-choice">
+          Private {% icon "lock" width="16px" height="16px" %}<br>
+          <small class="text-secondary">Only visible to you.</small>
+        </label>
+      </div>
+    </div>
+
+    <!-- Organization Type Selection -->
+    <div class="col col-md-8 col-lg-6 my-5">
+      <div class="my-5 px-3">
+        <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Organization Type</h1>
+        <h2 class="fs-6 lh-base text-secondary mb-3">
+          <small>Select the organization type for your appropriate functionality.</small>
+        </h2>
+        <div class="row my-3">
+          <label class="col-sm-2 col-form-label col-form-label-sm">
+            Type
           </label>
-          <input
-            id="input_{{ item.section }}"
-            class="form-check-input"
-            type="checkbox"
-            {% if item.selected %}checked{% endif %}
-            onchange="cannlytics.settings.toggleTraceabilityEndpoint(event);"
-          >
+          <div class="col-sm-10">
+            <select
+              id="input_type"
+              name="type"
+              class="form-select form-select-sm"
+              aria-label="Organization Type"
+              onchange="cannlytics.settings.changeOrganizationType('{{ organizations.0.organization_id }}')"
+            >
+              <option value="lab" {% if organizations.0.type == 'lab' %}selected{% endif %}>🥼 For Labs</option>
+              <option value="producer" {% if organizations.0.type == 'producer' %}selected{% endif %}>🌳 For Cultivators, Processors, and Retailers</option>
+              <option value="integrator" {% if organizations.0.type == 'integrator' %}selected{% endif %}>🤝 For Everyone Else</option>
+            </select>
+          </div>
         </div>
-      {% endfor %}
+      </div>
     </div>
-  </div>
-
-  <!-- FIXME: Render licenses if Org has licenses -->
-  <!-- onclick="toggleLicenseFields(event);" -->
-  <!-- Add licenses -->
-  <div class="my-5 px-3">
-    <h1 class="fs-5 lh-base text-dark mb-0">Licenses</h1>
-    <h2 class="fs-6 lh-base text-secondary mb-3">
-      <small>Manage your organization's licenses.</small>
-    </h2>
-    <a
-      id="license-fields-show"
-      class="btn btn-sm btn-sm-light"
-      href="/traceability/settings"
-    >
-      Manage state-issued license
-    </a>
-  </div>
-
-  <!-- Visibility (public / private choice) -->
-  <div class="my-5 px-3">
-    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Visibility</h1>
-    <h2 class="fs-6 lh-base text-secondary mb-3">
-      <small>Decide whether or not to list your organization for discovery by other users.</small>
-    </h2>
-    <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" name="public" id="public-choice" value="true">
-      <label class="form-check-label" for="public-choice">
-        Public {% icon "globe" width="16px" height="16px" %}<br>
-        <small class="text-secondary">Appears in search results.</small>
-      </label>
-    </div>
-    <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" name="public" id="private-choice" value="false" checked>
-      <label class="form-check-label" for="private-choice">
-        Private {% icon "lock" width="16px" height="16px" %}<br>
-        <small class="text-secondary">Only visible to you.</small>
-      </label>
-    </div>
-  </div>
-
-  <!-- Admin -->
-  {% if unit and unit in user.owner %}
 
     <!-- Subscription -->
     {% include "console/pages/settings/organizations/subscription.html" %}
@@ -155,15 +197,14 @@
     // Get and display team members.
     cannlytics.settings.getTeamMembers(
       '{{ organizations.0.organization_id }}',
-      '{{ organizations.0.owner }}',
-      '{{ user.uid }}'
+      {
+        uid: '{{ user.uid }}',
+        owner: '{{ organizations.0.owner }}' || [],
+        qa: '{{ organizations.0.qa }}' || [],
+        billing: '{{ organizations.0.billing }}' || [],
+        staff: '{{ organizations.0.staff }}' || [],
+      }
     );
-
-    function removeField(event) {
-      /* Remove data model field. */
-      // TODO: Implement
-      console.log(event);
-    }
 
   </script>
 

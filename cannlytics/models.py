@@ -1,8 +1,9 @@
 """
 Data Models | Cannlytics
-Author: Keegan Skeate <keegan@cannlytics.com>
-Created: 5/8/2021
-Updated: 6/22/2021
+
+Author: Keegan Skeate <keegan@cannlytics.com>  
+Created: 5/8/2021  
+Updated: 6/22/2021  
 
 Data schema of the Cannlytics platform.
 """

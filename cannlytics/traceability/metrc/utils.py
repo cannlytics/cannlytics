@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-cannlytics.traceability.metrc.utils
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Metrc Utility Functions | Cannlytics
+
 This module contains common Metrc utility functions
 and constants.
 """

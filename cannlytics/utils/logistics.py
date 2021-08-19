@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 Logistics | Cannlytics
-Copyright © 2021 Cannlytics
-Author: Keegan Skeate <keegan@cannlytics.com>
-Created: 1/10/2021
+
+Copyright (c) 2021 Cannlytics 
+Author: Keegan Skeate <keegan@cannlytics.com>  
+Created: 1/10/2021  
 
 License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
