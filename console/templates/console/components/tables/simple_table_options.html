@@ -4,7 +4,7 @@
   Simple Table Options | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 7/6/2020
-  Updated: 8/15/2021
+  Updated: 8/19/2021
   Parameters:
     data_models
     model
@@ -138,7 +138,7 @@
         id="cancel-edit-table-button"
         type="button"
         class="btn btn-sm-light btn-md-light me-2 d-none"
-        onclick="cannlytics.app.cancelEdit('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+        onclick="cannlytics.app.cancelEdit('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}', '{{ limit }}');"
       >
         Cancel
       </button>
@@ -146,7 +146,7 @@
         id="edit-table-button"
         type="button"
         class="btn btn-sm-light btn-md-light me-2"
-        onclick="cannlytics.app.startEdit('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+        onclick="cannlytics.app.startEdit('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}', '{{ limit }}');"
       >
         Edit
       </button>

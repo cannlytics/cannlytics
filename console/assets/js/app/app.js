@@ -136,7 +136,7 @@ export const app = {
   },
 
 
-  // TODO: Pass data model directly
+  // Optional: Pass data model directly
   async downloadWorksheet(orgId, model) {
     /*
      * Download a worksheet to facilitate importing data.
@@ -399,11 +399,11 @@ export const app = {
   },
 
 
-  startEdit(model, modelSingular, orgId) {
+  startEdit(model, modelSingular, orgId, limit=null) {
     /*
      * Start editing a data table.
      */
-    this.streamData(model, modelSingular, orgId, null, true);
+    this.streamData(model, modelSingular, orgId, limit, true);
     const newButton = document.getElementById('new-button');
     if (newButton) newButton.classList.add('d-none');
     document.getElementById('import-form').classList.add('d-none');
@@ -416,7 +416,7 @@ export const app = {
   },
 
 
-  cancelEdit(model, modelSingular, orgId) {
+  cancelEdit(model, modelSingular, orgId, limit=null) {
     /*
      * Cancel editing a data table.
      */
@@ -429,7 +429,7 @@ export const app = {
     // document.getElementById('date-selection').classList.remove('d-none');
     document.getElementById('cancel-edit-table-button').classList.add('d-none');
     document.getElementById('save-table-button').classList.add('d-none');
-    this.streamData(model, modelSingular, orgId);
+    this.streamData(model, modelSingular, orgId, limit);
   },
 
 
@@ -639,21 +639,6 @@ export const app = {
      * Render a table for data from a sub-model.
      */
 
-    // function onSelectionChanged(event) {
-    //   /*
-    //    * Show options that are only available when table rows are selected.
-    //    */
-    //   var selectOnly = document.getElementsByClassName('select-only-option');
-    //   var rowCount = event.api.getSelectedNodes().length;
-    //   for (var i = 0; i < selectOnly.length; i++) {
-    //     const item = selectOnly.item(i);
-    //     if (rowCount > 0) {
-    //       item.classList.remove('d-none');
-    //     } else {
-    //       item.classList.add('d-none');
-    //     }
-    //   }
-    // }
     var onSelectionChanged = this.onSelectionChanged;
 
     // Specify the table columns according to the data model fields from organization settings.

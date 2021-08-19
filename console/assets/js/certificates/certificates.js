@@ -67,22 +67,24 @@ export const certificates = {
     /*
      * Generate a CoA PDF.
      */
-    console.log('Generating CoA...');    
-    return new Promise((resolve, reject) => {
-      const sample = JSON.parse(localStorage.getItem('sample'));
-      const sampleId = sample['sample_id'];
-      const data = { sample_ids: [sampleId] };
-      authRequest(`/api/certificates/generate?organization_id=${orgId}`, data).then((response) => {
-        if (response.error) {
-          showNotification('Error getting templates', response.message, { type: 'error' });
-          reject(response.error);
-        } else {
-          resolve(response.data);
-          document.getElementById('certificate-placeholder').classList.add('d-none');
-          document.getElementById('certificate-container').classList.remove('d-none');
-        }
-      });
-    });
+    console.log('Generating CoA...');
+    const message = 'A Pro subscription is required to issue certificates.';
+    showNotification('Pro Subscription Required', message, { type: 'error' });
+    // return new Promise((resolve, reject) => {
+    //   const sample = JSON.parse(localStorage.getItem('sample'));
+    //   const sampleId = sample['sample_id'];
+    //   const data = { sample_ids: [sampleId] };
+    //   authRequest(`/api/certificates/generate?organization_id=${orgId}`, data).then((response) => {
+    //     if (response.error) {
+    //       showNotification('Error getting templates', response.message, { type: 'error' });
+    //       reject(response.error);
+    //     } else {
+    //       resolve(response.data);
+    //       document.getElementById('certificate-placeholder').classList.add('d-none');
+    //       document.getElementById('certificate-container').classList.remove('d-none');
+    //     }
+    //   });
+    // });
   },
 
 
@@ -91,6 +93,8 @@ export const certificates = {
      * Review a CoA.
      */
     console.log('Reviewing CoA...');
+    const message = 'A Pro subscription is required to issue certificates.';
+    showNotification('Pro Subscription Required', message, { type: 'error' });
   },
 
 
@@ -99,6 +103,8 @@ export const certificates = {
      * Approve a CoA.
      */
     console.log('Reviewing CoA...');
+    const message = 'A Pro subscription is required to issue certificates.';
+    showNotification('Pro Subscription Required', message, { type: 'error' });
   },
 
 
@@ -107,6 +113,8 @@ export const certificates = {
      * Post a CoA to the traceability system.
      */
     console.log('Reviewing CoA...');
+    const message = 'A Pro subscription is required to issue certificates.';
+    showNotification('Pro Subscription Required', message, { type: 'error' });
   },
 
 
@@ -115,6 +123,8 @@ export const certificates = {
      * Release a CoA.
      */
     console.log('Releasing CoA...');
+    const message = 'A Pro subscription is required to issue certificates.';
+    showNotification('Pro Subscription Required', message, { type: 'error' });
   },
 
 
@@ -123,6 +133,8 @@ export const certificates = {
      * Un-approve a CoA.
      */
     console.log('Un-approving CoA...');
+    const message = 'A Pro subscription is required to issue certificates.';
+    showNotification('Pro Subscription Required', message, { type: 'error' });
   },
 
 
@@ -131,6 +143,8 @@ export const certificates = {
      * Un-review a CoA.
      */
     console.log('Un-reviewing CoA...');
+    const message = 'A Pro subscription is required to issue certificates.';
+    showNotification('Pro Subscription Required', message, { type: 'error' });
   },
 
 
