@@ -133,8 +133,6 @@ export const app = {
      * Change the limit for streamData.
      */
     this.limit = event.target.value;
-     // FIXME: Refresh the table?
-     // streamData(model, modelSingular, orgId)
   },
 
 
@@ -214,7 +212,7 @@ export const app = {
   },
 
 
-  renderTable(model, modelSingular, data, dataModel) {
+  renderTable(model, modelSingular, data, dataModel, editable=false) {
     /*
      * Render a data table in the user interface.
      * TODO: Generalize as a utility function.
@@ -227,27 +225,40 @@ export const app = {
       document.getElementById('loading-placeholder').classList.add('d-none');
       document.getElementById('data-placeholder').classList.add('d-none');
       document.getElementById('data-table').classList.remove('d-none');
-      this.tableHidden = false;
+      // this.tableHidden = false;
   
       // Get data model fields from organization settings.
       const columnDefs = dataModel.fields.map(function(e) { 
         return { headerName: e.label, field: e.key, sortable: true, filter: true };
       });
+
+      // Enable checkbox selection?
+      if (editable) {
+        columnDefs[0]['checkboxSelection'] = true;
+        columnDefs[0]['headerCheckboxSelection'] = true;
+      }
   
       // Specify the table options.
       this.gridOptions = {
         columnDefs: columnDefs,
-        defaultColDef: { flex: 1,  minWidth: 175 },
+        defaultColDef: { flex: 1,  minWidth: 175, editable },
+        enterMovesDownAfterEdit: editable,
+        singleClickEdit: editable,
+        suppressRowClickSelection: editable,
         pagination: true,
         paginationAutoPageSize: true,
         rowClass: 'app-action',
         rowHeight: 25,
-        rowSelection: 'single',
-        suppressRowClickSelection: false,
-        onRowClicked: event => navigationHelpers.openObject(model, modelSingular, event.data),
+        rowSelection: 'multiple',
+        // onRowClicked: event => navigationHelpers.openObject(model, modelSingular, event.data),
         onGridReady: event => theme.toggleTheme(theme.getTheme()),
       };
-  
+
+      var onSelectionChanged = this.onSelectionChanged;
+
+      if (!editable) this.gridOptions.onRowClicked = (event) => navigationHelpers.openObject(model, modelSingular, event.data);
+      else this.gridOptions.onSelectionChanged = onSelectionChanged;
+
       // Render the table
       const eGridDiv = document.querySelector(`#${model}-table`);
       eGridDiv.innerHTML = '';
@@ -283,7 +294,7 @@ export const app = {
   },
 
 
-  searchTable() {
+  searchTable(model, modelSingular, orgId) {
     /*
      * A general search of a data model table.
      */
@@ -291,10 +302,27 @@ export const app = {
     // documents are found. Prefer to iterate over data model fields in a logical
     // manner. For example, if the search contains an abbreviation, then we may know
     // that it is an ID, etc.
+    console.log('TODO: Implement search....');
+    this.dataModel.fields.forEach((field) => {
+      console.log(field);
+    })
+    // TODO: Show clear search button.
+    document.getElementById('clear-button').classList.remove('d-none');
   },
 
 
-  async streamData(model, modelSingular, orgId, limit=null) {
+  clearSearch(model, modelSingular, orgId) {
+    /*
+     * Reset the table after performing a search.
+     */
+    console.log('TODO: Clearing search...');
+    document.getElementById('clear-button').classList.add('d-none');
+    document.getElementById('searchInput').value = '';
+    this.streamData(model, modelSingular, orgId);
+  },
+
+
+  async streamData(model, modelSingular, orgId, limit=null, editable=false) {
     /*
      * Stream data, listening for any changes. Search by date range (by updated_at)
      * by first. If no observations are found, then search with a limit and set
@@ -324,14 +352,14 @@ export const app = {
         data.push(item);
       });
       if (data.length) {
-        this.renderTable(model, modelSingular, data, this.dataModel);
+        this.renderTable(model, modelSingular, data, this.dataModel, editable);
         try {
           document.getElementById('time_start').value = earliest.slice(0, 10);
         } catch (error) {
           // Date input likely hidden.
         }
       }
-      else if (!limit) this.streamData(model, modelSingular, orgId, 100);
+      else if (!limit) this.streamData(model, modelSingular, orgId, 100, editable);
       else this.renderPlaceholder();
     });
   },
@@ -371,6 +399,40 @@ export const app = {
   },
 
 
+  startEdit(model, modelSingular, orgId) {
+    /*
+     * Start editing a data table.
+     */
+    this.streamData(model, modelSingular, orgId, null, true);
+    const newButton = document.getElementById('new-button');
+    if (newButton) newButton.classList.add('d-none');
+    document.getElementById('import-form').classList.add('d-none');
+    document.getElementById('import_options').classList.add('d-none');
+    document.getElementById('export-table-button').classList.add('d-none');
+    document.getElementById('edit-table-button').classList.add('d-none');
+    // document.getElementById('date-selection').classList.add('d-none');
+    document.getElementById('cancel-edit-table-button').classList.remove('d-none');
+    document.getElementById('save-table-button').classList.remove('d-none');
+  },
+
+
+  cancelEdit(model, modelSingular, orgId) {
+    /*
+     * Cancel editing a data table.
+     */
+    const newButton = document.getElementById('new-button');
+    if (newButton) newButton.classList.remove('d-none');
+    document.getElementById('import-form').classList.remove('d-none');
+    document.getElementById('import_options').classList.remove('d-none');
+    document.getElementById('export-table-button').classList.remove('d-none');
+    document.getElementById('edit-table-button').classList.remove('d-none');
+    // document.getElementById('date-selection').classList.remove('d-none');
+    document.getElementById('cancel-edit-table-button').classList.add('d-none');
+    document.getElementById('save-table-button').classList.add('d-none');
+    this.streamData(model, modelSingular, orgId);
+  },
+
+
   /*----------------------------------------------------------------------------
   Sub-models
   ----------------------------------------------------------------------------*/
@@ -392,27 +454,34 @@ export const app = {
     newRow[`${modelSingular}_id`] = await this.createID(model, modelSingular, orgId, abbreviation, count);
     rows.push(newRow);
     this.gridOptions.api.setRowData(rows);
-    document.getElementById('save-table-button').classList.remove('d-none');
+    document.getElementById(`${modelSingular}-save-table-button`).classList.remove('d-none');
   },
 
 
-  async deleteTableRows(model, modelSingular, orgId) {
+  async deleteTableRows(model, modelSingular, orgId, parentModelSingular='', removeOnly=false) {
     /*
      * Delete a row or rows from an editable data table,
-     * trying to remove the data from Firestore.
+     * trying to remove the data from Firestore if removeOnly is false,
+     * which it is by default.
      */
-    const rows = []
+    const rows = [];
     const idKey = `${modelSingular}_id`;
+    const parentKey = `${parentModelSingular}_id`;
     const rowsToDelete = this.gridOptions.api.getSelectedRows();
     const idsToDelete = rowsToDelete.map(a => a[idKey]);
     const postData = [];
     idsToDelete.forEach((id) => {
       const entry = {};
       entry[idKey] = id;
+      entry[parentKey] = '';
       postData.push(entry);
     });
     try {
-      authRequest(`/api/${model}?organization_id=${orgId}`, postData, { delete: true });
+      if (removeOnly) {
+        authRequest(`/api/${model}?organization_id=${orgId}`, postData);
+      } else {
+        authRequest(`/api/${model}?organization_id=${orgId}`, postData, { delete: true });
+      }
     } catch (error) {
       // Entries may not exist in the database yet.
     }
@@ -422,7 +491,7 @@ export const app = {
       }
     });
     this.gridOptions.api.setRowData(rows);
-    document.getElementById('delete-table-button').classList.add('d-none');
+    document.getElementById(`${modelSingular}-delete-table-button`).classList.add('d-none');
   },
 
 
@@ -471,7 +540,6 @@ export const app = {
       rowSelection: 'multiple',
       singleClickEdit: true,
       suppressRowClickSelection: true,
-      // onSelectionChanged: onSelectionChanged,
       overlayLoadingTemplate: `
         <div class="spinner-grow text-success" role="status">
           <span class="visually-hidden">Loading...</span>
@@ -490,7 +558,7 @@ export const app = {
             <small>${dataModel.description}</small>
           </p>
         </div>
-      `
+      `,
     };
 
     // Render the table.
@@ -512,11 +580,11 @@ export const app = {
     await this.gridOptions.api.forEachNode((rowNode, index) => rows.push(rowNode.data));
     const data = [...rows, ...selected];
     this.gridOptions.api.setRowData(data);
-    if (data.length) document.getElementById('save-table-button').classList.remove('d-none');
+    if (data.length) document.getElementById(`${modelSingular}-save-table-button`).classList.remove('d-none');
   },
 
 
-  async saveTable(model, modelSingular, orgId, parentModel, parentModelSingular, parentId) {
+  async saveTable(model, modelSingular, orgId, parentModel=null, parentModelSingular=null, parentId=null) {
     /*
      * Save a sub-model's data, associating the data with the current data
      * model entry using the parent data model's ID.
@@ -524,14 +592,14 @@ export const app = {
     const data = [];
     await this.gridOptions.api.forEachNode((rowNode, index) => {
       const item = rowNode.data;
-      item[`${parentModelSingular}_id`] = parentId;
+      if (parentModelSingular) item[`${parentModelSingular}_id`] = parentId;
       data.push(item);
     });
     authRequest(`/api/${model}?organization_id=${orgId}`, data)
       .then((response) => {
         const message = `Data saved under ${model} for organization ${orgId}.`;
         showNotification('Data saved', message, { type: 'success' });
-        document.getElementById('delete-table-button').classList.add('d-none');
+        document.getElementById(`${modelSingular}-delete-table-button`).classList.add('d-none');
       })
       .catch((error) => {
         showNotification('Error saving data', error.message, { type: 'error' });
@@ -554,7 +622,7 @@ export const app = {
     } else {
       ref = ref.limit(limit);
     }
-    ref = ref.where(key, '==', value);
+    if (key) ref = ref.where(key, '==', value);
     ref.onSnapshot((querySnapshot) => {
       const data = [];
       querySnapshot.forEach((doc) => {
@@ -571,16 +639,23 @@ export const app = {
      * Render a table for data from a sub-model.
      */
 
-    function onSelectionChanged(event) {
-      var deleteButton = document.getElementById('delete-table-button');
-      var rowCount = event.api.getSelectedNodes().length;
-      if (rowCount > 0) {
-        deleteButton.classList.remove('d-none');
-      } else {
-        deleteButton.classList.add('d-none');
-      }
-    }
-    
+    // function onSelectionChanged(event) {
+    //   /*
+    //    * Show options that are only available when table rows are selected.
+    //    */
+    //   var selectOnly = document.getElementsByClassName('select-only-option');
+    //   var rowCount = event.api.getSelectedNodes().length;
+    //   for (var i = 0; i < selectOnly.length; i++) {
+    //     const item = selectOnly.item(i);
+    //     if (rowCount > 0) {
+    //       item.classList.remove('d-none');
+    //     } else {
+    //       item.classList.add('d-none');
+    //     }
+    //   }
+    // }
+    var onSelectionChanged = this.onSelectionChanged;
+
     // Specify the table columns according to the data model fields from organization settings.
     const columnDefs = dataModel.fields.map(function(e) {
       const dateColumn = e.key.endsWith('_at') ? 'datePicker' : null;
@@ -625,7 +700,7 @@ export const app = {
             <small>${dataModel.description}</small>
           </p>
         </div>
-      `
+      `,
     };
 
     // Render the table.
@@ -636,15 +711,24 @@ export const app = {
 
     // Get any template data and provide it to the table via the AG Grid API.
     this.gridOptions.api.setRowData(data);
-    if (data.length) document.getElementById('save-table-button').classList.remove('d-none');
+    if (data.length) document.getElementById(`${dataModel.singular}-save-table-button`).classList.remove('d-none');
   },
 
 
-  showDeleteRowsButton() {
+  onSelectionChanged(event) {
     /*
-     * Show delete row button.
+     * Show options that are only available when table rows are selected.
      */
-    document.getElementById('delete-table-button').classList.remove('d-none')
+    var selectOnly = document.getElementsByClassName('select-only-option');
+    var rowCount = event.api.getSelectedNodes().length;
+    for (var i = 0; i < selectOnly.length; i++) {
+      const item = selectOnly.item(i);
+      if (rowCount > 0) {
+        item.classList.remove('d-none');
+      } else {
+        item.classList.add('d-none');
+      }
+    }
   },
 
 

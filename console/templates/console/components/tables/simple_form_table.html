@@ -14,11 +14,16 @@
     parent_model_singular
     parent_id
     select (optional)
+    remove_only
 
-  When adding sub-models, entries are created in /organizations/{org_id}/{sub-model} with a unique id
+  When adding sub-models, entries are created in /organizations/{org_id}/{sub-model} with a unique id.
 -->
 <div id="{{ model }}-container" class="px-3">
+
+  <!-- Header -->
   <div class="d-flex justify-content-between">
+
+    <!-- Title -->
     <div class="col">
       <h1 class="fs-6 lh-base text-dark mb-0 mt-3">
         {{ model|title }}
@@ -27,6 +32,8 @@
         <small>{{ description }}</small>
       </h2>
     </div>
+
+    <!-- Options -->
     <div class="d-flex align-items-center">
       {% if select %}
         <button
@@ -44,30 +51,41 @@
       >
         Add {{ model_singular }}
       </button>
+      {% if remove_only %}
+        <button
+          class="btn btn-sm btn-set-width btn-sm-light btn-md-light select-only-option d-none ms-2"
+          onclick="cannlytics.app.deleteTableRows('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}', '{{ parent_model_singular }}', true);"
+        >
+          Remove
+        </button>
+      {% endif %}
       <button
-        id="save-table-button"
+        id="{{ model_singular}}-save-table-button"
         class="btn btn-sm btn-set-width bg-gradient-green text-white d-none ms-2"
         onclick="cannlytics.app.saveTable('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}', '{{ parent_model }}', '{{ parent_model_singular }}', '{{ parent_id }}');"
       >
         Save
       </button>
-      <button
-        id="delete-table-button"
-        class="btn btn-sm btn-set-width btn-danger d-none ms-2"
-        onclick="cannlytics.app.deleteTableRows('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
-      >
-        Delete
-      </button>
+      {% if not remove_only %}
+        <button
+          id="{{ model_singular}}-delete-table-button"
+          class="btn btn-sm btn-set-width btn-danger select-only-option d-none ms-2"
+          onclick="cannlytics.app.deleteTableRows('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+        >
+          Delete
+        </button>
+      {% endif %}
     </div>
   </div>
 
-  <div id="data-table mb-5">
+  <!-- AG Grid Table -->
+  <div class="mb-5">
     <div
       id="{{ model }}-table"
       class="ag-theme-alpine-dark"
       style="height: 350px; width:100%;"
     ></div>
   </div>
-</div>
 
+</div>
 </html>

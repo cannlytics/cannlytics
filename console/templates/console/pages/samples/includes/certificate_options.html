@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<!--
+  Certificate Options | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 8/18/2021
+  Updated: 8/18/2021
+-->
+<div class="d-flex align-itemx-center select-only-option d-none">
+  {% if not request.GET.status or request.GET.status == 'unreviewed' %}
+    <button
+      class="btn btn-sm btn-set-width bg-gradient-green text-white mx-2"
+      data-bs-toggle="modal"
+      data-bs-target="#pinModal"
+      onclick="setCallback('reviewCoA')"
+    >
+      Review
+    </button>
+  {% endif %}
+  {% if request.GET.status == 'reviewed' %}
+    <button
+      class="btn btn-sm btn-sm-light btn-md-light me-2"
+      data-bs-toggle="modal"
+      data-bs-target="#pinModal"
+      onclick="setCallback('unreviewCoA')"
+    >
+      Unreview
+    </button>
+  {% endif %}
+  {% if request.GET.status == 'approved' or request.GET.status == 'released' %}
+    <button
+      class="btn btn-sm btn-sm-light btn-md-light me-2"
+      data-bs-toggle="modal"
+      data-bs-target="#pinModal"
+      onclick="setCallback('unapproveCoA')"
+    >
+      Unapprove
+    </button>
+  {% endif %}
+  {% if request.GET.status == 'reviewed' %}
+    <button
+      class="btn btn-sm btn-set-width bg-gradient-green text-white"
+      data-bs-toggle="modal"
+      data-bs-target="#pinModal"
+      onclick="setCallback('approveCoA')"
+    >
+      Approve
+    </button>
+  {% endif %}
+  {% if request.GET.status == 'approved' %}
+    <button
+      class="btn btn-sm btn-set-width bg-gradient-green text-white mx-2"
+      data-bs-toggle="modal"
+      data-bs-target="#pinModal"
+      onclick="setCallback('postCoA')"
+    >
+      Post
+    </button>
+    <button
+      class="btn btn-sm btn-set-width bg-gradient-green text-white"
+      data-bs-toggle="modal"
+      data-bs-target="#pinModal"
+      onclick="setCallback('releaseCoA')"
+    >
+      Release
+    </button>
+  {% endif %}
+</div>
+</html>

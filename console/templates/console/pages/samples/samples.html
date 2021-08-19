@@ -53,10 +53,7 @@
 
       <!-- Certificates -->
       {% if section == 'certificates' %}
-        {% comment %} {% include "console/pages/samples/includes/certificates.html" with
-          organizations=organizations
-          user=user
-        %} {% endcomment %}
+
         {% block unit %}{% endblock unit %}
 
       <!-- Logs -->
@@ -108,7 +105,6 @@
 
         <!-- AG Grid Table -->
         <div id="data-table" class="d-none">
-          <!-- TODO: Advanced search -->
           <div
             id="samples-table"
             class="ag-theme-alpine-dark"

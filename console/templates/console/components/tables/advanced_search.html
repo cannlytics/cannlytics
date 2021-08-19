@@ -41,7 +41,7 @@ You can't order your query by a field included in an equality (==) or in clause.
       placeholder="Search"
       list="searchOptions"
       name="org_id"
-      oninput="cannlytics.app.searchTable()"
+      oninput="cannlytics.app.searchTable('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}')"
       type="text"
     >
     <datalist id="searchOptions"></datalist>
@@ -53,6 +53,18 @@ You can't order your query by a field included in an equality (==) or in clause.
       {% icon 'search' width="16px" height="16px" class="text-secondary" %}
     </button>
   </div><!-- End of search -->
+
+  <!-- Clear Search Button -->
+  <div>
+    <button
+      id="clear-button"
+      class="btn btn-sm-light btn-md-light d-none me-2"
+      onclick="cannlytics.app.clearSearch('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+      title="Clear search"
+    >
+      {% icon 'x-circle' width="16px" height="16px" class="text-secondary" %}
+    </button>
+  </div>
 
   <!-- Advanced Search Button -->
   <div>

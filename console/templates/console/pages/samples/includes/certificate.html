@@ -40,8 +40,8 @@
     <!-- Review button -->
       <!-- Require pin, insert signature on the CoA (by re-creating it) -->
 
-  <!-- Certificate d-none -->
-  <div id="certificate-container" class="mt-4">
+  <!-- Certificate -->
+  <div id="certificate-container" class="d-none mt-4">
 
     <!-- Options -->
     <!-- TODO: Dynamic options
@@ -73,7 +73,7 @@
           Unapprove
         </button>
         <button
-          class="btn btn-sm bg-gradient-green text-white"
+          class="btn btn-sm btn-set-width bg-gradient-green text-white"
           data-bs-toggle="modal"
           data-bs-target="#pinModal"
           onclick="setCallback('approveCoA')"
@@ -81,7 +81,7 @@
           Approve
         </button>
         <button
-          class="btn btn-sm bg-gradient-green text-white mx-2"
+          class="btn btn-sm btn-set-width bg-gradient-green text-white mx-2"
           data-bs-toggle="modal"
           data-bs-target="#pinModal"
           onclick="setCallback('postCoA')"
@@ -89,7 +89,7 @@
           Post
         </button>
         <button
-          class="btn btn-sm bg-gradient-green text-white"
+          class="btn btn-sm btn-set-width bg-gradient-green text-white"
           data-bs-toggle="modal"
           data-bs-target="#pinModal"
           onclick="setCallback('releaseCoA')"

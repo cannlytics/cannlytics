@@ -71,6 +71,7 @@
 
     <!-- Export -->
     <button
+      id="export-table-button"
       class="btn btn-sm-light btn-md-light me-2"
       onclick="cannlytics.app.exportDataTable('{{ model }}');"
     >
@@ -129,6 +130,40 @@
           </ul>
         </div>
       </div>
+    {% endif %}
+
+    <!-- Edit -->
+    {% if organizations.0.type == 'lab' %}
+      <button
+        id="cancel-edit-table-button"
+        type="button"
+        class="btn btn-sm-light btn-md-light me-2 d-none"
+        onclick="cannlytics.app.cancelEdit('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+      >
+        Cancel
+      </button>
+      <button
+        id="edit-table-button"
+        type="button"
+        class="btn btn-sm-light btn-md-light me-2"
+        onclick="cannlytics.app.startEdit('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+      >
+        Edit
+      </button>
+      <button
+        id="save-table-button"
+        class="btn btn-sm bg-gradient-green text-white d-none"
+        onclick="cannlytics.app.saveTable('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+      >
+        Save
+      </button>
+      <button
+        id="{{ model_singular}}-delete-table-button"
+        class="btn btn-sm btn-set-width btn-danger select-only-option d-none ms-2"
+        onclick="cannlytics.app.deleteTableRows('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');"
+      >
+        Delete
+      </button>
     {% endif %}
 
     <!-- New -->

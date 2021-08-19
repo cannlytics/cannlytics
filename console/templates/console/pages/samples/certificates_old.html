@@ -4,7 +4,7 @@
   Certificates Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/5/2021
-  Updated: 8/18/2021
+  Updated: 8/9/2021
   TODO:
     - Select All, Unreviewed, Reviewed, Approved, Released (finish)
 
@@ -47,18 +47,18 @@
     <div id="certificates-options" class="d-flex align-items-center">
 
       <!-- Type selection -->
-      <select
+      {% comment %} <select
         name="certificate_status"
         class="form-select form-select-sm me-2"
         onchange="selectStatus(event);"
         style="max-width:140px;"
       >
-        {% comment %} <option value="All" {% if not request.GET.status or request.GET.status == 'all' %}selected{% endif %}>All</option> {% endcomment %}
-        <option value="Unreviewed" {% if not request.GET.status or request.GET.status == 'unreviewed' %}selected{% endif %}>Unreviewed</option>
+        <option value="All" {% if not request.GET.status or request.GET.status == 'all' %}selected{% endif %}>All</option>
+        <option value="Unreviewed" {% if request.GET.status == 'unreviewed' %}selected{% endif %}>Unreviewed</option>
         <option value="Reviewed" {% if request.GET.status == 'reviewed' %}selected{% endif %}>Reviewed</option>
         <option value="Approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Approved</option>
         <option value="Released" {% if request.GET.status == 'released' %}selected{% endif %}>Released</option>
-      </select>
+      </select> {% endcomment %}
 
       <!-- Date selection -->
       <!-- Optional: Only show if `All` is selected -->
@@ -80,27 +80,13 @@
         />
       </div> {% endcomment %}
 
-      <!-- TODO: Template selection -->
-      <select
-        id="coa_template_select"
-        name="coa_template"
-        class="form-select form-select-sm me-2"
-        onchange="selectTemplate(event);"
-        style="max-width:200px;"
-      >
-        <option value="standard_coa_tempalte.xlsm">Standard CoA</option>
-      </select>
-
       <!-- Templates -->
       <a
-        class="btn btn-sm-light btn-md-light"
+        class="btn btn-sm-light btn-md-light me-2"
         href="/samples/certificates/templates"
       >
         Templates
       </a>
-
-      <!-- Certificate Options -->
-      {% include "./includes/certificate_options.html" %}
 
       <!-- Optional: Upload / Download -->
       {% comment %} <div class="btn-group btn-group-sm me-2" role="group" aria-label="Data import">
@@ -166,7 +152,36 @@
     </div>
   </div>
 
-  <!-- Samples sub-table -->
+  {% comment %} <!-- Loading placeholder -->
+  <div id="loading-placeholder">
+    {% include "console/components/placeholders/loading_placeholder.html" with
+      height='366px'
+      width='100%'
+      only
+    %}
+  </div>
+
+  <!-- No-data Placeholder -->
+  <div id="data-placeholder" class="d-none">
+    {% include "console/components/placeholders/table_placeholder.html" with
+      height='200px'
+      image='console/images/icons/multi-tone/documents.svg'
+      message='You do not have any certificates in this section (yet).'
+      title='No certificates found'
+      only
+    %}
+  </div> {% endcomment %}
+
+  <!-- AG Grid Table -->
+  {% comment %} <div id="data-table">
+    <div
+      id="certificates-table"
+      class="ag-theme-alpine-dark"
+      style="height: 366px; width:100%;"
+    ></div>
+  </div> {% endcomment %}
+
+  <!-- Results sub-table -->
   {% include "console/components/tables/simple_form_table.html" with
     model="samples"
     model_singular="sample"
@@ -175,18 +190,8 @@
     parent_model="samples"
     parent_model_singular="sample"
     parent_id=section
-    remove_only=True
     select=True
   %}
-
-  <!-- Samples selection dialog -->
-  {% include "console/components/modals/selection_dialog.html" with
-    model="samples"
-  %}
-
-  <!-- Enter pin dialog -->
-  <!-- Optional: Dynamically add functionality to button and input more elegantly -->
-  {% include "console/components/modals/pin_modal.html" with  callback="dynamicCallback" %}
 
 {% endblock unit %}
 
@@ -194,41 +199,12 @@
 
   <script type="text/javascript" charset="utf-8">
 
-    function selectStatus(event) {
-      /*
-       * Select the status of certificates to view.
-       */
-      console.log(event.target.value);
-      var status = event.target.value.toLowerCase();
-      var refresh = `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=${status}`;    
-      window.history.pushState({ path: refresh }, '', refresh);
-      // TODO: Filter table...
-      // TODO: Change which button is being displayed
-    }
-
-
-    var currentCallback = '';
-
-
-    function setCallback(name) {
-      /*
-      * Set the callback to execute.
-      */
-      currentCallback = name;
-    }
-
-
-    function dynamicCallback() {
-      /*
-      *  Dynamically call appropriate function.
-      */
-      cannlytics.certificates[currentCallback]('{{ organizations.0.organization_id }}');
-    }
-
     // Stream data.
-    cannlytics.app.streamSubModelData('samples', 'samples', '{{ organizations.0.organization_id }}', null, null, 1000);
+    cannlytics.app.streamSubModelData('samples', 'samples', '{{ organizations.0.organization_id }}', 'sample_id', '{{ section }}', 1000);
+    // FIXME: Load data
+    // cannlytics.app.streamLogs('{{ model_singular }}', '{{ section }}', '{{ organizations.0.organization_id }}');
 
-    {% comment %} // Set the initial date.
+    // Set the initial date.
     document.getElementById('time_start').value = new Date(new Date().setDate(new Date().getDate()-1)).toISOString().substring(0, 10);
     document.getElementById('time_end').value = new Date().toISOString().substring(0, 10);
 
@@ -255,7 +231,20 @@
       }
       // FIXME: Load data
       // cannlytics.app.streamLogs('{{ model_singular }}', '{{ section }}', '{{ organizations.0.organization_id }}', 'key', 'created_at', start, end);
-    }); {% endcomment %}
+    });
+
+
+    // Select certificat status.
+    function selectStatus(event) {
+      /*
+       * Select the status of certificates to view.
+       */
+      console.log(event.target.value);
+      var status = event.target.value.toLowerCase();
+      var refresh = `${window.location.protocol}//${window.location.host}${window.location.pathname}?status=${status}`;    
+      window.history.pushState({ path: refresh }, '', refresh);
+      // TODO: Filter table...
+    }
 
   </script>
 
