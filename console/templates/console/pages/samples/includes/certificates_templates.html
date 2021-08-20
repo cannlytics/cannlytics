@@ -4,7 +4,7 @@
   Certificates Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/5/2021
-  Updated: 7/15/2021
+  Updated: 8/19/2021
 -->
 
   <div class="d-flex flex-wrap par-md">
@@ -12,8 +12,15 @@
     <div id="key-table-container" class="col-12">
 
         <!-- Title  -->
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h1 class="fs-5 mb-0 lh-base">CoA Templates</h1>
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3">
+          {% comment %} <h1 class="fs-5 mb-0 lh-base">Templates</h1> {% endcomment %}
+          <div class="">
+            <h1 class="fs-5 lh-base text-dark mb-0">Templates</h1>
+            <h2 class="fs-6 lh-base text-secondary mb-3">
+              <small>Manage templates used in your workflow.</small>
+            </h2>
+          </div>
+          
           <button
             class="btn btn-sm bg-gradient-green text-white"
             onclick=""
@@ -23,7 +30,11 @@
         </div>
 
         <!-- Table -->
-        <div id="template-table" style="height:350px; width:100%;" class="ag-theme-alpine"></div>
+        <div
+          id="template-table" =
+          style="height:350px; width:100%;" =
+          class="ag-theme-alpine"
+        ></div>
 
     </div><!-- End of column -->
 
@@ -99,6 +110,7 @@
 
     // Render the table.
     const eGridDiv = document.querySelector('#template-table');
+    eGridDiv.innerHtml = '';
     new agGrid.Grid(eGridDiv, gridOptions);
     cannlytics.theme.setTableTheme();
 

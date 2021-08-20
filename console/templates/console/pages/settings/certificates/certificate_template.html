@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+<!--
+  File Page | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 7/9/2021
+  Updated: 7/11/2021
+-->
+{% load icon %}
+{% block console_css %}
+
+  <!-- Bootstrap Datepicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
+
+{% endblock console_css %}
+{% block console_body %}
+
+    <!-- Title -->
+    <div class="d-flex justify-content-between align-items-center px-3">
+      <div>
+        <h1 class="fs-6 lh-base text-dark mb-0 mt-3">
+          {% if part == 'new' %}New Template{% else %}Template {{ part }}{% endif %}
+        </h1>
+        <h2 class="fs-6 lh-base text-secondary mb-3">
+          <small>Manage templates for your workflow.</small>
+        </h2>
+      </div>
+      <div class="d-flex align-items-center">
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="viewFile();"
+        >
+          View
+        </button>
+        <button
+          class="btn btn-sm-light btn-md-light me-2"
+          onclick="document.getElementById('file_input').click();"
+        >
+          Upload
+        </button>
+        <input
+          id="file_input"
+          type="file"
+          accept="image/*"
+          class="visually-hidden"
+          onchange="uploadChosenFile(event);"
+        />
+        <button
+          id="form-save-button"
+          class="btn btn-sm bg-gradient-green text-white"
+          onclick="downloadFile();"
+        >
+          Download
+        </button>
+        <button
+          id="form-save-loading-button"
+          class="btn btn-sm bg-gradient-green text-white d-none"
+          type="button"
+          disabled
+        >
+          <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Optional: File preview -->
+
+    <!-- Form -->
+    <!-- FIXME: Load files data model from Firestore instead of state.py -->
+    <div class="mb-4 px-3">
+      <form id="file-form">
+        {% include "console/components/forms/dynamic_form.html" with
+          fields=files.fields
+        %}
+      </form>
+    </div>
+
+    <!-- Delete -->
+    {% if organizations.0.organization_id in user.qa or organizations.0.organization_id in user.owner %}
+      {% include "console/components/forms/simple_delete_option.html" with
+        model="files"
+        model_singular="file"
+      %}
+    {% endif %}
+
+{% endblock console_body %}
+
+<!-- JavaScript -->
+{% block console_js %}
+  <script>
+
+    // Load the data into the user interface.
+    cannlytics.ui.viewObject('file');
+
+
+    function deleteFile() {
+      /* Delete the file from Firebase Storage and
+      remove the file data from Firestore. */
+      cannlytics.app.deleteModelFile(event, {
+        model: '{{ model }}',
+        modelSingular: '{{ model_singular }}',
+        modelId: '{{ section }}',
+        orgId: '{{ organizations.0.organization_id }}',
+      });
+    }
+
+
+    function downloadFile() {
+      /* Download a file to the local file system. */
+      const fileName = document.getElementById('input_name').value;
+      const orgId = '{{ organizations.0.organization_id }}';
+      const model = '{{ model }}';
+      const modelId = '{{ section }}';
+      const ref = `organizations/${orgId}/${model}/${modelId}/files/${fileName}`;
+      cannlytics.firebase.downloadFile(ref, fileName);
+    }
+
+
+    function pinFile(event) {
+      /* Download a file to the local file system. */
+      console.log(event);
+      cannlytics.app.pinFile(event, {
+        model: '{{ model }}',
+        modelSingular: '{{ model_singular }}',
+        modelId: '{{ section }}',
+        orgId: '{{ organizations.0.organization_id }}',
+        userId: '{{ user.uid }}',
+        userName: '{{ user.name }}',
+        userEmail: '{{ user.email }}',
+        photoUrl: '{{ user.photo_url }}',
+      });
+    }
+
+
+    function uploadChosenFile(event) {
+      /* Upload chosen file to Firebase Storage. */
+      cannlytics.app.uploadModelFile(event, {
+        model: '{{ model }}',
+        modelSingular: '{{ model_singular }}',
+        modelId: '{{ section }}',
+        orgId: '{{ organizations.0.organization_id }}',
+        userId: '{{ user.uid }}',
+        userName: '{{ user.name }}',
+        userEmail: '{{ user.email }}',
+        photoUrl: '{{ user.photo_url }}',
+      });
+    }
+
+
+    async function viewFile() {
+      /* Open the file in a new tab. */
+      // FIXME: Broken, does not open links (permission error?)
+      const fileName = document.getElementById('input_name').value;
+      const orgId = '{{ organizations.0.organization_id }}';
+      const model = '{{ model }}';
+      const modelId = '{{ section }}';
+      const ref = `organizations/${orgId}/${model}/${modelId}/files/${fileName}`;
+      const url = await cannlytics.firebase.getDownloadURL(ref);
+      window.open(url, '_blank').focus();
+    }
+
+
+  </script>
+{% endblock console_js %}
+
+</html>

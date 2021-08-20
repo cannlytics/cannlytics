@@ -527,6 +527,7 @@ Contributions are always welcome! You are encouraged to submit issues, functiona
 - Charles Rice <charles@ufosoftwarellc.com>
 - Carlos Krefft <carlos@krefft.org>
 - Keegan Skeate <keegan@cannlytics.com>
+- Michael Pilosov <https://www.mathematicalmichael.com>
 
 ## License <a name="license"></a>
 
