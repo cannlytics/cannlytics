@@ -505,3 +505,57 @@ def get_worksheet_indexes(wb, output_pages):
         index = wb.worksheets.index(wb[page])
         ws_index_list.append(index + 1)
     return ws_index_list
+
+
+if __name__ == '__main__':
+
+    import argparse
+
+    # Declare command line arguments.
+    parser = argparse.ArgumentParser(description='CoA Generation')
+    parser.add_argument('--files', action='store', dest='files', default=['export.xlsx'])
+    parser.add_argument('--pages', action='store', dest='pages', default=['Page 1', 'Page 2', 'Page 3', 'Page 4'])
+    parser.add_argument('--template', action='store', dest='template', default='coa_template.xlsm')
+    args = parser.parse_args()
+
+    # Format files as a list.
+    files = args.files.replace('[', '').replace(']', '').split(',')
+    files = [x.strip() for x in files]
+
+    # Format pages as a list.
+    pages = args.files.replace('[', '').replace(']', '').split(',')
+    pages = [x.strip() for x in pages]
+
+    # Read in analyte limits.
+    limits = get_analyte_limits()
+
+    # TEST:
+    # files = './Export Files'
+    # pages = ['Page 1', 'Page 2', 'Page 3', 'Page 4']
+
+    # Optionally specify a folder instead of a list of files.
+    # If its a directory, get all .xlsx files as import files.
+    try:
+        # dir_path = os.path.dirname(os.path.realpath(__file__))
+        # full_file = os.path.join(dir_path, files)
+        potential_dir = files[0]
+        if os.path.exists(os.path.dirname(potential_dir)):
+            import_files = []
+            for file in os.listdir(potential_dir):
+                if file.endswith('.xlsx'):
+                    filename = os.path.join(potential_dir, file)
+                    import_files.append(filename)
+            files = import_files
+    except TypeError:
+        pass
+
+
+    # Optional: Enter image files.
+
+    # Test CoA generation.
+    generate_coas(
+        files,
+        output_pages=pages,
+        # coa_template=args.template,
+        limits=limits
+    )

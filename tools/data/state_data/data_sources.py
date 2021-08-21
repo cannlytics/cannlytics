@@ -19,14 +19,20 @@ sources = [
     {
         'state': 'AL',
         'state_name': 'Alabama',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'AK',
         'state_name': 'Alaska',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'AZ',
         'state_name': 'Arizona',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'AR',
@@ -35,10 +41,14 @@ sources = [
     {
         'state': 'CA',
         'state_name': 'California',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'CO',
         'state_name': 'Colorado',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'CT',
@@ -55,26 +65,30 @@ sources = [
     {
         'state': 'FL',
         'state_name': 'Florida',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'GA',
         'state_name': 'Georgia',
     },
     {
-        'state': 'GU',
-        'state_name': 'Guam',
-    },
-    {
         'state': 'HI',
         'state_name': 'Hawaii',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'ID',
         'state_name': 'Idaho',
+        'medicinal': False,
+        'recreational': False,
     },
     {
         'state': 'IL',
         'state_name': 'Illinois',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'IN',
@@ -87,6 +101,8 @@ sources = [
     {
         'state': 'KS',
         'state_name': 'Kansas',
+        'medicinal': False,
+        'recreational': False,
     },
     {
         'state': 'KY',
@@ -99,6 +115,8 @@ sources = [
     {
         'state': 'ME',
         'state_name': 'Maine',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'MD',
@@ -111,6 +129,8 @@ sources = [
     {
         'state': 'MI',
         'state_name': 'Michigan',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'MN',
@@ -131,6 +151,8 @@ sources = [
     {
         'state': 'NE',
         'state_name': 'Nebraska',
+        'medicinal': False,
+        'recreational': False,
     },
     {
         'state': 'NV',
@@ -155,6 +177,8 @@ sources = [
     {
         'state': 'NC',
         'state_name': 'North Carolina',
+        'medicinal': False,
+        'recreational': False,
     },
     {
         'state': 'ND',
@@ -163,10 +187,14 @@ sources = [
     {
         'state': 'OH',
         'state_name': 'Ohio',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'OK',
         'state_name': 'Oklahoma',
+        'medicinal': True,
+        'recreational': False,
         'sources': [
             {'name': 'Medical Marijuana Excise Tax', 'url': 'https://oklahomastate.opengov.com/transparency#/33894/accountType=revenues&embed=n&breakdown=types&currentYearAmount=cumulative&currentYearPeriod=months&graph=bar&legendSort=desc&month=5&proration=false&saved_view=105742&selection=A49C34CEBF1D01A1738CB89828C9274D&projections=null&projectionType=null&highlighting=null&highlightingVariance=null&year=2021&selectedDataSetIndex=null&fiscal_start=earliest&fiscal_end=latest'},
             {'name': 'List of Licensed Businesses', 'url': 'https://oklahoma.gov/omma/businesses/list-of-businesses.html'},
@@ -175,6 +203,8 @@ sources = [
     {
         'state': 'OR',
         'state_name': 'Oregon',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'PA',
@@ -223,6 +253,8 @@ sources = [
     {
         'state': 'WA',
         'state_name': 'Washington',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'WV',
