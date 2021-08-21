@@ -589,6 +589,7 @@ export const app = {
      * Save a sub-model's data, associating the data with the current data
      * model entry using the parent data model's ID.
      */
+    // FIXME: Save the table and re-render without being so janky!!!
     const data = [];
     await this.gridOptions.api.forEachNode((rowNode, index) => {
       const item = rowNode.data;

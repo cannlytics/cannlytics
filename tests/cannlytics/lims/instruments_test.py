@@ -111,34 +111,34 @@ if __name__ == '__main__':
     # Print out objects
     verbose = False
     
-    # # Test supporting functions
-    # sample_data = test_get_sample_data()
-    # compound_data = test_get_compound_dataframe()
-    # compound_data = test_clean_column_names()
+    # Test supporting functions
+    sample_data = test_get_sample_data()
+    compound_data = test_get_compound_dataframe()
+    compound_data = test_clean_column_names()
     
-    # # Test importing cannabinoids by Agilent HPLC.
-    # cannabinoids_measurement = test_import_agilent_cannabinoids()
-    # print('\nCannabinoid Measurement: ✓\n')
-    # if verbose:
-    #     print(json.dumps(cannabinoids_measurement, indent=4, sort_keys=True))
+    # Test importing cannabinoids by Agilent HPLC.
+    cannabinoids_measurement = test_import_agilent_cannabinoids()
+    print('\nCannabinoid Measurement: ✓\n')
+    if verbose:
+        print(json.dumps(cannabinoids_measurement, indent=4, sort_keys=True))
     
-    # # Test importing terpenes by Agilent GC
-    # terpenes_measurement = test_import_agilent_gc_terpenes()
-    # print('\nTerpenes Measurement: ✓\n')
-    # if verbose:
-    #     print(json.dumps(terpenes_measurement, indent=4, sort_keys=True))
+    # Test importing terpenes by Agilent GC
+    terpenes_measurement = test_import_agilent_gc_terpenes()
+    print('\nTerpenes Measurement: ✓\n')
+    if verbose:
+        print(json.dumps(terpenes_measurement, indent=4, sort_keys=True))
     
-    # # Test importing residual solvents by Agilent GC
-    # residual_solvents_measurement = test_import_agilent_gc_residual_solvents()
-    # print('\nResidual Solvent Measurement: ✓\n')
-    # if verbose:
-    #     print(json.dumps(residual_solvents_measurement, indent=4, sort_keys=True))
+    # Test importing residual solvents by Agilent GC
+    residual_solvents_measurement = test_import_agilent_gc_residual_solvents()
+    print('\nResidual Solvent Measurement: ✓\n')
+    if verbose:
+        print(json.dumps(residual_solvents_measurement, indent=4, sort_keys=True))
     
-    # # Test importing microbiological screening results.
-    # micro_samples = test_import_micro()
-    # print('\nMicrobe Measurements: ✓\n')
-    # if verbose:
-    #     print(json.dumps(micro_samples, indent=4, sort_keys=True))
+    # Test importing microbiological screening results.
+    micro_samples = test_import_micro()
+    print('\nMicrobe Measurements: ✓\n')
+    if verbose:
+        print(json.dumps(micro_samples, indent=4, sort_keys=True))
     
     # Test import heavy metal results.
     heavy_metal_samples = test_import_heavy_metals()
@@ -147,6 +147,11 @@ if __name__ == '__main__':
         print(json.dumps(heavy_metal_samples, indent=4, sort_keys=True))
     
     # Test automatic collection
-    # org_id = 'test-company'
-    # last_modified_at = datetime.now() - timedelta(minutes=60)
-    # instruments.automatic_collection(org_id, last_modified_at, env_file='../../../.env')
+    org_id = 'test-company'
+    measurements = instruments.automatic_collection(
+        org_id,
+        env_file='../../../.env',
+        minutes_ago=None
+    )
+    assert len(measurements) == 24
+    print('\nResults automatically imported: ✓\n')

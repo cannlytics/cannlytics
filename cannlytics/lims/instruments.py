@@ -3,7 +3,7 @@ Instruments | Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>  
 Created: 8/3/2021  
-Updated: 8/20/2021  
+Updated: 8/21/2021  
 License: MIT License <https://opensource.org/licenses/MIT>  
 
 Manage scientific instruments and measurements from the instruments.
@@ -33,18 +33,20 @@ except:
 API_BASE = 'https://console.cannlytics.com'
 
 
-def automatic_collection(org_id, last_modified_at, env_file='.env'):
+def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
     """Automatically collect results from scientific instruments.
     Args:
         org_id (str): The organization ID to associate with instrument results.
         env_file (str): The environment variable file, `.env` by default.
             Either a `GOOGLE_APPLICATION_CREDENTIALS` or a
             `CANNLYTICS_API_KEY` is needed to run the routine.
-    Returns
+        minutes_ago (int): The number of minutes in the past to restrict
+            recently modified files.
+    Returns:
         (list): A list of measurements (dict) that were collected.
     """
 
-    # Initialize Firebase or use an API key.
+    # Try to initialize Firebase, otherwise an API key will be used.
     try:
         env = environ.Env()
         env.read_env(env_file)
@@ -52,57 +54,117 @@ def automatic_collection(org_id, last_modified_at, env_file='.env'):
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
         initialize_firebase()
     except:
-        api_key = env('CANNLYTICS_API_KEY')
-        headers = {
-            'Authorization': 'Bearer %s' % api_key,
-            'Content-type': 'application/json',
-        }
+        pass
+
+    # Get the organization ID from the .env file if not specified.
+    if not org_id:
+        org_id = env('CANNLYTICS_ORGANIZATION_ID')
+
+    # Format the last modified time cut-off as a datetime.
+    last_modified_at = None
+    if minutes_ago:
+        last_modified_at = datetime.now() - timedelta(minutes=minutes_ago)
 
     # Get the instruments, trying Firestore, then the API.
     try:
         ref = f'organizations/{org_id}/instruments'
         instruments = get_collection(ref)
     except:
+        api_key = env('CANNLYTICS_API_KEY')
+        headers = {
+            'Authorization': 'Bearer %s' % api_key,
+            'Content-type': 'application/json',
+        }
         url = f'{API_BASE}/instruments?organization_id={org_id}'
         instruments = requests.get(url, headers=headers)
-    print('INSTRUMENTS:', instruments)
 
     # Iterate over instruments, collecting measurements.
     measurements = []
     for instrument in instruments:
 
-        # Identify the analysis being run and identify the import routine.
-        analysis = instrument['analysis']
-        if 'micro' in analysis:
-            import_method = locals()['import_micro']
-        elif 'metal' in analysis:
-            import_method = locals()['import_heavy_metals']
-        else:
-            import_method = locals()['import_results']
+        # Iterate over analyses that the instrument may be running.
+        analyses = instrument.get('analyses', '').split(',')
+        analyses = [x.strip() for x in analyses]
+        for n in range(len(analyses)):
 
-        # Search for recently modified files in the instrument directory
-        # and parse any recently modified file.
-        directory = instrument['data_path']
-        for root, dirs, filenames in os.walk(directory):
-            for filename in filenames:
-                if filename.endswith('.xlsx'):
-                    data_file = os.path.join(root, filename)
-                    modifed_at = os.stat(data_file).st_mtime
-                    if modifed_at >= last_modified_at:
+            # Optional: Handle multiple data paths more elegantly.
+            analysis = analyses[n]
+            try:
+                data_paths = instrument['data_path'].split(',')
+            except AttributeError:
+                continue # No data path.
+            data_paths = [x.strip() for x in data_paths]
+            data_path = data_paths[n]
+            if not data_path:
+                continue
+
+            # Identify the analysis being run and identify the import routine.
+            # Optional: Identify more elegantly.
+            if 'micro' in analysis or 'MICR' in analysis:
+                import_method = globals()['import_micro']
+            elif 'metal' in analysis or 'HEAV' in analysis:
+                import_method = globals()['import_heavy_metals']
+            else:
+                import_method = globals()['import_results']
+
+            # Search for recently modified files in the instrument directory
+            # and parse any recently modified file.
+            for root, _, filenames in os.walk(data_path):
+                for filename in filenames:
+                    if filename.endswith('.xlsx') or filename.endswith('.xls'):
+                        data_file = os.path.join(root, filename)
+                        modifed_at = os.stat(data_file).st_mtime
+                        if last_modified_at:
+                            if modifed_at < last_modified_at:
+                                continue
                         samples = import_method(data_file)
                         if isinstance(samples, dict):
-                            measurements.append(samples)
+                            sample_data = {**instrument, **samples}
+                            measurements.append(sample_data)
                         else:
-                            measurements = [*measurements, *samples]
-    print('Found all measurements:', measurements)
+                            for sample in samples:
+                                sample_data = {**instrument, **sample}
+                                measurements.append(sample_data)
 
-    # Upload data to Firestore.
+    # Upload measurement data to Firestore.
+    # FIXME: Needs to be idempotent!!!
+    now = datetime.now()
+    updated_at = now.isoformat()
     for measurement in measurements:
-        measurement_id = measurement.get('acq_inj_time')
+        try:
+            measurement['sample_id'] = measurement['sample_name']
+        except:
+            continue # Already has `sample_id`.
+
+        # TODO: Format a better measurement ID.
+        measurement_id = measurement.get('acq_inj_time') # E.g. 12-Jun-21, 15:21:07
         if not measurement_id:
-            measurement_id = str(int(datetime.now().timestamp()))
+            # measurement_id = now.strftime('%d-%b-%y-%H-%M-%S') + '_' + str(measurement['sample_id'])
+            measurement_id = measurement['sample_id']
+        else:
+            try:
+                measurement_id = measurement_id.replace(',', '').replace(' ', '-').replace(':', '-')
+            except AttributeError:
+                pass
+            measurement_id = str(measurement_id) + '_' + str(measurement['sample_id'])
+        measurement['measurement_id'] = measurement_id
+        measurement['updated_at'] = updated_at
         ref = f'organizations/{org_id}/measurements/{measurement_id}'
         update_document(ref, measurement)
+        print('Uploaded measurement:', ref)
+    
+        # Upload result data to Firestore
+        # FIXME: Needs to be idempotent!!!
+        for result in measurement['results']:
+            analyte = result['analyte']
+            result_id = f'{measurement_id}_{analyte}'
+            result['sample_id'] = measurement['sample_name']
+            result['result_id'] = result_id
+            result['measurement_id'] = measurement_id
+            result['updated_at'] = updated_at
+            ref = f'organizations/{org_id}/results/{result_id}'
+            update_document(ref, result)
+            print('Uploaded result:', ref)
     
     # Return the measurements
     return measurements
@@ -235,7 +297,7 @@ def import_micro(file_name):
     return samples
 
 
-def import_results(file_name, vendor='agilent', instrument='hplc'):
+def import_results(file_name):
     """Import scientific instrument data. The routine is as follows:
         1. Read in all the excel sheets at one time.
         2. Get the sample name.
@@ -261,29 +323,11 @@ if __name__ == '__main__':
     import argparse
 
     # Declare command line arguments.
-    # Get Cannlytics User API Key from .env file and specify the organization.
     parser = argparse.ArgumentParser(description='Scientific instrument data collection routine.')
     parser.add_argument('--env', action='store', dest='env_file', default=['.env'])
     parser.add_argument('--modified', action='store', dest='last_modified', default=[60])
     parser.add_argument('--org', action='store', dest='org_id', default=[''])
     args = parser.parse_args()
 
-    # Specify the last modified time cut-off.
-    last_modified_at = datetime.now() - timedelta(minutes=args.last_modified)
-
     # Collect data.
-    automatic_collection(args.org_id, last_modified_at, env_file=args.env_file)
-
-
-#-----------------------------------------------------------------------
-# DRAFT
-#-----------------------------------------------------------------------
-
-from crontab import CronTab
-
-def schedule_automatic_collection():
-    """Schedule an automatic collection CRON job."""
-    my_cron = CronTab(tab="""*/1 * * * * python test_cron.py""")
-    # job = my_cron.new(command='python /home/roy/writeDate.py')
-    # job.minute.every(1)
-    my_cron.write()
+    automatic_collection(args.org_id, args.last_modified, env_file=args.env_file)
