@@ -68,7 +68,7 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
     # Get the instruments, trying Firestore, then the API.
     try:
         ref = f'organizations/{org_id}/instruments'
-        instruments = get_collection(ref)
+        instrument_data = get_collection(ref)
     except:
         api_key = env('CANNLYTICS_API_KEY')
         headers = {
@@ -76,11 +76,12 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
             'Content-type': 'application/json',
         }
         url = f'{API_BASE}/instruments?organization_id={org_id}'
-        instruments = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers)
+        instrument_data = response.json()['data']
 
     # Iterate over instruments, collecting measurements.
     measurements = []
-    for instrument in instruments:
+    for instrument in instrument_data:
 
         # Iterate over analyses that the instrument may be running.
         analyses = instrument.get('analyses', '').split(',')
@@ -114,6 +115,7 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
                     if filename.endswith('.xlsx') or filename.endswith('.xls'):
                         data_file = os.path.join(root, filename)
                         modifed_at = os.stat(data_file).st_mtime
+                        # FIXME: Ensure date restriction works.
                         if last_modified_at:
                             if modifed_at < last_modified_at:
                                 continue
@@ -127,7 +129,6 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
                                 measurements.append(sample_data)
 
     # Upload measurement data to Firestore.
-    # FIXME: Needs to be idempotent!!!
     now = datetime.now()
     updated_at = now.isoformat()
     for measurement in measurements:
@@ -150,11 +151,14 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
         measurement['measurement_id'] = measurement_id
         measurement['updated_at'] = updated_at
         ref = f'organizations/{org_id}/measurements/{measurement_id}'
-        update_document(ref, measurement)
+        try:
+            update_document(ref, measurement)
+        except:
+            url = f'{API_BASE}/measurements/{measurement_id}?organization_id={org_id}'
+            response = requests.post(url, json=measurement, headers=headers)
         print('Uploaded measurement:', ref)
-    
+
         # Upload result data to Firestore
-        # FIXME: Needs to be idempotent!!!
         for result in measurement['results']:
             analyte = result['analyte']
             result_id = f'{measurement_id}_{analyte}'
@@ -163,9 +167,13 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
             result['measurement_id'] = measurement_id
             result['updated_at'] = updated_at
             ref = f'organizations/{org_id}/results/{result_id}'
-            update_document(ref, result)
+            try:
+                update_document(ref, result)
+            except:
+                url = f'{API_BASE}/results/{result_id}?organization_id={org_id}'
+                response = requests.post(url, json=result, headers=headers)
             print('Uploaded result:', ref)
-    
+
     # Return the measurements
     return measurements
 
@@ -321,13 +329,24 @@ def import_results(file_name):
 if __name__ == '__main__':
 
     import argparse
+    import os, sys
+    # sys.path.append(os.path.join(os.path.dirname(__file__)))
+    sys.path.append('../cannlytics')
+
+    # Internal imports
+    from cannlytics.firebase import (
+        get_collection,
+        initialize_firebase,
+        update_document
+    )
+    from cannlytics.utils.utils import snake_case
 
     # Declare command line arguments.
     parser = argparse.ArgumentParser(description='Scientific instrument data collection routine.')
-    parser.add_argument('--env', action='store', dest='env_file', default=['.env'])
-    parser.add_argument('--modified', action='store', dest='last_modified', default=[60])
-    parser.add_argument('--org', action='store', dest='org_id', default=[''])
+    parser.add_argument('--env', action='store', dest='env_file', default='.env')
+    parser.add_argument('--modified', action='store', dest='last_modified', default=None)
+    parser.add_argument('--org', action='store', dest='org_id', default='')
     args = parser.parse_args()
 
     # Collect data.
-    automatic_collection(args.org_id, args.last_modified, env_file=args.env_file)
+    automatic_collection(args.org_id, env_file=args.env_file, minutes_ago=args.last_modified)

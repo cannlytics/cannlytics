@@ -147,7 +147,7 @@ if __name__ == '__main__':
         print(json.dumps(heavy_metal_samples, indent=4, sort_keys=True))
     
     # Test automatic collection
-    org_id = 'test-company'
+    org_id = ''
     measurements = instruments.automatic_collection(
         org_id,
         env_file='../../../.env',
