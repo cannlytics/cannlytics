@@ -40,8 +40,12 @@ if __name__ == '__main__':
     db = firebase.initialize_firebase()
     
     # Move document(s).
-    move_collection('events', 'public/events/event_data')
-    move_collection('partners', 'public/partners/partner_data')
-    move_collection('team', 'public/team/team_members')
-    move_collection('whitepapers', 'public/whitepapers/whitepaper_data')
-    move_collection('contributors', 'public/contributors/contributor_data')
+    move_collection(
+        'website/logs/page_visits',
+        'logs/website/page_visits'
+    )
+    
+    move_collection(
+        'logs/downloads/data_downloads',
+        'logs/website/data_downloads'
+    )

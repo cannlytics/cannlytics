@@ -7,11 +7,13 @@ Updated: 7/17/2021
 
 # Standard imports
 import csv
+from datetime import datetime
 from json import loads
 
 # External imports
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect, JsonResponse
+import numpy as np
 import pandas as pd
 import openpyxl
 
@@ -61,11 +63,18 @@ def read_worksheet(path, filename='Upload'):
         path (str or InMemoryFile): An Excel workbook to read.
         filename (str): The name of the worksheet to upload.
     Returns:
+        (DataFrame): A Pandas DataFrame of the results.
     """
-    workbook = openpyxl.load_workbook(path, data_only=True)
-    sheet = workbook.get_sheet_by_name(filename)
-    headers = get_worksheet_headers(sheet)
-    return get_worksheet_data(sheet, headers)
+    # try:
+    #     workbook = openpyxl.load_workbook(path, data_only=True)
+    #     sheet = workbook.get_sheet_by_name(filename)
+    #     headers = get_worksheet_headers(sheet)
+    #     return pd.DataFrame(get_worksheet_data(sheet, headers))
+    # except:
+    print('Path:', path)
+    data = pd.read_csv(path)
+    data.columns = [snake_case(x) for x in data.columns]
+    return data
 
 
 def download_csv_data(request):
@@ -113,7 +122,7 @@ def import_data(request):
         return HttpResponse({'error': True, 'message': 'You are not a member of this organization.'}, status=403)
 
     # Read the data from Excel.
-    excel_data = read_worksheet(excel_file)
+    data = read_worksheet(excel_file)
 
     # Get singular from data models, to identify the ID.
     data_model = get_document(f'organizations/{org_id}/data_models/{model}')
@@ -121,19 +130,26 @@ def import_data(request):
 
     # Clean data according to data type.
     # Optional: Add more validation / data cleaning by type.
-    data = pd.DataFrame(excel_data)
     for field in data_model['fields']:
         key = field['key']
         data_type = field.get('type', 'text')
         if data_type == 'text' or data_type == 'textarea':
             data[key].replace(['0', '0.0', 0], '', inplace=True)
 
-    # Save imported data to Firestore.
+    # Save imported data to Firestore (FIXME: in reverse order for user sanity).
+    updated_at = datetime.now().isoformat()
     for key, row in data.iterrows():
+    # data = data.replace({np.nan: None})
+    # for idx in reversed(data.index):
+        # row = data.loc[idx]
         doc_id = row[f'{model_singular}_id']
         if doc_id:
             values = row.to_dict()
+            values['updated_at'] = updated_at
+            values['updated_by'] = claims['uid']
             update_document(f'organizations/{org_id}/{model}/{doc_id}', values)
 
-    # Submit the form (preferably without refreshing).
+    # Submit the form (FIXME: preferably without refreshing).
+    # See: https://stackoverflow.com/questions/11647715/how-to-submit-form-without-refreshing-page-using-django-ajax-jquery
     return HttpResponseRedirect(f'/{model}')
+    # return JsonResponse({'success': True}, status=200)

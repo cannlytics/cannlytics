@@ -445,13 +445,16 @@ def update_custom_claims(uid, email=None, claims=None):
         user = auth.get_user_by_email(email)
         uid = user.uid
     existing_claims = get_custom_claims(uid)
-    if existing_claims:
-        existing_owner = existing_claims.get('owner', [])
-    else:
+    if not existing_claims:
         existing_claims = {}
-        existing_owner = []
-    current_owner = claims.get('owner', [])
-    claims['owner'] = list(set(existing_owner + current_owner))
+    # if existing_claims:
+    #     existing_owner = existing_claims.get('owner', [])
+    # else:
+    #     existing_claims = {}
+    #     existing_owner = []
+    # current_owner = claims.get('owner', [])
+    # FIXME: For now, only 1 organization per user.
+    # claims['owner'] = list(set(existing_owner + current_owner))
     auth.set_custom_user_claims(uid, {**existing_claims, **claims})
 
 

@@ -118,7 +118,7 @@
 
   {% if not section %}
     <script>
-      cannlytics.app.streamData('inventory', 'item', '{{ organizations.0.organization_id }}', 1000);
+      cannlytics.app.awaitStreamData('inventory', 'item', '{{ organizations.0.organization_id }}', 1000);
     </script>
   {% endif %}
 

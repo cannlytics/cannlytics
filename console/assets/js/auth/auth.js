@@ -2,7 +2,7 @@
  * Authentication JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 12/4/2020
- * Updated: 6/23/2021
+ * Updated: 8/22/2021
  */
 
 import { apiRequest, authRequest, showNotification } from '../utils.js';
@@ -30,42 +30,44 @@ export const auth = {
   },
 
 
-  googleSignIn() {
-    /*
-     * Sign in a user with Google.
-     */
-    var provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithRedirect(provider);
-  },
+  // Optional: Implement Google Sign-in
+  // googleSignIn() {
+  //   /*
+  //    * Sign in a user with Google.
+  //    */
+  //   var provider = new firebase.auth.GoogleAuthProvider();
+  //   firebase.auth().signInWithRedirect(provider);
+  // },
 
 
-  googleSignInRedirect() {
-    /*
-     * Signs in a user after a successful Google sign-in redirect.
-     */
-    // FIXME: Login on redirect does not work
-    console.log('Checking for Google redirect...')
-    firebase.auth().getRedirectResult().then((result) => {
-      if (result.credential) {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        // var token = result.credential.accessToken;
-        // window.location.href = '/';
-      }
-      // The signed-in user info.
-      var user = result.user;
-      console.log('User:', user);
-    }).catch((error) => {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      // The email of the user's account used.
-      var email = error.email;
-      // The firebase.auth.AuthCredential type that was used.
-      var credential = error.credential;
-      // ...
-      console.log('Error:', errorMessage);
-    });
-  },
+  // Optional: Implement Google Sign-in Redirect
+  // googleSignInRedirect() {
+  //   /*
+  //    * Signs in a user after a successful Google sign-in redirect.
+  //    */
+  //   // FIXME: Login on redirect does not work
+  //   console.log('Checking for Google redirect...')
+  //   firebase.auth().getRedirectResult().then((result) => {
+  //     if (result.credential) {
+  //       // This gives you a Google Access Token. You can use it to access the Google API.
+  //       // var token = result.credential.accessToken;
+  //       // window.location.href = '/';
+  //     }
+  //     // The signed-in user info.
+  //     var user = result.user;
+  //     console.log('User:', user);
+  //   }).catch((error) => {
+  //     // Handle Errors here.
+  //     var errorCode = error.code;
+  //     var errorMessage = error.message;
+  //     // The email of the user's account used.
+  //     var email = error.email;
+  //     // The firebase.auth.AuthCredential type that was used.
+  //     var credential = error.credential;
+  //     // ...
+  //     console.log('Error:', errorMessage);
+  //   });
+  // },
 
 
   resetPassword() {
@@ -90,7 +92,7 @@ export const auth = {
     const code = url.searchParams.get('oobCode');
     firebase.auth().verifyPasswordResetCode(code)
       .then((email) => {
-        document.getElementById('user-email').value = email;
+        document.getElementById('login-email').value = email;
       })
       .catch(()  => {
         const invalidMessage = document.getElementById('password-reset-code-invalid-message');
@@ -112,6 +114,8 @@ export const auth = {
       showNotification('Passwords do not match', message, { type: 'error' });
       return;
     }
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get('oobCode');
     firebase.auth().confirmPasswordReset(code, newPassword)
       .then(() => {
         window.location.href = '/account/password-reset-complete';
@@ -165,7 +169,7 @@ export const auth = {
   
   signUp(event) {
     /*
-     * Sign up a user.
+     * Sign up a user for a Firebase authentication account.
      */
     event.preventDefault();
     const terms = document.getElementById('login-terms-accepted');
@@ -181,7 +185,6 @@ export const auth = {
     const password = document.getElementById('login-password').value;
     document.getElementById('sign-up-button').classList.add('d-none');
     document.getElementById('sign-up-loading-button').classList.remove('d-none');
-    // FIXME: Ensure that sign-up works with user sessions.
     firebase.auth().createUserWithEmailAndPassword(email, password)
       .then(() => {
         // Optional: Handle error more elegantly.
@@ -189,17 +192,10 @@ export const auth = {
           this.postSignUp(email);
         })
         .catch((error) => {
-          this.postSignUp(email);
+          console.log(error);
+          // this.postSignUp(email);
         });
       })
-      // .then(() => {
-      //   apiRequest('/api/users', { email, photo_url: `https://robohash.org/${email}?set=set5` })
-      //       .then(() => {
-      //         window.location.href = window.location.origin;
-      //       })
-      //   // Optional: Implement user verification and don't send emails in development.
-      //   // this.verifyUser();
-      // })
       .catch((error) => {
         showNotification('Sign up error', error.message, { type: 'error' });
       })
@@ -227,14 +223,11 @@ export const auth = {
     * Sign a user out of Firebase and clear the session.
     */
     const baseURL = window.location.origin;
-    console.log('Signing out....')
     authRequest('/logout')
       .then((response) => {
-        console.log(response);
         document.location.href = `${window.location.origin}/account/sign-out`;
       })
       .catch((error) => {
-        console.log(error);
         document.location.href = `${window.location.origin}/account/sign-out`;
       })
       .finally(() => {
@@ -251,7 +244,6 @@ export const auth = {
     user.sendEmailVerification().then(() => {
       showNotification('Verification email sent', error.message, { type: 'success' });
     }).catch(function(error) {
-      console.log(error);
       showNotification('Verification error', error.message, { type: 'error' });
     });
   },

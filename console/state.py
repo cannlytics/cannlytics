@@ -96,7 +96,7 @@ data_models = [
             {"key": "analyte_id", "label": "Analyte ID"},
             {"key": "name", "label": "Name"},
             {"key": "key", "label": "Key"},
-            {"key": "formula", "label": "Results Formula", "type": "text"},
+            {"key": "formula", "label": "Formula", "type": "text"},
             {"key": "limit", "label": "Limit", "type": "number", "class":"field-sm text-end"},
             {"key": "lod", "label": "LOD", "type": "number", "class":"field-sm text-end"},
             {"key": "loq", "label": "LOQ", "type": "number", "class":"field-sm text-end"},

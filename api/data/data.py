@@ -1,7 +1,7 @@
 """
 Data Endpoints | Cannlytics API
 Created: 5/30/2021
-Updated: 7/8/2021
+Updated: 8/21/2021
 
 API endpoints to interface with datasets.
 """
@@ -25,12 +25,14 @@ from cannlytics.firebase import (
 
 
 @api_view(['GET', 'POST'])
-def data(request, format=None):
+def datasets(request, state=None):
     """Get or update information about datasets."""
 
     # Authenticate the user.
     claims = auth.verify_session(request)
     uid = claims['uid']
+
+    # TODO: Allow user to pass state as a parameter.
 
     if request.method == 'GET':
 

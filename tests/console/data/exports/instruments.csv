@@ -1,0 +1,6 @@
+﻿"Instrument ID","Name","Vendor","Instrument Type","Analyses","Data path","Area ID","Area Name","Calibrated At","Calibrated By","Description"
+"T005","Titus","PerkinElmer","qPCR","MICR","C:\Cannlytics\data\qpcr_microbials","","","0","",""
+"T004","Nero","Agilent","LC-MS","","","","","0","",""
+"T003","Tiberius","Agilent","ICP-MS","HEAV","C:\Cannlytics\data\icp_ms_heavy_metals","","","0","",""
+"T002","Augustus","Agilent","GC","TERP, RES","C:\Cannlytics\data\agilent_gc_terpenes, C:\Cannlytics\data\agilent_gc_residual_solvents","","","0","",""
+"T001","Romulus","Agilent","HPLC","PTCY","C:\Cannlytics\data\agilent_hplc_cannabinoids","","","0","",""

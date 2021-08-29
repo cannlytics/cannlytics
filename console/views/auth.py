@@ -2,16 +2,14 @@
 Authentication Views | Cannlytics console
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 12/18/2020
-Updated: 7/24/2021
+Updated: 8/29/2021
 """
 
 # Standard imports
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 
 # External imports
-from django.http import HttpResponse
-from django.http.response import HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect, render
+from django.http import JsonResponse
 from django.views.generic.base import TemplateView
 
 # Internal imports
@@ -48,14 +46,18 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
         authorization = request.headers.get('Authorization', '')
         token = authorization.split(' ').pop()
         if not token:
-            return HttpResponse(status=401)
+            # return HttpResponse(status=401)
+            message = 'Authorization token not provided in the request header.'
+            return JsonResponse({'error': True, 'message': message}, status=401)
         initialize_firebase()
         print('Initialized Firebase.')
 
         # Set session cookie in a cookie in the response.
-        response = HttpResponse(status=200)
-        expires_in = timedelta(days=5) # Optional: Let user specify cookie duration?
-        expires = datetime.now() + expires_in
+        # response = HttpResponse(status=200)
+        response = JsonResponse({'success': True}, status=200)
+        # Optional: Let user specify cookie duration?
+        # expires_in = timedelta(days=5) 
+        # expires = datetime.now() + expires_in
         session_cookie = create_session_cookie(token)
         response['Set-Cookie'] = f'__session={session_cookie}; Path=/'
         response['Cache-Control'] = 'public, max-age=300, s-maxage=900' # TODO: Set the expiration time
@@ -80,11 +82,15 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
         print('Logged user sign-in in Firestore:', uid)
         return response
     except:
-        return HttpResponse(status=401)
+        # return HttpResponse(status=401)
+        message = 'Authorization failed in entirety. Please contact support.'
+        return JsonResponse({'error': True, 'message': message}, status=401)
 
 
 def logout(request, *args, **argv): #pylint: disable=unused-argument
-    """Functional view to remove a user session."""
+    """Functional view to remove a user session.
+    FIXME: Does not appear to delete the user's session!
+    """
     try:
         print('Signing user out.')
         session_cookie = request.COOKIES.get('__session')
@@ -102,12 +108,16 @@ def logout(request, *args, **argv): #pylint: disable=unused-argument
         update_document(f'users/{uid}', {'signed_in': False})
         print('Updated user as signed-out in Firestore:', uid)
         revoke_refresh_tokens(claims['sub'])
-        response = HttpResponse(status=205)
+        request.session['__session'] = ''
+        # response = HttpResponse(status=205)
+        response = JsonResponse({'success': True}, status=205)
         response['Set-Cookie'] = '__session=None; Path=/'
         response['Cache-Control'] = 'public, max-age=300, s-maxage=900'
         return response
     except:
-        response = HttpResponse(status=205)
+        request.session['__session'] = ''
+        # response = HttpResponse(status=205)
+        response = JsonResponse({'success': True}, status=205)
         response['Set-Cookie'] = '__session=None; Path=/'
         response['Cache-Control'] = 'public, max-age=300, s-maxage=900'
-        return HttpResponse(status=401)
+        return response

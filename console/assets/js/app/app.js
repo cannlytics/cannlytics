@@ -322,6 +322,14 @@ export const app = {
   },
 
 
+  awaitStreamData(model, modelSingular, orgId, limit=null, editable=false) {
+    auth.onAuthStateChanged((user) => {
+      console.log('Streaming data for user:', user);
+      this.streamData(model, modelSingular, orgId, limit=limit, editable=editable)
+    });
+  },
+
+
   async streamData(model, modelSingular, orgId, limit=null, editable=false) {
     /*
      * Stream data, listening for any changes. Search by date range (by updated_at)

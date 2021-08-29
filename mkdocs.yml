@@ -233,7 +233,7 @@ nav:
     - Data:
       # FIXME: Touchup
       # - Overview: console/lims/data/data.md
-      # - Data Collection: console/lims/data/data_collection.md
+      - Data Collection: console/lims/data/data_collection.md
       # - Data Analysis: console/lims/data/data_analysis.md
       # - Data Review: console/lims/data/data_review.md
       # - Importing and exporting data: console/lims/data/exports.md

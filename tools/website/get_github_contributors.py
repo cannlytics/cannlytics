@@ -50,7 +50,7 @@ def upload_github_contributors(org_name):
                     'url': user.html_url,
                     'slug': user.login,
                 }
-                update_document(f'contributors/{user.id}', data)
+                update_document(f'public/contributors/contributor_data/{user.id}', data)
     return users
 
 if __name__ == '__main__':

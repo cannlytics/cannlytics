@@ -372,6 +372,10 @@ if __name__ == '__main__':
     date = '2021-07-31'
     print('Getting data for the latest month:', date)
     
+    # TODO: Get supplementary data for each state.
+    # -> population
+    # -> licensing costs
+    
     
     # Create workbook to collect July 2021 data.
     # create_data_collection_workbook(sources, date)
