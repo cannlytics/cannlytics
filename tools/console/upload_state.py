@@ -31,6 +31,7 @@ if __name__ == '__main__':
         if key:
             firebase.update_document(f'public/state/data_models/{key}', data_model)
             firebase.update_document(f'organizations/test-company/data_models/{key}', data_model)
+            firebase.update_document(f'organizations/test-processor/data_models/{key}', data_model)
 
     # Save all data models, excluding fields, to one document.
 

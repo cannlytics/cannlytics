@@ -19,6 +19,7 @@ from api.areas import areas
 from api.auth import auth
 from api.certificates import certificates
 from api.contacts import contacts
+from api.data import data
 from api.instruments import instruments
 from api.inventory import inventory
 from api.invoices import invoices
@@ -62,6 +63,10 @@ urlpatterns = [
         path('', contacts.contacts),
         path('/<contact_id>', contacts.contacts),
     ])),
+    # path('data', include([
+    #     path('', data.datasets),
+    #     path('/<state>', data.datasets),
+    # ])),
     path('people', include([
         path('', contacts.people),
         path('/<person_id>', contacts.people),

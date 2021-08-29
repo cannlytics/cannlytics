@@ -33,10 +33,10 @@ urlpatterns = [
         path('/subscribe', email.subscribe),
     ])),
     path('<slug:screen>', main.ConsoleView.as_view()),
-    path('<slug:screen>/<slug:section>', main.ConsoleView.as_view()),
-    path('<slug:screen>/<slug:section>/<slug:unit>', main.ConsoleView.as_view()),
-    path('<slug:screen>/<slug:section>/<slug:unit>/<slug:part>', main.ConsoleView.as_view()),
-    path('<slug:screen>/<slug:section>/<slug:unit>/<slug:part>/<slug:piece>', main.ConsoleView.as_view()),
+    path('<slug:screen>/<str:section>', main.ConsoleView.as_view()),
+    path('<slug:screen>/<str:section>/<str:unit>', main.ConsoleView.as_view()),
+    path('<slug:screen>/<str:section>/<str:unit>/<str:part>', main.ConsoleView.as_view()),
+    path('<slug:screen>/<str:section>/<str:unit>/<str:part>/<str:piece>', main.ConsoleView.as_view()),
 ]
 
 # Error pages.

@@ -2,7 +2,7 @@
 <html>
   <!-- Cannlytics Console -->
   <!-- Created: 11/26/2020 | Thanksgiving -->
-  <!-- Updated: 5/4/2021 -->
+  <!-- Updated: 8/22/2021 -->
   {% extends "console/base.html" %}
   {% load static %}
 
@@ -19,10 +19,6 @@
 
   <!-- Console header -->
   {% block page_css %}
-    {% comment %} <script src="{% static 'console/plugins/ag-grid/ag-grid-community.min.noStyle.js'%}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'console/plugins/ag-grid/ag-grid.min.css'%}">
-    <link rel="stylesheet" type="text/css" href="{% static 'console/plugins/ag-grid/ag-theme-alpine.min.css'%}">
-    <link rel="stylesheet" type="text/css" href="{% static 'console/plugins/ag-grid/ag-theme-alpine-dark.min.css'%}"> {% endcomment %}
     {% block console_css %}{% endblock console_css %}
   {% endblock %}
 
@@ -46,18 +42,6 @@
     <!-- Console -->
     <div class="container-fluid">
       <div class="row">
-
-        <!-- Verify email prompt -->
-        <!-- TODO: Show verify email promty if uesr isn't verified. -->
-        <!-- 
-          img
-
-        Please verify your email address
-        Before you dive in, can you please verify your email address? A verification email
-        has been sent to EMAIL.
-
-        Resend
-        -->
         
         <!-- Side Navigation | For users with organizations -->
         {% if organizations %}

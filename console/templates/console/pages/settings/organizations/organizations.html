@@ -58,7 +58,7 @@
           class="card shade-hover border-secondary rounded-3 app-action col col-sm-1 col-md-2 p-3"
           style="width:400px; height:150px;"
         >
-        <a class="card-block stretched-link text-decoration-none" href="/settings/organizations/{{ org.uid }}">
+        <a class="card-block stretched-link text-decoration-none" href="/settings/organizations/{{ org.organization_id }}">
 
           <!-- Card header -->
           <div class="d-flex justify-content-between">
@@ -90,15 +90,26 @@
 
             <!-- Badges -->
             {% if org.support == 'Enterprise' %}
-              <span class="badge rounded-pill bg-primary">Enterprise</span>
+              <span class="badge rounded-pill bg-primary">{% icon 'shield' width="16px" height="16px" %} Enterprise</span>
             {% elif org.support == 'Pro' %}
-              <span class="badge rounded-pill bg-warning text-dark">Pro</span>
+              <span class="badge rounded-pill bg-warning text-dark">{% icon 'shield' width="16px" height="16px" %} Pro</span>
             {% else %}
-              <span class="badge rounded-pill bg-gradient-green text-white">Free</span>
+              <span class="badge rounded-pill bg-gradient-green text-white">{% icon 'shield' width="16px" height="16px" %} Free</span>
+            {% endif %}
+            {% if org.public %}
+              <span class="badge rounded-pill bg-info ms-2">{% icon 'globe' width="16px" height="16px" %} Public</span>
+            {% else %}
+              <span class="badge rounded-pill bg-info ms-2">{% icon 'lock' width="16px" height="16px" %} Private</span>
             {% endif %}
 
-            <!-- Card Stats -->
+            <!-- TODO: Card Stats -->
             <div class="row h-100 text-dark align-items-center">
+              <div class="col mb-3">
+                <div>Organization ID: {{ org.organization_id }}</div>
+                <div>Type: {{ org.type }}</div>
+              </div>
+            </div>
+            {% comment %} <div class="row h-100 text-dark align-items-center">
               <div class="col-4 mb-3">
                 {% if org.total_projects %}{{ org.total_projects }}{% else %}0{% endif %} Projects
               </div>
@@ -108,7 +119,7 @@
               <div class="col-4 mb-3">
                 {% if org.total_contacts %}{{ org.total_contacts }}{% else %}0{% endif %} Contacts
               </div>
-            </div>
+            </div> {% endcomment %}
 
           </div>
 

@@ -40,6 +40,7 @@
         <!-- Dashboard cards -->
         <div class="row row-cols-2 justify-content-md-start mb-5">
           {% for item in data_models %}
+            {% if not item.hidden %}
             {% if organizations.0.type in item.user_type or item.user_type == '*' %}
               <div class="col-6 col-lg-4 my-3 {% if item.hidden %}d-none{% endif %}">
                 <a href="./{{ item.key }}">
@@ -75,6 +76,7 @@
                 </a>
               </div>
             {% endif %}
+            {% endif %}
           {% endfor %}
         </div><!-- End of cards -->
       </div><!-- End of row -->
@@ -104,7 +106,7 @@
                   href="/get-started/profile?type={{ item.type }}"
                 >
                   <div class="card-body">
-                    <h5 class="card-title text-dark fs-6">{{ item.label }}</h5>
+                    <h5 class="card-title text-dark fs-6">{{ item.title }}</h5>
                     <p class="card-text text-secondary fs-6">
                       <small class="serif tiny-text">{{ item.description }}</small>
                     </p>

@@ -238,10 +238,11 @@ def organizations(request, organization_id=None, type='lab'):
         print('Entry:', entry)
         update_document(f'{model_type}/{organization_id}', entry)
 
+        # FIXME:
         # On organization creation, the creating user get custom claims.
         update_custom_claims(uid, claims={
-            'owner': [organization_id],
-            'team': [organization_id]
+            'owner': organization_id,
+            'team': organization_id
         })
 
         # TODO:  Owners can add other users to the team and

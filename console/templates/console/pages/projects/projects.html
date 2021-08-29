@@ -121,7 +121,7 @@
     <script type="text/javascript" charset="utf-8">
 
       // Stream the data.
-      cannlytics.app.streamData('projects', 'project', '{{ organizations.0.organization_id }}');
+      cannlytics.app.awaitStreamData('projects', 'project', '{{ organizations.0.organization_id }}');
 
     </script>
   {% endif %}
