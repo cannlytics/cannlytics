@@ -84,7 +84,10 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
     for instrument in instrument_data:
 
         # Iterate over analyses that the instrument may be running.
-        analyses = instrument.get('analyses', '').split(',')
+        try:
+            analyses = instrument.get('analyses', '').split(',')
+        except AttributeError:
+            continue # FIXME: Handle missing analyses more elegantly.
         analyses = [x.strip() for x in analyses]
         for n in range(len(analyses)):
 

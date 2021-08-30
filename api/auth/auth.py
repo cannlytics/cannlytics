@@ -37,11 +37,11 @@ from cannlytics.firebase import (
 )
 
 # Initialize Firebase.
-try:
-    initialize_firebase()
-    BUCKET_NAME = environ.get('FIREBASE_STORAGE_BUCKET', None)
-except ValueError:
-    pass
+# try:
+#     initialize_firebase()
+#     BUCKET_NAME = environ.get('FIREBASE_STORAGE_BUCKET', None)
+# except ValueError:
+#     pass
 
 #-----------------------------------------------------------------------
 # Core Authentication Mechanism
@@ -62,10 +62,16 @@ def authorize_user(request):
     claims = authenticate_request(request)
     try:
         uid = claims['uid']
-        owner = claims.get('owner', [])
-        team = claims.get('team', [])
-        qa = claims.get('qa', [])
-        authorized_ids = owner + team + qa
+        # FIXME: Handle multiple organizations
+        # owner = claims.get('owner', [])
+        # team = claims.get('team', [])
+        # qa = claims.get('qa', [])
+        # authorized_ids = owner + team + qa
+        authorized_ids = claims.get('team', '')
+        authorized_ids = claims.get('qa', '')
+        authorized_ids = claims.get('owner', '')
+        if isinstance(authorized_ids, list):
+            authorized_ids = authorized_ids[0]
     except KeyError:
         message = 'Your request was not authenticated. Ensure that you have a valid session or API key.'
         return {'error': True, 'message': message}, 401, None
@@ -93,14 +99,18 @@ def authenticate_request(request):
     claims = {}
     try:
         session_cookie = request.COOKIES.get('__session')
+        print('Session cookie:', session_cookie)
         if session_cookie is None:
             session_cookie = request.session.get('__session')
+            print('Session cookie (2nd try):', session_cookie)
         claims = verify_session_cookie(session_cookie, check_revoked=True)
+        print('Verified:', claims.get('email'))
     except:
         try:
             authorization = request.META['HTTP_AUTHORIZATION']
             key = authorization.split(' ').pop()
             claims = get_user_from_api_key(key)
+            print('Verified by auth header:', claims.get('email'))
         except:
             claims = {}
     return claims
@@ -119,13 +129,19 @@ def verify_session(request):
         claims (dict): A dictionary of the user's custom claims, including
             the user's `uid`.
     """
-    try:
+    # try:
+    # session_cookie = request.COOKIES.get('__session')
+    session_cookie = request.session.get('__session')
+    print('Session cookie:', session_cookie)
+    if session_cookie is None:
         session_cookie = request.COOKIES.get('__session')
-        if session_cookie is None:
-            session_cookie = request.session.get('__session')
-        return verify_session_cookie(session_cookie, check_revoked=True)
-    except (KeyError, ValueError) as e:
-        return {}
+        print('Session cookie (2nd try):', session_cookie)
+        # session_cookie = request.session.get('__session')
+    claims = verify_session_cookie(session_cookie, check_revoked=True)
+    print('Verified by auth header:', claims.get('email'))
+    return claims
+    # except (KeyError, ValueError) as e:
+    #     return {}
 
 
 #-----------------------------------------------------------------------

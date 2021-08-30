@@ -185,21 +185,30 @@
 
   // Set the initial date.
   const defaultPeriod = 14;
-  document.getElementById('time_start').value = new Date(new Date().setDate(new Date().getDate() - defaultPeriod)).toISOString().substring(0, 10);
-  document.getElementById('time_end').value = new Date().toISOString().substring(0, 10);
+  try {
+    document.getElementById('time_start').value = new Date(new Date().setDate(new Date().getDate() - defaultPeriod)).toISOString().substring(0, 10);
+    document.getElementById('time_end').value = new Date().toISOString().substring(0, 10);
+  } catch (error) {
+    // No date selection.
+  }
+  
+  try {
+    // Initialize date range selection.
+    $('#date-selection .input-daterange').datepicker({
+      autoclose: true,
+      format: 'yyyy-mm-dd',
+      formatToDisplay: 'mm/dd/yy',
+      formatToValue: 'yyyy-mm-dd',
+    });
 
-  // Initialize date range selection.
-  $('#date-selection .input-daterange').datepicker({
-    autoclose: true,
-    format: 'yyyy-mm-dd',
-    formatToDisplay: 'mm/dd/yy',
-    formatToValue: 'yyyy-mm-dd',
-  });
-
-  // Add callback to date selection.
-  $('#date-selection .input-daterange').on('changeDate', function(e) {
-    cannlytics.app.streamData('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');
-  });
+    // Add callback to date selection.
+    $('#date-selection .input-daterange').on('changeDate', function(e) {
+      cannlytics.app.streamData('{{ model }}', '{{ model_singular }}', '{{ organizations.0.organization_id }}');
+    });
+  } catch(error) {
+    // No date selection.
+  }
+  
 </script>
 
 </html>

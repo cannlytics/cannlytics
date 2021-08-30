@@ -23,11 +23,13 @@ from cannlytics.firebase import (
 )
 
 
-def delete_object(request, claims, model_id, model_type, model_type_singular, organization_id, owner, qa):
+def delete_object(request, claims, model_id, model_type, model_type_singular, organization_id):
     """Delete an object through the API.
     Parse the data. Check that the user is an owner or quality assurance.
     Delete by URL ID if given. Otherwise delete by using posted ID(s).
     """
+    qa = claims.get('qa', '')
+    owner = claims.get('owner', '')
     data = loads(request.body.decode('utf-8'))
     if organization_id not in qa and organization_id not in owner:
         return False
@@ -47,14 +49,14 @@ def delete_object(request, claims, model_id, model_type, model_type_singular, or
     return True
 
 
-def get_objects(request, authorized_ids, organization_id, model_id, model_type):
+def get_objects(request, claims, organization_id, model_id, model_type):
     """Read object(s) through the API.
     Get any parameters and filters. Get organization objects if given an
     organization ID. Get a singular object if requested. Get all of a
     user's data if no organization ID is given.
     Args:
         request (HTTPRequest): An HTTP request used to retrieve parameters.
-        authorized_ids (list): A list of organizations the use belongs to.
+        claims (dict): A dictionary of user claims.
         organization_id (str): An organization ID to narrow matches.
         model_id (str): A specific data model ID.
         model_type (str): The type of data model.
@@ -70,6 +72,16 @@ def get_objects(request, authorized_ids, organization_id, model_id, model_type):
     # name = request.query_params.get('name')
     # if name:
     #     filters.append({'key': 'name', 'operation': '==', 'value': name})
+    # FIXME: Handle multiple organizations
+    # owner = claims.get('owner', [])
+    # team = claims.get('team', [])
+    # qa = claims.get('qa', [])
+    # authorized_ids = owner + team + qa
+    authorized_ids = claims.get('team', '')
+    authorized_ids = claims.get('qa', '')
+    authorized_ids = claims.get('owner', '')
+    if isinstance(authorized_ids, list):
+        authorized_ids = authorized_ids[0]
     if organization_id:
         if model_id:
             print('Requested:', model_id)
@@ -88,9 +100,13 @@ def get_objects(request, authorized_ids, organization_id, model_id, model_type):
                 ref = f'organizations/{organization_id}/{model_type}'
                 docs = get_collection(ref, limit=limit, order_by=order_by, desc=desc, filters=filters)
     else:
-        for _id in authorized_ids:
-            ref = f'organizations/{_id}/{model_type}'
+        if isinstance(authorized_ids, str):
+            ref = f'organizations/{authorized_ids}/{model_type}'
             docs += get_collection(ref, limit=limit, order_by=order_by, desc=desc, filters=filters)
+        elif isinstance(authorized_ids, list):
+            for _id in authorized_ids:
+                ref = f'organizations/{_id}/{model_type}'
+                docs += get_collection(ref, limit=limit, order_by=order_by, desc=desc, filters=filters)
     return docs
 
 

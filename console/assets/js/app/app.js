@@ -39,7 +39,15 @@ export const app = {
     auth.onAuthStateChanged((user) => {
       const userNotLoaded = document.getElementById('userPhotoNav').src.endsWith('user.svg');
       // FIXME: Prefer to redirect from server.
-      if (!user || userNotLoaded) window.location.href = `${window.location.origin}/account/sign-in`;
+      if (!user) window.location.href = `${window.location.origin}/account/sign-in`;
+      else {
+        if (userNotLoaded) {
+          authRequest('/login').then((response) => {
+            // FIXME: Prefer a different way to update screen. Can cause jank.
+            window.location.href = window.location.origin;
+          });
+        }
+      }
     });
 
     // Enable any and all tooltips.
@@ -315,7 +323,6 @@ export const app = {
     /*
      * Reset the table after performing a search.
      */
-    console.log('TODO: Clearing search...');
     document.getElementById('clear-button').classList.add('d-none');
     document.getElementById('searchInput').value = '';
     this.streamData(model, modelSingular, orgId);
@@ -324,7 +331,6 @@ export const app = {
 
   awaitStreamData(model, modelSingular, orgId, limit=null, editable=false) {
     auth.onAuthStateChanged((user) => {
-      console.log('Streaming data for user:', user);
       this.streamData(model, modelSingular, orgId, limit=limit, editable=editable)
     });
   },
@@ -752,7 +758,6 @@ export const app = {
           const values = doc.data();
           data.push(values);
         });
-        console.log('Files:', data);
         if (data.length) this.renderTable(`${modelSingular}-files`, 'file', data, dataModel);
         else this.renderPlaceholder();
       });
@@ -899,7 +904,6 @@ export const app = {
      * relevant page.
      */
     // TODO: Implement search by ID for all data models, plus granular search.
-    console.log('Searching...');
     const searchTerms = document.getElementById('navigation-search').value;
     setURLParameter('q', searchTerms)
   },

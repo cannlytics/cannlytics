@@ -1,7 +1,8 @@
 """
 Organizations API Views | Cannlytics API
 Created: 4/25/2021
-Updated: 7/19/2021
+Updated: 8/30/2021
+
 Description: API to interface with organizations.
 """
 

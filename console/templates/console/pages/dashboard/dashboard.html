@@ -38,7 +38,7 @@
       <div class="row">
 
         <!-- Dashboard cards -->
-        <div class="row row-cols-2 justify-content-md-start mb-5">
+        <div class="row row-cols-md-2 justify-content-md-start mb-5">
           {% for item in data_models %}
             {% if not item.hidden %}
             {% if organizations.0.type in item.user_type or item.user_type == '*' %}
@@ -94,12 +94,12 @@
         </div>
 
         <!-- Getting-started cards -->
-        <div class="row row-cols-1 row-cols-lg-2 g-4 mt-3 mb-5">
+        <div class="row wrap row-cols-lg-2 g-4 mt-3 mb-5">
           {% for item in dashboard.organization_choices %}
-            <div class="col-6 my-3">
+            <div class="col col-md-6 my-3">
               <div
                 class="card h-100 bg-transparent border-secondary shadow-hover rounded-3 px-0 py-2"
-                style="max-width:375px;"
+                style="max-width:375px; min-width:250px;"
               >
                 <a
                   class="card-block stretched-link text-decoration-none"

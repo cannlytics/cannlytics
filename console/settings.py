@@ -50,7 +50,7 @@ env_file = os.path.join(BASE_DIR, '.env')
 # Attempt to load the Project ID into the environment, safely failing on error.
 try:
     _, os.environ['GOOGLE_CLOUD_PROJECT'] = google.auth.default()
-except google.exceptions.DefaultCredentialsError:
+except google.auth.exceptions.DefaultCredentialsError:
     pass
 
 # Use a local secret file, if provided.
@@ -58,7 +58,7 @@ if os.path.isfile(env_file):
     env.read_env(env_file)
 
 # Retrieve the .env from Secret Manager.
-elif os.environ.get('GOOGLE_CLOUD_PROJECT', None):
+elif os.environ.get('GOOGLE_CLOUD_PROJECT', 'cannlytics'):
     project_id = os.environ.get('GOOGLE_CLOUD_PROJECT')
     client = secretmanager.SecretManagerServiceClient()
     settings_name = env('SETTINGS_NAME')

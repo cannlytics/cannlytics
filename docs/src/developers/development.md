@@ -387,7 +387,7 @@ Resources:
 
 ### Building and running the project with Docker <a name="docker"></a>
 
-First, create a `docker.env` file in the project's root directory using the variables found in `.env.example`. You can [build the application in a Docker container image](https://docs.docker.com/get-started/02_our_app/#build-the-apps-container-image) with:
+You can [build the application in a Docker container image](https://docs.docker.com/get-started/02_our_app/#build-the-apps-container-image) with:
 
 ```shell
 # build docker image
@@ -412,7 +412,7 @@ Finally, you can quickly run the container, or multiple containers, with:
 
 ```shell
 # bring up containers
-docker-compose up -d
+docker-compose up -d --build
 
 # bring down
 docker-compose down

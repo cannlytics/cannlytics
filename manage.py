@@ -13,6 +13,7 @@ def main():
 
     # Set Google Application credentials.
     try:
+        # FIXME:
         env = environ.Env()
         env.read_env('.env')
         credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
