@@ -9,7 +9,7 @@ Updated: 8/29/2021
 # from datetime import datetime, timedelta
 
 # External imports
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.generic.base import TemplateView
 
 # Internal imports
@@ -70,7 +70,7 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
         # and return a response with the session cookie.
         claims = verify_token(token)
         uid = claims['uid']
-        print('Verified user with Firebase Authentication:', uid)
+        print('Verified user with Firebase Authentication:', claims['email'])
         create_log(
             ref=f'users/{uid}/logs',
             claims=claims,
@@ -108,16 +108,16 @@ def logout(request, *args, **argv): #pylint: disable=unused-argument
         update_document(f'users/{uid}', {'signed_in': False})
         print('Updated user as signed-out in Firestore:', uid)
         revoke_refresh_tokens(claims['sub'])
-        request.session['__session'] = ''
-        # response = HttpResponse(status=205)
-        response = JsonResponse({'success': True}, status=205)
+        # request.session['__session'] = ''
+        response = HttpResponse(status=205)
+        # response = JsonResponse({'success': True}, status=205)
         response['Set-Cookie'] = '__session=None; Path=/'
         response['Cache-Control'] = 'public, max-age=300, s-maxage=900'
         return response
     except:
-        request.session['__session'] = ''
-        # response = HttpResponse(status=205)
-        response = JsonResponse({'success': True}, status=205)
+        # request.session['__session'] = ''
+        response = HttpResponse(status=205)
+        # response = JsonResponse({'success': True}, status=205)
         response['Set-Cookie'] = '__session=None; Path=/'
         response['Cache-Control'] = 'public, max-age=300, s-maxage=900'
         return response

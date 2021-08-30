@@ -143,9 +143,9 @@ export const auth = {
       .catch((error) => {
         console.log(error);
         // Optional: Fix error returned by successful login.
-        window.location.href = window.location.origin;
-        // const message = 'Platform down for maintenance. Thank you for your patience.'
-        // showNotification('Sign in error', message, { type: 'error' });
+        // window.location.href = window.location.origin;
+        const message = 'Platform down for maintenance. Thank you for your patience.'
+        showNotification('Sign in error', message, { type: 'error' });
       });
     })
     // Optional: Determine if it's okay to stay signed in.
@@ -225,14 +225,23 @@ export const auth = {
     const baseURL = window.location.origin;
     authRequest('/logout')
       .then((response) => {
-        document.location.href = `${window.location.origin}/account/sign-out`;
+        // document.location.href = `${baseURL}/account/sign-out`;
       })
       .catch((error) => {
-        document.location.href = `${window.location.origin}/account/sign-out`;
+        console.log(error);
+        // FIXME: Handle JSON parsing error. (Unexpected end of JSON input)
+        // showNotification('Sign out error', error.message, { type: 'error' });
+        // document.location.href = `${window.location.origin}/account/sign-out`;
       })
       .finally(() => {
-        document.location.href = `${window.location.origin}/account/sign-out`;
-      });
+        firebase.auth().signOut().then(() => {
+          // Sign-out successful.
+          document.location.href = `${window.location.origin}/account/sign-out`;
+        }).catch((error) => {
+          // An error happened.
+          document.location.href = `${window.location.origin}/account/sign-out`;
+        });
+      })
   },
   
   

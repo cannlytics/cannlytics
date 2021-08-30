@@ -118,7 +118,6 @@ export const navigationHelpers = {
      */
     const data = JSON.parse(localStorage.getItem(modelSingular));
     deserializeForm(document.forms[`${modelSingular}-form`], data)
-    console.log('DEV: Observation data:', data);
   },
 
 

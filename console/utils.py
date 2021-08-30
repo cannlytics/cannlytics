@@ -112,7 +112,7 @@ def get_user_context(request, context):
         return context
     if claims:
         uid = claims['uid']
-        print('User verified from session cookie:', uid)
+        print('User verified from session cookie:', claims['email'])
         query = {'key': 'team', 'operation': 'array_contains', 'value': uid}
         organizations = get_collection('organizations', filters=[query])
         user_data = get_document(f'users/{uid}')

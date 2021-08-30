@@ -58,7 +58,7 @@ if os.path.isfile(env_file):
     env.read_env(env_file)
 
 # Retrieve the .env from Secret Manager.
-elif os.environ.get('GOOGLE_CLOUD_PROJECT', None):
+elif os.environ.get('GOOGLE_CLOUD_PROJECT', 'cannlytics'):
     project_id = os.environ.get('GOOGLE_CLOUD_PROJECT')
     client = secretmanager.SecretManagerServiceClient()
     settings_name = env('SETTINGS_NAME')
