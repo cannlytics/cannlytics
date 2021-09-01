@@ -17,14 +17,6 @@ npm:
 	-w /app \
 	npm-image $(c)
 
-#run: install build .env
-run:
-	docker run --rm -it \
-	--name cannlytics-back \
-	-p 8089:8080 \
-	-v `pwd`/.env:/app/.env \
-	cannlytics
-
 
 install: npm_image node_modules
 
@@ -43,24 +35,6 @@ node_modules:
 
 live:
 	make npm c="npm start"
-
-migrate:
-	make npm c="npm migrate"
-	#docker run --rm -it \
-	#--name cannlytics \
-	#-v `pwd`/.env:/app/.env \
-	#npm-image python manage.py migrate
-
-start:
-	# make npm c="npm start"
-	docker run --rm -it \
-	--name cannlytics \
-	-p 8088:8080 \
-	-p 35729:35729 \
-	-v `pwd`/.env:/app/.env \
-	cannlytics python manage.py livereload --ignore-static-dirs --host 0.0.0.0
-	# cannlytics python manage.py runserver 0.0.0.0:8080
-
 
 update:
 	make npm c="npm update"
