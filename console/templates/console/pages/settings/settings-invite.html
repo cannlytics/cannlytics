@@ -26,6 +26,30 @@
       <!-- Feedback form -->
       <div class="col px-0">
         <div class="form-floating">
+
+          <!-- TODO: Email input -->
+          <div class="mb-3 row">
+            <label
+              for="login-email"
+              class="col-sm-2 col-form-label col-form-label-sm pe-2"
+            >
+              Email
+            </label>
+            <div class="col-sm-10">
+              <input
+                type="email"
+                class="form-control form-control-sm"
+                id="login-email"
+                required
+                autofocus
+                spellcheck="false"
+              >
+            </div>
+          </div>
+
+          <!-- TODO: Team member input -->
+
+          <!-- Message -->
           <textarea
             class="form-control"
             placeholder="Write your feedback here"
@@ -40,10 +64,19 @@
         <!-- Optional: File attachment -->
         <div class="d-flex justify-content-end mt-3">
           <button
+          id="action-button"
             class="btn btn-sm bg-gradient-green text-white"
-            onclick="cannlytics.sendFeedback()"
+            onclick="cannlytics.settings.inviteUser()"
           >
             Invite user
+          </button>
+          <button
+            id="action-button-loading"
+            class="btn btn-sm btn-set-width bg-gradient-green text-white d-none"
+            type="button"
+            disabled
+          >
+            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
           </button>
         </div>
 

@@ -28,9 +28,10 @@ urlpatterns = [
     path('livereload', main.no_content),
     path('login', auth.login),
     path('logout', auth.logout),
-    path('send-feedback', email.send_feedback),
     path('src', include([
         path('/subscribe', email.subscribe),
+        path('/send-feedback', email.send_feedback),
+        path('/invite-user', email.invite_user),
     ])),
     path('<slug:screen>', main.ConsoleView.as_view()),
     path('<slug:screen>/<str:section>', main.ConsoleView.as_view()),

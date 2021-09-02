@@ -2,7 +2,7 @@
  * Authentication JavaScript | Cannlytics Console
  * Author: Keegan Skeate
  * Created: 12/4/2020
- * Updated: 8/22/2021
+ * Updated: 8/30/2021
  */
 
 import { apiRequest, authRequest, showNotification } from '../utils.js';

@@ -24,6 +24,27 @@ from console.settings import (
 )
 
 
+def invite_user(request, *args, **argv): #pylint: disable=unused-argument
+    """Invite a user to the Cannlytics console."""
+    data = loads(request.body.decode('utf-8'))['data']
+    subject = data['subject']
+    message = data['message']
+    sender = data['email']
+    recipients = LIST_OF_EMAIL_RECIPIENTS
+    if not sender:
+        sender = DEFAULT_FROM_EMAIL
+    text = 'New feedback on the Cannlytics Console'
+    text += '\n\n{0}'.format(message)
+    # TODO: Logic to invite user to organization's team.
+    send_mail(
+        subject=subject.strip(),
+        message=text,
+        from_email=sender,
+        recipient_list=recipients,
+        fail_silently=False,
+    )
+    return JsonResponse({'success': True}, status=204)
+
 def send_results(request, *args, **argv): #pylint: disable=unused-argument
     """Email certificates from the console to the specified recipients."""
     data = loads(request.body.decode('utf-8'))['data']

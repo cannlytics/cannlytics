@@ -74,14 +74,19 @@
       <div>
         <button
           id="sign-up-button"
-          class="ms-1 btn btn-sm bg-gradient-green text-white"
+          class="ms-1 btn btn-sm btn-set-width bg-gradient-green text-white"
           style="max-width:250px;"
           type="button"
           onclick="cannlytics.auth.signUp(event)"
         >
           Sign Up
         </button>
-        <button id="sign-up-loading-button" class="ms-1 btn btn-sm bg-gradient-green text-white d-none" style="width:77px;" type="button" disabled>
+        <button
+          id="sign-up-loading-button"
+          class="ms-1 btn btn-sm btn-set-width bg-gradient-green text-white d-none"
+          type="button"
+          disabled
+        >
           <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
         </button>
       </div>

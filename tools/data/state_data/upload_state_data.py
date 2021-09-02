@@ -11,9 +11,8 @@ Manage scientific instruments and measurements from the instruments.
 from datetime import datetime
 import pandas as pd
 
-from openpyxl import Workbook
-from openpyxl.styles import Font, Color, Alignment, Border, Side
-from openpyxl.styles import PatternFill
+# Internal imports
+from get_data_OK import get_cannabis_data_ok
 
 sources = [
     {
@@ -289,33 +288,6 @@ DATA_POINTS = [
     'total_patients',
 ]
 
-def create_data_collection_workbook(sources, date):
-    """Create a workbook that is used on a month-by-month
-    basis to collect cannabis data for states. The workbook
-    can be easily read and aggregated with existing data."""
-
-    # Create workbook and set the sheetname.
-    workbook = Workbook()
-    sheet = workbook.active
-    sheet.title = 'State Data'
-    
-    # Add the headers and the data.
-    sheet.append(DATA_POINTS)
-    for source in sources:
-        sheet.append([source['state'], date])
-
-    # Style the workbook
-    cell_color = Color(rgb='00FFF2CC')
-    cell_fill = PatternFill(patternType='solid', fgColor=cell_color)
-    bottom_border = Border(bottom=Side(border_style='thin'))
-    for i in range(len(DATA_POINTS)):
-        sheet.cell(row=1, column=i+1).border = bottom_border
-        sheet.cell(row=1, column=i+1).fill = cell_fill
-
-    # Save the workbook.
-    directory = './.datasets/monthly_state_data'
-    workbook.save(filename=f'{directory}/state_data_{date}.xlsx')
-
 
 def monthly_state_report():
     """
@@ -368,14 +340,21 @@ def monthly_state_report():
 
 
 if __name__ == '__main__':
-    
-    date = '2021-07-31'
-    print('Getting data for the latest month:', date)
+
+    # Optional: Only get data for the past month?    
+    # date = '2021-07-31'
+    # print('Getting data for the latest month:', date)
+
+
+    # TODO: This is a CRON job that is run periodically
+    # to collect as much state data as is possible (automatically).
+    datasets = {}
+    datasets['ok'] = get_cannabis_data_ok()
+
     
     # TODO: Get supplementary data for each state.
     # -> population
     # -> licensing costs
-    
     
     # Create workbook to collect July 2021 data.
     # create_data_collection_workbook(sources, date)
@@ -389,3 +368,5 @@ if __name__ == '__main__':
     # TODO: Create the report!
 
     # Rank states
+
+    # TODO: Upload data to Firestore!

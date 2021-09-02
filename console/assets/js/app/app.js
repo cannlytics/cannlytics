@@ -2,7 +2,7 @@
  * App JavaScript | Cannlytics Console
  * Author: Keegan Skeate <contact@cannlytics.com>
  * Created: 12/7/2020
- * Updated: 8/16/2021
+ * Updated: 8/30/2021
  */
 
 import {
@@ -44,7 +44,7 @@ export const app = {
         if (userNotLoaded) {
           authRequest('/login').then((response) => {
             // FIXME: Prefer a different way to update screen. Can cause jank.
-            window.location.href = window.location.origin;
+            window.location.href = window.location.href;
           });
         }
       }

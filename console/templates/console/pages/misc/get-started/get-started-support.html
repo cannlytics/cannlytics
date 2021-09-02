@@ -39,7 +39,8 @@
   <div class="row row-cols-1 row-cols-md-3 mb-3 mt-4 text-center">
     {% for item in get_started.pricing_tiers %}
       <div class="col">
-        <div class="card support-card mb-4 shadow-hover" id="tier{{ item.name }}">
+        <!-- FIXME: Background color of cards -->
+        <div class="card h-100 bg-light support-card mb-4 shadow-hover" id="tier{{ item.name }}">
           <a
             class="card-block stretched-link text-decoration-none app-action"
             onclick="cannlytics.dashboard.selectSupportTier('{{ item.name }}');"

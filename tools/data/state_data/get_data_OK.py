@@ -22,6 +22,13 @@ import time
 from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.parse import urljoin
+from dotenv import dotenv_values
+from fredapi import Fred
+
+# Internal imports
+import sys
+sys.path.append('../../../')
+from cannlytics import firebase # pylint: disable=import-error
 
 COLUMNS = [
     'name',
@@ -225,6 +232,21 @@ def clean_licensee_records(records):
     return data
 
 
+def get_state_current_population(state):
+    """Get a given state's latest population."""
+    config = dotenv_values('../.env')
+    fred = Fred(api_key=config['FRED_API_KEY'])
+    state_code = state.upper()
+    population = fred.get_series(f'{state_code}POP')
+    return population.iloc[-1] * 1000
+
+
+def get_cannabis_data_ok():
+    """Get cannabis data from Oklahoma."""
+
+    return {}
+
+
 if __name__ == '__main__':
 
     # Download all licensee lists to a new folder in the directory.
@@ -247,8 +269,16 @@ if __name__ == '__main__':
     
     # Save the data.
     licensees.to_excel(f'.datasets/licensees_OK_{date}.xlsx')
+    
+    # Get the state's population.
+    population = get_state_current_population('OK')
 
     # TODO: Upload licensees data.
+    firebase.update_document('public/data/state_data/ok', {
+        'population': population,
+        'population_source_code': 'OKPOP',
+        'population_source': 'https://fred.stlouisfed.org/series/OKPOP',
+    })
     
     # Read Oklahoma tax data.
     # Downloaded from:
