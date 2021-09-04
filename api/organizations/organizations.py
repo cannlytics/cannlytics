@@ -1,7 +1,7 @@
 """
 Organizations API Views | Cannlytics API
 Created: 4/25/2021
-Updated: 8/30/2021
+Updated: 9/4/2021
 
 Description: API to interface with organizations.
 """
@@ -44,18 +44,18 @@ def labs(request):
         # Get a specific organization.
         organization_id = request.query_params.get('organization_id')
         print('Organization ID:', organization_id)
-        if organization_id:
+        if organization_id and organization_id != 'undefined':
             filters.append({'key': 'slug', 'operation': '==', 'value': organization_id})
 
         # Get all organizations in a state
         state = request.query_params.get('state')
+        print('State:', state)
         if state:
             filters.append({'key': 'state', 'operation': '==', 'value': state})
             order_by = 'name'
 
         # Query and return the docs.
         docs = get_collection('labs', filters=filters, order_by=order_by)
-        print('Returning docs:', docs)
         return Response({'data': docs}, status=200)
 
 
@@ -164,14 +164,13 @@ def organizations(request, organization_id=None, type='lab'):
         data = loads(request.body.decode('utf-8'))
         if organization_id:
 
-            # Return an error if the organization already exists
-            # and the user is not part of the organization's team.
+            # Return an error if the organization does not exist.
             doc = get_document(f'{model_type}/{organization_id}')
             if not doc:
                 message = 'No data exists for the given ID.'
                 return Response({'error': True, 'message': message}, status=400)
-
-            organization_id = doc['uid']
+            
+            # Return an error if the user is not part of the organization's team.
             team_list = claims.get('team', [])
             owner_list = claims.get('owner', [])
             if uid not in team_list and organization_id not in owner_list:

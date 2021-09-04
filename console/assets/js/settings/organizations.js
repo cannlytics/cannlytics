@@ -114,6 +114,7 @@ export const organizationSettings = {
     authRequest(`/api/organizations/${orgId}`, { type: orgType }).then((response) => {
       showNotification('Organization type saved', `Your organization is now a ${orgType}. Refresh for changes to take effect.`, { type: 'success' });
       // Refresh the page.
+      window.location.reload();
     })
     .catch((error) => {
       showNotification('Error changing organization type.', error, { type: 'error' });

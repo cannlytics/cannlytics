@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+<!--
+  Transporter Page | Cannlytics Console
+  Author: Keegan Skeate <keegan@cannlytics.com>
+  Created: 9/4/2021
+  Updated: 9/4/2021
+-->
+{% load icon %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+
+    <!-- Header -->
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Transfers"
+      base_page_url="/transfers"
+      nested_page="Transporters"
+      nested_page_url="/transfers/transporters"
+      current_page=id
+    %}
+
+    <!-- Tabs -->
+    {% if id and id != 'new' %}
+      {% include "console/components/forms/form_tabs.html" with
+          id=id
+          model="transporters"
+        %}
+    {% endif %}
+
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='transporters'
+        model_singular='transporter'
+        organizations=organizations
+        section=unit
+        user=user
+      %}
+    
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='transporters'
+        model_singular='transporter'
+        organizations=organizations
+        section=unit
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='transporters'
+        model_singular='transporter'
+        description="Manage transporter details."
+        options=True
+        export=id
+      %}
+
+      <!-- Form -->
+      <div class="mb-4 px-3">
+        <form id="transporter-form">
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=transporters.fields
+          %}
+        </form>
+      </div><!-- End of form -->
+
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="transporters"
+          model_singular="transporter"
+        %}
+      {% endif %}
+
+    {% endif %}
+
+  </main>
+{% endblock console_body %}
+
+<!-- JavaScript -->
+{% block console_js %}
+  <script>
+
+    // Load the data into the user interface.
+    cannlytics.ui.viewObject('transporter');
+
+  </script>
+{% endblock console_js %}
+</html>

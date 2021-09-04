@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<!--
+  Transporters Page | Cannlytics Console
+  Created: 9/4/2021
+  Updated: 9/4/2021
+-->
+{% extends "../transfers.html" %}
+{% block title %}Transporters | Cannlytics {% endblock title %}
+{% block unit %}
+{% if unit %}
+
+  <!-- Detail page -->
+  {% include "console/pages/transfers/transporters/transporter.html" with
+    id=unit
+    data_model=data_model
+  %}
+
+{% else %}
+  <main role="main" class="col ml-sm-auto">
+
+    <!-- Options -->
+    {% include "console/components/tables/simple_table_options.html" with
+      model='transporters'
+      model_singular='transporter'
+      import=False
+      limit=100
+    %}
+
+    <!-- Loading placeholder -->
+    <div id="loading-placeholder">
+      {% include "console/components/placeholders/loading_placeholder.html" with
+        height='350px'
+        width='100%'
+        only
+      %}
+    </div>
+
+    <!-- No-data Placeholder -->
+    <div id="data-placeholder" class="d-none">
+      {% include "console/components/placeholders/placeholder.html" with
+        placeholder=transporters.placeholder
+        only
+      %}
+    </div>
+
+    <!-- AG Grid Table -->
+    <div id="data-table" class="d-none">
+      <div
+        id="transporters-table"
+        class="ag-theme-alpine-dark"
+        style="height: 350px; width:100%;"
+      ></div>
+    </div>
+
+  </main>
+{% endif %}
+{% endblock unit %}
+
+<!-- JavaScript -->
+{% block console_js %}
+
+  {% if not unit %}
+    <script>
+      cannlytics.app.awaitStreamData('transporters', 'transporter', '{{ organizations.0.organization_id }}', 100);
+    </script>
+  {% endif %}
+
+{% endblock console_js %}
+</html>

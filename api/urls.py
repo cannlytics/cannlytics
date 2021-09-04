@@ -130,6 +130,14 @@ urlpatterns = [
         path('/<transfer_id>', transfers.transfers),
         path('/receive', transfers.receive_transfers),
     ])),
+    path('transporters', include([
+        path('', transfers.transporters),
+        path('/<transporter_id>', transfers.transporters),
+    ])),
+    path('vehicles', include([
+        path('', transfers.vehicles),
+        path('/<vehicle_id>', transfers.vehicles),
+    ])),
     path('traceability', include([
         path('/delete-license', traceability.delete_license),
         path('/employees', traceability.employees),

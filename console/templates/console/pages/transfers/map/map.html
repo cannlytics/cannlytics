@@ -108,8 +108,8 @@
 
       <!-- Caption -->
       <figcaption class="figure-caption" style="max-width:540px;">
-        <h6 class="sans-serif fw-bold mt-3">
-          How Cannlytics sources data
+        <h6 class="simple-serif fw-bold mt-3">
+          <small>How Cannlytics sources data</small>
         </h6>
         Cannlytics retrieves data through listings on Google Search and
         Google Maps, from a company's official website, or from a company themselves. Users can
@@ -155,7 +155,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
   <script type="text/javascript">
     var script = document.createElement('script');
-    // FIXME:
+    // FIXME: Does this work in production?
     var apiKey = "{{ 'GOOGLE_MAPS_API_KEY'|get_env }}"; // FIXME: Passing API key from Django.
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
     script.defer = true;

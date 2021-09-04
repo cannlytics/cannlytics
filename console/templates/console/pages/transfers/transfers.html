@@ -17,7 +17,7 @@
 {% endblock console_css %}
 {% block console_body %}
 <!-- Optional: Add back logs,files, -->
-{% if section and section not in 'map' %}
+{% if section and section not in 'map,transporters,vehicles' %}
 
   <!-- Detail page -->
   {% include "console/pages/transfers/transfer.html" with
@@ -39,12 +39,8 @@
     <div class="transfers">
 
       <!-- Tabs -->
-      {% include "console/components/forms/form_tabs.html" with
-        model="transfers"
-        extra="Map"
-        extra_path="map"
-      %}
-      {% comment %} <ul class="nav nav-tabs mt-3">
+      <!-- TODO: Transporters tab -->
+      <ul class="nav nav-tabs mt-3">
         <li class="nav-item">
           <a
             class="nav-link {% if not section %}active{% endif %}"
@@ -62,7 +58,23 @@
             Map
           </a>
         </li>
-      </ul> {% endcomment %}
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'transporters' %}active{% endif %}"
+            href="/transfers/transporters"
+          >
+            Transporters
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'vehicles' %}active{% endif %}"
+            href="/transfers/vehicles"
+          >
+            Vehicles
+          </a>
+        </li>
+      </ul>
 
       <!-- Logs -->
       {% if section == 'logs' %}
@@ -86,8 +98,8 @@
           user=user
         %}
 
-      <!-- Map -->
-      {% elif section == 'map' %}
+      <!-- Map or Transporters -->
+      {% elif section in 'map,transporters,vehicles' %}
 
         {% block unit %}{% endblock unit %}
 

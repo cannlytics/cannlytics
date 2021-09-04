@@ -183,7 +183,7 @@ export const maps = {
     var content = `<div class="text-dark p-3 bg-light" style="min-height:320px">`;
     content += `
       <a href="/labs/${item.slug}/" target="_blank" class="bg-light">
-        <img src="${image}" class="float-start me-3 mb-3" style="max-width:150px;max-height:75px;">
+        <img src="${image}" class="mb-3" style="max-width:150px;max-height:75px;">
       </a>`
     if (name) content += `<h6 class="text-dark mb-0">
         <a class="text-dark serif open-in-new" href="/labs/${item.slug}/">${name}</a>
@@ -291,10 +291,11 @@ export const maps = {
       var name = this.getOrganizationName(item);
       content += `
       <button
-        class="list-group-item list-group-item-action bg-transparent text-dark"
+        class="list-group-item list-group-item-action bg-transparent text-dark background-hover"
         onclick="cannlytics.transfers.selectLab('${item.slug}')"
       >
-        ${name}
+        ${name}<br>
+        <small class="text-secondary">${item.city}, ${item.state}</small>
       </button>`;
     });
     div.innerHTML += content;

@@ -584,6 +584,13 @@ body.dark .sliding-action:hover {
   background: #45B649;
   color: #ffffff;
 }
+.background-hover:hover {
+  background-color: #50fa7b33 !important;
+}
+body.dark .background-hover:hover {
+  background-color: #ffa60033 !important;
+}
+
 
 /*--------------------------------------------------------------------------
   Tabs

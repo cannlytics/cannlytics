@@ -3,18 +3,26 @@ Define Data Sources | Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>  
 Created: 8/20/2021  
-Updated: 8/20/2021  
+Updated: 9/3/2021  
 License: MIT License <https://opensource.org/licenses/MIT>  
 
 Manage scientific instruments and measurements from the instruments.
 """
+# Standard imports
 from datetime import datetime
-import pandas as pd
+from dotenv import dotenv_values
+import os
+
+# External imports
+from fredapi import Fred
 
 # Internal imports
-from get_data_OK import get_cannabis_data_ok
+import sys
+sys.path.append('../../../')
+from cannlytics import firebase # pylint: disable=import-error
+# from get_data_OK import get_cannabis_data_ok
 
-sources = [
+data_sources = [
     {
         'state': 'AL',
         'state_name': 'Alabama',
@@ -52,14 +60,20 @@ sources = [
     {
         'state': 'CT',
         'state_name': 'Connecticut',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'DE',
         'state_name': 'Delaware',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'DC',
         'state_name': 'District of Columbia',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'FL',
@@ -70,6 +84,8 @@ sources = [
     {
         'state': 'GA',
         'state_name': 'Georgia',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'HI',
@@ -92,10 +108,14 @@ sources = [
     {
         'state': 'IN',
         'state_name': 'Indiana',
+        'medicinal': False,
+        'recreational': False,
     },
     {
         'state': 'IA',
         'state_name': 'Iowa',
+        'medicinal': False,
+        'recreational': False,
     },
     {
         'state': 'KS',
@@ -106,10 +126,14 @@ sources = [
     {
         'state': 'KY',
         'state_name': 'Kentucky',
+        'medicinal': False,
+        'recreational': False,
     },
     {
         'state': 'LA',
         'state_name': 'Louisiana',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'ME',
@@ -120,10 +144,14 @@ sources = [
     {
         'state': 'MD',
         'state_name': 'Maryland',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'MA',
         'state_name': 'Massachusetts',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'MI',
@@ -134,18 +162,26 @@ sources = [
     {
         'state': 'MN',
         'state_name': 'Minnesota',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'MS',
         'state_name': 'Mississippi',
+        'medicinal': False,
+        'recreational': False,
     },
     {
         'state': 'MO',
         'state_name': 'Missouri',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'MT',
         'state_name': 'Montana',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'NE',
@@ -156,22 +192,32 @@ sources = [
     {
         'state': 'NV',
         'state_name': 'Nevada',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'NH',
         'state_name': 'New Hampshire',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'NJ',
         'state_name': 'New Jersey',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'NM',
         'state_name': 'New Mexico',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'NY',
         'state_name': 'New York',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'NC',
@@ -182,6 +228,8 @@ sources = [
     {
         'state': 'ND',
         'state_name': 'North Dakota',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'OH',
@@ -198,6 +246,7 @@ sources = [
             {'name': 'Medical Marijuana Excise Tax', 'url': 'https://oklahomastate.opengov.com/transparency#/33894/accountType=revenues&embed=n&breakdown=types&currentYearAmount=cumulative&currentYearPeriod=months&graph=bar&legendSort=desc&month=5&proration=false&saved_view=105742&selection=A49C34CEBF1D01A1738CB89828C9274D&projections=null&projectionType=null&highlighting=null&highlightingVariance=null&year=2021&selectedDataSetIndex=null&fiscal_start=earliest&fiscal_end=latest'},
             {'name': 'List of Licensed Businesses', 'url': 'https://oklahoma.gov/omma/businesses/list-of-businesses.html'},
         ],
+        'background_image': 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fstates%2Foklahoma_city.jpg?alt=media&token=83bb9264-2674-4a09-b682-9f96251164e1',
     },
     {
         'state': 'OR',
@@ -208,46 +257,62 @@ sources = [
     {
         'state': 'PA',
         'state_name': 'Pennsylvania',
+        'medicinal': True,
+        'recreational': False,
     },
-    {
-        'state': 'PR',
-        'state_name': 'Puerto Rico',
-    },
+    # {
+    #     'state': 'PR',
+    #     'state_name': 'Puerto Rico',
+    #     'medicinal': True,
+    #     'recreational': False,
+    # },
     {
         'state': 'RI',
         'state_name': 'Rhode Island',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'SC',
         'state_name': 'South Carolina',
+        'medicinal': False,
+        'recreational': False,
     },
     {
         'state': 'SD',
         'state_name': 'South Dakota',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'TN',
         'state_name': 'Tennessee',
+        'medicinal': False,
+        'recreational': False,
     },
     {
         'state': 'TX',
         'state_name': 'Texas',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'UT',
         'state_name': 'Utah',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'VT',
         'state_name': 'Vermont',
-    },
-    {
-        'state': 'VI',
-        'state_name': 'Virgin Islands',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'VA',
         'state_name': 'Virginia',
+        'medicinal': True,
+        'recreational': True,
     },
     {
         'state': 'WA',
@@ -258,115 +323,70 @@ sources = [
     {
         'state': 'WV',
         'state_name': 'West Virginia',
+        'medicinal': True,
+        'recreational': False,
     },
     {
         'state': 'WI',
         'state_name': 'Wisconsin',
+        'medicinal': False,
+        'recreational': False,
     },
     {
         'state': 'WY',
         'state_name': 'Wyoming',
+        'medicinal': False,
+        'recreational': False,
     }
- ]
-
-
-DATA_POINTS = [
-    'state',
-    'date',
-    'total_sales',
-    'total_quantity',
-    'total_rec_sales',
-    'total_rec_quantity',
-    'total_med_sales',
-    'total_med_quantity',
-    'total_licenses',
-    'total_cultivators',
-    'total_processors',
-    'total_labs',
-    'total_retailers',
-    'total_transporters',
-    'total_patients',
 ]
 
 
-def monthly_state_report():
-    """
-    Once a month, collect cannabis data points from all states
-    with permitted recreational and or medicinal cannabis sales.
-    All available monthly series will be collected, with an emphasis
-    on the following data points:
-
-        - Total cannabis sales (total_sales)
-        - Total cannabis sold (total_quantity)
-        - Recreational cannabis sales (total_rec_sales)
-        - Recreational cannabis soled (total_rec_quantity)
-        - Medicinal cannabis sales (total_med_sales)
-        - Medicinal cannabis sold (total_med_quantity)
-        - Number of licensees (total_licenses)
-        - Number of cultivation licenses (total_cultivators)
-        - Number of processor licenses (total_processors)
-        - Number of laboratory licenses (total_labs)
-        - Number of retail licenses (total_retailers)
-        - Number of transportation licenses (total_transporters)
-
-    Optional data points include:
-
-        - Number of medical patients (total_patients)
-
-    Detailed information will be collected about each laboratory.
-    Sales data can also be grouped into `flower`, `oil`, and `edibles`.
-
-    Once data is collected, summary statistics and visualization are
-    prepared on a state-by-state basis and aggregate totals are
-    calculated.
-
-    This will provide a monthly "State of the Industry" report that 
-    will include 12-month ahead forecasts.
-    """
-
-    # TODO: Collect monthly data for each state.
-
-
-    # TODO: Aggregate the monthly data.
-
-
-    # TODO: Calculate statistics.
-
-
-    # TODO: Prepare figures.
-
-
-    # TODO: Render LaTeX text and tables.
+def get_state_current_population(state_data):
+    """Get a given state's latest population from the Fed Fred API,
+    getting the number in 1000's and returning the absolute value."""
+    config = dotenv_values('../../../.env')
+    fred = Fred(api_key=config['FRED_API_KEY'])
+    state_code = state_data['state']
+    population_source_code = f'{state_code}POP'
+    population = fred.get_series(population_source_code)
+    real_population = int(population.iloc[-1] * 1000)
+    population_date = population.index[-1].isoformat()[:10]
+    return {
+        'population': f'{real_population:,}',
+        'population_source_code': population_source_code,
+        'population_source': f'https://fred.stlouisfed.org/series/{population_source_code}',
+        'population_at': population_date,
+    }
 
 
 if __name__ == '__main__':
-
-    # Optional: Only get data for the past month?    
-    # date = '2021-07-31'
-    # print('Getting data for the latest month:', date)
-
-
-    # TODO: This is a CRON job that is run periodically
-    # to collect as much state data as is possible (automatically).
-    datasets = {}
-    datasets['ok'] = get_cannabis_data_ok()
-
     
+    # Get the population for each state.
+    for n in range(len(data_sources)):
+        data_source = data_sources[n]
+        population_data = get_state_current_population(data_source)
+        data_sources[n] = {**data_source, **population_data}
+        print(data_source['state'], 'Population:', population_data['population'])
+
     # TODO: Get supplementary data for each state.
-    # -> population
     # -> licensing costs
-    
-    # Create workbook to collect July 2021 data.
-    # create_data_collection_workbook(sources, date)
+    # -> Regulations
+        # - Testing requirements
 
-    # TODO: Ensure data is collected for each month.
+    # TODO: Rank states
     
-    # TODO: Ensure data is uploaded for each month.
-    
-    # TODO: Ensure data can be aggregated.
-    
-    # TODO: Create the report!
+    # Add Id to each state.
+    for n in range(len(data_sources)):
+        data_source = data_sources[n]
+        data_sources[n]['id'] = data_source['state'].lower()
+        
+    # Initialize Firebase.
+    config = dotenv_values('../../../.env')
+    credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
+    firebase.initialize_firebase()
 
-    # Rank states
-
-    # TODO: Upload data to Firestore!
+    # Upload data to Firestore.
+    for data_source in data_sources:
+        state = data_source['state'].lower()
+        firebase.update_document(f'public/data/state_data/{state}', data_source)

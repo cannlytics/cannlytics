@@ -407,7 +407,7 @@ data_models = [
         'sortable': True,
         'filter': True,
         "fields": [
-            {"key": "receiver", "label": "Receiver"},
+            {"key": "receiver", "label": "Receiver", "type": "select"},
             {"key": "receiver_org_id", "label": "Receiver Organization ID", "hidden": True},
             {"key": "sender", "label": "Sender", "hidden": True},
             {"key": "sender_org_id", "label": "Sender Organization ID", "hidden": True},
@@ -418,7 +418,8 @@ data_models = [
             {"key": "departed_at", "label": "Estimated Departure", "type": "datetime"},
             {"key": "arrived_at", "label": "Estimated Arrival", "type": "datetime"},
             {"key": "sample_count", "label": "Sample Count", "type": "number", "class": "field-sm"},
-            {"key": "transporter", "label": "Transporter"},
+            {"key": "transporter", "label": "Transporter", "type": "select"},
+            {"key": "vehicle", "label": "Vehicle", "type": "select"},
         ],
         "metrc_fields": [
             {"key": "actual_arrival_date_time", "label": "Actual Arrival Date Time"},
@@ -440,7 +441,7 @@ data_models = [
             {"key": "delivery_received_package_count", "label": "Delivery Received Package Count"},
             {"key": "driver_name", "label": "Driver Name"},
             {"key": "driver_occupational_license_number", "label": "Driver Occupational License Number"},
-            {"key": "driver_vehicle_license_number","label": "Driver Vehicle License Number"},
+            {"key": "driver_vehicle_license_number", "label": "Driver Vehicle License Number"},
             {"key": "estimated_arrival_date_time", "label": "Estimated Arrival Date Time"},
             {"key": "estimated_departure_date_time", "label": "Estimated Departure Date Time"},
             {"key": "estimated_return_arrival_date_time", "label": "Estimated Return Arrival Date Time"},
@@ -689,6 +690,38 @@ material = {
             "message": "Create a transfer of inventory items, such as lab samples, from one organization to another.",
             "url": "./transfers/new",
         },
+    },
+    "transporters": {
+        "placeholder": {
+            "height": "200px",
+            "image": "console/images/icons/two-tone/two_tone_report.svg",
+            "title": "No transporter data",
+            "message": "You can add information here about the people who will be transporting your products.",
+        },
+        "fields": [
+            {"key": "transporter_id", "label": "Transporter ID"},
+            {"key": "driver_name", "label": "Driver Name"},
+            {"key": "driver_occupational_license_number", "label": "Driver Occupational License Number"},
+            {"key": "transporter_facility_license_number", "label": "Transporter Facility License Number"},
+            {"key": "transporter_facility_name", "label": "Transporter Facility Name"},
+            {"key": "notes", "label": "Notes", "type": "textarea"},
+        ],
+    },
+    "vehicles": {
+        "placeholder": {
+            "height": "200px",
+            "image": "console/images/icons/two-tone/two_tone_clock.svg",
+            "title": "No vehicle data",
+            "message": "You can add information here about the vehicles that transport your products.",
+        },
+        "fields": [
+            {"key": "vehicle_id", "label": "Vehicle ID"},
+            {"key": "vehicle_make", "label": "Vehicle Make"},
+            {"key": "vehicle_model", "label": "Vehicle Model"},
+            {"key": "vehicle_color", "label": "Vehicle Color"},
+            {"key": "vehicle_license_plate_number", "label": "Vehicle License Plate Number"},
+            {"key": "notes", "label": "Notes", "type": "textarea"},
+        ],
     },
     "traceability": {
         "provider": "Metrc",

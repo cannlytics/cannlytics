@@ -1,9 +1,9 @@
 """
 Transfers Views | Cannlytics API
 Created: 4/21/2021
-Updated: 8/30/2021
+Updated: 9/4/2021
 
-API to interface with laboratory transfers.
+API to interface with laboratory transfers, transporters, and vehicles.
 """
 # pylint:disable=line-too-long
 
@@ -24,7 +24,7 @@ def transfers(request, transfer_id=None):
     model_id = transfer_id
     model_type = 'transfers'
     model_type_singular = 'transfer'
-    
+
     # Authenticate the user.
     claims, status, org_id = authorize_user(request)
     if status != 200:
@@ -60,6 +60,80 @@ def transfers(request, transfer_id=None):
 def receive_transfers(request):
     """Receive incoming transfers."""
     return NotImplementedError
+
+
+@api_view(['GET', 'POST', 'DELETE'])
+def transporters(request, transporter_id=None):
+    """Get, create, or update transporters."""
+
+    # Initialize.
+    model_id = transporter_id
+    model_type = 'transporters'
+    model_type_singular = 'transporter'
+
+    # Authenticate the user.
+    claims, status, org_id = authorize_user(request)
+    if status != 200:
+        return Response(claims, status=status)
+
+    # GET data.
+    if request.method == 'GET':
+        docs = get_objects(request, claims, org_id, model_id, model_type)
+        return Response({'success': True, 'data': docs}, status=200)
+
+    # POST data.
+    elif request.method == 'POST':
+        data = update_object(request, claims, model_type, model_type_singular, org_id)
+        if data:
+            return Response({'success': True, 'data': data}, status=200)
+        else:
+            message = 'Data not recognized. Please post either a singular object or an array of objects.'
+            return Response({'error': True, 'message': message}, status=400)
+
+    # DELETE data.
+    elif request.method == 'DELETE':
+        success = delete_object(request, claims, model_id, model_type, model_type_singular, org_id)
+        if not success:
+            message = f'Your must be an owner or quality assurance to delete {model_type}.'
+            return Response({'error': True, 'message': message}, status=403)
+        return Response({'success': True, 'data': []}, status=200)
+
+
+@api_view(['GET', 'POST', 'DELETE'])
+def vehicles(request, vehicle_id=None):
+    """Get, create, or update vehicles."""
+
+    # Initialize.
+    model_id = vehicle_id
+    model_type = 'vehicles'
+    model_type_singular = 'vehicle'
+
+    # Authenticate the user.
+    claims, status, org_id = authorize_user(request)
+    if status != 200:
+        return Response(claims, status=status)
+
+    # GET data.
+    if request.method == 'GET':
+        docs = get_objects(request, claims, org_id, model_id, model_type)
+        return Response({'success': True, 'data': docs}, status=200)
+
+    # POST data.
+    elif request.method == 'POST':
+        data = update_object(request, claims, model_type, model_type_singular, org_id)
+        if data:
+            return Response({'success': True, 'data': data}, status=200)
+        else:
+            message = 'Data not recognized. Please post either a singular object or an array of objects.'
+            return Response({'error': True, 'message': message}, status=400)
+
+    # DELETE data.
+    elif request.method == 'DELETE':
+        success = delete_object(request, claims, model_id, model_type, model_type_singular, org_id)
+        if not success:
+            message = f'Your must be an owner or quality assurance to delete {model_type}.'
+            return Response({'error': True, 'message': message}, status=403)
+        return Response({'success': True, 'data': []}, status=200)
 
 
 #-----------------------------------------------------------------------
@@ -378,7 +452,7 @@ def receive_transfers(request):
     # rejected_transfers = track.get_transfers(
     #     transfer_type='rejected',
     #     license_number=cultivator.license_number
-    # )                            
+    # )
 
     # # Step 4 Find a Transfer by the Manifest ID number: GET/transfers/v1/{id}/deliveries
     # transfer_id = 'YOUR_TRANSFER_ID'

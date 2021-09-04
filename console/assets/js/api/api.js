@@ -118,7 +118,7 @@ export const api = {
   updateOrganizationSettings: (orgId, data) => authRequest(`/api/organizations/${orgId}/settings`, data),
 
   // Get labs
-  getLabs: (id) => authRequest(`/api/organizations/labs?organization_id=${id}`),
+  getLabs: (id, opts={}) => authRequest(`/api/organizations/labs?organization_id=${id || ''}&state=${opts.state || ''}`),
 
   /*----------------------------------------------------------------------------
   Measurements
@@ -169,5 +169,12 @@ export const api = {
   createTransfers: (data) => authRequest('/api/transfers', data),
   updateTransfers: (data) => authRequest('/api/transfers', data),
   deleteTransfers: (data) => authRequest('/api/transfers', data, { delete: true }),
+
+
+  getTransporter: (id) => authRequest(`/api/transporters/${id}`),
+  getTransporters: (params) => authRequest('/api/transporters', null, { params }),
+
+  getVehicle: (id) => authRequest(`/api/vehicles/${id}`),
+  getVehicles: (params) => authRequest('/api/vehicles', null, { params }),
 
 }
