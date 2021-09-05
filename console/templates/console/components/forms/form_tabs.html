@@ -20,7 +20,7 @@
       aria-current="page"
       href="/{{ model }}{% if id %}/{{ id }}{% endif %}"
     >
-      List
+      {% if unit %}Details{% else %}List{% endif %}
     </a>
   </li>
   {% if organizations.0.type == 'lab' or logs %}

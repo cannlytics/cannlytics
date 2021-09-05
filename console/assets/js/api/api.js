@@ -170,11 +170,10 @@ export const api = {
   updateTransfers: (data) => authRequest('/api/transfers', data),
   deleteTransfers: (data) => authRequest('/api/transfers', data, { delete: true }),
 
+  getTransporter: (id, orgId) => authRequest(`/api/transporters/${id}?organization_id=${orgId}`),
+  getTransporters: (params, orgId) => authRequest(`/api/transporters?organization_id=${orgId}`, null, { params }),
 
-  getTransporter: (id) => authRequest(`/api/transporters/${id}`),
-  getTransporters: (params) => authRequest('/api/transporters', null, { params }),
-
-  getVehicle: (id) => authRequest(`/api/vehicles/${id}`),
-  getVehicles: (params) => authRequest('/api/vehicles', null, { params }),
+  getVehicle: (id, orgId) => authRequest(`/api/vehicles/${id}?organization_id=${orgId}`),
+  getVehicles: (params, orgId) => authRequest(`/api/vehicles?organization_id=${orgId}`, null, { params }),
 
 }

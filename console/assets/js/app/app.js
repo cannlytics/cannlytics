@@ -97,13 +97,14 @@ export const app = {
   },
 
 
-  async save(model, modelSingular, abbreviation) {
+  async save(model, modelSingular, abbreviation, buttonId='form-save') {
     /* Create an entry in the database if it does not exist,
     otherwise update the entry. */
     // FIXME: Delete old entry if ID changes.
     const orgId = document.getElementById('organization_id').value;
-    document.getElementById('form-save-button').classList.add('d-none');
-    document.getElementById('form-save-loading-button').classList.remove('d-none');
+    console.log('Saving under org:', orgId);
+    document.getElementById(`${buttonId}-button`).classList.add('d-none');
+    document.getElementById(`${buttonId}-loading-button`).classList.remove('d-none');
     let id = document.getElementById(`input_${modelSingular}_id`).value;
     if (!id) id = await this.createID(model, modelSingular, orgId, abbreviation);
     const data = serializeForm(`${modelSingular}-form`);
@@ -121,6 +122,13 @@ export const app = {
         document.getElementById('form-save-loading-button').classList.add('d-none');
         document.getElementById('form-save-button').classList.remove('d-none');
       });
+  },
+
+
+  async getDataModel(orgId, model) {
+    /* Get a specific data model for a given organization. */
+    console.log('Getting data model:', orgId, model);
+    return await getDocument(`organizations/${orgId}/data_models/${model}`);
   },
 
   /*----------------------------------------------------------------------------
@@ -213,6 +221,7 @@ export const app = {
     /*
      * Render a no-data placeholder in the user interface.
      */
+    document.getElementById('simple-table-options').classList.add('d-none');
     document.getElementById('loading-placeholder').classList.add('d-none');
     document.getElementById('data-table').classList.add('d-none');
     document.getElementById('data-placeholder').classList.remove('d-none');
@@ -232,6 +241,7 @@ export const app = {
       // Hide the placeholder and show the table.
       document.getElementById('loading-placeholder').classList.add('d-none');
       document.getElementById('data-placeholder').classList.add('d-none');
+      document.getElementById('simple-table-options').classList.remove('d-none');
       document.getElementById('data-table').classList.remove('d-none');
       // this.tableHidden = false;
   
@@ -348,8 +358,14 @@ export const app = {
     this.dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
     let ref = db.collection('organizations').doc(orgId).collection(model);
     if (!limit) {
-      const startDate = document.getElementById('time_start').value;
-      const endDate = document.getElementById('time_end').value;
+      let startDate = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().slice(0, 10);
+      let endDate = new Date().toISOString().slice(0, 10);
+      try {
+        startDate = document.getElementById('time_start').value;
+        endDate = document.getElementById('time_end').value;
+      } catch (error) {
+        // FIXME: Unknown error
+      }
       ref = ref.where('updated_at', '>=', startDate);
       ref = ref.where('updated_at', '<=', `${endDate}T23:59:59`);
       ref = ref.orderBy('updated_at', 'desc');

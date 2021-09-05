@@ -4,7 +4,7 @@
  * Created: 5/2/2021
  * Updated: 7/4/2021
  */
-import { deserializeForm, getCookie, hasClass } from '../utils.js';
+import { deserializeForm, serializeForm, getCookie, hasClass } from '../utils.js';
 
 
 const formHelpers = {
@@ -64,6 +64,102 @@ const formHelpers = {
   },
 
 
+  renderForm(id, fields) {
+    /*
+     * Render a form given an Id and fields.
+     */
+    console.log('Render form:', id, fields);
+    const form = document.getElementById(id);
+    form.innerHTML = '';
+    fields.forEach((field) => {
+      if (!field.type || field.type == 'text') form.innerHTML += this.renderFormTextInput(field);
+      else if (field.type =='textarea') form.innerHTML += this.renderFormTextArea(field);
+      else if (field.type =='checkbox') form.innerHTML += this.renderFormCheckbox(field);
+    });
+
+  },
+
+
+  renderFormTextInput(options) {
+    /* Render a form text input given it's options. */
+    var html = `<div class="row mb-3">
+      <label class="col-sm-3 col-form-label col-form-label-sm">
+        ${options.label}
+      </label>
+      <div class="col-sm-9">
+        <input
+          type="text"
+          id="input_${options.key}"
+          class="form-control form-control-sm ${options.class}"
+          name="${options.key}"
+          spellcheck="false"
+          style="${options.style}"
+          type="${options.type}"`;
+    if (options.disabled) html += `\ndisabled`;
+    if (options.readonly) html += `\readonly`;
+    html += `>
+      </div>
+    </div>`;
+    return html;
+  },
+
+
+  renderFormDateInput(options) {
+    /* Render a form date input given it's options. */
+
+
+  },
+
+
+  renderFormDateTimeInput(options) {
+    /* Render form date and time inputs given it's options. */
+
+
+  },
+
+
+  renderFormTextArea(options) {
+    /* Render a form text area given it's options. */
+    var html = `
+    <div class="form-floating mb-3">
+      <textarea
+        id="input_${options.key}"
+        name="${options.key}"
+        class="form-control"
+        placeholder=""
+        style="height:250px"
+      `;
+      if (options.disabled) html += `\ndisabled`;
+      if (options.readonly) html += `\readonly`;
+      html += `
+      ></textarea>
+      <label for="input_${options.key}">
+        ${options.label}
+      </label>
+    </div>`;
+    return html;
+  },
+
+
+  renderFormCheckbox(options) {
+    /* Render a form checkbox given it's options. */
+
+
+  },
+
+
+  renderFormSelect(options) {
+    /* Render a form select given it's options. */
+
+
+  },
+
+
+  // Optional: Render other field types:
+    // - Images
+    // - Numbers / integers
+    // - Lists
+
 };
 
 
@@ -119,6 +215,14 @@ export const navigationHelpers = {
     const data = JSON.parse(localStorage.getItem(modelSingular));
     deserializeForm(document.forms[`${modelSingular}-form`], data)
   },
+
+
+  getFormData(formId) {
+    /*
+     * Get the data from a form from a template.
+     */
+    return serializeForm(document.forms[formId]);
+  }
 
 
 };

@@ -36,11 +36,17 @@ def transfers(request, transfer_id=None):
         return Response({'success': True, 'data': docs}, status=200)
 
     # POST data.
-    # TODO: Send transfer to the organization.
-    # TODO: Notify the receiving organization.
-    # TODO: Post to Metrc if user specifies.
     elif request.method == 'POST':
         data = update_object(request, claims, model_type, model_type_singular, org_id)
+        # TODO:
+        # 1. Send transfer to the receiving organization.
+        print('\n-------------------')
+        
+        print('-------------------\n')
+            # - Populate the transfer data in the receiving organization's transfers
+            # ensuring that no existing transfer is overwritten.
+        # 2. Notify the receiving organization.
+        # 3. Optional: Post transfer to Metrc if user has traceability set up.
         if data:
             return Response({'success': True, 'data': data}, status=200)
         else:
@@ -73,6 +79,7 @@ def transporters(request, transporter_id=None):
 
     # Authenticate the user.
     claims, status, org_id = authorize_user(request)
+    print(claims)
     if status != 200:
         return Response(claims, status=status)
 

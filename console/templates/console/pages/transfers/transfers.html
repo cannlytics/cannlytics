@@ -23,6 +23,7 @@
   {% include "console/pages/transfers/transfer.html" with
     id=section
     data_model=data_model
+    organizations=organizations
   %}
 
 {% else %}
@@ -99,7 +100,7 @@
         %}
 
       <!-- Map or Transporters -->
-      {% elif section in 'map,transporters,vehicles' %}
+      {% elif section and section in 'map,transporters,vehicles' %}
 
         {% block unit %}{% endblock unit %}
 
@@ -150,6 +151,10 @@
 
 <!-- JavaScript -->
 {% block console_js %}
+
+  <script>
+    console.log('Screen:', '{{ screen }}');
+  </script>
 
   {% if not section %}
     <script>

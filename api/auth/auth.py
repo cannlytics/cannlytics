@@ -63,15 +63,11 @@ def authorize_user(request):
     try:
         uid = claims['uid']
         # FIXME: Handle multiple organizations
-        # owner = claims.get('owner', [])
-        # team = claims.get('team', [])
-        # qa = claims.get('qa', [])
-        # authorized_ids = owner + team + qa
-        authorized_ids = claims.get('team', '')
-        authorized_ids = claims.get('qa', '')
-        authorized_ids = claims.get('owner', '')
+        authorized_ids = claims.get('team', '') # []
+        authorized_ids = claims.get('qa', '') # []
+        authorized_ids = claims.get('owner', '') # []
         if isinstance(authorized_ids, list):
-            authorized_ids = authorized_ids[0]
+            authorized_ids = authorized_ids[0] # authorized_ids = owner + team + qa
     except KeyError:
         message = 'Your request was not authenticated. Ensure that you have a valid session or API key.'
         return {'error': True, 'message': message}, 401, None
