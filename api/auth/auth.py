@@ -37,11 +37,11 @@ from cannlytics.firebase import (
 )
 
 # Initialize Firebase.
-# try:
-#     initialize_firebase()
-#     BUCKET_NAME = environ.get('FIREBASE_STORAGE_BUCKET', None)
-# except ValueError:
-#     pass
+try:
+    initialize_firebase()
+    BUCKET_NAME = environ.get('FIREBASE_STORAGE_BUCKET', None)
+except ValueError:
+    pass
 
 #-----------------------------------------------------------------------
 # Core Authentication Mechanism
@@ -312,6 +312,7 @@ def create_signature(request, *args, **argv): #pylint: disable=unused-argument
         'signature_ref': ref,
     }
     update_document(f'admin/auth/{uid}/user_settings', signature_data)
+    update_document(f'users/{uid}/user_settings/signature', signature_data)
     create_log(f'users/{uid}/logs', user_claims, 'Created signature.', 'signature', 'signature_create', [{'created_at': signature_created_at}])
     return JsonResponse({'success': True, 'message': 'Signature saved.', 'signature_url': url})
 
@@ -325,12 +326,14 @@ def delete_signature(request, *args, **argv): #pylint: disable=unused-argument
     """
     user_claims = verify_session(request)
     uid = user_claims['uid']
-    delete_file(BUCKET_NAME, f'users/{uid}/user_settings/signature.png')
-    update_document(f'users/{uid}', {
+    entry = {
         'signature_created_at': '',
         'signature_url': '',
         'signature_ref': '',
-    })
+    }
+    delete_file(BUCKET_NAME, f'users/{uid}/user_settings/signature.png')
+    update_document(f'users/{uid}', entry)
+    update_document(f'users/{uid}/user_settings/signature', entry)
     create_log(f'users/{uid}/logs', user_claims, 'Deleted signature.', 'signature', 'signature_delete', [{'deleted_at': datetime.now().isoformat()}])
     return JsonResponse({'success': True, 'message': 'Signature deleted.'})
 
@@ -373,12 +376,12 @@ def get_signature(request, *args, **argv): #pylint: disable=unused-argument
     if not verified_claims:
         return JsonResponse({'error': True, 'message': 'Invalid pin.'})
     elif verified_claims.get('uid') == uid:
-        user_settings = get_document(f'users/{uid}')
+        signature_data = get_document(f'users/{uid}/user_settings/signature')
         return JsonResponse({
             'success': True,
             'message': 'User verified.',
-            'signature_url': user_settings['signature_url'],
-            'signature_created_at': user_settings['signature_created_at']
+            'signature_url': signature_data['signature_url'],
+            'signature_created_at': signature_data['signature_created_at']
         })
     else:
         return JsonResponse({'error': True, 'message': 'Invalid pin.'})

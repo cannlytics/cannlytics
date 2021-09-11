@@ -304,7 +304,7 @@ Cannlytics operates with a NoSQL database, [Firestore](https://firebase.google.c
 
 ### File Storage <a name="storage"></a>
 
-Cannlytics utilizes [Firebase Storage] ( a.k.a Google Cloud Storage) for most storage solutions. For help with storing static files, see [serving static files on App Engine](https://cloud.google.com/appengine/docs/standard/python3/serving-static-files). You can gather all supporting files, located in each app's `static` directory, into the `public/static` directory with:
+Cannlytics utilizes [Firebase Storage](https://firebase.google.com/docs/storage) ( a.k.a Google Cloud Storage) for most storage solutions. For help with storing static files, see [serving static files on App Engine](https://cloud.google.com/appengine/docs/standard/python3/serving-static-files). You can gather all supporting files, located in each app's `static` directory, into the `public/static` directory with:
 
 ```shell
 python manage.py collectstatic --noinput
@@ -316,7 +316,7 @@ or
 npm run collectstatic
 ```
 
-You can configure static files to be served from [Firebase Storage] instead of from [Firebase Hosting] in `console/settings.py`.
+You can configure static files to be served from [Firebase Storage](https://firebase.google.com/docs/storage) instead of from [Firebase Hosting](https://firebase.google.com/docs/hosting) in `console/settings.py`.
 
 ### Email <a name="email"></a>
 

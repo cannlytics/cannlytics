@@ -166,6 +166,10 @@ export const userSettings = {
     const signatureRef = `users/${uid}/user_settings/signature.png`;
     uploadImage(signatureRef, data).then((snapshot) => {
       getDownloadURL(signatureRef).then((url) => {
+        updateDocument(`users/${uid}`, {
+          signature_created_at: new Date().toISOString(),
+          signature_ref: signatureRef,
+        })
         updateDocument(`users/${uid}/user_settings/signature`, {
           signature_created_at: new Date().toISOString(),
           signature_ref: signatureRef,
@@ -175,9 +179,11 @@ export const userSettings = {
           window.location.href = '/settings/user';
         })
         .catch((error) => {
+          console.log(error);
           showNotification('Error saving signature', 'An error occurred when saving your signature.', { type: 'error' });
         });
       }).catch((error) => {
+        console.log(error)
         showNotification('Error uploading signature', 'An error occurred when uploading your signature.', { type: 'error' });
       });
     });

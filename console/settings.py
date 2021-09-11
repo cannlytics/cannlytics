@@ -80,7 +80,6 @@ except:
 if PRODUCTION == 'True':
     DEBUG = False
 else:
-    print('\n-------------\nDEVELOPMENT MODE\n-------------\n')
     DEBUG = True
 
 # ------------------------------------------------------------#

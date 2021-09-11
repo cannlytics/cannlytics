@@ -89,7 +89,7 @@ export const app = {
     const data = { deletion_reason: deletionReason };
     authRequest(`/api/${model}/${id}?organization_id=${orgId}`, data, { delete: true })
       .then((response) => {
-        window.location.href = `/${model}`;
+        window.location.href = `/${model}`; // FIXME:
       })
       .catch((error) => {
         showNotification('Error deleting data', error.message, { type: 'error' });

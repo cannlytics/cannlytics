@@ -129,17 +129,19 @@
       </div>
 
       <!-- Measurements sub-table -->
-      {% include "console/components/tables/simple_form_table.html" with
-        model="measurements"
-        model_singular="measurement"
-        description="Manage measurements that have been taken for this sample."
-        abbreviation="MT"
-        parent_model="samples"
-        parent_model_singular="sample"
-        parent_id=section
-        remove_only=True
-        select=False
-      %}
+      {% if organizations.0.type == 'lab' %}
+        {% include "console/components/tables/simple_form_table.html" with
+          model="measurements"
+          model_singular="measurement"
+          description="Manage measurements that have been taken for this sample."
+          abbreviation="MT"
+          parent_model="samples"
+          parent_model_singular="sample"
+          parent_id=section
+          remove_only=True
+          select=False
+        %}
+      {% endif %}
 
       <!-- Results sub-table -->
       <!-- TODO: Prevent editing for recipients? -->
@@ -204,8 +206,12 @@
     }
 
     // Stream any sub-model data.
-    cannlytics.app.streamSubModelData('measurements', 'measurement', '{{ organizations.0.organization_id }}', 'sample_id', '{{ section }}', 1000);
-    cannlytics.app.streamSubModelData('results', 'result', '{{ organizations.0.organization_id }}', 'sample_id', '{{ section }}', 1000);
+    {% if not unit %}
+      {% if organizations.0.type == 'lab' %}
+        cannlytics.app.streamSubModelData('measurements', 'measurement', '{{ organizations.0.organization_id }}', 'sample_id', '{{ section }}', 1000);
+      {% endif %}
+      cannlytics.app.streamSubModelData('results', 'result', '{{ organizations.0.organization_id }}', 'sample_id', '{{ section }}', 1000);
+    {% endif %}
 
   </script>
 {% endblock console_js %}
