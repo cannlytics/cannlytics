@@ -398,43 +398,43 @@ if __name__ == '__main__':
     print('Getting licensees...')
     licensees = get_licensees_ok()
     print('Found data for %i licensees.' % len(licensees))
-
-    # Upload all licensees.
-    print('Uploading licensee data...')
-    upload_licensees(licensees, STATE)
-    print('Uploaded data for %i licensees.' % len(licensees))
-
-    # Get the state's population.
-    print('Getting state data...')
-    population = get_state_current_population(STATE)
-
-    # Update state data.
-    state_key = STATE.lower()
-    total_licensees = len(licensees)
-    licensees_per_capita = total_licensees / population
-    firebase.update_document(f'public/data/state_data/{state_key}', {
-        'id': state_key,
-        'population': f'{int(population):,}',
-        'population_source_code': f'{STATE}POP',
-        'population_source': f'https://fred.stlouisfed.org/series/{STATE}POP',
-        'total_licensees': f'{total_licensees:,}',
-        'licensees_per_capita': f'{licensees_per_capita:,}'
-    })
-    print('Uploaded state data.')
-
-    # Get licensees, population, and licensees per capita for each county.
-    county_data = get_licensees_by_county_ok(licensees, COUNTIES)
     
-    # Rank counties by licensees_per_capita.
-    county_dataframe = pd.DataFrame.from_dict(county_data, orient='index')
-    county_dataframe['licensees_per_capita_rank'] = county_dataframe.licensees_per_capita.rank()
+    # # Upload all licensees.
+    # print('Uploading licensee data...')
+    # upload_licensees(licensees, STATE)
+    # print('Uploaded data for %i licensees.' % len(licensees))
+
+    # # Get the state's population.
+    # print('Getting state data...')
+    # population = get_state_current_population(STATE)
+
+    # # Update state data.
+    # state_key = STATE.lower()
+    # total_licensees = len(licensees)
+    # licensees_per_capita = total_licensees / population
+    # firebase.update_document(f'public/data/state_data/{state_key}', {
+    #     'id': state_key,
+    #     'population': f'{int(population):,}',
+    #     'population_source_code': f'{STATE}POP',
+    #     'population_source': f'https://fred.stlouisfed.org/series/{STATE}POP',
+    #     'total_licensees': f'{total_licensees:,}',
+    #     'licensees_per_capita': f'{licensees_per_capita:,}'
+    # })
+    # print('Uploaded state data.')
+
+    # # Get licensees, population, and licensees per capita for each county.
+    # county_data = get_licensees_by_county_ok(licensees, COUNTIES)
     
-    # Upload county data.
-    for county_name, values in county_dataframe.iterrows():
-        key = county_name.lower().replace(' ', '-')
-        ref = f'public/data/state_data/ok/county_data/{key}'
-        firebase.update_document(ref, values)
-        print('Uploaded data for county', county_name)
+    # # Rank counties by licensees_per_capita.
+    # county_dataframe = pd.DataFrame.from_dict(county_data, orient='index')
+    # county_dataframe['licensees_per_capita_rank'] = county_dataframe.licensees_per_capita.rank()
+    
+    # # Upload county data.
+    # for county_name, values in county_dataframe.iterrows():
+    #     key = county_name.lower().replace(' ', '-')
+    #     ref = f'public/data/state_data/ok/county_data/{key}'
+    #     firebase.update_document(ref, values)
+    #     print('Uploaded data for county', county_name)
 
     # FIXME: Automate the download of the sales data!!!
 

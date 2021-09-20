@@ -1,0 +1,8 @@
+# Function dependencies, for example:
+# package>=version
+cannlytics==0.0.8
+firebase_admin==5.0.2
+# matplotlib==3.4.3
+pandas==1.3.3
+# seaborn==0.11.2
+sodapy==2.1.0

@@ -74,7 +74,7 @@ We strive for:
 - Simplicity.
 - Easily read source code. Code should read like english.
 - Writing fast. We're perfectionist with deadlines after all!
-- Versatility: automation, web development, etc.
+- Versatility: best of both worlds.
 
 The faster you get the app out the better, because development is an iterative process. The Python core allows for lab teams to build custom workflows directly in the Cannlytics platform. Furthermore, you can superpower your lab with data science and automation.
 

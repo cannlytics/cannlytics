@@ -27,6 +27,7 @@ sources = [
         'state_name': 'Alaska',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'AZ',
@@ -43,12 +44,14 @@ sources = [
         'state_name': 'California',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'CO',
         'state_name': 'Colorado',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'CT',
@@ -121,6 +124,7 @@ sources = [
     {
         'state': 'MD',
         'state_name': 'Maryland',
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'MA',
@@ -131,6 +135,7 @@ sources = [
         'state_name': 'Michigan',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'MN',
@@ -143,10 +148,12 @@ sources = [
     {
         'state': 'MO',
         'state_name': 'Missouri',
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'MT',
         'state_name': 'Montana',
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'NE',
@@ -189,6 +196,7 @@ sources = [
         'state_name': 'Ohio',
         'medicinal': True,
         'recreational': False,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'OK',
@@ -199,12 +207,14 @@ sources = [
             {'name': 'Medical Marijuana Excise Tax', 'url': 'https://oklahomastate.opengov.com/transparency#/33894/accountType=revenues&embed=n&breakdown=types&currentYearAmount=cumulative&currentYearPeriod=months&graph=bar&legendSort=desc&month=5&proration=false&saved_view=105742&selection=A49C34CEBF1D01A1738CB89828C9274D&projections=null&projectionType=null&highlighting=null&highlightingVariance=null&year=2021&selectedDataSetIndex=null&fiscal_start=earliest&fiscal_end=latest'},
             {'name': 'List of Licensed Businesses', 'url': 'https://oklahoma.gov/omma/businesses/list-of-businesses.html'},
         ],
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'OR',
         'state_name': 'Oregon',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'PA',
@@ -255,10 +265,12 @@ sources = [
         'state_name': 'Washington',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'CCRS',
     },
     {
         'state': 'WV',
         'state_name': 'West Virginia',
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'WI',

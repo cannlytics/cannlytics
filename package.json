@@ -32,7 +32,7 @@
     "collectstatic": "python manage.py collectstatic --noinput",
     "publish": "npm run container && npm run cloud && npm run deploy",
     "container": "npm run collectstatic && gcloud builds submit --tag gcr.io/cannlytics/cannlytics-lims",
-    "cloud": "gcloud run deploy cannlytics-lims --image gcr.io/cannlytics/cannlytics-lims --set-env-vars SETTINGS_NAME=cannlytics_platform_settings --region us-central1 --allow-unauthenticated --platform managed --memory 2Gi --cpu 2",
+    "cloud": "gcloud run deploy cannlytics-lims --image gcr.io/cannlytics/cannlytics-lims --set-env-vars SETTINGS_NAME=cannlytics_platform_settings --region us-central1 --allow-unauthenticated --platform managed --memory 2Gi --cpu 2 --min-instances 1",
     "deploy": "firebase deploy --project cannlytics --only hosting:production",
     "lint": "python manage.py check",
     "install-docs": "docker build -t squidfunk/mkdocs-material docs",
@@ -40,7 +40,8 @@
     "build-docs": "mkdocs build",
     "publish-docs": "firebase deploy --project cannlytics --only hosting:docs",
     "docker-build": "docker build -t cannlytics .",
-    "docker-run": "docker run -dp 8080:8080 cannlytics"
+    "docker-run": "docker run -dp 8080:8080 cannlytics",
+    "deploy-cannabis-data-daily": "cd ./tools/data/state_data/get_cannabis_data_daily && gcloud functions deploy get_cannabis_data_daily --entry-point get_cannabis_data_daily --runtime python39 --trigger-topic get_cannabis_data_daily --memory 1024MB --timeout 300 --env-vars-file env.yaml && cd ../../../../"
   },
   "dependencies": {
     "@popperjs/core": "^2.5.3",

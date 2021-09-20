@@ -34,6 +34,7 @@ data_sources = [
         'state_name': 'Alaska',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'AZ',
@@ -50,12 +51,14 @@ data_sources = [
         'state_name': 'California',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'CO',
         'state_name': 'Colorado',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'CT',
@@ -134,30 +137,35 @@ data_sources = [
         'state_name': 'Louisiana',
         'medicinal': True,
         'recreational': False,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'ME',
         'state_name': 'Maine',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'MD',
         'state_name': 'Maryland',
         'medicinal': True,
         'recreational': False,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'MA',
         'state_name': 'Massachusetts',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'MI',
         'state_name': 'Michigan',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'MN',
@@ -176,12 +184,14 @@ data_sources = [
         'state_name': 'Missouri',
         'medicinal': True,
         'recreational': False,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'MT',
         'state_name': 'Montana',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'NE',
@@ -194,6 +204,7 @@ data_sources = [
         'state_name': 'Nevada',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'NH',
@@ -236,6 +247,7 @@ data_sources = [
         'state_name': 'Ohio',
         'medicinal': True,
         'recreational': False,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'OK',
@@ -247,12 +259,14 @@ data_sources = [
             {'name': 'List of Licensed Businesses', 'url': 'https://oklahoma.gov/omma/businesses/list-of-businesses.html'},
         ],
         'background_image': 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fstates%2Foklahoma_city.jpg?alt=media&token=83bb9264-2674-4a09-b682-9f96251164e1',
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'OR',
         'state_name': 'Oregon',
         'medicinal': True,
         'recreational': True,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'PA',
@@ -325,6 +339,7 @@ data_sources = [
         'state_name': 'West Virginia',
         'medicinal': True,
         'recreational': False,
+        'traceability_system': 'Metrc',
     },
     {
         'state': 'WI',

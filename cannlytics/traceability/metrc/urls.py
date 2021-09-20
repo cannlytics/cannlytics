@@ -6,7 +6,7 @@ Metrc API URLs.
 """
 
 # FIXME: Make state dynamic
-METRC_API_BASE_URL = 'https://api-%s.metrc.com'
+METRC_API_BASE_URL = 'https://sandbox-api-%s.metrc.com'
 METRC_API_BASE_URL_TEST = 'https://sandbox-api-%s.metrc.com'
 
 # FIXME: Ideally form complete URLs before execution?

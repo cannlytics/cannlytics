@@ -57,6 +57,7 @@ typings/
 *.env
 .env
 docker.env
+env.yaml
 
 # next.js build output
 .next
