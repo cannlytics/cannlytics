@@ -13,3 +13,17 @@ Cannlytics protocols abide by all security requirements put forth in the [State 
 ## Services
 
 Cannlytics utilizes Firebase services which encrypt data in transit using HTTPS and logically isolate customer data. In addition, several Firebase services, principally Cloud Firestore and Firebase Authentication, also encrypt their data at rest.
+
+## Confidential Information
+
+<!-- "Confidential Information  of any  kind  shall be  stored, processed,  or  transferred  only  in  or  to facilities  located  within  the  State of  Nevada,  and  shall  not  be  distributed  or  sold  to  any  third  party, retained  in  any  files  or  otherwise, or  used  by  Provider  or  its  agents  in  any  way, except  as authorized  by  this  Agreement,  by  law,  unless  approved  in  writing by  the  State.  Provider  shall provide  and  maintain  a  secure  environment  that  ensures  confidentiality  of  all  Confidential Information wherever located. Neither  Provider  nor  any  of  its  agents,  employees,  Subcontractors, or  permitted  assigns  shall  have  any  rights  to  use  or  access  any  data or  information  of EITS,  the Nevada  Cannabis  Compliance  Board,  or  any  other  Nevada  state agency,  except  with  the prior approval of the  State" -->
+
+
+## Our security requirments
+
+We hold ourselves to the following minimal security requirements.
+
+- We shall  routinely  review  such  statutes,  rules,  policies, standards,  and  guidelines.
+- We will abide by all State security policies in States that we operate in:
+  * <https://it.nv.gov/Governance/Security/State_Security_Policies_Standards___Procedures/>
+

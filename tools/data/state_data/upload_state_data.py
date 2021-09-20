@@ -65,6 +65,9 @@ data_sources = [
         'state_name': 'Connecticut',
         'medicinal': True,
         'recreational': True,
+        'update_daily_data': True,
+        'update_weekly_data': True,
+        'update_monthly_data': True,
     },
     {
         'state': 'DE',
@@ -159,6 +162,13 @@ data_sources = [
         'medicinal': True,
         'recreational': True,
         'traceability_system': 'Metrc',
+        'state_sales_tax': 6.25,
+        'state_excise_tax': 10.75,
+        'state_local_tax': 3,
+        'tax_rate_url': 'https://opendata.mass-cannabis-control.com/stories/s/xwwk-y3zr',
+        'update_daily_data': True,
+        'update_weekly_data': True,
+        'update_monthly_data': True,
     },
     {
         'state': 'MI',
@@ -260,6 +270,9 @@ data_sources = [
         ],
         'background_image': 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fstates%2Foklahoma_city.jpg?alt=media&token=83bb9264-2674-4a09-b682-9f96251164e1',
         'traceability_system': 'Metrc',
+        'update_daily_data': True,
+        'update_weekly_data': True,
+        'update_monthly_data': True,
     },
     {
         'state': 'OR',
