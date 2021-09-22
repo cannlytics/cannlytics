@@ -10,7 +10,9 @@ License: MIT License <https://opensource.org/licenses/MIT>
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from sodapy import Socrata
+import requests
+# from sodapy import Socrata
+import yaml
 
 
 DATASETS = [
@@ -73,37 +75,65 @@ DATASETS = [
     # Optional: Weekly sales by product type
     # https://dev.socrata.com/foundry/opendata.mass-cannabis-control.com/87rp-xn9v
     # https://opendata.mass-cannabis-control.com/Industry-and-Products/Website-Previous-Week-Adult-Use-Sales/pnfk-d3cf
-    # https://opendata.mass-cannabis-control.com/Industry-and-Products/Public-View-Marijuana-Establishment-Facility-Activ/j3q7-3usu
 ]
 
 
 if __name__ == '__main__':
     
-    # Print let's rock and roll baby!!!
-    
     #--------------------------------------------------------------------------
     # 1. Get the data.
     #--------------------------------------------------------------------------
     
-    # Initialize a Socrata client.
-    app_token = os.environ.get('APP_TOKEN', None)
-    client = Socrata('opendata.mass-cannabis-control.com', app_token)
+    # Get the App Token.
+    app_token = None
+    with open('env.yaml', 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+        app_token = config['APP_TOKEN']
+
+    # Define headers for all requests.
+    headers = {
+        'X-App-Token': app_token,
+        'Content-Type': 'application/json'
+    }
     
+    # Define the base URL.
+    base = 'https://opendata.mass-cannabis-control.com/resource'
+     
     # Get sales by product type.
-    results = client.get('xwf2-j7g9', limit=2000)
-    results_df = pd.DataFrame.from_records(results)
+    url = f'{base}/xwf2-j7g9.json'
+    params = {
+        '$limit': 10, 
+        '$order': 'saledate DESC',
+    }
+    response = requests.get(url,  headers=headers, params=params)
+    products = pd.DataFrame(response.json())
     
     # Get licensees.
-    results = client.get("hmwt-yiqy", limit=2000)
-    results_df = pd.DataFrame.from_records(results)
+    url = f'{base}/hmwt-yiqy.json'
+    params = {
+        '$limit': 10, 
+        '$order': 'app_create_date DESC',
+    }
+    response = requests.get(url,  headers=headers, params=params)
+    licensees = pd.DataFrame(response.json())
     
     # Get the monthly average price per ounce.
-    results = client.get("rqtv-uenj", limit=2000)
-    results_df = pd.DataFrame.from_records(results)
+    url = f'{base}/rqtv-uenj.json'
+    params = {
+        '$limit': 10, 
+        '$order': 'date DESC',
+    }
+    response = requests.get(url,  headers=headers, params=params)
+    prices = pd.DataFrame(response.json())
     
-    # Get production stats (total employees, total plants, etc.)
-    results = client.get("j3q7-3usu", limit=2000)
-    results_df = pd.DataFrame.from_records(results)
+    # Get production stats (total employees, total plants, etc.) j3q7-3usu
+    url = f'{base}/j3q7-3usu.json'
+    params = {
+        '$limit': 10, 
+        '$order': 'activitysummarydate DESC',
+    }
+    response = requests.get(url,  headers=headers, params=params)
+    production = pd.DataFrame(response.json())
     
     #--------------------------------------------------------------------------
     # 2. Clean the data, standardizing variables.
@@ -115,9 +145,10 @@ if __name__ == '__main__':
     # 3. Calculate interesting statistics.
     #--------------------------------------------------------------------------
 
+    # plt.plot(production_data.activitysummarydate, production_data.total_employees)
     
     #--------------------------------------------------------------------------
-    # Upload the data, boiii!!!
+    # Upload the data!
     #--------------------------------------------------------------------------
     
     
