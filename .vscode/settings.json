@@ -12,7 +12,6 @@
     "**/app/build/win-unpacked/**": true
   },
   "files.exclude": {
-    "**/__pycache__": true,
     "**/__init__.py": false,
   },
   "git.countBadge": "off",

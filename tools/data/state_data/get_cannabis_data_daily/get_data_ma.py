@@ -102,7 +102,7 @@ if __name__ == '__main__':
     # Get sales by product type.
     url = f'{base}/xwf2-j7g9.json'
     params = {
-        '$limit': 10, 
+        '$limit': 1000, 
         '$order': 'saledate DESC',
     }
     response = requests.get(url,  headers=headers, params=params)
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     # Get licensees.
     url = f'{base}/hmwt-yiqy.json'
     params = {
-        '$limit': 10, 
+        '$limit': 1000, 
         '$order': 'app_create_date DESC',
     }
     response = requests.get(url,  headers=headers, params=params)
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     # Get the monthly average price per ounce.
     url = f'{base}/rqtv-uenj.json'
     params = {
-        '$limit': 10, 
+        '$limit': 1000, 
         '$order': 'date DESC',
     }
     response = requests.get(url,  headers=headers, params=params)
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # Get production stats (total employees, total plants, etc.) j3q7-3usu
     url = f'{base}/j3q7-3usu.json'
     params = {
-        '$limit': 10, 
+        '$limit': 1000, 
         '$order': 'activitysummarydate DESC',
     }
     response = requests.get(url,  headers=headers, params=params)
