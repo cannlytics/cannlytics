@@ -8,11 +8,13 @@ License: MIT License <https://opensource.org/licenses/MIT>
 Description:
     Get public cannabis data that needs to be updated daily.
 """
-# Standard imports
-# import base64
-
-# Internal imports
 from get_data_ct import get_data_ct
+from get_data_ma import get_data_ma
+
+DAILY_ROUTINES = [
+    # 'get_data_ct',
+    'get_data_ma',
+]
 
 
 def get_cannabis_data_daily(event, context):
@@ -21,9 +23,15 @@ def get_cannabis_data_daily(event, context):
          event (dict): Event payload.
          context (google.cloud.functions.Context): Metadata for the event.
     """
-    # pubsub_message = base64.b64decode(event['data']).decode('utf-8')
-    # if pubsub_message != 'success':
-    #     return
+    print('Initializing Get Cannabis Daily Data Routine.')
 
-    # Get state daily data.
-    get_data_ct()
+    # Run all state daily data collection routines.
+    for routine in DAILY_ROUTINES:
+        state = routine.replace('get_data_', '')
+        print('Getting data for %s.' % state)
+        try:
+            eval(routine + '()')
+            print('Successfully retrieved data for %s.' % state)
+        except:
+            print('Failed getting data for %s.' % state)
+    print('Finished collecting daily data for %i states.' % len(DAILY_ROUTINES))

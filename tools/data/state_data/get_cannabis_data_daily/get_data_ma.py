@@ -4,7 +4,7 @@ Get MAssachussets Data | Cannlytics
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
 Created: 9/20/2021
-Updated: 9/20/2021
+Updated: 10/2/2021
 License: MIT License <https://opensource.org/licenses/MIT>
 """
 import os
@@ -14,6 +14,8 @@ import requests
 # from sodapy import Socrata
 import yaml
 
+
+STATE = 'ma'
 
 DATASETS = [
     {
@@ -78,6 +80,11 @@ DATASETS = [
 ]
 
 
+def get_data_ma():
+    """Get public data for Massachusetts."""
+    raise NotImplementedError
+
+
 if __name__ == '__main__':
     
     #--------------------------------------------------------------------------
@@ -125,6 +132,10 @@ if __name__ == '__main__':
     }
     response = requests.get(url,  headers=headers, params=params)
     prices = pd.DataFrame(response.json())
+    price_per_gram = prices.avg_1oz.astype(float).divide(28)
+    price_per_teenth = prices.avg_1oz.astype(float).divide(16)
+    price_per_eighth = prices.avg_1oz.astype(float).divide(8)
+    price_per_quarter = prices.avg_1oz.astype(float).divide(4)
     
     # Get production stats (total employees, total plants, etc.) j3q7-3usu
     url = f'{base}/j3q7-3usu.json'
@@ -145,10 +156,99 @@ if __name__ == '__main__':
     # 3. Calculate interesting statistics.
     #--------------------------------------------------------------------------
 
-    # plt.plot(production_data.activitysummarydate, production_data.total_employees)
+    # Total licensees.
+
+    # Total licensees by type.
+    license_types = {
+        'cultivator': ['Marijuana Cultivator',],
+        'processor': ['Marijuana Product Manufacturer',],
+        'retailer': ['Marijuana Retailer',],
+        'lab': ['Independent Testing Laboratory',],
+        'transporter': [
+            'Marijuana Transporter with Other Existing ME License',
+            'Third Party Marijuana Transporter',
+        ],
+        'other': ['Marijuana Microbusiness', 'Craft Marijuana Cooperative'],
+    }
+
+    # Total employees.
+    # 'total_employees'
+
+    # Total sales (GDP).
+    # 'salestotal',
+
+    # Year-to-date total
+
+    # 2021 forecast / 2022 forecast
+
+    # Sales by product type.
+    product_types = {
+        'flower': ['Buds',],
+        'concentrate': ['Concentrate (Each)', 'Concentrate', 'Concentrate (Bulk)',],
+        'inhalation_product': ['Vape Product',],
+        'liquid_edible': ['Infused Beverage',],
+        'solid_edible': ['Infused (edible)',],
+        'infused_mix': ['Infused (non-edible)', 'Kief',],
+        'mix': ['Shake/Trim (by strain)', 'Shake/Trim'],
+        'pre_roll': ['Infused Pre-Rolls', 'Raw Pre-Rolls',],
+    }
+
+    # Add population.
+
+    # GDP per capita.
+
+    # Avg. price per gram / teenth / eighth / quarter / and ounce.
+
+    # Total plants
+    # 'total_planttrackedcount' # Alt: total_plantcount
+
+    # Total flowering plants
+    # 'total_plantfloweringcount',
+
+    # Total vegetative plants
+    # 'total_plantimmaturecount', 'total_plantvegetativecount',
+
+    # Total inventory items.
+    # total_active_packagecount
+    # 'total_plantimmaturecount',
+    # 'total_planttrackedcount',
+    # 'total_plantvegetativecount',
+    # 'total_plantdestroyedcount',
+    # 'total_plantharvestedcount',
+    # 'total_active_harvestcount',
+    # 'total_active_packagecount',
+    # 'total_plantbatchcount',
+    # 'total_activeproducts',
+    # 'total_activestrains',
+
+    # TODO: For each series, calculate the monthly percent change.
+
+    # Update weekly statistics.
+
+    # Update monthly statistics.
+
+    #--------------------------------------------------------------------------
+    # Optional: Create charts and report on the 1st of every month.
+    #--------------------------------------------------------------------------
+    
     
     #--------------------------------------------------------------------------
     # Upload the data!
     #--------------------------------------------------------------------------
     
-    
+    # # Initialize Firebase.
+    # initialize_firebase()
+
+    # # Upload the statistics.
+    # update_document(f'public/stats/{STATE}/terpene_prevalence', stats)
+
+    # # Upload the data.
+    # for _, values in data.iterrows():
+    #     doc_id = values['sample_id']
+    #     doc_data = values.to_dict()
+    #     ref = f'public/data/state_data/{STATE}/lab_results/{doc_id}'
+    #     update_document(ref, doc_data)
+
+        # Return the statistics.
+        # return stats
+
