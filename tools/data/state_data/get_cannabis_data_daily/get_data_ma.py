@@ -334,8 +334,8 @@ if __name__ == '__main__':
     for product_type, categories in PRODUCT_TYPES.items():
         product_data = products.loc[products.productcategoryname.isin(categories)]
         product_data.index = product_data.saledate
-        daily_products_data = product_data.groupby(product_data.saledate).sum().reset_index()
-        daily_stats[f'total_{product_type}_sales'] = daily_products_data.dollartotal
+        daily_products_data = product_data.groupby(product_data.saledate).sum()
+        daily_stats[f'total_{product_type}_sales'] = daily_products_data.dollartotal.values
 
     # Format weekly statistics.
 

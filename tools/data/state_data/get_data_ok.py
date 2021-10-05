@@ -30,8 +30,8 @@ import requests
 import statsmodels.api as sm
 
 # Internal imports
-# import sys
-# sys.path.append('../../../')
+import sys
+sys.path.append('../../../')
 from cannlytics import firebase # pylint: disable=import-error
 
 
@@ -389,7 +389,7 @@ def upload_licensees(data, state):
 if __name__ == '__main__':
     
     # Initialize Firebase.
-    config = dotenv_values('../../../../.env')
+    config = dotenv_values('../../../.env')
     credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
     firebase.initialize_firebase()
