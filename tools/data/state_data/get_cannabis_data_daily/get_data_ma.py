@@ -357,6 +357,9 @@ if __name__ == '__main__':
     # Optional: Only upload the last day, week, and month.
     #--------------------------------------------------------------------------
 
+    # Add collected_at timestamp.
+    stats['collected_at'] = datetime.now()
+
     # Upload the current stats.
     # update_document(f'public/stats/state_stats/{STATE}', stats)
     
@@ -379,6 +382,11 @@ if __name__ == '__main__':
     #     license_number = values.license_number
     #     ref = f'public/data/licensees/state_licensees/{STATE}/{license_number}'
     #     update_document(ref, values)
+    
+    #--------------------------------------------------------------------------
+    # Optional: Upload datasets as .xlsx files.
+    #--------------------------------------------------------------------------
+    
 
     #--------------------------------------------------------------------------
     # Optional: Create charts and report on the 1st of every month.
