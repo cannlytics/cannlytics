@@ -44,7 +44,7 @@
     "docker-run": "docker run -dp 8080:8080 cannlytics"
   },
   "dependencies": {
-    "@popperjs/core": "^2.5.3",
+    "@popperjs/core": "^2.10.2",
     "@primer/octicons": "^11.0.0",
     "axios": "^0.21.1",
     "bootstrap": "^5.0.0-beta1",
