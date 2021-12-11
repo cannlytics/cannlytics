@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.5.3",
-    "@primer/octicons": "^11.0.0",
+    "@primer/octicons": "^11.3.0",
     "axios": "^0.21.1",
     "bootstrap": "^5.0.0-beta1",
     "chart.js": "^2.9.4",
