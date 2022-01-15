@@ -20,8 +20,10 @@ firebase.initializeApp({
 // firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
 
 // Core modules
+const analytics = firebase.analytics();
 const auth = firebase.auth();
 const db = firebase.firestore();
+const performance = firebase.performance();
 const storage = firebase.storage();
 const { firestore } = firebase;
 const GoogleAuthProvider = firebase.auth.GoogleAuthProvider;
@@ -272,9 +274,11 @@ const storageErrors = {
 
 
 export {
+  analytics,
   auth,
   db,
   firestore,
+  performance,
   storageErrors,
   GoogleAuthProvider,
   changePhotoURL,

@@ -1,8 +1,11 @@
 """
 Middleware | Cannlytics Console
+Copyright (c) 2021 Cannlytics
+
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
 Created: 5/1/2021
+Updated: 11/26/2021
 """
 from django import http
 from django.utils.http import urlquote

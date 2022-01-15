@@ -90,8 +90,8 @@ else:
 # Define apps used in the project.
 INSTALLED_APPS = [
     'api',
-    'cannlytics',
-    'console',
+    # 'cannlytics',
+    PROJECT_NAME,
     # 'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -119,7 +119,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'console.core.middleware.AppendOrRemoveSlashMiddleware',
+    f'{PROJECT_NAME}.core.middleware.AppendOrRemoveSlashMiddleware',
 ]
 
 # FIXME: Enable CORS for PDFs
@@ -146,7 +146,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'console/templates'),
+            os.path.join(BASE_DIR, f'{PROJECT_NAME}/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -155,7 +155,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'console.core.context_processors.selected_settings',
+                f'{PROJECT_NAME}.core.context_processors.selected_settings',
             ],
         },
     },
@@ -231,21 +231,6 @@ except:
     DEFAULT_FROM_EMAIL = EMAIL_HOST
     LIST_OF_EMAIL_RECIPIENTS = [EMAIL_HOST_USER]
     print('Warning: Email not entirely configured.')
-
-# ------------------------------------------------------------#
-# Password validation
-# https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
-# ------------------------------------------------------------#
-
-# Setup validators.
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'
-    },
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
 
 # ------------------------------------------------------------#
 # Static files (CSS, JavaScript, Images)

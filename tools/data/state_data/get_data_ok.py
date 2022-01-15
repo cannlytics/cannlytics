@@ -31,8 +31,8 @@ import statsmodels.api as sm
 
 # Internal imports
 import sys
-sys.path.append('../../../')
-from cannlytics import firebase # pylint: disable=import-error
+sys.path.append('../../')
+# from cannlytics import firebase # pylint: disable=import-error
 
 
 STATE = 'OK'
@@ -311,7 +311,7 @@ def get_licensees_by_county_ok(licensees, counties):
     return county_data
 
 
-def get_sales_data_ok():
+def get_sales_data_ok(licensees):
     """Get cannabis sales data in Oklahoma."""
     # Read Oklahoma tax data.
     # Downloaded from:
@@ -369,6 +369,7 @@ def get_sales_data_ok():
     dispensaries = licensees.loc[licensees.license_type == 'dispensaries']
     number_of_dispensaries = len(dispensaries)
     revenue_data['revenue_per_dispensary'] = revenue_data['revenue'] / number_of_dispensaries
+    return revenue_data
 
 
 def get_cannabis_data_ok():
@@ -377,22 +378,22 @@ def get_cannabis_data_ok():
     return {}
 
 
-def upload_licensees(data, state):
-    """Upload cannabis licensees."""
-    for key, values in data.iterrows():
-        values['state'] = state
-        key = values['license_number']
-        ref = f'public/data/licensees/{key}'
-        firebase.update_document(ref, values.to_dict())
+# def upload_licensees(data, state):
+#     """Upload cannabis licensees."""
+#     for key, values in data.iterrows():
+#         values['state'] = state
+#         key = values['license_number']
+#         ref = f'public/data/licensees/{key}'
+#         update_document(ref, values.to_dict())
 
 
 if __name__ == '__main__':
     
-    # Initialize Firebase.
-    config = dotenv_values('../../../.env')
-    credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
-    firebase.initialize_firebase()
+    # # Initialize Firebase.
+    # config = dotenv_values('../../../.env')
+    # credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
+    # os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
+    # firebase.initialize_firebase()
 
     # Get all licensees.
     print('Getting licensees...')
@@ -437,6 +438,8 @@ if __name__ == '__main__':
     #     print('Uploaded data for county', county_name)
 
     # FIXME: Automate the download of the sales data!!!
+    
+    sales_data = get_sales_data_ok(licensees)
 
     # TODO: Upload the revenue data.
 

@@ -1,16 +1,14 @@
-# <img width="20" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics
-<!-- TODO: FIx reference to calyx image -->
+# <img height="32" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics
 
-![version](https://img.shields.io/badge/version-0.0.9-darkgreen)
 [![License: MIT](https://img.shields.io/badge/License-MIT-darkgreen.svg)](https://opensource.org/licenses/MIT)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)](https://github.com/cannlytics/cannlytics/fork)
+![version](https://img.shields.io/badge/version-0.0.9-darkgreen)
 
 Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software designed to make your data and information accessible. Cannlytics makes cannabis analysis **simple** and **easy** through data accessibility. We believe that everyone in the cannabis industry should be able to access rich, valuable data quickly and easily and that you will be better off for it. This documentation covers the Cannlytics architecture and how to build, develop, and publish the Cannlytics platform. You can view the platform live at <https://console.cannlytics.com> and the documentation at <https://docs.cannlytics.com>.
 
-- [Introduction](#introduction)
-- [Installation](#installation)
-- [Architecture](#architecture)
-- [Development](#development)
+- [🐱‍👓 Introduction](#introduction)
+- [🌱 Installation](#installation)
+- [🏗️ Architecture](#architecture)
+- [🔨 Development](#development)
   * [Authentication](#authentication)
   * [Running the project for development](#running)
   * [Data](#data)
@@ -21,15 +19,13 @@ Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software de
   * [Style](#style)
   * [Text](#text)
   * [Building and running the project with Docker](#docker)
-- [Testing](#testing)
-- [Publishing](#publishing)
-- [Contributing](#contributing)
-- [Resources](#resources)
-- [License](#license)
-<!-- -  -->
-<!-- - [Administration](#administration) -->
+- [👩‍🔬 Testing](#testing)
+- [🚀 Publishing](#publishing)
+- [🤝 Contributing](#contributing)
+- [❤️ Support](#support)
+- [🏛️ License](#license)
 
-## Introduction <a name="introduction"></a>
+## 🐱‍👓 Introduction <a name="introduction"></a>
 
 The `cannlytics` package is the core module implementing cannabis analytics logic. The `cannlytics` module handles [database interactions](#data), [file management](#storage), [authentication and authorization](#authentication), traceability, data importing and exporting, and the logic for all workflows, such as certificate creation, item transfers, and publishing results. The `api` is the interface between the user application and the cannabis analytics logic of `cannlytics`. The `console` is the user application where user's can interface with the infrastructure, such as the database, and utilize the cannabis analytics logic. The `docs` provide information about the project and the `website` provides people with information about cannabis analytics. You can test the [console](https://console.cannlytics.com) with the following credentials.
 
@@ -37,7 +33,7 @@ Email: test@cannlytics.com
 
 Password: dontpanic
 
-## Installation <a name="installation"></a>
+## 🌱 Installation <a name="installation"></a>
 
 Cannlytics is an open box and transparent. You do not have to guess about the software used or how your logic is implemented. Our philosophy is that **open source** and **free** solutions are the best ([**free** as in **free** speech, not as in *free beer*](http://www.gnu.org/philosophy/free-sw.html)). In brief, installation entails:
 
@@ -150,7 +146,7 @@ Cannlytics is built and depends on the following software and services, so you w
 * [Gimp](https://www.gimp.org/about/)
 * [Inkscape](https://inkscape.org/about/)
 
-## Architecture <a name="architecture"></a>
+## 🏗️ Architecture <a name="architecture"></a>
 
 Cannlytics is built with [Python](https://www.python.org/) and leverages the [Django](https://www.djangoproject.com/) framework. Cannlytics utilizes [Firebase](https://firebase.google.com/) for user authentication with [Firebase Authentication](https://firebase.google.com/docs/auth), a [Firestore](https://firebase.google.com/docs/firestore) NoSQL database for real-time data management, [Firebase Storage](https://firebase.google.com/docs/storage) for file storage, and hosted with [Firebase Hosting](https://firebase.google.com/docs/hosting). Cannlytics uses a number of [Google Cloud](https://console.cloud.google.com/) backend services, including:
 
@@ -226,7 +222,7 @@ Cannlytics favors a [domain-style code structure](https://stackoverflow.com/ques
 └── webpack.config.js # JavaScript and CSS bundle configuration.
 ```
 
-## Development <a name="development"></a>
+## 🔨 Development <a name="development"></a>
 
 Development can happen in many avenues. Frequent, small scope pull requests are encouraged. Any contribution, even if it needs future polishing, helps build the project and advance the field of cannabis analytics. In general;
 
@@ -421,42 +417,7 @@ docker-compose down
 docker-compose logs
 ```
 
-## Documentation <a name="documentation"></a>
-
-Documentation for the project is written in [Markdown](https://guides.github.com/features/mastering-markdown/). Building the documentation locally requires installing [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and [Docker](https://www.docker.com/get-started). The configuration for the documentation is contained within `mkdocs.yml`. You can serve the documentation locally by first pulling and building the Material for MKDocs image:
-
-```shell
-docker pull squidfunk/mkdocs-material
-docker build -t squidfunk/mkdocs-material docs
-```
-
-Once setup, you can preview the documentation as you write:
-
-```shell
-docker run --rm -it -p 8000:8000 -v "%cd%":/docs squidfunk/mkdocs-material
-```
-
-or
-
-```shell
-npm run docs
-```
-
-> Note that there is [a namespace conflict between `django-livereload-server` and `livereload`](https://gist.github.com/hangtwenty/f53b3867db1e33780505ccafd8d2eef0), so you need to be careful when and where you install Python requirements. If you run into a `django-livereload-server` import error, first check that `PRODUCTION = False` in your `console/settings.py` and then follow [these instructions](https://gist.github.com/hangtwenty/f53b3867db1e33780505ccafd8d2eef0) to uninstall `livereload` and reinstall  `django-livereload-server`.
-
-When you are ready, you can build the documentation:
-
-```shell
-npm run build-docs
-```
-
-And publish the documentation:
-
-```shell
-npm run publish-docs
-```
-
-## Testing <a name="testing"></a>
+## 👩‍🔬 Testing <a name="testing"></a>
 
 You can check for errors detectable by Django with:
 
@@ -478,7 +439,7 @@ gcloud auth configure-docker
 docker push gcr.io/your-lims/cannlytics
 ```
 
-## Publishing <a name="publishing"></a>
+## 🚀 Publishing <a name="publishing"></a>
 
 See [the publishing guide](https://docs.cannlytics.com/developers/publishing/) for complete instructions on how to publish Cannlytics for production. The guide is based on the [Running Django on Cloud Run guide](https://cloud.google.com/python/django/run#windows). After setup, publishing is done with one command:
 
@@ -517,7 +478,7 @@ This step provides access to this containerized app from a [Firebase Hosting] UR
 firebase deploy --only hosting:production
 ```
 
-## Contributing <a name="contributing"></a>
+## 🤝 Contributing <a name="contributing"></a>
 
 Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](https://docs.cannlytics.com/developers/contributing/) to get started. Anyone is welcome to contribute anything. Email <dev@cannlytics.com> for a quick onboarding. Currently, the Cannlytics Console would love:
 
@@ -526,17 +487,32 @@ Contributions are always welcome! You are encouraged to submit issues, functiona
 * More documentation;
 * Ideas.
 
-### Contributors
+## ❤️ Support <a name="support"></a>
 
-- Charles Rice <charles@ufosoftwarellc.com>
-- Carlos Krefft <carlos@krefft.org>
-- Keegan Skeate <keegan@cannlytics.com>
-- Michael Pilosov <https://www.mathematicalmichael.com>
+Cannlytics is made available with ❤️ and <a href="https://opencollective.com/cannlytics-company">your good will</a>. Please consider making a contribution to keep the good work coming 🚢
 
-## License <a name="license"></a>
+🥞 Bitcoin donation address: 34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6
 
-**Cannlytics** Copyright (©) 2020-2021 Cannlytics and Cannlytics Contributors.
+## 🏛️ License <a name="license"></a>
 
-[MIT License](https://opensource.org/licenses/MIT)
+```
+Copyright (c) 2021 Cannlytics and Cannlytics Contributors
 
-Made with 🧡 and <a href="https://opencollective.com/cannlytics-company">your good will</a>.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
