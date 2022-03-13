@@ -112,5 +112,17 @@ MANIFEST
 # Testing
 tmp/
 
-# firebase
+# Ignore Firebase cahce.
 *.cache
+
+# Ignore VS Code settings.
+.vscode/*
+
+# Ignore Webpack bundles.
+console/static/console/bundles/*
+website/static/website/bundles/*
+*webpack-stats.json
+
+# Ignore local copy of cannlytics.
+# cannlytics/*
+/public/static/*
