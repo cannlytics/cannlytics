@@ -1,7 +1,7 @@
 # <img height="32" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-darkgreen.svg)](https://opensource.org/licenses/MIT)
-![version](https://img.shields.io/badge/version-0.0.9-darkgreen)
+![version](https://img.shields.io/badge/version-0.0.11-darkgreen)
 
 Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software designed to make your data and information accessible. Cannlytics makes cannabis analysis **simple** and **easy** through data accessibility. We believe that everyone in the cannabis industry should be able to access rich, valuable data quickly and easily and that you will be better off for it. This documentation covers the Cannlytics architecture and how to build, develop, and publish the Cannlytics platform. You can view the platform live at <https://console.cannlytics.com> and the documentation at <https://docs.cannlytics.com>.
 
@@ -27,11 +27,7 @@ Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software de
 
 ## 🐱‍👓 Introduction <a name="introduction"></a>
 
-The `cannlytics` package is the core module implementing cannabis analytics logic. The `cannlytics` module handles [database interactions](#data), [file management](#storage), [authentication and authorization](#authentication), traceability, data importing and exporting, and the logic for all workflows, such as certificate creation, item transfers, and publishing results. The `api` is the interface between the user application and the cannabis analytics logic of `cannlytics`. The `console` is the user application where user's can interface with the infrastructure, such as the database, and utilize the cannabis analytics logic. The `docs` provide information about the project and the `website` provides people with information about cannabis analytics. You can test the [console](https://console.cannlytics.com) with the following credentials.
-
-Email: test@cannlytics.com
-
-Password: dontpanic
+The `cannlytics` package is the core module implementing cannabis analytics logic. The `cannlytics` module handles [database interactions](#data), [file management](#storage), [authentication and authorization](#authentication), traceability, data importing and exporting, and the logic for all workflows, such as certificate creation, item transfers, and publishing results. The `api` is the interface between the user application and the cannabis analytics logic of `cannlytics`. The `console` is the user application where user's can interface with the infrastructure, such as the database, and utilize the cannabis analytics logic. The `docs` provide information about the project and the `website` provides people with information about cannabis analytics.
 
 ## 🌱 Installation <a name="installation"></a>
 
@@ -146,6 +142,18 @@ Cannlytics is built and depends on the following software and services, so you w
 * [Gimp](https://www.gimp.org/about/)
 * [Inkscape](https://inkscape.org/about/)
 
+Cannlytics is built and tested with Python 3.9 and above. We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/index.html) if you are developing Cannlytics. You can then create a virtual environment to test, develop, and use the Cannlytics Console in isolation and in a reproducible manner. After installing Anaconda, you can open a terminal and run the following commands to create a ready-to-go environment.
+
+```bash
+conda create --name cannlytics python=3.9
+conda activate cannlytics
+pip install -r config/all-requirements.txt
+python manage.py migrate
+npm install
+```
+
+You are now ready to develop. Note that `python manage.py migrate` creates a new `db.sqlite3` file if you do not have one already.
+
 ## 🏗️ Architecture <a name="architecture"></a>
 
 Cannlytics is built with [Python](https://www.python.org/) and leverages the [Django](https://www.djangoproject.com/) framework. Cannlytics utilizes [Firebase](https://firebase.google.com/) for user authentication with [Firebase Authentication](https://firebase.google.com/docs/auth), a [Firestore](https://firebase.google.com/docs/firestore) NoSQL database for real-time data management, [Firebase Storage](https://firebase.google.com/docs/storage) for file storage, and hosted with [Firebase Hosting](https://firebase.google.com/docs/hosting). Cannlytics uses a number of [Google Cloud](https://console.cloud.google.com/) backend services, including:
@@ -159,11 +167,11 @@ Cannlytics is built with [Python](https://www.python.org/) and leverages the [Dj
 
 Cannlytics generally follows a model-template-view (MTV) architectural pattern, where:
 
-* The **model** is Django, the engine that sends requests to views.
-* The **views** are Python functions that describe the data to be presented.
-* The **templates** are Django HTML files that describe how the data is presented.
+- The **model** is Django, `cannlytics`, and all engine components, such as JavaScript and CSS, that contain the logic of the application, which is provided to the views.
+- The **templates** are Django HTML files that describe the display and how data are presented.
+- The **views** are Python functions that control the model's logic, specify and provide data to templates, and manage user requests.
 
-Cannlytics favors a [domain-style code structure](https://stackoverflow.com/questions/40233657/ddd-what-is-proper-code-structure) for apps and material that will be edited frequently and a [ducks-style code structure](https://www.etatvasoft.com/insights/react-design-patterns-and-structures-of-redux-and-flux/) for concepts within the apps. Ducks 🦆 can inherit properties if needed and are encouraged to be individualized and self-contained as possible. The architecture of the Cannlytics app is as follows.
+Cannlytics favors a [domain-style code structure](https://stackoverflow.com/questions/40233657/ddd-what-is-proper-code-structure) for apps and material that will be edited frequently, separating Python views, HTML templates, and Javascript/CSS assets, and a [ducks-style code structure](https://www.etatvasoft.com/insights/react-design-patterns-and-structures-of-redux-and-flux/) for concepts within the apps, grouping dependencies required for a specific feature. 🦆 Ducks can inherit properties if needed, but are encouraged to be individualized and as self-contained as possible. The architecture of the Cannlytics app is as follows.
 
 ```bash
 ├── .admin
@@ -227,7 +235,7 @@ Cannlytics favors a [domain-style code structure](https://stackoverflow.com/ques
 Development can happen in many avenues. Frequent, small scope pull requests are encouraged. Any contribution, even if it needs future polishing, helps build the project and advance the field of cannabis analytics. In general;
 
 1. [Create a fork](https://docs.github.com/en/github/getting-started-with-github/quickstart/fork-a-repo) of the repository.
-2. Work on a solution for your most-pressing problem.
+2. Work on a solution for your most-pressing problem. Be creative.
 3. [Create a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) for your changes to be reviewed and merged into the project upon approval or for you to receive feedback on how your changes can be approved.
 
 The simplest way to run the app is to open a command line from the project's root directory and run:
@@ -344,7 +352,7 @@ Templates are Django HTML files that describe how the data is presented. Default
 
 ### Style <a name="style"></a>
 
-Style distinguishes one site from another. You are free and encouraged to modify the style to create a site that is uniquely yours. [Bootstrap](https://getbootstrap.com/docs/4.5/getting-started/introduction/) is used for styling templates. You can install Bootstrap with:
+Style distinguishes one site from another. You are free and encouraged to modify the style to create a site that is uniquely yours. [Bootstrap 5](https://getbootstrap.com/docs/5.0/getting-started/introduction/) is used for styling templates. You can install Bootstrap with:
 
 ```shell
 npm install bootstrap
@@ -353,24 +361,31 @@ npm install style-loader --save
 
 The main Cannlytics colors are:
 
-* Cannlytics Orange: #ff5733
-* Cannlytics Light Orange: #ffa600
-* Cannlytics Dark Orange: #e53a23
-* Cannlytics Green: #45B649
-* Cannlytics Light Green: #96e6a1
-* Cannlytics Dark Green: #3f7f34
-* Cannlytics Darkest Green: #104607
+| Color Name | Hex |
+|------|-----|
+| Cannlytics Orange | `#ff5733` |
+| Cannlytics Light Orange | `#ffa600` |
+| Cannlytics Dark Orange | `#e53a23` |
+| Cannlytics Green | `#45B649` |
+| Cannlytics Light Green | `#96e6a1` |
+| Cannlytics Dark Green | `#3f7f34` |
+| Cannlytics Darkest Green | `#104607` |
 
 The main Cannlytics fonts are:
 
-* [Libre Franklin (Headlines)](https://fonts.google.com/specimen/Libre+Franklin)
-* [Libre Baskerville (Body)](https://fonts.google.com/specimen/Libre+Baskerville)
-* [Montserrat](https://fonts.google.com/specimen/Montserrat?query=Montserrat)
+| Font | URL |
+|------|-----|
+| Libre Franklin (Headlines) | <https://fonts.google.com/specimen/Libre+Franklin> |
+| Libre Baskerville (Body) | <(https://fonts.google.com/specimen/Libre+Baskerville> |
+| Montserrat | <https://fonts.google.com/specimen/Montserrat?query=Montserrat> |
 
 Useful open source icon sets include:
 
-- [Feather Icons](https://feathericons.com/)
-- [Material Icons](https://fonts.google.com/icons)
+| Icons | URL |
+|-------|-----|
+| Feather Icons | <https://feathericons.com/> |
+| Material Icons | <https://fonts.google.com/icons> |
+| OpenMoji | <https://openmoji.org/> |
 
 
 ### Text Material <a name="text"></a>
@@ -489,9 +504,13 @@ Contributions are always welcome! You are encouraged to submit issues, functiona
 
 ## ❤️ Support <a name="support"></a>
 
-Cannlytics is made available with ❤️ and <a href="https://opencollective.com/cannlytics-company">your good will</a>. Please consider making a contribution to keep the good work coming 🚢
+Cannlytics is made available with ❤️ and <a href="https://opencollective.com/cannlytics-company">your good will</a>. Please consider making a contribution to help us continue crafting useful tools and data pipelines for you.
 
-🥞 Bitcoin donation address: 34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6
+| | |
+|-|-|
+| 💸 PayPal Donation | <form action="https://www.paypal.com/donate" method="post" target="_top"><input type="hidden" name="hosted_button_id" value="SSB85GMSZB6UG" /><input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" /><img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" /></form> |
+| 🪙 Bitcoin donation address| 34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6 |
+| ⚡ Ethereum donation address | 0x8997cA09B3FAe2ce4039E295A5269cf4ae7a0BA5 |
 
 ## 🏛️ License <a name="license"></a>
 

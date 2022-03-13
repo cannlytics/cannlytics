@@ -13,6 +13,12 @@
   },
   "files.exclude": {
     "**/__init__.py": false,
+    "**/__pycache__": true,
+    "**/tmp": true,
+    "**/node_modules": true,
+    "db.sqlite3": true,
+    "package-lock.json": true,
+    "LICENSE": true,
   },
   "git.countBadge": "off",
   "git.enabled": true,
@@ -155,6 +161,7 @@
     "plex",
     "popperjs",
     "postgres",
+    "precss",
     "progressbar",
     "projectnum",
     "pubspec",
@@ -166,6 +173,7 @@
     "pytest",
     "pythonpath",
     "pythonw",
+    "quickbooks",
     "quickstart",
     "reauth",
     "repos",
@@ -210,10 +218,5 @@
     "xlsxwriter",
     "xlwings"
   ],
-  "yaml.customTags": [
-    "!ref"
-  ],
-  "npm-scripts.showStartNotification": false,
   "todo-tree.tree.showBadges": false,
-  "python.pythonPath": "C:\\Anaconda\\python.exe"
 }

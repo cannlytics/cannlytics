@@ -13,7 +13,7 @@
     },
     {
       "target": "production",
-      "public": "public",
+      "public": "public/console",
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -46,7 +46,7 @@
     },
     {
       "target": "dev",
-      "public": "public",
+      "public": "public/console",
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -58,6 +58,40 @@
           "source": "**",
           "run": {
             "serviceId": "cannlytics-lims",
+            "region": "us-central1"
+          }
+        }
+      ]
+    },
+    {
+      "target": "website",
+      "public": "public/website",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**",
+        "**/development/**"
+      ],
+      "appAssociation": "AUTO",
+      "rewrites": [
+        {
+          "source": "!/sitemap",
+          "run": {
+            "serviceId": "cannlytics-website",
+            "region": "us-central1"
+          }
+        },
+        {
+          "source": "!/static",
+          "run": {
+            "serviceId": "cannlytics-website",
+            "region": "us-central1"
+          }
+        },
+        {
+          "source": "**",
+          "run": {
+            "serviceId": "cannlytics-website",
             "region": "us-central1"
           }
         }

@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<!--
+  Massachusetts (MA) Data Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 9/16/2021
+  Updated: 1/20/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Massachusetts Data | Cannlytics{% endblock %}
+{% block material %}
+
+<!-- Banner -->
+<!-- Optional Suggest (upload) image button -->
+{% include "website/components/heros/hero_banner.html" with
+  title='Massachusetts Data'
+  description='Explore public cannabis data available for Massachusetts.'
+  background_image=''
+  image_url=' '
+  only
+%}
+
+<!-- Title
+- title (or name)
+- updated_at
+- description
+- Link to collection algorithm
+-->
+
+<!-- Charts:
+- Sales by product type
+- Licensees (table)
+- Licensees by license type
+- Monthly average price per ounce (optional: by specific quantity)
+- Production series total employees, total plants, etc.
+-->
+
+<!-- Data Blocks
+- Current price <units>: monthly_avg_price_per_punce
+- GDP from Cannabis (2022)
+- Cannabis GDP per Capita (2022)
+- Total licensees
+- Current, last month, and year-to-date sales.
+- population
+- population_source_code
+- population_source
+- licensees_per_capita
+- total_licensees
+- forecast_2022
+-->
+
+<!-- TODO: Discussion -->
+
+
+<!-- TODO: Data Sources -->
+Data is updated daily at 4:20am EDT.
+<span>Page updated: 1/20/2022</span>
+
+<!-- TODO: Data collection routine link -->
+
+{% endblock material %}
+
+

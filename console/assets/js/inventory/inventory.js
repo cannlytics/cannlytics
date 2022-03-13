@@ -1,15 +1,15 @@
 /**
  * Inventory | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 4/24/2021
+ * Updated: 12/12/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
-
-import { areas } from './areas.js';
 
 export const inventory = {
  
-  ...areas,
+  initialize() {},
  
 };
- 
- 

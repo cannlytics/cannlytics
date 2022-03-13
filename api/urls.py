@@ -1,25 +1,31 @@
 """
 URLs | Cannlytics API
-Author: Keegan Skeate <keegan@cannlytics.com>
+Copyright (c) 2021-2022 Cannlytics
+
+Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/21/2021
-Updated: 7/19/2021
+Updated: 12/30/2021
+License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+
 Description: API URLs to interface with cannabis analytics.
 """
-
-# External imports
+# External imports.
 from django.urls import include, path
-from rest_framework import urlpatterns
+from rest_framework import urlpatterns #pylint: disable=unused-import
 
-# Internal imports
-from api import views
-from api.analytics import analytics
+# Internal imports.
 from api.analyses import analyses
 from api.analytes import analytes
 from api.areas import areas
 from api.auth import auth
+from api.base import base
 from api.certificates import certificates
 from api.contacts import contacts
 from api.data import data
+from api.data.analysis_data import analysis_data
+from api.data.lab_data import lab_data, lab_analyses, lab_logs
+from api.data.regulation_data import regulation_data
+from api.data.state_data import state_data
 from api.instruments import instruments
 from api.inventory import inventory
 from api.invoices import invoices
@@ -32,13 +38,22 @@ from api.settings import settings
 from api.transfers import transfers
 from api.traceability import traceability
 from api.users import users
+from api.waste import waste
 
 app_name = 'api' # pylint: disable=invalid-name
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('analytics', include([
-        path('', analytics.analytics),
+    path('', base.index, name='index'),
+    path('auth', include([
+        path('/create-key', auth.create_api_key),
+        path('/create-pin', auth.create_user_pin),
+        path('/create-signature', auth.create_signature),
+        path('/delete-key', auth.delete_api_key),
+        path('/delete-pin', auth.delete_user_pin),
+        path('/delete-signature', auth.delete_signature),
+        path('/get-keys', auth.get_api_key_hmacs),
+        path('/get-signature', auth.get_signature),
+        path('/verify-pin', auth.verify_user_pin),
     ])),
     path('analyses', include([
         path('', analyses.analyses),
@@ -63,10 +78,15 @@ urlpatterns = [
         path('', contacts.contacts),
         path('/<contact_id>', contacts.contacts),
     ])),
-    # path('data', include([
-    #     path('', data.datasets),
-    #     path('/<state>', data.datasets),
-    # ])),
+    path('data', include([
+        path('', data.datasets),
+        path('/analyses', analysis_data),
+        path('/analyses/<analysis_id', analysis_data),
+        path('/regulations', regulation_data),
+        path('/regulations/<state>', regulation_data),
+        path('/state', state_data),
+        path('/state/<state>', state_data),
+    ])),
     path('people', include([
         path('', contacts.people),
         path('/<person_id>', contacts.people),
@@ -100,9 +120,13 @@ urlpatterns = [
         path('/<user_id>', users.users),
         path('/<user_id>/settings', users.users),
     ])),
+    path('labs', include([
+        path('', lab_data),
+        path('/<license_number>', lab_data),
+        path('/<license_number>/analyses', lab_analyses),
+        path('/<license_number>/logs', lab_logs),
+    ])),
     path('organizations', include([
-        path('', organizations.organizations),
-        path('/labs', organizations.labs),
         path('/<organization_id>', organizations.organizations),
         path('/<organization_id>/settings', organizations.organizations),
         path('/<organization_id>/team', organizations.organization_team),
@@ -155,18 +179,8 @@ urlpatterns = [
         path('/transfers', traceability.transfers),
         path('/transfers/<transfer_id>', traceability.transfers),
     ])),
-    # path('data', include([
-    #     path('/regulations', views.regulations),
-    # ])),
-    path('auth', include([
-        path('/create-key', auth.create_api_key),
-        path('/create-pin', auth.create_user_pin),
-        path('/create-signature', auth.create_signature),
-        path('/delete-key', auth.delete_api_key),
-        path('/delete-pin', auth.delete_user_pin),
-        path('/delete-signature', auth.delete_signature),
-        path('/get-keys', auth.get_api_key_hmacs),
-        path('/get-signature', auth.get_signature),
-        path('/verify-pin', auth.verify_user_pin),
+    path('waste', include([
+        path('', waste.waste),
+        path('/<waste_item_id>', waste.waste),
     ])),
 ]

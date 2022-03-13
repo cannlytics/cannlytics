@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<!--
+  Lab Analyses Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/24/2021
+  Updated: 1/9/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% load icon %}
+<div class="mt-3 mb-2 d-flex align-items-center justify-content-between">
+      
+  <!-- Header -->
+  <div>
+    <h4 class="fw-bold text-dark mb-0">Common Analyses</h4>
+  </div>
+
+  <!-- Filters -->
+  <div class="d-flex justify-content-end">
+
+    <!-- Download Button -->
+    <button
+      type="button"
+      class="btn btn-sm bg-gradient-green text-nowrap text-white serif ms-2"
+      onclick="cannlytics.testing.downloadAnalysesData()"
+    >
+      Download Data
+    </button>
+
+  </div><!-- End of filters -->
+
+</div><!-- End of options -->
+
+<!-- Under Construction -->
+{% include "website/components/notifications/under_construction.html" %}
+
+<!-- Loading placeholder -->
+<div id="loading-placeholder">
+  {% include "website/components/placeholders/loading_placeholder.html" with
+    height='540px'
+    width='100%'
+    only
+  %}
+</div>
+
+<!-- AG Grid Table -->
+<div id="data-table" class="mb-5 d-none">
+  <div
+    id="analyses-table"
+    class="ag-theme-alpine-dark"
+    style="height:540px; width:100%;"
+  ></div>
+</div>
+
+<!-- JavaScript -->
+{% block page_js %}
+<script>
+  cannlytics.testing.initializeAnalysesTable();
+</script>
+{% endblock page_js %}
+
+</html>

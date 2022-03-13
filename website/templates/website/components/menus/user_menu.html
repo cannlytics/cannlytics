@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<!--
+  User Menu | Cannlytics Website
+  Created: 11/15/2021
+  Updated: 11/28/2021
+-->
+<ul class="navbar-nav align-items-center me-3 requires-auth visually-hidden">
+  <li class="nav-item h6 mb-0">
+    <a
+      class="btn btn-sm bg-gradient-orange text-white text-nowrap me-2 serif"
+      href="https://console.cannlytics.com"
+    >
+      Launch App
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      id="navbarUserMenu"
+      class="nav-link dropdown-toggle py-0"
+      href="#"
+      role="button"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+      aria-label="User Menu"
+    >
+      <img
+        id="user-photo"
+        class="rounded-circle"
+        style="max-width:60px; max-height:60px;"
+        src=""
+        title="User Menu"
+      >
+    </a>
+    <ul
+      id="user-menu"
+      class="dropdown-menu dropdown-menu-end bg-light shadow mx-2"
+      aria-labelledby="navbarUserMenu"
+      style="z-index:10000; right:1rem !important; top:8rem; position: fixed !important;"
+    >
+      <li class="px-3 pt-1">
+        <h5 class="fs-6 serif text-dark" id="user-name"></h5>
+        <h6 class="fs-6"><small class="serif text-secondary" id="user-email"></small></h6>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a
+          class="dropdown-item background-hover"
+          href="{% url 'page' page='account' %}"
+        >
+          <small class="serif">Your account</small>
+        </a>
+      </li>
+      <li>
+        <a
+          class="serif dropdown-item background-hover"
+          href="{% url 'section' page='account' section='password-reset' %}"
+        >
+          <small class="serif">Change your password</small>
+        </a>
+      </li>
+      <li>
+        <a
+          class="serif dropdown-item background-hover"
+          href="{% url 'section' page='account' section='subscription' %}"
+        >
+          <small class="serif">Manage your subscription</small>
+        </a>
+      </li>
+      <li>
+        <a
+          class="serif dropdown-item background-hover"
+          href="{% url 'section' page='account' section='feedback' %}"
+        >
+          <small class="serif">Make a suggestion</small>
+        </a>
+      </li>
+      <!-- Optional: Sign out oddly does no highlight on hover correctly. Worth an optional fix. -->
+      <li>
+        <button
+          class="serif dropdown-item background-hover"
+          onClick="cannlytics.auth.signOut(false);"
+        >
+          <small class="serif ">Sign Out</small>
+        </button>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+</html>

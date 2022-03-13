@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+<!--
+  Data Market Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 10/14/2021
+  Updated: 1/26/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static icon get_env %}
+{% block title %}Data Market | Cannlytics{% endblock %}
+{% block material %}
+
+<!-- Banner -->
+{% include "website/components/heros/hero_banner.html" with
+  title=''
+  description='The one-and-only, open-source<br>cannabis data market.'
+  image_url='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics-data-market-logo.png?alt=media&token=33bec6d2-f428-42a6-b8c3-bf8ded05889d'
+  image_size="200px"
+  only
+%}
+
+<!-- Market -->
+<section class="container mt-3 mb-5">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+
+    <!-- Title -->
+    <h2 id="data-market" class="text-dark serif mb-0">Data Market</h2>
+
+    <!-- Options -->
+    <div class="d-flex align-items-center">
+
+      {% comment %}
+      <!-- TODO: Currency selection -->
+      <select
+        class="app-action form-select form-select-sm btn-sm-light"
+        aria-label="Select currency"
+        style="width:90px;"
+      >
+        <option selected value="usd">USD ($)</option>
+        <option value="btc">GBP (£)</option>
+        <option value="btc">EUR (€)</option>
+        <option value="btc">BTC (₿)</option>
+        <option value="eth">ETH (Ξ)</option>
+      </select>
+      {% endcomment %}
+
+      {% comment %}
+      <!-- TODO: Connect wallet -->
+      <button class="btn btn-sm-light text-nowrap ms-2">
+        {% icon "credit-card" width="16px" height="16px" class="me-1" %}
+        Connect Wallet
+      </button>
+      {% endcomment %}
+
+      <!-- TODO: Implement publish data -->
+      <a
+        class="btn btn-sm-light btn-md-light ms-2 serif text-nowrap"
+        href="{% url 'section' 'data' 'publish' %}"
+      >
+        {% icon "upload-cloud" width="16px" height="16px" class="me-1" %}
+        Publish Data
+      </a>
+
+      <!-- Link to GitHub -->
+      <a
+        class="btn btn-sm-light btn-md-light ms-2 serif text-nowrap"
+        href="https://github.com/cannlytics/cannlytics-ai"
+      >
+        {% icon "github" width="16px" height="16px" class="me-1" %}
+        Browse Algorithms
+      </a>
+
+      {% comment %}
+      <!-- TODO: Implement checkout -->
+      <button class="btn btn-sm-light text-nowrap ms-2 d-flex align-items-center">
+        {% icon "shopping-cart" width="16px" height="16px" %}
+        <span
+          class="badge rounded-pill bg-secondary mx-2"
+          id="shopping-cart-count"
+        >0</span>
+        Checkout
+      </button>
+      {% endcomment %}
+
+    </div>
+  </div>
+
+  <!-- Grid of Datasets -->
+  <!-- TODO: Implement keyword filter -->
+  {% include "website/pages/data/datasets.html" with items=datasets %}
+  
+
+  <!-- Options -->
+  {% comment %} <div class="mt-3 d-flex align-items-center justify-content-between">
+    
+    <!-- TODO: Tabs with Stats -->
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a
+          class="nav-link fs-6 {% if request.GET.table == 'datasets' or not request.GET.table %}active{% endif %}"
+          href="{% url 'section' page='data' section='market' %}"
+        >
+          <small class="serif"><span id="total_datasets"></span>Data Sets</small>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link fs-6 {% if request.GET.table == 'profiles' %}active{% endif %}"
+          aria-current="page"
+          href="./?table=profiles"
+        >
+          <small class="serif"><span id="total_profiles"></span> Authors</small>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Filters -->
+    <div class="d-flex align-items-center">
+
+      <!-- Sort select -->
+      <select
+        class="form-select form-select-sm btn-sm-light me-2"
+        aria-label="Default select example"
+        style="width:150px;"
+      >
+        <option selected value="date-new">Date Listed: Newest</option>
+        <option value="date-old">Date Listed: Oldest</option>
+        <option value="price-high">Price: Highest</option>
+        <option value="price-low">Price: Lowest</option>
+      </select>
+
+      <!-- Currency select -->
+      <select
+        class="form-select form-select-sm btn-sm-light"
+        aria-label="Select currency"
+      >
+        <option selected value="usd">USD ($)</option>
+        <option value="btc">BTC (₿)</option>
+        <option value="eth">ETH (Ξ)</option>
+      </select>
+
+    </div><!-- End of filters -->
+
+  </div><!-- End of options --> {% endcomment %}
+
+  {% comment %}
+  <div class="d-flex">
+
+    <!-- TODO: Sidebar options -->
+    <div
+      class="d-flex flex-column flex-shrink-0 p-3 text-dark border rounded"
+      style="width: 280px;"
+    >
+
+      <h2>Filters</h2>
+
+      <!-- Price range -->
+
+      <!-- Type -->
+
+      <!-- Availability -->
+
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
+        <label class="form-check-label" for="defaultCheck1">
+          Default checkbox
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="defaultCheck2" disabled>
+        <label class="form-check-label" for="defaultCheck2">
+          Disabled checkbox
+        </label>
+      </div>
+      <hr>
+      <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+          <strong>mdo</strong>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+          <li><a class="dropdown-item" href="#">New project...</a></li>
+          <li><a class="dropdown-item" href="#">Settings</a></li>
+          <li><a class="dropdown-item" href="#">Profile</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#">Sign out</a></li>
+        </ul>
+      </div>
+    </div><!-- End of sidebar -->
+
+    <!-- Grid -->
+    <section class="w-100">
+    {% include "website/pages/data/data_components/market_datasets.html" with items=datasets %}
+    </section>
+
+  </div><!-- End of sidepanel --> {% endcomment %}
+
+
+  <!-- TODO: Table of high liquidity data sets -->
+  {% comment %} <h5 class="sans-serif text-dark fs-5 mt-5 mb-3">Highest Liquidity</h5> {% endcomment %}
+
+
+  <!-- TODO: Table of recently published data sets -->
+  {% comment %} <h5 class="sans-serif text-dark fs-5 mt-5 mb-3">Recently Published</h5> {% endcomment %}
+
+
+  <!-- TODO: Data market stats -->
+
+
+  <!-- About Open Data -->
+  {% include "website/components/content/introduction.html" with
+    title="Open Data"
+    description='All of our data collection methods are <a href="https://github.com/cannlytics/cannlytics-ai">open source</a>. You are welcome to use our tools to compile the datasets for yourself. We simply make the data available at a nominal cost because we think that we will still save you time and money and provide you with net value from ease and convinience. If you have time, know-how, a good internet connection, sufficient computer storage and memory, and are up to process the data yourself, then you can probably make short work of collecting the data too. Please enjoy the rich data. Happy data mining!'
+    action="Request a New Dataset"
+    image_id="gem-emoji"
+    image_ref="website/images/emojies/gem.svg"
+    link="/contact?topic=data"
+  %}
+
+</section>
+
+<!-- Vines -->
+{% include "website/components/art/vines.html" %}
+
+{% endblock material %}

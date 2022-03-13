@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<!--
+  National Realtime Statistics Page | Cannlytics
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 9/25/2021
+  Updated: 11/14/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+
+  TODO:
+    - For each data point list which states are included in the statistic.
+-->
+<section class="container my-5">
+  <h2 class="mb-2 pt-5 serif text-dark">National Real-Time Statistics</h2>
+  <i class="fs-6 serif text-gradient-orange">
+    The one and only source for real-time aggregate cannabis statistics.
+  </i>
+
+  <!-- Market Statistics -->
+  <h4 class="mt-5">Market</h4>
+
+    <h5>Total Cannabis Licensees: #</h5>
+    <h5>Current Month Total Sales: #</h5>
+    <h5>Year to date total sales: #</h5>
+    <h5>2021 Forecasted Sales: #</h5>
+
+    <h5>Total registered patients</h5>
+
+    <h5>Total Licensees by License Type</h5>
+
+    <h5>Total employees</h5>
+
+    <!-- TODO: Chart | Timeline of monthly number of licensees -->
+
+    <!-- TODO: Chart | Timeline of monthly total sales -->
+
+
+  <!-- Cannabinoids Statistics -->
+  <h4 class="mt-5">Cannabinoids</h4>
+
+    <!-- TODO: Sample Type Select-->
+
+    <!-- National YTD Avg. Total THC -->
+    <!-- National YTD Avg. Total CBD -->
+    <!-- National YTD Avg. Total Cannabinoids -->
+
+    <!-- TODO: Chart | Histogram of the Distribution of Analyte Concentrations -->
+
+
+  <!-- Terpenes Statistics -->
+  <h4 class="mt-5">Terpenes</h4>
+
+    <!-- National YTD AVG. | Total Terpenes -->
+    <!-- Sample Type Select -->
+    <!-- Optional dropdown to show the top terpenes -->
+
+
+  <!-- Contaminants Statistics -->
+  <h4 class="mt-5">Contaminants</h4>
+
+    <!-- TODO: A table of contaminants -->
+      <!-- Analysis select -->
+      <!-- Sample Type select -->
+      <!-- YTD or past month or past 3 months or current month -->
+
+      <!-- analyte | avg. limit | avg. failure rate -->
+
+  <!-- TODO: Chart | Scatterplot of concentration to time with a horizontal limit line -->
+
+
+  <!-- Production Statistics -->
+  <h4 class="mt-5">Production</h4>
+
+    <h5>Total Pounds Grown</h5>
+
+    <h5>Total Kilograms Processed</h5>
+
+  <!-- References -->
+  <!-- TODO: Dynamically list data sources -->
+  <h6 class="fs-5 fw-bold mt-5 mb-3">References</h6>
+  <ol>
+    <li class="serif fs-6">
+      <small class="serif">
+        Data source...
+      </small>
+    </li>
+  </ol>
+
+  <!-- Notes (Optional: Load notes from Firestore or state?) -->
+  <h6 class="fs-5 fw-bold mt-5 mb-3">Notes</h6>
+  <p class="fs-6">
+    <small>
+      Aggregate statistics are calculated from available data only and may not be representative of actual values.
+    </small>
+  </p>
+
+  <!-- How-to-cite -->
+  <h6 class="fs-5 fw-bold mt-5 mb-3">Suggested Citation</h6>
+  <p class="fs-6">
+    <small>Public cannabis data retrieved from Cannlytics; https://cannlytics.com/data, {% now "jS \o\f F, Y" %}.</small>
+  </p>
+
+</section>
+
+
+  <!-- TODO: Load data in realtime from Firestore! -->
+  <script>
+
+    console.log('Get da data!!!');
+    // Get datasets from Firestore.
+
+    // Stream statistics from Firestore.
+
+  </script>
+
+</html>

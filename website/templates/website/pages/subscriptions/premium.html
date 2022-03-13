@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<!--
+  Premium Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 11/26/2021
+  Updated: 11/26/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load get_env %}
+{% block title %}Premium | Cannlytics{% endblock %}
+{% block material %}
+<div class="premium">
+
+  <!-- Header -->
+  {% include "website/components/heros/hero_banner.html" with
+    title='Premium'
+    description="Get your premium Cannlytics loot now."
+    image_url="website/images/illustrations/multi-tone/notes.svg"
+    only
+  %}
+
+</div>
+{% endblock material %}
+</html>

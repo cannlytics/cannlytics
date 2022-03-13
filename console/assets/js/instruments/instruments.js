@@ -1,14 +1,15 @@
 /**
  * Instruments JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 6/9/2021
  * Updated: 6/9/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
 
  export const instruments = {
 
-  initialize() {
-    console.log('Initializing instruments!')
-  }
+  initialize() {},
 
 }

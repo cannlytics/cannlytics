@@ -1,9 +1,12 @@
-/*--------------------------------------------------------------------------
-  Cannlytics Console Style
-  Author: Keegan Skeate <keegan@cannlytics.com>
-  Created: 11/26/2020
-  Updated: 5/5/2021
----------------------------------------------------------------------------*/
+/**
+ * Cannlytics Console Style | Cannlytics Console
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
+ * Created: 11/26/2020
+ * Updated: 12/7/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+ */
 
 body {
   font-size: .875rem;
@@ -210,9 +213,12 @@ body.dark .tooltip-inner {
   Navigation
 ---------------------------------------------------------------------------*/
 
-.navbar {
+.navbar,
+body:not(.dark) #sidebar-menu,
+body:not(.dark) #footer,
+body:not(.dark) #console {
   background-color: #fff !important;
-  border-color: #bbbbbb !important;
+  border-color: #6c757d !important;
 }
 body.dark .navbar {
   background-color: rgba(0, 0, 0, .5) !important;
@@ -222,18 +228,7 @@ body.dark .navbar {
   padding-top: .75rem;
   padding-bottom: .75rem;
   font-size: 1rem;
-  /* background-color: rgba(0, 0, 0, .25); */
-  /* box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25); */
 }
-/* .navbar .navbar-toggler {
-  top: .25rem;
-  left: 0rem;
-} */
-/* .navbar .form-control {
-  padding: .75rem 1rem;
-  border-width: 0;
-  border-radius: 0;
-} */
 .form-control-dark {
   color: #fff;
   background-color: rgba(255, 255, 255, .1);
@@ -268,10 +263,10 @@ body.dark .navbar {
   background-color: #111217 !important;
 }
 
-body:not(.dark) .border-bottom,
-body:not(.dark) .border-top {
-  border-color: #bbbbbb !important;
-}
+// body:not(.dark) .border-bottom,
+// body:not(.dark) .border-top {
+//   border-color: #bbbbbb !important;
+// }
 
 /*--------------------------------------------------------------------------
   Search
@@ -360,9 +355,6 @@ body.dark .nav-search-form .feather:hover {
 ---------------------------------------------------------------------------*/
 
 .breadcrumb-item+.breadcrumb-item::before {
-  /* float: left;
-  padding-right: .5rem;
-  color: #6c757d; */
   content: ">";
 }
 .breadcrumb-item,
@@ -388,16 +380,18 @@ body.dark .breadcrumb-item .action {
 
 /*--------------------------------------------------------------------------
   Sidebar
+  Optional: min-height likely needs to be applied to child element. See:
+  https://stackoverflow.com/questions/27221332/bootstrap-collapse-animation-not-smooth/28375912
 ---------------------------------------------------------------------------*/
 
 .sidebar {
-  /* position: fixed; */
   top: 0;
   bottom: 0;
   left: 0;
   z-index: 100; /* Behind the navbar */
   padding: 48px 0 0; /* Height of navbar */
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+  // box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+  box-shadow: inset -1px 0 0 #6c757d66;
 }
 @media (max-width: 767.98px) {
   .sidebar {
@@ -473,7 +467,6 @@ main .action {
 body.dark main .action {
   color: #50fa7b !important;
 }
-/* TODO: Style primary buttons */
 body.dark .btn-light {
   background-color: #333644;
   border-color: #495C65;
@@ -506,12 +499,6 @@ body.dark .btn-light:hover {
   width: 70px;
   height: 70px;
 }
-/* .feature-icon:hover {
-  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .3), 0 2px 6px 2px rgba(60, 64, 67,.15);
-}
-body.dark .feature-icon:hover {
-  box-shadow: 0 1px 2px 0 rgba(108, 112, 130, .3), 0 2px 6px 2px rgba(108, 112, 130, .15);
-} */
 body.dark .feature-icon {
   background-color: rgba(191, 149, 249, .1);
 }
@@ -530,9 +517,10 @@ body.dark .list-group-item-action:hover {
   font-weight: 700;
 }
 
-/*------------------------------------------------
+/*--------------------------------------------------------------------------
   Tables
--------------------------------------------------- */
+---------------------------------------------------------------------------*/
+
 body:not(.dark) .ag-row-hover {
   background-color: #dfffdf !important;
 }

@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<!--
+  Get Started Stepper | Cannlytics Console
+  Created: 12/16/2021
+  Updated: 12/16/2021
+  Params:
+    step_value
+    step
+-->
+<style>
+  .steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .step-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background-color: #ccc;
+      transition: .4s;
+  }
+  .step-button[aria-expanded="true"] {
+      width: 50px;
+      height: 50px;
+      background-color: #45B649;
+      color: #fff;
+  }
+  .done {
+      background-color: #45B649;
+      color: #fff;
+  }
+  .step-item {
+      z-index: 10;
+      text-align: center;
+  }
+  #progress {
+    -webkit-appearance:none;
+      position: absolute;
+      width: 95%;
+      z-index: 5;
+      height: 10px;
+      margin-left: 18px;
+      margin-bottom: 18px;
+  }
+  #progress::-webkit-progress-value {
+      background-color: #45B649;
+      transition: .5s ease;
+  }
+  #progress::-webkit-progress-bar {
+      background-color: #ccc;
+  
+  }
+</style>
+<div class="steps d-md-flex d-none my-2">
+  <progress id="progress" value={{ step_value }} max=100 ></progress>
+  <div class="step-item">
+    <button
+      class="step-button text-center"
+      onclick="window.location = `${window.location.origin}/get-started/profile`;"
+      aria-expanded="true"
+    >
+      1
+    </button>
+    <div class="step-title text-dark mt-1">
+      Account
+    </div>
+  </div>
+  <div class="step-item">
+    <button
+      class="step-button text-center"
+      onclick="window.location = `${window.location.origin}/get-started/organization`;"
+      aria-expanded="{% if step >= 2 %}true{% else %}false{% endif %}"
+    >
+      2
+  </button>
+    <div class="step-title text-dark mt-1">
+      Organization
+    </div>
+  </div>
+  <div class="step-item">
+    <button
+      class="step-button text-center"
+      onclick="window.location = `${window.location.origin}/get-started/support`;"
+      aria-expanded="{% if step >= 3 %}true{% else %}false{% endif %}"
+    >
+      3
+  </button>
+    <div class="step-title text-dark mt-1">
+      Support
+    </div>
+  </div>
+</div>
+</html>

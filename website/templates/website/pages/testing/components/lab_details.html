@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+<!--
+  Lab Details Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/24/2021
+  Updated: 1/9/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+<form>
+  
+  <!-- Title and Options -->
+  <div class="d-flex justify-content-between mt-3">
+    <div class="d-flex align-items-center mb-4 pb-2">
+      <h4 class="fw-bold mb-0">
+        <a
+          class="serif text-dark"
+          href="{% url 'section' page='testing' section='labs' %}"
+        >
+          Labs
+        </a>
+      </h4>
+      <h4 class="fw-bold serif text-dark mb-0 text-secondary mx-2">/</h4>
+      <h4 class="fw-bold serif text-dark mb-0">
+        {% if lab.name %}{{ lab.name }}{% else %}New{% endif %}
+      </h4>
+      {% if lab.status == "Suspended" %}
+        <span class="badge rounded-pill bg-danger ms-2">{{ lab.status }}</span>
+      {% elif lab.status == "Active" %}
+        <span class="badge rounded-pill bg-success ms-2">{{ lab.status }}</span>
+      {% else %}
+        <span class="badge rounded-pill bg-secondary ms-2">{{ lab.status }}</span>
+      {% endif %}
+    </div>
+    <!-- Optional: Add download lab data button -->
+    {% comment %} <button
+      id="download-button"
+      class="btn btn-set-width btn-sm-light btn-md-light serif me-2"
+      onclick="cannlytics.testing.downloadLabData();"
+      type="button"
+    >
+      Download
+    </button> {% endcomment %}
+    <div>
+      <button
+        id="cancel-button"
+        class="btn btn-set-width btn-sm-light btn-md-light serif visually-hidden me-2"
+        onclick="cannlytics.testing.toggleEditLab(false);"
+        type="button"
+      >
+        Cancel
+      </button>
+      <button
+        id="save-button"
+        class="btn btn-set-width btn-sm bg-gradient-green serif text-white visually-hidden me-2"
+        type="submit"
+      >
+        Submit
+      </button>
+      <button
+        id="edit-button"
+        class="btn btn-sm bg-gradient-green text-white serif"
+        onclick="{% if user %}cannlytics.testing.toggleEditLab(true){% else %}cannlytics.ui.showModal('sign-in-dialog'){% endif %};"
+        type="button"
+      >
+        Suggest an Edit
+      </button>
+    </div>
+  </div><!-- End of options -->
+  
+  <!-- Fields -->
+  <div class="row mb-5">
+
+    <!-- User image -->
+    <div class="col-md-6 order-md-2">
+      <!-- TODO: Upload image button -->
+      <img
+        src="{{ lab.image_url }}"
+        style="max-height:200px; max-width:400px;"
+        class="mx-2 mb-2"
+      >
+      <div class="my-md-3">
+        <textarea
+          id="input-description"
+          class="form-control form-control-sm form-control-plaintext"
+          placeholder="Start a lab description..."
+          rows="10"
+        >{{ lab.description }}</textarea>
+      </div>
+    </div>
+
+    <!-- Account fields -->
+    <div class="col-md-6">
+      {% for item in fields %}        
+        <div class="row mb-1">
+
+          <!-- Field label -->
+          <label
+            for="input-{{ item.key }}"
+            class="col col-form-label col-form-label-sm fw-bold"
+          >
+            {{ item.title }}
+          </label>
+
+          <!-- Field input -->
+          <div class="col-sm-9">
+            {% if item.type == "textarea" %}
+              <textarea
+                id="input-{{ item.key }}"
+                class="form-control form-control-sm form-control-plaintext"
+                name="{{item.key}}"
+                rows="3"
+                readonly
+              >{{ lab|dict_key:item.key }}</textarea>
+            <!-- TODO: Handle checkboxes -->
+            {% elif item.type == "color" %}
+              <input
+                id="input-{{ item.key }}"
+                class="form-control form-control-color"
+                name="{{item.key}}"
+                value="{{ lab|dict_key:item.key }}"
+                title="Pick a color"
+                type="color"
+                disabled
+              >
+            {% else %}
+              <input
+                id="input-{{ item.key }}"
+                class="form-control form-control-sm form-control-plaintext"
+                name="{{item.key}}"
+                spellcheck="false"
+                type="{{ item.type }}"
+                value="{{ lab|dict_key:item.key }}"
+                autocomplete="off"
+                readonly
+              >
+            {% endif %}
+          </div>
+
+        </div>
+      {% endfor %}
+
+    </div><!-- End of account fields -->
+
+  </div>
+
+</form><!-- End of lab details -->
+
+<!-- Claim lab -->
+{% if lab.name %}
+<div class="markdown mt-5 pt-5">
+  <a
+    class="text-dark"
+    href="https://console.cannlytics.com/account/sign-in"
+  >
+    Is this your lab? Claim and edit now &rarr;
+  </a>
+</div>
+{% endif %}
+
+<!-- Details JavaScript -->
+<script>
+  cannlytics.testing.initializeLabDetails();
+  {% if not lab.name %}
+    cannlytics.testing.toggleEditLab(true);
+  {% endif %}
+</script>
+
+</html>

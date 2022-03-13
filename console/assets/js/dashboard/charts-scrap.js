@@ -9,7 +9,6 @@
 // },
 
 // drawHeatmap() {
-//   console.log('Drawing heatmap');
 //   // Optional: Get beginning and end of year. (6-month if mobile)
 //   let data = {
 //     dataPoints: {
@@ -59,7 +58,6 @@
 
 
 // drawTimeseries() {
-//   console.log('Drawing timeseries!');
 //   // TODO: Get data dynamically
 //   new frappe.Chart("#timeseries", {
 //     // or DOM element

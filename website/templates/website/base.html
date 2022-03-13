@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en-US">
+<!--
+  Base Template | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/7/2021
+  Updated: 12/28/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% load static %}
+<head>
+  <meta charset="utf-8">
+  <meta name="theme-color" content="#281e52"/>
+  <meta name="description" content="Superpower your lab with open-source cannabis analytics made with love.">
+  <meta name="author" content="Keegan Skeate">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Icons and Manifest -->
+  <link rel="icon" href="{% static 'images/logos/favicon.ico' %}">
+  <link rel="icon" sizes="32x32" type="image/png" href="{% static 'images/logos/favicon-32x32.png' %}">
+  <link rel="icon" sizes="16x16" type="image/png" href="{% static 'images/logos/favicon-16x16.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static '/images/logos/apple-touch-icon.png' %}">
+  <link rel="mask-icon" color="#e48632" href="{% static '/images/logos/safari-pinned-tab.svg' %}">
+  <link rel="shortcut icon" href="{% static '/images/logos/favicon.ico' %}" type="image/x-icon">
+  
+  <!-- Manifest -->
+  <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+
+  <!-- Title -->
+  <title>{% block title %}Cannlytics{% endblock title %}</title>
+
+  <!-- jQuery -->
+  <!-- Optional: Ween off of jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+
+  <!-- Cannlytics JavaScript and CSS Module -->
+  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{% if DEBUG %}{% now 'U' %}{% else %}{{ APP_VERSION_NUMBER }}{% endif %}"></script>
+
+  <!-- Page-specific stylesheets -->
+  {% block page_css %}{% endblock page_css %}
+
+</head>
+
+<!-- Body -->
+<body class="base">
+
+  <!-- Page -->
+  <div id="page">{% block page %}{% endblock page %}</div>
+
+  <!-- Website JavaScript -->
+  <script>
+    cannlytics.website.initialize();
+  </script>
+
+  <!-- Login Dialog -->
+  {% include "website/components/dialogs/sign_in_dialog.html" %}
+
+  <!-- Cookie Notification -->
+  {% include "website/components/dialogs/cookie_notification.html" %}
+
+  <!-- General Notifications -->
+  {% include "website/components/notifications/notification_toast.html" %}
+
+  <!-- Page-specific JavaScript -->
+  {% block page_js %}{% endblock page_js %}
+
+</body>
+
+</html>

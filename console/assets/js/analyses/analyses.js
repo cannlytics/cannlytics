@@ -1,32 +1,30 @@
 /**
  * Analysis JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate
  * Created: 12/3/2020
  * Updated: 6/12/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
 // import Chart from 'chart.js';
 // import "chartjs-chart-box-and-violin-plot/build/Chart.BoxPlot.js";
 
 import { api } from '../api/api.js';
 
-
 function randomValues(count, min, max) {
   const delta = max - min;
   return Array.from({length: count}).map(() => Math.random() * delta + min);
 }
 
-
 export const analyses = {
 
-
   initialize() {
-    console.log('TODO: Initialize analyses...!')
     // this.drawGraphs();
   },
 
-
   drawAnalysesTable() {
-    /*
+    /**
      * Render the analyses table.
      */
 
@@ -64,7 +62,6 @@ export const analyses = {
     //}
 
   },
-
 
   drawGraphs() {
     var ctx = document.getElementById('graph-concentrations');
@@ -121,18 +118,16 @@ export const analyses = {
     }]
   },
 
-
   getAnalyses() {
-    /*
+    /**
      * Get all analyses for an organization.
      */
     // TODO: Get the data and fill it into an AG Grid table!
     api.getAnalyses(data);
   },
 
-
   saveAnalysis() {
-    /*
+    /**
      * Create or update an analysis.
      */
     // TODO: Serialize the analysis data!
@@ -140,9 +135,8 @@ export const analyses = {
     api.createAnalyses(data);
   },
 
-
   deleteAnalysis() {
-    /*
+    /**
      * Delete an analysis.
      */
     // TODO: Serialize the analysis data!
@@ -150,9 +144,8 @@ export const analyses = {
     api.createAnalyses(data);
   },
 
-
   exportAnalyses() {
-    /*
+    /**
      * Export all Analyses to Excel.
      */
     // TODO: Serialize the analysis data!
@@ -160,17 +153,15 @@ export const analyses = {
     api.createAnalyses(data);
   },
 
-
   importAnalyses() {
-    /*
+    /**
      * Import a data file (.csv or .xlsx) of data.
      */
     // TODO:
   },
 
-
   exportAnalytes() {
-    /*
+    /**
      * Export all data to Excel.
      */
     // TODO: Serialize the analysis data!
@@ -178,13 +169,11 @@ export const analyses = {
     api.createAnalyses(data);
   },
 
-
   importAnalytes() {
-    /*
+    /**
      * Import a data file (.csv or .xlsx) of data.
      */
     // TODO:
   },
-
 
 }

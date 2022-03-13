@@ -1,9 +1,13 @@
 """
 Inventory Views | Cannlytics API
+Copyright (c) 2021-2022 Cannlytics
+
+Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/21/2021
 Updated: 8/30/2021
+License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
-API to interface with inventory.
+Description: API to interface with inventory.
 """
 # pylint:disable=line-too-long
 
@@ -12,7 +16,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from api.auth.auth import authorize_user
+from api.auth.auth import authenticate_request
 from api.api import get_objects, update_object, delete_object
 
 
@@ -26,9 +30,12 @@ def inventory(request, inventory_id=None):
     model_type_singular = 'item'
 
     # Authenticate the user.
-    claims, status, org_id = authorize_user(request)
-    if status != 200:
-        return Response(claims, status=status)
+    claims = authenticate_request(request)
+    # FIXME: Get `org_id`
+    org_id = None
+    if claims.get('user') is None:
+        message = 'Authentication failed.'
+        return Response({'success': False, 'data': message}, status=401)
 
     # GET data.
     if request.method == 'GET':

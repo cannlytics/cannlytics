@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+<!--
+  Sign In Dialog | Cannlytics Website
+  Created: 1/24/2021
+  Updated: 11/15/2021
+-->
+{% load static %}
+<style>
+  #google-signin {
+    background: url({% static 'website/images/logos/signin-assets/btn_google_signin_dark_normal_web@2x.png' %});
+    width: 191px;
+    height: 46px;
+    background-size: contain;
+  }
+  #google-signin:hover {
+    background: url({% static 'website/images/logos/signin-assets/btn_google_signin_dark_focus_web@2x.png' %});
+    width: 191px;
+    height: 46px;
+    background-size: contain;
+  }
+  #google-signin:active {
+    background: url({% static 'website/images/logos/signin-assets/btn_google_signin_dark_pressed_web@2x.png' %});
+    width: 191px;
+    height: 46px;
+    background-size: contain;
+  }
+</style>
+<div
+  id="sign-in-dialog"
+  class="modal fade"
+  tabindex="-1"
+  aria-labelledby="sign-in-dialog-label"
+  aria-hidden="false"
+>
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+
+      <!-- Dialog header -->
+      <div class="modal-header bg-light no-border">
+        <div class="d-flex align-items-center">
+
+          <!-- Logo and header-->
+          <img
+            src="{% static 'website/images/logos/cannlytics_calyx_detailed.svg' %}"
+            height="32px"
+            style="transform:translateY(-6px)"
+            class="me-2"
+            alt="Cannlytics"
+          >
+          <h5
+            id="sign-in-dialog-label"
+            class="modal-title text-dark serif h5"
+          >
+            Sign In
+          </h5>
+        </div>
+
+        <!-- Close button -->
+        <button
+          type="button"
+          class="btn-close btn-sm light-only"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+        <button
+          type="button"
+          class="btn-close btn-sm btn-close-white dark-only"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+
+      </div>
+
+      <!-- Dialog body -->
+      <div class="modal-body">
+        <div class="col">
+
+          <!-- Email Field -->
+          <div class="fieldWrapper">
+            <div class="form-label-group">
+              <input
+                id="sign-in-email"
+                name="email"
+                type="email"
+                class="form-control form-control-sm"
+                placeholder="Email address"
+                required
+                autofocus
+                spellcheck="false"
+              >
+              <label for="sign-in-email">Email address</label>
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="fieldWrapper">
+            <div class="form-label-group">
+              <input
+                name="password"
+                type="password"
+                id="sign-in-password"
+                class="form-control form-control-sm"
+                placeholder="Password"
+                required
+                autofocus
+              >
+              <label for="sign-in-password">Password</label>
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-column align-items-end">
+              <div class="form-check">
+                <input id="stay-signed-in" class="app-action form-check-input" type="checkbox" value="" checked>
+                <label for="stay-signed-in" class="app-action background-hover form-check-label fs-6"><small>
+                  Stay signed in?
+                </small></label>
+              </div>
+              <p class="text-center text-small fs-6 font-weight-light mb-1 mt-2">
+                <a
+                  class="background-hover text-secondary text-small fs-6"
+                  href="{% url 'section' page='account' section='password-reset' %}"
+                >
+                  <small class="sans-serif">Lost password?</small>
+                </a>
+              </p>
+            </div>
+            <button
+              id="sign-in-button"
+              class="ms-1 btn btn-sm btn-set-width bg-gradient-green serif text-white"
+              style="max-width:250px;"
+              type="button"
+              onclick="cannlytics.auth.signIn(event)"
+            >
+              Sign In
+            </button>
+            <button
+              id="sign-in-loading-button"
+              class="ms-1 btn btn-sm btn-set-width bg-gradient-green text-white d-none"
+              type="button"
+              title="Loading"
+              disabled
+            >
+              <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <!-- Google Sign In Alternative -->
+          <div class="fs-6 text-center my-3">
+            <small class="serif text-dark">&mdash;&nbsp;or&nbsp;&mdash;</small>
+          </div>
+          <div class="d-grid gap-2 justify-content-center">
+            <a id="google-signin" class="app-action" onclick="cannlytics.auth.signInWithGoogle()"></a>
+          </div>
+          <img style="display:none;" src="{% static 'website/images/logos/signin-assets/btn_google_signin_dark_focus_web@2x.png' %}" alt="Google Sign In">
+          <img style="display:none;" src="{% static 'website/images/logos/signin-assets/btn_google_signin_dark_pressed_web@2x.png' %}" alt="Google Sign In">
+
+          <!-- Sign Up -->
+          <p class="text-dark text-center h6 font-weight-light mt-5">
+            <small>New to Cannlytics?
+              <a
+                class="background-hover"
+                href="{% url 'section' page='account' section='sign-up' %}"
+              >
+                <b class="serif text-dark">Sign up!</b>
+              </a>
+            </small>
+          </p>
+        </div>
+      </div><!-- End of dialog body -->
+
+    </div>
+  </div>
+</div>
+<script>
+
+  // Add sign-in on enter on login password field.
+  const input = document.getElementById('sign-in-password');
+  input.addEventListener('keyup', function(event) {
+    event.preventDefault();
+    if (event.keyCode === 13) cannlytics.auth.signIn(event);
+  });
+
+</script>
+</html>

@@ -3,7 +3,7 @@
 <!--
   Analytics Page | Cannlytics Console
   Created: 8/1/2021
-  Updated: 8/1/2021
+  Updated: 2/6/2022
 -->
 {% extends "console/console.html" %}
 {% load icon %}
@@ -11,50 +11,23 @@
 {% block console_body %}
 
 <!-- Page -->
-<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
 
   <!-- Header -->
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-    <h1 class="fs-5 mb-0 lh-base">Analytics</h1>
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+    <h4 class="breadcrumb-item text-dark lh-sm fs-6 mb-0">Analytics</h4>
   </div>
 
-  <!-- Body -->
-  <div class="analytics">
-
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mt-3">
-      <li class="nav-item">
-        <a
-          class="nav-link {% if not section %}active{% endif %}"
-          aria-current="page"
-          href="/analytics"
-        >
-          General statistics
-        </a>
-      </li>
-      {% comment %} <li class="nav-item">
-        <a
-          class="nav-link {% if not section %}active{% endif %}"
-          aria-current="page"
-          href="/analytics"
-        >
-          Financial Projections
-        </a>
-      </li> {% endcomment %}
-    </ul>
-
-    <!-- TODO: Dynamic material -->
-    
-    <!-- TODO: General stats -->
+  {% if True %}
 
     <!-- Sponsorship placeholder -->
-    <div class="card bg-light rounded p-3 my-5 mx-auto" style="max-width:420px;">
+    <div class="card rounded p-3 my-5 mx-auto" style="max-width:420px;">
       <h5 class="text-dark mb-3">Sponsorhip Required</5>
-      <p class="text-secondary fs-6">
-        <small>Rich analytics takes time and money to develop. Please consider making a donation
+      <p class="text-secondary fs-6 mt-2">
+        <small class="serif">Rich analytics takes time and money to develop. Please consider making a donation
         to help us reach our funding requirement sooner so that we can offer this feature to you.</small>
       <p>
-      <h6 class="text-dark fw-bold mb-3">Goal: $2,000
+      <h6 class="text-dark fw-bold mb-4">Goal: $2,000
       <div class="progress mt-2">
         <div
           class="progress-bar bg-gradient-green"
@@ -78,38 +51,69 @@
         </div>
       </div>
       <a
-        class="btn btn-sm bg-gradient-green text-white mt-3 w-100"
-        href="https://opencollective.com/cannlytics-company"
+        class="btn bg-gradient-green text-white mt-3 w-100"
+        href="https://cannlytics.com/sponsors"
         target="_blank"
       >
-        👐 Become a sponsor
+        Become a Sponsor
       </a>
     </div>
 
-  </div><!-- End of the body -->
+  {% else %}
+
+    <!-- Body -->
+    <div class="analytics">
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mt-3">
+        <li class="nav-item">
+          <a
+            class="nav-link {% if not section %}active{% endif %}"
+            aria-current="page"
+            href="/analytics"
+          >
+            General statistics
+          </a>
+        </li>
+        {% comment %} <li class="nav-item">
+          <a
+            class="nav-link {% if not section %}active{% endif %}"
+            aria-current="page"
+            href="/analytics"
+          >
+            Financial Projections
+          </a>
+        </li> {% endcomment %}
+      </ul>
+
+      <!-- TODO: Dynamic material -->
+      
+      <!-- TODO: General stats -->
+
+    </div><!-- End of the body -->
+
+  {% endif %}
 
 </main><!-- End of the page -->
 
 {% endblock console_body %}
 
 <!-- JavaScript -->
-{% block console_js %}
+{% comment %} {% block console_js %}
+<script>
 
-  <script>
+  // Initialize any JavaScript
+  // cannlytics.analytics.initialize();
 
-    // Initialize any JavaScript
-    cannlytics.analytics.initialize();
+  // Define a utility function
+  function clearForm() {
+    /*
+      * Clear the form.
+      */
+    document.getElementById('output').classList.add('d-none');
+    document.getElementById('analytics-form').reset();
+  }
 
-    // Define a utility function
-    function clearForm() {
-      /*
-       * Clear the form.
-       */
-      document.getElementById('output').classList.add('d-none');
-      document.getElementById('analytics-form').reset();
-    }
-
-  </script>
-
-{% endblock console_js %}
+</script>
+{% endblock console_js %} {% endcomment %}
 </html>

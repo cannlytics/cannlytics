@@ -4,16 +4,16 @@
   Help Page | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 12/8/2020
-  Update: 5/5/2021
+  Update: 12/16/2021
 -->
 {% extends "console/console.html" %}
-{% load icon %}
+{% load static icon %}
 {% block console_body %}
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="fs-5 mb-0 lh-base">Help</h1>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+      <h4 class="breadcrumb-item text-dark lh-sm fs-6 mb-0">Help</h4>
     </div>
 
     <!-- Support features -->
@@ -23,7 +23,9 @@
       <div class="feature col-lg-4 text-center mt-5">
         <a href="https://docs.cannlytics.com">
           <div class="feature-icon">
-            {% icon "file-text" class="text-dark" %}
+            <svg style="width:120px;height:120px;">
+              <use href="{% static "console/images/icons/emojies/notes.svg" %}#notes-emoji"></use>
+            </svg>
           </div>
         </a>
         <h2 class="h4 text-dark mt-3">
@@ -42,7 +44,9 @@
       <div class="feature col-lg-4 text-center mt-5">
         <a href="mailto:support@cannlytics.com">
           <div class="feature-icon">
-            {% icon "phone" class="text-dark" %}
+            <svg style="width:120px;height:120px;">
+              <use href="{% static "console/images/icons/emojies/rescue-hat.svg" %}#rescue-hat-emoji"></use>
+            </svg>
           </div>
         </a>
         <h2 class="h4 mt-3 text-dark">
@@ -52,16 +56,18 @@
           <small>Get support immediately by calling
           <a class="text-link" href="tel:18283953954">828 395-3954</a>
           or emailing
-          <a class="text-link" href="mailto:support@cannlytics.com">contact@cannlytics.com</a>
+          <a class="text-link" href="mailto:support@cannlytics.com">{{ CONTACT_EMAIL }}</a>
           and we will help you find a solution.</small>
         </p>
       </div>
 
       <!-- Community -->
       <div class="feature col-lg-4 text-center mt-5 px-md-4">
-        <a href="https://cannlytics.com/community">
+        <a href="https://cannlytics.com/testing">
           <div class="feature-icon">
-            {% icon "message-square" class="text-dark" %}
+            <svg style="width:120px;height:120px;">
+              <use href="{% static "console/images/icons/emojies/collaboration.svg" %}#collaboration-emoji"></use>
+            </svg>
           </div>
         </a>
         <h2 class="h4 text-dark mt-3">
@@ -69,7 +75,7 @@
         </h2>
         <p class="text-start fs-6">
           <small>Ask the
-          <a class="text-link" href="https://cannlytics.com/community">community</a>
+          <a class="text-link" href="https://cannlytics.com/testing">community</a>
           for answers to directly query scientists, developers,
           and experts in the cannabis industry.</small>
         </p>
@@ -80,35 +86,38 @@
     <!-- Pricing -->
 
     <!-- Feedback-->
-    <h2 class="h6 mt-5 mb-0">Other help options</h2>
-    <div class="list-group col-md-6 py-3">
-      <a
-        href="/help/feedback"
-        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-        aria-current="true"
-      >
-        Send feedback
-        {% icon "chevron-right" height="18px" width="18px" %}
-      </a>
-      <a
-        href="https://cannlytics.com/support"
-        target="_blank"
-        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-        aria-current="true"
-      >
-        Explore support subscriptions
-        {% icon "chevron-right" height="18px" width="18px" %}
-      </a>
-      <a
-        href="https://github.com/cannlytics/cannlytics"
-        target="_blank"
-        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
-        aria-current="true"
-      >
-        Look at the source code
-        {% icon "chevron-right" height="18px" width="18px" %}
-      </a>
+    <div class="row container mx-auto">
+      <h2 class="h6 mt-5 mb-0">Other help options</h2>
+      <div class="list-group col-md-6 py-3">
+        <a
+          href="{% url 'section' screen='help' section='feedback' %}"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark border-secondary"
+          aria-current="true"
+        >
+          Send feedback
+          {% icon "chevron-right" height="18px" width="18px" %}
+        </a>
+        <a
+          href="https://cannlytics.com/support"
+          target="_blank"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark border-secondary"
+          aria-current="true"
+        >
+          Explore support subscriptions
+          {% icon "chevron-right" height="18px" width="18px" %}
+        </a>
+        <a
+          href="https://github.com/cannlytics/cannlytics-console"
+          target="_blank"
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark border-secondary"
+          aria-current="true"
+        >
+          Look at the source code
+          {% icon "chevron-right" height="18px" width="18px" %}
+        </a>
+      </div>
     </div>
+
   </main>
 {% endblock console_body %}
 </html>

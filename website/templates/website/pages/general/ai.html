@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<!--
+  AI Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 11/22/2021
+  Updated: 1/2/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% block title %}AI | Cannlytics{% endblock %}
+{% block material %}
+
+  <!-- Hero Banner -->
+  {% include "website/components/heros/hero_banner.html" with
+    primary_action='Integrate now'
+    primary_action_url='https://console.cannlytics.com/account/sign-in'
+    secondary_action='Read the docs'
+    secondary_action_url='https://github.com/cannlytics/cannlytics-ai'
+    image_url='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_ai_with_text.png?alt=media&token=78d19117-eff5-4f45-a8fa-3bbdabd6917d'
+    alt_title='Cannlytics API'
+    only
+  %}
+
+  <!-- Markdown -->
+  <div class="container my-3">
+    <div class="col markdown">
+      {{ ai|safe }}
+    </div>
+  </div>
+
+  <!-- Learn More -->
+  {% include "website/components/content/introduction.html" with
+    title="Read the API Documentation"
+    description='Cannlytics AI is artificial intelligence, powered by Cannlytics, that strives to be the go-to source of public cannabis data. Cannlytics AI leverages the comparative advantage of Cannlytics in aggregating cannabis data from disparate resources to provide you with clean, standardized data. Cannlytics AI provides you with a rich buffet of cannabis data, automatically, without mistakes, flaws, or complaint.'
+    action="Utilize Cannlytics AI today"
+    image_id="mechanical-arm-emoji"
+    image_ref="website/images/emojies/mechanical-arm.svg"
+    link="https://github.com/cannlytics/cannlytics-ai"
+  %}
+
+  <!-- Vines -->
+  {% include "website/components/art/vines.html" %}
+
+{% endblock %}
+</html>

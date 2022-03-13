@@ -1,0 +1,30 @@
+# Python Requirements | Cannlytics Website
+# Created 1/5/2021
+# Updated: 1/10/2022
+
+cannlytics==0.0.10
+datetime==4.3
+django==4.0
+# django-csp==3.7 # FIXME: Implement CSP.
+django-environ==0.8.1
+django-feather==0.3.0
+django-livereload-server==0.4
+django-permissions-policy==4.6.0
+django-robohash-svg==0.9.5
+djangorestframework==3.12.4
+google-auth==2.3.3
+google-cloud-secret-manager==2.8.0
+gunicorn==20.1.0
+Markdown==3.3.4
+python-dotenv==0.19.2
+pymdown-extensions==9.1
+python-markdown-math==0.8
+waitress==2.0.0
+whitenoise==5.3.0
+
+# cannlytics package dependencies:
+# firebase_admin==5.1.0 # Used only in cannlytics module and for admin.
+# openpyxl==3.0.9 # Used only in cannlytics module.
+# ocean-lib==0.8.5 # Used only in cannlytics module.
+# pandas==1.2.1 # Used only in cannlytics module.
+# ulid-py==1.1.0 # Used only in cannlytics module.

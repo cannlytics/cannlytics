@@ -8,16 +8,16 @@
 -->
 {% load icon %}
 {% block console_body %}
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+<main role="main" class="col ml-sm-auto pb-5 mx-auto">
 
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs.html" with
+    {% comment %} {% include "console/components/links/breadcrumbs.html" with
       base_page="Transfers"
       base_page_url="/transfers"
       nested_page="Vehicles"
       nested_page_url="/transfers/vehicles"
       current_page=id
-    %}
+    %} {% endcomment %}
 
     <!-- Tabs -->
     {% if id and id != 'new' %}

@@ -1,0 +1,282 @@
+<!doctype html>
+<html>
+<!--
+  Footer Template | Cannlytics Website
+  Created: 12/30/2020
+  Updated: 12/28/2021
+-->
+{% load static %}
+
+<!-- Wave -->
+<div class="wave small green" >
+  <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+    <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
+  </svg>
+</div>
+
+<!-- Back to the top -->
+<button
+  onclick="window.scrollTo({ top: 0, behavior: 'smooth' });"
+  class="btn btn-link cannlytics-light-green-text no-underline me-3"
+  style="float:right; transform:translateY(-50px); color:#ccc;"
+  title="Go back to the top."
+>
+  <small>Back to the top ↑</small>
+</button>
+
+<!-- Footer -->
+<footer class="bg-cannlytics-green pb-4 py-md-5 px-2 px-md-5">
+  <div class="container">
+    <div class="row justify-content-center full-width m-0">
+
+      <!-- Company Contact -->
+      <div class="col col-md-4 me-6 me-md-3 ps-0">
+        <div class="d-flex simple-column align-items-start flex-wrap">
+
+          <!-- Company Detail -->
+          <div class="simple-flex align-items-center mb-2">
+            <a
+              class="navbar-brand simple-flex px-1"
+              href="{% url 'index' %}"
+              title="Go to the homepage."
+            >
+              <img
+                src="{% static 'website/images/logos/cannlytics_logo_with_text_dark.png' %}"
+                style="height:40px;"
+                alt="Cannlytics"
+              >
+            </a>
+          </div>
+          <a
+            class="medium-text"
+            href="tel:{{ app.contact_phonenumber }}"
+            title="Call us."
+          >
+            <small class="light-text light-green-hover">
+              {{ app.contact_phone }}
+            </small>
+          </a>
+          <a
+            class="medium-text"
+            href="mailto:{{ app.contact_phone }}"
+            title="Email us anytime."
+          >
+            <small class="light-text light-green-hover">
+              {{ app.contact_email }}
+            </small>
+          </a>
+
+          <!-- Subscribe -->
+          <div id="subscribe" class="subscription w-100">
+            <input
+              id="sign-up-email"
+              class="form-control form-control-sm my-2"
+              type="email"
+              aria-describedby="subscribe-button"
+              placeholder="Enter your email to get data reports ↬"
+              {% if user.email and not user.newsletter %}value="{{ user.email }}"{% endif %}
+            >
+            <button
+              id="subscribe-button"
+              class="btn btn-sm w-100 bg-gradient-green serif text-white mt-0"
+              onclick="cannlytics.payments.subscribe()"
+            >
+              Subscribe to Data Reports
+            </button>
+            <button
+              id="subscribe-button-loading"
+              class="btn btn-sm w-100 bg-gradient-green text-white mt-0 d-none"
+              type="button"
+              title="Loading"
+              disabled
+            >
+              <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Index -->
+      {% for group in app.footer.index %}
+        <div class="col mx-6 mx-md-3">
+          <h6 class="h5 footer-header serif text-light mb-3 mt-2">
+            {{ group.name }}
+          </h6>
+          <ul class="list-unstyled">
+            {% for item in group.links %}
+              <li class="mb-1">
+                <a
+                  class="fs-6 serif text-white cannlytics-light-green-text"
+                  {% if item.app %}
+                    href="{% url item.app item.path %}"
+                  {% elif item.hashtag %}
+                    href="/{{ item.url }}#{{ item.hashtag }}"
+                  {% elif item.page %}
+                    href="{% url 'page' page=item.page %}"
+                  {% else %}
+                    href="{{ item.url }}"
+                  {% endif %}
+                >
+                  <small>{{ item.title }}</small>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}<!-- End of Index -->
+
+    </div>
+  </div>
+
+  <!-- Copyright -->
+  <div class="container text-secondary-on-light">
+    <p
+      class="fs-6 text-light font-weight-light mt-5"
+      style="max-width:420px;"
+    >
+      <small class="sans-serif">
+        New to Cannlytics?
+        Cannlytics is open source, so, please
+        <a
+          class="cannlytics-light-green-text"
+          href="https://github.com/cannlytics"
+          title="Download the engine now!"
+        >
+          download
+        </a>
+        and customize Cannlytics for yourself!
+        The
+        <a
+          class="cannlytics-light-green-text"
+          href="https://docs.cannlytics.com/console/get-started"
+          title="Start reading the docs."
+        >
+          getting started guide
+        </a>
+        can get you off the ground.
+        Cannlytics is lovingly maintained by a
+        <a
+          class="cannlytics-light-green-text"
+          href="{% url 'page' 'team' %}"
+          titl="Meet the teem."
+        >
+          core team
+        </a>
+        of developers and scientists. Cannlytics is built with
+        💖 thanks to
+        <a
+          class="cannlytics-light-green-text"
+          href="{% url 'page' page='sponsors' %}"
+          title="Meet our sponsors"
+        >
+          sponsors
+        </a>
+        and
+        <a
+          class="cannlytics-light-green-text"
+          href="{% url 'page' page='contributors' %}"
+          title="Meet our contributors"
+        >
+          contributors
+        </a>
+        like yourself!
+      </small>
+    </p>
+    <p class="fs-6 mt-2 mb-2">
+      <small>
+        <a
+          class="text-white light-green-hover"
+          href="https://docs.cannlytics.com/about/privacy-policy"
+        >
+          Privacy
+        </a> |
+        <a
+          class="text-white light-green-hover"
+          href="https://docs.cannlytics.com/about/security-policy"
+        >
+          Security
+        </a> | 
+        <a
+          class="text-white light-green-hover"
+          href="https://docs.cannlytics.com/about/terms-of-service"
+        >
+          Terms of Service
+        </a>
+      </small>
+    </p>
+
+    <!-- Github star buttons -->
+    {% comment %} <div class="mb-2">
+      <iframe
+        src="https://ghbtns.com/github-btn.html?user=cannlytics&repo=cannlytics&type=star&count=true"
+        frameborder="0"
+        scrolling="0"
+        width="125"
+        height="20"
+        title="GitHub"
+      ></iframe>
+      <iframe
+        src="https://ghbtns.com/github-btn.html?user=cannlytics&repo=cannlytics-engine&type=star&count=true"
+        frameborder="0"
+        scrolling="0"
+        width="125"
+        height="20"
+        title="GitHub"
+      ></iframe>
+      <iframe
+        src="https://ghbtns.com/github-btn.html?user=cannlytics&repo=cannlytics-console&type=star&count=true"
+        frameborder="0"
+        scrolling="0"
+        width="125"
+        height="20"
+        title="GitHub"
+      ></iframe>
+    </div> {% endcomment %}
+
+    <div class="fs-6 text-small  mt-0">
+      <!-- Please leave our Copyright in accordance with our License:
+
+        Copyright (c) 2020-2022 Cannlytics
+
+        Permission is hereby granted, free of charge, to any person obtaining
+        a copy of this software and associated documentation files (the
+        "Software"), to deal in the Software without restriction, including
+        without limitation the rights to use, copy, modify, merge, publish,
+        distribute, sublicense, and/or sell copies of the Software, and to
+        permit persons to whom the Software is furnished to do so, subject to
+        the following conditions:
+
+        The above copyright notice and this permission notice shall be
+        included in all copies or substantial portions of the Software.
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+        EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+        MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+        NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+        LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+        OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+        WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+      Thank you!
+      -->
+      <small class="tiny-text text-white">Copyright &copy; Cannlytics 2020-2022</small>
+    </div>
+
+  </div><!-- End of Copyright -->
+
+</footer>
+
+<!-- Footer JavaScript -->
+{% block page_js %}
+  <script>
+
+    // Add subscribe to input on enter.
+    document.getElementById('sign-up-email').addEventListener('keydown', function(event) {
+      if (event.keyCode === 13) cannlytics.payments.subscribe();
+    });
+
+  </script>
+{% endblock page_js %}
+
+</html>

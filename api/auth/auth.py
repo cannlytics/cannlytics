@@ -1,25 +1,27 @@
 """
 Authentication Views | Cannlytics API
+Copyright (c) 2021-2022 Cannlytics
+
+Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 1/22/2021
 Updated: 7/24/2021
+License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
-Authentication mechanisms for the Cannlytics API, including API key
+Description: Authentication mechanisms for the Cannlytics API, including API key
 utility functions, request authentication and verification helpers,
 and the authentication endpoints.
 """
-
-# Standard imports
+# Standard imports.
 from os import environ
 from json import loads
 from secrets import token_urlsafe
 
-# External imports
-import hmac
-from hashlib import sha256
+# External imports.
 from datetime import datetime, timedelta
 from django.http.response import JsonResponse
 
-# Internal imports
+# Internal imports.
+from cannlytics.auth.auth import authenticate_request, sha256_hmac
 from cannlytics.firebase import (
     create_custom_token,
     create_log,
@@ -27,13 +29,11 @@ from cannlytics.firebase import (
     delete_file,
     delete_field,
     get_collection,
-    get_custom_claims,
     get_document,
     get_file_url,
     initialize_firebase,
     update_document,
     upload_file,
-    verify_session_cookie,
 )
 
 # Initialize Firebase.
@@ -42,103 +42,6 @@ try:
     BUCKET_NAME = environ.get('FIREBASE_STORAGE_BUCKET', None)
 except ValueError:
     pass
-
-#-----------------------------------------------------------------------
-# Core Authentication Mechanism
-#-----------------------------------------------------------------------
-
-def authorize_user(request):
-    """
-    Authenticate and authorize that the user can work with
-    the organization's data.
-    Args:
-        request: An instance of `django.http.HttpRequest` or
-            `rest_framework.request.Request`.
-    Returns:
-        (dict): A dictionary of the user's claims or an error message.
-        (int): The status code.
-        (str): The organizations ID.
-    """
-    claims = authenticate_request(request)
-    try:
-        uid = claims['uid']
-        # FIXME: Handle multiple organizations
-        authorized_ids = claims.get('team', '') # []
-        authorized_ids = claims.get('qa', '') # []
-        authorized_ids = claims.get('owner', '') # []
-        if isinstance(authorized_ids, list):
-            authorized_ids = authorized_ids[0] # authorized_ids = owner + team + qa
-    except KeyError:
-        message = 'Your request was not authenticated. Ensure that you have a valid session or API key.'
-        return {'error': True, 'message': message}, 401, None
-    try:
-        org_id = request.query_params['organization_id']
-    except KeyError:
-        message = 'An organization_id parameter is required.'
-        return {'error': True, 'message': message}, 403, None
-    if org_id not in authorized_ids:
-        message = f'Your must be an owner, quality assurance, or a team member of this organization for this operation.'
-        return {'error': True, 'message': message}, 403, None
-    return claims, 200, org_id
-
-
-def authenticate_request(request):
-    """Authenticate a user given a Firebase token or an API key
-    passed in an `Authentication: Bearer <token>` header.
-    Args:
-        request: An instance of `django.http.HttpRequest` or
-            `rest_framework.request.Request`.
-    Returns:
-        claims (dict): A dictionary of the user's custom claims, including
-            the user's `uid`.
-    """
-    claims = {}
-    try:
-        session_cookie = request.COOKIES.get('__session')
-        print('Session cookie:', session_cookie)
-        if session_cookie is None:
-            session_cookie = request.session.get('__session')
-            print('Session cookie (2nd try):', session_cookie)
-        claims = verify_session_cookie(session_cookie, check_revoked=True)
-        print('Verified:', claims.get('email'))
-    except:
-        try:
-            authorization = request.META['HTTP_AUTHORIZATION']
-            key = authorization.split(' ').pop()
-            claims = get_user_from_api_key(key)
-            print('Verified by auth header:', claims.get('email'))
-        except:
-            claims = {}
-    return claims
-
-
-def verify_session(request):
-    """Verifies that the user has authenticated with a Firebase ID token.
-    If the session cookie is unavailable, then force the user to login.
-    Verify the session cookie. In this case an additional check is added to detect
-    if the user's Firebase session was revoked, user deleted/disabled, etc.
-    If the session cookie is invalid, expired or revoked, then force the user to login.
-    Args:
-        request: An instance of `django.http.HttpRequest` or
-            `rest_framework.request.Request`.
-    Returns:
-        claims (dict): A dictionary of the user's custom claims, including
-            the user's `uid`.
-    """
-    # try:
-    # session_cookie = request.COOKIES.get('__session')
-    session_cookie = request.session.get('__session')
-    print('Session cookie:', session_cookie)
-    if session_cookie is None:
-        session_cookie = request.COOKIES.get('__session')
-        print('Session cookie (2nd try):', session_cookie)
-        # session_cookie = request.session.get('__session')
-    claims = verify_session_cookie(session_cookie, check_revoked=True)
-    print('Verified by auth header:', claims.get('email'))
-    return claims
-    # except (KeyError, ValueError) as e:
-    #     return {}
-
 
 #-----------------------------------------------------------------------
 # API Key Utilities
@@ -157,11 +60,12 @@ def create_api_key(request, *args, **argv): #pylint: disable=unused-argument
         (JsonResponse): A JSON response containing the API key in an
             `api_key` field.
     """
-    user_claims = verify_session(request)
+    user_claims = authenticate_request(request)
     uid = user_claims['uid']
     api_key = token_urlsafe(48)
     app_secret = get_document('admin/api')['app_secret_key']
-    code = sha256_hmac(app_secret, api_key)
+    app_salt = get_document('admin/api')['app_salt']
+    code = sha256_hmac(app_secret, api_key + app_salt)
     post_data = loads(request.body.decode('utf-8'))
     now = datetime.now()
     expiration_at = post_data['expiration_at']
@@ -192,7 +96,7 @@ def delete_api_key(request, *args, **argv): #pylint: disable=unused-argument
     Args:
         request (HTTPRequest): A request to get the user's API key.
     """
-    user_claims = verify_session(request)
+    user_claims = authenticate_request(request)
     uid = user_claims['uid']
     post_data = loads(request.body.decode('utf-8'))
 
@@ -224,43 +128,12 @@ def get_api_key_hmacs(request, *args, **argv): #pylint: disable=unused-argument
         (JsonResponse): A JSON response containing the API key HMAC
             information in a `data` field.
     """
-    user_claims = verify_session(request)
+    user_claims = authenticate_request(request)
     uid = user_claims['uid']
     query = {'key': 'uid', 'operation': '==', 'value': uid}
     docs = get_collection('admin/api/api_key_hmacs', filters=[query])
     return JsonResponse({'status': 'success', 'data': docs})
 
-
-def get_user_from_api_key(api_key):
-    """Identify a user given an API key.
-    Args:
-        api_key (str): An API key to identify a given user.
-    Returns:
-        (dict): Any user data found, with an empty dictionary if there
-            is no user found.
-    """
-    app_secret = get_document('admin/api')['app_secret_key']
-    code = sha256_hmac(app_secret, api_key)
-    key_data = get_document(f'admin/api/api_key_hmacs/{code}')
-    uid = key_data['uid']
-    user_claims = get_custom_claims(uid)
-    user_claims['permissions'] = key_data['permissions']
-    user_claims['uid'] = uid
-    return user_claims
-
-
-def sha256_hmac(secret, message):
-    """Create a SHA256-HMAC (hash-based message authentication code).
-    Args:
-        secret (str): A server-side app secret.
-        message (str): The client's secret.
-    Returns:
-        (str): An HMAC string.
-    Credit: https://stackoverflow.com/a/66958131/5021266
-    """
-    byte_key = bytes(secret, 'UTF-8')
-    payload = message.encode()
-    return hmac.new(byte_key, payload, sha256).hexdigest()
 
 #-----------------------------------------------------------------------
 # User Pin Utilities
@@ -273,13 +146,14 @@ def create_user_pin(request, *args, **argv): #pylint: disable=unused-argument
     Returns:
         (JsonResponse): A JSON response with a success message.
     """
-    user_claims = verify_session(request)
+    user_claims = authenticate_request(request)
     uid = user_claims['uid']
     post_data = loads(request.body.decode('utf-8'))
     pin = post_data['pin']
     message = f'{pin}:{uid}'
     app_secret = get_document('admin/api')['app_secret_key']
-    code = sha256_hmac(app_secret, message)
+    app_salt = get_document('admin/api')['app_salt']
+    code = sha256_hmac(app_secret, message + app_salt)
     post_data = loads(request.body.decode('utf-8'))
     now = datetime.now()
     # Optional: Add expiration to pins
@@ -298,7 +172,7 @@ def create_signature(request, *args, **argv): #pylint: disable=unused-argument
     Returns:
         (JsonResponse): A JSON response with a success message.
     """
-    user_claims = verify_session(request)
+    user_claims = authenticate_request(request)
     uid = user_claims['uid']
     post_data = loads(request.body.decode('utf-8'))
     data_url = post_data['data_url']
@@ -324,7 +198,7 @@ def delete_signature(request, *args, **argv): #pylint: disable=unused-argument
     Returns:
         (JsonResponse): A JSON response containing the user's claims.
     """
-    user_claims = verify_session(request)
+    user_claims = authenticate_request(request)
     uid = user_claims['uid']
     entry = {
         'signature_created_at': '',
@@ -346,7 +220,7 @@ def delete_user_pin(request, *args, **argv): #pylint: disable=unused-argument
         (JsonResponse): A JSON response containing the API key in an
             `api_key` field.
     """
-    user_claims = verify_session(request)
+    user_claims = authenticate_request(request)
     uid = user_claims['uid']
     query = {'key': 'uid', 'operation': '==', 'value': uid}
     existing_pins = get_collection('admin/api/pin_hmacs', filters=[query])
@@ -365,13 +239,14 @@ def get_signature(request, *args, **argv): #pylint: disable=unused-argument
     Returns:
         (JsonResponse): A JSON response containing the user's claims.
     """
-    user_claims = verify_session(request)
+    user_claims = authenticate_request(request)
     uid = user_claims['uid']
     post_data = loads(request.body.decode('utf-8'))
     pin = post_data['pin']
     message = f'{pin}:{uid}'
     app_secret = get_document('admin/api')['app_secret_key']
-    code = sha256_hmac(app_secret, message)
+    app_salt = get_document('admin/api')['app_salt']
+    code = sha256_hmac(app_secret, message + app_salt)
     verified_claims = get_document(f'admin/api/pin_hmacs/{code}')
     if not verified_claims:
         return JsonResponse({'error': True, 'message': 'Invalid pin.'})
@@ -394,13 +269,14 @@ def verify_user_pin(request, *args, **argv): #pylint: disable=unused-argument
     Returns:
         (JsonResponse): A JSON response containing the user's claims.
     """
-    user_claims = verify_session(request)
+    user_claims = authenticate_request(request)
     uid = user_claims['uid']
     post_data = loads(request.body.decode('utf-8'))
     pin = post_data['pin']
     message = f'{pin}:{uid}'
     app_secret = get_document('admin/api')['app_secret_key']
-    code = sha256_hmac(app_secret, message)
+    app_salt = get_document('admin/api')['app_salt']
+    code = sha256_hmac(app_secret, message + app_salt)
     verified_claims = get_document(f'admin/api/pin_hmacs/{code}')
     if verified_claims.get('uid') == uid:
         token = create_custom_token(uid, claims={'pin_verified': True})

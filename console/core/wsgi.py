@@ -1,34 +1,28 @@
 """
 WSGI Configuration | Cannlytics Console
-Copyright (c) 2021 Cannlytics
+Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 11/24/2021
-Updated: 11/24/2021
-License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+Updated: 12/20/2021
+License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 
-Description:
-
-    This script exposes the WSGI callable as a
-    module-level variable named ``application``.
-    For more information on this file, see
-    https://docs.djangoproject.com/en/3.1/howto/deployment/wsgi/
+Description: This script exposes the WSGI callable as a module-level variable
+named ``application``. For more information on this file, see:
+https://docs.djangoproject.com/en/3.1/howto/deployment/wsgi/
 """
 # Internal imports.
 import os
 
 # External imports.
 from django.core.wsgi import get_wsgi_application
-try:
-    from dj_static import Cling
-except ImportError:
-    pass
+from whitenoise import WhiteNoise
 
 # Specify the name of the settings file.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'console.settings')
 
-# Use dj-static if installed.
+# Main Django app with static file serving by WhiteNoise.
 try:
-    application = Cling(get_wsgi_application())
+    application = WhiteNoise(get_wsgi_application())
 except:
     application = get_wsgi_application()

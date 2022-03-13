@@ -1,30 +1,25 @@
 /**
  * Map JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 8/12/2021
- * Updated: 8/14/2021
- * Resources:
- *    https://github.com/fullcalendar/fullcalendar-example-projects/blob/master/webpack/src/main.js
- *    https://fullcalendar.io/docs/handlers
+ * Updated: 12/6/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
-import { getDocument } from '../firebase.js';
 import { authRequest } from '../utils.js';
-
 
 export const maps = {
 
   // State
-
   map: null,
   points: {},
   markerOrange: '/static/console/images/maps/marker-orange.svg',
   markerGreen: '/static/console/images/maps/marker-green.svg',
   organizations: [],
 
-  // Functions
-
   initializeMap() {
-    /*
+    /**
      * Initialize a market map, showing labs for products and showing contacts for labs.
      */
 
@@ -32,7 +27,7 @@ export const maps = {
     this.map = this.createMap();
 
     // Create marker spiderfier for overlapping markers.
-    var oms = new OverlappingMarkerSpiderfier(this.map, {
+    const oms = new OverlappingMarkerSpiderfier(this.map, {
       markersWontMove: true,
       markersWontHide: true,
       basicFormatEvents: true,
@@ -45,7 +40,7 @@ export const maps = {
       this.organizations = data;
 
       // Create info windows for each lab.
-      var markers = this.createInfoWindows(this.map, oms, data);
+      const markers = this.createInfoWindows(this.map, oms, data);
 
       // Cluster dense markers.
       this.createMarkerClusterer(this.map, markers);
@@ -59,9 +54,8 @@ export const maps = {
     });
   },
 
-
   createMap() {
-    /*
+    /**
      * Render a Google map.
      */
     return new google.maps.Map(document.getElementById('map'), {
@@ -73,28 +67,30 @@ export const maps = {
     });
   },
 
-
   createInfoWindows(map, oms, data) {
-    /*
+    /**
      * Create markers with info windows.
+     * @param {Map} map A Google Maps map object.
+     * @param {OverlappingMarkerSpiderfier} oms An overlapping-marker-spiderfier object to handle overlapping markers.
+     * @param {Array} data An array of data to render as markers with info windows.
      */
     var logView = this.logView;
-    var createWindow = this.createMarkerInfoWindow;
-    var getOrgName = this.getOrganizationName;
-    var infoWindow = new google.maps.InfoWindow();
-    var markers = [];
-    var searchOptions = '';
+    const createWindow = this.createMarkerInfoWindow;
+    const getOrgName = this.getOrganizationName;
+    const infoWindow = new google.maps.InfoWindow();
+    const markers = [];
+    let searchOptions = '';
     data.forEach((item, index) => {
 
       // Alternate marker colors.
       // Optional: Use green for DEA registered hemp testing laboratories.
       // https://www.ams.usda.gov/rules-regulations/hemp/dea-laboratories
-      var icon;
+      let icon;
       if (index % 2) icon = this.markerOrange;
       else icon = this.markerOrange;     
 
       // Create marker.
-      var marker = new google.maps.Marker({
+      const marker = new google.maps.Marker({
         icon: icon,
         position: new google.maps.LatLng(item.latitude, item.longitude),
         map: map,
@@ -103,10 +99,10 @@ export const maps = {
 
       // Open info window on click.
       google.maps.event.addListener(marker, 'spider_click', ((marker) => {
-        return function() {
+        return () => {
 
           // Ensure that the website is valid.
-          var url = item.website;
+          let url = item.website;
           if (url) {
             if (!url.startsWith('http')) {
               url = `http://${url}`;
@@ -121,7 +117,7 @@ export const maps = {
           }
           
           // Format the content.
-          var content = createWindow(item);
+          const content = createWindow(item);
 
           // Attach the content to the info window.
           infoWindow.setContent(content);
@@ -139,13 +135,13 @@ export const maps = {
       // Add marker to list of markers.
       markers.push(marker);
       oms.addMarker(marker);
-      var name = getOrgName(item);
+      const name = getOrgName(item);
       this.points[name] = { latitude: item.latitude, longitude: item.longitude };
       searchOptions += `<option value="${name}"/>`;
     });
 
     // Close info window on map click.
-    google.maps.event.addListener(map, 'click', function() {
+    google.maps.event.addListener(map, 'click', () => {
       infoWindow.close();
     });
 
@@ -156,10 +152,11 @@ export const maps = {
 
   },
 
-
   createMarkerClusterer(map, markers) {
-    /*
+    /**
      * Create a clusterer for markers on the map.
+     * @param {Map} map A Google Maps map object.
+     * @param {Array} markers An array of marks to pack into a cluster.
      */
     return new MarkerClusterer(map, markers, {
       gridSize: 50,
@@ -169,18 +166,17 @@ export const maps = {
     });
   },
 
-
   createMarkerInfoWindow(item) {
-    /*
+    /**
      * Creates a marker info window.
-     * Optional: Ensure image is a valid image.
+     * @param {Object} item An observation to be used to render an info window.
      */
-    var image = item.image_url ?? 'static/images/icons/multi-tone/lab.svg';
-    // var name = this.getOrganizationName(item);
-    var name = '';
+    // TODO: Ensure that each image is a valid image.
+    const image = item.image_url ?? 'static/images/icons/multi-tone/lab.svg';
+    let name = '';
     if (item.trade_name && item.trade_name != 'Nan') name = item.trade_name;
     else name = item.name;
-    var content = `<div class="text-dark p-3 bg-light" style="min-height:320px">`;
+    let content = `<div class="text-dark p-3 bg-light" style="min-height:320px">`;
     content += `
       <a href="/labs/${item.slug}/" target="_blank" class="bg-light">
         <img src="${image}" class="mb-3" style="max-width:150px;max-height:75px;">
@@ -204,7 +200,7 @@ export const maps = {
       content += `Email: <a class="btn btn-sm btn-light" href="/labs/${item.slug}/?edit=true">Recommend an email</a><br>`;
     }
     if (item.website) {
-      var url = item.website;
+      let url = item.website;
       if (!url.startsWith('https')) url = `https://${url}`;
       content += `<small>Website: <a class="text-link" href="${url}" target="_blank">${item.website}</a></small>`;
     } else {
@@ -223,14 +219,13 @@ export const maps = {
     return content;
   },
 
-
   onMapSearchInput() {
-    /*
+    /**
      * Pan to a marker on selection.
      */
-    var val = document.getElementById('searchInput').value;
-    var opts = document.getElementById('searchOptions').childNodes;
-    for (var i = 0; i < opts.length; i++) {
+    const val = document.getElementById('searchInput').value;
+    const opts = document.getElementById('searchOptions').childNodes;
+    for (let i = 0; i < opts.length; i++) {
       if (opts[i].value === val) {
         this.panToMarker(this.map, opts[i].value)
         break;
@@ -239,8 +234,10 @@ export const maps = {
   },
 
   panToMarker(map, value) {
-    /*
+    /**
      * Pan to a point on the map.
+     * @param {Map} map A Google Maps map object.
+     * @param {String} value The key for a given marker point.
      */
     const point = this.points[value];
     map.panTo(new google.maps.LatLng(point.latitude, point.longitude));
@@ -250,13 +247,13 @@ export const maps = {
     // this.logView(item.id, 'searches');
   },
 
-
   setupSearch(map) {
-    /*
+    /**
      * Setup search for the map.
+     * @param {Map} map A Google Maps map object.
      */
-    var searchButton = document.getElementById('searchButton');
-    var searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const searchInput = document.getElementById('searchInput');
     searchButton.addEventListener('click', () => {
       this.panToMarker(map, searchInput.value)
     });
@@ -267,22 +264,22 @@ export const maps = {
     });
   },
 
-
   getLabs() {
-    /*
+    /**
      * Get labs with API.
      */
     return new Promise((resolve, reject) => {
       const state = document.getElementById('state_input').value;
-      const url = `/api/organizations/labs?state=${state}`;
+      let url = '/api/organizations/labs';
+      if (state !== 'All') url = `${url}?state=${state}`;
       authRequest(url).then((response) => resolve(response.data));
     });
   },
 
-
   renderLabList(data) {
-    /*
-     * Render all labs as a list.
+    /**
+     * Render all labs from an array..
+     * @param {Array} data An array of observations.
      */
     var div = document.getElementById('lab-list');
     var content = '';
@@ -301,10 +298,10 @@ export const maps = {
     div.innerHTML += content;
   },
 
-
   selectLab(slug) {
-    /*
+    /**
      * Select a lab from the list.
+     * @param {String} slug A lab's unique organization name in kebab case (a lab's slug).
      */
     const item = this.findOrganization(slug, this.organizations);
     const content = this.createMarkerInfoWindow(item);
@@ -314,10 +311,11 @@ export const maps = {
     this.panToMarker(this.map, name);
   },
 
-
   findOrganization(value, array) {
-    /*
+    /**
      * Find an organization's data in memory.
+     * @param {String} value The query value to compare against each organization's slug.
+     * @param {Array} array A list of organizations to search slugs for a given value.
      */
     for (var i=0; i < array.length; i++) {
       if (array[i].slug === value) {
@@ -326,26 +324,15 @@ export const maps = {
     }
   },
 
-
   getOrganizationName(item) {
-    /*
+    /**
      * Get an organization's preferred name.
+     * @param {Object} item An item to retrieve a clean name from.
      */
     var name = '';
     if (item.trade_name && item.trade_name != 'Nan') name = item.trade_name;
     else name = item.name;
     return name;
   },
-
-
-  // startTransferSamples() {
-  //   /*
-  //    * Begin a new transfer with a selected organization.
-  //    */
-  //   // /transfers/new?
-  // },
-
-  // TODO: Similar accordian for analyses.
-
 
 };

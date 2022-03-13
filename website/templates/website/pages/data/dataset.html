@@ -1,0 +1,313 @@
+<!doctype html>
+<html>
+<!--
+  Dataset Page | Cannlytics Website
+  Copyright (c) 2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/14/2022
+  Updated: 1/26/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load humanize icon static title_case %}
+{% block title %}Dataset | Cannlytics{% endblock %}
+{% block page_css %}
+
+  <!-- PayPal JavaScript -->
+  <script
+    src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}"
+    data-sdk-integration-source="button-factory"
+  ></script>
+
+{% endblock page_css %}
+{% block material %}
+<section class="container">
+
+  <!-- Title -->
+  <div class="d-flex mt-4">
+    <nav
+      style="--bs-breadcrumb-divider: '>';"
+      aria-label="breadcrumb"
+    >
+      <ol class="breadcrumb bg-transparent p-0 mb-0">
+        <li class="breadcrumb-item fs-6 lh-sm">
+          <a
+            class="text-dark serif action"
+            href="{% url 'section' page='data' section='market' %}#data-market"
+          >
+            Data Market
+          </a>
+        </li>
+        <li class="breadcrumb-item active fs-6 lh-sm text-dark serif" aria-current="page">
+          {{ dataset.name }}
+        </li>
+      </ol>
+      <div>
+    </div>
+    </nav>
+    <button
+      class="btn btn-sm nav-link text-secondary p-0 ms-1"
+      style="transform: translateY(-8px);"
+      onclick="cannlytics.ui.copyToClipboard(document.getElementById('page-url').value);"
+      title="Copy Link to Page"
+    >
+      {% icon 'bookmark' width="16px" height="16px" style="transform: translateY(-8px);" %}
+    </button>
+    <input id="page-url" class="visually-hidden" value="{{ request.build_absolute_uri }}">
+    <input id="dataset_file_name" class="visually-hidden" value="{{ dataset.file_name }}">
+    <input id="dataset_file_ref" class="visually-hidden" value="{{ dataset.file_ref }}">
+  </div>
+
+  <!-- Dataset Details -->
+  <div class="row markdown mt-3">
+
+    <!-- Column -->
+    <div class="col-12 col-md-6 order-md-2 mt-3 pt-md-2">
+
+      <!-- Image -->
+      <img
+        class="pt-3 pe-3"
+        style="width:100%; max-height:250px; max-width: "
+        src="{{ dataset.image_url }}"
+      >
+
+      <!-- PayPal Checkout -->
+      <!-- FIXME: Ensure that PayPal Checkout works!!! -->
+      <div class="px-4 mt-5">
+        <h5 class="fw-bold text-dark serif mb-2">
+          Price
+        </h5>
+        <div class="d-flex">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="flexRadioDefault" id="business-price" checked>
+            <label class="form-check-label" for="business-price">
+              Business <span id="price-usd-{{ dataset.id }}">{{ dataset.price_usd }}</span>
+            </label>
+          </div>
+          <div class="form-check ms-3">
+            <input class="form-check-input" type="radio" name="flexRadioDefault" id="student-price">
+            <label class="form-check-label" for="student-price">
+              Student <span id="price-usd-student-{{ dataset.id }}">{{ dataset.price_usd_students }}</span>
+            </label>
+          </div>
+        </div>
+        <input id="dataset_business_price" class="visually-hidden" value="{{ dataset.price_usd }}">
+        <input id="dataset_student_price" class="visually-hidden" value="{{ dataset.price_usd_students }}">
+        <div class="d-flex flex-column align-items-center mt-4">
+          <div id="paypal-button-container" style="max-width:350px;"></div>
+        </div>
+      </div>
+
+      <!-- Thank you message -->
+      <div id="thank-you-message" class="mt-3 text-center d-none">
+        <svg style="width:80px;height:80px;">
+          <use href="{% static "website/images/emojies/green-check.svg" %}#green-check-emoji"></use>
+        </svg>
+        <h4 class="serif text-gradient-reverse mt-0 mb-2">
+          Purchase success, thank you!</h4>
+        <h6 class="fs-6 serif text-dark mt-0 mb-2">
+          You have been emailed a copy of your data.<br>Happy data mining and exploration!
+        </h6>
+        {% comment %}
+        <!-- Optional: Implement download data from button after purchase -->
+        <button
+          type="button"
+          class="btn bg-gradient-green serif text-white mt-3"
+        >
+          {% icon "download" width="18px" height="18px" class="me-1" %} Download Data
+        </button>
+        {% endcomment %}
+      </div>
+
+    </div>
+
+    <!-- Details-->
+    <div class="col col-md-6">
+
+      <!-- Title -->
+      <h2
+        id="{{ dataset.id }}"
+        class="text-dark serif mb-2"
+      >
+        {{ dataset.name }}
+      </h2>
+
+      <!-- Publisher -->
+      <h6 class="text-dark serif mb-1">
+        Published by
+        <a class="serif" href="{{ dataset.published_by_url }}">{{ dataset.published_by }}</a>
+      </h6>
+      <h6 class="text-dark">
+        <small class="serif">{{ dataset.published_at_formatted }}</small>
+        {% if dataset.updated_at_formatted %}
+          <small class="serif">-- updated {{ dataset.updated_at_formatted }}</small>
+        {% endif %}
+      </h6>
+
+      <!-- Description -->
+      <h5 class="fw-bold text-dark serif mt-4">
+        Description
+      </h5>
+      <p class="mt-2 lh-md" style="max-width:560px;">
+        {{ dataset.description }}
+      </p>
+      <input id="dataset_description" class="visually-hidden" value="{{ dataset.description }}">
+
+      <!-- Details -->
+      <h5 class="fw-bold text-dark serif mt-4">
+        Details
+      </h5>
+      <div class="row">
+        <div class="col">
+          <table class="mb-3">
+            <tbody>
+              <tr>
+                <td class="fw-bold">Author</td>
+                <td>{{ dataset.published_by }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Author's Website</td>
+                <td>
+                  <a class="serif fw-normal" href="{{ dataset.published_by_url }}" target="_blank">
+                    {{ dataset.published_by_url }} {% icon 'external-link' width="16px" height="16px" style="transform: translateY(-8px)" %}
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Number of Fields</td>
+                <td>{{ dataset.number_of_fields|intcomma }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Number of Observations</td>
+                <td>{{ dataset.number_of_observations|intcomma }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">First Observation</td>
+                <td>{{ dataset.time_period_start }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Last Observation</td>
+                <td>{{ dataset.time_period_end }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">File Size</td>
+                <td>{{ dataset.file_size }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">File Type</td>
+                <td>{{ dataset.file_types|first }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Algorithm</td>
+                <td>
+                  <a class="serif fw-normal" href="{{ dataset.algorithm_url }}" target="_blank">
+                    {{ dataset.algorithm_url }} {% icon 'external-link' width="16px" height="16px" style="transform: translateY(-8px)" %}
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">License</td>
+                <td>
+                  <a
+                    class="serif fw-normal"
+                    target="_blank"
+                    href="{{ dataset.license_url }}"
+                  >
+                    {{ dataset.license }} {% icon 'external-link' width="16px" height="16px" style="transform: translateY(-8px)" %}
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Data Guide -->
+          {% if dataset.data_guide_url %}
+            <div class="mb-4">
+              <a
+                class="btn btn-sm-light btn-md-light serif"
+                type="button"
+                href="{{ dataset.data_guide_url }}"
+                target="_blank"
+              >
+                View Data Guide
+              </a>
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+      <!-- Sample -->
+      {% if dataset.sample_file_url %}
+        <h5 class="fw-bold text-dark serif mt-4">
+          Sample Data
+        </h5>
+        <a
+          class="btn btn-sm-light btn-md-light serif"
+          type="button"
+          href="{{ dataset.sample_file_url }}"
+          target="_blank"
+        >
+          Download Sample
+        </a>
+      {% endif %}
+
+      <!-- Tags -->
+      <h5 class="fw-bold text-dark serif mt-5">
+        Keywords
+      </h5>
+      <div style="max-width:300px;">
+        {% for tag in dataset.tags %}
+          <a
+            href="{% url 'section' page='data' section='market' %}?keyword={{ tag }}"
+            class="badge background-hover bg-transparent border border-dark text-dark me-1 mb-1"
+          >
+            {{ tag }}
+          </a>
+        {% endfor %}
+      </div>
+
+      {% comment %}
+      <!-- TODO: List data sources reference style
+        {% for source in datasets.data_sources %}
+          1. [name](url)
+          etc.
+        {% endfor %}
+      -->
+      {% endcomment %}
+
+      {% comment %}
+      <!-- Optional: Add
+        - history
+        - owner
+        - Dataset ID (DID)
+        - 
+      -->
+
+      <!-- Optional: Load preview into a table? -->
+
+      <!-- Optional: About the Author
+        Picture of the author, name, decription, and contact info.
+      -->
+      {% endcomment %}
+
+    </div>
+  
+  </div>
+
+</section>
+
+  {% comment %}
+    <!-- Optional: Grid of similar datasets -->
+  {% endcomment %}
+
+{% endblock material %}
+
+<!-- JavaScript -->
+{% block page_js %}
+<script>
+  cannlytics.data.initializePayPalPayment();
+</script>
+{% endblock page_js %}
+</html>

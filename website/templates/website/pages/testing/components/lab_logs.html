@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<!--
+  Lab Logs Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/24/2021
+  Updated: 1/9/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+
+  <!-- Placeholder -->
+  <div class="col mt-5">
+    {% include "website/components/placeholders/placeholder.html" with
+      url="#"
+      image="website/images/illustrations/chemist.svg"
+      image_height="120px"
+      title="No activity"
+      message="Changes made to this lab's data will be listed here."
+      only
+    %}
+  </div>
+
+  <!-- TODO: Table of analyses -->
+
+  <!-- Logs JavaScript -->
+  <script>
+    cannlytics.lab.initializeLogs("{{ lab.id }}"); // Passing org ID from Django.
+  </script>
+
+</html>

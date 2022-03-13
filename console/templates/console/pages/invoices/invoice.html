@@ -3,10 +3,13 @@
 <!--
   Invoice Page | Cannlytics Console
   Created: 7/7/2021
-  Updated: 8/16/2021
+  Updated: 2/6/2022
 -->
 {% load icon %}
 {% block console_css %}
+
+  <!-- AG-Grid CSS and JavaScript -->
+  {% include "console/components/tables/ag_grid_scripts.html" %}
 
   <!-- Bootstrap Datepicker -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
@@ -16,11 +19,13 @@
 {% block console_body %}
 
   <!-- Header -->
-  {% include "console/components/links/breadcrumbs.html" with
-    base_page="Invoices"
-    base_page_url="/invoices"
-    current_page=id
-  %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Invoices"
+      base_page_url="/invoices"
+      current_page=id
+    %}
+  </div>
 
   <!-- Tabs -->
   {% if id and id != 'new' %}

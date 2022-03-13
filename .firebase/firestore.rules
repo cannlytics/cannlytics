@@ -9,8 +9,7 @@ service cloud.firestore {
     
     // Allow user's to read their own API key information.
     match /admin/api/api_key_hmacs/{code} {
-      //allow read: if request.auth != null && request.auth.uid == resource.data.uid;
-      allow read: if request.auth != null;
+      allow read: if request.auth != null && request.auth.uid == resource.data.uid;
       allow write: if false;
     }
     

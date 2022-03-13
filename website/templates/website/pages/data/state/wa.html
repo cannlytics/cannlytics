@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<!--
+  Washington (WA) Data Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 9/16/2021
+  Updated: 1/20/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Washington Data | Cannlytics{% endblock %}
+{% block material %}
+
+<!-- Banner -->
+<!-- Optional Suggest (upload) image button -->
+{% include "website/components/heros/hero_banner.html" with
+  title='Washington Data'
+  description='Explore public cannabis data available for Washington.'
+  background_image=''
+  image_url=' '
+  only
+%}
+
+<!-- Licensees tables + charts -->
+<!-- Licensees by license type -->
+
+<!-- Retail Stats -->
+<h2 id="retail-stats" class="text-dark serif mb-0">Retail Stats</h2>
+
+<!-- TODO: Timeseries of sales over time
+- Frequency: 1D, 1W, 3M, 1Y, All
+- Filter by:
+  - date
+  - licensee(s)
+  - proudct type
+  - if name contains
+  - by city, zip
+  - by cannabinoid concentration
+-->
+
+<!-- Production Stats -->
+<h2 id="production-stats" class="text-dark serif mb-0 mt-5">Production Stats</h2>
+
+<!-- TODO: Map of licensees by license type -->
+
+
+<!-- TODO: Time lapse of total plants -->
+
+
+<!-- Optional: Map of transfers -->
+
+
+<!-- Lab Stats -->
+<h2 id="lab-stats" class="text-dark serif mb-0 mt-5">Lab Stats</h2>
+
+<!-- TODO: Distribution of cannabinoids
+Filter by:
+  - analyte
+  - sample type
+  - licensee(s)
+  - license type
+  - city, zip
+  - date
+-->
+
+
+<!-- Charts:
+- Sales by product type
+- Licensees (table)
+- Licensees by license type
+- Monthly average price per ounce (optional: by specific quantity)
+- Production series total plants, etc.
+-->
+
+<!-- Data Blocks
+- Current price <units>: monthly_avg_price_per_punce
+- GDP from Cannabis (2022)
+- Cannabis GDP per Capita (2022)
+- Total licensees
+- Current, last month, and year-to-date sales.
+- population
+- population_source_code
+- population_source
+- licensees_per_capita
+- total_licensees
+- forecast_2022
+-->
+
+<!-- TODO: Discussion -->
+
+
+<!-- TODO: Data Sources -->
+Data is updated daily at 4:20am EDT.
+<span>Page updated: 1/20/2022</span>
+
+<!-- TODO: Data collection routine link -->
+
+{% endblock material %}
+
+

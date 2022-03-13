@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<!--
+  Lab List | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 11/24/2020
+  Updated: 1/17/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% load icon %}
+<div class="mt-3 mb-2 d-flex align-items-center justify-content-between">
+      
+  <!-- Header -->
+  <div>
+    <h4 class="fw-bold text-dark mb-0">Testing Labs</h4>
+  </div>
+
+  <!-- Filters -->
+  <div class="d-flex justify-content-end">
+
+    <!-- Search -->
+    <div
+      id="lab-table-search"
+      class="col-10 d-flex align-items-center pe-0 me-2"
+    >
+      <input
+        aria-label="Search"
+        id="search-input"
+        class="nav-search-input form-control form-control-sm w-100"
+        placeholder="Search"
+        list="searchOptions"
+        name="org_id"
+        oninput="cannlytics.testing.searchLabTable(this)"
+        spellcheck="false"
+        type="text"
+      >
+      <datalist id="searchOptions"></datalist>
+      <button
+        id="search-button"
+        class="nav-search-button btn btn-default p-0"
+        style="transform:translateX(-32px);width:0;"
+      >
+        {% icon 'search' width="20px" height="20px" class="text-secondary pb-1" %}
+      </button>
+    </div>
+
+    <!-- Clear Search Button -->
+    <div>
+      <button
+        id="clear-button"
+        class="nav-search-button btn btn-default p-0 d-none"
+        style="transform:translateX(-64px);width:0;"
+        title="Clear search"
+      >
+        {% icon 'x-circle' width="16px" height="16px" class="text-secondary" %}
+      </button>
+    </div>
+
+    <!-- State select -->
+    <select
+      id="lab-state-selection"
+      class="app-action form-select form-select-sm btn-sm-light btn-md-light"
+      aria-label="State select"
+      style="width:80px;"
+      onchange="cannlytics.testing.filterLabsByState(this);"
+    >
+      <option selected value="all">All States</option>
+    </select>
+
+    <!-- Download Button -->
+    <button
+      type="button"
+      class="btn btn-sm bg-gradient-green text-nowrap text-white serif ms-2"
+      {% if not user %}
+      data-bs-target="#sign-in-dialog"
+      data-bs-toggle="modal"
+      {% else %}
+      onclick="cannlytics.testing.downloadLabData()"
+      {% endif %}
+    >
+      Download Data
+    </button>
+
+  </div><!-- End of filters -->
+
+</div><!-- End of options -->
+
+<!-- Loading placeholder -->
+<div id="loading-placeholder">
+  {% include "website/components/placeholders/loading_placeholder.html" with
+    height='540px'
+    width='100%'
+    only
+  %}
+</div>
+
+<!-- AG Grid Table -->
+<div id="data-table" class="d-none">
+  <div
+    id="labs-table"
+    class="ag-theme-alpine-dark"
+    style="height:540px; width:100%;"
+  ></div>
+</div>
+
+<!-- More options -->
+<div class="d-flex justify-content-end mt-3">
+  <button
+    id="view-all-labs"
+    class="btn btn-sm btn-sm-light btn-md-light"
+    onclick="cannlytics.testing.viewAllLabs();"
+  >
+    View All
+  </button>
+  <button
+    id="view-less-labs"
+    class="btn btn-sm btn-sm-light btn-md-light d-none"
+    onclick="cannlytics.testing.viewLessLabs();"
+  >
+    View Less
+  </button>
+</div>
+
+<!-- Add Lab Button -->
+<div class="d-flex align-items-center justify-content-center mb-5">
+  <div class="d-flex flex-column align-items-start justify-content-center mt-5">
+    <p class="text-dark text-center text-small fs-6 font-weight-light">
+      <a
+        class="background-hover fs-6 fw-bold text-dark serif"
+        href="{% url 'lab' lab='new' %}"
+      >
+        Is your lab missing? Have your lab added to the list &rarr;
+      </a>
+    </p>
+  </div>
+</div>
+
+
+<!-- JavaScript -->
+{% block page_js %}
+<script>
+
+  // Initialize labs table.
+  cannlytics.testing.initializeLabsTable();
+
+</script>
+{% endblock page_js %}
+</html>

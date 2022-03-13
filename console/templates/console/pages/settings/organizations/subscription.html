@@ -4,7 +4,7 @@
   Subscription Management | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 7/18/2021
-  Updated: 8/14/2021
+  Updated: 1/13/2022
   Params:
     settings
 -->
@@ -33,7 +33,7 @@
         name="subscription"
         class="form-select form-select-sm"
         aria-label="Subscription"
-        onchange="changeSubscription()"
+        onchange="cannlytics.payments.showSubscription()"
       >
         {% for option in settings.subscriptions %}
           <option value="{{ option.name }}">

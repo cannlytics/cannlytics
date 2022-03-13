@@ -11,7 +11,7 @@
 {% load static icon %}
 
   <!-- Form -->
-  <form id="organization-form" class="my-3 {{ optional_class }}">
+  <form id="organization-form" class="mt-4 mb-5 {{ optional_class }}">
     <div class="row px-3">
 
       <!-- Image -->
@@ -52,6 +52,7 @@
         </h2>
 
         <!-- Primary Fields -->
+        <!-- FIXME: Don't display organization type -->
         {% for item in organization_context.fields %}
           {% if not item.secondary %}
             <div class="row mb-3">

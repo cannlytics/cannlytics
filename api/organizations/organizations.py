@@ -1,35 +1,42 @@
 """
 Organizations API Views | Cannlytics API
+Copyright (c) Cannlytics
+
+Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/25/2021
-Updated: 9/4/2021
+Updated: 1/13/2022
+License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 
 Description: API to interface with organizations.
 """
-
-# Standard imports
+# Standard imports.
 from json import loads
+from django.core.mail import send_mail
 
-# External imports
+# External imports.
 import google.auth
 from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-# Internal imports
+# Internal imports.
 from cannlytics.firebase import (
     access_secret_version,
     add_secret_version,
     create_secret,
     create_log,
+    delete_document,
     get_custom_claims,
     get_collection,
     get_document,
     update_custom_claims,
     update_document,
+    update_documents,
 )
-from cannlytics.traceability.metrc import authorize
 from api.auth.auth import authenticate_request #pylint: disable=import-error
+from api.traceability.traceability import initialize_traceability
+from console.settings import DEFAULT_FROM_EMAIL, LIST_OF_EMAIL_RECIPIENTS
 
 
 @api_view(['GET'])
@@ -54,8 +61,8 @@ def labs(request):
             filters.append({'key': 'state', 'operation': '==', 'value': state})
 
         # Query and return the docs.
-        docs = get_collection('labs', filters=filters, order_by=order_by, desc=True)
-        return Response({'data': docs}, status=200)
+        docs = get_collection('public/data/labs', filters=filters, order_by=order_by, desc=False)
+        return Response({'data': docs})
 
 
 @api_view(['GET'])
@@ -78,13 +85,38 @@ def organization_team(request, organization_id=None, user_id=None):
             return Response({'data': team_members}, content_type='application/json')
         else:
             message = 'You are not a member of the requested organization.'
-            return Response({'error': True, 'message': message}, status=403)
+            return Response({'success': False, 'message': message}, status=403)
     except KeyError:
         message = 'You are not a member of any teams. Try authenticating.'
-        return Response({'error': True, 'message': message}, status=401)
+        return Response({'success': False, 'message': message}, status=401)
 
 
-@api_view(['GET', 'POST'])
+def invite_user_to_organization(uid, organization_id, organization_name):
+    """Invite a user to an organization."""
+    member_data = get_document(f'users/{uid}')
+    member_claims = get_custom_claims(uid)
+    member_team = member_claims.get('team', [])
+    member_team.append(organization_id)
+    # FIXME: Allow multiple organizations.
+    new_member_claims = {
+        # 'owner': member_claims.get('owner', []),
+        # 'qa': member_claims.get('qa', []),
+        # 'team': member_team,
+        'owner': organization_id,
+        'qa': organization_id,
+        'team': organization_id,
+    }
+    update_custom_claims(uid, claims=new_member_claims)
+    send_mail(
+        subject=f"Invitation to join {organization_name}",
+        message=f"You've been invited by the owner to join {organization_name}.",
+        from_email=DEFAULT_FROM_EMAIL,
+        recipient_list=LIST_OF_EMAIL_RECIPIENTS + member_data['email'],
+        fail_silently=False,
+    )
+
+
+@api_view(['GET', 'POST', 'DELETE'])
 def organizations(request, organization_id=None, type='lab'):
     """Get, create, or update organizations.
     E.g.
@@ -99,44 +131,61 @@ def organizations(request, organization_id=None, type='lab'):
             }
         ```
     """
+    # Authenticate the user. 
+    claims = authenticate_request(request)
+    unauthenticated = False
+    try:
+        uid = claims['uid']
+    except KeyError:
+        unauthenticated = True
+
+    # Return publically available information if the authentication fails.
+    if unauthenticated or request.query_params.get('public'):
+        filters = [{'key': 'public', 'operation': '==', 'value': True}]
+        limit = request.query_params.get('limit')
+        # order_by = request.query_params.get('order_by', 'name')
+        data = get_collection(
+            'organizations',
+            filters=filters,
+            limit=limit,
+            # order_by=order_by,
+        )
+        response = {'success': True, 'data': data, 'message': 'Unable to authenticate.'}
+        return Response(response)
 
     # Get endpoint variables.
     model_type = 'organizations'
     _, project_id = google.auth.default()
-    claims = authenticate_request(request)
-    uid = claims['uid']
-    print('User request to organizations:', uid)
 
     # Get organization(s).
     if request.method == 'GET':
 
         # Get organization_id parameter
         if organization_id:
-            print('Query organizations by ID:', organization_id)
             data = get_document(f'{model_type}/{organization_id}')
-            print('Found data:', data)
             if not data:
                 message = 'No organization exists with the given ID.'
-                return Response({'error': True, 'message': message}, status=404)
+                return Response({'success': False, 'message': message}, status=404)
             elif data['public']:
-                return Response({'data': data}, status=200)
+                return Response({'data': data})
             elif uid not in data['team']:
-                message = 'This is a private organization and you are not a team member. Request to join before continuing.'
-                return Response({'error': True, 'message': message}, status=400)
+                message = """This is a private organization and you are not
+                authenticated as a team member. You will need to request to
+                join the organization or fix authentication before continuing."""
+                return Response({'success': False, 'message': message}, status=400)
             else:
-                return Response({'data': data}, status=200)
+                return Response({'data': data})
 
-        # TODO: Get query parameters.
+        # TODO: Get more query parameters.
         keyword = request.query_params.get('name')
         if keyword:
-            print('Query by name:', keyword)
             query = {
                 'key': 'name',
                 'operation': '==',
                 'value': keyword
             }
             docs = get_collection(model_type, filters=[query])
-            return Response({'data': docs}, status=200)
+            return Response({'data': docs})
 
         # Get all of a user's organizations
         else:
@@ -146,126 +195,146 @@ def organizations(request, organization_id=None, type='lab'):
                 'value': uid
             }
             docs = get_collection(model_type, filters=[query])
-            return Response({'data': docs}, status=200)
-
-        # Optional: Get list of other organizations.
-        # Check if user is in organization's team, otherwise,
-        # only return publically available information.
+            return Response({'data': docs})
 
         # Optional: Try to get facility data from Metrc.
         # facilities = track.get_facilities()
-
 
     # Create or update an organization.
     elif request.method == 'POST':
 
         # Update an organization with the posted data if there is an ID.
         data = loads(request.body.decode('utf-8'))
-        if organization_id:
+        if organization_id is None:
+            organization_id = slugify(data['name'])
 
-            # Return an error if the organization does not exist.
-            doc = get_document(f'{model_type}/{organization_id}')
-            if not doc:
-                message = 'No data exists for the given ID.'
-                return Response({'error': True, 'message': message}, status=400)
-            
-            # Return an error if the user is not part of the organization's team.
-            team_list = claims.get('team', [])
-            owner_list = claims.get('owner', [])
-            if uid not in team_list and organization_id not in owner_list:
-                message = 'You do not currently belong to this organization. Request to join before continuing.'
-                return Response({'error': True, 'message': message}, status=400)
+        # Create organization if it doesn't exist.
+        # On organization creation, the creating user get custom claims.
+        doc = get_document(f'{model_type}/{organization_id}')
+        if not doc:
+            team = data.get('team', [])
+            doc['organization_id'] = organization_id
+            doc['team'] = [uid] + team
+            doc['owner'] = uid
+            doc['type'] = data.get('type')
+            data_models = get_collection('public/state/data_models')
+            refs = []
+            datasets = []
+            for data_model in data_models:
+                key = data_model['key']
+                refs.append(f'{model_type}/{organization_id}/data_models/{key}')
+                datasets.append(data_model)
+            update_documents(refs, datasets)
+            current_owner = claims.get('owner', [])
+            current_qa = claims.get('qa', [])
+            current_team = claims.get('team', [])
+            current_owner.append(organization_id)
+            current_team.append(organization_id)
+            current_qa.append(organization_id)
+            # FIXME: Need to allow multiple organizations.
+            new_claims = {
+                # 'owner': current_owner,
+                # 'qa': current_qa,
+                # 'team': current_team,
+                'owner': organization_id,
+                'qa': organization_id,
+                'team': organization_id,
+            }
+            update_custom_claims(uid, claims=new_claims)
+            if team:
+                for member in team:
+                    invite_user_to_organization(member, organization_id, data['name'])
 
-            # If an organization already exists, then only the owner
-            # can edit the organization's team.
-            if uid != doc['owner']:
-                data['team'] = doc['team']
+        # Return an error if the user is not part of the organization's team.
+        else:
+            team_list = doc.get('team', [])
+            if uid not in team_list:
+                message = """You do not currently belong to this organization.
+                You will need to request to join the organization or fix your
+                authentication before continuing."""
+                return Response({'success': False, 'message': message}, status=400)
 
-            # Store posted API keys as secrets.
-            # FIXME: Update licenses if they are being edited.
-            new_licenses = data.get('licenses')
-            if new_licenses:
-                licenses = doc.get('licenses', [])
-                for license_data in new_licenses:
-                    license_number = license_data['license_number']
-                    secret_id = f'{license_number}_secret'
-                    try:
-                        create_secret(
-                            project_id,
-                            secret_id,
-                            license_data['user_api_key']
-                        )
-                    except:
-                        pass
-                    secret = add_secret_version(
+        # If an organization already exists, then only the owner can edit the
+        # organization's team. Owners can add other users to the team and the
+        # receiving user gets the `organization_id` in their `team` claims.
+        # Only the owner can change the ownership of the organization.
+        if uid != doc['owner']:
+            data['team'] = doc['team']
+            data['owner'] = doc['owner']
+        else:
+            current_team = doc['team']
+            new_team = data.get('team', current_team)
+            current_team.sort()
+            new_team.sort()
+            if current_team != new_team:
+                new_team_members = list(set(current_team).difference(new_team))
+                for member in new_team_members:
+                    invite_user_to_organization(member, organization_id, doc['name'])
+
+        # Store posted API keys as secrets.
+        # FIXME: Update licenses if they are being edited.
+        new_licenses = data.get('licenses')
+        if new_licenses:
+            licenses = doc.get('licenses', [])
+            for license_data in new_licenses:
+                license_number = license_data['license_number']
+                secret_id = f'{license_number}_secret'
+                try:
+                    create_secret(
                         project_id,
                         secret_id,
                         license_data['user_api_key']
                     )
-                    version_id = secret.split('/')[-1]
-                    license_data['user_api_key_secret'] = {
-                        'project_id': project_id,
-                        'secret_id': secret_id,
-                        'version_id': version_id,
-                    }
-                    del license_data['user_api_key']
-                    licenses.append(license_data)
-                doc['licenses'] = licenses
-
-        # Create organization if it doesn't exist
-        # All organizations have a unique `organization_id`.
-        else:
-            doc = {}
-            organization_id = slugify(data['name'])
-            doc['organization_id'] = organization_id
-            doc['team'] = [uid]
-            doc['owner'] = uid
-
-            # Identify created organization type.
-            doc['type'] = type
-
-            # All organizations start with the standard data models.
-            # FIXME: Remove data models that have permissions
-            # if the user does not have sufficient claims.
-            data_models = get_collection('public/state/data_models')
-            for data_model in data_models:
-                key = data_model['key']
-                update_document(f'{model_type}/{organization_id}/data_models/{key}', data_model)
+                except:
+                    pass
+                secret = add_secret_version(
+                    project_id,
+                    secret_id,
+                    license_data['user_api_key']
+                )
+                version_id = secret.split('/')[-1]
+                license_data['user_api_key_secret'] = {
+                    'project_id': project_id,
+                    'secret_id': secret_id,
+                    'version_id': version_id,
+                }
+                del license_data['user_api_key']
+                licenses.append(license_data)
+            doc['licenses'] = licenses
 
         # Create or update the organization in Firestore.
         entry = {**doc, **data}
-        print('Entry:', entry)
         update_document(f'{model_type}/{organization_id}', entry)
 
-        # FIXME:
-        # On organization creation, the creating user get custom claims.
-        update_custom_claims(uid, claims={
-            'owner': organization_id,
-            'team': organization_id
-        })
-
-        # TODO:  Owners can add other users to the team and
-        # the receiving user then gets the claims.
-        # team: [organization_id, ...]
-
         # Create activity log.
-        changes = [data]
         create_log(
             f'{model_type}/{uid}/logs',
             claims=claims,
             action='Updated organization data.',
             log_type=model_type,
             key=f'{model_type}_data',
-            changes=changes
+            changes=[data]
         )
-
-        return Response({'data': entry, 'success': True}, content_type='application/json')
+        return Response({'success': True, 'data': entry}, content_type='application/json')
 
     elif request.method == 'DELETE':
 
-        # TODO: Only user's with organization_id in owner claim can delete the organization.
-
-        return Response({'error': 'not_implemented'}, content_type='application/json')
+        # Only the organization owner can delete the organization.
+        doc = get_document(f'{model_type}/{organization_id}')
+        if uid != doc['owner']:
+            message = 'You are not the owner of this organization and cannot delete it.'
+            return Response({'success': False, 'message': message}, content_type='application/json')
+        delete_document(f'{model_type}/{organization_id}')
+        message = 'Organization and its data successfully deleted.'
+        create_log(
+            f'{model_type}/{uid}/logs',
+            claims=claims,
+            action='Deleted organization data.',
+            log_type=model_type,
+            key=f'{model_type}_data',
+            changes=[doc]
+        )
+        return Response({'success': True, 'message': message}, content_type='application/json')
 
 #-----------------------------------------------------------------------
 # Organization team and employees
@@ -277,6 +346,7 @@ def team(request):
     return NotImplementedError
 
 
+# FIXME: Is this a duplicate of /traceability/employees?
 @api_view(['GET'])
 def employees(request):
     """Get a licenses employees from Metrc.
@@ -288,29 +358,14 @@ def employees(request):
     claims = authenticate_request(request)
     if not claims:
         message = 'Authentication failed. Please use the console or provide a valid API key.'
-        return Response({'error': True, 'message': message}, status=403)
+        return Response({'success': False, 'message': message}, status=403)
     _, project_id = google.auth.default()
     license_number = request.query_params.get('name')
-
-    # Optional: Figure out how to pre-initialize a Metrc client.
-
-    # Get Vendor API key using secret manager.
-    # FIXME: Determine where to store project_id, secret_id, and version_id.
-    vendor_api_key = access_secret_version(
-        project_id=project_id,
-        secret_id='metrc_vendor_api_key',
-        version_id='1'
-    )
-
-    # TODO: Get user API key using secret manager.
-    user_api_key = access_secret_version(
-        project_id=project_id,
-        secret_id=f'{license_number}_secret',
-        version_id='1'
-    )
-
+    
     # Create a Metrc client.
-    track = authorize(vendor_api_key, user_api_key)
+    # FIXME: Also pass state and primary license? | Pass state as version ID?
+    # Optional: Figure out how to pre-initialize a Metrc client.
+    track = initialize_traceability(project_id, license_number, '1')
 
     # Make a request to the Metrc API.
     data = track.get_employees(license_number=license_number)
@@ -324,7 +379,6 @@ def employees(request):
 #-----------------------------------------------------------------------
 
 # TODO: Implement organization actions:
-
 
 def change_primary_organization():
     """Change the primary organization."""
@@ -360,6 +414,8 @@ def promote_organization_owner():
 
 def join_organization(request):
     """Send the owner of an organization a request for a user to join."""
+
+    # FIXME: This needs to be refactored!!!
 
     # Identify the user.
     claims = authenticate_request(request)

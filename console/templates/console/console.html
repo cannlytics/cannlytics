@@ -1,83 +1,86 @@
 <!doctype html>
 <html>
-  <!-- Cannlytics Console -->
-  <!-- Created: 11/26/2020 | Thanksgiving -->
-  <!-- Updated: 8/22/2021 -->
-  {% extends "console/base.html" %}
-  {% load static %}
+<!--
+  Console | Cannlytics Console
+  Created: 11/26/2020 | Thanksgiving
+  Updated: 12/5/2021
+-->
+{% extends "console/base.html" %}
+{% load static %}
 
-  <!-- Title -->
-  {% block title %}
-    {% if unit %}
-      {{ unit|title }}
-    {% elif section %}
-      {{ section|title }}
-    {% elif screen %}
-      {{ screen|title }}
-    {% else %}Dashboard{% endif %} | Cannlytics
-  {% endblock %}
+<!-- Title -->
+{% block title %}
+  {% if unit %}
+    {{ unit|title }}
+  {% elif section %}
+    {{ section|title }}
+  {% elif screen %}
+    {{ screen|title }}
+  {% else %}Dashboard{% endif %} | Cannlytics
+{% endblock %}
 
-  <!-- Console header -->
-  {% block page_css %}
-    {% block console_css %}{% endblock console_css %}
-  {% endblock %}
+<!-- Headers -->
+{% block page_css %}
 
-  <!-- Console Template -->
-  {% block page %}
+  <!-- Screen-specific CSS -->
+  {% block console_css %}{% endblock console_css %}
 
-    <!-- Set the theme after the body, but before the page, loads. -->
-    <script>
-      cannlytics.theme.setInitialTheme();
-    </script>
+{% endblock page_css %}
 
-    <!-- Top Navigation -->
-    {% include "console/layout/topbar.html" with
-      navbar=navbar
-      version=APP_VERSION_NUMBER
-      user=user
-      organizations=organizations
-      only
-    %}
+<!-- Page -->
+{% block page %}
 
-    <!-- Console -->
-    <div class="container-fluid">
-      <div class="row">
-        
-        <!-- Side Navigation | For users with organizations -->
-        {% if organizations %}
-          {% include "console/layout/sidebar.html" with
-            screen=screen
-            data_models=data_models
-            user=user
-            organizations=organizations
-            only
-          %}
-        {% endif %}
+  <!-- Set the theme after the body, but before the page, loads. -->
+  <script>
+    cannlytics.theme.setInitialTheme();
+  </script>
 
-        <!-- Dynamic Body -->
-        {% block console_body %}{% endblock console_body %}
-        
-      </div>
+  <!-- Top Navigation -->
+  {% include "console/layout/topbar.html" with
+    navbar=navbar
+    version=APP_VERSION_NUMBER
+    user=user
+    organizations=organizations
+    only
+  %}
+
+  <!-- Console -->
+  <div id="console" class="container-fluid">
+    <div class="row">
+      
+      <!-- Side Navigation -->
+      {% include "console/layout/sidebar.html" with
+        screen=screen
+        data_models=data_models
+        user=user
+        organizations=organizations
+        only
+      %}
+
+      <!-- Dynamic Body -->
+      {% block console_body %}{% endblock console_body %}
+      
     </div>
+  </div>
 
-    <!-- Footer -->
-    {% include "console/layout/footer.html" %}
+  <!-- Footer -->
+  {% include "console/layout/footer.html" %}
 
-    <!-- Notifications -->
-    {% include "console/components/notifications/notification_toast.html" %}
+  <!-- Notifications -->
+  {% include "console/components/notifications/notification_toast.html" %}
 
-  {% endblock %}
+{% endblock page %}
 
-  <!-- Console JavaScript -->
-  {% block page_js %}
+<!-- Console JavaScript -->
+{% block page_js %}
 
-    <!-- Initialize the console -->
-    <script>
-      cannlytics.app.initialize();
-    </script>
+  <!-- Initialize the console -->
+  <script>
+    cannlytics.app.initialize();
+  </script>
 
-    <!-- Page-specific JavaScript -->
-    {% block console_js %}{% endblock console_js %}
+  <!-- Screen-specific JavaScript -->
+  {% block console_js %}{% endblock console_js %}
 
-  {% endblock page_js %}
+{% endblock page_js %}
 </html>

@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+<!--
+  Support Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/15/2021
+  Updated: 1/10/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Support | Cannlytics{% endblock %}
+{% block page_css %}
+
+  <!-- PayPal Client-->
+  <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+
+{% endblock page_css %}
+{% block material %}
+  <div class="products">
+    
+    <!-- Hero -->
+    {% include "website/components/heros/hero_banner.html" with
+      title="Software Support"
+      description="In addition to crafting you awesome software, we can meet you where you are and assist you with custom solutions."
+      only
+    %}
+
+    <!-- Pricing Options -->
+    <div class="container mb-5">
+
+      <!-- Introduction -->
+      <div class="container mt-3">
+        <div class="markdown py-5" style="max-width:560px;">
+          <svg class="pe-1" style="float:left;width:125px;height:125px;">
+            <use href="{% static "website/images/emojies/atronaut.svg" %}#atronaut-emoji"></use>
+          </svg>
+          <h1 class="pt-4 text-dark">Support Options</h1>
+          <p class="mt-2">
+            Explore your Cannlytics support options.
+          </p>
+        </div>
+      </div>
+
+      <!-- Tiers -->
+      <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+        {% for item in support.pricing_tiers %}
+          <div class="col-8 col-md-6 col-lg-4">
+            <div class="card mb-4 shadow-sm">
+              <div class="card-header bg-gradient-{{ item.color }}">
+                <h4 class="font-weight-normal text-white my-0">
+                  {{ item.name }}
+                </h4>
+              </div>
+              <div class="card-body bg-transparent d-flex flex-column justify-content-between align-items-center">
+                <h1 class="text-dark card-title pricing-card-title">
+                  {{ item.price }}
+                </h1>
+                <ul class="text-dark list-unstyled mt-3 mb-4 text-start w-75">
+                  {% for attribute in item.attributes %}
+                    <li class="fs-6 mb-1">
+                      <svg class="" style="width:24px;height:24px;">
+                        <use href="{% static "website/images/emojies/check.svg" %}#check-emoji"></use>
+                      </svg>
+                      <small class="serif text-dark">
+                        {{ attribute }}
+                      </small>
+                    </li>
+                  {% endfor %}
+                </ul>
+                <div id="paypal-{{ item.plan_name }}"></div>
+                {% comment %} <a
+                  type="button"
+                  class="btn btn-sm btn-block bg-gradient-{{ item.color }} serif text-white"
+                  href="{{ item.url }}"
+                >
+                  {{ item.action }}
+                </a> {% endcomment %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div><!-- End of tiers -->
+
+      <!-- Note -->
+      <p class="markdown fs-6 serif text-dark w-50">
+        <small>
+          * If Cannlytics is verified with Metrc in your state and your company is licensed.
+          Please <a class="serif" href="{% url 'index' %}#metrc">check our current validation list</a>
+          and request your state if you
+          do not see your state in the list.
+        </small>
+      </p>
+
+      <!-- Historic Lab Result Migration -->
+      <div class="container mb-5 mt-5">
+        <div class="markdown py-5" style="max-width:560px;">
+          <svg class="pt-3 pe-3" style="float:left;width:125px;height:125px;">
+            <use href="{% static "website/images/emojies/sparkler.svg" %}#sparkler-emoji"></use>
+          </svg>
+          <h1 class="pt-4 text-dark">Historic Lab Data Migration</h1>
+          <p class="mt-2">
+            Your laboratory data are valuable to you and your clients,
+            therefore, you can have us work to migrate your
+            historic lab data into a user-firendly format that you can
+            interact with programatically with the 
+            <a href="{% url 'page' page='api' %}">Cannlytics API</a>
+            and manage in the <a href="https://console.cannlytics.com/account/sign-in">Cannlytics Console</a>.
+          </p>
+          <p class="text-start mt-3">
+            <a
+              class="btn btn-sm bg-gradient-green text-white"
+              href="{% url 'page' page='contact' %}?topic=data-migration"
+            >
+              <small>Request a quote</small> &rarr;
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Consulting -->
+      <div class="container mb-5 mt-3">
+        <div class="markdown" style="max-width:560px;">
+          <svg class="pt-3 pe-3" style="float:left;width:125px;height:125px;">
+            <use href="{% static "website/images/emojies/toolbox.svg" %}#toolbox-emoji"></use>
+          </svg>
+          <h1 class="pt-4 text-dark">Consulting and Custom Development</h1>
+          <p class="mt-2">
+            You can employ the Cannlytics team to help you solve any problems at hand.
+            In general, the Cannlytics team is available for <strong>$500 per significant
+            feature</strong> or for <strong>$60 per hour</strong>.
+            We are always happy to talk and help you find your best-possible solution.
+          </p>
+          <p class="text-start mt-3">
+            <a
+              class="btn btn-sm bg-gradient-orange text-white"
+              href="{% url 'page' page='contact' %}?topic=custom"
+            >
+              <small>Request a job</small> &rarr;
+            </a>
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Vines -->
+  {% include "website/components/art/vines.html" %}
+
+{% endblock material %}
+
+<!-- JavaScript -->
+{% block page_js %}
+<script>
+  cannlytics.payments.initializeSupport();
+</script>
+{% endblock page_js %}
+
+</html>

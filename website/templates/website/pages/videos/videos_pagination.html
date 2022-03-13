@@ -1,0 +1,47 @@
+
+<!doctype html>
+<html>
+<!--
+  Video Pagination | Cannlytics Website
+  Created: 11/15/2021
+  Updated: 11/15/2021
+  Params:
+    video_list
+-->
+  <section class="container">
+    <nav aria-label="Video pagination" class="px-3">
+      <ul class="pagination pagination-sm justify-content-end">
+        <li class="page-item {% if request.GET.page == '1' or not request.GET.page %}disabled{% endif %}">
+          <a
+            class="page-link text-dark bg-transparent {% if request.GET.page != last_page %}text-dark{% endif %}"
+            href="{% url 'videos' %}?page={{ request.GET.page|add:"-1" }}"
+            tabindex="-1"
+            {% if request.GET.page == '1' or not request.GET.page %}aria-disabled="true"{% endif %}
+          >
+            Previous
+          </a>
+        </li>
+        {% for i in page_index %}
+          <li
+            class="page-item">
+              <a
+                class="page-link bg-transparent {% if i == request.GET.page|add:"-1" or not request.GET.page and i == 0%}cannlytics-dark-orange-text fw-bold{% else %}text-dark{% endif %}"
+                href="{% url 'videos' %}?page={{ i|add:"1" }}"
+              >
+                {{ i|add:"1" }}
+              </a>
+            </li>
+        {% endfor %}
+        <li class="page-item {% if request.GET.page == last_page %}disabled{% endif %}">
+          <a
+            class="page-link bg-transparent {% if request.GET.page != last_page %}text-dark{% endif %}"
+            href="{% url 'videos' %}?page={{ request.GET.page|add:"1" }}"
+          >
+            Next
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </section>
+
+</html>

@@ -1,8 +1,11 @@
 /**
  * Analytics JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021 Cannlytics
+ * 
+ * Authors: Keegan Skeate
  * Created: 8/1/2021
  * Updated: 8/1/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
 
 // Import any needed charting libraries.
@@ -11,20 +14,16 @@
 
 import { authRequest, deserializeForm, serializeForm, showNotification } from '../utils.js';
 
-
 export const analytics = {
 
-
   initialize() {
-    /*
+    /**
      * Initialize analytics.
      */
-    console.log('TODO: Initialize any analytics...')
   },
 
-
   getAnalytics() {
-    /*
+    /**
      * Get analytics through the API.
      */
     const form = document.getElementById('analytics-form');
@@ -39,6 +38,5 @@ export const analytics = {
       }
     });
   },
-
 
 }

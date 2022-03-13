@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<!--
+  Hero Featurette
+  Created: 1/9/2021
+  Updated: 11/26/2021
+-->
+{% load static %}
+<div class="container mb-5">
+  <div class="row featurette mt-5">
+    <div class="col-md-7">
+      <h3 class="serif text-gradient-reverse pb-3 mt-0">
+        {{ title }}
+      </h3>
+      <p class="fs-6 double-line text-dark text-start text-muted">
+        {{ description }}
+      </p>
+    </div>
+    <div class="col-md-5">
+      <img
+        src="{% static image_path %}"
+        width="100%"
+      >
+    </div>
+  </div>
+</div>
+</html>

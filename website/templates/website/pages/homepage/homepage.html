@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<!--
+  Home Page | Cannlytics
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/5/2020
+  Updated: 12/24/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Welcome | Cannlytics{% endblock %}
+{% block material %}
+  <div class="homepage pb-5 overflow-hidden">
+
+    <!-- Hero -->
+    {% include "website/pages/homepage/components/hero.html" with hero=homepage.hero only %}
+
+    <!-- Features -->
+    {% include "website/pages/homepage/components/features.html" with features=homepage.features only %}
+
+    <!-- Wave -->
+    <div class="wave small upside-down" >
+      <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+        <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
+      </svg>
+    </div>
+
+    <!-- Featurettes -->
+    {% comment %} {% include "./featurettes.html" with featurettes=homepage.featurettes only %} {% endcomment %}
+
+    <!-- Demo -->
+    {% include "website/pages/homepage/components/demo.html" %}
+
+    <!-- Partners -->
+    {% comment %} {% include "website/components/banners/partners_banner.html" %} {% endcomment %}
+
+    <!-- List of Metrc Validations -->
+    {% include "website/pages/homepage/components/metrc_state_list.html" with verifications=verifications only %}
+
+    <!-- Call to Action -->
+    {% include "website/pages/homepage/components/call_to_action.html" with app=app only %}
+
+    <!-- Video Banner -->
+    {% include "website/components/banners/video_banner.html" %}
+
+    <!-- Optional: List Cannlytics products and links to each GitHub repository | card style
+      - Cannlytics AI
+      - Cannlytics API
+      - Cannlytics App
+      - Cannlytics Console
+      - Cannlytics Engine
+    -->
+
+  </div>
+
+  <!-- Vines -->
+  {% include "website/components/art/vines.html" %}
+
+{% endblock %}
+
+<!-- Homepage JavaScript -->
+{% block page_js %}
+  <script>
+
+    function CopyToClipboard(id) {
+      /**
+       * Copy a block of code to the clipboard.
+       * @param {String} id An element ID with text contents.
+       */
+      if (window.getSelection) {
+        if (window.getSelection().empty) { // Chrome
+          window.getSelection().empty();
+        } else if (window.getSelection().removeAllRanges) { // Firefox
+          window.getSelection().removeAllRanges();
+        }
+      } else if (document.selection) { // IE
+        document.selection.empty();
+      }
+      if (document.selection) {
+        var range = document.body.createTextRange();
+        range.moveToElementText(document.getElementById(id));
+        range.select().createTextRange();
+        document.execCommand('copy');
+      } else if (window.getSelection) {
+        var range = document.createRange();
+        range.selectNode(document.getElementById(id));
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+      }
+    }
+
+    // Optional: Re-code without jQuery.
+    $('.copy-btn').on('click', function(event) {
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      var block = $(`#${event.currentTarget.id}`).siblings()[0];
+      var code = $(`#${block.id}`).find('.code-block')[0];
+      CopyToClipboard(code.id);
+    });
+
+  </script>
+{% endblock %}
+
+</html>

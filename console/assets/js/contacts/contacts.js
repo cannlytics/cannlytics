@@ -1,18 +1,24 @@
 /**
  * Contacts JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 12/3/2020
- * Updated: 6/9/2021
+ * Updated: 12/14/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
 
  export const contacts = {
 
   logLimit: 10,
 
-
   async renderTable(model, modelSingular, orgId, data) {
-    /*
+    /**
      * Render a data table in the user interface.
+     * @param {String} model
+     * @param {String} modelSingular
+     * @param {String} orgId
+     * @param {Array} data
      */
 
     // Render the table if it's the first time that it's shown.
@@ -26,7 +32,6 @@
   
       // Get data model fields from organization settings.
       this.dataModel = await getDocument(`organizations/${orgId}/data_models/${model}`);
-      console.log('Data Model:', this.dataModel);
       const columnDefs = this.dataModel.fields.map(function(e) { 
         return { headerName: e.label, field: e.key, sortable: true, filter: true };
       });
@@ -58,26 +63,35 @@
 
   },
 
-
-  streamLogs(model, modelId, orgId) {
-    /*
+  streamLogs(model, modelId, orgId, orderBy = '', desc = false) {
+    /**
      * Stream logs, listening for any changes.
+     * @param {String} model A type of data model to filter the stream logs of by.
+     * @param {String} modelId A specific data model to stream its logs.
+     * @param {String} orgId The organization ID of the logs to retrieve.
+     * @param {String} orderBy A field to order logs by. 
+     * @param {Boolean} desc Whether or not the logs should be in descending order.
      */
-    const desc = false;
-    const orderBy = null;
-    db.collection('organizations').doc(orgId).collection('logs')
-      .where('key', '==', modelId)
-      .orderBy(orderBy, 'desc')
-      .limit(this.logLimit)
-      .onSnapshot((querySnapshot) => {
-        const data = [];
-        querySnapshot.forEach((doc) => {
-          data.push(doc.data());
-        });
-        console.log('Logs:', data);
-        // if (data.length) this.drawTable(model, modelSingular, orgId, data);
-        // else this.drawPlaceholder();
+    // FIXME:
+    const path = `contacts/${orgId}/logs`;
+    const filters = [];
+    if (model) filters.push({ key: 'type', operation: '==', value: model });
+    else if (modelId) filters.push({ key: 'key', operation: '==', value: modelId });
+    const params = {
+      desc,
+      filters,
+      order: orderBy,
+      max: this.logLimit,
+    };
+    listenToCollection(path, params, (querySnapshot) => {
+      const data = [];
+      querySnapshot.forEach((doc) => {
+        data.push(doc.data());
       });
+      // FIXME: Does this need to be rendered?
+      // if (data.length) this.drawTable(model, modelSingular, orgId, data);
+      // else this.drawPlaceholder();
+    });
   },
 
 }

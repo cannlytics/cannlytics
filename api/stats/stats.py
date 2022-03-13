@@ -1,8 +1,13 @@
 """
 Stats Views | Cannlytics API
-Created: 4/21/2021
+Copyright (c) 2021-2022 Cannlytics
 
-API to interface with laboratory statistics.
+Authors: Keegan Skeate <keegan@cannlytics.com>
+Created: 4/21/2021
+Updated: 12/5/2021
+License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+
+Description: API to interface with laboratory statistics.
 """
 
 from rest_framework import status

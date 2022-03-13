@@ -3,23 +3,26 @@
 <!--
   Join Organizations Page | Cannlytics Console
   Created: 4/26/2021
-  Updated: 6/18/2021
+  Updated: 2/6/2022
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block console_body %}
-<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
 
   <!-- Header -->
-  <!-- Optional: Add settings base breadcrumb -->
-  {% include "console/components/links/breadcrumbs.html" with
-    base_page='Organization settings'
-    base_page_url='/settings/organizations'
-    current_page='Join an organization'
-  %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page='Settings'
+      base_page_url='/settings'
+      nested_page='Organizations'
+      nested_page_url='/settings/organizations'
+      current_page='Join an organization'
+    %}
+  </div>
 
   <!-- Form -->
-  <form id="join-organization-form" class="col-md-6 mb-5 px-3 {{ custom_class }}">
+  <form id="join-organization-form" class="col-md-6 mt-4 mb-5 px-3 {{ custom_class }}">
     <h1 class="fs-5 mb-0 lh-base text-dark">Join an organization</h1>
     <p class="card-text text-secondary fs-6 mb-3">
       <small>Request to join an existing organization owned by someone else.
@@ -39,7 +42,7 @@
         id="join-organization-button"
         class="btn btn-sm bg-gradient-green text-white"
         type="button"
-        onclick="cannlytics.dashboard.joinOrganizationRequest()"
+        onclick="cannlytics.settings.joinOrganizationRequest()"
       >
         Request to join
       </button>

@@ -1,92 +1,56 @@
 """
 Results Views | Cannlytics API
+Copyright (c) 2021-2022 Cannlytics
+
+Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/21/2021
-Updated: 8/30/2021
+Updated: 12/6/2021
+License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
-API to interface with laboratory results and CoA templates.
+Description: API to interface with laboratory results and CoA templates.
 """
-# pylint:disable=line-too-long
-
-# External imports
+# External imports.
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-# Internal imports
-from api.auth.auth import authorize_user
-from api.api import get_objects, update_object, delete_object
+# Internal imports.
+from api.api import get, post, delete, handle_request
+
+ACTIONS = {
+    'GET': get,
+    'POST': post,
+    'DELETE': delete,
+}
 
 
 @api_view(['GET', 'POST', 'DELETE'])
-def results(request, result_id=None):
+def results(request: Response, result_id: str = '') -> Response:
     """Get, create, or update laboratory results."""
-
-    # Initialize.
-    model_id = result_id
-    model_type = 'results'
-    model_type_singular = 'result'
-    
-    # Authenticate the user.
-    claims, status, org_id = authorize_user(request)
-    if status != 200:
-        return Response(claims, status=status)
-
-    # GET data.
-    if request.method == 'GET':
-        docs = get_objects(request, claims, org_id, model_id, model_type)
-        return Response({'success': True, 'data': docs}, status=200)
-
-    # POST data.
-    elif request.method == 'POST':
-        data = update_object(request, claims, model_type, model_type_singular, org_id)
-        if data:
-            return Response({'success': True, 'data': data}, status=200)
-        else:
-            message = 'Data not recognized. Please post either a singular object or an array of objects.'
-            return Response({'error': True, 'message': message}, status=400)
-
-    # DELETE data.
-    elif request.method == 'DELETE':
-        success = delete_object(request, claims, model_id, model_type, model_type_singular, org_id)
-        if not success:
-            message = f'Your must be an owner or quality assurance to delete {model_type}.'
-            return Response({'error': True, 'message': message}, status=403)
-        return Response({'success': True, 'data': []}, status=200)
+    response, status_code = handle_request(
+        request,
+        actions=ACTIONS,
+        model_type='results',
+        model_type_singular='result',
+        model_id=result_id,
+    )
+    return Response(response, status=status_code)
 
 
 #------------------------------------------------------------------
 # Results functional views
 #------------------------------------------------------------------
 
-# @api_view(['POST'])
-# def generate_coas(request):
-#     """Generate CoAs."""
-
-#     # TODO: Get posted samples.
-#         # - Get the results for each sample.
-#         # - If not results, then
-#             # - Get the measurements for each sample
-#             # - Calculate results for each sample
-    
-#         # Get the template
-
-#         # Create the PDF
-
-#         # Generate download link for the PDF
-#         # Optional: create short-link for the CoA.
-
-#     # Return list of certificate data.
-#     return NotImplementedError
-
-
 @api_view(['POST'])
 def calculate_results(request):
     """Receive incoming transfers."""
+    # TODO: Implement result calculation through the API logic.
     return NotImplementedError
 
 
 @api_view(['POST'])
 def post_results(request):
     """Receive incoming transfers."""
+    # TODO: Implement post result through the API logic.
     # # Record a lab test result using: POST /labtests/v1/record
     # test_package_data = {
     #     'Tag': test_package_tag,
@@ -120,7 +84,7 @@ def post_results(request):
 
     # # Create the lab result record.
     # encoded_pdf = encode_pdf('../assets/pdfs/example_coa.pdf')
-    # test_package_label =  'ABCDEF012345670000015141'
+    # test_package_label =  'your-package-label'
     # lab_result_data = {
     #     'Label': test_package_label,
     #     'ResultDate': get_timestamp(),
@@ -174,51 +138,30 @@ def post_results(request):
 @api_view(['POST'])
 def release_results(request):
     """Receive incoming transfers."""
+    # TODO: Implement release results through the API logic.
     return NotImplementedError
 
 
 @api_view(['POST'])
 def send_results(request):
     """Receive incoming transfers."""
+    # TODO: Implement send results through the API logic.
     return NotImplementedError
 
 
 #------------------------------------------------------------------
-# Templates (draft)
+# Templates
 #------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def templates(request, template_id=None):
-    """Manage laboratory templates, such as for certificates of analysis."""
-
-    # Initialize.
-    model_id = template_id
-    model_type = 'templates'
-    model_type_singular = 'template'
-
-    # Authenticate the user.
-    claims, status, org_id = authorize_user(request)
-    if status != 200:
-        return Response(claims, status=status)
-
-    # GET data.
-    if request.method == 'GET':
-        docs = get_objects(request, claims, org_id, model_id, model_type)
-        return Response({'success': True, 'data': docs}, status=200)
-
-    # POST data.
-    elif request.method == 'POST':
-        data = update_object(request, claims, model_type, model_type_singular, org_id)
-        if data:
-            return Response({'success': True, 'data': data}, status=200)
-        else:
-            message = 'Data not recognized. Please post either a singular object or an array of objects.'
-            return Response({'error': True, 'message': message}, status=400)
-
-    # DELETE data.
-    elif request.method == 'DELETE':
-        success = delete_object(request, claims, model_id, model_type, model_type_singular, org_id)
-        if not success:
-            message = f'Your must be an owner or quality assurance to delete {model_type}.'
-            return Response({'error': True, 'message': message}, status=403)
-        return Response({'success': True, 'data': []}, status=200)
+def templates(request: Response, template_id: str = '') -> Response:
+    """Get, create, or update laboratory templates,
+    such as for certificates of analysis."""
+    response, status_code = handle_request(
+        request,
+        actions=ACTIONS,
+        model_type='templates',
+        model_type_singular='template',
+        model_id=template_id,
+    )
+    return Response(response, status=status_code)

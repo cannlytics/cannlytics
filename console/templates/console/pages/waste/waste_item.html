@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<!--
+  Waste Item Page | Cannlytics Console
+  Created: 12/15/2021
+  Updated: 12/16/2021
+-->
+{% load icon %}
+{% block console_css %}
+
+  <!-- Bootstrap Datepicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
+
+{% endblock console_css %}
+{% block console_body %}
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page="Waste"
+      base_page_url="/waste"
+      current_page=id
+    %}
+  </div>
+
+  <!-- Tabs -->
+  {% if id and id != 'new' %}
+    {% include "console/components/forms/form_tabs.html" with
+        id=id
+        model="waste"
+      %}
+  {% endif %}
+
+  <!-- Files page -->
+  {% if unit == 'files' %}
+    {% include "console/pages/settings/files/files.html" with
+      model='waste'
+      model_singular='waste_item'
+      organizations=organizations
+      section=section
+      user=user
+    %}
+
+  <!-- Logs page -->
+  {% elif unit == 'logs' %}
+    {% include "console/pages/settings/logs/logs.html" with
+      model='waste'
+      model_singular='waste_item'
+      organizations=organizations
+      section=section
+      user=user
+    %}
+
+  {% else %}
+
+    <!-- Title -->
+    <!-- FIXME: Hide "save" button to non-lab users more elegantly -->
+    {% if organizations.0.type == 'lab' %}
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='waste'
+        model_singular='waste_item'
+        description="Manage controlled waste for reconciliation and traceability."
+        options=True
+        export=id
+      %}
+    {% else %}
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='waste'
+        model_singular='waste_item'
+        description="Manage controlled waste for reconciliation and traceability."
+        options=False
+        export=id
+      %}
+    {% endif %}
+
+    <!-- Form -->
+    <div class="mb-4 px-3">
+      <form id="waste_item-form">
+        {% if organizations.0.type == 'lab' %}
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+          %}
+        {% else %}
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+            readonly=True
+          %}
+        {% endif %}
+      </form>
+    </div>
+
+    <!-- Danger zone (delete) -->
+    {% if id and id != 'new' and organizations.0.type == 'lab' %}
+      {% include "console/components/forms/delete_option.html" with
+        id=id
+        model="waste"
+        model_singular="waste_item"
+      %}
+    {% endif %}
+
+  {% endif %}
+
+{% endblock console_body %}
+
+<!-- JavaScript -->
+{% block console_js %}
+{% if not unit %}
+  <script>
+
+    // Load the data into the user interface.
+    cannlytics.ui.viewObject('waste_item');
+
+  </script>
+{% endif %}
+{% endblock console_js %}
+
+</html>

@@ -3,19 +3,20 @@
 <!--
   Invite a user | Cannlytics Console
   Created: 1/13/2021
-  Updated: 6/18/2021
+  Updated: 2/6/2022
 -->
 {% extends "console/console.html" %}
 {% block console_body %}
-
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-5">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-5 pb-5 mx-auto">
 
     <!-- Header-->
-    {% include "console/components/links/breadcrumbs.html" with
-      base_page="Settings"
-      base_page_url="/settings"
-      current_page="Invite a user"
-    %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+      {% include "console/components/links/breadcrumbs.html" with
+        base_page="Settings"
+        base_page_url="/settings"
+        current_page="Invite a user"
+      %}
+    </div>
 
     <div class="col-md-6 px-3">
       <h1 class="fs-5 lh-base text-dark mb-0">Invite a user</h1>
@@ -50,15 +51,18 @@
           <!-- TODO: Team member input -->
 
           <!-- Message -->
-          <textarea
-            class="form-control"
-            placeholder="Write your feedback here"
-            id="feedback-message"
-            style="height:250px"
-          ></textarea>
-          <label for="feedback-message">
-            Enter an email and a message here...
-          </label>
+          <div class="form-floating">
+            <textarea
+              class="form-control"
+              placeholder="Write your feedback here"
+              id="feedback-message"
+              style="height:250px"
+            ></textarea>
+            <label for="feedback-message">
+              Enter an email and a message here...
+            </label>
+          </div>
+
         </div>
 
         <!-- Optional: File attachment -->
@@ -83,6 +87,6 @@
       </div>
     
     </div>
-
+  </main>
 {% endblock console_body %}
 </html>

@@ -1,0 +1,16 @@
+<!--
+  Main Page | Cannlytics Docs
+  Created: 4/29/2021
+  Updated: 4/29/2021
+-->
+{% extends "base.html" %}
+
+<!-- Included CSS and JavaScript-->
+{% block libs %}
+  {{ super() }}
+  {% include "partials/libs.html" ignore missing %}
+{% endblock %}
+
+<!-- Announcement -->
+{% block announce %}{% include "partials/announcement.html" ignore missing %}{% endblock %}
+

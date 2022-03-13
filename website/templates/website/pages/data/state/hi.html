@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<!--
+  Hawaii Data Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 9/16/2021
+  Updated: 1/20/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Hawaii Data | Cannlytics{% endblock %}
+{% block material %}
+
+<!-- Banner -->
+<!-- Optional Suggest (upload) image button -->
+{% include "website/components/heros/hero_banner.html" with
+  title='Hawaii Data'
+  description='Explore public cannabis data available for Hawaii.'
+  background_image=''
+  image_url=' '
+  only
+%}
+
+<!-- TODO: Discussion -->
+
+
+<!-- TODO: Data Sources -->
+Data is updated daily at 4:20am EDT.
+<span>Page updated: 1/20/2022</span>
+
+<!-- TODO: Data collection routine link -->
+
+{% endblock material %}

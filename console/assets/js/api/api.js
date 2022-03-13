@@ -1,16 +1,18 @@
 /**
  * API Interface | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate
  * Created: 4/24/2021
  * Updated: 8/4/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
+ * 
  * Description: The `api` object interfaces with the Cannlytics API to send
  * and retrieve data to and from the back-end, where data is processed and
  * stored in the Firestore database and Metrc API.
  */
-
 import { authRequest } from '../utils.js';
  
-
 export const api = {
 
   /*----------------------------------------------------------------------------
@@ -170,9 +172,11 @@ export const api = {
   updateTransfers: (data) => authRequest('/api/transfers', data),
   deleteTransfers: (data) => authRequest('/api/transfers', data, { delete: true }),
 
+  // Transporters
   getTransporter: (id, orgId) => authRequest(`/api/transporters/${id}?organization_id=${orgId}`),
   getTransporters: (params, orgId) => authRequest(`/api/transporters?organization_id=${orgId}`, null, { params }),
 
+  // Vehicles
   getVehicle: (id, orgId) => authRequest(`/api/vehicles/${id}?organization_id=${orgId}`),
   getVehicles: (params, orgId) => authRequest(`/api/vehicles?organization_id=${orgId}`, null, { params }),
 

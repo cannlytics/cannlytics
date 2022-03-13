@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<!--
+  Index Template | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/7/2021
+  Updated: 11/25/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/base.html" %}
+{% load static %}
+{% block page %}
+
+  <!-- Header -->
+  {% include "website/layout/header.html" %}
+
+  <!-- Material -->
+  <div id="material">{% block material %}{% endblock %}</div>
+
+  <!-- Footer -->
+  {% include "website/layout/footer.html" %}
+
+{% endblock %}
+</html>

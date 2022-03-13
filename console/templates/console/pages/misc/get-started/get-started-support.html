@@ -3,14 +3,13 @@
 <!--
   Get Started Page - Support | Cannlytics Console
   Created: 2/20/2021
-  Updated: 7/14/2021
+  Updated: 1/13/2022
 -->
-<!--  -->
 {% extends "./get-started.html" %}
-{% load icon get_env %}
+{% load static icon %}
 {% block console_css %}
 
-  <script src="https://www.paypal.com/sdk/js?client-id={{ 'PAYPAL_CLIENT_ID'|get_env }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
 
 {% endblock console_css %}
 {% block unit %}
@@ -18,17 +17,19 @@
   <!-- Header -->
   <div class="d-flex justify-content-between mt-5">
     <div class="col">
-      <h1 class="fs-2">Choose your support</h1>
-      <p class="fs-6 text-secondary">Get setup with support for a seamless experience.<p>
+      <h1 class="fs-4">Get started</h1>
     </div>
     <div class="fs-5 text-dark me-2">3/3</div>
   </div>
 
+  <!-- Get started stepper -->
+  {% include "./get_started_stepper.html" with step_value=100 step=3 %}
+
   <!-- Selectable cards -->
   <!-- Optional: Have a tier selected by default -->
-  <h1 class="fs-5 mt-5 mb-1">3. Choose your level of support</h1>
-  <p class="fs-5 text-secondary mb-3">
-    <small>If you need software support or a ready-to-use implementation,
+  <h1 class="fs-5 mt-4 mb-1">3. Choose your level of support</h1>
+  <p class="fs-6 text-secondary mb-3" style="max-width:540px;">
+    <small class="serif">If you need software support or a ready-to-use implementation,
     then choose your desired level of support. You can always change your level of support later.</small>
   </p>
   <input
@@ -39,26 +40,32 @@
   <div class="row row-cols-1 row-cols-md-3 mb-3 mt-4 text-center">
     {% for item in get_started.pricing_tiers %}
       <div class="col">
-        <!-- FIXME: Background color of cards -->
-        <div class="card h-100 bg-light support-card mb-4 shadow-hover" id="tier{{ item.name }}">
+        <div class="card h-100 bg-light support-card mb-4 shadow-hover" id="tier-{{ item.id }}">
           <a
             class="card-block stretched-link text-decoration-none app-action"
-            onclick="cannlytics.dashboard.selectSupportTier('{{ item.name }}');"
+            onclick="cannlytics.dashboard.selectSupportTier('{{ item.id }}');"
           >
             <div class="card-header bg-gradient-{{ item.color }}">
               <h4 class="font-weight-normal text-white my-0">
                 {{ item.name }}
               </h4>
             </div>
-            <div class="card-body">
-              <h1 class="text-dark card-title pricing-card-title">
+            <div class="card-body bg-transparent d-flex flex-column justify-content-between align-items-center">
+              <h4 class="text-dark card-title pricing-card-title mt-2 mb-0">
                 {{ item.price }}
-              </h1>
-              <ul class="text-dark list-unstyled mt-3 mb-4">
+              </h4>
+              <ul class="list-unstyled text-dark text-start mt-3 mb-4">
                 {% for attribute in item.attributes %}
                   <li class="fs-6 mb-1">
-                    <small class="serif text-muted">
-                      {{ attribute }}
+                    {% if attribute.limited %}
+                    <small>🟡</small>
+                    {% else %}
+                    <svg class="" style="width:24px;height:24px;">
+                      <use href="{% static "console/images/icons/emojies/check.svg" %}#check-emoji"></use>
+                    </svg>
+                    {% endif %}
+                    <small class="serif text-dark">
+                      {{ attribute.name }}
                     </small>
                   </li>
                 {% endfor %}
@@ -71,7 +78,7 @@
   </div><!-- End of tiers -->
 
   <!-- Options -->
-  <div class="mb-5">
+  <div class="mb-5 mt-4">
     <a
       class="btn btn-sm btn-sm-light btn-md-light me-2"
       href="/get-started/organization/{% if request.GET.from %}?from={{ request.GET.from }}{% endif %}"
@@ -79,9 +86,16 @@
       Back
     </a>
     <button
+      id="cancel-support-button"
+      class="btn btn-sm btn-sm-light btn-md-light d-none"
+      onclick="cannlytics.dashboard.selectSupportTier();"
+    >
+      Cancel
+    </button>
+    <button
       id="finish-support-button"
       class="btn btn-set-weidth bg-gradient-green text-white btn-sm"
-      onclick="finalizeSupport();"
+      onclick="cannlytics.payments.initializeSupport();"
     >
       Finish
     </button>
@@ -96,52 +110,15 @@
     <div id="paypal-button-container" class="mt-4"></div>
   </div>
 
+  <!-- Footnote of states where Cannlytics is verified with Metrc -->
+  {% if not organizations.0.licenses %}
+    {% include 'console/components/notifications/alert_notification.html' with
+      message="* Cannlytics is currently verified with Metrc in: California, Louisiana, Massachusetts, Maryland, Michigan, Montana, Ohio, Oklahoma, and Oregon. <a class='background-hover' href='mailto:support@cannlytics.com'>Please request your state if it's missing</a>"
+    %}
+  {% endif %}
+
 {% endblock unit %}
 
-{% block console_js %}
-
-  <script>
-
-    function finalizeSupport() {
-      /*
-       * Select subscription, getting subscription plan ID and rendering a PayPal button.
-       */
-      document.getElementById('finish-support-button').classList.add('d-none');
-      document.getElementById('finish-support-loading-button').classList.remove('d-none');
-      cannlytics.dashboard.saveSupport().then(function(response) {
-        document.getElementById('paypal-button-container').innerHTML = '';
-        var planID = response['plan_id'];
-        if (planID === 'free') {
-          cannlytics.dashboard.subscribe({ 'plan_id': planID });
-          return;
-        }
-        paypal.Buttons({
-          style: {
-              shape: 'rect',
-              color: 'silver',
-              layout: 'horizontal',
-              label: 'subscribe',
-          },
-          createSubscription: function(data, actions) {
-            return actions.subscription.create({ 'plan_id': planID });
-          },
-          onApprove: function(data, actions) {
-            var subscription = { ...data, ...response };
-            cannlytics.dashboard.subscribe(subscription);
-          },
-          onError: function (error) {
-            alert('Uknown error subscribing. Please contact contact@cannlytics.com. Thank you for your patience and we will deliver you support.');
-          },
-        }).render('#paypal-button-container');
-      })
-      .finally(function() {
-        document.getElementById('finish-support-button').classList.remove('d-none');
-        document.getElementById('finish-support-loading-button').classList.add('d-none');
-      });
-    }
-
-  </script>
-
-{% endblock console_js %}
+<!-- FIXME: Promprt the user to re-authneticate if coming from ?from={organizationType} -->
 
 </html>

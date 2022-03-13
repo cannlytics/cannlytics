@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<!--
+  Dataset Page | Cannlytics Console
+  Created 12/14/2021
+  Updated: 12/14/2021
+-->
+{% load icon %}
+{% block console_css %}
+
+  <!-- AG-Grid CSS and JavaScript -->
+  {% include "console/components/tables/ag_grid_scripts.html" %}
+
+  <!-- Bootstrap Datepicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
+
+{% endblock console_css %}
+{% block console_body %}
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 mt-2 border-bottom">
+      {% include "console/components/links/breadcrumbs.html" with
+        base_page="Datasets"
+        base_page_url="/datasets"
+        current_page=id
+      %}
+    </div>
+
+    <!-- Tabs -->
+    {% if id and id != 'new' %}
+      {% include "console/components/forms/form_tabs.html" with
+          id=id
+          model="datasets"
+        %}
+    {% endif %}
+
+    <!-- Files page -->
+    {% if unit == 'files' %}
+      {% include "console/pages/settings/files/files.html" with
+        model='datasets'
+        model_singular='dataset'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+    
+    <!-- Logs page -->
+    {% elif unit == 'logs' %}
+      {% include "console/pages/settings/logs/logs.html" with
+        model='datasets'
+        model_singular='dataset'
+        organizations=organizations
+        section=section
+        user=user
+      %}
+
+    {% else %}
+
+      <!-- Title -->
+      {% include "console/components/forms/form_title.html" with
+        abbreviation=data_model.abbreviation
+        id=id
+        model='datasets'
+        model_singular='dataset'
+        description="Manage the fields and observations in your datasets."
+        options=True
+        export=id
+      %}
+
+      <!-- Fields -->
+      <div class="mb-4 px-3">
+
+        <!-- Form -->
+        <form id="dataset-form">
+
+          <!-- Dynamic fields -->
+          {% include "console/components/forms/dynamic_form.html" with
+            fields=data_model.fields
+          %}
+
+        </form>
+
+      </div><!-- End of fields -->
+      
+      <!-- Danger zone (delete) -->
+      {% if id and id != 'new' %}
+        {% include "console/components/forms/delete_option.html" with
+          id=id
+          model="datasets"
+          model_singular="dataset"
+        %}
+      {% endif %}
+
+    {% endif %}
+
+  </main>
+
+{% endblock console_body %}
+
+<!-- JavaScript -->
+{% block console_js %}
+  <script>
+
+    // Load the data into the user interface.
+    cannlytics.ui.viewObject('dataset');
+
+    // Render any date pickers.
+    // $('.datepicker').datepicker({ format: 'mm/dd/yyyy' });
+
+  </script>
+{% endblock console_js %}
+</html>

@@ -1,98 +1,85 @@
 /**
  * Authentication JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 12/4/2020
- * Updated: 8/30/2021
+ * Updated: 1/13/2022
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
-
-import { apiRequest, authRequest, showNotification } from '../utils.js';
-
+import { Modal } from 'bootstrap';
+import {
+  authErrors,
+  checkGoogleLogIn,
+  confirmPasswordChange,
+  createAccount,
+  getCurrentUser,
+  googleLogIn,
+  logIn,
+  logOut,
+  onAuthChange,
+  sendPasswordReset,
+} from '../firebase.js';
+import {
+  apiRequest,
+  authRequest,
+  showNotification,
+} from '../utils.js';
 
 export const auth = {
 
-
-  currentUser() { return firebase.auth().currentUser },
-
-
-  anonymousSignIn() {
-    /*
-     * Anonymously sign-in a user.
+  async loginWhenUserDetected() {
+    /**
+     * Trigger server login and navigation to the dashboard when a user is detected.
+     * If it's the first time that the user has logged in, then their `email` and
+     * `photo_url` are saved to their user data in Firestore.
      */
-    return new Promise((resolve, reject) => {
-      firebase.auth().signInAnonymously()
-        .then(() => {
-          resolve();
-        })
-        .catch((error) => {
-          reject(error)
-        });
+    onAuthChange(async (user) => {
+      if (!user) return;
+      await authRequest('/src/auth/login');
+      if (user.metadata.createdAt == user.metadata.lastLoginAt) {
+        const { email } = user;
+        const data = { email, photo_url: `https://robohash.org/${email}?set=set1` };
+        try {
+          await apiRequest('/api/users', data);
+        } catch(error) {
+          showNotification('Login error', 'Authentication failed. Try again later.', /* type = */ 'error' );
+        }
+      }
+      window.location.href = window.location.origin;
     });
   },
 
-
-  // Optional: Implement Google Sign-in
-  // googleSignIn() {
-  //   /*
-  //    * Sign in a user with Google.
-  //    */
-  //   var provider = new firebase.auth.GoogleAuthProvider();
-  //   firebase.auth().signInWithRedirect(provider);
-  // },
-
-
-  // Optional: Implement Google Sign-in Redirect
-  // googleSignInRedirect() {
-  //   /*
-  //    * Signs in a user after a successful Google sign-in redirect.
-  //    */
-  //   // FIXME: Login on redirect does not work
-  //   console.log('Checking for Google redirect...')
-  //   firebase.auth().getRedirectResult().then((result) => {
-  //     if (result.credential) {
-  //       // This gives you a Google Access Token. You can use it to access the Google API.
-  //       // var token = result.credential.accessToken;
-  //       // window.location.href = '/';
-  //     }
-  //     // The signed-in user info.
-  //     var user = result.user;
-  //     console.log('User:', user);
-  //   }).catch((error) => {
-  //     // Handle Errors here.
-  //     var errorCode = error.code;
-  //     var errorMessage = error.message;
-  //     // The email of the user's account used.
-  //     var email = error.email;
-  //     // The firebase.auth.AuthCredential type that was used.
-  //     var credential = error.credential;
-  //     // ...
-  //     console.log('Error:', errorMessage);
-  //   });
-  // },
-
-
-  resetPassword() {
-    /*
+  async resetPassword() {
+    /**
      * Reset a user's password.
      */
-    var auth = firebase.auth();
-    var email = document.getElementById('login-email').value;
-    auth.sendPasswordResetEmail(email).then(function() {
-      window.location.href = '/account/password-reset-done';
-    }).catch(function(error) {
-      showNotification('Reset password error', error.message, { type: 'error' });
-    });
+    const email = document.getElementById('sign-in-email').value;
+    if (!email) {
+      showNotification('Password reset error', 'Please enter your email to request a password reset.', /* type = */ 'error' );
+      return;
+    }
+    document.getElementById('password-reset-button').classList.add('d-none');
+    document.getElementById('password-reset-loading-button').classList.remove('d-none');
+    try {
+      await sendPasswordReset();
+      window.location.href = `${window.location.origin}\\acount\\password-reset-done`;
+    } catch(error) {
+      document.getElementById('password-reset-button').classList.remove('d-none');
+      document.getElementById('password-reset-loading-button').classList.add('d-none');
+      showNotification('Password reset error', 'Password reset email failed to send. Try again later.', /* type = */ 'error' );
+    }
   },
 
-
   resetPasswordCodeCheck() {
-    /*
+    /**
      * Check if the password reset code is valid.
      */
     const url = new URL(window.location.href);
     const code = url.searchParams.get('oobCode');
-    firebase.auth().verifyPasswordResetCode(code)
+    verifyPasswordReset(code)
       .then((email) => {
-        document.getElementById('login-email').value = email;
+        document.getElementById('sign-in-email').value = email;
       })
       .catch(()  => {
         const invalidMessage = document.getElementById('password-reset-code-invalid-message');
@@ -102,160 +89,129 @@ export const auth = {
       });
   },
 
-
   resetPasswordConfirm() {
-    /*
+    /**
      * Confirm a password reset.
      */
-    const newPassword = document.getElementById('login-password').value;
-    const newPasswordConfirmation = document.getElementById('login-password-confirmation').value;
+    const newPassword = document.getElementById('sign-in-password').value;
+    const newPasswordConfirmation = document.getElementById('sign-in-password-confirmation').value;
     if (newPassword !== newPasswordConfirmation) {
       const message = 'The passwords you entered are not the same, please confirm your password.';
-      showNotification('Passwords do not match', message, { type: 'error' });
+      showNotification('Passwords do not match', message, /* type = */ 'error');
       return;
     }
     const url = new URL(window.location.href);
     const code = url.searchParams.get('oobCode');
-    firebase.auth().confirmPasswordReset(code, newPassword)
+    confirmPasswordChange(code, newPassword)
       .then(() => {
         window.location.href = '/account/password-reset-complete';
       })
       .catch(() => {
         const message = 'The password reset link that you used is invalid. Please request a new password reset link.';
-        showNotification('Password reset error', message, { type: 'error' });
+        showNotification('Password reset error', message, /* type = */ 'error');
       });
   },
 
-
-  signIn(event) {
-    /*
-     * Sign in a user.
+  async signIn(event) {
+    /**
+     * Sign in with username and password.
+     * @param {Event} event A user-driven event.
      */
     event.preventDefault();
-    var email = document.getElementById('login-email').value;
-    var password = document.getElementById('login-password').value;
+    const email = document.getElementById('sign-in-email').value;
+    const password = document.getElementById('sign-in-password').value;
     document.getElementById('sign-in-button').classList.add('d-none');
     document.getElementById('sign-in-loading-button').classList.remove('d-none');
-    firebase.auth().signInWithEmailAndPassword(email, password).then((user) => {
-      return authRequest('/login').then((response) => {
-        window.location.href = window.location.origin;
-      })
-      .catch((error) => {
-        console.log(error);
-        // Optional: Fix error returned by successful login.
-        // window.location.href = window.location.origin;
-        const message = 'Platform down for maintenance. Thank you for your patience.'
-        showNotification('Sign in error', message, { type: 'error' });
-      });
-    })
-    // Optional: Determine if it's okay to stay signed in.
-    // The Firestore docs show to sign out when using session cookies,
-    // but this means that all requests to Firestore have to go through the API.
-    // It is still nice to be able to interact with Firestore from client-side JavaScript.
-    // .then(() => {
-    //   // return firebase.auth().signOut();
-    // }).then(() => {
-    //   // window.location.href = window.location.origin;
-    //   // window.location.assign('/');
-    // })
-    .catch((error) => {
-      showNotification('Sign in error', error.message, { type: 'error' });
-    }).finally(() => {
+    let persistence = true;
+    try {
+      persistence = document.getElementById('stay-signed-in').checked;
+    } catch(error) { /* No persistence option. */ }
+    try {
+      await logIn(email, password, persistence);
+    } catch(error) {
+      console.log(error.code);
+      const message = authErrors[error.code] || 'Unknown error encountered while signing in.';
+      showNotification('Sign in error', message, /* type = */ 'error' );
       document.getElementById('sign-in-button').classList.remove('d-none');
       document.getElementById('sign-in-loading-button').classList.add('d-none');
-    });
-  },
-  
-  
-  signUp(event) {
-    /*
-     * Sign up a user for a Firebase authentication account.
-     */
-    event.preventDefault();
-    const terms = document.getElementById('login-terms-accepted');
-    if (!terms.checked) {
-      const message = 'Please agree with our terms of service and read our privacy policy to create an account.';
-      showNotification('Terms not accepted', message, { type: 'error' });
-      terms.classList.add('is-invalid');
       return;
-    } else {
-      terms.classList.remove('is-invalid');
     }
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    document.getElementById('sign-up-button').classList.add('d-none');
-    document.getElementById('sign-up-loading-button').classList.remove('d-none');
-    firebase.auth().createUserWithEmailAndPassword(email, password)
-      .then(() => {
-        // Optional: Handle error more elegantly.
-        return authRequest('/login').then((response) => {
-          this.postSignUp(email);
-        })
-        .catch((error) => {
-          console.log(error);
-          // this.postSignUp(email);
-        });
-      })
-      .catch((error) => {
-        showNotification('Sign up error', error.message, { type: 'error' });
-      })
-      .finally(() => {
-        document.getElementById('sign-up-button').classList.remove('d-none');
-        document.getElementById('sign-up-loading-button').classList.add('d-none');
-      });;
+    try {
+      const modal = Modal.getInstance(document.getElementById('sign-in-dialog'));
+      modal.hide();
+    } catch(error) { /* No login dialog. */ }
   },
 
-
-  postSignUp(email) {
-    /*
-     * Post sign-up routine.
+  signInWithGoogle() {
+    /**
+     * Sign in with Google.
      */
-    const data = { email, photo_url: `https://robohash.org/${email}?set=set5` };
-    apiRequest('/api/users', data)
-      .then(() => {
-        window.location.href = window.location.origin;
-      });
+    googleLogIn();
   },
 
+  signUp,
 
-  signOut() {
-    /*
-    * Sign a user out of Firebase and clear the session.
-    */
-    const baseURL = window.location.origin;
-    authRequest('/logout')
-      .then((response) => {
-        // document.location.href = `${baseURL}/account/sign-out`;
-      })
-      .catch((error) => {
-        console.log(error);
-        // FIXME: Handle JSON parsing error. (Unexpected end of JSON input)
-        // showNotification('Sign out error', error.message, { type: 'error' });
-        // document.location.href = `${window.location.origin}/account/sign-out`;
-      })
-      .finally(() => {
-        firebase.auth().signOut().then(() => {
-          // Sign-out successful.
-          document.location.href = `${window.location.origin}/account/sign-out`;
-        }).catch((error) => {
-          // An error happened.
-          document.location.href = `${window.location.origin}/account/sign-out`;
-        });
-      })
+  async signOut() {
+    /**
+     * Sign a user out of their account.
+     */
+    await logOut();
+    await authRequest('/src/auth/logout');
+    document.location.href = `${window.location.origin}/account/sign-out`;
   },
-  
   
   verifyUser() {
-    /*
+    /**
      * Send a user a verification email.
      */
-    var user = firebase.auth().currentUser;
+    const user = getCurrentUser();
     user.sendEmailVerification().then(() => {
-      showNotification('Verification email sent', error.message, { type: 'success' });
-    }).catch(function(error) {
-      showNotification('Verification error', error.message, { type: 'error' });
+      showNotification('Verification email sent', error.message, /* type = */ 'success');
+    }).catch((error) => {
+      showNotification('Verification error', error.message, /* type = */ 'error');
     });
   },
 
+}
 
+export async function checkForCredentials() {
+  /**
+   * Check if a user has signed in through a redirect from
+   * an authentication provider, such as Google.
+   */
+  try {
+    await checkGoogleLogIn();
+    await authRequest('/src/auth/login');
+  } catch(error) { /* No Google sign-in token. */ }
+}
+
+export async function signUp() {
+  /**
+   * Sign a user up for a Firebase account with a username and password.
+   */
+  const terms = document.getElementById('login-terms-accepted');
+  if (!terms.checked) {
+    const message = 'Please agree with our terms of service and read our privacy policy to create an account.';
+    showNotification('Terms not accepted', message, /* type = */ 'error');
+    terms.classList.add('is-invalid');
+    return;
+  } else {
+    terms.classList.remove('is-invalid');
+  }
+  const email = document.getElementById('sign-up-email').value;
+  const password = document.getElementById('sign-up-password').value;
+  document.getElementById('sign-up-button').classList.add('d-none');
+  document.getElementById('sign-up-loading-button').classList.remove('d-none');
+  try {
+    await createAccount(email, password);
+  } catch(error) {
+    console.log(error.code);
+    const message = authErrors[error.code] || 'Unknown error encountered while signing in.';
+    document.getElementById('sign-up-button').classList.remove('d-none');
+    document.getElementById('sign-up-loading-button').classList.add('d-none');
+    showNotification('Sign up error', message, /* type = */ 'error');
+    return;
+  }
+  document.getElementById('sign-up-button').classList.remove('d-none');
+  document.getElementById('sign-up-loading-button').classList.add('d-none');
 }

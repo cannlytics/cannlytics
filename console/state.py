@@ -1,32 +1,37 @@
 """
 State Variables | Cannlytics Console
+Copyright (c) 2021-2022 Cannlytics
 
-Author: Keegan Skeate
-Company: Cannlytics
+Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 10/15/2020
-Updated: 7/30/2021
+Updated: 2/6/2022
+License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 
-Relatively static state variables for extra context on each page/screen.
+Description: Relatively static state variables for extra context on each page/screen.
 The idea is to separate the material from the templates,
 with the hope of better-maintained code.
 The data models are stored in an organizations settings, so that
 each organization can customize the data points that they collect.
 """
 # pylint:disable=line-too-long
+from console.settings import DEFAULT_FROM_EMAIL
 
-#-----------------------------------------------------------------------
-# Data, page-specific supplementary data. (loaded from Firestore)
-# FIXME: Currently not implemented in views/main.py
-#-----------------------------------------------------------------------
-
-data = {
-    "settings": {
-        "documents": [
-            {"key": "traceability_settings", "ref": "organizations/{organization_id}/organization_settings/traceability_settings"},
-        ],
-        "collections": [
-            {"key": "data_models", "ref": "organizations/{organization_id}/data_models"},
-        ],
+app_context = {
+    'app_name': 'Cannlytics',
+    'contact_email': DEFAULT_FROM_EMAIL,
+    'contact_phone': '',
+    'contact_phonenumber': '',
+    'homepage': 'https://cannlytics.com',
+    'logos': {
+        'light': 'console/images/logos/cannlytics_logo_with_phrase.svg',
+        'dark': 'console/images/logos/cannlytics_logo_with_phrase_dark.svg',
+        'favicon': 'images/logos/favicon.ico',
+    },
+    'policies': {
+        'license': 'https://docs.cannlytics.com/about/license',
+        'privacy': 'https://docs.cannlytics.com/about/privacy-policy',
+        'security': 'https://docs.cannlytics.com/about/security-policy',
+        'terms': 'https://docs.cannlytics.com/about/terms-of-service',
     },
 }
 
@@ -52,8 +57,7 @@ data_models = [
         "label": "Analytics",
         "url": "/analytics",
         "key": "analytics",
-        "user_type": ["producer", "processor", "retailer",
-            "consumer", "integrator"],
+        "user_type": ["producer", "processor", "retailer", "consumer", "integrator"],
         "image_path": "console/images/icons/two-tone/two_tone_graph.svg",
         "description": "Explore rich analytics to better understand your choices and performance.",
         "seperator": True
@@ -128,11 +132,12 @@ data_models = [
             {"key": "quarantine", "label": "Quarantine", "type": "bool"},
         ],
     },
+    # TODO: Batch data model
     {
         "label": "Contacts",
         "url": "/contacts",
         "key": "contacts",
-        "user_type": '*',
+        "user_type": ["producer", "processor", "retailer", "lab"],
         "description": "Manage laboratory clients, vendors, and relations.",
         "image_path": "console/images/icons/multi-tone/clients.svg",
         'abbreviation': 'CT',
@@ -187,7 +192,7 @@ data_models = [
             {"key": "calibrated_at", "label": "Calibrated At", "type": "datetime"},
             {"key": "calibrated_by", "label": "Calibrated By", "class": "field-sm"},
             {"key": "description", "label": "Description", "type": "textarea"},
-            
+            # TODO: Add analyses (list)
         ],
     },
     {
@@ -235,7 +240,7 @@ data_models = [
         "label": "Invoices",
         "url": "/invoices",
         "key": "invoices",
-        "user_type": "*",
+        "user_type": ["producer", "processor", "retailer", "lab"],
         "user_permissions": ["billing"],
         "description": "Manage invoices for your laboratory analyses.",
         "image_path": "console/images/icons/multi-tone/notes.svg",
@@ -299,7 +304,7 @@ data_models = [
         "label": "Projects",
         "url": "/projects",
         "key": "projects",
-        "user_type": "*",
+        "user_type": ["producer", "processor", "retailer", "lab"],
         "description": "Manage your internal and external projects.",
         "image_path": "console/images/icons/multi-tone/folder.svg",
         'abbreviation': 'P',
@@ -368,7 +373,7 @@ data_models = [
         "label": "Samples",
         "url": "/samples",
         "key": "samples",
-        "user_type": "*",
+        "user_type": ["producer", "processor", "retailer", "lab"],
         "description": "Manage laboratory samples.",
         "image_path": "console/images/icons/multi-tone/vials.svg",
         'abbreviation': 'S',
@@ -398,7 +403,7 @@ data_models = [
         "label": "Transfers",
         "url": "/transfers",
         "key": "transfers",
-        "user_type": '*',
+        "user_type": ["producer", "processor", "retailer", "lab"],
         "description": "Manage sample transfers.",
         "image_path": "console/images/icons/multi-tone/transmit.svg",
         'abbreviation': 'TR',
@@ -466,6 +471,41 @@ data_models = [
             {"key": "vehicle_license_plate_number", "label": "Vehicle License Plate Number"},
             {"key": "vehicle_make", "label": "Vehicle Make"},
             {"key": "vehicle_model", "label": "Vehicle Model"},
+        ],
+    },
+    {
+        "label": "Waste",
+        "url": "/waste",
+        "key": "waste",
+        "user_type": ["lab"],
+        "description": "Manage controlled waste and sample reconciliation.",
+        "image_path": "console/images/icons/multi-tone/calibration.svg",
+        'singular': 'waste_item',
+        'sortable': True,
+        'filter': True,
+        'abbreviation': 'WST',
+        'id_schema': '[abbreviation]%y%m%d',
+        "fields": [
+            {"key": "waste_item_id", "label": "Waste Item ID"},
+            {"key": "sample_id", "label": "Sample ID"},
+            {"key": "external_id", "label": "External ID"},
+            {"key": "balance_id", "label": "Balance ID", "class": "field-sm"},
+            {"key": "area_id", "label": "Waste Area"}, # TODO: Make this multiple select of existing areas.
+            {"key": "waste_amount", "label": "Waste Amount", "class": "field-sm"},
+            {"key": "waste_units", "label": "Waste Units", "class": "field-sm"},
+            {"key": "current_sample_amount", "label": "Current Amount", "class": "field-sm"},
+            {"key": "sample_amount", "label": "Expected Amount", "class": "field-sm"}, # TODO: Load current sample amount.
+            {"key": "original_sample_amount", "label": "Original Amount", "class": "field-sm"}, # TODO: Load original sample amount.
+            {"key": "percent_used", "label": "Percent Used", "type": "string"}, # TODO: Calculated field: sample_amount / original_sample_amount * 100
+            {"key": "percent_difference", "label": "Percent Difference", "type": "string"}, # TODO: Calculated field: (current_sample_amount - sample_amount) / sample_amount * 100 
+            {"key": "status", "label": "Status", "type": "select", "options": [{"key": "none", "label": "None Left"}, {"key": "wasted", "label": "Wasted"}]},
+            {"key": "updated_at", "label": "Updated At", "type": "datetime"},
+            {"key": "updated_by", "label": "Updated By", "type": "string", "class": "field-sm"},
+            {"key": "approved_by", "label": "Approved By", "type": "string", "class": "field-sm"},
+            {"key": "corrective_action", "label": "Corrective Action", "type": "bool"}, # TODO: Raise corrective_action if percent_difference > warning_limit
+            {"key": "pass", "label": "Pass / Fail", "type": "select", "options": [{"key": "fail", "label": "Fail"}, {"key": "pass", "label": "Pass"}]},
+            {"key": "reason", "label": "Waste Reason", "type": "textarea"},
+            {"key": "notes", "label": "Notes", "type": "textarea"},
         ],
     },
     {
@@ -548,7 +588,7 @@ data_models = [
         'singular': 'person',
         'abbreviation': 'USR',
         'description': 'Manage people associated with a given contact.',
-        "image_path": "console/images/icons/outline/teamwork.svg",
+        "image_path": "console/images/account/organization.svg",
         'id_schema': '[abbreviation]%y%m%d',
         'sortable': True,
         'filter': True,
@@ -567,7 +607,7 @@ data_models = [
 ]
 
 #-----------------------------------------------------------------------
-# Material, page-specific context.
+# Page-specific material.
 #-----------------------------------------------------------------------
 
 material = {
@@ -575,7 +615,7 @@ material = {
         "placeholder": {
             "action": "Create an analysis",
             "height": "200px",
-            "image": "console/images/illustrations/outline/lab_microbiologist.svg",
+            "image": "console/images/illustrations/science/lab_microbiologist.svg",
             "title": "Create your first analysis",
             "message": "Create a scientific analysis, a set of analytes or tests to collect measurements for to get results.",
             "url": "./analyses/new",
@@ -585,7 +625,7 @@ material = {
         "placeholder": {
             "action": "Create an analyte",
             "height": "200px",
-            "image": "console/images/illustrations/outline/lab_microscope.svg",
+            "image": "console/images/illustrations/science/lab_microscope.svg",
             "title": "Create your first analyte",
             "message": "Add analytes for analyses, a set of analytes constitutes an analysis. Analytes can have limits and formulas for calculating results.",
             "url": "./analytes/new",
@@ -595,7 +635,7 @@ material = {
         "placeholder": {
             "action": "Create an area",
             "height": "200px",
-            "image": "console/images/illustrations/outline/lab_books.svg",
+            "image": "console/images/illustrations/science/lab_books.svg",
             "title": "Create your first area",
             "message": "Organize your company and facilities into logical areas so you can easily manage the location of your physical items.",
             "url": "./areas/new",
@@ -605,7 +645,7 @@ material = {
         "placeholder": {
             "action": "Add a contact",
             "height": "200px",
-            "image": "console/images/illustrations/chemistry_scientist.svg",
+            "image": "console/images/illustrations/science/chemistry_scientist.svg",
             "title": "Add your first contact",
             "message": "Add a contact to begin providing analyses for other organizations. Contacts are any other organization you interact with, such as your clients, vendors, and partners.",
             "url": "./contacts/new",
@@ -615,7 +655,7 @@ material = {
         "placeholder": {
             "action": "Connect an instrument",
             "height": "200px",
-            "image": "console/images/illustrations/outline/lab.svg",
+            "image": "console/images/illustrations/science/lab.svg",
             "title": "Connect your first instrument",
             "message": "Connect your scientific instruments to ease your data collection.",
             "url": "./instruments/new",
@@ -625,7 +665,7 @@ material = {
         "placeholder": {
             "action": "Add an inventory item",
             "height": "200px",
-            "image": "console/images/illustrations/outline/lab_reagents.svg",
+            "image": "console/images/illustrations/science/lab_reagents.svg",
             "title": "Add your first inventory item",
             "message": "Track your inventory through your analysis workflow.",
             "url": "./inventory/new",
@@ -655,7 +695,7 @@ material = {
         "placeholder": {
             "action": "Create a project",
             "height": "200px",
-            "image": "console/images/illustrations/outline/lab_tablet.svg",
+            "image": "console/images/illustrations/science/lab_tablet.svg",
             "title": "Create your first project",
             "message": "Begin analyses by creating a project, a collection of samples and their analyses.",
             "url": "./projects/new",
@@ -665,7 +705,7 @@ material = {
         "placeholder": {
             "action": "Calculate your first result",
             "height": "200px",
-            "image": "console/images/illustrations/outline/lab_reagents.svg",
+            "image": "console/images/illustrations/science/lab_reagents.svg",
             "title": "Calculate your first result",
             "message": "Calculate your first result given analyses performed and data collected.",
             "url": "./results/new",
@@ -675,7 +715,7 @@ material = {
         "placeholder": {
             "action": "Create a sample",
             "height": "200px",
-            "image": "console/images/illustrations/outline/lab_reagents.svg",
+            "image": "console/images/illustrations/science/lab_reagents.svg",
             "title": "Create your first laboratory sample",
             "message": "Create laboratory samples which can be part of organization specific projects or multi-organization batches for analysis.",
             "url": "./samples/new",
@@ -685,7 +725,7 @@ material = {
         "placeholder": {
             "action": "Create an transfer",
             "height": "200px",
-            "image": "console/images/illustrations/outline/lab_reagents.svg",
+            "image": "console/images/illustrations/science/lab_reagents.svg",
             "title": "Create your first transfer",
             "message": "Create a transfer of inventory items, such as lab samples, from one organization to another.",
             "url": "./transfers/new",
@@ -697,6 +737,8 @@ material = {
             "image": "console/images/icons/two-tone/two_tone_report.svg",
             "title": "No transporter data",
             "message": "You can add information here about the people who will be transporting your products.",
+            "action": "Add a transporter",
+            "url": "./transporters/new",
         },
         "fields": [
             {"key": "transporter_id", "label": "Transporter ID"},
@@ -713,6 +755,8 @@ material = {
             "image": "console/images/icons/two-tone/two_tone_clock.svg",
             "title": "No vehicle data",
             "message": "You can add information here about the vehicles that transport your products.",
+            "action": "Add a vehicle",
+            "url": "./vehicles/new",
         },
         "fields": [
             {"key": "vehicle_id", "label": "Vehicle ID"},
@@ -853,6 +897,7 @@ material = {
             {"title": "Organization settings", "url": "/settings/organizations"},
             # {"title": "Theme", "url": "/settings/theme"},
             {"title": "User Settings", "url": "/settings/user"},
+            {"title": "Invite a user", "url": "/settings/invite"},
         ],
         "organizations": {
             "breadcrumbs": [
@@ -862,10 +907,10 @@ material = {
             "fields": [
                 {"key": "name", "label": "Name"},
                 {"key": "trade_name", "label": "Trade Name"},
+                {"key": "type", "label": "Type", "type": "select", "options": [{"key": "lab", "label": "Lab"}, {"key": "producer", "label": "Producer"}, {"key": "retailer", "label": "Retailer"}, {"key": "integrator", "label": "Integrator"},]},
                 {"key": "website", "label": "Website"},
                 {"type": "email", "key": "email", "label": "Email"},
                 {"key": "phone", "label": "Phone"},
-                {"key": "linkedin", "label": "LinkedIn"},
                 {"key": "address", "label": "Address", "secondary": True},
                 {"key": "city", "label": "City", "secondary": True},
                 {"key": "state", "label": "State", "secondary": True},
@@ -876,18 +921,18 @@ material = {
             "placeholder": {
                 "action": "Start an organization",
                 "height": "200px",
-                "image": "console/images/illustrations/chemistry_scientist.svg",
+                "image": "console/images/illustrations/science/chemist.svg",
                 "title": "Create or join an organization",
                 "message": "Add team members to your organization or join an organization to begin collaborating.",
-                "url": "./organizations/new",
+                "url": "/settings/organizations/new",
             },
         },
         "organization_breadcrumbs": [
-            {"title": "Settings", "url": "settings"},
+            {"title": "Settings", "url": "/settings"},
             {"title": "Organization Settings", "active": True},
         ],
         "user_breadcrumbs": [
-            {"title": "Settings", "url": "settings"},
+            {"title": "Settings", "url": "/settings"},
             {"title": "User Settings", "active": True},
         ],
         "user_fields": [
@@ -941,6 +986,16 @@ material = {
             {"key": "pinned", "label": "Pin File", "type": "bool", "onchange": "pinFile"},
         ],
     },
+    "waste": {
+        "placeholder": {
+            "action": "Add an waste item",
+            "height": "200px",
+            "image": "console/images/icons/multi-tone/calibration.svg",
+            "title": "Reconcile your first waste item",
+            "message": "Track your controlled waste through sample reconciliation.",
+            "url": "./waste/new",
+        },
+    },
 }
 
 # Getting-started material.
@@ -949,42 +1004,48 @@ material['get-started'] = {
     "organization": {"fields": material['settings']['organizations']['fields']},
     "pricing_tiers": [
         {
+            "id": "enterprise",
             "name": "Enterprise",
-            "price": "$2000 / mo.",
+            "price": "$1,200 / mo.",
             "color": "purple",
             "action": "Contact us",
             "url": "/contact",
             "attributes": [
-                "Custom installation",
-                "Access to internal tools",
-                "Early access to new features",
-                "3 on-site support days / year",
+                {"name": "Feature requests", "limited": False},
+                {"name": "Unlimited data storage", "limited": False},
+                {"name": "Unlimited file storage", "limited": False},
+                {"name": "Unlimited API access", "limited": False},
+                {"name": "Video and on-site support", "limited": False},
             ],
         },
         {
+            "id": "pro",
             "name": "Pro",
-            "price": "$500 / mo.",
+            "price": "$420 / mo.",
             "color": "orange",
             "action": "Get started",
             "url": "/contact",
             "attributes": [
-                "Metrc integration",
-                "Access to development builds",
-                "Priority GitHub Issues",
-                "Remote support",
+                {"name": "Metrc integration*", "limited": False},
+                {"name": "Unlimited data storage", "limited": False},
+                {"name": "Limited file storage", "limited": True},
+                {"name": "Limited API access", "limited": True},
+                {"name": "Email support only", "limited": True},
             ],
         },
         {
+            "id": "free",
             "name": "Free",
             "price": "👐",
             "color": "green",
             "action": "Sign up for free",
             "url": "https://console.cannlytics.com",
             "attributes": [
-                "All software",
-                "All community material",
-                "GitHub Issues",
-                "Email support",
+                {"name": "All software", "limited": False},
+                {"name": "Limited data storage", "limited": True},
+                {"name": "Limited file storage", "limited": True},
+                {"name": "Limited API access", "limited": True},
+                {"name": "GitHub Issues only", "limited": True},
             ],
         },
     ],
@@ -995,40 +1056,33 @@ material['settings']['traceability'] = material['traceability']
 material['settings']['subscriptions'] = material['get-started']['pricing_tiers']
 
 #-----------------------------------------------------------------------
-# Layout context, context for general template rendering.
+# Page-specific data loaded from Firestore.
 #-----------------------------------------------------------------------
 
-layout = {
-    "dashboard": {
-        "welcome_message": {
-            "title": "Welcome to your new cannabis analytics platform!", # 🚀
-            "message": "Get started with cannabis analytics in 5 minutes.",
-        },
-        "organization_choices": [
-            {
-                "action": "Get started",
-                "title": "🥼 For Labs",
-                "description": "Start your lab workflow, manage your lab data, and issue your certificates. Start or join a lab. You can utilize the Cannlytics platform to manage all of your laboratory data and deliver data and certificates blazingly fast. Use your own workflow and data points, while using ready-to-go tools built for cannabis analysis.",
-                "image": "console/images/illustrations/outline/lab_tablet.svg",
-                "type": "lab",
-            },
-            {
-                "action": "Begin now",
-                "title": "🌳 For Cultivators, Processors, and Retailers",
-                "description": "Start managing your lab results now. You can utilize the Cannlytics platform to make testing simple, easy, and insightful. Aggregate your data points and leverage statistics to boost your yields. Don't leave money on the table, get and use the laboratory data for tests that you have commissioned.",
-                "image": "console/images/illustrations/outline/lab_tablet.svg",
-                "type": "producer",
-                "disabled": True,
-            },
-            {
-                "action": "Dive in",
-                "title": "🤝 For Everyone Else",
-                "description": "We believe that cannabis analytics is for everyone. For all software integrators, researchers, consumers, and data seekers. Cannlytics has something for you. Get your hands on public datasets and explore our catacombs of data.",
-                "image": "console/images/illustrations/outline/lab_desktop.svg",
-                "type": "integrator",
-                "disabled": True,
-            },
-        ],
+page_data = {
+    "get-started": {
+        "collections": [
+            {"name": "verifications", "ref": "public/verifications/verification_data"}
+        ]
     },
-    "sidebar": {},
+    "map": {
+        "documents":[{"name": "google", "ref": "credentials/google"}],
+    },
+    "organizations": {"documents":[{"name": "paypal", "ref": "credentials/paypal"}]},
+    "settings": {
+        "documents": [
+            {"name": "traceability_settings", "ref": "organizations/{organization_id}/organization_settings/traceability_settings"},
+        ],
+        # FIXME: This breaks the UI.
+        # "collections": [
+        #     {
+        #         "name": "data_models",
+        #         "ref": "organizations/{organization_id}/data_models",
+        #         # "limit": 10,
+        #         # "order_by": "published_at",
+        #         # "desc": True,
+        #     },
+        # ],
+    },
+    "support": {"documents":[{"name": "paypal", "ref": "credentials/paypal"}]},
 }

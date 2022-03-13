@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<!--
+  Publish Data Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 10/15/2021
+  Updated: 1/24/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Publish Data | Cannlytics{% endblock %}
+{% block material %}
+
+<section class="container mb-2 mt-5">
+
+  <!-- Title -->
+  <div class="d-flex mt-4">
+    <nav
+      style="--bs-breadcrumb-divider: '>';"
+      aria-label="breadcrumb"
+    >
+      <ol class="breadcrumb bg-transparent p-0 mb-0">
+        <li class="breadcrumb-item fs-6 lh-sm">
+          <a
+            class="text-dark serif action"
+            href="{% url 'section' page='data' section='market' %}#data-market"
+          >
+            Data Market
+          </a>
+        </li>
+        <li class="breadcrumb-item active fs-6 lh-sm text-dark serif" aria-current="page">
+          Publish Data
+        </li>
+      </ol>
+      <div>
+    </div>
+    </nav>
+  </div>
+
+  <!-- Header -->
+  <h2 class="mb-2 pt-5 serif text-dark">
+    Publish Your Data
+  </h2>
+  <p class="fs-6 double-line mb-4" style="max-width:540px;">
+    Sell your data to people with a demand for cannabis data.
+  </p>
+
+  <!-- TODO: Implement form to sell data. -->
+
+  <!-- Under Construction -->
+  {% include "website/components/notifications/under_construction.html" %}
+
+  <p class="fs-6 double-line mb-3 mt-3" style="max-width:540px;">
+    If you are eager to sell your data, then please contact
+    <a class="serif text-gradient" href="mailto:sales@cannlytics.com">sales@cannlytics.com</a>
+    and we will work with you to manually list your data for the time being.
+  </p>
+
+</section>
+
+{% endblock material %}

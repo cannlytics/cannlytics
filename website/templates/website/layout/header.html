@@ -1,0 +1,199 @@
+<!doctype html>
+<html>
+<!--
+  Header | Cannlytics Website
+  Created: 1/7/2021
+  Updated: 1/11/2022
+
+  Optional links to add:
+    - Examples?
+-->
+{% load static icon %}
+
+<!-- Banner offer -->
+{% include "website/components/banners/banner_support.html" with
+  email="contact@cannlytics.com"
+  phone=app.contact_phone
+  phone_number=app.contact_phonenumber
+  only
+%}
+
+<!-- Theme Toggle -->
+{% include "website/components/buttons/theme_toggle.html" %}
+
+<!-- Header Template -->
+<nav class="navbar navbar-expand-lg navbar-light justify-content-start p-3 px-md-4">
+  <div class="container-fluid">
+
+    <!-- Title -->
+    <a 
+      class="navbar-brand d-flex align-items-center me-2 pt-0"
+      href="{% url 'index' %}"
+      aria-label="Cannlytics"
+    >
+      <img
+        src="{% static 'website/images/logos/cannlytics_logo_with_text_light.svg' %}"
+        class="light-only"
+        height="42px"
+        alt="Cannlytics"
+      >
+      <img
+        src="{% static 'website/images/logos/cannlytics_logo_with_text_dark.svg' %}"
+        class="dark-only"
+        height="42px"
+        alt="Cannlytics"
+      >
+    </a>
+
+    <!-- Menu Toggle -->
+    <button
+      class="navbar-toggler me-4 p-1"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNavDropdown"
+      aria-controls="navbarNavDropdown"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      {% icon "menu" height="21px" width="21px" %}
+    </button>
+
+    <!-- Navigation Links -->
+    <div
+      id="navbarNavDropdown"
+      class="collapse navbar-collapse justify-content-between"
+    >
+      <ul class="navbar-nav me-2">
+        <li class="nav-item mb-0">
+          <a
+            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'data' in request.path %}active{% endif %}"
+            href="{% url 'page' page='data' %}"
+          >
+            Data
+          </a>
+        </li>
+        <li class="nav-item mb-0">
+          <a
+            class="nav-link btn-sm background-hover fw-bold serif text-dark"
+            href="https://docs.cannlytics.com"
+          >
+            Docs
+          </a>
+        </li>
+        <li class="nav-item mb-0">
+          <a
+            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'support' in request.path %}active{% endif %}"
+            href="{% url 'page' page='support' %}"
+          >
+            Support
+          </a>
+        </li>
+        <li id="more-menu" class="nav-item dropdown dropdown-mega position-static">
+          <a
+            class="nav-link dropdown-toggle btn-sm background-hover fw-bold serif text-dark"
+            href="#"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+          >
+            More
+          </a>
+          <div id="mega-menu" class="dropdown-menu p-0 m-0">
+            <div class="mega-content px-4">
+              <div class="container-fluid">
+                <div class="row">
+
+                  <div class="col-12 col-sm-4 col-md-3 py-4">
+                    <h5 class="fw-bold px-3 serif text-dark">Core</h5>
+                    <div class="list-group border-none">
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='ai' %}">🦾 AI</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='api' %}">📡 API</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://console.cannlytics.com">📱 App</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://pypi.org/project/cannlytics/">🐍 Python SDK</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='support' %}">⛑️ Support</a>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-sm-4 col-md-3 py-4">
+                    <h5 class="fw-bold serif text-dark">Cannabis Data Science</h5>
+                    <div class="card no-border bg-transparent">
+                      <a href="https://www.meetup.com/cannabis-data-science/events/">
+                        <img class="img-fluid" alt="image" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fcannabis_data_science%2Fsaturday_morning_statistics%2Fbackgrounds%2Fsaturday-morning-statistics.png?alt=media&token=bedd0f08-7996-4d1b-afa5-59637b6dcfb9">
+                      </a>
+                      <div class="card-body bg-transparent px-0">
+                        <p class="card-text fs-6 text-dark markdown">
+                          <small>
+                            Join like-minded individuals
+                            who apply data science to cannabis data every Wednesday
+                            at 8:30am PST / 11:30am EST at the
+                            <a
+                              href="https://www.meetup.com/cannabis-data-science/"
+                              class="serif background-hover"
+                            >
+                              Cannabis Data Science Meetup
+                            </a>.
+                          </small>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-sm-4 col-md-3 py-4">
+                    <h5 class="fw-bold px-3 serif text-dark">Material</h5>
+                    <div class="list-group">
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='articles' %}">🗞️ Articles</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='events' %}">🎫 Events</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='videos' %}">📺 Videos</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='whitepapers' %}">📜 Whitepapers</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='subscriptions' %}">📮 Subscriptions</a>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-sm-12 col-md-3 py-4">
+                    <h5 class="fw-bold px-3 serif text-dark">Data</h5>
+                    <div class="list-group">
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'section' page='data' section='market' %}">🪙 Data Market <span class="badge rounded-pill bg-success">New</span></a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='testing' %}">🥼 Labs, analyses, and <strong class="serif">prices</strong>!</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='economics' %}">📈 Economics and forecasts</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='data' %}#state-data">🏛️ Public state data</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='data' %}#regulations">⚖️ Regulations</a>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Right Navigation (Not signed in) -->
+      <ul class="navbar-nav align-items-center me-3 indicates-auth visually-hidden">
+        {% if section != 'sign-in' %}
+        <li class="nav-item h6 mb-0">
+          <a
+            class="nav-link btn-sm app-action background-hover text-nowrap me-2 fw-bold serif text-dark"
+            data-bs-target="#sign-in-dialog"
+            data-bs-toggle="modal"
+          >
+            Sign in
+          </a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a
+            type="button"
+            class="btn btn-sm bg-gradient-orange text-white text-nowrap serif"
+            href="https://console.cannlytics.com"
+          >
+            Launch App
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right navigation shown if user is signed in. -->
+      {% include "website/components/menus/user_menu.html" %}
+
+    </div>
+  </div>
+</nav>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<!--
+  Integrators Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/16/2021
+  Updated: 1/2/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Integrators | Cannlytics{% endblock %}
+{% block material %}
+
+  <!-- Hero Banner -->
+  {% include "website/components/heros/hero_banner.html" with
+    title='Integrators'
+    description='You can utilize Cannlytics to seamlessly interface with state traceability systems.'
+    primary_action='Integrate now'
+    primary_action_url='https://console.cannlytics.com/account/login'
+    secondary_action='Browse solutions'
+    secondary_action_url='https://github.com/cannlytics'
+    only
+  %}
+
+  <!-- Introduction -->
+  <div class="container mb-5 mt-3">
+    <div class="markdown py-5" style="max-width:560px;">
+      <svg class="pt-3 pe-1" style="float:left;width:125px;height:125px;">
+        <use href="{% static "website/images/emojies/examine.svg" %}#examine-emoji"></use>
+      </svg>
+      {{ integrators|safe }}
+      <p class="text-start mt-3">
+        <a
+          class="btn btn-sm bg-gradient-orange text-white"
+          href="https://github.com/cannlytics/cannlytics-engine"
+        >
+          <small>Utilize the engine today</small> &rarr;
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Vines -->
+  {% include "website/components/art/vines.html" %}
+
+{% endblock material %}
+</html>

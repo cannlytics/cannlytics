@@ -8,6 +8,12 @@
 {% extends "console/console.html" %}
 {% load icon %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Instruments | Cannlytics {% endblock title %}
+{% block console_css %}
+
+  <!-- AG-Grid CSS and JavaScript -->
+  {% include "console/components/tables/ag_grid_scripts.html" %}
+
+{% endblock console_css %}
 {% block console_body %}
 {% if section and section not in 'logs,files,certifiates' %}
 
@@ -20,11 +26,11 @@
 {% else %}
 
   <!-- List -->
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
   
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-      <h1 class="fs-5 mb-0 lh-base">Instruments</h1>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom">
+      <h4 class="breadcrumb-item text-dark lh-sm fs-6 mb-0">Instruments</h4>
     </div>
 
     <!-- Body -->

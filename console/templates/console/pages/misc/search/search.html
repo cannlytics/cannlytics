@@ -38,14 +38,14 @@
     <a
       class="btn btn-link text-dark"
       type="button"
-      href="/"
+      href="{% url 'index' %}"
     >
       Home
     </a>
     <a
       class="btn btn-link text-dark"
       type="button"
-      href="/account/sign-in"
+      href="{% url 'section' screen='account' section='sign-in' %}"
     >
       Login
     </a>

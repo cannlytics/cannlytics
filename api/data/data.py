@@ -1,27 +1,20 @@
 """
 Data Endpoints | Cannlytics API
+Copyright (c) 2021-2022 Cannlytics
+
+Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 5/30/2021
 Updated: 8/21/2021
+License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
-API endpoints to interface with datasets.
+Description: API endpoints to interface with datasets.
 """
-
-# Standard imports
-from datetime import datetime
-
 # External imports
-from django.template.defaultfilters import slugify
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
 from api.auth import auth
-from cannlytics.firebase import (
-    get_collection,
-    get_document,
-    update_document,
-)
 
 
 @api_view(['GET', 'POST'])
@@ -29,7 +22,7 @@ def datasets(request, state=None):
     """Get or update information about datasets."""
 
     # Authenticate the user.
-    claims = auth.verify_session(request)
+    claims = auth.authenticate_request(request)
     uid = claims['uid']
 
     # TODO: Allow user to pass state as a parameter.
@@ -60,29 +53,32 @@ def datasets(request, state=None):
         # need to get location data from the API, or is the data in
         # Firestore sufficient (given Firestore is syncing with Metrc).
         # Otherwise, initialize a Metrc client and get areas from Metrc.
-        # traced_location = cultivator.get_locations(uid=cultivation_uid)  
+        # traced_location = cultivator.get_locations(uid=cultivation_uid)
 
         # # Optional: Get any filters from dict(request.query_params)
-        
+
         return Response([{'make': "Subaru", 'model': "WRX", 'price': 21000}])
-    
+
     elif request.method == 'POST':
 
         # TODO: Either create or update the area.
 
             # # Create a new location using: POST /locations/v1/create
-            # cultivation_name = 'MediGrow'
-            # cultivation_original_name = 'medi grow'
+            # cultivation_name = 'Medical Grow'
+            # cultivation_original_name = 'medical_grow'
             # cultivator.create_locations([
             #     cultivation_original_name,
             #     'Harvest Location',
             #     'Plant Location',
             #     'Warehouse',
             # ])
-            
+
             # # Get created location
             # cultivation= None
-            # locations = track.get_locations(action='active', license_number=cultivator.license_number)
+            # locations = track.get_locations(
+            #     action='active',
+            #     license_number=cultivator.license_number
+            # )
             # for location in locations:
             #     if location.name == cultivation_original_name:
             #         cultivation = location

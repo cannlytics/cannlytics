@@ -1,12 +1,13 @@
 <!doctype html>
 <html>
 <!--
-  Sign In Page
+  Sign In Page | Cannlytics Console
   Created: 2/18/2021
-  Updated: 5/16/2021
+  Updated: 1/13/2022
 -->
 {% extends "./base_sign_in.html" %}
 {% load static %}
+{% block title %}Sign In | Cannlytics{% endblock title %}
 {% block login_form %}
 
   <!-- Login Style -->
@@ -38,7 +39,7 @@
   <!-- Email -->
   <div class="mb-3 row">
     <label
-      for="login-email"
+      for="sign-in-email"
       class="col-sm-2 col-form-label col-form-label-sm pe-2"
     >
       Email
@@ -47,7 +48,7 @@
       <input
         type="email"
         class="form-control form-control-sm"
-        id="login-email"
+        id="sign-in-email"
         required
         autofocus
         spellcheck="false"
@@ -58,7 +59,7 @@
   <!-- Password -->
   <div class="mb-3 row">
     <label
-      for="login-password"
+      for="sign-in-password"
       class="col-sm-2 col-form-label col-form-label-sm pe-2"
     >
       Password
@@ -67,14 +68,30 @@
       <input
         type="password"
         class="form-control form-control-sm"
-        id="login-password"
+        id="sign-in-password"
         required
       >
     </div>
   </div>
 
   <!-- Sign in  -->
-  <div class="d-flex justify-content-end w-100 mt-3">
+  <div class="d-flex justify-content-between align-items-start w-100 mt-3">
+    <div class="d-flex flex-column align-items-end">
+      <div class="form-check">
+        <input id="stay-signed-in" class="form-check-input" type="checkbox" value="">
+        <label class="form-check-label fs-6" for="stay-signed-in"><small>
+          Stay signed in?
+        </small></label>
+      </div>
+      <p class="text-center text-small fs-6 font-weight-light mb-1">
+        <a
+          class="background-hover text-secondary text-small fs-6"
+          href="{% url 'section' screen='account' section='password-reset' %}"
+        >
+          <small class="sans-serif">Lost password?</small>
+        </a>
+      </p>
+    </div>
     <button
       id="sign-in-button"
       class="ms-1 btn btn-sm btn-set-width bg-gradient-green text-white"
@@ -94,28 +111,15 @@
     </button>
   </div>
 
-  <!-- Remember Me -->
-  <!-- FIXME: Implement remember user option | custom checkbox color -->
-  {% comment %} <div class="d-flex justify-content-between">
-    <div class="custom-control custom-checkbox mb-3">
-      <input type="checkbox" class="custom-control-input app-action" id="input_remember_password">
-      <label class="custom-control-label app-action" for="input_remember_password">
-        Stay signed in?
-      </label>
-    </div>
-  </div> {% endcomment %}
-
   <!-- Google Sign In -->
-  <!-- FIXME: Google sign-in on redirect does not work -->
-  {% comment %} <div class="text-dark text-center my-3">
+  <div class="text-dark text-center my-3">
     &mdash;&nbsp;or&nbsp;&mdash;
   </div>
   <div class="d-grid gap-2 justify-content-center">
-    <a id="google-signin" class="app-action" onclick="cannlytics.auth.googleSignIn()"></a>
+    <a id="google-signin" class="app-action" onclick="cannlytics.auth.signInWithGoogle()"></a>
   </div>
   <img style="display:none;" src="{% static 'console/images/logos/signin-assets/btn_google_signin_dark_focus_web@2x.png' %}"/>
   <img style="display:none;" src="{% static 'console/images/logos/signin-assets/btn_google_signin_dark_pressed_web@2x.png' %}"/>
- {% endcomment %}
 
   <!-- Sign up -->
   <div class="d-flex align-items-center justify-content-center">
@@ -125,17 +129,11 @@
     >
       <p class="text-center text-small fs-6 font-weight-light">
         <small>Are you new to Cannlytics?</small>
-        <a class="text-dark text-small fs6" href="./sign-up">
-          <small><b>Sign up now &rarr;</b></small>
-        </a>
-      </p>
-      <p class="text-center text-small fs-6 font-weight-light mb-1">
-        <small>Lost your password?</small>
         <a
-          href="./password-reset"
-          class="text-dark text-small fs-6"
+          class="background-hover text-dark text-small fs6"
+          href="{% url 'section' screen='account' section='sign-up' %}"
         >
-          <small><b>Reset your password &rarr;</b></small>
+          <small><b>Sign up now &rarr;</b></small>
         </a>
       </p>
     </div>
@@ -143,13 +141,16 @@
 
   <!-- JavaScript to add actions to inputs -->
   <script>
-    var node = document.getElementById('login-password');
-    node.addEventListener('keyup', function(event) {
-      if (event.key === 'Enter') {
-        cannlytics.auth.signIn(event);
-      }
-    });
+
+    // Initialize the sign in form, logging the user in when authorization is  detected.
+    cannlytics.app.initialize(/* redirect = */ true);
+
+    //  Add sign in on enter.
+    document.getElementById('sign-in-password')
+      .addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') cannlytics.auth.signIn(event);
+      });
   </script>
 
-{% endblock %}
+{% endblock login_form %}
 </html>
