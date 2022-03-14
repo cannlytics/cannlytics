@@ -165,6 +165,7 @@ data_models = [
             {"key": "billing_state", "label": "Billing State", "class": "field-sm"},
             {"key": "billing_zip_code", "label": "Billing Zip Code", "class": "field-sm"},
             {"key": "billing_email", "label": "Billing Email"},
+            # FIXME: Add license number!
             # TODO: Add people (list)
         ],
     },

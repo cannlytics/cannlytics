@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 1/22/2021
-Updated: 12/31/2021
+Updated: 3/14/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Description: API interface for Cannlytics users to manage their personal data.
@@ -31,7 +31,6 @@ def users(request):
 
         # Authenticate the user.
         claims = authenticate_request(request)
-        print('User claims:', claims)
         uid = claims['uid']
 
         # Get the user's data.

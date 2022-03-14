@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 12/9/2020
- * Updated: 3/13/2021
+ * Updated: 3/14/2021
  * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
 const appName = 'console';
@@ -26,15 +26,16 @@ module.exports = env => {
       extensions: ['.js'],
     },
     entry: {
-      cannlytics: `./${appName}/assets/js/index.js`,
+      cannlytics: `./assets/js/index.js`,
     },
     output: {
-      path: path.resolve(__dirname, `${appName}/static/${appName}`), // Should be in STATICFILES_DIRS.
+      path: path.resolve(__dirname, `./static/${appName}`), // Should be in STATICFILES_DIRS.
       filename: './bundles/[name].min.js',
-      library: { // Turns JavaScript into a module.
-        name: 'cannlytics',
-        type: 'umd',
-      },
+      // library: { // Turns JavaScript into a module.
+      //   name: 'cannlytics',
+      //   type: 'umd',
+      // },
+      library: 'cannlytics',
       libraryTarget: 'var',
       hotUpdateChunkFilename: './bundles/hot/hot-update.js',
       hotUpdateMainFilename: './bundles/hot/hot-update.json',
@@ -87,13 +88,19 @@ module.exports = env => {
         new CssMinimizerPlugin({}),
       ],
     },
+    
+    // Define maximum optimal bundle-size.
+    performance: {
+      maxEntrypointSize: 512000 * 4,
+      maxAssetSize: 512000 * 4,
+    },
 
     // Useful plugins.
     plugins: [
 
       // Make .env variables available in the entry file.
       // WARNING: Any variables used in JavaScript will be compiled.
-      new Dotenv(),
+      new Dotenv({ path: '../.env' }),
 
     ],
 

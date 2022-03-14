@@ -250,6 +250,14 @@ You can also leverage [django-livereload-server](https://github.com/tjwalch/djan
 npm run start
 ```
 
+<!-- TODO: Table of NPM scripts
+
+Script name
+Description
+Accepted arguments (optional)
+Links to other documentation (optional): For example, if your script runs tsc --build, you may want to include a link to Typescript docs.
+-->
+
 ### Authentication <a name="authentication"></a>
 
 Below is a diagram that depicts how Cannlytics leverages [Firebase Authentication] to authorize user requests.

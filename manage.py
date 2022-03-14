@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 """
 Django's command-line utility for administrative tasks.
+
+Usage:
+
+    set PROJECT=console & python manage.py runserver
+
 """
 import os
 import sys
@@ -8,8 +13,7 @@ import sys
 
 def main():
     """ Run administrative tasks. """
-    # project = sys.argv[2]
-    project = os.environ.get('PROJECT', 'website')
+    project = os.environ.get('PROJECT', 'website').strip()
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'{project}.settings')
     try:
         from django.core.management import execute_from_command_line
