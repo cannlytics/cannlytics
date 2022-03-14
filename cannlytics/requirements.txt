@@ -1,3 +1,7 @@
+# Python Requirements | Cannlytics
+# Created 3/14/2022
+# Updated: 3/14/2022
+
 beautifulsoup4
 firebase_admin
 google-cloud-secret-manager
@@ -14,5 +18,5 @@ ulid-py
 # FIXME:
 # ocean-lib # Breaks App Engine deployments.
 
-# Optional dependency:
+# Optional:
 # xlwings # Breaks App Engine deployments.

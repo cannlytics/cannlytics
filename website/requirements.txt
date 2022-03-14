@@ -2,7 +2,7 @@
 # Created 1/5/2021
 # Updated: 1/10/2022
 
-cannlytics==0.0.10
+cannlytics==0.0.10 # Soon to be v0.0.11
 datetime==4.3
 django==4.0
 # django-csp==3.7 # FIXME: Implement CSP.
@@ -21,10 +21,3 @@ pymdown-extensions==9.1
 python-markdown-math==0.8
 waitress==2.0.0
 whitenoise==5.3.0
-
-# cannlytics package dependencies:
-# firebase_admin==5.1.0 # Used only in cannlytics module and for admin.
-# openpyxl==3.0.9 # Used only in cannlytics module.
-# ocean-lib==0.8.5 # Used only in cannlytics module.
-# pandas==1.2.1 # Used only in cannlytics module.
-# ulid-py==1.1.0 # Used only in cannlytics module.

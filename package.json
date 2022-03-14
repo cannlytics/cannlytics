@@ -16,7 +16,7 @@
   "license": "MIT",
   "private": true,
   "author": {
-    "name": "Keegan Leon Skeate",
+    "name": "Keegan Skeate",
     "email": "keegan@cannlytics.com"
   },
   "repository": {
@@ -24,22 +24,31 @@
     "url": "https://github.com/cannlytics/cannlytics.git"
   },
   "scripts": {
-    "ai:deploy-cannabis-data-daily": "cd ./tools/data/state_data/get_cannabis_data_daily && gcloud functions deploy get_cannabis_data_daily --entry-point get_cannabis_data_daily --runtime python39 --trigger-topic get_cannabis_data_daily --memory 1024MB --timeout 300 --env-vars-file env.yaml && cd ../../../../",
+    "ai:deploy-cannabis-data-daily": "cd ./tools/data/state_data/get_cannabis_data_daily & gcloud functions deploy get_cannabis_data_daily --entry-point get_cannabis_data_daily --runtime python39 --trigger-topic get_cannabis_data_daily --memory 1024MB --timeout 300 --env-vars-file env.yaml & cd ../../../../",
     "console:start": "npm-run-all --parallel console:livereload console:dev console:serve",
-    "console:serve": "cd console && webpack serve --env production && cd ../",
+    "console:serve": "cd console & webpack serve --env development & cd ../",
     "console:livereload": "set PROJECT=console & python manage.py livereload --ignore-static-dirs",
     "console:dev": "set PROJECT=console & python manage.py runserver",
     "console:collectstatic": "set PROJECT=console & python manage.py collectstatic --noinput",
-    "console:build": "webpack --env production --config ./config/console.webpack.config.js",
-    "console:container": "npm run console:collectstatic && gcloud builds submit --tag gcr.io/cannlytics/cannlytics-lims",
+    "console:build": "cd console & webpack --env production & cd ../",
+    "console:container": "npm run console:collectstatic & gcloud builds submit --tag gcr.io/cannlytics/cannlytics-lims",
     "console:cloud": "gcloud run deploy cannlytics-lims --image gcr.io/cannlytics/cannlytics-lims --set-env-vars SETTINGS_NAME=cannlytics_platform_settings --region us-central1 --allow-unauthenticated --platform managed --memory 2Gi --cpu 2 --min-instances 1",
     "console:deploy": "firebase deploy --project cannlytics --only hosting:production",
-    "console:publish": "npm run console:build && npm run console:container && npm run console:cloud && npm run console:deploy",
+    "console:publish": "npm run console:build & npm run console:container & npm run console:cloud & npm run console:deploy",
     "docs:install": "docker build -t squidfunk/mkdocs-material docs",
     "docs:build": "mkdocs build",
     "docs:publish": "firebase deploy --project cannlytics --only hosting:docs",
     "docs:serve": "docker run --rm -it -p 8000:8000 -v \"%cd%\":/docs squidfunk/mkdocs-material",
-    "website": "TODO: Add all website scripts!"
+    "website:start": "npm-run-all --parallel website:serve website:livereload website:runserver",
+    "website:serve": "cd website & webpack serve --env development & cd ../",
+    "website:livereload": "set PROJECT=website & python manage.py livereload --ignore-static-dirs",
+    "website:runserver": "set PROJECT=website & python manage.py runserver",
+    "website:build": "cd website & webpack --env production & cd ../",
+    "website:collectstatic": "set PROJECT=website & python manage.py collectstatic --noinput",
+    "website:container": "npm run website:collectstatic --noinput & gcloud builds submit --tag gcr.io/cannlytics/cannlytics-website",
+    "website:cloud": "gcloud run deploy cannlytics-website --image gcr.io/cannlytics/cannlytics-website --set-env-vars SETTINGS_NAME=cannlytics_website_settings --region us-central1 --allow-unauthenticated --platform managed --memory 2Gi --cpu 2 --min-instances 1",
+    "website:deploy": "firebase deploy --project cannlytics --only hosting:website",
+    "website:publish": "npm run website:build & npm run website:container & npm run website:cloud && npm run website:deploy"
   },
   "dependencies": {
     "@popperjs/core": "^2.10.2",

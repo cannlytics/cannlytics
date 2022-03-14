@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 1/5/2021
- * Updated: 1/1/2022
+ * Updated: 3/14/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 */
 const appName = 'website';
@@ -25,15 +25,15 @@ module.exports = env => {
       extensions: ['.js'],
     },
     entry: [
-      `./${appName}/assets/css/cannlytics.scss`,
-      `./${appName}/assets/js/index.js`,
+      './assets/css/cannlytics.scss',
+      './assets/js/index.js',
       // You can add additional JS here.
     ],
     output: {
-      path: path.resolve(__dirname, `${appName}/static/${appName}`),
+      path: path.resolve(__dirname, `./static/${appName}`),
       filename: './js/bundles/cannlytics.min.js',
-      libraryTarget: 'var',
       library: 'cannlytics', // Turns JavaScript into a module.
+      libraryTarget: 'var',
       hotUpdateChunkFilename: './js/bundles/hot/hot-update.js',
       hotUpdateMainFilename: './js/bundles/hot/hot-update.json'
     },
@@ -84,8 +84,13 @@ module.exports = env => {
       minimize: env.production, // Minimize JavaScript in production.
       minimizer: [new TerserPlugin({ parallel: true })],
     },
+    // Define maximum optimal bundle-size.
+    performance: {
+      maxEntrypointSize: 512000 * 4,
+      maxAssetSize: 512000 * 4,
+    },
     plugins: [
-      new Dotenv(), // Make .env variables available in entry file.
+      new Dotenv({ path: '../.env' }), // Make .env variables available in entry file.
     ],
   }
 };

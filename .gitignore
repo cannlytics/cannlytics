@@ -120,7 +120,7 @@ tmp/
 
 # Ignore Webpack bundles.
 console/static/console/bundles/*
-website/static/website/bundles/*
+website/static/website/js/bundles/*
 *webpack-stats.json
 
 # Ignore local copy of cannlytics.

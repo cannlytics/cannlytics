@@ -147,7 +147,7 @@ Cannlytics is built and tested with Python 3.9 and above. We recommend using [An
 ```bash
 conda create --name cannlytics python=3.9
 conda activate cannlytics
-pip install -r config/all-requirements.txt
+pip install -r requirements.txt
 python manage.py migrate
 npm install
 ```

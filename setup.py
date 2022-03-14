@@ -5,7 +5,7 @@ Copyright (c) 2021-2022 Cannlytics
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Contact: <keegan@cannlytics.com>
 Created: 1/21/2021
-Updated: 3/13/2022
+Updated: 3/14/2022
 License: MIT <https://opensource.org/licenses/MIT>
 """
 from setuptools import find_packages, setup
@@ -16,12 +16,12 @@ version = '0.0.11'
 
 # Get the project description.
 README = ''
-with open('../cannlytics/README.md', 'r', encoding='utf-8') as readme_file:
+with open('./cannlytics/README.md', 'r', encoding='utf-8') as readme_file:
     README = readme_file.read()
 
 # Specify requirements installed by `pip install cannlytics`.
 REQUIREMENTS = []
-with open('cannlytics-requirements.txt', 'r') as f:
+with open('./cannlytics/requirements.txt', 'r') as f:
     REQUIREMENTS = [i[:-1] for i in f if i[0] != '#']
 
 # Specify requirements for development.
