@@ -1,39 +1,42 @@
 """
 Instruments | Cannlytics
+Copyright (c) 2021-2022 Cannlytics
 
-Author: Keegan Skeate <keegan@cannlytics.com>  
-Created: 8/3/2021  
-Updated: 8/21/2021  
-License: MIT License <https://opensource.org/licenses/MIT>  
+Authors: Keegan Skeate <keegan@cannlytics.com>
+Created: 8/3/2021
+Updated: 12/21/2021
+License: MIT License <https://opensource.org/licenses/MIT>
 
-Manage scientific instruments and measurements from the instruments.
+Description: Manage scientific instruments and measurements from the instruments.
 """
 # Standard imports
 import os
-import environ
 from datetime import datetime, timedelta
+from typing import Any, List, Optional
 
-try:
+# External imports
+from dotenv import dotenv_values
+import pandas as pd
+import requests
 
-    # External imports
-    import pandas as pd
-    import requests
+# Internal imports
+from ..firebase import (
+    get_collection,
+    initialize_firebase,
+    update_document
+)
+from ..utils.utils import clean_column_names, snake_case
 
-    # Internal imports
-    from cannlytics.firebase import (
-        get_collection,
-        initialize_firebase,
-        update_document
-    )
-    from cannlytics.utils.utils import snake_case
-
-except:
-    pass
 
 API_BASE = 'https://console.cannlytics.com'
 
 
-def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
+# TODO: Refactor, big time.
+def automatic_collection(
+        org_id: Optional[str] = None,
+        env_file: Optional[str] = '.env',
+        minutes_ago: Optional[int] = None,
+) -> List[dict]:
     """Automatically collect results from scientific instruments.
     Args:
         org_id (str): The organization ID to associate with instrument results.
@@ -46,19 +49,17 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
         (list): A list of measurements (dict) that were collected.
     """
 
-    # Try to initialize Firebase, otherwise an API key will be used.
+    # Try to set credentials and initialize Firebase, otherwise an API key will be used.
     try:
-        env = environ.Env()
-        env.read_env(env_file)
-        credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
-        initialize_firebase()
+        config = dotenv_values(env_file)
+        credentials = config.get('GOOGLE_APPLICATION_CREDENTIALS')
+        initialize_firebase(credentials)
     except:
         pass
 
     # Get the organization ID from the .env file if not specified.
     if not org_id:
-        org_id = env('CANNLYTICS_ORGANIZATION_ID')
+        org_id = config['CANNLYTICS_ORGANIZATION_ID']
 
     # Format the last modified time cut-off as a datetime.
     last_modified_at = None
@@ -70,7 +71,7 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
         ref = f'organizations/{org_id}/instruments'
         instrument_data = get_collection(ref)
     except:
-        api_key = env('CANNLYTICS_API_KEY')
+        api_key = config['CANNLYTICS_API_KEY']
         headers = {
             'Authorization': 'Bearer %s' % api_key,
             'Content-type': 'application/json',
@@ -79,6 +80,7 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
         response = requests.get(url, headers=headers)
         instrument_data = response.json()['data']
 
+    # TODO: Split this functionality into separate functions.
     # Iterate over instruments, collecting measurements.
     measurements = []
     for instrument in instrument_data:
@@ -89,16 +91,16 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
         except AttributeError:
             continue # FIXME: Handle missing analyses more elegantly.
         analyses = [x.strip() for x in analyses]
-        for n in range(len(analyses)):
+        for index, analysis in enumerate(analyses):
 
             # Optional: Handle multiple data paths more elegantly.
-            analysis = analyses[n]
+            analysis = analyses[index]
             try:
                 data_paths = instrument['data_path'].split(',')
             except AttributeError:
                 continue # No data path.
             data_paths = [x.strip() for x in data_paths]
-            data_path = data_paths[n]
+            data_path = data_paths[index]
             if not data_path:
                 continue
 
@@ -118,7 +120,7 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
                     if filename.endswith('.xlsx') or filename.endswith('.xls'):
                         data_file = os.path.join(root, filename)
                         modifed_at = os.stat(data_file).st_mtime
-                        # FIXME: Ensure date restriction works.
+                        # TODO: Ensure that date restriction works.
                         if last_modified_at:
                             if modifed_at < last_modified_at:
                                 continue
@@ -143,7 +145,6 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
         # TODO: Format a better measurement ID.
         measurement_id = measurement.get('acq_inj_time') # E.g. 12-Jun-21, 15:21:07
         if not measurement_id:
-            # measurement_id = now.strftime('%d-%b-%y-%H-%M-%S') + '_' + str(measurement['sample_id'])
             measurement_id = measurement['sample_id']
         else:
             try:
@@ -181,32 +182,7 @@ def automatic_collection(org_id=None, env_file='.env', minutes_ago=None):
     return measurements
 
 
-def clean_column_names(df, column):
-    """
-    Args:
-        df (DataFrame): A DataFrame with any column names.
-        column (str): The column of the DataFrame to clean.
-    Returns:
-        (DataFrame): A DataFrame with snake_case column names.
-    """
-    df[column] = df[column].str.strip()
-    df[column] = df[column].str.rstrip('.)]')
-    df[column] = df[column].str.replace('%', 'percent', regex=True)
-    df[column] = df[column].str.replace('#', 'number', regex=True)
-    df[column] = df[column].str.replace('[/,]', '_', regex=True)
-    df[column] = df[column].str.replace('[.,(,)]', '', regex=True)
-    df[column] = df[column].str.replace("\'", '', regex=True)
-    df[column] = df[column].str.replace("[[]", '_', regex=True)
-    df[column] = df[column].str.replace(r"[]]", '', regex=True)
-    df[column] = df[column].str.replace('β', 'beta', regex=True)
-    df[column] = df[column].str.replace('Δ', 'delta', regex=True)
-    df[column] = df[column].str.replace('δ', 'delta', regex=True)
-    df[column] = df[column].str.replace('α', 'alpha', regex=True)
-    df[column] = df[column].str.replace('__', '', regex=True)
-    return df
-
-
-def get_compound_dataframe(workbook_data, sheetname='Compound'):
+def get_compound_dataframe(workbook_data: dict, sheetname: Optional[str] = 'Compound') -> Any:
     """ Rename the columns in the `Compound` sheet to match the required
     names. For simplicity, make a copy of the `Compound` sheet to
     handle NaN values.
@@ -229,11 +205,11 @@ def get_compound_dataframe(workbook_data, sheetname='Compound'):
     return compounds
 
 
-def get_sample_data(workbook_data, sheet_name='Sheet1'):
+def get_sample_data(workbook_data: dict, sheet_name: Optional[str] = 'Sheet1') -> dict:
     """Return the sample name from a dictionary.
     Converts the first column of the first sheet to snake_case.
     Args:
-        df (DataFrame): A DataFrame.
+        data (DataFrame): A DataFrame.
         sheet_name (str): The name of the worksheet containing the sample data.
     Returns:
         (dict): The sample data as a key and value pairs.
@@ -243,14 +219,33 @@ def get_sample_data(workbook_data, sheet_name='Sheet1'):
     return dict(data.values)
 
 
-def import_heavy_metals(file_name):
+def import_analyses(directory: str):
+    """Import analyses to Firestore from a .csv or .xlsx file.
+    Args:
+        directory (str): The full filename of a data file.
+    """
+    analyses = pd.read_excel(directory + 'analyses.xlsx')
+    analytes = pd.read_excel(directory + 'analytes.xlsx')
+    for index, analysis in analyses.iterrows():
+        analyte_data = []
+        analyte_names = analysis.analyte_keys.split(', ')
+        for analyte_key in analyte_names:
+            analyte_item = analytes.loc[analytes.key == analyte_key]
+            analyte_data.append(analyte_item.to_dict(orient='records'))
+        analyses.at[index, 'analytes'] = analyte_data 
+    analyses_data = analyses.to_dict(orient='records')
+    # TODO: Implement.
+    raise NotImplementedError
+
+
+def import_heavy_metals(file_name: str) -> List[dict]:
     """Import heavy metal results from ICP-MS screening.
     First, reads in the log sheet and summary sheets seperately to
     make parsing easier. Drops the rows that do not contain sample ids.
     Renames columns to make parsing clearer. Get list of samples and
     then parses measurements.
     Args:
-        df (DataFrame): A DataFrame.
+        data (DataFrame): A DataFrame.
     Returns:
         (list): A list of measurements (dict).
     """
@@ -268,7 +263,7 @@ def import_heavy_metals(file_name):
         sample['sample_dilution'] = result_data['Sample Dilution'].values[0]
         analytes = []
         criterion = (samples_data['analyte'] == 'ID:') & (samples_data['mass'] == sample_id)
-        index  = samples_data.index[criterion].tolist()
+        index = samples_data.index[criterion].tolist()
         for offset in range(index[0] + 20, index[0] + 27): # Magic numbers
             analyte = {}
             analyte['analyte'] = samples_data.iloc[offset].analyte
@@ -279,13 +274,13 @@ def import_heavy_metals(file_name):
     return samples
 
 
-def import_micro(file_name):
+def import_micro(file_name: str) -> List[dict]:
     """Import microbiological screening results, grouping sample results
     by well name.
     Args:
         file_name (str): The path to a qPCR data file.
     Returns:
-        (list): A list of sample measurements (dictionary).
+        (list): A list of sample measurements (dict).
     """
     workbook_data = pd.read_excel(file_name, sheet_name=None)
     results = workbook_data['Tabular Results']
@@ -308,7 +303,7 @@ def import_micro(file_name):
     return samples
 
 
-def import_results(file_name):
+def import_results(file_name: str) -> dict:
     """Import scientific instrument data. The routine is as follows:
         1. Read in all the excel sheets at one time.
         2. Get the sample name.
@@ -316,7 +311,7 @@ def import_results(file_name):
         4. Add the analyte names and measurements to a list of result dictionaries.
         5. Collect the data into a running list.
     Args:
-        df (DataFrame): A DataFrame.
+        data (DataFrame): A DataFrame.
     Returns:
         (dict): A dictionary of sample results.
     """
@@ -331,18 +326,17 @@ def import_results(file_name):
 
 if __name__ == '__main__':
 
+    # Standard imports.
     import argparse
-    import os, sys
-    # sys.path.append(os.path.join(os.path.dirname(__file__)))
-    sys.path.append('../cannlytics')
+    import os
 
-    # Internal imports
-    from cannlytics.firebase import (
+    # Internal imports.
+    from ..firebase import (
         get_collection,
         initialize_firebase,
         update_document
     )
-    from cannlytics.utils.utils import snake_case
+    from ..utils.utils import snake_case
 
     # Declare command line arguments.
     parser = argparse.ArgumentParser(description='Scientific instrument data collection routine.')

@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <!--
-  Dynamic Form | Cannlytics
+  Dynamic Form | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
   Updated: 7/9/2021
@@ -142,6 +142,7 @@
       </label>
       <div class="col-sm-9">
         <select
+          id="input_{{ field.key }}"
           name="{{ field.key }}"
           class="form-select form-select-sm {{ field.class }}"
           aria-label="{{ field.label }}"

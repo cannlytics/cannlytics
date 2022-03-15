@@ -1,14 +1,17 @@
 <!doctype html>
 <html>
 <!--
-  Transfers Page | Cannlytics
+  Transfers Page | Cannlytics Console
   Created: 5/4/2021
-  Updated: 8/15/2021
+  Updated: 2/6/2022
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Transfers | Cannlytics {% endblock title %}
 {% block console_css %}
+
+  <!-- AG-Grid CSS and JavaScript -->
+  {% include "console/components/tables/ag_grid_scripts.html" %}
 
   <!-- Bootstrap Datepicker -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
@@ -17,34 +20,39 @@
 {% endblock console_css %}
 {% block console_body %}
 <!-- Optional: Add back logs,files, -->
-{% if section and section not in 'map' %}
+{% if section and section not in 'map,transporters,vehicles' %}
 
   <!-- Detail page -->
   {% include "console/pages/transfers/transfer.html" with
     id=section
     data_model=data_model
+    organizations=organizations
   %}
 
 {% else %}
 
   <!-- List -->
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-      <h1 class="fs-5 mb-0 lh-base">Transfers</h1>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+      <h4 class="breadcrumb-item text-dark lh-sm fs-6 mb-0">Transfers</h4>
     </div>
+    <!-- TODO: Prefer breadcrumbs here -->
+    {% comment %} {% include "console/components/links/breadcrumbs.html" with
+      base_page="Transfers"
+      base_page_url="/transfers"
+      nested_page="Vehicles"
+      nested_page_url="/transfers/vehicles"
+      current_page=id
+    %} {% endcomment %}
 
     <!-- Body -->
     <div class="transfers">
 
       <!-- Tabs -->
-      {% include "console/components/forms/form_tabs.html" with
-        model="transfers"
-        extra="Map"
-        extra_path="map"
-      %}
-      {% comment %} <ul class="nav nav-tabs mt-3">
+      <!-- TODO: Transporters tab -->
+      <ul class="nav nav-tabs mt-3">
         <li class="nav-item">
           <a
             class="nav-link {% if not section %}active{% endif %}"
@@ -62,7 +70,23 @@
             Map
           </a>
         </li>
-      </ul> {% endcomment %}
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'transporters' %}active{% endif %}"
+            href="/transfers/transporters"
+          >
+            Transporters
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if section == 'vehicles' %}active{% endif %}"
+            href="/transfers/vehicles"
+          >
+            Vehicles
+          </a>
+        </li>
+      </ul>
 
       <!-- Logs -->
       {% if section == 'logs' %}
@@ -86,8 +110,8 @@
           user=user
         %}
 
-      <!-- Map -->
-      {% elif section == 'map' %}
+      <!-- Map or Transporters -->
+      {% elif section and section in 'map,transporters,vehicles' %}
 
         {% block unit %}{% endblock unit %}
 
@@ -134,7 +158,7 @@
   </main>
 {% endif %}
 
-{% endblock %}
+{% endblock console_body %}
 
 <!-- JavaScript -->
 {% block console_js %}

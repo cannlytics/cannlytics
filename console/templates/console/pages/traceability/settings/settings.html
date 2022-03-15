@@ -3,7 +3,7 @@
 <!--
   Traceability Settings Page | Cannlytics Console
   Created: 6/12/2021
-  Updated: 7/18/2021
+  Updated: 12/16/2021
 -->
 {% extends "console/pages/traceability/traceability.html" %}
 {% load icon %}
@@ -91,7 +91,7 @@
                   aria-label="License type"
                   name="state"
                 >
-                  <!-- Optional: Dynamically list states where Cannlytics is verified -->
+                  <!-- TODO: Dynamically list states where Cannlytics is verified -->
                   <option value="OK" selected>Oklahoma</option>
                   <!-- <option value="other">Other</option> -->
                 </select>
@@ -252,12 +252,6 @@
 
     // Initialize the UI.
     // cannlytics.dashboard.initializeGetStarted('organization');
-  
-    // Enable tooltips.
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
 
     // Toggle add license fields
     function toggleLicenseFields(event) {

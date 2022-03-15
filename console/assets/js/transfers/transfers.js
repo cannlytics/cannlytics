@@ -1,13 +1,16 @@
 /**
  * Transfers JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 12/9/2020
  * Updated: 8/12/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
+ * 
  * Resources:
  *    https://github.com/fullcalendar/fullcalendar-example-projects/blob/master/webpack/src/main.js
  *    https://fullcalendar.io/docs/handlers
  */
-
 // import { Calendar } from '@fullcalendar/core';
 // import interactionPlugin from '@fullcalendar/interaction';
 // import dayGridPlugin from '@fullcalendar/daygrid';
@@ -20,6 +23,9 @@ export const transfers = {
   ...maps,
 
   initialize() {
+    /**
+     * Initialize the transfers user interface.
+     */
     // this.drawCalendar();
     var script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js';
@@ -85,23 +91,28 @@ export const transfers = {
           }
         ]
       });
-    
       calendar.render();
     });
   },
 
-
   initializeLogs() {
+    /**
+     * Initialize transfer logs.
+     */
     console.log('Initialize logs...');
   },
 
-
   initializeAnalytics() {
+    /**
+     * Initialize transfer analytics.
+     */
     console.log('Initialize analytics...');
   },
 
-
   drawCalendar() {
+    /**
+     * Draw the transfer calendar.
+     */
     var calendarEl = document.getElementById('calendar');
     if (!calendarEl) return;
     var calendar = new Calendar(calendarEl, {
@@ -130,8 +141,10 @@ export const transfers = {
     calendar.render();
   },
 
-
   drawMap() {
+    /**
+     * Draw the transfer map.
+     */
     var locations = [["USA", 39.8283, -98.5795, 1]]; // TODO: Get location of transfers from Firestore
     var map = new google.maps.Map(document.getElementById('map'), {
       zoom: 4,
@@ -153,6 +166,5 @@ export const transfers = {
       })(marker, i));
     }
   },
-
 
 };

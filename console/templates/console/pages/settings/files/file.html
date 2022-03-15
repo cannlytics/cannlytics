@@ -156,7 +156,7 @@
       const model = '{{ model }}';
       const modelId = '{{ section }}';
       const ref = `organizations/${orgId}/${model}/${modelId}/files/${fileName}`;
-      const url = await cannlytics.firebase.getDownloadURL(ref);
+      const url = await cannlytics.firebase.getFileURL(ref);
       window.open(url, '_blank').focus();
     }
 

@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<!--
+  Call to action | Cannlytics Website
+  Created: Spring 2021
+  Updated: 12/23/2021
+-->
+{% load static %}
+<div class="container features">
+  <div class="row">
+    <div class="row mt-5 mx-auto px-3 p-md-0">
+      <div class="col-md-7 border-right border-md-hidden pe-5">
+        <h2 class="serif text-dark mt-0 mb-2">
+          Ready to get started?
+        </h2>
+        <p class="fs-6 double-line text-dark">
+          In addition to awesome software,
+          Cannlytics is an open-source software support business.
+          If you need assistance or desire a
+          fully-managed solution, then you can
+          <a href="/support" class="serif text-dark background-hover fw-bold">
+            find a support option suited to <span class="serif text-nowrap">you &rarr;</span>
+          </a>
+        </p>
+        <!-- Optional: Dynamically render from state. -->
+        <div class="row w-100 mt-4 mx-0">
+          <div class="col card bg-transparent rounded shadow-hover py-2 border-secondary text-center d-flex align-items-center">
+            <h6 class="text-dark card-title pricing-card-title serif mt-2">
+              $1,200 / mo.
+            </h6>
+            <button
+              type="button"
+              class="btn btn-sm btn-block bg-gradient-purple serif text-white text-nowrap"
+            >
+              Enterprise
+            </button>
+            <a
+              href="{% url 'page' page='support' %}"
+              class="stretched-link">
+            </a>
+          </div>
+          <div class="col card bg-transparent rounded shadow-hover py-2 border-secondary text-center d-flex align-items-center mx-2">
+            <h6 class="text-dark card-title pricing-card-title serif mt-2">
+              $420 / mo.
+            </h6>
+            <button
+              type="button"
+              class="btn btn-sm btn-set-width btn-block bg-gradient-orange serif text-white text-nowrap"
+            >
+              Pro
+            </button>
+            <a
+              href="{% url 'page' page='support' %}"
+              class="stretched-link">
+            </a>
+          </div>
+          <div class="col card bg-transparent rounded shadow-hover py-2 border-secondary text-center d-flex align-items-center">
+            <h6 class="text-dark card-title pricing-card-title serif mt-2">
+              $4.20 / mo.
+            </h6>
+            <button
+              type="button"
+              class="btn btn-sm btn-block bg-gradient-green serif text-white text-nowrap"
+            >
+              Premium
+            </button>
+            <a
+              href="{% url 'page' page='subscriptions' %}"
+              class="stretched-link">
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5 px-3 ps-md-5">
+        <h3 class="serif text-dark fw-bold fs-6 mt-4">Need help?</h3>
+        <a
+          class="serif fs-6 text-gradient-orange"
+          href="tel:{{ app.contact_phonenumber }}"
+        >
+          <svg class="" style="width:24px;height:24px;">
+            <use href="{% static "website/images/emojies/phone.svg" %}#phone-emoji"></use>
+          </svg>
+          {{ app.contact_phone }}
+        </a>
+        <h3 class="serif text-dark fw-bold fs-6 mt-4">Have a question?</h3>
+        <a
+          class="serif fs-6 text-gradient-orange"
+          href="mailto:{{ app.email }}"
+        >
+          <svg class="" style="width:24px;height:24px;">
+            <use href="{% static "website/images/emojies/incoming-mail.svg" %}#incoming-mail-emoji"></use>
+          </svg>
+          {{ app.contact_email }}
+        </a>
+        <h3 class="serif text-dark fw-bold fs-6 mt-4">Want to talk?</h3>
+        <a
+          class="serif fs-6 text-gradient-orange"
+          href="https://calendly.com/cannlytics/traceability-for-cannabis-testing?month=2021-08"
+        >
+          <svg class="" style="width:24px;height:24px;">
+            <use href="{% static "website/images/emojies/handshake.svg" %}#handshake-emoji"></use>
+          </svg>
+          Schedule a meeting 
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+</html>

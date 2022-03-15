@@ -1,46 +1,57 @@
 <!doctype html>
 <html>
+<!--
+  Consumers Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
 
-  <!-- Consumers Page -->
-  <!-- Created 1/16/2021 -->
-  {% extends "cannlytics_website/index.html" %}
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/16/2021
+  Updated: 12/23/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Consumers | Cannlytics{% endblock %}
+{% block material %}
 
-  <!-- Title -->
-  {% block title %}Consumers | {{ general.title }}{% endblock %}
+  <!-- Hero Banner -->
+  {% include "website/components/heros/hero_banner.html" with
+    title='Consumers'
+    description="If you are a consumer seeking meaningful analysis from the lab results of the cannabis that you buy, then capitalize on Cannlytics' robust and extensive toolkits."
+    primary_action='Join now'
+    primary_action_url='https://console.cannlytics.com/account/sign-in'
+    secondary_action='Browse solutions'
+    secondary_action_url='https://github.com/cannlytics'
+    background_image="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fmisc%2FIllustration_Cannabis_sativa0.jpg?alt=media&token=7c1f2d17-1df6-46b4-b698-21eb5cc5c174"
+    background_position="50% 75%"
+    only
+  %}
 
-  <!-- Main material -->
-  {% block material %}
-
-    <!-- Hero Banner -->
-    {% include "cannlytics_website/components/heros/hero_banner.html" with
-      title='Consumers'
-      description="If you are a consumer seeking meaningful analysis from the lab results of the cannabis that you buy, then capitalize on Cannlytics' robust and extensive toolkits."
-      primary_action='Join now'
-      primary_action_url='https://console.cannlytics.com/account/login'
-      secondary_action='Browse solutions'
-      secondary_action_url='https://github.com/cannlytics'
-      only
-    %}
-
-    <!-- About consumer analytics -->
-    <div class="container markdown my-5">
-      <h1 class="my-4">
-        About consumer analytics
-      </h1>
-      <p>
+  <!-- Introduction -->
+  <div class="container mb-5 mt-3">
+    <div class="markdown py-5" style="max-width:560px;">
+      <svg class="pe-1" style="float:left;width:125px;height:125px;">
+        <use href="{% static "website/images/emojies/money.svg" %}#money-emoji"></use>
+      </svg>
+      <h1 class="pt-4 text-dark">Consumer Analytics</h1>
+      <p class="mt-2">
         Cannlytics is proud to offer our suite of industry-leading cannabis analytics tools to all
         cannabis consumers. You can periodically scan your cannabis purchases. Then you can view
         rich analytics in the Cannlytics Console or with the Cannlytics API.
       </p>
-      <p class="text-start">
-        <a href="https://console.cannlytics.com/account/sign-up">
-          Utilize the app today &rarr;
+      <p class="text-start mt-3">
+        <a
+          class="btn btn-sm-light btn-md-light"
+          href="https://console.cannlytics.com/account/sign-up"
+        >
+          <small>Utilize the app today</small> &rarr;
         </a>
       </p>
     </div>
+  </div>
 
-    <!-- Vines -->
-    {% include "cannlytics_website/components/art/vines.html" %}
+  <!-- Vines -->
+  {% include "website/components/art/vines.html" %}
 
-  {% endblock %}
+{% endblock material %}
 </html>

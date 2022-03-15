@@ -1,40 +1,41 @@
 """
 Certificate of Analysis (CoA) Generation | Cannlytics
+Copyright (c) 2021-2022 Cannlytics
 
-Author: Keegan Skeate <keegan@cannlytics.com>  
-Created: 2/6/2021  
-Updated: 8/9/2021  
+Authors: Keegan Skeate <keegan@cannlytics.com>
+Created: 2/6/2021
+Updated: 1/10/2022
 License: MIT LIcense <https://opensource.org/licenses/MIT>
 
 TODO:
     - Allow users to create CoA's with a myriad of templates! (.docx, .xlsx, etc.)
-    - Import any docx template styed with jinga-style formatting and let'r'rip.
-    - Use your own templates or download the started templates and customize them to your heart's galore.
+    - Import any docx template styed with Jinga-style formatting and let'r'rip.
+    - Use your own templates or download the started templates and customize
+    them to your heart's galore.
 """
-# Standard imports
+# Standard imports.
 import os
-import environ
 from pathlib import Path
 from shutil import copyfile
 
-try:
+# External packages.
+from dotenv import dotenv_values
+import openpyxl
+# from openpyxl.drawing.image import Image
+import pandas as pd
+# import qrcode
 
-    # External packages
-    import openpyxl
-    from openpyxl.drawing.image import Image
-    import pandas as pd
-    # import qrcode
+# Internal imports.
+from ..firebase import (
+    get_document,
+    # update_document,
+    download_file,
+)
+from ..utils.utils import snake_case
 
-    # Internal imports
-    from cannlytics.firebase import (
-        get_document,
-        update_document,
-        download_file,
-    )
-    from cannlytics.utils.utils import snake_case
 
-except:
-    pass
+# TODO: This file needs a MAJOR refactor.
+
 
 def create_coa():
     """
@@ -172,11 +173,10 @@ def review_coa(env_file='.env', signature_dest='./tmp/signature.png'):
     uid = ''
 
     # Get the user's signature (if not already downloaded?).
-    env = environ.Env()
-    env.read_env(env_file)
-    bucket_name = env('FIREBASE_STORAGE_BUCKET')
+    env_variables = dotenv_values(env_file)
+    bucket_name = env_variables['FIREBASE_STORAGE_BUCKET']
     signature_data = get_document(f'users/{uid}/user_settings/signature')
-    download_file(bucket_name, signature_data['signature_ref'], signature_dest)
+    download_file(signature_data['signature_ref'], signature_dest, bucket_name)
 
     # Insert the signature into the CoA template.
 
@@ -361,7 +361,7 @@ def generate_coas(
     excel.EnableEvents = True
 
 
-# FIXME: Do it without Excel :(
+# FIXME: This requires that Excel is installed on Windows. Try to do this without Excel :(
 def create_coa_pdfs(render_file, ws_index_list, output_file, tight=False):
     """Generate PDFs for rendred CoAs.
     Args:

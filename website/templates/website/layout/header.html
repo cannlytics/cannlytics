@@ -1,204 +1,199 @@
 <!doctype html>
 <html>
-  <!-- Header | Cannlytics Website -->
-  <!-- Created 1/7/2021 -->
-  {% load static %}
+<!--
+  Header | Cannlytics Website
+  Created: 1/7/2021
+  Updated: 1/11/2022
 
-  <!-- Banner offer -->
-  <!-- AB TEST: Phone number and email banner -->
-  {% if 'docs' not in request.path %}
-    <div class="info-bar text-dark d-flex justify-content-between py-2 px-2 px-lg-3">
-      <div class="d-flex"></div>
-      <div class="d-flex align-items-center fw-bold">
-        <small class="d-none d-lg-block">
-          Questions? Call&nbsp;
-        </small>
-        <a
-          class="text-dark underline-hover"
-          href="tel:{{ general.phone_number }}"
-          title="Call us."
-        >
-          <small class="d-none d-lg-block">
-            {{ general.phone }}
-          </small>
-        </a>
-        <span class="px-2 d-none d-lg-block">|</span>
-        <!-- A/B Test: promotionals -->
-        <a
-          class="text-dark underline-hover"
-          href="/events"
-          title="Join us Wednesdays at 8:30am PST to talk about cannabis data science."
-        >
-          <small>
-            Join the Cannabis Data Science meetup 🤝
-          </small>
-        </a>
-        {% comment %} <a
-          class="text-dark underline-hover"
-          href="/whitepapers"
-          title="Premium subscriptions starting at $1/mo."
-        >
-          <small class="d-none d-lg-block">
-            Get 2021's first whitepaper 🎉
-          </small>
-        </a> {% endcomment %}
-        <!-- Optional: Star on github -->
-        {% comment %} <iframe
-          src="https://ghbtns.com/github-btn.html?user=cannlytics&repo=cannlytics-website&type=star&count=true"
-          frameborder="0"
-          scrolling="0"
-          width="150"
-          height="20"
-          title="GitHub"
-        ></iframe> {% endcomment %}
-      </div>
-      <div class="d-flex d-lg-none"></div>
-    </div>
-  {% endif %}
+  Optional links to add:
+    - Examples?
+-->
+{% load static icon %}
 
-  <!-- Theme Toggle -->
-  {% include "cannlytics_website/components/buttons/theme_toggle.html" %}
+<!-- Banner offer -->
+{% include "website/components/banners/banner_support.html" with
+  email="contact@cannlytics.com"
+  phone=app.contact_phone
+  phone_number=app.contact_phonenumber
+  only
+%}
 
-  <!-- Header Template -->
-  <nav class="navbar navbar-expand-lg navbar-light justify-content-start p-3 px-md-4 {% if 'docs' in request.path %}border-bottom{% endif %}">
-    <div class="container-fluid">
+<!-- Theme Toggle -->
+{% include "website/components/buttons/theme_toggle.html" %}
 
-      <!-- Title -->
-      <!-- AB TEST: Logo font -->
-      <a 
-        class="navbar-brand d-flex align-items-center me-2"
-        href="{% url 'index' %}"
+<!-- Header Template -->
+<nav class="navbar navbar-expand-lg navbar-light justify-content-start p-3 px-md-4">
+  <div class="container-fluid">
+
+    <!-- Title -->
+    <a 
+      class="navbar-brand d-flex align-items-center me-2 pt-0"
+      href="{% url 'index' %}"
+      aria-label="Cannlytics"
+    >
+      <img
+        src="{% static 'website/images/logos/cannlytics_logo_with_text_light.svg' %}"
+        class="light-only"
+        height="42px"
+        alt="Cannlytics"
       >
-        <img
-          src="{% static 'cannlytics_website/images/logos/cannlytics_logo_with_text_light.png' %}"
-          class="light-only"
-          height="{% if 'docs' in request.path %}32px{% else %}42px{% endif %}"
-        >
-        <img
-          src="{% static 'cannlytics_website/images/logos/cannlytics_logo_with_text_dark.png' %}"
-          class="dark-only"
-          height="{% if 'docs' in request.path %}32px{% else %}42px{% endif %}"
-        >
-      </a>
-
-      <!-- Menu Toggle -->
-      <button
-        class="navbar-toggler me-4"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNavDropdown"
-        aria-controls="navbarNavDropdown"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
+      <img
+        src="{% static 'website/images/logos/cannlytics_logo_with_text_dark.svg' %}"
+        class="dark-only"
+        height="42px"
+        alt="Cannlytics"
       >
-        <span data-feather="menu"></span>
-      </button>
+    </a>
 
-      <!-- Navigation Links -->
-      <div
-        id="navbarNavDropdown"
-        class="collapse navbar-collapse justify-content-between"
-      >
-        <ul class="navbar-nav me-2">
-          <li class="nav-item h6 mb-0">
-            <a
-              class="nav-link sliding-action {% if 'community' in request.path %}active{% endif %}"
-              href="{% url 'community' %}"
-            >
-              Community
-            </a>
-          </li>
-          <li class="nav-item h6 mb-0">
-            <a
-              class="nav-link sliding-action {% if 'docs' in request.path %}active{% endif %}"
-              href="{% url 'cannlytics_docs:index' %}"
-            >
-              Docs
-            </a>
-          </li>
-          <li class="nav-item h6 mb-0">
-            <a
-              class="nav-link sliding-action {% if 'contact' in request.path %}active{% endif %}"
-              href="{% url 'contact' %}"
-            >
-              Contact
-            </a>
-          </li>
-          <!-- AB TEST: contact vs. help dropdown-->
-          {% comment %} <li class="nav-item h6 mb-0 dropdown">
-            <a
-              class="nav-link sliding-action dropdown-toggle"
-              href="#"
-              id="navbarDropdownMenuLink"
-              role="button"
-              data-bs-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              Help
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              <a class="dropdown-item" href="{% url 'contact' %}">Contact</a>
-              <a class="dropdown-item" href="{% url 'pricing' %}">Consulting</a>
-            </div>
-          </li> {% endcomment %}
-        </ul>
+    <!-- Menu Toggle -->
+    <button
+      class="navbar-toggler me-4 p-1"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNavDropdown"
+      aria-controls="navbarNavDropdown"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      {% icon "menu" height="21px" width="21px" %}
+    </button>
 
-        <!-- Right Navigation (Not signed in) -->
-        <ul class="navbar-nav indicates-auth align-items-center me-3">
-          {% comment %} {% include 'console/components/buttons/donate_button.html' %} {% endcomment %}
-          <li class="nav-item h6 mb-0">
-            <a
-              class="nav-link app-action sliding-action text-nowrap me-2"
-              data-bs-target="#login-dialog"
-              data-bs-toggle="modal"
-            >
-              Sign in
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              type="button"
-              class="btn btn-sm bg-gradient-green text-white text-nowrap"
-              href="https://console.cannlytics.com/account/sign-up/"
-            >
-              Sign up
-            </a>
-          </li>
-        </ul>
+    <!-- Navigation Links -->
+    <div
+      id="navbarNavDropdown"
+      class="collapse navbar-collapse justify-content-between"
+    >
+      <ul class="navbar-nav me-2">
+        <li class="nav-item mb-0">
+          <a
+            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'data' in request.path %}active{% endif %}"
+            href="{% url 'page' page='data' %}"
+          >
+            Data
+          </a>
+        </li>
+        <li class="nav-item mb-0">
+          <a
+            class="nav-link btn-sm background-hover fw-bold serif text-dark"
+            href="https://docs.cannlytics.com"
+          >
+            Docs
+          </a>
+        </li>
+        <li class="nav-item mb-0">
+          <a
+            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'support' in request.path %}active{% endif %}"
+            href="{% url 'page' page='support' %}"
+          >
+            Support
+          </a>
+        </li>
+        <li id="more-menu" class="nav-item dropdown dropdown-mega position-static">
+          <a
+            class="nav-link dropdown-toggle btn-sm background-hover fw-bold serif text-dark"
+            href="#"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+          >
+            More
+          </a>
+          <div id="mega-menu" class="dropdown-menu p-0 m-0">
+            <div class="mega-content px-4">
+              <div class="container-fluid">
+                <div class="row">
 
-        <!-- Right navigation (Signed in) -->
-        <ul class="navbar-nav requires-auth align-items-center me-3">
-          {% comment %} {% include 'console/components/buttons/donate_button.html' %} {% endcomment %}
-          <li class="nav-item h6 mb-0">
-            <a
-              class="nav-link sliding-action text-nowrap me-2"
-              href="https://console.cannlytics.com"
-            >
-              Console
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link dropdown-toggle py-0" href="#" id="navbarUserMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <img id="user-photo" class="rounded-circle" style="max-width:60px; max-height:60px;" src="">
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow mx-2" aria-labelledby="navbarUserMenu">
-              <div class="px-3 py-1"><!-- TODO: Make display name / email standout -->
-                <h5 class="serif" id="user-name"></h5>
-                <h6 class="serif" id="user-email"></h6>
+                  <div class="col-12 col-sm-4 col-md-3 py-4">
+                    <h5 class="fw-bold px-3 serif text-dark">Core</h5>
+                    <div class="list-group border-none">
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='ai' %}">🦾 AI</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='api' %}">📡 API</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://console.cannlytics.com">📱 App</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://pypi.org/project/cannlytics/">🐍 Python SDK</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='support' %}">⛑️ Support</a>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-sm-4 col-md-3 py-4">
+                    <h5 class="fw-bold serif text-dark">Cannabis Data Science</h5>
+                    <div class="card no-border bg-transparent">
+                      <a href="https://www.meetup.com/cannabis-data-science/events/">
+                        <img class="img-fluid" alt="image" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fcannabis_data_science%2Fsaturday_morning_statistics%2Fbackgrounds%2Fsaturday-morning-statistics.png?alt=media&token=bedd0f08-7996-4d1b-afa5-59637b6dcfb9">
+                      </a>
+                      <div class="card-body bg-transparent px-0">
+                        <p class="card-text fs-6 text-dark markdown">
+                          <small>
+                            Join like-minded individuals
+                            who apply data science to cannabis data every Wednesday
+                            at 8:30am PST / 11:30am EST at the
+                            <a
+                              href="https://www.meetup.com/cannabis-data-science/"
+                              class="serif background-hover"
+                            >
+                              Cannabis Data Science Meetup
+                            </a>.
+                          </small>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-sm-4 col-md-3 py-4">
+                    <h5 class="fw-bold px-3 serif text-dark">Material</h5>
+                    <div class="list-group">
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='articles' %}">🗞️ Articles</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='events' %}">🎫 Events</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='videos' %}">📺 Videos</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='whitepapers' %}">📜 Whitepapers</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='subscriptions' %}">📮 Subscriptions</a>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-sm-12 col-md-3 py-4">
+                    <h5 class="fw-bold px-3 serif text-dark">Data</h5>
+                    <div class="list-group">
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'section' page='data' section='market' %}">🪙 Data Market <span class="badge rounded-pill bg-success">New</span></a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='testing' %}">🥼 Labs, analyses, and <strong class="serif">prices</strong>!</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='economics' %}">📈 Economics and forecasts</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='data' %}#state-data">🏛️ Public state data</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='data' %}#regulations">⚖️ Regulations</a>
+                    </div>
+                  </div>
+
+                </div>
               </div>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="serif dropdown-item" href="https://console.cannlytics.com/settings/account/">Your account</a></li>
-              <li><a class="serif dropdown-item" href="https://console.cannlytics.com/settings/invite/">Invite user</a></li>
-              <li><a class="serif dropdown-item" href="https://console.cannlytics.com/help/feedback/">Send feedback</a></li>
-              <li><button class="serif dropdown-item" onClick="cannlytics.auth.signOut()">Sign Out</button></li>
-            </ul>
-          </li>
-        </ul><!-- End of right navigation -->
+            </div>
+          </div>
+        </li>
+      </ul>
 
-      </div><!-- End of navigation links-->
+      <!-- Right Navigation (Not signed in) -->
+      <ul class="navbar-nav align-items-center me-3 indicates-auth visually-hidden">
+        {% if section != 'sign-in' %}
+        <li class="nav-item h6 mb-0">
+          <a
+            class="nav-link btn-sm app-action background-hover text-nowrap me-2 fw-bold serif text-dark"
+            data-bs-target="#sign-in-dialog"
+            data-bs-toggle="modal"
+          >
+            Sign in
+          </a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a
+            type="button"
+            class="btn btn-sm bg-gradient-orange text-white text-nowrap serif"
+            href="https://console.cannlytics.com"
+          >
+            Launch App
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right navigation shown if user is signed in. -->
+      {% include "website/components/menus/user_menu.html" %}
 
     </div>
-  </nav><!-- End of header -->
-
+  </div>
+</nav>
 </html>

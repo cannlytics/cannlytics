@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<!--
+  Sponsorships | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+-->
+{% load static %}
+  <div class="markdown" style="max-width:560px;">
+    <svg class="pe-1" style="float:left;width:125px;height:125px;">
+      <use href="{% static "website/images/emojies/money.svg" %}#money-emoji"></use>
+    </svg>
+    <h1 id="sponsor" class="pt-4 text-dark">Sponsor Cannlytics</h1>
+    <p class="mt-2">
+      Would you like to help advance cannabis analytics, further data science,
+      and make everyone's lives simpler, easier, and better at the same time?
+      A small sponsorship can go a long way. If you can help sponsor Cannlytics,
+      then we will do our best to make it worth your while.
+    </p>
+    <div class="card my-3 p-3 border rounded text-dark">
+      <div class="d-flex justify-content-between mb-3">
+        <h3 class="m-0">Sponsorship Packages</h3>
+        <button
+          id="select-all-tiers-button"
+          class="btn btn-sm nav-link text-dark fw-bold background-hover"
+        >
+          Select all
+        </button>
+      </div>
+      {% for item in sponsorships %}
+        <div class="d-flex justify-content-between mb-3">
+          <div class="form-check pe-4">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              value=""
+              id="sponsor-tier-{{ item.id }}"
+              onchange="cannlytics.payments.toggleSponsorCheckout(this)"
+            >
+            <label
+              class="app-action background-hover form-check-label"
+              for="sponsor-tier-{{ item.id }}"
+            >
+              {{ item.reward }}
+            </label>
+          </div>
+          <div class="text-secondary text-nowrap">{{ item.price }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="d-flex justify-content-end">
+      <button
+        id="cancel-button"
+        class="btn btn-sm btn-sm-light serif me-2 d-none"
+      >
+        Cancel
+      </button>
+      <button
+        id="save-button"
+        class="btn btn-sm bg-gradient-green text-white serif d-none"
+      >
+        Save
+      </button>
+      <div id="donate-container" class="ms-2">
+        <div id="donate-button"></div>
+      </div>
+    </div>
+  </div>
+
+<!-- JavaScript -->
+{{ sponsorships|json_script:"sponsorships" }}
+{{ user.sponsorships|json_script:"user_sponsorships" }}
+<script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
+<script type="application/javascript">
+  cannlytics.payments.initializeSponsorships();
+</script>
+
+</html>

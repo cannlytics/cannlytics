@@ -1,8 +1,12 @@
-/*--------------------------------------------------------------------------
-  Login Style | Cannlytics
-  Author: Keegan Skeate
-  Created: 10/11/2020
----------------------------------------------------------------------------*/
+/**
+ * Cannlytics Login Style | Cannlytics Console
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
+ * Created: 10/11/2020
+ * Updated: 12/7/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+ */
 @import url("https://fonts.googleapis.com/css?family=Cinzel:400");
 @import url('https://fonts.googleapis.com/css?family=Source+Serif+Pro:100,200,300,400,500,600,700');
 
@@ -11,21 +15,19 @@ body {
   height: 100%;
   background-color: #f5f5f5;
 }
-a.text-dark:hover {
-  text-decoration: underline;
-}
+// a.text-dark:hover {
+//   text-decoration: underline;
+// }
 * {
   font-family: 'Source Serif Pro', Georgia, 'Times New Roman', Times, serif;
 }
 
 .bg-decorative {
   background-color: #062A00;
-  /* background-image: -webkit-linear-gradient(-45deg, #062A00, #104607ff); */
   background-image: -webkit-linear-gradient(-45deg, #2d47a3ff, #90d3bcff);
   background-size: contain;
   background-repeat: no-repeat;
 }
-/* url("../images/chemist.png"),  */
 
 /* Custom checkboxes */
 .form-check a {
@@ -64,8 +66,6 @@ a.text-dark:hover {
   animation-duration: 10s; 
   animation-iteration-count: infinite; 
   animation-timing-function: ease-in-out; 
-  /* margin-left: 30px; 
-  margin-top: 5px;  */
 } 
 
 @keyframes floating { 
@@ -80,29 +80,11 @@ a.text-dark:hover {
 
 body.dark,
 body.dark .login {
-  /* background-color: #062A00; */
   background-color: rgb(50, 52, 67);
 }
 body.dark .text-dark {
   color: #fff !important;
 }
-/* body.dark .form-control {
-  background-color: #236619;
-  background-clip: padding-box;
-  border: 1px solid #3f7f34;
-  color: #fff !important;
-}
-body.dark .form-control:focus {
-  border-color: #3f7f34ff;
-  box-shadow: 0 0 0 0.2rem #3f7f34ff;
-  background-color: #236619 !important;
-}
-body.dark input:-webkit-autofill,
-body.dark input:-webkit-autofill:hover, 
-body.dark input:-webkit-autofill:focus, 
-body.dark input:-webkit-autofill:active  {
-  -webkit-box-shadow:0 0 0 50px #23661975 inset !important;
-} */
 body.dark .form-label-group input:not(:-moz-placeholder-shown) ~ label {
   color: #ccc;
 }
@@ -118,15 +100,11 @@ body.dark .toast {
   background-color: #646464;
 }
 body.dark .toast-header {
-  /* background-color: #b0002080 !important; */
   border-color: #646464;
 }
 body.dark .toast-body {
   background-color: #616161;
 }
-/* .toast-error .toast-header {
-  background-color: #E63F5D !important;
-} */
 .error-icon {
   color: #E63F5D;
 }

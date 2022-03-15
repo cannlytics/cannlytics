@@ -57,6 +57,7 @@ typings/
 *.env
 .env
 docker.env
+env.yaml
 
 # next.js build output
 .next
@@ -110,3 +111,18 @@ MANIFEST
 
 # Testing
 tmp/
+
+# Ignore Firebase cahce.
+*.cache
+
+# Ignore VS Code settings.
+.vscode/*
+
+# Ignore Webpack bundles.
+console/static/console/bundles/*
+website/static/website/js/bundles/*
+*webpack-stats.json
+
+# Ignore local copy of cannlytics.
+# cannlytics/*
+/public/static/*

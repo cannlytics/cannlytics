@@ -3,7 +3,7 @@
 <!--
   Map Page | Cannlytics Console
   Created: 8/11/2021
-  Updated: 8/14/2021
+  Updated: 2/6/2022
 -->
 {% extends "../transfers.html" %}
 {% load get_env %}
@@ -23,7 +23,7 @@
   </style>
 {% endblock %}
 {% block unit %}
-<main role="main" class="col ml-sm-auto">
+<main role="main" class="col ml-sm-auto pb-5 mx-auto">
 
   <!-- Options -->
   <div class="row row-md-6">
@@ -86,10 +86,19 @@
             class="form-select form-select-sm"
             aria-label="State"
           >
-            <!-- TODO: Dynamically load all states that Cannlytics operates in. -->
-            <option value="OK" selected >
-              Oklahoma
-            </option>
+            <!-- TODO: Dynamically load all states that Cannlytics operates in
+            or all states with permitted medicinal or recreational cannabis.
+            -->
+            <option value="All" selected >All</option>
+            <option value="CA" >California</option>
+            <option value="LA" >Louisiana</option>
+            <option value="MA" >Massachusetts</option>
+            <option value="MD" >Maryland</option>
+            <option value="MI" >Michigan</option>
+            <option value="MT" >Montana</option>
+            <option value="OH" >Ohio</option>
+            <option value="OK" >Oklahoma</option>
+            <option value="OR" >Oregon</option>
           </select>
         </div>
       </div>
@@ -108,8 +117,8 @@
 
       <!-- Caption -->
       <figcaption class="figure-caption" style="max-width:540px;">
-        <h6 class="sans-serif fw-bold mt-3">
-          How Cannlytics sources data
+        <h6 class="simple-serif fw-bold mt-3">
+          <small>How Cannlytics sources data</small>
         </h6>
         Cannlytics retrieves data through listings on Google Search and
         Google Maps, from a company's official website, or from a company themselves. Users can
@@ -119,7 +128,7 @@
         <a class="text-link" href="mailto:support@cannlytics.com">support@cannlytics.com</a>.
         For further information about how Cannlytics sources data, then please
         see the open source
-        <a class="text-link" href="https://github.com/cannlytics/cannlytics/tree/main/tools">Cannlytics tools</a>.
+        <a class="text-link" href="https://github.com/cannlytics">Cannlytics tools</a>.
       </figcaption>
 
     </figure>
@@ -139,7 +148,9 @@
         style="max-height:420px; overflow-y:scroll;"
       >
         <div class="card-header text-dark bg-light">Labs</div>
-        <!-- TODO: Add analyses list -->  
+
+        <!-- TODO: Add analyses list -->
+
       </div>
   
     </div><!-- End of list column -->
@@ -153,16 +164,6 @@
 {% block console_js %}
   <script src="https://unpkg.com/@googlemaps/markerclustererplus/dist/index.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
-  <script type="text/javascript">
-    var script = document.createElement('script');
-    // FIXME:
-    var apiKey = "{{ 'GOOGLE_MAPS_API_KEY'|get_env }}"; // FIXME: Passing API key from Django.
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
-    script.defer = true;
-    window.initMap = function() {
-      cannlytics.transfers.initializeMap();
-    }
-    document.head.appendChild(script);
-  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google.google_maps_api_key }}&callback=cannlytics.transfers.initializeMap"></script>
 {% endblock console_js %}
 </html>

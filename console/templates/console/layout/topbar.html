@@ -2,19 +2,18 @@
 <html>
 <!--
   Top Navigation | Cannlytics Console
-  Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 11/27/2020
-  Updated: 5/11/2021
+  Updated: 2/6/2022
 -->
 {% load static icon %}
 
   <!-- Header -->
   <header
     id="console-header"
-    class="navbar navbar-expand flex-md-nowrap justify-content-between border-bottom px-0 py-0"
+    class="navbar navbar-expand flex-md-nowrap justify-content-between border-bottom border-dark px-0 py-0"
   >
 
-    <!-- Logo -->
+    <!-- Organization Logo -->
     <div class="navbar-brand d-flex d-md-flex align-items-center col-md-3 col-lg-2 me-0 ps-2 pe-0 px-md-3">
       <a
         href="/"
@@ -23,6 +22,24 @@
         data-bs-placement="bottom"
         title="Dashboard"
       >
+        {% if organizations.0.photo_url %}
+          <img
+            src="{{ organizations.0.photo_url }}"
+            style="height:30px; max-width:150px;"
+            class="pe-2"
+            id="organizationLogo"
+          >
+        {% endif %}
+
+        <!-- Old: Logo -->
+        {% comment %} {% if organizations.0.photo_url %}
+          <img
+            src="{{ organizations.0.photo_url }}"
+            style="height:30px; max-width:150px;"
+            class="d-md-none pe-2"
+            id="organizationLogo"
+          >
+        {% else %}
         <img
           src="{% static 'console/images/logos/cannlytics_calyx_detailed.svg' %}"
           style="height:30px;"
@@ -40,22 +57,11 @@
             src="{% static 'console/images/logos/cannlytics_logo_with_text_dark.svg' %}"
             style="height:30px;"
             class="dark-only pe-2"
-            id="organizationPhoto"
+            id="organizationPhotoDark"
           >
         </div>
+        {% endif %} {% endcomment %}
       </a>
-
-      <!-- Website Link -->
-      {% comment %} <a
-        class="nav-link text-secondary navbar-toggle d-flex px-2"
-        href="https://get.cannlytics.com"
-        target="_blank"
-        data-bs-toggle="tooltip"
-        data-bs-placement="bottom"
-        title="Website"
-      >
-        {% icon "globe" width="21px" height="21px" %}
-      </a> {% endcomment %}
 
     <!-- Organization Choice -->
     {% if organizations %}
@@ -63,33 +69,21 @@
     {% endif %}
 
     <!-- Menu toggle -->
-    <!-- FIXME: Show sidebar toggle on small screens
-      data-bs-toggle="collapse"
-      data-bs-target="#sidebarMenu"
-      aria-controls="sidebarMenu"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-      d-md-none
-
-      onclick="cannlytics.ui.showSidebar();"
-    -->
     <a
       id="navbar-menu-button"
-      class="nav-link navbar-toggle d-flex d-md-none px-2 py-0"
+      class="nav-link navbar-toggle d-flex px-2 py-0"
       href="#"
       role="button"
       data-bs-toggle="collapse"
       data-bs-target="#sidebar-menu"
       aria-controls="sidebar-menu"
-      aria-expanded="false"
+      aria-expanded="true"
       aria-label="Toggle navigation"
     >
       {% icon "menu" class="text-secondary" width="21px" height="21px" %}
     </a>
 
     </div>
-
-
 
     <!-- Search -->
     <!-- col-12 col-lg-auto me-lg-3 d-flex align-items-center -->

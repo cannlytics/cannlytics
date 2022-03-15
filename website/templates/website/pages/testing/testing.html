@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<!--
+  Testing Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 11/24/2020
+  Updated: 1/9/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% block title %}Testing | Cannlytics{% endblock %}
+{% load static %}
+{% block page_css %}
+
+  <!-- AG-Grid CSS and JavaScript -->
+  {% include "website/components/tables/ag_grid_scripts.html" %}
+
+{% endblock %}
+{% block material %}
+<div class="container">
+
+  <!-- Hero Banner -->
+  {% include "website/components/heros/hero_banner.html" with
+    title="Cannlytics Testing Center"
+    description="Welcome to a vibrant hub for<br>laboratories, scientists, researchers, and<br>everyone else in the cannabis industry."
+    image_url="website/images/emojies/scientist.svg"
+    title_skinny="true"
+    only
+  %}
+
+  <!-- Tabs -->
+  <!-- Optional: Make rendering dynamic? -->
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a
+        class="nav-link fs-6 {% if section == 'labs' or not section %}active{% endif %}"
+        href="{% url 'section' page='testing' section='labs'  %}"
+      >
+        <small class="serif">Labs</small>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link fs-6 {% if section == 'map' %}active{% endif %}"
+        href="{% url 'section' page='testing' section='map'  %}"
+      >
+        <small class="serif">Map</small>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link fs-6 {% if section == 'regulations' %}active{% endif %}"
+        href="{% url 'section' page='testing' section='regulations'  %}"
+      >
+        <small class="serif">Regulations</small>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link fs-6 {% if section == 'analyses' %}active{% endif %}"
+        href="{% url 'section' page='testing' section='analyses'  %}"
+      >
+        <small class="serif">Analyses</small>
+      </a>
+    </li>
+  </ul>
+
+  <!-- Dynamic Tab Body -->
+  {% if section == 'labs' or not section %}
+
+    <!-- Lab List -->
+    {% include "website/pages/testing/components/lab_list.html" %}
+
+  {% elif section == 'map' %}
+    
+    <!-- Lab Map -->
+    {% include "website/pages/testing/components/lab_map.html" %}
+
+  {% elif section == 'regulations' %}
+    
+    <!-- Regulations List -->
+    {% include "website/pages/testing/components/regulations_list.html" %}
+  
+  {% elif section == 'analyses' %}
+    
+    <!-- Analyses List -->
+    {% include "website/pages/testing/components/analyses_list.html" %}
+
+  {% endif %}
+
+</div>
+{% endblock %}
+
+</html>

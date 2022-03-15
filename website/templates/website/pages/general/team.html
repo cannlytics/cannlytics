@@ -1,63 +1,101 @@
 <!doctype html>
 <html>
+<!--
+  Team Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
 
-  <!-- Team Page -->
-  <!-- Created 11/17/2020 -->
-  {% extends "cannlytics_website/index.html" %}
-  {% load static %}
-  {% block title %}Team | {{ general.title }}{% endblock %}
-  {% block material %}
-    <div class="contributors large-bottom-margin">
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 11/17/2021
+  Updated: 12/24/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Team | Cannlytics{% endblock %}
+{% block material %}
+  <div class="contributors large-bottom-margin">
 
-      <!-- Hero -->
-      {% include "cannlytics_website/components/heros/hero_banner.html" with
-        title='Team'
-        description='All aboard! The Cannlytics team is responsible for developing the Cannlytics Engine and helping the Cannlytics ecosystem thrive.'
-        primary_action='Join now'
-        primary_action_url='/contact'
-        secondary_action='Browse opportunities'
-        secondary_action_url='https://github.com/orgs/cannlytics/projects'
-        only
-      %}
+    <!-- Hero -->
+    {% include "website/components/heros/hero_banner.html" with
+      title='Team'
+      description='All aboard! The Cannlytics team develops the Cannlytics platform and helps the Cannlytics ecosystem thrive.'
+      primary_action='Join now'
+      primary_action_url='/contact?topic=join'
+      secondary_action='Browse opportunities'
+      secondary_action_url='https://github.com/orgs/cannlytics/projects'
+      image_url='website/images/illustrations/outline/lab_analyst_prep.svg'
+      only
+    %}
 
-      <!-- Team -->
-      <div class="container markdown">
+    <!-- Body -->
+    <div class="container mt-5">
 
-        <h1 class="mb-5">
-          Cannlytics is built with the love by...
-        </h1>
-        <div class="row">
-        {% for item in team %}
-          <figure class="figure col-md-4">
-            <a href="{{ item.url }}" title="{{ item.name}}">
-              <img
-                class="figure-img img-fluid rounded-3"
-                src="{{ item.image }}"
-                style="height:150px"
-              >
-            </a>
-            <figcaption class="figure-caption w-50">
-              <div class="fs-5 text-dark fw-bold">{{ item.name}}</div>
-              <div>{{ item.company}}</div>
-              <div>{{ item.location}}</div>
-              <div>{{ item.description}}</div>
-              <!-- Optional: Add phone number and email-->
-            </figcaption>
-          </figure>
-        {% endfor %}
-        </div>
+      <!-- Introduction -->
+      <div class="markdown">
+        <svg class="pe-1 pt-3" style="float:left;width:125px;height:125px;">
+          <use href="{% static "website/images/emojies/heart.svg" %}#heart-emoji"></use>
+        </svg>
+        <h1 class="pt-4 text-dark">Cannlytics is built with the love of...</h1>
+        <p class="mt-2" style="max-width:560px;">
+          These heros who create, make, and deliver your software solutions and support.
+        </p>
       </div>
 
-      <!-- How to join -->
-      {% comment %} <div class="container markdown py-3 mt-5">
-        {{ contribute | safe }}
-      </div> {% endcomment %}
-    
+      <!-- Team Grid -->
+      <div class="row mt-5">
+        {% for item in team %}
+          {% if item.active %}
+            <figure id="{{ item.id }}" class="figure col-md-4 p-4">
+              <a href="{{ item.url }}" title="{{ item.name}}">
+                <img
+                  class="figure-img img-fluid rounded-3"
+                  src="{{ item.image }}"
+                  style="height:150px"
+                >
+              </a>
+              <figcaption class="figure-caption text-dark mt-1">
+                <div class="fs-6 text-dark fw-bold serif">{{ item.name}}</div>
+                <div class="mb-2">{{ item.position}}</div>
+                <div class="serif lh-md">{{ item.description}}</div>
+                <!-- Optional: Add phone number and email-->
+              </figcaption>
+            </figure>
+          {% endif %}
+        {% endfor %}
+      </div>
+
     </div>
 
-    <!-- Vines -->
-    {% include "cannlytics_website/components/art/vines.html" %}
+    <!-- Joining the team -->
+    <div class="container mt-3">
+      <div class="markdown pt-5" style="max-width:560px;">
+        <svg class="pt-3 pe-3" style="float:left;width:125px;height:125px;">
+          <use href="{% static "website/images/emojies/handshake.svg" %}#handshake-emoji"></use>
+        </svg>
+        <h1 class="pt-4 text-dark">Interested in joining?</h1>
+        <p class="mt-2">
+          Do you have the chops and / or passion to help deliver industry-leading
+          analytics, software, and support
+          to everyone in the cannabis industry? Then please email the team at
+          <a href="mailto:dev@cannlytics.com" class="serif text-gradient">dev@cannlytics.com</a>
+          and explain who, what, where, why, when, and how you can contrbiute to Cannlytics.
+        </p>
+        <p class="text-start mt-3">
+          <a
+            class="btn btn-sm bg-gradient-green text-white"
+            href="{% url 'page' page='contact' %}?topic=join"
+          >
+            <small>Join today</small> &rarr;
+          </a>
+        </p>
+      </div>
+    </div>
+  
+  </div>
 
-  {% endblock %}
+  <!-- Vines -->
+  {% include "website/components/art/vines.html" %}
+
+{% endblock material %}
 
 </html>

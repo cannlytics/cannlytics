@@ -2,12 +2,14 @@
 <html>
 <!--
   Transfer Page | Cannlytics Console
-  Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/19/2020
-  Updated: 7/15/2021
+  Updated: 12/16/2021
 -->
 {% load icon %}
 {% block console_css %}
+
+  <!-- AG-Grid CSS and JavaScript -->
+  {% include "console/components/tables/ag_grid_scripts.html" %}
 
   <!-- Bootstrap Datepicker -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
@@ -15,14 +17,16 @@
 
 {% endblock console_css %}
 {% block console_body %}
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
 
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs.html" with
-      base_page="Transfers"
-      base_page_url="/transfers"
-      current_page=id
-    %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+      {% include "console/components/links/breadcrumbs.html" with
+        base_page="Transfers"
+        base_page_url="/transfers"
+        current_page=id
+      %}
+    </div>
 
     <!-- Tabs -->
     {% if id and id != 'new' %}
@@ -60,9 +64,10 @@
         id=id
         model='transfers'
         model_singular='transfer'
-        description="Manage transfers of samples sent for analysis."
+        description="Manage transfer data and samples sent for analysis."
         options=True
         export=id
+        action='Send'
       %}
       <!-- action="Send Transfer" -->
 
@@ -72,12 +77,19 @@
           {% include "console/components/forms/dynamic_form.html" with
             fields=data_model.fields
           %}
-          <!-- TODO: Show additional fields (traceability fields) -->
-          {% comment %} {% include "console/components/forms/additional_fields.html" %} {% endcomment %}
         </form>
-      </div>
+      </div>      
 
       <!-- Samples sub-table -->
+      <!-- FIXME: Hide certain fields for producers / on creation:
+        - project_id
+        - batch_id
+        - created_at, created_by, updated_at, updated_by
+        - coa_ref
+    
+      * Change CoA status to status.
+      -->
+      <!-- TODO: Import functionality to upload samples from worksheets -->
       {% include "console/components/tables/simple_form_table.html" with
         model="samples"
         model_singular="sample"
@@ -105,6 +117,9 @@
 
     {% endif %}
 
+    <!-- TODO: Dialogs to add eith transporter or vehicle -->
+    {% include "console/components/modals/add_observation_modal.html" %}
+
   </main>
 
 {% endblock console_body %}
@@ -116,23 +131,133 @@
     // Load the data into the user interface.
     cannlytics.ui.viewObject('transfer');
 
-    // TODO: Initialize transfer form (create an ID, etc. )
-
-    // Given parameter, set receiving organization.
-    const receiverId = '{{ request.GET.receiver }}';
-    if (receiverId) {
-      document.getElementById('input_receiver_org_id').value = receiverId;
-      cannlytics.api.getLabs(receiverId).then(function(response) {
-        console.log(response);
-        console.log(response.data);
-        document.getElementById('input_receiver').value = response.data[0].name;
-      });
-    }
+    // TODO: Create an ID if no ID.
 
     // Stream any sub-model data.
     cannlytics.app.streamSubModelData('samples', 'sample', '{{ organizations.0.organization_id }}', 'transfer_id', '{{ section }}', 1000);
 
+    async function getReceivers() {
+      /**
+       * Load labs to populate receiver select options.
+       */
+      // TODO: Load all labs if the user is a hemp producer / processor.
+      var receiverId = '{{ request.GET.receiver }}';
+      var response = await cannlytics.api.getLabs(null, { state: '{{ organizations.0.state }}' });
+      var select = document.getElementById('input_receiver');
+      response.data.forEach(function(item) {
+        var opt = document.createElement('option');
+        opt.value = item.id;
+        opt.innerHTML = `${item.name} (${item.city}, ${item.state})`;
+        select.appendChild(opt);
+        if (item.slug === receiverId) {
+          select.value = item.id;
+        }
+      });
+    }
+    getReceivers();
+
+    async function getTransporters() {
+      /**
+       * Load transporters
+       */
+      var response = await cannlytics.api.getTransporters(null, '{{ organizations.0.organization_id }}');
+      var select = document.getElementById('input_transporter');
+      if (response.data) {
+        response.data.forEach(function(item) {
+          var opt = document.createElement('option');
+          opt.value = item.transporter_id;
+          opt.innerHTML = item.driver_name;
+          select.appendChild(opt);
+        });
+      }
+      addBlankSelectEntries(select, 'Add a Transporter');
+    }
+    getTransporters();
+
+    async function getVehicles() {
+      /**
+       * Load vehicles
+       */
+      var response = await cannlytics.api.getVehicles(null, '{{ organizations.0.organization_id }}');
+      var select = document.getElementById('input_vehicle');
+      if (response.data) {
+        response.data.forEach(function(item) {
+          var opt = document.createElement('option');
+          opt.value = item.vehicle_id;
+          if (item.make && item.model) opt.innerHTML = `${item.make} ${item.model}`;
+          else if (item.make) opt.innerHTML = item.make;
+          else opt.innerHTML = item.vehicle_id;
+          select.appendChild(opt);
+        });
+      }
+      addBlankSelectEntries(select, 'Add a Vehicle');
+    }
+    getVehicles();
+
+    function addBlankSelectEntries(select, title='Add') {
+      /**
+       * Add a blank option and an add option to a select input.
+       */
+      var opt = document.createElement('option');
+      opt.value = '';
+      opt.innerHTML = '';
+      select.appendChild(opt);
+      var opt = document.createElement('option');
+      opt.value = 'new';
+      opt.innerHTML = title;
+      select.appendChild(opt);
+    }
+
+    async function saveNewEntry(event) {
+      /**
+       * Save a new entry to the database through the API.
+       * Optional: Get secondary data model more elegantly.
+       * Optional: Get model more elegantly.
+       * Optional: Refresh more elegantly.
+       */
+      var modelSingular = document.getElementById('observation-modal-title').textContent.replace('Add ', '');
+      var dataModel = await cannlytics.app.getDataModel('{{ organizations.0.organization_id }}', `${modelSingular}s`);
+      cannlytics.app.save(dataModel.key, modelSingular, dataModel.abbreviation, buttonId='add-observation-modal-action');
+      cannlytics.ui.hideModal('observation-modal');
+      var data = cannlytics.ui.getFormData(`${modelSingular}-form`);
+      localStorage.setItem(modelSingular, JSON.stringify(data));
+      window.location.reload();
+    }
+
+    // Show transporters / vehicles dialog.
+    async function handleNewEntry(event) {
+      /**
+       * Handle adding a new entry to the database.
+       */
+      if (event.target.value !== 'new') return;
+      var modelSingular = event.target.id.replace('input_', '');
+
+      // Open dialog.
+      cannlytics.ui.showModal('observation-modal');
+
+      // Set select value back to blank.
+      event.target.value = '';
+
+      // Render the dialog title and description.
+      document.getElementById('observation-modal-title').textContent = `Add ${modelSingular}`;
+      document.getElementById('observation-modal-description').textContent = `Save details associated with this ${modelSingular}.`;
+      document.getElementById('add-observation-modal-action-button').onclick = saveNewEntry;
+      document.getElementsByClassName('add-observation-modal-form')[0].id = `${modelSingular}-form`;
+
+      // Get data model.
+      // Optional: Get plural data model in a more elegant manner.
+      var dataModel = await cannlytics.app.getDataModel('{{ organizations.0.organization_id }}', `${modelSingular}s`);
+      console.log('Secondary data model:', dataModel);
+
+      // Render data model fields in dialog.
+      cannlytics.ui.renderForm('add-observation-modal-fields', dataModel.fields);
+
+    }
+
+    // Attach new transporter and new vehicle functionality.
+    document.getElementById('input_transporter').onchange = handleNewEntry;
+    document.getElementById('input_vehicle').onchange = handleNewEntry;
+
   </script>
 {% endblock console_js %}
-
 </html>

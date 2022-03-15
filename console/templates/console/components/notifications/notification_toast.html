@@ -1,11 +1,10 @@
 <!doctype html>
 <html>
 <!--
-  Notification Toast
+  Notification Toast | Cannlytics Console
   Created: 2/27/20201
-  Updated: 7/7/2021
+  Updated: 1/13/2022
 -->
-  <!-- FIXME: d-none required to hide but hinders showing of notifications -->
 {% load icon %}
 <div
   id="notification-toast"
@@ -16,58 +15,16 @@
   aria-atomic="true"
   data-bs-autohide="true"
 >
-  {% comment %} <div class="toast-header bg-light pe-0 py-0">
-
-    <!-- Icon -->
-    <span id="notification-error-icon" class="d-none">{% icon "alert-circle" class="error-icon me-2" width="20px" height="20px" %}</span>
-    <span id="notification-success-icon" class="d-none">{% icon "check-circle" class="success-icon me-2" width="20px" height="20px" %}</span>
-    <span id="notification-wait-icon" class="d-none">{% icon "watch" class="warning-icon me-2" width="20px" height="20px" %}</span>
-
-    <!-- Title -->
-    <span
-      id="notification-title"
-      class="me-auto fs-6 text-dark"
-    ></span>
-
-    <!-- Close -->
-    <button
-      id="notification-close"
-      type="button"
-      class="custom-close-button position-static"
-      data-bs-dismiss="toast"
-      aria-label="Close"
-    >
-      {% icon "x" class="text-dark" width="20px" height="20px" %}
-    </button>
-
-  </div> {% endcomment %}
-
-  <!-- Message -->
-  {% comment %} <div class="toast-body mb-1">
-    <p class="fs-6"><small id="notification-message"></small></p>
-  </div> {% endcomment %}
-
   <div class="d-flex">
-
     <div class="col">
       <div class="d-flex align-items-center px-2 pt-3">
-
-        <!-- Icon -->
         <span id="notification-error-icon" class="d-none">{% icon "alert-circle" class="error-icon me-2" width="20px" height="20px" %}</span>
         <span id="notification-success-icon" class="d-none">{% icon "check-circle" class="success-icon me-2" width="20px" height="20px" %}</span>
         <span id="notification-wait-icon" class="d-none">{% icon "watch" class="warning-icon me-2" width="20px" height="20px" %}</span>
-
-        <!-- Title -->
         <span id="notification-title" class="me-auto fs-6 text-dark fw-bold"></span>
-      
       </div>
-
-      <!-- Message -->
       <div id="notification-message" class="toast-body text-secondary bg-light pt-2"></div>
-    
     </div>
-
-    <!-- Close -->
     <button
       type="button"
       class="btn btn-sm nav-link m-auto me-0 position-absolute top-0 end-0"
@@ -76,8 +33,6 @@
     >
       {% icon 'x' width="18px" height="18px" %}
     </button>
-
   </div>
-
 </div>
 </html>

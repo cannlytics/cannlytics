@@ -12,8 +12,13 @@
     "**/app/build/win-unpacked/**": true
   },
   "files.exclude": {
-    "**/__pycache__": true,
     "**/__init__.py": false,
+    "**/__pycache__": true,
+    "**/tmp": true,
+    "**/node_modules": true,
+    "db.sqlite3": true,
+    "package-lock.json": true,
+    "LICENSE": true,
   },
   "git.countBadge": "off",
   "git.enabled": true,
@@ -72,10 +77,13 @@
     "boxplot",
     "bylocation",
     "cann",
+    "cannabavarin",
+    "cannabidiol",
     "cannabinoid",
     "cannabinoids",
     "cannlypedia",
     "cannlytics",
+    "cbda",
     "cbdv",
     "chartjs",
     "cloudbuild",
@@ -153,6 +161,7 @@
     "plex",
     "popperjs",
     "postgres",
+    "precss",
     "progressbar",
     "projectnum",
     "pubspec",
@@ -164,6 +173,7 @@
     "pytest",
     "pythonpath",
     "pythonw",
+    "quickbooks",
     "quickstart",
     "reauth",
     "repos",
@@ -192,6 +202,7 @@
     "tasklist",
     "testpypi",
     "thca",
+    "thcv",
     "timegrid",
     "tolist",
     "twemoji",
@@ -207,10 +218,5 @@
     "xlsxwriter",
     "xlwings"
   ],
-  "yaml.customTags": [
-    "!ref"
-  ],
-  "npm-scripts.showStartNotification": false,
   "todo-tree.tree.showBadges": false,
-  "python.pythonPath": "C:\\Anaconda\\python.exe"
 }

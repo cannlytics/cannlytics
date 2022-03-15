@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<!--
+  Banner - DataScience | Cannlytics Website
+  Created: 6/27/2021
+  Updated: 9/13/2021
+  Params:
+    email
+    phone
+    phone_number
+-->
+{% load static %}
+<div class="info-bar text-dark d-flex justify-content-between py-2 px-2 px-lg-3">
+  <div class="d-flex"></div>
+  <div class="d-flex align-items-center justify-content-center flex-wrap fw-bold">
+
+    <!-- Phone-->
+    {% comment %} <a
+      class="text-dark background-hover"
+      href="tel:{{ phone_number }}"
+      title="Call us"
+    >
+      <small>
+        {{ phone }}
+      </small>
+    </a>
+    <span class="px-2">|</span> {% endcomment %}
+
+    <!-- Email-->
+    {% comment %} <a
+      class="text-dark background-hover"
+      href="mailto:{{ email }}"
+      title="Email us"
+    >
+      <small>
+        {{ email }}
+      </small>
+    </a>
+    <span class="px-2">|</span> {% endcomment %}
+    <a
+      class="text-dark background-hover d-flex align-items-center"
+      href="{% url 'page' page='whitepapers' %}"
+      title="Read the latest paper about the cannabis industry."
+    >
+      {% comment %} <svg class="" style="width:20px;height:20px;">
+        <use href="{% static "website/images/emojies/scroll.svg" %}#scroll-emoji"></use>
+      </svg> {% endcomment %}
+      <span class="badge rounded-pill bg-success me-1">New</span>
+      <small>
+        Cannabis Data Science Issue #1
+      </small>
+    </a>
+    <span class="px-2">|</span>
+
+    <!-- Support -->
+    <a
+      class="text-dark background-hover d-flex align-items-center"
+      href="{% url 'page' page='subscriptions' %}"
+      title="Get the support that your company needs."
+    >
+      <svg class="" style="width:20px;height:20px;">
+        <use href="{% static "website/images/emojies/atronaut.svg" %}#atronaut-emoji"></use>
+      </svg>
+      <small>
+        Premium subscriptions now available!
+      </small>
+    </a>
+
+  </div>
+  <div class="d-flex d-lg-none"></div>
+</div>
+</html>

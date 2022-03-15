@@ -1,33 +1,55 @@
 """
 Worksheets | Cannlytics
+Copyright (c) 2021-2022 Cannlytics
 
-Author: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 7/18/2021
-Updated: 7/20/2021
+Updated: 1/10/2022
 License: MIT License <https://opensource.org/licenses/MIT>
 """
+# Standard packages
+from ast import literal_eval
+from typing import Any, List, Optional, Tuple, Union
 
+# External packages.
+from dotenv import dotenv_values
+from pandas import DataFrame, to_datetime
+import requests
 try:
-
-    # Standard packages
-    from ast import literal_eval
-    import os
-
-    # External packages.
-    from dotenv import load_dotenv
-    from pandas import DataFrame, to_datetime
-    import requests
     import xlwings
     from xlwings.utils import rgb_to_int
+except ImportError:
+    # FIXME: Work on alternatives as xlwings doesn't work in App Engine.
+    pass
 
-    # Internal packages.
-    from cannlytics.utils.utils import snake_case
-
-except:
-    pass # FIXME: Docs can't import.
+# Internal packages.
+from ..utils.utils import snake_case
 
 
-def get_data_block(sheet, coords, expand=None):
+def format_values(data: Union[list, dict], columns: List[str]) -> List[dict]:
+    """Format response data by given columns. Handles a list or dictionary of data.
+    Args:
+        data (list,dict): A list of values or a dictionary of values.
+        columns (list): A list of column names used to get values from the data.
+    Returns:
+        (list): Returns a list of items.
+    """
+    items = []
+    try:
+        for item in data:
+            values = []
+            for column in columns:
+                values.append(item.get(column))
+            items.append(values)
+    except AttributeError:
+        values = []
+        for column in columns:
+            values.append(data.get(column))
+        items = [values]
+    return items
+
+
+def get_data_block(sheet: Any, coords: str, expand: Optional[str] = None) -> dict:
     """Get a data block.
     Args:
         sheet (Sheet): The worksheet containing the data block.
@@ -45,7 +67,33 @@ def get_data_block(sheet, coords, expand=None):
     return data
 
 
-def increment_row(coords):
+def get_data_model(worksheet: Any, config: dict, model_type: str, ids: List[str]) -> Any:
+    """Get a specific data model from the Cannlytics API.
+    Args:
+        worksheet (Worksheet): An xlwings Excel worksheet instance.
+        config (dict): A dictionary of user configuration.
+        model_type (str): The data model name.
+        ids (list): Specific IDs to retrieve from the API.
+    Returns:
+        (HTTPResponse): An HTTP response from the Cannlytics API.
+    """
+    base = config['api_url']
+    org_id = worksheet.range(config['org_id_cell']).value
+    env_variables = dotenv_values(config['env_path'])
+    api_key = env_variables['CANNLYTICS_API_KEY']
+    headers = {
+        'Authorization': 'Bearer %s' % api_key,
+        'Content-type': 'application/json',
+    }
+    if len(ids) == 1:
+        url = f'{base}/{model_type}/{ids[0]}?organization_id={org_id}'
+    else:
+        url = f'{base}/{model_type}?organization_id={org_id}&items={str(ids)}'
+    response = requests.get(url, headers=headers)
+    return response
+
+
+def increment_row(coords: str) -> str:
     """Increment a row given its starting coordinates.
     Args:
         coords (str):
@@ -58,10 +106,15 @@ def increment_row(coords):
     return column + str(row)
 
 
-def import_worksheet(filename, sheetname, range_start='A1'):
+def import_worksheet(
+        filename: str,
+        sheetname: str,
+        range_start: Optional[str] = 'A1',
+) -> List[dict]:
     """Read the data from a given worksheet using xlwings.
     Args:
-        filename (str): The name of the Excel file to read.
+        filename (str): The name of the Excel workbook to read.
+        sheetname (str): The name of the worksheet to import.
         range_start (str): Optional starting cell.
     Returns:
         list(dict): A list of dictionaries.
@@ -78,21 +131,19 @@ def import_worksheet(filename, sheetname, range_start='A1'):
 
 
 @xlwings.sub
-def import_worksheet_data(model_type):
-    """A function called from Excel to import data by ID
+def import_worksheet_data(model_type: str):
+    """A function called from Excel to import data by IDs in the worksheet
     from Firestore into the Excel workbook.
     Args:
         model_type (str): The data model at hand.
     """
 
     # Initialize the workbook.
-    book = xlwings.Book.caller()
-    worksheet = book.sheets.active
-    config_sheet = book.sheets['cannlytics.conf']
-    config = get_data_block(config_sheet, 'A1', expand='table')
+    worksheet, config = initialize_workbook()
+    status_cell = config['status_cell']
     show_status_message(
         worksheet,
-        coords=config['status_cell'],
+        coords=status_cell,
         message='Importing %s data...' % model_type,
         background=config['success_color'],
     )
@@ -101,58 +152,33 @@ def import_worksheet_data(model_type):
     id_cell = increment_row(config['table_cell'])
     ids = worksheet.range(id_cell).options(expand='down', ndim=1).value
 
-    # Get your Cannlytics API key from your .env file, location specified
-    # by env_path on the cannlytics.config sheet.
-    load_dotenv(config['env_path'])
-    api_key = os.getenv('CANNLYTICS_API_KEY')
-
     # Get the worksheet columns.
     columns = worksheet.range(config['table_cell']).options(expand='right', ndim=1).value
     columns = [snake_case(x) for x in columns]
 
     # Get data using model type and ID through the API.
-    base = config['api_url']
-    org_id = worksheet.range(config['org_id_cell']).value
-    headers = {
-        'Authorization': 'Bearer %s' % api_key,
-        'Content-type': 'application/json',
-    }
-    if len(ids) == 1:
-        url = f'{base}/{model_type}/{ids[0]}?organization_id={org_id}'
-    else:
-        url = f'{base}/{model_type}?organization_id={org_id}&items={str(ids)}'
-    response = requests.get(url, headers=headers)
+    response = get_data_model(worksheet, config, model_type, ids)
     if response.status_code != 200:
         show_status_message(
             worksheet,
-            coords=config['status_cell'],
+            coords=status_cell,
             message='Error importing data.',
             background=config['error_color']
         )
         return
 
     # Format the values.
-    items = []
-    data = response.json()['data']
-    if not data:
+    try:
+        data = response.json()['data']
+        items = format_values(data, columns)
+    except TypeError:
         show_status_message(
             worksheet,
-            coords=config['status_cell'],
+            coords=status_cell,
             message='No data found.',
             background=config['error_color']
         )
         return
-    try:
-        for item in data:
-            values = []
-            for column in columns:
-                values.append(item.get(column))
-            items.append(values)
-    except AttributeError:
-        values = []
-        for column in columns:
-            values.append(data.get(column))
-        items = [values]
 
     # Insert all rows at the same time.
     worksheet.range(id_cell).value = items
@@ -160,41 +186,61 @@ def import_worksheet_data(model_type):
     # Show success status message.
     show_status_message(
         worksheet,
-        coords=config['status_cell'],
+        coords=status_cell,
         message='Imported %i %s.' % (len(ids), model_type),
     )
 
 
-@xlwings.sub
-def upload_worksheet_data(model_type):
-    """A function called from Excel to import data by ID
-    from Firestore into the Excel workbook."""
-
-    # Initialize the workbook.
+def initialize_workbook() -> Tuple:
+    """Initialize an xlwings workbook and return the config worksheet data.
+    Returns:
+        (Worksheet): Returns the active worksheet.
+        (dict): Returns a dictionary of user configuration.
+    """
     book = xlwings.Book.caller()
     worksheet = book.sheets.active
     config_sheet = book.sheets['cannlytics.conf']
     config = get_data_block(config_sheet, 'A1', expand='table')
-    show_status_message(
-        worksheet,
-        coords=config['status_cell'],
-        message='Uploading %s data...' % model_type,
-        background=config['success_color'],
-    )
+    return worksheet, config
 
-    # Read the table data, cleaning the column names.
-    table = worksheet.range(config['table_cell'])
+
+def read_table_data(worksheet: Any, cell: str) -> dict:
+    """Read table data from a worksheet and clean the columns and data.
+    Args:
+        worksheet (Worksheet): A worksheet containing the table data.
+        cell (str): The cell range of the table.
+    Returns:
+        (dict): Returns the data in the worksheet table as a dictionary.
+    """
+    table = worksheet.range(cell)
     data = table.options(DataFrame, index=False, expand='table').value
     data.columns = list(map(snake_case, data.columns))
-
-    # Clean columns. (Optional: Clean more efficiently.)
     for column in data.columns:
         if column.endswith('_at'):
             try:
                 data[column] = to_datetime(data[column]).dt.strftime('%Y-%m-%dT%H:%M%:%SZ')
             except:
                 pass
-    data = data.fillna('')
+    return data.fillna('')
+
+
+@xlwings.sub
+def upload_worksheet_data(model_type):
+    """A function called from Excel to import data by IDs in the worksheet
+    from Firestore into the Excel workbook."""
+
+    # Initialize the workbook.
+    worksheet, config = initialize_workbook()
+    status_cell = config['status_cell']
+    show_status_message(
+        worksheet,
+        coords=status_cell,
+        message='Uploading %s data...' % model_type,
+        background=config['success_color'],
+    )
+
+    # Read the table data, cleaning the column names.
+    data = read_table_data(worksheet, config['table_cell'])
 
     # Determine the model type and the organization.
     org_id = worksheet.range(config['org_id_cell']).value
@@ -202,16 +248,17 @@ def upload_worksheet_data(model_type):
     if not org_id:
         show_status_message(
             worksheet,
-            coords=config['status_cell'],
+            coords=status_cell,
             message='Organization ID required.',
             background=config['error_color']
         )
         return
 
     # Get Cannlytics API key from .env using env_path in config.
-    load_dotenv(config['env_path'])
-    api_key = os.getenv('CANNLYTICS_API_KEY')
+    env_variables = dotenv_values(config['env_path'])
+    api_key = env_variables['CANNLYTICS_API_KEY']
 
+    # TODO: Split this into a separate function.
     # Upload data using model type, ID, and data through the API.
     headers = {
         'Authorization': 'Bearer %s' % api_key,
@@ -229,13 +276,13 @@ def upload_worksheet_data(model_type):
         if response.status_code == 200:
             show_status_message(
                 worksheet,
-                coords=config['status_cell'],
+                coords=status_cell,
                 message='Uploaded %s' % doc_id,
             )
         else:
             show_status_message(
                 worksheet,
-                coords=config['status_cell'],
+                coords=status_cell,
                 message='Error uploading %s. Check your organization, internet connection and API key.' % doc_id, # pylint:disable=line-too-long
                 background=config['error_color']
             )
@@ -244,7 +291,7 @@ def upload_worksheet_data(model_type):
     # Show success status message.
     show_status_message(
         worksheet,
-        coords=config['status_cell'],
+        coords=status_cell,
         message='Uploaded %i %s.' % (len(data), model_type),
     )
 
@@ -263,3 +310,55 @@ def show_status_message(sheet, coords, message, background=None, color=None):
         sheet.range(coords).color = literal_eval(background)
     if color:
         sheet.range(coords).api.Font.Color = rgb_to_int(literal_eval(color))
+
+
+# openpyxl and pandas methods for reading data.
+
+# def get_worksheet_headers(sheet):
+#     """Get the headres of a worksheet.
+#     Args:
+#         sheet (Worksheet): An openpyx; Excel file object.
+#     Returns:
+#         headers (list): A list of header strings.
+#     """
+#     headers = []
+#     for cell in sheet[1]:
+#         headers.append(snake_case(cell.value))
+#     return headers
+
+
+# def get_worksheet_data(sheet, headers):
+#     """Get the data of a worksheet.
+#     Args:
+#         sheet (Worksheet): An openpyx; Excel file object.
+#         headres (list): A list of headers to map the values.
+#     Returns:
+#         list(dict): A list of dictionaries.
+#     """
+#     data = []
+#     for row in sheet.iter_rows(min_row=2):
+#         values = {}
+#         for key, cell in zip(headers, row):
+#             values[key] = cell.value
+#         data.append(values)
+#     return data
+
+
+# def read_worksheet(path, filename='Upload'):
+#     """Read the imported data, iterating over the rows and
+#     getting value from each cell in row.
+#     Args:
+#         path (str or InMemoryFile): An Excel workbook to read.
+#         filename (str): The name of the worksheet to upload.
+#     Returns:
+#         (DataFrame): A Pandas DataFrame of the results.
+#     """
+#     # try:
+#     #     workbook = openpyxl.load_workbook(path, data_only=True)
+#     #     sheet = workbook.get_sheet_by_name(filename)
+#     #     headers = get_worksheet_headers(sheet)
+#     #     return pd.DataFrame(get_worksheet_data(sheet, headers))
+#     # except:
+#     data = pd.read_csv(path)
+#     data.columns = [snake_case(x) for x in data.columns]
+#     return data

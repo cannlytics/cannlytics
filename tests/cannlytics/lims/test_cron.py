@@ -1,7 +1,7 @@
 """
 Title | Project
 
-Author: Keegan Skeate
+Authors: Keegan Skeate
 Contact: <keegan@cannlytics.com>
 Created: 
 Updated: 

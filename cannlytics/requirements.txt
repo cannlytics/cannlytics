@@ -1,0 +1,22 @@
+# Python Requirements | Cannlytics
+# Created 3/14/2022
+# Updated: 3/14/2022
+
+beautifulsoup4
+firebase_admin
+google-cloud-secret-manager
+google-cloud-firestore
+googlemaps
+matplotlib
+numpy
+openpyxl
+pandas
+python-dotenv
+statsmodels
+ulid-py
+
+# FIXME:
+# ocean-lib # Breaks App Engine deployments.
+
+# Optional:
+# xlwings # Breaks App Engine deployments.

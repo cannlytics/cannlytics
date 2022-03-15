@@ -1,20 +1,14 @@
 /**
  * Results JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 6/18/2020
- * Updated: 8/2/2021
+ * Updated: 12/14/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
-
-import {
-  getDownloadURL,
-  updateDocument,
-  uploadFile,
-} from '../firebase.js';
-
-import {
-  authRequest,
-  showNotification,
-} from '../utils.js';
+import { getFileURL, setDocument, uploadFile } from '../firebase.js';
+import { authRequest, showNotification } from '../utils.js';
 
 export const results = {
 
@@ -23,137 +17,121 @@ export const results = {
   ----------------------------------------------------------------------------*/
 
   postResults() {
-    /*
+    /**
      * Post results to a given state traceability system.
      */
-    console.log('Reviewing CoA...');
   },
-
 
   releaseResults() {
-    /*
+    /**
      * Release results, making them available to the client's contacts.
      */
-    console.log('Reviewing CoA...');
   },
-
 
   sendResults() {
-    /*
+    /**
      * Send results to specific people.
      */
-    console.log('Reviewing CoA...');
   },
 
-
   shareResults() {
-    /*
+    /**
      * Ability for result recipients to share their results with others.
      */
-    console.log('Sharing results...');
   },
 
   /*----------------------------------------------------------------------------
   CoA Generation and Review
   ----------------------------------------------------------------------------*/
 
-  generateCoA() {
-    /*
+  async generateCoA() {
+    /**
      * Generate a CoA PDF.
+     * @returns {Object} Returns data of the generated CoA or the error message.
      */
-    console.log('Generating CoA...');
-    return new Promise((resolve, reject) => {
-      const data = {
-
-      };
-      authRequest(`/api/results/generate_coa?organization_id=${orgId}`, data).then((response) => {
-        if (response.error) {
-          showNotification('Error getting templates', response.message, { type: 'error' });
-          reject(response.error);
-        } else {
-          resolve(response.data);
-        }
-      });
-    });
+    // TODO: Implement.
+    const data = {};
+    const url = `/api/results/generate_coa?organization_id=${orgId}`;
+    const response = await authRequest(url, data);
+    if (!response.success) {
+      showNotification('Error getting templates', response.message, /* type = */ 'error');
+      return response.message;
+    }
+    return response.data;
   },
-
 
   reviewCoA() {
-    /*
+    /**
      * Review a CoA.
      */
-    console.log('Reviewing CoA...');
   },
-
 
   approveCoA() {
-    /*
+    /**
      * Approve a CoA.
      */
-    console.log('Reviewing CoA...');
   },
-
 
   /*----------------------------------------------------------------------------
   Templates
   ----------------------------------------------------------------------------*/
 
-
-  getCoATemplates(orgId) {
-    /*
+  async getCoATemplates(orgId) {
+    /**
      * Get CoA templates.
+     * @param {String} orgId A specific organization ID.
+     * @returns {Object} Returns data of the template or the error message.
      */
-    console.log('Getting CoA templates:', orgId);
-    return new Promise((resolve, reject) => {
-      authRequest(`/api/templates?organization_id=${orgId}`).then((response) => {
-        if (response.error) {
-          showNotification('Error getting templates', response.message, { type: 'error' });
-          reject(response.error);
-        } else {
-          resolve(response.data);
-        }
-      });
-    });
-  },
-
-
-  saveCoATemplate() {
-    /*
-     * Save CoA template data to Firestore.
-     */
-    console.log('Saving CoA template...');
-  },
-
-
-  uploadCoATemplate(event, orgId) {
-    /*
-     * Upload a CoA template to Firebase Storage.
-     */
-    console.log('Uploading CoA template...', event);
-    if (event.target.files.length) {
-      showNotification('Uploading template', 'Uploading your CoA template...', { type: 'wait' });
-      const file = event.target.files[0];
-      const [name] = file.name.split('.');
-      const ref = `organizations/${orgId}/templates/${file.name}`;
-      uploadFile(ref, file).then((snapshot) => {
-        getDownloadURL(ref).then((url) => {
-          // FIXME: Insufficient permissions. Post data to the API instead.
-          updateDocument(`organizations/${orgId}/templates/{name}`, {
-            photo_uploaded_at: new Date().toISOString(),
-            photo_modified_at: file.lastModifiedDate,
-            photo_size: file.size,
-            photo_type: file.type,
-            photo_ref: ref,
-            photo_url: url,
-          }).then(() => {
-            showNotification('Photo saved', 'Organization photo saved with your organization files.', { type: 'success' });
-            document.getElementById('organization_photo_url').src = url;
-          })
-          .catch((error) => showNotification('Photo Change Error', 'Error saving photo.', { type: 'error' }));
-        }).catch((error) => showNotification('Photo Change Error', 'Error uploading photo.', { type: 'error' }));
-      });
+    const url = `/api/templates?organization_id=${orgId}`;
+    const response = await authRequest(url);
+    if (!response.success) {
+      showNotification('Error getting templates', response.message, /* type = */ 'error');
+      return response.message;
+    } else {
+      return response.data;
     }
   },
 
+  saveCoATemplate() {
+    /**
+     * Save CoA template data to Firestore.
+     */
+  },
+
+  async uploadCoATemplate(event, orgId) {
+    /**
+     * Upload a CoA template to Firebase Storage.
+     * @param {Event} event A user-driven event.
+     * @param {String} orgId A specific organization ID.
+     */
+    if (event.target.files.length) {
+      showNotification('Uploading template', 'Uploading your CoA template...', /* type = */ 'wait');
+      const file = event.target.files[0];
+      const [name] = file.name.split('.');
+      const ref = `organizations/${orgId}/templates/${file.name}`;
+      try {
+        await uploadFile(ref, file);
+        const url = await getFileURL(ref);
+      } catch(error) {
+        showNotification('Photo Change Error', 'Error uploading photo.', /* type = */ 'error')
+      }
+      try {
+        // FIXME: Insufficient permissions. Post data to the API instead.
+        const data = {
+          photo_uploaded_at: new Date().toISOString(),
+          photo_modified_at: file.lastModifiedDate,
+          photo_size: file.size,
+          photo_type: file.type,
+          photo_ref: ref,
+          photo_url: url,
+        };
+        await setDocument(`organizations/${orgId}/templates/${name}`, data);
+        showNotification('Photo saved', 'Organization photo saved with your organization files.', /* type = */ 'success');
+        document.getElementById('organization_photo_url').src = url;
+      } catch(error) {
+        showNotification('Photo Change Error', 'Error saving photo.', /* type = */ 'error')
+      }
+    }
+  },
 
 };

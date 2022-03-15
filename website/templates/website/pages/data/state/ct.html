@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<!--
+  Connecticut (CT) Data Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 9/16/2021
+  Updated: 11/25/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Connecticut Data | Cannlytics{% endblock %}
+{% block material %}
+
+<!-- Banner -->
+<!-- Optional Suggest (upload) image button -->
+{% include "website/components/heros/hero_banner.html" with
+  title='Connecticut Data'
+  description='Explore public cannabis data available for Connecticut.'
+  background_image=''
+  image_url=' '
+  only
+%}
+
+<!-- Brand Statistics -->
+<section class="container mb-2 mt-5">
+  <h2 class="mb-3 pt-5 serif">Medical Cannabis Brands</h2>
+  <p class="fs-6 double-line" style="max-width:540px;">
+      Below are statistics for all the medical marijuana brands registered with the
+      Connecticut State Deptartment of Consumer Protection.
+  </p>
+</section>
+
+<!-- Socrata Embed -->
+
+<div><iframe width="500px" title="Medical Marijuana Brand Registry" height="425px" src="https://data.ct.gov/w/egd5-wb6r/wqz6-rhce?cur=37rMgqgL7RF&from=root" frameborder="0"scrolling="no"><a href="https://data.ct.gov/Health-and-Human-Services/Medical-Marijuana-Brand-Registry/egd5-wb6r" title="Medical Marijuana Brand Registry" target="_blank">Medical Marijuana Brand Registry</a></iframe><p><a href="http://www.socrata.com/" target="_blank">Powered by Socrata</a></p></div>
+
+<!-- TODO: Ability to correlate various analytes -->
+
+<!-- TODO: Terpene prevelance (cannabinoid prevelance?)-->
+
+
+<!-- TODO: Discussion -->
+
+
+<!-- TODO: Data Sources -->
+Data is updated daily at 4:20am EDT.
+
+<span>Page updated: 9/16/2021</span>
+
+<!-- TODO: Data collection routine link -->
+
+{% endblock material %}
+
+

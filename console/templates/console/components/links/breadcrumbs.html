@@ -12,40 +12,42 @@
     extra_page_url (optional)
     nested_page (optional)
     nested_page_url (optional)
+    back (optional)
 -->
-  <!-- border-bottom -->
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-      <ol class="breadcrumb bg-transparent p-0 mb-0">
-        <li class="breadcrumb-item fs-6 lh-sm">
-          <a class="action" href="{{ base_page_url }}">
-            {{ base_page }}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+  <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb bg-transparent p-0 mb-0">
+      <li class="breadcrumb-item fs-6 lh-sm">
+        <a class="action" href="{{ base_page_url }}">
+          {{ base_page }}
+        </a>
+      </li>
+      {% if nested_page %}
+        <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
+          <a class="action" href="{{ nested_page_url }}">
+            {{ nested_page }}
           </a>
         </li>
-        {% if nested_page %}
-          <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
-            <a class="action" href="{{ nested_page_url }}">
-              {{ nested_page }}
-            </a>
-          </li>
-        {% endif %}
-        {% if extra_page %}
-          <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
-            <a class="action" href="{{ extra_page_url }}">
-              {{ extra_page }}
-            </a>
-          </li>
-        {% endif %}
+      {% endif %}
+      {% if extra_page %}
         <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
-          {% if current_page == 'new' %}New{% else %}{{ current_page }}{% endif %}
+          <a class="action" href="{{ extra_page_url }}">
+            {{ extra_page }}
+          </a>
         </li>
-      </ol>
-    </nav>
+      {% endif %}
+      <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
+        {% if current_page == 'new' %}New{% else %}{{ current_page }}{% endif %}
+      </li>
+    </ol>
+  </nav>
+  {% if back is False %}
     <a
       class="btn btn-sm-light btn-md-light"
       onclick="window.history.back();"
     >
       Back
     </a>
-  </div>
+  {% endif %}
+</div>
 </html>

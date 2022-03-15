@@ -1,94 +1,79 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
- 
-  <!--
-    Login Template | Cannlytics Console
-    Created: 11/26/2020 Thanksgiving
-    Updated: 6/21/2021
-    Hashes filled by build.py
-  -->
- {% extends "console/base.html" %}
-  {% load static %}
-  {% block title %}Console | Cannlytics{% endblock %}
-  {% block page_css %}
- <link href="{% static 'console/plugins/cannlytics/login-02386b42ad81d581c251.css'%}" id="login_css" rel="stylesheet" type="text/css"/>
- {% endblock %}
-  {% block page %}
+<!--
+  Login Template | Cannlytics Console
+  Created: 11/26/2020 Thanksgiving
+  Updated: 12/12/2021
+-->
+{% extends "console/base.html" %}
+{% load static %}
+{% block title %}Console | Cannlytics{% endblock %}
+{% block page %}
+
+  <!-- Set the initial theme. -->
+  <script>
+    cannlytics.theme.setInitialTheme();
+  </script>
  
   <!-- Theme Toggle -->
- <script>
-  cannlytics.theme.setInitialTheme();
- </script>
- {% include "console/components/buttons/theme_toggle.html" %}
+  {% include "console/components/buttons/theme_toggle.html" %}
  
   <!-- Auth template -->
- <div class="login py-0" style="min-height:100vh; height:100vh">
-  <div class="d-flex w-100" style="min-height:100%">
-   
-  <!-- Decorative background -->
-   <div class="col-7 d-none d-lg-flex justify-content-center align-items-center bg-decorative">
-    <div class="h-100 col-7 position-absolute" id="particles-js">
-    </div>
-    <img class="floating" src="{% static 'console/images/science/chemist.png' %}" style="height:20rem; max-height:100%; max-width:100%;"/>
-   </div>
-   
-  <!-- Form section -->
-   <div class="col col-lg-5 bg-light">
-    <form class="form-login px-5 py-5 mx-auto" style="max-width:540px;">
-     {% csrf_token %}
-     
-  <!-- Logo -->
-     <div class="text-center mb-3 mb-sm-4">
-      <img class="light-only" src="{% static 'console/images/logos/cannlytics_logo_with_phrase.png' %}" style="max-height:6rem; max-width:100%;"/>
-      <img class="dark-only" src="{% static 'console/images/logos/cannlytics_logo_with_phrase_dark.png' %}" style="max-height:6rem; max-width:100%;"/>
-     </div>
-     
-  <!-- Form -->
-     {% block login_form %}{% endblock %}
-     
-  <!-- Privacy policy and terms of service -->
-     <div class="text-center text-dark" style="margin-top:6rem;">
+  <div class="login py-0" style="min-height:100vh; height:100vh">
+    <div class="d-flex w-100" style="min-height:100%">
+    
+      <!-- Decorative background -->
+      <div class="col-7 d-none d-lg-flex justify-content-center align-items-center bg-decorative">
+        <div class="h-100 col-7 position-absolute" id="particles-js"></div>
+        <img class="floating" src="{% static 'console/images/illustrations/science/chemist.svg' %}" style="height:20rem; max-height:100%; max-width:100%;"/>
+      </div>
       
-  <!-- Policies -->
-      <a class="text-secondary fs-6" href="https://docs.cannlytics.com/about/privacy-policy" target="_blank">
-       <small class="tiny-text">
-        Privacy
-       </small>
-      </a>
-      ‧
-      <a class="text-secondary fs-6" href="https://docs.cannlytics.com/about/security-policy" target="_blank">
-       <small class="tiny-text">
-        Security
-       </small>
-      </a>
-      ‧
-      <a class="text-secondary fs-6" href="https://docs.cannlytics.com/about/terms-of-service" target="_blank">
-       <small class="tiny-text">
-        Terms
-       </small>
-      </a>
-     </div>
-    </form>
-   </div>
-   
-  <!-- End of form section -->
-  </div>
- </div>
- 
-  <!-- End of auth template -->
- 
-  <!-- Error toast -->
- {% include "console/components/notifications/notification_toast.html" %}
+      <!-- Form -->
+      <div class="col col-lg-5 bg-light">
+        <form class="form-login px-5 py-5 mx-auto" style="max-width:540px;">
 
-{% endblock %}
+          <!-- CSRF Token -->
+          {% csrf_token %}
+            
+          <!-- Logo -->
+          <div class="text-center mb-3 mb-sm-4">
+            <img class="light-only" src="{% static 'console/images/logos/cannlytics_logo_with_phrase.svg' %}" style="max-height:6rem; max-width:100%;"/>
+            <img class="dark-only" src="{% static 'console/images/logos/cannlytics_logo_with_phrase_dark.svg' %}" style="max-height:6rem; max-width:100%;"/>
+          </div>
+            
+          <!-- Dynamic Form Fields -->
+          {% block login_form %}{% endblock %}
+            
+          <!-- Policies -->
+          <div class="text-center text-dark" style="margin-top:6rem;">
+            <a class="text-secondary fs-6" href="https://docs.cannlytics.com/about/privacy-policy" target="_blank">
+              <small class="tiny-text">Privacy</small>
+            </a>
+            ‧
+            <a class="text-secondary fs-6" href="https://docs.cannlytics.com/about/security-policy" target="_blank">
+              <small class="tiny-text">Security</small>
+            </a>
+            ‧
+            <a class="text-secondary fs-6" href="https://docs.cannlytics.com/about/terms-of-service" target="_blank">
+              <small class="tiny-text">Terms</small>
+            </a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Error toast -->
+  {% include "console/components/notifications/notification_toast.html" %}
+
+{% endblock page %}
  
-  <!-- JavaScript -->
- {% block page_js %}
- <script src="{% static 'console/plugins/particlesjs/particles.js' %}" type="text/javascript">
- </script>
- <script type="text/javascript">
-  // Initialize particles.
-  particlesJS.load('particles-js', '{% static "console/plugins/particlesjs/particles.json" %}');
- </script>
- {% endblock page_js %}
+<!-- JavaScript -->
+{% block page_js %}
+  <script src="{% static 'console/plugins/particlesjs/particles.js' %}" type="text/javascript"></script>
+  <script type="text/javascript">
+    particlesJS.load('particles-js', '{% static "console/plugins/particlesjs/particles.json" %}');
+  </script>
+{% endblock page_js %}
 </html>

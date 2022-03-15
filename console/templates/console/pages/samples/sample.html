@@ -2,9 +2,8 @@
 <html>
 <!--
   Sample Page | Cannlytics Console
-  Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
-  Updated: 8/17/2021
+  Updated: 2/6/2022
   TODO:
     - Allow the user to reset, save (update and create), and delete.
     - Render additional fields, ability to add an additional field.
@@ -14,20 +13,25 @@
 {% load icon %}
 {% block console_css %}
 
+  <!-- AG-Grid CSS and JavaScript -->
+  {% include "console/components/tables/ag_grid_scripts.html" %}
+
   <!-- Bootstrap Datepicker -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
 
 {% endblock console_css %}
 {% block console_body %}
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
 
     <!-- Header -->
-    {% include "console/components/links/breadcrumbs.html" with
-      base_page="Samples"
-      base_page_url="/samples"
-      current_page=id
-    %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+      {% include "console/components/links/breadcrumbs.html" with
+        base_page="Samples"
+        base_page_url="/samples"
+        current_page=id
+      %}
+    </div>
 
     <!-- Tabs -->
     <!-- Optional: Render dynamically -->
@@ -129,19 +133,22 @@
       </div>
 
       <!-- Measurements sub-table -->
-      {% include "console/components/tables/simple_form_table.html" with
-        model="measurements"
-        model_singular="measurement"
-        description="Manage measurements that have been taken for this sample."
-        abbreviation="MT"
-        parent_model="samples"
-        parent_model_singular="sample"
-        parent_id=section
-        remove_only=True
-        select=False
-      %}
+      {% if organizations.0.type == 'lab' %}
+        {% include "console/components/tables/simple_form_table.html" with
+          model="measurements"
+          model_singular="measurement"
+          description="Manage measurements that have been taken for this sample."
+          abbreviation="MT"
+          parent_model="samples"
+          parent_model_singular="sample"
+          parent_id=section
+          remove_only=True
+          select=False
+        %}
+      {% endif %}
 
       <!-- Results sub-table -->
+      <!-- TODO: Prevent editing for recipients? -->
       {% include "console/components/tables/simple_form_table.html" with
         model="results"
         model_singular="result"
@@ -203,8 +210,12 @@
     }
 
     // Stream any sub-model data.
-    cannlytics.app.streamSubModelData('measurements', 'measurement', '{{ organizations.0.organization_id }}', 'sample_id', '{{ section }}', 1000);
-    cannlytics.app.streamSubModelData('results', 'result', '{{ organizations.0.organization_id }}', 'sample_id', '{{ section }}', 1000);
+    {% if not unit %}
+      {% if organizations.0.type == 'lab' %}
+        cannlytics.app.streamSubModelData('measurements', 'measurement', '{{ organizations.0.organization_id }}', 'sample_id', '{{ section }}', 1000);
+      {% endif %}
+      cannlytics.app.streamSubModelData('results', 'result', '{{ organizations.0.organization_id }}', 'sample_id', '{{ section }}', 1000);
+    {% endif %}
 
   </script>
 {% endblock console_js %}

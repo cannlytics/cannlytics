@@ -2,14 +2,16 @@
 <html>
 <!--
   API Settings | Cannlytics Console
-  Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/9/2021
-  Updated: 7/19/2021
+  Updated: 12/16/2021
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block title %}API | Cannlytics {% endblock title %}
 {% block console_css %}
+
+  <!-- AG-Grid CSS and JavaScript -->
+  {% include "console/components/tables/ag_grid_scripts.html" %}
 
   <!-- Bootstrap Datepicker -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
@@ -17,22 +19,23 @@
 
 {% endblock console_css %}
 {% block console_body %}
-
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-5">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
 
     <!-- Header-->
-    {% include "console/components/links/breadcrumbs.html" with
-      base_page="Settings"
-      base_page_url="/settings"
-      current_page="API"
-    %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+      {% include "console/components/links/breadcrumbs.html" with
+        base_page="Settings"
+        base_page_url="/settings"
+        current_page="API"
+      %}
+    </div>
 
     <div class="d-flex flex-wrap">
 
       <div id="key-table-container" class="col-12">
 
         <!-- Title  -->
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mt-3">
             <h1 class="fs-5 mb-0 lh-base">API Keys</h1>
             <button
               class="btn btn-sm bg-gradient-green text-white"
@@ -57,10 +60,10 @@
         <!-- Create a key card -->
         <div
           id="new-key-card"
-          class="card bg-transparent border-secondary rounded-3 px-2 py-2 d-none"
+          class="mt-4 py-2 d-none"
           style="max-width: 375px;"
         >
-          <div class="simple-flex border-bottom pb-2 mb-3">
+          <div class="simple-flex pb-2">
             <h4 class="fs-5 text-dark mb-0">New API Key</h4>
           </div>
           <div class="col pb-2">
@@ -134,13 +137,7 @@
             </form>
 
             <!-- Create button -->
-            <div class="d-flex justify-content-end">
-              <button
-                class="btn btn-sm btn-sm-light text-dark me-2"
-                onclick="hideNewKeyForm()"
-              >
-                Cancel
-              </button>
+            <div class="d-flex justify-content-start">
               <button
                 id='create-api-key-button'
                 class="btn btn-sm bg-gradient-green text-white"
@@ -152,6 +149,12 @@
                 button_id='create-api-key-button-loading'
                 size='sm'
               %}
+              <button
+                class="btn btn-sm btn-sm-light text-dark ms-2"
+                onclick="hideNewKeyForm()"
+              >
+                Cancel
+              </button>
             </div>
 
           </div><!-- End of fields -->
@@ -211,10 +214,8 @@
     </div><!-- End of row -->
 
   </main>
-
 {% endblock console_body %}
 {% block console_js %}
-
   <script type="text/javascript" charset="utf-8">
 
     // Render the date picker.
@@ -222,7 +223,7 @@
 
 
     function closeKeyCreatedForm() {
-      /*
+      /**
        * Close the key created form.
        */
       document.getElementById('key-created-card').classList.add('d-none');
@@ -232,7 +233,7 @@
 
 
     function showNewKeyForm() {
-      /*
+      /**
        * Show the add new key form and hide the key information form.
        */
       document.getElementById('new-key-card').classList.remove('d-none');
@@ -241,7 +242,7 @@
 
 
     function hideNewKeyForm() {
-      /*
+      /**
        * Show the add new key form and hide the key information form.
        */
       document.getElementById('new-key-card').classList.add('d-none');
@@ -250,7 +251,7 @@
 
     
     function onSelectionChanged() {
-      /*
+      /**
        * Show a key's details on selection.
        */
       hideNewKeyForm();
@@ -312,6 +313,5 @@
     });
 
   </script>
-
 {% endblock %}
 </html>

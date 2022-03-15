@@ -3,12 +3,12 @@
 <!--
   Account Management Page | Cannlytics Console
   Created: 12/9/2020
-  Updated: 6/17/2021
+  Updated: 2/6/2022
 -->
 {% extends "console/console.html" %}
 {% load static icon %}
 {% block console_body %}
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mb-5">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
   
     <!-- Header -->
     {% include "console/components/links/breadcrumbs_dynamic.html" with
@@ -36,11 +36,11 @@
             </button>
           </div>
         </div>
-        <div class="text-center order-md-2 border rounded">
+        <div class="text-center order-md-2 border border-secondary rounded">
           <img
             src="{% if user.photo_url %}{{ user.photo_url }}{% else %}{% static "console/images/account/default-dark.png" %}{% endif %}"
             style="height:200px;"
-            class="pe-1"
+            class="user-photo-url pe-1"
             id="user-photo-url"
           >
           <input type="file" id="userPhotoUrl" multiple accept="image/*" class="visually-hidden">
@@ -181,11 +181,11 @@
     <!-- TODO: User logs -->
     <div class="col-md-6 px-3">
       <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Other account options</h1>
-      <div class="list-group col-md-6 py-3">
+      <div class="list-group py-3">
         {% for item in settings.user_options %}   
           <a
             href="{{ item.url }}"
-            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark border-secondary"
             aria-current="true"
           >
             {{ item.title }}
@@ -195,8 +195,7 @@
       </div>
     </div>
 
-    <!-- TODO: Enter pin dialog -->
-    <!-- TODO: Add functionality to button and input -->
+    <!-- Enter pin dialog -->
     {% include "console/components/modals/pin_modal.html" with
       callback="cannlytics.settings.viewSignature"
     %}

@@ -3,7 +3,7 @@
 <!--
   User Menu | Cannlytics Console
   Created: 2/20/2021
-  Updated: 7/13/2021
+  Updated: 12/13/2021
 -->
 {% load static %}
 <li class="nav-item dropdown d-flex align-items-center">
@@ -24,7 +24,7 @@
       title="Settings"
       width="30"
       height="30"
-      class="rounded-circle"
+      class="user-photo-url rounded-circle"
       style="vertical-align:unset;{% if not user.photo_url %}background:linear-gradient(to bottom right, #ffc371, #ff5f6d);{% endif %}"
       data-bs-html="true"
       data-bs-toggle="tooltip"
@@ -41,7 +41,7 @@
     <div class="d-flex px-3 py-1">
 
       <!-- Profile menu image -->
-      <a href="{% if user.email %}/settings/user{% else %}/account/sign-in{% endif %}">
+      <a href="{% if user.email %}{% url 'section' screen='settings' section='user' %}{% else %}{% url 'auth' page='sign-in' %}{% endif %}">
         <img
           id="userPhotoMenu"
           src="{% if user.photo_url %}{{ user.photo_url }}{% else %}{% static "console/images/account/user.svg" %}{% endif %}"
@@ -49,14 +49,12 @@
           title="Account"
           width="75"
           height="75"
-          class="rounded-circle"
+          class="user-photo-url rounded-circle"
           style="vertical-align:unset;{% if not user.photo_url %}background:linear-gradient(to bottom right, #ffc371, #ff5f6d);{% endif %}"
         >
       </a>
 
       <!-- Profile name and email -->
-      <!-- Sign-up / sign-in for anonymous users -->
-      <!-- Optional: Sign-up in dialog -->
       <div class="d-flex flex-column justify-content-center ps-2">
         {% if user.email %}
           <a
@@ -75,13 +73,13 @@
           <div id="anonymous-signup" class="d-flex align-items-center ps-2">
             <a
               class="btn btn-sm bg-gradient-green text-white text-no-wrap me-2"
-              href="/account/sign-in"
+              href="{% url 'auth' page='sign-in' %}"
             >
               Sign in
             </a>
             <a
               class="btn btn-sm bg-gradient-orange text-white text-no-wrap"
-              href="/account/sign-up"
+              href="{% url 'auth' page='sign-up' %}"
             >
               Sign up
             </a>
@@ -97,17 +95,31 @@
       <li>
         <a
           class="dropdown-item"
-          href="/settings/user"
+          href="{% url 'section' screen='settings' section='user' %}"
         >
           Your account
         </a>
       </li>
-      <!-- Optional: Invite a user -->
-      {% comment %} <li><a class="dropdown-item" href="/settings/invite">Invite a user</a></li> {% endcomment %}
       <li>
         <a
           class="dropdown-item"
-          href="/help/feedback"
+          href="{% url 'screen' screen='help' %}"
+        >
+          Get help
+        </a>
+      </li>
+      <li>
+        <a
+          class="dropdown-item"
+          href="{% url 'section' screen='settings' section='invite' %}"
+        >
+          Invite a user
+        </a>
+      </li>
+      <li>
+        <a
+          class="dropdown-item"
+          href="{% url 'section' screen='help' section='feedback' %}"
         >
           Send feedback
         </a>
@@ -122,6 +134,6 @@
       </li>
     {% endif %}
 
-  </ul><!-- End of dropdown menu -->
+  </ul>
 </li>
 </html>

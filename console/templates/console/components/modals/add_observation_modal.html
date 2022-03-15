@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<!--
+  Add Observation Modal | Cannlytics Console
+  Created: 9/5/2021
+  Updated: 9/5/2021
+  Parameters:
+    callback
+    model_singular
+-->
+<div class="modal fade" id="observation-modal" tabindex="-1" aria-labelledby="pinModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body">
+
+        <!-- Close button -->
+        <button type="button" class="btn-close btn-sm light-only" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-sm btn-close-white dark-only" data-bs-dismiss="modal" aria-label="Close"></button>
+
+        <!-- Header -->
+        <h1 id="observation-modal-title" class="fs-5 lh-base text-dark mb-0 mt-3"></h1>
+        <h2 class="fs-6 lh-base text-secondary mb-3">
+          <small id="observation-modal-description"></small>
+        </h2>
+
+      </div>
+
+        <!-- TODO: Form of data model fields -->
+        <form class="add-observation-modal-form">
+          <div
+            id="add-observation-modal-fields"
+            class="col px-3"
+          ></div>
+        </form>
+
+      <!-- Options -->
+      <div class="modal-footer d-flex justify-content-end px-3 pb-3">
+        <button
+          type="button"
+          class="btn btn-sm-light btn-md-light me-2"
+          data-bs-dismiss="modal"
+        >
+          Cancel
+        </button>
+        <button
+          id="add-observation-modal-action-button"
+          type="button"
+          class="btn btn-sm btn-set-width bg-gradient-green text-white"
+        >
+          Add
+        </button>
+        <button
+          id="add-observation-modal-action-loading-button"
+          class="btn btn-sm btn-set-width bg-gradient-green text-white d-none"
+          type="button"
+          disabled
+        >
+          <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal JavaScript -->
+{% comment %} <script>
+
+    // Trigger callback from input on enter.
+    document.getElementById('pin_input').addEventListener('keydown', function(e) {
+      if (e.code === 'Enter') {
+        {{ callback }}(e);
+      }
+    });
+
+    // Clear the fields when the modal closes.
+    var modal = document.getElementById('pinModal');
+    modal.addEventListener('hidden.bs.modal', function(event) {
+      document.getElementById('pin_input').value = '';
+    });
+
+</script> {% endcomment %}
+</html>

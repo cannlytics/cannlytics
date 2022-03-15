@@ -1,71 +1,87 @@
 <!doctype html>
 <html>
-  <!-- Events Page -->
-  <!-- Created 2/3/2021 -->
-  {% extends "cannlytics_website/index.html" %}
-  {% block title %}Events | {{ general.title }}{% endblock %}
-  {% block material %}
+<!--
+  Events Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
 
-    <!-- Hero Banner -->
-    {% include "cannlytics_website/components/heros/hero_banner.html" with
-      title='Events'
-      description='Join a group of like-minded individuals who are interested in learning about how to apply data science to cannabis data.'
-      primary_action='Join now'
-      primary_action_url='https://www.meetup.com/cannabis-data-science/events/276156927/'
-      secondary_action='Archive'
-      secondary_action_url='/events/archive/'
-      only
-    %}
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 2/3/2021
+  Updated: 1/11/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% block title %}Events | Cannlytics{% endblock %}
+{% block material %}
 
-    <!-- Events List -->
-    <div class="album py-5 my-5">
-      <div class="container">
-        {% for item in events %}
-          <div
-            class="row featurette"
-            style="{% if forloop.counter|divisibleby:2 %}margin-top:10rem;margin-bottom:10rem;{% endif %}"
-          >
-            <div class="col-md-6 {% if forloop.counter|divisibleby:2 %}order-md-2{% endif %}">
-              <h2 class="featurette-heading display-4 serif large-line text-dark mt-0">
-                {{ item.name }}
-              </h2>
-              <p class="text-secondary fs-5 double-line my-4">
-                {{ item.description }}
-              </p>
-            </div>
-            <div class="col col-md-6 d-flex justify-content-center {% if forloop.counter|divisibleby:2 %}order-md-1 ps-0 pe-5 {% else %}ps-5{% endif %}">
-              <figure class="figure">
-                <a href="{{ item.url }}">
-                  <img
-                    src="{{ item.image }}"
-                    class="figure-img img-fluid rounded shadow"
-                    style="max-height:420px;max-width:100%;"
-                  >
-                </a>
-                <figcaption class="figure-caption">
-                  <div>When: {{ item.date }} {{ item.time }}</div>
-                  <div>Price: {{ item.price }}</div>
-                  <a
-                    class="btn btn-large bg-gradient-green text-white mb-5 mt-2"
-                    href="{{ item.url }}"
-                  >
-                    Register
-                  </a>
-                </figcaption>
-              </figure>
-            </div>
+  <!-- Hero Banner -->
+  {% include "website/components/heros/hero_banner.html" with
+    title='Events'
+    description='Join like-minded individuals who are interested in learning about how to apply data science to cannabis data.'
+    primary_action='Join now'
+    primary_action_url='https://www.meetup.com/cannabis-data-science/'
+    secondary_action='Browse the Archives'
+    secondary_action_url='/videos'
+    image_url='website/images/illustrations/multi-tone/transmit.svg'
+    only
+  %}
+
+  <!-- Events List -->
+  <div class="album mt-5 pt-5 mb-0">
+    <div class="container">
+      {% for item in events %}
+        <div
+          class="row featurette"
+          style="{% if forloop.counter|divisibleby:2 %}margin-top:10rem;margin-bottom:5rem;{% endif %}"
+        >
+          <div class="col-md-6 {% if forloop.counter|divisibleby:2 %}order-md-2{% endif %}">
+            <h3 class="serif text-dark mt-0">
+              {{ item.name }}
+            </h3>
+            <div class="text-secondary fs-6"><small class="serif">When: {{ item.date }} {{ item.time }}</small></div>
+            <div class="text-secondary fs-6"><small class="serif">Price: {{ item.price }}</small></div>
+            <p class="text-secondary fs-6 double-line my-3">
+              {{ item.description|safe }}
+            </p>
+            <a
+              class="btn btn-sm bg-gradient-green serif text-white mb-5"
+              href="{{ item.url }}"
+            >
+              Register &rarr;
+            </a>
           </div>
-        {% endfor %}
-      </div>
-    </div><!-- End of Events List -->
+          <div class="col col-md-6 d-flex justify-content-center {% if forloop.counter|divisibleby:2 %}order-md-1 ps-0 pe-5 {% else %}ps-5{% endif %}">
+            <figure class="figure">
+              <a href="{{ item.url }}">
+                <img
+                  src="{{ item.image }}"
+                  class="figure-img img-fluid rounded shadow"
+                  style="max-height:420px;max-width:100%;"
+                >
+              </a>
+            </figure>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
 
-  {% endblock %}
+  <!-- Archive -->
+  {% include "website/components/content/introduction.html" with
+    title="Past Events"
+    description='You can view all of the past meetups in the <a class="serif text-gradient" href="/videos">video archive</a>. Get a <a class="serif text-gradient" href="/subscriptions">premium account</a> amd get access to all special events too, including Saturday Morning Statistics.'
+    action="Browse Now"
+    image_id="tv-emoji"
+    image_ref="website/images/emojies/tv.svg"
+    link="/videos"
+  %}
 
-  <!-- Events JavaScript -->
-  {% block page_js %}
-    <script type="text/javascript">
-      cannlytics.website.logPromo();
-    </script>
-  {% endblock page_js %}
+{% endblock material %}
+
+<!-- JavaScript -->
+{% block page_js %}
+  <script type="text/javascript">
+    cannlytics.website.logPromo();
+  </script>
+{% endblock page_js %}
 
 </html>

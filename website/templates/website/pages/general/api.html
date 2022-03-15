@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<!--
+  API Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 12/27/2020
+  Updated: 1/1/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}API | Cannlytics{% endblock %}
+{% block material %}
+<div class="large-bottom-margin">
+
+  <!-- Hero -->
+  {% include "website/components/heros/hero_banner.html" with
+    primary_action='Learn now'
+    primary_action_url='https://docs.cannlytics.com/api/about'
+    secondary_action='Browse examples'
+    secondary_action_url='https://github.com/cannlytics/cannlytics-api'
+    image_url='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics-api-logo.png?alt=media&token=5c0ec64e-f755-45cf-991f-61573a2fcd5b'
+    image_size='200px'
+    alt_title='Cannlytics API'
+    only
+  %}
+
+  <!-- Markdown -->
+  <div class="container my-3">
+    <div class="col markdown">
+      {{ api|safe }}
+    </div>
+  </div>
+
+  <!-- Learn More -->
+  {% include "website/components/content/introduction.html" with
+    title="Read the API Documentation"
+    description='The Cannlytics API provides an interface to programatically receive samples, perform analyses, collect and review results, and publish certificates of analysis (CoAs).'
+    action="Learn More and Integrate Now"
+    image_id="satellite-emoji"
+    image_ref="website/images/emojies/satellite.svg"
+    link="https://docs.cannlytics.com/api/about"
+  %}
+  
+</div>
+
+<!-- Vines -->
+{% include "website/components/art/vines.html" %}
+
+{% endblock material %}
+
+</html>

@@ -1,47 +1,69 @@
 <!doctype html>
 <html>
+<!--
+  Producers Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
 
-  <!-- Producers Page -->
-  <!-- Created 1/16/2021 -->
-  {% extends "cannlytics_website/index.html" %}
+  Authors: Keegan Skeate <keegan@cannlytics.com>
+  Created: 1/16/2021
+  Updated: 1/2/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Producers | Cannlytics{% endblock %}
+{% block material %}
 
-  <!-- Title -->
-  {% block title %}Producers | {{ general.title }}{% endblock %}
+  <!-- Hero Banner -->
+  {% include "website/components/heros/hero_banner.html" with
+    title='Producers and Processors'
+    description="If you are a producer or processor needing data analytics, then capitalize on the robust and extensive Cannlytics toolkit for cannabis analytics."
+    primary_action='Join now'
+    primary_action_url='https://console.cannlytics.com/account/login'
+    secondary_action='Browse solutions'
+    secondary_action_url='https://github.com/cannlytics'
+    image_url='website/images/illustrations/multi-tone/instrument.svg'
+    only
+  %}
 
-  <!-- Main material -->
-  {% block material %}
-
-    <!-- Hero Banner -->
-    {% include "cannlytics_website/components/heros/hero_banner.html" with
-      title='Producers'
-      description="If you are a producer needing analysis from your lab results, then capitalize on Cannlytics' robust and extensive toolkit for cannabis analytics."
-      primary_action='Join now'
-      primary_action_url='https://console.cannlytics.com/account/login'
-      secondary_action='Browse solutions'
-      secondary_action_url='https://github.com/cannlytics'
-      only
-    %}
-
-    <!-- About producer analytics -->
-    <div class="container markdown my-5">
-
-      <h1 class="my-4">
-        About producer analytics
-      </h1>
-      <p>
-        Cannlytics is proud to offer our suite of industry-leading cannabis analytics tools to all
-        cannabis producers and processors. You can utilize any data set of lab results to generate
-        rich analytics. Use the Cannlytics Console or the Cannlytics API to securely analyze your data.
-      </p>
-      <p class="text-start">
-        <a href="https://console.cannlytics.com/account/sign-up">
-          Utilize the app today &rarr;
+  <!-- Introduction -->
+  <div class="container my-3">
+    <div class="markdown py-5" style="max-width:560px;">
+      <svg class="pt-3 pe-1" style="float:left;width:125px;height:125px;">
+        <use href="{% static "website/images/emojies/spade.svg" %}#spade-emoji"></use>
+      </svg>
+      {{ producers|safe }}
+      <p class="text-start mt-3">
+        <a
+          class="btn btn-sm bg-gradient-green text-white"
+          href="https://console.cannlytics.com/account/sign-up"
+        >
+          <small>Utilize the app today</small> &rarr;
         </a>
       </p>
     </div>
+  </div>
 
-    <!-- Vines -->
-    {% include "cannlytics_website/components/art/vines.html" %}
+  <!-- Introduction -->
+  <div class="container my-3">
+    <div class="markdown py-5" style="max-width:560px;">
+      <svg class="pt-3 pe-1" style="float:left;width:125px;height:125px;">
+        <use href="{% static "website/images/emojies/oil.svg" %}#oil-emoji"></use>
+      </svg>
+      {{ processors|safe }}
+      <p class="text-start mt-3">
+        <a
+          class="btn btn-sm bg-gradient-orange text-white"
+          href="https://console.cannlytics.com/account/sign-up"
+        >
+          <small>Utilize the app today</small> &rarr;
+        </a>
+      </p>
+    </div>
+  </div>
 
-  {% endblock %}
+  <!-- Vines -->
+  {% include "website/components/art/vines.html" %}
+
+{% endblock material %}
 </html>

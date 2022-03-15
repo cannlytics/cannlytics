@@ -1,7 +1,7 @@
 """
 Result Calculation | Cannlytics
 
-Author: Keegan Skeate <keegan@cannlytics.com>  
+Authors: Keegan Skeate <keegan@cannlytics.com>  
 Created: 6/23/2021  
 Updated: 7/19/2021  
 License: MIT License <https://opensource.org/licenses/MIT>  
@@ -9,21 +9,14 @@ License: MIT License <https://opensource.org/licenses/MIT>
 Use analyte limits and formulas and instrument measurements to calculate
 final results for analyses.
 """
-try:
+# Standard imports.
+from datetime import datetime
+from email.mime.multipart import MIMEMultipart
+from smtplib import SMTP
 
-    # Standard imports
-    from datetime import datetime
-
-    # External imports
-    from smtplib import SMTP
-    from email.mime.multipart import MIMEMultipart
-
-    # Internal imports
-    from cannlytics.firebase import get_collection, update_documents
-    from cannlytics.traceability.metrc.utils import encode_pdf
-
-except:
-    pass # FIXME: Docs can't import.
+# Internal imports.
+from ..firebase import get_collection, update_documents
+from ..metrc.utils import encode_pdf
 
 
 def calculate_results(sample_data, analysis, mass, dilution_factor=10, correction_factor=10000):
@@ -48,6 +41,12 @@ def calculate_results(sample_data, analysis, mass, dilution_factor=10, correctio
         except ValueError:
             continue
     return sample_data
+
+
+# TODO: Implement.
+def convert_results_units():
+    """Convert results between units."""
+    raise NotImplementedError
 
 
 def post_results():

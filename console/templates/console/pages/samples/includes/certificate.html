@@ -5,6 +5,8 @@
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 8/2/2021
   Updated: 8/9/2021
+  Reading:
+    - https://medium.com/adobetech/improving-the-reader-experience-with-adobe-embed-api-5079498411d9
 -->
 {% load static get_env %}
 {% block console_css %}
@@ -15,8 +17,9 @@
 {% endblock console_css %}
 
   <!-- Certificate placeholder (if CoA is not yet created). -->
+  <!-- FIXME: onclick="setCallback('generateCoA')" -->
   <div id="certificate-placeholder" class="row my-5 mx-auto px-2 px-md-5">
-    <img src="{% static 'console/images/illustrations/outline/lab_tablet.svg' %}"
+    <img src="{% static 'console/images/illustrations/science/lab_tablet.svg' %}"
       style="width:200px;height:200px;"
       class="mx-auto"
     >
@@ -29,7 +32,7 @@
         class="btn btn-sm bg-gradient-green text-white my-3"
         data-bs-toggle="modal"
         data-bs-target="#pinModal"
-        onclick="setCallback('generateCoA')"
+        onclick="showPDF();"
       >
         Create CoA
       </button>
@@ -114,11 +117,18 @@
         Released
       </div>
     </div>
-    <div
+    {% comment %} <div
       id="certifiacte-of-analysis"
       style="height: 688px; width: 532px;"
       class="mx-auto mb-5"
-    ></div>
+    ></div> {% endcomment %}
+    <iframe
+      src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Flims%2Ftemplates%2Fexample_coa_template.pdf?alt=media&token=f1e397c7-18cb-4b68-b041-eda4e3ccac35"
+      height="688px"
+      width="532px"
+      class="mx-auto mb-5"
+    ></iframe>
+
   
   </div>
 
@@ -147,6 +157,13 @@
 {% block console_js %}
   <script type="text/javascript">
 
+    // FIXME: This code is illogical.
+    // FIXME: Retrieve the ADOBE_CLIENT_ID from Firestore
+    function showPDF() {
+      cannlytics.ui.toggleElementClass('certificate-placeholder', 'd-none');
+      cannlytics.ui.toggleElementClass('certificate-container', 'd-none');
+    }
+
   var currentCallback = '';
 
 
@@ -171,7 +188,7 @@
       // TODO: Get URL and file name from server on page load.
       var url = 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Flims%2Ftemplates%2Fexample_coa_template.pdf?alt=media&token=f1e397c7-18cb-4b68-b041-eda4e3ccac35';
       var fileName = 'test-certificate.pdf';
-      var adobeDCView = new AdobeDC.View({clientId: "{{ 'ADOBE_CLIENT_ID'|get_env }}", divId: 'certifiacte-of-analysis'});
+      var adobeDCView = new AdobeDC.View({clientId: "redacted", divId: 'certifiacte-of-analysis'});
       var fileInfo = {
         content:{ location:  { url } },
         metaData:{ fileName }

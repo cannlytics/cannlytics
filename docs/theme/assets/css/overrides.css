@@ -164,12 +164,12 @@ body[data-md-color-scheme="slate"] .tx-container {
 }
 
 /* Announcement actions */
-.md-announce .md-typeset a {
+/* .md-banner__inner.md-grid.md-typeset a {
   color: #ffa600 !important;
 }
-.md-announce .md-typeset a:hover {
+.md-banner .md-typeset a:hover {
   color: #ff6e42 !important;
-}
+} */
 
 /*--------------------------------------------------------------------------
   Header

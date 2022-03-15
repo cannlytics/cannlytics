@@ -11,24 +11,27 @@
 {% load icon %}
 
 {% if unit and unit in user.owner %}
+{% block console_css %}
+
   <!-- Load PayPal SDK if it's the owner of the organization -->
-  {% load get_env %}
-  {% block console_css %}
-    <script src="https://www.paypal.com/sdk/js?client-id={{ 'PAYPAL_CLIENT_ID'|get_env }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
-  {% endblock console_css %}
+  <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+
+{% endblock console_css %}
 {% endif %}
 
-<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
 
   <!-- Header -->
-  {% include "console/components/links/breadcrumbs.html" with
-    base_page='Settings'
-    base_page_url='/settings'
-    nested_page="Organization settings"
-    nested_page_url="/settings/organizations"
-    current_page=unit
-  %}
-  <input id="organization_id_input" type="text" class="visually-hidden" value="{{ unit }}">
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+    {% include "console/components/links/breadcrumbs.html" with
+      base_page='Settings'
+      base_page_url='/settings'
+      nested_page="Organizations"
+      nested_page_url="/settings/organizations"
+      current_page=unit
+    %}
+    <input id="organization_id_input" type="text" class="visually-hidden" value="{{ unit }}">
+  </div>
 
   <!-- Organization form -->  
   {% include "console/pages/settings/organizations/organization_form.html" with
@@ -42,9 +45,9 @@
 
     <!-- Data Model Management -->
     <!-- FIXME: Touch up layout and functionality -->
-    {% include "console/pages/settings/organizations/data_models.html" with
+    {% comment %} {% include "console/pages/settings/organizations/data_models.html" with
       data_models=data_models
-    %}
+    %} {% endcomment %}
 
     <!-- Traceability Managemvent -->
     <div class="col-md-6 my-5 px-3">
@@ -215,41 +218,9 @@
   <script>
 
     // Get the subscription plan if it's the owner.
-    cannlytics.settings.getSubscription(function(response) {
-      document.getElementById('input_tier').value = response['name'];
+    cannlytics.payments.getOrganizationSubscription(function(response) {
+      document.getElementById('input_tier').value = response.id;
     });
-
-    function changeSubscription() {
-      /*
-       * Change subscription, getting subscription plan ID and rendering a PayPal button.
-       */
-      cannlytics.dashboard.saveSupport().then(function(response) {
-        document.getElementById('paypal-button-container').innerHTML = '';
-        var planID = response['plan_id'];
-        if (planID === 'free') {
-          cannlytics.dashboard.subscribe({ 'plan_id': planID }, false);
-          return;
-        }
-        paypal.Buttons({
-          style: {
-              shape: 'rect',
-              color: 'silver',
-              layout: 'horizontal',
-              label: 'subscribe',
-          },
-          createSubscription: function(data, actions) {
-            return actions.subscription.create({ 'plan_id': planID });
-          },
-          onApprove: function(data, actions) {
-            var subscription = { ...data, ...response };
-            cannlytics.dashboard.subscribe(subscription);
-          },
-          onError: function (error) {
-            alert('Uknown error subscribing. Please contact contact@cannlytics.com. Thank you for your patience and we will deliver you support.');
-          },
-        }).render('#paypal-button-container');
-      });
-    }
 
   </script>
   {% endif %}

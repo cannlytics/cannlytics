@@ -2,7 +2,6 @@
 <html>
 <!--
   Certificates Page | Cannlytics Console
-  Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 5/5/2021
   Updated: 8/18/2021
   TODO:
@@ -23,6 +22,9 @@
 -->
 {% extends "./samples.html" %}
 {% block console_css %}
+
+  <!-- AG-Grid CSS and JavaScript -->
+  {% include "console/components/tables/ag_grid_scripts.html" %}
 
   <!-- Bootstrap Datepicker -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />

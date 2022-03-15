@@ -1,13 +1,14 @@
 """
 Transfer Management | Cannlytics
 
-Author: Keegan Skeate <keegan@cannlytics.com>  
+Authors: Keegan Skeate <keegan@cannlytics.com>  
 Created: 6/23/2021  
 Updated: 6/23/2021  
 License: MIT License <https://opensource.org/licenses/MIT>  
 
 Tools to help manage transfers of laboratory samples.
 """
+# TODO: Does this belong in crm?
 
 def create_transfer():
     """Create a transfer of samples to a lab for analysis. The sending
@@ -21,7 +22,7 @@ def create_transfer():
     return NotImplementedError
 
 
-def receive_transfer(transfer_id):
+def receive_transfer(transfer_id: str):
     """
     Receive a transfer of laboratory samples.
     """

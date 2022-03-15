@@ -1,48 +1,55 @@
 <!doctype html>
 <html>
-  <!-- Unsubscribe Page -->
-  <!-- Created 3/19/2021 -->
-  {% extends "cannlytics_website/index.html" %}
-  {% load static %}
-  {% block title %}Unsubscribe | Cannlytics{% endblock %}
-  {% block material %}
+<!--
+  Unsubscribe Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
 
-    <!-- Hero Banner -->
-    {% comment %} {% include "cannlytics_website/components/heros/hero_banner.html" with
-      title=event.name
-      description=event.description
-      image_url=event.icon
-      only
-    %} {% endcomment %}
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 3/19/2021
+  Updated: 11/25/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Unsubscribe | Cannlytics{% endblock %}
+{% block material %}
 
-    <!-- Body -->
-    <main role="main" class="container">
-      <div class="col-md-12 pb-5 mb-5">
+  <!-- Hero Banner -->
+  {% comment %} {% include "website/components/heros/hero_banner.html" with
+    title=event.name
+    description=event.description
+    image_url=event.icon
+    only
+  %} {% endcomment %}
 
-        <!-- Header -->
-        <div class="d-flex align-items-center mb-4 pb-2">
-          <h3 class="serif mb-0">
-            Unsubscribe
-          </h3>
-        </div>
+  <!-- Body -->
+  <main role="main" class="container">
+    <div class="col-md-12 pb-5 mb-5">
 
-        <!-- Tab content -->
-        <div class="tab-content" id="tabsContent">
-
-          <p>TODO: Unsubscribe notification</p>
-
-        </div><!-- End of tab content -->
-
+      <!-- Header -->
+      <div class="d-flex align-items-center mb-4 pb-2">
+        <h3 class="serif mb-0">
+          Unsubscribe
+        </h3>
       </div>
-    </main><!-- End of body -->
 
-  {% endblock %}
+      <!-- Tab content -->
+      <div class="tab-content" id="tabsContent">
 
-  <!-- Unsubscribe JavaScript -->
-  {% block page_js %}
-    <script>
-      // TODO: Update email as unsubscribed, manually or with id in URL.
-    </script>
-  {% endblock %}
+        <p>TODO: Unsubscribe notification</p>
+
+      </div><!-- End of tab content -->
+
+    </div>
+  </main><!-- End of body -->
+
+{% endblock material %}
+
+<!-- Unsubscribe JavaScript -->
+{% block page_js %}
+  <script>
+    // TODO: Update email as unsubscribed, manually or with id in URL.
+  </script>
+{% endblock page_js %}
 
 </html>

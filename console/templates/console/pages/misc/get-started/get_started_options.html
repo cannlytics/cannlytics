@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<!--
+  Get Started Options
+  Created: 12/15/2021
+  Updated: 12/16/2021
+-->
+{% load static icon %}
+<div class="col mb-5" style="max-width:540px;">
+  <div class="list-group py-3">
+    <a
+      href="{% url 'section' screen='get-started' section='profile' %}"
+      class="border-secondary list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+      aria-current="true"
+    >
+      {% if user.account_created %}
+        <svg class="pe-3 pb-3" style="width:120px;height:120px;">
+          <use href="{% static "console/images/icons/emojies/green-check.svg" %}#green-check-emoji"></use>
+        </svg>
+      {% else %}
+        <svg class="pe-3 pb-3" style="width:120px;height:120px;">
+          <use href="{% static "console/images/icons/emojies/astronaut.svg" %}#astronaut-emoji"></use>
+        </svg>
+      {% endif %}
+      <div class="w-75">
+        <h5 class="fw-bold text-dark">1. Create your profile.</h5>
+        <p class="fs-6">
+          Initialize your account.
+          Get setup to be as productive as possible.
+        </p>
+      </div>
+      {% icon "chevron-right" height="18px" width="18px" %}
+    </a>
+    <a
+      href="{% url 'section' screen='get-started' section='organization' %}"
+      class="border-secondary list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+      aria-current="true"
+    >
+      {% if organizations %}
+        <svg class="pe-3 pb-3" style="width:120px;height:120px;">
+          <use href="{% static "console/images/icons/emojies/green-check.svg" %}#green-check-emoji"></use>
+        </svg>
+      {% else %}
+        <svg class="pe-3 pb-3" style="width:120px;height:120px;">
+          <use href="{% static "console/images/icons/emojies/castle.svg" %}#castle-emoji"></use>
+        </svg>
+      {% endif %}
+      <div class="w-75">
+        <h5 class="fw-bold text-dark">2. Create or join your organization.</h5>
+        <p class="fs-6">
+          Initialize your organization.
+        </p>
+      </div>
+      {% icon "chevron-right" height="18px" width="18px" %}
+    </a>
+    <a
+      href="{% url 'section' screen='get-started' section='support' %}"
+      class="border-secondary list-group-item list-group-item-action d-flex justify-content-between align-items-center text-dark"
+      aria-current="true"
+    >
+      {% if user.support %}
+        <svg class="pe-3 pb-3" style="width:120px;height:120px;">
+          <use href="{% static "console/images/icons/emojies/green-check.svg" %}#green-check-emoji"></use>
+        </svg>
+      {% else %}
+        <svg class="pe-3 pb-3" style="width:120px;height:120px;">
+          <use href="{% static "console/images/icons/emojies/sparkler.svg" %}#sparkler-emoji"></use>
+        </svg>
+      {% endif %}
+      <div class="w-75">
+        <h5 class="fw-bold text-dark">3. Choose your level of support.</h5>
+        <p class="fs-6">
+          Get supported to the exact extent you require.
+        </p>
+      </div>
+      {% icon "chevron-right" height="18px" width="18px" %}
+    </a>
+  </div>
+</div>
+</html>

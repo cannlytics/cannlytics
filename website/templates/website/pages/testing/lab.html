@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<!--
+  Lab Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 12/26/2020
+  Updated: 1/9/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static dict_key %}
+{% block title%}{{ lab.name }} | Cannlytics{% endblock %}
+{% block material %}
+
+  <!-- Hero Banner -->
+  {% include "website/components/heros/hero_banner.html" with
+    title=lab.name
+    description=lab.description
+    image_url=lab.favicon
+    only
+  %}
+
+  <!-- TODO: Number of views -->
+
+  <!-- Body -->
+  <main role="main" class="container">
+    <div class="col-md-12 pb-5 mb-5">
+
+      <!-- Tabs -->
+      <ul id="labTabs" class="nav nav-tabs" role="tablist">
+        {% for item in tabs %}
+          <li class="nav-item" role="presentation">
+            <a
+              id="{{ item.section }}-tab"
+              data-bs-toggle="tab"
+              class="nav-link serif fs-6 {% if item.active %}active{% endif %}"
+              aria-selected="{% if item.active %}true{% else %}false{% endif %}"
+              aria-controls="{{ item.section }}"
+              href="#{{ item.section }}"
+              role="tab"
+            >
+              <small class="serif">{{ item.name }}</small>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <!-- Tab content -->
+      <div id="labTabsContent" class="tab-content">
+
+        <!-- Details -->
+        <div
+          id="details" 
+          class="tab-pane fade show active"
+          role="tabpanel"
+          aria-labelledby="details-tab"
+        >
+          {% include "website/pages/testing/components/lab_details.html" with
+            lab=lab
+            fields=fields
+            user=user
+            only
+          %}
+        </div>
+
+        <!-- Analyses -->
+        <div
+          id="analyses"
+          class="tab-pane fade"
+          role="tabpanel"
+          aria-labelledby="analyses-tab"
+        >
+          {% include "website/pages/testing/components/lab_analyses.html" with
+            lab=lab
+            user=user
+            only
+          %}
+        </div>
+
+        <!-- Change log -->
+        {% comment %} <div
+          id="logs"
+          class="tab-pane fade"
+          role="tabpanel"
+          aria-labelledby="logs-tab"
+        >
+          {% include "./logs.html" with lab=lab only%}
+        </div> {% endcomment %}
+
+      </div><!-- End of tab content -->
+
+    </div>
+  </main><!-- End of body -->
+
+{% endblock material %}
+
+<!-- Lab JavaScript -->
+{% block page_js %}
+  <script>
+    // cannlytics.testing.logView("{{ lab.id }}", 'page_views'); // Passing org ID from Django.
+  </script>
+{% endblock page_js %}
+
+</html>

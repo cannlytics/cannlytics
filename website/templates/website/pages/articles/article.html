@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<!--
+  Article Page | Cannlytics Website
+  Copyright (c) 2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/14/2022
+  Updated: 1/14/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% load title_case %}
+<section class="container">
+
+  <!-- Title -->
+  <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb bg-transparent p-0 mb-0">
+      <li class="breadcrumb-item fs-6 lh-sm">
+        <a class="text-dark action" href="{% url 'page' page='articles' %}">
+          Articles
+        </a>
+      </li>
+      <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
+        {{ article.title }}
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Premium Subscription Logic -->
+  {% if article.premium and not premium_subscription %} 
+
+    <!-- TODO: Show a preview and prompt the user to subscribe. -->
+    <div class="w-100 border rounded mt-3" style="height:420px;overflow:hidden;">
+      <img src="{{ video_data.cover_image_url }}" height="100%" width="100%">
+      <div
+        class="d-flex align-items-center justify-content-center opaque-background rounded w-100 h-100"
+        style="transform:translateY(-420px)"
+      >
+        {% if user_id %}
+          <!-- Prompt to subscribe. -->
+          <a
+            class="btn btn-sm bg-gradient-green text-white"
+            type="button"
+            style="opacity:1.0;visibility:hidden;"
+            data-bs-toggle="modal"
+            data-bs-target="#subscribeDialog"
+          >
+            <small class="serif">Subscribe now to view</small>
+          </a>
+        {% else %}
+          <!-- Prompt to sign-in. -->
+          <a
+            class="btn btn-sm bg-gradient-green text-white"
+            type="button"
+            style="opacity:1.0;visibility:hidden;"
+            data-bs-target="#sign-in-dialog"
+            data-bs-toggle="modal"
+          >
+            <small class="serif">Sign in to view</small>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+  {% else %}
+
+    <!-- TODO: 
+    
+      - View PDF button
+      - Share button: Email / LinkedIn / Copy Link
+      - Cite button: Export BibTex citation, ACM reference (open in a modal)
+      - Links to author pages.
+      - Submit a paper button
+      - Keyword chips -> Link to articles/keyword/<keyword> that show
+        a list of all articles with that keyword.
+
+      Sidebar including:
+        - Metrics:
+          # Reads
+          # Downloads
+      
+      Article information:
+        - Published: {{ article.published_at_formatted }}
+
+    -->
+
+    <!-- Article Body -->
+    <div class="container my-3">
+      <div class="col markdown">
+        <!-- TODO: Show the abstract -->
+        {{ article.abstract|safe }}
+      </div>
+    </div>
+
+    <!-- About the Author(s)
+      TODO: Picture of the author(s) [Ask Paul for his picture],
+      name, decription, and contact info.
+    -->
+
+  {% endif %}
+
+</section>
+
+  {% comment %} <!-- TODO: More articles -->
+  <section class="container mt-5">
+    <h2 class="mb-3">More videos</h2>
+    {% include "website/pages/videos/video_grid.html" with video_list=more_videos %}
+    <h2 class="mt-3 mb-3">Recent videos</h2>
+    {% include "website/pages/videos/video_grid.html" with video_list=recent_videos %}
+    <a
+      class="btn btn-sm btn-sm-light btn-md-light"
+      href="{% url 'videos' %}"
+      type="button"
+    >
+      <small class="serif">View more videos</small> &raquo;
+    </a>
+  </section> {% endcomment %}
+
+</html>

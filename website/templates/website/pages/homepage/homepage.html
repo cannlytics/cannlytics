@@ -1,16 +1,25 @@
-<!-- Home Page -->
-<!-- Created 1/5/2020 -->
-{% extends "cannlytics_website/index.html" %}
+<!doctype html>
+<html>
+<!--
+  Home Page | Cannlytics
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/5/2020
+  Updated: 12/24/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
 {% load static %}
-{% block title %}Welcome | {{ general.title }}{% endblock %}
+{% block title %}Welcome | Cannlytics{% endblock %}
 {% block material %}
   <div class="homepage pb-5 overflow-hidden">
 
     <!-- Hero -->
-    {% include "./hero.html" with hero=homepage.hero only %}
+    {% include "website/pages/homepage/components/hero.html" with hero=homepage.hero only %}
 
     <!-- Features -->
-    {% include "./features.html" with features=homepage.features only %}
+    {% include "website/pages/homepage/components/features.html" with features=homepage.features only %}
 
     <!-- Wave -->
     <div class="wave small upside-down" >
@@ -20,18 +29,35 @@
     </div>
 
     <!-- Featurettes -->
-    {% include "./featurettes.html" with featurettes=homepage.featurettes only %}
+    {% comment %} {% include "./featurettes.html" with featurettes=homepage.featurettes only %} {% endcomment %}
 
     <!-- Demo -->
-    {% include "./demo.html" %}
+    {% include "website/pages/homepage/components/demo.html" %}
+
+    <!-- Partners -->
+    {% comment %} {% include "website/components/banners/partners_banner.html" %} {% endcomment %}
+
+    <!-- List of Metrc Validations -->
+    {% include "website/pages/homepage/components/metrc_state_list.html" with verifications=verifications only %}
 
     <!-- Call to Action -->
-    {% include "./call_to_action.html" with general=general %}
+    {% include "website/pages/homepage/components/call_to_action.html" with app=app only %}
+
+    <!-- Video Banner -->
+    {% include "website/components/banners/video_banner.html" %}
+
+    <!-- Optional: List Cannlytics products and links to each GitHub repository | card style
+      - Cannlytics AI
+      - Cannlytics API
+      - Cannlytics App
+      - Cannlytics Console
+      - Cannlytics Engine
+    -->
 
   </div>
 
   <!-- Vines -->
-  {% include "cannlytics_website/components/art/vines.html" %}
+  {% include "website/components/art/vines.html" %}
 
 {% endblock %}
 
@@ -39,9 +65,10 @@
 {% block page_js %}
   <script>
 
-    function CopyToClipboard(containerid) {
-      /*
+    function CopyToClipboard(id) {
+      /**
        * Copy a block of code to the clipboard.
+       * @param {String} id An element ID with text contents.
        */
       if (window.getSelection) {
         if (window.getSelection().empty) { // Chrome
@@ -54,77 +81,27 @@
       }
       if (document.selection) {
         var range = document.body.createTextRange();
-        range.moveToElementText(document.getElementById(containerid));
+        range.moveToElementText(document.getElementById(id));
         range.select().createTextRange();
         document.execCommand('copy');
       } else if (window.getSelection) {
         var range = document.createRange();
-        range.selectNode(document.getElementById(containerid));
+        range.selectNode(document.getElementById(id));
         window.getSelection().addRange(range);
         document.execCommand('copy');
       }
     }
 
-    $('.copy-btn').on('click', function(event){
+    // Optional: Re-code without jQuery.
+    $('.copy-btn').on('click', function(event) {
       event.stopPropagation();
       event.stopImmediatePropagation();
-      console.log(event.currentTarget);
-      var par = $(`#${event.currentTarget.id}`).siblings()[0];
-      var code = $(`#${par.id}`).find('.code-block')[0];
+      var block = $(`#${event.currentTarget.id}`).siblings()[0];
+      var code = $(`#${block.id}`).find('.code-block')[0];
       CopyToClipboard(code.id);
     });
 
   </script>
 {% endblock %}
 
-
-<!-- JavaScript SCRAP -->
-
-{% comment %} <script>
-  (function () {
-    function SelectText(element) {
-      var range;
-      var selection;
-      if (document.body.createTextRange) {
-        range = document.body.createTextRange();
-        range.moveToElementText(element);
-        range.select();
-        copy2clipboard(range.text, element.innerHTML);
-        document.getSelection().removeAllRanges();
-      } else if (window.getSelection) {
-        selection = window.getSelection();
-        range = document.createRange();
-        range.selectNodeContents(element);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        copy2clipboard(selection.toString(), element.innerHTML);
-        selection.removeAllRanges();
-      }
-    };
-    function copy2clipboard(text, html) {
-      function listener(e) {
-        e.clipboardData.setData('text/plain', text);
-        e.clipboardData.setData('text/html', html);
-        e.preventDefault();
-      }
-      document.addEventListener('copy', listener);
-      document.execCommand('copy');
-      document.removeEventListener('copy', listener);
-    };
-    $('#notebook-container').on('mouseenter', '.codehilite', function () {
-      if ($(this).find('i:last').length) {
-        $(this).find('i:last').show();
-      } else {
-        $(this).css({
-          'position': 'relative'
-        }).append($('<i style=\"position:absolute; top:7px; left: 7px;\" class=\"fa-copy fa\">Copy</i>').on('click', function () {
-          SelectText($(this).parent().find('.codehilite') [0]);
-          $(this).slideUp();
-        }));
-      }
-    });
-    $('#notebook-container').on('mouseleave', '.codehilite', function () {
-      $(this).find('i:last').hide();
-    });
-  }) ();
-</script> {% endcomment %}
+</html>

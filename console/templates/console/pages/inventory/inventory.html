@@ -2,7 +2,6 @@
 <html>
 <!--
   Inventory Page | Cannlytics Console
-  Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 12/18/2020
   Updated: 7/6/2021
   TODO:
@@ -19,11 +18,17 @@
 {% extends "console/console.html" %}
 {% load icon %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Inventory | Cannlytics {% endblock title %}
+{% block console_css %}
+
+  <!-- AG-Grid CSS and JavaScript -->
+  {% include "console/components/tables/ag_grid_scripts.html" %}
+
+{% endblock console_css %}
 {% block console_body %}
 {% if section and section not in 'logs,files,certifiates' %}
 
   <!-- Detail page -->
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
     {% include "console/pages/inventory/item.html" with
       id=section
       data_model=data_model
@@ -33,11 +38,11 @@
 {% else %}
 
   <!-- List -->
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-      <h1 class="fs-5 mb-0 lh-base">Inventory</h1>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+      <h4 class="breadcrumb-item text-dark lh-sm fs-6 mb-0">Inventory</h4>
     </div>
 
     <!-- Body -->

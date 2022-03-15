@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<!--
+  Lab Analyses Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/24/2021
+  Updated: 1/9/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+
+  <!-- Title and Options -->
+  <div class="d-flex justify-content-between mt-3">
+    <div class="d-flex align-items-center mb-4 pb-2">
+      <h4 class="fw-bold mb-0">
+        <a
+          class="serif text-dark"
+          href="{% url 'section' page='testing' section='analyses' %}"
+        >
+          Analyses
+        </a>
+      </h4>
+      <h4 class="fw-bold serif text-dark mb-0 text-secondary mx-2">/</h4>
+      <h4 class="fw-bold serif text-dark mb-0">
+        {% if lab.name %}{{ lab.name }}{% else %}New{% endif %}
+      </h4>
+      {% if lab.status == "Suspended" %}
+        <span class="badge rounded-pill bg-danger ms-2">{{ lab.status }}</span>
+      {% elif lab.status == "Active" %}
+        <span class="badge rounded-pill bg-success ms-2">{{ lab.status }}</span>
+      {% else %}
+        <span class="badge rounded-pill bg-secondary ms-2">{{ lab.status }}</span>
+      {% endif %}
+    </div>
+    <!-- Optional: Add download lab data button -->
+    <!-- <button
+      id="download-button"
+      class="btn btn-set-width btn-sm-light btn-md-light serif me-2"
+      onclick="cannlytics.testing.downloadLabData();"
+      type="button"
+    >
+      Download
+    </button> -->
+    <div>
+      {% comment %} <button
+        id="cancel-button"
+        class="btn btn-set-width btn-sm-light btn-md-light serif visually-hidden me-2"
+        onclick="cannlytics.testing.toggleEditLab(false);"
+        type="button"
+      >
+        Cancel
+      </button>
+      <button
+        id="save-button"
+        class="btn btn-set-width btn-sm bg-gradient-green serif text-white visually-hidden me-2"
+        type="submit"
+      >
+        Save
+      </button>
+       {% endcomment %}
+       <a
+        id="edit-button"
+        class="btn btn-sm bg-gradient-green text-white serif"
+        href="{% url 'page' page='contact' %}?topic=analyses"
+      >
+        Suggest Analyses
+      </a>
+    </div>
+  </div><!-- End of options -->
+
+  <!-- Under Construction -->
+  {% include "website/components/notifications/under_construction.html" %}
+
+  <!-- TODO: Table of analyses -->
+
+
+<!-- Analyses JavaScript -->
+{% comment %} <script>
+  // FIXME: Safely pass org ID from Django.
+  // cannlytics.testing.initializeLabAnalyses("{{ lab.id }}");
+</script> {% endcomment %}
+
+</html>

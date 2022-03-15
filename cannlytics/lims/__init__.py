@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
 """
-LIMS Module | Cannlytics
-Author: Keegan Skeate <keegan@cannlytics.com>
-Created: 2/6/2021
-Updated: 6/17/2021
+Cannlytics LIMS Initialization | Cannlytics
+Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
+
+Authors: Keegan Skeate <keegan@cannlytics.com>
+Created: 11/6/2021
+Updated: 11/6/2021
 """
 
-
-__version__ = '0.0.7'
-__author__ = 'Keegan Skeate'
-
-
+# TODO: Decide which packages to make readily available.
 # from .calculations import calculate_results
 # from .certificates import (
 #     create_coa,

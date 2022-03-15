@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<!--
+  Metrc State List | Cannlytics Website
+  Created: 11/15/2021
+  Updated: 11/22/2021
+  Args:
+    verifications (list): A list of state verification data (dict).
+-->
+{% load static %}
+
+<!-- Wave -->
+<div class="wave small" >
+  <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+    <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
+  </svg>
+</div>
+
+<!-- List -->
+<div class="ground">
+  <section class="container d-flex flex-column pt-5">
+
+    <!-- Title -->
+    <div class="w-100">
+      <h2 id="metrc" class="serif text-dark mb-3">
+        <svg class="pe-1" style="float:left;width:125px;height:125px;">
+          <use href="{% static "website/images/emojies/green-shield.svg" %}#green-shield-emoji"></use>
+        </svg>
+        Cannlytics Integrates with Metrc!
+      </h2>
+      <p class="fs-6 double-line mb-3" style="max-width:720px;">
+        Cannlytics is a
+        <a
+          href="https://www.metrc.com/validated-integrators/#cannlytics"
+          class="serif text-dark fw-bold background-hover"
+        >
+          validated Metrc integrator
+        </a>
+        in the following states.
+        If you need assistance, a fully-managed solution, or help automating your
+        interactions with Metrc, then you can
+        <a href="/support" class="serif text-dark background-hover fw-bold">
+          sign up for support &rarr;
+        </a>
+      </p>
+    </div>
+
+    <!-- State flags -->
+    <!-- Optional: Replace external state URLs with internal pages? -->
+    <ul class="three-columns mt-3" style="max-width:720px;">
+      {% for item in verifications %}
+        <li class="mb-2" style="display:flex;">
+          <table>
+            <tr class="d-flex align-items-center justify-content-center">
+              <td class="pb-0 pe-2">
+                {% with 'website/images/emojies/state-flags/'|add:item.state_name|lower|add:'-flag.png' as image_url %}
+                  <img
+                    src="{% static image_url %}"
+                    style="height:auto;max-height:45px;max-width:45px;-webkit-column-break-inside: avoid;"
+                  >
+                {% endwith %}
+              </td>
+              <td class="pb-0">
+                <h5 class="my-0 fs-6 serif text-dark">
+                  {{ item.state_name }}
+                </h5>
+              </td>
+            </tr>
+          </table>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Python package mention -->
+    <p class="fs-6 double-line mb-3" style="max-width:720px;">
+      You can also utilize the Metrc interface in the
+      <a
+        class="serif text-dark background-hover fw-bold"
+        href="https://pypi.org/project/cannlytics/"
+      >
+        Cannlytics Python package
+        <svg class="" style="width:24px;height:24px;">
+          <use href="{% static "website/images/emojies/snake.svg" %}#snake-emoji"></use>
+        </svg>
+      </a>
+    </p>
+
+  </section>
+</div>
+
+<!-- Wave -->
+<div class="wave small upside-down" >
+  <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+    <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
+  </svg>
+</div>
+
+</html>

@@ -1,9 +1,17 @@
+"""
+Get Environment Variable Filter | Cannlytics Console
+Copyright (c) 2021-2022 Cannlytics
+
+Authors: Keegan Skeate <keegan@cannlytics.com>
+Created: 12/16/2021
+Updated: 12/16/2021
+License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
+"""
 import os
-from django import template
 
-register = template.Library()
+from django.template.defaultfilters import register
 
-@register.filter
+@register.filter(name='get_env')
 def get_env(key):
     """Get a variable from the .env file."""
     return os.environ.get(key, None)

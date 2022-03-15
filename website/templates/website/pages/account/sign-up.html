@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+<!--
+  Password Reset Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 2/13/2021
+  Updated: 1/8/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+
+  Optional: Add reCaptcha.
+-->
+{% extends "website/index.html" %}
+{% load static icon %}
+{% block title %}Sign Up | Cannlytics{% endblock %}
+{% block material %}
+<section class="container pt-5" style="max-width:475px;">
+
+  <!-- Message -->
+  <h2 class="serif text-dark">
+    Create an Account
+  </h2>
+  <p class="fs-6 double-line mb-3">
+    Sign up with a secure email and password.
+  </p>
+
+  <!-- Email -->
+  <div class="mb-3 row">
+    <label
+      for="sign-up-email"
+      class="col-sm-2 col-form-label col-form-label-sm"
+    >
+      Email
+    </label>
+    <div class="col-sm-10">
+      <input
+        type="email"
+        class="form-control form-control-sm"
+        id="sign-up-email"
+        required
+        autofocus
+        spellcheck="false"
+      >
+    </div>
+  </div>
+
+  <!-- Password -->
+  <div class="mb-3 row">
+    <label
+      for="sign-up-password"
+      class="col-sm-2 col-form-label col-form-label-sm"
+    >
+      Password
+    </label>
+    <div class="col-sm-10">
+      <input
+        autocomplete="new-password"
+        type="password"
+        class="form-control form-control-sm"
+        id="sign-up-password"
+        required
+      >
+    </div>
+  </div>
+
+  <!-- Subscribe to Newsletter Option -->
+  <div class="form-check markdown mb-3">
+    <input id="newsletter-signup" class="app-action form-check-input" type="checkbox" value="" checked>
+    <label for="newsletter-signup" class="app-action background-hover form-check-label fs-6">
+      <small>Subscribe to newsletter</small>
+    </label>
+  </div>
+
+  <!-- Agree to terms of use -->
+  <div class="form-check markdown">
+    <input id="sign-up-terms-accepted" class="app-action form-check-input" type="checkbox" value="">
+    <label for="sign-up-terms-accepted" class="form-check-label fs-6"><small>
+      Do you agree to our 
+      <a href="https://docs.cannlytics.com/about/terms-of-service" target="_blank">
+        terms of service
+      </a>
+      and that you have read our
+      <a href="https://docs.cannlytics.com/about/privacy-policy" target="_blank">
+        privacy policy
+      </a>
+      and
+      <a href="https://docs.cannlytics.com/about/security-policy" target="_blank">
+        security policy
+      </a>?
+    </small></label>
+  </div>
+
+  <!-- Sign up -->
+  <div class="d-flex justify-content-end w-100 mt-3">
+    <div>
+      <button
+        id="sign-up-button"
+        class="ms-1 btn btn-sm btn-set-width bg-gradient-green text-white"
+        style="max-width:250px;"
+        type="button"
+        onclick="cannlytics.auth.signUp(event)"
+      >
+        Sign Up
+      </button>
+      <button
+        id="sign-up-loading-button"
+        class="ms-1 btn btn-sm btn-set-width bg-gradient-green text-white d-none"
+        type="button"
+        disabled
+      >
+        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Back button -->
+  <div class="d-flex align-items-center justify-content-center">
+    <div class="d-flex flex-column align-items-start justify-content-center mt-5">
+      <p class="text-center text-small fs-6 font-weight-light">
+        <a
+          class="background-hover text-dark fs-6"
+          href="{% url 'section' page='account' section='sign-in' %}"
+        >
+          <small>Click here to sign into an existing account</small>
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- JavaScript to add actions to inputs -->
+  <script>
+    var node = document.getElementById('login-password');
+    node.addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        cannlytics.auth.signUp(event);
+      }
+    });
+  </script>
+
+</section>
+
+<!-- Vines -->
+{% include "website/components/art/vines.html" %}
+
+{% endblock material %}
+</html>

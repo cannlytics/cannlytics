@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+<!--
+  Citation Dialog | Cannlytics Website
+  Created: 1/23/2022
+  Updated: 1/23/2022
+-->
+{% load static icon %}
+<div
+  id="citation-dialog"
+  class="modal fade"
+  tabindex="-1"
+  aria-labelledby="citation-dialog-label"
+  aria-hidden="false"
+>
+  <div class="modal-dialog modal-md"><!-- modal-dialog-centered -->
+    <div class="modal-content">
+
+      <!-- Dialog header -->
+      <div class="modal-header bg-light no-border">
+        <div class="d-flex align-items-center">
+
+          <!-- Logo and header-->
+          <img
+            src="{% static 'website/images/logos/cannlytics_calyx_detailed.svg' %}"
+            height="32px"
+            style="transform:translateY(-6px)"
+            class="me-2"
+            alt="Cannlytics"
+          >
+          <h5
+            id="citation-dialog-label"
+            class="modal-title text-dark serif h5"
+          >
+            Article Citation
+          </h5>
+        </div>
+
+        <!-- Close button -->
+        <button
+          type="button"
+          class="btn-close btn-sm light-only"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+        <button
+          type="button"
+          class="btn-close btn-sm btn-close-white dark-only"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+
+      </div>
+
+      <!-- Dialog body -->
+      <div class="modal-body mt-0 pt-0">
+        <div class="col">
+
+          <p class="fs-6 text-dark text-start mb-3">How to cite this article:</p>
+
+          <!-- Type of Citation -->
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label col-form-label-sm serif">
+              Format
+            </label>
+            <div class="col-sm-10">
+              <select
+                id="citation_format"
+                name="citation_format"
+                class="form-select form-select-sm text-dark"
+                aria-label="Citation Format"
+                onchange="changeCitationFormat()"
+              >
+                <option value="apa">APA</option>
+                <option selected value="bibtex">BibTex</option>
+                <option value="chicago">Chicago</option>
+                <option value="harvard">Harvard</option>
+              </select>
+            </div>
+          </div>
+
+          <!--  Citation in plain text formats: APA, Chicago, Harvard.
+            Optional: Add MLA, ACM
+          -->
+          <div id="citation-apa" class="d-none">
+            <textarea id="citation-apa-textarea" class="form-control form-control-sm text-dark" style="height:90px" readonly>{{ item.apa_citation_style }}</textarea>
+            <button
+              class="btn btn-sm link-primary p-0 mt-2"
+              onclick="cannlytics.ui.copyToClipboard(document.getElementById('citation-apa-textarea').value)"
+            >
+              Copy Link
+            </button>
+          </div>
+          <div id="citation-harvard" class="d-none">
+            <textarea id="citation-apa-textarea" class="form-control form-control-sm text-dark" style="height:90px" readonly>{{ item.harvard_citation_style }}</textarea>
+            <button
+              class="btn btn-sm link-primary p-0 mt-2"
+              onclick="cannlytics.ui.copyToClipboard(document.getElementById('citation-harvard-textarea').value)"
+            >
+              Copy Link
+            </button>
+          </div>
+          <div id="citation-chicago" class="d-none">
+            <textarea id="citation-apa-textarea" class="form-control form-control-sm text-dark" style="height:90px" readonly>{{ item.chicago_citation_style }}</textarea>
+            <button
+              class="btn btn-sm link-primary p-0 mt-2"
+              onclick="cannlytics.ui.copyToClipboard(document.getElementById('citation-chicago-textarea').value)"
+            >
+              Copy Link
+            </button>
+          </div>
+
+          <!-- Code Block -->
+          <!-- TODO: Load dynamically for each article -->
+          <div id="citation-bibtex" class="codehilite rounded">
+            <button
+              class="copy-btn bg-transparent border-0 float-end app-action pt-2"
+              onclick="cannlytics.ui.copyToClipboard(document.getElementById('codeblock').innerHTML)"
+              title="Copy citation"
+            >
+              {% icon "copy" class="link-secondary" height="24px" width="24px" %}
+            </button>
+ <pre id="codeblock">@article{kitko2022identifying,
+  title = {Identifying Cannabis Dispensary Purchase Patterns with Market Basket Analysis},
+  author = {Paul Kitko},
+  journal = {Cannabis Data Science},
+  volume = {1},
+  number = {1},
+  pages = {1--24},
+  year = {2022},
+  publisher = {Cannlytics},
+  url = {\url{https://cannlytics.com/whitepapers}},
+  keywords = {Cannabis retail, Market basket analysis},
+  abstract = {Market Basket Analysis (MBA) sometimes referred to as
+Association Rule Mining, Affinity Analysis or Frequent Itemset Mining,
+was developed as a method to evaluate \"if / then\" associations that
+arise between elements in a dataset. Historically MBA rule sets have
+been applied to retail grocery stores' Point of Sale data to develop
+likely product associations that can then be used to anticipate and
+recommend combinations of future purchases. These recommendations or
+\"cross--sells\" have been found to be useful in improving retail sales
+volume. The newly legalized recreational cannabis market offers an
+opportunity to apply MBA to an unexplored retail industry. This
+project used MBA on a retail cannabis dataset representing multiple
+dispensaries across the state of Washington. The project's purpose
+was to verify if MBA was feasible in uncovering useful product
+association rules from a cannabis sales dataset to use in cross-selling
+recommendations. The results of the study show that it is possible to
+derive meaning MBA rule sets from cannabis retail data but that some
+limitations were uncovered that offer three future opportunities for
+research. First that similar product with highly differentiated names
+may need to be re-categorized into more generalized and meaningful
+products. Second, that it is possible that product churn may introduce
+signal noise into the MBA process resulting in a higher number of less
+useful rule sets. Third, that cannabis customers tend to purchase
+within product families which is an atypical finding in MBA and
+should be further explored.}
+}</pre>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+<script>
+
+  // Change citation format.
+  function changeCitationFormat() {
+    var style = document.getElementById('citation_format').value;
+    var styles = ['apa', 'bibtex', 'harvard', 'chicago'];
+    styles.forEach((s) => {
+      cannlytics.ui.hideElement(`citation-${s}`, 'd-none');
+    });
+    cannlytics.ui.showElement(`citation-${style}`);
+  }
+
+</script>
+</html>

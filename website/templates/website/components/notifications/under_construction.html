@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<!-- Under Construction -->
+{% load static %}
+<div class="container text-start d-flex flex-column align-items-center">
+  <h3 class="fw-bold d-flex align-items-center text-dark text-start mb-0">
+    <svg class="pe-1" style="width:75px;height:75px;">
+      <use href="{% static "website/images/emojies/construction.svg" %}#construction-emoji"></use>
+    </svg>
+    Under Construction
+    <svg class="ps-1" style="width:75px;height:75px;">
+      <use href="{% static "website/images/emojies/construction.svg" %}#construction-emoji"></use>
+    </svg>
+  </h3>
+  <div style="max-width:400px;">
+    <svg class="pe-1 pb-3" style="width:100px;height:100px;float:left;">
+      <use href="{% static "website/images/emojies/factory-worker.svg" %}#factory-worker-emoji"></use>
+    </svg>
+    <p class="fs-6 text-dark text-start pt-1">
+      Please consider
+      <a class="background-hover fw-bold serif text-dark" href="https://gitub.com/cannlytics/cannlytics-website">
+        contributing
+      </a>
+      or
+      <a class="background-hover fw-bold serif text-dark" href="{% url 'page' page='sponsors' %}#sponsor">
+        sponsoring
+      </a>
+      us to hasten construction.
+    </p>
+  </div>
+</div>
+</html>

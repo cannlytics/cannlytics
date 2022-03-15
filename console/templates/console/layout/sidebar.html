@@ -1,11 +1,11 @@
-<!doctype>
+<!doctype html>
 <html>
 <!--
   Console Sidebar | Cannlytics Console
   Created: 6/10/2021
-  Updated: 7/8/2021
+  Updated: 12/14/2021
   TODO:
-    - Make minimizable in an elegant manner.
+    - Sidebar minimization is janky and can be improved.
   Optional:
     - Custom / re-arrangable fields.
     - Use organization data models for links
@@ -13,16 +13,16 @@
 {% load static icon %}
 <nav
   id="sidebar-menu"
-  class="col-md-3 col-lg-2 d-md-block bg-light sidebar sidebar-sticky collapse pt-0"
+  class="col-md-3 col-lg-2 sidebar sidebar-sticky collapse show p-0"
 >
 
   <!-- Index -->
-  <ul class="nav flex-column pt-3">
+  <ul class="nav flex-column py-4">
     {% for item in data_models %}
       {% if organizations.0.type in item.user_type or item.user_type == '*' %}
         
         <!-- Navigation item -->
-        <li class="nav-item px-2 {% if item.seperator %}border-top pt-2 mt-1{% endif %}{% if item.major %} mb-1{% endif %}">
+        <li class="nav-item px-2 {% if item.seperator %}border-top border-secondary pt-2 mt-1{% endif %}{% if item.major %} mb-1{% endif %}">
           <a
             class="app-action nav-link d-flex {% if item.nested %} justify-content-between {% endif %} py-1 px-3 {% if item.key == screen %}active{% endif %}"
             {% if item.nested %}
@@ -36,9 +36,11 @@
             {% endif %}
             {{ item.label }}
             {% if item.nested %}
-              <div id="{{ item.key }}-toggle" class="{% if item.key == screen %}flipped{% endif %}">
-                <img src="{% static 'console/images/layout/arrow_drop_down_light.svg' %}" class="arrow light-only"/>
-                <img src="{% static 'console/images/layout/arrow_drop_down_dark.svg' %}" class="arrow dark-only"/>
+              <div
+                id="{{ item.key }}-toggle"
+                class="{% if item.key == screen %}flipped{% endif %}"
+              >
+                {% icon "chevron-up" width="16px" hegiht="16px" class="arrow text-dark" %}
               <div>
             {% endif %}
           </a>
@@ -67,6 +69,6 @@
 
       {% endif %}
     {% endfor %}
-  </ul><!-- End of main index -->
+  </ul>
 </nav>
 </html>

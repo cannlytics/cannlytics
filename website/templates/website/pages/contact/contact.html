@@ -1,94 +1,183 @@
 <!doctype html>
 <html>
-  <!-- Contact Page -->
-  <!-- Created 1/6/2021 -->
-  {% extends "cannlytics_website/index.html" %}
-  {% block title %}Contact | {{ general.title }}{% endblock %}
-  {% load static crispy_forms_tags %}
-  {% block page_css %}
-    <style>
-      body.dark .captcha-question {
-        color: #f8f8f8;
-      }
-      body.dark .textinput {
-        background: transparent;
-        color: #f8f8f8;
-      }
-    </style>
-  {% endblock %}
-  {% block material %}
-    <div class="contact container my-4 my-lg-5 px-5">
+<!--
+  Contact Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
 
-      <!-- Hero -->
-      <div class="row featurette mt-5">
-        <div class="col-md-7 order-2 order-lg-1">
-          <h2 class="h1 serif text-gradient-reverse pb-3 mt-0">
-            You're welcome to contact us anytime about anything.
-          </h2>
-          <p class="h5 double-line text-dark text-start text-muted">
-            Please enter your contact information and message
-            and the team will get back to you as soon as possible.
-          </p>
+  Authors: Keegan Skeate <keegan@cannlytics.com>
+  Created: 1/6/2021
+  Updated: 1/9/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+  
+  Optional Improvements:
+    - Loading button
+-->
+{% extends "website/index.html" %}
+{% block title %}Contact | Cannlytics{% endblock %}
+{% load static get_env %}
+{% block page_css %}
+  <style>
+    body.dark .captcha-question {
+      color: #f8f8f8;
+    }
+    body.dark .textinput {
+      background: transparent;
+      color: #f8f8f8;
+    }
+  </style>
+{% endblock %}
+{% block material %}
+  <div class="contact container my-4 my-lg-5 px-5">
 
-          <!-- FIXME: -->
-          <!-- https://github.com/mbi/django-simple-captcha -->
-          <!-- https://simpleisbetterthancomplex.com/tutorial/2017/02/21/how-to-add-recaptcha-to-django-site.html -->
+    <!-- Hero -->
+    <div class="row featurette mt-5">
+      <div class="col-md-7 order-2 order-lg-1">
+        <h2 class="h1 serif text-gradient-reverse pb-3 mt-3 mb-0">
+          {{ contact.title }}
+        </h2>
+        <p class="fs-6 double-line text-dark text-start text-muted mb-4">
+          {{ contact.message }}
+        </p>
 
-          <!-- Form -->
-          {% comment %} {% crispy form %} {% endcomment %}
-          <form id="contact-form" action="?" method="POST">
-            {% csrf_token %}
-            {{ form|crispy }}
-            <button
-              data-sitekey="6LdJfE8aAAAAAAAOL7QialM_4iEhU66pad3jeMQZ" 
-              data-callback='onSubmit' 
-              data-action='submit'
-              class="g-recaptcha btn bg-gradient-green text-white"
+        <!-- Form -->
+        <form
+          id="contact-form"
+          class="mt-4 pe-sm-5"
+          action="{% url 'message' %}"
+          method="post"
+          onsubmit="return cannlytics.website.submitContactForm();"
+        >
+
+          <!-- CSRF Token -->
+          {% csrf_token %}
+          
+          <!-- Name -->
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label col-form-label-sm serif">
+              Name
+            </label>
+            <div class="col-sm-10">
+              <input
+                id="name_input"
+                type="text"
+                class="form-control form-control-sm"
+                name="name"
+                spellcheck="false"
+                type="text"
+                value="{{ user.name }}"
+              >
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label col-form-label-sm serif">
+              Email
+            </label>
+            <div class="col-sm-10">
+              <input
+                type="text"
+                id="email_input"
+                class="form-control form-control-sm"
+                name="email"
+                spellcheck="false"
+                type="email"
+                value="{{ user.email }}"
+              >
+            </div>
+          </div>
+
+          <!-- Topic -->
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label col-form-label-sm serif">
+              Topic
+            </label>
+            <div class="col-sm-10">
+              <select
+                id="topic_input"
+                name="subject"
+                class="form-select form-select-sm"
+                aria-label="Topic"
+                onchange="cannlytics.website.setContactFormTopic(this.value);"
+              >
+                <option selected value="general">General Inquiry</option>
+                <option value="lims">Cannlytics LIMS</option>
+                <option value="custom">Custom Development</option>
+                <option value="join">Joining Cannlytics</option>
+                <option value="metrc">Metrc Integration</option>
+                <option value="partner">Partner with Cannlytics</option>
+                <option value="data">Seeking Cannabis Data</option>
+                <option value="economics">Seeking Economic Analysis</option>
+                <option value="forecasting">Seeking Forecasting</option>
+                <option value="paper">Submitting a Paper</option>
+                <option value="analyses">Suggest Analyses</option>
+                <option value="edit">Suggest Data Edit</option>
+                <option value="regulations">Question about Regulations</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Message -->
+          <div class="form-floating mb-3">
+            <textarea
+              id="message_input"
+              name="message"
+              class="form-control form-control-sm"
+              placeholder=""
+              style="height:250px"
+            ></textarea>
+            <label for="message_input" class="serif mb-3 text-dark">
+              Message
+            </label>
+          </div>
+
+          <!-- Submit with simple math check -->
+          <div class="d-flex align-items-center justify-content-between mt-1">
+            <div class="row">
+              <label class="col col-9 col-form-label col-form-label-sm serif">
+                🤖 Check: What is <span id="math-check-min"></span> + <span id="math-check-max"></span>?
+              </label>
+              <div class="col-sm-3">
+                <input
+                  id="math_input"
+                  type="text"
+                  class="form-control form-control-sm"
+                  name="math"
+                  spellcheck="false"
+                  type="number"
+                  min="0"
+                  max="99"
+                >
+                <input id="math_total" class="visually-hidden">
+              </div>
+            </div>
+            <input
+              class="btn btn-sm bg-gradient-green text-white ms-2"
+              type="submit"
+              value="Send message"
             >
-              Send
-            </button>
-          </form>
-          <!-- Form -->
-          {% comment %} <form method="post">
-            {% csrf_token %}
-            {{ form|crispy }}
-            <button
-              data-sitekey="6LdJfE8aAAAAAAAOL7QialM_4iEhU66pad3jeMQZ" 
-              data-callback='onSubmit' 
-              data-action='submit'
-              class="g-recaptcha btn bg-gradient-green text-white"
-            >
-              Send
-            </button>
-          </form> {% endcomment %}
+          </div>
 
-        </div>
+        </form>
+      </div>
 
-        <!-- Image -->
-        <div class="col-md-5 order-1 order-lg-2 mb-3">
-          <img
-            src="{% static 'cannlytics_website/images/illustrations/cannlytics_office.svg' %}"
-            width="100%"
-          >
-        </div>
+      <!-- Image -->
+      <div class="col-md-5 order-1 order-lg-2 mb-3">
+        <img
+          src="{% static 'website/images/illustrations/cannlytics_office.svg' %}"
+          width="100%"
+        >
+      </div>
 
-      </div><!-- End of hero -->
     </div>
-  {% endblock %}
+  </div>
+{% endblock %}
 
-  {% block page_js %}
-    <script src='https://www.google.com/recaptcha/api.js'></script>
-    {% comment %} <script type="text/javascript">
-      var onloadCallback = function() {
-        alert("grecaptcha is ready!");
-      };
-    </script>
-    <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script> {% endcomment %}
-    <script>
-      function onSubmit(token) {
-        document.getElementById("contact-form").submit();
-      }
-    </script>
-  {% endblock %}
+<!-- JavaScript -->
+{% block page_js %}
+  <script>
+    cannlytics.website.initializeContactForm();
+  </script>
+{% endblock %}
 
 </html>

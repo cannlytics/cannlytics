@@ -1,0 +1,288 @@
+<!doctype html>
+<html>
+<!--
+  Subscription Management Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 11/16/2021
+  Updated: 1/4/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static icon %}
+{% block title %}Subscription | Cannlytics{% endblock %}
+{% block page_css %}
+
+  <!-- Minor Style Adjustments -->
+  <style>
+    .tooltip-inner {
+      text-align: left;
+    }
+  </style>
+
+  <!-- PayPal JavaScript -->
+  <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&vault=true&intent=subscription"></script>
+
+{% endblock page_css %}
+{% block material %}
+
+{% if not user.email %}
+
+  <!-- Sign In Prompt -->
+  <section class="container mb-2 mt-5 d-flex justify-content-center">
+    <div class="markdown py-5" style="max-width:560px;">
+      <svg class="pe-3 pt-3" style="float:left;width:125px;height:125px;">
+        <use href="{% static "website/images/emojies/newspaper.svg" %}#newspaper-emoji"></use>
+      </svg>
+      <h1 class="pt-4 text-dark">Cannlytics Subscriptions</h1>
+      <p class="mt-2">
+        You will need to create an account or to sign in
+        to take advantage of Cannlytics subscriptions.
+      </p>
+      <div class="d-flex justify-content-center mt-3">
+        <a
+          class="btn btn-sm bg-gradient-green text-white serif"
+          data-bs-target="#sign-in-dialog"
+          data-bs-toggle="modal"
+        >
+          Sign in &raquo;
+        </a>
+      </div>
+    </div>
+  </section>
+
+{% else %}
+
+  <!-- Subscription Management -->
+  <section class="container mb-2 mt-5">
+
+    <!-- Header -->
+    <div class="text-center pb-3">
+      <h2 class="mb-3 pt-5 serif text-dark">
+        Manage your Cannlytics Subscription
+      </h2>
+      <p class="fs-6 double-line mb-5 mx-auto" style="max-width:540px;">
+        Showing subscriptions for {{ user.email }}.
+      </p>
+    </div>
+
+    <!-- Subscribe / unsubscribe from enterprise / pro support -->
+    <div class="markdown mb-5 mt-3" style="max-width:560px;">
+      <svg class="pe-1 pt-3" style="float:left;width:125px;height:125px;">
+        <use href="{% static "website/images/emojies/atronaut.svg" %}#atronaut-emoji"></use>
+      </svg>
+      <h1 class="pt-4 text-dark">Software Support</h1>
+      <p class="mt-2">
+        If you are an organization or a developer, then you can utilize our
+        software support options to help get up and running, make sure that your
+        systems run smoothly, and get us to create solutions for you.
+      </p>
+      <div class="row px-3">
+        <div class="col-10 col-md-8 card my-3 p-3 border rounded text-dark">
+          <h3 class="mb-3 mt-0">Support Options</h3>
+          <div class="d-flex justify-content-between mb-3">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="support-option"
+                id="support-option-enterprise"
+              >
+              <label
+                class="app-action background-hover form-check-label"
+                for="support-option-enterprise"
+              >
+                Enterprise
+              </label>
+              {% icon 'info' width="16px" height="16px" class="ms-1"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                title="Custom installation, access to admin tools, feature requests, and talk with devs."
+              %}
+            </div>
+            <div class="text-secondary text-nowrap">$1,200 / mo.</div>
+          </div>
+          <div class="d-flex justify-content-between mb-3">
+            <div class="form-check">
+              <input
+                class="form-check-input danger"
+                type="radio"
+                name="support-option"
+                id="support-option-pro"
+              >
+              <label
+                class="app-action background-hover form-check-label"
+                for="support-option-pro"
+              >
+                Pro
+              </label>
+              {% icon 'info' width="16px" height="16px" class="ms-1"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                title="Metrc integration, access to dev tools, unlimited data storage, and email support."
+              %}
+            </div>
+            <div class="text-secondary text-nowrap">$420 / mo.</div>
+          </div>
+          <div class="d-flex justify-content-between mb-3">
+            <div class="form-check pe-4">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="support-option"
+                id="support-option-no-support"
+                checked
+              >
+              <label
+                class="app-action background-hover form-check-label"
+                for="support-option-no-support"
+              >
+                No support
+              </label>
+            </div>
+          </div>
+        </div>
+        <div id="checkout-enterprise-button" class="col-3 my-3 d-none">
+          <div id="paypal-enterprise"></div>
+        </div>
+        <div id="checkout-pro-button" class="col-3 my-3 d-none">
+          <div id="paypal-pro"></div>
+        </div>
+      </div>
+      <div class="col-8 d-flex justify-content-end">
+        <button
+          id="cancel-support-button"
+          class="btn btn-sm btn-sm-light serif me-2 d-none"
+        >
+          Cancel
+        </button>
+        <button
+          id="save-support-button"
+          class="btn btn-sm bg-gradient-green text-white serif d-none"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+
+    <!-- Subscribe / unsubscribe from premium material -->
+    <div class="markdown mb-5 mt-3" style="max-width:560px;">
+      <svg class="pe-1 pt-3" style="float:left;width:125px;height:125px;">
+        <use href="{% static "website/images/emojies/coin.svg" %}#coin-emoji"></use>
+      </svg>
+      <h1 class="pt-4 text-dark">Premium Material</h1>
+      <p class="mt-2">
+        You can get premium material to gain a competitive edge, including all
+        <a href="{% url 'page' page='data' %}">datasets</a>,
+        <a href="{% url 'page' page='videos' %}">premium videos</a>,
+        <a href="{% url 'page' page='whitepapers' %}">whitepapers</a>, and
+        <a href="{% url 'page' page='api' %}">API access</a>.
+      </p>
+      <div class="row px-3">
+        <div class="col-10 col-md-8 card my-3 p-3 border rounded text-dark">
+          <h3 class="mb-3 mt-0">Premium Material</h3>
+          <div class="d-flex justify-content-between mb-3">
+            <div class="form-check pe-4">
+              <input
+                id="premium-material-checkbox"
+                class="form-check-input"
+                type="checkbox"
+                value=""
+              >
+              <label
+                class="app-action background-hover form-check-label"
+                for="premium-material-checkbox"
+              >
+                Subscribe to all videos, whitepapers, datasets,
+                and API access
+              </label>
+            </div>
+            <div class="text-secondary text-nowrap">$4.20 / mo.</div>
+          </div>
+        </div>
+        <div id="checkout-premium-button" class="col-3 my-3 d-none">
+          <div id="paypal-premium"></div>
+        </div>
+      </div>
+      <div class="col-8 d-flex justify-content-end">
+        <button
+          id="cancel-premium-button"
+          class="btn btn-sm btn-sm-light serif me-2 d-none"
+        >
+          Cancel
+        </button>
+        <button
+          id="save-premium-button"
+          class="btn btn-sm bg-gradient-green text-white serif d-none"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+
+    <!-- Subscribe / unsubscribe from newsletter -->
+    <div class="markdown mb-5 mt-3" style="max-width:560px;">
+      <svg class="pe-1 pt-3" style="float:left;width:125px;height:125px;">
+        <use href="{% static "website/images/emojies/newspaper.svg" %}#newspaper-emoji"></use>
+      </svg>
+      <h1 class="pt-4 text-dark">Free Newsletters</h1>
+      <p class="mt-2">
+        You can receive periodic newsletters and updates from Cannlytics if you
+        believe that you will benefit from our free material, including novel
+        datasets and statistics.
+      </p>
+      <div class="card col-8 my-3 p-3 border rounded text-dark">
+        <h3 class="mb-3 mt-0">Newsletters</h3>
+        <div class="d-flex justify-content-between mb-3">
+          <div class="form-check pe-4">
+            <input
+              id="free-newsletter-checkbox"
+              class="form-check-input"
+              type="checkbox"
+              value=""
+            >
+            <label
+              class="app-action background-hover form-check-label"
+              for="free-newsletter-checkbox"
+            >
+              Subscribe to Free Weekly Newsletter
+            </label>
+          </div>
+          <div class="text-secondary text-nowrap">Free</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- List sponsorship packages -->
+    {% include "website/pages/subscriptions/sponsorships.html" %}
+
+  </section>
+
+{% endif %}
+
+{% endblock material %}
+
+<!-- JavaScript -->
+{% block page_js %}
+
+<!-- Make user's subscriptions available to JavaScript -->
+{{ user.newsletter|json_script:"user_newsletter" }}
+{{ user.premium|json_script:"user_premium" }}
+{{ user.subscriptions|json_script:"user_subscriptions" }}
+{{ user.support|json_script:"user_support" }}
+
+<script>
+
+  // Initialize the interface with the user's current subscriptions.
+  cannlytics.payments.initializeSubscriptions();
+
+  // TODO: Automatically unsubscribe user from newsletter if they navigate with
+  // special query parameter that is a salted hash of their email.
+
+  // Enable tooltips.
+  cannlytics.ui.enableTooltips();
+
+</script>
+
+{% endblock page_js %}

@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<!--
+  Sign In Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 2/18/2021
+  Updated: 1/7/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static icon %}
+{% block title %}Sign In | Cannlytics{% endblock title %}
+{% block page_css %}
+<style>
+  #google-signin {
+    background: url({% static 'website/images/logos/signin-assets/btn_google_signin_dark_normal_web@2x.png' %});
+    width: 191px;
+    height: 46px;
+    background-size: contain;
+  }
+  #google-signin:hover {
+    background: url({% static 'website/images/logos/signin-assets/btn_google_signin_dark_focus_web@2x.png' %});
+    width: 191px;
+    height: 46px;
+    background-size: contain;
+  }
+  #google-signin:active {
+    background: url({% static 'website/images/logos/signin-assets/btn_google_signin_dark_pressed_web@2x.png' %});
+    width: 191px;
+    height: 46px;
+    background-size: contain;
+  }
+</style>
+{% endblock page_css %}
+{% block material %}
+<section class="container pt-5" style="max-width:475px;">
+
+  <!-- Message -->
+  <h2 class="serif text-dark">
+    Account Sign In
+  </h2>
+  <p class="fs-6 double-line mb-3">
+    Sign into your user account.
+  </p>
+
+  <!-- Email -->
+  <div class="mb-3 row">
+    <label
+      for="sign-in-email"
+      class="col-sm-2 col-form-label col-form-label-sm pe-2"
+    >
+      Email
+    </label>
+    <div class="col-sm-10">
+      <input
+        type="email"
+        class="form-control form-control-sm"
+        id="sign-in-email"
+        required
+        autofocus
+        spellcheck="false"
+      >
+    </div>
+  </div>
+
+  <!-- Password -->
+  <div class="mb-3 row">
+    <label
+      for="sign-in-password"
+      class="col-sm-2 col-form-label col-form-label-sm pe-2"
+    >
+      Password
+    </label>
+    <div class="col-sm-10">
+      <input
+        type="password"
+        class="form-control form-control-sm"
+        id="sign-in-password"
+        required
+      >
+    </div>
+  </div>
+
+  <!-- Sign in  -->
+  <div class="d-flex justify-content-between align-items-start w-100 mt-3">
+    <div class="d-flex flex-column align-items-end">
+      <div class="form-check">
+        <input id="stay-signed-in" class="app-action form-check-input" type="checkbox" value="" checked>
+        <label class="app-action background-hover form-check-label fs-6" for="stay-signed-in">
+          <small>Stay signed in?</small>
+        </label>
+      </div>
+      <p class="text-center text-small fs-6 font-weight-light mb-1 mt-2">
+        <a
+          class="background-hover text-secondary text-small fs-6"
+          href="{% url 'section' page='account' section='password-reset' %}"
+        >
+          <small class="sans-serif">Lost password?</small>
+        </a>
+      </p>
+    </div>
+    <button
+      id="sign-in-button"
+      class="ms-1 btn btn-sm btn-set-width bg-gradient-green text-white"
+      style="max-width:250px;"
+      type="button"
+      onclick="cannlytics.auth.signIn(event)"
+    >
+      Sign In
+    </button>
+    <button
+      id="sign-in-loading-button"
+      class="ms-1 btn btn-sm btn-set-width bg-gradient-green text-white d-none"
+      type="button"
+      disabled
+    >
+      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <!-- Google Sign In -->
+  <div class="serif text-dark text-center my-3">
+    &mdash;&nbsp;or&nbsp;&mdash;
+  </div>
+  <div class="d-grid gap-2 justify-content-center">
+    <a id="google-signin" class="app-action" onclick="cannlytics.auth.signInWithGoogle()"></a>
+  </div>
+  <img style="display:none;" src="{% static 'website/images/logos/signin-assets/btn_google_signin_dark_focus_web@2x.png' %}">
+  <img style="display:none;" src="{% static 'website/images/logos/signin-assets/btn_google_signin_dark_pressed_web@2x.png' %}">
+
+  <!-- Sign up -->
+  <div class="d-flex align-items-center justify-content-center">
+    <div
+      class="d-flex flex-column align-items-start justify-content-center"
+      style="margin-top:6rem;"
+    >
+      <p class="text-center text-small fs-6 font-weight-light">
+        <small class="sans-serif">Are you new to Cannlytics?</small>
+        <a
+          class="background-hover text-dark text-small fs6"
+          href="{% url 'section' page='account' section='sign-up' %}"
+        >
+          <small><b>Sign up now &rarr;</b></small>
+        </a>
+      </p>
+    </div>
+  </div>
+
+</section>
+
+<!-- Vines -->
+{% include "website/components/art/vines.html" %}
+
+{% endblock material %}
+
+<!-- JavaScript -->
+{% block page_js %}
+  <script>
+
+    // Initialize the sign in form.
+    cannlytics.firebase.onAuthChange(function(user) {
+      if (user) window.location.href = `${window.location.origin}\\account`;
+    });
+
+    // Add sign in on enter.
+    var node = document.getElementById('sign-in-password');
+    node.addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        cannlytics.auth.signIn(event);
+      }
+    });
+
+  </script>
+{% endblock page_js %}
+
+</html>

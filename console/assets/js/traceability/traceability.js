@@ -1,16 +1,15 @@
 /**
  * Traceability JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 6/12/2021
- * Updated: 6/14/2021
+ * Updated: 12/7/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
 
 import { authRequest, deserializeForm, showNotification } from '../utils.js';
 import { theme } from '../settings/theme.js';
-
-// Optional: Setup Index DB for client-side storage.
-// import { idbStore } from '../store.js';
-// https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Client-side_storage#storing_complex_data_%E2%80%94_indexeddb
 
 /*---------------------------------------------------------------------
  Employees
@@ -19,7 +18,13 @@ import { theme } from '../settings/theme.js';
 const employees = {
 
   getEmployees(tableId, orgId, licenseNumber, versionId) {
-    /* Get data from the API and in a table. */
+    /**
+     * Get data from the API and in a table.
+     * @param {String} tableId A table element ID for rendering data in the user interface.
+     * @param {String} orgId A specific organization ID.
+     * @param {String} licenseNumber The license number for the organization.
+     * @param {String} versionId The secret version, the organization's state.
+     */
     
     // Get the data.
     const query = `license=${licenseNumber}&org_id=${orgId}&version_id=${versionId}`;
@@ -67,7 +72,12 @@ const employees = {
  const items = {
 
   getItems(tableId, orgId, licenseNumber, versionId) {
-    /* Get data from the API and in a table. */
+    /** Get data from the API and in a table.
+     * @param {String} tableId A table element ID for rendering data in the user interface.
+     * @param {String} orgId A specific organization ID.
+     * @param {String} licenseNumber The license number for the organization.
+     * @param {String} versionId The secret version, the organization's state.
+     */
 
     // Get the data.
     const query = `license=${licenseNumber}&org_id=${orgId}&version_id=${versionId}`;
@@ -108,30 +118,30 @@ const employees = {
   },
 
   createItem() {
-    /* Create a given location. */
+    /** Create a given location. */
 
   },
 
   updateItem() {
-    /* Update a given location. */
+    /** Update a given location. */
 
   },
 
   deleteItem() {
-    /* Delete a given location. */
+    /** Delete a given location. */
 
   },
 
   saveItem() {
-    /* Create or update a given location. */
+    /** Create or update a given location. */
   },
 
   exportItems() {
-    /* Export locations data to Excel (.xlsx or .csv). */
+    /** Export locations data to Excel (.xlsx or .csv). */
   },
 
   importItems() {
-    /* Import locations data from Excel (.xlsx or .csv). */
+    /** Import locations data from Excel (.xlsx or .csv). */
   },
 
 };
@@ -143,7 +153,13 @@ const employees = {
 const labTests = {
 
   getLabTests(tableId, orgId, licenseNumber, versionId) {
-    /* Get data from the API and in a table. */
+    /**
+     * Get data from the API and in a table.
+     * @param {String} tableId A table element ID for rendering data in the user interface.
+     * @param {String} orgId A specific organization ID.
+     * @param {String} licenseNumber The license number for the organization.
+     * @param {String} versionId The secret version, the organization's state.
+     */
     const query = `license=${licenseNumber}&org_id=${orgId}&version_id=${versionId}`;
     const url = `/api/traceability/lab-tests?${query}`;
     authRequest(url).then((response) => {
@@ -183,30 +199,30 @@ const labTests = {
   },
 
   createLabTest() {
-    /* Create a given lab test. */
+    /** Create a given lab test. */
 
   },
 
   updateLabTest() {
-    /* Update a given lab test. */
+    /** Update a given lab test. */
 
   },
 
   deleteLabTest() {
-    /* Delete a given lab test. */
+    /** Delete a given lab test. */
 
   },
 
   saveLabTest() {
-    /* Create or update a given lab test. */
+    /** Create or update a given lab test. */
   },
 
   exportLabTests() {
-    /* Export lab test data to Excel (.xlsx or .csv). */
+    /** Export lab test data to Excel (.xlsx or .csv). */
   },
 
   importLabTests() {
-    /* Import lab test data from Excel (.xlsx or .csv). */
+    /** Import lab test data from Excel (.xlsx or .csv). */
   },
 
 };
@@ -218,7 +234,13 @@ const labTests = {
 const locations = {
 
   getLocations(tableId, orgId, licenseNumber, versionId) {
-    /* Get data from the API and in a table. */
+    /**
+     * Get data from the API and in a table.
+     * @param {String} tableId A table element ID for rendering data in the user interface.
+     * @param {String} orgId A specific organization ID.
+     * @param {String} licenseNumber The license number for the organization.
+     * @param {String} versionId The secret version, the organization's state.
+     */
     const query = `license=${licenseNumber}&org_id=${orgId}&version_id=${versionId}`;
     const url = `/api/traceability/locations?${query}`;
     authRequest(url).then((response) => {
@@ -268,30 +290,30 @@ const locations = {
   },
 
   createLocation() {
-    /* Create a given location. */
+    /** Create a given location. */
 
   },
 
   updateLocation() {
-    /* Update a given location. */
+    /** Update a given location. */
 
   },
 
   deleteLocation() {
-    /* Delete a given location. */
+    /** Delete a given location. */
 
   },
 
   saveLocation() {
-    /* Create or update a given location. */
+    /** Create or update a given location. */
   },
 
   exportLocations() {
-    /* Export locations data to Excel (.xlsx or .csv). */
+    /** Export locations data to Excel (.xlsx or .csv). */
   },
 
   importLocations() {
-    /* Import locations data from Excel (.xlsx or .csv). */
+    /** Import locations data from Excel (.xlsx or .csv). */
   },
 
 };
@@ -303,7 +325,13 @@ const locations = {
  const packages = {
 
   getPackages(tableId, orgId, licenseNumber, versionId) {
-    /* Get data from the API and in a table. */
+    /**
+     * Get data from the API and in a table.
+     * @param {String} tableId A table element ID for rendering data in the user interface.
+     * @param {String} orgId A specific organization ID.
+     * @param {String} licenseNumber The license number for the organization.
+     * @param {String} versionId The secret version, the organization's state.
+     */
     const query = `license=${licenseNumber}&org_id=${orgId}&version_id=${versionId}`;
     const url = `/api/traceability/packages?${query}`;
     authRequest(url).then((response) => {
@@ -342,30 +370,30 @@ const locations = {
   },
 
   createPackage() {
-    /* Create a given location. */
+    /** Create a given location. */
 
   },
 
   updatePackage() {
-    /* Update a given location. */
+    /** Update a given location. */
 
   },
 
   deletePackage() {
-    /* Delete a given location. */
+    /** Delete a given location. */
 
   },
 
   savePackage() {
-    /* Create or update a given location. */
+    /** Create or update a given location. */
   },
 
   exportPackages() {
-    /* Export locations data to Excel (.xlsx or .csv). */
+    /** Export locations data to Excel (.xlsx or .csv). */
   },
 
   importPackages() {
-    /* Import locations data from Excel (.xlsx or .csv). */
+    /** Import locations data from Excel (.xlsx or .csv). */
   },
 
 };
@@ -377,7 +405,13 @@ const locations = {
 const strains = {
 
   getStrains(tableId, orgId, licenseNumber, versionId) {
-    /* Get data from the API and in a table. */
+    /**
+     * Get data from the API and in a table.
+     * @param {String} tableId A table element ID for rendering data in the user interface.
+     * @param {String} orgId A specific organization ID.
+     * @param {String} licenseNumber The license number for the organization.
+     * @param {String} versionId The secret version, the organization's state.
+     */
     const query = `license=${licenseNumber}&org_id=${orgId}&version_id=${versionId}`;
     const url = `/api/traceability/strains?${query}`;
     authRequest(url).then((response) => {
@@ -418,30 +452,30 @@ const strains = {
   },
 
   createStrain() {
-    /* Create a given strain. */
+    /** Create a given strain. */
 
   },
 
   updateStrain() {
-    /* Update a given strain. */
+    /** Update a given strain. */
 
   },
 
   deleteStrain() {
-    /* Delete a given strain. */
+    /** Delete a given strain. */
 
   },
 
   saveStrain() {
-    /* Create or update a given strain. */
+    /** Create or update a given strain. */
   },
 
   exportStrains() {
-    /* Export strain data to Excel (.xlsx or .csv). */
+    /** Export strain data to Excel (.xlsx or .csv). */
   },
 
   importStrains() {
-    /* Import strain data from Excel (.xlsx or .csv). */
+    /** Import strain data from Excel (.xlsx or .csv). */
   },
 
 };
@@ -453,7 +487,13 @@ const strains = {
 const transfers = {
 
   getTransfers(tableId, orgId, licenseNumber, versionId) {
-    /* Get data from the API and in a table. */
+    /**
+     * Get data from the API and in a table.
+     * @param {String} tableId A table element ID for rendering data in the user interface.
+     * @param {String} orgId A specific organization ID.
+     * @param {String} licenseNumber The license number for the organization.
+     * @param {String} versionId The secret version, the organization's state.
+     */
     const query = `license=${licenseNumber}&org_id=${orgId}&version_id=${versionId}`;
     const url = `/api/traceability/transfers?${query}`;
     authRequest(url).then((response) => {
@@ -492,30 +532,30 @@ const transfers = {
   },
 
   createTransfer() {
-    /* Create a given location. */
+    /** Create a given location. */
 
   },
 
   updateTransfer() {
-    /* Update a given location. */
+    /** Update a given location. */
 
   },
 
   deleteTransfer() {
-    /* Delete a given location. */
+    /** Delete a given location. */
 
   },
 
   saveTransfer() {
-    /* Create or update a given location. */
+    /** Create or update a given location. */
   },
 
   exportTransfers() {
-    /* Export locations data to Excel (.xlsx or .csv). */
+    /** Export locations data to Excel (.xlsx or .csv). */
   },
 
   importTransfers() {
-    /* Import locations data from Excel (.xlsx or .csv). */
+    /** Import locations data from Excel (.xlsx or .csv). */
   },
 
 };
@@ -535,8 +575,12 @@ export const traceability = {
   ...transfers,
 
   openObject(type, row, plural = 's', id_field='id') {
-    /*
+    /**
      * View a selected object.
+     * @param {String} type The type of data model.
+     * @param {Object} row A table row object.
+     * @param {String} plural The plural of the data model.
+     * @param {String} id_field The ID of an object.
      */
     const url = `/traceability/${type}${plural}/${type}?id=${row.data[id_field]}`;
     localStorage.setItem(type, JSON.stringify(row.data));
@@ -545,8 +589,9 @@ export const traceability = {
 
 
   viewObject(type) {
-    /*
+    /**
      * View the data when navigating to a selected object.
+     * @param {string} type The type of data being displayed.
      */
     const data = JSON.parse(localStorage.getItem(type));
     deserializeForm(document.forms[`${type}-form`], data)
@@ -555,13 +600,15 @@ export const traceability = {
 
 
   deleteLicenseValidation(orgId, licenseNumber) {
-    /*
+    /**
      * Validate that a reason is present before deleting a license.
+     * @param {String} orgId A specific organization ID.
+     * @param {String} licenseNumber The license number for the organization.
      */
     const deletionReason = document.getElementById('license-deletion-reason-input').value;
     if (!deletionReason) {
       const message = 'A deletion reason is required for quality control.'
-      showNotification('Deletion reason required', message, { type: 'error' });
+      showNotification('Deletion reason required', message, /* type = */ 'error');
       return;
     }
     deleteLicense(orgId, licenseNumber, deletionReason);
@@ -569,14 +616,17 @@ export const traceability = {
 
 
   deleteLicense(orgId, licenseNumber, message) {
-    /*
+    /**
      * Delete a license from an organization's data, saving a deletion reason.
+     * @param {String} orgId A specific organization ID.
+     * @param {String} licenseNumber The license number for the organization.
+     * @param {String} message The reason for deleting a specific license.
      */
     const url = `/api/traceability/delete-license?license=${licenseNumber}&org_id=${orgId}`;
     authRequest(url, {deletion_reason: message}).then((response) => {
       if (response.error) {
         // Optional: Show better error messages.
-        showNotification('Deleting license failed', response.message, { type: 'error' });
+        showNotification('Deleting license failed', response.message, /* type = */ 'error');
       } else {
         window.location.href = '/traceability/settings';
         // Optional: Show success message
@@ -586,9 +636,9 @@ export const traceability = {
 
 
   saveLicenses(orgId) {
-    /*
+    /**
      * Save an organization's licenses.
-     * FIXME: Handle updating licenses.
+     * @param {String} orgId A specific organization ID.
      */
 
     // Get the licenses data.
@@ -606,14 +656,15 @@ export const traceability = {
     }
 
     // Post the data.
+    // FIXME: Handle updating licenses.
     authRequest(`/api/organizations/${orgId}`, {'licenses': licenses}).then((response) => {
       console.log('Saved licenses:', response);
       // TODO: Show better error messages.
       // TODO: Tell user if organization name is already taken
       if (response.error) {
-        showNotification('Organization request failed', response.message, { type: 'error' });
+        showNotification('Organization request failed', response.message, /* type = */ 'error');
       } else {
-        // showNotification('Organization request sent', response.message, { type: 'success' });
+        // showNotification('Organization request sent', response.message, /* type = */ 'success');
         // TODO: Re-render licenses.
         location.reload();
       }

@@ -1,22 +1,26 @@
 <!doctype html>
 <html>
-  <!-- Index Template | Cannlytics Website -->
-  <!-- Created 1/7/2021 -->
-  {% extends "cannlytics_website/base.html" %}
-  {% load static %}
-  {% block page %}
+<!--
+  Index Template | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
 
-    <!-- Header -->
-    {% include "cannlytics_website/layout/header.html" %}
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/7/2021
+  Updated: 11/25/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/base.html" %}
+{% load static %}
+{% block page %}
 
-    <!-- Page Material -->
-    <div id="material">{% block material %}{% endblock %}</div>
+  <!-- Header -->
+  {% include "website/layout/header.html" %}
 
-    <!-- Footer -->
-    {% include "cannlytics_website/layout/footer.html" %}
+  <!-- Material -->
+  <div id="material">{% block material %}{% endblock %}</div>
 
-    <!-- Subscribe Dialog -->
-    {% include "cannlytics_website/components/dialogs/subscribe_dialog.html" %}
+  <!-- Footer -->
+  {% include "website/layout/footer.html" %}
 
-  {% endblock %}
+{% endblock %}
 </html>

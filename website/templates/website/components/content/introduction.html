@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<!--
+  Introduction | Cannlytics Website
+  Created 12/24/2021
+  Updated: 12/24/2021
+  Params:
+    image_id
+    image_ref
+-->
+{% load static %}
+<div class="container my-3">
+  <div class="markdown pt-5" style="max-width:560px;">
+    <svg class="pt-3 pe-3" style="float:left;width:125px;height:125px;">
+      <use href="{% static image_ref %}#{{ image_id }}"></use>
+    </svg>
+    <h1 id="{{ title|slugify }}" class="pt-4 text-dark">{{ title }}</h1>
+    <p class="text-dark mt-2">
+      {{ description }}
+    </p>
+  </div>
+  <div class="pb-5" style="max-width:560px;">
+    <p class="text-start mt-3">
+      <a
+        class="btn btn-sm bg-gradient-green serif text-white"
+        href="{{ link }}"
+      >
+        {{ action }} &rarr;
+      </a>
+    </p>
+  </div>
+</div>
+</html>

@@ -1,47 +1,47 @@
 /**
  * Theme JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 12/6/2020
- * Updated: 4/24/2021
+ * Updated: 12/14/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
-
+import { hasClass } from '../utils.js';
 
 export const theme = {
 
-
   changeTheme() {
-    /*
+    /**
      * Change the UI theme.
      */
-    var theme = localStorage.getItem('theme');
+    let theme = localStorage.getItem('theme');
     if (!theme) {
-      var hours = new Date().getHours();
-      var dayTime = hours > 6 && hours < 20;
+      const hours = new Date().getHours();
+      const dayTime = hours > 6 && hours < 20;
       theme = dayTime ? 'light' : 'dark';
     }
-    var newTheme = (theme === 'light') ? 'dark' : 'light';
+    const newTheme = (theme === 'light') ? 'dark' : 'light';
     this.toggleTheme(newTheme);
     localStorage.setItem('theme', newTheme);
   },
 
-
   getTheme() {
-    /*
+    /**
      * Get the current theme.
      */
     return (document.body.classList.contains('dark')) ? 'dark' : 'light';
   },
 
-
   setInitialTheme () {
-    /*
+    /**
      * Set th initial UI theme.
      */
     if (typeof(Storage) !== 'undefined') {
-      var theme = localStorage.getItem('theme');
+      const theme = localStorage.getItem('theme');
       if (!theme) {
-        var hours = new Date().getHours();
-        var dayTime = hours > 6 && hours < 20;
+        const hours = new Date().getHours();
+        const dayTime = hours > 6 && hours < 20;
         if (!dayTime) this.toggleTheme('dark');
         return;
       }
@@ -50,28 +50,25 @@ export const theme = {
     }
   },
 
-
   setTableTheme() {
-    /*
-     * Set the appropriate theme for tables based on the current theme.
+    /**
+     * Set the appropriate theme for tables based on the current theme,
+     * toggling the Ag-Grid theme too.
      */
-    console.log('Setting theme on tables...');
     let nuisanceTableClass = 'ag-theme-alpine-dark';
     let finalTableClass = 'ag-theme-alpine';
     if (hasClass(document.body, 'dark')) {
       nuisanceTableClass = 'ag-theme-alpine';
       finalTableClass = 'ag-theme-alpine-dark';
     }
-    // Toggle Ag-Grid theme.
     let tables = document.getElementsByClassName(nuisanceTableClass);
     [...tables].forEach( x => x.classList.add(finalTableClass) );
     [...tables].forEach( x => x.classList.remove(nuisanceTableClass) );
   },
 
-
   toggleTheme(theme) {
-    /*
-     * Toggle the UI theme, toggling AG-Grid table class.
+    /**
+     * Toggle the UI theme, toggling the AG-Grid table class too.
      */
     let currentTableClass = 'ag-theme-alpine';
     let newTableClass = 'ag-theme-alpine-dark';
@@ -82,16 +79,9 @@ export const theme = {
     } else {
       document.body.classList.add('dark');
     }
-    // Toggle Ag-Grid theme.
     let tables = document.getElementsByClassName(currentTableClass);
     [...tables].forEach( x => x.classList.add(newTableClass) );
     [...tables].forEach( x => x.classList.remove(currentTableClass) );
   }
 
-
 }
-
-function hasClass(element, className) {
-  return (' ' + element.className + ' ').indexOf(' ' + className + ' ') > -1;
-}
-

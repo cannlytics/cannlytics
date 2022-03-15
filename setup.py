@@ -1,40 +1,66 @@
-# -*- coding: utf-8 -*-
 """
-setup.py | Cannlytics
+Module Setup | Cannlytics Engine
+Copyright (c) 2021-2022 Cannlytics
 
-Author: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <keegan@cannlytics.com>
 Contact: <keegan@cannlytics.com>
 Created: 1/21/2021
-Updated: 6/21/2021
-License: MIT
+Updated: 3/14/2022
+License: MIT <https://opensource.org/licenses/MIT>
 """
-import setuptools
+from setuptools import find_packages, setup
 
-with open('README.md', 'r', encoding='utf-8') as fh:
-    long_description = fh.read()
+# Define the package version.
+# TODO: Read from package.json?
+version = '0.0.11'
 
-setuptools.setup(
-    name='cannlytics',
-    version='0.0.8',
+# Get the project description.
+README = ''
+with open('./cannlytics/README.md', 'r', encoding='utf-8') as readme_file:
+    README = readme_file.read()
+
+# Specify requirements installed by `pip install cannlytics`.
+REQUIREMENTS = []
+with open('./cannlytics/requirements.txt', 'r') as f:
+    REQUIREMENTS = [i[:-1] for i in f if i[0] != '#']
+
+# Specify requirements for development.
+dev_requirements = ['ocean-lib', 'xlwings']
+
+# Specify requirements for setup.
+setup_requirements = []
+
+# Specify requirements for testing.
+test_requirements = []
+
+# Publish the module.
+setup(
     author='Cannlytics',
-    author_email='contact@cannlytics.com',
-    description='Cannlytics is simple, easy-to-use, end-to-end cannabis analytics software designed to make your data and information accessible.',
-    long_description='Cannlytics makes cannabis analysis **simple** and **easy** through data accessibility. We believe that everyone in the cannabis industry should be able to access rich, valuable data quickly and easily and that you will be better off for it.',
-    long_description_content_type='text/markdown',
-    url='https://github.com/cannlytics/cannlytics',
-    packages=setuptools.find_packages(),
-    license='MIT',
+    author_email='dev@cannlytics.com',
     classifiers=[
-        'Programming Language :: Python :: 3',
+        'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 3.9',
     ],
-    python_requires='>=3.8',
+    description='🔥 Cannlytics is simple, easy-to-use, end-to-end cannabis analytics software designed to make your data and information accessible.', #pylint: disable=line-too-long
+    extras_require={
+        'test': test_requirements,
+        'dev': dev_requirements + test_requirements,
+    },
     include_package_data=True,
-    install_requires=[
-        'beautifulsoup4',
-        'django',
-        'firebase_admin',
-        'googlemaps',
-        'pandas',
-    ],
+    install_requires=REQUIREMENTS,
+    keywords='cannlytics',
+    license='MIT',
+    long_description=README,
+    long_description_content_type='text/markdown',
+    name='cannlytics',
+    packages=find_packages(),
+    python_requires='>=3.9',
+    setup_requires=setup_requirements,
+    test_suite='tests',
+    tests_require=test_requirements,
+    url='https://github.com/cannlytics/cannlytics-engine',
+    version=version,
+    zip_safe=False,
 )

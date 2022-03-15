@@ -1,75 +1,71 @@
 <!doctype html>
 <html lang="en-US">
-  <!-- Base Template | Cannlytics Website -->
-  <!-- Created 1/7/2021 -->
-  {% load static %}
+<!--
+  Base Template | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
 
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="theme-color" content="#281e52"/>
-    <meta name="description" content="Super power your lab with free cannabis-testing software made with love and ready for you to plug and play or pop the hood and tinker to your heart's content.">
-    <meta name="author" content="Keegan Skeate">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 1/7/2021
+  Updated: 12/28/2021
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% load static %}
+<head>
+  <meta charset="utf-8">
+  <meta name="theme-color" content="#281e52"/>
+  <meta name="description" content="Superpower your lab with open-source cannabis analytics made with love.">
+  <meta name="author" content="Keegan Skeate">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Title -->
-    <title>{% block title %}{% endblock %}</title>
+  <!-- Icons and Manifest -->
+  <link rel="icon" href="{% static 'images/logos/favicon.ico' %}">
+  <link rel="icon" sizes="32x32" type="image/png" href="{% static 'images/logos/favicon-32x32.png' %}">
+  <link rel="icon" sizes="16x16" type="image/png" href="{% static 'images/logos/favicon-16x16.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static '/images/logos/apple-touch-icon.png' %}">
+  <link rel="mask-icon" color="#e48632" href="{% static '/images/logos/safari-pinned-tab.svg' %}">
+  <link rel="shortcut icon" href="{% static '/images/logos/favicon.ico' %}" type="image/x-icon">
+  
+  <!-- Manifest -->
+  <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
 
-    <!-- Icons and Manifest -->
-    <link rel="icon" href="{% static 'cannlytics_website/images/favicon/cannlytics-icon.ico' %}">
-    <link rel="icon" type="image/png" href="{% static 'images/logos/favicon-32x32.png' %}" sizes="32x32">
-    <link rel="icon" type="image/png" href="{% static 'images/logos/favicon-16x16.png' %}" sizes="16x16">
-    <link rel="apple-touch-icon" href="{% static '/images/logos/apple-touch-icon.png' %}" sizes="180x180">
-    <link rel="mask-icon" href="{% static '/images/logos/safari-pinned-tab.svg' %}" color="#e48632">
-    <link rel="shortcut icon" href="{% static '/images/logos/favicon.ico' %}" type="image/x-icon">
-    {% comment %} <link rel="manifest" href="{% static 'manifest.webmanifest' %}"> {% endcomment %}
+  <!-- Title -->
+  <title>{% block title %}Cannlytics{% endblock title %}</title>
 
-    <!-- PRODUCTION: CDN Bootstrap stylesheet | DEV: Local Bootstrap stylesheet-->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-    {% comment %} <link href="{% static 'cannlytics_website/css/bootstrap.min.css'%}" rel="stylesheet" type="text/css"> {% endcomment %}
+  <!-- jQuery -->
+  <!-- Optional: Ween off of jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 
-    <!-- Cannlytics stylesheets -->
-    <link href="{% static 'cannlytics_website/css/bundle.css'%}?{% now "U" %}" rel="stylesheet" type="text/css">
+  <!-- Cannlytics JavaScript and CSS Module -->
+  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{% if DEBUG %}{% now 'U' %}{% else %}{{ APP_VERSION_NUMBER }}{% endif %}"></script>
 
-    <!-- Page-specific stylesheets -->
-    {% block page_css %}{% endblock %}
+  <!-- Page-specific stylesheets -->
+  {% block page_css %}{% endblock page_css %}
 
-    <!-- Optional: Migrate from jQuery to modern framework (Svelte?) -->
-    <!-- PRODUCTION: CDN jQuery | DEV: Local jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    {% comment %} <script src="{% static 'cannlytics_website/js/jquery.slim.min.js'%}"></script> {% endcomment %}
+</head>
 
-    <!-- Cannlytics module -->
-    <script src="{% static 'cannlytics_website/js/bundle.js' %}?{% now 'U' %}"></script>
+<!-- Body -->
+<body class="base">
 
-  </head>
-  <body class="base">
+  <!-- Page -->
+  <div id="page">{% block page %}{% endblock page %}</div>
 
-    <!-- Page -->
-    <div id="page">
-      {% block page %}{% endblock %}
-    </div>
+  <!-- Website JavaScript -->
+  <script>
+    cannlytics.website.initialize();
+  </script>
 
-    <!-- Login dialog -->
-    {% include "cannlytics_website/components/dialogs/login_dialog.html" %}
+  <!-- Login Dialog -->
+  {% include "website/components/dialogs/sign_in_dialog.html" %}
 
-    <!-- Cookie notification -->
-    {% include "cannlytics_website/components/dialogs/cookie_notification.html" %}
+  <!-- Cookie Notification -->
+  {% include "website/components/dialogs/cookie_notification.html" %}
 
-    <!-- PRODUCTION: CDN Bootstrap JavaScript | DEV: Local Bootstrap JavaScript-->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
-    {% comment %} <script src="{% static 'cannlytics_website/js/bootstrap.min.js'%}"></script> {% endcomment %}
+  <!-- General Notifications -->
+  {% include "website/components/notifications/notification_toast.html" %}
 
-    <!-- Feather Icons -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
+  <!-- Page-specific JavaScript -->
+  {% block page_js %}{% endblock page_js %}
 
-    <!-- Website JavaScript -->
-    <script>
-      cannlytics.website.initialize();
-    </script>
+</body>
 
-    <!-- Page-specific JavaScript -->
-    {% block page_js %}{% endblock page_js %}
-
-  </body>
 </html>

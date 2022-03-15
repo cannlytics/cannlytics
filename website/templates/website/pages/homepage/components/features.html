@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <!--
+    Features | Cannlytics Website
+    Created: 1/5/2021
+    Updated: 11/25/2021
+  -->
+  {% load static %}
+  <div class="ground">
+    <div class="container">
+      <h2 class="serif text-dark pt-5">Why Cannlytics?</h2>
+      <div class="row justify-content-center">
+        {% for feature in features %}
+          <div class="col-lg-4 col-md-5 mb-3 px-5 pb-5 p-md-4 text-center">
+            <img
+              class="mb-4 mx-auto"
+              src="{% static feature.image %}"
+              style="height:175px;"
+            >
+            <h2 class="h5 fw-bold serif text-dark text-start mb-2">
+              {{ feature.title }}
+            </h2>
+            <p class="fs-6 double-line text-start">
+              {{ feature.message }}
+            </p>
+            {% if feature.action %}
+              <p class="markdown text-start fs-6 mt-2">
+                <a
+                  class="fw-bold btn btn-sm-light serif text-dark"
+                  href="{{ feature.action_url }}"
+                >
+                  {{ feature.action }} &rarr;
+                </a>
+              </p>
+              {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</html>

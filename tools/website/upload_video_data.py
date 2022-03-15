@@ -83,6 +83,11 @@ if __name__ == '__main__':
     datafile = f'{directory}/videos/videos.json'
     
     # Upload the latest video
-    print('Uploading latest video...')
-    video_data = upload_latest_video(datafile)
-    print('Uploaded video:\n', video_data)
+    # print('Uploading latest video...')
+    # video_data = upload_latest_video(datafile)
+    # print('Uploaded video:\n', video_data)
+    
+    # Upload the entire video archive data.
+    print('Uploading video archive data...')
+    video_data = upload_all_videos(datafile)
+    print('Uploaded data for all videos. Total:', len(video_data))

@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<!--
+  Video Banner | Cannlytics Website
+  Created: 7/27/2021
+  Updated: 11/22/2021
+  Fields:
+    title
+    description
+    length
+    cover_image_url
+    video_id
+    video_url
+-->
+{% load icon %}
+
+<!-- Title -->
+<section class="container mb-2 my-5 pt-5">
+  <h2 class="mb-3"><a class="serif text-dark" href="{% url 'videos' %}">Want to explore the Cannlytics troves?</a></h2>
+</section>
+
+<!-- Video Cards -->
+<section class="container mt-4">
+  <div class="row row-cols-3 justify-content-md-start">
+    {% for video in video_archive %}
+      <div class="col-10 col-md-6 col-lg-4 mb-4 mb-lg-0 px-4">
+        <div
+          class="bg-image hover-overlay ripple shadow-1-strong rounded"
+          data-ripple-color="light"
+        >
+          <a href="{% url 'video' video.video_id %}">
+          {% if video.premium %}
+            <div class="d-flex justify-content-end">
+              <span class="badge badge-pill bg-gradient-orange position-absolute m-1">Premium</span>
+            </div>
+          {% endif %}
+            <img
+              src="{{ video.cover_image_url }}"
+              class="w-100"
+              stlye="max-height:125px;"
+            >
+          </a>
+          <h6 class="lh-md mt-3 mb-1 pb-0">
+            <a
+              class="background-hover text-dark fw-bold serif"
+              href="{% url 'video' video.video_id %}"
+            >
+              {{ video.title }}
+            </a>
+          </h6>
+          <div class="mb-1">
+            <small  class="serif text-secondary-on-dark">{{ video.published|date }}</small>
+          </div>
+          <p class="text-secondary-on-dark fs-6">
+            <small>
+              {{ video.description|truncatechars:165 }}
+            </small>
+          </p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Actions -->
+<section class="container mt-4 mb-5">
+  <div class="grid gap-2 mt-2">
+    <a
+      class="btn btn-sm btn-sm-light btn-md-light me-2"
+      href="{% url 'videos' %}"
+      type="button"
+    >
+      <small class="serif">View more</small> &raquo;
+    </a>
+    <a
+      class="btn btn-sm btn-sm-light btn-md-light me-2"
+      href="https://github.com/cannlytics/cannabis-data-science"
+      type="button"
+    >
+      <small class="serif">Get the data</small> {% icon "database" width="16px" height="16px"%}
+    </a>
+    <a
+      class="btn btn-sm bg-gradient-orange text-white"
+      href="https://www.meetup.com/cannabis-data-science/"
+      type="button"
+    >
+      <small class="serif">Join the Cannabis Data Science Meetup ☕</small>
+    </a>
+  </div>
+</section>
+
+</html>

@@ -1,42 +1,44 @@
 <!doctype html>
 <html>
-<!-- Password Logout Page -->
-<!-- Created 12/5/2020 -->
+<!--
+  Sign Out Page | Cannlytics Console
+  Created 12/5/2020
+  Updated: 12/5/2021
+-->
 {% extends "./base_sign_in.html" %}
 {% block title %}Logged Out | Cannlytics{% endblock %}
 {% block login_form %}
-  <div class="text-center">
+<div class="text-center">
 
-    <!-- Message -->
-    <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Signed Out</h1>
-    <h2 class="fs-6 lh-base text-secondary mb-3">
-    You have been logged out.<br>Navigating home in <span id="navigation-countdown">10</span>...
-    </h2>
+  <!-- Message -->
+  <h1 class="fs-5 lh-base text-dark mb-0 mt-5">Signed Out</h1>
+  <h2 class="fs-6 lh-base text-secondary mb-3">
+  You have been logged out.<br>Navigating home in <span id="navigation-countdown">10</span>...
+  </h2>
 
-    <!-- Option -->
-    <a
-      class="btn btn-sm bg-gradient-green text-white"
-      style="width: 191px;"
-      type="button"
-      href="/account/sign-in"
-    >
-      Sign In
-    </a>
+  <!-- Option -->
+  <a
+    class="btn btn-sm bg-gradient-green text-white"
+    style="width: 191px;"
+    type="button"
+    href="/account/sign-in"
+  >
+    Sign In
+  </a>
 
-  </div>
+</div>
 
-  <!-- Redirect to login JavaScript -->
-  <script>
-    var count = 10;
-    var countdownElement = document.getElementById('navigation-countdown');
-    var baseURL = window.location.origin;
-    setInterval(function() {
-      count -= 1
-      countdownElement.textContent = count.toString();
-      if (count === 0) document.location.href = `${baseURL}/account/sign-in`;
-    }, 1000);
-  </script>
+<!-- Redirect to login JavaScript -->
+<script>
+  var count = 10;
+  var countdownElement = document.getElementById('navigation-countdown');
+  var baseURL = window.location.origin;
+  setInterval(function() {
+    count -= 1
+    countdownElement.textContent = count.toString();
+    if (count === 0) document.location.href = `${baseURL}/account/sign-in`;
+  }, 1000);
+</script>
 
-{% endblock %}
-
+{% endblock login_form %}
 </html>

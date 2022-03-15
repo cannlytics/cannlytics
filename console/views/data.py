@@ -1,8 +1,11 @@
 """
 Data Views | Cannlytics Console
-Author: Keegan Skeate <keegan@cannlytics.com>
+Copyright (c) 2021-2022 Cannlytics
+
+Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 12/18/2020
-Updated: 7/17/2021
+Updated: 2/7/2022
+License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 """
 
 # Standard imports
@@ -13,9 +16,7 @@ from json import loads
 # External imports
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect, JsonResponse
-import numpy as np
 import pandas as pd
-import openpyxl
 
 # Internal imports
 from cannlytics.firebase import (
@@ -26,37 +27,7 @@ from cannlytics.firebase import (
 from cannlytics.utils.utils import snake_case
 
 
-def get_worksheet_headers(sheet):
-    """Get the headres of a worksheet.
-    Args:
-        sheet (Worksheet): An openpyx; Excel file object.
-    Returns:
-        headers (list): A list of header strings.
-    """
-    headers = []
-    for cell in sheet[1]:
-        headers.append(snake_case(cell.value))
-    return headers
-
-
-def get_worksheet_data(sheet, headers):
-    """Get the data of a worksheet.
-    Args:
-        sheet (Worksheet): An openpyx; Excel file object.
-        headres (list): A list of headers to map the values.
-    Returns:
-        list(dict): A list of dictionaries.
-    """
-    data = []
-    for row in sheet.iter_rows(min_row=2):
-        values = {}
-        for key, cell in zip(headers, row):
-            values[key] = cell.value
-        data.append(values)
-    return data
-
-
-def read_worksheet(path, filename='Upload'):
+def read_worksheet(path):
     """Read the imported data, iterating over the rows and
     getting value from each cell in row.
     Args:
@@ -65,14 +36,6 @@ def read_worksheet(path, filename='Upload'):
     Returns:
         (DataFrame): A Pandas DataFrame of the results.
     """
-    # FIXME:
-    # try:
-    #     workbook = openpyxl.load_workbook(path, data_only=True)
-    #     sheet = workbook.get_sheet_by_name(filename)
-    #     headers = get_worksheet_headers(sheet)
-    #     return pd.DataFrame(get_worksheet_data(sheet, headers))
-    # except:
-    print('Path:', path)
     data = pd.read_csv(path)
     data.columns = [snake_case(x) for x in data.columns]
     return data
@@ -137,12 +100,10 @@ def import_data(request):
         if data_type == 'text' or data_type == 'textarea':
             data[key].replace(['0', '0.0', 0], '', inplace=True)
 
-    # Save imported data to Firestore (FIXME: in reverse order for user sanity).
+    # Save imported data to Firestore, in reverse order for user sanity.
     updated_at = datetime.now().isoformat()
+    data = data[::-1]
     for key, row in data.iterrows():
-    # data = data.replace({np.nan: None})
-    # for idx in reversed(data.index):
-        # row = data.loc[idx]
         doc_id = row[f'{model_singular}_id']
         if doc_id:
             values = row.to_dict()
@@ -150,7 +111,8 @@ def import_data(request):
             values['updated_by'] = claims['uid']
             update_document(f'organizations/{org_id}/{model}/{doc_id}', values)
 
-    # Submit the form (FIXME: preferably without refreshing).
+    # Submit the form.
+    # FIXME: preferably without refreshing.
     # See: https://stackoverflow.com/questions/11647715/how-to-submit-form-without-refreshing-page-using-django-ajax-jquery
     return HttpResponseRedirect(f'/{model}')
     # return JsonResponse({'success': True}, status=200)

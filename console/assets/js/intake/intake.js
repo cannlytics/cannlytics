@@ -1,8 +1,11 @@
 /**
  * Intake JavaScript | Cannlytics Console
- * Author: Keegan Skeate
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <keegan@cannlytics.com>
  * Created: 12/3/2020
  * Updated: 6/3/2021
+ * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
 // import Chart from 'chart.js';
 
@@ -21,8 +24,6 @@
 export const intake = {
 
   initialize() {
-    // console.log(this.getData())
-    console.log('Initializing intake..')
     this.drawProgressGraph();
     // var data = cannlyticsConsole.getData()
     // cannlyticsConsole.renderGraph('myChart', data)

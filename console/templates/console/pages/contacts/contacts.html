@@ -2,23 +2,27 @@
 <html>
 <!--
   Contacts Page | Cannlytics Console
-  Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 12/17/2020
-  Updated: 7/15/2021
-  TODO:
-    - The ability to import contact records from .csv or .xlsx fields.
-    - The ability to export contact records to .csv or .xlsx.
+  Updated: 2/6/2022
   Wishlist:
     - Marketing, notifications, logs
+    - The ability to import contact records from .csv or .xlsx fields.
+    - The ability to export contact records to .csv or .xlsx.
 -->
 {% extends "console/console.html" %}
 {% load icon %}
 {% block title %}{% if section == 'new' %}New | {% elif section %}{{ section }} | {% endif %}Contacts | Cannlytics {% endblock title %}
+{% block console_css %}
+
+  <!-- AG-Grid CSS and JavaScript -->
+  {% include "console/components/tables/ag_grid_scripts.html" %}
+
+{% endblock console_css %}
 {% block console_body %}
 {% if section and section not in 'logs,files' %}
 
   <!-- Detail page -->
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
     {% include "console/pages/contacts/contact.html" with
       id=section
       data_model=data_model
@@ -29,14 +33,25 @@
 {% else %}
 
   <!-- List -->
-  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-      <h1 class="fs-5 mb-0 lh-base">Contacts</h1>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+      <h4 class="breadcrumb-item text-dark lh-sm fs-6 mb-0">Contacts</h4>
     </div>
 
     <!-- Body -->
+    {% if not organizations %}
+      {% include "console/components/placeholders/table_placeholder.html" with
+        height='200px'
+        image='console/images/account/organization.svg'
+        message='An organization is required to manage contacts. Create or join an organization first.'
+        title='Organization needed'
+        url='/get-started/organization'
+        action='Create or Join an Organization'
+        only
+      %}
+    {% else %}
     <div class="contacts">
 
       <!-- Tabs -->
@@ -105,6 +120,7 @@
       {% endif %}
 
     </div><!-- End of the body -->
+    {% endif %}
 
   </main>
 {% endif %}
@@ -113,7 +129,7 @@
 <!-- JavaScript -->
 {% block console_js %}
 
-  {% if not section %}
+  {% if not section and organizations %}
     <script>
       cannlytics.app.awaitStreamData('contacts', 'contact', '{{ organizations.0.organization_id }}', 1000);
     </script>

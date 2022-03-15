@@ -1,11 +1,10 @@
 <!doctype html>
 <html>
 <!--
-  Form Title | Cannlytics
+  Form Title | Cannlytics Console
   Author: Keegan Skeate <keegan@cannlytics.com>
   Created: 6/22/2021
   Updated: 6/22/2021
-
   Params:
     id
     model
@@ -15,11 +14,12 @@
     export (bool | optional)
     action (string  | optional)
 -->
+{% load title_case %}
 <div class="d-flex justify-content-between">
   <div class="px-3">
     <h1 class="fs-6 lh-base text-dark mb-0 mt-3">
       {% if id == 'new' %}New{% endif %}
-      {{ model_singular|title }}
+      {{ model_singular|title_case }}
       {% if id != 'new' %}{{ id }}{% endif %}
     </h1>
     {% if description %}

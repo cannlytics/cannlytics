@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+<!--
+  Demo Page | Cannlytics Website
+  Created: 1/5/2021
+  Updated: 1/5/2022
+  Optional:
+    - Make rendering dynamic with a for loop.
+-->
+{% load static icon %}
+<div class="container">
+
+  <!-- Title -->
+  <h2 class="serif text-dark pt-5 mb-0">How can I use Cannlytics?</h2>
+
+  <!-- Console -->
+  <div class="row align-items-center justify-content-center">
+    <div class="col-12 col-md-6 pt-3 px-3 pe-lg-5 pt-md-5 text-start overflow-hidden">
+      <div class="my-3 py-lg-3">
+        <svg class="pe-1" style="float:left;width:120px;height:120px;">
+          <use href="{% static "website/images/emojies/brain.svg" %}#brain-emoji"></use>
+        </svg>
+        <h2 class="fs-3 text-dark fw-bold my-2">
+          The Cannlytics Console
+        </h2>
+        <p class="fs-6 double-line mb-2">
+          If you need a hosted solution, then you can 
+          take advantage of the ready to use Cannlytics console for
+          hosting, analysis, and data and file storage.
+          You can manage your lab results and provide your
+          clients with a simple, yet complete, client portal.
+        </p>
+        <div class="d-none d-lg-flex mt-3">
+          <a
+            class="btn btn-sm-light btn-md-light serif"
+            href="https://console.cannlytics.com/account/sign-up"
+          >
+            Create an account &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+    <a class="col-11 col-md-8 col-lg-6" href="https://console.cannlytics.com">
+      <img
+        src="{% static 'website/images/screenshots/console_dashboard_light.png' %}"
+        class="rounded shadow light-only"
+        height="275px"
+      >
+      <img
+        src="{% static 'website/images/screenshots/console_dashboard_dark.png' %}"
+        class="rounded shadow dark-only"
+        height="275px"
+      >
+    </a>
+  </div>
+
+  <!-- API -->
+  <div class="row align-items-center justify-content-center">
+    <div class="col-12 col-md-6 pt-3 px-3 pe-lg-5 pt-md-5 text-start overflow-hidden">
+      <div class="my-3 py-lg-3">
+        <svg class="pe-3" style="float:left;width:120px;height:120px;">
+          <use href="{% static "website/images/emojies/satellite.svg" %}#satellite-emoji"></use>
+        </svg>
+        <h2 class="fs-3 text-dark fw-bold mb-2">
+          The Cannlytics API
+        </h2>
+        <p class="fs-6 double-line mb-2">
+          Do you have a technical staff? Than you can utilize the
+          Cannlytics API to programmatically manage your operations and
+          interface with your data. You have all of your data and the power
+          of all laboratory software at your finger tips.
+        </p>
+        <div class="d-none d-lg-flex mt-3">
+          <a
+            class="btn btn-sm-light btn-md-light serif"
+            href="https://docs.cannlytics.com/api/about"
+          >
+            Read the Docs &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="codehilite rounded col-11 col-md-8 col-lg-6 text-start overflow-hidden px-3">
+    <button
+      class="copy-btn bg-transparent border-0 float-end app-action pt-2"
+      onclick="cannlytics.ui.copyToClipboard(document.getElementById('codeblock-3').innerHTML)"
+      title="Copy snippet"
+    >
+      {% icon "copy" class="link-secondary" height="24px" width="24px" %}
+    </button>
+    <pre><span></span><code id="codeblock-3"><span class="p">{</span>
+  <span class="nx">analyses</span><span class="o">:</span> <span class="p">[...],</span>
+  <span class="nx">lab_id</span><span class="o">:</span> <span class="s2">"cann-do"</span><span class="p">,</span>
+  <span class="nx">sample_name</span><span class="o">:</span> <span class="s2">"Super Easy"</span><span class="p">,</span>
+  <span class="nx">results</span><span class="o">:</span> <span class="p">[...],</span>
+<span class="p">}</span>
+</code></pre></div>
+  </div>
+
+  <!-- Installation -->
+  {% comment %} <div class="row align-items-center justify-content-center mt-5">
+    <div class="col-12 col-md-6 text-start overflow-hidden">
+      <div class="my-3 py-lg-3">
+        <svg class="pe-3 pb-3" style="float:left;width:120px;height:120px;">
+          <use href="{% static "website/images/emojies/toolbox.svg" %}#toolbox-emoji"></use>
+        </svg>
+        <h2 class="fs-3 text-dark fw-bold my-2">
+          Custom Installation
+        </h2>
+        <p class="fs-6 double-line mb-2 pe-5">
+          <small>
+            Installing Cannlytics for use in your lab is as easy as 1, 2, 3.
+            You can simply clone
+            the source code and follow the included guides.
+            You can quickly configure
+            your installation to your liking.
+          </small>
+        </p>
+        <div class="d-none d-lg-flex mt-3">
+          <a
+            class="btn btn-sm-light btn-md-light"
+            href="https://docs.cannlytics.com/developers/installation"
+          >
+            <small class="serif">Installation Guide</small> &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="codehilite rounded col-11 col-md-8 col-lg-6 text-start overflow-hidden px-2">
+      <button
+        class="copy-btn bg-transparent border-0 float-end app-action pt-2"
+        onclick="cannlytics.ui.copyToClipboard(document.getElementById('codeblock-1').innerHTML)"
+        title="Copy snippet"
+      >
+        {% icon "copy" class="link-secondary" height="24px" width="24px" %}
+      </button>
+      <pre class="d-flex">
+        <code id="codeblock-1">git clone https://github.com/cannlytics/cannlytics.git</code>
+      </pre>
+    </div>
+  </div> {% endcomment %}
+
+  <!-- Plug and Play -->
+  <div class="row align-items-center justify-content-center">
+    <div class="col-12 col-md-6 pt-3 px-3 pe-lg-5 pt-md-5 text-start overflow-hidden">
+      <div class="my-3 py-lg-3">
+        <svg class="pe-1" style="float:left;width:120px;height:120px;">
+          <use href="{% static "website/images/emojies/plug.svg" %}#plug-emoji"></use>
+        </svg>
+        <h2 class="fs-3 text-dark fw-bold my-2">
+          Plug &amp; Play
+        </h2>
+        <p class="fs-6 double-line mb-2">
+          Once you have your copy of Cannlytics,
+          you can pick and choose engine components as you need them.
+          Perhaps you need an addition to your existing software. Simply
+          grab what you need and you're free to use it.
+        </p>
+        <div class="d-none d-lg-flex mt-3">
+          <a
+            class="btn btn-sm-light btn-md-light serif"
+            href="https://docs.cannlytics.com/developers/development"
+          >
+            Use the Components &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+<div class="codehilite rounded col-11 col-md-8 col-lg-6 text-start overflow-hidden px-3">
+<button
+class="copy-btn bg-transparent border-0 float-end app-action pt-2"
+onclick="cannlytics.ui.copyToClipboard(document.getElementById('codeblock-2').innerHTML)"
+title="Copy snippet"
+>
+{% icon "copy" class="link-secondary" height="24px" width="24px" %}
+</button>
+
+<pre><span></span><code id="codeblock-2"><span class="kn">from</span> <span class="nn">cannlytics</span> <span class="kn">import</span> <span class="n">lims</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">lims</span><span class="o">.</span><span class="n">get_lab_results</span><span class="p">(</span><span class="n">lab_id</span><span class="o">=</span><span class="s2">"xyz"</span><span class="p">)</span>
+</code></pre></div>
+  </div>
+
+</div>
+</html>

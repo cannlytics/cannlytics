@@ -1,11 +1,11 @@
 """
 Calculation Parser | Cannlytics
+Copyright (c) 2021-2022 Cannlytics
 
-Author: Keegan Skeate  
-Contact: <keegan@cannlytics.com>  
-Created: 6/8/2021  
-Updated: 6/8/2021  
-License: MIT License <https://opensource.org/licenses/MIT>
+Authors: Keegan Skeate <keegan@cannlytics.com>
+Created: 6/8/2021
+Updated: 6/8/2021
+License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
 """
 # Standard imports
 import re
@@ -23,12 +23,9 @@ def calculate_results():
     instrument / analyst measurements.
     Calculate results by using analyte formula and
     instrument / analyst measurements.
-    Args:
-
-    Returns:
     """
-
-    print('Calculating results..')
+    # TODO: Implement a function that calculates results given a formula and results.
+    raise NotImplementedError
 
 
 # # Prepare testing dataset

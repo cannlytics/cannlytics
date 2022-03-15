@@ -1,7 +1,12 @@
 """
 Traceability API Views | Cannlytics API
+Copyright (c) 2021-2022 Cannlytics
+
+Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 6/13/2021
 Updated: 7/19/2021
+License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+
 Description: API to interface with the Metrc API.
 """
 
@@ -22,7 +27,7 @@ from cannlytics.firebase import (
     get_document,
     update_document
 )
-from cannlytics.traceability.metrc import authorize
+from cannlytics.metrc import initialize_metrc
 from api.auth.auth import authenticate_request #pylint: disable=import-error
 
 
@@ -34,7 +39,7 @@ AUTH_ERROR = 'Authentication failed. Please login to the console or \
 # Utility functions
 #-----------------------------------------------------------------------
 
-def initialize_metrc(project_id, license_number, version_id):
+def initialize_traceability(project_id, license_number, version_id):
     """Initialize a Metrc client.
     Optional: Figure out how to pre-initialize and save Metrc client.
     """
@@ -57,7 +62,7 @@ def initialize_metrc(project_id, license_number, version_id):
         version_id=version_id
     )
 
-    track = authorize(vendor_api_key, user_api_key)
+    track = initialize_metrc(vendor_api_key, user_api_key)
     return track
 
 #-----------------------------------------------------------------------
@@ -77,7 +82,7 @@ def employees(request):
     version_id = request.query_params.get('version_id')
 
     # Initialize Metrc.
-    track = initialize_metrc(project_id, license_number, version_id)
+    track = initialize_traceability(project_id, license_number, version_id)
 
     # Make a request to the Metrc API.
     objs = track.get_employees(license_number=license_number)
@@ -106,7 +111,7 @@ def items(request):
         return Response({'error': True, 'message': message}, status=403)
 
     # Initialize Metrc.
-    track = initialize_metrc(project_id, license_number, version_id)
+    track = initialize_traceability(project_id, license_number, version_id)
 
     # Get data.
     if request.method == 'GET':
@@ -137,7 +142,7 @@ def lab_tests(request):
         return Response({'error': True, 'message': message}, status=403)
 
     # Initialize Metrc.
-    track = initialize_metrc(project_id, license_number, version_id)
+    track = initialize_traceability(project_id, license_number, version_id)
 
     # Get lab results.
     if request.method == 'GET':
@@ -168,7 +173,7 @@ def locations(request):
         return Response({'error': True, 'message': message}, status=403)
 
     # Initialize Metrc.
-    track = initialize_metrc(project_id, license_number, version_id)
+    track = initialize_traceability(project_id, license_number, version_id)
 
     # Get data.
     if request.method == 'GET':
@@ -201,7 +206,7 @@ def packages(request):
         return Response({'error': True, 'message': message}, status=403)
 
     # Initialize Metrc.
-    track = initialize_metrc(project_id, license_number, version_id)
+    track = initialize_traceability(project_id, license_number, version_id)
 
     # Get data.
     if request.method == 'GET':
@@ -237,7 +242,7 @@ def strains(request):
         return Response({'error': True, 'message': message}, status=403)
 
     # Initialize Metrc.
-    track = initialize_metrc(project_id, license_number, version_id)
+    track = initialize_traceability(project_id, license_number, version_id)
 
     # Get data.
     if request.method == 'GET':
@@ -269,7 +274,7 @@ def transfers(request):
         return Response({'error': True, 'message': message}, status=403)
 
     # Initialize Metrc.
-    track = initialize_metrc(project_id, license_number, version_id)
+    track = initialize_traceability(project_id, license_number, version_id)
 
     # Get data.
     if request.method == 'GET':
@@ -284,7 +289,7 @@ def transfers(request):
         data = [obj.to_dict() for obj in objs]
         print('Retrieved the data:', data)
         return Response({'data': data}, content_type='application/json')
-    
+
     # TODO: Create / update transfers.
 
     # TODO: Delete transfers.

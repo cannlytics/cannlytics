@@ -1,0 +1,84 @@
+/**
+ * Data Market Style | Cannlytics Website
+ * Copyright (c) 2021-2022 Cannlytics
+ * 
+ * Authors: Keegan Skeate <contact@cannlytics.com>
+ * Created: 1/21/2022
+ * Updated: 1/21/2022
+ * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+ */
+.card {
+  margin-bottom:2%;
+}
+.grid__col-sizer,
+.photo-item {
+  width: 32%;
+}
+.grid__gutter-sizer {
+  width: 2%;
+}
+@media only screen and (max-width: 480px) {
+  .grid__col-sizer,
+  .photo-item {
+    width: 98%;
+  }
+}
+.photo-item__image {
+  display: block;
+  max-width: 100%;
+}
+.photo-item__caption a {
+  color: black;
+  font-size: 0.8em;
+  text-decoration: none;
+}
+.page-load-status {
+  display: none; /* hidden by default */
+  padding-top: 20px;
+  border-top: 1px solid #DDD;
+  text-align: center;
+  color: #777;
+}
+.loader-ellipsis {
+  font-size: 20px; /* change size here */
+  position: relative;
+  width: 4em;
+  height: 1em;
+  margin: 10px auto;
+}
+.loader-ellipsis__dot {
+  display: block;
+  width: 1em;
+  height: 1em;
+  border-radius: 0.5em;
+  background: #555; /* change color here */
+  position: absolute;
+  animation-duration: 0.5s;
+  animation-timing-function: ease;
+  animation-iteration-count: infinite;
+}
+.loader-ellipsis__dot:nth-child(1),
+.loader-ellipsis__dot:nth-child(2) {
+  left: 0;
+}
+.loader-ellipsis__dot:nth-child(3) { left: 1.5em; }
+.loader-ellipsis__dot:nth-child(4) { left: 3em; }
+
+@keyframes reveal {
+  from { transform: scale(0.001); }
+  to { transform: scale(1); }
+}
+@keyframes slide {
+  to { transform: translateX(1.5em) }
+}
+.loader-ellipsis__dot:nth-child(1) {
+  animation-name: reveal;
+}
+.loader-ellipsis__dot:nth-child(2),
+.loader-ellipsis__dot:nth-child(3) {
+  animation-name: slide;
+}
+.loader-ellipsis__dot:nth-child(4) {
+  animation-name: reveal;
+  animation-direction: reverse;
+}
