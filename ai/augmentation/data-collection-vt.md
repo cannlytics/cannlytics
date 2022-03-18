@@ -1,3 +1,0 @@
-# Data Collection | Vermont
-
-## Resources

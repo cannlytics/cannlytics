@@ -1,3 +1,0 @@
-# Data Collection | Oregon
-
-## Resources
