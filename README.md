@@ -273,6 +273,7 @@ or
 
 ```shell
 npm run console:collectstatic
+# or
 npm run website:collectstatic
 ```
 
@@ -303,6 +304,7 @@ or
 
 ```shell
 npm run console:dev
+# or
 npm run website:dev
 ```
 
@@ -310,6 +312,7 @@ You can also leverage [django-livereload-server](https://github.com/tjwalch/djan
 
 ```shell
 npm run console:start
+# or
 npm run website:start
 ```
 
@@ -375,6 +378,7 @@ or
 
 ```shell
 npm run console:serve
+# or
 npm run website:serve
 ```
 
@@ -382,6 +386,7 @@ It is an inconvenience to run multiple consoles, but a major convenience to have
 
 ```shell
 npm run console:start
+# or
 npm run website:start
 ```
 
@@ -455,6 +460,7 @@ See [the publishing guide](https://docs.cannlytics.com/developers/publishing/) f
 
 ```shell
 npm run console:publish
+# or
 npm run website:publish
 ```
 
@@ -506,7 +512,7 @@ Cannlytics is made available with ❤️ and your good will. Please consider mak
 
 | | |
 |-|-|
-| 💸 PayPal Donation | <form action="https://www.paypal.com/donate" method="post" target="_top"><input type="hidden" name="hosted_button_id" value="SSB85GMSZB6UG" /><input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" /><img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" /></form> |
+| 💸 PayPal Donation | <https://paypal.me/cannlytics> |
 | 🪙 Bitcoin donation address| 34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6 |
 | ⚡ Ethereum donation address | 0x8997cA09B3FAe2ce4039E295A5269cf4ae7a0BA5 |
 

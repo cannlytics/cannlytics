@@ -13,6 +13,7 @@ import sys
 
 def main():
     """ Run administrative tasks. """
+    # Allow user to specify project from the command line.
     project = os.environ.get('PROJECT', 'website').strip()
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'{project}.settings')
     try:

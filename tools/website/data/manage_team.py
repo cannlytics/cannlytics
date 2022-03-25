@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 12/26/2021
-Updated: 12/26/2021
+Updated: 03/24/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Command-line examples:
@@ -12,13 +12,13 @@ Command-line examples:
     Get and save data.
 
     ```
-    python tools/data/manage_team.py get_team_data
+    python tools/website/data/manage_team.py get_team_data
     ```
 
     Upload data.
 
     ```
-    python tools/data/manage_team.py upload_team_data
+    python tools/website/data/manage_team.py upload_team_data
     ```
 """
 # Standard imports
@@ -33,7 +33,7 @@ from data_management import get_data, upload_data
 
 # Set credentials.
 try:
-    config = dotenv_values('../../.env')
+    config = dotenv_values('../../../.env')
     credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
 except KeyError:
     config = dotenv_values('.env')
@@ -41,26 +41,28 @@ except KeyError:
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 
 
-def get_team_data():
+def get_team_data(filename, doc, ref):
     """Get team member data from Firestore."""
-    ref = 'public/team/team_members'
     try:
-        return get_data(REF, datafile='.datasets/team.json')
+        return get_data(ref, datafile=f'.datasets/website/{filename}')
     except FileNotFoundError:
-        return get_data(REF, datafile='../../.datasets/team.json')
+        return get_data(ref, datafile=f'../../../.datasets/website/{filename}')
 
 
-def upload_team_data():
+def upload_team_data(filename, doc, ref):
     """Upload team member data from local `.datasets`."""
-    ref = 'public/team/team_members'
-    stats_doc = 'public/team'
     try:
-        upload_data('.datasets/team.json', ref, stats_doc=stats_doc)
+        upload_data(f'.datasets/website/{filename}', ref, stats_doc=doc)
     except FileNotFoundError:
-        upload_data('../../.datasets/team.json', ref, stats_doc=stats_doc)
+        upload_data(f'../../../.datasets/website/{filename}', ref, stats_doc=doc)
 
 
 if __name__ == '__main__':
 
+        # Define references.
+    FILENAME = 'team.json'
+    DOC = 'public/team'
+    REF = f'{DOC}/team_members'
+
     # Make functions available from the command line.
-    globals()[sys.argv[1]]()
+    globals()[sys.argv[1]](FILENAME, DOC, REF)
