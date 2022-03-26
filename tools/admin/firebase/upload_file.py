@@ -14,7 +14,6 @@ Command-line example:
     ```
 """
 # Standard imports.
-from datetime import datetime
 import os
 import sys
 
@@ -22,7 +21,7 @@ import sys
 from dotenv import dotenv_values
 
 # Internal imports.
-sys.path.append('../../')
+sys.path.append('../../../')
 sys.path.append('./')
 from cannlytics.firebase import ( # pylint: disable=import-error, wrong-import-position
     create_short_url,
@@ -57,14 +56,16 @@ if __name__ == '__main__':
 
     # Initialize Firebase.
     try:
-        config = dotenv_values('../../.env')
+        config = dotenv_values('../../../.env')
         credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
     except KeyError:
         config = dotenv_values('.env')
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
     initialize_firebase()
 
-    # Update all docs in a given collection.
+    # Upload a given file to storage.
     ref = sys.argv[1]
     file_name = sys.argv[2]
     upload_file_to_storage(ref, file_name)
+
+    # TODO: Allow the generation of a short link! (Separate script?)

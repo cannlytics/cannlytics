@@ -3,29 +3,37 @@ Upload Data Model Worksheets | Cannlytics Console
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 7/6/2021
-Updated: 7/20/2021
+Updated: 3/25/2022
 License: MIT License <https://opensource.org/licenses/MIT>
+
+Command-line example:
+
+    ```
+    python tools/console/upload_worksheets
+    ```
 """
-
+# Standard imports.
 import os
-import environ
 from datetime import datetime
-
 import sys
+
+# External packages.
+from dotenv import dotenv_values
+
+# Internal imports.
 sys.path.append('../../')
 from cannlytics import firebase # pylint: disable=import-error
-from console import state
+from console import state # pylint: disable=import-error
 
 if __name__ == '__main__':
 
     # Initialize Firebase.
-    env = environ.Env()
-    env.read_env('../../.env')
-    credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
+    config = dotenv_values('../../.env')
+    credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
     db = firebase.initialize_firebase()
     api_key = firebase.get_document('admin/firebase')['web_api_key']
-    bucket_name = env('FIREBASE_STORAGE_BUCKET')
+    bucket_name = config['FIREBASE_STORAGE_BUCKET']
     
     # Upload worksheets to Firebase Storage and update model data in Firestore.
     for key, data_model in state.material['data_models'].items():

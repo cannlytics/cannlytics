@@ -4,7 +4,7 @@ Change User Custom Claims | Cannlytics
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
 Created: 6/13/2021
-Updated: 6/13/2021
+Updated: 3/25/2022
 License: MIT License <https://opensource.org/licenses/MIT>
 
 Description: Change a user's custom claims.
@@ -16,10 +16,12 @@ Command-line example:
     ```
 """
 # Standard imports.
-import environ
 import json
 import os
 import sys
+
+# External packages.
+from dotenv import dotenv_values
 
 # Internal imports.
 sys.path.append('../../..')
@@ -29,9 +31,8 @@ from cannlytics import firebase # pylint: disable=import-error
 if __name__ == '__main__':
 
     # Initialize Firebase
-    env = environ.Env()
-    env.read_env('../../../.env')
-    credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
+    config = dotenv_values('../../../.env')
+    credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
     firebase.initialize_firebase()
 

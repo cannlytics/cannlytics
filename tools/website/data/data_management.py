@@ -1,5 +1,5 @@
 """
-Manage Events | Cannlytics Website
+Data Interface for Tools | Cannlytics Website
 Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
