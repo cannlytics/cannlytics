@@ -1,6 +1,6 @@
 # Python Requirements | Cannlytics
 # Created 1/5/2021
-# Updated: 3/13/2022
+# Updated: 4/4/2022
 
 # Console and website requirements:
 datetime==4.3
@@ -33,3 +33,6 @@ ulid-py==1.1.0 # Used only in cannlytics module.
 spacy
 pymc3
 lifelines
+
+# Tool requirements:
+moviepy
