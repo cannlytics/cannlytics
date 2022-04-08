@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/4/2022
-Updated: 4/4/2022
+Updated: 4/7/2022
 License: MIT License <https://opensource.org/licenses/MIT>
 
 Command-line example:
@@ -22,7 +22,13 @@ from dotenv import dotenv_values
 import moviepy.editor as mp # pip install moviepy
 
 
-def video_to_audio(directory: str, episode: str, volume: Optional[float] = 1):
+def video_to_audio(
+        directory: str,
+        episode: str,
+        volume: Optional[float] = 1,
+        video_type: Optional[str] = 'mov',
+        audio_type: Optional[str] = 'mp3',
+):
     """Save the audio from a video as an audio file.
     Args:
         directory (str): The directory with `videos` and `audio` folders.
@@ -31,14 +37,14 @@ def video_to_audio(directory: str, episode: str, volume: Optional[float] = 1):
     """
 
     # Import the video.
-    clip = mp.VideoFileClip(f'{directory}/videos/{episode}.mov')
+    clip = mp.VideoFileClip(f'{directory}/videos/{episode}.{video_type}')
 
     # FIXME: Increase the volume of the video.
     if volume != 1:
         clip = clip.volumex(volume)
 
     # Output an audio file.
-    clip.audio.write_audiofile(f'{directory}/audio/{episode}.mp3')
+    clip.audio.write_audiofile(f'{directory}/audio/{episode}.{audio_type}')
 
 
 if __name__ == '__main__':
