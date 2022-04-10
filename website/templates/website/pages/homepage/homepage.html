@@ -18,6 +18,13 @@
     <!-- Hero -->
     {% include "website/pages/homepage/components/hero.html" with hero=homepage.hero only %}
 
+    <!-- Video Banner -->
+    <div class="ground">
+    {% include "website/components/banners/video_banner.html" %}
+    </div>
+
+    <!-- TODO: Mention Podcast on Spotify!!! -->
+
     <!-- Features -->
     {% include "website/pages/homepage/components/features.html" with features=homepage.features only %}
 
@@ -42,9 +49,6 @@
 
     <!-- Call to Action -->
     {% include "website/pages/homepage/components/call_to_action.html" with app=app only %}
-
-    <!-- Video Banner -->
-    {% include "website/components/banners/video_banner.html" %}
 
     <!-- Optional: List Cannlytics products and links to each GitHub repository | card style
       - Cannlytics AI
