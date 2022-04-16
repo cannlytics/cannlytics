@@ -31,7 +31,7 @@ from cannlytics.firebase import access_secret_version
 # Define project namespaces.
 PROJECT_NAME = 'website'
 ROOT_URLCONF = f'{PROJECT_NAME}.urls'
-SECRET_SETTINGS_NAME = 'cannlytics_website_settings'
+# SETTINGS_NAME = 'cannlytics_website_settings'
 WSGI_APPLICATION = f'{PROJECT_NAME}.core.wsgi.application'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -64,7 +64,7 @@ if os.path.isfile(env_file):
 else:
     try:
         project_id = os.environ['GOOGLE_CLOUD_PROJECT']
-        payload = access_secret_version(project_id, SECRET_SETTINGS_NAME, 'latest')
+        payload = access_secret_version(project_id, 'cannlytics_website_settings', 'latest')
         env.read_env(io.StringIO(payload))
     except KeyError:
         raise Exception('No local .env or GOOGLE_CLOUD_PROJECT detected. No secrets found.')
@@ -312,7 +312,7 @@ STATICFILES_DIRS = (
 
 # The directory from where files are served. (web accessible folder)
 STATIC_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', 'public/static')
+    os.path.join(os.path.dirname(__file__), '..', 'public/website/static')
 )
 
 # The relative path to serve files.

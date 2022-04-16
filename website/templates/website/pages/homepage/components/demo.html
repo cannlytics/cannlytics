@@ -3,7 +3,7 @@
 <!--
   Demo Page | Cannlytics Website
   Created: 1/5/2021
-  Updated: 1/5/2022
+  Updated: 4/10/2022
   Optional:
     - Make rendering dynamic with a for loop.
 -->
@@ -97,49 +97,6 @@
 </code></pre></div>
   </div>
 
-  <!-- Installation -->
-  {% comment %} <div class="row align-items-center justify-content-center mt-5">
-    <div class="col-12 col-md-6 text-start overflow-hidden">
-      <div class="my-3 py-lg-3">
-        <svg class="pe-3 pb-3" style="float:left;width:120px;height:120px;">
-          <use href="{% static "website/images/emojies/toolbox.svg" %}#toolbox-emoji"></use>
-        </svg>
-        <h2 class="fs-3 text-dark fw-bold my-2">
-          Custom Installation
-        </h2>
-        <p class="fs-6 double-line mb-2 pe-5">
-          <small>
-            Installing Cannlytics for use in your lab is as easy as 1, 2, 3.
-            You can simply clone
-            the source code and follow the included guides.
-            You can quickly configure
-            your installation to your liking.
-          </small>
-        </p>
-        <div class="d-none d-lg-flex mt-3">
-          <a
-            class="btn btn-sm-light btn-md-light"
-            href="https://docs.cannlytics.com/developers/installation"
-          >
-            <small class="serif">Installation Guide</small> &rarr;
-          </a>
-        </div>
-      </div>
-    </div>
-    <div class="codehilite rounded col-11 col-md-8 col-lg-6 text-start overflow-hidden px-2">
-      <button
-        class="copy-btn bg-transparent border-0 float-end app-action pt-2"
-        onclick="cannlytics.ui.copyToClipboard(document.getElementById('codeblock-1').innerHTML)"
-        title="Copy snippet"
-      >
-        {% icon "copy" class="link-secondary" height="24px" width="24px" %}
-      </button>
-      <pre class="d-flex">
-        <code id="codeblock-1">git clone https://github.com/cannlytics/cannlytics.git</code>
-      </pre>
-    </div>
-  </div> {% endcomment %}
-
   <!-- Plug and Play -->
   <div class="row align-items-center justify-content-center">
     <div class="col-12 col-md-6 pt-3 px-3 pe-lg-5 pt-md-5 text-start overflow-hidden">
@@ -175,9 +132,16 @@ title="Copy snippet"
 {% icon "copy" class="link-secondary" height="24px" width="24px" %}
 </button>
 
-<pre><span></span><code id="codeblock-2"><span class="kn">from</span> <span class="nn">cannlytics</span> <span class="kn">import</span> <span class="n">lims</span>
+<pre><span></span><code id="codeblock-2"><span class="kn">from</span> <span class="nn">cannlytics</span> <span class="kn">import</span> <span class="n">metrc</span>
 
-<span class="n">result</span> <span class="o">=</span> <span class="n">lims</span><span class="o">.</span><span class="n">get_lab_results</span><span class="p">(</span><span class="n">lab_id</span><span class="o">=</span><span class="s2">"xyz"</span><span class="p">)</span>
+<span class="c1"># Initalize Metrc.</span>
+<span class="n">track</span> <span class="o">=</span> <span class="n">metrc</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="s2">"vendor"</span><span class="o">, </span><span class="s2">"user"</span><span class="p">)</span>
+
+<span class="c1"># Labs can post lab results.</span>
+<span class="n">track.post_lab_results([{...}, {...}])</span>
+
+<span class="c1"># You can get your lab results!</span>
+<span class="n">lab_results = track.get_lab_results(uid=</span><span class="s2">"tag"</span><span class="o">)</span>
 </code></pre></div>
   </div>
 

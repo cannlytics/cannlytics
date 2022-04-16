@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 10/15/2020
-Updated: 1/26/2022
+Updated: 4/10/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # pylint:disable=line-too-long
@@ -327,7 +327,7 @@ page_data = {
             {
                 "name": "video_archive",
                 "ref": "public/videos/video_data",
-                "limit": 3,
+                "limit": 9,
                 "order_by": "published_at",
                 "desc": True
             },

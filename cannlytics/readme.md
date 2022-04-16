@@ -105,7 +105,7 @@ track.create_receipts([{...}, {...}])
 # Get recent receipts.
 sales = track.get_receipts(action='active', start='2021-04-20')
 
-# Update the sales receipt using.
+# Update the sales receipt.
 sale = track.get_receipts(uid='420')
 sale.total_price = 25
 sale.update()
