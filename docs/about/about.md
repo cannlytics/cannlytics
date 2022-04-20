@@ -30,7 +30,7 @@ For everyone else, Cannlytics provides cannabis data, statistics, and informatio
 
 ![Keegan Skeate](../../assets/images/illustrations/keeganskeate-robohash-human.png){ align=left width=100px}
 
-Cannlytics envisions providing laboratories around the world with modern, utility-filled, open source software to help make cannabis testing simple and easy. Cannlytics, the jet engine of cannabis analysis, has been built from the start with true traceability systemically engrained in every facet. In the Winter of 2020, a sole developer, Keegan Skeate, undertook the crafting of the Cannlytics platform to help make cannabis testing simple, easy, and accessible. Since then, the team has grown and Cannlytics is now a hearty community of developers and scientists dedicated to sharing their knowledge to create value, help people, and advance cannabis science.
+Cannlytics envisions providing laboratories around the world with modern, utility-filled, open source software to help make cannabis testing simple and easy. Cannlytics, the jet engine of cannabis analysis, has been built from the start with true traceability systemically engrained in every facet. In the Winter of 2020, an economist turned software developer, Keegan Skeate, undertook the crafting of the Cannlytics platform to help make cannabis testing simple, easy, and accessible. Since then, the team has grown and Cannlytics is now a hearty community of developers and scientists dedicated to sharing their knowledge to create value, help people, and advance cannabis science.
 
 !!! Quote "Keegan Skeate"
     I would like to help people access lab data easier in the lab, for the lab's clients, for the retailers of the clients, and for the end consumers. My mission is help connect people to their laboratory data. From the time data is generated from a scientific instrument, there is a long pipeline to get the data to the end consumer. In a nutshell, the data is often transcribed by a lab analyst, entered into an Excel spreadsheet, funneled into a database, looked at by multiple people, put on a certificate, then emailed or delivered through a portal to the client. The client, a wholesaler, then has to relay the certificate to their retailers. By this point, the chain is so convoluted that consumers can not quickly review actual lab results. So, there is interesting and potentially valuable lab data at different bottlenecks, but poor system communication often renders it useless. I would like to help everyone access lab data easier, from people in the lab to people who use labs to consumers of lab-tested products.
@@ -54,7 +54,7 @@ Users are encouraged to have their own kit of Cannlytics, since Cannlytics is a 
 
 **Value for value 🤝**
 
-We hope that we provide you with a lot of value. If you want to send us a portion of your value so that we can continue to provide you with value, then you can <a href="https://opencollective.com/cannlytics-company">make a small contribution to the Cannlytics team</a>.
+We hope that we provide you with value. If you want to invest a portion of your value so that we can provide you with even more value in the future, then you can <a href="https://cannlytics.page.link/donate">make a contribution to the Cannlytics team</a>.
 
 **Transparency 👐**
 
@@ -64,16 +64,16 @@ Part of the scientific process is presenting your methods to show how you reache
 
 Ultimately we believe that technology should be:
 
-- Approachable
-- Really easy to learn.
-- Really easy to use.
-- Really easy to install.
+- Approachable;
+- Easy to learn;
+- Easy to use;
+- Easy to install.
 
 We strive for:
 
-- Simplicity.
-- Easily read source code. Code should read like english.
-- Writing fast. We're perfectionist with deadlines after all!
+- Simplicity;
+- Source code that reads like english;
+- Fast execution (we're perfectionists with deadlines after all!);
 - Versatility: best of both worlds.
 
 The faster you get the app out the better, because development is an iterative process. The Python core allows for lab teams to build custom workflows directly in the Cannlytics platform. Furthermore, you can superpower your lab with data science and automation.

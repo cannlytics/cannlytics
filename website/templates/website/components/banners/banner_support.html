@@ -3,7 +3,7 @@
 <!--
   Banner - DataScience | Cannlytics Website
   Created: 6/27/2021
-  Updated: 9/13/2021
+  Updated: 4/10/2022
   Params:
     email
     phone
@@ -14,40 +14,16 @@
   <div class="d-flex"></div>
   <div class="d-flex align-items-center justify-content-center flex-wrap fw-bold">
 
-    <!-- Phone-->
-    {% comment %} <a
-      class="text-dark background-hover"
-      href="tel:{{ phone_number }}"
-      title="Call us"
-    >
-      <small>
-        {{ phone }}
-      </small>
-    </a>
-    <span class="px-2">|</span> {% endcomment %}
-
-    <!-- Email-->
-    {% comment %} <a
-      class="text-dark background-hover"
-      href="mailto:{{ email }}"
-      title="Email us"
-    >
-      <small>
-        {{ email }}
-      </small>
-    </a>
-    <span class="px-2">|</span> {% endcomment %}
+    <!-- New -->
     <a
       class="text-dark background-hover d-flex align-items-center"
-      href="{% url 'page' page='whitepapers' %}"
-      title="Read the latest paper about the cannabis industry."
+      href="https://open.spotify.com/show/026mnrCyi1QmyGnPRxdH1u"
+      title="Listen to Cannabis Data Science on Spotify!"
+      target="_blank"
     >
-      {% comment %} <svg class="" style="width:20px;height:20px;">
-        <use href="{% static "website/images/emojies/scroll.svg" %}#scroll-emoji"></use>
-      </svg> {% endcomment %}
       <span class="badge rounded-pill bg-success me-1">New</span>
       <small>
-        Cannabis Data Science Issue #1
+        Cannabis Data Science Podcast on Spotfiy
       </small>
     </a>
     <span class="px-2">|</span>
@@ -65,6 +41,19 @@
         Premium subscriptions now available!
       </small>
     </a>
+
+    <!-- Github star button -->
+    <span class="px-2">|</span>
+    <div class="d-flex">
+      <iframe
+        src="https://ghbtns.com/github-btn.html?user=cannlytics&repo=cannlytics&type=star&count=true"
+        frameborder="0"
+        scrolling="0"
+        width="75"
+        height="20"
+        title="Check out Cannlytics code and data on GitHub!"
+      ></iframe>
+    </div>
 
   </div>
   <div class="d-flex d-lg-none"></div>

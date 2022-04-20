@@ -126,3 +126,5 @@ website/static/website/js/bundles/*
 # Ignore local copy of cannlytics.
 # cannlytics/*
 /public/static/*
+public/console/
+public/website/

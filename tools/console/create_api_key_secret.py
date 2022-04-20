@@ -4,15 +4,18 @@ Create API Key Secret | Cannlytics
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
 Created: 6/13/2021
-Updated: 6/13/2021
+Updated: 3/25/2022
 License: MIT License <https://opensource.org/licenses/MIT>
-Description:
-    Save sensitive API keys as secrets.
-"""
-import os
-import environ
 
+Description: Save sensitive API keys as secrets.
+"""
+# Standard imports.
+import os
 import sys
+
+# External imports.
+from dotenv import dotenv_values
+
 sys.path.append('../..')
 from cannlytics import firebase # pylint: disable=import-error
 
@@ -49,18 +52,19 @@ def create_project_secret(project_id, secret_id, secret, ref, field):
     firebase.update_document(ref, data)
     return data
 
+
 if __name__ == '__main__':
 
     # Initialize Firebase
-    env = environ.Env()
-    env.read_env('../../.env')
-    credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
+    config = dotenv_values('../../.env')
+    credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
     firebase.initialize_firebase()
 
     # Create Metrc vendor API key secret.
-    PROJECT_ID = env('FIREBASE_PROJECT_ID')
-    SECRET = env('METRC_VENDOR_API_KEY')
+    # TODO: Allow secret_id, ref, and field to be dynamic.
+    PROJECT_ID = config['FIREBASE_PROJECT_ID']
+    SECRET = config['METRC_VENDOR_API_KEY']
     secret_data = create_project_secret(
         PROJECT_ID,
         secret_id='metrc_vendor_api_key',

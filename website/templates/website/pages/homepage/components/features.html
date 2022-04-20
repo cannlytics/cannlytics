@@ -21,15 +21,15 @@
               {{ feature.title }}
             </h2>
             <p class="fs-6 double-line text-start">
-              {{ feature.message }}
+              <small>{{ feature.message }}</small>
             </p>
             {% if feature.action %}
-              <p class="markdown text-start fs-6 mt-2">
+              <p class="text-start fs-6 mt-2">
                 <a
                   class="fw-bold btn btn-sm-light serif text-dark"
                   href="{{ feature.action_url }}"
                 >
-                  {{ feature.action }} &rarr;
+                  <small class="serif">{{ feature.action }} &rarr;</small>
                 </a>
               </p>
               {% endif %}

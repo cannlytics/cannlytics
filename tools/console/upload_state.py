@@ -4,24 +4,32 @@ Upload State | Cannlytics Console
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
 Created: 7/5/2021
-Updated: 7/5/2021
+Updated: 3/25/2022
 License: MIT License <https://opensource.org/licenses/MIT>
+
+Command-line example:
+
+    ```
+    python tools/console/upload_state
+    ```
 """
-
+# Standard imports.
 import os
-import environ
-
 import sys
+
+# External imports.
+from dotenv import dotenv_values
+
+# Internal imports.
 sys.path.append('../../')
 from cannlytics import firebase # pylint: disable=import-error
-from console.state import data_models
+from console.state import data_models # pylint: disable=import-error
 
 if __name__ == '__main__':
 
     # Initialize Firebase.
-    env = environ.Env()
-    env.read_env('../../.env')
-    credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
+    config = dotenv_values('../../../.env')
+    credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
     db = firebase.initialize_firebase()
     

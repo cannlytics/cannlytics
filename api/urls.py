@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/21/2021
-Updated: 12/30/2021
+Updated: 4/20/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Description: API URLs to interface with cannabis analytics.
@@ -23,6 +23,7 @@ from api.certificates import certificates
 from api.contacts import contacts
 from api.data import data
 from api.data.analysis_data import analysis_data
+from api.data import ccrs_data
 from api.data.lab_data import lab_data, lab_analyses, lab_logs
 from api.data.regulation_data import regulation_data
 from api.data.state_data import state_data
@@ -82,6 +83,20 @@ urlpatterns = [
         path('', data.datasets),
         path('/analyses', analysis_data),
         path('/analyses/<analysis_id', analysis_data),
+        path('/ccrs/areas', ccrs_data.areas),
+        path('/ccrs/contacts', ccrs_data.contacts),
+        path('/ccrs/integrators', ccrs_data.integrators),
+        path('/ccrs/inventory', ccrs_data.inventory),
+        path('/ccrs/inventory_adjustments', ccrs_data.inventory_adjustments),
+        path('/ccrs/plants', ccrs_data.plants),
+        path('/ccrs/plant_destructions', ccrs_data.plant_destructions),
+        path('/ccrs/products', ccrs_data.products),
+        path('/ccrs/lab_results', ccrs_data.lab_results),
+        path('/ccrs/licensees', ccrs_data.licensees),
+        path('/ccrs/sale_headers', ccrs_data.sale_headers),
+        path('/ccrs/sale_details', ccrs_data.sale_details),
+        path('/ccrs/strains', ccrs_data.strains),
+        path('/ccrs/transfers', ccrs_data.transfers),
         path('/regulations', regulation_data),
         path('/regulations/<state>', regulation_data),
         path('/state', state_data),

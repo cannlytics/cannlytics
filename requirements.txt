@@ -1,6 +1,6 @@
 # Python Requirements | Cannlytics
 # Created 1/5/2021
-# Updated: 3/13/2022
+# Updated: 4/4/2022
 
 # Console and website requirements:
 datetime==4.3
@@ -19,7 +19,7 @@ Markdown==3.3.4
 python-dotenv==0.19.2
 pymdown-extensions==9.1
 python-markdown-math==0.8
-waitress==2.0.0
+waitress==2.1.1
 whitenoise==5.3.0
 
 # Cannlytics package requirements:
@@ -33,3 +33,6 @@ ulid-py==1.1.0 # Used only in cannlytics module.
 spacy
 pymc3
 lifelines
+
+# Tool requirements:
+moviepy

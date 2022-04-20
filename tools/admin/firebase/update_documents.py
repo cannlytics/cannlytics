@@ -4,14 +4,26 @@ Update Firestore Documents | Cannlytics
 Author: Keegan Skeate
 Contact: <keegan@cannlytics.com>
 Created: 8/21/2021
-Updated: 8/21/2021
+Updated: 3/25/2022
 License: MIT License <https://opensource.org/licenses/MIT>
+
+Description: Update a given Firestore document given data as an object.
+
+Command-line example:
+
+    ```
+    python admin/firebase/update_documents location destination
+    ```
 """
+# Standard imports.
 from datetime import datetime
 import os
-import environ
-
 import sys
+
+# External packages.
+from dotenv import dotenv_values
+
+# Internal imports.
 sys.path.append('../../../')
 from cannlytics import firebase # pylint: disable=import-error
 
@@ -33,11 +45,12 @@ def set_updated_at(ref):
 if __name__ == '__main__':
 
     # Initialize Firebase.
-    env = environ.Env()
-    env.read_env('../../../.env')
-    credentials = env('GOOGLE_APPLICATION_CREDENTIALS')
+    config = dotenv_values('../../../.env')
+    credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
     db = firebase.initialize_firebase()
     
-    # Update all docs in a given collection.
-    set_updated_at('organizations/test-company/analytes')
+    # TODO: Implement useful logic here, such as allowing
+    # the user to pass an object (or list?) of data.
+    DOCUMENT = sys.argv[1]
+    set_updated_at(DOCUMENT)
