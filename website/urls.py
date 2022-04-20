@@ -53,6 +53,7 @@ urlpatterns = [
     #     path('/market', main.GeneralView.as_view(), name='market'),
     #     path('/<dataset_id>', market.DatasetView.as_view(), name='dataset'),
     # ])),
+    # Optional: Redirect data/wa or data/washington to data/states/washington?
     path('data/market/<dataset_id>', market.DatasetView.as_view(), name='dataset'),
     path('testing', include([
         path('', testing.TestingView.as_view(), name='testing'),

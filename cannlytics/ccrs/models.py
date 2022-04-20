@@ -5,23 +5,27 @@ Copyright (c) 2022 Cannlytics
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/10/2022
 Updated: 4/10/2022
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains common CCRS models.
 """
 
 # Internal imports.
-from ..firebase import get_document, update_document
-from ..utils.utils import (
-    camel_to_snake,
-    clean_dictionary,
+from cannlytics.firebase import get_document, update_document
+from cannlytics.utils.utils import (
     clean_nested_dictionary,
-    get_timestamp,
-    remove_dict_fields,
-    remove_dict_nulls,
-    snake_to_camel,
-    update_dict,
+    snake_case
 )
+# from cannlytics.utils.utils import (
+#     camel_to_snake,
+#     clean_dictionary,
+#     clean_nested_dictionary,
+#     get_timestamp,
+#     remove_dict_fields,
+#     remove_dict_nulls,
+#     snake_to_camel,
+#     update_dict,
+# )
 
 
 class Model(object):
@@ -32,7 +36,7 @@ class Model(object):
             client,
             context,
             license_number='',
-            function=camel_to_snake
+            function=snake_case
     ):
         """Initialize the model, setting keys as properties."""
         self.client = client

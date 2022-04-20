@@ -64,7 +64,7 @@
       ]
     },
     {
-      "target": "website",
+      "site": "cannlytics",
       "public": "public/website",
       "ignore": [
         "firebase.json",

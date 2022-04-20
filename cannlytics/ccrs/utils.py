@@ -5,7 +5,7 @@ Copyright (c) 2022 Cannlytics
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/11/2022
 Updated: 4/11/2022
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 import os
 import zipfile

@@ -4,30 +4,50 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/12/2022
-Updated: 4/12/2022
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+Updated: 4/20/2022
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+Data Sources:
+
+    - WAC 314-55-102 Quality assurance and quality control
+    https://app.leg.wa.gov/wac/default.aspx?cite=314-55-102&pdf=true
+
+    - WAC 314-55-108 Pesticide action levels
+    https://apps.leg.wa.gov/WAC/default.aspx?cite=314-55-108
+
+    - WAC 246-70-050 Quality assurance testing
+    https://app.leg.wa.gov/WAC/default.aspx?cite=246-70-050&pdf=true
 """
 
-analyte_limits = {
-
-}
-
-analysis_map = {
-    'Microbiological': 'microbe',
-    'Residual Solvent': 'residual_solvent',
-    'Potency': 'cannabinoid',
+analyses = {
     'Foreign Matter': 'foreign_matter',
-    'Moisture Analysis': 'moisture',
-    'Mycotoxin': 'mycotoxin',
-    'Moistures Analysis': 'moisture',
     'Heavy Metal': 'heavy_metal',
+    'Microbiological': 'microbe',
+    'Moisture Analysis': 'moisture',
+    'Moistures Analysis': 'moisture',
+    'Mycotoxin': 'mycotoxin',
     'Pesticide': 'pesticide',
+    'Potency': 'cannabinoid',
+    'Residual Solvent': 'residual_solvent',
     'Terpene': 'terpene',
+    'Water Activity': 'water_activity',
 }
 
+# FIXME: Reformat and add WSLCB limits.
+# Ensure all analytes are included and not repeated.
 analytes = {
-    'Microbial- I502 panel (3)-E.coli': {'key': 'e_coli', 'type': 'microbe', 'units': 'CFU/G'},
-    'Microbial- I502 panel (3)-Bile Tolerant gram neg': {'key': 'btgn', 'type': 'microbe', 'units': 'CFU/G'},
+    'Microbial- I502 panel (3)-E.coli': {
+        'key': 'e_coli',
+        'type': 'microbe',
+        'units': 'CFU/G',
+        'limit': -1,
+    },
+    'Microbial- I502 panel (3)-Bile Tolerant gram neg': {
+        'key': 'btgn',
+        'type': 'microbe',
+        'units': 'CFU/G',
+        'limit': -1,
+    },
     'Microbial- I502 panel (3)-Salmonella': {'key': 'salmonella', 'type': 'microbe', 'units': 'CFU/G'},
     'Moisture & Water Activity-Moisture(%)': {'key': 'moisture', 'type': 'moisture', 'units': 'percent'},
     'Moisture & Water Activity-Water Activity (Aw)(%)': {'key': 'water_activity', 'type': 'water_activity', 'units': 'aw'},
@@ -49,7 +69,7 @@ analytes = {
     'Residual Solvent - Toluene (ppm)': {'key': 'toluene', 'type': 'Residual Solvent', 'units': 'ppm'},
     'Residual Solvent - Heptanes (ppm)': {'key': 'heptanes', 'type': 'Residual Solvent', 'units': 'ppm'},
     'Microbiological - Salmonella (CFU/g)': {'key': 'salmonella', 'type': 'Microbiological', 'units': 'CFU/g'},
-    'Microbiological - STEC (CFU/g)': {'key': 'stec', 'type': 'Microbiological', 'units': 'CFU/g'},
+    'Microbiological - Ste (CFU/g)': {'key': 'stec', 'type': 'Microbiological', 'units': 'CFU/g'},
     'Moisture Analysis - Water Activity (aw)': {'key': 'water_activity', 'type': 'Moisture Analysis', 'units': 'aw'},
     'Mycotoxin - Ochratoxin A (ppb)': {'key': 'ochratoxin', 'type': 'Mycotoxin', 'units': 'ppb'},
     'Moistures Analysis - Moisture Content (%)': {'key': 'moisture_content', 'type': 'Moistures Analysis', 'units': 'percent'},
@@ -110,6 +130,7 @@ analytes = {
     'Microbiological - BTGN (CFU/G)': {'key': 'btgn', 'type': 'Microbiological', 'units': 'CFU/G'},
     'Mycotoxin - Ochratoxin (CFU/G)': {'key': 'ochratoxin', 'type': 'Mycotoxin', 'units': 'CFU/G'},
     'Microbiological - STEC (CFU/G)': {'key': 'stec', 'type': 'Microbiological', 'units': 'CFU/G'},
+    'Microbiological - STEC (CFU/g)': {'key': 'stec', 'type': 'Microbiological', 'units': 'CFU/G'},
     'Microbiological - Salmonella (CFU/G)': {'key': 'salmonella', 'type': 'Microbiological', 'units': 'CFU/G'},
     'Mycotoxin - Aflatoxins (CFU/G)': {'key': 'aflatoxins', 'type': 'Mycotoxin', 'units': 'CFU/G'},
     'Residual Solvent - Benzene (PPM)': {'key': 'benzene', 'type': 'Residual Solvent', 'units': 'PPM'},
@@ -196,32 +217,114 @@ analytes = {
     'Pesticide - Trifloxystrobin (ppm)': {'key': 'trifloxystrobin', 'type': 'Pesticide', 'units': 'ppm'},
 }
 
-model_names = {
+datasets = {
     'areas': {
-        'state_name': 'Areas_0',
+        'dataset': 'Areas_0',
         'singular': 'area',
         'fields': {
-            
-        }
+            'LicenseeId': 'string',
+            'Name': 'string',
+            'IsQuarantine': 'bool',
+            'ExternalIdentifier': 'string',
+            'IsDeleted': 'bool',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'UpdatedDate': 'datetime',
+        },
+        'date_fields': [
+            'CreatedDate',
+            'UpdatedDate',
+        ],
     },
     'contacts': {
-        'state_name': 'Contacts_0',
+        'dataset': 'Contacts_0',
         'singular': 'contact',
+        'fields': {
+            'LicenseeId': 'string',
+            'IntegratorId': 'string',
+            'FirstName': 'string',
+            'MiddleInitial': 'string',
+            'LastName': 'string',
+            'ExternalIdentifier': 'string',
+            'IsDeleted': 'bool',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'UpdatedDate': 'datetime',
+            'IsAdmin': 'bool',
+        },
+        'date_fields': [
+            'CreatedDate',
+            'UpdatedDate',
+        ],
     },
     'integrators': {
-        'state_name': 'Integrator_0',
+        'dataset': 'Integrator_0',
         'singular': 'integrator',
+        'fields': {
+            'Name': 'string',
+            'IsActive': 'bool',
+            'IsDeleted': 'bool',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'UpdatedDate': 'datetime',
+        },
+        'date_fields': [
+            'CreatedDate',
+            'UpdatedDate',
+        ],
     },
     'inventory': {
-        'state_name': 'Inventory_0',
+        'dataset': 'Inventory_0',
         'singular': 'inventory_item',
+        'fields': {
+            'LicenseeId': 'string',
+            'StrainId': 'string',
+            'AreaId': 'string',
+            'ProductId': 'string',
+            'InventoryIdentifier': 'string',
+            'InitialQuantity': 'float',
+            'QuantityOnHand': 'float',
+            'TotalCost': 'float',
+            'IsMedical': 'bool',
+            'ExternalIdentifier': 'string',
+            'IsDeleted': 'bool',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'updatedDate': 'datetime',
+        },
+        'date_fields': [
+            'CreatedDate',
+            'updatedDate',
+        ],
     },
     'inventory_adjustments': {
-        'state_name': 'Areas_0',
+        'dataset': 'Areas_0',
         'singular': 'inventory_adjustment',
+        'fields': {
+            'InventoryId': 'string',
+            'InventoryAdjustmentReason': 'string',
+            'AdjustmentDetail': 'string',
+            'Quantity': 'float',
+            'AdjustmentDate': 'datetime',
+            'ExternalIdentifier': 'string',
+            'IsDeleted': 'bool',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'UpdatedDate': 'datetime',
+        },
+        'date_fields': [
+            'AdjustmentDate',
+            'CreatedDate',
+            'UpdatedDate',
+        ],
     },
     'lab_results': {
-        'state_name': 'LabResult_0',
+        'dataset': 'LabResult_0',
         'singular': 'lab_result',
         'fields': {
             'LabLicenseeId': 'string',
@@ -245,36 +348,222 @@ model_names = {
         ],
     },
     'licensees': {
-        'state_name': 'Areas_0',
+        'dataset': 'Licensee_0',
         'singular': 'licensee',
+        'fields': {
+            'LicenseStatus': 'string',
+            'UBI': 'string',
+            'LicenseNumber': 'string',
+            'Name': 'string',
+            'DBA': 'string',
+            'LicenseIssueDate': 'datetime',
+            'LicenseExpirationDate': 'datetime',
+            'ExternalIdentifier': 'string',
+            'IsDeleted': 'bool',
+            'Address1': 'string',
+            'Address2': 'string',
+            'City': 'string',
+            'State': 'string',
+            'ZipCode': 'string',
+            'County': 'string',
+            'EmailAddress': 'string',
+            'PhoneNumber': 'string',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'UpdatedDate': 'datetime',
+        },
+        'date_fields': [
+            'CreatedDate',
+            'LicenseIssueDate',
+            'LicenseExpirationDate',
+            'UpdatedDate',
+        ],
     },
     'plants': {
-        'state_name': 'Areas_0',
+        'dataset': 'Plant_0',
         'singular': 'plant',
+        'fields': {
+            'LicenseeId': 'string',
+            'AreaId': 'string',
+            'StrainId': 'string',
+            'PlantSource': 'string',
+            'PlantState': 'string',
+            'GrowthStage': 'string',
+            'HarvestCycle': 'string',
+            'MotherPlantId': 'string',
+            'PlantIdentifier': 'string',
+            'HarvestDate': 'datetime',
+            'IsMotherPlant': 'bool',
+            'ExternalIdentifier': 'string',
+            'IsDeleted': 'bool',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'UpdatedDate': 'string',
+        },
+        'date_fields': [
+            'CreatedDate',
+            'HarvestDate',
+            'UpdatedDate',
+        ],
     },
     'plant_destructions': {
-        'state_name': 'Areas_0',
+        'dataset': 'PlantDestructions_0',
         'singular': 'plant_destruction',
+        'fields': {
+            'PlantId',
+            'DestructionReason',
+            'DestructionMethod',
+            'DestructionDate',
+            'ExternalIdentifier',
+            'IsDeleted',
+            'CreatedBy',
+            'CreatedDate',
+            'UpdatedBy',
+            'UpdatedDate'
+        },
+        'date_fields': [
+            'CreatedDate',
+            'DestructionDate',
+            'UpdatedDate',
+        ],
     },
     'products': {
-        'state_name': 'Areas_0',
+        'dataset': 'Product_0',
         'singular': 'product',
+        'fields': {
+            'LicenseeId': 'string',
+            'InventoryTypeId': 'string',
+            'Name': 'string',
+            'Description': 'string',
+            'UnitWeightGrams': 'float',
+            'ExternalIdentifier': 'string',
+            'IsDeleted': 'bool',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'UpdatedDate': 'datetime',
+        },
+        'date_fields': [
+            'CreatedDate',
+            'UpdatedDate',
+        ],
     },
     'sale_headers': {
-        'state_name': 'Areas_0',
+        'dataset': 'SaleHeader_0',
         'singular': 'sale',
+        'fields': {
+            'SaleHeaderId': 'string',
+            'LicenseeId': 'string',
+            'SoldToLicenseeId': 'string',
+            'SaleType': 'string',
+            'SaleDate': 'datetime',
+            'ExternalIdentifier': 'string',
+            'IsDeleted': 'bool',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'UpdatedDate': 'datetime',
+        },
+        'date_fields': [
+            'CreatedDate',
+            'SaleDate',
+            'UpdatedDate',
+        ],
     },
     'sale_details': {
-        'state_name': 'Areas_0',
+        'dataset': 'SalesDetail_0',
         'singular': 'sale_item',
+        'fields': {
+            'SaleDetailId': 'string',
+            'SaleHeaderId': 'string',
+            'InventoryId': 'string',
+            'PlantId': 'string',
+            'Quantity': 'float',
+            'UnitPrice': 'float',
+            'Discount': 'float',
+            'SalesTax': 'float',
+            'OtherTax': 'float',
+            'ExternalIdentifier': 'string',
+            'IsDeleted': 'bool',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'UpdatedDate': 'datetime',
+        },
+        'date_fields': [
+            'CreatedDate',
+            'UpdatedDate',
+        ],
     },
     'strains': {
-        'state_name': 'Areas_0',
+        'dataset': 'Strains_0',
         'singular': 'strain',
+        'fields': {
+            'StrainType': 'string',
+            'Name': 'string',
+            'IsDeleted': 'bool',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'UpdatedDate': 'datetime',
+        },
+        'date_fields': [
+            'CreatedDate',
+            'UpdatedDate',
+        ],
     },
     'transfers': {
-        'state_name': 'Areas_0',
+        'dataset': 'Transfers_0',
         'singular': 'transfer',
+        'fields': {
+            'Serial': 'string',
+            'SID': 'string',
+            'Submitted Time': 'datetime',
+            'Completed Time': 'datetime',
+            'Modified Time': 'datetime',
+            'Draft': 'int',
+            'UID': 'string',
+            'Username': 'string',
+            'Transportation Type': 'string',
+            'Scheduled Transportation Date': 'datetime',
+            'UBI Number': 'string',
+            'Origin License Number': 'string',
+            'Origin Trade Name': 'string',
+            'Origin License Address': 'string',
+            'Origin License Phone': 'string',
+            'Origin License E-mail Address': 'string',
+            'Departure Date': 'datetime',
+            'Estimated Departure Time': 'time',
+            'Arrival Date': 'datetime',
+            'Estimated Arrival Time': 'time',
+            'Destination License Name': 'string',
+            'Destination License Number': 'string',
+            'Destination License Email': 'string',
+            'Destination License Phone': 'string',
+            'Destination License Address': 'string',
+            'Items Shipped': 'string', # This is actually a complex CSV, TSV, etc.
+        },
+        'date_fields': [
+            'Submitted Time',
+            'Completed Time',
+            'Modified Time',
+            'Scheduled Transportation Date',
+            'Departure Date',
+            'Arrival Date',
+        ],
     },
 }
 
+plant_growth_stages = ['Vegetative', 'Immature', 'Flowering']
+plant_harvest_cycles = [ 3,  6,  9, 12]
+plants_sources = ['Clone', 'Seed']
+plant_states = [
+    'Growing',
+    'Inventory',
+    'Drying',
+    'Harvested',
+    'Destroyed',
+    'Sold',
+]
