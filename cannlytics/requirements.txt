@@ -1,9 +1,10 @@
 # Python Requirements | Cannlytics
 # Created 3/14/2022
-# Updated: 3/14/2022
+# Updated: 4/21/2022
 
 beautifulsoup4
 firebase_admin
+fredapi
 google-cloud-secret-manager
 google-cloud-firestore
 googlemaps
@@ -11,6 +12,7 @@ matplotlib
 numpy
 openpyxl
 pandas
+python-dateutil
 python-dotenv
 statsmodels
 ulid-py

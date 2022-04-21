@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 11/6/2021
-Updated: 11/8/2021
+Updated: 4/21/2022
 License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
 
 Description: This module contains general cannabis analytics utility functions.
@@ -12,7 +12,10 @@ Description: This module contains general cannabis analytics utility functions.
 # Standard imports.
 from datetime import datetime, timedelta
 from typing import Any, Callable, List, Optional
-from zoneinfo import ZoneInfo
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    print('Operating with Python < 3.9 is not recommended.')
 from re import sub, findall
 import secrets
 
@@ -91,9 +94,9 @@ def clean_nested_dictionary(data: dict, function: Callable = camel_to_snake) -> 
         (dict): Returns the input dictionary with cleaned keys.
     """
     clean = clean_dictionary(data, function)
-    for k, v in clean.items():
+    for k, value in clean.items():
         try:
-            clean[k] = clean_dictionary(v, function)
+            clean[k] = clean_dictionary(value, function)
         except AttributeError:
             pass
     return clean
@@ -127,21 +130,21 @@ def get_random_string(length, allowed_chars=RANDOM_STRING_CHARS):
 
     Copyright (c) Django Software Foundation and individual contributors.
     All rights reserved.
-    
+
     Redistribution and use in source and binary forms, with or without modification,
     are permitted provided that the following conditions are met:
-    
+
         1. Redistributions of source code must retain the above copyright notice,
            this list of conditions and the following disclaimer.
-    
+
         2. Redistributions in binary form must reproduce the above copyright
            notice, this list of conditions and the following disclaimer in the
            documentation and/or other materials provided with the distribution.
-    
+
         3. Neither the name of Django nor the names of its contributors may be used
            to endorse or promote products derived from this software without
            specific prior written permission.
-    
+
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE

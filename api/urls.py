@@ -83,6 +83,8 @@ urlpatterns = [
         path('', data.datasets),
         path('/analyses', analysis_data),
         path('/analyses/<analysis_id', analysis_data),
+
+        # FIXME: Re-design CCRS endpoints around timeseries statistics :)
         path('/ccrs/areas', ccrs_data.areas),
         path('/ccrs/contacts', ccrs_data.contacts),
         path('/ccrs/integrators', ccrs_data.integrators),
@@ -97,8 +99,10 @@ urlpatterns = [
         path('/ccrs/sale_details', ccrs_data.sale_details),
         path('/ccrs/strains', ccrs_data.strains),
         path('/ccrs/transfers', ccrs_data.transfers),
+
         path('/regulations', regulation_data),
         path('/regulations/<state>', regulation_data),
+
         path('/state', state_data),
         path('/state/<state>', state_data),
     ])),

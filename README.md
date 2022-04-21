@@ -518,7 +518,7 @@ Cannlytics is made available with ❤️ and your good will. Please consider mak
 | ⚡ Ethereum donation address | 0x8997cA09B3FAe2ce4039E295A5269cf4ae7a0BA5 |
 
 <div style="margin-top:1rem; margin-bottom: 1rem;">
-  <img style="max-width:240px" alt="" src="https://cannlytics.com/static/website/images/decoration/data-pipeline.png">
+  <img style="width:240px" alt="" src="https://cannlytics.com/static/website/images/decoration/data-pipeline.png">
 </div>
 
 Thank you 🙏
