@@ -1,7 +1,7 @@
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
   <img style="height:180px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics-space-logo.png?alt=media&token=87727d92-bfb1-43df-bb9e-e2308dfa9b08">
-  <div style="margin-top:0.5rem;">
-    <h3>Simple, easy, cannabis analytics.</h3>
+  <div>
+    <h3>Cannabis + Analytics</h3>
   </div>
 
 <https://cannlytics.com>
@@ -514,6 +514,7 @@ Cannlytics is made available with ❤️ and your good will. Please consider mak
 |-|-|
 | 👐 OpenCollective | <https://opencollective.com/cannlytics-company/donate> |
 | 💸 PayPal Donation | <https://paypal.me/cannlytics> |
+| 💵 Venmo Donation | <https://www.venmo.com/u/cannlytics> |
 | 🪙 Bitcoin donation address| 34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6 |
 | ⚡ Ethereum donation address | 0x8997cA09B3FAe2ce4039E295A5269cf4ae7a0BA5 |
 

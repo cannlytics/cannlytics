@@ -18,6 +18,8 @@ Setup:
 
     1. pip install cannlytics
 
+FIXME: Turn script into re-usable functions.
+
 """
 # Standard imports.
 import os

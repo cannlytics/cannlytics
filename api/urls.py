@@ -26,7 +26,7 @@ from api.data.analysis_data import analysis_data
 from api.data import ccrs_data
 from api.data.lab_data import lab_data, lab_analyses, lab_logs
 from api.data.regulation_data import regulation_data
-from api.data.state_data import state_data
+from api.data import state_data
 from api.instruments import instruments
 from api.inventory import inventory
 from api.invoices import invoices
@@ -103,8 +103,13 @@ urlpatterns = [
         path('/regulations', regulation_data),
         path('/regulations/<state>', regulation_data),
 
-        path('/state', state_data),
-        path('/state/<state>', state_data),
+        path('/states', state_data.state_data),
+        path('/states/ct', state_data.state_data_ma),
+        path('/states/ma', state_data.state_data_ma),
+        path('/states/ok', state_data.state_data_ma),
+        path('/states/or', state_data.state_data_ma),
+        path('/states/wa', state_data.state_data_ma),
+        # path('/state/<state>', state_data),
     ])),
     path('people', include([
         path('', contacts.people),

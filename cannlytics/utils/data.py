@@ -3,7 +3,7 @@ Data Utilities | Cannlytics
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 4/21/2022
-Updated: 4/21/2022
+Updated: 4/24/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Internal imports.
@@ -14,7 +14,7 @@ from typing import Any, List, Optional
 # External imports.
 from dateutil import relativedelta
 from fredapi import Fred
-from pandas import merge, to_datetime
+from pandas import merge, NaT, to_datetime
 from pandas.tseries.offsets import MonthEnd
 
 
@@ -25,13 +25,21 @@ from pandas.tseries.offsets import MonthEnd
 def get_state_population(
         api_key: str,
         state: str,
+        district: Optional[str] = '',
         obs_start: Optional[Any] = None,
         obs_end: Optional[Any] = None,
+        multiplier: Optional[float] = 1000.0,
 ) -> List[int]:
     """Get a given state's population from the Fed Fred API."""
     fred = Fred(api_key=api_key)
-    population = fred.get_series(f'{state}POP', obs_start, obs_end)
-    return [int(x * 1000) for x in population.values]
+    population = fred.get_series(f'{state}POP{district}', obs_start, obs_end)
+    try:
+        population = [int(x * multiplier) for x in population.values]
+        if len(population) == 1:
+            return population[0]
+    except ValueError:
+        pass
+    return population
 
 
 def get_state_current_population(state, api_key=None):
@@ -65,6 +73,14 @@ def get_state_current_population(state, api_key=None):
 #-----------------------------------------------------------------------
 # Time utilities.
 #-----------------------------------------------------------------------
+
+def convert_month_year_to_date(x):
+    """Convert a month, year series to datetime. E.g. `'April 2022'`."""
+    try:
+        return datetime.strptime(x.replace('.0', ''), '%B %Y')
+    except:
+        return NaT
+
 
 def end_of_month(value: datetime) -> str:
     """Format a datetime as an ISO formatted date at the end of the month.
@@ -166,6 +182,14 @@ def sorted_nicely(unsorted_list: List[str]) -> List[str]:
     convert = lambda text: int(text) if text.isdigit() else text
     alpha = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
     return sorted(unsorted_list, key=alpha)
+
+
+def sentence_case(s):
+    """
+    Author: Zizouz212 https://stackoverflow.com/a/39969233/5021266
+    License: CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0/
+    """
+    return '. '.join(i.capitalize() for i in s.split('. ')).strip()
 
 
 #-----------------------------------------------------------------------

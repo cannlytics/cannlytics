@@ -196,24 +196,24 @@ def get_page_email(html: str, response: Any) -> str:
         return email
 
 
-def find_lab_address():
+def find_company_address():
     """
-    TODO: Try to find a lab's address from their website, then Google Maps.
+    TODO: Try to find a company's address from their website, then Google Maps.
     """
     raise NotImplementedError
     # street, city, state, zipcode = None, None, None, None
     # return street, city, state, zipcode
 
 
-def find_lab_linkedin():
+def find_company_linkedin():
     """
-    TODO: Tru to find a lab's LinkedIn URL. (Try to find LinkedIn on homepage?)
+    TODO: Tru to find a company's LinkedIn URL. (Try to find LinkedIn on homepage?)
     """
     raise NotImplementedError
 
 
-def find_lab_url():
+def find_company_url():
     """
-    TODO: Find a lab's website URL. (Google search for name?)
+    TODO: Find a company's website URL. (Google search for name?)
     """
     raise NotImplementedError

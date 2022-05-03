@@ -4,9 +4,10 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 11/6/2021
-Updated: 4/21/2022
+Updated: 5/2/2022
 """
 from .data import (
+    convert_month_year_to_date,
     get_state_population,
     get_state_current_population,
     end_of_month,
@@ -29,7 +30,7 @@ from .files import (
 from .utils import (
     camelcase,
     camel_to_snake,
-    clean_column_names,
+    clean_column_strings,
     clean_dictionary,
     clean_nested_dictionary,
     get_keywords,
@@ -38,23 +39,22 @@ from .utils import (
     remove_dict_fields,
     remove_dict_nulls,
     snake_case,
-    snake_to_camel,
     update_dict,
 )
 
 __all__ = [
     'camelcase',
     'camel_to_snake',
-    'clean_column_names',
+    'clean_column_strings',
     'clean_dictionary',
     'clean_nested_dictionary',
+    'convert_month_year_to_date',
     'get_keywords',
     'get_random_string',
     'get_timestamp',
     'remove_dict_fields',
     'remove_dict_nulls',
     'snake_case',
-    'snake_to_camel',
     'update_dict',
     'get_state_population',
     'get_state_current_population',

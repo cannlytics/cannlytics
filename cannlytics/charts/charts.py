@@ -4,22 +4,33 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
 Created: 9/16/2021
-Updated: 9/23/2021
+Updated: 5/2/2022
 License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
-
-Plotting Resources:
-    https://scentellegher.github.io/visualization/2018/10/10/beautiful-bar-plots-matplotlib.html
-    https://towardsdatascience.com/a-simple-guide-to-beautiful-visualizations-in-python-f564e6b9d392
-    https://www.python-graph-gallery.com/ridgeline-graph-seaborn
-    http://www.randalolson.com/2014/06/28/how-to-make-beautiful-data-visualizations-in-python-with-matplotlib/
-    https://www.machinelearningplus.com/plots/top-50-matplotlib-visualizations-the-master-plots-python/
 """
 # External imports.
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 
 
-def crispy_scatter_plot(
+# TODO: crispy_choropleth
+
+
+# TODO: crispy_map
+
+
+# TODO: crispy_piechart
+
+
+# TODO: crispy_histogram
+
+
+# TODO: crispy_regressionplot
+
+
+# TODO: crispy_timeplot
+
+
+def crispy_scatterplot(
         data,
         x,
         y,
@@ -47,14 +58,14 @@ def crispy_scatter_plot(
     Returns:
         (figure): The chart figure for any post-processing.
     """
-    
+
     # Set the chart font.
     plt.rcParams['font.family'] = font_family
     if font_family == 'sans-serif':
         plt.rcParams['font.sans-serif'] = font_style
     else:
         plt.rcParams['font.sans-serif'] = font_style
-        
+
     # Set the style of the axes and the text color.
     plt.style.use('fivethirtyeight')
     plt.rcParams['axes.edgecolor'] = text_color
@@ -62,16 +73,16 @@ def crispy_scatter_plot(
     plt.rcParams['xtick.color'] = text_color
     plt.rcParams['ytick.color'] = text_color
     plt.rcParams['text.color'] = text_color
-    
+
     # Create a figure.
     fig, ax = plt.subplots(figsize=fig_size)
-    
+
     # Plot categorical data.
     for i, category in enumerate(categories):
         plt.scatter(
             x=x,
             y=y,
-            data=data.loc[data[category_key]==category.upper(), :], 
+            data=data.loc[data[category_key] == category.upper(), :],
             s=20,
             c=colors[i],
             label=str(category)
@@ -82,21 +93,21 @@ def crispy_scatter_plot(
         xlim=(0.0, 100),
         ylim=(0, 15),
     )
-    
+
     # Format the X-axis.
     plt.xticks(fontsize=font_size)
     plt.yticks(fontsize=font_size)
-    
+
     # Add a title.
     if title:
         plt.title(title, fontsize=title_size, pad=20)
-    
+
     # Add X and Y axis labels.
     plt.xlabel(x.replace('_', ' ').title(), fontsize=label_size, labelpad=10)
     plt.ylabel(y.replace('_', ' ').title(), fontsize=label_size, labelpad=10)
-    
+
     # Format the legend.
-    plt.legend(fontsize=font_size, loc=legend_loc)  
+    plt.legend(fontsize=font_size, loc=legend_loc)
 
     # Hide unnecessary spines and ticks.
     ax.spines['top'].set_visible(False)
@@ -104,7 +115,7 @@ def crispy_scatter_plot(
     ax.spines['bottom'].set_visible(True)
     ax.spines['left'].set_visible(True)
     ax.tick_params(axis='both', which='major', labelsize=font_size)
-    
+
     # Format the axes as percentages.
     if percentage:
         ax.xaxis.set_major_formatter(mtick.PercentFormatter(decimals=0))
@@ -115,9 +126,14 @@ def crispy_scatter_plot(
 
     # Add figure notes.
     if notes:
-        plt.figtext(0.0, -notes_offset, notes,
-                    ha='left', fontsize=note_size)
-    
+        plt.figtext(
+            0.0,
+            -notes_offset,
+            notes,
+            ha='left',
+            fontsize=note_size,
+        )
+
     # Show and optionally save the figure.
     if save:
         plt.margins(1, 1)
@@ -128,13 +144,13 @@ def crispy_scatter_plot(
             pad_inches=0.75,
             transparent=False,
         )
-    
+
     # Return the figure.
     plt.show()
     return fig
 
 
-def crispy_bar_chart(
+def crispy_barchart(
         df,
         annotations=False,
         key=0,
@@ -159,14 +175,14 @@ def crispy_bar_chart(
     Returns:
         (figure): The chart figure for any post-processing.
     """
-    
+
     # Set the chart font.
     plt.rcParams['font.family'] = font_family
     if font_family == 'sans-serif':
         plt.rcParams['font.sans-serif'] = font_style
     else:
         plt.rcParams['font.sans-serif'] = font_style
-    
+
     # Set the style of the axes and the text color.
     plt.style.use('fivethirtyeight')
     plt.rcParams['axes.edgecolor'] = text_color
@@ -174,16 +190,16 @@ def crispy_bar_chart(
     plt.rcParams['xtick.color'] = text_color
     plt.rcParams['ytick.color'] = text_color
     plt.rcParams['text.color'] = text_color
-    
+
     # we first need a numeric placeholder for the y axis
-    y_range=  list(range(1, len(df.index) + 1))
-    
+    y_range = list(range(1, len(df.index) + 1))
+
     # Create a figure.
     fig, ax = plt.subplots(figsize=fig_size)
-    
+
     # Plot the data with the following method.
     # Create for each type a horizontal line
-    # that starts at x = 0 with the length 
+    # that starts at x = 0 with the length
     # represented by the specific expense percentage value.
     plt.hlines(
         y=y_range,
@@ -192,7 +208,7 @@ def crispy_bar_chart(
         colors=palette,
         linewidth=5
     )
-    
+
     # create for each expense type a dot at the level of the expense percentage value
     values = []
     for i in y_range:
@@ -204,7 +220,7 @@ def crispy_bar_chart(
             color=palette[i - 1],
         )
         values.append(df[key][i - 1])
-    
+
     # Add annotations to the chart.
     if annotations:
         for i, txt in enumerate(values):
@@ -216,8 +232,8 @@ def crispy_bar_chart(
 
     # Add a title.
     if title:
-        plt.title(title, fontsize=21, color=text_color, loc='left')    
-    
+        plt.title(title, fontsize=21, color=text_color, loc='left')
+
     # Set the x and y axis labels.
     if x_label is None:
         x_label = key.title()
@@ -228,7 +244,7 @@ def crispy_bar_chart(
     ax.set_ylabel(y_label)
     ax.tick_params(axis='both', which='major', labelsize=12)
     plt.yticks(y_range, y_ticks)
-    
+
     if percentage:
         ax.xaxis.set_major_formatter(mtick.PercentFormatter())
 
@@ -238,16 +254,16 @@ def crispy_bar_chart(
     ax.spines['bottom'].set_visible(False)
     ax.spines['left'].set_visible(False)
 
-    # Restirct the x-axis to 0 and above.
+    # Restrict the x-axis to 0 and above.
     if zero_bound:
         plt.xlim(0)
-    
+
     # Add figure notes.
     if notes:
         plt.figtext(0.0, -notes_offset, notes, ha='left', fontsize=11)
-    
+
     # Optionally save the figure.
     if save:
         plt.savefig(save, dpi=300, bbox_inches='tight')
-    
+
     return fig

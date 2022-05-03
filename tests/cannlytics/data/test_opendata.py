@@ -16,38 +16,38 @@ from cannlytics.data.opendata import CCC
 
 
 
-# #--------------------------------------------------------------------------
-# # Wrangle Massachussetts Open Data.
-# #--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# Wrangle Massachussetts Open Data.
+#--------------------------------------------------------------------------
 
-# # Initialize a CCC Data Catalog client.
-# ccc = CCC()
+# Initialize a CCC Data Catalog client.
+ccc = CCC()
 
-# # Get licensees data and stats.
-# licensees = ccc.get_licensees()
-# licensees_approved = ccc.get_licensees('approved')
-# licensees_pending = ccc.get_licensees('pending')
-# demographics = ccc.get_licensees('demographics')
-# under_review_stats = ccc.get_licensees('under-review-stats')
-# application_stats = ccc.get_licensees('application-stats')
+# Get licensees data and stats.
+licensees = ccc.get_licensees()
+licensees_approved = ccc.get_licensees('approved')
+licensees_pending = ccc.get_licensees('pending')
+demographics = ccc.get_licensees('demographics')
+under_review_stats = ccc.get_licensees('under-review-stats')
+application_stats = ccc.get_licensees('application-stats')
 
-# # Get retail stats.
-# sales_stats = ccc.get_retail('sales-stats')
-# sales_weekly = ccc.get_retail('sales-weekly')
-# prices = ccc.get_retail('price-per-ounce')
+# Get retail stats.
+sales_stats = ccc.get_retail('sales-stats')
+sales_weekly = ccc.get_retail('sales-weekly')
+prices = ccc.get_retail('price-per-ounce')
 
-# # Get agent stats.
-# gender_stats = ccc.get_agents('gender-stats')
-# ethnicity_stats = ccc.get_agents('ethnicity-stats')
+# Get agent stats.
+gender_stats = ccc.get_agents('gender-stats')
+ethnicity_stats = ccc.get_agents('ethnicity-stats')
 
-# # Get medical stats.
-# medical = ccc.get_medical()
+# Get medical stats.
+medical = ccc.get_medical()
 
-# # Get cultivation data.
-# plants = ccc.get_plants()
+# Get cultivation data.
+plants = ccc.get_plants()
 
-# # Get sales data.
-# sales = ccc.get_sales()
+# Get sales data.
+sales = ccc.get_sales()
 
 
 # #--------------------------------------------------------------------------
@@ -78,73 +78,73 @@ from cannlytics.data.opendata import CCC
 # # Curate the data.
 # #--------------------------------------------------------------------------
 
-# # Identify sales by product type.
-# flower_sales = sales.loc[
-#     (sales['productcategoryname'] == 'Buds') &
-#     (sales['unitofmeasurename'] == 'Grams')
-# ]
-# oil_sales = sales.loc[
-#     (sales['productcategoryname'] == 'Concentrate') &
-#     (sales['unitofmeasurename'] == 'Grams')
-# ]
-# vape_sales = sales.loc[
-#     (sales['productcategoryname'] == 'Vape Product')
-# ]
-# beverage_sales = sales.loc[
-#     (sales['productcategoryname'] == 'Infused Beverage')
-# ]
-# edible_sales = sales.loc[
-#     (sales['productcategoryname'] == 'Infused (edible)')
-# ]
-# preroll_sales = sales.loc[
-#     (sales['productcategoryname'] == 'Raw Pre-Rolls') |
-#     (sales['productcategoryname'] == 'Infused Pre-Rolls')
-# ]
+# Identify sales by product type.
+flower_sales = sales.loc[
+    (sales['productcategoryname'] == 'Buds') &
+    (sales['unitofmeasurename'] == 'Grams')
+]
+oil_sales = sales.loc[
+    (sales['productcategoryname'] == 'Concentrate') &
+    (sales['unitofmeasurename'] == 'Grams')
+]
+vape_sales = sales.loc[
+    (sales['productcategoryname'] == 'Vape Product')
+]
+beverage_sales = sales.loc[
+    (sales['productcategoryname'] == 'Infused Beverage')
+]
+edible_sales = sales.loc[
+    (sales['productcategoryname'] == 'Infused (edible)')
+]
+preroll_sales = sales.loc[
+    (sales['productcategoryname'] == 'Raw Pre-Rolls') |
+    (sales['productcategoryname'] == 'Infused Pre-Rolls')
+]
 
 
-# def calculate_avg_price(
-#         series,
-#         price='totalprice',
-#         quantity='quantity',
-#         index='saledate',
-#         period='M'
-# ):
-#     """Calculate average price for a series given the price and quantity fields."""
-#     price = series[price].div(series[quantity])
-#     price.index = series[index]
-#     return price.resample(period).mean()
+def calculate_avg_price(
+        series,
+        price='totalprice',
+        quantity='quantity',
+        index='saledate',
+        period='M'
+):
+    """Calculate average price for a series given the price and quantity fields."""
+    price = series[price].div(series[quantity])
+    price.index = series[index]
+    return price.resample(period).mean()
 
-# # Format prices.
-# price_per_gram_flower = calculate_avg_price(flower_sales)
-# price_per_gram_oil = calculate_avg_price(oil_sales)
-# price_per_vape = calculate_avg_price(vape_sales)
-# price_per_beverage = calculate_avg_price(beverage_sales)
-# price_per_edible = calculate_avg_price(edible_sales)
-# price_per_preroll = calculate_avg_price(preroll_sales)
-
-
-# def calculate_inflation_rate(series):
-#     """Calculate the inflation rate for a series."""
-#     lag = series.shift(1)
-#     return (series - lag) / lag
+# Format prices.
+price_per_gram_flower = calculate_avg_price(flower_sales)
+price_per_gram_oil = calculate_avg_price(oil_sales)
+price_per_vape = calculate_avg_price(vape_sales)
+price_per_beverage = calculate_avg_price(beverage_sales)
+price_per_edible = calculate_avg_price(edible_sales)
+price_per_preroll = calculate_avg_price(preroll_sales)
 
 
-# # Calculate inflation for various product types.
-# flower_inflation_rate = calculate_inflation_rate(price_per_gram_flower)
-# oil_inflation_rate = calculate_inflation_rate(price_per_gram_oil)
-# vape_inflation_rate = calculate_inflation_rate(price_per_vape)
-# beverage_inflation_rate = calculate_inflation_rate(price_per_beverage)
-# edible_inflation_rate = calculate_inflation_rate(price_per_edible)
-# preroll_inflation_rate = calculate_inflation_rate(price_per_preroll)
+def calculate_inflation_rate(series):
+    """Calculate the inflation rate for a series."""
+    lag = series.shift(1)
+    return (series - lag) / lag
 
-# # Visualize inflation.
-# fig, ax = plt.subplots(figsize=(12, 8))
-# flower_inflation_rate.tail(12).plot(label='Flower')
-# oil_inflation_rate.tail(12).plot(label='Oil')
-# vape_inflation_rate.tail(12).plot(label='Vape')
-# beverage_inflation_rate.tail(12).plot(label='Beverage')
-# edible_inflation_rate.tail(12).plot(label='Edible')
-# preroll_inflation_rate.tail(12).plot(label='Preroll')
-# plt.hlines(0, xmin=flower_inflation_rate.index[0], xmax=flower_inflation_rate.index[-1])
-# plt.legend()
-# plt.show()
+
+# Calculate inflation for various product types.
+flower_inflation_rate = calculate_inflation_rate(price_per_gram_flower)
+oil_inflation_rate = calculate_inflation_rate(price_per_gram_oil)
+vape_inflation_rate = calculate_inflation_rate(price_per_vape)
+beverage_inflation_rate = calculate_inflation_rate(price_per_beverage)
+edible_inflation_rate = calculate_inflation_rate(price_per_edible)
+preroll_inflation_rate = calculate_inflation_rate(price_per_preroll)
+
+# Visualize inflation.
+fig, ax = plt.subplots(figsize=(12, 8))
+flower_inflation_rate.tail(12).plot(label='Flower')
+oil_inflation_rate.tail(12).plot(label='Oil')
+vape_inflation_rate.tail(12).plot(label='Vape')
+beverage_inflation_rate.tail(12).plot(label='Beverage')
+edible_inflation_rate.tail(12).plot(label='Edible')
+preroll_inflation_rate.tail(12).plot(label='Preroll')
+plt.hlines(0, xmin=flower_inflation_rate.index[0], xmax=flower_inflation_rate.index[-1])
+plt.legend()
+plt.show()

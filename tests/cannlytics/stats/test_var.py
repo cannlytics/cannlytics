@@ -1,5 +1,5 @@
 """
-VAR Test | Cannlytics Engine
+VAR Model Test
 Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <keegan@cannlytics.com>
