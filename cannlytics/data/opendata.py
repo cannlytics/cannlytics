@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/5/2022
-Updated: 4/21/2022
+Updated: 5/5/2022
 License: MIT License <https://opensource.org/licenses/MIT>
 
 Data sources:
@@ -23,6 +23,22 @@ from requests import Session
 from simplejson import JSONDecodeError
 
 
+ENDPOINTS = {
+    'agent-gender-stats': 'hhjg-atjk',
+    'agent-ethnicity-stats': 'pt2c-wb44',
+    'licensees': 'albs-all',
+    'licensees-approved': 'hmwt-yiqy',
+    'licensees-pending': 'piib-tj3f',
+    'licensees-demographics': '5dkg-e39p',
+    'licensees-under-review-stats': 'pebi-jpc4',
+    'licensees-application-stats': 'n6qz-us6r',
+    'retail-sales-stats': '87rp-xn9v',
+    'retail-sales-weekly': 'dt9b-i6ds',
+    'retail-price-per-ounce': 'rqtv-uenj',
+    'medical-stats': 'g5mj-5pg3',
+    'plants': 'meau-plav',
+    'sales': 'fren-z7jq',
+}
 BOOLEAN = [
     'activity_date',
     'app_create_date',
@@ -87,7 +103,7 @@ class APIError(Exception):
     def get_response_messages(self, response):
         """Extract error messages from a Open Data API response.
         Args:
-            response (Response): A request response from the Metrc API.
+            response (Response): A request response from the Open Data API.
         Returns:
             (str): Returns any error messages.
         """
@@ -97,33 +113,18 @@ class APIError(Exception):
             return response.text
 
 
-class CCC(object):
+class OpenData(object):
     """An instance of this class communicates with the
     Cannabis Control Commission of the Commonwealth of Massachusetts'
     Open Data catalog."""
 
 
     def __init__(self):
-        """Initialize a CCC API client."""
+        """Initialize an Open Data API client."""
         self.base = 'https://masscannabiscontrol.com/resource/'
         self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
         self.session = Session()
-        self.endpoints = {
-            'agent-gender-stats': 'hhjg-atjk',
-            'agent-ethnicity-stats': 'pt2c-wb44',
-            'licensees': 'albs-all',
-            'licensees-approved': 'hmwt-yiqy',
-            'licensees-pending': 'piib-tj3f',
-            'licensees-demographics': '5dkg-e39p',
-            'licensees-under-review-stats': 'pebi-jpc4',
-            'licensees-application-stats': 'n6qz-us6r',
-            'retail-sales-stats': '87rp-xn9v',
-            'retail-sales-weekly': 'dt9b-i6ds',
-            'retail-price-per-ounce': 'rqtv-uenj',
-            'medical-stats': 'g5mj-5pg3',
-            'plants': 'meau-plav',
-            'sales': 'fren-z7jq',
-        }
+        self.endpoints = ENDPOINTS
 
 
     def get(self, endpoint, params=None):
