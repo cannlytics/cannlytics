@@ -2,7 +2,7 @@
 Augment lab results with licensees, inventories, inventory types, and strains data.
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/11/2022
 Updated: 1/28/2022
 License: MIT License <https://opensource.org/licenses/MIT>

@@ -28,6 +28,6 @@
 README.md
 .admin/tokens
 console/static/console/webpack-stats.json
-docs/build
 .firebasesrc
 tools/data/.datasets
+**/.datasets

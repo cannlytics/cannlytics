@@ -2,7 +2,7 @@
 Get Value Given Key Filter | Cannlytics Website
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/16/2021
 Updated: 12/16/2021
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>

@@ -3,10 +3,10 @@ Box Jenkins ARIMA Forecasting Methodology
 Copyright (c) 2021-2022 Cannlytics
 Copyright (c) 2017-2021 Keegan Skeate
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: March 2017
 Updated: 10/27/2021
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # External imports.
 import numpy as np

@@ -2,7 +2,7 @@
 Authentication Views | Cannlytics API
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/22/2021
 Updated: 7/24/2021
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>

@@ -2,7 +2,7 @@
 Augment Data with Quantities from NLP
 Copyright (c) 2021 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 3/11/2022
 Updated: 3/11/2022
 License: MIT License <https://opensource.org/licenses/MIT>

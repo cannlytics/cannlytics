@@ -3,10 +3,10 @@ VAR Functions | Cannlytics
 Copyright (c) 2021-2022 Cannlytics
 Copyright (c) 2017-2021 Keegan Skeate
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/14/2021
 Updated: 11/6/2021
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: Crude VAR functions.
 """

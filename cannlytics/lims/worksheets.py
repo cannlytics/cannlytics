@@ -2,7 +2,7 @@
 Worksheets | Cannlytics
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/18/2021
 Updated: 1/10/2022
 License: MIT License <https://opensource.org/licenses/MIT>

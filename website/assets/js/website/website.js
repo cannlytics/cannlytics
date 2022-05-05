@@ -2,7 +2,7 @@
  * Website JavaScript | Cannlytics Website
  * Copyright (c) 2021-2022 Cannlytics
  * 
- * Authors: Keegan Skeate <keegan@cannlytics.com>
+ * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 12/3/2020
  * Updated: 1/5/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>

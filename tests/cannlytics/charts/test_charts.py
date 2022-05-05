@@ -2,7 +2,7 @@
 Cannlytics Charts Test | Cannlytics Engine
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/10/2021
 Updated: 5/2/2022
 License: MIT License <https://opensource.org/licenses/MIT>

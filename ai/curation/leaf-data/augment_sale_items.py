@@ -2,7 +2,7 @@
 Calculate Sale Statistics | Cannabis Data Science Meetup Group
 Copyright (c) 2021 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/10/2022
 Updated: 2/18/2022
 License: MIT License <https://opensource.org/licenses/MIT>

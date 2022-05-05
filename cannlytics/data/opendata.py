@@ -2,7 +2,7 @@
 Massachusetts Cannabis Control Commission (CCC) Open Data API Wrapper
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/5/2022
 Updated: 4/21/2022
 License: MIT License <https://opensource.org/licenses/MIT>

@@ -18,7 +18,8 @@ Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software de
 - [🌱 Installation](#installation)
 - [🏗️ Architecture](#architecture)
 - [🪛 Development](#development)
-  * [Compiling](#compiling)
+  * [Editing](#editing)
+  * [Running](#running)
   * [Serving](#serving)
 - [👩‍🔬 Testing](#testing)
 - [🚀 Publishing](#publishing)
@@ -58,149 +59,7 @@ The best place to begin is to clone the repository and get a lay of the architec
 git clone https://github.com/cannlytics/cannlytics.git
 ```
 
-### 2. Setting your account credentials <a name="setting-your-account-credentials"></a>
-
-When you are ready to begin development or publish the Cannlytics web app, then you will need to setup your credentials. You will need to [create a Firebase account](https://console.firebase.google.com/) and start a project before you begin. We recommend choosing a project name that is in kebab-case so that you can safely use the project name for many namespaces throughout the project, for example `your-lims`. Below is a diagram that depicts how Cannlytics leverages [Firebase Authentication to authorize user requests](https://cloud.google.com/blog/products/gcp/how-to-authenticate-users-on-google-app-engine-using-firebase).
-
-![Authentication on Google App Engine using Firebase](https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fdiagrams%2Ffirebase_auth_diagram.png?alt=media&token=ca0afc16-4829-4785-abb0-695304de802c)
-
-2.1. First, create an `.env` file at the project's root.
-
-2.2. Next, create a Django secret key and save it your `.env` file as follows.
-
-```py
-# tools/quickstart.py
-from django.utils.crypto import get_random_string
-
-# Generate a secret key for your project.
-chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
-generated_secret_key = get_random_string(50, chars)
-print(generated_secret_key)
-```
-
-```shell
-# .env
-SECRET_KEY=xyz
-```
-
-2.3 Next, [add a Firebase web app](https://firebase.google.com/docs/web/setup). We recommend using the same namespace you chose for your project, for example `your-lims`, and setting up [Firebase Hosting] with your app. Once you have created a web app, navigate to your Firebase project settings, find your Firebase app Config, and set your Firebase configuration in your `.env` file.
-
-```shell
-# .env
-FIREBASE_API_KEY=xyz
-FIREBASE_AUTH_DOMAIN=your-lims.firebaseapp.com
-FIREBASE_DATABASE_URL=https://your-lims.firebaseio.com
-FIREBASE_PROJECT_ID=your-lims
-FIREBASE_STORAGE_BUCKET=your-lims.appspot.com
-FIREBASE_MESSAGING_SENDER_ID=123
-FIREBASE_APP_ID=123
-FIREBASE_MEASUREMENT_ID=G-abc
-```
-
-2.4. If you wish to leverage Cannlytics' email capabilities, then set `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` environment variables in your `.env` file. It is recommended that you [create an app password](https://support.google.com/accounts/answer/185833/sign-in-with-app-passwords?hl=en) if you are using Gmail. After you have created your app password, set your Gmail email and app password as environment variables, `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` respectively.
-
-```shell
-echo EMAIL_HOST_USER=\"youremail@gmail.com\" >> .env
-echo EMAIL_HOST_PASSWORD=\"your-app-password\" >> .env
-gcloud secrets versions add cannlytics_settings --data-file .env
-```
-
-```shell
-# .env
-EMAIL_HOST_USER=admin@your-company.com
-EMAIL_HOST_PASSWORD=your-app-password
-```
-
-2.5. Finally, to facilitate communication between your app and Firebase, create and download a service account and save the path to your service account as a `GOOGLE_APPLICATION_CREDENTIALS` environment variable. For your security, this configuration file needs to be kept in a safe place.
-
-```shell
-# .env
-GOOGLE_APPLICATION_CREDENTIALS=path/to/your/service/account.json
-```
-
-You will need to grant your service key *Secret Manager Admin* permissions in [Cloud IAM Admin](https://console.cloud.google.com/iam-admin/iam).
-
-2.6. Finish by creating a `.firebasesrc` in the root directory with your [Firebase Hosting] references. For example
-
-```json
-{
-  "projects": {
-    "default": "your-lims"
-  },
-  "targets": {
-    "your-project": {
-      "hosting": {
-        "docs": [
-          "your-lims-docs"
-        ],
-        "dev": [
-          "your-lims-dev"
-        ],
-        "production": [
-          "your-lims"
-        ],
-        "website": [
-          "your-website"
-        ]
-      }
-    }
-  }
-}
-```
-
-### 3. Installing project dependencies and development tools <a name="installing-dependencies"></a>
-
-<!-- npm install webpack-dev-server --save-dev -->
-
-Cannlytics is built and depends on the following software and services, so you will need to install or setup each service. We recommend using the latest stable version of each piece of software whenever possible.
-
-* [Python](https://www.python.org/psf/)
-* [Django](https://www.djangoproject.com/foundation/)
-* [Docker](https://docs.docker.com/get-docker/)
-* [Firebase](https://firebase.google.com/)
-* [Firebase Tools](https://firebase.google.com/docs/cli)
-* [Google Cloud Platform](https://cloud.google.com/gcp)
-* [Google Cloud SDK](https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe)
-* [Node.js](https://nodejs.org/en/about/)
-* [Javascript, HTML, CSS](https://www.w3schools.com/)
-* [Gimp](https://www.gimp.org/about/)
-* [Inkscape](https://inkscape.org/about/)
-
-Cannlytics is built and tested with Python 3.9 and above. We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/index.html) if you are developing Cannlytics. You can then create a virtual environment to test, develop, and use the Cannlytics Console in isolation and in a reproducible manner. After installing Anaconda, you can open a terminal and run the following commands to create a ready-to-go environment.
-
-```bash
-conda create --name cannlytics python=3.9
-conda activate cannlytics
-pip install -r requirements.txt
-python manage.py migrate
-npm install
-```
-
-You are now ready to develop. Note that `python manage.py migrate` creates a new `db.sqlite3` file if you do not have one already.
-
-## 🏗️ Architecture <a name="architecture"></a>
-
-Cannlytics is built with [Python](https://www.python.org/) and leverages the [Django](https://www.djangoproject.com/) framework. Cannlytics utilizes [Firebase](https://firebase.google.com/) for user authentication with [Firebase Authentication](https://firebase.google.com/docs/auth), a [Firestore](https://firebase.google.com/docs/firestore) NoSQL database for real-time data management, [Firebase Storage](https://firebase.google.com/docs/storage) for file storage, and is hosted with [Firebase Hosting](https://firebase.google.com/docs/hosting). Cannlytics also uses a number of other [Google Cloud](https://console.cloud.google.com/) backend services for hosting, including:
-
-| Service | Purpose |
-|---------|---------|
-| [Cloud Build](https://cloud.google.com/build) | Used to containerize the app. |
-| [Cloud Registry](https://cloud.google.com/container-registry) | Used to upload the app to storage. |
-| [Cloud Run](https://cloud.google.com/run) | Used to run the app as a stateless container. |
-| [Cloud Storage](https://cloud.google.com/storage) | Used for file storage. |
-| [Cloud Secret Manager](https://cloud.google.com/secret-manager) | Used for storing configurations and keeping secrets secret. |
-
-Cannlytics generally follows a model-template-view (MTV) architectural pattern, where:
-
-| | |
-|-|-|
-| **model** | Django, `cannlytics`, and all engine components, such as JavaScript and CSS, that contain the core logic, which is provided to the views.|
-| **template** | Django HTML files that describe the display and how data are presented. |
-| **view** | Python functions that control the model's logic, specify and provide data to templates, and manage user requests. [Django describes views](https://docs.djangoproject.com/en/3.1/intro/tutorial03/#write-views-that-actually-do-something) as follows: *"Your view can read records from a database, or not. It can use a template system such as Django's – or a third-party Python template system – or not. It can generate a PDF file, output XML, create a ZIP file on the fly, anything you want, using whatever Python libraries you want."* |
-
 The architecture of the Cannlytics codebase is as follows.
-<!-- TODO: Talk about `Dockerfile` and `webpack.config.js` in each folder -->
-<!-- TODO: Talk about remaining cannlytics modules -->
 
 ```bash
 ├── .admin
@@ -211,8 +70,8 @@ The architecture of the Cannlytics codebase is as follows.
 │   ├── firestore.rules # Database access control and data validation.
 |   └── storage.rules # File storage access control and validation.
 ├── ai
-│   ├── augmentation # Tools for automatically augmenting data.
-│   ├── collection # Tools for automatically collecting data.
+│   ├── curation # Tools for automatically cleaning and augmenting data.
+│   ├── functions # Tools for automatically collecting data.
 |   └── inference # Tools for automatically making inferences from data.
 ├── api
 │   ├── {endpoint}
@@ -221,102 +80,174 @@ The architecture of the Cannlytics codebase is as follows.
 |   └── views.py # Implementation of general API endpoints.
 ├── cannlytics
 │   ├── auth # Core authentication logic.
-│   ├── lims # All LIMS logic.
-│   ├── metrc # Metrc API module.
-│   ├── models # Main data entities.
+│   ├── ccrs # Interface to Washington State's traceability system.
+│   ├── charts # Crispy, ready-to-use charts.
+│   ├── data # Data logic, from wrangling to market.
+│   ├── firebase # Interface to Firebase.
+│   ├── lims # All laboratory information management (LIMS) logic.
+│   ├── metrc # Interface to the Metrc traceability system.
+│   ├── models # Defined models.
+│   ├── paypal # Interface to PayPal.
+│   ├── quickbooks # Interface to QuickBooks.
+│   ├── stats # Nifty, ready-to-use statistical models.
 │   ├── utils # General utility functions.
-│   ├── firebase.py # Firebase module.
-│   ├── paypal.py # PayPal module.
-|   └── quickbooks.py # QuickBooks module.
+│   ├── cannlytics.py # Core Cannlytics interface.
+|   └── requirements.txt # Package-specific requirements.
 ├── console
 │   ├── assets
-│   |   ├── css # Core style, minified and bundled.
-│   |   └── js # JavaScript bundled into a `cannlytics` module.
+│   |   ├── css # Stylesheets that will be minified and bundled.
+│   |   └── js # JavaScript that will be bundled into a `cannlytics.min.js` module.
 │   ├── core # Required Django configuration.
-│   ├── static/console # Static files, like images.
+│   ├── static/console # Static files, such as images and Excel templates.
 │   ├── templates/console # User interface templates.
+│   ├── templatetags # Custom Django template utility functions.
+│   ├── views # Implementation of user interfaces and their context.
+│   |   └── {view}.py # Views for specific purposes.
+│   ├── db.sqlite3 # Unused SQL database.
+│   ├── Dockerfile # Production configuration.
+│   ├── requirements.txt # Console-specific requirements.
 │   ├── settings.py # Django configuration.
 │   ├── state.py # Static text for certain pages and sections.
 │   ├── urls.py # Console navigation.
-│   ├── utils.py # General console utility functions.
-|   └── views.py # Implementation of user interfaces and their context.
+|   └── webpack.config.js # Build configuration.
 ├── docs
-│   ├── src # The documentation text.
-│   ├── theme # The style of the documentation.
+│   ├── {src} # Specific documentation.
+│   ├── theme # The style of the documentation site.
 |   └── Dockerfile # Documentation container configuration.
 ├── node_modules
-├── public
-|   └── static # Files hosted with Firebase hosting.
+├── public # Files hosted with Firebase hosting.
 ├── tests # Tests for all features and functionality.
-├── tools # Development tools.
-├── website # A company website.
+├── tools # Administrative, developer, and data management tools.
+├── website # A company website with the same structure as the `console`.
 ├── .env # Your secrets.
 ├── .firebasesrc # Firebase hosting sources.
-├── db.sqlite3 # Unused SQL database.
+├── .gitignore # Files not committed to GitHub.
 ├── firebase.json # Firebase configuration file.
-├── LICENSE
 ├── manage.py # Django utility script.
 ├── mkdocs.yaml # Documentation configuration.
 ├── package.json # Node.js dependencies and scripts.
-├── README.md
-└── requirements.txt # All Python requirements.
+├── requirements.txt # All Python requirements.
+└── setup.py # Python SDK configuration.
 ```
 
-All text material is either stored in JSON in `state.py` or written in Markdown in `docs` directories. See [`python-markdown` Extensions](https://python-markdown.github.io/extensions/) for more information on rendering Markdown. For help with storing static files, see [serving static files on App Engine](https://cloud.google.com/appengine/docs/standard/python3/serving-static-files). If you modify assets, then you can gather all supporting files, located in each app's `static` directory, into the `public/static` directory with:
+### 2. Installing project dependencies and development tools <a name="installing-dependencies"></a>
 
-```shell
-set PROJECT=website
-python manage.py collectstatic --noinput
+You will need to install the following technologies when developing or creating an installation of Cannlytics. We recommend using the latest stable version of each piece of software whenever possible. Cannlytics has been tested with Python 3.9.
+
+* [Python](https://www.python.org/psf/)
+* [Docker](https://docs.docker.com/get-docker/)
+* [Node.js](https://nodejs.org/en/about/)
+
+The standard installation requires that you have an account with:
+
+* [Firebase](https://firebase.google.com/)
+* [Google Cloud Platform](https://cloud.google.com/gcp)
+
+If you are developing Cannlytics, then you will need a couple extra tools:
+
+* [Firebase Tools](https://firebase.google.com/docs/cli)
+* [Google Cloud SDK](https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe)
+
+We recommend using [Anaconda](https://docs.anaconda.com/anaconda/install/index.html) if you are developing Cannlytics so that you can create a virtual environment to test, develop, and use the Cannlytics Console in isolation and in a reproducible manner. After installing Anaconda, you can open a terminal and run the following commands to create a ready-to-go environment.
+
+<!-- Is this needed? npm install webpack-dev-server --save-dev -->
+```bash
+conda create --name cannlytics python=3.9
+conda activate cannlytics
+pip install -r requirements.txt
+python manage.py migrate
+npm install
 ```
 
-or
+> Note that `python manage.py migrate` creates a new `db.sqlite3` file if you do not have one already.
 
-```shell
-npm run console:collectstatic
-# or
-npm run website:collectstatic
-```
+### 3. Setting your account credentials <a name="setting-your-account-credentials"></a>
 
-You can configure static files to be served from [Firebase Storage](https://firebase.google.com/docs/storage) instead of from [Firebase Hosting](https://firebase.google.com/docs/hosting) in `console/settings.py`.
+For a standard setup, you will need to [create a Firebase account and a project](https://console.firebase.google.com/). We recommend choosing a project name that is in kebab-case, e.g. `your-lims`, so that you can safely use the project name in many places. Now, follow these steps to fill in your environment variables. When publishing, you will need to copy pertinent environment variables to a [Google Cloud Secret](https://codelabs.developers.google.com/codelabs/cloud-run-django/index.html?index=..%2F..index#4).
 
-### Data
+1. Create an `.env` file in your project's root directory. See `.env.example` for an example with all credentials.
+2. Create a Django secret key:
+    ```py
+    # tools/quickstart.py
+    from django.utils.crypto import get_random_string
 
-Cannlytics operates with a NoSQL database, [Firestore](https://firebase.google.com/docs/firestore) by default. You can conceptualize every entity as a JSON object called a document. A group of documents is a collection. Every document is required to be a member of a collection. Below is a [diagram of the Cannlytics LIMS standard data models](https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Flims%2Fdiagrams%2Fcannlytics_standard_data_models_0_0_8.svg?alt=media&token=de8e81a9-6250-4aac-857e-3936d26b4f1b).
+    # Generate a secret key for your project.
+    chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+    generated_secret_key = get_random_string(50, chars)
+    print(generated_secret_key)
+    ```
+
+    And save it in your `.env` file:
+
+    ```bash
+    # .env
+    SECRET_KEY=xyz
+    ```
+3. [Create a Firebase web app](https://firebase.google.com/docs/web/setup). We recommend using the same namespace you chose for your project, e.g. `your-lims` or `your-lims-dev`, and setting up [Firebase Hosting](https://firebase.google.com/docs/hosting) with your app. Once you have created a Firebase web app, navigate to your Firebase project settings, find your Firebase App Config, and set your Firebase configuration in your `.env` file.
+    ```bash
+    # .env
+    FIREBASE_API_KEY=xyz
+    FIREBASE_AUTH_DOMAIN=your-lims.firebaseapp.com
+    FIREBASE_DATABASE_URL=https://your-lims.firebaseio.com
+    FIREBASE_PROJECT_ID=your-lims
+    FIREBASE_STORAGE_BUCKET=your-lims.appspot.com
+    FIREBASE_MESSAGING_SENDER_ID=123
+    FIREBASE_APP_ID=123
+    FIREBASE_MEASUREMENT_ID=G-abc
+    ```
+4. If you wish to leverage Cannlytics' email capabilities, then set `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` environment variables in your `.env` file. It is recommended that you [create an app password](https://support.google.com/accounts/answer/185833/sign-in-with-app-passwords?hl=en) if you are using Gmail. After you have created your app password, set your email and app password as environment variables, `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` respectively.
+    ```bash
+    # .env
+    EMAIL_HOST_USER=admin@your-company.com
+    EMAIL_HOST_PASSWORD=your-app-password
+    ```
+5. Finally, to facilitate Firebase management, create and download a service account and save the path to your service account as a `GOOGLE_APPLICATION_CREDENTIALS` environment variable. For accessing [secrets](https://cloud.google.com/secret-manager), you will need to grant your service key *Secret Manager Admin* permissions in [Cloud IAM Admin](https://console.cloud.google.com/iam-admin/iam). For your security, this configuration file needs to be kept in a safe place.
+    ```bash
+    # .env
+    GOOGLE_APPLICATION_CREDENTIALS=path/to/your/service/account.json
+    ```
+6. Finish by creating a `.firebaserc` in the root directory with your [Firebase Hosting](https://firebase.google.com/docs/hosting) references. See `example.firebaserc` for an example.
+
+You are now ready to develop!
+
+## 🏗️ Architecture <a name="architecture"></a>
+
+The Cannlytics Console and Cannlytics Website are built with the [Django](https://www.djangoproject.com/) framework and generally follow a model-template-view (MTV) architectural pattern, where:
+
+| Abstraction | Description |
+|-|-|
+| **Model** | The `cannlytics` package, Django, and all `assets`, such as JavaScript and CSS, that contain the core logic, which is provided to the views.|
+| **Template** | Django HTML files that describe the display and how data are presented. |
+| **View** | Python functions that control the model's logic, specify and provide data to templates, and manage user requests. [Django describes views](https://docs.djangoproject.com/en/3.1/intro/tutorial03/#write-views-that-actually-do-something) as follows: *"Your view can read records from a database, or not. It can use a template system such as Django's – or a third-party Python template system – or not. It can generate a PDF file, output XML, create a ZIP file on the fly, anything you want, using whatever Python libraries you want."* |
+
+Cannlytics utilizes a number of [Google Cloud](https://console.cloud.google.com/) services, including:
+
+| Service | Purpose |
+|---------|---------|
+| [Firebase](https://firebase.google.com/) | Cloud services, such as [dynamic links](https://firebase.google.com/docs/dynamic-links). |
+| [Firebase Authentication](https://firebase.google.com/docs/auth) | User authentication. |
+| [Firebase Firestore](https://firebase.google.com/docs/firestore) | NoSQL database for real-time data management. |
+| [Firebase Storage](https://firebase.google.com/docs/storage) | File storage. |
+| [Firebase Hosting](https://firebase.google.com/docs/hosting) | Console, website, and documentation hosting. |
+| [Cloud Build](https://cloud.google.com/build) | Used to containerize the app. |
+| [Cloud Registry](https://cloud.google.com/container-registry) | Used to upload the app to storage. |
+| [Cloud Run](https://cloud.google.com/run) | Used to run the app as a stateless container. |
+| [Cloud Storage](https://cloud.google.com/storage) | Used for console and website file storage. |
+| [Cloud Secret Manager](https://cloud.google.com/secret-manager) | Used for storing configurations and keeping secrets secret. |
+
+The [standard Cannlytics data models](https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Flims%2Fdiagrams%2Fcannlytics_standard_data_models_0_0_8.svg?alt=media&token=de8e81a9-6250-4aac-857e-3936d26b4f1b) and their default fields are shown below. Cannlytics data models are highly flexible and can contain fewer, different, or additional fields.
 
 <img width="100%" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Flims%2Fdiagrams%2Fcannlytics_standard_data_models_0_0_8.svg?alt=media&token=de8e81a9-6250-4aac-857e-3936d26b4f1b">
 
 ## 🪛 Development <a name="development"></a>
 
-Development can happen in many avenues. Frequent, small scope pull requests are encouraged. Any contribution, even if it needs future polishing, helps build the project and advance the field of cannabis analytics. In general;
+Development can happen in many avenues. Frequent, small scope pull requests are encouraged. Any contribution, even if it needs future polishing, helps build the project and advance cannabis science. In general;
 
 1. [Create a fork](https://docs.github.com/en/github/getting-started-with-github/quickstart/fork-a-repo) of the repository.
-2. Work on a solution for your most-pressing problem. Be creative.
+2. [Edit the project](#edit) by improving the codebase in some manner. Be creative.
 3. [Create a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) for your changes to be reviewed and merged into the project upon approval or for you to receive feedback on how your changes can be approved.
 
-The simplest way to run the app is to open a command line from the project's root directory, set a `PROJECT` environment variable, and run:
-
-```shell
-set PROJECT=website
-python manage.py runserver
-```
-
-or
-
-```shell
-npm run console:dev
-# or
-npm run website:dev
-```
-
-You can also leverage [django-livereload-server](https://github.com/tjwalch/django-livereload-server) for hot-reloading while you develop.
-
-```shell
-npm run console:start
-# or
-npm run website:start
-```
-
-See the table below for a complete list of available development commands.
+The table below lists available development commands.
 
 | Command | Purpose |
 |---------|---------|
@@ -346,7 +277,47 @@ See the table below for a complete list of available development commands.
 | `website:deploy` | Direct requests to the running container image. |
 | `website:publish` | Perform all publishing steps: `build`, `container`, `cloud`, and `deploy`.
 
-### Compiling the project <a name="compiling"></a>
+### Editing the project <a name="editing"></a>
+
+All text material is either stored in JSON in `state.py` or written in Markdown in `docs` directories. See [`python-markdown` Extensions](https://python-markdown.github.io/extensions/) for more information on rendering Markdown. For help with storing static files, see [serving static files on App Engine](https://cloud.google.com/appengine/docs/standard/python3/serving-static-files). You can configure static files to be served from [Firebase Storage](https://firebase.google.com/docs/storage) instead of from [Firebase Hosting](https://firebase.google.com/docs/hosting) in `console/settings.py` or `website/settings.py`. If you modify assets, then you can gather all supporting files, located in each app's `static` directory, into the `public/static` directory with:
+
+```shell
+set PROJECT=website
+python manage.py collectstatic --noinput
+```
+
+or
+
+```shell
+npm run console:collectstatic
+# or
+npm run website:collectstatic
+```
+
+### Running the project <a name="running"></a>
+
+The simplest way to run the app is to open a command line from the project's root directory, set a `PROJECT` environment variable, and run:
+
+```shell
+set PROJECT=website
+python manage.py runserver
+```
+
+or
+
+```shell
+npm run console:dev
+# or
+npm run website:dev
+```
+
+You can also leverage [django-livereload-server](https://github.com/tjwalch/django-livereload-server) for hot-reloading while you develop.
+
+```shell
+npm run console:start
+# or
+npm run website:start
+```
 
 Hot-reloading is an important tool of development. You can use `django-livereload-server`, which uses both [python-livereload](https://github.com/lepture/python-livereload) and [django-livereload](https://github.com/Fantomas42/django-livereload), for smooth reloading. You can install [django-live-reload-server](https://github.com/tjwalch/django-livereload-server) with:
 
@@ -500,11 +471,11 @@ firebase deploy --only hosting:production
 Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](https://docs.cannlytics.com/developers/contributing/) to get started. Anyone is welcome to contribute anything. Email <dev@cannlytics.com> for a quick onboarding. Currently, the codebase could greatly benefit from:
 
 * Art;
-* More code;
-* More documentation;
-* Ideas;
+* Code refactoring;
+* General ideas for improvement;
 * Tests;
-* Examples.
+* User documentation;
+* Example use cases.
 
 ## ❤️ Support <a name="support"></a>
 

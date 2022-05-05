@@ -2,7 +2,7 @@
 New Jersey Bayesian Forecast
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/22/2022
 Updated: 4/23/2022
 License: MIT License <https://opensource.org/licenses/MIT>

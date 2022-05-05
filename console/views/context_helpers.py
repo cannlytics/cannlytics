@@ -2,7 +2,7 @@
 Utility Functions | Cannlytics Console
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/26/2020
 Updated: 2/6/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>

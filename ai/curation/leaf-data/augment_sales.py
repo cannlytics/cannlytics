@@ -2,7 +2,7 @@
 Augment Washington State Leaf Traceability Sales Data
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/29/2022
 Updated: 2/4/2022
 License: MIT License <https://opensource.org/licenses/MIT>

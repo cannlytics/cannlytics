@@ -2,7 +2,7 @@
 Main Views | Cannlytics
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/18/2020
 Updated: 12/16/2021
 License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>

@@ -5,7 +5,7 @@ Copyright (c) 2021-2022 Cannlytics
 Authors: Keegan Skeate <contact@cannlytics.com>
 Created: 2/7/2021
 Updated: 1/10/2022
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: A wrapper of `firebase_admin` to make interacting with a Firestore
 database and Firebase Storage buckets even easier. For more information, see
@@ -46,7 +46,7 @@ from google.cloud.firestore_v1.transforms import DELETE_FIELD
 from pandas import notnull, read_csv, read_excel, DataFrame, Series
 
 # Internal imports.
-from .utils.utils import get_random_string, snake_case
+from ..utils.utils import get_random_string, snake_case
 
 # The maximum number of documents to include in batch updates.
 # The official limit is 500, but pushing too close to the limit

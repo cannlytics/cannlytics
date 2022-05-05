@@ -2,10 +2,10 @@
 Charts | Cannlytics
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/16/2021
 Updated: 5/2/2022
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # External imports.
 import matplotlib.pyplot as plt

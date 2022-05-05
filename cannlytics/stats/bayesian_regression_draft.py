@@ -2,7 +2,7 @@
 Estimate a Bayesian Linear Regression with Gibbs Sampling
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/25/2022
 Updated: 2/26/2022
 License: MIT License <https://opensource.org/licenses/MIT>

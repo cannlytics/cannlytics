@@ -2,7 +2,7 @@
 Certificate of Analysis (CoA) Generation | Cannlytics
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/6/2021
 Updated: 1/10/2022
 License: MIT LIcense <https://opensource.org/licenses/MIT>

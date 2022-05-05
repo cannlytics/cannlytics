@@ -1,7 +1,7 @@
 """
 Data Utilities | Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2022
 Updated: 4/24/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>

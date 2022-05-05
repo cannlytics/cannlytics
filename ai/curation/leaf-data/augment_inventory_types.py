@@ -3,7 +3,7 @@ Get inventory type names from Washington Leaf traceability data.
 Cannabis Data Science Meetup Group
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/18/2022
 Updated: 1/19/2022
 License: MIT License <https://opensource.org/licenses/MIT>

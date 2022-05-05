@@ -2,7 +2,7 @@
  * Map JavaScript | Cannlytics Console
  * Copyright (c) 2021-2022 Cannlytics
  * 
- * Authors: Keegan Skeate <keegan@cannlytics.com>
+ * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 8/12/2021
  * Updated: 12/6/2021
  * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
