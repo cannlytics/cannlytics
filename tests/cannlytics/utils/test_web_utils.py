@@ -7,11 +7,14 @@ Created: 1/27/2021
 Updated: 5/2/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-ai/blob/main/LICENSE>
 """
+# Standard imports.
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-import environ
-import pytest
+
+# External imports.
+# import environ
+# import pytest
 
 # FIXME:
 from cannlytics.utils.web import (
