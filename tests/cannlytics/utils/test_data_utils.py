@@ -150,7 +150,7 @@ def test_sorted_nicely():
 
 
 # TODO: `sentence_case`
-def test_sentence_case()):
+def test_sentence_case():
     """Test ..."""
     result = sentence_case()
     assert

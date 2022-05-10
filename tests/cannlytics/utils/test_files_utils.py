@@ -15,7 +15,7 @@ from cannlytics.utils.files import (
 )
 
 
-# TODO: Test `decode_pdf`.
+# TODO: Test `decode_pdf`.                  
 def test_decode_pdf():
     """Test ..."""
     result = decode_pdf()
@@ -39,7 +39,8 @@ def test_get_blocks():
 # TODO: Test `get_number_of_lines`.
 def test_get_number_of_lines():
     """Test ..."""
-    result = get_number_of_lines()
+    datafile = '../assets/data/instrument_data/LC2040C.csv'
+    result = get_number_of_lines(datafile)
     assert
 
 
