@@ -24,6 +24,7 @@ def send_message(request):
     """Send a message from the website to the Cannlytics admin through email.
     The user must provide an `email`, `subject`, and `message` in their POST.
     """
+    # FIXME: IS CSRF token passed? It appears that this throws a 403 error.
     try:
         request.POST['math_input'] == request.POST['math_total']
     except KeyError:

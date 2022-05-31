@@ -24,21 +24,21 @@
         {
           "source": "!/sitemap",
           "run": {
-            "serviceId": "cannlytics-lims",
+            "serviceId": "cannlytics-console",
             "region": "us-central1"
           }
         },
         {
           "source": "!/static",
           "run": {
-            "serviceId": "cannlytics-lims",
+            "serviceId": "cannlytics-console",
             "region": "us-central1"
           }
         },
         {
           "source": "**",
           "run": {
-            "serviceId": "cannlytics-lims",
+            "serviceId": "cannlytics-console",
             "region": "us-central1"
           }
         }
@@ -57,7 +57,7 @@
         {
           "source": "**",
           "run": {
-            "serviceId": "cannlytics-lims",
+            "serviceId": "cannlytics-dev",
             "region": "us-central1"
           }
         }

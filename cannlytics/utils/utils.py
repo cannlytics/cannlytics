@@ -48,6 +48,7 @@ def camelcase(string: str) -> str:
 
 
 # FIXME: camel_to_snake handles camelcase better.
+# Also, this doesn't handle all caps well, e.g. APP_ID.
 def camel_to_snake(string: str) -> str:
     """Turn a camel-case string to a snake-case string.
     Args:
@@ -56,6 +57,20 @@ def camel_to_snake(string: str) -> str:
         (str): Returns the string in snake_case.
     """
     return sub(r'(?<!^)(?=[A-Z])', '_', string).lower()
+
+
+def kebab_case(string: str) -> str:
+    """Turn a string into a kebab-case string."""
+    key = string.replace(' ', '-')
+    key = key.replace('&', 'and')
+    key = key.replace('%', 'percent')
+    key = key.replace('#', 'number')
+    key = key.replace('$', 'dollars')
+    key = key.replace('/', 'to')
+    key = key.replace(r'\\', '-').lower()
+    key = sub('[!@#$%^&*()[]{};:,./<>?\|`~-=+]', ' ', key)
+    keys = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', key)
+    return '-'.join(map(str.lower, keys))
 
 
 def snake_case(string: str) -> str:

@@ -35,6 +35,8 @@ ulid-py==1.1.0 # Used only in cannlytics module.
 spacy
 pymc3
 lifelines
+# PySimpleGUI
+# opencv-python
 
 # Tool requirements:
 moviepy

@@ -3,7 +3,7 @@ Data Utilities | Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2022
-Updated: 4/24/2022
+Updated: 5/23/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Internal imports.
@@ -14,7 +14,7 @@ from typing import Any, List, Optional
 # External imports.
 from dateutil import relativedelta
 from fredapi import Fred
-from pandas import merge, NaT, to_datetime
+from pandas import ExcelWriter, merge, NaT, to_datetime
 from pandas.tseries.offsets import MonthEnd
 
 
@@ -29,7 +29,7 @@ def get_state_population(
         obs_start: Optional[Any] = None,
         obs_end: Optional[Any] = None,
         multiplier: Optional[float] = 1000.0,
-) -> List[int]:
+    ) -> List[int]:
     """Get a given state's population from the Fed Fred API."""
     fred = Fred(api_key=api_key)
     population = fred.get_series(f'{state}POP{district}', obs_start, obs_end)
@@ -196,6 +196,18 @@ def sentence_case(s):
 # DataFrame utilities.
 #-----------------------------------------------------------------------
 
+def nonzero_columns(data):
+    """Return the non-zero column names of a DataFrame."""
+    nonzero = (data != 0).any()
+    return data.columns[nonzero].to_list()
+
+
+def nonzero_keys(data):
+    """Return the non-zero column names of a DataFrame."""
+    nonzero = (data != 0)
+    return nonzero.index[nonzero].to_list()
+
+
 def rmerge(left, right, **kwargs):
     """Perform a merge using pandas with optional removal of overlapping
     column names not associated with the join.
@@ -204,7 +216,7 @@ def rmerge(left, right, **kwargs):
     command, I find it useful because re-executing IPython notebook cells
     containing a merge command does not result in the replacement of existing
     columns if the name of the resulting DataFrame is the same as one of the
-    two merged DataFrames, i.e. data = pa.merge(data,new_dataframe). I prefer
+    two merged DataFrames, i.e. data = pa.merge(data, df). I prefer
     this command over pandas df.combine_first() method because it has more
     flexible join options.
 
@@ -280,3 +292,31 @@ def rmerge(left, right, **kwargs):
             right = right.copy().drop(dropcols, axis=1)
 
     return merge(left, right, **kwargs)
+
+
+def to_excel_with_style(
+        df: Any,
+        file_name: str,
+        index: Optional[bool] = False,
+        sheet_name: Optional[str] = 'Sheet1',
+        style: Optional[dict] = None,
+    ):
+    """Save a DataFrame to Excel with no style.
+    Args:
+        df (DataFrame): The data to save.
+        file_name (str): The name of the file.
+        index (bool): Whether to include the index, `False` by default (optional).
+        sheet_name (str): The name for the worksheet, `Sheet1` by default (optional).
+        style (dict): The style to apply to the headers (optional). Applies
+            a light green background with an underline by default.
+    """
+    if style is None:
+        style = {'bottom': 1, 'bg_color': '#EBF1DE'}
+    writer = ExcelWriter(file_name, engine='xlsxwriter')
+    df.to_excel(writer, index=index, sheet_name=sheet_name, startrow=1, header=False)
+    worksheet = writer.sheets[sheet_name]
+    workbook = writer.book
+    bold = workbook.add_format(style)
+    for idx, val in enumerate(df.columns):
+        worksheet.write(0, idx, val, bold)
+    writer.save()

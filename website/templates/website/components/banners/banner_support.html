@@ -23,24 +23,26 @@
     >
       <span class="badge rounded-pill bg-success me-1">New</span>
       <small>
-        Cannabis Data Science Podcast on Spotfiy
+        Podcast now on Spotfiy
       </small>
     </a>
-    <span class="px-2">|</span>
 
-    <!-- Support -->
-    <a
-      class="text-dark background-hover d-flex align-items-center"
-      href="{% url 'page' page='subscriptions' %}"
-      title="Get the support that your company needs."
-    >
-      <svg class="" style="width:20px;height:20px;">
-        <use href="{% static "website/images/emojies/atronaut.svg" %}#atronaut-emoji"></use>
-      </svg>
-      <small>
-        Premium subscriptions now available!
-      </small>
-    </a>
+    <!-- Premium -->
+    {% if not user.premium %}
+      <span class="px-2">|</span>
+      <a
+        class="text-dark background-hover d-flex align-items-center"
+        href="{% url 'page' page='subscriptions' %}"
+        title="Get the support that your company needs."
+      >
+        <svg class="" style="width:20px;height:20px;">
+          <use href="{% static "website/images/emojies/atronaut.svg" %}#atronaut-emoji"></use>
+        </svg>
+        <small>
+          Get premium material!
+        </small>
+      </a>
+    {% endif %}
 
     <!-- Github star button -->
     <span class="px-2">|</span>

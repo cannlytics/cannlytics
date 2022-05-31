@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <contact@cannlytics.com>
 Created: 2/7/2021
-Updated: 1/10/2022
+Updated: 5/17/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: A wrapper of `firebase_admin` to make interacting with a Firestore
@@ -14,20 +14,18 @@ database and Firebase Storage buckets even easier. For more information, see
 Example:
 
 ```py
-# Get the path to your service account.
-from dotenv import dotenv_values
-config = dotenv_values('./env')
-key_path = config['GOOGLE_APPLICATION_CREDENTIALS']
-
-# Initialize Firebase.
-database = initialize_firebase(key_path)
+# Initialize Firebase with a .env file with `GOOGLE_APPLICATION_CREDENTIALS`
+# pointing to the path of your service account.
+database = initialize_firebase('./env')
 ```
 """
 # Standard imports
 from datetime import datetime, timedelta
+import json
 from os import listdir
 from os.path import isfile, join
 from typing import Any, List, Optional, Tuple
+from dotenv import dotenv_values
 
 # External imports
 import requests
@@ -43,6 +41,8 @@ from google.cloud import secretmanager
 from google.cloud.firestore import ArrayUnion, ArrayRemove, Increment
 from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.transforms import DELETE_FIELD
+# FIXME: Raises the error below in Cloud Run.
+# AttributeError: partially initialized module 'pandas' has no attribute 'core' (most likely due to a circular import)
 from pandas import notnull, read_csv, read_excel, DataFrame, Series
 
 # Internal imports.
@@ -174,6 +174,7 @@ def increment_value(ref: str, field: str, amount: int = 1, database=None):
 
 
 def initialize_firebase(
+        env_file: Optional[str] = None,
         key_path: Optional[str] = None,
         bucket_name: Optional[str] = None,
         project_id: Optional[str] = None,
@@ -181,6 +182,7 @@ def initialize_firebase(
     """Initialize Firebase, unless already initialized. Searches for environment
     credentials if `key_path` is not specified.
     Args:
+        env_file (str): An .env file that contains `GOOGLE_APPLICATION_CREDENTIALS`.
         key_path (str): A path to your service account credentials (optional).
         project_id (str): A Firebase project ID (optional).
         bucket_name (str): A Cloud Storage bucket name (optional).
@@ -189,7 +191,10 @@ def initialize_firebase(
     """
     cred = None
     options = {}
-    if key_path:
+    if env_file:
+        config = dotenv_values(env_file)
+        key_path = config['GOOGLE_APPLICATION_CREDENTIALS']
+    elif key_path:
         cred = credentials.Certificate(key_path)
     if bucket_name:
         options['storageBucket'] = bucket_name.replace('gs://', '')
@@ -816,6 +821,7 @@ def upload_file(
         blob.upload_from_filename(source_file_name)
     else:
         blob.upload_from_string(data_url, content_type=content_type)
+
 
 def upload_files(bucket_folder: str, local_folder: str, bucket_name: Optional[str] = None):
     """Upload multiple files to Firebase Storage.

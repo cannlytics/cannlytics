@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<!--
+  Potential Effects and Flavors Calculator Page | Cannlytics Website
+  Copyright (c) 2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 5/14/2022
+  Updated: 5/14/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+
+  TODO:
+
+    - Let user upload lab results.
+
+    - Let user load defaults.
+
+    - Display accuracy.
+
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Effect and Aroma Calculator | Cannlytics{% endblock %}
+{% block material %}
+
+<!-- Hero Banner -->
+{% include "website/components/heros/hero_banner.html" with
+primary_action='Effect and Aroma Magician'
+primary_action_url='https://console.cannlytics.com/account/sign-in'
+secondary_action='Read the docs'
+secondary_action_url='https://github.com/cannlytics/cannlytics-ai'
+image_url='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_ai_with_text.png?alt=media&token=78d19117-eff5-4f45-a8fa-3bbdabd6917d'
+alt_title='Effect and Aroma Calculator'
+only
+%}
+
+<section class="container mb-2 mt-5">
+
+  <!-- Title -->
+  <div class="d-flex mt-4">
+    <nav
+      style="--bs-breadcrumb-divider: '>';"
+      aria-label="breadcrumb"
+    >
+      <ol class="breadcrumb bg-transparent p-0 mb-0">
+        <li class="breadcrumb-item fs-6 lh-sm">
+          <a
+            class="text-dark serif action"
+            href="{% url 'page' page='statistics' %}#data-market"
+          >
+            Statistics
+          </a>
+        </li>
+        <li class="breadcrumb-item active fs-6 lh-sm text-dark serif" aria-current="page">
+          Potential Effects and Flavors Calculator
+        </li>
+      </ol>
+      <div>
+    </div>
+    </nav>
+  </div>
+
+
+  <!-- TODO: Calculator form -->
+
+
+  <!-- About the API -->
+  <h1>API</h1>
+  <p>
+    Tell your developer about our effects and aromas calculator
+    that you can use with our free API. If you're paying for
+    quality control tests and/or terpene tests, then you may
+    as well have the effects and aromas of your products predicted.
+  </p>
+  <p>
+    For each prediction, you receive the estimated probability and
+    accuracy of a consumer reporting the effect or flavor. Simply
+    input cannabinoid and or terpene data and you receive a
+    surprisingly useful prediction of potential effects and flavors
+    that your consumers may report.
+  </p>
+  <p>
+    The cherry on top is that you can report back the actual
+    effects and flavors that you believe best characterizes
+    your product and the algorithm becomes that much smarter!
+    So, you can help improve the prediction model with each
+    prediction if you opt-in to providing feedback. Once again,
+    your developer can use our free API to communicate your
+    feedback if you desire.
+  </p>
+
+  <!-- Data Source Notice -->
+  <h1>Data Sources</h1>
+  <p class="markdown">
+    Data curated independently by Cannlytics from data published by
+    <a href="https://data.mendeley.com/datasets/6zwcgrttkp/1" target="_blank">
+      de la Fuente, et al. (2019)
+    </a>.<br>
+    License: <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">
+      CC BY 4.0.
+    </a>
+  </p>
+
+  <!-- TODO: Disclaimer -->
+  <p class="markdown">
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+  </p>
+
+
+</section>
+
+<!-- Learn More -->
+{% include "website/components/content/introduction.html" with
+title="Read the API Documentation"
+description='Cannlytics AI is artificial intelligence, powered by Cannlytics, that strives to be the go-to source of public cannabis data. Cannlytics AI leverages the comparative advantage of Cannlytics in aggregating cannabis data from disparate resources to provide you with clean, standardized data. Cannlytics AI provides you with a rich buffet of cannabis data, automatically, without mistakes, flaws, or complaint.'
+action="Utilize Cannlytics AI today"
+image_id="mechanical-arm-emoji"
+image_ref="website/images/emojies/mechanical-arm.svg"
+link="https://github.com/cannlytics/cannlytics-ai"
+%}
+
+<!-- Vines -->
+{% include "website/components/art/vines.html" %}
+
+{% endblock material %}
+
+</html>
