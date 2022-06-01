@@ -1,10 +1,9 @@
 """
 Test Statistics API Endpoint | Cannlytics API
 
-Author: Keegan Skeate
-Contact: <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/26/2021
-Updated: 5/27/2021
+Updated: 5/31/2021
 License: MIT License <https://opensource.org/licenses/MIT>
 """
 import os

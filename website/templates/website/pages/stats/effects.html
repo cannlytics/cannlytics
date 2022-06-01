@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <!--
-  Potential Effects and Flavors Calculator Page | Cannlytics Website
+  Potential Effects and Aromas Prediction Model Page | Cannlytics Website
   Copyright (c) 2022 Cannlytics
 
   Authors: Keegan Skeate <contact@cannlytics.com>
@@ -22,17 +22,6 @@
 {% load static %}
 {% block title %}Effect and Aroma Calculator | Cannlytics{% endblock %}
 {% block material %}
-
-<!-- Hero Banner -->
-{% include "website/components/heros/hero_banner.html" with
-primary_action='Effect and Aroma Magician'
-primary_action_url='https://console.cannlytics.com/account/sign-in'
-secondary_action='Read the docs'
-secondary_action_url='https://github.com/cannlytics/cannlytics-ai'
-image_url='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_ai_with_text.png?alt=media&token=78d19117-eff5-4f45-a8fa-3bbdabd6917d'
-alt_title='Effect and Aroma Calculator'
-only
-%}
 
 <section class="container mb-2 mt-5">
 
@@ -62,6 +51,38 @@ only
 
 
   <!-- TODO: Calculator form -->
+
+  <!-- Strain Name -->
+
+
+  <!-- Cannabinoids -->
+
+
+  <!-- Terpenes -->
+
+
+  <!-- Model selection -->
+
+
+  <!-- Show positive effects -->
+
+
+  <!-- Show negative effects -->
+
+
+  <!-- Show aromas -->
+
+
+  <!-- Save and export results -->
+
+
+  <!-- Optional: Determine most similar strain? -->
+
+
+  <!-- Feedback form shown after prediction -->
+
+
+  <!-- Model information -->
 
 
   <!-- About the API -->
@@ -129,5 +150,18 @@ link="https://github.com/cannlytics/cannlytics-ai"
 {% include "website/components/art/vines.html" %}
 
 {% endblock material %}
+
+<!-- JavaScript -->
+{% block page_js %}
+  <script>
+
+    // TODO: When the time is right, get the model statistics.
+    // cannlytics.stats.getModelStats();
+
+    // TODO: Get variable definitions (aromas and effects)
+    // to use in rending (e.g. colors and icons).
+  
+  </script>
+{% endblock %}
 
 </html>

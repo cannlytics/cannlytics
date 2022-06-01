@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/13/2022
-Updated: 5/30/2022
+Updated: 5/31/2022
 License: MIT License <https://opensource.org/licenses/MIT>
 
 Description:
@@ -37,24 +37,33 @@ Resources:
 # Standard imports.
 from datetime import datetime
 import os
-import shutil
 from typing import Any, Optional
+from cv2 import threshold
 
 # External imports.
 from dotenv import dotenv_values
+import pandas as pd
+
+# Internal imports.
 from cannlytics.firebase import (
-    download_file,
-    get_document,
     initialize_firebase,
     update_documents,
-    upload_file,
 )
-from cannlytics.utils import kebab_case, snake_case
-from cannlytics.utils.data import nonzero_columns, nonzero_keys
+from cannlytics.stats import (
+    calculate_model_statistics,
+    estimate_discrete_model,
+    get_stats_model,
+    predict_stats_model,
+    upload_stats_model,
+)
+from cannlytics.utils import snake_case
+from cannlytics.utils.data import (
+    combine_columns,
+    nonzero_columns,
+    nonzero_rows,
+    sum_columns,
+)
 from cannlytics.utils.files import download_file_from_url, unzip_files
-import pandas as pd
-from sklearn.metrics import confusion_matrix
-import statsmodels.api as sm
 
 # Ignore convergence errors.
 import warnings
@@ -89,53 +98,6 @@ def download_strain_review_data(
     strain_folder = 'Strain data/strains'
     compound_folder = 'Terpene and Cannabinoid data'
     return {'strains': strain_folder, 'compounds': compound_folder}
-
-
-def combine_columns(
-        df: Any,
-        new_key: str,
-        old_key: str,
-        drop: Optional[bool] = True,
-    ):
-    """Combine two numeric columns of a DataFrame.
-    Args:
-        df (DataFrame): The DataFrame with the columns.
-        new_key (str): The column to have values filled.
-        old_key (str): The column to use to fill values.
-        drop (bool): Whether or not to drop the old column, the default
-            is `True` (optional).
-    Returns:
-        (DataFrame): Returns the DataFrame with combined columns.
-    """
-    df.loc[df[new_key] == 0, new_key] = df[old_key]
-    df[new_key].fillna(df[old_key], inplace=True)
-    if drop:
-        df.drop(columns=[old_key], inplace=True)
-    return df
-
-
-def sum_columns(
-        df: Any,
-        new_key: str,
-        columns: list,
-        drop: Optional[bool] = True,
-    ):
-    """Sum multiple numeric columns of a DataFrame.
-    Args:
-        df (DataFrame): The DataFrame with the columns.
-        new_key (str): The column to have values filled.
-        columns (list): The columns to use to fill values.
-        drop (bool): Whether or not to drop the old column, the default
-            is `True` (optional).
-    Returns:
-        (DataFrame): Returns the DataFrame with summed columns.
-    """
-    df[new_key] = 0
-    for column in columns:
-        df[new_key] += df[column].fillna(0)
-    if drop:
-        df.drop(columns=columns, inplace=True)
-    return df
 
 
 def curate_lab_results(
@@ -307,164 +269,6 @@ def curate_strain_reviews(
     return panel.fillna(0)
 
 
-def estimate_effects_model(X, Y, method=None):
-    """Estimate a potential effects prediction model.
-    The algorithm excludes all null columns, adds a constant,
-    then fits probit model(s) for each effect variable.
-    The user can specify their model, e.g. logit, probit, etc.
-    Args:
-        X (DataFrame): A DataFrame of explanatory variables.
-        Y (DataFrame): A DataFrame of outcome variables.
-        method (str, function): Specify 'probit', 'logit', or pass
-            a statistical model of your choice with a `fit` method.
-    Returns:
-        (list): Returns a list of simultaneous prediction models.
-    """
-    X = X.loc[:, (X != 0).any(axis=0)]
-    X = sm.add_constant(X)
-    models = {}
-    if method == 'logit':
-        method = sm.Logit
-    elif method is None or method == 'probit':
-        method = sm.Probit
-    for variable in Y.columns:
-        try:
-            y = Y[variable]
-            model = method(y, X).fit(disp=0)
-            models[variable] = model
-        except:
-            models[variable] = None # Error estimating!
-    return models
-
-
-def calculate_model_statistics(models, Y, X):
-    """Determine prediction thresholds for a given model.
-    Calculate a confusion matrix and returns prediction statistics.
-    Args:
-        models (list): A list of simultaneous prediction models.
-        X (DataFrame): A DataFrame of explanatory variables.
-        Y (DataFrame): A DataFrame of outcome variables.
-    Returns:
-        (dict): Returns a dictionary of statistics for each model.
-    """
-    X = X.loc[:, (X != 0).any(axis=0)]
-    x = sm.add_constant(X)
-    base, acc, fpr, fnr, tpr, tnr, info = {}, {}, {}, {}, {}, {}, {}
-    for key in Y.columns:
-        y = Y[key]
-        y_bar = y.mean()
-        model = models[key]
-        if model:
-            x_hat = x[list(model.params.keys())]
-            y_hat = model.predict(x_hat)
-            threshold = round(y_hat.quantile(1 - y_bar), 4)
-            base[key] = threshold
-            prediction = pd.Series(y_hat > threshold).astype(int)
-            cm = confusion_matrix(y, prediction)
-            tn, fp, fn, tp = cm.ravel()
-            pos = sum(y)
-            neg = len(y) - pos
-            fpr[key] = round(fp / neg, 4)
-            fnr[key] = round(fn / pos, 4)
-            tpr[key] = round(tp / pos, 4)
-            tnr[key] = round(tn / neg, 4)
-            acc[key] = round((tp + tn) / (pos + neg), 4)
-            info[key] = round((tp / pos) / (tn / neg), 4)
-    return pd.DataFrame({
-        'threshold': base,
-        'false_positive_rate': fpr,
-        'false_negative_rate': fnr,
-        'true_positive_rate': tpr,
-        'true_negative_rate': tnr,
-        'accuracy': acc,
-        'informedness': info,
-    })
-
-
-def predict_effects(models, X, thresholds):
-    """Predict potential aromas and effects for a cannabis product(s)
-    given. Add a constant column if necessary and only use model columns.
-    Args:
-        models (list): A list of simultaneous prediction models.
-        X (DataFrame): A DataFrame of explanatory variables.
-        thresholds (dict): A dictionary of thresholds to be used as
-            decision rules.
-    Returns:
-        (DataFrame): Returns predictions for each outcome variable.
-    """
-    x = X.assign(const=1)
-    predictions = pd.DataFrame()
-    for key, model in models.items():
-        if not model:
-            predictions[key] = 0
-            continue
-        x_hat = x[list(model.params.keys())]
-        y_hat = model.predict(x_hat)
-        threshold = thresholds[key]
-        prediction = pd.Series(y_hat > threshold).astype(int)
-        predictions[key] = prediction
-    return predictions
-
-
-def upload_effects_model(models, ref, name=None, data_dir='/tmp', stats=None):
-    """Upload an effects prediction model for future use.
-    Pickle each model, zip the model files, then upload the zipped file.
-    Finally, record the file's data in Firebase Firestore.
-    Args:
-        models (list): The list of effects models.
-        ref (str): The reference for the model data and file.
-        name (str): A name to save the model as (optional).
-        data_dir (str): A directory to save the model files (optional).
-        stats (DataFrame): Model summary statistics (optional).
-    Returns:
-        (dict): Returns the model data.
-    """
-    if name is None:
-        name = ref.replace('/', '-')
-    model_path = os.path.join(data_dir, name)
-    if not os.path.exists(model_path):
-        os.makedirs(model_path)
-    for key, model in models.items():
-        model_file = os.path.join(model_path, f'model_{key}.pickle')
-        model.save(model_file)
-    zipped_file = os.path.join(data_dir, name)
-    shutil.make_archive(zipped_file, 'zip', model_path)
-    file_ref = ref + '.zip'
-    data = {'model_stats': stats.to_dict(), 'model_ref': file_ref}
-    upload_file(file_ref, zipped_file + '.zip')
-    update_documents([ref], [data])
-    return data
-
-
-def get_effects_model(ref, data_dir='/tmp', name=None,):
-    """Get a pre-built prediction model for use.
-    First, gets the model data from Firebase Firestore.
-    Second, downloads the pickle file and loads it into a model.
-    Args:
-        ref (str): The reference of the model data and file.
-        data_dir (str): A folder to save the model files.
-    Returns:
-        (dict): Data about the model.
-    """
-    if name is None:
-        name = ref.replace('/', '-')
-    model_path = os.path.join(data_dir, name)
-    if not os.path.exists(model_path):
-        os.makedirs(model_path)
-    data = get_document(ref)
-    file_name = ref.split('/')[-1] + '.zip'
-    zipped_file = os.path.join(data_dir, file_name)
-    download_file(data['model_ref'], zipped_file)
-    shutil.unpack_archive(zipped_file, model_path)
-    models = {}
-    for item in os.listdir(model_path):
-        pickle_file = os.path.join(model_path, item)
-        key = item.replace('model_', '').replace('.pickle', '')
-        models[key] = sm.load(pickle_file)
-    data['model'] = models
-    return data
-
-
 def download_dataset(name, destination):
     """Download a Cannlytics dataset by its name and given a destination.
     Args:
@@ -475,6 +279,8 @@ def download_dataset(name, destination):
     download_file_from_url(short_url, destination=destination)
 
 
+#-----------------------------------------------------------------------
+# Tests
 #-----------------------------------------------------------------------
 
 if __name__ == '__main__':
@@ -551,7 +357,7 @@ if __name__ == '__main__':
 
     #-------------------------------------------------------------------
 
-    # Future work: Upload the datasets to Firebase Storage for easy access.
+    # Future work: Programmatically upload the datasets to Storage.
 
     # Optional: Download the pre-compiled data from Cannlytics.
     # strain_data = download_dataset('strains', DATA_DIR)
@@ -562,10 +368,7 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------
 
     # Specify different prediction models.
-    # Future work:
-        # - Logit
-        # - Terpene ratios
-        # - Bayesian
+    # Future work: Logit, terpene ratio, and bayesian models.
     variates = {
         'full': [
             'delta_9_thc',
@@ -656,17 +459,21 @@ if __name__ == '__main__':
     Y = reviews[aromas + effects]
     X = reviews[variates[model_name]]
     print('Estimating model:', model_name)
-    effects_model = estimate_effects_model(X, Y)
+    effects_model = estimate_discrete_model(X, Y)
 
     # Calculate statistics for the model.
     model_stats = calculate_model_statistics(effects_model, Y, X)
 
-    # Look at the expected probability of an informed decision .
-    print('Mean informedness:', round(model_stats.loc[model_stats.informedness < 1].informedness.mean(), 4))
+    # Look at the expected probability of an informed decision.
+    stat = 'informedness'
+    print(
+        f'Mean {stat}:',
+        round(model_stats.loc[model_stats[stat] < 1][stat].mean(), 4)
+    )
 
     # Save the model.
     ref = f'public/models/effects/{model_name}'
-    model_data = upload_effects_model(
+    model_data = upload_stats_model(
         effects_model,
         ref,
         name=model_name,
@@ -682,8 +489,8 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------
 
     # Optional: Save the official strain predictions.
-    # predictions = predict_effects(effects_model, X, model_stats['threshold'])
-    # predicted_effects = predictions.apply(nonzero_keys, axis=1)
+    # predictions = predict_stats_model(effects_model, X, model_stats['threshold'])
+    # predicted_effects = predictions.apply(nonzero_rows, axis=1)
     # strain_effects = predicted_effects.to_frame()
     # strain_effects['strain_name'] = reviews['strain_name']
     # strain_effects = strain_effects.groupby('strain_name').first()
@@ -704,14 +511,16 @@ if __name__ == '__main__':
 
 
     #-------------------------------------------------------------------
-    # How to use the model in the wild: Full model.
+    # How to use the model in the wild: `full` model.
     #-------------------------------------------------------------------
 
     # 1. Get the model and its statistics.
-    model_data = get_effects_model(
-        'public/models/effects/full',
-        data_dir=DATA_DIR,
-    )
+    model_name = 'full'
+    model_ref = f'public/models/effects/{model_name}'
+    model_data = get_stats_model(model_ref, data_dir=DATA_DIR)
+    model_stats = model_data['model_stats']
+    models = model_data['model']
+    thresholds = model_stats['threshold']
 
     # 2. Predict a single sample (below are mean concentrations).
     strain_name = 'Test Sample'
@@ -752,7 +561,7 @@ if __name__ == '__main__':
         'p_cymene': 0.00,
         'terpinene': 0.00,
     }])
-    prediction = predict_effects(model_data['model'], x, model_data['model_stats']['threshold'])
+    prediction = predict_stats_model(models, x, thresholds)
     outcomes = nonzero_columns(prediction)
     effects = [x for x in outcomes if x.startswith('effect')]
     aromas = [x for x in outcomes if x.startswith('aroma')]
@@ -768,22 +577,22 @@ if __name__ == '__main__':
         'strain_name': strain_name,
         'timestamp': timestamp,
         'model': model_name,
-        'model_stats': model_data['model_stats'],
+        'model_stats': model_stats,
     }
     ref = 'models/effects/model_predictions/%s' % (timestamp.replace(':', '-'))
     update_documents([ref], [data])
-    print('Test finished.')
 
     #-------------------------------------------------------------------
-    # How to use the model in the wild: simple model.
+    # How to use the model in the wild: `simple` model.
     #-------------------------------------------------------------------
 
     # 1. Get the model and its statistics.
-    model_data = get_effects_model(
-        'public/models/effects/simple',
-        data_dir=DATA_DIR,
-    )
-    stats = model_data['model_stats']
+    model_name = 'simple'
+    model_ref = f'public/models/effects/{model_name}'
+    model_data = get_stats_model(model_ref, data_dir=DATA_DIR)
+    model_stats = model_data['model_stats']
+    models = model_data['model']
+    thresholds = model_stats['threshold']
 
     # 2. Predict samples.
     x = pd.DataFrame([
@@ -792,17 +601,23 @@ if __name__ == '__main__':
         {'total_cbd': 0.04, 'total_thc': 28.0},
         {'total_cbd': 7.0, 'total_thc': 7.0},
     ])
-    prediction = predict_effects(model_data['model'], x, model_data['model_stats']['threshold'])
+    prediction = predict_stats_model(models, x, thresholds)
     outcomes = []
     for index, row in prediction.iterrows():
-        outcome = nonzero_keys(row)
+        outcome = nonzero_rows(row)
         outcomes.append(outcome)
         effects = [x for x in outcome if x.startswith('effect')]
         aromas = [x for x in outcome if x.startswith('aroma')]
         print(f'\nSample {index} predicted effects:')
         print('------------------------------------')
         for i, key in enumerate(effects):
-            tpr = round(stats['true_positive_rate'][key] * 100, 2)
-            fpr = round(stats['false_positive_rate'][key] * 100, 2)
+            tpr = round(model_stats['true_positive_rate'][key] * 100, 2)
+            fpr = round(model_stats['false_positive_rate'][key] * 100, 2)
             title = key.replace('effect_', '').replace('_', ' ').title()
             print(title, f'(TPR: {tpr}%, FPR: {fpr}%)')
+
+    #-------------------------------------------------------------------
+    # Fin.
+    #-------------------------------------------------------------------
+
+    print('Test finished.')

@@ -3,7 +3,7 @@ Data Utilities | Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2022
-Updated: 5/23/2022
+Updated: 5/31/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Internal imports.
@@ -202,10 +202,57 @@ def nonzero_columns(data):
     return data.columns[nonzero].to_list()
 
 
-def nonzero_keys(data):
-    """Return the non-zero column names of a DataFrame."""
+def nonzero_rows(data):
+    """Return the non-zero row keys of a DataFrame."""
     nonzero = (data != 0)
     return nonzero.index[nonzero].to_list()
+
+
+def combine_columns(
+        df: Any,
+        new_key: str,
+        old_key: str,
+        drop: Optional[bool] = True,
+    ):
+    """Combine two numeric columns of a DataFrame.
+    Args:
+        df (DataFrame): The DataFrame with the columns.
+        new_key (str): The column to have values filled.
+        old_key (str): The column to use to fill values.
+        drop (bool): Whether or not to drop the old column, the default
+            is `True` (optional).
+    Returns:
+        (DataFrame): Returns the DataFrame with combined columns.
+    """
+    df.loc[df[new_key] == 0, new_key] = df[old_key]
+    df[new_key].fillna(df[old_key], inplace=True)
+    if drop:
+        df.drop(columns=[old_key], inplace=True)
+    return df
+
+
+def sum_columns(
+        df: Any,
+        new_key: str,
+        columns: list,
+        drop: Optional[bool] = True,
+    ):
+    """Sum multiple numeric columns of a DataFrame.
+    Args:
+        df (DataFrame): The DataFrame with the columns.
+        new_key (str): The column to have values filled.
+        columns (list): The columns to use to fill values.
+        drop (bool): Whether or not to drop the old column, the default
+            is `True` (optional).
+    Returns:
+        (DataFrame): Returns the DataFrame with summed columns.
+    """
+    df[new_key] = 0
+    for column in columns:
+        df[new_key] += df[column].fillna(0)
+    if drop:
+        df.drop(columns=columns, inplace=True)
+    return df
 
 
 def rmerge(left, right, **kwargs):
@@ -280,16 +327,16 @@ def rmerge(left, right, **kwargs):
 
     if myargs['replace'] is not None:
         # Generate a list of overlapping column names not associated with the join
-        skipcols = set(flatten([v for k, v in myargs.items() if k in ['on', 'left_on', 'right_on']]))
-        leftcols = set(left.columns)
-        rightcols = set(right.columns)
-        dropcols = list((leftcols & rightcols).difference(skipcols))
+        skip_cols = set(flatten([v for k, v in myargs.items() if k in ['on', 'left_on', 'right_on']]))
+        left_cols = set(left.columns)
+        right_cols = set(right.columns)
+        drop_cols = list((left_cols & right_cols).difference(skip_cols))
 
         # Remove the overlapping column names from the appropriate DataFrame
         if myargs['replace'].lower() == 'left':
-            left = left.copy().drop(dropcols, axis=1)
+            left = left.copy().drop(drop_cols, axis=1)
         elif myargs['replace'].lower() == 'right':
-            right = right.copy().drop(dropcols, axis=1)
+            right = right.copy().drop(drop_cols, axis=1)
 
     return merge(left, right, **kwargs)
 

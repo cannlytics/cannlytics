@@ -12,6 +12,7 @@ import { data } from './data/data.js';
 import * as firebase from './firebase.js';
 import { payments } from './payments/payments.js';
 import { settings } from './settings/settings.js';
+import { stats } from './stats/stats.js';
 import { testing } from './testing/testing.js';
 import { videos } from './website/videos.js';
 import { website } from './website/website.js';
@@ -26,6 +27,7 @@ export {
   firebase,
   payments,
   settings,
+  stats,
   testing,
   ui,
   videos,

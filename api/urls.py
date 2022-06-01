@@ -40,6 +40,7 @@ from api.projects import projects
 from api.results import results
 from api.samples import samples
 from api.settings import settings
+from api.stats import stats
 from api.transfers import transfers
 from api.traceability import traceability
 from api.users import users
@@ -116,13 +117,13 @@ urlpatterns = [
         # path('/state/<state>', state_data),
 
         # TODO: Implement strains endpoints.
-        path('strains', include([
+        path('/strains', include([
             path('', strain_data.strain_data),
-            path('/<strain_id>', strain_data.strain_data),
+            path('/<strain_name>', strain_data.strain_data),
         ])),
 
         # TODO: Implement patents endpoints.
-        path('patents', include([
+        path('/patents', include([
             path('', patent_data.patent_data),
             path('/<patent_number>', patent_data.patent_data),
         ])),
@@ -189,10 +190,11 @@ urlpatterns = [
 
     # TODO: Implement stats endpoints
     path('stats', include([
-        path('', strain_data.strain_data),
-        path('/effects', strain_data.strain_data),
-        path('/effects/predict', strain_data.strain_data),
-        path('/recommendations', strain_data.strain_data),
+        path('', stats.effects_stats),
+        path('/effects', stats.effects_stats),
+        path('/effects/<strain>', stats.effects_stats),
+        path('/recommendations', stats.recommendations_stats),
+        path('/patents', stats.patents_stats),
     ])),
 
     path('templates', include([

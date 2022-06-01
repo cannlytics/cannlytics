@@ -108,6 +108,9 @@ EFFECTS = [
     'effect_spasticity',
 ]
 
+#-----------------------------------------------------------------------
+# Get colors associated with effect and aroma words.
+#-----------------------------------------------------------------------
 
 def get_color_association(string):
     """Get a color associated with a given word or phrase.
@@ -123,6 +126,7 @@ def get_color_association(string):
     soup = BeautifulSoup(response.content, features='html.parser')
     a = soup.find_all('span', {'class': 'hex'})
     return a[0].text
+
 
 # Format aroma data.
 aroma_data = []
@@ -167,6 +171,26 @@ with open(data_dir + 'effects.json', 'w+') as datafile:
     json.dump(effect_data, datafile, indent=4, sort_keys=True)
 
 
+#-----------------------------------------------------------------------
+# Get details about each compound.
+#-----------------------------------------------------------------------
+
+# TODO: Get details for each cannabinoid and terpene.
+{
+    'analyte_type': '',
+    'cas_number': '',
+    'name': '',
+    'key': '',
+    'common_names': [],
+    'units': [],
+}
+
+# TODO: Save the compounds to Firestore.
+
+
+#-----------------------------------------------------------------------
+# Create an image for each strain based on its chemotype.
+#-----------------------------------------------------------------------
 
 # Future work: Create image from the effects and aromas of a particular strain.
 
@@ -175,3 +199,5 @@ with open(data_dir + 'effects.json', 'w+') as datafile:
 # img = Image.new('RGB', (width, height))
 # img.putdata(my_list)
 # img.save('image.png')
+
+
