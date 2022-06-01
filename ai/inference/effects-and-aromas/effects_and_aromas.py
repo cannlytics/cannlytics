@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/13/2022
-Updated: 5/31/2022
+Updated: 6/1/2022
 License: MIT License <https://opensource.org/licenses/MIT>
 
 Description:
@@ -38,7 +38,6 @@ Resources:
 from datetime import datetime
 import os
 from typing import Any, Optional
-from cv2 import threshold
 
 # External imports.
 from dotenv import dotenv_values
@@ -60,7 +59,6 @@ from cannlytics.utils import snake_case
 from cannlytics.utils.data import (
     combine_columns,
     nonzero_columns,
-    nonzero_rows,
     sum_columns,
 )
 from cannlytics.utils.files import download_file_from_url, unzip_files
@@ -319,8 +317,8 @@ if __name__ == '__main__':
     # Upload the strain data to Firestore.
     docs = strain_data.to_dict(orient='records')
     refs = [f'public/data/strains/{x}' for x in strain_data.index]
-    update_documents(refs, docs, database=db)
-    print('Updated %i strains.' % len(docs))
+    # update_documents(refs, docs, database=db)
+    # print('Updated %i strains.' % len(docs))
 
     # Upload individual lab results for each strain.
     # Future work: Format the lab results as metrics with CAS, etc.
@@ -329,8 +327,8 @@ if __name__ == '__main__':
     results['lab_name'] = 'PSI Labs'
     docs = results.to_dict(orient='records')
     refs = [f'public/data/strains/{x[0]}/strain_lab_results/lab_result_{x[1]}' for x in results[['strain_name', 'id']].values]
-    update_documents(refs, docs, database=db)
-    print('Updated %i strain lab results.' % len(docs))
+    # update_documents(refs, docs, database=db)
+    # print('Updated %i strain lab results.' % len(docs))
 
     #-------------------------------------------------------------------
     # Curate the strain review data.
@@ -344,10 +342,10 @@ if __name__ == '__main__':
     reviews = combine_columns(reviews, 'effect_anxious', 'effect_anxiety')
 
     # Optional: Save and read back in the reviews.
-    # today = datetime.now().isoformat()[:10]
-    # datafile = DATA_DIR + f'/strain-reviews-{today}.xlsx'
-    # reviews.to_excel(datafile)
-    # reviews = pd.read_excel(datafile, index_col=0)
+    today = datetime.now().isoformat()[:10]
+    datafile = DATA_DIR + f'/strain-reviews-{today}.xlsx'
+    reviews.to_excel(datafile)
+    reviews = pd.read_excel(datafile, index_col=0)
 
     # # Optional: Upload strain review data to Firestore.
     # reviews['id'] = reviews.index
@@ -453,7 +451,7 @@ if __name__ == '__main__':
     }
 
     # Use the data to create an effect prediction model.
-    model_name = 'simple'
+    model_name = 'full'
     aromas = [x for x in reviews.columns if x.startswith('aroma')]
     effects = [x for x in reviews.columns if x.startswith('effect')]
     Y = reviews[aromas + effects]
@@ -482,9 +480,8 @@ if __name__ == '__main__':
     )
     print('Effects prediction model saved:', ref)
 
-
     #-------------------------------------------------------------------
-    # Use the model to predict the sample and save the
+    # Optional: Use the model to predict the sample and save the
     # predictions for easy access in the future.
     #-------------------------------------------------------------------
 
@@ -509,112 +506,156 @@ if __name__ == '__main__':
     # update_documents(refs, docs)
     # print('Updated %i strain predictions.' % len(docs))
 
-
     #-------------------------------------------------------------------
     # How to use the model in the wild: `full` model.
     #-------------------------------------------------------------------
 
-    # 1. Get the model and its statistics.
-    model_name = 'full'
-    model_ref = f'public/models/effects/{model_name}'
-    model_data = get_stats_model(model_ref, data_dir=DATA_DIR)
-    model_stats = model_data['model_stats']
-    models = model_data['model']
-    thresholds = model_stats['threshold']
+    # # 1. Get the model and its statistics.
+    # model_name = 'full'
+    # model_ref = f'public/models/effects/{model_name}'
+    # model_data = get_stats_model(model_ref, data_dir=DATA_DIR)
+    # model_stats = model_data['model_stats']
+    # models = model_data['model']
+    # thresholds = model_stats['threshold']
 
-    # 2. Predict a single sample (below are mean concentrations).
-    strain_name = 'Test Sample'
-    x = pd.DataFrame([{
-        'delta_9_thc': 10.85,
-        'cbd': 0.29,
-        'cbn': 0.06,
-        'cbg': 0.54,
-        'cbc': 0.15,
-        'thcv': 0.07,
-        'cbda': 0.40,
-        'delta_8_thc': 0.00,
-        'cbga': 0.40,
-        'thca': 8.64,
-        'd_limonene': 0.22,
-        'beta_ocimene': 0.05,
-        'beta_myrcene': 0.35,
-        'beta_pinene': 0.12,
-        'linalool': 0.07,
-        'alpha_pinene': 0.10,
-        'camphene': 0.01,
-        'carene': 0.00,
-        'alpha_terpinene': 0.00,
-        'ocimene': 0.00,
-        'cymene': 0.00,
-        'eucalyptol': 0.00,
-        'gamma_terpinene': 0.00,
-        'terpinolene': 0.80,
-        'isopulegol': 0.00,
-        'geraniol': 0.00,
-        'humulene': 0.06,
-        'nerolidol': 0.01,
-        'guaiol': 0.01,
-        'caryophyllene_oxide': 0.00,
-        'alpha_bisabolol': 0.03,
-        'beta_caryophyllene': 0.18,
-        'alpha_humulene': 0.03,
-        'p_cymene': 0.00,
-        'terpinene': 0.00,
-    }])
-    prediction = predict_stats_model(models, x, thresholds)
-    outcomes = nonzero_columns(prediction)
-    effects = [x for x in outcomes if x.startswith('effect')]
-    aromas = [x for x in outcomes if x.startswith('aroma')]
-    print(f'Predicted effects:', effects)
-    print(f'Predicted aromas:', aromas)
+    # # 2. Predict a single sample (below are mean concentrations).
+    # strain_name = 'Test Sample'
+    # x = pd.DataFrame([{
+    #     'delta_9_thc': 10.85,
+    #     'cbd': 0.29,
+    #     'cbn': 0.06,
+    #     'cbg': 0.54,
+    #     'cbc': 0.15,
+    #     'thcv': 0.07,
+    #     'cbda': 0.40,
+    #     'delta_8_thc': 0.00,
+    #     'cbga': 0.40,
+    #     'thca': 8.64,
+    #     'd_limonene': 0.22,
+    #     'beta_ocimene': 0.05,
+    #     'beta_myrcene': 0.35,
+    #     'beta_pinene': 0.12,
+    #     'linalool': 0.07,
+    #     'alpha_pinene': 0.10,
+    #     'camphene': 0.01,
+    #     'carene': 0.00,
+    #     'alpha_terpinene': 0.00,
+    #     'ocimene': 0.00,
+    #     'cymene': 0.00,
+    #     'eucalyptol': 0.00,
+    #     'gamma_terpinene': 0.00,
+    #     'terpinolene': 0.80,
+    #     'isopulegol': 0.00,
+    #     'geraniol': 0.00,
+    #     'humulene': 0.06,
+    #     'nerolidol': 0.01,
+    #     'guaiol': 0.01,
+    #     'caryophyllene_oxide': 0.00,
+    #     'alpha_bisabolol': 0.03,
+    #     'beta_caryophyllene': 0.18,
+    #     'alpha_humulene': 0.03,
+    #     'p_cymene': 0.00,
+    #     'terpinene': 0.00,
+    # }])
+    # prediction = predict_stats_model(models, x, thresholds)
+    # outcomes = nonzero_columns(prediction)
+    # effects = [x for x in outcomes if x.startswith('effect')]
+    # aromas = [x for x in outcomes if x.startswith('aroma')]
+    # print(f'Predicted effects:', effects)
+    # print(f'Predicted aromas:', aromas)
 
-    # 3. Save / log the prediction and model stats.
-    timestamp = datetime.now().isoformat()[:19]
-    data = {
-        'potential_effects': effects,
-        'potential_aromas': aromas,
-        'lab_results': x.to_dict(orient='records')[0],
-        'strain_name': strain_name,
-        'timestamp': timestamp,
-        'model': model_name,
-        'model_stats': model_stats,
-    }
-    ref = 'models/effects/model_predictions/%s' % (timestamp.replace(':', '-'))
-    update_documents([ref], [data])
+    # # 3. Save / log the prediction and model stats.
+    # timestamp = datetime.now().isoformat()[:19]
+    # data = {
+    #     'potential_effects': effects,
+    #     'potential_aromas': aromas,
+    #     'lab_results': x.to_dict(orient='records')[0],
+    #     'strain_name': strain_name,
+    #     'timestamp': timestamp,
+    #     'model': model_name,
+    #     'model_stats': model_stats,
+    # }
+    # ref = 'models/effects/model_predictions/%s' % (timestamp.replace(':', '-'))
+    # update_documents([ref], [data])
 
     #-------------------------------------------------------------------
     # How to use the model in the wild: `simple` model.
     #-------------------------------------------------------------------
 
-    # 1. Get the model and its statistics.
-    model_name = 'simple'
-    model_ref = f'public/models/effects/{model_name}'
-    model_data = get_stats_model(model_ref, data_dir=DATA_DIR)
-    model_stats = model_data['model_stats']
-    models = model_data['model']
-    thresholds = model_stats['threshold']
+    # # 1. Get the model and its statistics.
+    # model_name = 'simple'
+    # model_ref = f'public/models/effects/{model_name}'
+    # model_data = get_stats_model(model_ref, data_dir=DATA_DIR)
+    # model_stats = model_data['model_stats']
+    # models = model_data['model']
+    # thresholds = model_stats['threshold']
 
-    # 2. Predict samples.
-    x = pd.DataFrame([
-        {'total_cbd': 0.04, 'total_thc': 18.0},
-        {'total_cbd': 0.04, 'total_thc': 20.0},
-        {'total_cbd': 0.04, 'total_thc': 28.0},
-        {'total_cbd': 7.0, 'total_thc': 7.0},
-    ])
-    prediction = predict_stats_model(models, x, thresholds)
-    outcomes = []
-    for index, row in prediction.iterrows():
-        outcome = nonzero_rows(row)
-        outcomes.append(outcome)
-        effects = [x for x in outcome if x.startswith('effect')]
-        aromas = [x for x in outcome if x.startswith('aroma')]
-        print(f'\nSample {index} predicted effects:')
-        print('------------------------------------')
-        for i, key in enumerate(effects):
-            tpr = round(model_stats['true_positive_rate'][key] * 100, 2)
-            fpr = round(model_stats['false_positive_rate'][key] * 100, 2)
-            title = key.replace('effect_', '').replace('_', ' ').title()
-            print(title, f'(TPR: {tpr}%, FPR: {fpr}%)')
+    # # 2. Predict samples.
+    # x = pd.DataFrame([
+    #     {'total_cbd': 1.8, 'total_thc': 18.0},
+    #     {'total_cbd': 1.0, 'total_thc': 20.0},
+    #     {'total_cbd': 1.0, 'total_thc': 30.0},
+    #     {'total_cbd': 7.0, 'total_thc': 7.0},
+    # ])
+    # prediction = predict_stats_model(models, x, thresholds)
+    # outcomes = pd.DataFrame()
+    # for index, row in prediction.iterrows():
+    #     print(f'\nSample {index}')
+    #     print('-----------------')
+    #     for i, key in enumerate(row['potential_effects']):
+    #         tpr = round(model_stats['true_positive_rate'][key] * 100, 2)
+    #         fpr = round(model_stats['false_positive_rate'][key] * 100, 2)
+    #         title = key.replace('effect_', '').replace('_', ' ').title()
+    #         print(title, f'(TPR: {tpr}%, FPR: {fpr}%)')
+    #         outcomes = pd.concat([outcomes, pd.DataFrame([{
+    #             'tpr': tpr,
+    #             'fpr': fpr,
+    #             'name': title,
+    #             'strain_name': index,
+    #         }])])
+
+    #-------------------------------------------------------------------
+    # Example visualization of the predicted outcomes.
+    #-------------------------------------------------------------------
+
+    # # Setup plotting style.
+    # import seaborn as sns
+    # import matplotlib.pyplot as plt
+    # import matplotlib.patches as mpatches
+    # plt.style.use('fivethirtyeight')
+    # plt.rcParams.update({
+    #     'font.family': 'Times New Roman',
+    # })
+
+    # # Create the plot.
+    # outcomes.sort_values('tpr', ascending=False, inplace=True)
+    # colors = sns.color_palette('Spectral', n_colors=12)
+    # colors = [colors[x] for x in [9, 3, 1, 10]]
+    # sns.catplot(
+    #     x='name',
+    #     y='tpr',
+    #     hue='strain_name',
+    #     data=outcomes,
+    #     kind='bar',
+    #     legend=False,
+    #     aspect=12/8,
+    #     palette=colors,
+    # )
+    # handles = []
+    # ratios = ['10:1', '20:1', '30:1', '1:1']
+    # for i, ratio in enumerate(ratios):
+    #     patch = mpatches.Patch(color=colors[i], label=ratio)
+    #     handles.append(patch)
+    # plt.legend(
+    #     loc='upper right',
+    #     title='THC:CBD',
+    #     handles=handles,
+    # )
+    # plt.title('Predicted Effects That May be Reported')
+    # plt.ylabel('True Positive Rate')
+    # plt.xlabel('Predicted Effect')
+    # plt.xticks(rotation=90)
+    # plt.show()
 
     #-------------------------------------------------------------------
     # Fin.

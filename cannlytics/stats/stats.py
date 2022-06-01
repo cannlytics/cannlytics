@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/31/2022
-Updated: 5/31/2022
+Updated: 6/1/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports.
@@ -60,7 +60,7 @@ def calculate_model_statistics(models, Y, X):
             tnr[key] = round(tn / neg, 4)
             acc[key] = round((tp + tn) / (pos + neg), 4)
             info[key] = round((tp / pos) / (tn / neg), 4)
-    return pd.DataFrame({
+    stats = pd.DataFrame({
         'threshold': base,
         'false_positive_rate': fpr,
         'false_negative_rate': fnr,
@@ -69,6 +69,8 @@ def calculate_model_statistics(models, Y, X):
         'accuracy': acc,
         'informedness': info,
     })
+    stats = stats.fillna(None)
+    return stats
 
 
 def estimate_discrete_model(X, Y, method=None):

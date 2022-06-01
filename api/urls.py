@@ -40,11 +40,12 @@ from api.projects import projects
 from api.results import results
 from api.samples import samples
 from api.settings import settings
-from api.stats import stats
 from api.transfers import transfers
 from api.traceability import traceability
 from api.users import users
 from api.waste import waste
+
+from api import stats
 
 app_name = 'api' # pylint: disable=invalid-name
 
@@ -89,7 +90,7 @@ urlpatterns = [
         path('/analyses', analysis_data.analysis_data),
         path('/analyses/<analysis_id', analysis_data.analysis_data),
 
-        # FIXME: Re-design CCRS endpoints around timeseries statistics :)
+        # TODO: Re-design CCRS endpoints around timeseries statistics :)
         path('/ccrs/areas', ccrs_data.areas),
         path('/ccrs/contacts', ccrs_data.contacts),
         path('/ccrs/integrators', ccrs_data.integrators),
@@ -191,9 +192,11 @@ urlpatterns = [
     path('stats', include([
         path('', stats.effects_stats),
         path('/effects', stats.effects_stats),
+        path('/effects/actual', stats.record_effects),
         path('/effects/<strain>', stats.effects_stats),
-        path('/recommendations', stats.recommendations_stats),
-        path('/patents', stats.patents_stats),
+        # TODO: Implement.
+        path('/recommendations', stats.recommendation_stats),
+        path('/patents', stats.patent_stats),
     ])),
 
     path('templates', include([

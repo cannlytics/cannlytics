@@ -46,7 +46,7 @@ print('Found %s.' % data['strain_name'])
 url = f'{BASE}/data/strains'
 params = {
     'limit': 10,
-    'effects': json.dumps(['focused']),
+    'effects': json.dumps(['focused', 'creative']),
 }
 response = requests.get(url, params=params)
 assert response.status_code == 200
@@ -81,67 +81,3 @@ assert response.status_code == 200
 data = pd.DataFrame(response.json()['data'])
 print('Found %i strains.' % len(data))
 print(data[['strain_name', compound]])
-
-#-----------------------------------------------------------------------
-
-# Post lab results to get potential effects and aromas.
-data = {
-    'model': 'simple',
-    'samples': [
-        {'total_cbd': 0.04, 'total_thc': 18.0},
-        {'total_cbd': 0.04, 'total_thc': 20.0},
-        {'total_cbd': 0.04, 'total_thc': 28.0},
-        {'total_cbd': 7.0, 'total_thc': 7.0},
-    ]
-}
-url = f'{BASE}/stats/effects'
-response = requests.post(url, json=data)
-assert response.status_code == 200
-data = response.json()['data']
-model_stats = data['model_stats']
-samples = pd.DataFrame(data['samples'])
-
-# Collect outcomes.
-outcomes = pd.DataFrame()
-for index, row in samples.iterrows():
-    print(f'\nSample {index}')
-    print('-------------')
-    for i, key in enumerate(row['potential_effects']):
-        tpr = round(model_stats['true_positive_rate'][key] * 100, 2)
-        fpr = round(model_stats['false_positive_rate'][key] * 100, 2)
-        title = key.replace('effect_', '').replace('_', ' ').title()
-        print(title, f'(TPR: {tpr}%, FPR: {fpr}%)')
-        outcomes = pd.concat([outcomes, pd.DataFrame([{
-            'tpr': tpr,
-            'fpr': fpr,
-            'name': title,
-            'strain_name': index,
-        }])])
-
-# Visualize outcomes.
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-# Setup plotting style.
-plt.style.use('fivethirtyeight')
-plt.rcParams.update({
-    'figure.figsize': (18, 8),
-    'font.family': 'Times New Roman',
-})
-
-# Create the plot.
-sns.factorplot(
-    x='name',
-    y='tpr',
-    hue='strain_name',
-    data=outcomes,
-    kind='bar',
-    legend=False,
-    aspect=11.7/8.27
-)
-plt.legend(loc='upper right', title='Strain')
-plt.title('Predicted Effects That May be Reported')
-plt.ylabel('True Positive Rate')
-plt.xlabel('Predicted Effect')
-plt.xticks(rotation=90)
-plt.show()
