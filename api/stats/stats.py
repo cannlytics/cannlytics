@@ -28,12 +28,13 @@ from cannlytics.stats.stats import (
     predict_stats_model,
 )
 from cannlytics.utils.data import  nonzero_rows
+from website.settings import STORAGE_BUCKET
 
 
 @api_view(['GET', 'POST'])
-def effects_stats(request, strain='Unknown'):
+def effects_stats(request, strain=None):
     """Get, create, or update statistics about reported effects and aromas."""
-    data = []
+
     if request.method == 'GET':
 
         #---------------------------------------------------------------
@@ -50,6 +51,10 @@ def effects_stats(request, strain='Unknown'):
 
 
     elif request.method == 'POST':
+
+        # Get the data the user posted.
+        data = loads(request.body.decode('utf-8'))
+        params = request.query_params
 
         #---------------------------------------------------------------
         # Option 1: User posts effects and/or aromas
@@ -94,12 +99,16 @@ def effects_stats(request, strain='Unknown'):
         #---------------------------------------------------------------
 
         # 1. Get the model and its statistics.
-        params = request.query_params
-        data = loads(request.body.decode('utf-8'))
-        strain_name = data.get('strain_name', data.get('strain', params.get('strain', strain)))
-        model_name = data.get('data', params.get('model', 'full'))
+        data_dir = '../../.datasets/subjective-effects'
+        # FIXME: Make the algorithm choose the model smartly if
+        # the user does not pass a model.
+        model_name = data.get('model', params.get('model', 'full'))
         model_ref = f'public/models/effects/{model_name}'
-        model_data = get_stats_model(model_ref)
+        model_data = get_stats_model(
+            model_ref,
+            data_dir=data_dir,
+            bucket_name=STORAGE_BUCKET,
+        )
         model_stats = model_data['model_stats']
         models = model_data['model']
         thresholds = model_stats['threshold']
@@ -109,26 +118,27 @@ def effects_stats(request, strain='Unknown'):
         prediction = predict_stats_model(models, x, thresholds)
 
         # 3. Format, save, and return the prediction and model stats.
-        potential_effects = []
-        potential_aromas = []
-        for row in prediction.values:
+        samples = []
+        lab_results = x.to_dict(orient='records')
+        for i, row in prediction.iterrows():
             outcome = nonzero_rows(row)
             effects = [x for x in outcome if x.startswith('effect')]
             aromas = [x for x in outcome if x.startswith('aroma')]
-            potential_effects.append(effects)
-            potential_aromas.append(aromas)
-        now = datetime.now()
-        timestamp = now.isoformat()[:19]
-        prediction_id = ulid.from_timestamp(now).str.lower()
+            now = datetime.now()
+            timestamp = now.isoformat()[:19]
+            prediction_id = ulid.from_timestamp(now).str.lower()
+            samples.append({
+                'id': prediction_id,
+                'potential_effects': effects,
+                'potential_aromas': aromas,
+                'lab_results': lab_results[i],
+                'strain_name': row.get('strain_name'),
+                'timestamp': timestamp,
+                'model': model_name,
+            })
         data = {
-            'id': prediction_id,
-            'potential_effects': potential_effects,
-            'potential_aromas': potential_aromas,
-            'lab_results': x.to_dict(orient='records')[0],
-            'strain_name': strain_name,
-            'timestamp': timestamp,
-            'model': model_name,
             'model_stats': model_stats,
+            'samples': samples,
         }
         ref = 'models/effects/model_predictions/%s' % (timestamp.replace(':', '-'))
         update_documents([ref], [data])
@@ -140,7 +150,6 @@ def effects_stats(request, strain='Unknown'):
         # Option 3: User passes link to lab results data and / or reviews
         # data to train their own model.
         #---------------------------------------------------------------
-
 
 
     # Return the data.

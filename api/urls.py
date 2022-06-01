@@ -116,7 +116,6 @@ urlpatterns = [
         path('/states/wa', state_data.state_data_ma),
         # path('/state/<state>', state_data),
 
-        # TODO: Implement strains endpoints.
         path('/strains', include([
             path('', strain_data.strain_data),
             path('/<strain_name>', strain_data.strain_data),
@@ -188,7 +187,7 @@ urlpatterns = [
         path('/<sample_id>', samples.samples),
     ])),
 
-    # TODO: Implement stats endpoints
+    # Stats endpoints.
     path('stats', include([
         path('', stats.effects_stats),
         path('/effects', stats.effects_stats),

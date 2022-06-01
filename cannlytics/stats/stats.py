@@ -106,6 +106,7 @@ def get_stats_model(
         ref: str,
         data_dir: Optional[str] = '/tmp',
         name: Optional[str] = None,
+        bucket_name: Optional[str] = None,
     ):
     """Get a pre-built statistical model for use.
     First, gets the model data from Firebase Firestore.
@@ -124,13 +125,14 @@ def get_stats_model(
     data = get_document(ref)
     file_name = ref.split('/')[-1] + '.zip'
     zipped_file = os.path.join(data_dir, file_name)
-    download_file(data['model_ref'], zipped_file)
+    download_file(data['model_ref'], zipped_file, bucket_name)
     shutil.unpack_archive(zipped_file, model_path)
     models = {}
     for item in os.listdir(model_path):
         pickle_file = os.path.join(model_path, item)
         key = item.replace('model_', '').replace('.pickle', '')
-        models[key] = sm.load(pickle_file)
+        with open(pickle_file, 'rb') as f:
+            models[key] = sm.load(f)
     data['model'] = models
     return data
 
