@@ -45,7 +45,7 @@
     "website:dev": "set PROJECT=website & python manage.py runserver",
     "website:build": "cd website & webpack --env production & cd ../",
     "website:collectstatic": "set PROJECT=website & python manage.py collectstatic --noinput",
-    "website:container": "npm run website:collectstatic --noinput & gcloud builds submit --tag gcr.io/cannlytics/cannlytics-website ./website",
+    "website:container": "npm run website:collectstatic --noinput & gcloud builds submit --tag gcr.io/cannlytics/cannlytics-website",
     "website:cloud": "gcloud run deploy cannlytics-website --image gcr.io/cannlytics/cannlytics-website --set-env-vars SETTINGS_NAME=cannlytics_website_settings --region us-central1 --allow-unauthenticated --platform managed --memory 2Gi --cpu 2 --min-instances 1",
     "website:deploy": "firebase deploy --project cannlytics --only hosting:cannlytics",
     "website:publish": "npm run website:build & npm run website:container & npm run website:cloud && npm run website:deploy"

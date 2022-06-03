@@ -1,10 +1,10 @@
 """
 URLs | Cannlytics Website
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2020-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/29/2020
-Updated: 1/20/2022
+Updated: 6/2/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # External imports.
@@ -39,7 +39,7 @@ urlpatterns = [
         path('email/send-message', email.send_message, name="message"),
         path('email/suggest-edit', email.suggest_edit, name="suggestion"),
         path('market/promotions', market.promotions, name='promotions'),
-        # TODO: Implement blockchain market functionality
+        # TODO: Implement blockchain data market functionality.
         # path('market/buy', market.buy_data),
         # path('market/publish', market.publish_data),
         # path('market/sell', market.sell_data),
@@ -48,11 +48,6 @@ urlpatterns = [
         path('payments/subscriptions', subscriptions.get_user_subscriptions),
         path('payments/unsubscribe', subscriptions.unsubscribe),
     ])),
-    # path('data', include([
-    #     path('', main.GeneralView.as_view(), name='data'),
-    #     path('/market', main.GeneralView.as_view(), name='market'),
-    #     path('/<dataset_id>', market.DatasetView.as_view(), name='dataset'),
-    # ])),
     # Optional: Redirect data/wa or data/washington to data/states/washington?
     path('data/market/<dataset_id>', market.DatasetView.as_view(), name='dataset'),
     path('testing', include([
@@ -71,6 +66,7 @@ urlpatterns = [
     path('videos/<video_id>', videos.VideosView.as_view(), name='video'),
     path('meetup', main.meetup, name='meetup'),
     path('community', RedirectView.as_view(url='/testing', permanent=False)),
+    path('effects', RedirectView.as_view(url='/stats/effects', permanent=False)),
     path('labs', RedirectView.as_view(url='/testing/labs', permanent=False)),
     path('<page>', main.GeneralView.as_view(), name='page'),
     path('<page>/<section>', main.GeneralView.as_view(), name='section'),

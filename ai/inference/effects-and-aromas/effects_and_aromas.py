@@ -73,6 +73,10 @@ warnings.simplefilter('ignore', RuntimeWarning)
 # Decarboxylation rate. Source: <https://www.conflabs.com/why-0-877/>
 DECARB = 0.877
 
+# TODO: It would be worthwhile to parse effects and aromas
+# ourselves with NLP. Sometimes effects may be mentioned
+# but not a negative. For example,"helped with my anxiety."
+
 
 def download_strain_review_data(
         data_dir: str,
@@ -334,17 +338,19 @@ if __name__ == '__main__':
     # Curate the strain review data.
     #-------------------------------------------------------------------
 
-    # Curate the reviews.
-    print('Curating reviews...')
-    reviews = curate_strain_reviews(DATA_DIR, strain_data)
+    # # Curate the reviews.
+    # print('Curating reviews...')
+    # reviews = curate_strain_reviews(DATA_DIR, strain_data)
 
-    # Combine `effect_anxiety` and `effect_anxious`.
-    reviews = combine_columns(reviews, 'effect_anxious', 'effect_anxiety')
+    # # Combine `effect_anxiety` and `effect_anxious`.
+    # reviews = combine_columns(reviews, 'effect_anxious', 'effect_anxiety')
 
-    # Optional: Save and read back in the reviews.
-    today = datetime.now().isoformat()[:10]
-    datafile = DATA_DIR + f'/strain-reviews-{today}.xlsx'
-    reviews.to_excel(datafile)
+    # # Optional: Save and read back in the reviews.
+    # today = datetime.now().isoformat()[:10]
+    # datafile = DATA_DIR + f'/strain-reviews-{today}.xlsx'
+    # reviews.to_excel(datafile)
+
+    datafile = DATA_DIR + '/strain-reviews-2022-06-01.xlsx'
     reviews = pd.read_excel(datafile, index_col=0)
 
     # # Optional: Upload strain review data to Firestore.
@@ -366,7 +372,9 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------
 
     # Specify different prediction models.
-    # Future work: Logit, terpene ratio, and bayesian models.
+    # Future work: Logit, cannabinoid / terpene ratios, and bayesian models.
+    # Handle `minor` cannabinoids in `totals` and perhaps `simple` models
+    # (i.e. `total_cannabinoids` - `total_thc` - `total_cbd`).
     variates = {
         'full': [
             'delta_9_thc',
@@ -442,7 +450,6 @@ if __name__ == '__main__':
             'total_terpenes',
             'total_thc',
             'total_cbd',
-            'total_cbg',
         ],
         'simple': [
             'total_thc',
@@ -451,7 +458,7 @@ if __name__ == '__main__':
     }
 
     # Use the data to create an effect prediction model.
-    model_name = 'full'
+    model_name = 'simple'
     aromas = [x for x in reviews.columns if x.startswith('aroma')]
     effects = [x for x in reviews.columns if x.startswith('effect')]
     Y = reviews[aromas + effects]

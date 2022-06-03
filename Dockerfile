@@ -32,7 +32,7 @@ ENV APP_HOME /app
 WORKDIR $APP_HOME
 
 # Copy local code to the container image.
-COPY .. ./
+COPY . ./
 
 # Switching to a non-root user, please refer to https://aka.ms/vscode-docker-python-user-rights
 RUN useradd appuser && chown -R appuser /app
@@ -45,4 +45,4 @@ USER appuser
 # See:
 # https://docs.gunicorn.org/en/stable/design.html#how-many-workers
 # https://docs.gunicorn.org/en/stable/design.html#how-many-threads
-CMD exec gunicorn --bind :$PORT --workers 4 --threads 16 --timeout 120 core.wsgi:application
+CMD exec gunicorn --bind :$PORT --workers 4 --threads 16 --timeout 120 website.core.wsgi:application

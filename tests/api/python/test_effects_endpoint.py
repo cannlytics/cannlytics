@@ -3,7 +3,7 @@ Test Statistics API Endpoint | Cannlytics API
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/26/2021
-Updated: 6/1/2021
+Updated: 6/2/2021
 License: MIT License <https://opensource.org/licenses/MIT>
 """
 # Standard imports.
@@ -16,11 +16,12 @@ import pandas as pd
 
 
 # Specify the API server base URL.
-BASE = 'http://127.0.0.1:8000/api'
-# BASE = 'https://console.cannlytics.com/api' # Uncomment for production.
+# BASE = 'http://127.0.0.1:8000/api'
+BASE = 'https://cannlytics.com/api' # Uncomment for production.
 
 
-# TODO: Implement API key.
+# Future work: Implement API key to better monitor usage
+# and in case use becomes exorbitant.
 # # Pass your API key through the authorization header as a bearer token.
 # load_dotenv('../../../.env')
 # API_KEY = os.getenv('CANNLYTICS_API_KEY')
@@ -39,7 +40,7 @@ params = {'model': 'full'}
 response = requests.get(url, params=params)
 assert response.status_code == 200
 model_stats = response.json()['data']
-print(model_stats)
+print('Model Stats:\n', model_stats)
 
 
 #-----------------------------------------------------------------------

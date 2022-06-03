@@ -16,7 +16,8 @@ import requests
 
 
 # Define the API endpoint.
-BASE = 'http://127.0.0.1:8000/api'
+# BASE = 'http://127.0.0.1:8000/api'
+BASE = 'https://cannlytics.com/api' # Uncomment for production.
 url = f'{BASE}/data/strains'
 
 #-----------------------------------------------------------------------
@@ -44,10 +45,8 @@ print('Found %s.' % data['strain_name'])
 
 # Get strains by effects.
 url = f'{BASE}/data/strains'
-params = {
-    'limit': 10,
-    'effects': json.dumps(['focused', 'creative']),
-}
+effects = json.dumps(['focused', 'creative'])
+params = {'limit': 10, 'effects': effects}
 response = requests.get(url, params=params)
 assert response.status_code == 200
 data = pd.DataFrame(response.json()['data'])
@@ -59,10 +58,8 @@ print(data[['strain_name', 'potential_effects', 'pinene_limonene_ratio']])
 
 # Get strains by aromas.
 url = f'{BASE}/data/strains'
-params = {
-    'limit': 5,
-    'aromas': json.dumps(['skunk']),
-}
+aromas = json.dumps(['skunk'])
+params = {'limit': 5,'aromas': aromas}
 response = requests.get(url, params=params)
 assert response.status_code == 200
 data = pd.DataFrame(response.json()['data'])

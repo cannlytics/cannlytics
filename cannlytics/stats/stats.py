@@ -69,7 +69,7 @@ def calculate_model_statistics(models, Y, X):
         'accuracy': acc,
         'informedness': info,
     })
-    stats = stats.fillna(None)
+    stats = stats.fillna(0)
     return stats
 
 

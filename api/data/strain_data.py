@@ -90,7 +90,7 @@ def strain_data(request, strain_name=None):
             # Define query parameters.
             print('Getting strains....')
             filters = []
-            order_by = request.query_params.get('order_by', 'strain_name')
+            order_by = request.query_params.get('order', 'strain_name')
             desc = request.query_params.get('desc', False)
             limit = request.query_params.get('limit', None)
             if limit:
