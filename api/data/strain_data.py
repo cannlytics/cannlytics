@@ -1,5 +1,5 @@
 """
-Strain Data Endpoints | Cannlytics API
+Strain Data Endpoints | Cannlytics API | SkunkFx
 Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>

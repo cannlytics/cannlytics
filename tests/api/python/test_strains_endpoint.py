@@ -1,5 +1,7 @@
 """
 Test Strain Data API Endpoint | Cannlytics API
+SkunkFx
+Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/31/2021
@@ -25,6 +27,7 @@ url = f'{BASE}/data/strains'
 # Get strains.
 params = {'limit': 3}
 response = requests.get(url, params=params)
+print(response.url)
 assert response.status_code == 200
 data = response.json()['data']
 print('Found %i strains.' % len(data))
@@ -36,6 +39,7 @@ assert len(data) == 3
 url = f'{BASE}/data/strains'
 strain_name = 'Super Silver Haze'
 response = requests.get(url + '/' + urllib.parse.quote_plus(strain_name))
+print(response.url)
 assert response.status_code == 200
 data = response.json()['data']
 assert data['strain_name'] == strain_name
@@ -48,6 +52,7 @@ url = f'{BASE}/data/strains'
 effects = json.dumps(['focused', 'creative'])
 params = {'limit': 10, 'effects': effects}
 response = requests.get(url, params=params)
+print(response.url)
 assert response.status_code == 200
 data = pd.DataFrame(response.json()['data'])
 print('Found %i strains.' % len(data))
@@ -61,6 +66,7 @@ url = f'{BASE}/data/strains'
 aromas = json.dumps(['skunk'])
 params = {'limit': 5,'aromas': aromas}
 response = requests.get(url, params=params)
+print(response.url)
 assert response.status_code == 200
 data = pd.DataFrame(response.json()['data'])
 print('Found %i strains.' % len(data))
@@ -69,11 +75,11 @@ print(data[['strain_name', 'potential_aromas']])
 #-----------------------------------------------------------------------
 
 # Get strain by compound concentration.
-compound = 'beta_pinene'
+compound = 'terpinolene'
 url = f'{BASE}/data/strains'
-params = {'limit': 25}
-params[compound] = 'g0.2'
+params = {'limit': 25, compound: 'ge0.6'}
 response = requests.get(url, params=params)
+print(response.url)
 assert response.status_code == 200
 data = pd.DataFrame(response.json()['data'])
 print('Found %i strains.' % len(data))

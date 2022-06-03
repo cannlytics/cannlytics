@@ -57,7 +57,19 @@ def datasets(request, state=None):
 
         # # Optional: Get any filters from dict(request.query_params)
 
-        return Response([{'make': "Subaru", 'model': "WRX", 'price': 21000}])
+        message = """You're in the right place to get rich cannabis data.
+        
+        Currently, you can get data from the following endpoints:
+        
+          - `/data/analyses`
+          - `/data/regulations`
+          - `/data/states`
+          - `/data/strains`
+        
+        Please stay tuned for further documentation or get in touch with
+        the Cannlytics Team.
+        """
+        return Response({'message': message}, content_type='application/json')
 
     elif request.method == 'POST':
 

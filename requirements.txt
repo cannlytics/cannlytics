@@ -1,21 +1,25 @@
 # Python Requirements | Cannlytics
 # Created 1/5/2021
-# Updated: 6/2/2022
+# Updated: 6/3/2022
 
 # Console and website requirements:
 datetime==4.3
 django==4.0
-# django-csp==3.7 # TODO: Implement CSP.
+# TODO: Implement CSP.
+# django-csp==3.7
 django-environ==0.8.1
 django-feather==0.3.0
 django-livereload-server==0.4
 django-permissions-policy==4.6.0
 django-robohash-svg==0.9.5
 djangorestframework==3.12.4
+firebase_admin==5.2.0
+fredapi==0.5.0
 google-auth==2.3.3
 google-cloud-secret-manager==2.8.0
 gunicorn==20.1.0
 Markdown==3.3.4
+openpyxl==3.0.9
 pandas==1.4.1
 python-dateutil==2.8.2
 python-dotenv==0.19.2
@@ -23,23 +27,26 @@ pymdown-extensions==9.1
 python-markdown-math==0.8
 scikit-learn==1.1.1
 statsmodels==0.13.2
+ulid-py==1.1.0
 waitress==2.1.1
 whitenoise==5.3.0
 
 # Cannlytics package requirements:
-# firebase_admin==5.1.0 # Used only in cannlytics module and for admin.
+# firebase_admin==5.2.0
 # fredapi==0.5.0
-# openpyxl==3.0.9 # Used only in cannlytics module.
-# # ocean-lib==0.8.5 # Used only in cannlytics module. (DEV)
-# pandas==1.2.1 # Used only in cannlytics module.
-# ulid-py==1.1.0 # Used only in cannlytics module.
+# openpyxl==3.0.9
+# pandas==1.2.1
+# ulid-py==1.1.0
 
 # AI requirements:
 # spacy
 # pymc3
 # lifelines
-# # PySimpleGUI
-# # opencv-python
+# PySimpleGUI
+# opencv-python
 
 # Tool requirements:
 # moviepy
+
+# Dev requirements:
+# ocean-lib==0.8.5

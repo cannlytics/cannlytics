@@ -1,9 +1,11 @@
 """
 Test Statistics API Endpoint | Cannlytics API
+SkunkFx
+Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/26/2021
-Updated: 6/2/2021
+Updated: 6/2/2022
 License: MIT License <https://opensource.org/licenses/MIT>
 """
 # Standard imports.
@@ -36,8 +38,9 @@ BASE = 'https://cannlytics.com/api' # Uncomment for production.
 
 # Get statistics for the `full` model.
 url = f'{BASE}/stats/effects'
-params = {'model': 'full'}
+params = {'model': 'simple'}
 response = requests.get(url, params=params)
+print(response.url)
 assert response.status_code == 200
 model_stats = response.json()['data']
 print('Model Stats:\n', model_stats)

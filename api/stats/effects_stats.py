@@ -1,5 +1,5 @@
 """
-Stats Views | Cannlytics API
+Stats Views | Cannlytics API | SkunkFx
 Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
