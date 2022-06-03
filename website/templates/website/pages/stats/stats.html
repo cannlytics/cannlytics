@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<!--
+  Potential Effects and Aromas Prediction Model Page | Cannlytics Website
+  Copyright (c) 2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 5/14/2022
+  Updated: 6/2/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+
+  TODO:
+
+    - List statistics models in a grid.
+
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Statistics | Cannlytics{% endblock %}
+{% block material %}
+
+<section class="container mb-2 mt-5 markdown">
+
+
+  <h2 class="mt-3">Statistics Models</h2>
+
+  <ul class="mt-4" style="max-width:560px;">
+
+    <li>
+      <a href="{% url 'section' page='stats' section='effects'%}">
+        Effects and Aromas Model
+      </a>
+      <p class="mt-1">
+        <small>
+          The effects model is used to predict effects and aromas that
+          may be reported for a given product given its lab results.
+        </small>
+      </p>
+    </li>
+
+  </ul>
+
+</section>
+
+
+<!-- Vines -->
+{% include "website/components/art/vines.html" %}
+
+{% endblock material %}
+
+<!-- JavaScript -->
+{% block page_js %}
+  <script>
+
+  
+  </script>
+{% endblock %}
+
+</html>

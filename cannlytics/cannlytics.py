@@ -2,10 +2,10 @@
 Cannlytics Module | Cannlytics
 Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 1/10/2022
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+Updated: 5/5/2022
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains the Cannlytics class,
 the entry point into Cannlytics features and functionality.
@@ -13,7 +13,7 @@ the entry point into Cannlytics features and functionality.
 # Standard imports.
 import logging
 from os import environ
-from typing import Dict, Optional # List, Type, Union
+from typing import Dict, Optional, Union
 
 # External imports
 from dotenv import dotenv_values
@@ -23,29 +23,98 @@ from .firebase import initialize_firebase
 from .metrc import initialize_metrc
 
 
-class Cannlytics:
-    """An instance of this class is the entry point the top-level Cannlytics logic."""
+class CannlyticsError(Exception):
+    """A base class for Cannlytics system exceptions."""
 
-    def __init__(self, config: Optional[Dict], env_file: str = './.env') -> None:
+
+class CannlyticsAPIError(CannlyticsError):
+    """A primary error raised by the Cannlytics API."""
+
+    def __init__(self, response):
+        message = self.get_error_message(response)
+        super().__init__(message)
+        self.response = response
+
+
+    def get_error_message(self, response):
+        """Extract error message from a Cannlytics API response.
+        Args:
+            response (Response): A request response from the Cannlytics API.
+        Returns:
+            (str): Returns any error messages.
+        """
+        try:
+            errors = response.json()
+            if isinstance(errors, list):
+                try:
+                    message = '\n'.join(errors)
+                except TypeError:
+                    message = '\n'.join([x.get('message') for x in errors])
+            elif isinstance(errors, dict):
+                message = errors.get('message')
+            else:
+                message = response.text
+        except (AttributeError, KeyError, ValueError):
+            message = 'Unknown Cannlytics API error'
+        return message
+
+
+class Cannlytics:
+    """An instance of this class is the entry point to interface with
+    the core Cannlytics logic."""
+
+    def __init__(
+            self,
+            config: Optional[Union[Dict, str]] = './.env',
+            license_number: Optional[str] = None,
+            state: Optional[str] = None,
+            firebase: Optional[bool] = False,
+            lims: Optional[bool] = False,
+            metrc: Optional[bool] = False,
+            paypal: Optional[bool] = False,
+            quickbooks: Optional[bool] = False,
+    ) -> None:
         """Initialize a Cannlytics class.
         Args:
-            config (dict): Configuration options, including: `GOOGLE_APPLICATION_CREDENTIALS`,
-                `METRC_VENDOR_API_KEY`, `METRC_USER_API_KEY`, and `METRC_STATE`.
-            env_file (str): An optional .env file path to use instead of config.
+            config (str, dict): A .env file or configuration with variables:
+                `GOOGLE_APPLICATION_CREDENTIALS`
+                `LICENSE_NUMBER`
+                `METRC_VENDOR_API_KEY`
+                `METRC_USER_API_KEY`
+                `METRC_STATE`
+            license_number (str): A primary license number (optional).
+            state (str): A state abbreviation (optional).
+            firebase (bool): Initialize the Firebase module, default `False` (optional).
+            lims (bool): Initialize the LIMS module, default `False` (optional).
+            metrc (bool): Initialize the Metrc module, default `False` (optional).
+            paypal (bool): Initialize the PayPal module, default `False` (optional).
+            quickbooks (bool): Initialize the QuickBooks module, default `False` (optional).
         """
         if isinstance(config, dict):
             self.config = config
         else:
-            self.config = dotenv_values(env_file)
+            self.config = dotenv_values(config)
         self.database = None
-        self.license = None
-        self.state = None
+        self.license = self.config.get('LICENSE_NUMBER', license_number)
+        self.state = self.config.get('METRC_STATE', state)
         self.storage = None
         self.track = None
         self.initialize_logs()
-        # TODO: Initialize Firebase and Metrc by default?
+        # TODO: Test / ensure module initialization errors are skipped.
+        if firebase:
+            self.initialize_firebase(self.config)
+        if metrc:
+            self.initialize_traceability(
+                self.config,
+                primary_license=self.license,
+                state=self.state
+            )
+        # TODO: Initialize modules if specified.
+        # lims
+        # paypal
+        # quickbooks
 
-    # Optional: Reduce duplication of logging code in the Metrc module?
+
     def create_log(self, message: str):
         """Create a log.
         Args:
@@ -53,9 +122,11 @@ class Cannlytics:
         """
         self.logger.debug(message)
 
+
     def initialize_logs(self):
         """Initialize logs.
         """
+        # Optional: Reduce duplication of logging code (also in the Metrc module)?
         logging.getLogger('cannlytics').handlers.clear()
         logging.basicConfig(
             filename='./tmp/cannlytics.log',
@@ -68,6 +139,7 @@ class Cannlytics:
         console.setLevel(logging.DEBUG)
         self.logger = logging.getLogger('cannlytics')
         self.logger.addHandler(console)
+
 
     def initialize_firebase(self, config: Optional[Dict] = None):
         """Initialize a Firebase account for back-end, cloud services.
@@ -87,6 +159,7 @@ class Cannlytics:
         self.create_log('Firebase client initialized.')
         return self.database
 
+
     def initialize_traceability(self, config=None, primary_license=None, state=None):
         """Initialize the traceability client.
         Args:
@@ -103,4 +176,27 @@ class Cannlytics:
             primary_license=primary_license,
             state=state,
         )
+        self.create_log('Traceability client initialized.')
         return self.track
+
+
+    # Optional: Make `paypal` available through the interface?
+
+
+    # Optional: Make `lims` available through the interface?
+
+
+    # Optional: Make `quickbooks` available through the interface?
+    
+
+    # Optional: Make `charts` available through the interface?
+
+
+    # Optional: Make `stats` available through the interface?
+
+
+    # Optional: Make `utils` available through the interface?
+
+
+
+    # Future work: Use models that have their own functions.

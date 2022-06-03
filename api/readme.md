@@ -4,7 +4,7 @@
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cannlytics/cannlytics-api/fork)
 
 
-The Cannlytics API provides an interface to quickly receive samples, perform analyses, collect and review results, and publish certificates of analysis (CoAs). There are also logistics, CRM (client relationship management), inventory management, and invoicing tools. The Cannlytics API comes with [**batteries included**](https://cannlytics.com/support/), but you are always welcome to supercharge your setup with custom modifications.
+The Cannlytics API provides an interface to quickly receive samples, perform analyses, collect and review results, and publish certificates of analysis (CoAs). There are also logistics, CRM (client relationship management), inventory management, and invoicing tools. The Cannlytics API comes with [**batteries included**](https://cannlytics.com/support/), but you are always welcome to supercharge your setup with custom modifications. You can get an API key by signing up at <https://cannlytics.com/api> and start exploring!
 
 - [Installation](#installation)
 - [Development](#development)

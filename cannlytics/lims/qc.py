@@ -1,7 +1,7 @@
 """
 Quality Control Tools | Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>  
+Authors: Keegan Skeate <https://github.com/keeganskeate>  
 Created: 2/6/2021  
 Updated: 6/23/2021  
 License: MIT License <https://opensource.org/licenses/MIT>  

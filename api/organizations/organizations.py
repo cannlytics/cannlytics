@@ -2,7 +2,7 @@
 Organizations API Views | Cannlytics API
 Copyright (c) Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/25/2021
 Updated: 1/13/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>

@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+<!--
+  Potential Effects and Aromas Prediction Model Page | Cannlytics Website
+  Copyright (c) 2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 5/14/2022
+  Updated: 6/2/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+
+  TODO:
+
+    - Let user upload lab results.
+
+    - Let user load defaults.
+
+    - Display accuracy.
+
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Effects and Aromas Stats | Cannlytics{% endblock %}
+{% block material %}
+
+<section class="container mb-2 mt-5">
+
+  <!-- Title -->
+  <div class="d-flex mt-4">
+    <nav
+      style="--bs-breadcrumb-divider: '>';"
+      aria-label="breadcrumb"
+    >
+      <ol class="breadcrumb bg-transparent p-0 mb-0">
+        <li class="breadcrumb-item fs-6 lh-sm">
+          <a
+            class="text-dark serif action"
+            href="{% url 'page' page='stats' %}"
+          >
+            Statistics
+          </a>
+        </li>
+        <li class="breadcrumb-item active fs-6 lh-sm text-dark serif" aria-current="page">
+          Effects and Aromas
+        </li>
+      </ol>
+      <div>
+    </div>
+    </nav>
+  </div>
+
+
+  <!-- TODO: Calculator form -->
+  <section class="markdown">
+    <h2 class="mt-4">Official Model</h2>
+    <p>
+      The effects model is used to predict effects and aromas that
+      may be reported for a given product given its lab results. 
+      For technical details of the model, please see the
+      <a href="https://github.com/cannlytics/cannlytics">documentation</a>.
+      Please remember that the predictions are simply statistics are
+      should not be mistaken as claims.
+    </p>
+
+  <!-- Strain Name -->
+
+
+  <!-- Cannabinoids -->
+
+
+  <!-- Terpenes -->
+
+
+  <!-- Model selection -->
+
+
+  <!-- Show positive effects -->
+
+
+  <!-- Show negative effects -->
+
+
+  <!-- Show aromas -->
+
+
+  <!-- Save and export results -->
+
+
+  <!-- Optional: Determine most similar strain? -->
+
+
+  <!-- Feedback form shown after prediction -->
+
+
+  <!-- Model information -->
+
+  </section>
+
+
+  <!-- About the API -->
+  <section class="markdown">
+
+  <h2 class="mt-5">API</h2>
+  <p>
+    Tell your developer(s) about our <a href="https://github.com/cannlytics/cannlytics">free effects and aromas API</a>! If you're paying for quality control tests and/or terpene tests, then you may
+    as well have the effects and aromas of your products predicted.
+    Simply input cannabinoid and/or terpene data and you will receive a
+    surprisingly useful prediction of effects and aromas.
+    The cherry 🍒 on top is that you can report back the actual
+    effects and aromas that characterize your product and the
+    model becomes that much smarter!
+    So, you can make your predictions better over time
+    if you opt-in to providing feedback.
+    Please explore at your pleasure and, hopefully, you are able to find many clever uses for the statistics.
+  </p>
+
+  <!-- Data Source Notice -->
+  <h2 class="mt-5">Data Sources</h2>
+  <ul>
+    <li>
+      <p class="fs-small">
+        <b class="serif">Dataset</b>:	<a class="fw-normal" href="https://cannlytics.page.link/reported-effects">Curated Cannabis Strains, their Average Chemical Compositions, and Reported Effects and Aromas</a><br>
+        <b class="serif">Author</b>:	Cannlytics<br>
+        <b class="serif">Created</b>:	5/18/2022<br>
+        <b class="serif">Updated</b>:	6/2/2022<br>
+        <b class="serif">Original Authors</b>: <a class="fw-normal" href="https://data.mendeley.com/datasets/6zwcgrttkp/1" target="_blank">
+          de la Fuente, et al. (2019)
+        </a>.<br>
+        <b class="serif">License</b>: <a class="fw-normal" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">
+          CC BY 4.0.
+        </a>
+      </p>
+      <p class="mt-2">
+        <small>The files associated with this dataset are licensed under a Creative Commons Attribution 4.0 International license.</small>
+      </p>
+      <p class="mt-2">
+        <small>You can share, copy and modify this dataset so long as you give appropriate credit, provide a link to the CC BY license, and indicate if changes were made, but you may not do so in a way that suggests the rights holder has endorsed you or your use of the dataset. Note that further permission may be required for any content within the dataset that is identified as belonging to a third party.</small>
+      </p>
+    </li>
+  </ul>
+
+  <!-- Disclaimer -->
+  <h2 class="mt-5">Disclaimer</h2>
+  <p class="fs-6">
+    <small>
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+    </small>
+  </p>
+
+</section>
+
+
+</section>
+
+<!-- Vines -->
+{% include "website/components/art/vines.html" %}
+
+{% endblock material %}
+
+<!-- JavaScript -->
+{% block page_js %}
+  <script>
+
+    // TODO: When the time is right, get the model statistics.
+    // cannlytics.stats.getModelStats();
+
+    // TODO: Get variable definitions (aromas and effects)
+    // to use in rending (e.g. colors and icons).
+  
+  </script>
+{% endblock %}
+
+</html>

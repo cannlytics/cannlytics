@@ -2,7 +2,7 @@
 Convert a Video File to an Audio File
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/4/2022
 Updated: 4/7/2022
 License: MIT License <https://opensource.org/licenses/MIT>

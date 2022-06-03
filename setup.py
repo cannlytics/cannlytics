@@ -2,7 +2,7 @@
 Module Setup | Cannlytics Engine
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Contact: <keegan@cannlytics.com>
 Created: 1/21/2021
 Updated: 3/14/2022
@@ -33,6 +33,9 @@ setup_requirements = []
 # Specify requirements for testing.
 test_requirements = []
 
+# Specify packages to exclude.
+exclude = ['ai', 'api', 'console', 'tools', 'website']
+
 # Publish the module.
 setup(
     author='Cannlytics',
@@ -55,7 +58,7 @@ setup(
     long_description=README,
     long_description_content_type='text/markdown',
     name='cannlytics',
-    packages=find_packages(),
+    packages=find_packages(exclude=exclude),
     python_requires='>=3.9',
     setup_requires=setup_requirements,
     test_suite='tests',

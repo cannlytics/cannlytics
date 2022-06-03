@@ -3,7 +3,7 @@
 #
 # Auhtors: Keegan Skeate <keegan@cannlytics.com>
 # Created: 1/5/2021
-# Updated: 4/20/2022
+# Updated: 6/2/2022
 # License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 # Use the official lightweight Python image.

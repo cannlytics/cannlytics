@@ -1,10 +1,10 @@
 """
 Email Utilities | Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/23/2021
 Updated: 12/21/2021
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: Various email tools to make your life simple and easy.
 """

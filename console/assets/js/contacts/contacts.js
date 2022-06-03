@@ -2,7 +2,7 @@
  * Contacts JavaScript | Cannlytics Console
  * Copyright (c) 2021-2022 Cannlytics
  * 
- * Authors: Keegan Skeate <keegan@cannlytics.com>
+ * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 12/3/2020
  * Updated: 12/14/2021
  * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>

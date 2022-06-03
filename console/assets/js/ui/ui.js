@@ -2,7 +2,7 @@
  * User Interface JavaScript | Cannlytics Console
  * Copyright (c) 2021-2022 Cannlytics
  * 
- * Authors: Keegan Skeate <keegan@cannlytics.com>
+ * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 5/2/2021
  * Updated: 12/16/2021
  * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>

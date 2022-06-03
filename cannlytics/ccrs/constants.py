@@ -2,7 +2,7 @@
 CCRS Constants | Cannlytics
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/12/2022
 Updated: 4/20/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>

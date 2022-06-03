@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<!--
+  New Jersey (NJ) Data Page | Cannlytics Website
+  Copyright (c) 2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 4/22/2022
+  Updated: 4/22/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}New Jersey Data | Cannlytics{% endblock %}
+{% block material %}
+
+<!-- Banner -->
+<!-- Optional Suggest (upload) image button -->
+{% include "website/components/heros/hero_banner.html" with
+  title='New Jersey Data'
+  description='Explore public cannabis data available for New Jersey.'
+  background_image=''
+  image_url=' '
+  only
+%}
+
+
+<!-- TODO: Map of retail licensees in NJ -->
+
+
+<!-- TODO: Blurb about regulatory body -->
+
+
+<!-- Optional: List upcoming meetings
+https://www.nj.gov/cannabis/about/meetings/
+-->
+
+
+<!-- TODO: Fee Calculator
+Estimate the fees for operating a given license type.
+
+The software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.
+-->
+
+<!-- Title
+- title (or name)
+- updated_at
+- description
+- Link to collection algorithm
+-->
+
+<!-- Charts:
+- Sales by product type
+- Licensees (table)
+- Licensees by license type
+- Monthly average price per ounce (optional: by specific quantity)
+- Production series total employees, total plants, etc.
+-->
+
+<!-- Data Blocks
+- Current price <units>: monthly_avg_price_per_punce
+- GDP from Cannabis (2022)
+- Cannabis GDP per Capita (2022)
+- Total licensees
+- Current, last month, and year-to-date sales.
+- population
+- population_source_code
+- population_source
+- licensees_per_capita
+- total_licensees
+- forecast_2022
+-->
+
+<!-- TODO: Discussion -->
+
+
+<!-- TODO: Data Sources -->
+<!-- 🐾 We eat our own dogfood it's so good! You can use all of our tools for free to replicate these statistics. -->
+Data is updated daily at 4:20am EDT.
+<span>Page updated: 1/20/2022</span>
+
+<!-- TODO: Data collection routine link -->
+
+{% endblock material %}

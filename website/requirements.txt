@@ -1,8 +1,8 @@
 # Python Requirements | Cannlytics Website
 # Created 1/5/2021
-# Updated: 1/10/2022
+# Updated: 6/2/2022
 
-cannlytics==0.0.10 # Soon to be v0.0.11
+# cannlytics==0.0.10 # Soon to be v0.0.11
 datetime==4.3
 django==4.0
 # django-csp==3.7 # FIXME: Implement CSP.
@@ -12,12 +12,17 @@ django-livereload-server==0.4
 django-permissions-policy==4.6.0
 django-robohash-svg==0.9.5
 djangorestframework==3.12.4
+firebase_admin==5.2.0
 google-auth==2.3.3
 google-cloud-secret-manager==2.8.0
 gunicorn==20.1.0
 Markdown==3.3.4
+pandas==1.4.1
 python-dotenv==0.19.2
 pymdown-extensions==9.1
 python-markdown-math==0.8
-waitress==2.0.0
+scikit-learn==1.1.1
+statsmodels==0.13.2
+ulid-py==1.1.0
+waitress==2.1.1
 whitenoise==5.3.0

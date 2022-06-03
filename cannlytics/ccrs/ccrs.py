@@ -2,9 +2,9 @@
 CCRS Client | Cannlytics
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/10/2022
-Updated: 4/20/2022
+Updated: 4/21/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports.
@@ -19,9 +19,7 @@ import requests
 # Internal imports.
 from cannlytics.firebase import initialize_firebase, update_documents
 from cannlytics.utils.utils import snake_case
-# Planned release: cannlytics==0.0.420
-# from cannlytics.ccrs.constants import analytes, analyses, datasets
-from constants import analytes, analyses, datasets
+from .constants import analytes, analyses, datasets
 
 
 class CCRS(object):
@@ -37,7 +35,7 @@ class CCRS(object):
             self.db = initialize_firebase()
         except ValueError:
             self.db = None
-    
+
 
     def initialize_firebase(self):
         """Initialize a Firebase client."""
@@ -48,35 +46,35 @@ class CCRS(object):
         """Read areas into a well-formatted DataFrame.
         Future work: Allow users to specify which fields to read.
         """
-        return self.read('Areas_0', 'areas', data_dir, limit)
+        return self.read_data('Areas_0', 'areas', data_dir, limit)
 
 
     def read_contacts(self, data_dir=None, limit=None):
         """Read contacts into a well-formatted DataFrame.
         Future work: Allow users to specify which fields to read.
         """
-        return self.read('Contacts_0', 'contacts', data_dir, limit)
+        return self.read_data('Contacts_0', 'contacts', data_dir, limit)
 
 
     def read_integrators(self, data_dir=None, limit=None):
         """Read integrators into a well-formatted DataFrame.
         Future work: Allow users to specify which fields to read.
         """
-        return self.read('Integrator_0', 'integrators', data_dir, limit)
-    
+        return self.read_data('Integrator_0', 'integrators', data_dir, limit)
+
 
     def read_inventory(self, data_dir=None, limit=None):
         """Read inventory into a well-formatted DataFrame.
         Future work: Allow users to specify which fields to read.
         """
-        return self.read('Inventory_0', 'inventory', data_dir, limit)
-    
+        return self.read_data('Inventory_0', 'inventory', data_dir, limit)
+
 
     def read_inventory_adjustments(self, data_dir=None, limit=None):
         """Read inventory adjustments into a well-formatted DataFrame.
         Future work: Allow users to specify which fields to read.
         """
-        return self.read('InventoryAdjustment_0', 'inventory_adjustments', data_dir, limit)
+        return self.read_data('InventoryAdjustment_0', 'inventory_adjustments', data_dir, limit)
 
 
     def read_lab_results(self, data_dir=None, limit=None):
@@ -84,7 +82,7 @@ class CCRS(object):
         mapping analyses from `test_name` into `key`, `type`, `units`.
         Future work: Allow users to specify which fields to read.
         """
-        data = self.read('LabResult_0', 'lab_results', data_dir, limit)
+        data = self.read_data('LabResult_0', 'lab_results', data_dir, limit)
         parsed_analyses = data['test_name'].map(analytes).values.tolist()
         data = data.join(pd.DataFrame(parsed_analyses))
         data['type'] = data['type'].map(analyses)
@@ -142,43 +140,43 @@ class CCRS(object):
         """Read plants into a well-formatted DataFrame.
         Future work: Allow users to specify which fields to read.
         """
-        return self.read('Plant_0', 'plants', data_dir, limit)
-    
+        return self.read_data('Plant_0', 'plants', data_dir, limit)
+
 
     def read_plant_destructions(self, data_dir=None, limit=None):
         """Read plant destructions into a well-formatted DataFrame.
         Future work: Allow users to specify which fields to read.
         """
-        return self.read('PlantDestructions_0', 'plant_destructions', data_dir, limit)
+        return self.read_data('PlantDestructions_0', 'plant_destructions', data_dir, limit)
 
 
     def read_products(self, data_dir=None, limit=None):
         """Read products into a well-formatted DataFrame.
         Future work: Allow users to specify which fields to read.
         """
-        return self.read('Product_0', 'products', data_dir, limit)
+        return self.read_data('Product_0', 'products', data_dir, limit)
 
 
     def read_sale_headers(self, data_dir=None, limit=None):
         """Read sale headers into a well-formatted DataFrame.
         Future work: Allow users to specify which fields to read.
         """
-        return self.read('SaleHeader_0', 'sale_headers', data_dir, limit)
+        return self.read_data('SaleHeader_0', 'sale_headers', data_dir, limit)
 
 
     def read_sale_details(self, data_dir=None, limit=None):
         """Read sale headers into a well-formatted DataFrame.
         Future work: Allow users to specify which fields to read.
         """
-        return self.read('SalesDetail_0', 'sale_details', data_dir, limit)
+        return self.read_data('SalesDetail_0', 'sale_details', data_dir, limit)
 
 
     def read_strains(self, data_dir=None, limit=None):
         """Read strains into a well-formatted DataFrame.
         Future work: Allow users to specify which fields to read.
         """
-        return self.read('Strains_0', 'strains', data_dir, limit)
-    
+        return self.read_data('Strains_0', 'strains', data_dir, limit)
+
 
     def read_transfers(self, data_dir=None, limit=None):
         """Read transfers into a well-formatted DataFrame.
@@ -199,7 +197,7 @@ class CCRS(object):
         return data
 
 
-    def read(self, dataset, dataset_name,  data_dir=None, limit=None):
+    def read_data(self, dataset, dataset_name,  data_dir=None, limit=None):
         """Read a dataset from local storage."""
         if data_dir is None:
             data_dir = self.data_dir
@@ -215,7 +213,7 @@ class CCRS(object):
         return data
 
 
-    def save(self, data, destination, index_col=True):
+    def save_data(self, data, destination, index_col=True):
         """Save data to local storage."""
         if destination.endswith('.csv'):
             data.to_csv(destination, index_col=index_col)
@@ -223,7 +221,7 @@ class CCRS(object):
             data.to_excel(destination, index_col=index_col)
 
 
-    def upload(self, data, dataset, id_field='id', refs=None):
+    def upload_data(self, data, dataset, id_field='id', refs=None):
         """Upload a dataset to a Firebase Firestore NoSQL database."""
         for field in datasets[dataset]['date_fields']:
             key = snake_case(field)
@@ -238,7 +236,7 @@ class CCRS(object):
         return items
 
 
-    def get(
+    def get_data(
             self,
             dataset,
             base='https://cannlytics.com/api',
@@ -252,6 +250,8 @@ class CCRS(object):
             'Authorization': 'Bearer %s' % api_key,
             'Content-type': 'application/json',
         }
+        # TODO: Allow user to get stats for licensee or time period or
+        # a panel (licensees, all or some, for specified or max time period)
         params = {
             'limit': limit,
             'order_by': order_by,
@@ -263,4 +263,9 @@ class CCRS(object):
 
     def get_lab_results(self):
         """Get lab results from the Cannlytics API."""
-        return self.get('lab_results')
+        return self.get_data('lab_results')
+
+
+    # TODO: Create helper functions for the rest of the datasets.
+
+    # TODO: Create helper functions to get statistics.

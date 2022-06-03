@@ -93,7 +93,7 @@ The source code can be found either by using the link in the footer of cannlytic
 They write the following:
 
 <i>"
-Copyright (c) 2020-2021 Cannlytics and Cannlytics Contributors
+Copyright (c) 2020-2022 Cannlytics
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -172,4 +172,4 @@ This document is published under CC BY-SA 4.0. A [Creative Commons Sharealike li
 
 This document was adapted, 2021-07-24, from <https://www.albinsocial.com/>. This document was first adapted, 2018-10-05, from [Automattics Terms of service](https://github.com/Automattic/legalmattic/blob/master/Terms%20of%20Service/WordPress.com/EN-Terms-of-Service.md). Automattic runs a blog and website hosting platform called [WordPress.com](https://wordpress.com/).
 
-This document was updated 2021-07-24.
+This document was updated 2022-04-26.

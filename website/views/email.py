@@ -2,7 +2,7 @@
 Email Views | Cannlytics Website
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/22/2021
 Updated: 1/14/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
@@ -24,6 +24,7 @@ def send_message(request):
     """Send a message from the website to the Cannlytics admin through email.
     The user must provide an `email`, `subject`, and `message` in their POST.
     """
+    # FIXME: IS CSRF token passed? It appears that this throws a 403 error.
     try:
         request.POST['math_input'] == request.POST['math_total']
     except KeyError:

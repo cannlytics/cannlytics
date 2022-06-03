@@ -2,10 +2,10 @@
 Metrc Models | Cannlytics
 Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
 Updated: 11/12/2021
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains common Metrc models.
 """
@@ -13,13 +13,13 @@ This module contains common Metrc models.
 # Internal imports.
 from ..firebase import get_document, update_document
 from ..utils.utils import (
+    camelcase,
     camel_to_snake,
     clean_dictionary,
     clean_nested_dictionary,
     get_timestamp,
     remove_dict_fields,
     remove_dict_nulls,
-    snake_to_camel,
     update_dict,
 )
 
@@ -144,7 +144,7 @@ class Delivery(Model):
     def create(self):
         """Create a receipt record in Metrc."""
         context = self.to_dict()
-        data = clean_nested_dictionary(context, snake_to_camel)
+        data = clean_nested_dictionary(context, camelcase)
         self.client.create_receipts([data], license_number=self._license)
 
     def update(self, **kwargs):
@@ -392,7 +392,7 @@ class Item(Model):
     def create(self, license_number='', return_obs=False):
         """Create an item record in Metrc."""
         context = self.to_dict()
-        data = clean_dictionary(context, snake_to_camel)
+        data = clean_dictionary(context, camelcase)
         self.client.create_items([data], license_number, return_obs=return_obs)
 
     def update(self, **kwargs):
@@ -438,7 +438,7 @@ class Location(Model):
     def update(self, **kwargs):
         """Update location."""
         data = self.to_dict()
-        update = clean_dictionary(data, snake_to_camel)
+        update = clean_dictionary(data, camelcase)
         for param in kwargs:
             key = self._parameters.get(param, param)
             update[key] = kwargs[param]
@@ -897,7 +897,7 @@ class Patient(Model):
         """Create a patient record in Metrc."""
         context = self.to_dict()
         context['actual_date'] = get_timestamp(zone=self.client.state)
-        data = clean_nested_dictionary(context, snake_to_camel)
+        data = clean_nested_dictionary(context, camelcase)
         self.client.create_patients([data], license_number=self._license)
 
     def update(self, **kwargs):
@@ -1219,7 +1219,7 @@ class PlantBatch(Model):
     def create(self, license_number=''):
         """Create a plant batch record in Metrc."""
         context = self.to_dict()
-        data = clean_dictionary(context, snake_to_camel)
+        data = clean_dictionary(context, camelcase)
         self.client.manage_batches([data], 'createplantings', license_number)
 
     def create_package(
@@ -1244,7 +1244,7 @@ class PlantBatch(Model):
             'is_donation': donation,
             'actual_date': get_timestamp(zone=self.client.state)
         }
-        data = clean_dictionary(data, snake_to_camel)
+        data = clean_dictionary(data, camelcase)
         self.client.manage_batches([data], 'createpackages', self._license)
         # TODO: Implement return_obs
 
@@ -1272,7 +1272,7 @@ class PlantBatch(Model):
             'IsDonation': donation,
             'ActualDate': get_timestamp(zone=self.client.state),
         }
-        data = clean_dictionary(data, snake_to_camel)
+        data = clean_dictionary(data, camelcase)
         self.client.manage_batches(
             [data],
             '/create/packages/frommotherplant',
@@ -1360,7 +1360,7 @@ class LabResult(Model):
     def create(self, data={}):
         """Post lab result data."""
         context = self.to_dict()
-        result = clean_dictionary(data, snake_to_camel)
+        result = clean_dictionary(data, camelcase)
         self.client.post_lab_results([{**context, **result}], self._license)
 
     def post(self, data={}):
@@ -1370,13 +1370,13 @@ class LabResult(Model):
     def upload_coa(self, data={}):
         """Upload lab result CoA."""
         context = self.to_dict()
-        result = clean_dictionary(data, snake_to_camel)
+        result = clean_dictionary(data, camelcase)
         self.client.upload_coas([{**context, **result}], self._license)
 
     def release(self, data={}):
         """Release lab results."""
         context = self.to_dict()
-        result = clean_dictionary(data, snake_to_camel)
+        result = clean_dictionary(data, camelcase)
         self.client.release_lab_results([{**context, **result}], self._license)
 
 
@@ -1439,7 +1439,7 @@ class Receipt(Model):
     def create(self):
         """Create a receipt record in Metrc."""
         context = self.to_dict()
-        data = clean_nested_dictionary(context, snake_to_camel)
+        data = clean_nested_dictionary(context, camelcase)
         self.client.create_receipts([data], license_number=self._license)
 
     def update(self, **kwargs):
@@ -1473,7 +1473,7 @@ class Strain(Model):
     def create(self):
         """Create a strain record in Metrc."""
         context = self.to_dict()
-        data = clean_dictionary(context, snake_to_camel)
+        data = clean_dictionary(context, camelcase)
         self.client.create_strains([data])
 
     def update(self, **kwargs):
@@ -1548,7 +1548,7 @@ class Transfer(Model):
     def create(self):
         """Create a transfer record in Metrc."""
         context = self.to_dict()
-        data = clean_nested_dictionary(context, snake_to_camel)
+        data = clean_nested_dictionary(context, camelcase)
         self.client.create_transfers([data], license_number=self._license)
 
     def update(self, **kwargs):
@@ -1581,7 +1581,7 @@ class TransferTemplate(Model):
     def create(self):
         """Create a transfer template record in Metrc."""
         context = self.to_dict()
-        data = clean_nested_dictionary(context, snake_to_camel)
+        data = clean_nested_dictionary(context, camelcase)
         self.client.create_transfer_templates(
             [data],
             license_number=self._license,
@@ -1665,7 +1665,7 @@ class Transaction(Model):
     def create(self):
         """Create a transaction record in Metrc."""
         context = self.to_dict()
-        data = clean_nested_dictionary(context, snake_to_camel)
+        data = clean_nested_dictionary(context, camelcase)
         self.client.create_transactions([data], license_number=self._license)
 
     def update(self, **kwargs):

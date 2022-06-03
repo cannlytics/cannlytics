@@ -2,17 +2,20 @@
 Utility Functions | Cannlytics
 Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 11/8/2021
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+Updated: 4/21/2022
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains general cannabis analytics utility functions.
 """
 # Standard imports.
 from datetime import datetime, timedelta
 from typing import Any, Callable, List, Optional
-from zoneinfo import ZoneInfo
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    print('Operating with Python < 3.9 is not recommended.')
 from re import sub, findall
 import secrets
 
@@ -20,7 +23,10 @@ import secrets
 from dateutil import parser
 
 # Internal imports.
-from .constants import state_time_zones
+try:
+    from cannlytics.utils.constants import state_time_zones
+except ImportError:
+    print('Failed to load constants.')
 
 
 def camelcase(string: str) -> str:
@@ -30,11 +36,19 @@ def camelcase(string: str) -> str:
     Returns:
         (str): A string in CamelCase.
     """
-    key = ''.join(x for x in string.title() if not x.isspace())
+    key = string.replace('&', 'and')
+    key = key.replace('%', 'percent')
+    key = key.replace('#', 'number')
+    key = key.replace('$', 'dollars')
+    key = key.replace('/', 'to')
+    key = key.replace('.', '_')
+    key = ''.join(x for x in key.title() if not x.isspace())
     key = key.replace('_', '').replace('-', '')
     return key
 
 
+# FIXME: camel_to_snake handles camelcase better.
+# Also, this doesn't handle all caps well, e.g. APP_ID.
 def camel_to_snake(string: str) -> str:
     """Turn a camel-case string to a snake-case string.
     Args:
@@ -45,7 +59,43 @@ def camel_to_snake(string: str) -> str:
     return sub(r'(?<!^)(?=[A-Z])', '_', string).lower()
 
 
-def clean_column_names(data: Any, column: str) -> Any:
+def kebab_case(string: str) -> str:
+    """Turn a string into a kebab-case string."""
+    key = string.replace(' ', '-')
+    key = key.replace('&', 'and')
+    key = key.replace('%', 'percent')
+    key = key.replace('#', 'number')
+    key = key.replace('$', 'dollars')
+    key = key.replace('/', 'to')
+    key = key.replace(r'\\', '-').lower()
+    key = sub('[!@#$%^&*()[]{};:,./<>?\|`~-=+]', ' ', key)
+    keys = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', key)
+    return '-'.join(map(str.lower, keys))
+
+
+def snake_case(string: str) -> str:
+    """Turn a given string to snake case.
+    Handles CamelCase, replaces known special characters with
+    preferred namespaces, replaces spaces with underscores,
+    and removes all other nuisance characters.
+    Args:
+        string (str): The string to turn to snake case.
+    Returns:
+        (str): A snake case string.
+    """
+    key = string.replace(' ', '_')
+    key = key.replace('&', 'and')
+    key = key.replace('%', 'percent')
+    key = key.replace('#', 'number')
+    key = key.replace('$', 'dollars')
+    key = key.replace('/', 'to')
+    key = key.replace(r'\\', '_').lower()
+    key = sub('[!@#$%^&*()[]{};:,./<>?\|`~-=+]', ' ', key)
+    keys = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', key)
+    return '_'.join(map(str.lower, keys))
+
+
+def clean_column_strings(data: Any, column: str) -> Any:
     """
     Args:
         data (DataFrame): A DataFrame with any column names.
@@ -70,7 +120,7 @@ def clean_column_names(data: Any, column: str) -> Any:
     return data
 
 
-def clean_dictionary(data: dict, function: Callable = camel_to_snake) -> dict:
+def clean_dictionary(data: dict, function: Callable = snake_case) -> dict:
     """Format dictionary keys with given function, snake case by default.
     Args:
         d (dict): A dictionary to clean.
@@ -81,7 +131,7 @@ def clean_dictionary(data: dict, function: Callable = camel_to_snake) -> dict:
     return {function(k): v for k, v in data.items()}
 
 
-def clean_nested_dictionary(data: dict, function: Callable = camel_to_snake) -> dict:
+def clean_nested_dictionary(data: dict, function: Callable = snake_case) -> dict:
     """Format nested (at most 2 levels) dictionary keys with a given function,
     snake case by default.
     Args:
@@ -91,9 +141,9 @@ def clean_nested_dictionary(data: dict, function: Callable = camel_to_snake) -> 
         (dict): Returns the input dictionary with cleaned keys.
     """
     clean = clean_dictionary(data, function)
-    for k, v in clean.items():
+    for k, value in clean.items():
         try:
-            clean[k] = clean_dictionary(v, function)
+            clean[k] = clean_dictionary(value, function)
         except AttributeError:
             pass
     return clean
@@ -127,21 +177,21 @@ def get_random_string(length, allowed_chars=RANDOM_STRING_CHARS):
 
     Copyright (c) Django Software Foundation and individual contributors.
     All rights reserved.
-    
+
     Redistribution and use in source and binary forms, with or without modification,
     are permitted provided that the following conditions are met:
-    
+
         1. Redistributions of source code must retain the above copyright notice,
            this list of conditions and the following disclaimer.
-    
+
         2. Redistributions in binary form must reproduce the above copyright
            notice, this list of conditions and the following disclaimer in the
            documentation and/or other materials provided with the distribution.
-    
+
         3. Neither the name of Django nor the names of its contributors may be used
            to endorse or promote products derived from this software without
            specific prior written permission.
-    
+
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -212,39 +262,7 @@ def remove_dict_nulls(data: dict) -> dict:
     return {k: v for k, v in data.items() if v is not None}
 
 
-def snake_case(string: str) -> str:
-    """Turn a given string to snake case.
-    Handles CamelCase, replaces known special characters with
-    preferred namespaces, replaces spaces with underscores,
-    and removes all other nuisance characters.
-    Args:
-        string (str): The string to turn to snake case.
-    Returns:
-        (str): A snake case string.
-    """
-    key = string.replace(' ', '_')
-    key = key.replace('&', 'and')
-    key = key.replace('%', 'percent')
-    key = key.replace('#', 'number')
-    key = key.replace('$', 'dollars')
-    key = key.replace('/', '_')
-    key = key.replace(r'\\', '_')
-    key = sub('[!@#$%^&*()[]{};:,./<>?\|`~-=+]', ' ', key)
-    keys = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', key)
-    return '_'.join(map(str.lower, keys))
-
-
-def snake_to_camel(string: str) -> str:
-    """Turn a snake-case string to a camel-case string.
-    Args:
-        string (str): The string to convert to camel-case.
-    Returns:
-        (str): Returns the string in CamelCase
-    """
-    return ''.join([*map(str.title, string.split('_'))])
-
-
-def update_dict(context: dict, function: Callable = snake_to_camel, **kwargs) -> dict:
+def update_dict(context: dict, function: Callable = camel_to_snake, **kwargs) -> dict:
     """Update dictionary with keyword arguments.
     Args:
         context (dict): A dictionary of context to update.

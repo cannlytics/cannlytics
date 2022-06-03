@@ -2,10 +2,10 @@
 Logistics Utilities | Cannlytics
 Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
 Updated: 12/5/2021
-License: <https://github.com/cannlytics/cannlytics-engine/blob/main/LICENSE>
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This script contains functions that are useful for logistics.
 """
@@ -28,44 +28,51 @@ def get_google_maps_api_key():
     """
     # FIXME: Prefer using secret manager to Firestore for secrets.
     database = initialize_firebase()
-    google_doc = get_document('admin/google', database=database)
-    google_data = google_doc.to_dict()
-    return google_data['google_maps_api_key']
+    data = get_document('admin/google', database=database)
+    return data['google_maps_api_key']
 
 
-def geocode_addresses(df, api_key: Optional[str] = None):
+def geocode_addresses(
+        data,
+        api_key: Optional[str] = None,
+        pause: Optional[float] = 0.0,
+        address_field: Optional[str] = '',
+):
     """Geocode addresses in a dataframe.
     Args:
-        df (DataFrame): A DataFrame containing the addresses to geocode.
+        data (DataFrame): A DataFrame containing the addresses to geocode.
+        api_key (str): A Google Maps API key.
+        pause (float): An optional pause to wait between requests, 0.0 by default.
+        address_field (str): An optional field to specify the address field,
+            otherwise assumes the DataFrame has `street`, `city`, `state`,
+            and `zip_code` columns.
     Returns:
         (DataFrame): Returns the DataFrame with geocoded latitudes and longitudes.
     """
     if api_key is None:
         api_key = get_google_maps_api_key()
     gmaps = Client(key=api_key)
-    for index, item in df.iterrows():
-        # TODO: Handle existing lat and long more elegantly.
-        # try:
-        #     if item.latitude and item.longitude:
-        #         continue
-        # except:
-        #     pass
-        address = f'{item.street}, {item.city}, {item.state} {item.zip}'
+    for index, item in data.iterrows():
+        if index and pause:
+            sleep(pause)
+        if address_field:
+            address = item.address
+        else:
+            address = f'{item.street}, {item.city}, {item.state} {item.zip_code}'
         geocode_result = gmaps.geocode(address)
         if geocode_result:
-            df.at[index, 'formatted_address'] = geocode_result[0]['formatted_address']
+            data.at[index, 'formatted_address'] = geocode_result[0]['formatted_address']
             location = geocode_result[0]['geometry']['location']
-            print(item.name, '-->', location)
-            df.at[index, 'latitude'] = location['lat']
-            df.at[index, 'longitude'] = location['lng']
-            # TODO: Round latitude and longitude (4-6 decimal places?)
+            data.at[index, 'latitude'] = location['lat']
+            data.at[index, 'longitude'] = location['lng']
             for info in geocode_result[0]['address_components']:
                 key = info['types'][0]
+                if key == 'administrative_area_level_1':
+                    data.at[index, 'state'] = info['short_name']
+                    data.at[index, 'state_name'] = info['long_name']
                 if key == 'administrative_area_level_2':
-                    df.at[index, 'county'] = info['long_name']
-
-        sleep(.2) # Prevents spamming Google's servers (necessary?).
-    return df
+                    data.at[index, 'county'] = info['long_name']
+    return data
 
 
 def search_for_address(
@@ -108,6 +115,7 @@ def get_place_details(
     if not fields:
         fields = [
             'formatted_address',
+            'icon',
             'photo',
             'opening_hours',
             'website',

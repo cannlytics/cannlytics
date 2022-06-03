@@ -2,7 +2,7 @@
 Django Settings | Cannlytics Console
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/5/2021
 Updated: 12/20/2021
 License: License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>

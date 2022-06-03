@@ -2,9 +2,9 @@
 URLs | Cannlytics API
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <keegan@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2021
-Updated: 4/20/2022
+Updated: 6/2/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Description: API URLs to interface with cannabis analytics.
@@ -21,12 +21,16 @@ from api.auth import auth
 from api.base import base
 from api.certificates import certificates
 from api.contacts import contacts
-from api.data import data
-from api.data.analysis_data import analysis_data
-from api.data import ccrs_data
-from api.data.lab_data import lab_data, lab_analyses, lab_logs
-from api.data.regulation_data import regulation_data
-from api.data.state_data import state_data
+from api.data import (
+    analysis_data,
+    ccrs_data,
+    data,
+    lab_data,
+    patent_data,
+    regulation_data,
+    state_data,
+    strain_data,
+)
 from api.instruments import instruments
 from api.inventory import inventory
 from api.invoices import invoices
@@ -40,6 +44,8 @@ from api.transfers import transfers
 from api.traceability import traceability
 from api.users import users
 from api.waste import waste
+
+from api import stats
 
 app_name = 'api' # pylint: disable=invalid-name
 
@@ -81,8 +87,10 @@ urlpatterns = [
     ])),
     path('data', include([
         path('', data.datasets),
-        path('/analyses', analysis_data),
-        path('/analyses/<analysis_id', analysis_data),
+        path('/analyses', analysis_data.analysis_data),
+        path('/analyses/<analysis_id', analysis_data.analysis_data),
+
+        # TODO: Re-design CCRS endpoints around timeseries statistics :)
         path('/ccrs/areas', ccrs_data.areas),
         path('/ccrs/contacts', ccrs_data.contacts),
         path('/ccrs/integrators', ccrs_data.integrators),
@@ -97,10 +105,29 @@ urlpatterns = [
         path('/ccrs/sale_details', ccrs_data.sale_details),
         path('/ccrs/strains', ccrs_data.strains),
         path('/ccrs/transfers', ccrs_data.transfers),
-        path('/regulations', regulation_data),
-        path('/regulations/<state>', regulation_data),
-        path('/state', state_data),
-        path('/state/<state>', state_data),
+
+        path('/regulations', regulation_data.regulation_data),
+        path('/regulations/<state>', regulation_data.regulation_data),
+
+        path('/states', state_data.state_data),
+        path('/states/ct', state_data.state_data_ma),
+        path('/states/ma', state_data.state_data_ma),
+        path('/states/ok', state_data.state_data_ma),
+        path('/states/or', state_data.state_data_ma),
+        path('/states/wa', state_data.state_data_ma),
+        # path('/state/<state>', state_data),
+
+        path('/strains', include([
+            path('', strain_data.strain_data),
+            path('/<strain_name>', strain_data.strain_data),
+        ])),
+
+        # TODO: Implement patents endpoints.
+        path('/patents', include([
+            path('', patent_data.patent_data),
+            path('/<patent_number>', patent_data.patent_data),
+        ])),
+
     ])),
     path('people', include([
         path('', contacts.people),
@@ -136,10 +163,10 @@ urlpatterns = [
         path('/<user_id>/settings', users.users),
     ])),
     path('labs', include([
-        path('', lab_data),
-        path('/<license_number>', lab_data),
-        path('/<license_number>/analyses', lab_analyses),
-        path('/<license_number>/logs', lab_logs),
+        path('', lab_data.lab_data),
+        path('/<license_number>', lab_data.lab_data),
+        path('/<license_number>/analyses', lab_data.lab_analyses),
+        path('/<license_number>/logs', lab_data.lab_logs),
     ])),
     path('organizations', include([
         path('/<organization_id>', organizations.organizations),
@@ -160,6 +187,18 @@ urlpatterns = [
         path('', samples.samples),
         path('/<sample_id>', samples.samples),
     ])),
+
+    # Stats endpoints.
+    path('stats', include([
+        path('', stats.effects_stats),
+        path('/effects', stats.effects_stats),
+        path('/effects/actual', stats.record_effects),
+        path('/effects/<strain>', stats.effects_stats),
+        # TODO: Implement.
+        path('/recommendations', stats.recommendation_stats),
+        path('/patents', stats.patent_stats),
+    ])),
+
     path('templates', include([
         path('', results.templates),
         path('/<template_id>', results.templates),

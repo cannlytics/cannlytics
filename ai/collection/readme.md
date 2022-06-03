@@ -1,1 +1,0 @@
-# Cannabis Data Collection AI
