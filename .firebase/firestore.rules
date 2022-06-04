@@ -18,6 +18,18 @@ service cloud.firestore {
     	allow read: if true;
       allow write: if false;
     }
+    
+    // Allow anyone to read public variables.
+    match /public/data/variables/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+    
+    // Allow anyone to read the subscription plan data.
+    match /public/subscriptions/subscription_plans/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
 
     // Allow anyone to subscribe.
     // TODO: Make more restrictive
@@ -27,42 +39,79 @@ service cloud.firestore {
     	allow read: if false;
       allow write: if true;
     }
-
-    // Allow user's to read and write their own records.
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    
+    // Allow anyone to read the public video data.
+    match /public/videos/video_data/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+    
+    // Allow anyone to read the public data sets.
+    match /public/data/state_data/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+    
+    // Allow users to manage data in their organization.
+    // Only owners can delete an organization.
+    match /organizations/{organizationId} {
+      allow read, create, update:
+          if request.auth.token.team == organizationId;
+      allow delete:
+          if request.auth.token.qa == organizationId
+          || request.auth.token.owner == organizationId;
     }
     
     // Allow users to manage data in their organization.
     // Only owners and quality assurance can delete.
     match /organizations/{organizationId}/{document=**} {
       allow read, create, update:
-          if organizationId in request.auth.token.team
-          || organizationId in request.auth.token.qa
-          || organizationId in request.auth.token.owner;
+          if request.auth.token.team == organizationId;
       allow delete:
-          if organizationId in request.auth.token.qa
-          || organizationId in request.auth.token.owner;
+          if request.auth.token.qa == organizationId
+          || request.auth.token.owner == organizationId;
     }
-
+    match /organizations/{organizationId}/data_models/{document=**} {
+      allow read, create, update:
+          if request.auth.token.team == organizationId;
+      allow delete:
+          if request.auth.token.qa == organizationId
+          || request.auth.token.owner == organizationId;
+    }
+    
+    // Allow organization members to read the daily totals.
+    match /organizations/{organizationId}/stats/organization_settings/daily_totals/{date=**} {
+    	allow read:
+      	if request.auth.token.team == organizationId;
+    }
+    
+    // Allow organization members to read and create data.
+    // Only owners and quality assurance can change or delete data.
+    match /organizations/{organizationId}/{dataModel}/{modelId=**} {
+    	allow read, create, update:
+          if request.auth.token.team == organizationId;
+      allow delete:
+          if request.auth.token.owner == organizationId;
+    }
+    
     // Allow organization members to read and create file data.
     // Only owners and quality assurance can change or delete file data.
     match /organizations/{organizationId}/{dataModel}/{modelId}/files/{file=**} {
     	allow read, create:
-          if organizationId in request.auth.token.team
-          || organizationId in request.auth.token.qa
-          || organizationId in request.auth.token.owner;
+          if request.auth.token.team == organizationId;
       allow delete, update:
-          if organizationId in request.auth.token.qa
-          || organizationId in request.auth.token.owner;
+          if request.auth.token.qa == organizationId
+          || request.auth.token.owner == organizationId;
     }
     
-    // Allow organization members to read the daily totals.
-    match /organizations/{organizationId}/stats/organization_settings/daily_totals/{date} {
-    	allow read:
-      	if organizationId in request.auth.token.team
-          || organizationId in request.auth.token.qa
-          || organizationId in request.auth.token.owner;
+    // Allow user's to read and write their own records.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow user's to read and write their own signature.
+    match /users/{userId}/user_settings/signature {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
     

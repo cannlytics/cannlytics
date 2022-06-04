@@ -6,16 +6,24 @@
 
   Authors: Keegan Skeate <contact@cannlytics.com>
   Created: 5/14/2022
-  Updated: 6/2/2022
+  Updated: 6/3/2022
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
   TODO:
 
-    - Let user upload lab results.
+    - Let the user upload lab results.
 
-    - Let user load defaults.
+    - Let the user switch between models.
 
-    - Display accuracy.
+    - Let the user load strains.
+
+    - Display predictions with colors, icons, and model stats.
+
+    - Let the user save / share the predictions.
+
+    - If the user is signed in, let them post actual effects and aromas.
+
+    - Let the user clear the form.
 
 -->
 {% extends "website/index.html" %}
@@ -52,26 +60,59 @@
 
   <!-- TODO: Calculator form -->
   <section class="markdown">
-    <h2 class="mt-4">Official Model</h2>
-    <p>
-      The effects model is used to predict effects and aromas that
+    <img
+      alt="SkunkFx"
+      src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30"
+      style="height:140px;"
+    >
+    <p class="mt-0 lh-md" style="max-width:560px;">
+      <small><b class="serif">SkunkFx</b> is the official Cannlytics effects and aromas prediction model.
+      The model is used to predict effects and aromas that
       may be reported for a given product given its lab results. 
       For technical details of the model, please see the
-      <a href="https://github.com/cannlytics/cannlytics">documentation</a>.
+      <a href="https://github.com/cannlytics/cannlytics"><small>documentation</small></a>.
       Please remember that the predictions are simply statistics are
       should not be mistaken as claims.
+      </small>
     </p>
 
-  <!-- Strain Name -->
+    <!-- Form options -->
+    <div class="mt-3">
+    
+      <!-- Model selection -->
+      <!-- TODO: Add label. -->
+      <select
+        id="model-selection"
+        class="app-action form-select form-select-sm btn-sm-light btn-md-light"
+        aria-label="State select"
+        style="width:130px;"
+        onchange="cannlytics.stats.changeModel(this);"
+      >
+        <!-- TODO: Get this dynamically from variables. -->
+        <option selected value="full">Full</option>
+        <option value="simple">Simple</option>
+        <option value="totals">Totals</option>
+        <option value="cannabinoid_only">Cannabinoid Only</option>
+        <option value="terpene_only">Terpene Only</option>
+      </select>
+
+    </div>
+    
+    <form id="effects-form">
+
+      <!-- Strain Name -->
 
 
-  <!-- Cannabinoids -->
+      <!-- Cannabinoids -->
 
 
-  <!-- Terpenes -->
+      <!-- Terpenes -->
 
 
-  <!-- Model selection -->
+      <!-- Predict! -->
+
+  
+    </form>
 
 
   <!-- Show positive effects -->
@@ -142,7 +183,7 @@
   <!-- Disclaimer -->
   <h2 class="mt-5">Disclaimer</h2>
   <p class="fs-6">
-    <small>
+    <small class="simple-serif">
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -170,8 +211,8 @@
     // TODO: When the time is right, get the model statistics.
     // cannlytics.stats.getModelStats();
 
-    // TODO: Get variable definitions (aromas and effects)
-    // to use in rending (e.g. colors and icons).
+    // Get variable definitions (aromas and effects) to use for rendering effect / aroma colors and icons.
+    // cannlytics.stats.getDefinitions('public/data/variables/effects_and_aromas');
   
   </script>
 {% endblock %}

@@ -1,8 +1,12 @@
 # Predicting Effects and Aromas
 
+<div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
+  <img width="240px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30">
+</div>
+
 > "It's been hard to breathe and the smell's been just horrendous... [It's] like you've literally been sprayed by a
-**skunk**." - Resident of Prague, Oklahoma
-[*'It's nasty': Prague neighbors push back on area cannabis facility*](https://kfor.com/news/local/its-nasty-prague-neighbors-push-back-on-area-cannabis-facility/), Oklahoma News 4 (2022)
+**skunk**." - Resident of Prague, Oklahoma in
+[*'It's nasty': Prague neighbors push back on area cannabis facility*](https://kfor.com/news/local/its-nasty-prague-neighbors-push-back-on-area-cannabis-facility/), Oklahoma News 4 (2022).
 
 ## Objective
 
@@ -17,7 +21,7 @@ perceptual profiles, and chemical compositions](https://www.biorxiv.org/content/
 
 ## Data
 
-A panel of strain reviews was curated from the data published by [Alethia, et. al. (2019)](https://data.mendeley.com/datasets/6zwcgrttkp/1). First, we downloaded the authors' strain review and lab result datasets. We then curated terpene and cannabinoid data from the raw text files in the lab result dataset. Average cannabinoid and terpene concentrations were calculated for each of the 184 strains in the dataset from 431 lab results. Reviews are for purported strains and the lab results may or may not be representative of the concentration of the product that the reviewer is referencing. However, without the actual lab results of the product that the reviewer is referencing, then the average concentrations for similarly named products can serve as an estimate. The following processing and assumptions were applied.
+A panel of strain reviews was curated from the data published by [Alethia, et. al. (2019)](https://data.mendeley.com/datasets/6zwcgrttkp/1). First, we downloaded the authors' strain review and lab result datasets. We then curated terpene and cannabinoid data from the raw text files in the lab result dataset. Average cannabinoid and terpene concentrations were calculated for each of the 184 strains in the dataset from 431 lab results. Reviews are for purported strains and the lab results may or may not be representative of the concentration of the product that the reviewer is referencing. However, without the actual lab results of the product that the reviewer is referencing, the average concentrations for similarly named products can serve as an estimate. The following processing and assumptions were applied.
 
 - Field names were transformed to `snake_case`.
 - The fields `total_terpenes` and `total_cannabinoids` were calculated as the simple sum of all terpenes and cannabinoids respectively.
@@ -29,12 +33,10 @@ A panel of strain reviews was curated from the data published by [Alethia, et. a
 - Certain terpenes were summed into a encompassing field: `ocimene`, `beta_ocimene`, `trans_ocimene` to `ocimene` and `trans_nerolidol`, `cis_nerolidol`, `transnerolidol_1`, `transnerolidol_2` to `nerolidol`.
 - A new field, `terpinenes`, was created as the sum of `alpha_terpinene`, `gamma_terpinene`, `terpinolene`, and `terpinene`.
 
-
-
 | Datasets | URL |
 |----------|-----|
 | Raw data | <https://data.mendeley.com/datasets/6zwcgrttkp/1> |
-| Curated panel data | <https://cannlytics.page.link/effects> |
+| Curated panel data | <https://cannlytics.page.link/reported-effects> |
 | Potential strain effects data | <https://cannlytics.page.link/strain-effects> |
 
 <!-- TODO: Add WA and CT (OH?) datasets :) -->

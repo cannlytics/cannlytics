@@ -192,12 +192,23 @@ def curate_lab_results(
     terpene_names.remove('transnerolidol_2')
     terpene_names.append('nerolidol')
 
+    # Code missing values as 0.
+    compounds = compounds.fillna(0)
+
     # Calculate totals.
     compounds['total_terpenes'] = compounds[terpene_names].sum(axis=1).round(2)
     compounds['total_cannabinoids'] = compounds[cannabinoid_names].sum(axis=1).round(2)
-    compounds['total_thc'] = (compounds['delta_9_thc'] + compounds['thca'].mul(DECARB)).round(2)
-    compounds['total_cbd'] = (compounds['cbd'] + compounds['cbda'].mul(DECARB)).round(2)
-    compounds['total_cbg'] = (compounds['cbg'] + compounds['cbga'].mul(DECARB)).round(2)
+
+    # Calculate total THC, CBD, and CBG.
+    # TODO: Optimize?
+    compounds.loc[compounds['thca'] == 0, 'total_thc'] = compounds['delta_9_thc'].round(2)
+    compounds.loc[compounds['thca'] != 0, 'total_thc'] = (compounds['delta_9_thc'] + compounds['thca'].mul(DECARB)).round(2)
+    compounds.loc[compounds['cbda'] == 0, 'total_cbd'] = compounds['cbd'].round(2)
+    compounds.loc[compounds['cbda'] != 0, 'total_cbd'] = (compounds['cbd'] + compounds['cbda'].mul(DECARB)).round(2)
+    compounds.loc[compounds['cbga'] == 0, 'total_cbg'] = compounds['cbg'].round(2)
+    compounds.loc[compounds['cbga'] != 0, 'total_cbg'] = (compounds['cbg'] + compounds['cbga'].mul(DECARB)).round(2)
+
+    # Calculate terpinenes total.
     analytes = ['alpha_terpinene', 'gamma_terpinene', 'terpinolene', 'terpinene']
     compounds = sum_columns(compounds, 'terpinenes', analytes, drop=False)
 
@@ -303,9 +314,14 @@ if __name__ == '__main__':
 
     # Average results by strain, counting the number of tests per strain.
     strain_data = results.groupby('strain_name').mean()
-    strain_data = strain_data.fillna(0)
+    # strain_data = strain_data.fillna(0)
     strain_data['tests'] = results.groupby('strain_name')['cbd'].count()
     strain_data['strain_name'] = strain_data.index
+
+    # Save the lab results and strain data.
+    today = datetime.now().isoformat()[:10]
+    results.to_excel(DATA_DIR + f'/psi-labs-results-{today}.xlsx')
+    strain_data.to_excel(DATA_DIR + f'/strain-avg-results-{today}.xlsx')
 
     #-------------------------------------------------------------------
 
@@ -339,19 +355,19 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------
 
     # # Curate the reviews.
-    # print('Curating reviews...')
-    # reviews = curate_strain_reviews(DATA_DIR, strain_data)
+    print('Curating reviews...')
+    reviews = curate_strain_reviews(DATA_DIR, strain_data)
 
     # # Combine `effect_anxiety` and `effect_anxious`.
     # reviews = combine_columns(reviews, 'effect_anxious', 'effect_anxiety')
 
     # # Optional: Save and read back in the reviews.
-    # today = datetime.now().isoformat()[:10]
-    # datafile = DATA_DIR + f'/strain-reviews-{today}.xlsx'
-    # reviews.to_excel(datafile)
+    today = datetime.now().isoformat()[:10]
+    datafile = DATA_DIR + f'/strain-reviews-{today}.xlsx'
+    reviews.to_excel(datafile)
 
-    datafile = DATA_DIR + '/strain-reviews-2022-06-01.xlsx'
-    reviews = pd.read_excel(datafile, index_col=0)
+    # datafile = DATA_DIR + '/strain-reviews-2022-06-01.xlsx'
+    # reviews = pd.read_excel(datafile, index_col=0)
 
     # # Optional: Upload strain review data to Firestore.
     # reviews['id'] = reviews.index

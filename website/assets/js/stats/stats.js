@@ -7,19 +7,29 @@
  * Updated: 5/31/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
-import { authRequest } from '../utils.js';
+// import { authRequest } from '../utils.js';
+import { getDocument } from '../firebase.js';
 
 export const stats = {
 
 
-  getDefinitions() {
+  changeModel(model) {
+    /**
+     * Change the prediction model, updating the user interface.
+     */
+    console.log('TODO: Change the model!', model);
+  },
+
+
+  async getDefinitions(ref) {
     /**
      * Get variable definitions and save them to local storage.
+     * @param {String} ref The reference to the variable definitions.
+     * @returns {Object} The variable definitions.
      */
-
-    // TODO: Get variable definitions (through the API).
-
-    // TODO: Save the variable definitions to local storage.
+    const data = await getDocument(ref);
+    localStorage.setItem('variables', JSON.stringify(data));
+    return data;
 
   },
 
@@ -60,6 +70,21 @@ export const stats = {
     // TODO: Make a request for model predictions.
 
     // TODO: Handle the user interface given the predictions.
+
+  },
+
+
+  renderPredictionForm(predictions) {
+    /**
+     * Render the prediction form.
+     */
+    // Get the variables.
+    const variables = localStorage.getItem('variables');
+    console.log('Variables:', variables);
+
+    // TODO: Plug in the predictions.
+
+    // TODO: Style as necessary.
 
   },
 
