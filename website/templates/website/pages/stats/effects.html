@@ -11,11 +11,11 @@
 
   TODO:
 
-    - Let the user upload lab results.
-
     - Let the user switch between models.
 
-    - Let the user load strains.
+    - Let the user upload lab results.
+
+    - Let the user search and load strains.
 
     - Display predictions with colors, icons, and model stats.
 
@@ -27,7 +27,7 @@
 
 -->
 {% extends "website/index.html" %}
-{% load static %}
+{% load static icon %}
 {% block title %}Effects and Aromas Stats | Cannlytics{% endblock %}
 {% block material %}
 
@@ -58,7 +58,7 @@
   </div>
 
 
-  <!-- TODO: Calculator form -->
+  <!-- Prediction Form -->
   <section class="markdown">
     <img
       alt="SkunkFx"
@@ -68,33 +68,50 @@
     <p class="mt-0 lh-md" style="max-width:560px;">
       <small><b class="serif">SkunkFx</b> is the official Cannlytics effects and aromas prediction model.
       The model is used to predict effects and aromas that
-      may be reported for a given product given its lab results. 
-      For technical details of the model, please see the
-      <a href="https://github.com/cannlytics/cannlytics"><small>documentation</small></a>.
-      Please remember that the predictions are simply statistics are
-      should not be mistaken as claims.
+      may be reported for a given cannabis product given its lab results.
       </small>
     </p>
 
     <!-- Form options -->
-    <div class="mt-3">
+    <div class="d-flex justify-content-between align-items-center w-100 mt-2">
     
       <!-- Model selection -->
-      <!-- TODO: Add label. -->
-      <select
-        id="model-selection"
-        class="app-action form-select form-select-sm btn-sm-light btn-md-light"
-        aria-label="State select"
-        style="width:130px;"
-        onchange="cannlytics.stats.changeModel(this);"
-      >
-        <!-- TODO: Get this dynamically from variables. -->
-        <option selected value="full">Full</option>
-        <option value="simple">Simple</option>
-        <option value="totals">Totals</option>
-        <option value="cannabinoid_only">Cannabinoid Only</option>
-        <option value="terpene_only">Terpene Only</option>
-      </select>
+      <div class="d-flex align-items-center">
+        <label
+          for="model-selection"
+          class="col-sm-4 col-form-label"
+        >
+          <small class="serif">Model</small>
+        </label>
+        <select
+          id="model-selection"
+          class="app-action form-select form-select-sm btn-sm-light btn-md-light"
+          aria-label="State select"
+          style="width:150px;"
+          onchange="cannlytics.stats.changeModel(this);"
+        >
+          <!-- FIXME: Add `selected` to current model or else `totals`. -->
+          {% for key in variables.variables %}
+            <option value="{{ key }}">{{ key|title_case }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- TODO: Autocomplete to search for strains -->
+
+      <!-- Upload lab results button -->
+      <div class="ms-2">
+        <button
+          id="view-all-labs"
+          class="btn btn-sm btn-sm-light btn-md-light"
+          onclick="cannlytics.stats.uploadLabResults();"
+        >
+          {% icon 'upload-cloud' width="16px" class="me-1" %}
+          <small class="serif">Upload Lab Results</small>
+        </button>
+      </div>
+
+      <!-- TODO: Clear the form button -->
 
     </div>
     
@@ -103,37 +120,156 @@
       <!-- Strain Name -->
 
 
-      <!-- Cannabinoids -->
+      <!-- TODO: Product type with only flower enabled at the moment. -->
 
+      <!-- Render the various models. -->
+      {% for model, values in variables.variables.items %}
+        <div id="{{ model }}-fields" class="d-flex flex-wrap d-none">
+          {% comment %} <h3 class="mt-3 mb-0 w-100">{{ model|title_case }} Model</h3> {% endcomment %}
 
-      <!-- Terpenes -->
+          <!-- Cannabinoids -->
+          {% if model == 'full' or model == 'cannabinoid_only'%}
+            <h6 class="serif w-100 mt-3">Cannabinoids</h6>
+            {% for analyte in values %}
+              {% if analyte.type == 'cannabinoid' %}
+              <div class="col-sm-6">
+              <div class="row mb-1">
+                <label
+                  for="input-{{ model }}-{{ analyte.key }}"
+                  class="col col-form-label col-form-label-sm"
+                  style="max-width:130px;"
+                >
+                  {{ analyte.name|greek_letters }}
+                </label>
+                <div class="col-sm-3">
+                  <input
+                    id="input-{{ model }}-{{ analyte.key }}"
+                    class="form-control form-control-sm"
+                    style="max-width:90px;"
+                    name="{{ analyte.key }}"
+                    spellcheck="false"
+                    type="number"
+                    autocomplete="off"
+                    onchange="cannlytics.stats.changeField(this);"
+                    min="0"
+                    max="40"
+                    value=""
+                  >
+                </div>
+                <div class="col-sm-5">
+                  <input
+                    id="range-{{ model }}-{{ analyte.key }}"
+                    class="form-range custom-range"
+                    type="range"
+                    min="0"
+                    max="40"
+                    value="0"
+                    onchange="cannlytics.stats.changeField(this);"
+                  >
+                </div>
+              </div>
+              </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
 
+          <!-- Terpenes -->
+          {% if model == 'full' or model == 'terpene_only'%}
+            <h6 class="serif w-100 mt-3">Terpenes</h6>
+            {% for analyte in values %}
+              {% if analyte.type == 'terpene' %}
+              <div class="col-sm-6">
+              <div class="row mb-1">
+                <label
+                  for="input-{{ model }}-{{ analyte.key }}"
+                  class="col col-form-label col-form-label-sm"
+                  style="max-width:130px;"
+                >
+                  {{ analyte.name|greek_letters }}
+                </label>
+                <div class="col-sm-3">
+                  <input
+                    id="input-{{ model }}-{{ analyte.key }}"
+                    class="form-control form-control-sm"
+                    style="max-width:90px;"
+                    name="{{ analyte.key }}"
+                    spellcheck="false"
+                    type="number"
+                    autocomplete="off"
+                    onchange="cannlytics.stats.changeField(this);"
+                    min="0"
+                    max="40"
+                    value=""
+                  >
+                </div>
+                <div class="col-sm-5">
+                  <input
+                    id="range-{{ model }}-{{ analyte.key }}"
+                    class="form-range custom-range"
+                    type="range"
+                    min="0"
+                    max="40"
+                    value="0"
+                    onchange="cannlytics.stats.changeField(this);"
+                  >
+                </div>
+              </div>
+              </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+
+          <!-- TODO: Totals -->
+
+    
+        </div>
+      {% endfor %}
 
       <!-- Predict! -->
+      <div class="d-flex justify-content-center mt-4">
+        <button
+          id="view-all-labs"
+          class="btn bg-gradient-purple text-white serif"
+          onclick="cannlytics.stats.getPredictions();"
+        >
+          {% icon 'zap' width="16px" class="me-1" %}
+          Predict
+        </button>
+      </div>
 
   
     </form>
 
+    <!-- TODO: Render prediction -->
 
-  <!-- Show positive effects -->
+      <!-- Save and export results -->
+
+      <!-- Clear the prediction -->
+
+      <!-- Show predicted positive effects -->
+
+      <!-- Show predictednegative effects -->
+
+      <!-- Show predicted aromas -->
+
+      <!-- Optional: Determine most similar strain? -->
+
+      <!-- Optional: Show terpene ratios and predict "Indica" / "Sativa"
+      and type 1, type 2, type 3, and type 4 cananbinoid profiles
+      -->
+
+      <!-- Feedback form to report actual effects and aromas -->
 
 
-  <!-- Show negative effects -->
-
-
-  <!-- Show aromas -->
-
-
-  <!-- Save and export results -->
-
-
-  <!-- Optional: Determine most similar strain? -->
-
-
-  <!-- Feedback form shown after prediction -->
-
-
-  <!-- Model information -->
+    <!-- Model information -->
+    <p class="mt-0 lh-md mt-4" style="max-width:560px;">
+      <small><b class="serif">Notes:</b>
+      For technical details of the model, please see the
+      <a href="https://github.com/cannlytics/cannlytics"><small>documentation</small></a>.
+      Please remember that the predictions are simply statistics are
+      should not be mistaken as claims.
+      </small>
+    </p>
 
   </section>
 
@@ -154,6 +290,7 @@
     if you opt-in to providing feedback.
     Please explore at your pleasure and, hopefully, you are able to find many clever uses for the statistics.
   </p>
+  <!-- TODO: API query builder! -->
 
   <!-- Data Source Notice -->
   <h2 class="mt-5">Data Sources</h2>
@@ -163,7 +300,7 @@
         <b class="serif">Dataset</b>:	<a class="fw-normal" href="https://cannlytics.page.link/reported-effects">Curated Cannabis Strains, their Average Chemical Compositions, and Reported Effects and Aromas</a><br>
         <b class="serif">Author</b>:	Cannlytics<br>
         <b class="serif">Created</b>:	5/18/2022<br>
-        <b class="serif">Updated</b>:	6/2/2022<br>
+        <b class="serif">Updated</b>:	6/4/2022<br>
         <b class="serif">Original Authors</b>: <a class="fw-normal" href="https://data.mendeley.com/datasets/6zwcgrttkp/1" target="_blank">
           de la Fuente, et al. (2019)
         </a>.<br>
@@ -208,9 +345,15 @@
 {% block page_js %}
   <script>
 
-    // TODO: When the time is right, get the model statistics.
-    // cannlytics.stats.getModelStats();
+    // Show the current model on page load.
+    const model = document.getElementById('model-selection').value;
+    document.getElementById(`${model}-fields`).classList.remove('d-none');
+    console.log('Model:', model);
 
+    // TODO: Get strains and populate the search form.
+
+  
+    // DRAFT
     // Get variable definitions (aromas and effects) to use for rendering effect / aroma colors and icons.
     // cannlytics.stats.getDefinitions('public/data/variables/effects_and_aromas');
   

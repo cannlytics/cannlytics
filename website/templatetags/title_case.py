@@ -12,4 +12,5 @@ from django.template.defaultfilters import register
 @register.filter(name='title_case')
 def title_case(key):
     """Capitalize a string, removing underscores and hyphens."""
+    # FIXME: Handle greek letters!
     return key.replace('_', ' ').replace('-', ' ').title()

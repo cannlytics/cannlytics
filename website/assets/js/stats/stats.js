@@ -13,6 +13,14 @@ import { getDocument } from '../firebase.js';
 export const stats = {
 
 
+  changeField(field) {
+    /**
+     * Change a field in the form.
+     */
+    console.log('TODO: Change the corresponding input:', field);
+  },
+
+
   changeModel(model) {
     /**
      * Change the prediction model, updating the user interface.
@@ -132,6 +140,24 @@ export const stats = {
     // TODO: Post the user's actual data.
 
     // TODO: Handle the user interface.
+
+  },
+
+
+  uploadLabResults() {
+    /**
+     * Load lab results into the form from a user-selected file.
+     */
+
+    // TODO: Read the user-selected file.
+
+    // TODO: Ensure the file is the correct type and doesn't appear malicious.
+
+    // TODO: Read any lab results from the file.
+
+    // TODO: Clean the lab results if necessary.
+
+    // TODO: Populate the form with the lab results.
 
   },
 
