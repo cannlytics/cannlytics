@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<!--
+  Effects List | Cannlytics Website
+  Copyright (c) 2022 Cannlytics
+
+  Authors: Keegan Skeate <https:github.com/keeganskeate>
+  Created: 6/5/2022
+  Updated: 6/5/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+  Description: Display dredicted effects and model summary statistics.
+-->
+{% load static %}
+<div class="row row-cols-1 row-cols-md-3 g-4">
+
+  <!-- TODO: Iteratively render effects, symptoms, and aromas
+    1. Use the icon.
+    2. Use the name for the title.
+    3. Get the model statistics.
+    4. If an aroma, get the color.
+  -->
+
+  <!-- Card -->
+  <div class="col-md-3 mb-3">
+    <div class="card no-border h-100">
+      <!-- TODO: Use aroma color for the background, -->
+      <div class="card-body {% if symptom %}text-bg-danger{% else %}text-bg-success{% endif %} bg-opacity-25 rounded-5 text-dark text-center p-0 pb-2">
+        <img src="{% static "website/images/emojies/happy.svg" %}" class="" alt="Effect image." height="75px">
+        <h5 class="card-title serif fw-bold">Happy</h5>
+        <small class="text-muted">TPR: xx.xx%</small><br>
+        <small class="text-muted">FPR: xx.xx%</small>
+      </div>
+    </div>
+  </div>
+
+</div>
+</html>

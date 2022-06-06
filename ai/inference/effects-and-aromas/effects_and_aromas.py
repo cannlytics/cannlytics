@@ -516,12 +516,12 @@ if __name__ == '__main__':
     # strain_effects = strain_effects.groupby('strain_name').first()
     # refs = [f'public/data/strains/{x}' for x in strain_effects.index]
     # docs = [{
-    #     'potential_effects': [y for y in x[0] if y.startswith('effect')],
-    #     'potential_aromas': [y for y in x[0] if y.startswith('aroma')],
+    #     'predicted_effects': [y for y in x[0] if y.startswith('effect')],
+    #     'predicted_aromas': [y for y in x[0] if y.startswith('aroma')],
     # } for x in strain_effects.values]
     # for i, doc in enumerate(docs):
     #     stats = {}
-    #     outcomes = doc['potential_effects'] + doc['potential_aromas']
+    #     outcomes = doc['predicted_effects'] + doc['predicted_aromas']
     #     for outcome in outcomes:
     #         stats[outcome] = model_stats.loc[outcome].to_dict()
     #     docs[i]['model_stats'] = stats
@@ -590,8 +590,8 @@ if __name__ == '__main__':
     # # 3. Save / log the prediction and model stats.
     # timestamp = datetime.now().isoformat()[:19]
     # data = {
-    #     'potential_effects': effects,
-    #     'potential_aromas': aromas,
+    #     'predicted_effects': effects,
+    #     'predicted_aromas': aromas,
     #     'lab_results': x.to_dict(orient='records')[0],
     #     'strain_name': strain_name,
     #     'timestamp': timestamp,
@@ -625,7 +625,7 @@ if __name__ == '__main__':
     # for index, row in prediction.iterrows():
     #     print(f'\nSample {index}')
     #     print('-----------------')
-    #     for i, key in enumerate(row['potential_effects']):
+    #     for i, key in enumerate(row['predicted_effects']):
     #         tpr = round(model_stats['true_positive_rate'][key] * 100, 2)
     #         fpr = round(model_stats['false_positive_rate'][key] * 100, 2)
     #         title = key.replace('effect_', '').replace('_', ' ').title()

@@ -54,10 +54,15 @@ print('Model Stats:\n', model_stats)
 data = {
     'model': 'simple', # full
     'samples': [
-        {'total_cbd': 1.0, 'total_thc': 18.0},
-        {'total_cbd': 1.0, 'total_thc': 20.0},
-        {'total_cbd': 1.0, 'total_thc': 30.0},
-        {'total_cbd': 7.0, 'total_thc': 7.0},
+        # {'total_cbd': 1.0, 'total_thc': 18.0},
+        # {'total_cbd': 1.0, 'total_thc': 20.0},
+        # {'total_cbd': 1.0, 'total_thc': 30.0},
+        # {'total_cbd': 7.0, 'total_thc': 7.0},
+        {
+            'strain_name': 'Old-time Moonshine',
+            'total_cbd': 0.4,
+            'total_thc': 20.0
+        },
     ]
 }
 url = f'{BASE}/stats/effects'
@@ -93,8 +98,8 @@ for index, row in samples.iterrows():
 data = {
     'samples': [
         {
-            'prediction_id': '01g4g8apexj1r426rbkcnfdjt9',
-            'strain_name': 'Test Strain',
+            'prediction_id': '01g4taktnzx8c8vvcz1w28ee0p',
+            'strain_name': 'Old-time Moonshine',
             'effects': ['happy', 'focused'],
             'aromas': ['citrus', 'pine'],
             'rating': 10,

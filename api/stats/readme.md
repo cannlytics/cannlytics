@@ -78,7 +78,7 @@ response = requests.post(url, json=json)
 message = response.json()['message']
 ```
 
-A typical response includes a list of `samples` with `potential_aromas` and `potential_effects`. There are also `model_stats`, summary statistics for each aroma and effect, and a `prediction_id` for each sample that can be used for reporting actual effects and aromas.
+A typical response includes a list of `samples` with `predicted_aromas` and `predicted_effects`. There are also `model_stats`, summary statistics for each aroma and effect, and a `prediction_id` for each sample that can be used for reporting actual effects and aromas.
 
 ```json
 [{
@@ -87,8 +87,8 @@ A typical response includes a list of `samples` with `potential_aromas` and `pot
   "samples" [
     {
       "lab_results": {},
-      "potential_aromas": [],
-      "potential_effects": [],
+      "predicted_aromas": [],
+      "predicted_effects": [],
       "predicted_at": "2022-06-03T04:20:00",
       "prediction_id": "01g4g8apexj1r426rbkcnfdjt9",
       "strain_name": "",

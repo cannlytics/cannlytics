@@ -92,8 +92,8 @@ def effects_stats(request, strain=None):
             ids.append(prediction_id)
             samples.append({
                 'lab_results': lab_results[i],
-                'potential_effects': effects,
-                'potential_aromas': aromas,
+                'predicted_effects': effects,
+                'predicted_aromas': aromas,
                 'predicted_at': timestamp,
                 'prediction_id': prediction_id,
                 'strain_name': row.get('strain_name'),

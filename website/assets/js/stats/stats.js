@@ -7,8 +7,9 @@
  * Updated: 5/31/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
-// import { authRequest } from '../utils.js';
+import { authRequest } from '../utils.js';
 import { getDocument } from '../firebase.js';
+import { hideLoadingButton, showLoadingButton } from '../ui/ui.js';
 
 export const stats = {
 
@@ -68,16 +69,49 @@ export const stats = {
   },
 
 
-  getPredictions() {
+  async getPredictions() {
     /**
      * Get model predictions given the user's observation.
      */
 
+    // Show loading wand on button.
+    showLoadingButton('predict-button');
+
     // TODO: Format the observation.
+    const body = {
+      'model': 'simple',
+      'samples': [
+        {
+          'strain_name': 'Website test',
+          'total_cbd': 0.4,
+          'total_thc': 20,
+        }
+      ]
+    }
 
-    // TODO: Make a request for model predictions.
+    // Make a request for model predictions.
+    const response = await authRequest('/api/stats/effects', body);
+    const { data } = response;
+    const sample = data.samples[0];
 
-    // TODO: Handle the user interface given the predictions.
+    // TODO: Render effects, separating positive and negative effects.
+    // `data.predicted_effects`
+    console.log('Predicted effects:', sample.predicted_effects);
+
+    // TODO: Render aromas.
+    // `data.aromas`
+    console.log('Predicted aromas:', sample.aromas);
+    
+    // TODO: Render model statistics for each effect and aroma.
+    const fpr = sample.model_stats.false_positive_rate;
+    const tpr = sample.model_stats.true_positive_rate;
+
+    // Show the predictions.
+    document.getElementById('prediction-id').value = sample.prediction_id;
+    document.getElementById('predictions').classList.remove('d-none');
+
+    // Remove loading wand from button.
+    hideLoadingButton('predict-button');
 
   },
 
@@ -107,13 +141,22 @@ export const stats = {
   },
 
 
+  closePredictions() {
+    /**
+     * Close the predictions.
+     */
+    // Optional: clear the predictions.
+    document.getElementById('predictions').classList.add('d-none');
+  },
+
+
   savePredictions() {
     /**
      * Save the model predictions.
      */
 
     // TODO: Implement.
-
+    console.log('Save predictions...');
   },
 
 
@@ -130,16 +173,45 @@ export const stats = {
   },
 
 
-  submitActual() {
+  selectActual(type, input) {
+    /**
+     * Select an actual effect.
+     */
+    console.log('Selected:', type, input);
+    input.value = '';
+    // TODO: Create a new badge with the effect.
+    // Optional: If it's a positive effect, then color green (success).
+    // If it's a negative effect then color red (danger).
+    // If it's an aroma then color based on the aroma's assigned color.
+  },
+
+
+  async submitActual() {
     /**
      * Submit the user's actually observed outcome.
      */
 
     // TODO: Format the user's actual data.
+    const actual = {
+      'samples': [
+        {
+          'prediction_id': '01g4taktnzx8c8vvcz1w28ee0p',
+          'strain_name': 'Old-time Moonshine',
+          'effects': ['happy', 'focused'],
+          'aromas': ['citrus', 'pine'],
+          'rating': 10,
+        },
+      ]
+    };
 
-    // TODO: Post the user's actual data.
+    // Post the user's actual data.
+    const response = await authRequest('/api/stats/effects/actual', body);
+    console.log(response);
 
-    // TODO: Handle the user interface.
+    // Handle the user interface.
+    document.getElementById('feedback-form').classList.add('d-none');
+    document.getElementById('feedback-submit').classList.add('d-none');
+    document.getElementById('feedback-thank-you').classList.remove('d-none');
 
   },
 
@@ -159,6 +231,18 @@ export const stats = {
 
     // TODO: Populate the form with the lab results.
 
+  },
+
+
+  selectRating() {
+    /**
+     * Select a prediction rating.
+     */
+    // TODO: Remove outline from all ratings.
+
+    // TODO: Add outline to the option that the user selected.
+
+    // TODO: Add the rating to the input.
   },
 
 

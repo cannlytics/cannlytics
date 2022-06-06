@@ -11,7 +11,7 @@ The Cannlytics API allows users to seamlessly integrate with all of the function
 | `\areas` | `GET`, `POST`, `DELETE` | Manage areas. |
 | `\certificates` | `GET`, `POST`, `DELETE` | Manage certificates of analysis. |
 | `\contacts` | `GET`, `POST`, `DELETE` | Manage your contacts. |
-| `\data` | `GET` | Get the public data that you need, including data of labs, cannabis markets, and regulations. |
+| `\data` | `GET` | Get the public data that you need, including data of `labs`, `states`, `regulations`, and cannabis `strains`. |
 | `\instruments` | `GET`, `POST`, `DELETE` | Manage instruments. |
 | `\inventory` | `GET`, `POST`, `DELETE` | Manage inventory items. |
 | `\invoices` | `GET`, `POST`, `DELETE` | Manage invoices. |
@@ -19,6 +19,7 @@ The Cannlytics API allows users to seamlessly integrate with all of the function
 | `\projects` | `GET`, `POST`, `DELETE` | Manage projects. |
 | `\results` | `GET`, `POST`, `DELETE` | Manage results. |
 | `\samples` | `GET`, `POST`, `DELETE` | Manage samples. |
+| `\stats` | `GET`, `POST` | Get, create, or update statistics. |
 | `\traceability` | `GET`, `POST`, `DELETE` | Manage interactions with your state traceability system. |
 | `\transfers` | `GET`, `POST`, `DELETE` | Manage transfers. |
 | `\users` | `GET`, `POST` | Manage user data. |
