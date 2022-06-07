@@ -11,7 +11,7 @@
 
   TODO:
 
-    - Let the user switch between models.
+    ✓ Let the user switch between models.
 
     - Optional: Let the user upload lab results.
 
@@ -23,16 +23,15 @@
 
     - Let the user save / share the predictions.
 
-    - If the user is signed in, let them post actual effects and aromas.
+    ✓ If the user is signed in, let them post actual effects and aromas.
 
-    - Let the user clear the form.
+    ✓ Let the user clear the form.
 
 -->
 {% extends "website/index.html" %}
 {% load static icon %}
 {% block title %}Effects and Aromas Stats | Cannlytics{% endblock %}
 {% block page_css %}
-<!-- FIXME: Make autocomplete dark on dark theme. -->
 <style>
 * { box-sizing: border-box; }
 .autocomplete {
@@ -45,7 +44,6 @@
   border-bottom: none;
   border-top: none;
   z-index: 99;
-  /*position the autocomplete items to be the same width as the container:*/
   top: 100%;
   left: 0;
   right: 0;
@@ -57,13 +55,36 @@
   border-bottom: 1px solid #d4d4d4;
 }
 .autocomplete-items div:hover {
-  /*when hovering an item:*/
   background-color: #e9e9e9;
 }
 .autocomplete-active {
-  /*when navigating through the items using the arrow keys:*/
-  background-color: DodgerBlue !important;
+  background-color: #50fa7b33 !important;
   color: #ffffff;
+}
+body.dark .autocomplete-items div {
+  background-color: #2e303e;
+  border-color: #8b949e;
+}
+body.dark .autocomplete-items div:hover {
+  background-color: #616161;
+}
+body.dark .autocomplete-active {
+  background-color: #ffa60033 !important;
+  color: #ffffff;
+}
+.callout {
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  background-color: var(--bs-gray-100);
+  border-left: 0.25rem solid var(--bs-gray-300);
+}
+.callout-info {
+  background-color: rgba(var(--bs-info-rgb), .075);
+  border-left: 0.25rem solid rgba(var(--bs-info-rgb), .5);
+}
+.tooltip-inner {
+  text-align: left;
 }
 </style>
 {% endblock page_css %}
@@ -127,7 +148,7 @@
         <button
           id="strain-name-button"
           class="btn btn-sm-light text-dark text-nowrap mx-2 mt-3"
-          onclick="cannlytics.stats.cancelSearchStrains();"
+          onclick="cannlytics.stats.clearStrainName();"
           title="Clear strain name."
         >
         {% icon 'slash' width="14px" %}
@@ -179,7 +200,6 @@
             onchange="cannlytics.stats.changeModel(this);"
             title="Select the prediction model."
           >
-            <!-- FIXME: Add `selected` to current model or else `totals`. -->
             {% for key in variables.variables %}
               <option class="fs-6" value="{{ key }}">
                 <small class="serif">{{ key|title_case }}</small>
@@ -208,8 +228,12 @@
     <form id="lab-results-form">
 
       <!-- Render the various models. -->
+      <!-- TODO: Have reasonable scales (min / max) for each compound type. -->
       {% for model, values in variables.variables.items %}
-        <div id="{{ model }}-fields" class="d-flex flex-wrap d-none">
+        <div
+          id="{{ model }}-fields"
+          class="stats-model d-flex flex-wrap d-none"
+        >
 
           <!-- Cannabinoids -->
           {% if model == 'full' or model == 'cannabinoid_only'%}
@@ -228,13 +252,13 @@
                 <div class="col-sm-3">
                   <input
                     id="input-{{ model }}-{{ analyte.key }}"
-                    class="form-control form-control-sm"
+                    class="{{ model }}-field form-control form-control-sm"
                     style="max-width:90px;"
                     name="{{ analyte.key }}"
                     spellcheck="false"
                     type="number"
                     autocomplete="off"
-                    onchange="cannlytics.stats.changeField(this);"
+                    onchange="cannlytics.stats.changeField(this, 'range');"
                     min="0"
                     max="40"
                     value=""
@@ -244,11 +268,12 @@
                   <input
                     id="range-{{ model }}-{{ analyte.key }}"
                     class="form-range custom-range"
+                    name="{{ analyte.key }}"
                     type="range"
                     min="0"
                     max="40"
                     value="0"
-                    onchange="cannlytics.stats.changeField(this);"
+                    onchange="cannlytics.stats.changeField(this, 'input');"
                   >
                 </div>
               </div>
@@ -274,13 +299,13 @@
                 <div class="col-sm-3">
                   <input
                     id="input-{{ model }}-{{ analyte.key }}"
-                    class="form-control form-control-sm"
+                    class="{{ model }}-field form-control form-control-sm"
                     style="max-width:90px;"
                     name="{{ analyte.key }}"
                     spellcheck="false"
                     type="number"
                     autocomplete="off"
-                    onchange="cannlytics.stats.changeField(this);"
+                    onchange="cannlytics.stats.changeField(this, 'range');"
                     min="0"
                     max="40"
                     value=""
@@ -290,11 +315,12 @@
                   <input
                     id="range-{{ model }}-{{ analyte.key }}"
                     class="form-range custom-range"
+                    name="{{ analyte.key }}"
                     type="range"
                     min="0"
                     max="40"
                     value="0"
-                    onchange="cannlytics.stats.changeField(this);"
+                    onchange="cannlytics.stats.changeField(this, 'input');"
                   >
                 </div>
               </div>
@@ -303,8 +329,50 @@
             {% endfor %}
           {% endif %}
 
-          <!-- FIXME: Totals -->
-
+          <!-- Totals -->
+          {% if model == 'simple' or model == 'totals'%}
+            <h6 class="serif w-100 mt-3">Totals</h6>
+            {% for analyte in values %}
+              <div class="col-sm-6">
+              <div class="row mb-1">
+                <label
+                  for="input-{{ model }}-{{ analyte.key }}"
+                  class="col col-form-label col-form-label-sm"
+                  style="max-width:130px;"
+                >
+                  {{ analyte.name|greek_letters }}
+                </label>
+                <div class="col-sm-3">
+                  <input
+                    id="input-{{ model }}-{{ analyte.key }}"
+                    class="{{ model }}-field form-control form-control-sm"
+                    style="max-width:90px;"
+                    name="{{ analyte.key }}"
+                    spellcheck="false"
+                    type="number"
+                    autocomplete="off"
+                    onchange="cannlytics.stats.changeField(this, 'range');"
+                    min="0"
+                    max="40"
+                    value=""
+                  >
+                </div>
+                <div class="col-sm-5">
+                  <input
+                    id="range-{{ model }}-{{ analyte.key }}"
+                    class="form-range custom-range"
+                    name="{{ analyte.key }}"
+                    type="range"
+                    min="0"
+                    max="40"
+                    value="0"
+                    onchange="cannlytics.stats.changeField(this, 'input');"
+                  >
+                </div>
+              </div>
+              </div>
+            {% endfor %}
+          {% endif %}
     
         </div>
       {% endfor %}
@@ -323,7 +391,7 @@
       </button>
       <button
         id="predict-button-loading"
-        class="btn bg-gradient-purple text-white d-none"
+        class="btn bg-gradient-purple text-white serif d-none"
         type="button"
         title="Predicting..."
         disabled
@@ -334,10 +402,10 @@
     </div>
 
     <!-- Predictions -->
-    <div id="predictions" class="card d-none mt-5">
+    <div id="predictions" class="card bg-light mt-5"><!-- d-none -->
 
       <!-- Prediction options -->
-      <div class="card-header d-flex align-items-center justify-content-between">
+      <div class="card-header d-flex align-items-center justify-content-between bg-dark">
         <div><h3 class="text-dark my-0">Predictions</h3></div>
         <div class="d-flex align-items-center">
 
@@ -380,18 +448,30 @@
       <!-- Predicted effects and aromas -->
       <div class="card-body bg-transparent serif text-dark">
 
-        <!-- FIXME: Add info / tooltips to each title explaining details. -->
-
         <!-- Show predicted positive effects -->
-        <h3 class="fw-bold mt-3">Predicted Effects</h3>
+        <h3 class="fw-bold mt-3">
+          Predicted Effects
+          {% icon 'info' width="16px" height="16px" class="ms-1 mb-2"
+            data-bs-toggle="tooltip"
+            data-bs-placement="right"
+            title="The predicted effects are the most probable effects to be reported by the observed training sample conditional on the expected lab results for a given strain. This statement has not been evaluated by the Food and Drug Administration. This product is not intended to diagnose, treat, cure, or prevent any disease."
+          %}
+        </h3>
         {% include "./effects_list.html" with list_id="predicted-effects" %}
 
-        <!-- Show predicted negative effects -->
+        <!-- Optional: Show predicted negative effects | Otherwise just color the negative effects red. -->
         {% comment %} <h3 class="fw-bold mt-3">Predicted Symptoms</h3>
         {% include "./effects_list.html" with list_id="predicted-symptoms" symptom=True %} {% endcomment %}
 
         <!-- Show predicted aromas -->
-        <h3 class="fw-bold mt-3">Predicted Aromas</h3>
+        <h3 class="fw-bold mt-3">
+          Predicted Aromas
+          {% icon 'info' width="16px" height="16px" class="ms-1 mb-2"
+            data-bs-toggle="tooltip"
+            data-bs-placement="right"
+            title="The predicted aromas are the most probable aromas to be reported by the observed training sample conditional on the expected lab results for a given strain. This statement has not been evaluated by the Food and Drug Administration. This product is not intended to diagnose, treat, cure, or prevent any disease."
+          %}
+        </h3>
         {% include "./effects_list.html" with list_id="predicted-aromas" %}
      
         {% comment %} 
@@ -432,12 +512,27 @@
         {% endcomment %}
 
         <!-- Feedback form to report actual effects and aromas -->
-        <!-- FIXME: Prompt the user to sign in first? -->
         <hr>
         <h3 class="fw-bold mt-3 mb-0">Feedback</h3>
         <form id="feedback-form">
           <input id="prediction-id" class="visually-hidden" name="prediction_id" value="">
           <input id="prediction-rating" class="visually-hidden" type="number" name="rating" value="">
+
+          <!-- Notify the user to sign-in if they haven't already. -->
+          {% if not user %}
+          <div class="callout callout-info fs-6">
+            <small class="serif"><strong>Sign-in to leave feedback.</strong><br> Please sign-in
+            to leave feedback of the actual effects and aromas that you may have observed.</small><br>
+            <button
+              class="btn btn-sm bg-gradient-green text-white serif mt-2"
+              data-bs-target="#sign-in-dialog"
+              data-bs-toggle="modal"
+              type="button"
+            >
+              Sign In
+            </button>
+          </div>
+          {% endif %}
 
           <!-- Actual effects selection -->
           <div class="mt-2 row">
@@ -582,14 +677,20 @@
           <button
             id="submit-actual-button"
             class="btn bg-gradient-orange text-white serif"
+            type="button"
+            {% if not user %}
+            data-bs-target="#sign-in-dialog"
+            data-bs-toggle="modal"
+            {% else %}
             onclick="cannlytics.stats.submitActual();"
+            {% endif %}
           >
           {% icon 'upload' width="16px" height="16px" class="me-1" %}
             Submit Actual Effects and Aromas
           </button>
           <button
             id="submit-actual-button-loading"
-            class="btn bg-gradient-orange text-white d-none"
+            class="btn bg-gradient-orange text-white serif d-none"
             type="button"
             title="Submitting..."
             disabled
@@ -608,7 +709,7 @@
       For technical details of the model, please see the
       <a href="https://github.com/cannlytics/cannlytics/tree/main/ai/inference/effects-and-aromas"><small>documentation</small></a>.
       Please remember that the predictions are simply statistics are
-      should not be mistaken as claims. Also, the model is only valid for flower samples at the moment, please stay tuned for predictions for additional product types.
+      should not be mistaken as claims. At this time, predictions are only valid for flower samples, but please stay tuned for predictions for additional product types.
       </small>
     </p>
 
@@ -687,7 +788,7 @@
       <h6 class="serif mt-3">Request URL</h6>
       <div class="codehilite rounded text-start overflow-hidden px-3"><pre>POST https://cannlytics.com/api/stats/effects</pre></div>
 
-      <h6 class="serif mt-3">Request body</h6>
+      <h6 class="serif mt-3">Request Body</h6>
     <div class="codehilite rounded text-start overflow-hidden px-3">
 <pre><span></span><code><span class="p">{</span>
     <span class="nt">"model"</span><span class="p">:</span> <span class="s2">"simple"</span><span class="p">,</span>
@@ -734,7 +835,7 @@
       <h6 class="serif mt-3">Request URL</h6>
       <div class="codehilite rounded text-start overflow-hidden px-3"><pre>POST https://cannlytics.com/api/stats/effects/actual</pre></div>
 
-      <h6 class="serif mt-3">Request body</h6>
+      <h6 class="serif mt-3">Request Body</h6>
       <div class="codehilite rounded text-start overflow-hidden px-3">
 <pre><span></span><code><span class="p">{</span>
   <span class="nt">"samples"</span><span class="p">:</span> <span class="p">[</span>
@@ -791,8 +892,9 @@
 
     <!-- Disclaimer -->
     <h2 class="mt-5">Disclaimer</h2>
+    <div class="callout">
     <p class="fs-6">
-      <small class="simple-serif">
+      <small class="serif" style="font-size:0.7rem;">
       THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
       IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
       FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -800,6 +902,13 @@
       LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
       OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
       SOFTWARE.
+      </small>
+    </p>
+    </div>
+    <p class="fs-6">
+      <small class="serif">
+        This statement has not been evaluated by the Food and Drug Administration.<br>
+        This product is not intended to diagnose, treat, cure, or prevent any disease.
       </small>
     </p>
 
@@ -820,6 +929,9 @@
     // Sort the effect and aroma selections.
     cannlytics.ui.sortSelectOptions('actual-effects-selection');
     cannlytics.ui.sortSelectOptions('actual-aromas-selection');
+
+    // Enable tooltips.
+  cannlytics.ui.enableTooltips();
   
   </script>
 {% endblock %}

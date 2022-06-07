@@ -14,7 +14,8 @@ import { autocomplete } from '../ui/autocomplete.js';
 
 export const stats = {
 
-
+  // Statistics state variables.
+  modelStats: {},
   strains: {},
 
 
@@ -22,7 +23,6 @@ export const stats = {
     /**
      * Initialize the model.
      */
-    // FIXME:
     let model = getUrlParameter('model') || 'simple';
     model = model.replace('-', '_');
     document.getElementById('model-selection').value = model;
@@ -30,46 +30,47 @@ export const stats = {
   },
 
 
-  changeField(field) {
+  changeField(field, type) {
     /**
      * Change a field in the form.
      */
-    // TODO: Implement.
-    console.log('TODO: Change the corresponding input:', field);
+    console.log('TODO: Change the corresponding input:', field.name, field.value);
+    const model = document.getElementById('model-selection').value;
+    const rangeId = `${type}-${model}-${field.name}`;
+    console.log('ID:', rangeId);
+    document.getElementById(rangeId).value = field.value;
   },
 
 
-  changeModel(model) {
+  changeModel(select) {
     /**
      * Change the prediction model, updating the user interface.
      */
-    // TODO: Implement.
+    const model = select.value;
     console.log('TODO: Change the model!', model);
+    const boxes = document.querySelectorAll('.stats-model');
+    boxes.forEach(box => {
+      box.classList.add('d-none');
+    });
+    document.getElementById(`${model}-fields`).classList.remove('d-none');
   },
 
 
-  // async getDefinitions(ref) {
-  //   /**
-  //    * Get variable definitions and save them to local storage.
-  //    * @param {String} ref The reference to the variable definitions.
-  //    * @returns {Object} The variable definitions.
-  //    */
-  //   const data = await getDocument(ref);
-  //   localStorage.setItem('variables', JSON.stringify(data));
-  //   return data;
-  // },
+  clearStrainName() {
+    /**
+     * Clear the strain name.
+     */
+    document.getElementById('strain-name').value = '';
+  },
 
 
-  getModelStats() {
+  async getModelStats() {
     /**
      * Get the statistics for a given statistical model.
      */
-
-    // TODO: Implement endpoint to get model statistics.
-    // modelStats = authRequest('/api/market/download-lab-data');
-
-    // TODO: Save model statistics to local storage.
-
+    const model = document.getElementById('model-selection').value;
+    const response = await authRequest(`/api/stats/effects?model=${model}`);
+    this.modelStats = response.data;
   },
 
 
@@ -81,34 +82,30 @@ export const stats = {
     // Show loading wand on button.
     showLoadingButton('predict-button');
 
-    // TODO: Format the observation.
-    const body = {
-      'model': 'simple',
-      'samples': [
-        {
-          'strain_name': 'Website test',
-          'total_cbd': 0.4,
-          'total_thc': 20,
-        }
-      ]
-    }
+    // Format the observation.
+    const model = document.getElementById('model-selection').value;
+    const strainName = document.getElementById('strain-name').value;
+    const body = { 'model': model, 'samples': [{ strain_name: strainName }] };
+
+    // Get all of the analyte values for the given model.
+    const fields = document.querySelectorAll(`.${model}-field`);
+    fields.forEach((field) => {
+      body.samples[0][field.name] = field.value;
+    }); // Can this be done with map?
+    console.log('Body:', body);
 
     // Make a request for model predictions.
     const response = await authRequest('/api/stats/effects', body);
     const { data } = response;
     const sample = data.samples[0];
 
-    // TODO: Render effects, separating positive and negative effects.
-    // `data.predicted_effects`
-    console.log('Predicted effects:', sample.predicted_effects);
-
-    // TODO: Render aromas.
-    // `data.aromas`
-    console.log('Predicted aromas:', sample.aromas);
+    // Render effects, separating positive and negative effects, and aromas.
+    this.renderPredictionForm(sample);
     
-    // TODO: Render model statistics for each effect and aroma.
-    const fpr = sample.model_stats.false_positive_rate;
-    const tpr = sample.model_stats.true_positive_rate;
+    // FIXME: Render model statistics for each effect and aroma.
+    this.modelStats = response.model_stats;
+    const fpr = this.modelStats.false_positive_rate;
+    const tpr = this.modelStats.true_positive_rate;
 
     // Show the predictions.
     document.getElementById('prediction-id').value = sample.prediction_id;
@@ -157,11 +154,13 @@ export const stats = {
     // document.getElementById('predicted-symptoms').innerHTML = '';
     document.getElementById('predicted-aromas').innerHTML = '';
     const modelStats = prediction.model_stats;
-    prediction.potential_effects.forEach((obs) => {
+    const effects = prediction.potential_effects || prediction.predicted_effects;
+    const aromas = prediction.potential_aromas || prediction.predicted_aromas;
+    effects.forEach((obs) => {
       // FIXME: Separate effects and symptoms.
       this.renderEffect(obs, 'predicted-effects', modelStats);
     });
-    prediction.potential_aromas.forEach((obs) => {
+    aromas.forEach((obs) => {
       this.renderEffect(obs, 'predicted-aromas', modelStats);
     });
     document.getElementById('predictions').classList.remove('d-none');
@@ -200,9 +199,7 @@ export const stats = {
     /**
      * Reset the form being used to submit observations.
      */
-
-    // TODO: Implement.
-
+    document.getElementById('lab-results-form').reset();
   },
 
 
@@ -210,7 +207,6 @@ export const stats = {
     /**
      * Close the predictions.
      */
-    // Optional: clear the predictions.
     document.getElementById('predictions').classList.add('d-none');
   },
 
@@ -232,7 +228,6 @@ export const stats = {
 
     // TODO: Implement.
 
-
     // TODO: Show notification.
 
   },
@@ -248,7 +243,6 @@ export const stats = {
     const tempNode = document.getElementById('actual-effect-template').cloneNode(true);
     console.log(tempNode);
     const name = input.value.replace('effect_', '').replace('aroma_', '').replace('_', '');
-    // tempNode.innerText = capitalize(name);
     tempNode.classList.remove('d-none');
     // TODO: If it's a positive effect, then color green (success).
     // If it's a negative effect then color red (danger).
@@ -343,36 +337,7 @@ export const stats = {
   },
 
 
-  showSearch() {
-    /**
-     * Show the search input for the user to search by strains.
-     */
-    const strains = this.getStrains();
-    // TODO: Implement.
-  },
-
-
-  hideSearch() {
-    /**
-     * Hide the search input.
-     */
-    // TODO: Implement.
-  },
-
-
-  searchStrains() {
-    /**
-     * Search strains.
-     */
-  },
-
-
-  cancelSearchStrains() {
-    /**
-     * Cancel searching strains.
-     */
-    document.getElementById('strain-name').value = '';
-  },
+  
 
 
   renderStrainData() {
