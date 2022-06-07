@@ -6,16 +6,18 @@
 
   Authors: Keegan Skeate <contact@cannlytics.com>
   Created: 5/14/2022
-  Updated: 6/3/2022
+  Updated: 6/6/2022
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
   TODO:
 
     - Let the user switch between models.
 
-    - Let the user upload lab results.
+    - Optional: Let the user upload lab results.
 
-    - Let the user search and load strains.
+    ✓ Let the user search strains.
+    
+    - Let the user load strain averages.
 
     - Display predictions with colors, icons, and model stats.
 
@@ -29,8 +31,43 @@
 {% extends "website/index.html" %}
 {% load static icon %}
 {% block title %}Effects and Aromas Stats | Cannlytics{% endblock %}
+{% block page_css %}
+<!-- FIXME: Make autocomplete dark on dark theme. -->
+<style>
+* { box-sizing: border-box; }
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #d4d4d4;
+}
+.autocomplete-items div:hover {
+  /*when hovering an item:*/
+  background-color: #e9e9e9;
+}
+.autocomplete-active {
+  /*when navigating through the items using the arrow keys:*/
+  background-color: DodgerBlue !important;
+  color: #ffffff;
+}
+</style>
+{% endblock page_css %}
 {% block material %}
-
 <section class="container mb-2 mt-5">
 
   <!-- Title -->
@@ -57,9 +94,8 @@
     </nav>
   </div>
 
-
   <!-- Prediction Form -->
-  <section class="markdown pb-5">
+  <div class="markdown pb-5">
     <img
       alt="SkunkFx"
       src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30"
@@ -73,77 +109,107 @@
     </p>
 
     <!-- Form options -->
-    <div class="d-flex justify-content-between align-items-center w-100 mt-2">
-    
-      <!-- Model selection -->
-      <div class="d-flex align-items-center">
-        <label
-          for="model-selection"
-          class="col-sm-3 col-form-label"
+    <div class="d-flex flex-wrap justify-content-between align-items-center w-100 mt-2">
+
+      <!-- Strain name entry, autocomplete and search -->
+      <div class="d-flex flex-wrap align-items-center mb-3">
+        <div class="autocomplete mt-3" style="width:300px;">
+          <input
+            type="text"
+            id="strain-name"
+            class="form-control form-control-sm serif w-100"
+            placeholder="Strain name"
+            aria-label="Strain name"
+            aria-describedby="strain-name-button"
+            spellcheck="false"
+          >
+        </div>
+        <button
+          id="strain-name-button"
+          class="btn btn-sm-light text-dark text-nowrap mx-2 mt-3"
+          onclick="cannlytics.stats.cancelSearchStrains();"
+          title="Clear strain name."
         >
-          <small class="serif">Model</small>
-        </label>
-        <select
-          id="model-selection"
-          class="app-action form-select form-select-sm btn-sm-light serif"
-          aria-label="Model selection"
-          style="width:200px;"
-          onchange="cannlytics.stats.changeModel(this);"
-          title="Select the prediction model."
-        >
-          <!-- FIXME: Add `selected` to current model or else `totals`. -->
-          {% for key in variables.variables %}
-            <option class="fs-6" value="{{ key }}">
-              <small class="serif">{{ key|title_case }}</small>
-            </option>
-          {% endfor %}
-        </select>
+        {% icon 'slash' width="14px" %}
+        </button>
+        <div class="d-flex align-items-center mt-3">
+          <button
+            id="get-strain-average"
+            class="btn btn-sm btn-sm-light text-nowrap fs-6"
+            onclick="cannlytics.stats.getStrainResults();"
+            title="Get strain average."
+          >
+            {% icon 'search' width="14px" class="me-1" %}
+            <small class="serif">Get strain average</small>
+          </button>
+        </div>
       </div>
-
-      <!-- TODO: Autocomplete to search for strains -->
-
+      
+      <!-- Right-side Options -->
       <div class="d-flex">
 
-      <!-- Upload lab results button -->
-      <div class="ms-2">
-        <button
-          id="view-all-labs"
-          class="btn btn-sm btn-sm-light"
-          onclick="cannlytics.stats.uploadLabResults();"
-          title="Upload lab results."
-        >
-          {% icon 'upload-cloud' width="16px" class="me-1" %}
-          <small class="serif">Upload Lab Results</small>
-        </button>
-      </div>
+        {% comment %}
+        <!-- TODO: Upload lab results button -->
+        <div class="ms-2">
+          <button
+            id="view-all-labs"
+            class="btn btn-sm btn-sm-light"
+            onclick="cannlytics.stats.uploadLabResults();"
+            title="Upload lab results."
+          >
+            {% icon 'upload-cloud' width="16px" class="me-1" %}
+            <small class="serif">Upload Lab Results</small>
+          </button>
+        </div>
+        {% endcomment %}
 
-      <!-- Reset the form button -->
-      <div class="ms-2">
-        <button
-          id="view-all-labs"
-          class="btn btn-sm btn-sm-light"
-          onclick="cannlytics.stats.resetObservationForm();"
-          title="Reset the form."
-        >
-          {% icon 'rotate-cw' width="16px" %}
-        </button>
-      </div>
+        <!-- Model selection -->
+        <div class="d-flex align-items-center">
+          <label
+            for="model-selection"
+            class="col-sm-3 col-form-label pe-1"
+          >
+            <small class="serif">Model</small>
+          </label>
+          <select
+            id="model-selection"
+            class="app-action form-select form-select-sm btn-sm-light btn-md-light serif"
+            aria-label="Model selection"
+            style="width:200px;"
+            onchange="cannlytics.stats.changeModel(this);"
+            title="Select the prediction model."
+          >
+            <!-- FIXME: Add `selected` to current model or else `totals`. -->
+            {% for key in variables.variables %}
+              <option class="fs-6" value="{{ key }}">
+                <small class="serif">{{ key|title_case }}</small>
+              </option>
+            {% endfor %}
+          </select>
+        </div>
 
-      </div>
+        <!-- Reset the form button -->
+        <div class="d-flex align-items-center ms-2">
+          <button
+            id="view-all-labs"
+            class="btn btn-sm-light"
+            onclick="cannlytics.stats.resetObservationForm();"
+            title="Reset the form."
+          >
+            {% icon 'rotate-cw' width="14px" %}
+          </button>
+        </div>
 
-    </div>
+      </div><!-- End of right-side options -->
+
+    </div><!-- End of form options -->
     
-    <form id="effects-form">
-
-      <!-- Strain Name -->
-
-
-      <!-- TODO: Product type with only flower enabled at the moment. -->
+    <!-- Lab results form -->
+    <form id="lab-results-form">
 
       <!-- Render the various models. -->
       {% for model, values in variables.variables.items %}
         <div id="{{ model }}-fields" class="d-flex flex-wrap d-none">
-          {% comment %} <h3 class="mt-3 mb-0 w-100">{{ model|title_case }} Model</h3> {% endcomment %}
 
           <!-- Cannabinoids -->
           {% if model == 'full' or model == 'cannabinoid_only'%}
@@ -237,13 +303,13 @@
             {% endfor %}
           {% endif %}
 
-          <!-- TODO: Totals -->
+          <!-- FIXME: Totals -->
 
     
         </div>
       {% endfor %}
   
-    </form>
+    </form><!-- End of the lab results form -->
 
     <!-- Predict! -->
     <div class="d-flex justify-content-center mt-4">
@@ -259,7 +325,7 @@
         id="predict-button-loading"
         class="btn bg-gradient-purple text-white d-none"
         type="button"
-        title="Loading"
+        title="Predicting..."
         disabled
       >
         <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
@@ -268,13 +334,11 @@
     </div>
 
     <!-- Predictions -->
-    <div id="predictions" class="card mt-5">
+    <div id="predictions" class="card d-none mt-5">
+
+      <!-- Prediction options -->
       <div class="card-header d-flex align-items-center justify-content-between">
-
-        <!-- Predictions title -->
-        <div><h4 class="text-dark my-0">Predictions</h4></div>
-
-        <!-- Predictions options -->
+        <div><h3 class="text-dark my-0">Predictions</h3></div>
         <div class="d-flex align-items-center">
 
           <!-- Share predictions -->
@@ -311,39 +375,38 @@
           </div>
 
         </div>
+      </div><!-- End of prediction options -->
 
-      </div>
+      <!-- Predicted effects and aromas -->
       <div class="card-body bg-transparent serif text-dark">
-          {% comment %} <h5 class="card-title">Card title</h5>
-          <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p> {% endcomment %}
 
-        <!-- TODO: Add info / tooltips to each title explaining details. -->
+        <!-- FIXME: Add info / tooltips to each title explaining details. -->
 
         <!-- Show predicted positive effects -->
         <h3 class="fw-bold mt-3">Predicted Effects</h3>
-        {% include "./effects_list.html" %}
+        {% include "./effects_list.html" with list_id="predicted-effects" %}
 
         <!-- Show predicted negative effects -->
-        <h3 class="fw-bold mt-3">Predicted Symptoms</h3>
-        {% include "./effects_list.html" with symptom=True %}
+        {% comment %} <h3 class="fw-bold mt-3">Predicted Symptoms</h3>
+        {% include "./effects_list.html" with list_id="predicted-symptoms" symptom=True %} {% endcomment %}
 
         <!-- Show predicted aromas -->
         <h3 class="fw-bold mt-3">Predicted Aromas</h3>
-        {% include "./effects_list.html" %}
+        {% include "./effects_list.html" with list_id="predicted-aromas" %}
      
-        <!-- TODO: Only show if relevant terpenes were entered. -->
-        {% if False %}
-        <hr>
-        <!-- Optional: Show terpene ratios and predict "Indica" / "Sativa"
-        and type 1, type 2, type 3, and type 4 cananbinoid profiles
-        -->
-        <h3 class="fw-bold mt-3">Classical Strain Type Predicted from ChemoType</h3>
+        {% comment %} 
         <!-- TODO: Have a range with Indica on one side and Sativa on the other.
           Use the observed range of beta-pinene to d-limonene ratio as the scale.
           Pure hybrid is at 1/4 or 1/5 ratio? Then display a badge depending on
           the classical strain type designation.
         -->
-
+        <!-- Optional: Show terpene ratios and predict "Indica" / "Sativa"
+        and type 1, type 2, type 3, and type 4 cananbinoid profiles
+        -->
+        <!-- Only show if relevant terpenes were entered. -->
+        {% if False %}
+        <hr>
+        <h3 class="fw-bold mt-3">Classical Strain Type Predicted from ChemoType</h3>
         <h3><span class="badge bg-gradient-purple serif fs-6">Indica</span></h3>
         <div class="col-sm-5">
           <input
@@ -358,91 +421,126 @@
         </div>
         <h3><span class="badge bg-gradient-orange serif fs-6">Sativa</span></h3>
         {% endif %}
+        {% endcomment %}
 
-        {% comment %} <!-- Optional: Determine most similar strain? -->
-        <h3 class="fw-bold mt-3">Similar Strains</h3>
+        {% comment %} 
         <!-- TODO: Get 3 strains that have similar effects and/or aromas.
         Display cards with those strains details, such as their average observed
         chemotype, predicted effects and aromas, etc.
-        --> {% endcomment %}
-
-        
+        -->
+        <h3 class="fw-bold mt-3">Similar Strains</h3>
+        {% endcomment %}
 
         <!-- Feedback form to report actual effects and aromas -->
+        <!-- FIXME: Prompt the user to sign in first? -->
         <hr>
         <h3 class="fw-bold mt-3 mb-0">Feedback</h3>
-        <input id="prediction-id" class="visually-hidden" name="prediction_id" value="">
-        <!-- Optional: Prompt the user to sign in first? -->
-
         <form id="feedback-form">
+          <input id="prediction-id" class="visually-hidden" name="prediction_id" value="">
+          <input id="prediction-rating" class="visually-hidden" type="number" name="rating" value="">
 
-        <!-- Actual effects selection -->
-        <!-- FIXME: Have an autocomplete that adds pills to a grid. User can click a
-        close icon on each pill to remove the effect.
-        -->
-        <div class="mt-2">
-          <label
-            class="col col-form-label col-form-label-sm serif"
-            style="max-width:130px;"
-          >
-            Actual Effects
-          </label>
-          <select
-            id="actual-effects-selection"
-            class="app-action form-select form-select-sm btn-sm-light serif"
-            aria-label="Model selection"
-            style="width:200px;"
-            onchange="cannlytics.stats.selectActual('effect', this);"
-            title="Select an actual effect."
-          >
-            <option class="fs-6" value=""></option>
-            <!-- FIXME: Would be nice to have these sorted! -->
-            {% for key, value in variables.effects.items %}
-              <option class="fs-6" value="{{ key }}">
-                <small class="serif">{{ value.name|title_case }}</small>
-              </option>
-            {% endfor %}
-          </select>
-        </div>
+          <!-- Actual effects selection -->
+          <div class="mt-2 row">
+            <div class="col-md-5">
+              <div class="row">
+                <label
+                  class="col col-form-label col-form-label-sm serif"
+                  style="max-width:130px;"
+                >
+                  Actual Effects
+                </label>
+                <!-- FIXME: Use an autocomplete instead. -->
+                {% comment %} <div class="autocomplete" style="width:300px;">
+                  <input
+                    type="text"
+                    id="strain-name"
+                    class="form-control form-control-sm serif w-100"
+                    placeholder="Strain name"
+                    aria-label="Strain name"
+                    aria-describedby="strain-name-button"
+                    spellcheck="false"
+                  >
+                </div> {% endcomment %}
+                <select
+                  id="actual-effects-selection"
+                  class="app-action form-select form-select-sm btn-sm-light serif"
+                  aria-label="Model selection"
+                  style="width:200px;"
+                  onchange="cannlytics.stats.selectActual('effect', this);"
+                  title="Select an actual effect."
+                >
+                  <option class="fs-6" value=""></option>
+                  {% for key, value in variables.effects.items %}
+                    <option class="fs-6" value="{{ key }}">
+                      <small class="serif">{{ value.name|title_case }}</small>
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div id="actual-effects" class="col-md-7"></div>
+          </div>
+          
+          <!-- Specific effect / aroma badge template -->
+          <span id="actual-effect-template" class="badge rounded-pill bg-opacity-25 text-dark d-inline-flex align-items-center d-none mt-3 me-2">
+            <span class="badge-text"></span>
+            <button type="button" class="btn nav-link ms-2" onclick="">
+              {% icon 'x' width="16px" %}
+            </button>
+          </span>
 
-        <!-- Actual aromas selection -->
-        <div class="mt-4">
-          <label
-            class="col col-form-label col-form-label-sm serif"
-            style="max-width:130px;"
-          >
-            Actual Aromas
-          </label>
-          <select
-            id="actual-effects-selection"
-            class="app-action form-select form-select-sm btn-sm-light serif"
-            aria-label="Model selection"
-            style="width:200px;"
-            onchange="cannlytics.stats.selectActual('aroma', this);"
-            title="Select an actual effect."
-          >
-            <option class="fs-6" value=""></option>
-            <!-- FIXME: Would be nice to have these sorted! -->
-            {% for key, value in variables.aromas.items %}
-              <option class="fs-6" value="{{ key }}">
-                <small class="serif">{{ value.name|title_case }}</small>
-              </option>
-            {% endfor %}
-          </select>
-        </div>
+          <!-- Actual aromas selection -->
+          <div class="mt-4 row">
+            <div class="col-md-5">
+              <div class="row">
+                <label
+                  class="col col-form-label col-form-label-sm serif"
+                  style="max-width:130px;"
+                >
+                  Actual Aromas
+                </label>
+                <!-- FIXME: Use an autocomplete instead. -->
+                <select
+                  id="actual-aromas-selection"
+                  class="app-action form-select form-select-sm btn-sm-light serif"
+                  aria-label="Model selection"
+                  style="width:200px;"
+                  onchange="cannlytics.stats.selectActual('aroma', this);"
+                  title="Select an actual aroma."
+                >
+                  <option class="fs-6" value=""></option>
+                  {% for key, value in variables.aromas.items %}
+                    <option class="fs-6" value="{{ key }}">
+                      <small class="serif">{{ value.name|title_case }}</small>
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div id="actual-aromas" class="col-md-7">
+              <span id="actual-aroma-template" class="badge rounded-pill text-dark d-inline-flex align-items-center d-none mt-3 me-2">
+                <span class="badge-text"></span>
+                <button type="button" class="btn nav-link ms-2" onclick="">
+                  {% icon 'x' width="16px" %}
+                </button>
+              </span>
+            </div>
+          </div>
 
-        <!-- Textarea for user to leave free-form review. -->
-        <div class="form-floating mb-3 mt-5">
-          <textarea
-            class="form-control form-control-sm serif"
-            placeholder="Leave a comment here"
-            id="feedback-review"
-            style="height: 150px; max-width: 560px;"
-          ></textarea>
-          <label for="feedback-review" class="serif fs-6">
-            <small class="serif">Product review</small>
-          </label>
-        </div>
+          <!-- Textarea for user to leave free-form review. -->
+          <div class="form-floating mb-3 mt-5">
+            <textarea
+              class="form-control form-control-sm serif"
+              placeholder="Leave a comment here"
+              id="feedback-review"
+              style="height: 150px; max-width: 560px;"
+            ></textarea>
+            <label for="feedback-review" class="serif fs-6">
+              <small class="serif">Product review</small>
+            </label>
+          </div>
+
+        </form><!-- End of feedback form. -->
 
         <!-- Rating for the prediction (1 to 10). -->
         <div class="d-flex align-items-center mb-3 mt-4">
@@ -452,22 +550,19 @@
           >
             Prediction rating:
           </label>
-          <input id="prediction-rating" class="visually-hidden" type="number" name="rating" value="">
           <div class="chart-scale">
-            <button class="btn btn-scale btn-scale-desc-1 text-dark">1</button>
-            <button class="btn btn-scale btn-scale-desc-2 text-dark">2</button>
-            <button class="btn btn-scale btn-scale-desc-3 text-dark">3</button>
-            <button class="btn btn-scale btn-scale-desc-4 text-dark">4</button>
-            <button class="btn btn-scale btn-scale-desc-5 text-dark">5</button>
-            <button class="btn btn-scale btn-scale-desc-6 text-dark">6</button>
-            <button class="btn btn-scale btn-scale-desc-7 text-dark">7</button>
-            <button class="btn btn-scale btn-scale-desc-8 text-dark">8</button>
-            <button class="btn btn-scale btn-scale-desc-9 text-dark">9</button>
-            <button class="btn btn-scale btn-scale-desc-10 text-dark">10</button>
+            <button onclick="cannlytics.stats.selectRating(this);" class="btn btn-scale btn-scale-desc-1 text-dark serif fs-6"><small>1</small></button>
+            <button onclick="cannlytics.stats.selectRating(this);" class="btn btn-scale btn-scale-desc-2 text-dark serif fs-6"><small>2</small></button>
+            <button onclick="cannlytics.stats.selectRating(this);" class="btn btn-scale btn-scale-desc-3 text-dark serif fs-6"><small>3</small></button>
+            <button onclick="cannlytics.stats.selectRating(this);" class="btn btn-scale btn-scale-desc-4 text-dark serif fs-6"><small>4</small></button>
+            <button onclick="cannlytics.stats.selectRating(this);" class="btn btn-scale btn-scale-desc-5 text-dark serif fs-6"><small>5</small></button>
+            <button onclick="cannlytics.stats.selectRating(this);" class="btn btn-scale btn-scale-desc-6 text-dark serif fs-6"><small>6</small></button>
+            <button onclick="cannlytics.stats.selectRating(this);" class="btn btn-scale btn-scale-desc-7 text-dark serif fs-6"><small>7</small></button>
+            <button onclick="cannlytics.stats.selectRating(this);" class="btn btn-scale btn-scale-desc-8 text-dark serif fs-6"><small>8</small></button>
+            <button onclick="cannlytics.stats.selectRating(this);" class="btn btn-scale btn-scale-desc-9 text-dark serif fs-6"><small>9</small></button>
+            <button onclick="cannlytics.stats.selectRating(this);" class="btn btn-scale btn-scale-desc-10 text-dark serif fs-6"><small>10</small></button>
           </div>
         </div>
-
-        </form>
 
         <!-- Thank you for feedback -->
         <div id="feedback-thank-you" class="mt-3 text-center d-none">
@@ -485,16 +580,27 @@
         <!-- Submit feedback button -->
         <div id="feedback-submit" class="d-flex justify-content-center mt-4 mb-3">
           <button
+            id="submit-actual-button"
             class="btn bg-gradient-orange text-white serif"
             onclick="cannlytics.stats.submitActual();"
           >
           {% icon 'upload' width="16px" height="16px" class="me-1" %}
             Submit Actual Effects and Aromas
           </button>
+          <button
+            id="submit-actual-button-loading"
+            class="btn bg-gradient-orange text-white d-none"
+            type="button"
+            title="Submitting..."
+            disabled
+          >
+            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+            Submitting...
+          </button>
         </div>
 
-      </div>
-    </div>
+      </div><!-- End of redicted effects and aromas -->
+    </div><!-- End of predictions -->
 
     <!-- Model information -->
     <p class="mt-0 lh-md mt-5" style="max-width:560px;">
@@ -502,16 +608,13 @@
       For technical details of the model, please see the
       <a href="https://github.com/cannlytics/cannlytics/tree/main/ai/inference/effects-and-aromas"><small>documentation</small></a>.
       Please remember that the predictions are simply statistics are
-      should not be mistaken as claims.
+      should not be mistaken as claims. Also, the model is only valid for flower samples at the moment, please stay tuned for predictions for additional product types.
       </small>
     </p>
 
-  </section>
+  </div><!-- End of prediction form -->
 
-
-  <!-- API Demo -->
-
-  <!-- Instructions -->
+  <!-- API Instructions -->
   <div class="row justify-content-center mt-5">
     <div class="col-12 col-md-6 px-3 pe-lg-5 text-start overflow-hidden">
       <h2 class="fs-3 text-dark fw-bold mb-2">
@@ -538,14 +641,14 @@
       </div>
     </div>
 
-    <!-- API demo -->
+    <!-- API Examples -->
     <ul
-      id="api-demo"
+      id="api-example"
       class="nav nav-pills col-11 col-md-8 col-lg-6"
       role="tablist"
     >
 
-      <!-- API demo toggles -->
+      <!-- API example toggles -->
       <li class="nav-item" role="presentation">
         <button
           class="btn btn-sm-light btn-md-light serif active"
@@ -574,28 +677,11 @@
           Post actual effects
         </button>
       </li>
-      {% comment %} <div class="d-flex justify-content-end">
-        <button
-          class="btn btn-sm-light btn-md-light serif"
-          type="button"
-          data-bs-target="#api-demo-carousel"
-          data-bs-slide="prev"
-        >
-          <span class="">Post results to get effects</span>
-        </button>
-        <button
-          class="btn btn-sm-light btn-md-light serif ms-2"
-          type="button"
-          data-bs-target="#api-demo-carousel"
-          data-bs-slide="next"
-        >
-          <span class="">Post actual effects</span>
-        </button>
-      </div> {% endcomment %}
 
-      <div class="tab-content" id="api-demo-content">
+      <!-- API examples -->
+      <div id="api-example-content" class="tab-content">
     
-      <!-- Get effects demo-->
+      <!-- Get effects example -->
       <div class="tab-pane fade show active" id="get-effects-pane" role="tabpanel" aria-labelledby="first-tab" tabindex="0">
 
       <h6 class="serif mt-3">Request URL</h6>
@@ -642,7 +728,7 @@
 
 </div><!-- End of get effects demo -->
 
-    <!-- Post actual effects and aromas demo -->
+    <!-- Post actual effects and aromas example -->
     <div class="tab-pane fade" id="post-effects-pane" role="tabpanel" aria-labelledby="second-tab" tabindex="0">
 
       <h6 class="serif mt-3">Request URL</h6>
@@ -671,96 +757,70 @@
 <span class="p">}</span>
 </code></pre></div>
 
-    </div><!-- End of actual effects and aromas demo-->
-
-  </div>
-
-</div>
+      </div><!-- End of actual effects and aromas example -->
+    </div>
+  </div><!-- End of API instructions -->
 
   <!-- About the API -->
-  <section class="markdown">
+  <div class="markdown">
 
-  {% comment %} <h2 class="mt-5">API</h2>
-  <p>
-    Tell your developer(s) about our <a href="https://github.com/cannlytics/cannlytics">free effects and aromas API</a>! If you're paying for quality control tests and/or terpene tests, then you may
-    as well have the effects and aromas of your products predicted.
-    Simply input cannabinoid and/or terpene data and you will receive a
-    surprisingly useful prediction of effects and aromas.
-    The cherry 🍒 on top is that you can report back the actual
-    effects and aromas that characterize your product and the
-    model becomes that much smarter!
-    So, you can make your predictions better over time
-    if you opt-in to providing feedback.
-    Please explore at your pleasure and, hopefully, you are able to find many clever uses for the statistics.
-  </p> {% endcomment %}
-  <!-- TODO: API query builder! -->
+    <!-- Data Source Notice -->
+    <h2 class="mt-5">Data Sources</h2>
+    <ul>
+      <li>
+        <p class="fs-small">
+          <b class="serif">Dataset</b>:	<a class="fw-normal" href="https://cannlytics.page.link/reported-effects">Curated Cannabis Strains, their Average Chemical Compositions, and Reported Effects and Aromas</a><br>
+          <b class="serif">Author</b>:	Cannlytics<br>
+          <b class="serif">Created</b>:	5/18/2022<br>
+          <b class="serif">Updated</b>:	6/4/2022<br>
+          <b class="serif">Original Authors</b>: <a class="fw-normal" href="https://data.mendeley.com/datasets/6zwcgrttkp/1" target="_blank">
+            de la Fuente, et al. (2019)
+          </a>.<br>
+          <b class="serif">License</b>: <a class="fw-normal" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">
+            CC BY 4.0.
+          </a>
+        </p>
+        <p class="mt-2">
+          <small>The files associated with this dataset are licensed under a Creative Commons Attribution 4.0 International license.</small>
+        </p>
+        <p class="mt-2">
+          <small>You can share, copy and modify this dataset so long as you give appropriate credit, provide a link to the CC BY license, and indicate if changes were made, but you may not do so in a way that suggests the rights holder has endorsed you or your use of the dataset. Note that further permission may be required for any content within the dataset that is identified as belonging to a third party.</small>
+        </p>
+      </li>
+    </ul>
 
-  <!-- Data Source Notice -->
-  <h2 class="mt-5">Data Sources</h2>
-  <ul>
-    <li>
-      <p class="fs-small">
-        <b class="serif">Dataset</b>:	<a class="fw-normal" href="https://cannlytics.page.link/reported-effects">Curated Cannabis Strains, their Average Chemical Compositions, and Reported Effects and Aromas</a><br>
-        <b class="serif">Author</b>:	Cannlytics<br>
-        <b class="serif">Created</b>:	5/18/2022<br>
-        <b class="serif">Updated</b>:	6/4/2022<br>
-        <b class="serif">Original Authors</b>: <a class="fw-normal" href="https://data.mendeley.com/datasets/6zwcgrttkp/1" target="_blank">
-          de la Fuente, et al. (2019)
-        </a>.<br>
-        <b class="serif">License</b>: <a class="fw-normal" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">
-          CC BY 4.0.
-        </a>
-      </p>
-      <p class="mt-2">
-        <small>The files associated with this dataset are licensed under a Creative Commons Attribution 4.0 International license.</small>
-      </p>
-      <p class="mt-2">
-        <small>You can share, copy and modify this dataset so long as you give appropriate credit, provide a link to the CC BY license, and indicate if changes were made, but you may not do so in a way that suggests the rights holder has endorsed you or your use of the dataset. Note that further permission may be required for any content within the dataset that is identified as belonging to a third party.</small>
-      </p>
-    </li>
-  </ul>
+    <!-- Disclaimer -->
+    <h2 class="mt-5">Disclaimer</h2>
+    <p class="fs-6">
+      <small class="simple-serif">
+      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+      IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+      FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+      AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+      LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+      SOFTWARE.
+      </small>
+    </p>
 
-  <!-- Disclaimer -->
-  <h2 class="mt-5">Disclaimer</h2>
-  <p class="fs-6">
-    <small class="simple-serif">
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
-    </small>
-  </p>
+  </div><!-- End of about the API -->
 
 </section>
-
-
-</section>
-
-<!-- Vines -->
 {% include "website/components/art/vines.html" %}
-
 {% endblock material %}
-
-<!-- JavaScript -->
 {% block page_js %}
   <script>
 
     // Show the current model on page load.
-    const model = document.getElementById('model-selection').value;
-    document.getElementById(`${model}-fields`).classList.remove('d-none');
-    console.log('Model:', model);
+    cannlytics.stats.initializeModel();
 
-    // TODO: Get strains and populate the search form.
+    // Initialize the strain autocomplete.
+    cannlytics.stats.getStrains();
 
-  
-    // DRAFT
-    // Get variable definitions (aromas and effects) to use for rendering effect / aroma colors and icons.
-    // cannlytics.stats.getDefinitions('public/data/variables/effects_and_aromas');
+    // Sort the effect and aroma selections.
+    cannlytics.ui.sortSelectOptions('actual-effects-selection');
+    cannlytics.ui.sortSelectOptions('actual-aromas-selection');
   
   </script>
 {% endblock %}
-
 </html>

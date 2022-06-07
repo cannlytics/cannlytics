@@ -165,12 +165,12 @@ def record_effects(request):
         aromas = ['aroma_' + x.lower().replace(' ', '_') for x in aromas]
         predicted_at = _id.timestamp().datetime
         logs.append({
+            'aromas': aromas,
+            'effects': effects,
             'created_at': datetime.now().isoformat(),
             'predicted_at': predicted_at.isoformat(),
             'prediction_id': prediction_id,
-            'effects': effects,
-            'aromas': aromas,
-            'rating': sample.get('rating'),
+            'prediction_rating': sample.get('prediction_rating'),
         })
         refs.append(f'models/effects/model_actuals/{prediction_id}')
     

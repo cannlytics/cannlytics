@@ -45,14 +45,14 @@ def get_effects_data(ref=REF):
     return data
 
 
-def upload_effects_data(data_dir='.datasets/website/', ref=REF):
+def upload_effects_data(data_dir='.datasets/website/models/', ref=REF):
     """Upload effects and aromas data from local `.datasets`."""
     database = initialize_firebase()
     with open(f'{data_dir}/aromas.json') as datafile:
         aromas = json.load(datafile)
     with open(f'{data_dir}/effects.json') as datafile:
         effects = json.load(datafile)
-    with open(f'{data_dir}/models/effects_models.json') as datafile:
+    with open(f'{data_dir}/effects_models.json') as datafile:
         variables = json.load(datafile)
     aromas = sorted(aromas, key=lambda d: d['name'])
     effects = sorted(effects, key=lambda d: d['name'])
@@ -70,11 +70,11 @@ if __name__ == '__main__':
     try:
         config = dotenv_values('../../../.env')
         credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
-        data_dir = '../../../.datasets/website/'
+        data_dir = '../../../.datasets/website/models/'
     except KeyError:
         config = dotenv_values('.env')
         credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
-        data_dir = '.datasets/website/'
+        data_dir = '.datasets/website/models/'
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 
     # Call function from the command line.
