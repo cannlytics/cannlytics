@@ -24,7 +24,7 @@ export const stats = {
     /**
      * Initialize the model.
      */
-    let model = getUrlParameter('model') || 'simple';
+    let model = getUrlParameter('model') || 'full';
     model = model.replace('-', '_');
     document.getElementById('model-selection').value = model;
     document.getElementById(`${model}-fields`).classList.remove('d-none');
@@ -99,21 +99,14 @@ export const stats = {
     fields.forEach((field) => {
       body.samples[0][field.name] = parseFloat(field.value);
     });
-    console.log('Body:', body);
 
     // Make a request for model predictions.
     const response = await authRequest('/api/stats/effects', body);
-    console.log('Response:', response);
     const { data } = response;
     const sample = data.samples[0];
 
     // Render effects, separating positive and negative effects, and aromas.
     this.renderPredictionForm(sample, data.model_stats);
-    
-    // Unnecessary: Render model statistics for each effect and aroma.
-    // this.modelStats = response.model_stats;
-    // const fpr = this.modelStats.false_positive_rate;
-    // const tpr = this.modelStats.true_positive_rate;
 
     // Show the predictions.
     document.getElementById('prediction-id').value = sample.prediction_id;
@@ -207,12 +200,12 @@ export const stats = {
       else tempNode.querySelector('.card-body').classList.add('text-bg-danger');
       tempNode.querySelector('.card-title').classList.add('text-dark');
       tempNode.querySelector('.tpr').classList.add('text-dark');
-      tempNode.querySelector('.fpr').classList.add('text-dark');
+      // tempNode.querySelector('.fpr').classList.add('text-dark');
     } else {
       tempNode.querySelector('.card-body').style.backgroundColor = this.variables[type][value].color;
       tempNode.querySelector('.card-title').classList.add('text-black');
       tempNode.querySelector('.tpr').classList.add('text-black');
-      tempNode.querySelector('.fpr').classList.add('text-black');
+      // tempNode.querySelector('.fpr').classList.add('text-black');
     }
 
     // Get the effect/aroma icon.
@@ -221,17 +214,17 @@ export const stats = {
     tempNode.querySelector('.card-title').textContent = capitalize(name);
 
     // Get the model statistics.
-    // FIXME:
-    let tpr = 0 ; let fpr = 0;
+    let tpr = 0 ;
+    // let fpr = 0;
     try {
       tpr = (modelStats[value]['true_positive_rate'] * 100).toFixed(2);
-      fpr = (modelStats[value]['false_positive_rate'] * 100).toFixed(2);
+      // fpr = (modelStats[value]['false_positive_rate'] * 100).toFixed(2);
     } catch(error) {
       tpr = (modelStats['true_positive_rate'][value] * 100).toFixed(2);
-      fpr = (modelStats['false_positive_rate'][value] * 100).toFixed(2);
+      // fpr = (modelStats['false_positive_rate'][value] * 100).toFixed(2);
     }
     tempNode.querySelector('.tpr').textContent = `TPR: ${tpr}%`;
-    tempNode.querySelector('.fpr').textContent = `FPR: ${fpr}%`;
+    // tempNode.querySelector('.fpr').textContent = `FPR: ${fpr}%`;
 
     // Add the card to the UI.
     tempNode.classList.remove('d-none');

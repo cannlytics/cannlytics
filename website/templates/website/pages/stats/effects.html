@@ -137,6 +137,7 @@ body.dark .callout {
     <div class="d-flex flex-wrap justify-content-between align-items-center w-100 mt-2">
 
       <!-- Strain name entry, autocomplete and search -->
+      <!-- FIXME: Allow search anywhere in the string!!! -->
       <div class="d-flex flex-wrap align-items-center mb-3">
         <div class="autocomplete mt-3" style="width:300px;">
           <input
@@ -401,7 +402,7 @@ body.dark .callout {
         disabled
       >
         <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-        Predicting...
+        Predicting... this may take a hot minute!
       </button>
     </div>
 
@@ -527,6 +528,7 @@ body.dark .callout {
           <input id="prediction-rating" class="visually-hidden" type="number" name="rating" value="">
 
           <!-- Notify the user to sign-in if they haven't already. -->
+          <!-- FIXME: Somehow show this once the user signs in. -->
           {% if not user %}
           <div class="callout callout-info fs-6">
             <small class="serif"><strong>Sign-in to leave feedback.</strong><br> Please sign-in
@@ -717,7 +719,11 @@ body.dark .callout {
       For technical details of the model, please see the
       <a href="https://github.com/cannlytics/cannlytics/tree/main/ai/inference/effects-and-aromas"><small>documentation</small></a>.
       Please remember that the predictions are simply statistics are
-      should not be mistaken as claims. At this time, predictions are only valid for flower samples, but please stay tuned for predictions for additional product types. The model statistics TPR, true positive rate, and FPR, false positive rate, are displayed to convey the uncertainty of the predictions.
+      should not be mistaken as claims. At this time, predictions are only valid for flower samples, but please stay tuned for predictions for additional product types. Model statistics,
+      <a href="https://en.wikipedia.org/wiki/Sensitivity_and_specificity" target="_blank">
+        <small class="serif">true positive rates (TPR)</small>
+      </a>,
+      are displayed to convey the uncertainty of the predictions.
       </small>
     </p>
 

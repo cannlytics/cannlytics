@@ -1363,8 +1363,7 @@ body:not(.dark) .card {
   color: #f5f5f5;
 }
 body:not(.dark) .card-header.bg-dark {
-  // background: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;
-  background-color: #282a36;
+  background: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;
 }
 body:not(.dark) .card-opaque {
   background-color: #f5f5f5e6 !important;
@@ -1377,6 +1376,9 @@ body.dark .card-opaque {
 }
 body.dark .card-header {
   background-color: #323443;
+}
+body.dark .card-header.bg-dark {
+  background-color: #282a36;
 }
 body.dark .card-body {
   background-color: #616161;

@@ -102,7 +102,7 @@ material = {
     },
     "homepage": {
         "hero": {
-            "title": "Simple, easy. Cannabis + analytics.",
+            "title": "Simple, Easy Cannabis Analytics",
             "message": "Get superpowers with open-source cannabis analytics made with 💖",
             "image": "website/images/engine_icons/space_station.svg",
             "primary_action": "Get Started 🌱",

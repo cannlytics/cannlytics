@@ -77,6 +77,7 @@ def effects_stats(request, strain=None):
 
         # 2. Predict samples.
         x = pd.DataFrame(data['samples'])
+        x.fillna(0, inplace=True)
         prediction = predict_stats_model(models, x, thresholds)
 
         # 3. Format, save, and return the prediction and model stats.
