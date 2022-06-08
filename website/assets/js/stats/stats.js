@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <contact@cannlytics.com>
  * Created: 5/31/2022
- * Updated: 6/6/2022
+ * Updated: 6/7/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
 import { authRequest, capitalize, getUrlParameter, showNotification } from '../utils.js';
@@ -17,6 +17,7 @@ export const stats = {
   // Statistics state variables.
   modelStats: {},
   strains: {},
+  variables: {},
 
 
   initializeModel() {
@@ -34,10 +35,8 @@ export const stats = {
     /**
      * Change a field in the form.
      */
-    console.log('TODO: Change the corresponding input:', field.name, field.value);
     const model = document.getElementById('model-selection').value;
     const rangeId = `${type}-${model}-${field.name}`;
-    console.log('ID:', rangeId);
     document.getElementById(rangeId).value = field.value;
   },
 
@@ -47,11 +46,8 @@ export const stats = {
      * Change the prediction model, updating the user interface.
      */
     const model = select.value;
-    console.log('TODO: Change the model!', model);
     const boxes = document.querySelectorAll('.stats-model');
-    boxes.forEach(box => {
-      box.classList.add('d-none');
-    });
+    boxes.forEach(box => { box.classList.add('d-none'); });
     document.getElementById(`${model}-fields`).classList.remove('d-none');
   },
 
@@ -74,6 +70,17 @@ export const stats = {
   },
 
 
+  async getVariables(ref) {
+    /**
+     * Get variable definitions and save them to local storage.
+     * @param {String} ref The reference to the variable definitions.
+     * @returns {Object} The variable definitions.
+     */
+    const data = await getDocument(ref);
+    this.variables = data;
+  },
+
+
   async getPredictions() {
     /**
      * Get model predictions given the user's observation.
@@ -90,22 +97,23 @@ export const stats = {
     // Get all of the analyte values for the given model.
     const fields = document.querySelectorAll(`.${model}-field`);
     fields.forEach((field) => {
-      body.samples[0][field.name] = field.value;
-    }); // Can this be done with map?
+      body.samples[0][field.name] = parseFloat(field.value);
+    });
     console.log('Body:', body);
 
     // Make a request for model predictions.
     const response = await authRequest('/api/stats/effects', body);
+    console.log('Response:', response);
     const { data } = response;
     const sample = data.samples[0];
 
     // Render effects, separating positive and negative effects, and aromas.
-    this.renderPredictionForm(sample);
+    this.renderPredictionForm(sample, data.model_stats);
     
-    // FIXME: Render model statistics for each effect and aroma.
-    this.modelStats = response.model_stats;
-    const fpr = this.modelStats.false_positive_rate;
-    const tpr = this.modelStats.true_positive_rate;
+    // Unnecessary: Render model statistics for each effect and aroma.
+    // this.modelStats = response.model_stats;
+    // const fpr = this.modelStats.false_positive_rate;
+    // const tpr = this.modelStats.true_positive_rate;
 
     // Show the predictions.
     document.getElementById('prediction-id').value = sample.prediction_id;
@@ -117,11 +125,12 @@ export const stats = {
   },
 
 
-  async getStrains() {
+  async getStrains(query = '') {
     /**
      * Get cannabis strains from the API.
      */
-    const response = await authRequest('/api/data/strains');
+    let url = `/api/data/strains${query}`;
+    const response = await authRequest(url);
     const strainNames = response.data.map(x => x.strain_name);
     autocomplete(document.getElementById('strain-name'),  strainNames);
     this.strains = response.data;
@@ -136,62 +145,113 @@ export const stats = {
     let matched = false;
     this.strains.forEach((strain) => {
       if (strain.strain_name == strainName) {
-        console.log('Matched:', strain);
         matched = true;
-        // TODO: Populate the lab results form and predictions with the strain averages.
-        this.renderPredictionForm(strain);
+        this.renderLabResultsForm(strain);
+        this.renderPredictionForm(strain, strain.model_stats);
       }
     });
     if (!matched) showNotification('No Strain Records', 'No strain records at this moment.', 'error');
   },
 
 
-  renderPredictionForm(prediction) {
+  renderLabResultsForm(results) {
+    /**
+     * Render given lab results into the lab results form.
+     */
+    const model = document.getElementById('model-selection').value;
+    const fields = this.variables.variables[model];
+    fields.forEach((field) => {
+      const { key } = field;
+      let value = results[key]
+      if (value) value = value.toFixed(2);
+      document.getElementById(`input-${ model }-${ key }`).value = value;
+      document.getElementById(`range-${ model }-${ key }`).value = results[key];
+    });
+  },
+
+
+  renderPredictionForm(prediction, modelStats) {
     /**
      * Render the effects and aromas of a prediction in the prediction form.
      */
     document.getElementById('predicted-effects').innerHTML = '';
-    // document.getElementById('predicted-symptoms').innerHTML = '';
     document.getElementById('predicted-aromas').innerHTML = '';
-    const modelStats = prediction.model_stats;
     const effects = prediction.potential_effects || prediction.predicted_effects;
     const aromas = prediction.potential_aromas || prediction.predicted_aromas;
-    effects.forEach((obs) => {
-      // FIXME: Separate effects and symptoms.
-      this.renderEffect(obs, 'predicted-effects', modelStats);
-    });
-    aromas.forEach((obs) => {
-      this.renderEffect(obs, 'predicted-aromas', modelStats);
-    });
+    effects.forEach((obs) => { this.renderEffect(obs, 'effects', modelStats); });
+    aromas.forEach((obs) => { this.renderEffect(obs, 'aromas', modelStats); });
     document.getElementById('predictions').classList.remove('d-none');
+    if (effects.length === 0) this.renderPlaceholder('effects');
+    if (aromas.length === 0) this.renderPlaceholder('aromas');
+    // TODO: Bonus! Load 3 similar strains
   },
 
 
-  renderEffect(value, listId, modelStats) {
+  renderEffect(value, type, modelStats) {
     /**
      * Render effect in the UI.
      */
-    const id = `predicted-${value}`;
+
+    // Clone the card template.
     const docFrag = document.createDocumentFragment();
     const tempNode = document.getElementById('effect-card').cloneNode(true);
-    const name = value.replace('effect_', '').replace('aroma_', '').replace('_', '');
-    tempNode.id = id;
+    const name = value.replace('effect_', '').replace('aroma_', '').replace('_', ' ');
+    tempNode.id = `predicted-${value}`;
 
-    // TODO: If it's a positive effect, then color green (success).
+    // If it's a positive effect, then color green (success).
     // If it's a negative effect then color red (danger).
     // If it's an aroma then color based on the aroma's assigned color.
-    tempNode.querySelector('.card-body').classList.add('text-bg-success');
+    if (type === 'effects') {
+      const { positive } = this.variables[type][value];
+      if (positive) tempNode.querySelector('.card-body').classList.add('text-bg-success');
+      else tempNode.querySelector('.card-body').classList.add('text-bg-danger');
+      tempNode.querySelector('.card-title').classList.add('text-dark');
+      tempNode.querySelector('.tpr').classList.add('text-dark');
+      tempNode.querySelector('.fpr').classList.add('text-dark');
+    } else {
+      tempNode.querySelector('.card-body').style.backgroundColor = this.variables[type][value].color;
+      tempNode.querySelector('.card-title').classList.add('text-black');
+      tempNode.querySelector('.tpr').classList.add('text-black');
+      tempNode.querySelector('.fpr').classList.add('text-black');
+    }
 
-    // FIXME: Get the effect/aroma icon.
-    tempNode.querySelector('img').src = `https://cannlytics.com/static/website/images/emojies/${value}.svg`;
+    // Get the effect/aroma icon.
+    tempNode.querySelector('img').src = this.variables[type][value].icon_url;
     tempNode.querySelector('img').alt = `${name}`;
     tempNode.querySelector('.card-title').textContent = capitalize(name);
-    // tempNode.querySelector('.tpr').textContent = modelStats['true_positive_rate'][value];
-    // tempNode.querySelector('.fpr').textContent = modelStats['false_positive_rate'][value];
 
+    // Get the model statistics.
+    // FIXME:
+    let tpr = 0 ; let fpr = 0;
+    try {
+      tpr = (modelStats[value]['true_positive_rate'] * 100).toFixed(2);
+      fpr = (modelStats[value]['false_positive_rate'] * 100).toFixed(2);
+    } catch(error) {
+      tpr = (modelStats['true_positive_rate'][value] * 100).toFixed(2);
+      fpr = (modelStats['false_positive_rate'][value] * 100).toFixed(2);
+    }
+    tempNode.querySelector('.tpr').textContent = `TPR: ${tpr}%`;
+    tempNode.querySelector('.fpr').textContent = `FPR: ${fpr}%`;
+
+    // Add the card to the UI.
     tempNode.classList.remove('d-none');
     docFrag.appendChild(tempNode);
-    document.getElementById(listId).appendChild(docFrag);
+    document.getElementById(`predicted-${type}`).appendChild(docFrag);
+  },
+
+
+  renderPlaceholder(type) {
+    /**
+     * Render a placeholder for no effects or aromas.
+     */
+    const docFrag = document.createDocumentFragment();
+    const tempNode = document.getElementById('effect-placeholder-card').cloneNode(true);
+    tempNode.querySelector('.card-title').textContent = `No Predicted ${capitalize(type)}`;
+    tempNode.querySelector('.card-note').textContent = `Recommend ${type} below.`;
+    tempNode.classList.remove('d-none');
+    tempNode.id = `${type}-placeholder`;
+    docFrag.appendChild(tempNode);
+    document.getElementById(`predicted-${type}`).appendChild(docFrag);
   },
 
 
@@ -216,8 +276,7 @@ export const stats = {
      * Save the model predictions.
      */
 
-    // TODO: Implement.
-    console.log('Save predictions...');
+    // TODO: Implement: Export results to .xlsx and a .pdf
   },
 
 
@@ -225,11 +284,7 @@ export const stats = {
     /**
      * Share the model predictions.
      */
-
-    // TODO: Implement.
-
-    // TODO: Show notification.
-
+    // TODO: Implement: Copy URL to clipboard?
   },
 
 
@@ -237,17 +292,20 @@ export const stats = {
     /**
      * Select an actual effect.
      */
-    console.log('Selected:', type, input);
-    const id = `actual-${type}-${input.value}`;
+    const value = input.value;
+    const id = `actual-${type}-${value}`;
     const docFrag = document.createDocumentFragment();
     const tempNode = document.getElementById('actual-effect-template').cloneNode(true);
-    console.log(tempNode);
-    const name = input.value.replace('effect_', '').replace('aroma_', '').replace('_', '');
+    const name = value.replace('effect_', '').replace('aroma_', '').replace('_', ' ');
     tempNode.classList.remove('d-none');
-    // TODO: If it's a positive effect, then color green (success).
-    // If it's a negative effect then color red (danger).
-    // If it's an aroma then color based on the aroma's assigned color.
-    tempNode.classList.add('text-bg-success');
+    if (type === 'effect') {
+      const { positive } = this.variables[`${type}s`][value];
+      if (positive) tempNode.classList.add('text-bg-success');
+      else tempNode.classList.add('text-bg-danger');
+    } else {
+      tempNode.style.backgroundColor = this.variables[`${type}s`][value].color;
+      tempNode.querySelector('.badge-text').classList.add('text-black');
+    }
     tempNode.id = id;
     tempNode.querySelector('.badge-text').textContent = capitalize(name);
     tempNode.querySelector('.btn').onclick = function() {
@@ -315,7 +373,8 @@ export const stats = {
 
     // TODO: Clean the lab results if necessary.
 
-    // TODO: Populate the form with the lab results.
+    // Populate the form with the lab results.
+    // renderLabResultsForm(results);
 
   },
 
@@ -328,23 +387,29 @@ export const stats = {
      * 3. Add the rating to the input.
      */
     const boxes = document.querySelectorAll('.btn-scale');
-    boxes.forEach(box => {
-      box.classList.remove('border-dark');
-    });
+    boxes.forEach(box => { box.classList.remove('border-dark'); });
     el.classList.add('border-dark');
     const value = parseInt(el.textContent);
     document.getElementById('prediction-rating').value = value;
   },
 
 
-  
-
-
-  renderStrainData() {
+  findSimilarStrains(sample) {
     /**
-     * Render a strain's lab results and predicted effects + aromas.
+     * Find the most similar strains by given effects.
      */
-    // TODO: Implement.
+    const candidates = {};
+
+    // TODO: Get strains for each effect and aroma.
+    sample.predicted_effects.forEach(async (effect) => {
+      const strains = await getStrains(query = `?effects=${effect}`);
+
+      // TODO: Keep list of predicted effects and aromas for each strain.
+
+    });
+
+    // TODO: Return candidates with the most effect and aroma matches.
+  
   },
 
 

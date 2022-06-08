@@ -1,37 +1,44 @@
 <!doctype html>
 <html>
 <!--
-  Effects List | Cannlytics Website
+  Effects and Aromas List | Cannlytics Website
   Copyright (c) 2022 Cannlytics
 
   Authors: Keegan Skeate <https:github.com/keeganskeate>
   Created: 6/5/2022
-  Updated: 6/6/2022
+  Updated: 6/7/2022
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-  Description: Display dredicted effects and model summary statistics.
--->
-{% load static %}
-<div id="{{ list_id }}" class="row row-cols-1 row-cols-md-3 g-4">
-
-  <!-- TODO: Iteratively render effects, symptoms, and aromas
+  Description: Iteratively render effects, symptoms, and aromas
     1. Use the effect/aroma icon.
     2. Use the effect/aroma name for the title.
     3. Get the model statistics for each effect/aroma.
     4. Get colors for aromas.
-  -->
+-->
+{% load static %}
 
-</div>
+<!-- Effect / Aroma List -->
+<div id="{{ list_id }}" class="row row-cols-1 row-cols-md-3 g-4"></div>
 
 <!-- Card Template -->
-<!-- TODO: Use aroma color for the background, -->
 <div id="effect-card" class="col-md-3 mb-3 d-none">
-  <div class="card no-border h-100">
+  <div class="card bg-transparent no-border h-100">
     <div class="card-body bg-opacity-25 rounded-5 text-dark text-center p-0 pb-2">
       <img src="{% static "website/images/emojies/happy.svg" %}" class="" alt="Effect image." height="75px">
       <h5 class="card-title serif fw-bold">Happy</h5>
-      <small class="tpr text-muted">TPR: xx.xx%</small><br>
-      <small class="fpr text-muted">FPR: xx.xx%</small>
+      <small class="card-note tpr">TPR: xx.xx%</small><br>
+      <small class="card-note fpr">FPR: xx.xx%</small>
+    </div>
+  </div>
+</div>
+
+<!-- Placeholder Template -->
+<div id="effect-placeholder-card" class="col-md-3 mb-3 d-none">
+  <div class="card bg-transparent no-border h-100">
+    <div class="card-body bg-opacity-25 text-bg-secondary rounded-5 text-dark text-center p-0 pb-2">
+      <img src="{% static "website/images/emojies/question-mark.svg" %}" class="" alt="Question mark." height="75px">
+      <h5 class="card-title serif fw-bold"></h5>
+      <small class="card-note"></small>
     </div>
   </div>
 </div>

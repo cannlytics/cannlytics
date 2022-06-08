@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <contact@cannlytics.com>
   Created: 5/14/2022
-  Updated: 6/6/2022
+  Updated: 6/7/2022
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
   TODO:
@@ -17,13 +17,13 @@
 
     ✓ Let the user search strains.
     
-    - Let the user load strain averages.
+    ✓ Let the user load strain averages.
 
-    - Display predictions with colors, icons, and model stats.
+    ✓ Display predictions with colors, icons, and model stats.
 
-    - Let the user save / share the predictions.
+    - Optional: Let the user save / share the predictions.
 
-    ✓ If the user is signed in, let them post actual effects and aromas.
+    ✓ If the user is signed in, then let them post actual effects and aromas.
 
     ✓ Let the user clear the form.
 
@@ -79,9 +79,13 @@ body.dark .autocomplete-active {
   background-color: var(--bs-gray-100);
   border-left: 0.25rem solid var(--bs-gray-300);
 }
+body.dark .callout {
+  background-color: var(--bs-gray-800);
+  border-left: 0.25rem solid var(--bs-gray-600);
+}
 .callout-info {
-  background-color: rgba(var(--bs-info-rgb), .075);
-  border-left: 0.25rem solid rgba(var(--bs-info-rgb), .5);
+  background-color: rgba(var(--bs-info-rgb), .075) !important;
+  border-left: 0.25rem solid rgba(var(--bs-info-rgb), .5) !important;
 }
 .tooltip-inner {
   text-align: left;
@@ -402,14 +406,15 @@ body.dark .autocomplete-active {
     </div>
 
     <!-- Predictions -->
-    <div id="predictions" class="card bg-light mt-5"><!-- d-none -->
+    <div id="predictions" class="card bg-light mt-5 d-none">
 
       <!-- Prediction options -->
       <div class="card-header d-flex align-items-center justify-content-between bg-dark">
         <div><h3 class="text-dark my-0">Predictions</h3></div>
         <div class="d-flex align-items-center">
 
-          <!-- Share predictions -->
+          {% comment %}
+          <!-- TODO: Share predictions -->
           <button
             id="share-button"
             class="btn btn-sm-light btn-md-light text-dark serif"
@@ -419,8 +424,10 @@ body.dark .autocomplete-active {
             {% icon 'share-2' width="16px" height="16px" class="me-1" %}
             Share
           </button>
+          {% endcomment %}
 
-          <!-- Save and export predictions -->
+          {% comment %}
+          <!-- TODO: Save and export predictions -->
           <button
             type="button"
             class="btn btn-sm-light btn-md-light text-dark serif ms-2"
@@ -429,6 +436,7 @@ body.dark .autocomplete-active {
             {% icon 'save' width="16px" height="16px" class="me-1" %}
             Save
           </button>
+          {% endcomment %}
 
           <!-- Close predictions -->
           <div class="ms-2">
@@ -544,7 +552,7 @@ body.dark .autocomplete-active {
                 >
                   Actual Effects
                 </label>
-                <!-- FIXME: Use an autocomplete instead. -->
+                <!-- TODO: Use an autocomplete instead. -->
                 {% comment %} <div class="autocomplete" style="width:300px;">
                   <input
                     type="text"
@@ -594,7 +602,7 @@ body.dark .autocomplete-active {
                 >
                   Actual Aromas
                 </label>
-                <!-- FIXME: Use an autocomplete instead. -->
+                <!-- TODO: Use an autocomplete instead. -->
                 <select
                   id="actual-aromas-selection"
                   class="app-action form-select form-select-sm btn-sm-light serif"
@@ -705,11 +713,11 @@ body.dark .autocomplete-active {
 
     <!-- Model information -->
     <p class="mt-0 lh-md mt-5" style="max-width:560px;">
-      <small><b class="serif">Notes:</b>
+      <small><b class="serif text-dark">Notes:</b>
       For technical details of the model, please see the
       <a href="https://github.com/cannlytics/cannlytics/tree/main/ai/inference/effects-and-aromas"><small>documentation</small></a>.
       Please remember that the predictions are simply statistics are
-      should not be mistaken as claims. At this time, predictions are only valid for flower samples, but please stay tuned for predictions for additional product types.
+      should not be mistaken as claims. At this time, predictions are only valid for flower samples, but please stay tuned for predictions for additional product types. The model statistics TPR, true positive rate, and FPR, false positive rate, are displayed to convey the uncertainty of the predictions.
       </small>
     </p>
 
@@ -926,12 +934,15 @@ body.dark .autocomplete-active {
     // Initialize the strain autocomplete.
     cannlytics.stats.getStrains();
 
+    // Get the model variables.
+    cannlytics.stats.getVariables('public/data/variables/effects_and_aromas');
+
     // Sort the effect and aroma selections.
     cannlytics.ui.sortSelectOptions('actual-effects-selection');
     cannlytics.ui.sortSelectOptions('actual-aromas-selection');
 
     // Enable tooltips.
-  cannlytics.ui.enableTooltips();
+    cannlytics.ui.enableTooltips();
   
   </script>
 {% endblock %}
