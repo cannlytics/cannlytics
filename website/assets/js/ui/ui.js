@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 5/2/2021
- * Updated: 12/16/2021
+ * Updated: 6/6/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { Modal, Popover, Tooltip } from 'bootstrap';
@@ -36,6 +36,18 @@ export function addSelectOptions(id, options) {
     newOption.innerHTML = option.label;
     select.appendChild(newOption);
   });
+}
+
+export function sortSelectOptions(id) {
+  /**
+   * Sort the options of a selection element given its ID.
+   * @param {String} id The element ID of a select in the UI.
+   */
+  const selectNode = document.getElementById(id);
+  const optionNodes = Array.from(selectNode.children);
+  const comparator = new Intl.Collator(document.documentElement.lang.slice(0, 2)).compare;
+  optionNodes.sort((a, b) => comparator(a.textContent, b.textContent));
+  optionNodes.forEach((option) => selectNode.appendChild(option));
 }
 
 export function getTheme() {
@@ -417,4 +429,5 @@ export const ui = {
   showLoadingButton,
   hideModal,
   showModal,
+  sortSelectOptions,
 };

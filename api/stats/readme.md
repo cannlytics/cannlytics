@@ -2,13 +2,13 @@
 
 Here you can find a brief introduction to the `/stats` endpoints.
 
-## Effects an Statistics
+## Effects and Aromas Statistics
 
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
   <img width="240px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30">
 </div>
 
-The effects endpoint is used to predict effects and aromas that may be reported for a given product given its lab results. For technical details of the model, please see the AI documentation. In general, there are 3 main actions:
+The `/stats/effects` endpoint is used to predict effects and aromas that may be reported for a given product given its lab results. For technical details of the model, please see the AI documentation. In general, there are 3 main actions:
 
 1. You can use the model to predict potentially reported effects and aromas for any cannabis flower for which you have lab results. Simply post your lab results to the `/stats/effects` endpoint, specifying your model if you desire, and you will receive effect and aroma predictions.
 
@@ -22,54 +22,82 @@ You can substitute training data, for strain reviews or lab results, as you see 
 
 Below are the parameters that you can pass and examples of how you can format a request body.
 
+<!-- FIXME: -->
 | Parameter | Options | Example |
 |-----------|---------|---------|
 | `model` | `full` (default), `cannabinoid_only`, `terpene_only`, `totals`, `simple` | `?model=simple` |
-| `train` | URL to training data | `?train=https://cannlytics.page.link/effects`  |
+<!-- | `train` | URL to training data | `?train=https://cannlytics.page.link/effects`  |
 | `predict` | URL to prediction data | `?predict=https://cannlytics.page.link/effects`  |
 | `pessimistic` | `true` (default), `false` | `?pessimistic=false` |
-| `strain` | The name of a strain for which you're seeing reported effects and flavors. | `?strain=Super+Silver+Haze`
+| `strain` | The name of a strain for which you're seeing reported effects and flavors. | `?strain=Super+Silver+Haze` -->
 
 ### Examples
 
-Here are a few quick examples in Python:
+Below are a handful of examples, written in Python, that can be generalized to your favorite programming language.
 
-<!-- FIXME: -->
 ```py
 import requests
+import pandas as pd
 
-# Safely pass your API key.
-url = 'https://cannltics.com/api/stats/effects'
-auth = {'Authorization': 'Bearer %s' % API_KEY}
+BASE = 'https://cannlytics.com/api'
 
-# Get effects given lab results.
-params = {'total_cbd': 0.04, 'total_thc': 20}
-response = requests.get(url, params=params, auth=auth)
+# Get statistics for the `full` model.
+url = f'{BASE}/stats/effects'
+params = {'model': 'full'}
+response = requests.get(url, params=params)
+model_stats = response.json()['data']
+
+# Post lab results to get potential effects and aromas.
+json = {
+    'model': 'simple',
+    'samples': [
+        {'total_cbd': 1.0, 'total_thc': 18.0},
+        {'total_cbd': 1.0, 'total_thc': 20.0},
+        {'total_cbd': 1.0, 'total_thc': 30.0},
+        {'total_cbd': 7.0, 'total_thc': 7.0},
+    ]
+}
+url = f'{BASE}/stats/effects'
+response = requests.post(url, json=json)
 data = response.json()['data']
 
-# Post actual aromas and effects.
-params = {
-    'strain_name': 'Golden Goat',
-    'effects': ['Bliss'],
-    'aromas': ['Sweet', 'Sassy']
+# Post actual aromas and effects, rating the usefulness of the prediction.
+json = {
+    'samples': [
+        {
+            'prediction_id': '01g4g8apexj1r426rbkcnfdjt9',
+            'strain_name': 'Test Strain',
+            'effects': ['happy', 'focused'],
+            'aromas': ['citrus', 'pine'],
+            'rating': 10,
+        },
+    ]
 }
-requests.post(url, params=params, auth=auth)
+url = f'{BASE}/stats/effects/actual'
+response = requests.post(url, json=json)
+message = response.json()['message']
 ```
 
-<!-- TODO: Return Type 1 or type 2 errors? -->
-
-A typical response includes `potential_aromas`, `potential_effects`, and `model_stats` which contains summary statistics for each aroma and effect:
+A typical response includes a list of `samples` with `predicted_aromas` and `predicted_effects`. There are also `model_stats`, summary statistics for each aroma and effect, and a `prediction_id` for each sample that can be used for reporting actual effects and aromas.
 
 ```json
 [{
-  "potential_aromas": [],
-  "potential_effects": [],
   "model": "full",
-  "model_stats": {}
+  "model_stats": {},
+  "samples" [
+    {
+      "lab_results": {},
+      "predicted_aromas": [],
+      "predicted_effects": [],
+      "predicted_at": "2022-06-03T04:20:00",
+      "prediction_id": "01g4g8apexj1r426rbkcnfdjt9",
+      "strain_name": "",
+    }
+  ]
 }]
 ```
 
-> At this time, the official Cannlytics effects model has only been trained on flower data.
+> At this time, the official Cannlytics effects model has only been trained on flower data and the model would not make sense for concentrates, edibles, etc..
 
 ### Variables
 

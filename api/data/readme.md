@@ -80,7 +80,7 @@ Any of the analytes below can be used to query strains by their average concentr
 
 ### Examples
 
-Below are a handful of examples written in Python that can be generalized to your favorite programming language.
+Below are a handful of examples, written in Python, that can be generalized to your favorite programming language.
 
 ```py
 import requests

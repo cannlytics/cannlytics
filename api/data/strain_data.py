@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/17/2022
-Updated: 6/1/2022
+Updated: 6/7/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with cannabis strain data.
@@ -97,7 +97,7 @@ def strain_data(request, strain_name=None):
                 limit = int(limit)
 
             # Allow user to specify whether to include all (default) or any.
-            # FIXME:
+            # FIXME: Currently any matches are returned, all matches would be nice.
             operation = 'array_contains_any'
             any = request.query_params.get('any')
             if any:
@@ -111,7 +111,7 @@ def strain_data(request, strain_name=None):
                 outcomes = [f'effect_{x.replace(" ", "_").lower()}' for x in json.loads(effects)]
                 print('Effects:', outcomes)
                 filters.append({
-                    'key': 'potential_effects',
+                    'key': 'predicted_effects',
                     'operation': operation,
                     'value': outcomes,
                 })
@@ -119,14 +119,14 @@ def strain_data(request, strain_name=None):
                 outcomes = [f'aroma_{x.replace(" ", "_").lower()}' for x in json.loads(aromas)]
                 print('Aromas:', outcomes)
                 filters.append({
-                    'key': 'potential_aromas',
+                    'key': 'predicted_aromas',
                     'operation': operation,
                     'value': outcomes,
                 })
 
             # Allow user to query by cannabinoid / terpene concentrations.
             # Handles open and closed ranges for a single analyte.
-            # FIXME:
+            # FIXME: This doesn't appear to work with 2 operations.
             for param in request.query_params:
                 if param in ANALYTES:
                     order_by = param

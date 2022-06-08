@@ -102,8 +102,8 @@ material = {
     },
     "homepage": {
         "hero": {
-            "title": "Cannabis Analytics for the 21st Century",
-            "message": "Get superpowers with open-source cannabis analytics made with love ❤️‍🔥!",
+            "title": "Simple, Easy Cannabis Analytics",
+            "message": "Get superpowers with open-source cannabis analytics made with 💖",
             "image": "website/images/engine_icons/space_station.svg",
             "primary_action": "Get Started 🌱",
             "primary_action_url": "https://docs.cannlytics.com",
@@ -301,12 +301,17 @@ page_data = {
             }
         ],
     },
-    "checkout": {"documents":[{"name": "paypal", "ref": "credentials/paypal"}]},
+    "checkout": {"documents": [{"name": "paypal", "ref": "credentials/paypal"}]},
     "contributors": {
         "collections": [{"name": "contributors", "ref": "public/contributors/contributor_data"}],
     },
+    "effects": {
+        "documents": [
+            {"name": "variables", "ref": "public/data/variables/effects_and_aromas"}
+        ]
+    },
     "map": {
-        "documents":[{"name": "google", "ref": "credentials/google"}],
+        "documents": [{"name": "google", "ref": "credentials/google"}],
     },
     "market": {
         "collections": [
@@ -351,7 +356,7 @@ page_data = {
         }],
     },
     "subscriptions": {
-        "documents":[{"name": "paypal", "ref": "credentials/paypal"}],
+        "documents": [{"name": "paypal", "ref": "credentials/paypal"}],
         "collections": [{
             "name": "sponsorships",
             "ref": "public/subscriptions/sponsorships",

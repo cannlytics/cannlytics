@@ -77,6 +77,7 @@ def effects_stats(request, strain=None):
 
         # 2. Predict samples.
         x = pd.DataFrame(data['samples'])
+        x.fillna(0, inplace=True)
         prediction = predict_stats_model(models, x, thresholds)
 
         # 3. Format, save, and return the prediction and model stats.
@@ -92,8 +93,8 @@ def effects_stats(request, strain=None):
             ids.append(prediction_id)
             samples.append({
                 'lab_results': lab_results[i],
-                'potential_effects': effects,
-                'potential_aromas': aromas,
+                'predicted_effects': effects,
+                'predicted_aromas': aromas,
                 'predicted_at': timestamp,
                 'prediction_id': prediction_id,
                 'strain_name': row.get('strain_name'),
@@ -165,12 +166,12 @@ def record_effects(request):
         aromas = ['aroma_' + x.lower().replace(' ', '_') for x in aromas]
         predicted_at = _id.timestamp().datetime
         logs.append({
+            'aromas': aromas,
+            'effects': effects,
             'created_at': datetime.now().isoformat(),
             'predicted_at': predicted_at.isoformat(),
             'prediction_id': prediction_id,
-            'effects': effects,
-            'aromas': aromas,
-            'rating': sample.get('rating'),
+            'prediction_rating': sample.get('prediction_rating'),
         })
         refs.append(f'models/effects/model_actuals/{prediction_id}')
     
