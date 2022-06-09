@@ -396,7 +396,6 @@ export const stats = {
     // TODO: Get strains for each effect and aroma.
     sample.predicted_effects.forEach(async (effect) => {
       const strains = await getStrains(query = `?effects=${effect}`);
-
       // TODO: Keep list of predicted effects and aromas for each strain.
 
     });
