@@ -33,7 +33,7 @@ BASE = 'https://cannlytics.com/api' # Uncomment for production.
 # }
 
 #-----------------------------------------------------------------------
-# Get model statistics..
+# Get model statistics.
 #-----------------------------------------------------------------------
 
 # Get statistics for the `full` model.

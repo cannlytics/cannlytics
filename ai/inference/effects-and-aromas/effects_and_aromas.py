@@ -59,6 +59,7 @@ from cannlytics.utils import snake_case
 from cannlytics.utils.data import (
     combine_columns,
     nonzero_columns,
+    nonzero_rows,
     sum_columns,
 )
 from cannlytics.utils.files import download_file_from_url, unzip_files
@@ -337,8 +338,8 @@ if __name__ == '__main__':
     # Upload the strain data to Firestore.
     docs = strain_data.to_dict(orient='records')
     refs = [f'public/data/strains/{x}' for x in strain_data.index]
-    # update_documents(refs, docs, database=db)
-    # print('Updated %i strains.' % len(docs))
+    update_documents(refs, docs, database=db)
+    print('Updated %i strains.' % len(docs))
 
     # Upload individual lab results for each strain.
     # Future work: Format the lab results as metrics with CAS, etc.
@@ -347,8 +348,8 @@ if __name__ == '__main__':
     results['lab_name'] = 'PSI Labs'
     docs = results.to_dict(orient='records')
     refs = [f'public/data/strains/{x[0]}/strain_lab_results/lab_result_{x[1]}' for x in results[['strain_name', 'id']].values]
-    # update_documents(refs, docs, database=db)
-    # print('Updated %i strain lab results.' % len(docs))
+    update_documents(refs, docs, database=db)
+    print('Updated %i strain lab results.' % len(docs))
 
     #-------------------------------------------------------------------
     # Curate the strain review data.
@@ -358,8 +359,8 @@ if __name__ == '__main__':
     print('Curating reviews...')
     reviews = curate_strain_reviews(DATA_DIR, strain_data)
 
-    # # Combine `effect_anxiety` and `effect_anxious`.
-    # reviews = combine_columns(reviews, 'effect_anxious', 'effect_anxiety')
+    # Combine `effect_anxiety` and `effect_anxious`.
+    reviews = combine_columns(reviews, 'effect_anxious', 'effect_anxiety')
 
     # # Optional: Save and read back in the reviews.
     today = datetime.now().isoformat()[:10]
@@ -474,7 +475,7 @@ if __name__ == '__main__':
     }
 
     # Use the data to create an effect prediction model.
-    model_name = 'simple'
+    model_name = 'full'
     aromas = [x for x in reviews.columns if x.startswith('aroma')]
     effects = [x for x in reviews.columns if x.startswith('effect')]
     Y = reviews[aromas + effects]
@@ -509,25 +510,25 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------
 
     # Optional: Save the official strain predictions.
-    # predictions = predict_stats_model(effects_model, X, model_stats['threshold'])
-    # predicted_effects = predictions.apply(nonzero_rows, axis=1)
-    # strain_effects = predicted_effects.to_frame()
-    # strain_effects['strain_name'] = reviews['strain_name']
-    # strain_effects = strain_effects.groupby('strain_name').first()
-    # refs = [f'public/data/strains/{x}' for x in strain_effects.index]
-    # docs = [{
-    #     'predicted_effects': [y for y in x[0] if y.startswith('effect')],
-    #     'predicted_aromas': [y for y in x[0] if y.startswith('aroma')],
-    # } for x in strain_effects.values]
-    # for i, doc in enumerate(docs):
-    #     stats = {}
-    #     outcomes = doc['predicted_effects'] + doc['predicted_aromas']
-    #     for outcome in outcomes:
-    #         stats[outcome] = model_stats.loc[outcome].to_dict()
-    #     docs[i]['model_stats'] = stats
-    #     docs[i]['model'] = model_name
-    # update_documents(refs, docs)
-    # print('Updated %i strain predictions.' % len(docs))
+    predictions = predict_stats_model(effects_model, X, model_stats['threshold'])
+    predicted_effects = predictions.apply(nonzero_rows, axis=1)
+    strain_effects = predicted_effects.to_frame()
+    strain_effects['strain_name'] = reviews['strain_name']
+    strain_effects = strain_effects.groupby('strain_name').first()
+    refs = [f'public/data/strains/{x}' for x in strain_effects.index]
+    docs = [{
+        'predicted_effects': [y for y in x[0] if y.startswith('effect')],
+        'predicted_aromas': [y for y in x[0] if y.startswith('aroma')],
+    } for x in strain_effects.values]
+    for i, doc in enumerate(docs):
+        stats = {}
+        outcomes = doc['predicted_effects'] + doc['predicted_aromas']
+        for outcome in outcomes:
+            stats[outcome] = model_stats.loc[outcome].to_dict()
+        docs[i]['model_stats'] = stats
+        docs[i]['model'] = model_name
+    update_documents(refs, docs)
+    print('Updated %i strain predictions.' % len(docs))
 
     #-------------------------------------------------------------------
     # How to use the model in the wild: `full` model.

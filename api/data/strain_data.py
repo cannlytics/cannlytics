@@ -80,6 +80,11 @@ def strain_data(request, strain_name=None):
     if request.method == 'GET':
 
         # Get a specific observation.
+        if strain_name is None:
+            strain_name = request.query_params.get(
+                'strain',
+                request.query_params.get('strain_name'),
+            )
         if strain_name is not None:
             strain_name = strain_name.replace('+', ' ')
             data = get_document(f'{collection}/{strain_name}')
@@ -109,7 +114,6 @@ def strain_data(request, strain_name=None):
             aromas = request.query_params.get('aromas')
             if effects:
                 outcomes = [f'effect_{x.replace(" ", "_").lower()}' for x in json.loads(effects)]
-                print('Effects:', outcomes)
                 filters.append({
                     'key': 'predicted_effects',
                     'operation': operation,
@@ -117,7 +121,6 @@ def strain_data(request, strain_name=None):
                 })
             elif aromas:
                 outcomes = [f'aroma_{x.replace(" ", "_").lower()}' for x in json.loads(aromas)]
-                print('Aromas:', outcomes)
                 filters.append({
                     'key': 'predicted_aromas',
                     'operation': operation,
