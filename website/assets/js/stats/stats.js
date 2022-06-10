@@ -4,17 +4,18 @@
  * 
  * Authors: Keegan Skeate <contact@cannlytics.com>
  * Created: 5/31/2022
- * Updated: 6/7/2022
+ * Updated: 6/9/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
 import { authRequest, capitalize, getUrlParameter, showNotification } from '../utils.js';
 import { getDocument } from '../firebase.js';
-import { navigationHelpers, hideLoadingButton, showLoadingButton } from '../ui/ui.js';
+import { hideLoadingButton, showLoadingButton } from '../ui/ui.js';
 import { autocomplete } from '../ui/autocomplete.js';
 
 export const stats = {
 
   // Statistics state variables.
+  model: 'full',
   modelStats: {},
   strains: {},
   variables: {},
@@ -24,19 +25,21 @@ export const stats = {
     /**
      * Initialize the model.
      */
-    let model = getUrlParameter('model') || 'full';
-    model = model.replace('-', '_');
-    document.getElementById('model-selection').value = model;
-    document.getElementById(`${model}-fields`).classList.remove('d-none');
+    this.model = getUrlParameter('model') || 'full';
+    this.model = this.model.replace('-', '_');
+    document.getElementById('model-selection').value = this.model;
+    document.getElementById(`${this.model}-fields`).classList.remove('d-none');
+    document.getElementById('strain-name').value = getUrlParameter('strain') || getUrlParameter('strain_name');
   },
 
 
   changeField(field, type) {
     /**
      * Change a field in the form.
+     * @param {Element} field An input field.
+     * @param {String} type The type of input; `'input'` or `'range'`.
      */
-    const model = document.getElementById('model-selection').value;
-    const rangeId = `${type}-${model}-${field.name}`;
+    const rangeId = `${type}-${this.model}-${field.name}`;
     document.getElementById(rangeId).value = field.value;
   },
 
@@ -44,11 +47,12 @@ export const stats = {
   changeModel(select) {
     /**
      * Change the prediction model, updating the user interface.
+     * @param {Element} select A selection element.
      */
-    const model = select.value;
+    this.model = select.value;
     const boxes = document.querySelectorAll('.stats-model');
     boxes.forEach(box => { box.classList.add('d-none'); });
-    document.getElementById(`${model}-fields`).classList.remove('d-none');
+    document.getElementById(`${this.model}-fields`).classList.remove('d-none');
   },
 
 
@@ -64,8 +68,7 @@ export const stats = {
     /**
      * Get the statistics for a given statistical model.
      */
-    const model = document.getElementById('model-selection').value;
-    const response = await authRequest(`/api/stats/effects?model=${model}`);
+    const response = await authRequest(`/api/stats/effects?model=${this.model}`);
     this.modelStats = response.data;
   },
 
@@ -73,11 +76,27 @@ export const stats = {
   async getVariables(ref) {
     /**
      * Get variable definitions and save them to local storage.
+     * If there are compound query params, then they are parsed into the lab
+     * results form. If the user passes a `predict` parameter, then predictions
+     * are retrieved.
      * @param {String} ref The reference to the variable definitions.
      * @returns {Object} The variable definitions.
      */
     const data = await getDocument(ref);
     this.variables = data;
+    const fields = this.variables.variables[this.model];
+    fields.forEach((field) => {
+      const { key } = field;
+      let value = getUrlParameter(key);
+      console.log(value);
+      if (value) {
+        // value = value.toFixed(2);
+        document.getElementById(`input-${ this.model }-${ key }`).value = value;
+        document.getElementById(`range-${ this.model }-${ key }`).value = value;
+      }
+    });
+    const predict = getUrlParameter('predict');
+    if (predict) this.getPredictions();
   },
 
 
@@ -121,6 +140,7 @@ export const stats = {
   async getStrains(query = '') {
     /**
      * Get cannabis strains from the API.
+     * @param {String} query An optional API query string, e.g. `'?limit=420'`.
      */
     let url = `/api/data/strains${query}`;
     const response = await authRequest(url);
@@ -150,15 +170,15 @@ export const stats = {
   renderLabResultsForm(results) {
     /**
      * Render given lab results into the lab results form.
+     * @param {Object} results An object of lab results.
      */
-    const model = document.getElementById('model-selection').value;
-    const fields = this.variables.variables[model];
+    const fields = this.variables.variables[this.model];
     fields.forEach((field) => {
       const { key } = field;
-      let value = results[key]
+      let value = results[key];
       if (value) value = value.toFixed(2);
-      document.getElementById(`input-${ model }-${ key }`).value = value;
-      document.getElementById(`range-${ model }-${ key }`).value = results[key];
+      document.getElementById(`input-${ this.model }-${ key }`).value = value;
+      document.getElementById(`range-${ this.model }-${ key }`).value = value;
     });
   },
 
@@ -166,6 +186,8 @@ export const stats = {
   renderPredictionForm(prediction, modelStats) {
     /**
      * Render the effects and aromas of a prediction in the prediction form.
+     * @param {Object} prediction An object of model predictions.
+     * @param {Object} modelStats An object of model statistics.
      */
     document.getElementById('predicted-effects').innerHTML = '';
     document.getElementById('predicted-aromas').innerHTML = '';
@@ -183,6 +205,9 @@ export const stats = {
   renderEffect(value, type, modelStats) {
     /**
      * Render effect in the UI.
+     * @param {String} value The key of the effect or aroma to render.
+     * @param {String} type The type of values, `'effects'` or `'aromas'`.
+     * @param {Object} modelStats An object of model statistics.
      */
 
     // Clone the card template.
@@ -236,6 +261,7 @@ export const stats = {
   renderPlaceholder(type) {
     /**
      * Render a placeholder for no effects or aromas.
+     * @param {String} type The type of placeholder, `'effects'` or `'aromas'`.
      */
     const docFrag = document.createDocumentFragment();
     const tempNode = document.getElementById('effect-placeholder-card').cloneNode(true);
@@ -284,6 +310,7 @@ export const stats = {
   selectActual(type, input) {
     /**
      * Select an actual effect.
+     * @param {String} type The type of effect, , `'effect'` or `'aroma'`.
      */
     const value = input.value;
     const id = `actual-${type}-${value}`;
@@ -378,6 +405,7 @@ export const stats = {
      * 1. Remove outline from all ratings.
      * 2. Add outline to the option that the user selected.
      * 3. Add the rating to the input.
+     * @param {Element} el The button element selected.
      */
     const boxes = document.querySelectorAll('.btn-scale');
     boxes.forEach(box => { box.classList.remove('border-dark'); });
@@ -390,6 +418,7 @@ export const stats = {
   findSimilarStrains(sample) {
     /**
      * Find the most similar strains by given effects.
+     * @param {Object} sample An object of sample data.
      */
     const candidates = {};
 

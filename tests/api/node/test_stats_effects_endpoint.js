@@ -9,8 +9,9 @@
  */
 const axios = require('axios');
 
-// Define the base URL
+// Define the base URL.
 const base = 'https://cannlytics.com/api';
+
 
 // Get a model's statistics.
 params = { model: 'full' };
@@ -41,6 +42,7 @@ axios.post(`${base}/stats/effects`, data)
   .catch(error => {
     console.log(error);
   });
+
 
 // Post lab results to get potential effects and aromas (full model).
 var data = {
