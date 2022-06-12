@@ -88,13 +88,13 @@ export const stats = {
     fields.forEach((field) => {
       const { key } = field;
       let value = getUrlParameter(key);
-      console.log(value);
       if (value) {
         // value = value.toFixed(2);
         document.getElementById(`input-${ this.model }-${ key }`).value = value;
         document.getElementById(`range-${ this.model }-${ key }`).value = value;
       }
     });
+    // TODO: Handle strain names in URL?
     const predict = getUrlParameter('predict');
     if (predict) this.getPredictions();
   },
@@ -134,6 +134,8 @@ export const stats = {
     // Remove loading wand from button.
     hideLoadingButton('predict-button');
 
+    // TODO: Update the URL so the user can easily copy and return.
+
   },
 
 
@@ -161,6 +163,7 @@ export const stats = {
         matched = true;
         this.renderLabResultsForm(strain);
         this.renderPredictionForm(strain, strain.model_stats);
+        // TODO: Update the URL so the user can easily copy and return.
       }
     });
     if (!matched) showNotification('No Strain Records', 'No strain records at this moment.', 'error');
