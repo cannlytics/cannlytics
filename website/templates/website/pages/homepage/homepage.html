@@ -68,7 +68,13 @@
 
 <!-- Homepage JavaScript -->
 {% block page_js %}
+  <script src="{% static "website/js/particles.js" %}"></script>
   <script>
+
+    // Initialize particles.
+    particlesJS.load('particles-js', './static/website/js/particles.json', function() {
+      console.log('callback - particles.js config loaded');
+    });
 
     function CopyToClipboard(id) {
       /**

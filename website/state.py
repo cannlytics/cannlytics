@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/15/2020
-Updated: 4/10/2022
+Updated: 6/21/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # pylint:disable=line-too-long
@@ -102,9 +102,10 @@ material = {
     },
     "homepage": {
         "hero": {
-            "title": "Simple, Easy Cannabis Analytics",
-            "message": "Get superpowers with open-source cannabis analytics made with 💖",
-            "image": "website/images/engine_icons/space_station.svg",
+            "title": "Advanced Statistics and Cannabis Data",
+            "message": "Automated statistics and the finest curated data for your cannabis OP to push the bounds of what is possible. Open-source + open-data + 💖.",
+            "image": "website/images/engine_icons/space_cultivation.svg",
+            # "image": "website/images/decoration/data-pipeline.png",
             "primary_action": "Get Started 🌱",
             "primary_action_url": "https://docs.cannlytics.com",
             "secondary_action": "Sign Up 🚀",
@@ -346,6 +347,11 @@ page_data = {
     },
     "partners": {
         "collections": [{"name": "partners_list", "ref": "public/partners/partner_data"}],
+    },
+    "personality": {
+        "documents": [
+            {"name": "variables", "ref": "public/data/variables/personality_test"}
+        ]
     },
     "sponsors": {
         "collections": [{

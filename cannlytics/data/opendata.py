@@ -20,7 +20,6 @@ FIXME: SQL queries do not appear to work.
 import os
 import pandas as pd
 from requests import Session
-from simplejson import JSONDecodeError
 
 
 ENDPOINTS = {
@@ -109,7 +108,7 @@ class APIError(Exception):
         """
         try:
             return response.json()
-        except JSONDecodeError:
+        except:
             return response.text
 
 

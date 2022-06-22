@@ -6,4 +6,4 @@ Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2022
 Updated: 4/21/2022
 """
-from .opendata import CCC
+from .opendata import OpenData

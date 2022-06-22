@@ -26,14 +26,31 @@
 
   <ul class="mt-4" style="max-width:560px;">
 
-    <li>
-      <a href="{% url 'section' page='stats' section='effects'%}">
-        Effects and Aromas Model
+    <li class="mb-4">
+      <a href="{% url 'section' page='stats' section='effects'%}" class="text-dark">
+        <b class="serif">🦨 SkunkFx</b> - Effects and Aromas Prediction Model
       </a>
-      <p class="mt-1">
+      <p class="mt-1 lh-md">
         <small>
           The effects model is used to predict effects and aromas that
           may be reported for a given product given its lab results.
+        </small>
+      </p>
+    </li>
+
+    <li class="mb-3">
+      <a href="{% url 'section' page='stats' section='personality'%}" class="text-dark">
+        🎭 Big 5 Personality Test
+      </a>
+      <p class="mt-1 lh-md">
+        <small>
+          This test provides a score for each of the
+          five fundamental personality traits
+          generally agreed upon by psychologists.
+          The test uses public domain scales from the
+          International Personality Item Pool
+          to generate scores of the 5 traits, ranging from 0 to 1,
+          from 50 scaled questions.
         </small>
       </p>
     </li>

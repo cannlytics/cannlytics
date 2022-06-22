@@ -1,0 +1,473 @@
+<!doctype html>
+<html>
+<!--
+  Personality Test Page | Cannlytics Website
+  Copyright (c) 2022 Cannlytics
+
+  Authors: Keegan Skeate <contact@cannlytics.com>
+  Created: 6/20/2022
+  Updated: 6/21/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static icon %}
+{% block title %}Personality Test | Cannlytics{% endblock %}
+{% block material %}
+<section class="container mb-2 mt-5 markdown">
+  
+  <!-- Title -->
+  <div class="d-flex mt-4">
+    <nav
+      style="--bs-breadcrumb-divider: '>';"
+      aria-label="breadcrumb"
+    >
+      <ol class="breadcrumb bg-transparent p-0 mb-0">
+        <li class="breadcrumb-item fs-6 lh-sm">
+          <a
+            class="text-dark serif action"
+            href="{% url 'page' page='stats' %}"
+          >
+            Statistics
+          </a>
+        </li>
+        <li class="breadcrumb-item active fs-6 lh-sm text-dark serif" aria-current="page">
+          Personality Test
+        </li>
+      </ol>
+      <div>
+    </div>
+    </nav>
+  </div>
+
+  <!-- Personality Test Instructions -->
+  <div id="personality-test-instructions" class="row">
+    <div class="col-md-9">
+      <div class="card mt-3">
+        <div class="card-body bg-transparent">
+          <h4 class="text-dark serif mt-0 mb-2">
+            🎭 Big 5 Personality Test
+          </h4>
+          <p class="mt-1 text-dark lh-md w-75">
+            <small>
+              This test provides a score for each of the
+              five fundamental personality traits
+              generally agreed upon by psychologists.
+              The test uses public domain scales from the
+              <a href="https://ipip.ori.org/new_ipip-50-item-scale.htm" target="_blank">
+                <small>International Personality Item Pool</small>
+              </a>
+              to generate scores of the 5 traits, ranging from 0 to 1,
+              from 50 scaled questions.
+            </small>
+          </p>
+          <p class="fs-6 serif text-dark text-start mt-0 mb-2 lh-md mt-3">
+            <b class="serif">Instructions:</b>
+            <small class="serif">{{ variables.prompt }}</small>
+          </p>
+          <p class="fs-6 serif text-dark text-start mt-0 mb-2 lh-md mt-3">
+            <b class="serif">Disclaimer:</b>
+            <small class="serif">{{ variables.disclaimer }}</small>
+          </p>
+          <p class="fs-6 serif text-dark text-start mt-0 mb-2 lh-md mt-3">
+            <b class="serif">Research Participation:</b>
+            <small class="serif">
+              Do you consent to your responses being recorded and
+              anonymously used for research intended to help cannabis consumers?
+            </small>
+            <div class="d-flex justify-content-between mb-3">
+              <div class="form-check pe-4">
+                <input
+                  id="presonality-test-research-choice"
+                  class="form-check-input"
+                  type="checkbox"
+                  value=""
+                  {% if not user%}disabled{% endif %}
+                >
+                <label
+                  class="app-action background-hover form-check-label text-dark"
+                  for="presonality-test-research-choice"
+                >
+                  <small class="serif">
+                    Opt-in to anonymized cannabis consumer research?
+                    {% if not user%}
+                    <a class="text-dark serif"
+                      data-bs-target="#sign-in-dialog"
+                      data-bs-toggle="modal"
+                    >
+                      Please sign in first!
+                    </a>
+                    {% endif %}
+
+                  </small>
+                </label>
+              </div>
+            </div>
+          </p>
+          <div class="text-center mt-3">
+            <button
+              class="btn bg-gradient-orange text-white serif"
+              onclick="showPersonalityTest();"
+              type="button"
+            >
+              Begin Test
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- End of Personality Test Instructions -->
+
+  <!-- Personality Test -->
+  <div id="personality-test" class="row d-none">
+    <div class="col-md-9">
+      <div class="card mt-3">
+        <button
+        id="personality-test-cancel-button"
+        class="btn btn-sm btn-sm-light text-dark position-absolute end-0"
+        onclick="cancelPersonalityTest();"
+        title="Stop the personality test at this point."
+        type="button"
+      >
+        {% icon 'x' width="16px" %}
+      </button>
+        <div class="card-body bg-transparent markdown">
+          <form id="personality-test-form">
+
+            <!-- Questions | 5 pages of 10 questions -->
+            <div id="personality-test-questions" class="tab-content">
+              {% for page in '12345'|make_list %}
+              <div
+                id="personality-test-tab-pane-{{ page }}"
+                class="tab-pane fade"
+                aria-labelledby="personality-test-tab-{{ page }}"
+                role="tabpanel"
+                tabindex="{{ page|add:"-1" }}"
+              >
+                <div class="d-flex justify-content-between align-tems-center">
+                  <h4 class="text-dark serif mt-0 mb-2">
+                    Questions {{ page|multiply:"10"|add:"-9"|floatformat:"0" }} - {{ page|multiply:"10"|floatformat:"0" }} / 50
+                  </h4>
+                </div>
+                <table class="mx-0 mb-0">
+                  <th>
+                    <td>Statement</td>
+                    <td style="white-space: nowrap;">
+                      {% for i in '12345'|make_list %}
+                      <div class="form-check form-check-inline px-0" style="margin-left:15px;margin-right:15px;">
+                        <input class="form-check-input visually-hidden">
+                        <label class="form-check-label" style="transform:translateX(-15px)">{{ i }}</label>
+                      </div>
+                      {% endfor %}
+                    </td>
+                  </th>
+                  {% for question in variables.questions %}
+                    {% if page|multiply:"10"|add:"-9" <= forloop.counter and forloop.counter <= page|multiply:"10" %}                             
+                      <tr>
+                        <td>{{ forloop.counter }}.</td>
+                        <td>{{ question.text }}</td>
+                        <td style="white-space: nowrap;">
+                          {% for factor in '12345'|make_list %}
+                            <div class="form-check form-check-inline">
+                              <input
+                                id="question-{{ forloop.parentloop.counter }}-scale-{{ factor }}"
+                                class="form-check-input"
+                                name="{{ forloop.parentloop.counter }}"
+                                value="{{ factor }}"
+                                type="radio"
+                              >
+                            </div>
+                          {% endfor %}
+                        </td>
+                      </tr>
+                    {% endif %} 
+                  {% endfor %}
+                </table>
+              </div>
+              {% endfor %}
+            </div><!-- End of Questions -->
+
+            <!-- Navigation buttons -->
+            <nav aria-label="Personality test pagination" class="px-3">
+              <ul id="form-tabs" class="pagination pagination-sm justify-content-end" role="tablist">
+                {% for i in '12345'|make_list %}
+                  <li class="page-item" role="presentation">
+                    <button
+                      id="personality-test-tab-{{ i }}"
+                      class="page-link text-dark bg-transparent"
+                      data-bs-toggle="tab"
+                      data-bs-target="#personality-test-tab-pane-{{ i }}"
+                      aria-controls="personality-test-tab-pane-{{ i }}"
+                      aria-selected="false"
+                      type="button"
+                      role="tab"
+                      
+                      aria-selected="true"
+                    >
+                      {{ i }}
+                    </button>
+                  </li>
+                {% endfor %}
+              </ul>
+            </nav>
+
+            <!-- Repeat instructions -->
+            <p class="fs-6 serif text-dark text-start mt-0 mb-2 lh-md mt-3">
+              <b class="serif">Instructions:</b>
+              <small class="serif">{{ variables.prompt }}</small>
+            </p>
+
+            <!-- Score Test | Disabled until all questions answered -->
+            <!-- Optional: Show counter of completed questions | x / 50 -->
+            <div class="text-center mt-3">
+              <div>
+                <button
+                  id="personality-test-score-button"
+                  class="btn bg-gradient-purple text-white serif"
+                  onclick="scorePersonalityTest();"
+                  type="button"
+                  disabled
+                >
+                  Score Test
+                </button>
+                <button
+                  id="personality-test-score-button-loading"
+                  class="btn bg-gradient-purple text-white serif d-none"
+                  type="button"
+                  title="Submitting..."
+                  disabled
+                >
+                  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                  Evaluating...
+                </button>
+              </div>
+            </div>
+          
+          </form>
+        </div>
+      </div>
+    </div>
+  </div><!-- End of Personality Test -->
+  
+  <!-- Personality Test Complete -->
+  <div id="personality-test-complete" class="row d-none">
+    <div class="col-md-12">
+      <div class="card bg-light mx-auto mt-3">
+        <div class="card-header d-flex align-items-center justify-content-between bg-dark">
+            <h4 class="text-dark serif my-0">
+              🎭 Big 5 Personality Test Results
+            </h4>
+          <div class="d-flex align-items-center">
+            <div class="ms-2">
+              <button
+                id="personality-test-restart-button"
+                class="btn btn-sm btn-sm-light text-dark"
+                onclick="restartPersonalityTest();"
+                title="Restart the personality test."
+                type="button"
+              >
+                {% icon 'rotate-cw' width="16px" %}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card-body bg-transparent serif text-dark">
+          <svg style="width:80px;height:80px;" class="float-start">
+            <use href="{% static "website/images/emojies/green-check.svg" %}#green-check-emoji"></use>
+          </svg>
+          <h4 class="serif mt-0 mb-2">
+            Personality Analyzed!
+          </h4>
+          <p class="fs-6 serif text-dark text-start mt-0 mb-2 lh-md" style="max-width:675px;">
+            <small class="serif">Below are predicted personality metrics from the questions submitted,
+              on a scale of 0 to 1 for each of the
+              <a href="https://en.wikipedia.org/wiki/Big_Five_personality_traits" target="_blank">Big 5 personality traits</a>.</small>
+          </p>
+          <div class="w-75 mx-auto mt-4">
+          {% for i, factor in variables.factors.items %}
+            <div class="col-sm-9">
+              <div class="row mb-1">
+                <label
+                  for="input-{{ factor }}"
+                  class="col col-form-label col-form-label-sm"
+                  style="max-width:145px;"
+                >
+                  {{ factor }}
+                </label>
+                <div class="col-sm-2">
+                  <input
+                    id="input-{{ i }}"
+                    class="form-control form-control-sm text-center"
+                    style="max-width:65px;"
+                    name="{{ factor }}"
+                    spellcheck="false"
+                    type="number"
+                    autocomplete="off"
+                    min="0"
+                    max="1"
+                    value=""
+                    readonly
+                  >
+                </div>
+                <div class="col-sm-6">
+                  <input
+                    id="range-{{ i }}"
+                    class="form-range custom-range"
+                    style="max-width:200px;"
+                    name="{{ factor }}"
+                    type="range"
+                    min="0"
+                    max="100"
+                    value="50"
+                    disabled
+                  >
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+          </div>
+          <div class="mt-5 mx-3">
+            {% comment %} <button
+              class="btn btn-sm-light btn-md-light me-1"
+              {% if not user %}
+              data-bs-target="#sign-in-dialog"
+              data-bs-toggle="modal"
+              {% else %}
+              onclick="shareWithTCD();"
+              {% endif %}
+              type="button"
+            >
+              {% icon 'globe' width="14px" class="me-1" %}
+              Link with The Cannabis Diary
+            </button> {% endcomment %}
+            <button
+              class="btn btn-sm bg-gradient-green text-white serif"
+              {% if not user %}
+              data-bs-target="#sign-in-dialog"
+              data-bs-toggle="modal"
+              {% else %}
+              onclick="savePersonalityTest();"
+              {% endif %}
+              type="button"
+            >
+              Save
+            </button>
+          </div>
+          <p class="fs-6 serif text-dark text-start mt-0 mb-2 lh-md mt-5 mx-3" style="max-width:675px;">
+            <small class="serif"><b class="serif">Disclaimer:</b> {{ variables.disclaimer }}</small>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div><!-- End of Personality Test Complete -->
+
+</section>
+{% include "website/components/art/vines.html" %}
+{% endblock material %}
+{% block page_js %}
+  <script>
+
+    // Initialize the first 10 questions.
+    var pane = document.getElementById('personality-test-tab-pane-1');
+    pane.classList.add('show');
+    pane.classList.add('active');
+    var tab = document.getElementById('personality-test-tab-1');
+    tab.classList.add('active');
+    tab.ariaSelected = true;
+
+    // Allow the test to be scored only once all questions are filled.
+    var inputs = document.querySelectorAll('[type="radio"]');
+    var submitButton = document.querySelector('#personality-test-score-button');
+    submitButton.disabled = true;
+    for (i = 0; i < inputs.length; i++) {
+      inputs[i].addEventListener('input', () => {
+        var values = [];
+        inputs.forEach(v => {
+          if (v.checked) values.push(v.name);
+        });
+        // Optional: Update counter = values.length
+        submitButton.disabled = values.length < 50;
+      });
+    }
+
+
+    function showPersonalityTest() {
+      /**
+       * Show the personality test.
+       */
+      document.getElementById('personality-test-instructions').classList.add('d-none');
+      document.getElementById('personality-test').classList.remove('d-none');
+    }
+
+
+    function cancelPersonalityTest() {
+      /**
+       * Cancel the personality test.
+       */
+      document.getElementById('personality-test').classList.add('d-none');
+      document.getElementById('personality-test-instructions').classList.remove('d-none');
+    }
+
+
+    function savePersonalityTest(data = null) {
+      /**
+       * Save a user's personality test.
+       */
+      if (!data) data = cannlytics.utils.serializeForm('personality-test-form', /* keepAll =*/ true);
+      cannlytics.utils.authRequest('/api/stats/personality', data);
+      var message = 'Your personality test has been saved. Thank you for participating in the Big 5 personality test.';
+      cannlytics.utils.showNotification('Personality Test Saved', message, 'success');
+    }
+
+
+    function restartPersonalityTest() {
+      /**
+       * Restart the personality test.
+       */
+      document.getElementById('personality-test-complete').classList.add('d-none');
+      document.getElementById('personality-test-instructions').classList.remove('d-none');
+      document.getElementById('personality-test-form').reset();
+    }
+
+
+
+    function shareWithTCD() {
+      /**
+       * Share personality test results with The Cannabis Diary.
+       */
+      // TODO: Implement actual API connection.
+      if (!data) data = cannlytics.utils.serializeForm('personality-test-form', /* keepAll =*/ true);
+      cannlytics.utils.authRequest('/api/stats/personality', data);
+      var message = 'Your personality test has been saved and shared with The Cannabis Diary to improve your product recommendations.';
+      cannlytics.utils.showNotification('Personality Test Linked with TCD', message, 'success');
+    }
+
+
+    async function scorePersonalityTest() {
+      /**
+       * Score the personality test. Either with Python or JavaScript.
+       */
+      // Optional: Re-write in JavaScript for speed?
+      cannlytics.ui.showLoadingButton('personality-test-score-button');
+      var data = {};
+      var form = document.forms['personality-test-form'];
+      for ( var i = 0; i < form.elements.length; i++ ) {
+        var e = form.elements[i];
+        if (e.checked) data[encodeURIComponent(e.name)] = encodeURIComponent(e.value);
+      }
+      data.save = document.getElementById('presonality-test-research-choice').value;
+      var response = await cannlytics.utils.authRequest('/api/stats/personality', data);
+      var score = response.data.score;
+      Object.keys(score).forEach((key, i) => {
+        var value = score[key];
+        document.getElementById(`input-${i + 1}`).value = value;
+        document.getElementById(`range-${i + 1}`).value = value * 100;
+      });
+      document.getElementById('personality-test').classList.add('d-none');
+      document.getElementById('personality-test-complete').classList.remove('d-none');
+      cannlytics.ui.hideLoadingButton('personality-test-score-button');
+    }
+
+
+  </script>
+{% endblock %}
+</html>

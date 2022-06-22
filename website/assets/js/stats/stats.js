@@ -12,6 +12,12 @@ import { getDocument } from '../firebase.js';
 import { hideLoadingButton, showLoadingButton } from '../ui/ui.js';
 import { autocomplete } from '../ui/autocomplete.js';
 
+export const personalityStats = {
+
+  
+
+}
+
 export const stats = {
 
   // Statistics state variables.

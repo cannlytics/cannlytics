@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <contact@cannlytics.com>
   Created: 5/27/2021
-  Updated: 1/7/2022
+  Updated: 6/21/2022
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
   TODO:
@@ -65,14 +65,14 @@
         </a>
         <span class="badge rounded-pill bg-success">New</span>
       </li>
-      <li class="mb-3">
+      {% comment %} <li class="mb-3">
         <a
           href="{% url 'page' page='data' %}#state-data"
           class="serif text-dark fw-bold background-hover"
         >
           State Cannabis Data
         </a>
-      </li>
+      </li> {% endcomment %}
       <li class="mb-3">
         <a
           href="{% url 'page' page='data' %}#regulations"
@@ -85,7 +85,7 @@
   </section>
 
   <!-- State Data -->
-  <section class="container mb-2">
+  {% comment %} <section class="container mb-2">
     <h2
       id="state-data"
       class="mb-3 pt-5 serif text-dark"
@@ -96,13 +96,13 @@
       States collect and provide various data points to the public. Here Cannlytics attempts
       to collect and provide access to these data points in a simple, standard manner.
     </p>
-  </section>
+  </section> {% endcomment %}
 
   <!-- Under Construction -->
-  {% include "website/components/notifications/under_construction.html" %}
+  {% comment %} {% include "website/components/notifications/under_construction.html" %} {% endcomment %}
 
   <!-- Data Card -->
-  <section class="container card px-0">
+  {% comment %} <section class="container card px-0"> {% endcomment %}
 
       <!-- TODO: Data Card / List -->
       <!-- Show list of states if no state is selected -->
@@ -112,7 +112,7 @@
       </div> {% endcomment %}
 
       <!-- State detail card -->
-      <div class="row row-wrap">
+      {% comment %} <div class="row row-wrap">
       {% for i in '0'|make_list %}
         <div
           id="state-overview-card-{{ i }}"
@@ -148,16 +148,16 @@
             <div class="card-text text-dark fs-6"><small id="licensees_per_capita_{{ i }}" class="serif"></small></div>
             <div class="card-text text-dark fs-6"><small id="state_average_monthly_sales_{{ i }}" class="serif"></small></div>
             <div class="card-text text-dark fs-6"><small id="state_average_monthly_sales_per_capita_{{ i }}" class="serif"></small></div>
-            {% comment %} <p id="state_description" class="card-text"></p> {% endcomment %}
+            <!-- <p id="state_description" class="card-text"></p> -->
             <!-- TODO: State data sources -->
           </div>
         </div>
       {% endfor %}
       </div>
 
-  </section>
+  </section> {% endcomment %}
 
-  <!-- States Map -->
+  {% comment %} <!-- States Map -->
   <!-- TODO: Allow user to toggle choropleth data! -->
   <section class="container">
 
@@ -196,7 +196,7 @@
       <a href="https://fred.stlouisfed.org/release?rid=118" class="text-blue">FRED, Federal Reserve Bank of St. Louis</a>.
     </figcaption>
 
-  </section>
+  </section> {% endcomment %}
 
   <!-- TODO: National Statistics -->
   {% comment %} {% include "website/pages/data/data_components/national_realtime_statistics.html" %} {% endcomment %}

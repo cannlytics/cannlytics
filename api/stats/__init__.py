@@ -9,12 +9,14 @@ License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main
 """
 from .effects_stats import effects_stats, record_effects
 from .patent_stats import patent_stats
+from .personality_stats import personality_stats
 from .recommendation_stats import recommendation_stats
 
 
 __all__ = [
     'effects_stats',
     'patent_stats',
+    'personality_stats',
     'recommendation_stats',
     'record_effects',
 ]
