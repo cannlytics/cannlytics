@@ -194,6 +194,7 @@ urlpatterns = [
         path('/effects', stats.effects_stats),
         path('/effects/actual', stats.record_effects),
         path('/effects/<strain>', stats.effects_stats),
+        path('/personality', stats.personality_stats),
         # TODO: Implement.
         path('/recommendations', stats.recommendation_stats),
         path('/patents', stats.patent_stats),

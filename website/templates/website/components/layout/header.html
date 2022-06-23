@@ -74,18 +74,26 @@
         </li>
         <li class="nav-item mb-0">
           <a
+            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'stats' in request.path %}active{% endif %}"
+            href="{% url 'page' page='stats' %}"
+          >
+            Stats
+          </a>
+        </li>
+        {% comment %} <li class="nav-item mb-0">
+          <a
             class="nav-link btn-sm background-hover fw-bold serif text-dark"
             href="https://docs.cannlytics.com"
           >
             Docs
           </a>
-        </li>
+        </li> {% endcomment %}
         <li class="nav-item mb-0">
           <a
-            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'support' in request.path %}active{% endif %}"
-            href="{% url 'page' page='support' %}"
+            class="nav-link btn-sm background-hover fw-bold serif text-dark"
+            href="https://cannlytics.page.link/menu"
           >
-            Support
+            Menu
           </a>
         </li>
         <li id="more-menu" class="nav-item dropdown dropdown-mega position-static">

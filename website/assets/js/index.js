@@ -18,6 +18,7 @@ import { videos } from './website/videos.js';
 import { website } from './website/website.js';
 import { showNotification } from './utils.js';
 import { ui } from './ui/ui.js';
+import { utils } from './utils.js';
 
 import '../css/cannlytics.scss';
 
@@ -30,6 +31,7 @@ export {
   stats,
   testing,
   ui,
+  utils,
   videos,
   website,
   showNotification,

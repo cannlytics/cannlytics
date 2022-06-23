@@ -26,6 +26,7 @@ import { theme } from './settings/theme.js';
 import { traceability } from './traceability/traceability.js';
 import { transfers } from './transfers/transfers.js';
 import { ui } from './ui/ui.js';
+import { utils } from './utils.js';
 import { waste } from './waste/waste.js';
 
 // Stylesheets
@@ -53,5 +54,6 @@ export {
   settings,
   theme,
   ui,
+  utils,
   waste,
 }

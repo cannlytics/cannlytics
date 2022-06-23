@@ -296,3 +296,19 @@ export function setURLParameter(paramName, paramValue) {
   }
   window.location.href = `\\search\\${url}${hash}`;
 }
+
+
+export const utils = {
+  apiRequest,
+  authRequest,
+  capitalize,
+  deserializeForm,
+  getCookie,
+  getUrlParameter,
+  hasClass,
+  parameterizeForm,
+  setURLParameter,
+  serializeForm,
+  slugify,
+  showNotification,
+}

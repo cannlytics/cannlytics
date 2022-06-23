@@ -251,6 +251,29 @@ export function getUrlParameter(name) {
   return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
 
+export function setURLParameter(paramName, paramValue) {
+  /**
+   * Add query parameter to the URL.
+   * @param {String} paramName The key of the parameter.
+   * @param {String} paramValue The value for the parameter.
+   */
+  let url = window.location.href;
+  const hash = location.hash;
+  url = url.replace(hash, '');
+  if (url.indexOf(paramName + '=') >= 0) {
+    const prefix = url.substring(0, url.indexOf(paramName + '=')); 
+    let suffix = url.substring(url.indexOf(paramName + '='));
+    suffix = suffix.substring(suffix.indexOf('=') + 1);
+    suffix = (suffix.indexOf('&') >= 0) ? suffix.substring(suffix.indexOf('&')) : '';
+    url = `${prefix}${paramName}=${paramValue}${suffix}`;
+  }
+  else {
+    if (url.indexOf('?') < 0) url = `${url}?${paramName}=${paramValue}`;
+    else url = `${url}&${paramName}=${paramValue}`;
+  }
+  window.location.href = url + hash;
+}
+
 export function capitalize(text) {
   /**
   * Capitalize the first letter of given text.
@@ -314,4 +337,22 @@ export const sortArrayOfObjects = (array, field) => {
    * @returns {Array}
    */
   return array.sort((a, b) => (a[field] > b[field]) ? 1 : ((b[field] > a[field]) ? -1 : 0));
+}
+
+
+export const utils = {
+  apiRequest,
+  authRequest,
+  capitalize,
+  deserializeForm,
+  getCookie,
+  getUrlParameter,
+  hasClass,
+  parameterizeForm,
+  setURLParameter,
+  serializeForm,
+  slugify,
+  showNotification,
+  sortArrayOfObjects,
+  validateEmail,
 }
