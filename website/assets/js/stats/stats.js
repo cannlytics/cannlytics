@@ -2,7 +2,7 @@
  * Statistics JavaScript | Cannlytics Website
  * Copyright (c) 2022 Cannlytics
  * 
- * Authors: Keegan Skeate <contact@cannlytics.com>
+ * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 5/31/2022
  * Updated: 6/9/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>

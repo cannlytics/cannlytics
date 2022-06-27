@@ -2,7 +2,7 @@
  * Cannlytics Style | Cannlytics Website
  * Copyright (c) 2021-2022 Cannlytics
  * 
- * Authors: Keegan Skeate <contact@cannlytics.com>
+ * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 10/4/2020
  * Updated: 6/21/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
@@ -142,6 +142,7 @@ body.dark .brand-font {
   margin-top: 2rem;
   margin-bottom: 1rem;
   font-weight: 600;
+  font-family: "Libre Baskerville" !important;
 }
 .markdown h3 {
   margin-top: 2rem;
@@ -167,6 +168,9 @@ body.dark .brand-font {
 .markdown ul,
 .markdown ol {
   margin-top: 1rem;
+}
+.markdown ol > li::marker {
+  font-weight: bold;
 }
 .markdown li {
   font-size: 1rem;

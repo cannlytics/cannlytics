@@ -2,7 +2,7 @@
 Test Firebase Module | Cannlytics
 Copyright (c) 2021-2022 Cannlytics
 
-Authors: Keegan Skeate <contact@cannlytics.com>
+Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/27/2021
 Updated: 7/20/2021
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>

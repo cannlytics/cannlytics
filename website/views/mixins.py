@@ -93,7 +93,7 @@ def get_page_data(context: dict) -> dict:
 
 def get_page_docs(request: Any, context: dict) -> dict:
     """Get any text documents for a given page."""
-    docs = page_docs.get(context['page'])
+    docs = page_docs.get(context['page'], []) + page_docs.get(context['section'], [])
     if docs:
         for doc in docs:
             name = doc.replace('-', '_').replace('/', '_')

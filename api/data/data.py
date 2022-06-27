@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/30/2021
-Updated: 8/21/2021
+Updated: 6/26/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Description: API endpoints to interface with datasets.
@@ -15,6 +15,36 @@ from rest_framework.response import Response
 
 # Internal imports
 from api.auth import auth
+
+
+@api_view(['GET', 'POST'])
+def algorithm_nfts(request, state=None):
+
+    # Get a specific algorithm or query open-source algorithms.
+    if request.method == 'GET':
+
+        params = request.query_params
+        ref = 'public/algorithms/algorithm_nfts'
+
+    # Publish an algorithm.
+    if request.meth == 'POST':
+
+        ref = 'public/algorithms/algorithm_nfts'
+
+
+@api_view(['GET', 'POST'])
+def data_nfts(request, state=None):
+
+    # Get a specific data NFT or query open-source data NFT.
+    if request.method == 'GET':
+
+        params = request.query_params
+        ref = 'public/data/data_nfts'
+
+    # Publish a data NFT.
+    if request.meth == 'POST':
+
+        ref = 'public/data/data_nfts'
 
 
 @api_view(['GET', 'POST'])

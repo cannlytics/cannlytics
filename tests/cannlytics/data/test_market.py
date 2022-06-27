@@ -20,7 +20,7 @@ from ocean_lib.ocean.ocean import Ocean
 
 # Internal imports.
 sys.path.append('../../')
-from cannlytics.data import market # pylint: disable=import-error,wrong-import-position
+from cannlytics.data.market import market # pylint: disable=import-error,wrong-import-position
 from cannlytics.firebase import ( # pylint: disable=import-error,wrong-import-position
     initialize_firebase,
     update_document,

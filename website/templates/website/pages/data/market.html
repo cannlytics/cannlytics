@@ -4,27 +4,47 @@
   Data Market Page | Cannlytics Website
   Copyright (c) 2021-2022 Cannlytics
 
-  Authors: Keegan Skeate <contact@cannlytics.com>
+  Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 10/14/2021
-  Updated: 1/26/2022
-  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+  Updated: 6/26/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+TODO:
+
+  - Overhaul in favor of data NFT workflow.
+
 -->
 {% extends "website/index.html" %}
-{% load static icon get_env %}
+{% load static icon %}
 {% block title %}Data Market | Cannlytics{% endblock %}
 {% block material %}
 
 <!-- Banner -->
+<!-- TODO: Add picture of California countryside! -->
 {% include "website/components/heros/hero_banner.html" with
   title=''
   description='The one-and-only, open-source<br>cannabis data market.'
-  image_url='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics-data-market-logo.png?alt=media&token=33bec6d2-f428-42a6-b8c3-bf8ded05889d'
+  image_url='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_data_market.png?alt=media&token=f632504b-d00f-4b81-9182-6d5c64956436'
   image_size="200px"
   only
 %}
 
 <!-- Market -->
 <section class="container mt-3 mb-5">
+
+  <!-- Warning -->
+  <div class="alert alert-warning d-flex justify-content-between mt-3 mb-4" role="alert">
+    <div class="row d-flex align-items-center">
+      <div class="col-1 me-3" style="max-width:42px;">{% icon 'alert-triangle' height="32" width="32"%}</div>
+      <div class="col-10 ps-0"><small class="serif">
+        The Cannabis Data Market is still in test-mode. You are welcome to test out the functionality,
+        but <b class="serif">do not</b> use actual money and <b class="serif">do not</b> expect actual results.
+        You can get test currency from
+        <a href="https://www.rinkeby.io/#faucet" target="_blank" class="serif">a test faucet</a>.
+        </small>
+      </div>
+    </div>
+  </div>
 
   <!-- Header -->
   <div class="d-flex align-items-center justify-content-between mb-4">
@@ -58,22 +78,22 @@
       </button>
       {% endcomment %}
 
-      <!-- TODO: Implement publish data -->
+      <!-- Link to GitHub -->
       <a
         class="btn btn-sm-light btn-md-light ms-2 serif text-nowrap"
+        href="{% url "page" page="stats" %}"
+      >
+        {% icon "activity" width="16px" height="16px" class="me-1" %}
+        Browse Algorithms
+      </a>
+
+      <!-- TODO: Implement publish data -->
+      <a
+        class="btn btn-sm bg-gradient-purple text-white serif text-nowrap ms-2"
         href="{% url 'section' 'data' 'publish' %}"
       >
         {% icon "upload-cloud" width="16px" height="16px" class="me-1" %}
         Publish Data
-      </a>
-
-      <!-- Link to GitHub -->
-      <a
-        class="btn btn-sm-light btn-md-light ms-2 serif text-nowrap"
-        href="https://github.com/cannlytics/cannlytics-ai"
-      >
-        {% icon "github" width="16px" height="16px" class="me-1" %}
-        Browse Algorithms
       </a>
 
       {% comment %}
@@ -215,7 +235,7 @@
 
   <!-- About Open Data -->
   {% include "website/components/content/introduction.html" with
-    title="Open Data"
+    title="Decentralized Data"
     description='All of our data collection methods are <a href="https://github.com/cannlytics/cannlytics-ai">open source</a>. You are welcome to use our tools to compile the datasets for yourself. We simply make the data available at a nominal cost because we think that we will still save you time and money and provide you with net value from ease and convinience. If you have time, know-how, a good internet connection, sufficient computer storage and memory, and are up to process the data yourself, then you can probably make short work of collecting the data too. Please enjoy the rich data. Happy data mining!'
     action="Request a New Dataset"
     image_id="gem-emoji"
@@ -224,8 +244,6 @@
   %}
 
 </section>
-
-<!-- Vines -->
 {% include "website/components/art/vines.html" %}
-
 {% endblock material %}
+</html>

@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/11/2021
-Updated: 6/20/2022
+Updated: 6/26/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 TODO:
@@ -118,14 +118,13 @@ user_wallet = Wallet(
 )
 print(f"user_wallet.address = '{user_wallet.address}'")
 
-# Check that the user as ETH.
+# Check that the user has ETH.
 assert user_wallet.web3.eth.get_balance(user_wallet.address) > 0, 'need ETH'
 
 # Get OCEAN token balance.
 print(f"Address of OCEAN token: {ocean.OCEAN_address}")
 OCEAN_token = ocean.OCEAN_token
 OCEAN_balance_in_wei = OCEAN_token.balanceOf(user_wallet.address)
-from ocean_lib.web3_internal.currency import from_wei
 OCEAN_balance_in_ether = from_wei(OCEAN_balance_in_wei)
 print(f"Balance: {OCEAN_balance_in_ether} OCEAN")
 if OCEAN_balance_in_wei == 0:
@@ -162,6 +161,15 @@ gas_price = from_wei(data_nft.get_gas_price(data_nft.web3))
 
 # TODO: Get IDs from Firestore.
 # - Initiate token?
+
+
+#-----------------------------------------------------------------------
+# Algorithm publishing and consumption.
+#-----------------------------------------------------------------------
+
+# Get a preview of what you will pay for an algorithm compute job.
+# ocean.ocean_compute.get_c2d_environments(service.service_endpoint)
+# ocean.retrieve_provider_fees_for_compute(datasets, algorithm_data, consumer_address, compute_environment, duration)
 
 
 #-----------------------------------------------------------------------

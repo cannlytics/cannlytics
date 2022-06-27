@@ -1,0 +1,117 @@
+/**
+ * The Algorithm Farm Style | Cannlytics Website
+ * Copyright (c) 2022 Cannlytics
+ *
+ * Authors: Keegan Skeate <https://github.com/keeganskeate>
+ * Created: 6/26/2022
+ * Updated: 6/26/2022
+ * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+ */
+
+/* Form style */
+* { box-sizing: border-box; }
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #d4d4d4;
+}
+.autocomplete-items div:hover {
+  background-color: #e9e9e9;
+}
+.autocomplete-active {
+  background-color: #50fa7b33 !important;
+  color: #ffffff;
+}
+body.dark .autocomplete-items div {
+  background-color: #2e303e;
+  border-color: #8b949e;
+}
+body.dark .autocomplete-items div:hover {
+  background-color: #616161;
+}
+body.dark .autocomplete-active {
+  background-color: #ffa60033 !important;
+  color: #ffffff;
+}
+.callout {
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  background-color: #f8f9fa;
+  border-left: 0.25rem solid #dee2e6;
+}
+body.dark .callout {
+  background-color: #343a40;
+  border-left: 0.25rem solid #6c757d;
+}
+/* FIXME: Re-write as vanilla CSS */
+/* .callout-info {
+  background-color: rgba(#0dcaf0, .075) !important;
+  border-left: 0.25rem solid rgba(#0dcaf0, .5) !important;
+} */
+.tooltip-inner {
+  text-align: left;
+}
+
+/* Custom code style */
+body.dark .markdown code,
+body.dark .markdown tt {
+  background-color: unset !important;
+}
+.token.operator {
+  background: unset !important;
+}
+#highlighting-content {
+  padding: 0 !important;
+}
+
+/* Both elements need the same text and space styling so they are directly on top of each other.
+Move the textarea in front of the result and make textarea almost completely transparent.
+*/
+#editing,
+#highlighting { 
+  padding: 16px;
+  border: 0;
+  width: 100%;
+  height: 520px !important;
+  overflow-x: auto;
+  overflow-y: scroll !important;
+  white-space: nowrap;
+  tab-size: 4;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+}
+#editing {
+  z-index: 1;
+  color: transparent;
+  background: transparent;
+  caret-color: white;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#highlighting {
+  z-index: 0;
+}
+#editing,
+#highlighting,
+#highlighting-content,
+#highlighting * {
+  font-size: 12pt !important;
+  font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif !important;
+}
