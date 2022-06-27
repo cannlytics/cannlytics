@@ -284,6 +284,7 @@ page_docs = {
     "producers": ["producers", "processors"],
     "regulations": ["regulations"],
     "retailers": ["retailers"],
+    "farm": ["algorithm_market"],
 }
 
 #-----------------------------------------------------------------------

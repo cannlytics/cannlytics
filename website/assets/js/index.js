@@ -2,7 +2,7 @@
  * Cannlytics Module Index | Cannlytics Website
  * Copyright (c) 2021-2022 Cannlytics
  * 
- * Authors: Keegan Skeate <contact@cannlytics.com>
+ * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 1/6/2021
  * Updated: 1/1/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>

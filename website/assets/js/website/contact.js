@@ -12,6 +12,10 @@ import { getUrlParameter } from '../utils.js';
 export const contact = {
 
   cannedMessages: {
+    algorithms: {
+      message: 'I am seeking help with a cannabis-related algorithm.',
+      subject: 'Seeking Algorithm Help',
+    },
     analyses: {
       message: 'I would like to suggest the following analyses and their prices:',
       subject: 'Suggest Analyses',

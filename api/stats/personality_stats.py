@@ -26,7 +26,7 @@ from cannlytics.firebase import (
     get_document,
     update_documents,
 )
-from cannlytics.data.personality import score_personality_test
+from cannlytics.stats.personality_test import score_personality_test
 
 
 @api_view(['GET', 'POST'])

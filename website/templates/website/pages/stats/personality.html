@@ -4,7 +4,7 @@
   Personality Test Page | Cannlytics Website
   Copyright (c) 2022 Cannlytics
 
-  Authors: Keegan Skeate <contact@cannlytics.com>
+  Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 6/20/2022
   Updated: 6/21/2022
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
@@ -253,9 +253,9 @@
     <div class="col-md-12">
       <div class="card bg-light mx-auto mt-3">
         <div class="card-header d-flex align-items-center justify-content-between bg-dark">
-            <h4 class="text-dark serif my-0">
-              🎭 Big 5 Personality Test Results
-            </h4>
+          <h4 class="text-dark serif my-0">
+            🎭 Big 5 Personality Test Results
+          </h4>
           <div class="d-flex align-items-center">
             <div class="ms-2">
               <button
@@ -423,6 +423,7 @@
       /**
        * Restart the personality test.
        */
+      document.getElementById('personality-test-score-button').disabled = true;
       document.getElementById('personality-test-complete').classList.add('d-none');
       document.getElementById('personality-test-instructions').classList.remove('d-none');
       document.getElementById('personality-test-form').reset();
