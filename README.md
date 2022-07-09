@@ -487,7 +487,7 @@ Cannlytics is made available with ❤️ and your good will. Please consider mak
 | 💸 PayPal Donation | <https://paypal.me/cannlytics> |
 | 💵 Venmo Donation | <https://www.venmo.com/u/cannlytics> |
 | 🪙 Bitcoin donation address| 34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6 |
-| ⚡ Ethereum donation address | 0x8997cA09B3FAe2ce4039E295A5269cf4ae7a0BA5 |
+| ⚡ Ethereum donation address | 0xa466d0893e3d4f584c5a7aec1104b9f1d541cf1c |
 
 <!-- <div style="margin-top:1rem; margin-bottom: 1rem;">
   <img style="width:240px" alt="" src="https://cannlytics.com/static/website/images/decoration/data-pipeline.png">

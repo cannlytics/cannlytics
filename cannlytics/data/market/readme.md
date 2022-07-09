@@ -4,9 +4,7 @@ Welcome to the [Cannabis Data Market](https://cannabisdatamarket.com) and [Algor
 
 ## Introduction to Digital Assets: Data and Algorithm NFTs
 
-Creating distributed ledgers to store information that are transparent, auditable, timestamped, and immutable has become feasible to implement. This allows for the digitization of a vast body of assets, including contracts. This allows records to be reliable and programmable,
-able to be easily shared to provide value, and capable of being shared in a way to provide value.
-There are countless opportunities for entrepreneurs and innovators to build new products and services to improve efficiency.
+Creating distributed ledgers to store information that are transparent, auditable, timestamped, and immutable has become feasible to implement. This allows for the digitization of a vast body of assets, including contracts. This allows records to be reliable and programmable, able to be easily shared to provide value, and capable of being shared in a way to provide value. There are countless opportunities for entrepreneurs and innovators to build new products and services to improve efficiency.
 The key features are:
 
 - Universality;
