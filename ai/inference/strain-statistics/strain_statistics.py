@@ -160,7 +160,7 @@ print('Identified %i strains.' % len(strain_count))
 #-----------------------------------------------------------------------
 
 # De-duplicate the reviews.
-reviews.drop_duplicates(subset='review', keep=False, inplace=True)
+reviews.drop_duplicates(subset='review', inplace=True)
 
 # Save the processed.
 timestamp = datetime.now().isoformat()[:19].replace(':', '-')

@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/7/2022
-Updated: 7/7/2022
+Updated: 7/9/2022
 License: MIT License <https://opensource.org/licenses/MIT>
 
 Description:
@@ -28,15 +28,47 @@ Data Sources:
     - SC Labs Test Results
     URL: <https://client.sclabs.com/>
 
-    - Vergara, Daniela, Gaudino, Reggie, Blank, Thomas, & Keegan, Brian. (2020). Modeling cannabinoids from a large-scale sample of Cannabis sativa chemotypes [Data set]. https://doi.org/10.5061/dryad.sxksn0314
+    - Vergara, Daniela, Gaudino, Reggie, Blank, Thomas, & Keegan, Brian.
+    (2020). Modeling cannabinoids from a large-scale sample of Cannabis
+    sativa chemotypes [Data set].
+    URL: <https://doi.org/10.5061/dryad.sxksn0314>
 
 """
+# Internal imports.
+import os
 
+# External imports.
+import pandas as pd
+
+
+# Constants.
+TRAINING_DATA = '../../../.datasets/lab_results/training_data'
+MODEL_DATA = '../../../.datasets/lab_results/model_data'
+
+
+#-----------------------------------------------------------------------
 # Aggregate training data:
-# - PSI Labs test results (2015 through 2021)
-# - Connecticut product test results
-# - Washington State test results (2018 through 2021)
-# - Strain reviews (Alethia de la Fuente et. al) (2019)
+# ✓ PSI Labs test results (2015 through 2021).
+# ✓ SC Labs test results (through the present, 2022).
+# - Connecticut product test results.
+# - Washington State test results (2018 through 2021).
+# ✓ Strain reviews (Alethia de la Fuente et. al) (2019).
+#-----------------------------------------------------------------------
+
+# Optional: Helper function to download all training data from Cannlytics.
+
+# Aggregate all of the lab results datasets.
+data = pd.DataFrame()
+directory = '../../../.datasets/lab_results/training_data'
+datasets = [f for f in os.listdir(directory)]
+for dataset in datasets:
+    file_data = pd.read_excel(dataset)
+    data = pd.concat([data, file_data])
+
+# Read in the reviews data.
+filename = 'curated-strain-reviews-2022-07-08T08-14-09.xlsx'
+dataset = f'../../../.datasets/strains/training_data{filename}'
+reviews = pd.read_excel(dataset)
 
 
 #-----------------------------------------------------------------------
@@ -62,6 +94,9 @@ Data Sources:
 # When present, cannabinoids and terpenes should be used as
 # predictive factors, but the model needs to be flexible
 # to be able to still make predictions if missing lab results.
+
+
+# TODO: Save the model for use behind an API.
 
 
 #-----------------------------------------------------------------------

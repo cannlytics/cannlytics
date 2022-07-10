@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <link rel="stylesheet"
+	  href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+	  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+	  crossorigin="anonymous">
+    <link href="css/notebook.css" rel="stylesheet">
+    <link href="css/pygments/notebook/colorful.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Integrating a Jupyter Notebook in a Web Page</h1>
+      <p>Some text.</p>
+
+      <h2>Maths</h2>
+
+      <p>Here is a simple inline equation: $E=mc^2$.</p>
+
+      <p>And for longer equations, use the standard math mode:</p>
+      
+      $$
+      \mathcal{L}=\bar{\psi}\left(i\gamma^{\mu}\partial_  {\mu}-m\right)\psi 
+      $$
+      
+      <h2>A code section</h2>
+      <p>Here is some code:</p>
+      <pre>
+import foo
+print foo.bar()
+      </pre>
+
+      {% include 'overfitting.html' %}
+      
+    </div>
+    <!-- mathjax -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+  </body>
+</html>

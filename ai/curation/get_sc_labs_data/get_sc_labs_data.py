@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Author: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/8/2022
-Updated: 7/8/2022
+Updated: 7/9/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-ai/blob/main/LICENSE>
 
 Description:
@@ -22,10 +22,12 @@ Data Sources:
 from datetime import datetime
 from hashlib import sha256
 import hmac
+from time import sleep
 
 # External imports.
 from bs4 import BeautifulSoup
-from cannlytics.utils import snake_case
+from cannlytics.utils.utils import snake_case
+# from cannlytics.firebase import update_documents
 import pandas as pd
 import requests
 
@@ -33,6 +35,8 @@ import requests
 BASE = 'https://client.sclabs.com'
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
 STATE = 'CA'
+RAW_DATA = '../../../.datasets/lab_results/raw_data/sc_labs'
+TRAINING_DATA = '../../../.datasets/lab_results/training_data'
 
 # Pertinent sample details (original key to final key).
 DETAILS = {
@@ -104,13 +108,20 @@ def parse_data_block(div, tag='span') -> dict:
 # Automate collection
 #-----------------------------------------------------------------------
 
-def get_sc_labs_test_results(client, reverse=True, limit=100, page_limit=100) -> list:
+def get_sc_labs_test_results(
+        producer_id,
+        reverse=True,
+        limit=100,
+        page_limit=100,
+        pause=0.2,
+    ) -> list:
     """Get all test results for a specific SC Labs client.
     Args:
-        client (str): A client number.
+        producer_id (str): A producer ID.
         reverse (bool): Whether to collect in reverse order, True by default (optional).
         limit (int): The number of samples per page to collect, 100 by default.
         page_limit (int): The maximum number of pages to collect, 100 by default.
+        pause (float): A respectful pause to wait between requests.
     Returns:
         (list): A list of dictionaries of sample data.
     """
@@ -120,35 +131,60 @@ def get_sc_labs_test_results(client, reverse=True, limit=100, page_limit=100) ->
     active_page = None
     first_sample = None
     samples = []
-    pages = range(1, page_limit)
-    for page in pages:
+    sample_pages = range(1, page_limit)
+    for sample_page in sample_pages:
+
+        # Pause between requests to be respectful of the API server.
+        if sample_page > 1 and pause:
+            sleep(pause)
 
         # Get a client page with X amount of samples.
-        url = '/'.join([BASE, 'client', client])
-        params = {'limit': limit, 'page': page}
+        url = '/'.join([BASE, 'client', str(producer_id)])
+        params = {'limit': limit, 'page': sample_page}
         response = requests.get(url, headers=HEADERS, params=params)
         soup = BeautifulSoup(response.content, 'html.parser')
 
+        # Check if the page is a 404.
+        top_spans = soup.find_all('span')
+        for span in top_spans:
+            if '404' in span.text:
+                print('Client not found: %s' % (producer_id))
+                break
+
+        # FIXME: This doesn't appear to be working as intended.
         # Break the iteration if the page max is reached.
-        current_sample = soup.find('h3').text
+        try:
+            current_sample = soup.find('h3').text
+        except AttributeError:
+            current_sample = first_sample
         current_page = soup.find('li', attrs={'class': 'pagination-active'})
         if (current_page == active_page) and (current_sample == first_sample):
-            print('Repeat on page %i, collection finished: %s' % (page, client))
             break
         active_page = current_page
         first_sample = current_sample
-        print('Collecting samples on page:', page)
 
         # Get producer.
         details = soup.find('div', attrs={'id': 'detailQuickView'})
-        producer = details.find('h2').text
+        try:
+            producer = details.find('h2').text
+        except AttributeError:
+            try:
+                producer = soup.find('h2').text
+            except AttributeError:
+                producer = 'Anonymous'
 
         # Get producer image.
-        producer_image_url = details.find('img')['src'].replace('\n', '').strip()
+        try:
+            producer_image_url = details.find('img')['src'].replace('\n', '').strip()
+        except AttributeError:
+            producer_image_url = ''
 
         # Get producer website.
-        element = details.find('span', attrs={'class': 'pp-social-web'})
-        producer_url = element.find('a')['href']
+        try:
+            element = details.find('span', attrs={'class': 'pp-social-web'})
+            producer_url = element.find('a')['href']
+        except:
+            producer_url = ''
 
         # Get all of the sample cards.
         cards = soup.find_all('div', attrs={'class': 'grid-item'})
@@ -184,6 +220,7 @@ def get_sc_labs_test_results(client, reverse=True, limit=100, page_limit=100) ->
                 'date_received': date,
                 'lab_id': lab_id,
                 'lab_results_url': lab_results_url,
+                'producer_id': producer_id,
                 'producer': producer,
                 'producer_image_url': producer_image_url,
                 'product_name': product_name,
@@ -233,8 +270,11 @@ def get_sc_labs_sample_details(sample) -> dict:
     details['zip_code'] = address.split(' ')[-1]
 
     # Get the Metrc IDs.
-    metrc_ids = details['source_metrc_uid'].split(',')
-    details['metrc_ids'] = [x.strip() for x in metrc_ids]
+    try:
+        metrc_ids = details['source_metrc_uid'].split(',')
+        details['metrc_ids'] = [x.strip() for x in metrc_ids]
+    except KeyError:
+        details['metrc_ids'] = []
 
     # Get the product type.
     details['product_type'] = soup.find('p', attrs={'class': 'sdp-producttype'}).text
@@ -313,11 +353,11 @@ def get_sc_labs_sample_details(sample) -> dict:
 # Test the functionality.
 #-----------------------------------------------------------------------
 
-# Get all test results for a specific client.
+# ✓ Get all test results for a specific client.
 # test_results = get_sc_labs_test_results('2821')
 
-# Get details for a specific sample.
-sample_details = get_sc_labs_sample_details('858084')
+# ✓ Get details for a specific sample.
+# sample_details = get_sc_labs_sample_details('858084')
 
 
 #-----------------------------------------------------------------------
@@ -336,36 +376,53 @@ sample_details = get_sc_labs_sample_details('858084')
 #    (b) Save the sample details.
 #-----------------------------------------------------------------------
 
-# # 1. and 2. Iterate over potential client pages and client sample pages.
-# start = datetime.now()
-# errors = []
-# test_results = []
-# PAGES = range(1_000, 10_000)
+# FIXME: Figure out how to find all producer IDs.
+PRODUCER_IDS = []
+PRODUCER_IDS.sort()
+PRODUCER_IDS.reverse()
+# PAGES = range(1, 1_000)
 # pages = list(PAGES)
 # pages.reverse()
-# for page in pages:
-#     try:
-#         results = get_sc_labs_test_results(str(page))
-#         test_results += results
-#         print('Collected sample results on page:', page)
-#     except:
-#         errors.append(page)
 
-# # 3a. Get the sample details for each sample found.
-# total = len(test_results)
-# for i, test_result in enumerate(test_results):
-#     sample = test_result['lab_results_url'].split('/')[-1]
-#     print('Collecting (%i/%i):' % (i + 1, total), sample)
-#     details = get_sc_labs_sample_details(sample)
-#     test_results[i] = {**test_result, **details}
+# 1. and 2. Iterate over potential client pages and client sample pages.
+start = datetime.now()
+clients = []
+errors = []
+test_results = []
+for _id in PRODUCER_IDS:
+    # try:
+    results = get_sc_labs_test_results(_id)
+    if results:
+        test_results += results
+        print('Found all samples for:', _id)
+        clients.append(_id)
+    sleep(3)
+    # except:
+    #     errors.append(page)
 
-# # 3b. Save the results.
-# data = pd.DataFrame(test_results)
-# timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-# datafile = f'../../.datasets/lab-results/sc-lab-results-{timestamp}.xlsx'
-# data.to_excel(datafile, index=False)
-# end = datetime.now()
-# print('Runtime took:', end - start)
+# 2b. Save the results, just in case.
+data = pd.DataFrame(test_results)
+timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+datafile = f'{RAW_DATA}/sc-lab-results-{timestamp}.xlsx'
+data.to_excel(datafile, index=False)
+end = datetime.now()
+print('Sample collection took:', end - start)
+
+# 3a. Get the sample details for each sample found.
+total = len(test_results)
+for i, test_result in enumerate(test_results):
+    sample = test_result['lab_results_url'].split('/')[-2]
+    print('Collecting (%i/%i):' % (i + 1, total), sample)
+    details = get_sc_labs_sample_details(sample)
+    test_results[i] = {**test_result, **details}
+
+# 3b. Save the results.
+data = pd.DataFrame(test_results)
+timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+datafile = f'{RAW_DATA}/sc-lab-results-{timestamp}.xlsx'
+data.to_excel(datafile, index=False)
+end = datetime.now()
+print('Complete runtime took:', end - start)
 
 
 #-----------------------------------------------------------------------
@@ -377,17 +434,37 @@ sample_details = get_sc_labs_sample_details('858084')
 #    (b) Save the sample details.
 #-----------------------------------------------------------------------
 
-# 1. Discover all SC Labs public clients.
+# # 1. Discover all SC Labs public clients.
+# # Only do this once a week or so (Tue 4:20am EST or so).
 
+# # 2. Get the most recent 100 samples for each client.
+# errors = []
+# test_results = []
+# for client in clients:
+#     try:
+#         results = get_sc_labs_test_results(client, page_limit=1)
+#         test_results += results
+#         if test_results:
+#             print('Collected samples for client:', client)
+#             clients.append(client)
+#         sleep(0.2)
+#     except:
+#         errors.append(client)
 
-# 2. Get the most recent 100 samples for each client.
+# # 3a. Get the details for the most recent samples.
+# total = len(test_results)
+# for i, test_result in enumerate(test_results):
+#     sample = test_result['lab_results_url'].split('/')[-1]
+#     print('Collecting (%i/%i):' % (i + 1, total), sample)
+#     details = get_sc_labs_sample_details(sample)
+#     test_results[i] = {**test_result, **details}
 
+# # TODO: Process the data before saving it the the database.
 
-# 3a. Get the details for the most recent samples.
-
-
-# 3b. Save the most recent samples.
-
+# # 3b. Save the most recent samples.
+# # col = 'public/data/lab_results/{}'
+# # refs = [col.format(x['sample_id']) for x in test_results]
+# # update_documents(refs, test_results)
 
 
 #-----------------------------------------------------------------------
@@ -410,12 +487,16 @@ sample_details = get_sc_labs_sample_details('858084')
 
 # TODO: Standardize the `product_type` and `status`.
 
+
 # Separate `lod` and `loq`.
+
 
 # Rename `mu` to `margin_of_error`.
 # Remove: ±
 
+
 # Separate `batch_units` from `batch_size`.
+
 
 # Handle values and units.
 # result-mass -> mg_g
@@ -428,7 +509,12 @@ sample_details = get_sc_labs_sample_details('858084')
 # `result-mass` to `value`
 # `result-pf` to `status`
 
+
 # Handle:
 # - total_terpenoids_mgtog, total_terpenoids_percent
 
+# TODO: Standardize `analyses`.
+
 # TODO: Standardize the analyte names!
+
+# TODO: Standardize `strain_name`.
