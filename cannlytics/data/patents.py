@@ -1,8 +1,9 @@
 """
-CannPatent
-Copyright (c) 2022
+CannPatent | Cannlytics
+Copyright (c) 2022 Cannlytics
+
 Created: 5/21/2022
-Updated: 5/28/2022
+Updated: 7/12/2022
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 License: MIT License <https://opensource.org/licenses/MIT>
 
@@ -30,10 +31,11 @@ Requirements
 
 """
 # Standard imports.
-from audioop import avg
+import math
 import os
 from datetime import datetime
 import re
+from time import sleep
 from typing import Any, Optional, Union
 
 # External imports.
@@ -43,17 +45,16 @@ from cannlytics.firebase.firebase import (
     update_document,
     update_documents,
 )
-from cannlytics.utils.data import to_excel_with_style
 from cannlytics.utils.utils import (
     camel_to_snake,
     clean_dictionary,
     kebab_case,
     snake_case,
+    to_excel_with_style,
 )
-import math
 import pandas as pd
 import requests
-from time import sleep
+
 
 
 def curate_lab_results(

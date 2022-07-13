@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<!--
+  Wallet Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <https://github.com/keeganskeate>
+  Created: 6/27/2022
+  Updated: 6/27/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+TODO:
+
+  - Connect to MetaMask wallet!
+
+-->
+{% extends "website/index.html" %}
+{% load static icon %}
+{% block title %}Data Market | Cannlytics{% endblock %}
+{% block material %}
+
+
+
+You will need to connect an ERC-20 compatible wallet to manage your ETH and OCEAN tokens.
+At this time, we have setup the market to work with the
+<a href="" target="_blank">MetaMask</a> browser plugin-in wallet.
+Your wallet stores your private keys.
+
+Once your wallet is set up, it will have one or more accounts.
+Each account has one private key and one address.
+You must keep the private key secret.
+You can share the address with others, in fact,
+you will need to share your addresss with someone in order for them to send ETH or OCEAN to your account.
+
+Not that unlike traditional pocket wallets, crypto wallets don't actually store ETH or OCEAN.
+They store private keys.
+
+</section>
+{% include "website/components/art/vines.html" %}
+{% endblock material %}
+</html>

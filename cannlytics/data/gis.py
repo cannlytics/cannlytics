@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 12/5/2021
+Updated: 7/12/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This script contains functions that are useful for logistics.
@@ -17,7 +17,7 @@ from typing import List, Optional
 from googlemaps import Client, places
 
 # Internal imports.
-from ..firebase import initialize_firebase, get_document
+from cannlytics.firebase import initialize_firebase, get_document
 
 
 def get_google_maps_api_key():
@@ -26,10 +26,40 @@ def get_google_maps_api_key():
         (str): Returns the Google Maps API key stored
             in the Firestore database.
     """
-    # FIXME: Prefer using secret manager to Firestore for secrets.
+    # TODO: Prefer using secret manager to Firestore for secrets.
     database = initialize_firebase()
     data = get_document('admin/google', database=database)
     return data['google_maps_api_key']
+
+
+def get_place_details(
+        query: str,
+        api_key: Optional[str] = None,
+        fields: Optional[List[str]] = None,
+    ):
+    """Get the place details for a given a name.
+    Args:
+        query (str): The text to use to search for a place.
+        api_key (str): Optional Google Maps API key, None by default.
+        fields (list): Optional fields to retrieve.
+    Returns:
+        (dict): A dictionary of place details.
+    """
+    if api_key is None:
+        api_key = get_google_maps_api_key()
+    if not fields:
+        fields = [
+            'formatted_address',
+            'icon',
+            'photo',
+            'opening_hours',
+            'website',
+        ]
+    gmaps = Client(key=api_key)
+    search = places.find_place(gmaps, query, 'textquery')
+    place_id = search['candidates'][0]['place_id']
+    place = places.place(gmaps, place_id, fields=fields)
+    return place['result']
 
 
 def geocode_addresses(
@@ -37,7 +67,7 @@ def geocode_addresses(
         api_key: Optional[str] = None,
         pause: Optional[float] = 0.0,
         address_field: Optional[str] = '',
-):
+    ):
     """Geocode addresses in a dataframe.
     Args:
         data (DataFrame): A DataFrame containing the addresses to geocode.
@@ -79,7 +109,7 @@ def search_for_address(
         query: str,
         api_key: Optional[str] = None,
         fields: Optional[List[str]] = None,
-) -> List[dict]:
+    ) -> List[dict]:
     """Search for the address of a given name.
     Args:
         query (str): The text to use to search for an address.
@@ -95,33 +125,3 @@ def search_for_address(
     gmaps = Client(key=api_key)
     place = places.find_place(gmaps, query, 'textquery', fields=fields)
     return place['candidates']
-
-
-def get_place_details(
-        query: str,
-        api_key: Optional[str] = None,
-        fields: Optional[List[str]] = None,
-):
-    """Get the place details for a given a name.
-    Args:
-        query (str): The text to use to search for a place.
-        api_key (str): Optional Google Maps API key, None by default.
-        fields (list): Optional fields to retrieve.
-    Returns:
-        (dict): A dictionary of place details.
-    """
-    if api_key is None:
-        api_key = get_google_maps_api_key()
-    if not fields:
-        fields = [
-            'formatted_address',
-            'icon',
-            'photo',
-            'opening_hours',
-            'website',
-        ]
-    gmaps = Client(key=api_key)
-    search = places.find_place(gmaps, query, 'textquery')
-    place_id = search['candidates'][0]['place_id']
-    place = places.place(gmaps, place_id, fields=fields)
-    return place['result']

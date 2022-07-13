@@ -8,7 +8,7 @@ Updated: 5/2/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-ai/blob/main/LICENSE>
 """
 from cannlytics.firebase import initialize_firebase
-from cannlytics.utils.logistics import (
+from cannlytics.data.gis import (
     geocode_addresses,
     get_google_maps_api_key,
     get_place_details,

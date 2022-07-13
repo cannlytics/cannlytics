@@ -5,7 +5,7 @@ Copyright (c) 2021-2022 Cannlytics
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Contact: <keegan@cannlytics.com>
 Created: 1/21/2021
-Updated: 6/3/2022
+Updated: 7/10/2022
 License: MIT <https://opensource.org/licenses/MIT>
 """
 from setuptools import find_packages, setup
@@ -33,9 +33,6 @@ setup_requirements = []
 # Specify requirements for testing.
 test_requirements = []
 
-# Specify packages to exclude.
-exclude = ['ai', 'api', 'console', 'tools', 'website']
-
 # Publish the module.
 setup(
     author='Cannlytics',
@@ -46,7 +43,7 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 3.9',
     ],
-    description='🔥 Cannlytics is simple, easy-to-use, end-to-end cannabis analytics software designed to make your data and information accessible.', #pylint: disable=line-too-long
+    description='🔥 Cannlytics = cannabis + analytics. Data pipelines, user interfaces, and the best statistics in the game. Made with ❤️!', #pylint: disable=line-too-long
     extras_require={
         'test': test_requirements,
         'dev': dev_requirements + test_requirements,
@@ -58,12 +55,12 @@ setup(
     long_description=README,
     long_description_content_type='text/markdown',
     name='cannlytics',
-    packages=find_packages(exclude=exclude),
+    packages=find_packages(include=['cannlytics']),
     python_requires='>=3.9',
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/cannlytics/cannlytics-engine',
+    url='https://github.com/cannlytics/cannlytics',
     version=version,
     zip_safe=False,
 )

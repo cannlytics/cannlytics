@@ -55,14 +55,15 @@ from cannlytics.stats import (
     predict_stats_model,
     upload_stats_model,
 )
-from cannlytics.utils import snake_case
-from cannlytics.utils.data import (
+from cannlytics.utils import (
+    snake_case,
     combine_columns,
     nonzero_columns,
     nonzero_rows,
     sum_columns,
+    download_file_from_url,
+    unzip_files,
 )
-from cannlytics.utils.files import download_file_from_url, unzip_files
 
 # Ignore convergence errors.
 import warnings

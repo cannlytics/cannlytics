@@ -6,22 +6,6 @@ Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
 Updated: 5/2/2022
 """
-from .data import (
-    convert_month_year_to_date,
-    get_state_population,
-    get_state_current_population,
-    end_of_month,
-    end_of_year,
-    end_of_period_timeseries,
-    months_elapsed,
-    reverse_dataframe,
-    set_training_period,
-    format_billions,
-    format_millions,
-    format_thousands,
-    sorted_nicely,
-    rmerge,
-)
 from .files import (
     decode_pdf,
     encode_pdf,
@@ -41,6 +25,20 @@ from .utils import (
     remove_dict_nulls,
     snake_case,
     update_dict,
+    convert_month_year_to_date,
+    # get_state_population,
+    # get_state_current_population,
+    end_of_month,
+    end_of_year,
+    end_of_period_timeseries,
+    months_elapsed,
+    reverse_dataframe,
+    set_training_period,
+    format_billions,
+    format_millions,
+    format_thousands,
+    sorted_nicely,
+    rmerge,
 )
 
 __all__ = [
@@ -57,8 +55,8 @@ __all__ = [
     'remove_dict_nulls',
     'snake_case',
     'update_dict',
-    'get_state_population',
-    'get_state_current_population',
+    # 'get_state_population',
+    # 'get_state_current_population',
     'kebab_case',
     'end_of_month',
     'end_of_year',

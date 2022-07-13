@@ -1,13 +1,13 @@
 """
-Strain Data Endpoints | Cannlytics API | SkunkFx
+Lab Result Data Endpoints | Cannlytics API
 Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
-Created: 5/17/2022
-Updated: 6/7/2022
+Created: 7/10/2022
+Updated: 7/10/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-Description: API endpoints to interface with cannabis strain data.
+Description: API endpoints to interface with cannabis lab results data.
 """
 # External imports.
 import json
@@ -21,6 +21,11 @@ from cannlytics.firebase import (
     get_document,
 )
 from cannlytics.utils.utils import kebab_case
+
+
+def get_lab_results_filter():
+    """Get any lab results filter."""
+    raise NotImplementedError
 
 
 ANALYTES = [
@@ -73,10 +78,10 @@ OPERATIONS = {
 
 
 @api_view(['GET'])
-def strain_data(request, strain_name=None):
-    """Get data about cannabis strains (public API endpoint)."""
+def lab_results_data(request, strain_name=None):
+    """Get lab results data (public API endpoint)."""
     data = []
-    collection = 'public/data/strains'
+    collection = 'public/data/lab_results'
     if request.method == 'GET':
 
         # Get a specific observation.
