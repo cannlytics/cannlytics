@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 5/5/2022
+Updated: 7/12/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains the Cannlytics class,
@@ -19,44 +19,8 @@ from typing import Dict, Optional, Union
 from dotenv import dotenv_values
 
 # Internal imports.
-from .firebase import initialize_firebase
-from .metrc import initialize_metrc
-
-
-class CannlyticsError(Exception):
-    """A base class for Cannlytics system exceptions."""
-
-
-class CannlyticsAPIError(CannlyticsError):
-    """A primary error raised by the Cannlytics API."""
-
-    def __init__(self, response):
-        message = self.get_error_message(response)
-        super().__init__(message)
-        self.response = response
-
-
-    def get_error_message(self, response):
-        """Extract error message from a Cannlytics API response.
-        Args:
-            response (Response): A request response from the Cannlytics API.
-        Returns:
-            (str): Returns any error messages.
-        """
-        try:
-            errors = response.json()
-            if isinstance(errors, list):
-                try:
-                    message = '\n'.join(errors)
-                except TypeError:
-                    message = '\n'.join([x.get('message') for x in errors])
-            elif isinstance(errors, dict):
-                message = errors.get('message')
-            else:
-                message = response.text
-        except (AttributeError, KeyError, ValueError):
-            message = 'Unknown Cannlytics API error'
-        return message
+from cannlytics.firebase import initialize_firebase
+from cannlytics.metrc import initialize_metrc
 
 
 class Cannlytics:
@@ -198,5 +162,8 @@ class Cannlytics:
     # Optional: Make `utils` available through the interface?
 
 
-
     # Future work: Use models that have their own functions.
+
+
+    # TODO: Make data and statistics readily available through
+    # the main Cannlytics class.

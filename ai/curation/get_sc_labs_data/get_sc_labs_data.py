@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Author: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/8/2022
-Updated: 7/9/2022
+Updated: 7/12/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-ai/blob/main/LICENSE>
 
 Description:
@@ -30,6 +30,7 @@ from cannlytics.utils.utils import snake_case
 # from cannlytics.firebase import update_documents
 import pandas as pd
 import requests
+
 
 # Constants.
 BASE = 'https://client.sclabs.com'
@@ -151,7 +152,7 @@ def get_sc_labs_test_results(
                 print('Client not found: %s' % (producer_id))
                 break
 
-        # FIXME: This doesn't appear to be working as intended.
+        # FIXME: This may not be working as intended.
         # Break the iteration if the page max is reached.
         try:
             current_sample = soup.find('h3').text
@@ -212,6 +213,7 @@ def get_sc_labs_test_results(
             total_cbd = values[1].text.split(':')[-1].replace('%', '')
             total_terpenes = values[2].text.split(':')[-1].replace('%', '')
 
+            # FIXME: Do some lab results have blank dates?
             # Create a sample ID.
             sample_id = create_sample_id(producer, product_name, date)
 
@@ -231,7 +233,7 @@ def get_sc_labs_test_results(
                 'total_terpenes': total_terpenes,
             }
             samples.append(sample)
-    
+
     # Return all of the samples for the client.
     return samples
 
@@ -253,21 +255,31 @@ def get_sc_labs_sample_details(sample) -> dict:
     elements = soup.find_all('p', attrs={'class': 'sdp-summary-data'})
     details = parse_data_block(elements)
 
-    # Get the producer details.
-    element = soup.find('div', attrs={'id': 'cultivator-details'})
-    producer_details = parse_data_block(element)
-
     # Format the distributor address.
-    address = details['address'].split('*')[-1].strip()
-    details['distributor_address'] = address
-    details['distributor_city'] = address.split(',')[0]
-    details['distributor_zip_code'] = address.split(' ')[-1]
-
-    # Format the producer address.
-    address = producer_details['address'].split('*')[-1].strip()
-    details['address'] = address
-    details['city'] = address.split(',')[0]
-    details['zip_code'] = address.split(' ')[-1]
+    try:
+        address = details.get('address', '').split('*')[-1].strip()
+        details['distributor_address'] = address
+        details['distributor_city'] = address.split(',')[0]
+        details['distributor_zip_code'] = address.split(' ')[-1]
+    except TypeError:
+        details['distributor_address'] = ''
+        details['distributor_city'] = ''
+        details['distributor_zip_code'] = ''
+    
+    # Get the producer details.
+    try:
+        element = soup.find('div', attrs={'id': 'cultivator-details'})
+        producer_details = parse_data_block(element)
+    
+        # Format the producer address.
+        address = producer_details['address'].split('*')[-1].strip()
+        details['address'] = address
+        details['city'] = address.split(',')[0]
+        details['zip_code'] = address.split(' ')[-1]
+    except TypeError:
+        details['address'] = ''
+        details['city'] = ''
+        details['zip_code'] = ''
 
     # Get the Metrc IDs.
     try:
@@ -277,33 +289,62 @@ def get_sc_labs_sample_details(sample) -> dict:
         details['metrc_ids'] = []
 
     # Get the product type.
-    details['product_type'] = soup.find('p', attrs={'class': 'sdp-producttype'}).text
+    try:
+        details['product_type'] = soup.find('p', attrs={'class': 'sdp-producttype'}).text
+    except AttributeError:
+        details['product_type'] = 'Unknown'
 
     # Get the image.
-    image_url = soup.find('a', attrs={'data-popup': 'fancybox'})['href']
-    details['images'] = [{'url': image_url, 'filename': image_url.split('/')[-1]}]
+    try:
+        image_url = soup.find('a', attrs={'data-popup': 'fancybox'})['href']
+        details['images'] = [{'url': image_url, 'filename': image_url.split('/')[-1]}]
+    except TypeError:
+        details['images'] = []
 
     # Get the date tested.
-    element = soup.find('div', attrs={'class': 'sdp-masthead-data'})
-    mm, dd, yyyy = element.find('p').text.split('/')
-    details['date_tested'] = '-'.join([yyyy, mm, dd])
+    try:
+        element = soup.find('div', attrs={'class': 'sdp-masthead-data'})
+        mm, dd, yyyy = element.find('p').text.split('/')
+        details['date_tested'] = '-'.join([yyyy, mm, dd])
+    except AttributeError:
+        details['date_tested'] = ''
 
     # Get the overall status: Pass / Fail.
-    status = soup.find('p', attrs={'class': 'sdp-result-pass'}).text
-    details['status'] = status.replace('\n', '').strip()
+    try:
+        status = soup.find('p', attrs={'class': 'sdp-result-pass'}).text
+        details['status'] = status.replace('\n', '').strip()
+    except AttributeError:
+        details['status'] = ''
 
     # Format the dates.
-    mm, dd, yyyy = details['date_collected'].split('/')
-    details['date_collected'] = '-'.join([yyyy, mm, dd])
-    mm, dd, yyyy = details['date_received'].split('/')
-    details['date_received'] = '-'.join([yyyy, mm, dd])
+    try:
+        mm, dd, yyyy = details['date_collected'].split('/')
+        details['date_collected'] = '-'.join([yyyy, mm, dd]) 
+    except KeyError:
+        details['date_collected'] = ''
+    try:
+        mm, dd, yyyy = details['date_received'].split('/')
+        details['date_received'] = '-'.join([yyyy, mm, dd])
+    except KeyError:
+        details['date_received'] = ''
     
     # Rename desired fields.
     for key, value in DETAILS.items():
-        details[value] = details.pop(key)
+        try:
+            details[value] = details.pop(key)
+        except KeyError:
+            pass
 
     # Get the CoA ID.
-    details['coa_id'] = soup.find('p', attrs={'class': 'coa-id'}).text.split(':')[-1]
+    try:
+        details['coa_id'] = soup.find('p', attrs={'class': 'coa-id'}).text.split(':')[-1]
+    except AttributeError:
+        details['coa_id'] = ''
+
+    # Remove any keys that begin with a digit.
+    for key in list(details.keys()):
+        if key[0].isdigit():
+            del details[key]
 
     # Optional: Try to get sample_weight.
 
@@ -344,13 +385,21 @@ def get_sc_labs_sample_details(sample) -> dict:
                 result['analysis'] = analysis
             results.append(result)
 
+    # Remove any sample ID that may be in details as it is not needed.
+    try:
+        del details['sample_id']
+    except KeyError:
+        pass
+
     # Aggregate the sample details.
+    if not results:
+        results = None
     data = {'notes': notes, 'results': results}
     return {**data, **details}
 
 
 #-----------------------------------------------------------------------
-# Test the functionality.
+# ✓ Test the core functionality.
 #-----------------------------------------------------------------------
 
 # ✓ Get all test results for a specific client.
@@ -361,7 +410,7 @@ def get_sc_labs_sample_details(sample) -> dict:
 
 
 #-----------------------------------------------------------------------
-# Test full scrape.
+# ✓ Test full scrape.
 #-----------------------------------------------------------------------
 # 1. Discover all SC Labs public clients by scanning:
 #
@@ -376,13 +425,13 @@ def get_sc_labs_sample_details(sample) -> dict:
 #    (b) Save the sample details.
 #-----------------------------------------------------------------------
 
-# FIXME: Figure out how to find all producer IDs.
-PRODUCER_IDS = []
-PRODUCER_IDS.sort()
-PRODUCER_IDS.reverse()
-# PAGES = range(1, 1_000)
-# pages = list(PAGES)
-# pages.reverse()
+# Future work: Figure out a more efficient way to find all producer IDs.
+# PAGES = range(1, 12_000)
+# PRODUCER_IDS = list(PAGES)
+# PRODUCER_IDS.reverse()
+
+# Alternatively, read in the known producer IDs.
+from .sc_labs_producer_ids import PRODUCER_IDS
 
 # 1. and 2. Iterate over potential client pages and client sample pages.
 start = datetime.now()
@@ -390,15 +439,12 @@ clients = []
 errors = []
 test_results = []
 for _id in PRODUCER_IDS:
-    # try:
     results = get_sc_labs_test_results(_id)
     if results:
         test_results += results
-        print('Found all samples for:', _id)
+        print('Found all samples for producer:', _id)
         clients.append(_id)
     sleep(3)
-    # except:
-    #     errors.append(page)
 
 # 2b. Save the results, just in case.
 data = pd.DataFrame(test_results)
@@ -408,25 +454,46 @@ data.to_excel(datafile, index=False)
 end = datetime.now()
 print('Sample collection took:', end - start)
 
-# 3a. Get the sample details for each sample found.
-total = len(test_results)
-for i, test_result in enumerate(test_results):
-    sample = test_result['lab_results_url'].split('/')[-2]
-    print('Collecting (%i/%i):' % (i + 1, total), sample)
-    details = get_sc_labs_sample_details(sample)
-    test_results[i] = {**test_result, **details}
+# Read in the saved test results (useful for debugging).
+start = datetime.now()
+data = pd.read_excel(datafile)
 
-# 3b. Save the results.
-data = pd.DataFrame(test_results)
+# 3a. Get the sample details for each sample found.
+errors = []
+rows = []
+start_row = 13_000
+subset = data.loc[data['results'].isnull()][start_row:]
+total = len(subset)
+for index, values in subset.iterrows():
+    percent = round((index - start_row + 1) * 100 / total, 2)
+    sample = values['lab_results_url'].split('/')[-2]
+    details = get_sc_labs_sample_details(sample)
+    rows.append({**values.to_dict(), **details})
+    if details['results']:
+        print('Results found (%.2f%%) (%i/%i):' % (percent, index - start_row + 1, total), sample)
+    else:
+        print('No results found (%.2f%%) (%i/%i):' % (percent, index + 1, total), sample)
+    sleep(3)
+    
+    # Save the results every 500 iterations, just in case.
+    if index % 500 == 0:
+        data = pd.DataFrame(rows)
+        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+        datafile = f'{RAW_DATA}/sc-lab-results-{timestamp}.xlsx'
+        data.to_excel(datafile, index=False)
+        end = datetime.now()
+
+# 3b. Save the final results.
+data = pd.DataFrame(rows)
 timestamp = datetime.now().isoformat()[:19].replace(':', '-')
 datafile = f'{RAW_DATA}/sc-lab-results-{timestamp}.xlsx'
 data.to_excel(datafile, index=False)
 end = datetime.now()
-print('Complete runtime took:', end - start)
+print('Detail collection took:', end - start)
 
 
 #-----------------------------------------------------------------------
-# Test scrape most recent.
+# TODO: Test scrape most recent.
 #-----------------------------------------------------------------------
 # 1. Discover all SC Labs public clients.
 # 2. Get the most recent 100 samples for each client.

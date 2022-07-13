@@ -7,7 +7,7 @@ Created: 11/8/2021
 Updated: 11/8/2021
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-Description: This module contains Metrc variables that are constant.
+Description: This module contains useful constant.
 """
 
 states = {

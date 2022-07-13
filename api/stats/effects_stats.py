@@ -28,7 +28,7 @@ from cannlytics.stats.stats import (
     get_stats_model,
     predict_stats_model,
 )
-from cannlytics.utils.data import  nonzero_rows
+from cannlytics.utils.utils import  nonzero_rows
 from website.settings import STORAGE_BUCKET
 
 

@@ -28,8 +28,6 @@
   * [Building and running the project with Docker](#docker)
 - [👩‍🔬 Testing](#testing)
 - [🚀 Publishing](#publishing)
-- [❤️ Support](#support)
-- [🏛️ License](#license)
 
 ## 👩‍🏫 Introduction <a name="introduction"></a>
 
@@ -417,34 +415,4 @@ This step provides access to this containerized app from a [Firebase Hosting] UR
 
 ```bash
 firebase deploy --only hosting:production
-```
-
-## ❤️ Support <a name="support"></a>
-
-Cannlytics is made available with ❤️ and <a href="https://opencollective.com/cannlytics-company">your good will</a>. Please consider making a contribution to keep the good work coming. Thank you 🙏
-
-🥞 Bitcoin donation address: 34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6
-
-## 🏛️ License <a name="license"></a>
-
-```
-Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 ```

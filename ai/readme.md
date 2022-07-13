@@ -8,6 +8,8 @@
 
 <https://cannlytics.com/ai>
 
+> [Kreuzberger et. al](https://doi.org/10.48550/arXiv.2205.02302) stipulate, *"The final goal of all industrial machine learning (ML) projects is to develop ML products and rapidly bring them into production."* Cannlytics AI is no exception. The aim of Cannlytics AI is to develop and implement fully-functioning machine learning products for people in the cannabis space to use and interact with.
+
 </div>
 
 <!-- 1. Properly version and share AI models, code, and datasets. -->
@@ -21,7 +23,6 @@
 - [🏃‍♀️ Quickstart](#quickstart)
 - [🪛 Development](#development)
 - [🦾 Automation](#automation)
-- [🏛️ License](#license)
 
 ## 🧑‍💻 Data <a name="name"></a>
 
@@ -124,7 +125,9 @@ Contributions are strongly encouraged. If you know how a new data source can be 
 
 ## 🦾 Automation <a name="automation"></a>
 
-Now for the fun part, automation. These automation routines leverage the [Google Cloud Platform](https://cloud.google.com/) and require enabling [billing](http://console.cloud.google.com/billing/?_ga=2.91797530.1059044588.1636848277-147951098.1631325967), [the Cloud Scheduler API](http://console.cloud.google.com/apis/library/cloudscheduler.googleapis.com?_ga=2.121230088.1059044588.1636848277-147951098.1631325967), and [the Pub/Sub API](http://console.cloud.google.com/apis/library/pubsub.googleapis.com?_ga=2.121230088.1059044588.1636848277-147951098.1631325967). The 3 steps to publish a function, e.g. `get_data_ma`, are:
+Now for the fun part, automation. Automation is needed for machine learning programs to be reliably operationalized and brought into production.
+
+These automation routines leverage the [Google Cloud Platform](https://cloud.google.com/) and require enabling [billing](http://console.cloud.google.com/billing/?_ga=2.91797530.1059044588.1636848277-147951098.1631325967), [the Cloud Scheduler API](http://console.cloud.google.com/apis/library/cloudscheduler.googleapis.com?_ga=2.121230088.1059044588.1636848277-147951098.1631325967), and [the Pub/Sub API](http://console.cloud.google.com/apis/library/pubsub.googleapis.com?_ga=2.121230088.1059044588.1636848277-147951098.1631325967). The 3 steps to publish a function, e.g. `get_data_ma`, are:
 
 1. Create a Pub/Sub topic:
 
@@ -157,27 +160,3 @@ You can run tests with code coverage with `pytest`.
 ```
 pytest --cov=ai tests/
 ``` -->
-
-## 🏛️ License <a name="license"></a>
-
-```
-Copyright (c) 2021-2022 Cannlytics
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```

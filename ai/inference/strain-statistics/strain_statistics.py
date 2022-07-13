@@ -167,6 +167,54 @@ timestamp = datetime.now().isoformat()[:19].replace(':', '-')
 reviews.to_excel(f'{DATA_DIR}/curated-strain-reviews-{timestamp}.xlsx')
 
 
+# Create list of standard strain names to use for standardization.
+STRAIN_NAMES = []
+
+
+def standardize_strain_name(name) -> str:
+    """Standardize a given strain name.
+    Args:
+        name (str): A name to standardize.
+    Returns:
+        (str): A standardized strain name.
+    """
+
+
+    raise NotImplementedError
+
+
+
+# Create list of standard analysis and analyte names to use for standardization.
+ANALYSIS_NAMES = []
+ANALYTE_NAMES = []
+
+
+def standardize_analysis_name(name) -> str:
+    """Standardize an analysis name.
+    Args:
+        name (str): A name to standardize.
+    Returns:
+        (str): A standardized analysis name.
+    """
+
+    raise NotImplementedError
+
+
+
+def standardize_analyte_name(name) -> str:
+    """Standardize an analyte name.
+    Args:
+        name (str): A name to standardize.
+    Returns:
+        (str): A standardized analyte name.
+    """
+
+    raise NotImplementedError
+
+
+
+
+
 
 #-----------------------------------------------------------------------
 # Modeling the data.

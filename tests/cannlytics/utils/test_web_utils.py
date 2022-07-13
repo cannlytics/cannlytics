@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # import pytest
 
 # FIXME:
-from cannlytics.utils.web import (
+from cannlytics.data.web import (
     find_company_address,
     find_company_linkedin,
     find_company_url,

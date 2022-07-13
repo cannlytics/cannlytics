@@ -41,7 +41,7 @@ from cannlytics.firebase import (
     initialize_firebase,
     update_documents,
 )
-from cannlytics.utils.logistics import geocode_addresses
+from cannlytics.data.gis import geocode_addresses
 # from cannlytics.utils import (
 #     convert_month_year_to_date,
 #     end_of_period_timeseries,
@@ -353,7 +353,7 @@ if __name__ == '__main__':
 
     # 1. TODO: Try to find the retailers website. Then:
     # utils.web.get_page_metadata
-    from cannlytics.utils.logistics import get_place_details
+    from cannlytics.data.gis import get_place_details
 
 
 

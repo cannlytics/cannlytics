@@ -1,10 +1,10 @@
 """
-Web Scraping | Cannabis Data Science #73 | 2022-07-06
+PSI Labs Test Result Data Collection
 Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: July 4th, 2022
-Updated: 7/9/2022
+Updated: 7/12/2022
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 
 Description:
@@ -39,12 +39,20 @@ Resources:
     - Web Scraping using Selenium and Python
     URL: <https://www.scrapingbee.com/blog/selenium-python/>
 
+Setup:
+
+    1. Create a data folder `../../.datasets/lab_results/psi_labs/raw_data`.
+
+    2. Download ChromeDriver and put it in your `C:\Python39\Scripts` folder
+    or pass the `executable_path` to the `Service`.
+
+    3. Specify the `PAGES` that you want to collect.
+
 """
 # Standard imports.
 from datetime import datetime
 from hashlib import sha256
 import hmac
-import os
 from time import sleep
 
 # External imports.
@@ -61,9 +69,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 
-# Constants
+# Setup.
+DATA_DIR = '../../.datasets/lab_results/raw_data/psi_labs'
+
+# API Constants
 BASE = 'https://results.psilabs.org/test-results/?page={}'
-PAGES = 4921
+PAGES = range(1, 10) # 4921 total!
 
 # Desired order for output columns.
 COLUMNS = [
@@ -107,11 +118,12 @@ def create_sample_id(private_key, public_key, salt='') -> str:
 # Getting ALL the data.
 #-----------------------------------------------------------------------
 
-def get_psi_labs_test_results(driver, max_delay=3) -> list:
+def get_psi_labs_test_results(driver, max_delay=5, reverse=True) -> list:
     """Get all test results for PSI labs.
     Args:
         driver (WebDriver): A Selenium Chrome WebDiver.
-        max_delay (float): The maximum number of seconds to wait for rendering.
+        max_delay (float): The maximum number of seconds to wait for rendering (optional).
+        reverse (bool): Whether to collect in reverse order, True by default (optional).
     Returns:
         (list): A list of dictionaries of sample data.
     """
@@ -125,6 +137,8 @@ def get_psi_labs_test_results(driver, max_delay=3) -> list:
         print('Failed to load page within %i seconds.' % max_delay)
         return samples
     cards = driver.find_elements(by=By.TAG_NAME, value='sample-card')
+    if reverse:
+        cards.reverse()
     for card in cards:
 
         # Begin getting sample details from the card.
@@ -186,7 +200,7 @@ def get_psi_labs_test_results(driver, max_delay=3) -> list:
     return samples
 
 
-def get_psi_labs_test_result_details(driver, max_delay=3) -> dict:
+def get_psi_labs_test_result_details(driver, max_delay=5) -> dict:
     """Get the test result details for a specific PSI lab result.
     Args:
         driver (WebDriver): A Selenium Chrome WebDiver.
@@ -195,28 +209,37 @@ def get_psi_labs_test_result_details(driver, max_delay=3) -> dict:
         (dict): A dictionary of sample details.
     """
 
+    # Deemed optional:
     # Wait for elements to load, after a maximum delay of X seconds.
     qr_code, coa_urls = None, []
+    # try:
+
+    #     # Wait for the QR code to load.
+    #     detect = EC.presence_of_element_located((By.CLASS_NAME, 'qrcode-link'))
+    #     qr_code_link = WebDriverWait(driver, max_delay).until(detect)
+
+    #     # Get the QR code.
+    #     qr_code = qr_code_link.get_attribute('href')
+
+    #     # Get CoA URLs by finding all links with with `analytics-event="PDF View"`.
+    #     actions = driver.find_elements(by=By.TAG_NAME, value='a')
+    #     coa_urls = []
+    #     for action in actions:
+    #         event = action.get_attribute('analytics-event')
+    #         if event == 'PDF View':
+    #             href = action.get_attribute('href')
+    #             coa_urls.append({'filename': action.text, 'url': href})
+
+    # except TimeoutException:
+    #     print('QR Code not loaded within %i seconds.' % max_delay)
+
+
+    # Wait for the results to load.
     try:
-
-        # Wait for the QR code to load.
-        detect = EC.presence_of_element_located((By.CLASS_NAME, 'qrcode-link'))
-        qr_code_link = WebDriverWait(driver, max_delay).until(detect)
-
-        # Get the QR code.
-        qr_code = qr_code_link.get_attribute('href')
-
-        # Get CoA URLs by finding all links with with `analytics-event="PDF View"`.
-        actions = driver.find_elements(by=By.TAG_NAME, value='a')
-        coa_urls = []
-        for action in actions:
-            event = action.get_attribute('analytics-event')
-            if event == 'PDF View':
-                href = action.get_attribute('href')
-                coa_urls.append({'filename': action.text, 'url': href})
-
+        detect = EC.presence_of_element_located((By.TAG_NAME, 'ng-include'))
+        WebDriverWait(driver, max_delay).until(detect)
     except TimeoutException:
-        print('QR Code not loaded within %i seconds.' % max_delay)
+        print('Results not loaded within %i seconds.' % max_delay)
 
     # Get results for each analysis.
     results = []
@@ -260,6 +283,7 @@ def get_psi_labs_test_result_details(driver, max_delay=3) -> dict:
     return details
 
 
+# FIXME: This function doesn't work well.
 def get_all_psi_labs_test_results(service, pages, pause=0.125, verbose=True):
     """Get ALL of PSI Labs test results.
     Args:
@@ -308,63 +332,61 @@ def get_all_psi_labs_test_results(service, pages, pause=0.125, verbose=True):
 # Test: Data aggregation with `get_all_psi_labs_test_results`.
 #-----------------------------------------------------------------------
 
-# # Specify the full-path to your chromedriver.
-# # You can also put your chromedriver in `C:\Python39\Scripts`.
-# # DRIVER_PATH = '../assets/tools/chromedriver_win32/chromedriver'
-# # full_driver_path = os.path.abspath(DRIVER_PATH)
-# service = Service()
+if __name__ == '__main__':
 
-# # Get all of the results.
-# pages = range(1, 11) # PAGES + 1
-# pause = 0.125
-# runtime = round((len(pages) * 3 + (10 * len(pages) * 3)) / 60, 2)
-# print('Collecting results. Max runtime >', runtime, 'minutes.')
-# start = datetime.now()
-# all_test_results = get_all_psi_labs_test_results(service, pages, pause=pause)
-# data = pd.DataFrame(all_test_results)
-# end = datetime.now()
-# print('Runtime took:', end - start)
+    # Specify the full-path to your chromedriver.
+    # You can also put your chromedriver in `C:\Python39\Scripts`.
+    # DRIVER_PATH = '../assets/tools/chromedriver_win32/chromedriver'
+    # full_driver_path = os.path.abspath(DRIVER_PATH)
+    start = datetime.now()
+    service = Service()
 
-# # Save the results.
-# timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-# datafile = f'../../.datasets/michigan/psi-lab-results-{timestamp}.xlsx'
-# data.to_excel(datafile, index=False)
+    # Create a headless Chrome browser.
+    options = Options()
+    options.headless = True
+    options.add_argument('--window-size=1920,1200')
+    driver = webdriver.Chrome(options=options, service=service)
 
+    # Iterate over all of the pages to get all of the samples.
+    errors = []
+    test_results = []
+    pages = list(PAGES)
+    pages.reverse()
+    for page in pages:
+        print('Getting samples on page:', page)
+        driver.get(BASE.format(str(page)))
+        results = get_psi_labs_test_results(driver)
+        if results:
+            test_results += results
+        else:
+            print('Failed to find samples on page:', page)
+            errors.append(page)
 
-#-----------------------------------------------------------------------
-# Optional: Aggregate the data.
-# In case you compiled the data in shards and need to aggregate.
-#-----------------------------------------------------------------------
+    # Get the details for each sample.
+    rows = []
+    samples = pd.DataFrame(test_results)
+    total = len(samples)
+    for index, values in samples.iterrows():
+        percent = round((index  + 1) / total * 100, 2)
+        print('Collecting (%.2f%%) (%i/%i):' % (percent, index + 1, total), values['product_name'])
+        driver.get(values['lab_results_url'])
+        details = get_psi_labs_test_result_details(driver)
+        rows.append({**values.to_dict(), **details})
+            
+    # Save the results.
+    data = pd.DataFrame(rows)
+    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+    datafile = f'{DATA_DIR}/psi-lab-results-{timestamp}.xlsx'
+    data.to_excel(datafile, index=False)
+    end = datetime.now()
+    print('Runtime took:', end - start)
 
-RAW_DATA = '../../../.datasets/lab_results/raw_data/psi_labs'
-
-# Aggregate lab results data shards.
-data = pd.DataFrame()
-shards = [f for f in os.listdir(RAW_DATA)]
-for shard in shards:
-    shard_data = pd.read_excel('/'.join([RAW_DATA, shard]))
-    data = pd.concat([data, shard_data])
-
-# Remove duplicates.
-data.drop_duplicates(subset='sample_id', keep='last', inplace=True)
-
-# Re-do the sample IDs (if necessary).
-# data['sample_id'] = data.apply(
-#     lambda x: create_sample_id(
-#         x['producer'],
-#         x['product_name'],
-#         x['date_tested'],
-#     )
-# )
-
-# Save the data.
-timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-datafile = f'{RAW_DATA}/psi-labs-test-results-{timestamp}.xlsx'
-data.to_excel(datafile)
+    # Close the browser.
+    driver.quit()
 
 
 #-----------------------------------------------------------------------
-# Preprocessing the Data
+# TODO: Preprocessing the Data
 #-----------------------------------------------------------------------
 
 ANALYSES = {
@@ -387,7 +409,7 @@ DECODINGS = {
 TRAINING_DATA = '../../../.datasets/lab_results/training_data'
 
 # Read in the saved results.
-data = pd.read_excel(datafile)
+# data = pd.read_excel(datafile)
 
 # Optional: Drop rows with no analyses at this point.
 
@@ -398,16 +420,16 @@ data = pd.read_excel(datafile)
 # - `results`
 # - `images`
 # - `coa_urls`
-wide_data = pd.DataFrame()
-long_data = pd.DataFrame()
-for index, row in data.iterrows():
-    series = row.copy()
-    analyses = series['analyses']
-    images = series['images']
-    results = series['results']
-    series.drop(['analyses', 'images', 'results'], inplace=True)
-    if not analyses:
-        continue
+# wide_data = pd.DataFrame()
+# long_data = pd.DataFrame()
+# for index, row in data.iterrows():
+#     series = row.copy()
+#     analyses = series['analyses']
+#     images = series['images']
+#     results = series['results']
+#     series.drop(['analyses', 'images', 'results'], inplace=True)
+#     if not analyses:
+#         continue
 
     # TODO: Iterate over results, cleaning results and adding columns.
     # Future work: Augment results with key, limit, and CAS.

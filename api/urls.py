@@ -22,11 +22,10 @@ from api.base import base
 from api.certificates import certificates
 from api.contacts import contacts
 from api.data import (
-    analysis_data,
-    ccrs_data,
     data,
+    lab_analyses_data,
     lab_data,
-    patent_data,
+    # patent_data,
     regulation_data,
     state_data,
     strain_data,
@@ -87,46 +86,59 @@ urlpatterns = [
     ])),
     path('data', include([
         path('', data.datasets),
-        path('/analyses', analysis_data.analysis_data),
-        path('/analyses/<analysis_id', analysis_data.analysis_data),
 
-        # TODO: Re-design CCRS endpoints around timeseries statistics :)
-        path('/ccrs/areas', ccrs_data.areas),
-        path('/ccrs/contacts', ccrs_data.contacts),
-        path('/ccrs/integrators', ccrs_data.integrators),
-        path('/ccrs/inventory', ccrs_data.inventory),
-        path('/ccrs/inventory_adjustments', ccrs_data.inventory_adjustments),
-        path('/ccrs/plants', ccrs_data.plants),
-        path('/ccrs/plant_destructions', ccrs_data.plant_destructions),
-        path('/ccrs/products', ccrs_data.products),
-        path('/ccrs/lab_results', ccrs_data.lab_results),
-        path('/ccrs/licensees', ccrs_data.licensees),
-        path('/ccrs/sale_headers', ccrs_data.sale_headers),
-        path('/ccrs/sale_details', ccrs_data.sale_details),
-        path('/ccrs/strains', ccrs_data.strains),
-        path('/ccrs/transfers', ccrs_data.transfers),
+        # Analyses data.
+        path('/analyses', lab_analyses_data.analyses_data),
+        path('/analyses/<analysis_id', lab_analyses_data.analyses_data),
+        path('/analytes', lab_analyses_data.analytes_data),
+        path('/analytes/<analyte_id', lab_analyses_data.analytes_data),
 
+        # Optional: Datasets data - Allow users to find available datasets.
+
+        # Optional: Licenses data - Get data about specific licenses.
+
+        # Experimental CCRS data endpoints.
+        # TODO: Re-design CCRS endpoints around timeseries statistics.
+        # path('/ccrs/areas', ccrs_data.areas),
+        # path('/ccrs/contacts', ccrs_data.contacts),
+        # path('/ccrs/integrators', ccrs_data.integrators),
+        # path('/ccrs/inventory', ccrs_data.inventory),
+        # path('/ccrs/inventory_adjustments', ccrs_data.inventory_adjustments),
+        # path('/ccrs/plants', ccrs_data.plants),
+        # path('/ccrs/plant_destructions', ccrs_data.plant_destructions),
+        # path('/ccrs/products', ccrs_data.products),
+        # path('/ccrs/lab_results', ccrs_data.lab_results),
+        # path('/ccrs/licensees', ccrs_data.licensees),
+        # path('/ccrs/sale_headers', ccrs_data.sale_headers),
+        # path('/ccrs/sale_details', ccrs_data.sale_details),
+        # path('/ccrs/strains', ccrs_data.strains),
+        # path('/ccrs/transfers', ccrs_data.transfers),
+
+        # Regulation data.
         path('/regulations', regulation_data.regulation_data),
         path('/regulations/<state>', regulation_data.regulation_data),
 
+        # State data.
         path('/states', state_data.state_data),
-        path('/states/ct', state_data.state_data_ma),
-        path('/states/ma', state_data.state_data_ma),
-        path('/states/ok', state_data.state_data_ma),
-        path('/states/or', state_data.state_data_ma),
-        path('/states/wa', state_data.state_data_ma),
+        # TODO: Dynamically route states.
         # path('/state/<state>', state_data),
-
+        path('/states/ct', state_data.state_data_ct),
+        path('/states/ma', state_data.state_data_ma),
+        path('/states/ok', state_data.state_data_ok),
+        path('/states/or', state_data.state_data_or),
+        path('/states/wa', state_data.state_data_wa),
+        
+        # Strain data.
         path('/strains', include([
             path('', strain_data.strain_data),
             path('/<strain_name>', strain_data.strain_data),
         ])),
 
-        # TODO: Implement patents endpoints.
-        path('/patents', include([
-            path('', patent_data.patent_data),
-            path('/<patent_number>', patent_data.patent_data),
-        ])),
+        # TODO: Implement patents data endpoints.
+        # path('/patents', include([
+        #     path('', patent_data.patent_data),
+        #     path('/<patent_number>', patent_data.patent_data),
+        # ])),
 
     ])),
     path('people', include([

@@ -19,7 +19,7 @@ import pytest
 import sys
 sys.path.append('./')
 sys.path.append('../')
-from cannlytics.utils.data import (
+from cannlytics.data.data import (
     convert_month_year_to_date,
     end_of_month,
     end_of_year,

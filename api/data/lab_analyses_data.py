@@ -1,5 +1,5 @@
 """
-Analysis Data Endpoints | Cannlytics API
+Analyses Data Endpoints | Cannlytics API
 Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
@@ -21,8 +21,47 @@ from cannlytics.firebase import (
 
 
 @api_view(['GET'])
-def analysis_data(request, analysis_id=None):
-    """Get data about lab analyses (public API endpoint)."""
+def analyses_data(request, analysis_id=None):
+    """Get data about lab test analyses (public API endpoint)."""
+    data = []
+    collection = 'public/data/analyses'
+    if request.method == 'GET':
+
+        # Get a specific observation.
+        if analysis_id is not None:
+            data = get_document(f'{collection}/{analysis_id}')
+
+        # Otherwise query observations.
+        else:
+
+            # Define query parameters.
+            filters = []
+            order_by = request.query_params.get('order_by', 'name')
+            limit = request.query_params.get('limit')
+
+            # Optional: Implement more queries the user can use.
+            # Apply user-specified filters.
+            # param = request.query_params.get('param')
+            # if param:
+            #     filters.append({'key': 'param', 'operation': '==', 'value': param})
+
+            # Query and return the docs.
+            data = get_collection(
+                collection,
+                desc=False,
+                filters=filters,
+                limit=limit,
+                order_by=order_by,
+            )
+
+    # Return the data.
+    response = {'success': True, 'data': data}
+    return Response(response, status=200)
+
+
+@api_view(['GET'])
+def analytes_data(request, analysis_id=None):
+    """Get data about lab test analytes (public API endpoint)."""
     data = []
     collection = 'public/data/analyses'
     if request.method == 'GET':

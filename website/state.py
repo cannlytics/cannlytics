@@ -103,7 +103,7 @@ material = {
     "homepage": {
         "hero": {
             "title": "Advanced Statistics and Cannabis Data",
-            "message": "Automated statistics and the finest curated data for your cannabis OP to push the bounds of what is possible. Open-source + open-data + 💖.",
+            "message": "Automated statistics and the finest curated data for your cannabis OP to push the bounds of what is possible. Open-source, decentralized, and made with 💖!",
             "image": "website/images/engine_icons/space_cultivation.svg",
             # "image": "website/images/decoration/data-pipeline.png",
             "primary_action": "Get Started 🌱",
