@@ -46,7 +46,7 @@ from google.cloud.firestore_v1.transforms import DELETE_FIELD
 from pandas import notnull, read_csv, read_excel, DataFrame, Series
 
 # Internal imports.
-from ..utils.utils import get_random_string, snake_case
+from cannlytics.utils import get_random_string, snake_case
 
 # The maximum number of documents to include in batch updates.
 # The official limit is 500, but pushing too close to the limit

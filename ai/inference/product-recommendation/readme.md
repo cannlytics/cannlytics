@@ -27,3 +27,8 @@ The total formula is:
 
 TF-IDF score (w_{ij}) = TF_{ij} * IDF_i
 
+
+## References
+
+- [Machine Learning Operations (MLOps): Overview, Definition, and Architecture](https://doi.org/10.48550/arXiv.2205.02302)
+

@@ -5,11 +5,16 @@ Copyright (c) 2022 Cannlytics
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: July 4th, 2022
 Updated: 7/12/2022
-License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Archive all of the PSI Labs test results.
+    1. Archive all of the PSI Labs test results.
+
+    2. Analyze all of the PSI Labs test results, separating
+    training and testing data to use for prediction models.
+
+    3. Create and use re-usable prediction models.
 
 Data Sources:
 
@@ -50,6 +55,7 @@ Setup:
 
 """
 # Standard imports.
+from ast import literal_eval
 from datetime import datetime
 from hashlib import sha256
 import hmac
@@ -71,6 +77,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 # Setup.
 DATA_DIR = '../../.datasets/lab_results/raw_data/psi_labs'
+TRAINING_DATA = '../../../.datasets/lab_results/training_data'
 
 # API Constants
 BASE = 'https://results.psilabs.org/test-results/?page={}'
@@ -332,57 +339,57 @@ def get_all_psi_labs_test_results(service, pages, pause=0.125, verbose=True):
 # Test: Data aggregation with `get_all_psi_labs_test_results`.
 #-----------------------------------------------------------------------
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    # Specify the full-path to your chromedriver.
-    # You can also put your chromedriver in `C:\Python39\Scripts`.
-    # DRIVER_PATH = '../assets/tools/chromedriver_win32/chromedriver'
-    # full_driver_path = os.path.abspath(DRIVER_PATH)
-    start = datetime.now()
-    service = Service()
+#     # Specify the full-path to your chromedriver.
+#     # You can also put your chromedriver in `C:\Python39\Scripts`.
+#     # DRIVER_PATH = '../assets/tools/chromedriver_win32/chromedriver'
+#     # full_driver_path = os.path.abspath(DRIVER_PATH)
+#     start = datetime.now()
+#     service = Service()
 
-    # Create a headless Chrome browser.
-    options = Options()
-    options.headless = True
-    options.add_argument('--window-size=1920,1200')
-    driver = webdriver.Chrome(options=options, service=service)
+#     # Create a headless Chrome browser.
+#     options = Options()
+#     options.headless = True
+#     options.add_argument('--window-size=1920,1200')
+#     driver = webdriver.Chrome(options=options, service=service)
 
-    # Iterate over all of the pages to get all of the samples.
-    errors = []
-    test_results = []
-    pages = list(PAGES)
-    pages.reverse()
-    for page in pages:
-        print('Getting samples on page:', page)
-        driver.get(BASE.format(str(page)))
-        results = get_psi_labs_test_results(driver)
-        if results:
-            test_results += results
-        else:
-            print('Failed to find samples on page:', page)
-            errors.append(page)
+#     # Iterate over all of the pages to get all of the samples.
+#     errors = []
+#     test_results = []
+#     pages = list(PAGES)
+#     pages.reverse()
+#     for page in pages:
+#         print('Getting samples on page:', page)
+#         driver.get(BASE.format(str(page)))
+#         results = get_psi_labs_test_results(driver)
+#         if results:
+#             test_results += results
+#         else:
+#             print('Failed to find samples on page:', page)
+#             errors.append(page)
 
-    # Get the details for each sample.
-    rows = []
-    samples = pd.DataFrame(test_results)
-    total = len(samples)
-    for index, values in samples.iterrows():
-        percent = round((index  + 1) / total * 100, 2)
-        print('Collecting (%.2f%%) (%i/%i):' % (percent, index + 1, total), values['product_name'])
-        driver.get(values['lab_results_url'])
-        details = get_psi_labs_test_result_details(driver)
-        rows.append({**values.to_dict(), **details})
+#     # Get the details for each sample.
+#     rows = []
+#     samples = pd.DataFrame(test_results)
+#     total = len(samples)
+#     for index, values in samples.iterrows():
+#         percent = round((index  + 1) / total * 100, 2)
+#         print('Collecting (%.2f%%) (%i/%i):' % (percent, index + 1, total), values['product_name'])
+#         driver.get(values['lab_results_url'])
+#         details = get_psi_labs_test_result_details(driver)
+#         rows.append({**values.to_dict(), **details})
             
-    # Save the results.
-    data = pd.DataFrame(rows)
-    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-    datafile = f'{DATA_DIR}/psi-lab-results-{timestamp}.xlsx'
-    data.to_excel(datafile, index=False)
-    end = datetime.now()
-    print('Runtime took:', end - start)
+#     # Save the results.
+#     data = pd.DataFrame(rows)
+#     timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+#     datafile = f'{DATA_DIR}/psi-lab-results-{timestamp}.xlsx'
+#     data.to_excel(datafile, index=False)
+#     end = datetime.now()
+#     print('Runtime took:', end - start)
 
-    # Close the browser.
-    driver.quit()
+#     # Close the browser.
+#     driver.quit()
 
 
 #-----------------------------------------------------------------------
@@ -406,46 +413,170 @@ DECODINGS = {
     'ND': 0,
 }
 
-TRAINING_DATA = '../../../.datasets/lab_results/training_data'
 
 # Read in the saved results.
-# data = pd.read_excel(datafile)
+datafile = f'{DATA_DIR}/aggregated-cannabis-test-results.xlsx'
+data = pd.read_excel(datafile, sheet_name='psi_labs_raw_data')
 
 # Optional: Drop rows with no analyses at this point.
+drop = ['coa_urls', 'date_received', 'method', 'qr_code', 'sample_weight']
+data.drop(drop, axis=1, inplace=True)
+
+# Isolate a training sample.
+sample = data.sample(100, random_state=420)
+
 
 # Create both wide and long data for ease of use.
 # See: https://rstudio-education.github.io/tidyverse-cookbook/tidy.html
-# TODO: Normalize and clean the data. In particular, flatten:
-# - `analyses`
-# - `results`
+# Normalize and clean the data. In particular, flatten:
+# ✓ `analyses`
+# ✓ `results`
 # - `images`
-# - `coa_urls`
-# wide_data = pd.DataFrame()
-# long_data = pd.DataFrame()
-# for index, row in data.iterrows():
-#     series = row.copy()
-#     analyses = series['analyses']
-#     images = series['images']
-#     results = series['results']
-#     series.drop(['analyses', 'images', 'results'], inplace=True)
-#     if not analyses:
-#         continue
+wide_data = pd.DataFrame()
+long_data = pd.DataFrame()
+for index, row in sample.iterrows():
+    series = row.copy()
+    analyses = literal_eval(series['analyses'])
+    images = literal_eval(series['images'])
+    results = literal_eval(series['results'])
+    series.drop(['analyses', 'images', 'results'], inplace=True)
 
-    # TODO: Iterate over results, cleaning results and adding columns.
+    # Code analyses.
+    if not analyses:
+        continue
+    for analysis in analyses:
+        series[analysis] = 1
+    
+    # Add to wide data.
+    wide_data = pd.concat([wide_data, pd.DataFrame([series])])
+
+    # Iterate over results, cleaning results and adding columns.
     # Future work: Augment results with key, limit, and CAS.
+    for result in results:
+
+        # Clean the values.
+        analyte_name = result['name']
+        measurements = result['value'].split(' ')
+        try:
+            measurement = float(measurements[0])
+        except:
+            measurement = None
+        try:
+            units = measurements[1]
+        except:
+            units = None
+        key = snake_case(analyte_name)
+        try:
+            margin_of_error = float(result['margin_of_error'].split(' ')[-1])
+        except:
+            margin_of_error = None
+
+        # Format long data.
+        entry = series.copy()
+        entry['analyte'] = key
+        entry['analyte_name'] = analyte_name
+        entry['result'] = measurement
+        entry['units'] = units
+        entry['margin_of_error'] = margin_of_error
+
+        # Add to long data.
+        long_data = pd.concat([long_data, pd.DataFrame([entry])])
+
+
+# Fill null observations.
+wide_data = wide_data.fillna(0)
+
+# Rename columns
+analyses = {
+    'POT': 'cannabinoids',
+    'RST': 'residual_solvents',
+    'TERP': 'terpenes',
+    'PEST': 'pesticides',
+    'MICRO': 'micro',
+    'MET': 'heavy_metals',
+}
+wide_data.rename(columns=analyses, inplace=True)
+long_data.rename(columns=analyses, inplace=True)
+
+
+#------------------------------------------------------------------------------
+# Processing the data.
+#------------------------------------------------------------------------------
+
+# Calculate totals:
+# - `total_cbd`
+# - `total_thc`
+# - `total_terpenes`
+# - `total_cannabinoids`
+# - `total_cbg`
+# - `total_thcv`
+# - `total_cbc`
+# - `total_cbdv`
+
+
+# Optional: Add `status` variables for pass / fail tests.
+
+
+#------------------------------------------------------------------------------
+# Exploring the data.
+#------------------------------------------------------------------------------
+
+# Count the number of various tests.
+terpenes = wide_data.loc[wide_data['terpenes'] == 1]
+
+# Find all of the analytes.
+analytes = list(long_data.analyte.unique())
+
+# Find all of the product types.
+product_types = list(long_data.product_type.unique())
+
+# Look at cannabinoid distributions by type.
+flower = long_data.loc[long_data['product_type'] == 'Flower']
+flower.loc[flower['analyte'] == '9_thc']['result'].hist(bins=100)
+
+concentrates = long_data.loc[long_data['product_type'] == 'Concentrate']
+concentrates.loc[concentrates['analyte'] == '9_thc']['result'].hist(bins=100)
+
+
+# Look at terpene distributions by type!
+terpene = flower.loc[flower['analyte'] == 'dlimonene']
+terpene['result'].hist(bins=100)
+
+terpene = concentrates.loc[concentrates['analyte'] == 'dlimonene']
+terpene['result'].hist(bins=100)
+
+
+# Find the first occurrences of famous strains.
+gorilla_glue = flower.loc[
+    (flower['product_name'].str.contains('gorilla', case=False)) |
+    (flower['product_name'].str.contains('glu', case=False))    
+]
+
+# Create strain fingerprints: histograms of dominant terpenes.
+compound = gorilla_glue.loc[gorilla_glue['analyte'] == '9_thc']
+compound['result'].hist(bins=100)
+
+
+#------------------------------------------------------------------------------
+# Exploring the data.
+#------------------------------------------------------------------------------
+
+# Future work: Augment results with key, limit, and CAS.
 
 # TODO: Save the curated data, both wide and long data.
 
-# TODO: Clean `results` values and units.
-# E.g. Remove: ± from `margin_of_error`.
 
 # TODO: Standardize the `analyte` names! Ideally with a re-usable function.
 
+
 # TODO: Standardize `analyses`.
+
 
 # TODO: Standardize the `product_type`.
 
+
 # TODO: Standardize `strain_name`.
+
 
 # TODO: Add any new entries to the Cannlypedia:
 # - New `analyses`
@@ -496,6 +627,29 @@ TRAINING_DATA = '../../../.datasets/lab_results/training_data'
 # - total_thc
 # - total_cbd
 # - total_cannabinoids
+
+
+# Calculate THC to CBD ratio.
+
+
+# Calculate average terpene ratios by strain:
+# - beta-pinene to d-limonene ratio
+# - humulene to caryophyllene
+# - linalool and myrcene? (Research these!)
+
+
+# Future work: Add description of why the ratio is meaningful.
+
+
+# Future work: Calculator to determine the number of mg's of each
+# compound are in a given unit of weight.
+# E.g. How much total THC in mg is in an eighth given that it tests X%.
+# mg = percent * 10 * grams
+# mg_per_serving = percent * 10 * grams_per_serving (0.33 suggested?)
+
+
+# TODO: Find parents and crosses of particular strains.
+# E.g. Find all Jack crosses.
 
 
 #-----------------------------------------------------------------------

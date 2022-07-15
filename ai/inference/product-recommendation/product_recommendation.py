@@ -72,6 +72,14 @@ reviews = pd.read_excel(dataset)
 
 
 #-----------------------------------------------------------------------
+# Create a body of knowledge for GLP.
+#-----------------------------------------------------------------------
+
+# Create a body of knowledge from parsing relevant texts.
+# - https://review.mcrlabs.com/#cannabinoids
+
+
+#-----------------------------------------------------------------------
 # The 💐 FloRE, the 🛢️ CoRE, and the 🍪 BoERE
 #-----------------------------------------------------------------------
 # A comprehensive cannabis recommendation engine that estimates

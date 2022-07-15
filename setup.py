@@ -55,7 +55,7 @@ setup(
     long_description=README,
     long_description_content_type='text/markdown',
     name='cannlytics',
-    packages=find_packages(include=['cannlytics']),
+    packages=find_packages(include=['cannlytics', 'cannlytics.*']),
     python_requires='>=3.9',
     setup_requires=setup_requirements,
     test_suite='tests',

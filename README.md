@@ -58,7 +58,7 @@ Cannlytics is made available with ❤️ and your good will. Please consider mak
 ## 🏛️ License <a name="license"></a>
 
 ```
-Copyright (c) 2020-2022 Cannlytics
+Copyright (c) 2020-2022 Cannlytics and the Cannabis Data Science Team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -81,7 +81,7 @@ SOFTWARE.
 
 Please cite the following if you use the code examples in your research:
 
-```
+```bibtex
 @misc{cannlytics2022,
   title={Cannabis Data Science},
   author={Skeate, Keegan and Rice, Charles and O'Sullivan-Sutherland, Candace},
