@@ -4,13 +4,8 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 5/2/2022
+Updated: 7/14/2022
 """
-from .files import (
-    decode_pdf,
-    encode_pdf,
-    get_number_of_lines,
-)
 from .utils import (
     camelcase,
     camel_to_snake,
@@ -39,6 +34,9 @@ from .utils import (
     format_thousands,
     sorted_nicely,
     rmerge,
+    decode_pdf,
+    encode_pdf,
+    get_number_of_lines,
 )
 
 __all__ = [

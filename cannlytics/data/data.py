@@ -8,7 +8,9 @@ Updated: 7/12/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Internal imports.
-from optparse import OptionError
+from datetime import datetime
+from hashlib import sha256
+import hmac
 import os
 from typing import Any, List, Optional
 
@@ -18,6 +20,7 @@ import pandas as pd
 
 # Internal imports.
 from cannlytics.utils import rmerge
+from cannlytics.utils.utils import snake_case
 
 
 DATA_URL = 'https://cannlytics.com/api/data'
@@ -35,11 +38,30 @@ def download_dataset():
 
 
 # TODO:
-def get_data_catalogue():
+def load_dataset():
+    """Load a specific dataset."""
+
+    raise NotImplementedError
+
+
+# TODO:
+def list_datasets():
     """Get the Cannlytics data catalogue."""
 
     raise NotImplementedError
 
+
+# if __name__ == '__main__':
+
+#     # Test listing all of the available datasets.
+#     print(list_datasets())
+
+#     # Load a dataset and print the first observation.
+#     dataset = load_dataset('nsduh')
+#     print(dataset.iloc[0].to_dict())
+
+
+# === GIS ===
 
 # FIXME: Can these 2 functions be combined?
 def get_state_population(
@@ -155,6 +177,23 @@ def shard_datasets(data, directory, count=10_000):
 # Data augmentation tools.
 #-----------------------------------------------------------------------
 
+def create_sample_id(private_key, public_key, salt='') -> str:
+    """Create a hash to be used as a sample ID.
+    The standard is to use:
+        1. `private_key = producer`
+        2. `public_key = product_name`
+        3. `salt = date_tested`
+    Args:
+        private_key (str): A string to be used as the private key.
+        public_key (str): A string to be used as the public key.
+        salt (str): A string to be used as the salt, '' by default (optional).
+    Returns:
+        (str): A sample ID hash.
+    """
+    secret = bytes(private_key, 'UTF-8')
+    message = snake_case(public_key) + snake_case(salt)
+    sample_id = hmac.new(secret, message.encode(), sha256).hexdigest()
+    return sample_id
 
 
 if __name__ == '__main__':
@@ -163,16 +202,29 @@ if __name__ == '__main__':
 
     # TODO: Test each function here!
 
-    # Test `aggregate_datasets`.
-    data_dir = '../../.datasets/lab_results/raw_data/psi_labs'
-    data = aggregate_datasets(data_dir)
+    # Test `aggregate_datasets` with MCR Labs data.
+    data_dir = '../../../.datasets/lab_results/raw_data/mcr_labs'
+    data = aggregate_datasets(data_dir, concat=True)
     subset = data.loc[~data['results'].isnull()]
     subset.drop_duplicates(subset='sample_id', keep='first', inplace=True)
-    subset.to_excel('../../.datasets/lab_results/psi_labs_test_results.xlsx')
+    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+    datafile = f'../../../.datasets/lab_results/mcr_labs_test_results-{timestamp}.xlsx'
+    subset.to_excel(datafile, sheet_name='mcr_labs_raw_data')
+    print(len(subset))
 
-    # Test `aggregate_datasets`.
-    data_dir = '../../.datasets/lab_results/raw_data/sc_labs'
-    data = aggregate_datasets(data_dir)
-    subset = data.loc[~data['results'].isnull()]
-    subset.drop_duplicates(subset='sample_id', keep='first', inplace=True)
-    subset.to_excel('../../.datasets/lab_results/sc_labs_test_results.xlsx')
+    # Test `aggregate_datasets` with PSI Labs data.
+    # data_dir = '../../.datasets/lab_results/raw_data/psi_labs'
+    # data = aggregate_datasets(data_dir)
+    # subset = data.loc[~data['results'].isnull()]
+    # subset.drop_duplicates(subset='sample_id', keep='first', inplace=True)
+    # subset.to_excel('../../.datasets/lab_results/psi_labs_test_results.xlsx')
+
+    # Test `aggregate_datasets` with SC Labs data.
+    # data_dir = '../../.datasets/lab_results/raw_data/sc_labs'
+    # data = aggregate_datasets(data_dir, concat=True)
+    # subset = data.loc[~data['results'].isnull()]
+    # subset.drop_duplicates(subset='sample_id', keep='first', inplace=True)
+    # timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+    # datafile = f'../../.datasets/lab_results/sc_labs_test_results-{timestamp}.xlsx'
+    # subset.to_excel(datafile)
+    # print(len(subset))

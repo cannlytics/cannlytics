@@ -5,7 +5,7 @@ Copyright (c) 2022 Cannlytics
 Author: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/8/2022
 Updated: 7/12/2022
-License: MIT License <https://github.com/cannlytics/cannlytics-ai/blob/main/LICENSE>
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
@@ -36,6 +36,7 @@ import requests
 BASE = 'https://client.sclabs.com'
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
 STATE = 'CA'
+DATA_DIR = '../../../.datasets/lab_results'
 RAW_DATA = '../../../.datasets/lab_results/raw_data/sc_labs'
 TRAINING_DATA = '../../../.datasets/lab_results/training_data'
 
@@ -352,7 +353,7 @@ def get_sc_labs_sample_details(sample) -> dict:
     analyses = []
     results = []
     notes = None
-    cards = soup.find_all('div', attrs={'class': 'analysis-container'})
+    cards = soup.find_all('div', attrs={'class': 'analysis-container'})    
     for element in cards:
 
         # Get the analysis.
@@ -384,6 +385,20 @@ def get_sc_labs_sample_details(sample) -> dict:
                 result[key] = value
                 result['analysis'] = analysis
             results.append(result)
+    
+    # FIXME: If cards is None, then parse results in an older format:
+    if not results:
+        
+        cards = soup.find_all('div', attrs={'class': 'detail-row'})
+        for element in cards:
+            
+            # Get the analysis.
+            
+            # Get the method for the analysis.
+            
+            # Get all of the results for the analysis.
+            # - value, units, margin_of_error, lod, loq
+        
 
     # Remove any sample ID that may be in details as it is not needed.
     try:
@@ -402,11 +417,13 @@ def get_sc_labs_sample_details(sample) -> dict:
 # ✓ Test the core functionality.
 #-----------------------------------------------------------------------
 
-# ✓ Get all test results for a specific client.
-# test_results = get_sc_labs_test_results('2821')
+# if __name__ == '__main__':
 
-# ✓ Get details for a specific sample.
-# sample_details = get_sc_labs_sample_details('858084')
+    # ✓ Get all test results for a specific client.
+    # test_results = get_sc_labs_test_results('2821')
+
+    # ✓ Get details for a specific sample.
+    # sample_details = get_sc_labs_sample_details('858084')
 
 
 #-----------------------------------------------------------------------
@@ -425,71 +442,79 @@ def get_sc_labs_sample_details(sample) -> dict:
 #    (b) Save the sample details.
 #-----------------------------------------------------------------------
 
-# Future work: Figure out a more efficient way to find all producer IDs.
-# PAGES = range(1, 12_000)
-# PRODUCER_IDS = list(PAGES)
-# PRODUCER_IDS.reverse()
+if __name__ == '__main__':
 
-# Alternatively, read in the known producer IDs.
-from .sc_labs_producer_ids import PRODUCER_IDS
+    # Future work: Figure out a more efficient way to find all producer IDs.
+    # PAGES = range(1, 12_000)
+    # PRODUCER_IDS = list(PAGES)
+    # PRODUCER_IDS.reverse()
 
-# 1. and 2. Iterate over potential client pages and client sample pages.
-start = datetime.now()
-clients = []
-errors = []
-test_results = []
-for _id in PRODUCER_IDS:
-    results = get_sc_labs_test_results(_id)
-    if results:
-        test_results += results
-        print('Found all samples for producer:', _id)
-        clients.append(_id)
-    sleep(3)
+    # Alternatively, read in the known producer IDs.
+    # from .sc_labs_producer_ids import PRODUCER_IDS
 
-# 2b. Save the results, just in case.
-data = pd.DataFrame(test_results)
-timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-datafile = f'{RAW_DATA}/sc-lab-results-{timestamp}.xlsx'
-data.to_excel(datafile, index=False)
-end = datetime.now()
-print('Sample collection took:', end - start)
+    # # 1. and 2. Iterate over potential client pages and client sample pages.
+    # start = datetime.now()
+    # clients = []
+    # errors = []
+    # test_results = []
+    # for _id in PRODUCER_IDS:
+    #     results = get_sc_labs_test_results(_id)
+    #     if results:
+    #         test_results += results
+    #         print('Found all samples for producer:', _id)
+    #         clients.append(_id)
+    #     sleep(3)
 
-# Read in the saved test results (useful for debugging).
-start = datetime.now()
-data = pd.read_excel(datafile)
+    # # 2b. Save the results, just in case.
+    # data = pd.DataFrame(test_results)
+    # timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+    # datafile = f'{RAW_DATA}/sc-lab-results-{timestamp}.xlsx'
+    # data.to_excel(datafile, index=False)
+    # end = datetime.now()
+    # print('Sample collection took:', end - start)
 
-# 3a. Get the sample details for each sample found.
-errors = []
-rows = []
-start_row = 13_000
-subset = data.loc[data['results'].isnull()][start_row:]
-total = len(subset)
-for index, values in subset.iterrows():
-    percent = round((index - start_row + 1) * 100 / total, 2)
-    sample = values['lab_results_url'].split('/')[-2]
-    details = get_sc_labs_sample_details(sample)
-    rows.append({**values.to_dict(), **details})
-    if details['results']:
-        print('Results found (%.2f%%) (%i/%i):' % (percent, index - start_row + 1, total), sample)
-    else:
-        print('No results found (%.2f%%) (%i/%i):' % (percent, index + 1, total), sample)
-    sleep(3)
+    # # Read in the saved test results (useful for debugging).
+    datafile = f'{DATA_DIR}/sc_labs_test_results_pending.xlsx'
+    start = datetime.now()
+    data = pd.read_excel(datafile)
     
-    # Save the results every 500 iterations, just in case.
-    if index % 500 == 0:
-        data = pd.DataFrame(rows)
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-        datafile = f'{RAW_DATA}/sc-lab-results-{timestamp}.xlsx'
-        data.to_excel(datafile, index=False)
-        end = datetime.now()
+    import math
 
-# 3b. Save the final results.
-data = pd.DataFrame(rows)
-timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-datafile = f'{RAW_DATA}/sc-lab-results-{timestamp}.xlsx'
-data.to_excel(datafile, index=False)
-end = datetime.now()
-print('Detail collection took:', end - start)
+    # 3a. Get the sample details for each sample found.
+    errors = []
+    rows = []
+    subset = data.loc[data['results'].isnull()]
+    total = len(subset)
+    for index, values in subset[9_000:].iterrows():
+        if not math.isnan(values['results']):
+            continue
+        if index < 5465:
+            continue
+        percent = round((index  + 1) * 100 / total, 2)
+        sample = values['lab_results_url'].split('/')[-2]
+        details = get_sc_labs_sample_details(sample)
+        rows.append({**values.to_dict(), **details})
+        if details['results']:
+            print('Results found (%.2f%%) (%i/%i):' % (percent, index + 1, total), sample)
+        else:
+            print('No results found (%.2f%%) (%i/%i):' % (percent, index + 1, total), sample)
+        sleep(3)
+        
+        # Save every 500 rows just in case.
+        if index % 500 == 0 and index != 0:
+            data = pd.DataFrame(rows)
+            timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+            datafile = f'{RAW_DATA}/sc-lab-results-{timestamp}.xlsx'
+            data.to_excel(datafile, index=False)
+            print('Saved data:', datafile)
+
+    # 3b. Save the final results.
+    data = pd.DataFrame(rows)
+    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+    datafile = f'{RAW_DATA}/sc-lab-results-{timestamp}.xlsx'
+    data.to_excel(datafile, index=False)
+    end = datetime.now()
+    print('Detail collection took:', end - start)
 
 
 #-----------------------------------------------------------------------
@@ -585,3 +610,11 @@ print('Detail collection took:', end - start)
 # TODO: Standardize the analyte names!
 
 # TODO: Standardize `strain_name`.
+
+
+
+#-----------------------------------------------------------------------
+# Future work: Analyzing the data.
+#-----------------------------------------------------------------------
+
+# Research question: Where in California has the most potent flower?
