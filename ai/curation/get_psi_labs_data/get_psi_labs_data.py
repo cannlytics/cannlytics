@@ -517,6 +517,10 @@ long_data.rename(columns=analyses, inplace=True)
 # Optional: Add `status` variables for pass / fail tests.
 
 
+# TODO: Augment with:
+# - lab details: lab, lab_url, lab_license_number, etc.
+
+
 #------------------------------------------------------------------------------
 # Exploring the data.
 #------------------------------------------------------------------------------

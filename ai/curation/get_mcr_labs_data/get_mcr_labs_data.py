@@ -119,14 +119,14 @@ def get_mcr_labs_test_results(
     page_count = get_mcr_labs_sample_count()
     total_pages = page_count['pages']
     if not ending_page:
-        ending_page = total_pages + 1
+        ending_page = total_pages
     if verbose:
         print('Getting samples for pages %i to %i.' % (starting_page, ending_page))
     samples = []
-    for page_id in range(starting_page, ending_page):
+    for page_id in range(starting_page, ending_page + 1):
         sample_data = get_mcr_labs_samples(page_id)
         samples += sample_data
-        if page_id > 1 and page_id < ending_page:
+        if page_id > 1 and page_id <= ending_page:
             sleep(pause)
     if verbose:
         print('Found %i samples.' % len(samples))
@@ -134,13 +134,17 @@ def get_mcr_labs_test_results(
     # Get all of the sample details.
     rows = []
     for i, sample in enumerate(samples):
-        sample_id = sample['lab_results_url'].split('/')[-1]
-        details = get_mcr_labs_sample_details(sample_id)
-        rows.append({**sample, **details})
-        if i > 1:
-            sleep(pause)
-        if verbose:
-            print('Collected sample:', sample_id)
+        try:
+            sample_id = sample['lab_results_url'].split('/')[-1]
+            details = get_mcr_labs_sample_details(sample_id)
+            rows.append({**sample, **details})
+            if i > 1:
+                sleep(pause)
+            if verbose:
+                print('Collected sample:', sample_id)
+        except:
+            print('Failed to collect sample:', sample_id)
+            continue
     
     # Optional: Clean the data after collection?
     # - Map product types.
@@ -261,8 +265,12 @@ def get_mcr_labs_sample_details(sample_id: str) -> dict:
     # Optional: Get product serving size.
 
     # Get the lab.
-    element = soup.find('div', attrs={'class': 'rd_date'})
-    sample['lab'] = strip_whitespace(element.text).split('by ')[-1]
+    try:
+        element = soup.find('div', attrs={'class': 'rd_date'})
+        sample['lab'] = strip_whitespace(element.text).split('by ')[-1]
+    except:
+        print('Failed to find lab:', sample_id)
+        sample['lab'] = ''
 
     # Get sample test results.
     analyses = []
@@ -322,7 +330,15 @@ def get_mcr_labs_sample_details(sample_id: str) -> dict:
     return sample
 
 
+
+# TODO: Augment with:
+# - lab details: lab, lab_url, lab_license_number, etc.
+
+
 # === 3. Archive the data! ===
+
+def main():
+    """Archive MCR Labs data on a periodic basis."""
 
 
 if __name__ == '__main__':
@@ -341,8 +357,8 @@ if __name__ == '__main__':
     # ✓ Get all of the samples.
     print('Getting ALL of the samples.')
     all_results = get_mcr_labs_test_results(
-        starting_page=5,
-        ending_page=25,
+        starting_page=150,
+        ending_page=250,
         pause=0.2,
     )
     timestamp = datetime.now().isoformat()[:19].replace(':', '-')

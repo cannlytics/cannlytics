@@ -36,9 +36,9 @@ import requests
 BASE = 'https://client.sclabs.com'
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
 STATE = 'CA'
-DATA_DIR = '../../../.datasets/lab_results'
-RAW_DATA = '../../../.datasets/lab_results/raw_data/sc_labs'
-TRAINING_DATA = '../../../.datasets/lab_results/training_data'
+DATA_DIR = '.datasets/lab_results'
+RAW_DATA = '.datasets/lab_results/raw_data/sc_labs'
+TRAINING_DATA = '.datasets/lab_results/training_data'
 
 # Pertinent sample details (original key to final key).
 DETAILS = {
@@ -104,6 +104,11 @@ def parse_data_block(div, tag='span') -> dict:
         except AttributeError:
             pass
     return data
+
+
+def strip_whitespace(string):
+    """Strip whitespace from a string."""
+    return string.replace('\n', '').strip()
 
 
 #-----------------------------------------------------------------------
@@ -386,19 +391,48 @@ def get_sc_labs_sample_details(sample) -> dict:
                 result['analysis'] = analysis
             results.append(result)
     
-    # FIXME: If cards is None, then parse results in an older format:
+    # Parse legacy results if no results collected at this stage.
     if not results:
-        
+
+        # Get details.
+        element = soup.find('div', attrs={'id': 'detailQuickView'})
+        items = element.find_all('li')
+        mm, dd, yyyy = items[0].text.split(': ')[-1].split('-')
+        details['date_tested'] = f'{yyyy}-{mm}-{dd}'
+        details['product_type'] = items[-1].text.split(': ')[-1]
+
+        # Get analysis cards.
         cards = soup.find_all('div', attrs={'class': 'detail-row'})
-        for element in cards:
+        for card in cards:
             
             # Get the analysis.
-            
+            title = card.find('h3').text.lower()
+            if 'not tested' in title:
+                continue
+            text = title.split('test')[0]
+            analysis = snake_case(strip_whitespace(text))
+            if analysis == 'label_claims':
+                continue
+
             # Get the method for the analysis.
+            method = card.find('p').text
+            key = '_'.join([analysis, 'method'])
+            details[key] = method
             
+            # FIXME:
             # Get all of the results for the analysis.
             # - value, units, margin_of_error, lod, loq
-        
+            table = card.find('table')
+            rows = table.find_all('tr')
+            for row in rows[1:]:
+                cells = row.find_all('td')
+                result = {}
+                for cell in cells:
+                    key = cell['class'][0].replace('table-', '')
+                    value = cell.text.replace('\n', '').strip()
+                    result[key] = value
+                    result['analysis'] = analysis
+                results.append(result)
 
     # Remove any sample ID that may be in details as it is not needed.
     try:
@@ -566,7 +600,8 @@ if __name__ == '__main__':
 # TODO: Augment lab data:
 # - lab_id
 # - lab_name
-
+# - lab_url
+# - lab_license_number
 
 # TODO: Augment the `state`.
 

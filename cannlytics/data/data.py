@@ -200,17 +200,21 @@ if __name__ == '__main__':
 
     print('Performing tests...')
 
-    # TODO: Test each function here!
+    # TODO: Test each individual function here!
 
     # Test `aggregate_datasets` with MCR Labs data.
     data_dir = '../../../.datasets/lab_results/raw_data/mcr_labs'
     data = aggregate_datasets(data_dir, concat=True)
     subset = data.loc[~data['results'].isnull()]
-    subset.drop_duplicates(subset='sample_id', keep='first', inplace=True)
+    subset.drop_duplicates(
+        subset=['sample_id', 'total_cannabinoids'],
+        keep='last',
+        inplace=True
+    )
     timestamp = datetime.now().isoformat()[:19].replace(':', '-')
     datafile = f'../../../.datasets/lab_results/mcr_labs_test_results-{timestamp}.xlsx'
     subset.to_excel(datafile, sheet_name='mcr_labs_raw_data')
-    print(len(subset))
+    print('Aggregated %i samples.' % len(subset))
 
     # Test `aggregate_datasets` with PSI Labs data.
     # data_dir = '../../.datasets/lab_results/raw_data/psi_labs'

@@ -31,7 +31,10 @@ import requests
 
 # Internal imports.
 try:
-    from cannlytics.utils.constants import state_time_zones
+    from cannlytics.utils.constants import (
+        RANDOM_STRING_CHARS,
+        state_time_zones,
+    )
 except ImportError:
     print('Failed to load constants.')
 
@@ -99,36 +102,6 @@ def format_thousands(value: float, pos: Optional[int] = None) -> str: #pylint: d
     return '%1.0fK' % (value * 1e-3)
 
 
-def sentence_case(s):
-    """
-    Author: Zizouz212 https://stackoverflow.com/a/39969233/5021266
-    License: CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0/
-    """
-    return '. '.join(i.capitalize() for i in s.split('. ')).strip()
-
-
-def snake_case(string: str) -> str:
-    """Turn a given string to snake case.
-    Handles CamelCase, replaces known special characters with
-    preferred namespaces, replaces spaces with underscores,
-    and removes all other nuisance characters.
-    Args:
-        string (str): The string to turn to snake case.
-    Returns:
-        (str): A snake case string.
-    """
-    key = string.replace(' ', '_')
-    key = key.replace('&', 'and')
-    key = key.replace('%', 'percent')
-    key = key.replace('#', 'number')
-    key = key.replace('$', 'dollars')
-    key = key.replace('/', 'to')
-    key = key.replace(r'\\', '_').lower()
-    key = sub('[!@#$%^&*()[]{};:,./<>?\|`~-=+]', ' ', key)
-    keys = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', key)
-    return '_'.join(map(str.lower, keys))
-
-
 def get_keywords(string: str) -> List[str]:
     """Get keywords for a given string.
     Args:
@@ -141,8 +114,6 @@ def get_keywords(string: str) -> List[str]:
     keywords = list(set(keywords))
     return keywords
 
-
-RANDOM_STRING_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 
 def get_random_string(length, allowed_chars=RANDOM_STRING_CHARS):
     """
@@ -184,6 +155,41 @@ def get_random_string(length, allowed_chars=RANDOM_STRING_CHARS):
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     """
     return ''.join(secrets.choice(allowed_chars) for i in range(length))
+
+
+def sentence_case(s):
+    """
+    Author: Zizouz212 https://stackoverflow.com/a/39969233/5021266
+    License: CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0/
+    """
+    return '. '.join(i.capitalize() for i in s.split('. ')).strip()
+
+
+def snake_case(string: str) -> str:
+    """Turn a given string to snake case.
+    Handles CamelCase, replaces known special characters with
+    preferred namespaces, replaces spaces with underscores,
+    and removes all other nuisance characters.
+    Args:
+        string (str): The string to turn to snake case.
+    Returns:
+        (str): A snake case string.
+    """
+    key = string.replace(' ', '_')
+    key = key.replace('&', 'and')
+    key = key.replace('%', 'percent')
+    key = key.replace('#', 'number')
+    key = key.replace('$', 'dollars')
+    key = key.replace('/', 'to')
+    key = key.replace(r'\\', '_').lower()
+    key = sub('[!@#$%^&*()[]{};:,./<>?\|`~-=+]', ' ', key)
+    keys = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', key)
+    return '_'.join(map(str.lower, keys))
+
+
+def strip_whitespace(string: str) -> str:
+    """Strip whitespace from a string."""
+    return string.replace('\n', '').strip()
 
 
 #-----------------------------------------------------------------------
