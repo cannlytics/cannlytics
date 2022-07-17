@@ -333,6 +333,9 @@ def get_mcr_labs_sample_details(sample_id: str) -> dict:
 
 # TODO: Augment with:
 # - lab details: lab, lab_url, lab_license_number, etc.
+# - lab_latitude, lab_longitude
+
+# Future work: Calculate average results by state, county, and zip code.
 
 
 # === 3. Archive the data! ===

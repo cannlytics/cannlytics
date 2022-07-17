@@ -602,6 +602,7 @@ if __name__ == '__main__':
 # - lab_name
 # - lab_url
 # - lab_license_number
+# - lab_latitude, lab_longitude
 
 # TODO: Augment the `state`.
 
@@ -647,9 +648,11 @@ if __name__ == '__main__':
 # TODO: Standardize `strain_name`.
 
 
-
 #-----------------------------------------------------------------------
 # Future work: Analyzing the data.
 #-----------------------------------------------------------------------
+
+# Future work: Calculate average results by state, county, and zip code.
+
 
 # Research question: Where in California has the most potent flower?

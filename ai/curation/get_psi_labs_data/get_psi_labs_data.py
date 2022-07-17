@@ -519,6 +519,9 @@ long_data.rename(columns=analyses, inplace=True)
 
 # TODO: Augment with:
 # - lab details: lab, lab_url, lab_license_number, etc.
+# - lab_latitude, lab_longitude
+
+# Future work: Calculate average results by state, county, and zip code.
 
 
 #------------------------------------------------------------------------------
