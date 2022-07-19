@@ -1,0 +1,241 @@
+<!doctype html>
+<html>
+<!--
+  CoA Parser Page | Cannlytics Website
+  Copyright (c) 2022 Cannlytics
+
+  Authors: Keegan Skeate <https://github.com/keeganskeate>
+  Created: 7/17/2022
+  Updated: 7/18/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+  TODO:
+
+    - [ ] Allow users to upload a singular CoA or a folder of CoAs.
+    - [ ] Allow users to enter a CoA URL or a list of CoA URLs.
+    - [ ] Is your favorite lab or LIMS missing? Request an addition to the CoA parsing algorithm.
+    - [ ] Form to report an error parsing a CoA.
+    - [ ] QR code reader for mobile!
+    - [ ] Wire up the form to the API to send and receive data.
+    - [ ] Create a results table and downloadable file.
+    - [ ] Instructions on how to use the API.
+    - [ ] Instructions on how to use the Python SDK.
+-->
+{% extends "website/index.html" %}
+{% load static icon %}
+{% block title %}CoA Doctor | Cannlytics{% endblock %}
+{% block material %}
+
+<!-- Banner -->
+<!-- Optional: Add a background picture! -->
+{% include "website/components/heros/hero_banner.html" with
+  title=''
+  description='Do you need <span class="serif fw-bold fst-italic text-decoration-underline">your</span> CoA data? Of course!<br>Have no fear, CoADoc is here to get you your data.'
+  image_url='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3'
+  image_size="200px"
+  only
+%}
+
+<!-- Breadcrumbs -->
+<section class="container">
+  <div class="d-flex mt-4">
+    <nav
+      style="--bs-breadcrumb-divider: '>';"
+      aria-label="breadcrumb"
+    >
+      <ol class="breadcrumb bg-transparent p-0 mb-0">
+        <li class="breadcrumb-item fs-6 lh-sm">
+          <a
+            class="text-dark serif action"
+            href="{% url 'page' page='data' %}"
+          >
+            Data
+          </a>
+        </li>
+        <li class="breadcrumb-item fs-6 lh-sm">
+          <a
+            class="text-dark serif action"
+            href="{% url 'section' page='data' section='market' %}"
+          >
+            CoA Doc
+          </a>
+        </li>
+      </ol>
+      <div>
+    </div>
+    </nav>
+  </div>
+</section>
+
+<!-- CoA Doc -->
+<section class="container mb-5 mt-3 markdown">
+
+  <!-- TODO: QR code reader for mobile!
+    - [ ] If a known LIMS, get the data.
+    - [ ] If a PDF, show the PDF?
+    - [ ] If a Metrc ID, query lab results.
+  -->
+  <div id="reader" width="600px"></div>
+
+  <!-- TODO: Drag and drop files for PDF -->
+
+  <!-- TODO: URL search / PDF input -->
+  <div
+    id="default-search"
+    class="d-flex flex-wrap flex-md-nowrap pe-0"
+  >
+    <div class="d-flex flex-grow-1 order-2 order-md-1 mb-3">
+      <input
+        id="coa-search-input"
+        class="form-control serif"
+        style="min-width:300px;"
+        placeholder="Search by CoA URL..."
+        list="coa-search-options"
+        name="coa_url"
+        oninput=""
+        aria-label="Search"
+        spellcheck="false"
+        type="text"
+      >
+      <button
+        id="coa-search-button"
+        class="nav-search-button btn btn-default p-0"
+        style="transform:translateX(-32px);width:0;"
+      >
+        {% icon 'search' width="21px" height="21px" class="text-secondary" %}
+      </button>
+      <div>
+        <button
+          id="clear-button"
+          class="btn btn-sm-light btn-lg-light me-2"
+          onclick=""
+          title="Reset search"
+        >
+          {% icon 'rotate-cw' width="21px" height="21px" class="text-secondary" %}
+        </button>
+      </div>
+    </div>
+
+    <!-- TODO: Import PDF or PDFs -->
+    <div
+      class="btn-group btn-group-sm order-1 order-md-2 me-2 mb-3"
+      role="group"
+      aria-label="CoA Import"
+    >
+      <form
+        action="/api/data/coas"
+        method="post"
+        enctype="multipart/form-data"
+        name="coa_doc_import"
+        id="coa-doc-import-form"
+      >
+        {% csrf_token %}
+        <input
+          id="coas-input"
+          type="file"
+          class="visually-hidden"
+          title="Upload .zip or .pdf file."
+          name="coas"
+          required="required"
+          onchange="document.forms['coa-doc-import-form'].submit();"
+        >
+        <button
+          type="button"
+          class="btn btn-sm-light btn-lg-light text-nowrap serif"
+          onclick="document.getElementById('coas-input').click();"
+        >
+          {% icon "upload" width="21px" height="21px" class="me-1" %}
+          Import
+        </button>
+      </form>
+    </div>
+
+    <!-- TODO: Export -->
+    <button
+      id="coa-doc-export-button"
+      class="btn btn-sm-light btn-lg-light text-nowrap serif d-none"
+      onclick=""
+      >
+      {% icon "save" width="21px" height="21px" class="me-1" %}
+      Download
+    </button>
+
+    <!-- Honeypot email :p -->
+    <input class="visually-hidden" name="super_special_email" required="required" value="">
+
+  </div>
+
+  <!-- TODO: Placeholder / instructions -->
+
+
+  <!-- TODO: Data Table -->
+  <div id="data-table">
+    <div
+      id="data-table"
+      class="ag-theme-alpine-dark"
+      style="height: 350px; width:100%;"
+    ></div>
+  </div>
+
+  <!-- TODO: Request a lab or LIMS button -->
+  <p>
+    Is your favorite lab or LIMS missing? Request an addition to the CoA parsing algorithm.
+  </p>
+
+  <!-- TODO: Report an error: -->
+  {% comment %} <div>
+    <p class="fs-6 font-weight-light serif text-left mt-5 mb-4" style="line-height:2;">
+      The page you were looking for can not be found. Can you please
+      report this occurance to support@cannlytics.com?
+    </p>
+    <div class="simple-flex">
+      <button
+        class="btn bg-gradient-green text-white"
+        style="width: 191px;"
+        type="button"
+        onclick="cannlytics.settings.reportError({ 'status_code': 404, 'version': {{ APP_VERSION_NUMBER }} });"
+      >
+        Report Error
+      </button>
+    </div>
+    <p class="fs-6 font-weight-light serif text-left my-4" style="line-height:2;">
+      You can use the following links to
+      try to get to where you need to go.
+    </p>
+    <button
+      class="btn btn-link text-dark"
+      type="button"
+      onclick="goBack()"
+    >
+      Back
+    </button>
+    <a
+      class="btn btn-link text-dark"
+      type="button"
+      href="{% url 'index' %}"
+    >
+      Home
+    </a>
+    <a
+      class="btn btn-link text-dark"
+      type="button"
+      href="{% url 'section' screen='account' section='sign-in' %}"
+    >
+      Login
+    </a>
+  </div> {% endcomment %}
+
+
+</section>
+
+
+
+<!-- TODO: Documentation for CoA Doc API -->
+
+
+<!-- TODO: Documentation for CoA Doc Python SDK -->
+
+
+{% include "website/components/art/vines.html" %}
+{% endblock material %}
+</html>
