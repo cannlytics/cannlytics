@@ -31,7 +31,6 @@ from cannlytics.firebase import access_secret_version
 # Define project namespaces.
 PROJECT_NAME = 'website'
 ROOT_URLCONF = f'{PROJECT_NAME}.urls'
-# SETTINGS_NAME = 'cannlytics_website_settings'
 WSGI_APPLICATION = f'{PROJECT_NAME}.core.wsgi.application'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

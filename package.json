@@ -1,20 +1,21 @@
 {
   "name": "cannlytics",
-  "version": "0.0.19",
+  "version": "0.0.20",
+  "license": "MIT",
+  "homepage": "https://cannlytics.com",
   "description": "Cannlytics includes a LIMS, a console, documentation, a website, and vast amount of tools for cannabis analytics.",
   "keywords": [
     "cannabis",
     "analytics",
+    "data science",
+    "artificial intelligence",
+    "machine learning",
+    "automation",
+    "statistics",
+    "firebase",
     "python",
     "LIMS"
   ],
-  "homepage": "https://cannlytics.com",
-  "bugs": {
-    "url": "https://github.com/cannlytics/cannlytics/issues",
-    "email": "contact@cannlytics.com"
-  },
-  "license": "MIT",
-  "private": true,
   "author": {
     "name": "Keegan Skeate",
     "email": "keegan@cannlytics.com"
@@ -23,6 +24,11 @@
     "type": "git",
     "url": "https://github.com/cannlytics/cannlytics.git"
   },
+  "bugs": {
+    "url": "https://github.com/cannlytics/cannlytics/issues",
+    "email": "contact@cannlytics.com"
+  },
+  "private": true,
   "scripts": {
     "ai:deploy-cannabis-data-daily": "cd ./tools/data/state_data/get_cannabis_data_daily & gcloud functions deploy get_cannabis_data_daily --entry-point get_cannabis_data_daily --runtime python39 --trigger-topic get_cannabis_data_daily --memory 1024MB --timeout 300 --env-vars-file env.yaml & cd ../../../../",
     "console:start": "npm-run-all --parallel console:livereload console:dev console:serve",
@@ -51,20 +57,14 @@
     "website:publish": "npm run website:build & npm run website:container & npm run website:cloud && npm run website:deploy"
   },
   "dependencies": {
-    "@popperjs/core": "^2.10.2",
-    "@primer/octicons": "^11.3.0",
-    "axios": "^0.24.0",
-    "bootstrap": "^5.2.0-beta1",
-    "chart.js": "^2.9.4",
-    "chartjs-chart-box-and-violin-plot": "^2.3.0",
-    "chartjs-chart-matrix": "^0.1.3",
-    "firebase": "^9.6.5",
-    "frappe-charts": "^1.5.5",
-    "idb": "^5.0.8",
-    "particles.js": "^2.0.0",
-    "popper.js": "^1.16.1",
-    "tether": "^2.0.0",
-    "uuid": "^8.3.2"
+    "@popperjs/core": "^2.11.5",
+    "@primer/octicons": "17.3.0",
+    "axios": "0.27.2",
+    "bootstrap": "5.2.0-beta1",
+    "firebase": "9.9.0",
+    "particles.js": "2.0.0",
+    "popper.js": "1.16.1",
+    "tether": "2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",

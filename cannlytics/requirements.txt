@@ -10,12 +10,13 @@ google-cloud-firestore
 googlemaps
 matplotlib
 numpy
-opencv-python
 openpyxl
 pandas
+pdfplumber
 python-dateutil
 python-dotenv
 pyzbar
+selenium
 statsmodels
 ulid-py
 

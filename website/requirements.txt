@@ -1,6 +1,6 @@
 # Python Requirements | Cannlytics Website
 # Created 1/5/2021
-# Updated: 6/2/2022
+# Updated: 7/18/2022
 
 # cannlytics==0.0.10 # Soon to be v0.0.11
 datetime==4.3
@@ -18,10 +18,14 @@ google-cloud-secret-manager==2.8.0
 gunicorn==20.1.0
 Markdown==3.3.4
 pandas==1.4.1
+pdfplumber==0.7.3
+python-dateutil==2.8.2
 python-dotenv==0.19.2
 pymdown-extensions==9.1
 python-markdown-math==0.8
+pyzbar==0.1.9
 scikit-learn==1.1.1
+selenium==4.3.0
 statsmodels==0.13.2
 ulid-py==1.1.0
 waitress==2.1.1

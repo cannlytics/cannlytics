@@ -1,19 +1,19 @@
 """
-CoA Parser
+CoA Doc | A Certificate of Analysis Parser
 Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 7/17/2022
+Updated: 7/18/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
     Certificates of analysis (CoAs) are abundant for cultivators,
-    processors, and retailers, but the data is often locked away.
-    Rich, valuable laboratory data so close, yet so far away!
-    Cannlytics puts these vital data points in your hands by
-    parsing PDFs, finding all the data, standardizing the data,
+    processors, retailers, and consumers too,, but the data is often
+    locked away. Rich, valuable laboratory data so close, yet so far
+    away! Cannlytics puts these vital data points in your hands by
+    parsing PDFs and URLs, finding all the data, standardizing the data,
     and cleanly returning the data to you.
 
     Confident Cannabis data points:
@@ -116,13 +116,18 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import (
+    ElementNotInteractableException,
+    TimeoutException,
+)
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
 from cannlytics.utils import strip_whitespace, snake_case
+
+# TODO: Incorporate MCR Labs and SC Labs data collection routines.
 
 # TODO: Load known analyses and analytes from the Cannlytics library.
 ANALYSES = {
@@ -296,24 +301,27 @@ LIMS = {
     'Confident Cannabis': {
         'algorithm': 'parse_cc_url',
         'key': 'Con\x00dent Cannabis',
-        'qr_code_index': 2,
-        'url': 'https://lims.tagleaf.com',
+        'qr_code_index': 3,
+        'url': 'https://orders.confidentcannabis.com',
     },
     'TagLeaf LIMS': {
         'algorithm': 'parse_tagleaf_url',
         'key': 'lims.tagleaf',
         'qr_code_index': 2,
-        'url': 'https://orders.confidentcannabis.com',
+        'url': 'https://lims.tagleaf.com',
     },
     # TODO: Implement an algorithm to parse any custom CoA.
     'custom': {
         'algorithm': '',
+        'key': 'custom',
+        'qr_code_index': -1,
+        'url': 'https://cannlytics.com',
     }
 }
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
 
 
-class CoAParser:
+class CoADoc:
     """Parse data from certificate of analysis (CoA) PDFs or URLs."""
 
     def __init__(
@@ -335,6 +343,7 @@ class CoAParser:
             lims (str or dict): Specific LIMS to parse CoAs.
         """
         # Setup.
+        self.driver = None
         self.options = None
         self.session = None
         self.service = None
@@ -390,34 +399,37 @@ class CoAParser:
         obj = crop.to_image(resolution=resolution)
         return decode(obj.original)
 
-    def find_pdf_qr_code(
+    def find_pdf_qr_code_url(
             self,
-            doc: Any,
+            pdf: Any,
             image_index: Optional[int] = None,
         ) -> str:
         """Find the QR code given a CoA PDF or page.
         If no `image_index` is provided, then all images are tried to be
         decoded until a QR code is found. If no QR code is found, then a
-        `TypeError` is raised.
+        `IndexError` is raised.
         Args:
             doc (PDF or Page): A pdfplumber PDF or Page.
             image_index (int): A known image index for the QR code.
         Returns:
             (str): The QR code URL.
         """
-        if isinstance(doc, pdfplumber.pdf.PDF):
-            page = doc.pages[0]
+        if isinstance(pdf, str):
+            pdf_file = pdfplumber.open(pdf)
+            page = pdf_file.pages[0]
+        elif isinstance(pdf, pdfplumber.pdf.PDF):
+            page = pdf.pages[0]
         else:
-            page = doc
+            page = pdf
         if image_index:
             img = page.images[image_index]
             image_data = self.decode_pdf_qr_code(page, img)
         else:
             for img in page.images:
                 try:
-                    img = page.images[image_index]
                     image_data = self.decode_pdf_qr_code(page, img)
-                    break
+                    if image_data:
+                        break
                 except:
                     continue
         return image_data[0].data.decode('utf-8')
@@ -429,7 +441,11 @@ class CoAParser:
         Returns:
             (str): An ISO formatted date.
         """
-        date = doc.metadata['CreationDate'].split('D:')[-1]
+        if isinstance(doc, str):
+            pdf_file = pdfplumber.open(doc)
+        else:
+            pdf_file = doc
+        date = pdf_file.metadata['CreationDate'].split('D:')[-1]
         isoformat = f'{date[0:4]}-{date[4:6]}-{date[6:8]}'
         isoformat += f'T{date[8:10]}:{date[10:12]}:{date[12:14]}'
         return isoformat
@@ -449,7 +465,11 @@ class CoAParser:
         """
         known = None
         if isinstance(doc, str):
-            text = doc
+            try:
+                pdf_file = pdfplumber.open(doc)
+                text = pdf_file.pages[0].extract_text()
+            except (FileNotFoundError, OSError):
+                text = doc
         else:
             if isinstance(doc, pdfplumber.pdf.PDF):
                 page = doc.pages[0]
@@ -459,7 +479,7 @@ class CoAParser:
         if lims is None:
             lims = LIMS
         if isinstance(lims, str):
-            if lims in text:
+            if self.lims[lims]['url'] in text:
                 known = lims
         else:
             for key, values in lims.items():
@@ -531,7 +551,8 @@ class CoAParser:
             max_delay: Optional[float] = 7,
             persist: Optional[bool] = False,
         ) -> dict:
-        """Parse a CoA PDF.
+        """Parse a CoA PDF. Searches the best guess image, then all
+        images, for a QR code URL to find results online.
         Args:
             pdf (PDF): A file path to a PDF or a pdfplumber PDF.
             headers (dict): Headers for HTTP requests.
@@ -543,18 +564,23 @@ class CoAParser:
         """
         if lims is None:
             lims = self.lims
-        front_page = pdf.pages[0]
+        if isinstance(pdf, str):
+            pdf_file = pdfplumber.open(pdf)
+        else:
+            pdf_file = pdf
+        front_page = pdf_file.pages[0]
         known_lims = parser.identify_lims(front_page, lims=lims)
         if known_lims:
-            if isinstance(pdf, str):
-                pdf = pdfplumber.open(pdf)
-            date_tested = self.get_pdf_creation_date(pdf)
-            qr_code_index = self.lims[known_lims]['qr_code_index']
-            url = parser.find_pdf_qr_code(pdf, qr_code_index)
+            date_tested = self.get_pdf_creation_date(pdf_file)
+            try:
+                qr_code_index = self.lims[known_lims]['qr_code_index']
+                url = parser.find_pdf_qr_code_url(pdf_file, qr_code_index)
+            except IndexError:
+                url = parser.find_pdf_qr_code_url(pdf_file)
             # Future work: This is double-checking the `known_lims` twice!
             # but it does re-use the code, which is nice.
             data = self.parse_url(
-                pdf,
+                url,
                 headers=headers,
                 lims=known_lims,
                 max_delay=max_delay,
@@ -597,7 +623,7 @@ class CoAParser:
         known_lims = parser.identify_lims(url, lims=lims)
         if known_lims is None:
             # Future work: Parse custom CoAs.
-            # known_lims = 'custom'
+            # E.g. if `known_lims = 'custom'`.`
             raise NotImplementedError
         algorithm_name = LIMS[known_lims]['algorithm']
         algorithm = getattr(self, algorithm_name)
@@ -661,6 +687,7 @@ class CoAParser:
         if self.service is None:
             self.service = Service()
             self.options = Options()
+            # FIXME: DEV: Change in production
             self.options.headless = False
             self.options.add_argument('--window-size=1920,1200')
         if self.driver is None:
@@ -668,6 +695,7 @@ class CoAParser:
                 options=self.options,
                 service=self.service,
             )
+        print('Getting URL:', url)
         self.driver.get(url)
         try:
             el = (By.CLASS_NAME, 'product-box-cc')
@@ -676,8 +704,8 @@ class CoAParser:
         except TimeoutException:
             print('Failed to load page within %i seconds.' % max_delay)
 
-        # Get sample data!
-        data = {'analyses': [], 'results': [], 'lims': lims}
+        # Get sample observation.
+        obs = {'analyses': [], 'results': [], 'lims': lims}
 
         # Find the sample image.
         el = self.driver.find_element(
@@ -687,7 +715,7 @@ class CoAParser:
         img = el.find_element(by=By.TAG_NAME, value='img')
         image_url = img.get_attribute('src')
         filename = image_url.split('/')[-1]
-        data['images'] = [{'url': image_url, 'filename': filename}]
+        obs['images'] = [{'url': image_url, 'filename': filename}]
 
         # Try to get sample details.
         el = self.driver.find_element(
@@ -696,10 +724,10 @@ class CoAParser:
         )
         block = el.text.split('\n')
         product_name = block[0]
-        data['product_name'] = product_name
-        data['lab_id'] = block[1]
-        data['classification'] = block[2]
-        data['strain_name'], data['product_type'] = tuple(block[3].split(', '))
+        obs['product_name'] = product_name
+        obs['lab_id'] = block[1]
+        obs['classification'] = block[2]
+        obs['strain_name'], obs['product_type'] = tuple(block[3].split(', '))
 
         # Get the date tested.
         el = self.driver.find_element(by=By.CLASS_NAME, value='report')
@@ -707,7 +735,7 @@ class CoAParser:
         tooltip = span.get_attribute('uib-tooltip')
         tested_at = tooltip.split(': ')[-1]
         date_tested = pd.to_datetime(tested_at).isoformat()
-        data['date_tested'] = date_tested
+        obs['date_tested'] = date_tested
 
         # Get the CoA URL.
         button = el.find_element(by=By.TAG_NAME, value='button')
@@ -715,7 +743,7 @@ class CoAParser:
         base = url.split('/report')[0]
         coa_url = base.replace('/#!', '') + href
         filename = image_url.split('/')[-1].split('?')[0] + '.pdf'
-        data['coa_urls'] = [{'url': coa_url, 'filename': filename}]
+        obs['coa_urls'] = [{'url': coa_url, 'filename': filename}]
 
         # Find the `analyses` and `results`.
         els = self.driver.find_elements(by=By.CLASS_NAME, value='ibox')
@@ -748,8 +776,8 @@ class CoAParser:
                         value='name',
                     ).text
                     key = snake_case(name)
-                    data[key] = value
-                    data[f'{key}_units'] = units.replace('%', 'percent')
+                    obs[key] = value
+                    obs[f'{key}_units'] = units.replace('%', 'percent')
 
                 # Get the cannabinoids totals.
                 columns = ['name', 'value', 'mg_g']
@@ -762,9 +790,9 @@ class CoAParser:
                         key = columns[i]
                         value = cell.get_attribute('textContent').strip()
                         if key == 'name':
-                            value = self.analytes.get(value, value)
+                            value = self.analytes.get(value, snake_case(value))
                         result[key] = value
-                    data['results'].append(result)
+                    obs['results'].append(result)
 
             # Try to get terpene data.
             if title == 'terpenes':
@@ -778,18 +806,18 @@ class CoAParser:
                         key = columns[i]
                         value = cell.get_attribute('textContent').strip()
                         if key == 'name':
-                            value = self.analytes.get(value, value)
+                            value = self.analytes.get(value, snake_case(value))
                         result[key] = value
-                    data['results'].append(result)
+                    obs['results'].append(result)
 
                 # Try to get predicted aromas.
                 container = el.find_element(by=By.CLASS_NAME, value='row')
                 aromas = container.text.split('\n')
-                data['predicted_aromas'] = [snake_case(x) for x in aromas]
+                obs['predicted_aromas'] = [snake_case(x) for x in aromas]
 
             # Ty to get screening data.
             if title == 'safety':
-                data['status'] = el.find_element(
+                obs['status'] = el.find_element(
                     by=By.CLASS_NAME,
                     value='sample-status',
                 ).text
@@ -801,14 +829,17 @@ class CoAParser:
                     if status == 'Not Tested':
                         continue
                     analysis = snake_case(cells[0].get_attribute('textContent'))
-                    data[f'{analysis}_status'] = status.lower()
-                    data['analyses'].append(analysis)
+                    obs[f'{analysis}_status'] = status.lower()
+                    obs['analyses'].append(analysis)
 
                     # Click the row. and get all of the results from the modal!
                     # Future work: Make these columns dynamic.
                     columns = ['name', 'status', 'value', 'limit', 'loq']
                     if row.get_attribute('class') == 'clickable-content':
-                        row.click()
+                        try:
+                            row.click()
+                        except ElementNotInteractableException:
+                            continue
                         modal = self.driver.find_element(
                             by=By.ID,
                             value='safety-modal-table'
@@ -838,36 +869,60 @@ class CoAParser:
                                     'textContent'
                                 ).strip()
                                 if key == 'name':
-                                    value = self.analytes.get(value, value)
+                                    value = self.analytes.get(value, snake_case(value))
                                 result[key] = value
-                            data['results'].append(result)     
+                            obs['results'].append(result)   
+                        try:
+                            body = self.driver.find_element(
+                                by=By.TAG_NAME,
+                                value='body'
+                            )
+                            body.click()
+                        except ElementNotInteractableException:
+                            continue  
 
             # Try to get lab data.
             producer = ''
             if title == 'order info':
                 img = el.find_element(by=By.TAG_NAME, value='img')
+                producer = el.find_element(
+                    by=By.CLASS_NAME,
+                    value='public-name',
+                ).text
+                license_el = el.find_element(
+                    by=By.TAG_NAME,
+                    value='confident-address',
+                )
+                lab = license_el.find_element(
+                    by=By.CLASS_NAME,
+                    value='address-name',
+                ).text
+                lab_phone = license_el.find_element(
+                    by=By.CLASS_NAME,
+                    value='address-phone',
+                ).text.split(': ')[-1]
+                lab_email = license_el.find_element(
+                    by=By.CLASS_NAME,
+                    value='address-email',
+                ).text
                 block = el.find_element(
                     by=By.TAG_NAME,
                     value='confident-address',
                 ).text.split('\n')
                 street = block[1]
                 address = tuple(block[2].split(', '))
-                producer = el.find_element(
-                    by=By.CLASS_NAME,
-                    value='public-name',
-                ).text
-                data['lab'] = block[0]
-                data['lab_address'] = f'{street} {address}'
-                data['lab_image_url'] = img.get_attribute('src')
-                data['lab_street'] = street
-                data['lab_city'] = address[0]
-                data['lab_state'], data['lab_zipcode'] = tuple(address.split(' '))
-                data['lab_phone'] = block[-2].split(': ')[-1]
-                data['lab_email'] = block[-1]
-                data['producer'] = producer
+                obs['lab'] = lab
+                obs['lab_address'] = f'{street} {", ".join(address)}'
+                obs['lab_image_url'] = img.get_attribute('src')
+                obs['lab_street'] = street
+                obs['lab_city'] = address[0]
+                obs['lab_state'], obs['lab_zipcode'] = tuple(address[-1].split(' '))
+                obs['lab_phone'] = lab_phone
+                obs['lab_email'] = lab_email
+                obs['producer'] = producer
 
         # Return the sample with a freshly minted sample ID.
-        data['sample_id'] = create_sample_id(
+        obs['sample_id'] = create_sample_id(
             private_key=producer,
             public_key=product_name,
             salt=date_tested,
@@ -876,7 +931,7 @@ class CoAParser:
         # Close the Chrome driver once all PDFs have been parsed.
         if not persist:
             self.quit()
-        return data
+        return obs
 
     def parse_tagleaf_pdf(
             self,
@@ -937,10 +992,10 @@ class CoAParser:
         soup = BeautifulSoup(response.content, 'html.parser')
 
         # Get the date tested.
-        data = {'analyses': [], 'results': [], 'lims': lims}
+        obs = {'analyses': [], 'results': [], 'lims': lims}
         el = soup.find('p', attrs={'class': 'produced-statement'})
         date_tested = pd.to_datetime(el.text.split(': ')[-1]).isoformat()
-        data['date_tested'] = date_tested
+        obs['date_tested'] = date_tested
 
         # Get lab details.
         el = soup.find('section', attrs={'class': 'header-container'})
@@ -948,18 +1003,18 @@ class CoAParser:
         pars = el.find_all('p')
         details = [strip_whitespace(x) for x in pars[0].text.split('//')]
         address = details[1]
-        data['lab'] = details[0]
-        data['lab_address'] = address
-        data['lab_image_url'] = img.attrs['src']
-        data['lab_phone'] = details[2].replace('PH: ', '')
+        obs['lab'] = details[0]
+        obs['lab_address'] = address
+        obs['lab_image_url'] = img.attrs['src']
+        obs['lab_phone'] = details[2].replace('PH: ', '')
 
         # Get data from headings.
         text = soup.find_all('p', attrs={'class': 'h5'}, limit=2)
         parts = strip_whitespace(text[0].text.split('//')[0]).split(' (')
         product_name = parts[0]
-        data['product_name'] = product_name
-        data['product_type'] = parts[1].replace(')', '')
-        data['status'] = strip_whitespace(text[1].text.split(':')[-1]).lower()
+        obs['product_name'] = product_name
+        obs['product_type'] = parts[1].replace(')', '')
+        obs['status'] = strip_whitespace(text[1].text.split(':')[-1]).lower()
 
         # Get cannabinoid totals.
         el = soup.find('div', attrs={'class': 'cannabinoid-overview'})
@@ -968,26 +1023,26 @@ class CoAParser:
             pars = row.find_all('p')
             key = snake_case(strip_whitespace(pars[1].text))
             value = strip_whitespace(pars[0].text)
-            data[key] = value
+            obs[key] = value
 
         # Get cultivator and distributor details.
         els = soup.find_all('div', attrs={'class': 'license'})
         values = [x.text for x in els[0].find_all('p')]
         producer = values[1]
-        data['producer'] = producer
-        data['license_number'] = values[3]
-        data['license_type'] = values[5]
+        obs['producer'] = producer
+        obs['license_number'] = values[3]
+        obs['license_type'] = values[5]
         values = [x.text for x in els[1].find_all('p')]
-        data['distributor'] = values[1]
-        data['distributor_license_number'] = values[3]
-        data['distributor_license_type'] = values[5]
+        obs['distributor'] = values[1]
+        obs['distributor_license_number'] = values[3]
+        obs['distributor_license_type'] = values[5]
 
         # Get the sample image.
         el = soup.find('div', attrs={'class': 'sample-photo'})
         img = el.find('img')
         image_url = img['src']
         filename = image_url.split('/')[-1]
-        data['images'] = [{'url': image_url, 'filename': filename}]
+        obs['images'] = [{'url': image_url, 'filename': filename}]
 
         # Get the sample details
         el = soup.find('div', attrs={'class': 'sample-info'})
@@ -998,15 +1053,14 @@ class CoAParser:
             text = par.contents
             value = ''.join([x for x in text if type(x) == NavigableString])
             value = strip_whitespace(value)
-            print(key, value)
 
         # Get the lab ID and metrc ID.
-        data['lab_id'] = data['sample_id']
-        data['metrc_ids'] = [data['source_metrc_uid']]
+        obs['lab_id'] = obs['sample_id']
+        obs['metrc_ids'] = [obs['source_metrc_uid']]
 
         # Format `date_collected` and `date_received` dates.
-        data['date_collected'] = pd.to_datetime(data['date_collected']).isoformat()
-        data['date_received'] = pd.to_datetime(data['date_received']).isoformat()
+        obs['date_collected'] = pd.to_datetime(obs['date_collected']).isoformat()
+        obs['date_received'] = pd.to_datetime(obs['date_received']).isoformat()
 
         # Get the analyses and `{analysis}_status`.
         analyses = []
@@ -1017,12 +1071,12 @@ class CoAParser:
             if i % 2:
                 analysis = analyses[-1]
                 if value != '\xa0':
-                    data[f'{analysis}_status'] = value.lower()
+                    obs[f'{analysis}_status'] = value.lower()
             else:
                 analysis = snake_case(value)
                 analysis = keys.get(analysis, analysis) # Get preferred key.
                 analyses.append(analysis)
-        data['analyses'] = analyses
+        obs['analyses'] = analyses
 
         # Get `{analysis}_method`s.
         els = soup.find_all('div', attrs={'class': 'table-header'})
@@ -1031,7 +1085,7 @@ class CoAParser:
             analysis = keys.get(analysis, analysis) # Get preferred key.
             title = el.find('h3').contents
             text = ''.join([x for x in title if type(x) == NavigableString])
-            data[f'{analysis}_method'] = strip_whitespace(text)
+            obs[f'{analysis}_method'] = strip_whitespace(text)
 
         # Get the `results`, using the table header for the columns,
         # noting that `value` is repeated for `mg_g`.
@@ -1048,23 +1102,23 @@ class CoAParser:
                     key = columns[i]
                     value = strip_whitespace(cell.text)
                     if key == 'name':
-                        value = self.analytes.get(value, value)
+                        value = self.analytes.get(value, snake_case(value))
                     if key == 'value' and mg_g:
                         key = 'mg_g'
                     if key == 'value':
                         mg_g = True
                     result[key] = value
-                data['results'].append(result)
+                obs['results'].append(result)
 
         # Return the sample with a freshly minted sample ID.
-        data['sample_id'] = create_sample_id(
+        obs['sample_id'] = create_sample_id(
             private_key=producer,
             public_key=product_name,
             salt=date_tested,
         )
         if not persist:
             self.quit()
-        return data
+        return obs
 
     def save(self, data=None):
         """Save all CoA data."""
@@ -1086,6 +1140,7 @@ class CoAParser:
             self.session.close()
         except:
             pass
+        self.driver = None
         self.options = None
         self.session = None
         self.service = None
@@ -1148,17 +1203,19 @@ class CoAParser:
 
 if __name__ == '__main__':
 
+    from time import sleep
+
     # Initialize the CoA parser.
     # Future work: Test the parser with different configurations.
-    parser = CoAParser()
+    parser = CoADoc()
 
     # Specify where your data lives for testing.
     DATA_DIR = '../../.datasets/coas'
 
     # TODO: Test all functionality:
-    # - decode_pdf_qr_code
-    # - find_pdf_qr_code
-    # - get_pdf_creation_date
+    # ✓ decode_pdf_qr_code
+    # ✓ find_pdf_qr_code_url
+    # ✓ get_pdf_creation_date
     # - identify_lims
     # - parse
     # - parse_cc_pdf
@@ -1173,20 +1230,65 @@ if __name__ == '__main__':
 
     # TODO: Test specific use cases.
 
-    # # Parse a given directory.
-    # data = parser.parse(DATA_DIR)
+    # Test Confident Cannabis CoAs.
+    cc_coa_pdf = f'{DATA_DIR}/Classic Jack.pdf'
+    cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
 
-    # # Get all PDFs in a given directory.
-    # dr = os.listdir(DATA_DIR)
-    # pdfs = [f for f in dr if os.path.isfile(os.path.join(DATA_DIR, f)) and f.endswith('pdf')]
-    # data = parser.parse(pdfs)
+    # Test TagLeaf LIMS CoAs.
+    tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
+    tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
+    tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
+
+    # # Test `decode_pdf_qr_code` via `find_pdf_qr_code_url`.
+    # qr_code_url = parser.find_pdf_qr_code_url(cc_coa_pdf)
+    # assert qr_code_url.startswith('https')
+    # qr_code_url = parser.find_pdf_qr_code_url(tagleaf_coa_pdf)
+    # assert qr_code_url.startswith('https')
+
+    # # Test `get_pdf_creation_date`.
+    # from datetime import datetime
+    # creation_date = parser.get_pdf_creation_date(cc_coa_pdf)
+    # assert isinstance(pd.to_datetime(creation_date), datetime)
+    # creation_date = parser.get_pdf_creation_date(tagleaf_coa_pdf)
+    # assert isinstance(pd.to_datetime(creation_date), datetime)
+
+    # Test `identify_lims`.
+    # identified_lims = parser.identify_lims(cc_coa_pdf)
+    # assert identified_lims == 'Confident Cannabis'
+    # identified_lims = parser.identify_lims(tagleaf_coa_pdf)
+    # assert identified_lims == 'TagLeaf LIMS'
+
+    # Parse a PDF.
+    data = parser.parse_pdf(cc_coa_pdf)
+
+    # Parse a URL.
+
+    # # FIXME: Parse a Confident Cannabis CoA.
+    # data = parser.parse_cc_pdf(cc_coa_pdf)
+    # sleep(3)
+    # data = parser.parse_cc_url(cc_coa_url)
+
+    # # Parse a TagLeaf LIMS CoA.
+    # data = parser.parse_tagleaf_pdf(tagleaf_coa_pdf)
+    # sleep(3)
+    # data = parser.parse_tagleaf_url(tagleaf_coa_url)
+    # sleep(3)
+    # data = parser.parse_tagleaf_url(tagleaf_coa_short_url)
 
     # # Parse a list of CoA URLs.
-    # urls = [x['lab_result_url'] for x in data]
+    # urls = [cc_coa_url, tagleaf_coa_url]
     # data = parser.parse(urls)
 
-    # Parse a Confident Cannabis CoA.
+    # # Parse a list of CoA PDFs.
+    # files = [cc_coa_pdf, tagleaf_coa_pdf]
+    # data = parser.parse(files)
 
-    # Parse a TagLeaf LIMS CoA.
+    # # Parse all CoAs in a given directory.
+    # data = parser.parse(DATA_DIR)
+
+    # Close the parser.
+    parser.quit()
 
     # Future work: Parse a custom CoA.
+
+    print('✓ All tests finished.')

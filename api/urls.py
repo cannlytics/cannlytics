@@ -23,6 +23,7 @@ from api.certificates import certificates
 from api.contacts import contacts
 from api.data import (
     data,
+    coa_data,
     lab_analyses_data,
     lab_data,
     # patent_data,
@@ -92,6 +93,9 @@ urlpatterns = [
         path('/analyses/<analysis_id', lab_analyses_data.analyses_data),
         path('/analytes', lab_analyses_data.analytes_data),
         path('/analytes/<analyte_id', lab_analyses_data.analytes_data),
+
+        # CoA data and parser.
+        path('/coas', coa_data.coa_data),
 
         # Optional: Datasets data - Allow users to find available datasets.
 

@@ -5,7 +5,7 @@
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 8/21/2021
  * Updated: 1/25/2022
- * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+ * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
 import { reportError } from '../payments/payments.js';
 import { authRequest } from '../utils.js';

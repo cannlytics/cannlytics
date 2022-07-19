@@ -165,6 +165,19 @@ def sentence_case(s):
     return '. '.join(i.capitalize() for i in s.split('. ')).strip()
 
 
+REPLACEMENTS = [
+    {'name': ' ', 'text': '_'},
+    {'name': '&', 'text': 'and'},
+    {'name': '%', 'text': 'percent'},
+    {'name': '#', 'text': 'number'},
+    {'name': '$', 'text': 'dollars'},
+    {'name': '/', 'text': 'to'},
+    {'name': 'alpha', 'text': 'α'},
+    {'name': 'beta', 'text': 'β'},
+    {'name': 'gamma', 'text': 'γ'},
+    {'name': 'delta', 'text': 'Δ'},
+]
+
 def snake_case(string: str) -> str:
     """Turn a given string to snake case.
     Handles CamelCase, replaces known special characters with
@@ -175,13 +188,9 @@ def snake_case(string: str) -> str:
     Returns:
         (str): A snake case string.
     """
-    key = string.replace(' ', '_')
-    key = key.replace('&', 'and')
-    key = key.replace('%', 'percent')
-    key = key.replace('#', 'number')
-    key = key.replace('$', 'dollars')
-    key = key.replace('/', 'to')
-    key = key.replace(r'\\', '_').lower()
+    key = string.replace(r'\\', '_').lower()
+    for x in REPLACEMENTS:
+        key = key.replace(x['text'], x['key'])
     key = sub('[!@#$%^&*()[]{};:,./<>?\|`~-=+]', ' ', key)
     keys = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', key)
     return '_'.join(map(str.lower, keys))

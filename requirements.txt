@@ -21,11 +21,14 @@ gunicorn==20.1.0
 Markdown==3.3.4
 openpyxl==3.0.9
 pandas==1.4.1
+pdfplumber==0.7.3
 python-dateutil==2.8.2
 python-dotenv==0.19.2
 pymdown-extensions==9.1
 python-markdown-math==0.8
+pyzbar==0.1.9
 scikit-learn==1.1.1
+selenium==4.3.0
 statsmodels==0.13.2
 ulid-py==1.1.0
 waitress==2.1.1
