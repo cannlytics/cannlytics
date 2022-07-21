@@ -295,6 +295,18 @@ export function slugify(text) {
     .replace(/ +/g,'-');
 }
 
+export const snakeCase = string => {
+  /**
+   * Convert a given string to snake_case.
+   * Author: CertainPerformance
+   * License: CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>
+   */
+  return string.replace(/\W+/g, ' ')
+    .split(/ |\B(?=[A-Z])/)
+    .map(word => word.toLowerCase())
+    .join('_');
+};
+
 export const validateEmail = (email) => {
   /**
   * Validate that given text is an email.
@@ -351,6 +363,7 @@ export const utils = {
   parameterizeForm,
   setURLParameter,
   serializeForm,
+  snakeCase,
   slugify,
   showNotification,
   sortArrayOfObjects,

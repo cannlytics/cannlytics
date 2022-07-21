@@ -8,9 +8,9 @@
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { checkGoogleLogIn, onAuthChange } from '../firebase.js';
-import { setTableTheme } from '../ui/ui.js';
 import { authRequest, hasClass } from '../utils.js';
 import { contact } from './contact.js';
+import { theme } from '../ui/theme.js';
 
 export const website = {
 
@@ -88,7 +88,7 @@ export const website = {
     }
     const newTheme = (theme === 'light') ? 'dark' : 'light';
     this.setTheme(newTheme);
-    setTableTheme();
+    theme.setTableTheme();
     localStorage.setItem('cannlytics_theme', newTheme);
   },
 

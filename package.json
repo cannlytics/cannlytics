@@ -62,6 +62,7 @@
     "axios": "0.27.2",
     "bootstrap": "5.2.0-beta1",
     "firebase": "9.9.0",
+    "html5-qrcode": "^2.2.1",
     "particles.js": "2.0.0",
     "popper.js": "1.16.1",
     "tether": "2.0.0"

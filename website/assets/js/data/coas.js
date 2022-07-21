@@ -4,6 +4,250 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 7/19/2022
- * Updated: 7/19/2022
+ * Updated: 7/20/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
+import { Html5QrcodeScanner } from 'html5-qrcode';
+import { authRequest, showNotification, snakeCase } from '../utils.js';
+
+export const coaJS = {
+
+  initializeCoADoc() {
+
+    // Wire up clear button.
+    document.getElementById('coa-doc-clear-button').onclick = this.clearCoADocForm;
+
+    // Attach import functionality.
+    const searchInput = document.getElementById('coa-search-input');
+    document.getElementById('coa-doc-search-button').onclick(() => {
+      document.getElementById('coa-url-input').value = searchInput.value;
+    })
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.code === 'Enter') {
+        document.getElementById('coa-url-input').value = searchInput.value;
+      }
+    });
+
+    // TODO: Wire up export data button.
+    // 'coa-doc-export-button'
+
+    // Optional: Wire up report error button.
+    // coa-doc-report-error-button
+    // cannlytics.settings.reportError({ 'status_code': 404, 'version': {{ APP_VERSION_NUMBER }} });
+
+    // Optional: Wire-up request a LIMS/lab button.
+    // request-lims-button
+
+    // Optional: Detect if the user is using mobile.
+
+    // Initialize the QR code scanner.
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+      'reader',
+      { fps: 10, qrbox: {width: 250, height: 250} },
+      /* verbose= */ false,
+    );
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    document.getElementById('reader__camera_permission_button').classList.add('btn btn-sm-light btn-md-light mb-1')
+    document.getElementById('reader__dashboard_section_swaplink').classList.add('app-action');
+
+    // Initialize the drag and drop.
+    $(document).on('dragover', 'html', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    $(document).on('drop', 'html', function(e) {
+      e.preventDefault();
+      e.stopPropagation(); 
+    });
+    $(document).on('dragenter','.box__dragbox', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        document.getElementById('dropbox-text').innerHTML = `Drop your CoA <code>.pdf</code> or a <code>.zip</code> here!`;
+        $('.box__dragbox_background').css({'opacity':'1'})
+    });
+    $(document).on('dragover','.box__dragbox', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        document.getElementById('dropbox-text').innerHTML = `Drop your CoA <code>.pdf</code> or a <code>.zip</code> here!`;
+        $('.box__dragbox_background').css({'opacity':'1'})
+    });
+    $(document).on('dragleave','.box__dragbox', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        document.getElementById('dropbox-text').innerHTML = `Drag a CoA <code>.pdf</code> or a <code>.zip</code> of CoAs to parse.`;
+        $('.box__dragbox_background').css('opacity','0')
+    });
+    $(document).on('drop','.box__dragbox', function (event) {
+        event.stopPropagation();
+        event.preventDefault();
+        document.getElementById('dropbox-text').innerText = 'Uploaded Coa File!';
+        // TODO: Add more button
+        const formData = new FormData();
+        const droppedFiles = event.originalEvent.dataTransfer.files;
+        $.each( droppedFiles, function(i, file) {
+          const { type, name } = file;
+          if (!(type.includes('pdf') || type.includes('zip'))) {
+            const message = 'Invalid file type. Expecting a .pdf or .zip file.';
+            showNotification('Invalid CoA File', message, /* type = */ 'error');
+            return;
+          }
+          const key = snakeCase(name);
+          formData.append(key, file);
+        });
+        uploadCoAFile(formData);
+    });
+
+    // TODO: Render the table placeholder!
+
+  },
+
+  clearCoADocForm() {
+    /**
+     * Clear the CoA Doc form.
+     */
+    document.getElementById('coa-search-input').value = '';
+    // TODO: Clear any uploaded files.
+    $('.box__dragbox_background').css('opacity', '0');
+    document.getElementById('dropbox-text').innerHTML = `Drag a CoA <code>.pdf</code> or a <code>.zip</code>
+        of CoAs to parse.`;
+    // TODO: Clear the data table.
+  },
+
+  addCoAFile() {
+    /**
+     * Add a CoA File to be parsed.
+     */
+    // TODO: Implement!
+  },
+
+  addCoAURL() {
+    /**
+     * Add a CoA URL to be parsed.
+     */
+    // TODO: Implement!
+  },
+
+  removeCoA() {
+    /**
+     * Remove a CoA that is pending parsing.
+     */
+    // TODO: Implement!
+  },
+
+  parseCoAs() {
+    /**
+     * Parse all CoA files and URLs pending parsing.
+     */
+    // TODO: Implement!
+  },
+
+  exportCoADataTable() {
+    /**
+     * Export the CoA data table to a `.xlsx`,
+     * `.json`, or `.csv` file.
+     */
+    // TODO: Implement!
+  },
+
+  renderCoADataTable() {
+    /**
+     * Render the table for CoA data.
+     */
+    // TODO: Implement!
+  },
+
+  renderCoADataTableRow() {
+    /**
+     * Add a row to the CoA data table.
+     */
+    // TODO: Implement!
+
+    // First 6 digits of `sample_id`.
+    // `product_name`
+    // `product_type`
+    // `producer`
+    // `date_tested`
+    // `analyses` as chips
+    // `results.length`
+  },
+
+  reportError() {
+    /**
+     * Report encountered error(s).
+     */
+    // TODO: Implement!
+  },
+
+  requestLIMS() {
+    /**
+     * Request a given lab or LIMS be added to the
+     * CoADoc parsing routine.
+     */
+    // TODO: Implement!
+  },
+
+  uploadCoAFile: uploadCoAFile,  
+
+}
+
+async function uploadCoAFile(formData, formId = 'coa-doc-import-form') {
+  /**
+   * Upload CoA file for processing.
+   * @param {FormData} formData: The CoA file form data.
+   * @param {String} formId: If no form data is provided, then provide a form ID.
+   */
+  if (!formData) formData = new FormData(document.forms[formId]);
+  $.ajax({
+    headers: { 'X-CSRFToken': cannlytics.utils.getCookie('csrftoken') },
+    url: '/api/data/coas',
+    type: 'POST',
+    data: formData,
+    dataType: 'json',
+    //   async: false,
+    cache: false,
+    contentType: false,
+    processData: false,
+    // complete: function() {
+    //   // TODO: Handle post-upload.
+    //   console.log('Finished!');
+    // },
+    success: function(data) {
+      // $form.addClass( data.success == true ? 'is-success' : 'is-error' );
+      // if (!data.success) $errorMsg.text(data.error);
+      console.log('Success!');
+      console.log(data);
+    },
+    error: function() {
+      // TODO: Show an error message.
+    }
+  });
+}
+
+async function onScanSuccess(decodedText, decodedResult) {
+  /**
+   * Hand QR code scan success.
+   * @param {String} decodedText: The decoded QR code text.
+   * @param {Object} decodedResult: The decoded QR code object..
+   */
+  const postData = { urls: [decodedText] };
+  const response = await authRequest('/api/data/coas', postData);
+  if (response.success) {
+
+    // TODO: Render the data in the user interface.
+    console.log('Response data:', response.data);
+
+  } else {
+    const message = 'An error occurred when parsing the CoA. Please try again later or email support.';
+    showNotification('Error Parsing CoA', message, /* type = */ 'error');
+  }
+}
+
+function onScanFailure(error) {
+  /**
+   * Hand QR code scan failure.
+   * @param {Object} error: An error object.
+   */
+  console.warn(`Code scan error = ${error}`);
+  const message = 'An error occurred when parsing the CoA. Please try again later or email support.';
+  showNotification('Error Parsing CoA', message, /* type = */ 'error');
+}

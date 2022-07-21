@@ -166,16 +166,16 @@ def sentence_case(s):
 
 
 REPLACEMENTS = [
-    {'name': ' ', 'text': '_'},
-    {'name': '&', 'text': 'and'},
-    {'name': '%', 'text': 'percent'},
-    {'name': '#', 'text': 'number'},
-    {'name': '$', 'text': 'dollars'},
-    {'name': '/', 'text': 'to'},
-    {'name': 'alpha', 'text': 'α'},
-    {'name': 'beta', 'text': 'β'},
-    {'name': 'gamma', 'text': 'γ'},
-    {'name': 'delta', 'text': 'Δ'},
+    {'text': ' ', 'key': '_'},
+    {'text': '&', 'key': 'and'},
+    {'text': '%', 'key': 'percent'},
+    {'text': '#', 'key': 'number'},
+    {'text': '$', 'key': 'dollars'},
+    {'text': '/', 'key': 'to'},
+    {'text': 'α', 'key': 'alpha'},
+    {'text': 'β', 'key': 'beta'},
+    {'text': 'γ', 'key': 'gamma'},
+    {'text': 'Δ', 'key': 'delta'},
 ]
 
 def snake_case(string: str) -> str:
@@ -636,6 +636,23 @@ def encode_pdf(filename: str) -> str:
         return b64encode(pdf.read())
 
 
+def get_directory_files(
+        target_dir: str,
+        file_type: Optional[str] = 'pdf',
+    ) -> list:
+    """Get all of the files of a specified type in a given directory.
+    Args:
+        target_dir (str): The directory containing the files.
+        file_type (str): The file type extension, 'pdf' by default (optional).
+    Returns:
+    """
+    return [
+        os.path.join(target_dir, f) for f in os.listdir(target_dir) \
+        if os.path.isfile(os.path.join(target_dir, f)) \
+        and f.endswith(file_type)
+    ]
+
+
 def get_blocks(files, size=65536):
     """Get a block of a file by the given size."""
     while True:
@@ -671,18 +688,36 @@ def download_file_from_url(url, destination='', ext=''):
     return file_path
 
 
-def unzip_files(_dir, extension='.zip'):
-    """Unzip all files in a specified folder.
+def unzip_files(zip_dir, extension='.zip'):
+    """Unzip all files in a specified folder. Alternatively,
+    pass a .zip file to extract that file.
     Author: nlavr https://stackoverflow.com/a/69101930
     License: CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/
     """
-    for item in os.listdir(_dir):
-        abs_path = os.path.join(_dir, item)
+    single = ''
+    zip_destinations = []
+    if isinstance(zip_dir, str):
+        parts = zip_dir.split('/')
+        single = parts[-1]
+        doc_dir = '/'.join(parts[:-1])
+        if doc_dir == '':
+            doc_dir = '.'
+    else:
+        doc_dir = zip_dir
+    for item in os.listdir(doc_dir):
+        if single and single not in item:
+            continue
+        abs_path = os.path.join(doc_dir, item)
         if item.endswith(extension):
             file_name = os.path.abspath(abs_path)
+            zip_dest = os.path.join(doc_dir, item)
+            if not os.path.exists(zip_dest):
+                os.makedirs(zip_dest)
             zip_ref = ZipFile(file_name)
-            zip_ref.extractall(_dir)
+            zip_ref.extractall(zip_dest)
             zip_ref.close()
             os.remove(file_name)
+            zip_destinations.append(zip_dest)
         elif os.path.isdir(abs_path):
             unzip_files(abs_path)
+    return zip_destinations

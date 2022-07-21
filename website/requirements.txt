@@ -3,6 +3,7 @@
 # Updated: 7/18/2022
 
 # cannlytics==0.0.10 # Soon to be v0.0.11
+chromedriver-binary==104.0.5112.29.0
 datetime==4.3
 django==4.0
 # django-csp==3.7 # FIXME: Implement CSP.

@@ -24,6 +24,47 @@
 {% extends "website/index.html" %}
 {% load static icon %}
 {% block title %}CoA Doctor | Cannlytics{% endblock %}
+{% block page_css %}
+<script src="{% static 'website/plugins/ag-grid/ag-grid-community.min.noStyle.js' %}"></script>
+<link href="{% static 'website/plugins/ag-grid/ag-grid.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'website/plugins/ag-grid/ag-theme-alpine.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'website/plugins/ag-grid/ag-theme-alpine-dark.min.css' %}" rel="stylesheet" type="text/css"/>
+<style>
+  .box__dragndrop,
+  .box__uploading,
+  .box__success,
+  .box__error {
+    display: none;
+  }
+  .box__dragbox_background {
+    background-color:#ebebeb;
+    opacity:0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transition:'opacity 0.5s ease-in-out'
+  }
+  #reader {
+    border: 3px dashed #c1c1c1;
+    border-radius: 10px;
+  }
+  .box__dragbox {
+    border: 3px dashed #c1c1c1;
+    height: 200px;
+    border-radius: 10px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  .box__dragtext {
+    color: grey;
+    z-index: 1;
+  }
+</style>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+{% endblock page_css %}
 {% block material %}
 
 <!-- Banner -->
@@ -55,9 +96,9 @@
         <li class="breadcrumb-item fs-6 lh-sm">
           <a
             class="text-dark serif action"
-            href="{% url 'section' page='data' section='market' %}"
+            href="{% url 'section' page='data' section='coas' %}"
           >
-            CoA Doc
+            CoADoc
           </a>
         </li>
       </ol>
@@ -70,106 +111,207 @@
 <!-- CoA Doc -->
 <section class="container mb-5 mt-3 markdown">
 
-  <!-- TODO: QR code reader for mobile!
-    - [ ] If a known LIMS, get the data.
-    - [ ] If a PDF, show the PDF?
-    - [ ] If a Metrc ID, query lab results.
-  -->
-  <div id="reader" width="600px"></div>
-
-  <!-- TODO: Drag and drop files for PDF -->
-
-  <!-- TODO: URL search / PDF input -->
+  <!-- URL search / PDF input -->
   <div
-    id="default-search"
-    class="d-flex flex-wrap flex-md-nowrap pe-0"
+    id="coa-input-container"
+    class="col pe-0"
   >
     <div class="d-flex flex-grow-1 order-2 order-md-1 mb-3">
-      <input
-        id="coa-search-input"
-        class="form-control serif"
-        style="min-width:300px;"
-        placeholder="Search by CoA URL..."
-        list="coa-search-options"
-        name="coa_url"
-        oninput=""
-        aria-label="Search"
-        spellcheck="false"
-        type="text"
-      >
-      <button
-        id="coa-search-button"
-        class="nav-search-button btn btn-default p-0"
-        style="transform:translateX(-32px);width:0;"
-      >
-        {% icon 'search' width="21px" height="21px" class="text-secondary" %}
-      </button>
-      <div>
-        <button
-          id="clear-button"
-          class="btn btn-sm-light btn-lg-light me-2"
-          onclick=""
-          title="Reset search"
-        >
-          {% icon 'rotate-cw' width="21px" height="21px" class="text-secondary" %}
-        </button>
-      </div>
-    </div>
-
-    <!-- TODO: Import PDF or PDFs -->
-    <div
-      class="btn-group btn-group-sm order-1 order-md-2 me-2 mb-3"
-      role="group"
-      aria-label="CoA Import"
-    >
       <form
-        action="/api/data/coas"
+        id="coa-url-import-form"
+        name="coa_url_import"
         method="post"
+        action=""
         enctype="multipart/form-data"
-        name="coa_doc_import"
-        id="coa-doc-import-form"
       >
-        {% csrf_token %}
-        <input
-          id="coas-input"
-          type="file"
-          class="visually-hidden"
-          title="Upload .zip or .pdf file."
-          name="coas"
-          required="required"
-          onchange="document.forms['coa-doc-import-form'].submit();"
-        >
-        <button
-          type="button"
-          class="btn btn-sm-light btn-lg-light text-nowrap serif"
-          onclick="document.getElementById('coas-input').click();"
-        >
-          {% icon "upload" width="21px" height="21px" class="me-1" %}
-          Import
-        </button>
+        {% csrf_token %}   
+        <div class="input-group flex-grow-1">
+          <input
+            id="coa-search-input"
+            class="form-control serif"
+            style="min-width:300px;"
+            placeholder="Search by CoA URL..."
+            list="coa-search-options"
+            name="coa_url"
+            oninput=""
+            aria-label="Search"
+            spellcheck="false"
+            type="text"
+          >
+          <input
+            id="coa-url-input"
+            type="text"
+            class="visually-hidden"
+            name="urls"
+            required="required"
+            onchange="cannlytics.data.uploadCoAFile(null, 'coa-url-import-form');"
+          >
+          <button
+            id="coa-doc-search-button"
+            class="btn btn-outline-secondary"
+            title="Search for CoA"
+            type="button"
+          >
+            Search
+          </button>
+          <button
+            id="coa-doc-clear-button"
+            class="btn btn-outline-secondary"
+            title="Reset search"
+            type="button"
+          >
+            Reset
+          </button>
+        </div>
       </form>
+
+      <!-- TODO: Import PDF or PDFs -->
+      {% comment %} <div
+        class="btn-group btn-group-sm order-1 order-md-2 me-2 mb-3"
+        role="group"
+        aria-label="CoA Import"
+      >
+        <form
+          action="/api/data/coas"
+          method="post"
+          enctype="multipart/form-data"
+          name="coa_doc_import"
+          id="coa-doc-import-form"
+        >
+          {% csrf_token %}
+          <input
+            id="coas-input"
+            type="file"
+            class="visually-hidden"
+            name="coas"
+            required="required"
+            onchange="document.forms['coa-doc-import-form'].submit();"
+          >
+          <button
+            id='coa-doc-import-button'
+            type="button"
+            class="btn btn-sm-light btn-lg-light text-nowrap serif"
+            onclick=""
+          >
+            {% icon "upload" width="21px" height="21px" class="me-1" %}
+            Import
+          </button>
+        </form>
+      </div> {% endcomment %}
+
+      <!-- TODO: Export -->
+      <button
+        id="coa-doc-export-button"
+        class="btn btn-sm-light btn-lg-light text-nowrap serif d-none"
+        onclick=""
+        >
+        {% icon "save" width="21px" height="21px" class="me-1" %}
+        Download
+      </button>
+
+      <!-- Honeypot email :p -->
+      <input class="visually-hidden" name="super_special_email" required="required" value="">
+
     </div>
 
-    <!-- TODO: Export -->
-    <button
-      id="coa-doc-export-button"
-      class="btn btn-sm-light btn-lg-light text-nowrap serif d-none"
-      onclick=""
-      >
-      {% icon "save" width="21px" height="21px" class="me-1" %}
-      Download
-    </button>
+    <div class="row row-wrap">
 
-    <!-- Honeypot email :p -->
-    <input class="visually-hidden" name="super_special_email" required="required" value="">
+      <!-- Drag and drop files for PDF -->
+      <!-- 
+        - [ ] Let the user upload multiple files, then click
+        a "Parse" button.
+        - [ ] Fix submit. /api/data/coas
+      -->
+      <form
+        id="coa-doc-import-form"
+        name="coa_doc_import"
+        class="box col"
+        style="min-width:350px;min-height:350px;"
+        method="post"
+        action=""
+        enctype="multipart/form-data"
+      >
+        {% csrf_token %}           
+          <div id="dropbox" class="box__dragbox">
+            <div
+              id="dropbox_background"
+              class="box__dragbox_background"
+            ></div>
+            <p
+              id="dropbox-text"
+              class="box__dragtext jlrFontMediumBold text-dark px-3 lh-md"
+            >
+              Drag a CoA <code>.pdf</code> or a <code>.zip</code>
+              of CoAs to parse.
+              Alternatively, 
+              <button
+                id='coa-doc-import-button'
+                class="btn btn-link text-secondary serif mx-0 px-0"
+                type="button"
+                onclick="document.getElementById('coas-input').click();"
+              >
+                import your CoA file.
+              </button>
+            </p>
+            <div
+              class="btn-group btn-group-sm order-1 order-md-2 me-2 mb-3"
+              role="group"
+              aria-label="CoA Import"
+            >
+            <input
+              id="coas-input"
+              type="file"
+              class="visually-hidden"
+              name="urls"
+              required="required"
+              onchange="cannlytics.data.uploadCoAFile();"
+            >
+          </div>
+            <!-- TODO: Add a upload button 
+            <button class="box__button" type="submit">Upload</button>
+            -->
+        </div>
+        <div class="box__uploading">Uploading…</div>
+        <div class="box__success">Done!</div>
+        <div class="box__error">Error! <span></span>.</div>
+      </form>
+
+      <!-- TODO: QR code reader for mobile!
+        - [ ] If a known LIMS, get the data.
+        - [ ] If a PDF, show the PDF?
+        - [ ] If a Metrc ID, query lab results.
+      -->
+      <div class="col" style="min-width:350px;">
+        <div id="reader" class="text-dark py-2" width="600px"></div>
+      </div>
+
+    </div>
 
   </div>
 
-  <!-- TODO: Placeholder / instructions -->
+  <!-- Loading placeholder -->
+  <div id="loading-placeholder" class="d-none">
+    {% include "website/components/placeholders/loading_placeholder.html" with
+      height='350px'
+      width='100%'
+      only
+    %}
+  </div>
 
+  <!-- No-data Placeholder -->
+  <div id="data-placeholder" class="d-none">
+    {% include "website/components/placeholders/placeholder.html" with
+      image_height="200px"
+      title="No Data"
+      message=""
+      action=""
+      url=""
+      only
+    %}
+  </div>
 
   <!-- TODO: Data Table -->
-  <div id="data-table">
+  <div id="data-table" class="d-none">
     <div
       id="data-table"
       class="ag-theme-alpine-dark"
@@ -177,58 +319,74 @@
     ></div>
   </div>
 
-  <!-- TODO: Request a lab or LIMS button -->
-  <p>
-    Is your favorite lab or LIMS missing? Request an addition to the CoA parsing algorithm.
-  </p>
+  <!-- Notes -->
+  <caption class="markdown">
+    <p class="text-secondary lh-sm" style="max-width:560px;">
+      <small class="serif">
+        <b class="serif">Notes:</b>
+        Certificates of analysis (CoAs) from
+        <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas.py"><small class="serif">known LIMS providers</small></a>
+        can usually be parsed directly from the web. CoAs from
+        yet-to-be-incorporated labs or LIMS can be parsed to the
+        best of CoADoc's abilities.
+      </small>
+    </p>
+  </caption>
 
-  <!-- TODO: Report an error: -->
-  {% comment %} <div>
-    <p class="fs-6 font-weight-light serif text-left mt-5 mb-4" style="line-height:2;">
-      The page you were looking for can not be found. Can you please
-      report this occurance to support@cannlytics.com?
+  <!-- TODO: Request a lab or LIMS button -->
+  {% comment %} <div class="mt-5 mb-4">
+    <h3 class="serif mb-0">Is your favorite lab or LIMS missing?</h3>
+    <p class="fs-6 font-weight-light serif text-left lh-md mt-2 mb-3 text-secondary">
+      Request an addition to the CoA parsing algorithm.
+    </p>
+      <div class="col-auto mb-3">
+        <label
+          for="requested-lims"
+          class="form-label serif"
+        >
+          Lab or LIMS
+        </label>
+        <input
+          id="requested-lims"
+          class="form-control serif"
+          style="max-width:350px;"
+          spellcheck="false"
+          type="text"
+          value=""
+        >
+      </div>
+      <button
+        id="request-lims-button"
+        class="btn bg-gradient-green serif text-white"
+        style="width: 191px;"
+        type="button"
+        onclick=""
+      >
+        Request Addition
+      </button>
+  </div> {% endcomment %}
+
+  <!-- Optional: Report an error functionality. -->
+  {% comment %} <div class="mt-5 mb-4">
+    <h4 class="serif mb-0">Unknown Parsing Error!</h4>
+    <p class="fs-6 font-weight-light serif text-left lh-md mt-2 mb-4 text-secondary">
+      An error occurred when parsing the CoA.<br>
+      Please try again later or email support.
     </p>
     <div class="simple-flex">
       <button
-        class="btn bg-gradient-green text-white"
+        id="coa-doc-report-error-button"
+        class="btn bg-gradient-green serif text-white"
         style="width: 191px;"
         type="button"
-        onclick="cannlytics.settings.reportError({ 'status_code': 404, 'version': {{ APP_VERSION_NUMBER }} });"
+        onclick=""
       >
         Report Error
       </button>
     </div>
-    <p class="fs-6 font-weight-light serif text-left my-4" style="line-height:2;">
-      You can use the following links to
-      try to get to where you need to go.
-    </p>
-    <button
-      class="btn btn-link text-dark"
-      type="button"
-      onclick="goBack()"
-    >
-      Back
-    </button>
-    <a
-      class="btn btn-link text-dark"
-      type="button"
-      href="{% url 'index' %}"
-    >
-      Home
-    </a>
-    <a
-      class="btn btn-link text-dark"
-      type="button"
-      href="{% url 'section' screen='account' section='sign-in' %}"
-    >
-      Login
-    </a>
   </div> {% endcomment %}
 
-
 </section>
-
-
 
 <!-- TODO: Documentation for CoA Doc API -->
 
@@ -238,4 +396,12 @@
 
 {% include "website/components/art/vines.html" %}
 {% endblock material %}
+{% block page_js %}
+  <script>
+
+    // Initalize the CoA Doc!
+    cannlytics.data.initializeCoADoc();
+  
+  </script>
+{% endblock %}
 </html>

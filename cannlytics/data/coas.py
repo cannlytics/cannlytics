@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 7/18/2022
+Updated: 7/20/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -102,10 +102,12 @@ Description:
     then please get in contact with the team: <dev@cannlytics.com>
 """
 # Standard imports.
+from ast import Import
 import os
 from typing import Any, Optional
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString
+from wand.image import Image as wi
 
 # External imports.
 import pandas as pd
@@ -122,10 +124,19 @@ from selenium.common.exceptions import (
 )
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+try:
+    import chromedriver_binary  # Adds chromedriver binary to path.
+except ImportError:
+    print('Proceeding assuming that you have ChromeDriver in your path.')
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
-from cannlytics.utils import strip_whitespace, snake_case
+from cannlytics.utils import (
+    get_directory_files,
+    strip_whitespace,
+    snake_case,
+    unzip_files,
+)
 
 # TODO: Incorporate MCR Labs and SC Labs data collection routines.
 
@@ -171,10 +182,12 @@ ANALYTES = {
     'β-Ocimene': 'ocimene',
     'cis-Nerolidol': 'cis_nerolidol',
     'α-Bisabolol': 'alpha_bisabolol',
+    '3-Carene': 'carene',
     'Δ3-Carene': 'carene',
     'trans-Nerolidol': 'trans_nerolidol',
     'α-Terpinene': 'alpha_terpinene',
     'γ-Terpinene': 'gamma_terpinene',
+    'Terpinen-4-ol': 'terpineol',
     'Caryophyllene Oxide': 'caryophyllene_oxide',
     'Geraniol': 'geraniol',
     'Eucalyptol': 'eucalyptol',
@@ -492,7 +505,7 @@ class CoADoc:
             self,
             data: Any,
             headers: Optional[dict] = {},
-            kind: Optional[str] = 'pdf',
+            kind: Optional[str] = 'url',
             lims: Optional[Any] = None,
             max_delay: Optional[float] = 7,
             persist: Optional[bool] = True,
@@ -502,29 +515,41 @@ class CoADoc:
         Args:
             data (str or list): A directory (str) or a list
                 of PDF file paths or a list of CoA URLs.
-            headers (dict): Headers for HTTP requests.
-            kind (str): The kind of CoA input, PDF or URL.
-            lims (str or dict): Specific LIMS to parse CoAs.
+            headers (dict): Headers for HTTP requests (optional).
+            kind (str): The kind of CoA input, PDF or URL, `url`
+                by default (optional).
+            lims (str or dict): Specific LIMS to parse CoAs (optional).
             max_delay (float): The maximum number of seconds to wait
-                for the page to load.
+                for the page to load (optional).
             persist (bool): Whether to persist the driver
                 and / or session between CoA parses, the
                 default is `True`, with any driver and session
-                being closed at the end.
+                being closed at the end (optional).
         Returns:
             (list): Returns a list of all of the PDFs.
         """
         coas = []
         if isinstance(data, str):
-            docs = [
-                f for f in os.listdir(data) \
-                if os.path.isfile(os.path.join(data, f)) \
-                and f.endswith('pdf')
-            ]
+            if '.zip' in data:
+                doc_dir = unzip_files(data)
+            else:
+                doc_dir = data
+            docs = get_directory_files(data)
         else:
             docs = data
         for doc in docs:
-            if kind == 'pdf':
+            # FIXME: Somehow find unzipped files.
+            if '.zip' in doc and kind != 'url':
+                doc_dir = unzip_files(doc)
+                pdf_files = get_directory_files(doc_dir)
+                for pdf_file in pdf_files:
+                    coa_data = self.parse_pdf(
+                        pdf_file,
+                        lims=lims,
+                        persist=persist,
+                    )
+                    coas.append(coa_data)
+            elif '.pdf' in doc and kind != 'url':
                 coa_data = self.parse_pdf(
                     doc,
                     lims=lims,
@@ -566,17 +591,25 @@ class CoADoc:
             lims = self.lims
         if isinstance(pdf, str):
             pdf_file = pdfplumber.open(pdf)
-        else:
+        elif isinstance(pdf, pdfplumber.pdf.PDF):
             pdf_file = pdf
+        else:
+            with open(wi(file=pdf, resolution=300)) as temp_file:
+                temp_file.save('/tmp/coa.pdf')
+            pdf_file = pdfplumber.open('/tmp/coa.pdf')
         front_page = pdf_file.pages[0]
-        known_lims = parser.identify_lims(front_page, lims=lims)
+
+        # TODO: Try to read a Metrc ID from the PDF and use the Metrc ID
+        # to query the Cannlytics API.
+        
+        known_lims = self.identify_lims(front_page, lims=lims)
         if known_lims:
             date_tested = self.get_pdf_creation_date(pdf_file)
             try:
                 qr_code_index = self.lims[known_lims]['qr_code_index']
-                url = parser.find_pdf_qr_code_url(pdf_file, qr_code_index)
+                url = self.find_pdf_qr_code_url(pdf_file, qr_code_index)
             except IndexError:
-                url = parser.find_pdf_qr_code_url(pdf_file)
+                url = self.find_pdf_qr_code_url(pdf_file)
             # Future work: This is double-checking the `known_lims` twice!
             # but it does re-use the code, which is nice.
             data = self.parse_url(
@@ -620,7 +653,7 @@ class CoADoc:
         """
         if lims is None:
             lims = self.lims
-        known_lims = parser.identify_lims(url, lims=lims)
+        known_lims = self.identify_lims(url, lims=lims)
         if known_lims is None:
             # Future work: Parse custom CoAs.
             # E.g. if `known_lims = 'custom'`.`
@@ -687,9 +720,13 @@ class CoADoc:
         if self.service is None:
             self.service = Service()
             self.options = Options()
-            # FIXME: DEV: Change in production
-            self.options.headless = False
             self.options.add_argument('--window-size=1920,1200')
+            # Uncomment for dev:
+            self.options.headless = False
+            # FIXME: Uncomment for production!!!
+            # self.options.add_argument('--headless')
+            # self.options.add_argument('--disable-gpu')
+            # self.options.add_argument('--no-sandbox')
         if self.driver is None:
             self.driver = webdriver.Chrome(
                 options=self.options,
@@ -724,10 +761,12 @@ class CoADoc:
         )
         block = el.text.split('\n')
         product_name = block[0]
+        strain_name, product_type = tuple(block[3].split(', '))
         obs['product_name'] = product_name
         obs['lab_id'] = block[1]
         obs['classification'] = block[2]
-        obs['strain_name'], obs['product_type'] = tuple(block[3].split(', '))
+        obs['strain_name'] = strip_whitespace(strain_name)
+        obs['product_type'] = strip_whitespace(product_type)
 
         # Get the date tested.
         el = self.driver.find_element(by=By.CLASS_NAME, value='report')
@@ -1216,17 +1255,17 @@ if __name__ == '__main__':
     # ✓ decode_pdf_qr_code
     # ✓ find_pdf_qr_code_url
     # ✓ get_pdf_creation_date
-    # - identify_lims
-    # - parse
+    # ✓ identify_lims
+    # ✓ parse
     # - parse_cc_pdf
     # - parse_cc_url
-    # - parse_pdf
+    # ✓ parse_pdf
     # - parse_tagleaf_pdf
     # - parse_tagleaf_url
-    # - parse_url
+    # ✓ parse_url
     # - save (not implemented yet)
     # - standardize (not implemented yet)
-    # - quit
+    # ✓ quit
 
     # TODO: Test specific use cases.
 
@@ -1259,7 +1298,7 @@ if __name__ == '__main__':
     # assert identified_lims == 'TagLeaf LIMS'
 
     # Parse a PDF.
-    data = parser.parse_pdf(cc_coa_pdf)
+    # data = parser.parse_pdf(cc_coa_pdf)
 
     # Parse a URL.
 
@@ -1285,6 +1324,8 @@ if __name__ == '__main__':
 
     # # Parse all CoAs in a given directory.
     # data = parser.parse(DATA_DIR)
+
+    # TODO: Test parsing all CoAs in a zipped file!
 
     # Close the parser.
     parser.quit()

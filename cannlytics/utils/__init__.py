@@ -12,6 +12,10 @@ from .utils import (
     clean_column_strings,
     clean_dictionary,
     clean_nested_dictionary,
+    download_file_from_url,
+    decode_pdf,
+    encode_pdf,
+    get_directory_files,
     get_keywords,
     get_random_string,
     get_timestamp,
@@ -38,6 +42,7 @@ from .utils import (
     decode_pdf,
     encode_pdf,
     get_number_of_lines,
+    unzip_files,
 )
 
 __all__ = [
@@ -47,6 +52,8 @@ __all__ = [
     'clean_dictionary',
     'clean_nested_dictionary',
     'convert_month_year_to_date',
+    'download_file_from_url',
+    'get_directory_files',
     'get_keywords',
     'get_random_string',
     'get_timestamp',
@@ -72,4 +79,8 @@ __all__ = [
     'decode_pdf',
     'encode_pdf',
     'get_number_of_lines',
+    'unzip_files',
+    'get_number_of_lines',
+    'decode_pdf',
+    'encode_pdf',
 ]

@@ -21,7 +21,7 @@ from rest_framework.response import Response
 import ulid
 
 # Internal imports.
-from api.auth.auth import authenticate_request
+from cannlytics.auth.auth import authenticate_request
 from cannlytics.firebase import (
     get_document,
     update_documents,
