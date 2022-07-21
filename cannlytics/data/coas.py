@@ -10,7 +10,7 @@ License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 Description:
 
     Certificates of analysis (CoAs) are abundant for cultivators,
-    processors, retailers, and consumers too,, but the data is often
+    processors, retailers, and consumers too, but the data is often
     locked away. Rich, valuable laboratory data so close, yet so far
     away! Cannlytics puts these vital data points in your hands by
     parsing PDFs and URLs, finding all the data, standardizing the data,

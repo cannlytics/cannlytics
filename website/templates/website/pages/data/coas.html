@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 7/17/2022
-  Updated: 7/18/2022
+  Updated: 7/21/2022
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
   TODO:
@@ -25,10 +25,14 @@
 {% load static icon %}
 {% block title %}CoA Doctor | Cannlytics{% endblock %}
 {% block page_css %}
-<script src="{% static 'website/plugins/ag-grid/ag-grid-community.min.noStyle.js' %}"></script>
+{% comment %} <script src="{% static 'website/plugins/ag-grid/ag-grid-community.min.noStyle.js' %}"></script>
 <link href="{% static 'website/plugins/ag-grid/ag-grid.min.css' %}" rel="stylesheet" type="text/css"/>
 <link href="{% static 'website/plugins/ag-grid/ag-theme-alpine.min.css' %}" rel="stylesheet" type="text/css"/>
-<link href="{% static 'website/plugins/ag-grid/ag-theme-alpine-dark.min.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'website/plugins/ag-grid/ag-theme-alpine-dark.min.css' %}" rel="stylesheet" type="text/css"/> {% endcomment %}
+ <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+ <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
+ <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
+ {% comment %} <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine-dark.min.css"/> {% endcomment %}
 <style>
   .box__dragndrop,
   .box__uploading,
@@ -57,9 +61,26 @@
     align-items: center;
     position: relative;
   }
+  .box__action {
+    z-index: 1;
+  }
   .box__dragtext {
     color: grey;
     z-index: 1;
+  }
+  .btn-outline-secondary {
+    --bs-btn-focus-shadow-rgb: 150, 230, 161;
+  }
+  .btn-outline-secondary:active,
+  .btn-outline-secondary:focus,
+  .btn-outline-secondary:hover {
+    background-color: rgb(150, 230, 161);
+    border-color: #6CD379;
+  }
+  body.dark .btn-outline-secondary:active,
+  body.dark .btn-outline-secondary:focus,
+  body.dark .btn-outline-secondary:hover {
+    color: #004B09 !important;
   }
 </style>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -116,9 +137,10 @@
     id="coa-input-container"
     class="col pe-0"
   >
-    <div class="d-flex flex-grow-1 order-2 order-md-1 mb-3">
+    <div class="d-flex mb-3">
       <form
         id="coa-url-import-form"
+        class="flex-grow-1"
         name="coa_url_import"
         method="post"
         action=""
@@ -130,7 +152,7 @@
             id="coa-search-input"
             class="form-control serif"
             style="min-width:300px;"
-            placeholder="Search by CoA URL..."
+            placeholder="Search by CoA URL or Metrc ID..."
             list="coa-search-options"
             name="coa_url"
             oninput=""
@@ -148,7 +170,7 @@
           >
           <button
             id="coa-doc-search-button"
-            class="btn btn-outline-secondary"
+            class="btn btn-outline-secondary text-dark serif"
             title="Search for CoA"
             type="button"
           >
@@ -156,7 +178,7 @@
           </button>
           <button
             id="coa-doc-clear-button"
-            class="btn btn-outline-secondary"
+            class="btn btn-outline-secondary text-dark serif"
             title="Reset search"
             type="button"
           >
@@ -232,7 +254,7 @@
         enctype="multipart/form-data"
       >
         {% csrf_token %}           
-          <div id="dropbox" class="box__dragbox">
+          <div id="dropbox" class="box__dragbox d-flex flex-column">
             <div
               id="dropbox_background"
               class="box__dragbox_background"
@@ -241,18 +263,19 @@
               id="dropbox-text"
               class="box__dragtext jlrFontMediumBold text-dark px-3 lh-md"
             >
-              Drag a CoA <code>.pdf</code> or a <code>.zip</code>
+              Drop a CoA <code>.pdf</code> or a <code>.zip</code>
               of CoAs to parse.
-              Alternatively, 
+            </p>
+            <div class="box__action d-flex mt-3">
               <button
                 id='coa-doc-import-button'
-                class="btn btn-link text-secondary serif mx-0 px-0"
+                class="app-action btn btn-sm-light btn-md-light serif"
                 type="button"
                 onclick="document.getElementById('coas-input').click();"
               >
-                import your CoA file.
+                Alternatively, import your CoA file
               </button>
-            </p>
+            </div>
             <div
               class="btn-group btn-group-sm order-1 order-md-2 me-2 mb-3"
               role="group"
@@ -287,7 +310,9 @@
 
     </div>
 
-  </div>
+  </div><!-- End of search and file input -->
+
+  <!-- TODO: Toggle between table and list views. -->
 
   <!-- Loading placeholder -->
   <div id="loading-placeholder" class="d-none">
@@ -301,6 +326,7 @@
   <!-- No-data Placeholder -->
   <div id="data-placeholder" class="d-none">
     {% include "website/components/placeholders/placeholder.html" with
+      image="website/images/emojies/test-tube.svg"
       image_height="200px"
       title="No Data"
       message=""
@@ -332,6 +358,8 @@
       </small>
     </p>
   </caption>
+
+  <!-- TODO: Modal for lab results. -->
 
   <!-- TODO: Request a lab or LIMS button -->
   {% comment %} <div class="mt-5 mb-4">
@@ -366,6 +394,8 @@
       </button>
   </div> {% endcomment %}
 
+  <!-- Optional: Modal of labs or LIMS with collection routines. -->
+
   <!-- Optional: Report an error functionality. -->
   {% comment %} <div class="mt-5 mb-4">
     <h4 class="serif mb-0">Unknown Parsing Error!</h4>
@@ -388,11 +418,85 @@
 
 </section>
 
-<!-- TODO: Documentation for CoA Doc API -->
 
+<!-- Documentation -->
+<section class="container mb-5 mt-3 markdown">
 
-<!-- TODO: Documentation for CoA Doc Python SDK -->
+  <!-- TODO: Re-write descriptions for API and SDK -->
 
+  <!-- Documentation for CoA Doc API -->
+  <div class="row justify-content-center my-5 pt-5">
+    <div class="col-12 col-md-6 px-3 pe-lg-5 text-start">
+      <h2 class="fs-3 text-dark fw-bold mb-2 mt-0">
+        📡 CoADoc API
+      </h2>
+      <p class="fs-6 double-line mb-2" style="max-width:560px;">
+        Certificates of analysis (CoAs) are abundant for cultivators,
+        processors, retailers, and consumers too, but the data is often
+        locked away. Rich, valuable laboratory data so close, yet so far
+        away! Cannlytics puts these vital data points in your hands by
+        parsing PDFs and URLs, finding all the data, standardizing the data,
+        and cleanly returning the data to you.
+      </p>
+      {% comment %} <div class="d-none d-lg-flex mt-3">
+        <a
+          class="btn btn-sm bg-gradient-green text-white serif"
+          href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data"
+        >
+          Read the Docs &rarr;
+        </a>
+      </div> {% endcomment %}
+    </div>
+    <div class="col-11 col-md-8 col-lg-6">
+
+      <h6 class="serif">Request URL</h6>
+      <div class="codehilite rounded text-start overflow-hidden px-3"><pre>POST https://cannlytics.com/api/data/coas</pre></div>
+
+      <h6 class="serif mt-3">Request Body</h6>
+    <div class="codehilite rounded text-start overflow-hidden px-3"><pre><span></span><code><span class="p">{</span>
+    <span class="nt">"urls"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"https://cannlytics.page.link/test-coa"</span><span class="p">]</span>
+ <span class="p">}</span>
+  </code></pre></div>
+    </div>
+  </div>
+
+  <!-- Documentation for CoA Doc Python SDK -->
+  <div class="row justify-content-center my-5 pt-5">
+    <div class="col-12 col-md-6 px-3 pe-lg-5 text-start">
+      <h2 class="fs-3 text-dark fw-bold mb-2 mt-0">
+        🐍 CoADoc Python SDK
+      </h2>
+      <p class="fs-6 double-line mb-2" style="max-width:560px;">
+        Certificates of analysis (CoAs) are abundant for cultivators,
+        processors, retailers, and consumers too, but the data is often
+        locked away. Rich, valuable laboratory data so close, yet so far
+        away! Cannlytics puts these vital data points in your hands by
+        parsing PDFs and URLs, finding all the data, standardizing the data,
+        and cleanly returning the data to you.
+      </p>
+    </div>
+    <div class="col-11 col-md-8 col-lg-6">
+    <div class="codehilite rounded text-start overflow-hidden px-3">
+<button
+class="copy-btn bg-transparent border-0 float-end app-action pt-2"
+onclick="cannlytics.ui.copyToClipboard(document.getElementById('codeblock-coadoc').innerHTML)"
+title="Copy snippet"
+>
+{% icon "copy" class="link-secondary" height="24px" width="24px" %}
+</button>  
+<pre><code id="codeblock-coadoc"><span class="kn">from</span> <span class="nn">cannlytics.data.coas</span> <span class="kn">import</span> <span class="n">CoADoc</span>
+
+ <span class="c1"># Parse CoA data.</span>
+ <span class="n">parser</span> <span class="o">=</span> <span class="n">CoADoc</span><span class="p">(</span><span class="p">)</span>
+ <span class="n">urls = [</span><span class="s2">"https://cannlytics.page.link/test-coa"</span><span class="n">]</span>
+ <span class="n">data = parser.parse(urls)</span>
+ <span class="n">parser.quit()</span>
+</code></pre></div>
+        </div>
+  </div>
+</div>
+
+</section>
 
 {% include "website/components/art/vines.html" %}
 {% endblock material %}

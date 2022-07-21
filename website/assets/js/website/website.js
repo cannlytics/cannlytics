@@ -80,13 +80,13 @@ export const website = {
     /**
      * Change the website's theme.
      */
-    let theme = localStorage.getItem('cannlytics_theme');
-    if (!theme) {
+    let currentTheme = localStorage.getItem('cannlytics_theme');
+    if (!currentTheme) {
       const hours = new Date().getHours();
       const dayTime = hours > 6 && hours < 20;
-      theme = dayTime ? 'light' : 'dark';
+      currentTheme = dayTime ? 'light' : 'dark';
     }
-    const newTheme = (theme === 'light') ? 'dark' : 'light';
+    const newTheme = (currentTheme === 'light') ? 'dark' : 'light';
     this.setTheme(newTheme);
     theme.setTableTheme();
     localStorage.setItem('cannlytics_theme', newTheme);
@@ -97,26 +97,26 @@ export const website = {
      * Set the theme when the website loads.
      */
     if (typeof(Storage) !== 'undefined') {
-      let theme = localStorage.getItem('cannlytics_theme');
-      if (!theme) {
+      let currentTheme = localStorage.getItem('cannlytics_theme');
+      if (!currentTheme) {
         const hours = new Date().getHours();
         const dayTime = hours > 6 && hours < 20;
         if (!dayTime) this.setTheme('dark');
         return;
       }
-      this.setTheme(theme);
-      localStorage.setItem('cannlytics_theme', theme);
+      this.setTheme(currentTheme);
+      localStorage.setItem('cannlytics_theme', currentTheme);
     } else {
       document.getElementById('theme-toggle').style.display = 'none';
     }
   },
 
-  setTheme(theme) {
+  setTheme(currentTheme) {
     /**
      * Set the website's theme.
-     * @param {String} theme The theme to set: `light` or `dark`.
+     * @param {String} currentTheme The theme to set: `light` or `dark`.
      */
-    if (theme === 'light') document.body.className = 'base';
+    if (currentTheme === 'light') document.body.className = 'base';
     else if (!hasClass(document.body, 'dark')) document.body.className += ' dark';
   },
 

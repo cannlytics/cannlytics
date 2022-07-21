@@ -289,8 +289,11 @@ body.dark .markdown h4 {
 .markdown table td {
   border: 1px solid #dfe2e5 !important;
 }
-.markdown code,
-.markdown tt {
+// .markdown code,
+// .markdown tt {
+//   background-color: rgba(27, 31, 35, 0.05) !important;
+// }
+.codehilite {
   background-color: rgba(27, 31, 35, 0.05) !important;
 }
 
@@ -309,8 +312,11 @@ body.dark .markdown table th,
 body.dark .markdown table td {
   border: 1px solid #3b434b !important;
 }
-body.dark .markdown code,
-body.dark .markdown tt {
+// body.dark .markdown code,
+// body.dark .markdown tt {
+//   background-color: rgba(240, 246, 252, 0.15) !important;
+// }
+body.dark .codehilite {
   background-color: rgba(240, 246, 252, 0.15) !important;
 }
 

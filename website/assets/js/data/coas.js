@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 7/19/2022
- * Updated: 7/20/2022
+ * Updated: 7/21/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
 import { Html5QrcodeScanner } from 'html5-qrcode';
@@ -19,16 +19,18 @@ export const coaJS = {
 
     // Attach import functionality.
     const searchInput = document.getElementById('coa-search-input');
-    document.getElementById('coa-doc-search-button').onclick(() => {
+    document.getElementById('coa-doc-search-button').onclick = function() {
+      console.log('Function triggered:', searchInput.value);
       document.getElementById('coa-url-input').value = searchInput.value;
-    })
+    }
     searchInput.addEventListener('keydown', function (e) {
       if (e.code === 'Enter') {
+        console.log('Function triggered:', searchInput.value);
         document.getElementById('coa-url-input').value = searchInput.value;
       }
     });
 
-    // TODO: Wire up export data button.
+    // Future work: Wire up export data button.
     // 'coa-doc-export-button'
 
     // Optional: Wire up report error button.
@@ -41,17 +43,20 @@ export const coaJS = {
     // Optional: Detect if the user is using mobile.
 
     // Initialize the QR code scanner.
-    let html5QrcodeScanner = new Html5QrcodeScanner(
-      'reader',
-      { fps: 10, qrbox: {width: 250, height: 250} },
-      /* verbose= */ false,
-    );
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-    document.getElementById('reader__camera_permission_button').classList.add('btn btn-sm-light btn-md-light mb-1')
-    document.getElementById('reader__dashboard_section_swaplink').classList.add('app-action');
+    this.initializeQRCodeScanner();
 
     // Initialize the drag and drop.
-    $(document).on('dragover', 'html', function(e) {
+    this.initializeDragAndDrop();
+
+    // TODO: Render the table placeholder!
+
+  },
+
+  initializeDragAndDrop() {
+    /**
+     * Initialize the drag-and-drop file upload.
+     */
+     $(document).on('dragover', 'html', function(e) {
       e.preventDefault();
       e.stopPropagation();
     });
@@ -59,29 +64,28 @@ export const coaJS = {
       e.preventDefault();
       e.stopPropagation(); 
     });
-    $(document).on('dragenter','.box__dragbox', function (e) {
+    $(document).on('dragenter', '.box__dragbox', function (e) {
         e.stopPropagation();
         e.preventDefault();
         document.getElementById('dropbox-text').innerHTML = `Drop your CoA <code>.pdf</code> or a <code>.zip</code> here!`;
-        $('.box__dragbox_background').css({'opacity':'1'})
+        document.getElementById('dropbox_background').style.opacity = 1;
     });
-    $(document).on('dragover','.box__dragbox', function (e) {
+    $(document).on('dragover', '.box__dragbox', function (e) {
         e.stopPropagation();
         e.preventDefault();
         document.getElementById('dropbox-text').innerHTML = `Drop your CoA <code>.pdf</code> or a <code>.zip</code> here!`;
-        $('.box__dragbox_background').css({'opacity':'1'})
+        document.getElementById('dropbox_background').style.opacity = 1;
     });
-    $(document).on('dragleave','.box__dragbox', function (e) {
+    $(document).on('dragleave', '.box__dragbox', function (e) {
         e.stopPropagation();
         e.preventDefault();
-        document.getElementById('dropbox-text').innerHTML = `Drag a CoA <code>.pdf</code> or a <code>.zip</code> of CoAs to parse.`;
-        $('.box__dragbox_background').css('opacity','0')
+        document.getElementById('dropbox-text').innerHTML = `Drop a CoA <code>.pdf</code> or a <code>.zip</code> of CoAs to parse.`;
+        document.getElementById('dropbox_background').style.opacity = 0;
     });
-    $(document).on('drop','.box__dragbox', function (event) {
+    $(document).on('drop', '.box__dragbox', function (event) {
         event.stopPropagation();
         event.preventDefault();
         document.getElementById('dropbox-text').innerText = 'Uploaded Coa File!';
-        // TODO: Add more button
         const formData = new FormData();
         const droppedFiles = event.originalEvent.dataTransfer.files;
         $.each( droppedFiles, function(i, file) {
@@ -96,21 +100,39 @@ export const coaJS = {
         });
         uploadCoAFile(formData);
     });
+  },
 
-    // TODO: Render the table placeholder!
-
+  initializeQRCodeScanner() {
+    /**
+     * Initialize the QR Code scanner.
+     */
+    const qrCodeOptions = { fps: 10, qrbox: {width: 250, height: 250} };
+    let html5QrcodeScanner = new Html5QrcodeScanner('reader', qrCodeOptions, false);
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    document.getElementById('reader__camera_permission_button').classList.add(
+      'btn',
+      'btn-sm-light',
+      'btn-md-light',
+      'mb-1',
+      'serif',
+    );
+    document.getElementById('reader__dashboard_section_swaplink').classList.add(
+      'app-action',
+      'serif',
+    );
   },
 
   clearCoADocForm() {
     /**
      * Clear the CoA Doc form.
      */
+    const template = `Drop a CoA <code>.pdf</code> or a <code>.zip</code>
+    of CoAs to parse.`;
     document.getElementById('coa-search-input').value = '';
-    // TODO: Clear any uploaded files.
-    $('.box__dragbox_background').css('opacity', '0');
-    document.getElementById('dropbox-text').innerHTML = `Drag a CoA <code>.pdf</code> or a <code>.zip</code>
-        of CoAs to parse.`;
-    // TODO: Clear the data table.
+    document.getElementById('dropbox_background').style.opacity = 0;
+    document.getElementById('dropbox-text').innerHTML = template;
+    this.initializeQRCodeScanner();
+    // TODO: Clear any uploaded files and the the data table.
   },
 
   addCoAFile() {
@@ -203,17 +225,13 @@ async function uploadCoAFile(formData, formId = 'coa-doc-import-form') {
     type: 'POST',
     data: formData,
     dataType: 'json',
-    //   async: false,
     cache: false,
     contentType: false,
     processData: false,
-    // complete: function() {
-    //   // TODO: Handle post-upload.
-    //   console.log('Finished!');
-    // },
     success: function(data) {
       // $form.addClass( data.success == true ? 'is-success' : 'is-error' );
       // if (!data.success) $errorMsg.text(data.error);
+      // TODO: Render data!
       console.log('Success!');
       console.log(data);
     },
