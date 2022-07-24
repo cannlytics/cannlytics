@@ -94,6 +94,7 @@ def parse_tagleaf_pdf(
         persist=persist,
     )
 
+
 def parse_tagleaf_url(
         self,
         url: str,

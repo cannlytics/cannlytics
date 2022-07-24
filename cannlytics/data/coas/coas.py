@@ -2,9 +2,11 @@
 CoADoc | A Certificate of Analysis Parser
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+    Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 7/21/2022
+Updated: 7/24/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -12,15 +14,28 @@ Description:
     Certificates of analysis (CoAs) are abundant for cultivators,
     processors, retailers, and consumers too, but the data is often
     locked away. Rich, valuable laboratory data so close, yet so far
-    away! Cannlytics puts these vital data points in your hands by
+    away! CoADoc puts these vital data points in your hands by
     parsing PDFs and URLs, finding all the data, standardizing the data,
     and cleanly returning the data to you.
 
 Note:
     
-    Custom CoA parsing is still under development.
-    If you know of a specific LIMS or lab CoA that you want parsed,
-    then please get in contact with the team: <dev@cannlytics.com>
+    Custom CoA parsing is still under development. If you want a
+    specific lab or LIMS CoA parsed, then please contact the team!
+    Email: <dev@cannlytics.com>
+
+Supported Labs:
+
+    - Green Leaf Lab
+    - MCR Labs
+    - SC Labs
+    - Veda Scientific
+
+Supported LIMS:
+
+    ✓ Confident Cannabis
+    ✓ TagLeaf LIMS
+
 """
 # Standard imports.
 from typing import Any, Optional
@@ -52,6 +67,43 @@ from cannlytics.data.coas.parse_tagleaf_coa import (
 )
 from cannlytics.data.coas.parse_veda_coa import parse_veda_pdf
 
+LIMS = {
+    
+    # Common LIMS
+    'Confident Cannabis': {
+        'algorithm': 'parse_cc_url',
+        'key': 'Con\x00dent Cannabis',
+        'qr_code_index': 3,
+        'url': 'https://orders.confidentcannabis.com',
+    },
+    'TagLeaf LIMS': {
+        'algorithm': 'parse_tagleaf_url',
+        'key': 'lims.tagleaf',
+        'qr_code_index': 2,
+        'url': 'https://lims.tagleaf.com',
+    },
+
+    # Labs
+    # - Green Leaf Lab
+    # - SC Labs
+    # - MCR Labs
+    # - Veda Scientific
+    'Veda Scientific': {
+        'algorithm': 'parse_veda_pdf',
+        'key': 'veda scientific',
+        'qr_code_index': None,
+        'url': ' vedascientific.co',
+    },
+
+    # Dream: Implement an algorithm to parse any custom CoA.
+    'custom': {
+        'algorithm': '',
+        'key': 'custom',
+        'qr_code_index': -1,
+        'url': 'https://cannlytics.com',
+    }
+
+}
 DECODINGS = {
     '<LOQ': 0,
     '<LOD': 0,
@@ -74,40 +126,6 @@ KEYS = {
     'moisture': 'moisture_content',
     'terpenoids': 'terpenes',
     'foreign_materials': 'foreign_matter',
-}
-LIMS = {
-    
-    # Common LIMS
-    'Confident Cannabis': {
-        'algorithm': 'parse_cc_url',
-        'key': 'Con\x00dent Cannabis',
-        'qr_code_index': 3,
-        'url': 'https://orders.confidentcannabis.com',
-    },
-    'TagLeaf LIMS': {
-        'algorithm': 'parse_tagleaf_url',
-        'key': 'lims.tagleaf',
-        'qr_code_index': 2,
-        'url': 'https://lims.tagleaf.com',
-    },
-
-    # Labs
-    # TODO: Add SC Labs and MCR Labs.
-    'Veda Scientific': {
-        'algorithm': 'parse_veda_pdf',
-        'key': 'veda scientific',
-        'qr_code_index': None,
-        'url': ' vedascientific.co',
-    },
-
-    # Dream: Implement an algorithm to parse any custom CoA.
-    'custom': {
-        'algorithm': '',
-        'key': 'custom',
-        'qr_code_index': -1,
-        'url': 'https://cannlytics.com',
-    }
-
 }
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
 
@@ -234,13 +252,13 @@ class CoADoc:
                     continue
         return image_data[0].data.decode('utf-8')
 
-    def find_metrc_id(self, doc: Any) -> str:
+    def find_metrc_id(self, pdf: Any) -> str:
         """Find any Metrc ID that may be in a given CoA PDF."""
         # TODO: Implement!
-        if isinstance(doc, str):
-            pdf_file = pdfplumber.open(doc)
+        if isinstance(pdf, str):
+            pdf_file = pdfplumber.open(pdf)
         else:
-            pdf_file = doc
+            pdf_file = pdf
         raise NotImplementedError
     
     def get_metrc_results(self, metrc_id: str) -> dict:
@@ -255,18 +273,21 @@ class CoADoc:
         # return None or data!
         raise NotImplementedError
 
-    def get_pdf_creation_date(self, doc: Any) -> str:
+    def get_pdf_creation_date(self, pdf: Any) -> str:
         """Get the creation date of a PDF in ISO format.
         Args:
-            doc (PDF): A pdfplumber PDF.
+            pdf (PDF): A pdfplumber PDF.
         Returns:
             (str): An ISO formatted date.
         """
-        if isinstance(doc, str):
-            pdf_file = pdfplumber.open(doc)
+        if isinstance(pdf, str):
+            pdf_file = pdfplumber.open(pdf)
         else:
-            pdf_file = doc
-        date = pdf_file.metadata['CreationDate'].split('D:')[-1]
+            pdf_file = pdf
+        try:
+            date = pdf_file.metadata['CreationDate'].split('D:')[-1]
+        except KeyError:
+            return None
         isoformat = f'{date[0:4]}-{date[4:6]}-{date[6:8]}'
         isoformat += f'T{date[8:10]}:{date[10:12]}:{date[12:14]}'
         return isoformat
@@ -284,6 +305,8 @@ class CoADoc:
         Returns:
             (str): Returns LIMS name if found, otherwise returns `None`.
         """
+        # TODO: See if `search` works better / faster.
+        # .search(pattern, regex=True, case=True, **kwargs)
         known = None
         if isinstance(doc, str):
             try:
@@ -553,7 +576,7 @@ class CoADoc:
 # - lab_longitude
 
 
-# Optional: Calculate any meaningful statistics (perhaps `percentile`s?)
+# Optional: Calculate any meaningful statistics (perhaps `percentiles`s?)
 
 
 # TODO: Archive the lab results if they are public.
@@ -599,6 +622,7 @@ if __name__ == '__main__':
     veda_coa_pdf = f'{DATA_DIR}/Veda Scientific Sample COA.pdf'
 
     # Optional: Add GreenLeaf Labs CoA!
+    greenleaflab_coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
 
     # TODO: Test get MCR Labs results by metrc ID.
 

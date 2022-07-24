@@ -2,7 +2,9 @@
 Get SC Labs Test Result Data
 Copyright (c) 2022 Cannlytics
 
-Author: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+    Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/8/2022
 Updated: 7/12/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>

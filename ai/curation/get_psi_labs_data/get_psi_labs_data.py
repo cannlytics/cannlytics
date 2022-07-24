@@ -2,7 +2,9 @@
 PSI Labs Test Result Data Collection
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+    Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: July 4th, 2022
 Updated: 7/12/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>

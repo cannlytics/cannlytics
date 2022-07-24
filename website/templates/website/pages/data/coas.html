@@ -6,20 +6,21 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 7/17/2022
-  Updated: 7/21/2022
+  Updated: 7/24/2022
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
   TODO:
 
-    - [ ] Allow users to upload a singular CoA or a folder of CoAs.
+    - [✓] Allow users to upload a singular CoAs (.pdf).
+    - [ ] Allow users to upload a folder of CoAs (.zip).
     - [ ] Allow users to enter a CoA URL or a list of CoA URLs.
-    - [ ] Is your favorite lab or LIMS missing? Request an addition to the CoA parsing algorithm.
+    - [✓] Is your favorite lab or LIMS missing? Request an addition to the CoA parsing algorithm.
     - [ ] Form to report an error parsing a CoA.
     - [ ] QR code reader for mobile!
     - [ ] Wire up the form to the API to send and receive data.
     - [ ] Create a results table and downloadable file.
-    - [ ] Instructions on how to use the API.
-    - [ ] Instructions on how to use the Python SDK.
+    - [ ] Write instructions on how to use the API and add link to more instructions.
+    - [ ] Write instructions on how to use the Python SDK and add link to more instructions.
 -->
 {% extends "website/index.html" %}
 {% load static icon %}
@@ -75,7 +76,7 @@
   .btn-outline-secondary:focus,
   .btn-outline-secondary:hover {
     background-color: rgb(150, 230, 161);
-    border-color: #6CD379;
+    border-color: #4BB558;
   }
   body.dark .btn-outline-secondary:active,
   body.dark .btn-outline-secondary:focus,
@@ -99,7 +100,7 @@
 %}
 
 <!-- Breadcrumbs -->
-<section class="container">
+<section class="container mb-3">
   <div class="d-flex mt-4">
     <nav
       style="--bs-breadcrumb-divider: '>';"
@@ -130,7 +131,7 @@
 </section>
 
 <!-- CoA Doc -->
-<section class="container mb-5 mt-3 markdown">
+<section class="container markdown">
 
   <!-- URL search / PDF input -->
   <div
@@ -177,7 +178,7 @@
             Search
           </button>
           <button
-            id="coa-doc-clear-button"
+            id="coa-doc-reset-button"
             class="btn btn-outline-secondary text-dark serif"
             title="Reset search"
             type="button"
@@ -186,40 +187,6 @@
           </button>
         </div>
       </form>
-
-      <!-- TODO: Import PDF or PDFs -->
-      {% comment %} <div
-        class="btn-group btn-group-sm order-1 order-md-2 me-2 mb-3"
-        role="group"
-        aria-label="CoA Import"
-      >
-        <form
-          action="/api/data/coas"
-          method="post"
-          enctype="multipart/form-data"
-          name="coa_doc_import"
-          id="coa-doc-import-form"
-        >
-          {% csrf_token %}
-          <input
-            id="coas-input"
-            type="file"
-            class="visually-hidden"
-            name="coas"
-            required="required"
-            onchange="document.forms['coa-doc-import-form'].submit();"
-          >
-          <button
-            id='coa-doc-import-button'
-            type="button"
-            class="btn btn-sm-light btn-lg-light text-nowrap serif"
-            onclick=""
-          >
-            {% icon "upload" width="21px" height="21px" class="me-1" %}
-            Import
-          </button>
-        </form>
-      </div> {% endcomment %}
 
       <!-- TODO: Export -->
       <button
@@ -231,6 +198,7 @@
         Download
       </button>
 
+      <!-- TODO: Implement honeypot email to discourage bots. -->
       <!-- Honeypot email :p -->
       <input class="visually-hidden" name="super_special_email" required="required" value="">
 
@@ -240,15 +208,13 @@
 
       <!-- Drag and drop files for PDF -->
       <!-- 
-        - [ ] Let the user upload multiple files, then click
-        a "Parse" button.
-        - [ ] Fix submit. /api/data/coas
+        - [ ] Let the user upload multiple files, then click a "Parse" button.
       -->
       <form
         id="coa-doc-import-form"
         name="coa_doc_import"
-        class="box col"
-        style="min-width:350px;min-height:350px;"
+        class="box col mb-3"
+        style="min-width:350px;"
         method="post"
         action=""
         enctype="multipart/form-data"
@@ -290,9 +256,6 @@
               onchange="cannlytics.data.uploadCoAFile();"
             >
           </div>
-            <!-- TODO: Add a upload button 
-            <button class="box__button" type="submit">Upload</button>
-            -->
         </div>
         <div class="box__uploading">Uploading…</div>
         <div class="box__success">Done!</div>
@@ -304,7 +267,7 @@
         - [ ] If a PDF, show the PDF?
         - [ ] If a Metrc ID, query lab results.
       -->
-      <div class="col" style="min-width:350px;">
+      <div class="col mb-3" style="min-width:350px;">
         <div id="reader" class="text-dark py-2" width="600px"></div>
       </div>
 
@@ -312,41 +275,165 @@
 
   </div><!-- End of search and file input -->
 
-  <!-- TODO: Toggle between table and list views. -->
-
-  <!-- Loading placeholder -->
-  <div id="loading-placeholder" class="d-none">
-    {% include "website/components/placeholders/loading_placeholder.html" with
-      height='350px'
-      width='100%'
-      only
-    %}
+  <div class="d-flex mt-5 justify-content-between align-items-center">
+    <h2 class="fs-3 text-dark fw-bold mb-0 mt-0">
+      Your Results
+    </h2>
+    <ul
+      id="coa-results-tabs"
+      class="nav nav-pills mb-3"
+      role="tablist"
+    >
+      <li class="nav-item" role="presentation">
+        <button
+          class="btn btn-md-light me-1 active"
+          id="coa-grid-tab"
+          data-bs-toggle="pill"
+          data-bs-target="#coa-grid"
+          type="button"
+          role="tab"
+          aria-controls="coa-grid"
+          aria-selected="true"
+          title="List View"
+        >
+          {% icon "list" width="21px" height="21px" %}
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="btn btn-md-light"
+          id="coa-list-tab"
+          data-bs-toggle="pill"
+          data-bs-target="#coa-list"
+          type="button"
+          role="tab"
+          aria-controls="coa-list"
+          aria-selected="false"
+          title="Grid View"
+        >
+          {% icon "grid" width="21px" height="21px" %}
+        </button>
+      </li>
+    </ul>
   </div>
 
-  <!-- No-data Placeholder -->
-  <div id="data-placeholder" class="d-none">
-    {% include "website/components/placeholders/placeholder.html" with
-      image="website/images/emojies/test-tube.svg"
-      image_height="200px"
-      title="No Data"
-      message=""
-      action=""
-      url=""
-      only
-    %}
-  </div>
+  <!-- Samples -->
+  <div id="coa-results-content" class="tab-content">
 
-  <!-- TODO: Data Table -->
-  <div id="data-table" class="d-none">
+    <!-- TODO: List of samples -->
     <div
-      id="data-table"
-      class="ag-theme-alpine-dark"
-      style="height: 350px; width:100%;"
-    ></div>
+      id="coa-grid"
+      class="tab-pane fade show active"
+      role="tabpanel"
+      aria-labelledby="coa-grid-tab"
+      tabindex="0"
+    >
+      <div class="row my-5">
+        <div class="col-12 col-md-6 px-3 pe-lg-5 text-start">
+          
+          <!-- TODO: Create a sample card template. -->
+          List of samples here!
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div
+      id="coa-list"
+      class="tab-pane fade"
+      role="tabpanel"
+      aria-labelledby="coa-list-tab"
+      tabindex="0"
+    >
+      <div id="loading-placeholder" class="d-none">
+        {% include "website/components/placeholders/loading_placeholder.html" with
+          height='350px'
+          width='100%'
+          only
+        %}
+      </div>
+      <div id="data-table" class="d-none">
+        <div
+          id="data-table"
+          class="ag-theme-alpine-dark"
+          style="height: 350px; width:100%;"
+        ></div>
+      </div>
+    </div>
+  
+  </div>
+
+  <!-- Placeholder -->
+  <div
+    class="card rounded markdown p-3 my-3 mx-auto"
+    style="max-width:420px;"
+  >
+    <h4 class="serif fw-bold text-dark mt-0 mb-2">
+      🥸 Waiting on your CoAs boss!
+    </h4>
+    <p class="serif text-dark fs-6 lh-md mt-0">
+        Your CoA data from uploaded CoAs will render here.
+        At this time, only
+        certificates of analysis (CoAs) from known labs and
+        LIMS can be parsed.
+    </p>
+    <h4 class="serif fw-bold text-dark mb-2 mt-3">
+      Supported Labs and LIMS
+    </h4>
+    <div class="d-flex justify-content-between text-dark">
+      <ul class="my-2">
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">Green Leaf Lab</small>
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">MCR Labs</small>
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">SC Labs</small>
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">Veda Scientific</small>
+          </a>
+        </li>
+      </ul>
+      <ul class="my-2">
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">Confident Cannabis</small>
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">TagLeaf LIMS</small>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <p class="lh-sm mt-0 text-dark">
+      <small class="serif">
+        If you want your favorite lab or LIMS included,
+        then please email <a href="mailto:dev@cannlytics.com">
+          <small class="serif">dev@cannlytics.com</small>
+        </a> and chances are that they can be added to the
+        parsing algorithm. Alternatively, clone the
+        <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas">
+          <small class="serif">source code</small>
+        </a>
+        and you can write your own parsing algorithm!
+      </small>
+    </p>
   </div>
 
   <!-- Notes -->
-  <caption class="markdown">
+  {% comment %} <caption class="markdown">
     <p class="text-secondary lh-sm" style="max-width:560px;">
       <small class="serif">
         <b class="serif">Notes:</b>
@@ -357,7 +444,7 @@
         best of CoADoc's abilities.
       </small>
     </p>
-  </caption>
+  </caption> {% endcomment %}
 
   <!-- TODO: Modal for lab results. -->
 
@@ -420,7 +507,7 @@
 
 
 <!-- Documentation -->
-<section class="container mb-5 mt-3 markdown">
+<section class="container markdown">
 
   <!-- TODO: Re-write descriptions for API and SDK -->
 
@@ -428,7 +515,9 @@
   <div class="row justify-content-center my-5 pt-5">
     <div class="col-12 col-md-6 px-3 pe-lg-5 text-start">
       <h2 class="fs-3 text-dark fw-bold mb-2 mt-0">
-        📡 CoADoc API
+        <a class="serif" href="#">
+          📡 CoADoc API
+        </a>
       </h2>
       <p class="fs-6 double-line mb-2" style="max-width:560px;">
         Certificates of analysis (CoAs) are abundant for cultivators,
@@ -464,7 +553,9 @@
   <div class="row justify-content-center my-5 pt-5">
     <div class="col-12 col-md-6 px-3 pe-lg-5 text-start">
       <h2 class="fs-3 text-dark fw-bold mb-2 mt-0">
-        🐍 CoADoc Python SDK
+        <a class="serif" href="#">
+          🐍 CoADoc Python SDK
+        </a>
       </h2>
       <p class="fs-6 double-line mb-2" style="max-width:560px;">
         Certificates of analysis (CoAs) are abundant for cultivators,

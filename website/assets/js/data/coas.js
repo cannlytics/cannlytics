@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 7/19/2022
- * Updated: 7/21/2022
+ * Updated: 7/24/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
 import { Html5QrcodeScanner } from 'html5-qrcode';
@@ -12,10 +12,14 @@ import { authRequest, showNotification, snakeCase } from '../utils.js';
 
 export const coaJS = {
 
+  initializeQRCodeScanner: initializeQRCodeScanner,
+  renderCoAResults: renderCoAResults,
+  uploadCoAFile: uploadCoAFile,
+
   initializeCoADoc() {
 
-    // Wire up clear button.
-    document.getElementById('coa-doc-clear-button').onclick = this.clearCoADocForm;
+    // Wire up reset button.
+    document.getElementById('coa-doc-reset-button').onclick = this.resetCoADocForm;
 
     // Attach import functionality.
     const searchInput = document.getElementById('coa-search-input');
@@ -102,27 +106,7 @@ export const coaJS = {
     });
   },
 
-  initializeQRCodeScanner() {
-    /**
-     * Initialize the QR Code scanner.
-     */
-    const qrCodeOptions = { fps: 10, qrbox: {width: 250, height: 250} };
-    let html5QrcodeScanner = new Html5QrcodeScanner('reader', qrCodeOptions, false);
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-    document.getElementById('reader__camera_permission_button').classList.add(
-      'btn',
-      'btn-sm-light',
-      'btn-md-light',
-      'mb-1',
-      'serif',
-    );
-    document.getElementById('reader__dashboard_section_swaplink').classList.add(
-      'app-action',
-      'serif',
-    );
-  },
-
-  clearCoADocForm() {
+  resetCoADocForm() {
     /**
      * Clear the CoA Doc form.
      */
@@ -131,6 +115,8 @@ export const coaJS = {
     document.getElementById('coa-search-input').value = '';
     document.getElementById('dropbox_background').style.opacity = 0;
     document.getElementById('dropbox-text').innerHTML = template;
+    document.getElementById('coa-results-tabs').classList.add('d-none');
+    document.getElementById('coa-results-content').classList.add('d-none');
     this.initializeQRCodeScanner();
     // TODO: Clear any uploaded files and the the data table.
   },
@@ -193,6 +179,7 @@ export const coaJS = {
     // `results.length`
   },
 
+
   reportError() {
     /**
      * Report encountered error(s).
@@ -208,8 +195,19 @@ export const coaJS = {
     // TODO: Implement!
   },
 
-  uploadCoAFile: uploadCoAFile,  
+  // TODO: Toggle between table and list views.
 
+
+}
+
+function renderCoAResults() {
+  /**
+   * Render the CoA results for the user as both
+   * a card in a list of samples as well as a row on a table.
+   */
+  document.getElementById('coa-results-tabs').classList.remove('d-none');
+  document.getElementById('coa-results-content').classList.remove('d-none');
+  console.log('Rendering results....');
 }
 
 async function uploadCoAFile(formData, formId = 'coa-doc-import-form') {
@@ -219,6 +217,10 @@ async function uploadCoAFile(formData, formId = 'coa-doc-import-form') {
    * @param {String} formId: If no form data is provided, then provide a form ID.
    */
   if (!formData) formData = new FormData(document.forms[formId]);
+
+  // FIXME: It would be good to do some file checking before posting the form.
+  // https://stackoverflow.com/questions/7977084/check-file-type-when-form-submit
+
   $.ajax({
     headers: { 'X-CSRFToken': cannlytics.utils.getCookie('csrftoken') },
     url: '/api/data/coas',
@@ -234,11 +236,32 @@ async function uploadCoAFile(formData, formId = 'coa-doc-import-form') {
       // TODO: Render data!
       console.log('Success!');
       console.log(data);
+      renderCoAResults(data);
     },
     error: function() {
       // TODO: Show an error message.
     }
   });
+}
+
+function initializeQRCodeScanner() {
+  /**
+   * Initialize the QR Code scanner.
+   */
+  const qrCodeOptions = { fps: 10, qrbox: {width: 250, height: 250} };
+  let html5QrcodeScanner = new Html5QrcodeScanner('reader', qrCodeOptions, false);
+  html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+  document.getElementById('reader__camera_permission_button').classList.add(
+    'btn',
+    'btn-sm-light',
+    'btn-md-light',
+    'mb-1',
+    'serif',
+  );
+  document.getElementById('reader__dashboard_section_swaplink').classList.add(
+    'app-action',
+    'serif',
+  );
 }
 
 async function onScanSuccess(decodedText, decodedResult) {

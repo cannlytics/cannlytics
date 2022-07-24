@@ -13,9 +13,9 @@ Description: This module contains general utility functions.
 from base64 import b64encode, decodebytes
 from datetime import datetime, timedelta
 import os
-from re import sub, findall
+from re import split, sub, findall
 import secrets
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Tuple
 from zipfile import ZipFile
 try:
     from zoneinfo import ZoneInfo
@@ -176,6 +176,7 @@ REPLACEMENTS = [
     {'text': 'β', 'key': 'beta'},
     {'text': 'γ', 'key': 'gamma'},
     {'text': 'Δ', 'key': 'delta'},
+    {'text': 'δ', 'key': 'delta'},
 ]
 
 def snake_case(string: str) -> str:
@@ -211,8 +212,20 @@ def sorted_nicely(unsorted_list: List[str]) -> List[str]:
     License: CC BY-SA 2.5 <https://creativecommons.org/licenses/by-sa/2.5/>
     """
     convert = lambda text: int(text) if text.isdigit() else text
-    alpha = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
+    alpha = lambda key: [convert(c) for c in split('([0-9]+)', key)]
     return sorted(unsorted_list, key=alpha)
+
+
+def split_list(a_list: list, at_index: Optional[int] = None) -> Tuple:
+    """Split a list in half or at a given index.
+    Credit: Jason Coon <https://stackoverflow.com/a/752330/5021266>
+    License: CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>
+    """
+    if at_index:
+        half = at_index
+    else:
+        half = len(a_list)//2
+    return a_list[:half], a_list[half:]
 
 
 #-----------------------------------------------------------------------

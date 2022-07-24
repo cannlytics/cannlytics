@@ -26,6 +26,8 @@ ANALYSES = {
     'water_activity': {'names': ['WA']},
 }
 
+# TODO: Create `analyte_details.json`.
+
 ANALYTES = {
     'CBC': 'cbc',
     'CBCA': 'cbca',
@@ -35,12 +37,24 @@ ANALYTES = {
     'CBDVA': 'cbdva',
     'CBG': 'cbg',
     'CBGA': 'cbga',
+    'CBL': 'cbl',
     'CBN': 'cbn',
+    'CBNA': 'cbna',
+    'Δ8': 'delta_8_thc',
+    'Δ8 THC': 'delta_8_thc',
     'Δ8-THC': 'delta_8_thc',
+    'Δ9 THC': 'delta_9_thc',
     'Δ9-THC': 'delta_9_thc',
+    'Δ9': 'delta_9_thc',
     'THCA': 'thca',
     'THCV': 'thcv',
     'THCVA': 'thcva',
+    'Total CBD': 'total_cbd',
+    'Total CBG': 'total_cbg',
+    'Total CBDV': 'total_cbdv',
+    'Total CBC': 'total_cbc',
+    'Total CBN': 'total_cbn',
+    'Total THC': 'total_thc',
     'Total THC(Total THC = (THCA x 0.877) + THC)': 'total_thc',
     'Total CBD(Total CBD = (CBDA x 0.877) + CBD)': 'total_cbd',
     'Total Terpenes *': 'total_terpenes',
@@ -75,8 +89,9 @@ ANALYTES = {
     'Aspergillus fumigatus': 'aspergillus_fumigatus',
     'Aspergillus niger': 'aspergillus_niger',
     'Aspergillus terreus': 'aspergillus_terreus',
-    'Salmonella spp.': 'salmonella_spp',
-    'Shiga toxin-producing E. coli': 'shiga_toxin_producing_e_coli',
+    'Salmonella spp.': 'salmonella',
+    'Salmonella': 'salmonella',
+    'Shiga toxin-producing E. coli': 'e_coli',
     'Aflatoxin B1': 'aflatoxin_b1',
     'Aflatoxin B2': 'aflatoxin_b2',
     'Aflatoxin G1': 'aflatoxin_g1',
@@ -158,6 +173,7 @@ ANALYTES = {
     'Insect Fragments, Hair, Mammal Excrement': 'foreign_matter_fragments',
     'Mold': 'mold',
     'Sand, Soil, Cinders, Dirt': 'soil',
+    'Sand': 'soil',
 }
 
 DECARB = 0.877 # Source: <https://www.conflabs.com/why-0-877/>
