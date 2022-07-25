@@ -210,6 +210,28 @@ function renderCoAResults() {
   console.log('Rendering results....');
 }
 
+
+function renderCoAImage(obs) {
+  /**
+   * Render a CoA image, first from an image URL if provided,
+   * then from PNG data if provided.
+   */
+  if (obs.images) {
+    console.log('Render first image:', obs.images);
+  } else if (obs.image_data) {
+    // var blob = new Blob([obs.image_data], {'type': 'image/png'});
+    // var url = URL.createObjectURL(blob);
+    // console.log('Render:', url);
+    var img = document.createElement('img');
+    img.src = 'data:image/gif;base64,R0lGODlhEAAOALMAAOazToeHh0tLS/7LZv/0jvb29t/f3//Ub//ge8WSLf/rhf/3kdbW1mxsbP//mf///yH5BAAAAAAALAAAAAAQAA4AAARe8L1Ekyky67QZ1hLnjM5UUde0ECwLJoExKcppV0aCcGCmTIHEIUEqjgaORCMxIC6e0CcguWw6aFjsVMkkIr7g77ZKPJjPZqIyd7sJAgVGoEGv2xsBxqNgYPj/gAwXEQA7';
+    img.width = '16';
+    img.height = '14';
+    document.body.appendChild(img);
+  }
+  
+}
+
+
 async function uploadCoAFile(formData, formId = 'coa-doc-import-form') {
   /**
    * Upload CoA file for processing.

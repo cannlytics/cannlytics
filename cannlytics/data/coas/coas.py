@@ -38,6 +38,8 @@ Supported LIMS:
 
 """
 # Standard imports.
+import base64
+from io import BytesIO
 from typing import Any, Optional
 from wand.image import Image as wi
 
@@ -56,53 +58,41 @@ from cannlytics.utils.constants import (
     DECARB,
 )
 
-# Custom lab and LIMS CoA parsing algorithms.
+# Lab and LIMS CoA parsing algorithms.
+# TODO:
+# - SC Labs
+# - MCR Labs
 from cannlytics.data.coas.parse_cc_coa import (
+    CONFIDENT_CANNABIS,
     parse_cc_pdf,
     parse_cc_url,
 )
 from cannlytics.data.coas.parse_tagleaf_coa import (
+    TAGLEAF,
     parse_tagleaf_pdf,
     parse_tagleaf_url,
 )
-from cannlytics.data.coas.parse_veda_coa import parse_veda_pdf
+from cannlytics.data.coas.parse_green_leaf_lab_coa import (
+    GREEN_LEAF_LAB,
+    parse_green_leaf_lab_pdf,
+)
+from cannlytics.data.coas.parse_veda_coa import (
+    VEDA,
+    parse_veda_pdf,
+)
 
 LIMS = {
-    
-    # Common LIMS
-    'Confident Cannabis': {
-        'algorithm': 'parse_cc_url',
-        'key': 'Con\x00dent Cannabis',
-        'qr_code_index': 3,
-        'url': 'https://orders.confidentcannabis.com',
-    },
-    'TagLeaf LIMS': {
-        'algorithm': 'parse_tagleaf_url',
-        'key': 'lims.tagleaf',
-        'qr_code_index': 2,
-        'url': 'https://lims.tagleaf.com',
-    },
-
-    # Labs
-    # - Green Leaf Lab
-    # - SC Labs
-    # - MCR Labs
-    # - Veda Scientific
-    'Veda Scientific': {
-        'algorithm': 'parse_veda_pdf',
-        'key': 'veda scientific',
-        'qr_code_index': None,
-        'url': ' vedascientific.co',
-    },
-
+    'Confident Cannabis': CONFIDENT_CANNABIS,
+    'TagLeaf LIMS': TAGLEAF,
+    'Green Leaf Lab': GREEN_LEAF_LAB,
+    'Veda Scientific': VEDA,
     # Dream: Implement an algorithm to parse any custom CoA.
     'custom': {
-        'algorithm': '',
+        'coa_parsing_algorithm': '',
+        'coa_qr_code_index': -1,
         'key': 'custom',
-        'qr_code_index': -1,
         'url': 'https://cannlytics.com',
     }
-
 }
 DECODINGS = {
     '<LOQ': 0,
@@ -110,6 +100,7 @@ DECODINGS = {
     'ND': 0,
     'NR': None,
     'N/A': None,
+    'na': None,
 }
 KEYS = {
     'Analyte': 'name',
@@ -291,6 +282,30 @@ class CoADoc:
         isoformat = f'{date[0:4]}-{date[4:6]}-{date[6:8]}'
         isoformat += f'T{date[8:10]}:{date[10:12]}:{date[12:14]}'
         return isoformat
+    
+    def get_pdf_image_data(
+            self,
+            page: Any,
+            image_index: Optional[int] = 0, 
+            resolution: Optional[int] = 300,
+        ) -> str:
+        """Get the image data for a given PDF page image.
+        Args:
+            page (Page): A pdfplumber Page.
+            image_index (int): The index of the image.
+            resolution (int): The resolution for the image.
+        Returns:
+            (str): The image data.
+        """
+        y = page.height
+        img = page.images[image_index]
+        bbox = (img['x0'], y - img['y1'], img['x1'], y - img['y0'])
+        crop = page.crop(bbox)
+        obj = crop.to_image(resolution=resolution)
+        buffered = BytesIO()
+        obj.save(buffered, format='JPEG')
+        img_str = base64.b64encode(buffered.getvalue())
+        return img_str.decode('utf-8')
 
     def identify_lims(
             self,
@@ -501,7 +516,7 @@ class CoADoc:
             # Future work: Parse custom CoAs.
             # E.g. if `known_lims = 'custom'`.`
             raise NotImplementedError
-        algorithm_name = LIMS[known_lims]['algorithm']
+        algorithm_name = LIMS[known_lims]['coa_parsing_algorithm']
         algorithm = getattr(self, algorithm_name)
         data = algorithm(
             url,
@@ -577,6 +592,11 @@ class CoADoc:
 
 
 # Optional: Calculate any meaningful statistics (perhaps `percentiles`s?)
+
+
+# Optional: Drop helper fields: 
+# - coa_qr_code_index
+# - coa_image_index
 
 
 # TODO: Archive the lab results if they are public.

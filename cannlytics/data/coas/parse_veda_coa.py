@@ -69,24 +69,7 @@ from cannlytics.utils.constants import ANALYSES, ANALYTES
 from cannlytics.utils.utils import snake_case, split_list, strip_whitespace
 
 
-VEDA = {
-    'lab': 'Veda Scientific',
-    'lab_image_url': '', # <- Get this data.
-    'lab_license_number': '', # <- Get this data.
-    'lab_address': '1601 W Central Ave Building A Unit A, Lompoc, CA',
-    'lab_street': '1601 W Central Ave Building A Unit A',
-    'lab_city': 'Lompoc',
-    'lab_county': '', # <- Get this data.
-    'lab_state': 'CA',
-    'lab_zipcode': '93436',
-    'lab_phone': '(805) 324-7728',
-    'lab_email': '', # <- Get this data.
-    'lab_website': 'vedascientific.co',
-    'lab_latitude': '',# <- Get this data.
-    'lab_longitude': '',# <- Get this data.
-}
-
-# Define all of the analyses.
+# TODO: Define all of the analyses.
 VEDA_SCIENTIFIC_ANALYSES = {
     'cannabinoids': {
         'name': 'Cannabinoids',
@@ -161,6 +144,27 @@ VEDA_SCIENTIFIC_ANALYSES = {
         'units': 'ug/g',
         'analytes': [],
     },
+}
+
+VEDA = {
+    'analyses': VEDA_SCIENTIFIC_ANALYSES,
+    'coa_parsing_algorithm': 'parse_veda_pdf',
+    'coa_qr_code_index': None,
+    'coa_image_index': 2,
+    'lab': 'Veda Scientific',
+    'lab_image_url': 'https://images.squarespace-cdn.com/content/v1/5fab1470f012f739139935ac/58792970-f502-4e1a-ac29-ddca27b43266/Veda_Logo_Horizontal_RGB_Large.png?format=1500w', # <- Get this data.
+    'lab_license_number': '', # <-- Get this data point.
+    'lab_address': '1601 W Central Ave Building A Unit A, Lompoc, CA',
+    'lab_street': '1601 W Central Ave Building A Unit A',
+    'lab_city': 'Lompoc',
+    'lab_county': 'Santa Barbara',
+    'lab_state': 'CA',
+    'lab_zipcode': '93436',
+    'lab_phone': '(805) 324-7728',
+    'lab_email': 'info@vedascientific.co',
+    'lab_website': 'vedascientific.co',
+    'lab_latitude': '34.661520',
+    'lab_longitude': '-120.476520',
 }
 
 

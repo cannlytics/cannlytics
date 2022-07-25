@@ -69,6 +69,14 @@ from cannlytics.data.data import create_sample_id
 from cannlytics.utils.utils import snake_case, strip_whitespace
 
 
+TAGLEAF = {
+    'coa_parsing_algorithm': 'parse_tagleaf_url',
+    'coa_qr_code_index': 2,
+    'key': 'lims.tagleaf',
+    'url': 'https://lims.tagleaf.com',
+}
+
+
 def parse_tagleaf_pdf(
         self,
         doc: Any,

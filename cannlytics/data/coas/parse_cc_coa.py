@@ -73,6 +73,15 @@ except ImportError:
 from cannlytics.data.data import create_sample_id
 from cannlytics.utils.utils import snake_case, strip_whitespace
 
+
+CONFIDENT_CANNABIS = {
+    'coa_parsing_algorithm': 'parse_cc_url',
+    'coa_qr_code_index': 3,
+    'key': 'Con\x00dent Cannabis',
+    'url': 'https://orders.confidentcannabis.com',
+}
+
+
 def parse_cc_pdf(
             self,
             doc: Any,
