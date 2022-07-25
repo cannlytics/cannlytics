@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/23/2022
-Updated: 7/24/2022
+Updated: 7/25/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -43,17 +43,17 @@ Data Points:
     ✓ producer_license_number
     ✓ product_name
     ✓ product_type
-    - results
+    ✓ results
     ✓ sample_weight
     ✓ sample_size
     ✓ sampling_method
     ✓ status
-    - total_cannabinoids
-    - total_thc
-    - total_cbd
-    - total_terpenes
+    ✓ total_cannabinoids
+    ✓ total_thc
+    ✓ total_cbd
+    ✓ total_terpenes
     ✓ sample_id (generated)
-    - strain_name
+    - strain_name (augmented)
     ✓ lab_id
 
 Static Data Points:
@@ -75,8 +75,9 @@ Static Data Points:
 
 """
 # Standard imports.
+from ast import literal_eval
 import re
-from typing import Any, Optional
+from typing import Any
 
 # External imports.
 import pandas as pd
@@ -84,110 +85,19 @@ import pdfplumber
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
-from cannlytics.utils.constants import ANALYSES, ANALYTES
-from cannlytics.utils.utils import snake_case, split_list, strip_whitespace
+from cannlytics.utils.utils import (
+    snake_case,
+    split_list,
+    strip_whitespace,
+)
 
 
-GREEN_LEAF_LAB_ANALYSES = {
-    'cannabinoids': {
-        'key': 'cannabinoids',
-        'name': 'Potency Analysis by HPLC',
-        'columns': [],
-        'analytes': [],
-    },
-    'pesticides': {
-        'key': 'pesticides',
-        'name': 'Pesticide Analysis by GCMS/LCMS',
-        'columns': [],
-        'analytes': [],
-    },
-    'water_activity': {
-        'key': 'water_activity',
-        'name': 'Water Activity by Aqua Lab',
-        'columns': [],
-        'analytes': [],
-    },
-    'moisture_content': {
-        'key': 'moisture_content',
-        'name': 'Moisture by Moisture Balance',
-        'columns': [],
-        'analytes': [],
-    },
-    'terpene_analysis_add_on': {
-        'key': 'terpenes',
-        'name': 'Terpene Analysis by GCMS',
-        'columns': [],
-        'analytes': [],
-    },
-    'microbials': {
-        'key': 'microbials',
-        'name': 'Microbials by PCR',
-        'columns': [],
-        'analytes': [],
-    },
-    'metals': {
-        'key': 'heavy_metals',
-        'name': 'Metals Analysis by ICPMS',
-        'columns': [],
-        'analytes': [],
-    },
-    'foreign_material': {
-        'key': 'foreign_matter',
-        'name': 'Filth and Foreign Material Inspection by Magnification',
-        'columns': [],
-        'analytes': [],
-    },
-    'mycotoxins': {
-        'key': 'mycotoxins',
-        'name': 'Mycotoxins by LCMSMS',
-        'columns': [],
-        'analytes': [],
-    },
-}
-
-GREEN_LEAF_LABS_FIELDS = {
-    'licensenumber': 'lab_license_number',
-    'lab_sample_id': 'lab_id',
-    'matrix': 'product_type',
-    'batch_size': 'batch_size',
-    'sample_size': 'sample_size',
-    'date_sampled': 'date_sampled',
-    'date_received': 'date_received',
-    'harvesttoprocessing_date': 'date_harvested',
-    'product_density': 'sample_weight',
-    'overall_batch': 'status',
-    'cannabinoids': 'cannabinoids_status',
-    'pesticides': 'pesticides_status',
-    'water_activity': 'water_activity_status',
-    'moisture_content': 'moisture_content_status',
-    'terpene_analysis_add_on': 'terpenes_status',
-    'microbials': 'microbials_status',
-    'metals': 'heavy_metals_status',
-    'foreign_material': 'foreign_matter_status',
-    'mycotoxins': 'mycotoxins_status',
-    'sampling_method': 'sampling_method',
-    'Test RFID': 'metrc_lab_id',
-    'Source RFID': 'metrc_source_id',
-    'Lab Sample ID': 'lab_id',
-    'Sampling Method/SOP': 'sampling_method',
-    'Source Batch ID': 'batch_id',
-    'Matrix': 'product_type',
-    'Batch Size': 'batch_size',
-    'Sample Size': 'sample_size',
-    'Date Sampled': 'date_sampled',
-    'Date Received': 'date_received',
-    'Harvest/Processing Date': 'date_harvested',
-    'Product Density': 'sample_weight',
-}
-
+# It is assumed that the lab has the following details.
 # Future work: Make this dynamic to handle multiple lab locations.
 # E.g. Green Leaf Lab has a California and an Oregon location.
 GREEN_LEAF_LAB = {
-    'analyses': GREEN_LEAF_LAB_ANALYSES,
-    'coa_fields': GREEN_LEAF_LABS_FIELDS,
     'coa_parsing_algorithm': 'parse_green_leaf_lab_pdf',
-    'coa_qr_code_index': None,
-    'coa_image_index': 2,
+    'lims': 'Green Leaf Lab',
     'lab': 'Green Leaf Lab',
     'lab_image_url': 'https://cdn-djjmk.nitrocdn.com/MuWSCTBsUZpIUufaWqGQkErSrYFMxIqD/assets/static/optimized/rev-a199899/wp-content/uploads/2018/12/greenleaf-logo.png',
     'lab_license_number': ' C8-0000078-LIC', # <- Make dynamic.
@@ -204,12 +114,151 @@ GREEN_LEAF_LAB = {
     'lab_longitude': '-121.459870', # <- Make dynamic.
 }
 
+# It is assumed that there are the following analyses on each CoA.
+GREEN_LEAF_LAB_ANALYSES = {
+    'cannabinoids': {
+        'name': 'Potency Analysis by HPLC',
+        'columns': ['name', 'lod', 'loq', 'value', 'mg_g'],
+    },
+    'pesticides': {
+        'name': 'Pesticide Analysis by GCMS/LCMS',
+        'columns': ['name', 'value', 'limit', 'lod', 'loq', 'units'],
+        'double_column': True,
+    },
+    'water_activity': {
+        'name': 'Water Activity by Aqua Lab',
+        'columns': ['name', 'value', 'units', 'lod', 'loq'],
+    },
+    'moisture_content': {
+        'name': 'Moisture by Moisture Balance',
+        'columns': ['name', 'value', 'units'],
+    },
+    'terpenes': {
+        'name': 'Terpene Analysis by GCMS',
+        'columns': ['name', 'value', 'mg_g'],
+        'double_column': True,
+    },
+    'heavy_metals': {
+        'name': 'Metals Analysis by ICPMS',
+        'columns': ['name', 'value', 'limit', 'lod', 'loq', 'units'],
+    },
+    'mycotoxins': {
+        'name': 'Mycotoxins by LCMSMS',
+        'columns': ['name', 'value', 'limit', 'loq', 'loq', 'units'],
+    },
+    'microbials': {
+        'name': 'Microbials by PCR',
+        'columns': ['name', 'status', 'limit', 'lod', 'loq', 'units', 'value'],
+    },
+    'foreign_matter': {
+        'name': 'Filth and Foreign Material Inspection by Magnification',
+        'columns': ['name', 'status', 'limit', 'lod', 'loq', 'units'],
+    },
+}
+
+# It is assumed that the CoA has the following parameters.
+GREEN_LEAF_LAB_COA = {
+    'coa_qr_code_index': None,
+    'coa_image_index': 2,
+    'coa_page_area': '(0, 198, 612, 693)',
+    'coa_sample_details_area': '(0, 126.72, 612, 205.92)',
+    'coa_distributor_area': '(0, 79.2, 244.8, 142.56)',
+    'coa_producer_area': '(244.8, 79.2, 612, 142.56)',
+    # Optional: Clean up the fields!
+    'coa_fields': {
+        'licensenumber': 'lab_license_number',
+        'lab_sample_id': 'lab_id',
+        'matrix': 'product_type',
+        'batch_size': 'batch_size',
+        'sample_size': 'sample_size',
+        'date_sampled': 'date_sampled',
+        'date_received': 'date_received',
+        'harvesttoprocessing_date': 'date_harvested',
+        'product_density': 'sample_weight',
+        'overall_batch': 'status',
+        'cannabinoids': 'cannabinoids_status',
+        'pesticides': 'pesticides_status',
+        'water_activity': 'water_activity_status',
+        'moisture_content': 'moisture_content_status',
+        'terpene_analysis_add_on': 'terpenes_status',
+        'microbials': 'microbials_status',
+        'metals': 'heavy_metals_status',
+        'foreign_material': 'foreign_matter_status',
+        'mycotoxins': 'mycotoxins_status',
+        'sampling_method': 'sampling_method',
+        'Test RFID': 'metrc_lab_id',
+        'Source RFID': 'metrc_source_id',
+        'Lab Sample ID': 'lab_id',
+        'Sampling Method/SOP': 'sampling_method',
+        'Source Batch ID': 'batch_id',
+        'Matrix': 'product_type',
+        'Batch Size': 'batch_size',
+        'Sample Size': 'sample_size',
+        'Date Sampled': 'date_sampled',
+        'Date Received': 'date_received',
+        'Harvest/Processing Date': 'date_harvested',
+        'Product Density': 'sample_weight',
+    },
+    'coa_sample_detail_fields': [
+        'Test RFID',
+        'Source RFID',
+        'Lab Sample ID',
+        'Sampling Method/SOP',
+        'Source Batch ID',
+        'Matrix',
+        'Batch Size',
+        'Sample Size',
+        'Date Sampled',
+        'Date Received',
+        'Harvest/Processing Date',
+        'Product Density',
+    ],
+    'coa_skip_values': [
+        'Date/Time',
+        'Analysis Method',
+        'Analyte',
+        'ND - Compound not detected',
+        '<LOQ - Results below the Limit of Quantitation',
+        'Results above the Action Level',
+        'Sesquiterpenes',
+        'Monoterpenes',
+    ],
+    'coa_replacements': [
+        {'text': '< LOQ', 'key': '<LOQ'},
+        {'text': '< LOD', 'key': '<LOD'},
+        {'text': 'No detection in 1 gram', 'key': 'ND'},
+        {'text': 'Ocimene isomer II', 'key': 'beta-ocimene'},
+        {'text': 'Ocimene isomer I', 'key': 'alpha-ocimene'},
+        {'text': 'p-Mentha-1,5-diene', 'key': 'p-Mentha-1-5-diene'},
+        {'text': 'Methyl parathion', 'key': 'Methyl-parathion'},
+    ],
+}
+
+
+def augment_analyte_result(result, columns, parts):
+    """Quickly augment an analyte result."""
+    r = result.copy()
+    if len(parts) > len(columns):
+        break_point = len(parts) - len(columns) + 1
+        name = ' '.join(parts[:break_point])
+        r['name'] = name
+        r['key'] = snake_case(name)
+        for i, part in enumerate(parts[break_point:]):
+            r[columns[i + 1]] = part
+    else:
+        for i, part in enumerate(parts):
+            if i == 0:
+                r[columns[i]] = part
+                r['key'] = snake_case(part)
+            else:
+                r[columns[i]] = part
+    return r
+
 
 def parse_green_leaf_lab_pdf(
         self,
         doc: Any,
-        headers: Optional[dict] = None,
-        persist: Optional[bool] = False,
+        **kwargs,
     ) -> dict:
     """Parse a Green Leaf Lab CoA PDF.
     Args:
@@ -222,59 +271,37 @@ def parse_green_leaf_lab_pdf(
     Returns:
         (dict): The sample data.
     """
-    return self.parse_pdf(
-        self,
-        doc,
-        lims='Green Leaf Lab',
-        headers=headers,
-        persist=persist,
-    )
+    # Get the lab / LIMS analyses and CoA parameters.
+    obs = {}
+    lab = GREEN_LEAF_LAB
+    lab_analyses = GREEN_LEAF_LAB_ANALYSES
+    coa_parameters = GREEN_LEAF_LAB_COA
 
-
-def get_page_rows(page: Any, **kwargs) -> list:
-    """Get the rows a given page.
-    Args:
-        page (Page): A pdfplumber page containing rows to extract.
-    Returns:
-        (list): A list of text.
-    """
-    txt = page.extract_text(**kwargs)
-    txt = txt.replace('\xa0\xa0', '\n').replace('\xa0', ',')
-    return txt.split('\n')
-
-
-if __name__ == '__main__':
-
-    # Test parsing a Green Leaf Lab CoA
-    from cannlytics.data.coas import CoADoc
-    from cannlytics.utils.constants import ANALYTES
-
-    # Initialize the CoA parser.
-    parser = CoADoc()
-
-    # Specify where your test CoA lives.
-    DATA_DIR = '../../../.datasets/coas'
-    coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
+    # Get the lab's analyses.
+    standard_analyses = list(lab_analyses.keys())
+    analysis_names = [x['name'] for x in lab_analyses.values()]
 
     # Read the PDF.
-    obs = {}
-    report = pdfplumber.open(coa_pdf)
-    p0 = report.pages[0]
+    if isinstance(doc, str):
+        report = pdfplumber.open(doc)
+    else:
+        report = doc
+    front_page = report.pages[0]
 
-    # ✓ Test detection of Green Leaf Labs CoAs.
-    lab = 'Green Leaf Lab'
-    known_lims = parser.identify_lims(report, lab)
-    assert known_lims == lab
-    y, x = p0.height, p0.width
-    header_area = (0, 0, x, y * 0.25)
-    footer_area = (0, y * 0.875, x, y)
-    page_area = (0, y * 0.25, x, y * 0.875)
-    sample_details_area = (0, y * 0.16, x, y * 0.26)
-    distributor_area = (0, y * 0.1, x * 0.4, y * 0.18)
-    producer_area = (x * 0.4, y * 0.1, x, y * 0.18)
+    # Get the lab-specific CoA page areas.
+    page_area = literal_eval(coa_parameters['coa_page_area'])
+    sample_details_area = literal_eval(coa_parameters['coa_sample_details_area'])
+    distributor_area = literal_eval(coa_parameters['coa_distributor_area'])
+    producer_area = literal_eval(coa_parameters['coa_producer_area'])
 
-    # ✓ Get all distributor details.
-    crop = p0.within_bbox(distributor_area)
+    # Get lab CoA specific fields.
+    coa_fields = coa_parameters['coa_fields']
+    coa_replacements = coa_parameters['coa_replacements']
+    sample_details_fields = coa_parameters['coa_sample_detail_fields']
+    skip_values = coa_parameters['coa_skip_values']
+
+    # Get all distributor details.
+    crop = front_page.within_bbox(distributor_area)
     details = crop.extract_text().split('\n')
     address = details[2]
     parts = address.split(',')
@@ -291,8 +318,8 @@ if __name__ == '__main__':
     obs['distributor_zipcode'] = zipcode
     obs['distributor_license_number'] = details[-1]
     
-    # ✓ Get all producer details.
-    crop = p0.within_bbox(producer_area)
+    # Get all producer details.
+    crop = front_page.within_bbox(producer_area)
     details = crop.extract_text().split('\n')
     producer = details[1]
     street = details[2]
@@ -308,35 +335,21 @@ if __name__ == '__main__':
     obs['producer_zipcode'] = zipcode
     obs['producer_license_number'] = details[-1]
 
-    # ✓ Get the image data.
-    image_index = parser.lims[lab]['coa_image_index']
-    obs['image_data'] = parser.get_pdf_image_data(report.pages[0], image_index)
+    # Optional: Get the image data.
+    # image_index = coa_parameters['coa_image_index']
+    # obs['image_data'] = self.get_pdf_image_data(report.pages[0], image_index)
     obs['images'] = []
 
-    # ✓ Get the sample details.
-    fields = [
-        'Test RFID',
-        'Source RFID',
-        'Lab Sample ID',
-        'Sampling Method/SOP',
-        'Source Batch ID',
-        'Matrix',
-        'Batch Size',
-        'Sample Size',
-        'Date Sampled',
-        'Date Received',
-        'Harvest/Processing Date',
-        'Product Density',
-    ]
-    crop = p0.within_bbox(sample_details_area)
+    # Get the sample details.
+    crop = front_page.within_bbox(sample_details_area)
     details = crop.extract_text()
-    details = re.split('\n|' + '|'.join(fields), details)
+    details = re.split('\n|' + '|'.join(sample_details_fields), details)
     product_name = details[0]
     index = 0
     for i, detail in enumerate(details[1:]):
         if detail:
-            field = fields[index]
-            key = GREEN_LEAF_LABS_FIELDS[field]
+            field = sample_details_fields[index]
+            key = coa_fields[field]
             obs[key] = detail.replace(':', '').strip()
             index += 1  
 
@@ -353,7 +366,7 @@ if __name__ == '__main__':
                     value = strip_whitespace(parts[1])
                 except IndexError:
                     continue
-                field = GREEN_LEAF_LABS_FIELDS.get(key, key)
+                field = coa_fields.get(key, key)
                 obs[field] = value.lower()
                 if field != 'status':
                     analysis = field.replace('_status', '')
@@ -379,21 +392,11 @@ if __name__ == '__main__':
             pass
     date_tested = max(tested_at).isoformat()
 
-    # -- FIXME: Get ALL of the results! ---
-
-    # Get a list of standard analytes and fields to collect.
-    # Optional: Augment with Green Leaf Lab's analyses?
-    # field_keys = list(parser.lims[lab]['coa_fields'].keys())
-    standard_analytes = list(set(ANALYTES.values()))
-    field_keys = list(GREEN_LEAF_LABS_FIELDS.keys())
-    analysis_names = [x['name'] for x in GREEN_LEAF_LAB_ANALYSES.values()]
-    analysis_keys = [x['key'] for x in GREEN_LEAF_LAB_ANALYSES.values()]
-
     # Get all of the `results` rows.
     all_rows = []
     for page in report.pages[1:]:
         crop = page.within_bbox(page_area)
-        rows = get_page_rows(crop)
+        rows = self.get_page_rows(crop)
         for row in rows:
             if row in all_rows:
                 pass
@@ -402,7 +405,6 @@ if __name__ == '__main__':
 
     # Iterate over all rows to get the `results` rows
     # seeing if row starts with an analysis or analyte.
-    columns = []
     results = []
     current_analysis = None
     for row in all_rows:
@@ -411,43 +413,65 @@ if __name__ == '__main__':
         analysis = current_analysis
         for i, name in enumerate(analysis_names):
             if name in row:
-                analysis = analysis_keys[i]
+                analysis = standard_analyses[i]
                 break
         if analysis != current_analysis:
             current_analysis = analysis
             continue
-        
+
         # Skip detail rows.
-        if row.startswith('Date/Time') or row.startswith('Analysis Method'):
+        detail_row = False
+        for skip_value in skip_values:
+            if row.startswith(skip_value):
+                detail_row = True
+                break
+        if detail_row:
             continue
 
-        # TODO: Identify the analyte!
-        # for analyte in standard_analytes:
-        #     if snake.startswith(analyte):
+        # Get the analysis details.
+        analysis_details = lab_analyses[current_analysis]
+        columns = analysis_details['columns']
+        double_column = analysis_details.get('double_column')
 
-
-        # TODO: Identify the columns (static by analysis to make it easy!).
-
-
-        # TODO: Get the results!
-        values = row.replace('< LOQ', '<LOQ').replace('< LOD', '<LOD')
+        # Get the result!
+        values = row
+        for replacement in coa_replacements:
+            values = values.replace(replacement['text'], replacement['key'])
         values = values.split(' ')
         values = [x for x in values if x]
-        print(analysis, values)
+        result = {'analysis': analysis}
 
-        # Record the result.
-        result = {
-            'analysis': analysis,
-            'analyte': None,
-            'value': '',
-            'mg_g': '',
-            'units': '',
-            'status': '',
-            'limit': '',
-            'lod': '',
-            'loq': '',
-        }
-        results.append(result)
+        # FIXME: Skip the analysis title here.
+        if snake_case(values[0]) == current_analysis:
+            continue
+
+        # FIXME: There is probably a better way to do this.
+        # This may exclude results by accident.
+        if len(values) < len(columns):
+            continue
+
+        # FIXME: Hot-fix for `total_terpenes`.
+        if values[0] == 'Total' and values[1] == 'Terpenes':
+            values = ['Total Terpenes'] + values[2:]
+
+        # FIXME: Hot-fix for `mycotoxins`.
+        if values[0] == 'aflatoxin':
+            values.insert(2, 20)
+
+        # Split the row if double_column.
+        # Future work: This code could probably be refactored.
+        if double_column and len(values) > len(columns):
+            multi_part = split_list(values, int(len(values) / 2))
+            entry = augment_analyte_result(result, columns, multi_part[0])
+            if entry['name'] != 'mgtog' and entry['name'] != 'action':
+                results.append(entry)
+            entry = augment_analyte_result(result, columns, multi_part[1])
+            if entry['name'] != 'mgtog' and entry['name'] != 'action':
+                results.append(entry)
+        else:
+            entry = augment_analyte_result(result, columns, values)
+            if entry['name'] != 'mgtog' and entry['name'] != 'action':
+                results.append(entry)
 
     # Finish data collection with a freshly minted sample ID.
     obs['sample_id'] = create_sample_id(
@@ -456,7 +480,7 @@ if __name__ == '__main__':
         salt=date_tested,
     )
 
-    # Data cleaning.
+    # Data aggregation.
     obs['analyses'] = analyses
     obs['date_tested'] = date_tested
     obs['methods'] = methods
@@ -470,7 +494,14 @@ if __name__ == '__main__':
             obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
         except:
             pass
+    
+    # TODO: Lowercase `results` `status`.
 
+    # TODO: Standardize `results` `units`.
+
+    # Future work: Standardize the `product_type`.
+
+    # Future work: Attempt to identify `strain_name` from `product_name`.
 
     # Optional: Calculate THC to CBD ratio.
 
@@ -483,22 +514,28 @@ if __name__ == '__main__':
     # analytes = ['alpha_terpinene', 'gamma_terpinene', 'terpinolene', 'terpinene']
     # compounds = sum_columns(compounds, 'terpinenes', analytes, drop=False)
 
-    # Optional: Sum `nerolidol` and `ocimene`.
+    # Optional: Sum `nerolidol`s and `ocimene`s.
 
     # Optional: Calculate total_cbg, total_thcv, total_cbc, etc.
 
-    # Future work: Attempt to identify `strain_name`.
-
-    # Future work: Standardize the `product_type`
+    return {**lab, **obs}
 
 
-    #-------------------------------------------------------------------
-    # TEST: Parse a CoA PDF.
-    # from cannlytics.data.coas import CoADoc
-    # parser = CoADoc()
-    # data = parse_green_leaf_lab_pdf(parser, coa_pdf)
-    # assert data is not None
-    #-------------------------------------------------------------------
-    del obs['image_data']
-    del obs['results']
-    print('Obs:', obs)
+if __name__ == '__main__':
+
+    # Test parsing a Green Leaf Lab CoA
+    from cannlytics.data.coas import CoADoc
+
+    # Specify where your test CoA lives.
+    DATA_DIR = '../../../.datasets/coas'
+    coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
+
+    # Initialize the CoA parser.
+    parser = CoADoc()
+
+    # Detect the lab / LIMS that generated the CoA.
+    lab = parser.identify_lims(coa_pdf)
+
+    # Test parsing a Green Leaf Lab CoA.
+    data = parse_green_leaf_lab_pdf(parser, coa_pdf)
+    assert data is not None

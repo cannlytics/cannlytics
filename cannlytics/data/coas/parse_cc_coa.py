@@ -77,36 +77,36 @@ from cannlytics.utils.utils import snake_case, strip_whitespace
 CONFIDENT_CANNABIS = {
     'coa_parsing_algorithm': 'parse_cc_url',
     'coa_qr_code_index': 3,
-    'key': 'Con\x00dent Cannabis',
+    'lims': 'Con\x00dent Cannabis',
     'url': 'https://orders.confidentcannabis.com',
 }
 
 
 def parse_cc_pdf(
-            self,
-            doc: Any,
-            max_delay: Optional[float] = 7,
-            persist: Optional[bool] = False,
-        ) -> dict:
-        """Parse a Confident Cannabis CoA PDF.
-        Args:
-            doc (str or PDF): A file path to a PDF or a pdfplumber PDF.
-            max_delay (float): The maximum number of seconds to wait
-                for the page to load.
-            persist (bool): Whether to persist the driver.
-                The default is `False`. If you do persist
-                the driver, then make sure to call `quit`
-                when you are finished.
-        Returns:
-            (dict): The sample data.
-        """
-        return self.parse_pdf(
-            self,
-            doc,
-            lims='Confident Cannabis',
-            max_delay=max_delay,
-            persist=persist,
-        )
+        self,
+        doc: Any,
+        max_delay: Optional[float] = 7,
+        persist: Optional[bool] = False,
+    ) -> dict:
+    """Parse a Confident Cannabis CoA PDF.
+    Args:
+        doc (str or PDF): A file path to a PDF or a pdfplumber PDF.
+        max_delay (float): The maximum number of seconds to wait
+            for the page to load.
+        persist (bool): Whether to persist the driver.
+            The default is `False`. If you do persist
+            the driver, then make sure to call `quit`
+            when you are finished.
+    Returns:
+        (dict): The sample data.
+    """
+    return self.parse_pdf(
+        self,
+        doc,
+        lims='Confident Cannabis',
+        max_delay=max_delay,
+        persist=persist,
+    )
 
 def parse_cc_url(
         self,

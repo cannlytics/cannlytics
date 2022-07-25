@@ -151,6 +151,7 @@ VEDA = {
     'coa_parsing_algorithm': 'parse_veda_pdf',
     'coa_qr_code_index': None,
     'coa_image_index': 2,
+    'lims': 'Veda Scientific',
     'lab': 'Veda Scientific',
     'lab_image_url': 'https://images.squarespace-cdn.com/content/v1/5fab1470f012f739139935ac/58792970-f502-4e1a-ac29-ddca27b43266/Veda_Logo_Horizontal_RGB_Large.png?format=1500w', # <- Get this data.
     'lab_license_number': '', # <-- Get this data point.

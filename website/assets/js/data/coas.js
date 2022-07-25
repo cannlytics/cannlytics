@@ -208,6 +208,8 @@ function renderCoAResults() {
   document.getElementById('coa-results-tabs').classList.remove('d-none');
   document.getElementById('coa-results-content').classList.remove('d-none');
   console.log('Rendering results....');
+  // DEV:
+  const data = {};
 }
 
 

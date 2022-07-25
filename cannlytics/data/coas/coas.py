@@ -263,6 +263,17 @@ class CoADoc:
         # TODO: Implement!
         # return None or data!
         raise NotImplementedError
+    
+    def get_page_rows(self, page: Any, **kwargs) -> list:
+        """Get the rows a given page.
+        Args:
+            page (Page): A pdfplumber page containing rows to extract.
+        Returns:
+            (list): A list of text.
+        """
+        txt = page.extract_text(**kwargs)
+        txt = txt.replace('\xa0\xa0', '\n').replace('\xa0', ',')
+        return txt.split('\n')
 
     def get_pdf_creation_date(self, pdf: Any) -> str:
         """Get the creation date of a PDF in ISO format.
@@ -346,7 +357,7 @@ class CoADoc:
                     known = lims
         else:
             for key, values in lims.items():
-                if values['key'] in text or values['url'] in text:
+                if values['lims'] in text or values['url'] in text:
                     known = key
                     break
         return known
@@ -697,6 +708,12 @@ if __name__ == '__main__':
     # data = parser.parse(DATA_DIR)
 
     # TODO: Test parsing all CoAs in a zipped file!
+
+    # TODO: Test finding results by known metrc IDs.
+    metrc_ids = [
+        '1A4060300002A3B000000053',
+        '1A4060300017A85000001289',
+    ]
 
     # Close the parser.
     parser.quit()

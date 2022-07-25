@@ -91,6 +91,7 @@ ANALYTES = {
     'Aspergillus terreus': 'aspergillus_terreus',
     'Salmonella spp.': 'salmonella',
     'Salmonella': 'salmonella',
+    'Escherichia Coli': 'e_coli',
     'Shiga toxin-producing E. coli': 'e_coli',
     'Aflatoxin B1': 'aflatoxin_b1',
     'Aflatoxin B2': 'aflatoxin_b2',
