@@ -272,22 +272,21 @@ def parse_tagleaf_url(
 
 if __name__ == '__main__':
 
+    # Test TagLeaf LIMS CoAs parsing.
+    from cannlytics.data.coas import CoADoc
+
      # Specify where your test data lives.
     DATA_DIR = '../../../.datasets/coas'
-
-    # Test TagLeaf LIMS CoAs parsing.
     tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
     tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
     tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
 
-    from cannlytics.data.coas import CoADoc
+    # [✓] TEST: Parse a CoA URL.
+    parser = CoADoc()
+    data = parse_tagleaf_url(parser, tagleaf_coa_url)
+    assert data is not None
 
-    # # Parse a CoA URL.
-    # parser = CoADoc()
-    # data = parse_tagleaf_url(parser, tagleaf_coa_url)
-    # assert data is not None
-
-    # FIXME: Parse a CoA PDF.
+    # [✓] TEST: Parse a TagLeaf LIMS CoA PDF.
     parser = CoADoc()
     data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
     assert data is not None

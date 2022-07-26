@@ -530,12 +530,12 @@ if __name__ == '__main__':
     DATA_DIR = '../../../.datasets/coas'
     coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
 
-    # Initialize the CoA parser.
+    # [✓] TEST: Detect the lab / LIMS that generated the CoA.
     parser = CoADoc()
-
-    # Detect the lab / LIMS that generated the CoA.
     lab = parser.identify_lims(coa_pdf)
+    assert lab == 'Green Leaf Lab'
 
-    # Test parsing a Green Leaf Lab CoA.
+    # [✓] TEST: Parse a Green Leaf Lab CoA.
+    parser = CoADoc()
     data = parse_green_leaf_lab_pdf(parser, coa_pdf)
     assert data is not None

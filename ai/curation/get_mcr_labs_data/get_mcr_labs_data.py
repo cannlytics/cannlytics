@@ -23,7 +23,7 @@ Description:
         ✓ date_tested
         ✓ total_cannabinoids
         ✓ total_terpenes
-        ✓ lab_results_url
+        ✓ lab_results_url (FIXME: Has an extra slash `//report/`)
         ✓ image
         ✓ sample_id (generated)
         ✓ results

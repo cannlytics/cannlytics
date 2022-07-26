@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 7/24/2022
+Updated: 7/25/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -26,7 +26,7 @@ Note:
 
 Supported Labs:
 
-    - Green Leaf Lab
+    ✓ Green Leaf Lab
     - MCR Labs
     - SC Labs
     - Veda Scientific
@@ -59,9 +59,6 @@ from cannlytics.utils.constants import (
 )
 
 # Lab and LIMS CoA parsing algorithms.
-# TODO:
-# - SC Labs
-# - MCR Labs
 from cannlytics.data.coas.parse_cc_coa import (
     CONFIDENT_CANNABIS,
     parse_cc_pdf,
@@ -154,8 +151,7 @@ class CoADoc:
         self.parse_tagleaf_pdf = parse_tagleaf_pdf
         self.parse_tagleaf_url = parse_tagleaf_url
         self.parse_veda_pdf = parse_veda_pdf
-        # TODO: Incorporate MCR Labs and SC Labs `ai` data collection
-        # routines by simply using `get_metrc_results`.
+        self.parse_green_leaf_lab_pdf = parse_green_leaf_lab_pdf
 
         # Define analyses.
         self.analyses = analyses
@@ -564,7 +560,7 @@ class CoADoc:
 
 
 #-----------------------------------------------------------------------
-# TODO: Standardize and normalize the data.
+# Standardize and normalize the data.
 #-----------------------------------------------------------------------
 
 # TODO: Calculate totals if missing:
@@ -586,6 +582,9 @@ class CoADoc:
 # TODO: Normalize the `results`:
 # - Remove and keep `units` from `value`.
 # - Map `DECODINGS` with `value` and `mg_g`.
+
+
+# TODO: Standardize `units`, `product_type`, etc.
 
 
 # TODO: Try to parse a `strain_name` from `product_name`.
@@ -638,86 +637,92 @@ if __name__ == '__main__':
     parser = CoADoc()
 
     # Specify where your data lives for testing.
-    DATA_DIR = '../../.datasets/coas'
-
-    # Test Confident Cannabis CoAs.
+    DATA_DIR = '../../../.datasets/coas'
     cc_coa_pdf = f'{DATA_DIR}/Classic Jack.pdf'
     cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
-
-    # Test TagLeaf LIMS CoAs.
     tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
     tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
     tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
 
-    # TODO: Test Veda Scientific CoA.
-    veda_coa_pdf = f'{DATA_DIR}/Veda Scientific Sample COA.pdf'
-
-    # Optional: Add GreenLeaf Labs CoA!
-    greenleaflab_coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
-
-    # TODO: Test get MCR Labs results by metrc ID.
-
-    # TODO: Test get SC Labs results by metrc ID.
-
-    # ✓ Test `decode_pdf_qr_code` via `find_pdf_qr_code_url`.
+    # [✓] TEST: `decode_pdf_qr_code` via `find_pdf_qr_code_url`.
     # qr_code_url = parser.find_pdf_qr_code_url(cc_coa_pdf)
     # assert qr_code_url.startswith('https')
     # qr_code_url = parser.find_pdf_qr_code_url(tagleaf_coa_pdf)
     # assert qr_code_url.startswith('https')
 
-    # ✓ Test `get_pdf_creation_date`.
+    # [✓] TEST: `get_pdf_creation_date`.
     # from datetime import datetime
     # creation_date = parser.get_pdf_creation_date(cc_coa_pdf)
     # assert isinstance(pd.to_datetime(creation_date), datetime)
     # creation_date = parser.get_pdf_creation_date(tagleaf_coa_pdf)
     # assert isinstance(pd.to_datetime(creation_date), datetime)
 
-    # ✓ Test `identify_lims`.
+    # [✓] TEST: `identify_lims`.
     # identified_lims = parser.identify_lims(cc_coa_pdf)
     # assert identified_lims == 'Confident Cannabis'
     # identified_lims = parser.identify_lims(tagleaf_coa_pdf)
     # assert identified_lims == 'TagLeaf LIMS'
 
-    # ✓ Parse a PDF.
+    # [✓] TEST: Parse a PDF.
     # data = parser.parse_pdf(cc_coa_pdf)
 
-    # ✓ Parse a URL.
+    # [✓] TEST: Parse a URL.
     # data = parser.parse_pdf(cc_coa_url)
 
-    # # ✓ Parse a Confident Cannabis CoA.
+    # [✓] TEST: Parse a Confident Cannabis CoA.
     # data = parser.parse_cc_pdf(cc_coa_pdf)
     # sleep(3)
     # data = parser.parse_cc_url(cc_coa_url)
 
-    # ✓ Parse a TagLeaf LIMS CoA.
+    # [✓] TEST: Parse a TagLeaf LIMS CoA.
     # data = parser.parse_tagleaf_pdf(tagleaf_coa_pdf)
     # sleep(3)
     # data = parser.parse_tagleaf_url(tagleaf_coa_url)
     # sleep(3)
     # data = parser.parse_tagleaf_url(tagleaf_coa_short_url)
 
-    # ✓ Parse a list of CoA URLs.
+    # [✓] TEST: Parse a list of CoA URLs.
     # urls = [cc_coa_url, tagleaf_coa_url]
     # data = parser.parse(urls)
 
-    # ✓ Parse a list of CoA PDFs.
+    # [✓] TEST: Parse a list of CoA PDFs.
     # files = [cc_coa_pdf, tagleaf_coa_pdf]
     # data = parser.parse(files)
 
-    # ✓ Parse all CoAs in a given directory.
+    # [✓] TEST: Parse all CoAs in a given directory.
     # data = parser.parse(DATA_DIR)
 
-    # TODO: Test parsing all CoAs in a zipped file!
+    # [ ] TEST: Parse all CoAs in a zipped file!
 
-    # TODO: Test finding results by known metrc IDs.
+
+    # [ ] TEST: Find results by known metrc IDs.
     metrc_ids = [
-        '1A4060300002A3B000000053',
-        '1A4060300017A85000001289',
+        '1A4060300002A3B000000053', # Green Leaf Lab
+        '1A4060300017A85000001289', # Green Leaf Lab
+        '1A4060300002459000017049', # SC Labs
     ]
 
-    # Close the parser.
-    parser.quit()
+    # [✓] TEST: Green Leaf Lab CoA parsing algorithm.
+    # green_leaf_lab_coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
+    # data = parser.parse_green_leaf_lab_pdf(green_leaf_lab_coa_pdf)
+    # assert data is not None
+
+    # [ ] TEST: Parse a Veda Scientific CoA.
+    veda_coa_pdf = f'{DATA_DIR}/Veda Scientific Sample COA.pdf'
+
+
+    # [ ] TEST: Get MCR Labs results by URL or metrc ID.
+    mcr_labs_coa_url = 'https://reports.mcrlabs.com/reports/critical-kush_24'
+
+
+    # [ ] TEST: Parse a SC Labs CoA.
+    # Note: Download PDF from <https://client.sclabs.com/sample/796684/>
+    sc_labs_coa_url = 'https://client.sclabs.com/sample/796684/'
+    sc_labs_coa_pdf = f'{DATA_DIR}/SC Labs Test CoA.pdf'
 
     # Future work: Parse a custom CoA.
+   
+    # [✓] TEST: Close the parser.
+    parser.quit()
 
-    print('✓ All tests finished.')
+    print('All CoADoc tests finished.')

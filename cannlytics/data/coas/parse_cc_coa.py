@@ -387,21 +387,20 @@ def parse_cc_url(
 
 if __name__ == '__main__':
 
-     # Specify where your test data lives.
-    DATA_DIR = '../../../.datasets/coas'
-
     # Test Confident Cannabis CoAs parsing.
+    from cannlytics.data.coas import CoADoc
+
+    # Specify where your test data lives.
+    DATA_DIR = '../../../.datasets/coas'
     cc_coa_pdf = f'{DATA_DIR}/Classic Jack.pdf'
     cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
 
-    from cannlytics.data.coas import CoADoc
-
-    # Parse a CoA URL.
+    # [✓] TEST: Parse a CoA URL.
     parser = CoADoc()
     data = parse_cc_url(parser, cc_coa_url)
     assert data is not None
 
-    # FIXME: Parse a CoA PDF.
+    # [✓] TEST: Parse a CoA PDF.
     parser = CoADoc()
     data = parse_cc_pdf(parser, cc_coa_pdf)
     assert data is not None
