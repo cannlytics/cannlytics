@@ -1,13 +1,17 @@
 # 🥸 CoADoC | Cannlytics CoA Data Parser
 
-Certificates of analysis (CoAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! CoADoc puts these vital data points in your hands by parsing PDFs and URLs, finding all the data standardizing the data, and cleanly returning the data to you.
+<div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
+  <img width="150px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3">
+</div>
+
+Certificates of analysis (CoAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! CoADoc puts these vital data points in your hands by parsing PDFs and URLs, finding all the data, standardizing the data, and cleanly returning the data to you.
 
 | Algorithm | Lab / LIMS | Status |
 |-----------|------------|--------|
 | `parse_cc_coa` | Confident Cannabis | 🟢 |
 | `parse_tagleaf_coa` | TagLeaf LIMS | 🟢 |
-| `parse_green_leaf_lab_coa` | Green Leaf Lab | 🟡 |
-| `parse_veda_coa` | Veda Scientific | 🟡 |
+| `parse_green_leaf_lab_coa` | Green Leaf Lab | 🟢 |
+| `parse_veda_coa` | Veda Scientific | 🔴 |
 | `parse_mcr_labs_coa` | MCR Labs | 🔴 |
 | `parse_sc_labs_coa` | SC Labs | 🔴 |
 

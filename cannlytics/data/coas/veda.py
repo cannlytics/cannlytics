@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 7/25/2022
+Updated: 7/26/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -14,9 +14,9 @@ Description:
 Data Points:
 
     ✓ analyses
-    ✓ {analysis}_method
+    - {analysis}_method
     ✓ analysis_type
-    - {analysis}_status
+    ✓ {analysis}_status
     x coa_urls
     ✓ date_tested
     - date_received
@@ -87,7 +87,7 @@ import pdfplumber
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
-from cannlytics.utils.constants import ANALYSES, ANALYTES
+# from cannlytics.utils.constants import ANALYSES, ANALYTES
 from cannlytics.utils.utils import snake_case, split_list, strip_whitespace
 
 
@@ -96,7 +96,7 @@ VEDA_SCIENTIFIC = {
     'lims': 'Veda Scientific',
     'lab': 'Veda Scientific',
     'lab_image_url': 'https://images.squarespace-cdn.com/content/v1/5fab1470f012f739139935ac/58792970-f502-4e1a-ac29-ddca27b43266/Veda_Logo_Horizontal_RGB_Large.png?format=1500w', # <- Get this data.
-    'lab_license_number': '', # <-- Get this data point.
+    'lab_license_number': '', # <-- Get this static data point.
     'lab_address': '1601 W Central Ave Building A Unit A, Lompoc, CA',
     'lab_street': '1601 W Central Ave Building A Unit A',
     'lab_city': 'Lompoc',
@@ -183,7 +183,7 @@ VEDA_SCIENTIFIC_ANALYSES = {
 VEDA_SCIENTIFIC_COA = {
     'coa_qr_code_index': None,
     'coa_image_index': 0,
-    'coa_page_area': '(0, 198, 612, 693)',
+    'coa_page_area': '(0, 75, 612, 670)',
     'coa_distributor_area': '(0, 79.2, 306, 170.28)',
     'coa_producer_area': '(306, 79.2, 612, 170.28)',
     'coa_sample_details_area': '(0, 170.28, 612, 297)',
@@ -206,6 +206,8 @@ VEDA_SCIENTIFIC_COA = {
     'coa_skip_values': [],
     'coa_replacements': [
         {'text': ' Per package', 'key': ''},
+        {'text': 'Potency', 'key': 'Cannabinoids'},
+        {'text': 'Foreign Materials', 'key': 'Foreign Matter'},
     ],
 }
 
@@ -324,9 +326,6 @@ if __name__ == '__main__':
     # Create the observation.
     obs = {}
 
-    # Get the date the CoA was created.
-    date_tested = parser.get_pdf_creation_date(report)
-
     # Optional: Get the image data.
     # image_index = coa_parameters['coa_image_index']
     # obs['image_data'] = self.get_pdf_image_data(report.pages[0], image_index)
@@ -388,7 +387,6 @@ if __name__ == '__main__':
     for r in coa_replacements:
         text = text.replace(r['text'], r['key'])
     details = re.split('\n|' + '|'.join(sample_details_fields), text)
-    product_name = details[0]
     index = 0
     for i, detail in enumerate(details[1:]):
         if detail:
@@ -397,165 +395,87 @@ if __name__ == '__main__':
             obs[key] = detail.lstrip(':').strip()
             index += 1 
 
-    # TODO: Get the `analyses` and `{analysis}_status`.
+    # Get the front page tables.
+    tables = front_page.extract_tables()
 
+    # Get the overall status.
+    table_data = tables[0][0][0]
+    analysis_details = table_data.replace('\xa0\xa0\xa0\xa0', '\n').split('\n')
+    mm, dd, yyyy = analysis_details[2].split(':')[-1].strip().split('/')
+    date_tested = f'{yyyy}-{mm}-{dd}'
+    obs['date_tested'] = date_tested
+    obs['analysis_type'] = analysis_details[0]
+    obs['status'] = analysis_details[-1].split(':')[-1].strip().lower()
 
-    # TODO: Identify `{analysis}_method`s.
-
-
-    # TODO: Get all of the `results` rows.
-
-
-    # Iterate over all rows to get the `results` rows
-    # seeing if row starts with an analysis or analyte.
-
-
-    # Turn dates to ISO format.
-    date_columns = [x for x in obs.keys() if x.startswith('date')]
-    for date_column in date_columns:
-        try:
-            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
-        except:
-            pass
-
-
-    #---------------------------
-    # DRAFT
-    #---------------------------
-
-    # # Veda Scientific parameters.
-    # page_columns = 2
-
-    # # Get the header and footer.
-    # p0 = report.pages[0]
-    # top = p0.lines[0]
-    # bottom = p0.lines[-1]
-
-    # # Get the header text.
-    # y0 = p0.height
-    # crop = p0.within_bbox((0, 0, p0.width / 2, 300))
-    # text = crop.extract_text()
-    # print(text)
-
-    # # Get the footer text.
-    # crop = p0.within_bbox((0, 360, p0.width, 420))
-    # text = crop.extract_text()
-
-    # # FIXME: Parse tables smarter!
-
-    # # Get all table data.
-    # # tables = []
-    # # for page in pdf_file.pages:
-    # #     pdf_tables = page.find_tables()
-    # #     for t in pdf_tables:
-    # #         tables += t.extract(
-    # #             x_tolerance=1,
-    # #             y_tolerance=1,
-    # #         )
-    # # print(tables)
-        
-    # # Get all unique tables and remove empty tables.
-    # tables = list(k for k, _ in itertools.groupby(tables))
-    # tables = [x for x in tables if not (len(x) == 1 and x[0] == '')]
-
-    # # Parse observation to the best of our abilities!
-    # # Start with known Veda Scientific data and the
-    # # fields that are known to be blank.
-    # obs = {
-    #     'coa_urls': [],
-    #     'images': [],
-    #     'lab_results_url': '',
-    # }
-
-    # # Get all analyte names.
-    # analyte_keys = list(set(ANALYTES.keys()))
-    # analyte_values = list(set(ANALYTES.values()))
-
-    # # List analysis names and key identifiers.
-    # analysis_names = list([x for x in VEDA_SCIENTIFIC_ANALYSES.keys()])
-    # analysis_keys = [
-    #     x.rstrip('s') for x in analysis_names
-    # ]
-
-    # # TODO: Try to get all sample details from the front page!
-    # front_page_rows = get_page_rows(report, index=[0], analytes=ANALYTES)
-
-    # # FIXME: Try to read the front page in quadrants.
-
-
-    # # TODO: Get the `producer`, `product_name`.
-    # for row in front_page_rows:
-    #     initial_value = row[0].lower()
-
-    #     if initial_value == 'business':
-    #         second_index = row[1:].index('Business')
-    #         distributor = ' '.join(row[2:second_index])
-    #         producer = ' '.join(row[second_index + 1:])
-
-    #     if 'License' in row and 'Number' in row:
-    #         second_index = row.index('Number')
-
-    # product_name = ''
-    # # - product_name
-    # # - product_type 
-    # # - lab_id
-    # # - order_number
-    # # - batch_number
-    # # - lab_metrc_id
-    # # - metrc_id
-    # # - metrc_ids = [lab_metrc_id, metrc_id]
-
-    # # - date_collected
-    # # - date_received
-
-    # # - batch_size
-    # # - sample_size
-    # # - serving_size
-    # # - servings_per_package
-    # # - density -> sample_weight
-
+    # Get the statuses from the front page.
+    analyses = []
+    crop = front_page.within_bbox(page_area)
+    text = crop.extract_text()
+    summary = text.split('Sample Certification')[0]
+    summary = summary.split('SAFETY SUMMARY')[-1]
+    summary = summary.replace('\xa0', '\n').split('\n')
+    for row in summary:
+        if row:
+            parts = row.strip().split(' ')
+            analysis_name = ' '.join(parts[:len(parts) - 1])
+            for r in coa_replacements:
+                analysis_name = analysis_name.replace(r['text'], r['key'])
+            analysis = snake_case(analysis_name)
+            status = parts[-1].strip().lower()
+            obs[f'{analysis}_method'] = status
+            # Future work: Ensure this excludes not tested analyses.
+            # Will need to see an example CoA with not tested analyses.
+            if status != 'not tested':
+                analyses.append(analysis)
+    
+    # TODO: Get cannabinoid totals.
+    # block = text.split('\n')
     # # - total_thc
     # # - total_cbd
     # # - total_cannabinoids
 
-    # # - producer
-    # # - producer_license_number
-    # # - producer_address
-    # # - producer_street
-    # # - producer_city
-    # # - producer_state
-    # # - producer_zipcode
-    # # - producer_longitude (augmented)
-    # # - producer_latitude (augmented)
+    # Get the lab license number.
+    table_data = tables[-1][-1][0]
+    lab_details = table_data.replace('\xa0', '\n').split('\n')
+    lab_details = [x.strip() for x in lab_details if x.replace('|', '').strip() != '' ]
+    for detail in lab_details:
+        if 'license' in detail.lower():
+            obs['lab_license_number'] = detail.split(':')[-1].strip()
 
-    # # Get all page rows.
-    # page_rows = front_page_rows
+
+    #---------------------------
+
+    # TODO: Identify `{analysis}_method`s.
+    # TODO: Get all of the `results` rows.
+    # Iterate over all rows to get the `results` rows
+    # seeing if row starts with an analysis or analyte.
+
+    # Get all page rows.
     # index = range(1, len(report.pages))
-    # page_rows += get_page_rows(report, index=index, analytes=ANALYTES)
+    # page_rows = get_page_rows(report, index=index, analytes=ANALYTES)
 
-    # # Get analysis details.
-    # table_data = tables[0][0]
-    # analysis_details = table_data.replace('\xa0\xa0\xa0\xa0', '\n').split('\n')
-    # mm, dd, yyyy = analysis_details[2].split(':')[-1].strip().split('/')
-    # date_tested = f'{yyyy}-{mm}-{dd}'
-    # obs['date_tested'] = date_tested
-    # obs['analysis_type'] = analysis_details[0]
-    # obs['status'] = analysis_details[-1].split(':')[-1].strip().lower()
 
-    # # Get lab license number.
-    # table_data = tables[1][0]
-    # lab_details = table_data.replace('\xa0', '\n').split('\n')
-    # lab_details = [x.strip() for x in lab_details if x.replace('|', '').strip() != '' ]
-    # for detail in lab_details:
-    #     if 'license' in detail.lower():
-    #         obs['lab_license_number'] = detail.split(':')[-1].strip()
+    # Get all of the `results` rows.
+    all_rows = []
+    # for page in report.pages[1:]:
+    page = report.pages[1]
+    crop = page.within_bbox(page_area)
+    rows = parser.get_page_rows(crop)
+    for row in rows:
+        if row in all_rows:
+            pass
+        else:
+            all_rows.append(row)
 
-    # # Get all of the `results` and `{analysis}_method`s!
+    # Try to find lines to split the page?
+
+
+
+    # # FIXME: Get all of the `results` and `{analysis}_method`s!
     # current_analysis = None
     # collected_analytes = []
-    # analyses = []
     # methods = []
-    # results = []
+    results = []
     # for row in page_rows:
 
     #     # Try to get all sample details.
@@ -613,17 +533,25 @@ if __name__ == '__main__':
     #         if analysis_name in method:
     #             obs[f'{analysis_key}_method'] = method
             
-    # # Standardize and normalize the data.
-    # obs['date_tested'] = date_tested
-    # obs['results'] = results
-    # obs['analyses'] = list(set(analyses))
+    # Aggregate the data.
+    obs['date_tested'] = date_tested
+    obs['results'] = results
+    obs['analyses'] = list(set(analyses))
 
-    # # Return the sample with a freshly minted sample ID.
-    # obs['sample_id'] = create_sample_id(
-    #     private_key=producer,
-    #     public_key=product_name,
-    #     salt=date_tested,
-    # )
+    # Return the sample with a freshly minted sample ID.
+    obs['sample_id'] = create_sample_id(
+        private_key=producer,
+        public_key=obs['product_name'],
+        salt=date_tested,
+    )
+
+    # Turn dates to ISO format.
+    date_columns = [x for x in obs.keys() if x.startswith('date')]
+    for date_column in date_columns:
+        try:
+            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+        except:
+            pass
 
 
     #-------------------------------------------------

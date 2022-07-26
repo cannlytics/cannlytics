@@ -1,12 +1,12 @@
 """
-CoADoc | A Certificate of Analysis Parser
+CoADoc | A Certificate of Analysis (CoA) Parser
 Copyright (c) 2022 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 7/25/2022
+Updated: 7/26/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -36,6 +36,13 @@ Supported LIMS:
     ✓ Confident Cannabis
     ✓ TagLeaf LIMS
 
+Custom parsing:
+
+    In order to implement a good custom CoA parsing algorithm, we will
+    need to handle:
+        - PDF properties, such as the fonts used, glyph sizes, etc.
+        - Handle non-font parameters and page scaling.
+        - Detect words, lines, columns, white-space, etc..
 """
 # Standard imports.
 import base64
@@ -59,38 +66,42 @@ from cannlytics.utils.constants import (
 )
 
 # Lab and LIMS CoA parsing algorithms.
-from cannlytics.data.coas.parse_cc_coa import (
+from cannlytics.data.coas.confidentcannabis import (
     CONFIDENT_CANNABIS,
     parse_cc_pdf,
     parse_cc_url,
 )
-from cannlytics.data.coas.parse_tagleaf_coa import (
+from cannlytics.data.coas.tagleaf import (
     TAGLEAF,
     parse_tagleaf_pdf,
     parse_tagleaf_url,
 )
-from cannlytics.data.coas.parse_green_leaf_lab_coa import (
+from cannlytics.data.coas.greenleaflab import (
     GREEN_LEAF_LAB,
     parse_green_leaf_lab_pdf,
 )
-from cannlytics.data.coas.parse_veda_coa import (
+from cannlytics.data.coas.veda import (
     VEDA_SCIENTIFIC,
     parse_veda_pdf,
 )
+from cannlytics.data.coas.mcrlabs import (
+    MCR_LABS,
+)
+from cannlytics.data.coas.sclabs import (
+    SC_LABS,
+)
 
+# Labs and LIMS that CoADoc can parse.
 LIMS = {
     'Confident Cannabis': CONFIDENT_CANNABIS,
     'TagLeaf LIMS': TAGLEAF,
     'Green Leaf Lab': GREEN_LEAF_LAB,
     'Veda Scientific': VEDA_SCIENTIFIC,
-    # Dream: Implement an algorithm to parse any custom CoA.
-    'custom': {
-        'coa_parsing_algorithm': '',
-        'coa_qr_code_index': -1,
-        'key': 'custom',
-        'url': 'https://cannlytics.com',
-    }
+    'MCR Labs': MCR_LABS,
+    'SC_LABS': SC_LABS,
 }
+
+# General decodings to use for normalization of results.
 DECODINGS = {
     '<LOQ': 0,
     '<LOD': 0,
@@ -99,6 +110,8 @@ DECODINGS = {
     'N/A': None,
     'na': None,
 }
+
+# General keys to use for standardization of fields.
 KEYS = {
     'Analyte': 'name',
     'Labeled Amount': 'sample_weight',
@@ -327,8 +340,8 @@ class CoADoc:
         Returns:
             (str): Returns LIMS name if found, otherwise returns `None`.
         """
-        # TODO: See if `search` works better / faster.
-        # .search(pattern, regex=True, case=True, **kwargs)
+        # Optional: See if `search` works better / faster.
+        # E.g. `.search(pattern, regex=True, case=True, **kwargs)`
         known = None
         if isinstance(doc, str):
             try:
@@ -353,8 +366,12 @@ class CoADoc:
                     known = lims
         else:
             for key, values in lims.items():
-                # FIXME: This is prone to causing errors.
-                if values['lims'] in text or values['url'] in text:
+                url = values.get('url')
+                if url and url in text:
+                    known = key
+                    break
+                lab = values.get('lims')
+                if lab and lab in text:
                     known = key
                     break
         return known
@@ -536,12 +553,52 @@ class CoADoc:
 
     def save(self, data=None):
         """Save all CoA data, flattening results, images, etc."""
-        # TODO: Implement.
+
+        # TODO: Archive the lab results if they are public.
+
         raise NotImplementedError
 
     def standardize(self, data=None) -> Any:
         """Standardize (and normalize) given data."""
-        # TODO: Implement.
+
+        # TODO: Calculate totals if missing:
+        # - `total_cannabinoids`
+        # - `total_terpenes`
+        # - `total_thc`
+        # - `total_cbd`
+        # - `total_cbg`
+        # - `total_thcv`
+
+        # TODO: Standardize terpenes:
+        # - Calculate `ocimene` as the sum of: `ocimene`, `beta_ocimene`, `trans_ocimene`.
+        # - Calculate `nerolidol` as the sum of: `trans_nerolidol`, `cis_nerolidol`
+        # - Calculate `terpinenes` as the sum of: `alpha_terpinene``,
+        #   `gamma_terpinene`, `terpinolene`, `terpinene`
+
+        # TODO: Normalize the `results`:
+        # - Remove and keep `units` from `value`.
+        # - Map `DECODINGS` with `value` and `mg_g`.
+
+        # TODO: Standardize `units`, `product_type`, etc.
+
+        # TODO: Try to parse a `strain_name` from `product_name`.
+
+        # TODO: Augment any missing latitude and longitude or address field.
+        # E.g. Get missing address fields for TagLeaf LIMS:
+        # - lab_street
+        # - lab_city
+        # - lab_county
+        # - lab_state
+        # - lab_zipcode
+        # - lab_latitude
+        # - lab_longitude
+
+        # Optional: Calculate any meaningful statistics (perhaps `percentiles`s?)
+
+        # Optional: Drop helper fields: 
+        # - coa_qr_code_index
+        # - coa_image_index
+
         raise NotImplementedError
     
     def quit(self):
@@ -560,78 +617,28 @@ class CoADoc:
         self.service = None
 
 
-#-----------------------------------------------------------------------
-# Standardize and normalize the data.
-#-----------------------------------------------------------------------
-
-# TODO: Calculate totals if missing:
-# - `total_cannabinoids`
-# - `total_terpenes`
-# - `total_thc`
-# - `total_cbd`
-# - `total_cbg`
-# - `total_thcv`
-
-
-# TODO: Standardize terpenes:
-# - Calculate `ocimene` as the sum of: `ocimene`, `beta_ocimene`, `trans_ocimene`.
-# - Calculate `nerolidol` as the sum of: `trans_nerolidol`, `cis_nerolidol`
-# - Calculate `terpinenes` as the sum of: `alpha_terpinene``,
-#   `gamma_terpinene`, `terpinolene`, `terpinene`
-
-
-# TODO: Normalize the `results`:
-# - Remove and keep `units` from `value`.
-# - Map `DECODINGS` with `value` and `mg_g`.
-
-
-# TODO: Standardize `units`, `product_type`, etc.
-
-
-# TODO: Try to parse a `strain_name` from `product_name`.
-
-
-# TODO: Augment the latitude and longitude
-# Get address parts for TagLeaf LIMS:
-# - lab_street
-# - lab_city
-# - lab_county
-# - lab_state
-# - lab_zipcode
-# - lab_latitude
-# - lab_longitude
-
-
-# Optional: Calculate any meaningful statistics (perhaps `percentiles`s?)
-
-
-# Optional: Drop helper fields: 
-# - coa_qr_code_index
-# - coa_image_index
-
-
-# TODO: Archive the lab results if they are public.
-
-
-#-----------------------------------------------------------------------
-# TESTS
-# ✓ decode_pdf_qr_code
-# ✓ find_pdf_qr_code_url
-# ✓ get_pdf_creation_date
-# ✓ identify_lims
-# ✓ parse
-# ✓ parse_pdf
-# ✓ parse_url
-# ✓ parse_cc_pdf
-# ✓ parse_cc_url
-# ✓ parse_tagleaf_pdf
-# ✓ parse_tagleaf_url
-# - save (not implemented yet)
-# - standardize (not implemented yet)
-# ✓ quit
-#-----------------------------------------------------------------------
-
 if __name__ == '__main__':
+
+    # === Tests ===
+    # [✓] decode_pdf_qr_code
+    # [✓] find_pdf_qr_code_url
+    # [✓] get_pdf_creation_date
+    # [✓] identify_lims
+    # [✓] parse
+    # [✓] parse_pdf
+    # [✓] parse_url
+    # [✓] parse_cc_pdf
+    # [✓] parse_cc_url
+    # [✓] parse_tagleaf_pdf
+    # [✓] parse_tagleaf_url
+    # [ ] parse_green_leaf_lab_pdf
+    # [ ] parse_veda_scientific_pdf
+    # [ ] parse_mcr_labs_url
+    # [ ] parse_sc_labs_pdf
+    # [ ] parse_sc_labs_url
+    # [-] save (not implemented yet)
+    # [-] standardize (not implemented yet)
+    # [✓] quit
 
     # Initialize the CoA parser.
     # Future work: Test the parser with different configurations.
@@ -693,35 +700,51 @@ if __name__ == '__main__':
     # [✓] TEST: Parse all CoAs in a given directory.
     # data = parser.parse(DATA_DIR)
 
-    # [ ] TEST: Parse all CoAs in a zipped file!
+    # [-] TEST: Parse all CoAs in a zipped file!
 
-
-    # [ ] TEST: Find results by known metrc IDs.
-    metrc_ids = [
-        '1A4060300002A3B000000053', # Green Leaf Lab
-        '1A4060300017A85000001289', # Green Leaf Lab
-        '1A4060300002459000017049', # SC Labs
-    ]
 
     # [✓] TEST: Green Leaf Lab CoA parsing algorithm.
     # green_leaf_lab_coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
     # data = parser.parse_green_leaf_lab_pdf(green_leaf_lab_coa_pdf)
     # assert data is not None
 
-    # [ ] TEST: Parse a Veda Scientific CoA.
-    veda_coa_pdf = f'{DATA_DIR}/Veda Scientific Sample COA.pdf'
+    # [-] TEST: Parse a Veda Scientific CoA.
+    # veda_coa_pdf = f'{DATA_DIR}/Veda Scientific Sample COA.pdf'
 
 
-    # [ ] TEST: Get MCR Labs results by URL or metrc ID.
-    mcr_labs_coa_url = 'https://reports.mcrlabs.com/reports/critical-kush_24'
+    # [-] TEST: Get MCR Labs results by URL or metrc ID.
+    # mcr_labs_coa_url = 'https://reports.mcrlabs.com/reports/critical-kush_24'
+    # lab = parser.identify_lims(mcr_labs_coa_url)
+    # assert lab == 'MCR Labs'
+
+    # TODO: Re-test MCR Labs parsing of URL, ensuring all details are
+    # collected, including client details.
 
 
-    # [ ] TEST: Parse a SC Labs CoA.
+
+    # [-] TEST: Parse a SC Labs CoA.
     # Note: Download PDF from <https://client.sclabs.com/sample/796684/>
     sc_labs_coa_url = 'https://client.sclabs.com/sample/796684/'
     sc_labs_coa_pdf = f'{DATA_DIR}/SC Labs Test CoA.pdf'
 
-    # Future work: Parse a custom CoA.
+    # TODO: Re-test SC Labs parsing of URL, ensuring all details are
+    # collected, including client details.
+    
+
+
+    # TODO: Test parsing of SC Labs CoA.
+
+
+
+
+    # [-] TEST: Find results by known metrc IDs.
+    metrc_ids = [
+        '1A4060300002A3B000000053', # Green Leaf Lab
+        '1A4060300017A85000001289', # Green Leaf Lab
+        '1A4060300002459000017049', # SC Labs
+    ]
+
+    # [-] TEST: Parse a custom CoA.
    
     # [✓] TEST: Close the parser.
     parser.quit()

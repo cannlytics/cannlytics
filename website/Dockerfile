@@ -3,7 +3,7 @@
 #
 # Auhtors: Keegan Skeate <keegan@cannlytics.com>
 # Created: 1/5/2021
-# Updated: 6/2/2022
+# Updated: 7/26/2022
 # License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 # Use the official lightweight Python image.
@@ -29,6 +29,12 @@ RUN apt-get install -y gconf-service libasound2 libatk1.0-0 libcairo2 libcups2 l
 # Install Chrome
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
+
+# Install tesseract
+# See: https://stackoverflow.com/questions/57869385/can-not-make-tesseract-work-in-google-app-engine-with-python3
+RUN apt-get update -qqy && apt-get install -qqy \
+  tesseract-ocr \
+  libtesseract-dev
 
 # Install dependencies.
 COPY requirements.txt .
