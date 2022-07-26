@@ -161,9 +161,9 @@ GREEN_LEAF_LAB_COA = {
     'coa_qr_code_index': None,
     'coa_image_index': 2,
     'coa_page_area': '(0, 198, 612, 693)',
-    'coa_sample_details_area': '(0, 126.72, 612, 205.92)',
     'coa_distributor_area': '(0, 79.2, 244.8, 142.56)',
     'coa_producer_area': '(244.8, 79.2, 612, 142.56)',
+    'coa_sample_details_area': '(0, 126.72, 612, 205.92)',
     # Optional: Clean up the fields!
     'coa_fields': {
         'licensenumber': 'lab_license_number',
@@ -290,9 +290,9 @@ def parse_green_leaf_lab_pdf(
 
     # Get the lab-specific CoA page areas.
     page_area = literal_eval(coa_parameters['coa_page_area'])
-    sample_details_area = literal_eval(coa_parameters['coa_sample_details_area'])
     distributor_area = literal_eval(coa_parameters['coa_distributor_area'])
     producer_area = literal_eval(coa_parameters['coa_producer_area'])
+    sample_details_area = literal_eval(coa_parameters['coa_sample_details_area'])
 
     # Get lab CoA specific fields.
     coa_fields = coa_parameters['coa_fields']

@@ -74,7 +74,7 @@ from cannlytics.data.coas.parse_green_leaf_lab_coa import (
     parse_green_leaf_lab_pdf,
 )
 from cannlytics.data.coas.parse_veda_coa import (
-    VEDA,
+    VEDA_SCIENTIFIC,
     parse_veda_pdf,
 )
 
@@ -82,7 +82,7 @@ LIMS = {
     'Confident Cannabis': CONFIDENT_CANNABIS,
     'TagLeaf LIMS': TAGLEAF,
     'Green Leaf Lab': GREEN_LEAF_LAB,
-    'Veda Scientific': VEDA,
+    'Veda Scientific': VEDA_SCIENTIFIC,
     # Dream: Implement an algorithm to parse any custom CoA.
     'custom': {
         'coa_parsing_algorithm': '',
@@ -353,6 +353,7 @@ class CoADoc:
                     known = lims
         else:
             for key, values in lims.items():
+                # FIXME: This is prone to causing errors.
                 if values['lims'] in text or values['url'] in text:
                     known = key
                     break

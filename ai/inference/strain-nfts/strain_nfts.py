@@ -132,7 +132,7 @@ class FlowerArt():
         self.sigmaColor = sigmaColor
         self.sigmaSpace = sigmaSpace
     
-    def cartoonize_image(self, filename):
+    def cartoonize_image(self, filename: str, outfile: str):
         """Create a NFT for a given strain given a representative image.
         Combine edge mask with the colored image.
         Apply bilateral filter to reduce the noise in the image.
@@ -148,13 +148,12 @@ class FlowerArt():
             sigmaSpace=self.sigmaSpace,
         )
         cartoon = cv2.bitwise_and(blurred, blurred, mask=edges)
-        outfile = f'../../../.datasets/strains/images/cannabis-flower-cartoon.jpg'
         cv2.imwrite(outfile, cartoon)
         cv2.imshow('image', cartoon)
         cv2.waitKey()
         return img
     
-    def color_quantization(self, img, k):
+    def color_quantization(self, img, k: int):
         """Reduce the color palette, because a drawing has fewer colors
         than a photo. Color quantization is performed by the K-Means
         clustering algorithm of OpenCV."""
@@ -174,7 +173,7 @@ class FlowerArt():
         edges = cv2.adaptiveThreshold(gray_blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, line_size, blur_value)
         return edges
 
-    def get_color_association(self, string):
+    def get_color_association(self, string: str):
         """Get a color associated with a given word or phrase.
         The algorithm uses Colorize, a tool that uses a search engine to
         find image results for a word or phrase, and then calculates the
@@ -198,7 +197,8 @@ class FlowerArt():
 # [✓] TEST: Create a cartoon image for a given strain.
 art = FlowerArt()
 filename = f'../../../.datasets/strains/images/cannabis-flower.jpg'
-image_data = art.cartoonize_image(filename)
+nft_file = f'../../../.datasets/strains/images/cannabis-flower-cartoon.jpg'
+image_data = art.cartoonize_image(filename, nft_file)
 
 # -- The Cannlytics 420 --
 
