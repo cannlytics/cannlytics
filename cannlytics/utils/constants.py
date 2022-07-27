@@ -4,13 +4,13 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/8/2021
-Updated: 7/16/2022
+Updated: 7/26/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains useful constant.
 """
 
-
+# Common analyses.
 # Optional: Load known analyses and analytes from
 # the Cannlytics library via the Cannlytics API.
 ANALYSES = {
@@ -26,8 +26,8 @@ ANALYSES = {
     'water_activity': {'names': ['WA']},
 }
 
+# Common analytes.
 # TODO: Create `analyte_details.json`.
-
 ANALYTES = {
     'CBC': 'cbc',
     'CBCA': 'cbca',
@@ -177,10 +177,16 @@ ANALYTES = {
     'Sand': 'soil',
 }
 
+# Cannabinoid decarboxylation rate.
 DECARB = 0.877 # Source: <https://www.conflabs.com/why-0-877/>
 
+# Default headers to use for HTTP requests, because we are AI and should not be treated as a bot.
+DEFAULT_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
+
+# Random characters to use in password generation.
 RANDOM_STRING_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 
+# A map of state abbreviations to state names.
 states = {
     'AL': 'Alabama',
     'AK': 'Alaska',
@@ -235,6 +241,7 @@ states = {
     'DC': 'District of Columbia',
 }
 
+# A map of state names to state abbreviations.
 state_names = {
     'Alabama': 'AL',
     'Alaska': 'AK',

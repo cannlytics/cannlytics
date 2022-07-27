@@ -11,8 +11,73 @@ License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE
 
 Description:
 
-    Periodically collect recent lab results from
-    SC Labs publicly published lab results.
+    Get lab results from SC Labs publicly published lab results.
+
+Data Points:
+
+    ✓ analyses
+    ✓ {analysis}_method
+    ✓ {analysis}_status
+    - coa_urls
+    ✓ date_collected
+    ✓ date_tested
+    ✓ date_received
+    ✓ distributor
+    - distributor_address
+    - distributor_street
+    - distributor_city
+    - distributor_state
+    - distributor_zipcode
+    - distributor_license_number
+    ✓ images
+    ✓ lab_results_url
+    - producer
+    - producer_address
+    - producer_street
+    - producer_city
+    - producer_state
+    - producer_zipcode
+    - producer_license_number
+    - product_name
+    ✓ lab_id
+    ✓ product_type
+    ✓ batch_number
+    ✓ metrc_ids
+    - metrc_lab_id
+    ✓ metrc_source_id
+    - sample_size
+    - serving_size
+    - servings_per_package
+    - sample_weight
+    ✓ results
+    ✓ status
+    ✓ total_cannabinoids
+    ✓ total_thc
+    ✓ total_cbd
+    ✓ total_cbg
+    ✓ total_thcv
+    ✓ total_cbc
+    ✓ total_cbdv
+    ✓ total_terpenes
+    ✓ sample_id (generated)
+    - strain_name (augmented)
+
+Static Data Points:
+
+    ✓ lab
+    ✓ lab_image_url
+    - lab_license_number
+    ✓ lab_address
+    ✓ lab_street
+    ✓ lab_city
+    ✓ lab_county (augmented)
+    ✓ lab_state
+    ✓ lab_zipcode
+    ✓ lab_phone
+    - lab_email
+    ✓ lab_website
+    ✓ lab_latitude (augmented)
+    ✓ lab_longitude (augmented)
 
 Data Sources:
     
@@ -21,42 +86,36 @@ Data Sources:
 
 """
 # Internal imports.
-from hashlib import sha256
-import hmac
+from urllib.parse import urljoin
 from time import sleep
 
 # External imports.
 from bs4 import BeautifulSoup
 from cannlytics.data.data import create_sample_id
-from cannlytics.utils.utils import snake_case
+from cannlytics.utils.constants import DEFAULT_HEADERS
+from cannlytics.utils.utils import snake_case, strip_whitespace
 import requests
 
 
-# TODO: Augment with lab details:
+# It is assumed that the lab has the following details.
 SC_LABS = {
     'lims': 'SC Labs',
     'url': 'https://client.sclabs.com',
     'lab': 'SC Labs',
-    'lab_image_url': 'https://sclabs.com',
-    'lab_license_number': '',
-    'lab_address': '',
-    'lab_street': '',
-    'lab_city': '',
-    'lab_county': '',
+    'lab_image_url': 'https://www.sclabs.com/wp-content/uploads/2020/11/sc-labs-logo-white.png',
+    # 'lab_license_number': '', # Get this data point dynamically.
+    'lab_address': '100 Pioneer St., Ste. E, Santa Cruz, CA 95060',
+    'lab_street': '100 Pioneer St., Ste. E',
+    'lab_city': 'Santa Cruz',
+    'lab_county': 'Santa Cruz',
     'lab_state': 'CA',
-    'lab_zipcode': '',
-    'lab_phone': '',
-    'lab_email': '',
+    'lab_zipcode': '95060',
+    'lab_phone': '(866) 435-0709',
+    'lab_email': 'info@sclabs.com',
     'lab_website': 'https://sclabs.com',
-    'lab_latitude': '',
-    'lab_longitude': '',
+    'lab_latitude': '36.987869',
+    'lab_longitude': '-122.033162',
 }
-
-# FIXME: Make these constants reference parser or SC_LABS.
-# Constants.
-BASE = 'https://client.sclabs.com'
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
-STATE = 'CA'
 
 # It is assumed that the CoA has the following parameters.
 SC_LABS_COA = {
@@ -64,6 +123,7 @@ SC_LABS_COA = {
         'batch_number': 'batch_number',
         'batch_size': 'batch_size',
         'business_name': 'distributor',
+        'coa_id': 'lab_id',
         'license_number': 'distributor_license_number',
         'sum_of_cannabinoids': 'sum_of_cannabinoids',
         'total_cannabinoids': 'total_cannabinoids',
@@ -80,7 +140,11 @@ SC_LABS_COA = {
         'residual_solvents': 'residual_solvents_status',
         'heavy_metals': 'heavy_metals_status',
         'microbiology': 'microbiology_status',
-        'foreign_material': 'foreign_material_status',
+        'foreign_material': 'foreign_matter_status',
+        'foreign_material_method': 'foreign_matter_method',
+        'total_terpenoids_percent': 'total_terpenes',
+        'total_terpenoids_mgtog': '',
+        'source_metrc_uid': 'metrc_source_id',
     },
 }
 
@@ -107,21 +171,13 @@ def parse_data_block(div, tag='span') -> dict:
     return data
 
 
-def strip_whitespace(string):
-    """Strip whitespace from a string."""
-    return string.replace('\n', '').strip()
-
-
-#-----------------------------------------------------------------------
-# Automate collection
-#-----------------------------------------------------------------------
-
 def get_sc_labs_test_results(
         producer_id,
         reverse=True,
         limit=100,
         page_limit=100,
         pause=0.2,
+        headers=None
     ) -> list:
     """Get all test results for a specific SC Labs client.
     Args:
@@ -140,6 +196,8 @@ def get_sc_labs_test_results(
     first_sample = None
     samples = []
     sample_pages = range(1, page_limit)
+    if headers is None:
+            headers = DEFAULT_HEADERS
     for sample_page in sample_pages:
 
         # Pause between requests to be respectful of the API server.
@@ -147,9 +205,9 @@ def get_sc_labs_test_results(
             sleep(pause)
 
         # Get a client page with X amount of samples.
-        url = '/'.join([BASE, 'client', str(producer_id)])
+        url = '/'.join([SC_LABS['url'], 'client', str(producer_id)])
         params = {'limit': limit, 'page': sample_page}
-        response = requests.get(url, headers=HEADERS, params=params)
+        response = requests.get(url, headers=headers, params=params)
         soup = BeautifulSoup(response.content, 'html.parser')
 
         # Check if the page is a 404.
@@ -165,7 +223,8 @@ def get_sc_labs_test_results(
             current_sample = soup.find('h3').text
         except AttributeError:
             current_sample = first_sample
-        current_page = soup.find('li', attrs={'class': 'pagination-active'})
+        attributes = {'class': 'pagination-active'}
+        current_page = soup.find('li', attrs=attributes)
         if (current_page == active_page) and (current_sample == first_sample):
             break
         active_page = current_page
@@ -183,13 +242,15 @@ def get_sc_labs_test_results(
 
         # Get producer image.
         try:
-            producer_image_url = details.find('img')['src'].replace('\n', '').strip()
+            producer_image_url = details.find('img')['src'] \
+                .replace('\n', '').strip()
         except AttributeError:
             producer_image_url = ''
 
         # Get producer website.
         try:
-            element = details.find('span', attrs={'class': 'pp-social-web'})
+            attributes = {'class': 'pp-social-web'}
+            element = details.find('span', attrs=attributes)
             producer_url = element.find('a')['href']
         except:
             producer_url = ''
@@ -207,7 +268,9 @@ def get_sc_labs_test_results(
             product_name = card.find('h3').text
 
             # Get lab results URL.
-            lab_results_url = BASE + card.find('a')['href']
+            base_url = SC_LABS['url']
+            href = card.find('a')['href']
+            lab_results_url = urljoin(base_url, href)
 
             # Get the date tested.
             mm, dd, yyyy = card.find('h6').text.split('-')
@@ -220,7 +283,7 @@ def get_sc_labs_test_results(
             total_cbd = values[1].text.split(':')[-1].replace('%', '')
             total_terpenes = values[2].text.split(':')[-1].replace('%', '')
 
-            # FIXME: Do some lab results have blank dates?
+            # FIXME: Do any lab results have blank dates? Anticipate that?.
             # Create a sample ID.
             sample_id = create_sample_id(producer, product_name, date)
 
@@ -255,33 +318,54 @@ def get_sc_labs_client_details():
     raise NotImplementedError
 
 
-def get_sc_labs_sample_details(sample) -> dict:
+def get_sc_labs_sample_details(sample, headers=None) -> dict:
     """Get the details for a specific SC Labs test sample.
     Args:
-        sample (str): A sample number.
+        sample (str): A sample number or sample URL.
     Returns:
         (dict): A dictionary of sample details.
     """
 
     # Get the sample page.
-    url = '/'.join([BASE, 'sample', sample])
-    response = requests.get(url, headers=HEADERS)
+    base_url = SC_LABS['url']
+    if sample.startswith(base_url):
+        url = sample
+    else:
+        if headers is None:
+            headers = DEFAULT_HEADERS
+        url = urljoin(base_url, f'sample/{sample}/')
+    response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
+
+    # FIXME: Re-retrieve these details if requested.
+    # - date_received
+    # - lab_id
+    # - lab_results_url
+    # - producer_id
+    # - producer
+    # - producer_image_url
+    # - product_name
+    # - producer_url
+    # - sample_id
+    # - total_cbd
+    # - total_thc
+    # - total_terpenes
+    
 
     # Get the bulk of the details.
     elements = soup.find_all('p', attrs={'class': 'sdp-summary-data'})
-    details = parse_data_block(elements)
+    obs = parse_data_block(elements)
 
     # Format the distributor address.
     try:
-        address = details.get('address', '').split('*')[-1].strip()
-        details['distributor_address'] = address
-        details['distributor_city'] = address.split(',')[0]
-        details['distributor_zip_code'] = address.split(' ')[-1]
+        address = obs.get('address', '').split('*')[-1].strip()
+        obs['distributor_address'] = address
+        obs['distributor_city'] = address.split(',')[0]
+        obs['distributor_zip_code'] = address.split(' ')[-1]
     except TypeError:
-        details['distributor_address'] = ''
-        details['distributor_city'] = ''
-        details['distributor_zip_code'] = ''
+        obs['distributor_address'] = ''
+        obs['distributor_city'] = ''
+        obs['distributor_zip_code'] = ''
     
     # Get the producer details.
     try:
@@ -290,78 +374,87 @@ def get_sc_labs_sample_details(sample) -> dict:
     
         # Format the producer address.
         address = producer_details['address'].split('*')[-1].strip()
-        details['address'] = address
-        details['city'] = address.split(',')[0]
-        details['zip_code'] = address.split(' ')[-1]
+        obs['address'] = address
+        obs['city'] = address.split(',')[0]
+        obs['zip_code'] = address.split(' ')[-1]
     except TypeError:
-        details['address'] = ''
-        details['city'] = ''
-        details['zip_code'] = ''
+        obs['address'] = ''
+        obs['city'] = ''
+        obs['zip_code'] = ''
 
     # Get the Metrc IDs.
     try:
-        metrc_ids = details['source_metrc_uid'].split(',')
-        details['metrc_ids'] = [x.strip() for x in metrc_ids]
+        metrc_ids = obs['source_metrc_uid'].split(',')
+        obs['metrc_ids'] = [x.strip() for x in metrc_ids]
     except KeyError:
-        details['metrc_ids'] = []
+        obs['metrc_ids'] = []
 
     # Get the product type.
     try:
-        details['product_type'] = soup.find('p', attrs={'class': 'sdp-producttype'}).text
+        attributes = {'class': 'sdp-producttype'}
+        obs['product_type'] = soup.find('p', attrs=attributes).text
     except AttributeError:
-        details['product_type'] = 'Unknown'
+        obs['product_type'] = 'Unknown'
 
     # Get the image.
     try:
-        image_url = soup.find('a', attrs={'data-popup': 'fancybox'})['href']
-        details['images'] = [{'url': image_url, 'filename': image_url.split('/')[-1]}]
+        attributes = {'data-popup': 'fancybox'}
+        image_url = soup.find('a', attrs=attributes)['href']
+        obs['images'] = [{
+            'url': image_url,
+            'filename': image_url.split('/')[-1],
+        }]
     except TypeError:
-        details['images'] = []
+        obs['images'] = []
 
     # Get the date tested.
     try:
         element = soup.find('div', attrs={'class': 'sdp-masthead-data'})
         mm, dd, yyyy = element.find('p').text.split('/')
-        details['date_tested'] = '-'.join([yyyy, mm, dd])
+        obs['date_tested'] = '-'.join([yyyy, mm, dd])
     except AttributeError:
-        details['date_tested'] = ''
+        obs['date_tested'] = ''
 
     # Get the overall status: Pass / Fail.
     try:
         status = soup.find('p', attrs={'class': 'sdp-result-pass'}).text
-        details['status'] = status.replace('\n', '').strip()
+        obs['status'] = status.replace('\n', '').strip()
     except AttributeError:
-        details['status'] = ''
+        obs['status'] = ''
 
     # Format the dates.
     try:
-        mm, dd, yyyy = details['date_collected'].split('/')
-        details['date_collected'] = '-'.join([yyyy, mm, dd]) 
+        mm, dd, yyyy = obs['date_collected'].split('/')
+        obs['date_collected'] = '-'.join([yyyy, mm, dd]) 
     except KeyError:
-        details['date_collected'] = ''
+        obs['date_collected'] = ''
     try:
-        mm, dd, yyyy = details['date_received'].split('/')
-        details['date_received'] = '-'.join([yyyy, mm, dd])
+        mm, dd, yyyy = obs['date_received'].split('/')
+        obs['date_received'] = '-'.join([yyyy, mm, dd])
     except KeyError:
-        details['date_received'] = ''
+        obs['date_received'] = ''
     
     # Rename desired fields.
-    for key, value in SC_LABS_COA['coa_fields'].items():
+    for key, field in SC_LABS_COA['coa_fields'].items():
         try:
-            details[value] = details.pop(key)
+            value = obs.pop(key)
+            if field:
+                obs[field] = value
         except KeyError:
             pass
 
     # Get the CoA ID.
     try:
-        details['coa_id'] = soup.find('p', attrs={'class': 'coa-id'}).text.split(':')[-1]
+        attributes = {'class': 'coa-id'}
+        obs['coa_id'] = soup.find('p', attrs=attributes).text \
+            .split(':')[-1]
     except AttributeError:
-        details['coa_id'] = ''
+        obs['coa_id'] = ''
 
     # Remove any keys that begin with a digit.
-    for key in list(details.keys()):
+    for key in list(obs.keys()):
         if key[0].isdigit():
-            del details[key]
+            del obs[key]
 
     # Optional: Try to get sample_weight.
 
@@ -386,7 +479,7 @@ def get_sc_labs_sample_details(sample) -> dict:
         bold = element.find('b')
         method = bold.parent.text.replace('Method: ', '')
         key = '_'.join([analysis, 'method'])
-        details[key] = method
+        obs[key] = method
 
         # Get all of the results for the analysis.
         # - value, units, margin_of_error, lod, loq
@@ -409,8 +502,8 @@ def get_sc_labs_sample_details(sample) -> dict:
         element = soup.find('div', attrs={'id': 'detailQuickView'})
         items = element.find_all('li')
         mm, dd, yyyy = items[0].text.split(': ')[-1].split('-')
-        details['date_tested'] = f'{yyyy}-{mm}-{dd}'
-        details['product_type'] = items[-1].text.split(': ')[-1]
+        obs['date_tested'] = f'{yyyy}-{mm}-{dd}'
+        obs['product_type'] = items[-1].text.split(': ')[-1]
 
         # Get analysis cards.
         cards = soup.find_all('div', attrs={'class': 'detail-row'})
@@ -428,7 +521,7 @@ def get_sc_labs_sample_details(sample) -> dict:
             # Get the method for the analysis.
             method = card.find('p').text
             key = '_'.join([analysis, 'method'])
-            details[key] = method
+            obs[key] = method
             
             # FIXME:
             # Get all of the results for the analysis.
@@ -445,31 +538,6 @@ def get_sc_labs_sample_details(sample) -> dict:
                     result['analysis'] = analysis
                 results.append(result)
 
-    # Remove any sample ID that may be in details as it is not needed.
-    try:
-        del details['sample_id']
-    except KeyError:
-        pass
-
-    # Aggregate the sample details.
-    if not results:
-        results = None
-    data = {'notes': notes, 'results': results}
-    return {**data, **details}
-
-
-    # Future work: Post-collection processing of the raw data.
-
-
-    # TODO: Find the `county` for the `zip_code`.
-
-
-    # TODO: Normalize the `results`, `images`.
-
-
-    # TODO: Standardize the `product_type` and `status`.
-
-
     # TODO: Separate `lod` and `loq`.
 
 
@@ -483,44 +551,65 @@ def get_sc_labs_sample_details(sample) -> dict:
 
 
     # TODO: Handle values and units.
-    # result-mass -> mg_g
-    # result-percent -> value
-    # units = 'percent'
+    # - result-mass --> mg_g
+    # - result-percent --> value
+    # - units = 'percent'
 
 
     # TODO:Rename `compound` to `name` and add `key`.
     # Rename `action-limit` to `limit`
     # `result-mass` to `value`
     # `result-pf` to `status`
+    
+    
+    # Create a `sample_id`.
+    obs['sample_id'] = create_sample_id(
+        private_key=obs['producer'],
+        public_key=obs['product_name'],
+        salt=obs['date_tested'],
+    )
+
+    # Aggregate the sample data.
+    if not results:
+        results = None
+    obs['analyses'] = analyses
+    obs['lab_results_url'] = url
+    obs['notes'] = notes
+    obs['results'] = results
+    return { **SC_LABS, **obs}
 
 
-    # TODO: Handle:
-    # - total_terpenoids_mgtog
-    # - total_terpenoids_percent
+    # Optional: Find the `county` for the `zip_code`.
 
 
-    # TODO: Standardize `analyses`.
+    # Optional: Normalize the `results`, `images`.
 
 
-    # TODO: Standardize the analyte names!
+    # Optional: Standardize the `product_type` and `status`.
 
 
-    # TODO: Standardize `strain_name`.
+    # Future work: Standardize `analyses`. 
+
+
+    # Future work: Standardize the analyte names!
+
+
+    # Future work: Identify a `strain_name` from the `product_name`.
 
 
 if __name__ == '__main__':
 
     # === Test ===
-    from datetime import datetime
-    import pandas as pd
-
-    # Specify where your test data lives.
-    DATA_DIR = '.datasets/lab_results'
-    RAW_DATA = '.datasets/lab_results/raw_data/sc_labs'
-    TRAINING_DATA = '.datasets/lab_results/training_data'
 
     # [✓] TEST: Get all test results for a specific client.
     # test_results = get_sc_labs_test_results('2821')
+    # assert test_results is not None
 
-    # [✓] TEST: Get details for a specific sample.
+    # [✓] TEST: Get details for a specific sample ID.
     # sample_details = get_sc_labs_sample_details('858084')
+    # assert sample_details is not None
+
+    # [✓] TEST: Get details for a specific sample URL.
+    sc_labs_coa_url = 'https://client.sclabs.com/sample/858084'
+    sample_details = get_sc_labs_sample_details(sc_labs_coa_url)
+    # assert sample_details is not None

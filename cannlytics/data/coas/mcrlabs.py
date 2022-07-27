@@ -14,21 +14,37 @@ Description:
     Periodically collect recent lab results from
     MCR Labs publicly published lab results.
 
-    Data points collected for each sample include:
+Data Points:
 
-        ✓ analyses
-        ✓ product_name
-        ✓ product_type
-        ✓ producer
-        ✓ date_tested
-        ✓ total_cannabinoids
-        ✓ total_terpenes
-        ✓ lab_results_url (FIXME: Has an extra slash `//report/`)
-        ✓ image
-        ✓ sample_id (generated)
-        ✓ results
-        ✓ lab
-        ✓ {analysis}_method
+    ✓ analyses
+    ✓ product_name
+    ✓ product_type
+    ✓ producer
+    ✓ date_tested
+    ✓ total_cannabinoids
+    ✓ total_terpenes
+    ✓ lab_results_url (FIXME: Has an extra slash `//report/`)
+    ✓ image
+    ✓ sample_id (generated)
+    ✓ results
+    ✓ {analysis}_method
+
+Static Data Points:
+
+    ✓ lab
+    - lab_image_url
+    - lab_license_number
+    - lab_address
+    - lab_street
+    - lab_city
+    - lab_county (augmented)
+    - lab_state
+    - lab_zipcode
+    - lab_phone
+    - lab_email
+    ✓ lab_website
+    - lab_latitude (augmented)
+    - lab_longitude (augmented)
 
 Data Sources:
     
@@ -62,19 +78,19 @@ MCR_LABS = {
     'lims': 'MCR Labs',
     'url': 'https://reports.mcrlabs.com',
     'lab': 'MCR Labs',
-    'lab_image_url': 'https://mcrlabs.com',
-    'lab_license_number': '',
-    'lab_address': '',
-    'lab_street': '',
-    'lab_city': '',
-    'lab_county': '',
-    'lab_state': 'MA',
-    'lab_zipcode': '',
-    'lab_phone': '',
-    'lab_email': '',
+    # 'lab_image_url': 'https://mcrlabs.com',
+    # 'lab_license_number': '',
+    # 'lab_address': '',
+    # 'lab_street': '',
+    # 'lab_city': '',
+    # 'lab_county': '',
+    # 'lab_state': 'MA',
+    # 'lab_zipcode': '',
+    # 'lab_latitude': '',
+    # 'lab_longitude': '',
+    # 'lab_phone': '',
+    # 'lab_email': '',
     'lab_website': 'https://mcrlabs.com',
-    'lab_latitude': '',
-    'lab_longitude': '',
 }
 
 # FIXME: Make these either dynamic or referenced from MCR_LABS

@@ -91,6 +91,7 @@ from cannlytics.data.data import create_sample_id
 from cannlytics.utils.utils import snake_case, split_list, strip_whitespace
 
 
+# It is assumed that the lab has the following details.
 VEDA_SCIENTIFIC = {
     'coa_parsing_algorithm': 'parse_veda_pdf',
     'lims': 'Veda Scientific',
