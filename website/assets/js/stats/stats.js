@@ -337,6 +337,7 @@ export const stats = {
     }
     tempNode.id = id;
     tempNode.querySelector('.badge-text').textContent = capitalize(name);
+    // FIXME: This may be hiding and not removing!
     tempNode.querySelector('.btn').onclick = function() {
       document.getElementById(id).classList.add('d-none');
     };

@@ -18,34 +18,34 @@ Data Points:
     ✓ analyses
     ✓ {analysis}_method
     ✓ {analysis}_status
-    - coa_urls
+    ✓ coa_urls
     ✓ date_collected
     ✓ date_tested
     ✓ date_received
     ✓ distributor
-    - distributor_address
-    - distributor_street
+    ✓ distributor_address
+    ✓ distributor_street
     - distributor_city
     - distributor_state
-    - distributor_zipcode
-    - distributor_license_number
+    ✓ distributor_zipcode
+    ✓ distributor_license_number
     ✓ images
     ✓ lab_results_url
-    - producer
-    - producer_address
+    ✓ producer
+    ✓ producer_address
     - producer_street
-    - producer_city
+    ✓ producer_city
     - producer_state
     - producer_zipcode
-    - producer_license_number
-    - product_name
+    ✓ producer_license_number
+    ✓ product_name
     ✓ lab_id
     ✓ product_type
     ✓ batch_number
     ✓ metrc_ids
     - metrc_lab_id
     ✓ metrc_source_id
-    - sample_size
+    - product_size
     - serving_size
     - servings_per_package
     - sample_weight
@@ -84,6 +84,15 @@ Data Sources:
     - SC Labs Test Results
     URL: <https://client.sclabs.com/>
 
+Future work:
+
+    - Optional: Normalize the `results`, `images`.
+    - Optional: Standardize the `product_type` and `status`.
+    - Optional: Find the `county` given the `producer_zipcode`.
+    - Future work: Identify a `strain_name` from the `product_name`.
+    - Future work: Standardize `analyses`. 
+    - Future work: Standardize analytes (`results` `key`).
+
 """
 # Internal imports.
 from urllib.parse import urljoin
@@ -119,6 +128,9 @@ SC_LABS = {
 
 # It is assumed that the CoA has the following parameters.
 SC_LABS_COA = {
+    'analyses': {
+
+    },
     'coa_fields': {
         'batch_number': 'batch_number',
         'batch_size': 'batch_size',
@@ -145,6 +157,14 @@ SC_LABS_COA = {
         'total_terpenoids_percent': 'total_terpenes',
         'total_terpenoids_mgtog': '',
         'source_metrc_uid': 'metrc_source_id',
+    },
+    'coa_results_fields': {
+        'compound': 'name',
+        'mu': 'margin_of_error',
+        'result-mass': 'mg_g',
+        'result-percent': 'value',
+        'action-limit': 'limit',
+        'result-pf': 'status',
     },
 }
 
@@ -337,50 +357,58 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    # FIXME: Re-retrieve these details if requested.
-    # - date_received
-    # - lab_id
-    # - lab_results_url
-    # - producer_id
-    # - producer
-    # - producer_image_url
-    # - product_name
-    # - producer_url
-    # - sample_id
-    # - total_cbd
-    # - total_thc
-    # - total_terpenes
-    
-
     # Get the bulk of the details.
     elements = soup.find_all('p', attrs={'class': 'sdp-summary-data'})
     obs = parse_data_block(elements)
+
+    # Get the product name.
+    obs['product_name'] = soup.find('h2').text
 
     # Format the distributor address.
     try:
         address = obs.get('address', '').split('*')[-1].strip()
         obs['distributor_address'] = address
         obs['distributor_city'] = address.split(',')[0]
-        obs['distributor_zip_code'] = address.split(' ')[-1]
+        obs['distributor_zipcode'] = address.split(' ')[-1]
     except TypeError:
         obs['distributor_address'] = ''
         obs['distributor_city'] = ''
-        obs['distributor_zip_code'] = ''
+        obs['distributor_zipcode'] = ''
     
     # Get the producer details.
+    element = soup.find('div', attrs={'id': 'cultivator-details'})
+    producer_details = parse_data_block(element)
+    obs['producer'] = producer_details['business_name']
+    obs['producer_license_number'] = producer_details['license_number']
+
+    # Format the producer address.
     try:
-        element = soup.find('div', attrs={'id': 'cultivator-details'})
-        producer_details = parse_data_block(element)
-    
-        # Format the producer address.
         address = producer_details['address'].split('*')[-1].strip()
-        obs['address'] = address
-        obs['city'] = address.split(',')[0]
-        obs['zip_code'] = address.split(' ')[-1]
+        obs['producer_address'] = address
+        obs['producer_city'] = address.split(',')[0]
+        obs['producer_zipcode'] = address.split(' ')[-1]
     except TypeError:
-        obs['address'] = ''
-        obs['city'] = ''
-        obs['zip_code'] = ''
+        obs['producer_address'] = ''
+        obs['producer_city'] = ''
+        obs['producer_zipcode'] = ''
+
+    # Get the producer image.
+    el = soup.find('div', attrs={'id': 'clientprofileimage'})
+    obs['producer_image_url'] = strip_whitespace(el.find('img')['src'])
+
+    # Get the producer URL.
+    links = soup.find_all('a', attrs={'class': 'greybutton'})
+    for link in links:
+        href = link['href']
+        if 'sample' in href:
+            sample_number = href.split('sample/')[-1].split('/')[0]
+            obs['sample_number'] = sample_number
+            obs['coa_urls'] = [{
+                'url': urljoin(url, href),
+                'filename': f'{sample_number}.pdf',
+            }]
+        elif 'client' in href:
+            obs['producer_url'] = urljoin(url, href)
 
     # Get the Metrc IDs.
     try:
@@ -434,7 +462,7 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
     except KeyError:
         obs['date_received'] = ''
     
-    # Rename desired fields.
+    # FIXME: Rename desired fields.
     for key, field in SC_LABS_COA['coa_fields'].items():
         try:
             value = obs.pop(key)
@@ -462,6 +490,7 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
     analyses = []
     results = []
     notes = None
+    coa_results_fields = SC_LABS_COA['coa_results_fields']
     cards = soup.find_all('div', attrs={'class': 'analysis-container'})    
     for element in cards:
 
@@ -490,6 +519,7 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
             result = {}
             for cell in cells:
                 key = cell['class'][0].replace('table-', '')
+                key = coa_results_fields.get(key, key)
                 value = cell.text.replace('\n', '').strip()
                 result[key] = value
                 result['analysis'] = analysis
@@ -533,34 +563,49 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
                 result = {}
                 for cell in cells:
                     key = cell['class'][0].replace('table-', '')
+                    key = coa_results_fields.get(key, key)
                     value = cell.text.replace('\n', '').strip()
                     result[key] = value
                     result['analysis'] = analysis
                 results.append(result)
 
-    # TODO: Separate `lod` and `loq`.
-
-
-    # TODO: Rename `mu` to `margin_of_error`.
-
-
-    # TODO: Remove: ±
-
-
-    # TODO: Separate `batch_units` from `batch_size`.
-
-
-    # TODO: Handle values and units.
-    # - result-mass --> mg_g
-    # - result-percent --> value
-    # - units = 'percent'
-
-
-    # TODO:Rename `compound` to `name` and add `key`.
-    # Rename `action-limit` to `limit`
-    # `result-mass` to `value`
-    # `result-pf` to `status`
+    # Separate `lod` and `loq`.
+    lod_loq_values = [x['lodloq'].split(' / ') if x.get('lodloq') else None for x in results]
+    for i, values in enumerate(lod_loq_values):
+        if values is not None:
+            result = results[i]
+            result['lod'] = values[0]
+            result['loq'] = values[1]
+            del result['lodloq']
+            results[i] = result
     
+    # Clean results.
+    c
+    for result in results:
+        try:
+            margin = result['margin_of_error'].replace('±', '')
+            result['margin_of_error'] = margin
+        except KeyError:
+            pass
+
+        # FIXME: Parse `units` from `value`. E.g. '71.742%'
+
+        # TODO: Ensure that the results are numbers.
+
+        # TODO: Standardize the analyses!
+        result['analysis'] = result['analysis']
+
+        # Assign a `key` for the analyte.
+        result['key'] = snake_case(result['name'])
+    
+    # FIXME: Clean `total_{analyte}`s and `sum_of_cannabinoids`.
+
+    # FIXME: Lowercase `{analysis}_status`
+    
+    # FIXME: Re-key `address` to `producer_address`
+
+    # Separate `batch_units` from `batch_size`.
+    obs['batch_size'], obs['batch_units'] = tuple(obs['batch_size'].split(' '))
     
     # Create a `sample_id`.
     obs['sample_id'] = create_sample_id(
@@ -579,24 +624,6 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
     return { **SC_LABS, **obs}
 
 
-    # Optional: Find the `county` for the `zip_code`.
-
-
-    # Optional: Normalize the `results`, `images`.
-
-
-    # Optional: Standardize the `product_type` and `status`.
-
-
-    # Future work: Standardize `analyses`. 
-
-
-    # Future work: Standardize the analyte names!
-
-
-    # Future work: Identify a `strain_name` from the `product_name`.
-
-
 if __name__ == '__main__':
 
     # === Test ===
@@ -611,5 +638,5 @@ if __name__ == '__main__':
 
     # [✓] TEST: Get details for a specific sample URL.
     sc_labs_coa_url = 'https://client.sclabs.com/sample/858084'
-    sample_details = get_sc_labs_sample_details(sc_labs_coa_url)
-    # assert sample_details is not None
+    data = get_sc_labs_sample_details(sc_labs_coa_url)
+    assert data is not None

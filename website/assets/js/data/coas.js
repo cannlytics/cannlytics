@@ -14,6 +14,7 @@ export const coaJS = {
 
   initializeQRCodeScanner: initializeQRCodeScanner,
   renderCoAResults: renderCoAResults,
+  renderSamplePlaceholder: renderSamplePlaceholder,
   uploadCoAFile: uploadCoAFile,
 
   initializeCoADoc() {
@@ -24,8 +25,13 @@ export const coaJS = {
     // Attach import functionality.
     const searchInput = document.getElementById('coa-search-input');
     document.getElementById('coa-doc-search-button').onclick = function() {
+      // FIXME:
+      // 1. Show sample rendering...
+      // 2. Make request...
+      // 3. Either display the results or gracefully remove rendering...
       console.log('Function triggered:', searchInput.value);
-      document.getElementById('coa-url-input').value = searchInput.value;
+      renderSamplePlaceholder();
+      // document.getElementById('coa-url-input').value = searchInput.value;
     }
     searchInput.addEventListener('keydown', function (e) {
       if (e.code === 'Enter') {
@@ -179,7 +185,6 @@ export const coaJS = {
     // `results.length`
   },
 
-
   reportError() {
     /**
      * Report encountered error(s).
@@ -198,6 +203,29 @@ export const coaJS = {
   // TODO: Toggle between table and list views.
 
 
+}
+
+function renderSamplePlaceholder() {
+  /**
+   * Render a placeholder for a loading sample.
+   */
+  
+  const timestamp = new Date().toISOString().slice(0, 19).replaceAll(':', '-');
+
+  // Clone the sample template.
+  const docFrag = document.createDocumentFragment();
+  const tempNode = document.getElementById('sample-card-template').cloneNode(true);
+  tempNode.id = `${tempNode.id}-${timestamp}`;
+
+  // Wire-up the remove button.
+  tempNode.querySelector('.btn').onclick = function() {
+    tempNode.parentNode.removeChild(tempNode);
+  };
+
+  // Add the card to the UI.
+  tempNode.classList.remove('d-none');
+  docFrag.appendChild(tempNode);
+  document.getElementById('coa-grid-container').appendChild(docFrag);
 }
 
 function renderCoAResults() {

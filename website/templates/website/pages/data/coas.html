@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 7/17/2022
-  Updated: 7/24/2022
+  Updated: 7/27/2022
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
   TODO:
@@ -14,13 +14,14 @@
     - [✓] Allow users to upload a singular CoAs (.pdf).
     - [ ] Allow users to upload a folder of CoAs (.zip).
     - [ ] Allow users to enter a CoA URL or a list of CoA URLs.
-    - [✓] Is your favorite lab or LIMS missing? Request an addition to the CoA parsing algorithm.
-    - [ ] Form to report an error parsing a CoA.
     - [ ] QR code reader for mobile!
     - [ ] Wire up the form to the API to send and receive data.
     - [ ] Create a results table and downloadable file.
     - [ ] Write instructions on how to use the API and add link to more instructions.
     - [ ] Write instructions on how to use the Python SDK and add link to more instructions.
+    - [✓] Is your favorite lab or LIMS missing? Request an addition to the CoA parsing algorithm.
+    - [-] Optional: Form to report an error parsing a CoA.
+
 -->
 {% extends "website/index.html" %}
 {% load static icon %}
@@ -133,74 +134,144 @@
 <!-- CoA Doc -->
 <section class="container markdown">
 
-  <!-- URL search / PDF input -->
+  <!-- Instructions shown prior to parsing -->
   <div
-    id="coa-input-container"
-    class="col pe-0"
+    class="card rounded markdown p-3 my-3 mx-auto"
   >
-    <div class="d-flex mb-3">
-      <form
-        id="coa-url-import-form"
-        class="flex-grow-1"
-        name="coa_url_import"
-        method="post"
-        action=""
-        enctype="multipart/form-data"
-      >
-        {% csrf_token %}   
-        <div class="input-group flex-grow-1">
-          <input
-            id="coa-search-input"
-            class="form-control serif"
-            style="min-width:300px;"
-            placeholder="Search by CoA URL or Metrc ID..."
-            list="coa-search-options"
-            name="coa_url"
-            oninput=""
-            aria-label="Search"
-            spellcheck="false"
-            type="text"
-          >
-          <input
-            id="coa-url-input"
-            type="text"
-            class="visually-hidden"
-            name="urls"
-            required="required"
-            onchange="cannlytics.data.uploadCoAFile(null, 'coa-url-import-form');"
-          >
-          <button
-            id="coa-doc-search-button"
-            class="btn btn-outline-secondary text-dark serif"
-            title="Search for CoA"
-            type="button"
-          >
-            Search
-          </button>
-          <button
-            id="coa-doc-reset-button"
-            class="btn btn-outline-secondary text-dark serif"
-            title="Reset search"
-            type="button"
-          >
-            Reset
-          </button>
-        </div>
-      </form>
+    <h2 class="serif fw-bold text-dark mt-0 mb-2">
+      Certificate of Analysis Parser
+    </h2>
+    <p class="serif text-dark fs-6 lh-md mt-0" style="max-width:560px;">
+        Your CoA data from uploaded CoAs will render below.
+        At this time, only
+        certificates of analysis (CoAs) from known labs and
+        LIMS can be parsed.
+    </p>
+    {% comment %} <!-- TODO: Make supoorted labs / LIMS minimizable? -->
+    <h4 class="serif fw-bold text-dark mb-2 mt-3">
+      Supported Labs and LIMS
+    </h4>
+    <!-- TODO: Make this a tooltip -->
+    <p class="lh-sm mt-0 text-dark">
+      <small class="serif">
+        If you want your favorite lab or LIMS included,
+        then please email <a href="mailto:dev@cannlytics.com">
+          <small class="serif">dev@cannlytics.com</small>
+        </a> and chances are that they can be added to the
+        parsing algorithm. Alternatively, clone the
+        <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas">
+          <small class="serif">source code</small>
+        </a>
+        and you can write your own parsing algorithm!
+      </small>
+    </p>
+    <div class="d-flex justify-content-between text-dark"  style="max-width:420px;">
+      <ul class="my-2">
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">Green Leaf Lab</small>
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">MCR Labs</small>
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">SC Labs</small>
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">Veda Scientific</small>
+          </a>
+        </li>
+      </ul>
+      <ul class="my-2">
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">Confident Cannabis</small>
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            <small class="serif">TagLeaf LIMS</small>
+          </a>
+        </li>
+      </ul>
+    </div> {% endcomment %}
 
-      <!-- TODO: Export -->
-      <button
-        id="coa-doc-export-button"
-        class="btn btn-sm-light btn-lg-light text-nowrap serif d-none"
-        onclick=""
+    <!-- URL search / PDF input -->
+    <div
+      id="coa-input-container"
+      class="col pe-0 mt-2"
+    >
+      <div class="d-flex mb-3">
+        <form
+          id="coa-url-import-form"
+          class="flex-grow-1"
+          name="coa_url_import"
+          method="post"
+          action=""
+          enctype="multipart/form-data"
         >
-        {% icon "save" width="21px" height="21px" class="me-1" %}
-        Download
-      </button>
+          {% csrf_token %}   
+          <div class="input-group flex-grow-1">
+            <input
+              id="coa-search-input"
+              class="form-control serif"
+              style="min-width:300px;"
+              placeholder="Search by CoA URL or Metrc ID..."
+              list="coa-search-options"
+              name="coa_url"
+              oninput=""
+              aria-label="Search"
+              spellcheck="false"
+              type="text"
+            >
+            <input
+              id="coa-url-input"
+              type="text"
+              class="visually-hidden"
+              name="urls"
+              required="required"
+              onchange="cannlytics.data.uploadCoAFile(null, 'coa-url-import-form');"
+            >
+            <button
+              id="coa-doc-search-button"
+              class="btn btn-outline-secondary text-dark serif"
+              title="Search for CoA"
+              type="button"
+            >
+              Search
+            </button>
+            <button
+              id="coa-doc-reset-button"
+              class="btn btn-outline-secondary text-dark serif"
+              title="Reset search"
+              type="button"
+            >
+              Reset
+            </button>
+          </div>
+        </form>
 
-      <!-- TODO: Implement honeypot email to discourage bots. -->
-      <!-- Honeypot email :p -->
-      <input class="visually-hidden" name="super_special_email" required="required" value="">
+        <!-- TODO: Export -->
+        <button
+          id="coa-doc-export-button"
+          class="btn btn-sm-light btn-lg-light text-nowrap serif d-none"
+          onclick=""
+          >
+          {% icon "save" width="21px" height="21px" class="me-1" %}
+          Download
+        </button>
+
+        <!-- TODO: Implement honeypot email to discourage bots. -->
+        <!-- Honeypot email :p -->
+        <input class="visually-hidden" name="super_special_email" required="required" value="">
+
+      </div>
 
     </div>
 
@@ -275,165 +346,146 @@
 
   </div><!-- End of search and file input -->
 
-  <div class="d-flex mt-5 justify-content-between align-items-center">
-    <h2 class="fs-3 text-dark fw-bold mb-0 mt-0">
-      Your Results
-    </h2>
-    <ul
-      id="coa-results-tabs"
-      class="nav nav-pills mb-3"
-      role="tablist"
-    >
-      <li class="nav-item" role="presentation">
-        <button
-          class="btn btn-md-light me-1 active"
-          id="coa-grid-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#coa-grid"
-          type="button"
-          role="tab"
-          aria-controls="coa-grid"
-          aria-selected="true"
-          title="List View"
-        >
-          {% icon "list" width="21px" height="21px" %}
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="btn btn-md-light"
-          id="coa-list-tab"
-          data-bs-toggle="pill"
-          data-bs-target="#coa-list"
-          type="button"
-          role="tab"
-          aria-controls="coa-list"
-          aria-selected="false"
-          title="Grid View"
-        >
-          {% icon "grid" width="21px" height="21px" %}
-        </button>
-      </li>
-    </ul>
-  </div>
-
-  <!-- Samples -->
-  <div id="coa-results-content" class="tab-content">
-
-    <!-- TODO: List of samples -->
-    <div
-      id="coa-grid"
-      class="tab-pane fade show active"
-      role="tabpanel"
-      aria-labelledby="coa-grid-tab"
-      tabindex="0"
-    >
-      <div class="row my-5">
-        <div class="col-12 col-md-6 px-3 pe-lg-5 text-start">
-          
-          <!-- TODO: Create a sample card template. -->
-          List of samples here!
-
-        </div>
-      </div>
+  <!-- Sample Results -->
+  <div class="card rounded text-start mt-3">
+    <div class="card-header no-border bg-transparent d-flex justify-content-between align-items-center">
+      <h2 class="fs-3 text-dark fw-bold mb-0 mt-0">
+        Your Results
+      </h2>
+      <ul
+        id="coa-results-tabs"
+        class="nav nav-pills mb-3"
+        role="tablist"
+      >
+        <li class="nav-item" role="presentation">
+          <button
+            class="btn btn-md-light me-1 active"
+            id="coa-grid-tab"
+            data-bs-toggle="pill"
+            data-bs-target="#coa-grid"
+            type="button"
+            role="tab"
+            aria-controls="coa-grid"
+            aria-selected="true"
+            title="Grid View"
+          >
+            {% icon "grid" width="21px" height="21px" %}
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="btn btn-md-light"
+            id="coa-list-tab"
+            data-bs-toggle="pill"
+            data-bs-target="#coa-list"
+            type="button"
+            role="tab"
+            aria-controls="coa-list"
+            aria-selected="false"
+            title="List View"
+          >
+            {% icon "list" width="21px" height="21px" %}
+          </button>
+        </li>
+      </ul>
     </div>
+    <div class="card-body bg-transparent">
 
-    <!-- Data Table -->
-    <div
-      id="coa-list"
-      class="tab-pane fade"
-      role="tabpanel"
-      aria-labelledby="coa-list-tab"
-      tabindex="0"
-    >
-      <div id="loading-placeholder" class="d-none">
-        {% include "website/components/placeholders/loading_placeholder.html" with
-          height='350px'
-          width='100%'
-          only
-        %}
-      </div>
-      <div id="data-table" class="d-none">
+      <!-- Sample Results Placeholder -->
+      <p
+        id="coa-sample-results-placeholder"
+        class="text-secondary text-center fs-5 mb-5"
+      >
+        🥸 Waiting on your CoAs Boss!
+      </p>
+
+      <!-- Sample Results -->
+      <div id="coa-results-content" class="tab-content">
+
+        <!-- TODO: List of samples -->
         <div
-          id="data-table"
-          class="ag-theme-alpine-dark"
-          style="height: 350px; width:100%;"
-        ></div>
-      </div>
+          id="coa-grid"
+          class="tab-pane fade row show active"
+          role="tabpanel"
+          aria-labelledby="coa-grid-tab"
+          tabindex="0"
+        >
+          <div id="coa-grid-container" class="row">
+              
+              <!-- Sample card template -->
+              <div id="sample-card-template" class="col col-md-4 col-lg-3 px-3 pe-lg-5 pb-3 text-start d-none">
+                <div class="card rounded">
+                  <button
+                    id="remove-sample-button"
+                    class="btn btn-sm-light position-absolute text-dark text-center"
+                    style="z-index:1;right:0;"
+                    title="Remove sample"
+                    type="button"
+                  >
+                    {% icon "x" width="16px" height="16px" %}
+                  </button>
+                  {% include "website/components/placeholders/loading_placeholder.html" with
+                    height='200px'
+                    width='100%'
+                    class="my-0"
+                    only
+                  %}
+                </div>
+              </div>
+
+          </div>
+        </div>
+
+        <!-- Data Table -->
+        <div
+          id="coa-list"
+          class="tab-pane fade"
+          role="tabpanel"
+          aria-labelledby="coa-list-tab"
+          tabindex="0"
+        >
+          <div class="row">
+            <!-- TODO: Cancel button -->
+            <button
+              id="coa-cancel-parsing-button"
+              class="btn btn-sm-light position-absolute text-dark text-center"
+              style="z-index:1;right:0;"
+              title="Cancel parsing"
+              type="button"
+            >
+              {% icon "x" width="16px" height="16px" %}
+            </button>
+            <div id="loading-placeholder" class="d-none-">
+              {% include "website/components/placeholders/loading_placeholder.html" with
+                height='350px'
+                width='100%'
+                only
+              %}
+            </div>
+            <div id="data-table" class="d-none">
+              <div
+                id="data-table"
+                class="ag-theme-alpine-dark"
+                style="height: 350px; width:100%;"
+              ></div>
+            </div>
+          </div>
+        </div>
+      
+      </div><!-- End of Sample Results Grid and Table -->
+
     </div>
+  </div><!-- End of Sample Results -->
+
+  <!-- TODO: Modal for lab results.
+    - [ ] Sample details.
+    - [ ] List of results, in a datatable?
+  -->
+
   
-  </div>
-
-  <!-- Placeholder -->
-  <div
-    class="card rounded markdown p-3 my-3 mx-auto"
-    style="max-width:420px;"
-  >
-    <h4 class="serif fw-bold text-dark mt-0 mb-2">
-      🥸 Waiting on your CoAs boss!
-    </h4>
-    <p class="serif text-dark fs-6 lh-md mt-0">
-        Your CoA data from uploaded CoAs will render here.
-        At this time, only
-        certificates of analysis (CoAs) from known labs and
-        LIMS can be parsed.
-    </p>
-    <h4 class="serif fw-bold text-dark mb-2 mt-3">
-      Supported Labs and LIMS
-    </h4>
-    <div class="d-flex justify-content-between text-dark">
-      <ul class="my-2">
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">Green Leaf Lab</small>
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">MCR Labs</small>
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">SC Labs</small>
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">Veda Scientific</small>
-          </a>
-        </li>
-      </ul>
-      <ul class="my-2">
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">Confident Cannabis</small>
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">TagLeaf LIMS</small>
-          </a>
-        </li>
-      </ul>
-    </div>
-    <p class="lh-sm mt-0 text-dark">
-      <small class="serif">
-        If you want your favorite lab or LIMS included,
-        then please email <a href="mailto:dev@cannlytics.com">
-          <small class="serif">dev@cannlytics.com</small>
-        </a> and chances are that they can be added to the
-        parsing algorithm. Alternatively, clone the
-        <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas">
-          <small class="serif">source code</small>
-        </a>
-        and you can write your own parsing algorithm!
-      </small>
-    </p>
-  </div>
-
-  <!-- Notes -->
-  {% comment %} <caption class="markdown">
+  {% comment %}
+  <!-- Optional: Table Notes -->
+  <caption class="markdown">
     <p class="text-secondary lh-sm" style="max-width:560px;">
       <small class="serif">
         <b class="serif">Notes:</b>
@@ -444,12 +496,12 @@
         best of CoADoc's abilities.
       </small>
     </p>
-  </caption> {% endcomment %}
+  </caption>
+  {% endcomment %}
 
-  <!-- TODO: Modal for lab results. -->
-
-  <!-- TODO: Request a lab or LIMS button -->
-  {% comment %} <div class="mt-5 mb-4">
+  {% comment %}
+  <!-- Optional: Request a lab or LIMS form -->
+  <div class="mt-5 mb-4">
     <h3 class="serif mb-0">Is your favorite lab or LIMS missing?</h3>
     <p class="fs-6 font-weight-light serif text-left lh-md mt-2 mb-3 text-secondary">
       Request an addition to the CoA parsing algorithm.
@@ -479,12 +531,12 @@
       >
         Request Addition
       </button>
-  </div> {% endcomment %}
+  </div>
+  {% endcomment %}
 
-  <!-- Optional: Modal of labs or LIMS with collection routines. -->
-
+  {% comment %}
   <!-- Optional: Report an error functionality. -->
-  {% comment %} <div class="mt-5 mb-4">
+  <div class="mt-5 mb-4">
     <h4 class="serif mb-0">Unknown Parsing Error!</h4>
     <p class="fs-6 font-weight-light serif text-left lh-md mt-2 mb-4 text-secondary">
       An error occurred when parsing the CoA.<br>
@@ -501,10 +553,10 @@
         Report Error
       </button>
     </div>
-  </div> {% endcomment %}
+  </div>
+  {% endcomment %}
 
 </section>
-
 
 <!-- Documentation -->
 <section class="container markdown">
@@ -594,7 +646,7 @@ title="Copy snippet"
 {% block page_js %}
   <script>
 
-    // Initalize the CoA Doc!
+    // Initalize CoADoc!
     cannlytics.data.initializeCoADoc();
   
   </script>

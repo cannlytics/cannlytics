@@ -472,6 +472,8 @@ def parse_green_leaf_lab_pdf(
             entry = augment_analyte_result(result, columns, values)
             if entry['name'] != 'mgtog' and entry['name'] != 'action':
                 results.append(entry)
+        
+        # FIXME: Add `units` to results!
 
     # Finish data collection with a freshly minted sample ID.
     obs['sample_id'] = create_sample_id(

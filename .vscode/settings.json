@@ -530,7 +530,8 @@
     "ylim",
     "ytick",
     "yticklabels",
-    "yticks"
+    "yticks",
+    "zipcode"
   ],
   "todo-tree.tree.showBadges": false,
 }
