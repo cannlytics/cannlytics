@@ -1,32 +1,19 @@
 <!doctype html>
 <html>
 <!--
-  CoA Parser Page | Cannlytics Website
+  CoADoc Page | Cannlytics Website
   Copyright (c) 2022 Cannlytics
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 7/17/2022
-  Updated: 7/27/2022
+  Updated: 7/29/2022
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-  TODO:
-
-    - [✓] Allow users to upload a singular CoAs (.pdf).
-    - [ ] Allow users to upload a folder of CoAs (.zip).
-    - [ ] Allow users to enter a CoA URL or a list of CoA URLs.
-    - [ ] QR code reader for mobile!
-    - [ ] Wire up the form to the API to send and receive data.
-    - [ ] Create a results table and downloadable file.
-    - [ ] Write instructions on how to use the API and add link to more instructions.
-    - [ ] Write instructions on how to use the Python SDK and add link to more instructions.
-    - [✓] Is your favorite lab or LIMS missing? Request an addition to the CoA parsing algorithm.
-    - [-] Optional: Form to report an error parsing a CoA.
-
 -->
 {% extends "website/index.html" %}
 {% load static icon %}
-{% block title %}CoA Doctor | Cannlytics{% endblock %}
+{% block title %}CoADoc CoA Parser | Cannlytics{% endblock %}
 {% block page_css %}
+<!-- FIXME: Load JS locally and handle dark tables!!! -->
 {% comment %} <script src="{% static 'website/plugins/ag-grid/ag-grid-community.min.noStyle.js' %}"></script>
 <link href="{% static 'website/plugins/ag-grid/ag-grid.min.css' %}" rel="stylesheet" type="text/css"/>
 <link href="{% static 'website/plugins/ag-grid/ag-theme-alpine.min.css' %}" rel="stylesheet" type="text/css"/>
@@ -84,14 +71,19 @@
   body.dark .btn-outline-secondary:hover {
     color: #004B09 !important;
   }
+  .tooltip-inner {
+    text-align: left;
+  }
 </style>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 {% endblock page_css %}
 {% block material %}
 
-<!-- Banner -->
-<!-- Optional: Add a background picture! -->
+<!-- Banner
+ - [ ] Add a background picture!
+-->
+<!-- Optional:  -->
 {% include "website/components/heros/hero_banner.html" with
   title=''
   description='Do you need <span class="serif fw-bold fst-italic text-decoration-underline">your</span> CoA data? Of course!<br>Have no fear, CoADoc is here to get you your data.'
@@ -138,74 +130,23 @@
   <div
     class="card rounded markdown p-3 my-3 mx-auto"
   >
-    <h2 class="serif fw-bold text-dark mt-0 mb-2">
+    <h3 class="serif fw-bold text-dark mt-0 mb-2">
       Certificate of Analysis Parser
-    </h2>
+    </h3>
     <p class="serif text-dark fs-6 lh-md mt-0" style="max-width:560px;">
-        Your CoA data from uploaded CoAs will render below.
-        At this time, only
-        certificates of analysis (CoAs) from known labs and
-        LIMS can be parsed.
+        Your sample results from uploaded CoAs will render below.
+        {% icon 'info' width="16px" height="16px" class="ms-1 mb-2"
+          data-bs-toggle="tooltip"
+          data-bs-placement="right"
+          data-bs-html="true"
+          title="At this time, only certificates of analysis (CoAs) from validated labs and LIMS can be parsed. Please see the list of validated labs below."
+        %}
     </p>
-    {% comment %} <!-- TODO: Make supoorted labs / LIMS minimizable? -->
-    <h4 class="serif fw-bold text-dark mb-2 mt-3">
-      Supported Labs and LIMS
-    </h4>
-    <!-- TODO: Make this a tooltip -->
-    <p class="lh-sm mt-0 text-dark">
-      <small class="serif">
-        If you want your favorite lab or LIMS included,
-        then please email <a href="mailto:dev@cannlytics.com">
-          <small class="serif">dev@cannlytics.com</small>
-        </a> and chances are that they can be added to the
-        parsing algorithm. Alternatively, clone the
-        <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas">
-          <small class="serif">source code</small>
-        </a>
-        and you can write your own parsing algorithm!
-      </small>
-    </p>
-    <div class="d-flex justify-content-between text-dark"  style="max-width:420px;">
-      <ul class="my-2">
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">Green Leaf Lab</small>
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">MCR Labs</small>
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">SC Labs</small>
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">Veda Scientific</small>
-          </a>
-        </li>
-      </ul>
-      <ul class="my-2">
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">Confident Cannabis</small>
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            <small class="serif">TagLeaf LIMS</small>
-          </a>
-        </li>
-      </ul>
-    </div> {% endcomment %}
 
     <!-- URL search / PDF input -->
     <div
       id="coa-input-container"
-      class="col pe-0 mt-2"
+      class="col pe-0 mt-3"
     >
       <div class="d-flex mb-3">
         <form
@@ -236,7 +177,7 @@
               class="visually-hidden"
               name="urls"
               required="required"
-              onchange="cannlytics.data.uploadCoAFile(null, 'coa-url-import-form');"
+              onchange="cannlytics.data.coas.uploadCoAFile(null, 'coa-url-import-form');"
             >
             <button
               id="coa-doc-search-button"
@@ -246,41 +187,15 @@
             >
               Search
             </button>
-            <button
-              id="coa-doc-reset-button"
-              class="btn btn-outline-secondary text-dark serif"
-              title="Reset search"
-              type="button"
-            >
-              Reset
-            </button>
           </div>
         </form>
-
-        <!-- TODO: Export -->
-        <button
-          id="coa-doc-export-button"
-          class="btn btn-sm-light btn-lg-light text-nowrap serif d-none"
-          onclick=""
-          >
-          {% icon "save" width="21px" height="21px" class="me-1" %}
-          Download
-        </button>
-
-        <!-- TODO: Implement honeypot email to discourage bots. -->
-        <!-- Honeypot email :p -->
-        <input class="visually-hidden" name="super_special_email" required="required" value="">
-
       </div>
+    </div><!-- End of Search -->
 
-    </div>
-
+    <!-- File Input -->
     <div class="row row-wrap">
 
-      <!-- Drag and drop files for PDF -->
-      <!-- 
-        - [ ] Let the user upload multiple files, then click a "Parse" button.
-      -->
+      <!-- File Drag and Drop -->
       <form
         id="coa-doc-import-form"
         name="coa_doc_import"
@@ -306,7 +221,7 @@
             <div class="box__action d-flex mt-3">
               <button
                 id='coa-doc-import-button'
-                class="app-action btn btn-sm-light btn-md-light serif"
+                class="app-action btn btn-sm-light btn-md-light serif text-dark"
                 type="button"
                 onclick="document.getElementById('coas-input').click();"
               >
@@ -324,31 +239,27 @@
               class="visually-hidden"
               name="urls"
               required="required"
-              onchange="cannlytics.data.uploadCoAFile();"
+              onchange="cannlytics.data.coas.uploadCoAFile();"
             >
           </div>
         </div>
         <div class="box__uploading">Uploading…</div>
         <div class="box__success">Done!</div>
         <div class="box__error">Error! <span></span>.</div>
-      </form>
+      </form><!-- End of File Drag and Drop -->
 
-      <!-- TODO: QR code reader for mobile!
-        - [ ] If a known LIMS, get the data.
-        - [ ] If a PDF, show the PDF?
-        - [ ] If a Metrc ID, query lab results.
-      -->
+      <!-- QR Code Scanner -->
       <div class="col mb-3" style="min-width:350px;">
         <div id="reader" class="text-dark py-2" width="600px"></div>
       </div>
 
-    </div>
+    </div><!-- End of File Input -->
 
-  </div><!-- End of search and file input -->
+  </div><!-- End of Search and File Input -->
 
   <!-- Sample Results -->
   <div class="card rounded text-start mt-3">
-    <div class="card-header no-border bg-transparent d-flex justify-content-between align-items-center">
+    <div class="card-header no-border bg-transparent d-flex justify-content-between align-items-center pb-0">
       <h2 class="fs-3 text-dark fw-bold mb-0 mt-0">
         Your Results
       </h2>
@@ -359,7 +270,7 @@
       >
         <li class="nav-item" role="presentation">
           <button
-            class="btn btn-md-light me-1 active"
+            class="active btn btn-md-light me-1 text-dark"
             id="coa-grid-tab"
             data-bs-toggle="pill"
             data-bs-target="#coa-grid"
@@ -374,7 +285,7 @@
         </li>
         <li class="nav-item" role="presentation">
           <button
-            class="btn btn-md-light"
+            class="btn btn-md-light text-dark"
             id="coa-list-tab"
             data-bs-toggle="pill"
             data-bs-target="#coa-list"
@@ -389,7 +300,7 @@
         </li>
       </ul>
     </div>
-    <div class="card-body bg-transparent">
+    <div class="card-body bg-transparent pt-0">
 
       <!-- Sample Results Placeholder -->
       <p
@@ -402,6 +313,21 @@
       <!-- Sample Results -->
       <div id="coa-results-content" class="tab-content">
 
+        <!-- Sample Results Options -->
+        <div class="d-flex justify-content-start mb-3">
+
+          <!-- Download All Results -->
+          <button
+            id="coa-doc-export-button"
+            class="btn btn-sm-light btn-md-light text-nowrap text-dark serif"
+            type="button"
+            >
+            {% icon "download-cloud" width="21px" height="21px" class="me-1" %}
+            Download All Results
+          </button>
+
+        </div>
+
         <!-- TODO: List of samples -->
         <div
           id="coa-grid"
@@ -413,10 +339,12 @@
           <div id="coa-grid-container" class="row">
               
               <!-- Sample card template -->
-              <div id="sample-card-template" class="col col-md-4 col-lg-3 px-3 pe-lg-5 pb-3 text-start d-none">
+              <div
+                id="sample-placeholder-template"
+                class="sample-placeholder-template col-12 col-md-4 col-lg-3 px-3 pe-lg-5 pb-3 text-start d-none"
+              >
                 <div class="card rounded">
                   <button
-                    id="remove-sample-button"
                     class="btn btn-sm-light position-absolute text-dark text-center"
                     style="z-index:1;right:0;"
                     title="Remove sample"
@@ -430,6 +358,42 @@
                     class="my-0"
                     only
                   %}
+                </div>
+              </div><!-- End of sample card -->
+
+              <!-- Sample card -->
+              <div
+                id="sample-card-template"
+                class="sample-card-template col-12 col-md-4 col-lg-3 px-3 pb-3 text-start d-none-"
+              >
+                <div class="card rounded" style="height:200px;">
+                  <button
+                    class="btn btn-sm-light position-absolute text-dark text-center"
+                    style="z-index:1;right:0;"
+                    title="Remove sample"
+                    type="button"
+                  >
+                    {% icon "x" width="16px" height="16px" %}
+                  </button>
+                  <!-- Add more details:
+                    - [ ] Chips for `analyses`.
+                    - [ ] Number of `results`.
+                  -->
+                  <div class="card-body bg-transparent sample-details text-dark">
+                    <img class="sample-image d-none text-center" src="" height="75px;">
+                    <div class="product-name fw-bold fs-5 serif"></div>
+                    <div class="product-type serif"></div>
+                    <div class="producer serif"></div>
+                    <div class="date-tested serif"></div>
+                  </div>
+                  <div class="sample-data visually-hidden"></div>
+                  <a
+                    href=""
+                    class="stretched-link"
+                    data-bs-toggle="modal"
+                    data-bs-target="#results-modal"
+                    data-bs-sample=""
+                  ></a>
                 </div>
               </div>
 
@@ -445,7 +409,8 @@
           tabindex="0"
         >
           <div class="row">
-            <!-- TODO: Cancel button -->
+            {% comment %}
+            <!-- TODO: Cancel or reset button? -->
             <button
               id="coa-cancel-parsing-button"
               class="btn btn-sm-light position-absolute text-dark text-center"
@@ -455,6 +420,7 @@
             >
               {% icon "x" width="16px" height="16px" %}
             </button>
+            {% endcomment %}
             <div id="loading-placeholder" class="d-none-">
               {% include "website/components/placeholders/loading_placeholder.html" with
                 height='350px'
@@ -477,116 +443,172 @@
     </div>
   </div><!-- End of Sample Results -->
 
-  <!-- TODO: Modal for lab results.
-    - [ ] Sample details.
-    - [ ] List of results, in a datatable?
+  <!-- Modal for lab results.
+    - [ ] Render sample details.
+    - [ ] Render a table of results.
   -->
+  <div
+    class="modal fade"
+    id="results-modal"
+    tabindex="-1"
+    aria-labelledby="results-modal-label"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5
+            class="modal-title serif"
+            id="results-modal-label"
+          >
+            Sample Results
+          </h5>
+          <button
+            class="btn btn-sm-light position-absolute text-dark text-center"
+            style="z-index:1;right:0;top:0;"
+            data-bs-dismiss="modal"
+            title="Close results"
+            type="button"
+          >
+            {% icon "x" width="16px" height="16px" %}
+          </button>
+        </div>
+        <div class="modal-body">
+          
+          <!-- TODO: Render all sample details here. -->
+          <div class="modal-sample-details">
 
-  
-  {% comment %}
-  <!-- Optional: Table Notes -->
-  <caption class="markdown">
-    <p class="text-secondary lh-sm" style="max-width:560px;">
-      <small class="serif">
-        <b class="serif">Notes:</b>
-        Certificates of analysis (CoAs) from
-        <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas.py"><small class="serif">known LIMS providers</small></a>
-        can usually be parsed directly from the web. CoAs from
-        yet-to-be-incorporated labs or LIMS can be parsed to the
-        best of CoADoc's abilities.
-      </small>
-    </p>
-  </caption>
-  {% endcomment %}
+          </div>
 
-  {% comment %}
-  <!-- Optional: Request a lab or LIMS form -->
-  <div class="mt-5 mb-4">
-    <h3 class="serif mb-0">Is your favorite lab or LIMS missing?</h3>
-    <p class="fs-6 font-weight-light serif text-left lh-md mt-2 mb-3 text-secondary">
-      Request an addition to the CoA parsing algorithm.
-    </p>
-      <div class="col-auto mb-3">
-        <label
-          for="requested-lims"
-          class="form-label serif"
-        >
-          Lab or LIMS
-        </label>
-        <input
-          id="requested-lims"
-          class="form-control serif"
-          style="max-width:350px;"
-          spellcheck="false"
-          type="text"
-          value=""
-        >
+          <!-- TODO: Render results in a datatable! -->
+          <div id="results data-table" class="d-none-">
+            <div
+              id="results-table"
+              class="ag-theme-alpine-dark"
+              style="height: 350px; width:100%;"
+            ></div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-sm-light btn-md-light serif"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm bg-gradient-purple text-white serif"
+            type="button"
+            onclick="cannlytics.data.coas.downloadSampleResults();"
+          >
+            Download
+          </button>
+        </div>
       </div>
-      <button
-        id="request-lims-button"
-        class="btn bg-gradient-green serif text-white"
-        style="width: 191px;"
-        type="button"
-        onclick=""
-      >
-        Request Addition
-      </button>
-  </div>
-  {% endcomment %}
-
-  {% comment %}
-  <!-- Optional: Report an error functionality. -->
-  <div class="mt-5 mb-4">
-    <h4 class="serif mb-0">Unknown Parsing Error!</h4>
-    <p class="fs-6 font-weight-light serif text-left lh-md mt-2 mb-4 text-secondary">
-      An error occurred when parsing the CoA.<br>
-      Please try again later or email support.
-    </p>
-    <div class="simple-flex">
-      <button
-        id="coa-doc-report-error-button"
-        class="btn bg-gradient-green serif text-white"
-        style="width: 191px;"
-        type="button"
-        onclick=""
-      >
-        Report Error
-      </button>
     </div>
   </div>
-  {% endcomment %}
 
 </section>
 
 <!-- Documentation -->
 <section class="container markdown">
 
-  <!-- TODO: Re-write descriptions for API and SDK -->
+  <!-- Custom parsing algorithms-->
+  <div class="row mx-auto mx-lg-0 my-5 pt-5" style="max-width:560px">
+    <h2 class="fs-3 text-dark fw-bold mt-0 mb-0">
+      <a class="serif" href="#">
+        <svg style="width:50px;height:50px;">
+          <use href="{% static "website/images/emojies/alembic.svg" %}#alembic-emoji"></use>
+        </svg>
+        Custom CoA Parsing
+      </a>
+    </h2>
+    <p class="fs-6 double-line mb-2 mt-0" style="max-width:560px;">
+      At this time, CoADoc can only parse certificates of analysis (CoAs)
+      from labs and LIMS with validated parsing algorithms. We've currently validated:
+    </p>
+    <div class="d-flex justify-content-between text-dark"  style="max-width:420px;">
+      <ul class="my-2">
+        <li class="mb-2">
+          <a href="#">
+            Green Leaf Lab
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            MCR Labs
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            SC Labs
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            Veda Scientific
+          </a>
+        </li>
+      </ul>
+      <ul class="my-2">
+        <li class="mb-2">
+          <a href="#">
+            Confident Cannabis
+          </a>
+        </li>
+        <li class="mb-2">
+          <a href="#">
+            TagLeaf LIMS
+          </a>
+        </li>
+      </ul>
+    </div>
+    <p class="fs-6 double-line mb-2 mt-0" style="max-width:560px;">
+      If you want your favorite lab or LIMS added,
+      then please email <a href="mailto:dev@cannlytics.com">dev@cannlytics.com</a>
+      and chances are that they can be included.
+      Alternatively, because Cannlytics is open source, you can clone the
+      <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas">source code</a>
+      and write a custom parsing algorithm for your lab or LIMS for free!
+      It is as easy as 1, 2, 3 to add a new lab.
+    </p>
+    <div class="d-none d-lg-flex mt-2">
+      <a
+        class="btn btn-sm bg-gradient-orange text-white serif"
+        href="{% url "page" page="contact" %}?topic=coas"
+      >
+        Request a New Lab / LIMS &rarr;
+      </a>
+    </div>
+  </div>
 
   <!-- Documentation for CoA Doc API -->
   <div class="row justify-content-center my-5 pt-5">
     <div class="col-12 col-md-6 px-3 pe-lg-5 text-start">
-      <h2 class="fs-3 text-dark fw-bold mb-2 mt-0">
+      <h2 class="fs-3 text-dark fw-bold mb-0 mt-0">
         <a class="serif" href="#">
-          📡 CoADoc API
+          <svg style="width:50px;height:50px;">
+            <use href="{% static "website/images/emojies/satellite.svg" %}#satellite-emoji"></use>
+          </svg>
+          CoADoc API
         </a>
       </h2>
-      <p class="fs-6 double-line mb-2" style="max-width:560px;">
-        Certificates of analysis (CoAs) are abundant for cultivators,
-        processors, retailers, and consumers too, but the data is often
-        locked away. Rich, valuable laboratory data so close, yet so far
-        away! Cannlytics puts these vital data points in your hands by
-        parsing PDFs and URLs, finding all the data, standardizing the data,
-        and cleanly returning the data to you.
+      <p class="fs-6 double-line mb-2 mt-0" style="max-width:560px;">
+        You can integrate rich lab result data into your app with one quick request to the CoADoc API.
+        Given a QR code scanner or any other mechanism
+        to input CoA URLs or PDFs, make a simple request and you will receive your CoA data neatly organized and ready for your use.
       </p>
-      {% comment %} <div class="d-none d-lg-flex mt-3">
+      <div class="d-none d-lg-flex mt-3">
         <a
-          class="btn btn-sm bg-gradient-green text-white serif"
-          href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data"
+          class="btn btn-sm-light btn-md-light serif"
+          href="https://github.com/cannlytics/cannlytics/tree/main/api/data"
         >
-          Read the Docs &rarr;
+          Read the docs and get the code &rarr;
         </a>
-      </div> {% endcomment %}
+      </div>
     </div>
     <div class="col-11 col-md-8 col-lg-6">
 
@@ -604,19 +626,27 @@
   <!-- Documentation for CoA Doc Python SDK -->
   <div class="row justify-content-center my-5 pt-5">
     <div class="col-12 col-md-6 px-3 pe-lg-5 text-start">
-      <h2 class="fs-3 text-dark fw-bold mb-2 mt-0">
+      <h2 class="fs-3 text-dark fw-bold mb-0 mt-0">
         <a class="serif" href="#">
-          🐍 CoADoc Python SDK
+          <svg style="width:50px;height:50px;">
+            <use href="{% static "website/images/emojies/snake.svg" %}#snake-emoji"></use>
+          </svg>
+          CoADoc Python SDK
         </a>
       </h2>
-      <p class="fs-6 double-line mb-2" style="max-width:560px;">
-        Certificates of analysis (CoAs) are abundant for cultivators,
-        processors, retailers, and consumers too, but the data is often
-        locked away. Rich, valuable laboratory data so close, yet so far
-        away! Cannlytics puts these vital data points in your hands by
-        parsing PDFs and URLs, finding all the data, standardizing the data,
-        and cleanly returning the data to you.
+      <p class="fs-6 double-line mb-2 mt-0" style="max-width:560px;">
+        Are you interested in developing a new parsing routine for a lab or LIMS? Then you can easily use CoADoc directly
+        with the <code>cannlytics</code> Python package to parse CoAs
+        to your heart's content.
       </p>
+      <div class="d-none d-lg-flex mt-3">
+        <a
+          class="btn btn-sm-light btn-md-light serif"
+          href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas"
+        >
+          Read the docs and get the code &rarr;
+        </a>
+      </div>
     </div>
     <div class="col-11 col-md-8 col-lg-6">
     <div class="codehilite rounded text-start overflow-hidden px-3">
@@ -647,7 +677,10 @@ title="Copy snippet"
   <script>
 
     // Initalize CoADoc!
-    cannlytics.data.initializeCoADoc();
+    cannlytics.data.coas.initializeCoADoc();
+
+    // Initialize tooltips.
+    cannlytics.ui.enableTooltips();
   
   </script>
 {% endblock %}

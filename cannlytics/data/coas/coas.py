@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 7/26/2022
+Updated: 7/28/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -65,6 +65,8 @@ from cannlytics.utils.constants import (
     DECARB,
 )
 
+# FIXME: Dynamically import labs and LIMS.
+# See: https://stackoverflow.com/questions/3606202/how-can-i-import-a-python-module-function-dynamically
 # Lab and LIMS CoA parsing algorithms.
 from cannlytics.data.coas.confidentcannabis import (
     CONFIDENT_CANNABIS,
@@ -484,6 +486,8 @@ class CoADoc:
         # Identify any known LIMS.
         known_lims = self.identify_lims(front_page, lims=lims)
 
+        # FIXME: Get lab / LIMS specific parsing algorithm.
+
         # Get the time the CoA was created.
         date_tested = self.get_pdf_creation_date(pdf_file)
         
@@ -721,7 +725,6 @@ if __name__ == '__main__':
     # collected, including client details.
 
 
-
     # [-] TEST: Parse a SC Labs CoA.
     # Note: Download PDF from <https://client.sclabs.com/sample/796684/>
     sc_labs_coa_url = 'https://client.sclabs.com/sample/796684/'
@@ -729,12 +732,9 @@ if __name__ == '__main__':
 
     # TODO: Re-test SC Labs parsing of URL, ensuring all details are
     # collected, including client details.
-    
 
 
     # TODO: Test parsing of SC Labs CoA.
-
-
 
 
     # [-] TEST: Find results by known metrc IDs.

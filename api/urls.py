@@ -96,6 +96,8 @@ urlpatterns = [
 
         # CoA data and parser.
         path('/coas', coa_data.coa_data),
+        path('/coas/download', coa_data.download_coa_data),
+
 
         # Optional: Datasets data - Allow users to find available datasets.
 

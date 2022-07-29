@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 1/7/2022
- * Updated: 1/8/2022
+ * Updated: 7/29/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { getUrlParameter } from '../utils.js';
@@ -19,6 +19,10 @@ export const contact = {
     analyses: {
       message: 'I would like to suggest the following analyses and their prices:',
       subject: 'Suggest Analyses',
+    },
+    coas: {
+      message: 'I am interested in extracting the data from my CoAs.',
+      subject: 'CoA Data Extraction',
     },
     custom: {
       message: 'I have a custom project that I need developed.',
@@ -117,7 +121,6 @@ export const contact = {
       * Submit the contact form after validation.
       */
     const mathCheck = parseInt(document.getElementById('math_input').value);
-    console.log(mathCheck, this.mathCheckTotal);
     if (mathCheck !== this.mathCheckTotal) {
       cannlytics.showNotification('Match Check Mismatch', "Please try the math check again. We've implemented this to thwart abuse.", 'error');
       return false;

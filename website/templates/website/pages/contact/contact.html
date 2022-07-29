@@ -6,11 +6,14 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/6/2021
-  Updated: 1/9/2022
+  Updated: 7/29/2022
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
   
   Optional Improvements:
     - Loading button
+  
+  FIXME:
+    - [ ] Test contact form. An error has been reported.
 -->
 {% extends "website/index.html" %}
 {% block title %}Contact | Cannlytics{% endblock %}
@@ -101,7 +104,9 @@
                 onchange="cannlytics.website.setContactFormTopic(this.value);"
               >
                 <option selected value="general">General Inquiry</option>
+                <option value="algorithms">Algorithm Development</option>
                 <option value="lims">Cannlytics LIMS</option>
+                <option value="coas">CoA Data Extraction</option>
                 <option value="custom">Custom Development</option>
                 <option value="join">Joining Cannlytics</option>
                 <option value="metrc">Metrc Integration</option>
