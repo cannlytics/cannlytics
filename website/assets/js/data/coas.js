@@ -4,48 +4,60 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 7/19/2022
- * Updated: 7/29/2022
+ * Updated: 7/30/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
+import { Modal } from 'bootstrap';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { authRequest, downloadBlob, showNotification, snakeCase } from '../utils.js';
+import { authRequest, downloadBlob, hasClass, showNotification, snakeCase } from '../utils.js';
 import { theme } from '../ui/theme.js';
 
 export const CoADoc = {
-  // limit: 1000,
-  // hidden: true,
-  minWidth: 75,
+
+  // CoADoc parameters.
+  minWidth: 100,
   gridOptions: {},
   rowHeight: 40,
-  // selectGridOptions: {},
+
+  // Local functions.
   downloadSampleResults: downloadSampleResults,
   renderSamplePlaceholder: renderSamplePlaceholder,
 
-  /**
-   * Initialization functions.
-   */
-
   initializeCoADoc() {
+    /**
+     * Initialize the CoADoc user interface.
+     */
 
-    // Attach search import functionality.
+    // Wire-up search button and input.
     const searchInput = document.getElementById('coa-search-input');
     document.getElementById('coa-doc-search-button').onclick = function() {
-      this.uploadCoAFile([searchInput.value]);
+      cannlytics.data.coas.postCoAData({ urls: [searchInput.value] });
     }
     searchInput.addEventListener('keydown', function (e) {
       if (e.code === 'Enter') {
-        this.uploadCoAFile([searchInput.value]);
+        cannlytics.data.coas.postCoAData({ urls: [searchInput.value] });
       }
     });
 
-    // Initialize the QR code scanner.
-    this.initializeQRCodeScanner();
+    // Wire-up CoA file import functions.
+    document.getElementById('coa-url-input').onchange = function() {
+      cannlytics.data.coas.uploadCoAFile(null, 'coa-url-import-form');
+    }
+    document.getElementById('coas-input').onchange = function() {
+      cannlytics.data.coas.uploadCoAFile();
+    }
+    document.getElementById('coa-doc-import-button').onclick = function() {
+      document.getElementById('coas-input').click();
+    }
 
-    // Initialize the drag and drop.
-    this.initializeDragAndDrop();
-
-    // Wire-up export button.
+    // Wire-up download buttons.
     document.getElementById('coa-doc-export-button').onclick = downloadAllResults;
+    document.getElementById('download-sample-results-button').onclick = function() {
+      cannlytics.data.coas.downloadSampleResults(this);
+    }
+
+    // Wire-up save button.
+    document.getElementById('save-sample-results-button').onclick = saveSampleResults;
 
     // Wire up clear button.
     document.getElementById('coa-doc-clear-button').onclick = this.resetCoADocForm;
@@ -54,7 +66,13 @@ export const CoADoc = {
     const modal = document.getElementById('results-modal')
     modal.addEventListener('show.bs.modal', openResults);
 
-    // Initialize the table?
+    // Initialize the QR code scanner.
+    this.initializeQRCodeScanner();
+
+    // Initialize the drag and drop.
+    this.initializeDragAndDrop();
+
+    // Initialize the data table.
     this.renderCoADataTable();
 
   },
@@ -133,7 +151,8 @@ export const CoADoc = {
     /**
      * Clear the CoA Doc form.
      */
-    this.initializeQRCodeScanner();
+    cannlytics.data.coas.gridOptions.api.setRowData([]);
+    cannlytics.data.coas.initializeQRCodeScanner();
     const template = `Drop a CoA <code>.pdf</code> or a <code>.zip</code>
     of CoAs to parse.`;
     document.getElementById('coa-search-input').value = '';
@@ -142,17 +161,16 @@ export const CoADoc = {
     document.getElementById('coa-results-tabs').classList.add('d-none');
     document.getElementById('coa-results-content').classList.add('d-none');
     document.getElementById('coa-sample-results-placeholder').classList.remove('d-none');
-    const sampleCards = document.querySelectorAll('.sample-card');
-    sampleCards.forEach((card) => {
+    document.querySelectorAll('.sample-card').forEach((card) => {
       card.parentNode.removeChild(card);
     });
-    this.gridOptions.api.setRowData([]);
   },
 
   async renderCoAResults(data) {
     /**
      * Render the CoA results for the user as both
      * a card in a list of samples as well as a row on a table.
+     * @param {Object} data The CoA results to render.
      */
     const { gridOptions } = cannlytics.data.coas;
     const rows = [];
@@ -165,6 +183,20 @@ export const CoADoc = {
     });
     gridOptions.api.setRowData(rows);
     document.getElementById('coa-data-placeholder').classList.add('d-none');
+  },
+
+  async postCoAData(data) {
+    /**
+     * Post CoA URLs to the CoADoc API for data extraction.
+     * @param {Object} data The data for the API POST request.
+     */
+    const response = await authRequest('/api/data/coas', data);
+    if (response.success) {
+      this.renderCoAResults(response.data);
+    } else {
+      const message = 'An error occurred when parsing the CoA. Please try again later or email support.';
+      showNotification('Error Parsing CoA', message, /* type = */ 'error');
+    }
   },
 
   async uploadCoAFile(formData, formId = 'coa-doc-import-form') {
@@ -180,7 +212,7 @@ export const CoADoc = {
     // Get the form.
     if (!formData) formData = new FormData(document.forms[formId]);
   
-    // TODO: It would be good to do further / better file checking before posting the form.
+    // Optional: It would be good to do further / better file checking before posting the form.
     // https://stackoverflow.com/questions/7977084/check-file-type-when-form-submit
 
     const successCallback = this.renderCoAResults;
@@ -238,23 +270,11 @@ export const CoADoc = {
    * Table functions
    */
 
-  exportCoADataTable() {
-    /**
-     * Export the CoA data table to a `.xlsx`,
-     * `.json`, or `.csv` file.
-     */
-    // TODO: Implement!
-  },
-
   renderCoADataTable() {
     /**
      * Render the table for CoA data.
      */
 
-    // Hide the placeholder and show the table.
-    // document.getElementById('coa-data--placeholder').classList.add('d-none');
-    // document.getElementById('coa-data-table').classList.remove('d-none');
-    
     // Define the fields.
     const fields = [
       { key: 'product_name', label: 'Product' },
@@ -263,7 +283,6 @@ export const CoADoc = {
       { key: 'date_tested', label: 'Tested' },
       { key: 'analyses', label: 'Analyses' },
       { key: 'number_of_results', label: 'Results' },
-      // `results.length`
     ];
 
     // Get data model fields from organization settings.
@@ -271,14 +290,9 @@ export const CoADoc = {
       return { headerName: e.label, field: e.key, sortable: true, filter: true };
     });
 
-    // Enable checkbox selection?
-    // if (editable) {
-    //   columnDefs[0]['checkboxSelection'] = true;
-    //   columnDefs[0]['headerCheckboxSelection'] = true;
-    // }
+    // Enable checkbox selection,
     columnDefs[0]['checkboxSelection'] = true;
     columnDefs[0]['headerCheckboxSelection'] = true;
-    console.log('Columns:', columnDefs);
 
     // Render templates.
     const overlayLoadingTemplate = `
@@ -288,12 +302,11 @@ export const CoADoc = {
     `;
     const overlayNoRowsTemplate = ``;
 
+    // Specify table options.
     this.gridOptions = {
       columnDefs: columnDefs,
       defaultColDef: { flex: 1,  minWidth: this.minWidth, editable: false },
       enterMovesDownAfterEdit: true,
-      singleClickEdit: true,
-      suppressRowClickSelection: true,
       overlayLoadingTemplate: overlayLoadingTemplate,
       overlayNoRowsTemplate: overlayNoRowsTemplate,
       pagination: true,
@@ -301,13 +314,11 @@ export const CoADoc = {
       rowClass: 'app-action',
       rowHeight: this.rowHeight,
       rowSelection: 'multiple',
+      singleClickEdit: true,
+      suppressRowClickSelection: true,
       onGridReady: event => theme.toggleTheme(theme.getTheme()),
       onRowClicked: onRowClicked,
     };
-
-    // FIXME: Wire-up select and click
-    //if (!editable) this.gridOptions.onRowClicked = (event) => navigationHelpers.openObject(model, modelSingular, event.data);
-    // else this.gridOptions.onSelectionChanged = onSelectionChanged;
 
     // Render the table
     const table = document.getElementById('coa-data-table');
@@ -317,14 +328,18 @@ export const CoADoc = {
 
   },
 
-  onSelectionChanged(event) {
+  async removeCoADataTableRow(sampleId) {
     /**
-     * Change the rows of the table selected.
+     * Remove a row for the CoA data table.
+     * @param {String} sampleId A sample ID for the row to be removed.
      */
-    console.log('Selection changed!', event);
+    const { gridOptions } = cannlytics.data.coas;
+    const rows = [];
+    await gridOptions.api.forEachNode((rowNode, index) => {
+      if (rowNode.data !== sampleId) rows.push(rowNode.data);
+    })
+    gridOptions.api.setRowData(rows);
   },
-
-  // TODO: Open modal on row click.
 
 };
 
@@ -335,13 +350,23 @@ export const CoADoc = {
 function downloadAllResults() {
   /**
    * Download all of the parsed CoA sample results.
+   * If the table is active and only a subset of rows are selected, then
+   * only the selected rows are downloaded.
    */
   const data = [];
-  const allSamples = document.querySelectorAll('.sample-card');
-  allSamples.forEach((sampleCard) => {
-    const obs = JSON.parse(sampleCard.querySelector('.sample-data').textContent);
-    data.push(obs);
-  });
+  const selectedRows = cannlytics.data.coas.gridOptions.api.getSelectedNodes();
+  const tableActive = hasClass(document.getElementById('coa-list'), 'active')
+  if (selectedRows.length & tableActive) {
+    selectedRows.forEach((row) => {
+      data.push(row.data);
+    });
+  } else {
+    const allSamples = document.querySelectorAll('.sample-card');
+    allSamples.forEach((sampleCard) => {
+      const obs = JSON.parse(sampleCard.querySelector('.sample-data').textContent);
+      data.push(obs);
+    });
+  }
   downloadCoAData(data);
 }
 
@@ -374,23 +399,40 @@ async function downloadCoAData(data) {
 function onRowClicked(row) {
   /**
    * Open the modal of sample results when a row of the table is clicked.
+   * @param {RowNode} row A table row.
    */
   console.log('Open modal!', row.data);
-  // TODO: Implement!!! Combine with `openResults` :)
+  const modal = new Modal(document.getElementById('results-modal'), {});;
+  modal.show();
+  renderSampleResults(row.data.sample_id);
 }
 
 function openResults(event) {
-  const button = event.relatedTarget;
-  const sampleId = button.getAttribute('data-bs-sample');
+  /**
+   * Open a sample's results in a modal.
+   * @param {Event} event The button that triggered the function.
+   */
+  try {
+    const button = event.relatedTarget;
+    const sampleId = button.getAttribute('data-bs-sample');
+    renderSampleResults(sampleId);
+  } catch (error) {
+    // Results rendered through table click.
+  }
+}
+
+function renderSampleResults(sampleId) {
+  /**
+   * Render the sample results in the modal.
+   * @param {String} sampleId A sample ID for the sample results to be rendered.
+   */
 
   // Get sample data from appropriate `.sample-data` element textContent.
   const sampleCard = document.getElementById(`sample-${sampleId}`);
-  console.log(sampleCard);
   const obs = JSON.parse(sampleCard.querySelector('.sample-data').textContent);
+  
   console.log('Render:', obs);
-
-  // TODO: Render sample details.
-  /*
+  /* FIXME: Render all of the sample details.
 
     Sample Details
     - product_name
@@ -479,8 +521,50 @@ function openResults(event) {
   document.getElementById('download-sample-results-button').setAttribute('data-bs-sample', obs.sample_id);
 
   // Change the modal title.
-  const modalTitle = modal.querySelector('.modal-title')
+  const modalTitle = document.querySelector('.modal-title')
   modalTitle.textContent = `Sample Results | ${obs.product_name}`;
+
+  // Render the results in a table.
+  renderSampleResultsTable(obs.results)
+
+}
+
+function renderSampleResultsTable(results) {
+  /**
+   * Render a table to display the sample results.
+   */
+  const fields = [
+    { key: 'analysis', label: 'Analysis' },
+    { key: 'name', label: 'Compound' },
+    { key: 'value', label: 'Result' },
+    { key: 'units', label: 'Units' },
+    { key: 'status', label: 'Status' },
+  ];
+  const columnDefs = fields.map(function(e) { 
+    return { headerName: e.label, field: e.key, sortable: true, filter: true, editable: true };
+  });
+  const overlayLoadingTemplate = `
+    <div class="spinner-grow text-success" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  `;
+  const overlayNoRowsTemplate = ``;
+  const resultsGridOptions = {
+    columnDefs: columnDefs,
+    defaultColDef: { flex: 1,  minWidth: 100, editable: false },
+    enterMovesDownAfterEdit: true,
+    overlayLoadingTemplate: overlayLoadingTemplate,
+    overlayNoRowsTemplate: overlayNoRowsTemplate,
+    rowClass: 'app-action',
+    rowHeight: 25,
+    singleClickEdit: true,
+    suppressRowClickSelection: true,
+    onGridReady: event => theme.toggleTheme(theme.getTheme()),
+  };
+  const table = document.getElementById('results-data-table');
+  table.innerHTML = '';
+  new agGrid.Grid(table, resultsGridOptions);
+  resultsGridOptions.api.setRowData(results);
 }
 
 function renderSamplePlaceholder() {
@@ -518,20 +602,25 @@ function renderCoAResult(obs) {
   /**
    * Render the CoA results for the user as both
    * a card in a list of samples as well as a row on a table.
+   * @param {Object} obs The CoA result data.
    */
   document.getElementById('coa-results-tabs').classList.remove('d-none');
   document.getElementById('coa-results-content').classList.remove('d-none');
-  console.log('Rendering results:', obs);
+  const sampleId = obs.sample_id;
   
   // Remove the first placeholder.
-  const placeholder = document.querySelector('.sample-placeholder-template');
-  placeholder.parentNode.removeChild(placeholder);
+  try {
+    const placeholder = document.querySelector('.sample-placeholder-template');
+    placeholder.parentNode.removeChild(placeholder);
+  } catch (error) {
+    // No placeholder to hide.
+  }
 
   // Clone the sample template.
   const docFrag = document.createDocumentFragment();
   const el = document.getElementById('sample-card-template').cloneNode(true);
   el.classList.add('sample-card');
-  el.id = `sample-${obs.sample_id}`;
+  el.id = `sample-${sampleId}`;
 
   // Add the sample details.
   // Optional: Add more sample details.
@@ -548,11 +637,12 @@ function renderCoAResult(obs) {
   el.querySelector('.product-type').innerText = obs.product_type;
   if (obs.producer) el.querySelector('.producer').innerText = obs.producer;
   el.querySelector('.date-tested').innerText = obs.date_tested;
-  el.querySelector('.stretched-link').setAttribute('data-bs-sample', obs.sample_id);
+  el.querySelector('.stretched-link').setAttribute('data-bs-sample', sampleId);
   el.querySelector('.sample-data').textContent = JSON.stringify(obs);
 
   // Wire-up the remove button.
   el.querySelector('.btn').onclick = function() {
+    cannlytics.data.coas.removeCoADataTableRow(sampleId);
     el.parentNode.removeChild(el);
     const placeholder = document.querySelector('.sample-card');
     if (!placeholder) {
@@ -565,4 +655,18 @@ function renderCoAResult(obs) {
   docFrag.appendChild(el);
   const grid = document.getElementById('coa-grid-container');
   grid.insertBefore(docFrag, grid.firstChild);
+}
+
+function saveSampleResults() {
+  /**
+   * Save edited sample results for downloading.
+   */
+
+  // FIXME: Get the edited data.
+  console.log('Save the sample results!')
+
+  // FIXME: Update the sample `el` by sampleId!
+  // const sampleId = event.getAttribute('data-bs-sample');
+  // const sampleCard = document.getElementById(`sample-${sampleId}`);
+  // el.querySelector('.sample-data').textContent = JSON.stringify(obs);
 }

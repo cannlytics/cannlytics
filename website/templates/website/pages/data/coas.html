@@ -6,14 +6,15 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 7/17/2022
-  Updated: 7/29/2022
+  Updated: 7/30/2022
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
 {% load static icon %}
 {% block title %}CoADoc | Cannlytics{% endblock %}
 {% block page_css %}
-<!-- FIXME: Load JS locally and handle dark tables!!! -->
+
+<!-- FIXME: Loading JS from the Cannlytics server preferred. -->
 {% comment %} <script src="{% static 'website/plugins/ag-grid/ag-grid-community.min.noStyle.js' %}"></script>
 <link href="{% static 'website/plugins/ag-grid/ag-grid.min.css' %}" rel="stylesheet" type="text/css"/>
 <link href="{% static 'website/plugins/ag-grid/ag-theme-alpine.min.css' %}" rel="stylesheet" type="text/css"/>
@@ -21,8 +22,11 @@
  <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
  <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
  <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
+
+ <!-- FIXME: Load alpine-dark without the entire community bundle. -->
  <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
  {% comment %} <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine-dark.min.css"/> {% endcomment %}
+
 <style>
   .box__dragndrop,
   .box__uploading,
@@ -178,7 +182,6 @@
               class="visually-hidden"
               name="urls"
               required="required"
-              onchange="cannlytics.data.coas.uploadCoAFile(null, 'coa-url-import-form');"
             >
             <button
               id="coa-doc-search-button"
@@ -224,7 +227,6 @@
                 id='coa-doc-import-button'
                 class="app-action btn btn-sm-light btn-md-light serif text-dark"
                 type="button"
-                onclick="document.getElementById('coas-input').click();"
               >
                 Alternatively, import your CoA file
               </button>
@@ -240,7 +242,6 @@
               class="visually-hidden"
               name="urls"
               required="required"
-              onchange="cannlytics.data.coas.uploadCoAFile();"
             >
           </div>
         </div>
@@ -314,7 +315,32 @@
       <!-- Sample Results -->
       <div id="coa-results-content" class="tab-content d-none">
 
-        <!-- List of samples -->
+        <!-- Sample Results Options -->
+        <div class="d-flex justify-content-start mb-3">
+
+          <!-- Download All Results -->
+          <button
+            id="coa-doc-export-button"
+            class="btn btn-sm-light btn-md-light text-nowrap text-dark serif"
+            type="button"
+            >
+            {% icon "download-cloud" width="21px" height="21px" class="me-1" %}
+            Download All Results
+          </button>
+
+          <!-- Clear -->
+          <button
+            id="coa-doc-clear-button"
+            class="btn btn-sm-light btn-md-light text-nowrap text-dark serif ms-2"
+            type="button"
+            >
+            {% icon "slash" width="21px" height="21px" class="me-1" %}
+            Clear
+          </button>
+
+        </div>
+
+        <!-- Grid of CoA Results -->
         <div
           id="coa-grid"
           class="tab-pane fade row show active"
@@ -322,33 +348,6 @@
           aria-labelledby="coa-grid-tab"
           tabindex="0"
         >
-
-          <!-- Sample Results Options -->
-          <div class="d-flex justify-content-start mb-3">
-
-            <!-- Download All Results -->
-            <button
-              id="coa-doc-export-button"
-              class="btn btn-sm-light btn-md-light text-nowrap text-dark serif"
-              type="button"
-              >
-              {% icon "download-cloud" width="21px" height="21px" class="me-1" %}
-              Download All Results
-            </button>
-
-            <!-- Clear -->
-            <button
-              id="coa-doc-clear-button"
-              class="btn btn-sm-light btn-md-light text-nowrap text-dark serif ms-2"
-              type="button"
-              >
-              {% icon "slash" width="21px" height="21px" class="me-1" %}
-              Clear
-            </button>
-
-          </div>
-
-          <!-- Grid -->
           <div id="coa-grid-container" class="row">
               
               <!-- Sample card template -->
@@ -411,9 +410,9 @@
               </div>
 
           </div>
-        </div>
+        </div><!-- End of Grid of CoA Results -->
 
-        <!-- Data Table -->
+        <!-- Data Table of CoA Results -->
         <div
           id="coa-list"
           class="tab-pane fade"
@@ -422,18 +421,6 @@
           tabindex="0"
         >
           <div class="row">
-            {% comment %}
-            <!-- TODO: Cancel or reset button? -->
-            <button
-              id="coa-cancel-parsing-button"
-              class="btn btn-sm-light position-absolute text-dark text-center"
-              style="z-index:99;right:0;"
-              title="Cancel parsing"
-              type="button"
-            >
-              {% icon "x" width="16px" height="16px" %}
-            </button>
-            {% endcomment %}
             <div id="coa-data-placeholder" class="d-none-">
               {% include "website/components/placeholders/loading_placeholder.html" with
                 height='350px'
@@ -449,18 +436,15 @@
           </div>
         </div>
       
-      </div><!-- End of Sample Results Grid and Table -->
+      </div><!-- End of CoA Results Grid and Table -->
 
     </div>
   </div><!-- End of Sample Results -->
 
-  <!-- Modal for lab results.
-    - [ ] Render sample details.
-    - [ ] Render a table of results.
-  -->
+  <!-- Sample Results Modal -->
   <div
-    class="modal fade"
     id="results-modal"
+    class="modal fade"
     tabindex="-1"
     aria-labelledby="results-modal-label"
     aria-hidden="true"
@@ -486,7 +470,10 @@
         </div>
         <div class="modal-body">
           
-          <!-- TODO: Render all sample details here. -->
+          <!-- Render all sample details here.
+            - [ ] Render all results in inputs with labels.!
+            - [ ] Make results editable!
+          -->
           <div class="modal-sample-details">
             <img class="sample-image d-none text-center" src="" height="75px;">
             <div class="product-name fw-bold fs-5 serif"></div>
@@ -496,14 +483,12 @@
             <div class="sample-data visually-hidden"></div>
           </div>
 
-          <!-- FIXME: Render results in a datatable! -->
-          <div id="results data-table" class="d-none">
-            <div
-              id="results-table"
-              class="ag-theme-alpine-dark"
-              style="height: 350px; width:100%;"
-            ></div>
-          </div>
+          <!-- Render results in a datatable! -->
+          <div
+            id="results-data-table"
+            class="ag-theme-alpine-dark"
+            style="height:350px; width:100%;"
+          ></div>
 
         </div>
         <div class="modal-footer">
@@ -515,11 +500,16 @@
             Close
           </button>
           <button
-            id="download-sample-results-button"
+            id="save-sample-results-button"
+            class="btn btn-sm bg-gradient-green text-white serif"
             type="button"
+          >
+            Save
+          </button>
+          <button
+            id="download-sample-results-button"
             class="btn btn-sm bg-gradient-purple text-white serif"
             type="button"
-            onclick="cannlytics.data.coas.downloadSampleResults(this);"
             data-bs-sample=""
           >
             Download

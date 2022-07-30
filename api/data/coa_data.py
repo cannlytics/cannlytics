@@ -10,7 +10,7 @@ License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE
 Description: API endpoints to interface with CoA data.
 """
 # Standard imports.
-from csv import writer
+# from csv import writer
 from json import loads
 import os
 import tempfile
@@ -795,7 +795,7 @@ def coa_data(request, sample_id=None):
  'status': 'Pass',
  'batch_number': 'ROS32TP',
  'batch_size': '1031.0 units',
- 'distributor': 'AMETRINE WELLNESS',
+ 'distributor': 'WELLNESS',
  'distributor_license_number': 'C11-0000374-LIC',
  'sum_of_cannabinoids': '86.34%',
  'total_cannabinoids': '76.66%',
@@ -870,6 +870,8 @@ def download_coa_data(request):
 
     # Optional: Perform safety checks?
 
+    # FIXME: Create the Excel file as desired!
+
     # Create the response.
     # response = HttpResponse(content_type='text/csv')
     # response['Content-Disposition'] = 'attachment; filename="download.csv"'
@@ -885,9 +887,6 @@ def download_coa_data(request):
         del data[i]['results']
 
     # Save as double sheet Excel.
-    # with ExcelWriter(xls_path) as writer:
-    #     for n, df in enumerate(list_dfs):
-    #         df.to_excel(writer,'sheet%s' % n)
     writer = ExcelWriter(response)
     DataFrame(data).to_excel(writer, 'Details')
     DataFrame(results).to_excel(writer, 'Results')
