@@ -108,6 +108,8 @@ import requests
 
 # It is assumed that the lab has the following details.
 SC_LABS = {
+    'coa_algorithm': 'sclabs.py',
+    'coa_algorithm_entry_point': 'get_sc_labs_sample_details',
     'lims': 'SC Labs',
     'url': 'https://client.sclabs.com',
     'lab': 'SC Labs',

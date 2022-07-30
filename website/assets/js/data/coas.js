@@ -31,13 +31,25 @@ export const CoADoc = {
     // Wire-up search button and input.
     const searchInput = document.getElementById('coa-search-input');
     document.getElementById('coa-doc-search-button').onclick = function() {
+      if (!searchInput.value) {
+        const message = 'CoA URL or Metrc ID required.';
+        showNotification('Invalid CoA URL / Metrc ID', message, /* type = */ 'error');
+        return;
+      }
       cannlytics.data.coas.postCoAData({ urls: [searchInput.value] });
     }
     searchInput.addEventListener('keydown', function (e) {
       if (e.code === 'Enter') {
+        if (!searchInput.value) {
+          const message = 'CoA URL or Metrc ID required.';
+          showNotification('Invalid CoA URL / Metrc ID', message, /* type = */ 'error');
+          return;
+        }
         cannlytics.data.coas.postCoAData({ urls: [searchInput.value] });
       }
     });
+
+    // Future work: Search / autocomplete for metrc ID as the user types?
 
     // Wire-up CoA file import functions.
     document.getElementById('coa-url-input').onchange = function() {
@@ -57,7 +69,7 @@ export const CoADoc = {
     }
 
     // Wire-up save button.
-    document.getElementById('save-sample-results-button').onclick = saveSampleResults;
+    // document.getElementById('save-sample-results-button').onclick = saveSampleResults;
 
     // Wire up clear button.
     document.getElementById('coa-doc-clear-button').onclick = this.resetCoADocForm;
@@ -183,6 +195,7 @@ export const CoADoc = {
     });
     gridOptions.api.setRowData(rows);
     document.getElementById('coa-data-placeholder').classList.add('d-none');
+    document.getElementById('coa-sample-results-placeholder').classList.add('d-none');
   },
 
   async postCoAData(data) {
@@ -541,7 +554,7 @@ function renderSampleResultsTable(results) {
     { key: 'status', label: 'Status' },
   ];
   const columnDefs = fields.map(function(e) { 
-    return { headerName: e.label, field: e.key, sortable: true, filter: true, editable: true };
+    return { headerName: e.label, field: e.key, sortable: true, filter: true, editable: false };
   });
   const overlayLoadingTemplate = `
     <div class="spinner-grow text-success" role="status">
@@ -575,6 +588,7 @@ function renderSamplePlaceholder() {
   // Hide the general placeholder.
   document.getElementById('coa-sample-results-placeholder').classList.add('d-none');
 
+  // FIXME:
   // Clone the sample template.
   const timestamp = new Date().toISOString().slice(0, 19).replaceAll(':', '-');
   const docFrag = document.createDocumentFragment();

@@ -70,7 +70,8 @@ from cannlytics.utils.utils import snake_case, strip_whitespace
 
 
 TAGLEAF = {
-    'coa_parsing_algorithm': 'parse_tagleaf_url',
+    'coa_algorithm': 'tagleaf.py',
+    'coa_algorithm_entry_point': 'parse_tagleaf_url',
     'coa_qr_code_index': 2,
     'lims': 'lims.tagleaf',
     'url': 'https://lims.tagleaf.com',

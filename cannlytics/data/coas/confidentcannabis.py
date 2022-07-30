@@ -75,7 +75,8 @@ from cannlytics.utils.utils import snake_case, strip_whitespace
 
 
 CONFIDENT_CANNABIS = {
-    'coa_parsing_algorithm': 'parse_cc_url',
+    'coa_algorithm': 'confidentcannabis.py',
+    'coa_algorithm_entry_point': 'parse_cc_url',
     'coa_qr_code_index': 3,
     'lims': 'Con\x00dent Cannabis',
     'url': 'https://orders.confidentcannabis.com',

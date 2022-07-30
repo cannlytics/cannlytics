@@ -46,6 +46,7 @@ Custom parsing:
 """
 # Standard imports.
 import base64
+import importlib
 from io import BytesIO
 from typing import Any, Optional
 from wand.image import Image as wi
@@ -65,42 +66,23 @@ from cannlytics.utils.constants import (
     DECARB,
 )
 
-# FIXME: Dynamically import labs and LIMS.
-# See: https://stackoverflow.com/questions/3606202/how-can-i-import-a-python-module-function-dynamically
 # Lab and LIMS CoA parsing algorithms.
-from cannlytics.data.coas.confidentcannabis import (
-    CONFIDENT_CANNABIS,
-    parse_cc_pdf,
-    parse_cc_url,
-)
-from cannlytics.data.coas.tagleaf import (
-    TAGLEAF,
-    parse_tagleaf_pdf,
-    parse_tagleaf_url,
-)
-from cannlytics.data.coas.greenleaflab import (
-    GREEN_LEAF_LAB,
-    parse_green_leaf_lab_pdf,
-)
-from cannlytics.data.coas.veda import (
-    VEDA_SCIENTIFIC,
-    parse_veda_pdf,
-)
-from cannlytics.data.coas.mcrlabs import (
-    MCR_LABS,
-)
-from cannlytics.data.coas.sclabs import (
-    SC_LABS,
-)
+from cannlytics.data.coas.confidentcannabis import CONFIDENT_CANNABIS
+from cannlytics.data.coas.greenleaflab import GREEN_LEAF_LAB
+from cannlytics.data.coas.mcrlabs import MCR_LABS
+from cannlytics.data.coas.sclabs import SC_LABS
+from cannlytics.data.coas.tagleaf import TAGLEAF
+from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
+
 
 # Labs and LIMS that CoADoc can parse.
 LIMS = {
     'Confident Cannabis': CONFIDENT_CANNABIS,
-    'TagLeaf LIMS': TAGLEAF,
     'Green Leaf Lab': GREEN_LEAF_LAB,
-    'Veda Scientific': VEDA_SCIENTIFIC,
     'MCR Labs': MCR_LABS,
     'SC_LABS': SC_LABS,
+    'TagLeaf LIMS': TAGLEAF,
+    'Veda Scientific': VEDA_SCIENTIFIC,
 }
 
 # General decodings to use for normalization of results.
@@ -161,12 +143,12 @@ class CoADoc:
         self.service = None
 
         # Attach parsing routines.
-        self.parse_cc_pdf = parse_cc_pdf
-        self.parse_cc_url = parse_cc_url
-        self.parse_tagleaf_pdf = parse_tagleaf_pdf
-        self.parse_tagleaf_url = parse_tagleaf_url
-        self.parse_veda_pdf = parse_veda_pdf
-        self.parse_green_leaf_lab_pdf = parse_green_leaf_lab_pdf
+        # self.parse_cc_pdf = parse_cc_pdf
+        # self.parse_cc_url = parse_cc_url
+        # self.parse_tagleaf_pdf = parse_tagleaf_pdf
+        # self.parse_tagleaf_url = parse_tagleaf_url
+        # self.parse_veda_pdf = parse_veda_pdf
+        # self.parse_green_leaf_lab_pdf = parse_green_leaf_lab_pdf
 
         # Define analyses.
         self.analyses = analyses
@@ -545,9 +527,14 @@ class CoADoc:
             # Future work: Parse custom CoAs.
             # E.g. if `known_lims = 'custom'`.`
             raise NotImplementedError
-        algorithm_name = LIMS[known_lims]['coa_parsing_algorithm']
-        algorithm = getattr(self, algorithm_name)
+        
+        # FIXME: Would it be best to keep loaded modules for faster performance?
+        module_name = LIMS[known_lims]['coa_algorithm'].replace('.py', '')
+        algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
+        module = importlib.import_module(f'cannlytics.data.coas.{module_name}')
+        algorithm = getattr(module, algorithm_name)
         data = algorithm(
+            self,
             url,
             headers=headers,
             max_delay=max_delay,

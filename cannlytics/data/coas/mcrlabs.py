@@ -75,6 +75,8 @@ from cannlytics.utils.utils import snake_case, strip_whitespace
 
 # TODO: Augment with lab details:
 MCR_LABS = {
+    'coa_algorithm': 'mcrlabs.py',
+    'coa_algorithm_entry_point': 'get_mcr_labs_sample_details',
     'lims': 'MCR Labs',
     'url': 'https://reports.mcrlabs.com',
     'lab': 'MCR Labs',

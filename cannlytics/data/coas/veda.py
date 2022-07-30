@@ -93,7 +93,8 @@ from cannlytics.utils.utils import snake_case, split_list, strip_whitespace
 
 # It is assumed that the lab has the following details.
 VEDA_SCIENTIFIC = {
-    'coa_parsing_algorithm': 'parse_veda_pdf',
+    'coa_algorithm': 'veda.py',
+    'coa_algorithm_entry_point': 'parse_veda_pdf',
     'lims': 'Veda Scientific',
     'lab': 'Veda Scientific',
     'lab_image_url': 'https://images.squarespace-cdn.com/content/v1/5fab1470f012f739139935ac/58792970-f502-4e1a-ac29-ddca27b43266/Veda_Logo_Horizontal_RGB_Large.png?format=1500w', # <- Get this data.

@@ -96,7 +96,8 @@ from cannlytics.utils.utils import (
 # Future work: Make this dynamic to handle multiple lab locations.
 # E.g. Green Leaf Lab has a California and an Oregon location.
 GREEN_LEAF_LAB = {
-    'coa_parsing_algorithm': 'parse_green_leaf_lab_pdf',
+    'coa_algorithm': 'greenleaflab.py',
+    'coa_algorithm_entry_point': 'parse_green_leaf_lab_pdf',
     'lims': 'Green Leaf Lab',
     'lab': 'Green Leaf Lab',
     'lab_image_url': 'https://cdn-djjmk.nitrocdn.com/MuWSCTBsUZpIUufaWqGQkErSrYFMxIqD/assets/static/optimized/rev-a199899/wp-content/uploads/2018/12/greenleaf-logo.png',
