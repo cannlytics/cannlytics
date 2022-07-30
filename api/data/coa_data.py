@@ -18,11 +18,13 @@ import tempfile
 # External imports
 from django.http import HttpResponse
 from django.http.response import JsonResponse
+from pandas import DataFrame, ExcelWriter
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from cannlytics.auth.auth import authenticate_request
+
 
 # Internal imports
+from cannlytics.auth.auth import authenticate_request
 from cannlytics.data.coas import CoADoc
 from cannlytics.firebase.firebase import create_log, update_documents
 
@@ -123,7 +125,7 @@ def coa_data(request, sample_id=None):
         # parser.quit()
 
         # DEV:
-        data = {'notes': None,
+        data = [{'notes': None,
  'results': [{'compound': 'THCa',
    'analysis': 'cannabinoid',
    'lodloq': '0.05 / 0.14',
@@ -821,28 +823,28 @@ def coa_data(request, sample_id=None):
  'foreign_material_method': 'QSP 1226 - Analysis of Foreign Material in Cannabis and Cannabis Products',
  'product_name': 'Test Product',
  'sample_id': 'test-sample',
- }
+ }]
 
         # Create usage log and save any public lab results.
-        changes = []
-        refs = []
-        docs = []
-        for item in data:
-            if item.get('public'):
-                changes.append(item)
-                sample_id = item['sample_id']
-                refs.append(f'public/data/lab_results/{sample_id}')
-                docs.append(item)
-        if refs:
-            update_documents(refs, docs)
-        create_log(
-            'logs/website/coa_doc',
-            claims=claims,
-            action='Parsed CoAs.',
-            log_type='coa_data',
-            key='coa_data',
-            changes=changes
-        )
+        # changes = []
+        # refs = []
+        # docs = []
+        # for item in data:
+        #     if item.get('public'):
+        #         changes.append(item)
+        #         sample_id = item['sample_id']
+        #         refs.append(f'public/data/lab_results/{sample_id}')
+        #         docs.append(item)
+        # if refs:
+        #     update_documents(refs, docs)
+        # create_log(
+        #     'logs/website/coa_doc',
+        #     claims=claims,
+        #     action='Parsed CoAs.',
+        #     log_type='coa_data',
+        #     key='coa_data',
+        #     changes=changes
+        # )
 
         # Return either file or JSON.
         response = {'success': True, 'data': data}
@@ -869,14 +871,34 @@ def download_coa_data(request):
     # Optional: Perform safety checks?
 
     # Create the response.
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="download.csv"'
+    # response = HttpResponse(content_type='text/csv')
+    # response['Content-Disposition'] = 'attachment; filename="download.csv"'
+    response = HttpResponse(data,content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=download.xlsx'
 
-    # TODO: Normalize data into either a wide or long table.
+    # Create a long table of results.
+    results = []
+    for i, item in enumerate(data):
+        for result in item['results']:
+            result['sample_id'] = item['sample_id']
+            results.append(result)
+        del data[i]['results']
+
+    # Save as double sheet Excel.
+    # with ExcelWriter(xls_path) as writer:
+    #     for n, df in enumerate(list_dfs):
+    #         df.to_excel(writer,'sheet%s' % n)
+    writer = ExcelWriter(response)
+    DataFrame(data).to_excel(writer, 'Details')
+    DataFrame(results).to_excel(writer, 'Results')
+    writer.save()
 
     # Save the results.
-    csv_writer = writer(response)
-    csv_writer.writerow(list(data[0].keys()))
-    for item in data:
-        csv_writer.writerow(list(item.values()))
+    # csv_writer = writer(response)
+    # csv_writer.writerow(list(data[0].keys()))
+    # for item in data:
+    #     csv_writer.writerow(list(item.values()))
+
+    # TODO: Sort the columns in a logical manner.
+
     return response

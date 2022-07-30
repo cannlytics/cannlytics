@@ -11,7 +11,7 @@
 -->
 {% extends "website/index.html" %}
 {% load static icon %}
-{% block title %}CoADoc CoA Parser | Cannlytics{% endblock %}
+{% block title %}CoADoc | Cannlytics{% endblock %}
 {% block page_css %}
 <!-- FIXME: Load JS locally and handle dark tables!!! -->
 {% comment %} <script src="{% static 'website/plugins/ag-grid/ag-grid-community.min.noStyle.js' %}"></script>
@@ -21,6 +21,7 @@
  <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
  <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
  <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
+ <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
  {% comment %} <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine-dark.min.css"/> {% endcomment %}
 <style>
   .box__dragndrop,
@@ -51,11 +52,11 @@
     position: relative;
   }
   .box__action {
-    z-index: 1;
+    z-index: 99;
   }
   .box__dragtext {
     color: grey;
-    z-index: 1;
+    z-index: 99;
   }
   .btn-outline-secondary {
     --bs-btn-focus-shadow-rgb: 150, 230, 161;
@@ -259,13 +260,13 @@
 
   <!-- Sample Results -->
   <div class="card rounded text-start mt-3">
-    <div class="card-header no-border bg-transparent d-flex justify-content-between align-items-center pb-0">
+    <div class="card-header no-border bg-transparent d-flex justify-content-between align-items-center pb-0 pt-3">
       <h2 class="fs-3 text-dark fw-bold mb-0 mt-0">
         Your Results
       </h2>
       <ul
         id="coa-results-tabs"
-        class="nav nav-pills mb-3"
+        class="nav nav-pills mb-3 d-none"
         role="tablist"
       >
         <li class="nav-item" role="presentation">
@@ -311,24 +312,9 @@
       </p>
 
       <!-- Sample Results -->
-      <div id="coa-results-content" class="tab-content">
+      <div id="coa-results-content" class="tab-content d-none">
 
-        <!-- Sample Results Options -->
-        <div class="d-flex justify-content-start mb-3">
-
-          <!-- Download All Results -->
-          <button
-            id="coa-doc-export-button"
-            class="btn btn-sm-light btn-md-light text-nowrap text-dark serif"
-            type="button"
-            >
-            {% icon "download-cloud" width="21px" height="21px" class="me-1" %}
-            Download All Results
-          </button>
-
-        </div>
-
-        <!-- TODO: List of samples -->
+        <!-- List of samples -->
         <div
           id="coa-grid"
           class="tab-pane fade row show active"
@@ -336,6 +322,33 @@
           aria-labelledby="coa-grid-tab"
           tabindex="0"
         >
+
+          <!-- Sample Results Options -->
+          <div class="d-flex justify-content-start mb-3">
+
+            <!-- Download All Results -->
+            <button
+              id="coa-doc-export-button"
+              class="btn btn-sm-light btn-md-light text-nowrap text-dark serif"
+              type="button"
+              >
+              {% icon "download-cloud" width="21px" height="21px" class="me-1" %}
+              Download All Results
+            </button>
+
+            <!-- Clear -->
+            <button
+              id="coa-doc-clear-button"
+              class="btn btn-sm-light btn-md-light text-nowrap text-dark serif ms-2"
+              type="button"
+              >
+              {% icon "slash" width="21px" height="21px" class="me-1" %}
+              Clear
+            </button>
+
+          </div>
+
+          <!-- Grid -->
           <div id="coa-grid-container" class="row">
               
               <!-- Sample card template -->
@@ -346,7 +359,7 @@
                 <div class="card rounded">
                   <button
                     class="btn btn-sm-light position-absolute text-dark text-center"
-                    style="z-index:1;right:0;"
+                    style="z-index:99;right:0;"
                     title="Remove sample"
                     type="button"
                   >
@@ -364,12 +377,12 @@
               <!-- Sample card -->
               <div
                 id="sample-card-template"
-                class="sample-card-template col-12 col-md-4 col-lg-3 px-3 pb-3 text-start d-none-"
+                class="sample-card-template col-12 col-md-4 col-lg-3 px-3 pb-3 text-start d-none"
               >
                 <div class="card rounded" style="height:200px;">
                   <button
                     class="btn btn-sm-light position-absolute text-dark text-center"
-                    style="z-index:1;right:0;"
+                    style="z-index:99;right:0;"
                     title="Remove sample"
                     type="button"
                   >
@@ -385,8 +398,8 @@
                     <div class="product-type serif"></div>
                     <div class="producer serif"></div>
                     <div class="date-tested serif"></div>
+                    <div class="sample-data visually-hidden"></div>
                   </div>
-                  <div class="sample-data visually-hidden"></div>
                   <a
                     href=""
                     class="stretched-link"
@@ -414,27 +427,25 @@
             <button
               id="coa-cancel-parsing-button"
               class="btn btn-sm-light position-absolute text-dark text-center"
-              style="z-index:1;right:0;"
+              style="z-index:99;right:0;"
               title="Cancel parsing"
               type="button"
             >
               {% icon "x" width="16px" height="16px" %}
             </button>
             {% endcomment %}
-            <div id="loading-placeholder" class="d-none-">
+            <div id="coa-data-placeholder" class="d-none-">
               {% include "website/components/placeholders/loading_placeholder.html" with
                 height='350px'
                 width='100%'
                 only
               %}
             </div>
-            <div id="data-table" class="d-none">
-              <div
-                id="data-table"
-                class="ag-theme-alpine-dark"
-                style="height: 350px; width:100%;"
-              ></div>
-            </div>
+            <div
+              id="coa-data-table"
+              class="ag-theme-alpine"
+              style="height:350px; width:100%;"
+            ></div>
           </div>
         </div>
       
@@ -465,7 +476,7 @@
           </h5>
           <button
             class="btn btn-sm-light position-absolute text-dark text-center"
-            style="z-index:1;right:0;top:0;"
+            style="z-index:99;right:0;top:0;"
             data-bs-dismiss="modal"
             title="Close results"
             type="button"
@@ -477,11 +488,16 @@
           
           <!-- TODO: Render all sample details here. -->
           <div class="modal-sample-details">
-
+            <img class="sample-image d-none text-center" src="" height="75px;">
+            <div class="product-name fw-bold fs-5 serif"></div>
+            <div class="product-type serif"></div>
+            <div class="producer serif"></div>
+            <div class="date-tested serif"></div>
+            <div class="sample-data visually-hidden"></div>
           </div>
 
-          <!-- TODO: Render results in a datatable! -->
-          <div id="results data-table" class="d-none-">
+          <!-- FIXME: Render results in a datatable! -->
+          <div id="results data-table" class="d-none">
             <div
               id="results-table"
               class="ag-theme-alpine-dark"
@@ -499,10 +515,12 @@
             Close
           </button>
           <button
+            id="download-sample-results-button"
             type="button"
             class="btn btn-sm bg-gradient-purple text-white serif"
             type="button"
-            onclick="cannlytics.data.coas.downloadSampleResults();"
+            onclick="cannlytics.data.coas.downloadSampleResults(this);"
+            data-bs-sample=""
           >
             Download
           </button>
@@ -601,7 +619,7 @@
         Given a QR code scanner or any other mechanism
         to input CoA URLs or PDFs, make a simple request and you will receive your CoA data neatly organized and ready for your use.
       </p>
-      <div class="d-none d-lg-flex mt-3">
+      <div class="mt-3 mb-4">
         <a
           class="btn btn-sm-light btn-md-light serif"
           href="https://github.com/cannlytics/cannlytics/tree/main/api/data"
@@ -639,7 +657,7 @@
         with the <code>cannlytics</code> Python package to parse CoAs
         to your heart's content.
       </p>
-      <div class="d-none d-lg-flex mt-3">
+      <div class="mt-3 mb-4">
         <a
           class="btn btn-sm-light btn-md-light serif"
           href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas"
