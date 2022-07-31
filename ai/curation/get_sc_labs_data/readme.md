@@ -2,6 +2,14 @@
 
 Archive SC Labs test results.
 
+## Historic Data Curation
+
+If you wish to populate your database with all of SC Labs historic lab results, then you can run the full archival routine. The routine will create datafiles for archiving and upload the data to Firestore.
+
+```shell
+python ai/curation/get_sc_labs_data/get_all_sc_labs_data.py
+```
+
 ## Automation
 
 Automating the collection of lab results can be done with the following 3 steps.
@@ -12,10 +20,10 @@ Automating the collection of lab results can be done with the following 3 steps.
     gcloud pubsub topics create get_sc_labs_data
     ```
 
-2. Deploy the function (from the `ai/curation` directory):
+2. Deploy the function (from the root directory):
 
     ```shell
-    gcloud functions deploy get_sc_labs_data --source get_sc_labs_data --entry-point get_sc_labs_data --runtime python39 --trigger-topic get_sc_labs_data --memory 512MB --timeout 120
+    gcloud functions deploy get_sc_labs_data --source ai/curation/get_sc_labs_data --entry-point get_sc_labs_data --runtime python39 --trigger-topic get_sc_labs_data --memory 512MB --timeout 120
     ```
 
 3. Finally, create a [Cloud Scheduler](https://cloud.google.com/scheduler/docs/creating#gcloud) cron job:

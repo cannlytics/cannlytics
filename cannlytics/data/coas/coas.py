@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 7/30/2022
+Updated: 7/31/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -36,13 +36,17 @@ Supported LIMS:
     ✓ Confident Cannabis
     ✓ TagLeaf LIMS
 
-Custom parsing:
+Future work:
 
+    The roadmap for CoADoc is to continue adding labs and LIMS CoA
+    parsing routines until a general CoA parsing routine can be created.
     In order to implement a good custom CoA parsing algorithm, we will
     need to handle:
+
         - PDF properties, such as the fonts used, glyph sizes, etc.
         - Handle non-font parameters and page scaling.
-        - Detect words, lines, columns, white-space, etc..
+        - Detect words, lines, columns, white-space, etc.
+
 """
 # Standard imports.
 import base64
@@ -64,6 +68,7 @@ from cannlytics.utils.constants import (
     ANALYSES,
     ANALYTES,
     DECARB,
+    DEFAULT_HEADERS,
 )
 
 # Lab and LIMS CoA parsing algorithms.
@@ -89,6 +94,7 @@ LIMS = {
 DECODINGS = {
     '<LOQ': 0,
     '<LOD': 0,
+    # '≥ LOD': 0,
     'ND': 0,
     'NR': None,
     'N/A': None,
@@ -112,7 +118,6 @@ KEYS = {
     'terpenoids': 'terpenes',
     'foreign_materials': 'foreign_matter',
 }
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
 
 
 class CoADoc:
@@ -142,14 +147,6 @@ class CoADoc:
         self.session = None
         self.service = None
 
-        # Attach parsing routines.
-        # self.parse_cc_pdf = parse_cc_pdf
-        # self.parse_cc_url = parse_cc_url
-        # self.parse_tagleaf_pdf = parse_tagleaf_pdf
-        # self.parse_tagleaf_url = parse_tagleaf_url
-        # self.parse_veda_pdf = parse_veda_pdf
-        # self.parse_green_leaf_lab_pdf = parse_green_leaf_lab_pdf
-
         # Define analyses.
         self.analyses = analyses
         if analyses is None:
@@ -168,7 +165,7 @@ class CoADoc:
         # Define headers.
         self.headers = headers
         if headers is None:
-            self.headers = HEADERS
+            self.headers = DEFAULT_HEADERS
 
         # Define keys.
         self.keys = keys
@@ -691,7 +688,7 @@ if __name__ == '__main__':
     # [✓] TEST: Parse all CoAs in a given directory.
     # data = parser.parse(DATA_DIR)
 
-    # [-] TEST: Parse all CoAs in a zipped file!
+    # [ ] TEST: Parse all CoAs in a zipped file!
 
 
     # [✓] TEST: Green Leaf Lab CoA parsing algorithm.
@@ -699,39 +696,41 @@ if __name__ == '__main__':
     # data = parser.parse_green_leaf_lab_pdf(green_leaf_lab_coa_pdf)
     # assert data is not None
 
-    # [-] TEST: Parse a Veda Scientific CoA.
-    # veda_coa_pdf = f'{DATA_DIR}/Veda Scientific Sample COA.pdf'
+    # [ ] TEST: Parse a Veda Scientific CoA.
+    veda_coa_pdf = f'{DATA_DIR}/Veda Scientific Sample COA.pdf'
 
 
-    # [-] TEST: Get MCR Labs results by URL or metrc ID.
-    # mcr_labs_coa_url = 'https://reports.mcrlabs.com/reports/critical-kush_24'
-    # lab = parser.identify_lims(mcr_labs_coa_url)
-    # assert lab == 'MCR Labs'
-
-    # TODO: Re-test MCR Labs parsing of URL, ensuring all details are
-    # collected, including client details.
+    # [ ] TEST: Get MCR Labs results by URL.
+    mcr_labs_coa_url = 'https://reports.mcrlabs.com/reports/critical-kush_24'
+    lab = parser.identify_lims(mcr_labs_coa_url)
+    assert lab == 'MCR Labs'
+    
 
 
-    # [-] TEST: Parse a SC Labs CoA.
-    # Note: Download PDF from <https://client.sclabs.com/sample/796684/>
+    # [ ] TEST: Parse a MCR Labs URL.   
+    
+
+    # [ ] TEST: Parse a SC Labs sample URL.
     sc_labs_coa_url = 'https://client.sclabs.com/sample/796684/'
+
+
+    # [ ] TEST: Parse a SC Labs CoA.
     sc_labs_coa_pdf = f'{DATA_DIR}/SC Labs Test CoA.pdf'
 
-    # TODO: Re-test SC Labs parsing of URL, ensuring all details are
-    # collected, including client details.
 
-
-    # TODO: Test parsing of SC Labs CoA.
-
-
-    # [-] TEST: Find results by known metrc IDs.
+    # [ ] TEST: Find results by known metrc IDs.
     metrc_ids = [
         '1A4060300002A3B000000053', # Green Leaf Lab
         '1A4060300017A85000001289', # Green Leaf Lab
         '1A4060300002459000017049', # SC Labs
     ]
 
-    # [-] TEST: Parse a custom CoA.
+
+    # [ ] TEST: Parse a custom CoA (accept an error for now).
+    try:
+        parser.parse('https://cannlytics.page.link/partial-equilibrium-notes')
+    except ValueError:
+        pass
    
     # [✓] TEST: Close the parser.
     parser.quit()

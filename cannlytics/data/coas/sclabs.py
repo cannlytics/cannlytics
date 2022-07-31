@@ -11,7 +11,7 @@ License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE
 
 Description:
 
-    Get lab results from SC Labs publicly published lab results.
+    Tools to collect SC Labs' publicly published lab results.
 
 Data Points:
 
@@ -95,15 +95,19 @@ Future work:
 
 """
 # Internal imports.
-from urllib.parse import urljoin
+import re
 from time import sleep
+from typing import Optional
+from urllib.parse import urljoin
 
 # External imports.
 from bs4 import BeautifulSoup
+import requests
+
+# Internal imports.
 from cannlytics.data.data import create_sample_id
 from cannlytics.utils.constants import DEFAULT_HEADERS
 from cannlytics.utils.utils import snake_case, strip_whitespace
-import requests
 
 
 # It is assumed that the lab has the following details.
@@ -131,7 +135,14 @@ SC_LABS = {
 # It is assumed that the CoA has the following parameters.
 SC_LABS_COA = {
     'analyses': {
-
+        'cannabinoid': 'cannabinoids',
+        'terpenoid': 'terpenes',
+        'pesticide': 'pesticides',
+        'mycotoxin': 'mycotoxins',
+        'residual_solvents': 'residual_solvents',
+        'heavy_metals': 'heavy_metals',
+        'microbiology': 'microbes',
+        'foreign_material': 'foreign_matter',
     },
     'coa_fields': {
         'batch_number': 'batch_number',
@@ -191,6 +202,24 @@ def parse_data_block(div, tag='span') -> dict:
         except AttributeError:
             pass
     return data
+
+
+def convert_to_numeric(string: str, strip: Optional[str] = False) -> str:
+    """Convert a string to numeric, optionally replacing non-numeric
+    characters.
+    Args:
+        string (str): The string to attempt to parse to a number.
+    Returns:
+        (float): Returns either the original or the parsed number.
+    """
+    if strip:
+        s = re.sub('[^\d\.]', '', string)
+    else:
+        s = string
+    try:
+       return float(s)
+    except (TypeError, ValueError):
+        return s
 
 
 def get_sc_labs_test_results(
@@ -304,9 +333,10 @@ def get_sc_labs_test_results(
             total_thc = values[0].text.split(':')[-1].replace('%', '')
             total_cbd = values[1].text.split(':')[-1].replace('%', '')
             total_terpenes = values[2].text.split(':')[-1].replace('%', '')
-
-            # FIXME: Do any lab results have blank dates? Anticipate that?.
+            
             # Create a sample ID.
+            # FIXME: Test that this works as intended if any lab results
+            # do not have tested at dates.
             sample_id = create_sample_id(producer, product_name, date)
 
             # Aggregate sample data.
@@ -393,6 +423,12 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
         obs['producer_address'] = ''
         obs['producer_city'] = ''
         obs['producer_zipcode'] = ''
+    
+    # Remove the `address` field to avoid confusion.
+    try:
+        del obs['address']
+    except KeyError:
+        pass
 
     # Get the producer image.
     el = soup.find('div', attrs={'id': 'clientprofileimage'})
@@ -464,7 +500,8 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
     except KeyError:
         obs['date_received'] = ''
     
-    # FIXME: Rename desired fields.
+    # Rename desired fields.
+    # FIXME: Test that this working as intended.
     for key, field in SC_LABS_COA['coa_fields'].items():
         try:
             value = obs.pop(key)
@@ -504,6 +541,7 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
         if 'Analysis' not in analysis:
             continue
         analysis = snake_case(analysis.split(' Analysis')[0])
+        analysis = SC_LABS_COA['analyses'].get(analysis, analysis)
         analyses.append(analysis)
 
         # Get the method for the analysis.
@@ -549,6 +587,7 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
             analysis = snake_case(strip_whitespace(text))
             if analysis == 'label_claims':
                 continue
+            analysis = SC_LABS_COA['analyses'].get(analysis, analysis)
 
             # Get the method for the analysis.
             method = card.find('p').text
@@ -583,18 +622,26 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
     
     # Clean results.
     for i, result in enumerate(results):
+
+        # Clean the margin of error.
         try:
             margin = result['margin_of_error'].replace('±', '')
-            result['margin_of_error'] = margin
+            result['margin_of_error'] = convert_to_numeric(margin)
         except KeyError:
             pass
 
-        # FIXME: Parse `units` from `value`. E.g. '71.742%'
+        # Parse `units` from `value`. E.g. '71.742%'.
+        value = result.get('value', '')
+        result['value'] = re.sub('[^\d\.]', '', value)
+        result['units'] = re.sub('[\d\.]', '', value)
+        result['units'] = result['units'].replace('%', 'percent')
 
-        # TODO: Ensure that the results are numbers.
-
-        # TODO: Standardize the analyses!
-        result['analysis'] = result['analysis']
+        # Try to ensure that the result values are numbers.
+        result['value'] = convert_to_numeric(result['value'])
+        result['mg_g'] = convert_to_numeric(result['mg_g'])
+        result['lod'] = convert_to_numeric(result.get('lod'))
+        result['loq'] = convert_to_numeric(result.get('loq'))
+        result['limit'] = convert_to_numeric(result.get('limit'))
 
         # Assign a `key` for the analyte.
         result['key'] = snake_case(result['name'])
@@ -602,11 +649,15 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
         # Update the result.
         results[i] = result
     
-    # FIXME: Clean `total_{analyte}`s and `sum_of_cannabinoids`.
+    # Clean `total_{analyte}`s and `sum_of_cannabinoids`.
+    columns = [x for x in obs.keys() if x.startswith('total_') or x.startswith('sum_')]
+    for key in columns:
+        obs[key] = convert_to_numeric(obs[key], strip=True)
 
-    # FIXME: Lowercase `{analysis}_status`
-    
-    # FIXME: Re-key `address` to `producer_address`
+    # Lowercase `{analysis}_status`
+    columns = [x for x in obs.keys() if x.endswith('_status')]
+    for key in columns:
+        obs[key] = obs[key].lower()
 
     # Separate `batch_units` from `batch_size`.
     obs['batch_size'], obs['batch_units'] = tuple(obs['batch_size'].split(' '))
@@ -630,15 +681,15 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
 
 if __name__ == '__main__':
 
-    # === Test ===
+    # === Tests ===
 
     # [✓] TEST: Get all test results for a specific client.
-    # test_results = get_sc_labs_test_results('2821')
-    # assert test_results is not None
+    test_results = get_sc_labs_test_results('2821')
+    assert test_results is not None
 
     # [✓] TEST: Get details for a specific sample ID.
-    # sample_details = get_sc_labs_sample_details('858084')
-    # assert sample_details is not None
+    sample_details = get_sc_labs_sample_details('858084')
+    assert sample_details is not None
 
     # [✓] TEST: Get details for a specific sample URL.
     sc_labs_coa_url = 'https://client.sclabs.com/sample/858084'

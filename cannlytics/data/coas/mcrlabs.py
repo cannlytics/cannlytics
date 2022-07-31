@@ -6,45 +6,34 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 7/26/2022
+Updated: 7/31/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Periodically collect recent lab results from
-    MCR Labs publicly published lab results.
+    Tools to collect MCR Labs' publicly published lab results.
 
 Data Points:
 
     ✓ analyses
+    ✓ {analysis}_method
+    ✓ date_tested
+    ✓ image
+    ✓ lab
+    ✓ lab_website
+    ✓ lab_results_url
     ✓ product_name
     ✓ product_type
     ✓ producer
-    ✓ date_tested
+    ✓ results
+        - analysis
+        ✓ key
+        ✓ name
+        ✓ units
+        ✓ value
+    ✓ sample_id (generated)
     ✓ total_cannabinoids
     ✓ total_terpenes
-    ✓ lab_results_url (FIXME: Has an extra slash `//report/`)
-    ✓ image
-    ✓ sample_id (generated)
-    ✓ results
-    ✓ {analysis}_method
-
-Static Data Points:
-
-    ✓ lab
-    - lab_image_url
-    - lab_license_number
-    - lab_address
-    - lab_street
-    - lab_city
-    - lab_county (augmented)
-    - lab_state
-    - lab_zipcode
-    - lab_phone
-    - lab_email
-    ✓ lab_website
-    - lab_latitude (augmented)
-    - lab_longitude (augmented)
 
 Data Sources:
     
@@ -70,36 +59,19 @@ import requests
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
+from cannlytics.utils.constants import DEFAULT_HEADERS
 from cannlytics.utils.utils import snake_case, strip_whitespace
 
 
-# TODO: Augment with lab details:
+# Lab details.
 MCR_LABS = {
     'coa_algorithm': 'mcrlabs.py',
     'coa_algorithm_entry_point': 'get_mcr_labs_sample_details',
     'lims': 'MCR Labs',
     'url': 'https://reports.mcrlabs.com',
     'lab': 'MCR Labs',
-    # 'lab_image_url': 'https://mcrlabs.com',
-    # 'lab_license_number': '',
-    # 'lab_address': '',
-    # 'lab_street': '',
-    # 'lab_city': '',
-    # 'lab_county': '',
-    # 'lab_state': 'MA',
-    # 'lab_zipcode': '',
-    # 'lab_latitude': '',
-    # 'lab_longitude': '',
-    # 'lab_phone': '',
-    # 'lab_email': '',
-    'lab_website': 'https://mcrlabs.com',
+    'lab_website': 'https://mcrlabs.com',   
 }
-
-# FIXME: Make these either dynamic or referenced from MCR_LABS
-# === Constants ===
-BASE = 'https://reports.mcrlabs.com'
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
-STATE = 'MA'
 
 
 def format_iso_date(date, sep='/'):
@@ -114,10 +86,22 @@ def format_iso_date(date, sep='/'):
     return '-'.join([yyyy, mm, dd])
 
 
-def get_mcr_labs_sample_count(per_page: Optional[int] = 30) -> dict:
-    """Get the number of samples and pages of MCR Labs samples."""
-    url = f'{BASE}/products-weve-tested'
-    response = requests.get(url, headers=HEADERS)
+def get_mcr_labs_sample_count(
+        per_page: Optional[int] = 30,
+        headers: Optional[Any] = None,
+    ) -> dict:
+    """Get the number of samples and pages of MCR Labs samples.
+    Args:
+        per_page (int): The number of results displayed per page.
+        headers (dict): Headers for the HTTP request (optional).
+    Returns:
+        (dict): A dictionary with `count` and `pages` keys.
+    """
+    base = MCR_LABS['url']
+    url = f'{base}/products-weve-tested'
+    if headers is None:
+        headers = DEFAULT_HEADERS
+    response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
     element = soup.find('span', attrs={'id': 'found_posts'})
     count = int(element.text.replace(',', ''))
@@ -188,6 +172,7 @@ def get_mcr_labs_samples(
         cat: Optional[str] = 'all',
         order: Optional[str] = 'date-desc',
         search: Optional[str] = '',
+        headers: Optional[Any] = None,
     ) -> list:
     """Get all test results from MCR Labs on a specific page.
     Args:
@@ -198,18 +183,22 @@ def get_mcr_labs_samples(
             (optional). Options: `date-desc`, `samplename`, `client`,
             `totalcann-desc`, `totalterp-desc`, `maxthc-desc`, `maxcbd-desc`.
         search (str): A particular search query.
+        headers (dict): Headers for the HTTP request (optional).
     Returns:
         (list): A list of dictionaries of sample data.
     """
     # Get a page.
-    url = f'{BASE}/ProductWeVeTested/AjaxSearch'
+    base = MCR_LABS['url']
+    url = f'{base}/ProductWeVeTested/AjaxSearch'
     params = {
         'category': cat,
         'order': order,
         'page': str(page_id),
         'searchString': search,
     }
-    response = requests.get(url, headers=HEADERS, params=params)
+    if headers is None:
+        headers = DEFAULT_HEADERS
+    response = requests.get(url, headers=headers, params=params)
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # Get all of the products on the page.
@@ -241,13 +230,13 @@ def get_mcr_labs_samples(
         try:
             element = product.find('span', attrs={'class': 'url-linked'})
             href = element.attrs['data-url']
-            sample['producer_url'] = '/'.join([BASE, href])
+            sample['producer_url'] = '/'.join([base, href])
         except AttributeError:
             sample['producer_url'] = ''
 
         # Get the lab results URL.
         href = product.find('a')['href']
-        sample['lab_results_url'] = '/'.join([BASE, href])
+        sample['lab_results_url'] = '/'.join([base, href])
 
         # Get the image.
         image_url = product.find('img')['src']
@@ -262,7 +251,7 @@ def get_mcr_labs_samples(
         )
 
         # Aggregate sample data.
-        samples.append(sample)
+        samples.append({**MCR_LABS, **sample})
 
     # Return the samples.
     return samples
@@ -286,17 +275,24 @@ def get_mcr_labs_client_details():
     raise NotImplementedError
 
 
-def get_mcr_labs_sample_details(sample_id: str) -> dict:
+def get_mcr_labs_sample_details(
+        sample_id: str,
+        headers: Optional[Any] = None,
+    ) -> dict:
     """Get the details for a specific MCR Labs test sample.
     Args:
         sample_id (str): A sample ID number.
+        headers (dict): Headers for the HTTP request (optional).
     Returns:
         (dict): A dictionary of sample details.
     """
     # Get the sample page.
     sample = {}
-    url = f'{BASE}/reports/{sample_id}'
-    response = requests.get(url, headers=HEADERS)
+    base = MCR_LABS['url']
+    url = f'{base}/reports/{sample_id}'
+    if headers is None:
+        headers = DEFAULT_HEADERS
+    response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # Optional: Get product serving size.
@@ -346,6 +342,7 @@ def get_mcr_labs_sample_details(sample_id: str) -> dict:
         })
 
     # Get the results for all other analyses.
+    # FIXME: Add `analysis` field to results.
     values = ['name', 'result', 'lod' ,'loq']
     tables = soup.find_all('table', attrs={'class': 'safetytable'})
     for table in tables:
@@ -363,21 +360,14 @@ def get_mcr_labs_sample_details(sample_id: str) -> dict:
                 if result:
                     results.append(result)
 
-    # Future work: Calculate average results by state, county, and zip code.
-    
     # Return the sample details.
     sample['results'] = results
-    return sample
-
-
-def archive_mcr_labs_data():
-    """Archive MCR Labs data on a periodic basis."""
-    raise NotImplementedError
+    return {**MCR_LABS, **sample}
 
 
 if __name__ == '__main__':
 
-    # === Test ===
+    # === Tests ===
     from cannlytics.utils.utils import to_excel_with_style
     from datetime import datetime
     import pandas as pd

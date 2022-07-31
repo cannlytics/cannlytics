@@ -2,6 +2,14 @@
 
 Archive MCR Labs test results.
 
+## Historic Data Curation
+
+If you wish to populate your database with all of MCR Labs historic lab results, then you can run the full archival routine. The routine will create datafiles for archiving and upload the data to Firestore.
+
+```shell
+python ai/curation/get_mcr_labs_data/get_all_mcr_labs_data.py
+```
+
 ## Automation
 
 Automating the collection of lab results can be done with the following 3 steps.
