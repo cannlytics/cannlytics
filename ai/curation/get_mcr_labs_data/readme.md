@@ -12,10 +12,10 @@ Automating the collection of lab results can be done with the following 3 steps.
     gcloud pubsub topics create get_mcr_labs_data
     ```
 
-2. Deploy the function (from the `ai/curation` directory):
+2. Deploy the function (from the root directory):
 
     ```shell
-    gcloud functions deploy get_mcr_labs_data --source get_mcr_labs_data --entry-point get_mcr_labs_data --runtime python39 --trigger-topic get_mcr_labs_data --memory 512MB --timeout 120
+    gcloud functions deploy get_mcr_labs_data --source ai/curation/get_mcr_labs_data --entry-point get_mcr_labs_data --runtime python39 --trigger-topic get_mcr_labs_data --memory 512MB --timeout 252
     ```
 
 3. Finally, create a [Cloud Scheduler](https://cloud.google.com/scheduler/docs/creating#gcloud) cron job:

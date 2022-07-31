@@ -65,3 +65,14 @@ knowledge = [
 # TODO: Go from keywords, or data about a product, to a description.
 
 
+# Content Summarizer 
+# pip install gensim==3.6.0
+# from gensim.summarization.summarizer import summarize
+# def get_summary(text):
+#     # Summary by Ratio
+#     summary = summarize(text, ratio = 0.05)    
+#     print(summary)
+#     # Summary by Word Count
+#     summary = summarize(text, word_count = 100)
+#     print(summary)
+# get_summary(text)

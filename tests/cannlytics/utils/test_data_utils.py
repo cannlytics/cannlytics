@@ -4,8 +4,11 @@ Copyright (c) 2021-2022 Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 11/22/2021
-Updated: 5/02/2022
+Updated: 7/31/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-ai/blob/main/LICENSE>
+
+FIXME: These tests need to be heavily refactored and re-performed.
+
 """
 # Standard imports.
 import os
@@ -28,7 +31,6 @@ from cannlytics.data.data import (
     format_millions,
     format_thousands,
     get_state_population,
-    get_state_current_population,
     months_elapsed,
     reverse_dataframe,
     set_training_period,
@@ -38,8 +40,8 @@ from cannlytics.data.data import (
 )
 
 
-def test_get_state_current_population():
-    """Test the `get_state_current_population` function."""
+def test_get_state_population():
+    """Test the `get_state_population` function."""
 
     # Read the FRED API key.
     path = Path(os.path.realpath(__file__))
@@ -49,21 +51,21 @@ def test_get_state_current_population():
         fred_api_key = config['FRED_API_KEY']
 
     # Test getting Massachusetts population from lowercase abbreviation.
-    population_data = get_state_current_population('ma', fred_api_key)
+    population_data = get_state_population('ma', fred_api_key)
     assert population_data['population'] == 6893574 # MA 2020 population
 
     # Test getting Massachusetts population from uppercase abbreviation.
-    population_data = get_state_current_population('MA', fred_api_key)
+    population_data = get_state_population('MA', fred_api_key)
     assert population_data['population'] == 6893574 # MA 2020 population
 
     # Test getting Massachusetts population with no API key.
     with pytest.raises(Exception):
-        get_state_current_population('MA')
+        get_state_population('MA')
 
     # Test getting Massachusetts population with no API key after setting
     # `FRED_API_KEY` environment variable.
     os.environ['FRED_API_KEY'] = fred_api_key
-    population_data = get_state_current_population('MA')
+    population_data = get_state_population('MA')
     assert population_data['population'] == 6893574 # MA 2020 population
 
 
@@ -172,7 +174,7 @@ if __name__ == '__main__':
     test_format_millions()
     test_format_thousands()
     test_get_state_population()
-    test_get_state_current_population()
+    test_get_state_population()
     test_months_elapsed()
     test_reverse_dataframe()
     test_set_training_period()

@@ -20,7 +20,7 @@
 - [🧐 Traceability](#automation)
 - [👩‍🔬 Testing](#testing)
 - [🤝 Contributing](#contributing)
-- [❤️ Support](#support)
+- [💖 Support](#support)
 - [🏛️ License](#license)
 
 ## 🚀 Installation <a name="installation"></a>
@@ -123,16 +123,22 @@ pytest --cov=cannlytics tests/
 
 Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. You can also develop your own new features, fix known issues, and add documentation, tests, and examples. Anyone is welcome to contribute anything. Please see the [contributing guide](https://docs.cannlytics.com/developers/contributing) for more information.
 
-## ❤️ Support <a name="support"></a>
+## 💖 Support <a name="support"></a>
 
-Cannlytics is made available with ❤️ and <a href="https://opencollective.com/cannlytics-company">your good will</a>. Please consider making a contribution to keep the good work coming. Thank you 🙏
+Cannlytics is made available with ❤️ and your good will. Please consider making a contribution to help us continue crafting useful tools and data pipelines for you. Thank you 🙏
 
-🥞 Bitcoin donation address: 34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6
+| Provider | Link |
+|-|-|
+| 👐 OpenCollective | <https://opencollective.com/cannlytics-company/donate> |
+| 💸 PayPal Donation | <https://paypal.me/cannlytics> |
+| 💵 Venmo Donation | <https://www.venmo.com/u/cannlytics> |
+| 🪙 Bitcoin donation address| 34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6 |
+| ⚡ Ethereum donation address | 0xa466d0893e3d4f584c5a7aec1104b9f1d541cf1c |
 
 ## 🏛️ License <a name="license"></a>
 
 ```
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2022 Cannlytics and the Cannabis Data Science Team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

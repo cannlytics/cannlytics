@@ -1,26 +1,30 @@
 """
-Logistics Utilities | Cannlytics
+Geographic Information Systems (GIS) Data | Cannlytics
 Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 7/12/2022
+Updated: 7/31/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-Description: This script contains functions that are useful for logistics.
+Description:
+
+    This script contains useful GIS functions.
+
 """
 # Standard imports.
 from time import sleep
-from typing import List, Optional
+from typing import Any, List, Optional
 
 # External imports.
+from fredapi import Fred
 from googlemaps import Client, places
 
 # Internal imports.
 from cannlytics.firebase import initialize_firebase, get_document
 
 
-def get_google_maps_api_key():
+def get_google_maps_api_key() -> str:
     """Get Google Maps API key.
     Returns:
         (str): Returns the Google Maps API key stored
@@ -36,7 +40,7 @@ def get_place_details(
         query: str,
         api_key: Optional[str] = None,
         fields: Optional[List[str]] = None,
-    ):
+    ) -> dict:
     """Get the place details for a given a name.
     Args:
         query (str): The text to use to search for a place.
@@ -62,12 +66,50 @@ def get_place_details(
     return place['result']
 
 
+def get_state_population(
+        state: str,
+        api_key: Optional[str] = None,
+        district: Optional[str] = '',
+        obs_start: Optional[Any] = None,
+        obs_end: Optional[Any] = None,
+        multiplier: Optional[float] = 1000.0,
+    ) -> dict:
+    """Get a given state's latest population from the Fed Fred API,
+    getting the number in 1000's and returning the absolute value.
+    Args:
+        state (str): The state abbreviation for the state to retrieve
+            population data. The abbreviation can be upper or lower case.
+        api_key (str): A Fed FRED API key. You can sign up for a free API key at
+            http://research.stlouisfed.org/fred2/. You can also pass `None`
+            and set the environment variable 'FRED_API_KEY' to the value of
+            your API key.
+    Returns:
+        (dict): Returns a dictionary with population values and source.
+    """
+    pops = []
+    fred = Fred(api_key=api_key)
+    code = f'{state.upper()}POP{district.upper()}'
+    series = fred.get_series(code, obs_start, obs_end)
+    for index, value in series.iteritems():
+        real_pop = int(value * multiplier)
+        pops.append({
+            'population': real_pop,
+            'population_formatted': f'{real_pop:,}',
+            'population_source_code': code,
+            'population_source': f'https://fred.stlouisfed.org/series/{code}',
+            'population_at': index.isoformat()[:10],
+        })
+    if len(pops) == 1:
+        return pops[0]
+    return pops
+
+
 def geocode_addresses(
         data,
         api_key: Optional[str] = None,
         pause: Optional[float] = 0.0,
         address_field: Optional[str] = '',
-    ):
+    ) -> Any:
     """Geocode addresses in a dataframe.
     Args:
         data (DataFrame): A DataFrame containing the addresses to geocode.
@@ -77,7 +119,8 @@ def geocode_addresses(
             otherwise assumes the DataFrame has `street`, `city`, `state`,
             and `zip_code` columns.
     Returns:
-        (DataFrame): Returns the DataFrame with geocoded latitudes and longitudes.
+        (DataFrame): Returns the DataFrame with `latitude`, `longitude`,
+        and `formatted_address` columns.
     """
     if api_key is None:
         api_key = get_google_maps_api_key()

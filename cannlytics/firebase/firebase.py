@@ -615,7 +615,7 @@ def update_user(existing_user: Any, data: dict):
     Args:
         existing_user (Firebase user): A Firebase user object.
         data (dict): The values of the user to update, which can include
-            email, phone_number, email_verified, diplay_name, photo_url,
+            email, phone_number, email_verified, display_name, photo_url,
             and disabled.
     """
     values = {}

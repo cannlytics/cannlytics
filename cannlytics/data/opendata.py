@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/5/2022
-Updated: 5/5/2022
+Updated: 7/31/2022
 License: MIT License <https://opensource.org/licenses/MIT>
 
 Data sources:
@@ -12,17 +12,27 @@ Data sources:
     - Massachusetts Cannabis Control Commission Data Catalog
     https://masscannabiscontrol.com/open-data/data-catalog/
 
-TODO: Create a data guide.
+TODO:
+
+    - [ ] Create a data guide.
+    - [ ] Work on the dynamics of the column types.
 
 FIXME: SQL queries do not appear to work.
 
 """
+# Standard imports.
 import os
+from typing import Any, Optional
+
+# External imports.
 import pandas as pd
 from requests import Session
 
+# Internal imports.
+from cannlytics.utils.constants import DEFAULT_HEADERS
 
-ENDPOINTS = {
+
+OPENDATA_ENDPOINTS = {
     'agent-gender-stats': 'hhjg-atjk',
     'agent-ethnicity-stats': 'pt2c-wb44',
     'licensees': 'albs-all',
@@ -38,7 +48,7 @@ ENDPOINTS = {
     'plants': 'meau-plav',
     'sales': 'fren-z7jq',
 }
-BOOLEAN = [
+OPENDATA_BOOLEAN_COLUMNS = [
     'activity_date',
     'app_create_date',
     'facilityisexpired',
@@ -51,12 +61,12 @@ BOOLEAN = [
     'not_a_dbe',
     'priority',
 ]
-DATETIME = [
+OPENDATA_DATETIME_COLUMNS = [
     'activitysummarydate',
     'sale_period',
     'saledate',
 ]
-NUMERIC = [
+OPENDATA_NUMERIC_COLUMNS = [
     'abutters_count',
     'application_fee',
     'average_spent',
@@ -84,7 +94,7 @@ NUMERIC = [
     'units',
     'weightbasedtotal',
 ]
-RENAME = {
+OPENDATA_CODINGS = {
     '= 1 oz': 'price_per_ounce',
 }
 
@@ -92,12 +102,10 @@ RENAME = {
 class APIError(Exception):
     """A primary error raised by the Open Data API."""
 
-
     def __init__(self, response):
         message = self.get_response_messages(response)
         super().__init__(message)
         self.response = response
-
 
     def get_response_messages(self, response):
         """Extract error messages from a Open Data API response.
@@ -117,17 +125,27 @@ class OpenData(object):
     Cannabis Control Commission of the Commonwealth of Massachusetts'
     Open Data catalog."""
 
-
-    def __init__(self):
-        """Initialize an Open Data API client."""
+    def __init__(self, headers=None) -> None:
+        """Initialize an Open Data API client.
+        Args:
+            headers (dict): Headers for HTTP requests (optional).
+        """
         self.base = 'https://masscannabiscontrol.com/resource/'
-        self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
+        self.endpoints = OPENDATA_ENDPOINTS
+        if headers is None:
+            self.headers = DEFAULT_HEADERS
+        else:
+            self.headers = headers
         self.session = Session()
-        self.endpoints = ENDPOINTS
 
-
-    def get(self, endpoint, params=None):
-        """Make a request to the API."""
+    def get(self, endpoint:str, params: Optional[dict] = None) -> Any:
+        """Make a request to the API.
+        Args:
+            endpoint (str): The API endpoint.
+            params (dict): A dictionary of parameters.
+        Returns:
+            (DataFrame): The HTTP data formatted as a DataFrame.
+        """
         url = os.path.join(self.base, f'{endpoint}.json')
         try:
             response = self.session.get(url, headers=self.headers, params=params)
@@ -139,22 +157,23 @@ class OpenData(object):
         data = pd.DataFrame(response.json())
         data.columns = map(str.lower, data.columns)
         data.columns = [x.replace('$', 'dollars').replace('%', 'percent') for x in data.columns]
-        data.rename(columns=RENAME, inplace=True)
-        for key in list(set(BOOLEAN).intersection(data.columns)):
+        data.rename(columns=OPENDATA_CODINGS, inplace=True)
+        for key in list(set(OPENDATA_BOOLEAN_COLUMNS).intersection(data.columns)):
             data[key] = data[key].astype(bool, errors='ignore')
-        for key in list(set(DATETIME).intersection(data.columns)):
+        for key in list(set(OPENDATA_DATETIME_COLUMNS).intersection(data.columns)):
             data[key] = pd.to_datetime(data[key], errors='ignore')
-        for key in list(set(NUMERIC).intersection(data.columns)):
+        for key in list(set(OPENDATA_NUMERIC_COLUMNS).intersection(data.columns)):
             data[key] = data[key].astype(float, errors='ignore')
         return data
 
-
-    def get_agents(self, dataset='gender-stats'):
+    def get_agents(self, dataset: Optional[str] = 'gender-stats') -> Any:
         """Get agent statistics.
         Args:
             dataset (str): An optional dataset filter:
                 * `gender-stats` (default)
                 * `ethnicity-stats`
+        Returns:
+            (DataFrame): The agent data formatted as a DataFrame.
         """
         key = 'agent'
         if dataset:
@@ -162,15 +181,14 @@ class OpenData(object):
         endpoint = self.endpoints[key]
         return self.get(endpoint)
 
-
     def get_licensees(
             self,
-            dataset='',
-            limit=10_000,
-            order_by='app_create_date',
-            ascending=False,
-    ):
-        """Get Massachussetts licensee data and statistics.
+            dataset: Optional[str] = '',
+            limit: Optional[int] = 10_000,
+            order_by: Optional[str] = 'app_create_date',
+            ascending: Optional[bool] = False,
+        ) -> Any:
+        """Get Massachusetts licensee data and statistics.
         Args:
             dataset (str): An optional dataset filter:
                 * `approved`
@@ -181,6 +199,8 @@ class OpenData(object):
             limit (int): A limit to the number of returned observations.
             order_by (str): The field to order the results, `app_create_date` by default.
             ascending (bool): If ordering results, ascending or descending. Descending by default.
+        Returns:
+            (DataFrame): The licensees data formatted as a DataFrame.
         """
         key = 'licensees'
         if dataset:
@@ -194,14 +214,13 @@ class OpenData(object):
             params['$order'] += ' DESC'
         return self.get(endpoint, params=params)
 
-
     def get_retail(
             self,
-            dataset='sales-stats',
-            limit=10_000,
-            order_by='date',
-            ascending=False,
-    ):
+            dataset: Optional[str] = 'sales-stats',
+            limit: Optional[int] = 10_000,
+            order_by: Optional[str] = 'date',
+            ascending: Optional[bool] = False,
+        ) -> Any:
         """Get Massachusetts retail data and statistics.
         Args:
             dataset (str): An optional dataset filter:
@@ -211,6 +230,8 @@ class OpenData(object):
             limit (int): A limit to the number of returned observations.
             order_by (str): The field to order the results, `app_create_date` by default.
             ascending (bool): If ordering results, ascending or descending. Descending by default.
+        Returns:
+            (DataFrame): The retail data formatted as a DataFrame.
         """
         key = 'retail'
         key += '-' + dataset
@@ -223,26 +244,31 @@ class OpenData(object):
             params['$order'] += ' DESC'
         return self.get(endpoint, params=params)
 
-
-    def get_medical(self, dataset='stats'):
-        """Get Massachussetts medical stats."""
+    def get_medical(self, dataset: Optional[str] = 'stats') -> Any:
+        """Get Massachusetts medical stats.
+        Args:
+            dataset (str): The specific medical dataset to retrieve.
+        Returns:
+            (DataFrame): The medical data formatted as a DataFrame.
+        """
         key = 'medical'
         key += '-' + dataset
         endpoint = self.endpoints[key]
         return self.get(endpoint)
 
-
     def get_plants(
             self,
-            limit=10_000,
-            order_by='activitysummarydate',
-            ascending=False,
-    ):
+            limit: Optional[int] = 10_000,
+            order_by: Optional[str] = 'activitysummarydate',
+            ascending: Optional[bool] = False,
+        ) -> Any:
         """Get Massachusetts cultivation data and statistics.
         Args:
             limit (int): A limit to the number of returned observations.
             order_by (str): The field to order the results, `app_create_date` by default.
             ascending (bool): If ordering results, ascending or descending. Descending by default.
+        Returns:
+            (DataFrame): The plant data formatted as a DataFrame.
         """
         key = 'plants'
         endpoint = self.endpoints[key]
@@ -254,18 +280,19 @@ class OpenData(object):
             params['$order'] += ' DESC'
         return self.get(endpoint, params=params)
 
-
     def get_sales(
             self,
-            limit=10_000,
-            order_by='activitysummarydate',
-            ascending=False,
-    ):
+            limit: Optional[int] = 10_000,
+            order_by: Optional[str] = 'activitysummarydate',
+            ascending: Optional[bool] = False,
+        ) -> Any:
         """Get Massachusetts sales data.
         Args:
             limit (int): A limit to the number of returned observations.
             order_by (str): The field to order the results, `app_create_date` by default.
             ascending (bool): If ordering results, ascending or descending. Descending by default.
+        Returns:
+            (DataFrame): The sales data formatted as a DataFrame.
         """
         key = 'sales'
         endpoint = self.endpoints[key]

@@ -622,7 +622,7 @@ if __name__ == '__main__':
     # [✓] parse_cc_url
     # [✓] parse_tagleaf_pdf
     # [✓] parse_tagleaf_url
-    # [ ] parse_green_leaf_lab_pdf
+    # [✓] parse_green_leaf_lab_pdf
     # [ ] parse_veda_scientific_pdf
     # [ ] parse_mcr_labs_url
     # [ ] parse_sc_labs_pdf

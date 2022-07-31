@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 7/30/2022
+Updated: 7/31/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -373,7 +373,7 @@ def get_mcr_labs_data(event, context):
         context (google.cloud.functions.Context): Metadata for the event.
     """
 
-    # Check the PubSub message is valid.
+    # Check that the PubSub message is valid.
     pubsub_message = base64.b64decode(event['data']).decode('utf-8')
     if pubsub_message != 'success':
         return
@@ -398,7 +398,7 @@ def get_mcr_labs_data(event, context):
             refs.append(ref)
             updates.append(obs)
 
-    # Write any new lab results.
+    # Save any new lab results.
     if updates:
         update_documents(refs, updates, database=database)
         print('Added %i lab results' % len(refs))

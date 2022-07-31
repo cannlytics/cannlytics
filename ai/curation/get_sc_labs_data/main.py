@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/8/2022
-Updated: 7/30/2022
+Updated: 7/31/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -35,6 +35,7 @@ from cannlytics.data.data import create_sample_id
 from cannlytics.utils.constants import DEFAULT_HEADERS
 from cannlytics.utils.utils import snake_case, strip_whitespace
 from cannlytics.firebase import get_document, update_documents
+from sc_labs_producer_ids import PRODUCER_IDS
 
 
 # It is assumed that the lab has the following details.
@@ -98,38 +99,6 @@ SC_LABS_COA = {
         'result-pf': 'status',
     },
 }
-
-# # Constants.
-# BASE = 'https://client.sclabs.com'
-# HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
-# STATE = 'CA'
-# DATA_DIR = '.datasets/lab_results'
-# RAW_DATA = '.datasets/lab_results/raw_data/sc_labs'
-# TRAINING_DATA = '.datasets/lab_results/training_data'
-
-# # Pertinent sample details (original key to final key).
-# DETAILS = {
-#     'batch_number': 'batch_number',
-#     'batch_size': 'batch_size',
-#     'business_name': 'distributor',
-#     'license_number': 'distributor_license_number',
-#     'sum_of_cannabinoids': 'sum_of_cannabinoids',
-#     'total_cannabinoids': 'total_cannabinoids',
-#     'total_thc': 'total_thc',
-#     'total_cbd': 'total_cbd',
-#     'total_cbg': 'total_cbg',
-#     'total_thcv': 'total_thcv',
-#     'total_cbc': 'total_cbc',
-#     'total_cbdv': 'total_cbdv',
-#     'total_terpenoids': 'total_terpenes',
-#     '9_thc_per_unit': 'cannabinoids_status',
-#     'pesticides': 'pesticides_status',
-#     'mycotoxins': 'mycotoxins_status',
-#     'residual_solvents': 'residual_solvents_status',
-#     'heavy_metals': 'heavy_metals_status',
-#     'microbiology': 'microbiology_status',
-#     'foreign_material': 'foreign_material_status',
-# }
 
 
 def parse_data_block(div, tag='span') -> dict:
@@ -263,7 +232,7 @@ def get_sc_labs_test_results(
             total_cbd = values[1].text.split(':')[-1].replace('%', '')
             total_terpenes = values[2].text.split(':')[-1].replace('%', '')
 
-            # FIXME: Do some lab results have blank dates?
+            # FIXME: Do any lab results have blank dates? What happens then?
             # Create a sample ID.
             sample_id = create_sample_id(producer, product_name, date)
 
@@ -583,7 +552,7 @@ def get_sc_labs_data(event, context):
         context (google.cloud.functions.Context): Metadata for the event.
     """
 
-    # Check the PubSub message is valid.
+    # Check that the PubSub message is valid.
     pubsub_message = base64.b64decode(event['data']).decode('utf-8')
     if pubsub_message != 'success':
         return
@@ -594,12 +563,25 @@ def get_sc_labs_data(event, context):
     except ValueError:
         pass
     database = firestore.client()
+    
+    # Future work: Discover any new SC Labs public clients.
 
-    # FIXME: Get the most recent lab results.
-    # data = get_sc_labs_test_results(ending_page=2)
+    # Get the most recent samples for each client.
     data = []
-
-    # Read lab results to see if any are missing.
+    for producer_id in PRODUCER_IDS:
+        try:
+            results = get_sc_labs_test_results(
+                producer_id,
+                limit=25,
+                page_limit=1,
+            )
+            if results:
+                data += results
+            sleep(0.2)
+        except:
+            print('Error getting results for producer:', producer_id)
+    
+    # See if the samples already exist, if not, then get their details.
     refs, updates = [], []
     for obs in data:
         sample_id = obs['sample_id']
@@ -607,9 +589,11 @@ def get_sc_labs_data(event, context):
         doc = get_document(ref)
         if not doc:
             refs.append(ref)
-            updates.append(obs)
+            url = obs['lab_results_url']
+            details = get_sc_labs_sample_details(url)
+            updates.append({**obs, **details})
 
-    # Write any new lab results.
+    # Save any new lab results.
     if updates:
         update_documents(refs, updates, database=database)
         print('Added %i lab results' % len(refs))
@@ -618,7 +602,12 @@ def get_sc_labs_data(event, context):
 if __name__ == '__main__':
 
     # === Test ===
-    print('Testing')
+
+    # Specify where your test data lives.
+    DATA_DIR = '../../../.datasets/lab_results'
+    RAW_DATA = '../../../.datasets/lab_results/raw_data/sc_labs'
+    TRAINING_DATA = '../../../.datasets/lab_results/training_data'
+
 
     # [✓] TEST: Get all test results for a specific client.
     # test_results = get_sc_labs_test_results('2821')
@@ -728,45 +717,3 @@ if __name__ == '__main__':
     # data.to_excel(datafile, index=False)
     # end = datetime.now()
     # print('Detail collection took:', end - start)
-
-
-#-----------------------------------------------------------------------
-# TODO: Test scrape most recent.
-#-----------------------------------------------------------------------
-# 1. Discover all SC Labs public clients.
-# 2. Get the most recent 100 samples for each client.
-# 3. (a) Get the sample details for each sample found.
-#    (b) Save the sample details.
-#-----------------------------------------------------------------------
-
-# # 1. Discover all SC Labs public clients.
-# # Only do this once a week or so (Tue 4:20am EST or so).
-
-# # 2. Get the most recent 100 samples for each client.
-# errors = []
-# test_results = []
-# for client in clients:
-#     try:
-#         results = get_sc_labs_test_results(client, page_limit=1)
-#         test_results += results
-#         if test_results:
-#             print('Collected samples for client:', client)
-#             clients.append(client)
-#         sleep(0.2)
-#     except:
-#         errors.append(client)
-
-# # 3a. Get the details for the most recent samples.
-# total = len(test_results)
-# for i, test_result in enumerate(test_results):
-#     sample = test_result['lab_results_url'].split('/')[-1]
-#     print('Collecting (%i/%i):' % (i + 1, total), sample)
-#     details = get_sc_labs_sample_details(sample)
-#     test_results[i] = {**test_result, **details}
-
-# # TODO: Process the data before saving it the the database.
-
-# # 3b. Save the most recent samples.
-# # col = 'public/data/lab_results/{}'
-# # refs = [col.format(x['sample_id']) for x in test_results]
-# # update_documents(refs, test_results)
