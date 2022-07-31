@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 7/19/2022
+Updated: 7/30/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with CoA data.
@@ -18,6 +18,8 @@ import tempfile
 # External imports
 from django.http import HttpResponse
 from django.http.response import JsonResponse
+import openpyxl
+from openpyxl.utils import get_column_letter
 from pandas import DataFrame, ExcelWriter
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -875,8 +877,8 @@ def download_coa_data(request):
     # Create the response.
     # response = HttpResponse(content_type='text/csv')
     # response['Content-Disposition'] = 'attachment; filename="download.csv"'
-    response = HttpResponse(data,content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=download.xlsx'
+    # response = HttpResponse(data,content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    # response['Content-Disposition'] = 'attachment; filename=download.xlsx'
 
     # Create a long table of results.
     results = []
@@ -886,17 +888,37 @@ def download_coa_data(request):
             results.append(result)
         del data[i]['results']
 
-    # Save as double sheet Excel.
-    writer = ExcelWriter(response)
-    DataFrame(data).to_excel(writer, 'Details')
-    DataFrame(results).to_excel(writer, 'Results')
-    writer.save()
+    # FIXME: Create an Excel file.
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=this-is-your-filename.xlsx'
+    wb = openpyxl.Workbook()
+    ws = wb.get_active_sheet()
+    ws.title = 'Details'
+    row_num = 0
+    columns = [
+        ("ID", 5),
+        (u'Name', 20),
+    ]
+    for col_num in range(len(columns)):
+        c = ws.cell(row=row_num + 1, column=col_num + 1)
+        c.value = columns[col_num][0]
+        ws.column_dimensions[get_column_letter(col_num + 1)].width = columns[col_num][1]
+    # for obj in queryset:
+    #     row_num += 1
+    #     row = [
+    #         obj.pk,
+    #         obj.name,
+    #     ]
+    #     for col_num in range(len(row)):
+    #         c = ws.cell(row=row_num + 1, column=col_num + 1)
+    #         c.value = row[col_num]
+    wb.save(response)
 
-    # Save the results.
-    # csv_writer = writer(response)
-    # csv_writer.writerow(list(data[0].keys()))
-    # for item in data:
-    #     csv_writer.writerow(list(item.values()))
+    # # Save as double sheet Excel.
+    # writer = ExcelWriter(response)
+    # DataFrame(data).to_excel(writer, 'Details')
+    # DataFrame(results).to_excel(writer, 'Results')
+    # writer.save()
 
     # TODO: Sort the columns in a logical manner.
 

@@ -582,8 +582,7 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
             results[i] = result
     
     # Clean results.
-    c
-    for result in results:
+    for i, result in enumerate(results):
         try:
             margin = result['margin_of_error'].replace('±', '')
             result['margin_of_error'] = margin
@@ -599,6 +598,9 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
 
         # Assign a `key` for the analyte.
         result['key'] = snake_case(result['name'])
+
+        # Update the result.
+        results[i] = result
     
     # FIXME: Clean `total_{analyte}`s and `sum_of_cannabinoids`.
 

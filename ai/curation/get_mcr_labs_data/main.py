@@ -6,29 +6,34 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 7/14/2022
+Updated: 7/30/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Periodically collect recent lab results from
-    MCR Labs publicly published lab results.
+    Periodically collect MCR Labs' publicly published lab results.
 
-    Data points collected for each sample include:
+Data Points:
 
         ✓ analyses
+        ✓ {analysis}_method
+        ✓ date_tested
+        ✓ image
+        ✓ lab
+        ✓ lab_website
+        ✓ lab_results_url
         ✓ product_name
         ✓ product_type
         ✓ producer
-        ✓ date_tested
+        ✓ results
+            - analysis
+            ✓ key
+            ✓ name
+            ✓ units
+            ✓ value
+        ✓ sample_id (generated)
         ✓ total_cannabinoids
         ✓ total_terpenes
-        ✓ lab_results_url (FIXME: Has an extra slash `//report/`)
-        ✓ image
-        ✓ sample_id (generated)
-        ✓ results
-        ✓ lab
-        ✓ {analysis}_method
 
 Data Sources:
     
@@ -43,7 +48,7 @@ Future development:
 
 """
 # Internal imports.
-from datetime import datetime
+import base64
 import json
 import math
 from time import sleep
@@ -51,28 +56,35 @@ from typing import Any, Optional
 
 # External imports.
 from bs4 import BeautifulSoup
-import pandas as pd
+from firebase_admin import firestore, initialize_app
 import requests
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
-from cannlytics.utils.utils import (
-    snake_case,
-    to_excel_with_style,
-)
+from cannlytics.utils.constants import DEFAULT_HEADERS
+from cannlytics.utils.utils import snake_case, strip_whitespace
+from cannlytics.firebase import get_document, update_documents
 
 
-# === Constants ===
-BASE = 'https://reports.mcrlabs.com'
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
-STATE = 'MA'
-DATA_DIR = '../../../.datasets/lab_results'
-RAW_DATA = '../../../.datasets/lab_results/raw_data/mcr_labs'
-TRAINING_DATA = '../../../.datasets/lab_results/training_data'
+# Lab details.
+MCR_LABS = {
+    'coa_algorithm': 'mcrlabs.py',
+    'coa_algorithm_entry_point': 'get_mcr_labs_sample_details',
+    'lims': 'MCR Labs',
+    'url': 'https://reports.mcrlabs.com',
+    'lab': 'MCR Labs',
+    'lab_website': 'https://mcrlabs.com',
+}
 
 
-def format_iso_date(date, sep='/'):
-    """Format a human-written date into an ISO formatted date."""
+def format_iso_date(date: str, sep: Optional[str] = '/') -> str:
+    """Format a human-written date into an ISO formatted date.
+    Args:
+        date (str): A human-written date, e.g. '4/20/2022'.
+        sep (str): The separator used in the date, '/' by default (optional).
+    Returns:
+        (str): An ISO-formatted date.
+    """
     mm, dd, yyyy = tuple(date.split(sep))
     if len(mm) == 1:
         mm = f'0{mm}'
@@ -83,15 +95,22 @@ def format_iso_date(date, sep='/'):
     return '-'.join([yyyy, mm, dd])
 
 
-def strip_whitespace(string):
-    """Strip whitespace from a string."""
-    return string.replace('\n', '').strip()
-
-
-def get_mcr_labs_sample_count(per_page: Optional[int] = 30) -> dict:
-    """Get the number of samples and pages of MCR Labs samples."""
-    url = f'{BASE}/products-weve-tested'
-    response = requests.get(url, headers=HEADERS)
+def get_mcr_labs_sample_count(
+        per_page: Optional[int] = 30,
+        headers: Optional[Any] = None,
+    ) -> dict:
+    """Get the number of samples and pages of MCR Labs samples.
+    Args:
+        per_page (int): The number of results displayed per page.
+        headers (dict): Headers for the HTTP request (optional).
+    Returns:
+        (dict): A dictionary with `count` and `pages` keys.
+    """
+    base = MCR_LABS['url']
+    url = f'{base}/products-weve-tested'
+    if headers is None:
+        headers = DEFAULT_HEADERS
+    response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
     element = soup.find('span', attrs={'id': 'found_posts'})
     count = int(element.text.replace(',', ''))
@@ -162,6 +181,7 @@ def get_mcr_labs_samples(
         cat: Optional[str] = 'all',
         order: Optional[str] = 'date-desc',
         search: Optional[str] = '',
+        headers: Optional[Any] = None,
     ) -> list:
     """Get all test results from MCR Labs on a specific page.
     Args:
@@ -172,18 +192,22 @@ def get_mcr_labs_samples(
             (optional). Options: `date-desc`, `samplename`, `client`,
             `totalcann-desc`, `totalterp-desc`, `maxthc-desc`, `maxcbd-desc`.
         search (str): A particular search query.
+        headers (dict): Headers for the HTTP request (optional).
     Returns:
         (list): A list of dictionaries of sample data.
     """
     # Get a page.
-    url = f'{BASE}/ProductWeVeTested/AjaxSearch'
+    base = MCR_LABS['url']
+    url = f'{base}/ProductWeVeTested/AjaxSearch'
     params = {
         'category': cat,
         'order': order,
         'page': str(page_id),
         'searchString': search,
     }
-    response = requests.get(url, headers=HEADERS, params=params)
+    if headers is None:
+        headers = DEFAULT_HEADERS
+    response = requests.get(url, headers=headers, params=params)
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # Get all of the products on the page.
@@ -215,13 +239,13 @@ def get_mcr_labs_samples(
         try:
             element = product.find('span', attrs={'class': 'url-linked'})
             href = element.attrs['data-url']
-            sample['producer_url'] = '/'.join([BASE, href])
+            sample['producer_url'] = '/'.join([base, href])
         except AttributeError:
             sample['producer_url'] = ''
 
         # Get the lab results URL.
         href = product.find('a')['href']
-        sample['lab_results_url'] = '/'.join([BASE, href])
+        sample['lab_results_url'] = '/'.join([base, href])
 
         # Get the image.
         image_url = product.find('img')['src']
@@ -236,7 +260,7 @@ def get_mcr_labs_samples(
         )
 
         # Aggregate sample data.
-        samples.append(sample)
+        samples.append({**MCR_LABS, **sample})
 
     # Return the samples.
     return samples
@@ -251,17 +275,24 @@ def get_mcr_labs_producer_test_results():
     raise NotImplementedError
 
 
-def get_mcr_labs_sample_details(sample_id: str) -> dict:
+def get_mcr_labs_sample_details(
+        sample_id: str,
+        headers: Optional[Any] = None,
+    ) -> dict:
     """Get the details for a specific MCR Labs test sample.
     Args:
         sample_id (str): A sample ID number.
+        headers (dict): Headers for the HTTP request (optional).
     Returns:
         (dict): A dictionary of sample details.
     """
     # Get the sample page.
     sample = {}
-    url = f'{BASE}/reports/{sample_id}'
-    response = requests.get(url, headers=HEADERS)
+    base = MCR_LABS['url']
+    url = f'{base}/reports/{sample_id}'
+    if headers is None:
+        headers = DEFAULT_HEADERS
+    response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # Optional: Get product serving size.
@@ -303,6 +334,7 @@ def get_mcr_labs_sample_details(sample_id: str) -> dict:
     analyses.append('cannabinoids')
     for analyte in cannabinoids:
         results.append({
+            'analysis': 'cannabinoids',
             'key': analyte['key'],
             'name': analyte['label'],
             'value': analyte['perc'],
@@ -310,6 +342,7 @@ def get_mcr_labs_sample_details(sample_id: str) -> dict:
         })
 
     # Get the results for all other analyses.
+    # FIXME: Add `analysis` field to results.
     values = ['name', 'result', 'lod' ,'loq']
     tables = soup.find_all('table', attrs={'class': 'safetytable'})
     for table in tables:
@@ -329,52 +362,88 @@ def get_mcr_labs_sample_details(sample_id: str) -> dict:
 
     # Return the sample details.
     sample['results'] = results
-    return sample
+    return {**MCR_LABS, **sample}
 
 
+def get_mcr_labs_data(event, context):
+    """Archive MCR Labs data on a periodic basis.
+    Triggered from a message on a Cloud Pub/Sub topic.
+    Args:
+        event (dict): Event payload.
+        context (google.cloud.functions.Context): Metadata for the event.
+    """
 
-# TODO: Augment with:
-# - lab details: lab, lab_url, lab_license_number, etc.
-# - lab_latitude, lab_longitude
+    # Check the PubSub message is valid.
+    pubsub_message = base64.b64decode(event['data']).decode('utf-8')
+    if pubsub_message != 'success':
+        return
 
-# Future work: Calculate average results by state, county, and zip code.
+    # Initialize Firebase.
+    try:
+        initialize_app()
+    except ValueError:
+        pass
+    database = firestore.client()
 
+    # Get the most recent lab results.
+    data = get_mcr_labs_test_results(ending_page=1, verbose=False)
 
-# === 3. Archive the data! ===
+    # Read lab results to see if any are missing.
+    refs, updates = [], []
+    for obs in data:
+        sample_id = obs['sample_id']
+        ref = f'public/data/lab_results/{sample_id}'
+        doc = get_document(ref)
+        if not doc:
+            refs.append(ref)
+            updates.append(obs)
 
-def main():
-    """Archive MCR Labs data on a periodic basis."""
+    # Write any new lab results.
+    if updates:
+        update_documents(refs, updates, database=database)
+        print('Added %i lab results' % len(refs))
 
 
 if __name__ == '__main__':
 
-    # === Test ===
+    # === Tests ===
+    from cannlytics.utils.utils import to_excel_with_style
+    from datetime import datetime
+    import pandas as pd
+    
+    # Specify where your test data lives.
+    DATA_DIR = '../../../.datasets/lab_results'
+    RAW_DATA = '../../../.datasets/lab_results/raw_data/mcr_labs'
+    TRAINING_DATA = '../../../.datasets/lab_results/training_data'
 
-    # ✓ Test getting the number of total samples.
+    # [✓] TEST: Get the number of total samples.
     # page_count = get_mcr_labs_sample_count(per_page=30)
+    # assert page_count is not None
 
-    # ✓ Test getting samples on a given page.
+    # [✓] TEST: Get samples on a given page.
     # samples = get_mcr_labs_samples('6')
+    # assert samples is not None
 
-    # ✓ Test getting sample details.
+    # [✓] TEST: Get sample details.
     # details = get_mcr_labs_sample_details('rooted-labs-distillate_2')
+    # assert details is not None
 
-    # ✓ Get all of the samples.
-    print('Getting ALL of the samples.')
-    all_results = get_mcr_labs_test_results(
-        starting_page=150,
-        ending_page=250,
-        pause=0.2,
-    )
-    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-    datafile = f'{DATA_DIR}/mcr-lab-results-{timestamp}.xlsx'
-    to_excel_with_style(pd.DataFrame(all_results), datafile)
-    print('[✓] Tested getting ALL of the samples.')
+    # [✓] TEST: Get all of the samples.
+    # all_results = get_mcr_labs_test_results(
+    #     starting_page=150,
+    #     ending_page=250,
+    #     pause=0.2,
+    # )
+    # timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+    # datafile = f'{DATA_DIR}/mcr-lab-results-{timestamp}.xlsx'
+    # to_excel_with_style(pd.DataFrame(all_results), datafile)
 
-    # ✓ Get only the most recent samples.
-    # print('Getting the most recent samples.')
+    # [✓] TEST: Get only the most recent samples.
     # recent_results = get_mcr_labs_test_results(ending_page=2)
     # timestamp = datetime.now().isoformat()[:19].replace(':', '-')
     # datafile = f'{DATA_DIR}/mcr-lab-results-{timestamp}.xlsx'
     # to_excel_with_style(pd.DataFrame(recent_results), datafile)
-    # print('[✓] Tested getting the most recent samples.')
+
+    # [✓] TEST: Mock the Google Cloud Function scheduled routine.
+    # event = {'data': base64.b64encode('success'.encode())}
+    # get_mcr_labs_data(event, context={})

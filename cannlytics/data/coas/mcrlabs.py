@@ -338,6 +338,7 @@ def get_mcr_labs_sample_details(sample_id: str) -> dict:
     analyses.append('cannabinoids')
     for analyte in cannabinoids:
         results.append({
+            'analysis': 'cannabinoids',
             'key': analyte['key'],
             'name': analyte['label'],
             'value': analyte['perc'],
