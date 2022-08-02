@@ -588,7 +588,7 @@ function renderSamplePlaceholder() {
   // Hide the general placeholder.
   document.getElementById('coa-sample-results-placeholder').classList.add('d-none');
 
-  // FIXME:
+  // FIXME: This throws an error on subsequent renders.
   // Clone the sample template.
   const timestamp = new Date().toISOString().slice(0, 19).replaceAll(':', '-');
   const docFrag = document.createDocumentFragment();

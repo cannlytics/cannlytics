@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 7/16/2022
+Updated: 8/1/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains general utility functions.
@@ -200,6 +200,28 @@ def snake_case(string: str) -> str:
 def strip_whitespace(string: str) -> str:
     """Strip whitespace from a string."""
     return string.replace('\n', '').strip()
+
+
+#-----------------------------------------------------------------------
+# Number utilities.
+#-----------------------------------------------------------------------
+
+def convert_to_numeric(string: str, strip: Optional[str] = False) -> str:
+    """Convert a string to numeric, optionally replacing non-numeric
+    characters.
+    Args:
+        string (str): The string to attempt to parse to a number.
+    Returns:
+        (float): Returns either the original or the parsed number.
+    """
+    if strip:
+        s = sub('[^\d\.]', '', string)
+    else:
+        s = string
+    try:
+       return float(s)
+    except (TypeError, ValueError):
+        return s
 
 
 #-----------------------------------------------------------------------
@@ -581,6 +603,24 @@ def end_of_year(value: datetime) -> str:
         (str): An ISO formatted date.
     """
     return f'{value.year}-12-31'
+
+
+def format_iso_date(date: str, sep: Optional[str] = '/') -> str:
+    """Format a human-written date into an ISO formatted date.
+    Ags:
+        date (str): A human-written date.
+        sep (str): The separating character, '/' by default (optional).
+    Returns:
+        (str): An ISO formatted date string.
+    """
+    mm, dd, yyyy = tuple(date.split(sep))
+    if len(mm) == 1:
+        mm = f'0{mm}'
+    if len(dd) == 1:
+        dd = f'0{dd}'
+    if len(yyyy) == 2:
+        yyyy = f'20{yyyy}'
+    return '-'.join([yyyy, mm, dd])
 
 
 def get_timestamp(

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 7/31/2022
+Updated: 8/1/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -26,15 +26,21 @@ Note:
 
 Supported Labs:
 
+    - Anresco Laboratories
+    - Cannalysis
     ✓ Green Leaf Lab
-    - MCR Labs
-    - SC Labs
+    ✓ MCR Labs
+    ✓ SC Labs
+    - Sonoma Lab Works
     - Veda Scientific
 
 Supported LIMS:
 
     ✓ Confident Cannabis
+        - CB Labs (FIXME)
     ✓ TagLeaf LIMS
+        - BelCosta Labs (FIXME)
+        - California AG Labs (FIXME)
 
 Future work:
 
@@ -85,7 +91,7 @@ LIMS = {
     'Confident Cannabis': CONFIDENT_CANNABIS,
     'Green Leaf Lab': GREEN_LEAF_LAB,
     'MCR Labs': MCR_LABS,
-    'SC_LABS': SC_LABS,
+    'SC Labs': SC_LABS,
     'TagLeaf LIMS': TAGLEAF,
     'Veda Scientific': VEDA_SCIENTIFIC,
 }
@@ -118,6 +124,16 @@ KEYS = {
     'terpenoids': 'terpenes',
     'foreign_materials': 'foreign_matter',
 }
+
+
+def sandwich_list(a) -> list:
+    """Create a range that cycles from start to the end to the middle.
+    Args:
+        a (str): The iterable to sandwich.
+    Returns:
+        (list): The sandwich index.
+    """
+    return [a[-i//2] if i % 2 else a[i//2] for i in range(len(a))]
 
 
 class CoADoc:
@@ -202,6 +218,7 @@ class CoADoc:
             self,
             pdf: Any,
             image_index: Optional[int] = None,
+            page_index: Optional[int] = 0,
         ) -> str:
         """Find the QR code given a CoA PDF or page.
         If no `image_index` is provided, then all images are tried to be
@@ -210,28 +227,35 @@ class CoADoc:
         Args:
             doc (PDF or Page): A pdfplumber PDF or Page.
             image_index (int): A known image index for the QR code.
+            page_index (int): The page to search, 0 by default (optional).
         Returns:
             (str): The QR code URL.
         """
+        image_data = None
         if isinstance(pdf, str):
             pdf_file = pdfplumber.open(pdf)
-            page = pdf_file.pages[0]
+            page = pdf_file.pages[page_index]
         elif isinstance(pdf, pdfplumber.pdf.PDF):
-            page = pdf.pages[0]
+            page = pdf.pages[page_index]
         else:
             page = pdf
         if image_index:
             img = page.images[image_index]
-            image_data = self.decode_pdf_qr_code(page, img)
+            decoded_image = self.decode_pdf_qr_code(page, img)
+            image_data = decoded_image[0].data.decode('utf-8')
         else:
-            for img in page.images:
+            # Cycle from start to end to the middle.
+            image_range = sandwich_list(page.images)
+            for img in image_range:
+                # img = page.images[index]
                 try:
-                    image_data = self.decode_pdf_qr_code(page, img)
+                    decoded_image = self.decode_pdf_qr_code(page, img)
+                    image_data = decoded_image[0].data.decode('utf-8')
                     if image_data:
                         break
                 except:
                     continue
-        return image_data[0].data.decode('utf-8')
+        return image_data
 
     def find_metrc_id(self, pdf: Any) -> str:
         """Find any Metrc ID that may be in a given CoA PDF."""
@@ -355,6 +379,17 @@ class CoADoc:
                 if lab and lab in text:
                     known = key
                     break
+
+        # Try to get a QR code to ID the LIMs that way.
+        if not known:
+            qr_code_url = self.find_pdf_qr_code_url(doc)
+            if qr_code_url:
+                for key, values in lims.items():
+                    url = values.get('url')
+                    if url and url in qr_code_url:
+                        known = key
+                        break
+
         return known
 
     def parse(
@@ -384,13 +419,31 @@ class CoADoc:
         Returns:
             (list): Returns a list of all of the PDFs.
         """
-        coas = []
+        coas, docs = [], []
         if isinstance(data, str):
-            if '.zip' in data:
+            if 'https' in data:
+                coa_data = self.parse_url(
+                    data,
+                    headers=headers,
+                    lims=lims,
+                    max_delay=max_delay,
+                    persist=persist,
+                )
+                coas.append(coa_data)
+            elif '.pdf' in data:
+                coa_data = self.parse_pdf(
+                    data,
+                    headers=headers,
+                    lims=lims,
+                    max_delay=max_delay,
+                    persist=persist,
+                )
+                coas.append(coa_data)
+            elif '.zip' in data:
                 doc_dir = unzip_files(data)
+                docs = get_directory_files(doc_dir)
             else:
-                doc_dir = data
-            docs = get_directory_files(data)
+                docs = get_directory_files(data)
         else:
             docs = data
         for doc in docs:
@@ -401,6 +454,7 @@ class CoADoc:
                     coa_data = self.parse_pdf(
                         pdf_file,
                         lims=lims,
+                        max_delay=max_delay,
                         persist=persist,
                     )
                     coas.append(coa_data)
@@ -408,6 +462,7 @@ class CoADoc:
                 coa_data = self.parse_pdf(
                     doc,
                     lims=lims,
+                    max_delay=max_delay,
                     persist=persist,
                 )
             else:
@@ -472,8 +527,10 @@ class CoADoc:
         
         if known_lims:
             try:
-                qr_code_index = self.lims[known_lims]['qr_code_index']
+                qr_code_index = self.lims[known_lims].get('qr_code_index')
                 url = self.find_pdf_qr_code_url(pdf_file, qr_code_index)
+                if url is None and qr_code_index is not None:
+                    url = self.find_pdf_qr_code_url(pdf_file)
             except IndexError:
                 url = self.find_pdf_qr_code_url(pdf_file)
             # Future work: This is double-checking the `known_lims` twice!
@@ -608,25 +665,6 @@ class CoADoc:
 if __name__ == '__main__':
 
     # === Tests ===
-    # [✓] decode_pdf_qr_code
-    # [✓] find_pdf_qr_code_url
-    # [✓] get_pdf_creation_date
-    # [✓] identify_lims
-    # [✓] parse
-    # [✓] parse_pdf
-    # [✓] parse_url
-    # [✓] parse_cc_pdf
-    # [✓] parse_cc_url
-    # [✓] parse_tagleaf_pdf
-    # [✓] parse_tagleaf_url
-    # [✓] parse_green_leaf_lab_pdf
-    # [ ] parse_veda_scientific_pdf
-    # [ ] parse_mcr_labs_url
-    # [ ] parse_sc_labs_pdf
-    # [ ] parse_sc_labs_url
-    # [-] save (not implemented yet)
-    # [-] standardize (not implemented yet)
-    # [✓] quit
 
     # Initialize the CoA parser.
     # Future work: Test the parser with different configurations.
@@ -663,19 +701,19 @@ if __name__ == '__main__':
     # data = parser.parse_pdf(cc_coa_pdf)
 
     # [✓] TEST: Parse a URL.
-    # data = parser.parse_pdf(cc_coa_url)
+    # data = parser.parse_url(cc_coa_url)
 
     # [✓] TEST: Parse a Confident Cannabis CoA.
-    # data = parser.parse_cc_pdf(cc_coa_pdf)
+    # data = parser.parse(cc_coa_pdf)
     # sleep(3)
-    # data = parser.parse_cc_url(cc_coa_url)
+    # data = parser.parse(cc_coa_url)
 
     # [✓] TEST: Parse a TagLeaf LIMS CoA.
-    # data = parser.parse_tagleaf_pdf(tagleaf_coa_pdf)
+    # data = parser.parse(tagleaf_coa_pdf)
     # sleep(3)
-    # data = parser.parse_tagleaf_url(tagleaf_coa_url)
+    # data = parser.parse(tagleaf_coa_url)
     # sleep(3)
-    # data = parser.parse_tagleaf_url(tagleaf_coa_short_url)
+    # data = parser.parse(tagleaf_coa_short_url)
 
     # [✓] TEST: Parse a list of CoA URLs.
     # urls = [cc_coa_url, tagleaf_coa_url]
@@ -688,35 +726,43 @@ if __name__ == '__main__':
     # [✓] TEST: Parse all CoAs in a given directory.
     # data = parser.parse(DATA_DIR)
 
-    # [ ] TEST: Parse all CoAs in a zipped file!
-
+    # [ ] TEST: Parse all CoAs in a zipped folder!
+    zip_folder = '../../../.datasets/tests/coas.zip'
+    # data = parser.parse(zip_folder)
+    # assert data is not None
 
     # [✓] TEST: Green Leaf Lab CoA parsing algorithm.
     # green_leaf_lab_coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
-    # data = parser.parse_green_leaf_lab_pdf(green_leaf_lab_coa_pdf)
+    # data = parser.parse(green_leaf_lab_coa_pdf)
     # assert data is not None
 
     # [ ] TEST: Parse a Veda Scientific CoA.
     veda_coa_pdf = f'{DATA_DIR}/Veda Scientific Sample COA.pdf'
+    # lab = parser.identify_lims(veda_coa_pdf)
+    # assert lab == 'Veda Scientific'
+    # data = parser.parse(veda_coa_pdf)
+    # assert data is not None
 
-
-    # [ ] TEST: Get MCR Labs results by URL.
+    # [ ] TEST: Parse a MCR Labs URL.
     mcr_labs_coa_url = 'https://reports.mcrlabs.com/reports/critical-kush_24'
     lab = parser.identify_lims(mcr_labs_coa_url)
     assert lab == 'MCR Labs'
-    
-
-
-    # [ ] TEST: Parse a MCR Labs URL.   
-    
+    data = parser.parse(mcr_labs_coa_url)
+    assert data is not None
 
     # [ ] TEST: Parse a SC Labs sample URL.
-    sc_labs_coa_url = 'https://client.sclabs.com/sample/796684/'
-
+    # sc_labs_coa_url = 'https://client.sclabs.com/sample/796684/'
+    # lab = parser.identify_lims(sc_labs_coa_url)
+    # assert lab == 'SC Labs'
+    # data = parser.parse(sc_labs_coa_url)
+    # assert data is not None
 
     # [ ] TEST: Parse a SC Labs CoA.
     sc_labs_coa_pdf = f'{DATA_DIR}/SC Labs Test CoA.pdf'
-
+    # lab = parser.identify_lims(sc_labs_coa_pdf)
+    # assert lab == 'SC Labs'
+    # data = parser.parse(sc_labs_coa_pdf)
+    # assert data is not None
 
     # [ ] TEST: Find results by known metrc IDs.
     metrc_ids = [
@@ -724,12 +770,15 @@ if __name__ == '__main__':
         '1A4060300017A85000001289', # Green Leaf Lab
         '1A4060300002459000017049', # SC Labs
     ]
+    # sample = parser.parse(metrc_ids[0])
+    # assert sample is not None
+    # data = parser.parse(metrc_ids)
+    # assert data is not None
 
-
-    # [ ] TEST: Parse a custom CoA (accept an error for now).
+    # [✓] TEST: Parse a custom CoA (accept an error for now).
     try:
         parser.parse('https://cannlytics.page.link/partial-equilibrium-notes')
-    except ValueError:
+    except NotImplementedError:
         pass
    
     # [✓] TEST: Close the parser.

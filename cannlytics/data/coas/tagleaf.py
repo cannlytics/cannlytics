@@ -75,6 +75,7 @@ TAGLEAF = {
     'coa_qr_code_index': 2,
     'lims': 'lims.tagleaf',
     'url': 'https://lims.tagleaf.com',
+    'public': True,
 }
 
 

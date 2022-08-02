@@ -80,6 +80,7 @@ CONFIDENT_CANNABIS = {
     'coa_qr_code_index': 3,
     'lims': 'Con\x00dent Cannabis',
     'url': 'https://orders.confidentcannabis.com',
+    'public': True,
 }
 
 

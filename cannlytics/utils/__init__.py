@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 7/14/2022
+Updated: 8/1/2022
 """
 from .utils import (
     camelcase,
@@ -12,6 +12,7 @@ from .utils import (
     clean_column_strings,
     clean_dictionary,
     clean_nested_dictionary,
+    convert_to_numeric,
     download_file_from_url,
     decode_pdf,
     encode_pdf,
@@ -34,6 +35,7 @@ from .utils import (
     format_billions,
     format_millions,
     format_thousands,
+    format_iso_date,
     sorted_nicely,
     strip_whitespace,
     rmerge,
@@ -50,6 +52,7 @@ __all__ = [
     'clean_dictionary',
     'clean_nested_dictionary',
     'convert_month_year_to_date',
+    'convert_to_numeric',
     'download_file_from_url',
     'get_directory_files',
     'get_keywords',
@@ -69,6 +72,7 @@ __all__ = [
     'format_billions',
     'format_millions',
     'format_thousands',
+    'format_iso_date',
     'sorted_nicely',
     'strip_whitespace',
     'rmerge',
