@@ -264,11 +264,6 @@ def parse_green_leaf_lab_pdf(
     """Parse a Green Leaf Lab CoA PDF.
     Args:
         doc (str or PDF): A PDF file path or pdfplumber PDF.
-        headers (dict): Headers for HTTP requests.
-        persist (bool): Whether to persist the session.
-            The default is `False`. If you do persist
-            the driver, then make sure to call `quit`
-            when you are finished.
     Returns:
         (dict): The sample data.
     """

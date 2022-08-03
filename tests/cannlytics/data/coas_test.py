@@ -53,6 +53,11 @@ for path, subdirs, files in os.walk(DATA_DIR):
         # See which PDFs we can identify :p
         file_name = os.path.join(path, name)
         lab = parser.identify_lims(file_name)
+
+
+        if lab != 'SC Labs':
+            continue
+
         if lab:
             identified.append(file_name)
             print('Identified:', lab, file_name.split('/')[-1])

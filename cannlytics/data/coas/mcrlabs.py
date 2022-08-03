@@ -78,7 +78,8 @@ MCR_LABS = {
     'lims': 'MCR Labs',
     'url': 'https://reports.mcrlabs.com',
     'lab': 'MCR Labs',
-    'lab_website': 'https://mcrlabs.com',   
+    'lab_website': 'https://mcrlabs.com',
+    'public': True,
 }
 
 

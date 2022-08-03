@@ -11,7 +11,7 @@ License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE
 
 Description:
 
-    Tools to collect SC Labs' publicly published lab results.
+    Tools to collect SC Labs test results from CoA PDFs and URLs.
 
 Data Points:
 
@@ -95,25 +95,32 @@ Future work:
 
 """
 # Internal imports.
+from ast import literal_eval
 import re
 from time import sleep
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import urljoin
 
 # External imports.
 from bs4 import BeautifulSoup
+import pandas as pd
+import pdfplumber
 import requests
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
 from cannlytics.utils.constants import DEFAULT_HEADERS
-from cannlytics.utils.utils import snake_case, strip_whitespace
+from cannlytics.utils.utils import (
+    convert_to_numeric,
+    snake_case,
+    strip_whitespace,
+)
 
 
 # It is assumed that the lab has the following details.
 SC_LABS = {
     'coa_algorithm': 'sclabs.py',
-    'coa_algorithm_entry_point': 'get_sc_labs_sample_details',
+    'coa_algorithm_entry_point': 'parse_sc_labs_coa',
     'lims': 'SC Labs',
     'url': 'https://client.sclabs.com',
     'lab': 'SC Labs',
@@ -130,6 +137,7 @@ SC_LABS = {
     'lab_website': 'https://sclabs.com',
     'lab_latitude': '36.987869',
     'lab_longitude': '-122.033162',
+    'public': True,
 }
 
 # It is assumed that the CoA has the following parameters.
@@ -144,6 +152,13 @@ SC_LABS_COA = {
         'microbiology': 'microbes',
         'foreign_material': 'foreign_matter',
     },
+    'coa_page_area': '(0, 350, 612, 520)',
+    'coa_distributor_area': '(205, 150, 400, 230)',
+    'coa_producer_area': '(0, 150, 204.0, 230)',
+    'coa_sample_details_area': [
+        (0, 225, 200, 350),
+        (200, 225, 400, 350),
+    ],
     'coa_fields': {
         'batch_number': 'batch_number',
         'batch_size': 'batch_size',
@@ -169,7 +184,10 @@ SC_LABS_COA = {
         'foreign_material_method': 'foreign_matter_method',
         'total_terpenoids_percent': 'total_terpenes',
         'total_terpenoids_mgtog': '',
+        'sample_id': 'lab_id',
         'source_metrc_uid': 'metrc_source_id',
+        'sample_size': 'sample_weight',
+        'unit_mass': 'product_size',
     },
     'coa_results_fields': {
         'compound': 'name',
@@ -178,6 +196,20 @@ SC_LABS_COA = {
         'result-percent': 'value',
         'action-limit': 'limit',
         'result-pf': 'status',
+    },
+    'coa_replacements': {
+        'b_caryophyllene': 'beta_caryophyllene',
+        'a_humulene': 'humulene',
+        'b_pinene': 'beta_pinene',
+        'a_bisabolol': 'alpha_bisabolol',
+        'a_pinene': 'alpha_pinene',
+        'a_cedrene': 'alpha_cedrene',
+        '3_carene': 'carene',
+        'g_terpinene': 'gamma_terpinene',
+        'r_pulegone': 'pulegone',
+        'a_phellandrene': 'alpha_phellandrene',
+        'a_terpinene': 'alpha_terpinene',
+        'trans_b_farnesene': 'trans_beta_farnesene',
     },
 }
 
@@ -204,22 +236,212 @@ def parse_data_block(div, tag='span') -> dict:
     return data
 
 
-def convert_to_numeric(string: str, strip: Optional[str] = False) -> str:
-    """Convert a string to numeric, optionally replacing non-numeric
-    characters.
+def parse_sc_labs_coa(
+        self,
+        doc: Any,
+        headers: Optional[dict] = None,
+        persist: Optional[bool] = False,
+    ) -> dict:
+    """Parse a TagLeaf LIMS CoA PDF.
     Args:
-        string (str): The string to attempt to parse to a number.
+        doc (str or PDF): A PDF file path or pdfplumber PDF.
+        headers (dict): Headers for HTTP requests.
+        persist (bool): Whether to persist the session.
+            The default is `False`. If you do persist
+            the driver, then make sure to call `quit`
+            when you are finished.
     Returns:
-        (float): Returns either the original or the parsed number.
+        (dict): The sample data.
     """
-    if strip:
-        s = re.sub('[^\d\.]', '', string)
-    else:
-        s = string
+    # Pythonic try first, ask later approach.
+    # FIXME: Be more precise and check if there is a URL and if it is private.
     try:
-       return float(s)
-    except (TypeError, ValueError):
-        return s
+        data = get_sc_labs_sample_details(doc)
+    except:
+        data = parse_sc_labs_pdf(doc)
+        data['public'] = False
+    return data
+
+
+def parse_sc_labs_pdf(doc: Any) -> dict:
+    """Parse a SC Labs CoA PDF.
+    Args:
+        doc (str or PDF): A PDF file path or pdfplumber PDF.
+    Returns:
+        (dict): The sample data.
+    """
+    obs = {}
+
+    # Read the PDF.
+    if isinstance(doc, str):
+        report = pdfplumber.open(doc)
+    else:
+        report = doc
+    front_page = report.pages[0]
+
+    # Read the PDF.
+    if isinstance(doc, str):
+        report = pdfplumber.open(doc)
+    else:
+        report = doc
+    front_page = report.pages[0]
+
+    # Get the lab-specific CoA page areas.
+    distributor_area = literal_eval(SC_LABS_COA['coa_distributor_area'])
+    producer_area = literal_eval(SC_LABS_COA['coa_producer_area'])
+    sample_details_area = SC_LABS_COA['coa_sample_details_area']
+
+    # Get producer details.
+    crop = front_page.within_bbox(producer_area)
+    details = crop.extract_text().replace('\n', '')
+    address = details.split('Address:')[-1].strip()
+    business = details.split('Business Name:')[-1].split('License Number:')[0].strip()
+    license_number = details.split('License Number:')[-1].split('Address:')[0].strip()
+    parts = address.split(',')
+    street = parts[0]
+    subparts = parts[-1].strip().split(' ')
+    city = ' '.join(subparts[:-2])
+    try:
+        state, zipcode = subparts[-2], subparts[-1]
+    except IndexError:
+        state, zipcode = '', ''
+    obs['producer'] = business
+    obs['producer_address'] = address
+    obs['producer_street'] = street
+    obs['producer_city'] = city
+    obs['producer_state'] = state
+    obs['producer_zipcode'] = zipcode
+    obs['producer_license_number'] = license_number
+
+    # Get distributor details.
+    crop = front_page.within_bbox(distributor_area)
+    details = crop.extract_text().replace('\n', ' ')
+    address = details.split('Address:')[-1].strip()
+    business = details.split('Business Name:')[-1].split('License Number:')[0].strip()
+    license_number = details.split('License Number:')[-1].split('Address:')[0].strip()
+    parts = address.split(',')
+    street = parts[0]
+    subparts = parts[-1].strip().split(' ')
+    city = ' '.join(subparts[:-2])
+    try:
+        state, zipcode = subparts[-2], subparts[-1]
+    except IndexError:
+        state, zipcode = '', ''
+    obs['distributor'] = business
+    obs['distributor_address'] = address
+    obs['distributor_street'] = street
+    obs['distributor_city'] = city
+    obs['distributor_state'] = state
+    obs['distributor_zipcode'] = zipcode
+    obs['distributor_license_number'] = license_number
+
+    # Get sample details.
+    standard_fields = SC_LABS_COA['coa_fields']
+    if isinstance(sample_details_area, str):
+        sample_details_area = [sample_details_area]
+    for area in sample_details_area:
+        crop = front_page.within_bbox(area)
+        details = crop.extract_text().split('\n')
+        for d in details:
+            if ':' not in d:
+                continue
+            values = d.split(':')
+            key = snake_case(values[0])
+            key = standard_fields.get(key, key)
+            obs[key] = values[-1]
+
+    # Get the date tested, product name, and sample type.
+    front_page_text = front_page.extract_text()
+    date_tested = front_page_text.split('DATE ISSUED')[-1].split('|')[0].strip()
+    lines = front_page_text.split('SAMPLE NAME:')[1].split('\n')
+    product_name = lines[0]
+    obs['product_type'] = lines[1]
+
+    # TODO: Get analyses.
+    rects = front_page.rects
+    for rect in rects:
+        crop = front_page.within_bbox((rect['x0'], rect['y0'], rect['x1'], rect['y1']))
+        text = crop.extract_text()
+        if 'ANALYSIS' in text:
+            print(text)
+            break
+
+    # Get the totals.
+
+    value = front_page_text.split('Sum of Cannabinoids:')[-1].split('%')[0]
+    obs['sum_of_cannabinoids'] = convert_to_numeric(value, strip=True)
+
+    value = front_page_text.split('Total Cannabinoids:')[-1].split('%')[0]
+    obs['total_cannabinoids'] = convert_to_numeric(value, strip=True)
+
+    value = front_page_text.split('Total THC:')[-1].split('%')[0]
+    obs['total_thc'] = convert_to_numeric(value, strip=True)
+
+    value = front_page_text.split('Total CBD:')[-1].split('%')[0]
+    obs['total_cbd'] = convert_to_numeric(value, strip=True)
+
+    value = front_page_text.split('Total Terpenoids:')[-1].split('%')[0]
+    obs['total_terpenes'] = convert_to_numeric(value, strip=True)
+
+    value = front_page_text.split('Moisture:')[-1].split('%')[0]
+    obs['moisture'] = convert_to_numeric(value, strip=True)
+
+    # Get the results.
+    # FIXME: Is it possible to add `analysis` to the results? NLP?
+    results = []
+    standard_analytes = SC_LABS_COA['coa_replacements']
+    for page in report.pages[1:]:
+
+        # Get the results from each result page.
+        tables = page.extract_tables()
+        for table in tables:
+            for row in table:
+                key = snake_case(row[0])
+                key = standard_analytes.get(key, key)
+                parts = row[1].split(' / ')
+                subparts = parts[-1].strip().split(' ')
+                mg_g, value = tuple(row[-1].split(' '))
+                results.append({
+                    'key': key,
+                    'lod': convert_to_numeric(parts[0].strip()),
+                    'loq': convert_to_numeric(subparts[0]),
+                    'margin_of_error': convert_to_numeric(subparts[-1].replace('±', '')),
+                    'mg_g': convert_to_numeric(mg_g),
+                    'name': row[0].replace('\n', ' ').strip(),
+                    'value': convert_to_numeric(value),
+                })
+
+        # FIXME:
+        # Get the methods from the result page text.
+        # page_text = page.extract_text()
+        # texts = page_text.split('Method:')
+        # for text in texts[1:]:
+        #     if 'Analysis' in text:
+        #         method = text.split('.')[0]
+        #         analysis = method.split('Analysis of ')[-1].split(' by')[0].lower()
+        #         print(analysis, method)
+
+    # Aggregate results.
+    obs['analyses'] = []
+    obs['date_tested'] = date_tested
+    obs['product_name'] = product_name
+    obs['results'] = results
+
+    # Turn dates to ISO format.
+    date_columns = [x for x in obs.keys() if x.startswith('date')]
+    for date_column in date_columns:
+        try:
+            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+        except:
+            pass
+
+    # Finish data collection with a freshly minted sample ID.
+    obs['sample_id'] = create_sample_id(
+        private_key=obs['producer'],
+        public_key=obs['product_name'],
+        salt=obs['date_tested'],
+    )
+    return {**SC_LABS, **obs}
 
 
 def get_sc_labs_test_results(
@@ -370,10 +592,15 @@ def get_sc_labs_client_details():
     raise NotImplementedError
 
 
-def get_sc_labs_sample_details(sample, headers=None) -> dict:
+def get_sc_labs_sample_details(
+        sample='',
+        headers=None,
+        **kwargs,
+    ) -> dict:
     """Get the details for a specific SC Labs test sample.
     Args:
         sample (str): A sample number or sample URL.
+        headers (dict): Headers for the HTTP request (optional).
     Returns:
         (dict): A dictionary of sample details.
     """
@@ -638,7 +865,7 @@ def get_sc_labs_sample_details(sample, headers=None) -> dict:
 
         # Try to ensure that the result values are numbers.
         result['value'] = convert_to_numeric(result['value'])
-        result['mg_g'] = convert_to_numeric(result['mg_g'])
+        result['mg_g'] = convert_to_numeric(result.get('mg_g'))
         result['lod'] = convert_to_numeric(result.get('lod'))
         result['loq'] = convert_to_numeric(result.get('loq'))
         result['limit'] = convert_to_numeric(result.get('limit'))
@@ -683,15 +910,21 @@ if __name__ == '__main__':
 
     # === Tests ===
 
-    # [✓] TEST: Get all test results for a specific client.
-    test_results = get_sc_labs_test_results('2821')
-    assert test_results is not None
+    # # [✓] TEST: Get all test results for a specific client.
+    # test_results = get_sc_labs_test_results(sample='2821')
+    # assert test_results is not None
 
-    # [✓] TEST: Get details for a specific sample ID.
-    sample_details = get_sc_labs_sample_details('858084')
-    assert sample_details is not None
+    # # [✓] TEST: Get details for a specific sample ID.
+    # sample_details = get_sc_labs_sample_details('858084')
+    # assert sample_details is not None
 
     # [✓] TEST: Get details for a specific sample URL.
-    sc_labs_coa_url = 'https://client.sclabs.com/sample/858084'
-    data = get_sc_labs_sample_details(sc_labs_coa_url)
+    # sc_labs_coa_url = 'https://client.sclabs.com/sample/858084'
+    # data = get_sc_labs_sample_details(sc_labs_coa_url)
+    # assert data is not None
+
+    # [✓] Test parsing a SC Labs CoA PDF.
+    directory = '../../../.datasets/coas/Flore COA'
+    doc = f'{directory}/Dylan Mattole/Mattole Valley - Marshmellow OG.pdf'
+    data = parse_sc_labs_pdf(doc)
     assert data is not None

@@ -228,6 +228,17 @@ def convert_to_numeric(string: str, strip: Optional[str] = False) -> str:
 # List utilities.
 #-----------------------------------------------------------------------
 
+def sandwich_list(a) -> list:
+    """Create a range that cycles from start to the end to the middle.
+    Credit: Norman <https://stackoverflow.com/a/36533868/5021266>
+    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
+    Args:
+        a (str): The iterable to sandwich.
+    Returns:
+        (list): The sandwich index.
+    """
+    return [a[-i//2] if i % 2 else a[i//2] for i in range(len(a))]
+
 def sorted_nicely(unsorted_list: List[str]) -> List[str]:
     """Sort the given iterable in the way that humans expect.
     Credit: Mark Byers <https://stackoverflow.com/a/2669120/5021266>

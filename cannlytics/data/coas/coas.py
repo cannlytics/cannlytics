@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/1/2022
+Updated: 8/2/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -68,6 +68,7 @@ from pyzbar.pyzbar import decode
 # Internal imports.
 from cannlytics.utils import (
     get_directory_files,
+    sandwich_list,
     unzip_files,
 )
 from cannlytics.utils.constants import (
@@ -126,16 +127,6 @@ KEYS = {
 }
 
 
-def sandwich_list(a) -> list:
-    """Create a range that cycles from start to the end to the middle.
-    Args:
-        a (str): The iterable to sandwich.
-    Returns:
-        (list): The sandwich index.
-    """
-    return [a[-i//2] if i % 2 else a[i//2] for i in range(len(a))]
-
-
 class CoADoc:
     """Parse data from certificate of analysis (CoA) PDFs or URLs."""
 
@@ -147,6 +138,7 @@ class CoADoc:
             headers: Optional[dict] = None,
             keys: Optional[dict] = None,
             lims: Optional[Any] = None,
+            init_all: Optional[bool] = True,
         ) -> None:
         """Initialize CoA parser.
         Args:
@@ -156,6 +148,7 @@ class CoADoc:
             headers (dict): Headers for HTTP requests.
             keys (dict): A dictionary of keys for standardization.
             lims (str or dict): Specific LIMS to parse CoAs.
+            init_all (bool): Initialize all of the parsing routines.
         """
         # Setup.
         self.driver = None
@@ -192,6 +185,12 @@ class CoADoc:
         self.lims = lims
         if lims is None:
             self.lims = LIMS
+        
+        # Assign all of the parsing routines.
+        if init_all:
+            for values in self.lims.values():
+                name = values['coa_algorithm'].replace('.py', '')
+                self[name] = importlib.import_module(f'cannlytics.data.coas.{name}')
 
     def decode_pdf_qr_code(
             self,
@@ -345,8 +344,8 @@ class CoADoc:
         Returns:
             (str): Returns LIMS name if found, otherwise returns `None`.
         """
-        # Optional: See if `search` works better / faster.
-        # E.g. `.search(pattern, regex=True, case=True, **kwargs)`
+        # Search all of the text of the LIMS name or URL.
+        # TODO: See if `.search(pattern, regex=True, case=True, **kwargs)` is faster.
         known = None
         if isinstance(doc, str):
             try:
@@ -380,7 +379,7 @@ class CoADoc:
                     known = key
                     break
 
-        # Try to get a QR code to ID the LIMs that way.
+        # Try to get a QR code to identify the LIMS.
         if not known:
             qr_code_url = self.find_pdf_qr_code_url(doc)
             if qr_code_url:
@@ -420,7 +419,11 @@ class CoADoc:
             (list): Returns a list of all of the PDFs.
         """
         coas, docs = [], []
+
+        # Parse a URL, PDF, .zip, or directory.
         if isinstance(data, str):
+
+            # Parse a URL.
             if 'https' in data:
                 coa_data = self.parse_url(
                     data,
@@ -430,6 +433,8 @@ class CoADoc:
                     persist=persist,
                 )
                 coas.append(coa_data)
+
+            # Parse a PDF.
             elif '.pdf' in data:
                 coa_data = self.parse_pdf(
                     data,
@@ -439,11 +444,17 @@ class CoADoc:
                     persist=persist,
                 )
                 coas.append(coa_data)
+
+            # Parse a ZIP.
             elif '.zip' in data:
                 doc_dir = unzip_files(data)
                 docs = get_directory_files(doc_dir)
+
+            # Parse a directory.
             else:
                 docs = get_directory_files(data)
+        
+        # Handle a list of URLs, PDFs, and/or ZIPs.
         else:
             docs = data
         for doc in docs:
@@ -499,6 +510,8 @@ class CoADoc:
         """
         if lims is None:
             lims = self.lims
+
+        # Read the PDF.
         if isinstance(pdf, str):
             pdf_file = pdfplumber.open(pdf)
         elif isinstance(pdf, pdfplumber.pdf.PDF):
@@ -507,8 +520,7 @@ class CoADoc:
             with open(wi(file=pdf, resolution=300)) as temp_file:
                 temp_file.save('/tmp/coa.pdf')
             pdf_file = pdfplumber.open('/tmp/coa.pdf')
-        front_page = pdf_file.pages[0]
-
+        
         # TODO: Try to read a Metrc ID from the PDF and use the Metrc ID
         # to query the Cannlytics API.
         # metrc_id = self.find_metrc_id(pdf_file)
@@ -516,41 +528,60 @@ class CoADoc:
         #     data = self.get_metrc_results(metrc_id)
         #     if data is not None:
         #         return data
-        
+
         # Identify any known LIMS.
-        known_lims = self.identify_lims(front_page, lims=lims)
+        known_lims = self.identify_lims(pdf_file, lims=lims)
 
-        # FIXME: Get lab / LIMS specific parsing algorithm.
-
-        # Get the time the CoA was created.
+        # Get the time the CoA was created, if known.
         date_tested = self.get_pdf_creation_date(pdf_file)
-        
-        if known_lims:
-            try:
-                qr_code_index = self.lims[known_lims].get('qr_code_index')
-                url = self.find_pdf_qr_code_url(pdf_file, qr_code_index)
-                if url is None and qr_code_index is not None:
-                    url = self.find_pdf_qr_code_url(pdf_file)
-            except IndexError:
+
+        # Attempt to use an URL from any QR code on the PDF.
+        url = None
+        try:
+            qr_code_index = self.lims[known_lims].get('qr_code_index')
+            url = self.find_pdf_qr_code_url(pdf_file, qr_code_index)
+            if url is None and qr_code_index is not None:
                 url = self.find_pdf_qr_code_url(pdf_file)
-            # Future work: This is double-checking the `known_lims` twice!
-            # but it does re-use the code, which is nice.
-            data = self.parse_url(
-                url,
+        except IndexError:
+            url = self.find_pdf_qr_code_url(pdf_file)
+
+        # Get the LIMS parsing routine.
+        algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
+        algorithm = getattr(self, algorithm_name)
+        
+        # Use the URL if found, then try the PDF if the URL fails or is missing.
+        if url:
+            try:
+                data = self.parse_url(
+                    url,
+                    headers=headers,
+                    lims=known_lims,
+                    max_delay=max_delay,
+                    persist=persist,
+                )
+            except:
+                data = algorithm(
+                    self,
+                    pdf_file,
+                    headers=headers,
+                    max_delay=max_delay,
+                    persist=persist,
+                )
+        else:
+            data = algorithm(
+                self,
+                pdf_file,
                 headers=headers,
-                lims=known_lims,
                 max_delay=max_delay,
                 persist=persist,
             )
-            sample = {
-                'date_tested': date_tested,
-                'lab_results_url': url,
-                'lims': known_lims,
-            }
-            return {**sample, **data}
-        else:
-            # Dream: Parse custom CoAs.
-            raise NotImplementedError
+
+        sample = {
+            'date_tested': date_tested,
+            'lab_results_url': url,
+            'lims': known_lims,
+        }
+        return {**sample, **data}
 
     def parse_url(
             self,
@@ -576,17 +607,17 @@ class CoADoc:
         """
         if lims is None:
             lims = self.lims
+        
+        # Identify the LIMS.
         known_lims = self.identify_lims(url, lims=lims)
+        
+        # TODO: Parse custom CoAs.
         if known_lims is None:
-            # Future work: Parse custom CoAs.
-            # E.g. if `known_lims = 'custom'`.`
             raise NotImplementedError
         
-        # FIXME: Would it be best to keep loaded modules for faster performance?
-        module_name = LIMS[known_lims]['coa_algorithm'].replace('.py', '')
+        # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
-        module = importlib.import_module(f'cannlytics.data.coas.{module_name}')
-        algorithm = getattr(module, algorithm_name)
+        algorithm = getattr(self, algorithm_name)
         data = algorithm(
             self,
             url,
