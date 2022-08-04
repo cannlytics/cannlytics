@@ -4,12 +4,12 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/1/2022
-Updated: 8/1/2022
+Updated: 8/3/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    A rigorous test of CoA parsing.
+    A rigorous test of CoADoc parsing.
 
 """
 # Standard imports.
@@ -66,35 +66,34 @@ for path, subdirs, files in os.walk(DATA_DIR):
         else:
             unidentified.append(file_name)
 
-        # Parse CoAs one by one!
-        coa_data = parser.parse(file_name)
-        all_data.extend(coa_data)
+        # # Parse CoAs one by one!
+        # coa_data = parser.parse(file_name)
+        # all_data.extend(coa_data)
 
-        # Save the individual data files.
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-        outfile = f'{DATA_DIR}/datafiles/coa-data-{timestamp}.xlsx'
-        to_excel_with_style(pd.DataFrame(coa_data), outfile)
-
-        print('Parsed:', name)
+        # # Save the individual data files.
+        # timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+        # outfile = f'{DATA_DIR}/datafiles/coa-data-{timestamp}.xlsx'
+        # to_excel_with_style(pd.DataFrame(coa_data), outfile)
+        # print('Parsed:', name)
 
 percent = len(identified) / (len(identified) + len(unidentified)) * 100
 print('Identified %.2f%% of the CoAs.' % percent)
 
-# Aggregate all of the individual data files.
-data = pd.DataFrame(all_data)
-data.index = data['sample_id']
+# # Aggregate all of the individual data files.
+# data = pd.DataFrame(all_data)
+# data.index = data['sample_id']
 
-# Widen and elongate the data.
-long_data = pd.json_normalize(data['results'])
+# # Widen and elongate the data.
+# long_data = pd.json_normalize(data['results'])
 
-# Save the data.
-timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-outfile = f'{DATA_DIR}/datafiles/coa-data-{timestamp}.xlsx'
-writer = pd.ExcelWriter(outfile)
-pd.DataFrame(data).to_excel(writer, 'Details')
-pd.DataFrame(long_data).to_excel(writer, 'Results')
-writer.save()
-writer.close()
+# # Save the data.
+# timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+# outfile = f'{DATA_DIR}/datafiles/coa-data-{timestamp}.xlsx'
+# writer = pd.ExcelWriter(outfile)
+# pd.DataFrame(data).to_excel(writer, 'Details')
+# pd.DataFrame(long_data).to_excel(writer, 'Results')
+# writer.save()
+# writer.close()
 
 # # Format any public data to upload to Firestore.
 # refs, updates = [], []

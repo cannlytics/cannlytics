@@ -279,13 +279,6 @@ def parse_sc_labs_pdf(doc: Any) -> dict:
         report = doc
     front_page = report.pages[0]
 
-    # Read the PDF.
-    if isinstance(doc, str):
-        report = pdfplumber.open(doc)
-    else:
-        report = doc
-    front_page = report.pages[0]
-
     # Get the lab-specific CoA page areas.
     distributor_area = literal_eval(SC_LABS_COA['coa_distributor_area'])
     producer_area = literal_eval(SC_LABS_COA['coa_producer_area'])
@@ -357,14 +350,14 @@ def parse_sc_labs_pdf(doc: Any) -> dict:
     product_name = lines[0]
     obs['product_type'] = lines[1]
 
-    # TODO: Get analyses.
-    rects = front_page.rects
-    for rect in rects:
-        crop = front_page.within_bbox((rect['x0'], rect['y0'], rect['x1'], rect['y1']))
-        text = crop.extract_text()
-        if 'ANALYSIS' in text:
-            print(text)
-            break
+    # FIXME: Get analyses.
+    # rects = front_page.rects
+    # for rect in rects:
+    #     crop = front_page.within_bbox((rect['x0'], rect['y0'], rect['x1'], rect['y1']))
+    #     text = crop.extract_text()
+    #     if 'ANALYSIS' in text:
+    #         print(text)
+    #         break
 
     # Get the totals.
 
@@ -387,10 +380,11 @@ def parse_sc_labs_pdf(doc: Any) -> dict:
     obs['moisture'] = convert_to_numeric(value, strip=True)
 
     # Get the results.
-    # FIXME: Is it possible to add `analysis` to the results? NLP?
     results = []
     standard_analytes = SC_LABS_COA['coa_replacements']
     for page in report.pages[1:]:
+
+        # FIXME: Is it possible to add `analysis` to the results? NLP?
 
         # Get the results from each result page.
         tables = page.extract_tables()
@@ -728,7 +722,7 @@ def get_sc_labs_sample_details(
         obs['date_received'] = ''
     
     # Rename desired fields.
-    # FIXME: Test that this working as intended.
+    # FIXME: Test that this is working as intended.
     for key, field in SC_LABS_COA['coa_fields'].items():
         try:
             value = obs.pop(key)
@@ -821,7 +815,7 @@ def get_sc_labs_sample_details(
             key = '_'.join([analysis, 'method'])
             obs[key] = method
             
-            # FIXME:
+            # FIXME: This is not complete / throws an error.
             # Get all of the results for the analysis.
             # - value, units, margin_of_error, lod, loq
             table = card.find('table')

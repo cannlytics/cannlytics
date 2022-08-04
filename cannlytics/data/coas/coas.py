@@ -79,20 +79,26 @@ from cannlytics.utils.constants import (
 )
 
 # Lab and LIMS CoA parsing algorithms.
+from cannlytics.data.coas.anresco import ANRESCO
+from cannlytics.data.coas.cannalysis import CANNALYSIS
 from cannlytics.data.coas.confidentcannabis import CONFIDENT_CANNABIS
 from cannlytics.data.coas.greenleaflab import GREEN_LEAF_LAB
 from cannlytics.data.coas.mcrlabs import MCR_LABS
 from cannlytics.data.coas.sclabs import SC_LABS
+from cannlytics.data.coas.sonoma import SONOMA
 from cannlytics.data.coas.tagleaf import TAGLEAF
 from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
 
 
 # Labs and LIMS that CoADoc can parse.
 LIMS = {
+    'Anresco Laboratories': ANRESCO,
+    'Cannalysis': CANNALYSIS,
     'Confident Cannabis': CONFIDENT_CANNABIS,
     'Green Leaf Lab': GREEN_LEAF_LAB,
     'MCR Labs': MCR_LABS,
     'SC Labs': SC_LABS,
+    'Sonoma Lab Works': SONOMA,
     'TagLeaf LIMS': TAGLEAF,
     'Veda Scientific': VEDA_SCIENTIFIC,
 }
@@ -669,11 +675,8 @@ class CoADoc:
         # - lab_latitude
         # - lab_longitude
 
-        # Optional: Calculate any meaningful statistics (perhaps `percentiles`s?)
-
         # Optional: Drop helper fields: 
-        # - coa_qr_code_index
-        # - coa_image_index
+        # - coa_{field}
 
         raise NotImplementedError
     
