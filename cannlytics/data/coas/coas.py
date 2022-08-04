@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/2/2022
+Updated: 8/4/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -59,6 +59,12 @@ import base64
 import importlib
 from io import BytesIO
 from typing import Any, Optional
+import numpy as np
+import openpyxl
+from openpyxl.utils import get_column_letter
+from openpyxl.utils.dataframe import dataframe_to_rows
+import pandas as pd
+import requests
 from wand.image import Image as wi
 
 # External imports.
@@ -131,6 +137,20 @@ KEYS = {
     'terpenoids': 'terpenes',
     'foreign_materials': 'foreign_matter',
 }
+
+
+def write_to_worksheet(ws, values):
+    """Write data to an Excel Worksheet.
+    Credit: Charlie Clark <https://stackoverflow.com/a/36664027>
+    License:
+    """
+    rows = dataframe_to_rows(pd.DataFrame(values), index=False)
+    for r_idx, row in enumerate(rows, 1):
+        for c_idx, value in enumerate(row, 1):
+            try:
+                ws.cell(row=r_idx, column=c_idx, value=value)
+            except ValueError:
+                ws.cell(row=r_idx, column=c_idx, value=str(value))
 
 
 class CoADoc:
@@ -264,7 +284,9 @@ class CoADoc:
 
     def find_metrc_id(self, pdf: Any) -> str:
         """Find any Metrc ID that may be in a given CoA PDF."""
-        # TODO: Implement!
+        # FIXME: Implement!
+        # - 24 characters long (always?)
+        # - Looks like '1A40603000...'
         if isinstance(pdf, str):
             pdf_file = pdfplumber.open(pdf)
         else:
@@ -279,9 +301,9 @@ class CoADoc:
         Returns:
             (dict): The sample data.
         """
-        # TODO: Implement!
-        # return None or data!
-        raise NotImplementedError
+        url = f'https://cannlytics.com/api/data/results?metrc_id={metrc_id}'
+        response = requests.get(url)
+        return response['data']
     
     def get_page_rows(self, page: Any, **kwargs) -> list:
         """Get the rows a given page.
@@ -343,6 +365,9 @@ class CoADoc:
             lims: Optional[Any] = None,
         ) -> str:
         """Identify if a CoA was created by a common LIMS.
+        Search all of the text of the LIMS name or URL.
+        If no LIMS is identified from the text, then the images
+        are attempted to be decoded, searching for a QR code URL.
         Args:
             doc (str, PDF or Page): A URL or a pdfplumber PDF or Page.
             lims (str or dict): The name of a specific LIMS or a
@@ -351,7 +376,6 @@ class CoADoc:
             (str): Returns LIMS name if found, otherwise returns `None`.
         """
         # Search all of the text of the LIMS name or URL.
-        # TODO: See if `.search(pattern, regex=True, case=True, **kwargs)` is faster.
         known = None
         if isinstance(doc, str):
             try:
@@ -394,7 +418,6 @@ class CoADoc:
                     if url and url in qr_code_url:
                         known = key
                         break
-
         return known
 
     def parse(
@@ -527,7 +550,7 @@ class CoADoc:
                 temp_file.save('/tmp/coa.pdf')
             pdf_file = pdfplumber.open('/tmp/coa.pdf')
         
-        # TODO: Try to read a Metrc ID from the PDF and use the Metrc ID
+        # FIXME: Try to read a Metrc ID from the PDF and use the Metrc ID
         # to query the Cannlytics API.
         # metrc_id = self.find_metrc_id(pdf_file)
         # if metrc_id:
@@ -617,7 +640,7 @@ class CoADoc:
         # Identify the LIMS.
         known_lims = self.identify_lims(url, lims=lims)
         
-        # TODO: Parse custom CoAs.
+        # FIXME: Parse custom / unidentified CoAs as well as possible?
         if known_lims is None:
             raise NotImplementedError
         
@@ -633,15 +656,94 @@ class CoADoc:
         )
         return data
 
-    def save(self, data=None):
-        """Save all CoA data, flattening results, images, etc."""
-
+    def upload(self, data):
+        """Upload any public lab results to Firestore."""
         # TODO: Archive the lab results if they are public.
-
         raise NotImplementedError
 
-    def standardize(self, data=None) -> Any:
-        """Standardize (and normalize) given data."""
+    def save(
+            self,
+            data: Any,
+            outfile:str,
+            alphabetize: Optional[bool] = True,
+        ) -> Any:
+        """Save all CoA data, flattening results, images, etc.
+        Args:
+            data (dict or list or DataFrame): The data to save.
+            outfile (str): The file that you wish to save. Accepts a
+                response object for returning in an HTTP request.
+            alphabetize (bool): Whether or not to alphabetize the sample
+                details, True by default (optional).
+        Returns:
+            (Workbook): An openpyxl Workbook.
+        """
+
+        # Create a workbook for saving the data.
+        wb = openpyxl.Workbook()
+
+        # Format the data.
+        df = None
+        if isinstance(data, dict):
+            df = pd.DataFrame([data])
+        elif isinstance(data, list):
+            df = pd.DataFrame(data)
+        else:
+            df = data
+
+        # Alphabetize the results!
+        if alphabetize:
+            df = df.reindex(sorted(df.columns), axis=1)
+
+        # Save the results, cell by cell.
+        df = df[ ['sample_id'] + [col for col in df.columns if col != 'sample_id']]
+        ws = wb.worksheets[0]
+        ws.title = 'Details'
+        write_to_worksheet(ws, df)
+        
+        # Create a long table of results.
+        results = []
+        for _, item in df.iterrows():
+            for result in item['results']:
+                sample = {'sample_id': item['sample_id']}
+                results.append({**sample, **result})
+
+        # Create a worksheet of all sample results.
+        wb.create_sheet(title='Results')
+        ws = wb.worksheets[1]
+        write_to_worksheet(ws, pd.DataFrame(results))
+
+        # Format the values.
+        values = []
+        for _, item in df.iterrows():
+            value = {
+                'sample_id': item['sample_id'],
+                'product_name': item['product_name'],
+                'producer': item['producer'],
+                'date_tested': item['date_tested'],
+                'product_type': item['product_type'],
+            }
+            for result in item['results']:
+                value[result['key']] = result['value']
+            values.append(value)
+
+        # Add a values sheet.
+        wb.create_sheet(title='Values')
+        ws = wb.worksheets[2]
+        write_to_worksheet(ws, pd.DataFrame(values))
+
+        # Save and return the datafile.
+        wb.save(outfile)
+        return wb
+
+    def standardize(self, obs) -> Any:
+        """Standardize (and normalize) given data.
+        Args:
+            data (dict or list or DataFrame): The data to standardize.
+        Returns:
+            (dict or list or DataFrame): Returns the data with standardized
+                fields, analyses, analytes, product types, normalized
+                results, and augmented with strain name and GIS data.
+        """
 
         # TODO: Calculate totals if missing:
         # - `total_cannabinoids`
@@ -651,11 +753,17 @@ class CoADoc:
         # - `total_cbg`
         # - `total_thcv`
 
-        # TODO: Standardize terpenes:
+        # TODO: Normalize terpenes:
         # - Calculate `ocimene` as the sum of: `ocimene`, `beta_ocimene`, `trans_ocimene`.
         # - Calculate `nerolidol` as the sum of: `trans_nerolidol`, `cis_nerolidol`
         # - Calculate `terpinenes` as the sum of: `alpha_terpinene``,
         #   `gamma_terpinene`, `terpinolene`, `terpinene`
+
+        # TODO: Standardize analyses.
+
+        # TODO: Standardize analytes.
+
+        # TODO: Standardize fields.
 
         # TODO: Normalize the `results`:
         # - Remove and keep `units` from `value`.
@@ -674,11 +782,22 @@ class CoADoc:
         # - lab_zipcode
         # - lab_latitude
         # - lab_longitude
+        
+        # Turn dates to ISO format.
+        date_columns = [x for x in obs.keys() if x.startswith('date')]
+        for date_column in date_columns:
+            try:
+                obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+            except:
+                pass
 
-        # Optional: Drop helper fields: 
-        # - coa_{field}
+        # Drop `coa_{field}` helper fields.
+        drop = [x for x in obs.keys() if x.startswith('coa_')]
+        for k in drop:
+            del obs[k]
 
-        raise NotImplementedError
+        # Return the standardized observation.
+        return obs
     
     def quit(self):
         """Close any driver, end any session, and reset the parameters."""
@@ -803,6 +922,7 @@ if __name__ == '__main__':
         '1A4060300002A3B000000053', # Green Leaf Lab
         '1A4060300017A85000001289', # Green Leaf Lab
         '1A4060300002459000017049', # SC Labs
+        '1A4060300004088000010948', # Sonoma Lab Works
     ]
     # sample = parser.parse(metrc_ids[0])
     # assert sample is not None
@@ -814,6 +934,12 @@ if __name__ == '__main__':
         parser.parse('https://cannlytics.page.link/partial-equilibrium-notes')
     except NotImplementedError:
         pass
+
+    # [ ] TEST: Standardize CoA data.
+
+
+    # [ ] TEST: Save CoA data.
+
    
     # [✓] TEST: Close the parser.
     parser.quit()

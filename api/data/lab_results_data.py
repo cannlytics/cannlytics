@@ -84,6 +84,8 @@ def lab_results_data(request, strain_name=None):
     collection = 'public/data/lab_results'
     if request.method == 'GET':
 
+        # FIXME: Search by metrc_id if passed as a parameter!
+
         # Get a specific observation.
         if strain_name is None:
             strain_name = request.query_params.get(

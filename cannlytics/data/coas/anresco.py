@@ -23,6 +23,7 @@ Data Points:
     - date_received
     ✓ images
     ✓ lab_results_url
+    - metrc_source_id
     ✓ project_id
     ✓ producer
     - product_name
@@ -266,6 +267,9 @@ methods.append({'analysis': '', 'method': method})
 # # FIXME: Extract the results.
 # print(result_rows)
 
+
+#--------------------------
+# Data aggregation
 #--------------------------
 
 # Aggregate results.
@@ -289,6 +293,7 @@ obs['sample_id'] = create_sample_id(
 )
 
 print({**ANRESCO, **obs})
+
 
 #--------------------------
 # Future work

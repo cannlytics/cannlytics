@@ -204,7 +204,7 @@ SC_LABS_COA = {
         'a_bisabolol': 'alpha_bisabolol',
         'a_pinene': 'alpha_pinene',
         'a_cedrene': 'alpha_cedrene',
-        '3_carene': 'carene',
+        '3_carene': 'delta_3_carene',
         'g_terpinene': 'gamma_terpinene',
         'r_pulegone': 'pulegone',
         'a_phellandrene': 'alpha_phellandrene',
