@@ -31,7 +31,7 @@ Supported Labs:
     ✓ Green Leaf Lab
     ✓ MCR Labs
     ✓ SC Labs
-    - Sonoma Lab Works
+    ✓ Sonoma Lab Works
     - Veda Scientific
 
 Supported LIMS:
@@ -52,6 +52,17 @@ Future work:
         - PDF properties, such as the fonts used, glyph sizes, etc.
         - Handle non-font parameters and page scaling.
         - Detect words, lines, columns, white-space, etc.
+
+    NLP tools:
+
+        - Entity recognition.
+        - Pattern exploitation training.
+        - Wikipedia requests to identify terpenes, pesticides, etc.
+        - Custom lexicon
+        - Word embeddings
+
+        1. Candidate generation
+        2. Disambiguation.
 
 """
 # Standard imports.
@@ -85,8 +96,8 @@ from cannlytics.utils.constants import (
 )
 
 # Lab and LIMS CoA parsing algorithms.
-from cannlytics.data.coas.anresco import ANRESCO
-from cannlytics.data.coas.cannalysis import CANNALYSIS
+# from cannlytics.data.coas.anresco import ANRESCO
+# from cannlytics.data.coas.cannalysis import CANNALYSIS
 from cannlytics.data.coas.confidentcannabis import CONFIDENT_CANNABIS
 from cannlytics.data.coas.greenleaflab import GREEN_LEAF_LAB
 from cannlytics.data.coas.mcrlabs import MCR_LABS
@@ -98,8 +109,8 @@ from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
 
 # Labs and LIMS that CoADoc can parse.
 LIMS = {
-    'Anresco Laboratories': ANRESCO,
-    'Cannalysis': CANNALYSIS,
+    # 'Anresco Laboratories': ANRESCO,
+    # 'Cannalysis': CANNALYSIS,
     'Confident Cannabis': CONFIDENT_CANNABIS,
     'Green Leaf Lab': GREEN_LEAF_LAB,
     'MCR Labs': MCR_LABS,
@@ -165,6 +176,7 @@ class CoADoc:
             keys: Optional[dict] = None,
             lims: Optional[Any] = None,
             init_all: Optional[bool] = True,
+            google_maps_api_key: Optional[str] = None,
         ) -> None:
         """Initialize CoA parser.
         Args:
@@ -211,12 +223,16 @@ class CoADoc:
         self.lims = lims
         if lims is None:
             self.lims = LIMS
+
+        # Google Maps integration.
+        self.google_maps_api_key = google_maps_api_key
         
         # Assign all of the parsing routines.
         if init_all:
             for values in self.lims.values():
-                name = values['coa_algorithm'].replace('.py', '')
-                self[name] = importlib.import_module(f'cannlytics.data.coas.{name}')
+                key = values['coa_algorithm'].replace('.py', '')
+                module = f'cannlytics.data.coas.{key}'
+                self.__dict__[key] = importlib.import_module(module)
 
     def decode_pdf_qr_code(
             self,
@@ -595,6 +611,7 @@ class CoADoc:
                     headers=headers,
                     max_delay=max_delay,
                     persist=persist,
+                    google_maps_api_key=self.google_maps_api_key,
                 )
         else:
             data = algorithm(
@@ -603,6 +620,7 @@ class CoADoc:
                 headers=headers,
                 max_delay=max_delay,
                 persist=persist,
+                google_maps_api_key=self.google_maps_api_key,
             )
 
         sample = {
@@ -653,6 +671,7 @@ class CoADoc:
             headers=headers,
             max_delay=max_delay,
             persist=persist,
+            google_maps_api_key=self.google_maps_api_key,
         )
         return data
 

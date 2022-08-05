@@ -111,8 +111,8 @@ GREEN_LEAF_LAB = {
     'lab_phone': '916-924-5227', # <- Make dynamic.
     'lab_email': '', # <- Make dynamic.
     'lab_website': 'https://greenleaflab.org/',
-    'lab_latitude': '38.596060', # <- Make dynamic.
-    'lab_longitude': '-121.459870', # <- Make dynamic.
+    'lab_latitude': 38.596060, # <- Make dynamic.
+    'lab_longitude': -121.459870, # <- Make dynamic.
 }
 
 # It is assumed that there are the following analyses on each CoA.

@@ -84,6 +84,7 @@ def parse_tagleaf_pdf(
         doc: Any,
         headers: Optional[dict] = None,
         persist: Optional[bool] = False,
+        **kwargs,
     ) -> dict:
     """Parse a TagLeaf LIMS CoA PDF.
     Args:
@@ -110,8 +111,8 @@ def parse_tagleaf_url(
         url: str,
         headers: Optional[dict] = None,
         keys: Optional[dict] = None,
-        max_delay: Optional[float] = 7,
         persist: Optional[bool] = False,
+        **kwargs,
     ) -> dict:
     """Parse a TagLeaf LIMS CoA URL.
     Args:

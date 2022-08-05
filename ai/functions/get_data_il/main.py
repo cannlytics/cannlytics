@@ -353,7 +353,7 @@ if __name__ == '__main__':
 
     # 1. TODO: Try to find the retailers website. Then:
     # utils.web.get_page_metadata
-    from cannlytics.data.gis import get_place_details
+    # from cannlytics.data.gis import get_place_details
 
 
 

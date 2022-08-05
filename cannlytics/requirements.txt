@@ -19,6 +19,7 @@ pyzbar
 selenium
 statsmodels
 ulid-py
+zipcodes
 
 # FIXME:
 # ocean-lib # Breaks App Engine deployments.

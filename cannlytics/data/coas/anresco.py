@@ -105,8 +105,8 @@ ANRESCO =  {
     'lab_city': 'San Francisco',
     'lab_state': 'CA',
     'lab_zipcode': '94124',
-    'lab_latitude': '37.726610',
-    'lab_longitude': '-122.388450',
+    'lab_latitude': 37.726610,
+    'lab_longitude': -122.388450,
     'public': True,
 }
 
@@ -120,13 +120,10 @@ ANRESCO_COA = {
         'Type': 'product_type',
         'Date': 'date_tested',
     },
-    'coa_replacements': {
-
-    },
 }
 
 
-def parse_anresco_coa():
+def parse_anresco_coa(**kwargs):
     """Parse an Anresco Laboratories CoA PDF or URL."""
     raise NotImplementedError
 

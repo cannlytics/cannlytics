@@ -19,6 +19,7 @@ from typing import Any, List, Optional
 # External imports.
 from fredapi import Fred
 from googlemaps import Client, places
+import zipcodes
 
 # Internal imports.
 from cannlytics.firebase import initialize_firebase, get_document
@@ -34,36 +35,6 @@ def get_google_maps_api_key() -> str:
     database = initialize_firebase()
     data = get_document('admin/google', database=database)
     return data['google_maps_api_key']
-
-
-def get_place_details(
-        query: str,
-        api_key: Optional[str] = None,
-        fields: Optional[List[str]] = None,
-    ) -> dict:
-    """Get the place details for a given a name.
-    Args:
-        query (str): The text to use to search for a place.
-        api_key (str): Optional Google Maps API key, None by default.
-        fields (list): Optional fields to retrieve.
-    Returns:
-        (dict): A dictionary of place details.
-    """
-    if api_key is None:
-        api_key = get_google_maps_api_key()
-    if not fields:
-        fields = [
-            'formatted_address',
-            'icon',
-            'photo',
-            'opening_hours',
-            'website',
-        ]
-    gmaps = Client(key=api_key)
-    search = places.find_place(gmaps, query, 'textquery')
-    place_id = search['candidates'][0]['place_id']
-    place = places.place(gmaps, place_id, fields=fields)
-    return place['result']
 
 
 def get_state_population(
@@ -152,7 +123,7 @@ def search_for_address(
         query: str,
         api_key: Optional[str] = None,
         fields: Optional[List[str]] = None,
-    ) -> List[dict]:
+    ) -> dict:
     """Search for the address of a given name.
     Args:
         query (str): The text to use to search for an address.
@@ -164,7 +135,32 @@ def search_for_address(
     if api_key is None:
         api_key = get_google_maps_api_key()
     if fields is None:
-        fields = ['formatted_address']
+        fields = [
+            'formatted_address',
+            'geometry/location/lat',
+            'geometry/location/lng',
+        ]
     gmaps = Client(key=api_key)
-    place = places.find_place(gmaps, query, 'textquery', fields=fields)
-    return place['candidates']
+    search = places.find_place(gmaps, query, 'textquery')
+    place_id = search['candidates'][0]['place_id']
+    place = places.place(gmaps, place_id, fields=fields)
+    location = place['result']['geometry']['location']
+    formatted_address = place['result']['formatted_address']
+    parts = formatted_address.split(',')
+    street = parts[0]
+    city = parts[1].strip()
+    state, zipcode = tuple(parts[2].strip().split(' '))
+    try:
+        county = zipcodes.matching(zipcode)[0]['county']
+    except:
+        county = ''
+    return {
+        'formatted_address': formatted_address,
+        'street': street,
+        'city': city,
+        'county': county,
+        'state': state,
+        'zipcode': zipcode,
+        'latitude': location['lat'],
+        'longitude': location['lat'],
+    }

@@ -575,7 +575,8 @@
     "ytick",
     "yticklabels",
     "yticks",
-    "zipcode"
+    "zipcode",
+    "zipcodes"
   ],
   "todo-tree.tree.showBadges": false,
 }

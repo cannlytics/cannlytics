@@ -135,8 +135,8 @@ SC_LABS = {
     'lab_phone': '(866) 435-0709',
     'lab_email': 'info@sclabs.com',
     'lab_website': 'https://sclabs.com',
-    'lab_latitude': '36.987869',
-    'lab_longitude': '-122.033162',
+    'lab_latitude': 36.987869,
+    'lab_longitude': -122.033162,
     'public': True,
 }
 
@@ -239,17 +239,11 @@ def parse_data_block(div, tag='span') -> dict:
 def parse_sc_labs_coa(
         self,
         doc: Any,
-        headers: Optional[dict] = None,
-        persist: Optional[bool] = False,
+        **kwargs,
     ) -> dict:
     """Parse a TagLeaf LIMS CoA PDF.
     Args:
         doc (str or PDF): A PDF file path or pdfplumber PDF.
-        headers (dict): Headers for HTTP requests.
-        persist (bool): Whether to persist the session.
-            The default is `False`. If you do persist
-            the driver, then make sure to call `quit`
-            when you are finished.
     Returns:
         (dict): The sample data.
     """

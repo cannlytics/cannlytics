@@ -108,8 +108,8 @@ VEDA_SCIENTIFIC = {
     'lab_phone': '(805) 324-7728',
     'lab_email': 'info@vedascientific.co',
     'lab_website': 'vedascientific.co',
-    'lab_latitude': '34.661520',
-    'lab_longitude': '-120.476520',
+    'lab_latitude': 34.661520,
+    'lab_longitude': -120.476520,
 }
 
 # It is assumed that there are the following analyses on each CoA.
@@ -219,6 +219,7 @@ def parse_veda_pdf(
         doc: Any,
         headers: Optional[dict] = None,
         persist: Optional[bool] = False,
+        **kwargs,
     ) -> dict:
     """Parse a Veda Scientific CoA PDF.
     Args:

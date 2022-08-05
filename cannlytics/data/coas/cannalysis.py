@@ -101,7 +101,6 @@ lab_results_url = parser.find_pdf_qr_code_url(report)
 
 
 
-
 # Optional: Get the image data.
 
 
@@ -129,4 +128,16 @@ obs['sample_id'] = create_sample_id(
 
 print({**CANNALYSIS, **obs})
 
-# [ ] TEST: Parse a Cannalysis CoA PDF.
+
+# === Test ===
+if __name__ == '__main__':
+
+    from cannlytics.data.coas import CoADoc
+
+    # [ ] TEST: Parse a Cannalysis CoA PDF.
+    # parser = CoADoc()
+    # doc = '../../../.datasets/coas/Flore COA/Peak/LemonTree.pdf'
+    # lab = parser.identify_lims(doc)
+    # assert lab == 'Sonoma Lab Works'
+    # data = parse_cannalysis_coa(parser, doc)
+    # assert data is not None

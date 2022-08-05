@@ -89,6 +89,7 @@ def parse_cc_pdf(
         doc: Any,
         max_delay: Optional[float] = 7,
         persist: Optional[bool] = False,
+        **kwargs
     ) -> dict:
     """Parse a Confident Cannabis CoA PDF.
     Args:
@@ -116,6 +117,7 @@ def parse_cc_url(
         headers: Optional[Any] = None,
         max_delay: Optional[float] = 7,
         persist: Optional[bool] = False,
+        **kwargs
     ) -> dict:
     """Parse a Confident Cannabis CoA URL.
     Args:

@@ -33,6 +33,7 @@ statsmodels==0.13.2
 ulid-py==1.1.0
 waitress==2.1.1
 whitenoise==5.3.0
+zipcodes==1.2.0
 
 # Cannlytics package requirements:
 # firebase_admin==5.2.0
