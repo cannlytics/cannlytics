@@ -877,20 +877,26 @@ def get_sc_labs_sample_details(
     # Separate `batch_units` from `batch_size`.
     obs['batch_size'], obs['batch_units'] = tuple(obs['batch_size'].split(' '))
     
-    # Create a `sample_id`.
-    obs['sample_id'] = create_sample_id(
-        private_key=obs['producer'],
-        public_key=obs['product_name'],
-        salt=obs['date_tested'],
-    )
+    # Turn dates to ISO format.
+    date_columns = [x for x in obs.keys() if x.startswith('date')]
+    for date_column in date_columns:
+        try:
+            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+        except:
+            pass
 
-    # Aggregate the sample data.
+    # Return the sample details with a new or re-minted `sample_id`.
     if not results:
         results = None
     obs['analyses'] = analyses
     obs['lab_results_url'] = url
     obs['notes'] = notes
     obs['results'] = results
+    obs['sample_id'] = create_sample_id(
+        private_key=obs['producer'],
+        public_key=obs['product_name'],
+        salt=obs['date_tested'],
+    )
     return { **SC_LABS, **obs}
 
 

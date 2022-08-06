@@ -15,6 +15,10 @@ Certificates of analysis (CoAs) are abundant for cultivators, processors, retail
 | `parse_mcr_labs_coa` | MCR Labs | 🔴 |
 | `parse_sc_labs_coa` | SC Labs | 🟢 |
 
+## Introduction
+
+Getting data from CoAs is inevitable and with modern tools, plus a little human ingenuity, we can methodically parse CoAs produced by various labs that test cannabis. All CoAs that are extracted through manually written routines are quite useful because these can then be used for training natural language processing (NLP) models to further extract data!
+
 ## Usage
 
 Initialize a `CoADoc` parsing client.

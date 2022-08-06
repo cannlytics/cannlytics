@@ -6,34 +6,14 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 7/31/2022
+Updated: 8/6/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
     Periodically collect MCR Labs' publicly published lab results.
 
-Data Points:
-
-        ✓ analyses
-        ✓ {analysis}_method
-        ✓ date_tested
-        ✓ image
-        ✓ lab
-        ✓ lab_website
-        ✓ lab_results_url
-        ✓ product_name
-        ✓ product_type
-        ✓ producer
-        ✓ results
-            - analysis
-            ✓ key
-            ✓ name
-            ✓ units
-            ✓ value
-        ✓ sample_id (generated)
-        ✓ total_cannabinoids
-        ✓ total_terpenes
+Data Points: See `cannlytics.data.coas.mcrlabs.py`.
 
 Data Sources:
     
@@ -79,7 +59,7 @@ def get_mcr_labs_data(event, context):
     database = firestore.client()
 
     # Get the most recent lab results.
-    data = get_mcr_labs_test_results(ending_page=1, verbose=False)
+    data = get_mcr_labs_test_results(ending_page=1, verbose=True)
 
     # Read lab results to see if any are missing.
     refs, updates = [], []

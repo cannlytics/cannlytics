@@ -471,13 +471,6 @@ def parse_green_leaf_lab_pdf(
         
         # FIXME: Add `units` to results!
 
-    # Finish data collection with a freshly minted sample ID.
-    obs['sample_id'] = create_sample_id(
-        private_key=producer,
-        public_key=product_name,
-        salt=date_tested,
-    )
-
     # Data aggregation.
     obs['analyses'] = analyses
     obs['date_tested'] = date_tested
@@ -492,6 +485,13 @@ def parse_green_leaf_lab_pdf(
             obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
         except:
             pass
+    
+    # Finish data collection with a freshly minted sample ID.
+    obs['sample_id'] = create_sample_id(
+        private_key=producer,
+        public_key=product_name,
+        salt=date_tested,
+    )
     
     # TODO: Lowercase `results` `status`.
 

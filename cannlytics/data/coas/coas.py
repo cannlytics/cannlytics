@@ -153,7 +153,7 @@ KEYS = {
 def write_to_worksheet(ws, values):
     """Write data to an Excel Worksheet.
     Credit: Charlie Clark <https://stackoverflow.com/a/36664027>
-    License:
+    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
     """
     rows = dataframe_to_rows(pd.DataFrame(values), index=False)
     for r_idx, row in enumerate(rows, 1):
@@ -162,6 +162,12 @@ def write_to_worksheet(ws, values):
                 ws.cell(row=r_idx, column=c_idx, value=value)
             except ValueError:
                 ws.cell(row=r_idx, column=c_idx, value=str(value))
+
+
+# Optional: Create a "smart" CoA class?
+class CoA:
+    def __ini__():
+        return None
 
 
 class CoADoc:

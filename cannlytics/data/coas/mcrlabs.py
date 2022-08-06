@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 8/1/2022
+Updated: 8/6/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -44,7 +44,8 @@ Data Sources:
 
 Future development:
 
-    - Implement the function to get all of a given client's lab results.
+    - [ ] Create a parse CoA routine that could handle a MCR labs PDF.
+    - [ ] Implement a function to get all of a given client's lab results.
     - Optional: Create necessary data dirs automatically.
     - Optional: Function to download any pre-existing results.
 
@@ -71,7 +72,7 @@ from cannlytics.utils.utils import (
 )
 
 
-# Lab details.
+# It is assumed that the lab has the following details.
 MCR_LABS = {
     'coa_algorithm': 'mcrlabs.py',
     'coa_algorithm_entry_point': 'get_mcr_labs_sample_details',
@@ -80,6 +81,25 @@ MCR_LABS = {
     'lab': 'MCR Labs',
     'lab_website': 'https://mcrlabs.com',
     'public': True,
+}
+
+# It is assumed that the following mappings are valid for the CoA.
+MCR_LABS_COA = {
+    'coa_analyses': {
+        'terpene': 'terpenes',
+        'cannabinoid': 'cannabinoids',
+        'pesticide': 'pesticides',
+        'residual_solvent': 'residual_solvents',
+        'microbiological': 'microbes',
+        'mycotoxin': 'mycotoxins',
+    },
+    'coa_analytes': {
+        'd_8_thc': 'delta_8_thc',
+        'beta_myrcene': 'myrcene',
+        'para_cymene': 'p_cymene',
+        'aflatoxin_b_1_b_2_g_1_g_2_and_ochratoxin_a': 'mycotoxins',
+        'n_butane': 'butane',
+    }
 }
 
 
@@ -124,7 +144,7 @@ def get_mcr_labs_test_results(
     Returns:
         (list): The complete sample data.
     """
-    # Iterate over all of the pages.
+    # Determine the pages to collect.
     page_count = get_mcr_labs_sample_count()
     total_pages = page_count['pages']
     if not ending_page:
@@ -132,6 +152,8 @@ def get_mcr_labs_test_results(
     if verbose:
         print('Getting samples for pages %i to %i.' % (starting_page, ending_page))
     samples = []
+
+    # Iterate over all of the pages, index starting at 1.
     for page_id in range(starting_page, ending_page + 1):
         sample_data = get_mcr_labs_samples(page_id)
         samples += sample_data
@@ -141,11 +163,12 @@ def get_mcr_labs_test_results(
         print('Found %i samples.' % len(samples))
 
     # Get all of the sample details.
+    # Optional: Log errors?
     rows = []
     for i, sample in enumerate(samples):
         try:
             sample_id = sample['lab_results_url'].split('/')[-1]
-            details = get_mcr_labs_sample_details(sample_id=sample_id)
+            details = get_mcr_labs_sample_details(None, sample_id=sample_id)
             rows.append({**sample, **details})
             if i > 1:
                 sleep(pause)
@@ -198,19 +221,34 @@ def get_mcr_labs_samples(
     products = soup.find_all('li', attrs={'class': 'grid-item'})
     for product in products:
 
-        # Get sample details.
+        # Get the sample details.
         sample = {}
         details = product.find('div', attrs={'class': 'reportTable'})
-        sample['product_name'] = details.find('div', \
-            attrs={'class': 'fth_name'}).text
-        sample['producer'] = details.find('div', \
-            attrs={'class': 'fth_client'}).text
-        sample['product_type'] = details.find('div', \
-            attrs={'class': 'fth_category'}).text
-        sample['total_cannabinoids'] = strip_whitespace(details.find('div', \
-            attrs={'class': 'fth_cannabinoids'}).text)
-        sample['total_terpenes'] = strip_whitespace(details.find('div', \
-            attrs={'class': 'fth_terpenes'}).text)
+
+        # Get the product name.
+        attrs = {'class': 'fth_name'}
+        sample['product_name'] = details.find('div', attrs=attrs).text
+
+        # Get the producer.
+        attrs = {'class': 'fth_client'}
+        sample['producer'] = details.find('div', attrs=attrs).text
+
+        # Get the product type.
+        # Optional: Standardize product types.
+        attrs = {'class': 'fth_category'}
+        sample['product_type'] = details.find('div', attrs=attrs).text
+
+        # Get the total cannabinoids.
+        attrs = {'class': 'fth_cannabinoids'}
+        value = details.find('div', attrs=attrs).text
+        sample['total_cannabinoids'] = strip_whitespace(value)
+
+        # Get the total terpenes.
+        attrs = {'class': 'fth_terpenes'}
+        value = details.find('div', attrs=attrs).text
+        sample['total_terpenes'] = strip_whitespace(value)
+
+        # Get the date tested.
         try:
             sample['date_tested'] = format_iso_date(details.find('div', \
                 attrs={'class': 'fth_date'}).text)
@@ -235,14 +273,20 @@ def get_mcr_labs_samples(
         filename = image_url.split('/')[-1]
         sample['images'] = [{'url': image_url, 'filename': filename}]
 
+        # Turn dates to ISO format.
+        date_columns = [x for x in sample.keys() if x.startswith('date')]
+        for date_column in date_columns:
+            try:
+                sample[date_column] = pd.to_datetime(sample[date_column]).isoformat()
+            except:
+                pass
+
         # Create a sample ID.
         sample['sample_id'] = create_sample_id(
             private_key=sample['producer'],
             public_key=sample['product_name'],
             salt=sample['date_tested'],
         )
-
-        # Optional: Standardize product types.
 
         # Aggregate sample data.
         samples.append({**MCR_LABS, **sample})
@@ -273,6 +317,8 @@ def get_mcr_labs_sample_details(
         parser,
         sample_id: str,
         headers: Optional[Any] = None,
+        standard_analyses: Optional[Any] = None,
+        standard_analytes: Optional[Any] = None,
         **kwargs,
     ) -> dict:
     """Get the details for a specific MCR Labs test sample.
@@ -280,6 +326,10 @@ def get_mcr_labs_sample_details(
         parser (CoADoc): A CoADoc client for standardization.
         sample_id (str): A sample ID number or the `lab_results_url`.
         headers (dict): Headers for the HTTP request (optional).
+        standard_analyses (dict): An optional mapping of lab-specific
+            analyses to standard analyses.
+        standard_analytes (dict): An optional mapping of lab-specific
+            analyses to standard analytes.
     Returns:
         (dict): A dictionary of sample details.
     """
@@ -303,6 +353,12 @@ def get_mcr_labs_sample_details(
         print('Failed to find lab:', sample_id)
         obs['lab'] = ''
     
+    # Get a map of lab-specific analyses, analytes, and fields to the standard.
+    if standard_analyses is None:
+        standard_analyses = MCR_LABS_COA['coa_analyses']
+    if standard_analytes is None:
+        standard_analytes = MCR_LABS_COA['coa_analytes']
+    
     # Get the sample image, if not already collected.
     if not obs.get('images'):
         attrs = {'class': 'report_image'}
@@ -324,11 +380,10 @@ def get_mcr_labs_sample_details(
         obs['producer'] = details.find('h4').text.replace(product_name, '')
 
     # Get the product type, if not already collected.
+    # Optional: Standardize the product types?
     if not obs.get('product_type'):
         el = soup.find('div', attrs={'class': 'abb'})
         obs['product_type'] = el.attrs['class'][-1].replace('repor_', '')
-    
-    # Optional: Standardize the product types?
 
     # Get the total cannabinoids and total terpenes, if not already collected.
     if not obs.get('total_cannabinoids'):
@@ -350,6 +405,7 @@ def get_mcr_labs_sample_details(
             if 'quantified' in par.text:
                 text = strip_whitespace(par.text)
                 analysis = snake_case(text.split(' are quantified')[0])
+                analysis = standard_analyses.get(analysis, analysis)
                 method = text.split('quantified using ')[-1]\
                         .replace('.', '').title()
                 obs[f'{analysis}_method'] = method
@@ -359,108 +415,146 @@ def get_mcr_labs_sample_details(
     results = []
 
     # Get the cannabinoids.
-    try:
-        scripts = soup.find_all('script')
-        for script in scripts:
-            if script.string:
-                if 'dataProvided' in script.string:
-                    break
-        block = script.string.split('const dataProvided = ')[-1].split(';')[0]
-        block = strip_whitespace(block).replace(' ', '').replace(',]', ']')
-        cannabinoids = json.loads(block)
-        analyses.append('cannabinoids')
-        for analyte in cannabinoids:
-            results.append({
-                'analysis': 'cannabinoids',
-                'key': analyte['key'],
-                'name': analyte['label'],
-                'value': analyte['perc'],
-                'units': 'percent',
-            })
-    except UnboundLocalError:
-        pass
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if script.string:
+            if 'dataProvided' in script.string:
+                break
+    block = script.string.split('const dataProvided = ')[-1].split(';')[0]
+    block = strip_whitespace(block).replace(' ', '').replace(',]', ']')
+    cannabinoids = json.loads(block)
+    analyses.append('cannabinoids')
+    for analyte in cannabinoids:
+        key = snake_case(analyte['key'].replace('-', ''))
+        key = standard_analytes.get(key, key)
+        results.append({
+            'analysis': 'cannabinoids',
+            'key': key,
+            'name': analyte['label'],
+            'value': analyte['perc'],
+            'units': 'percent',
+        })
 
     # Get the results for all other analyses.
     values = ['name', 'value', 'lod' ,'loq']
     tables = soup.find_all('table', attrs={'class': 'safetytable'})
     for table in tables:
-        rows = table.find_all('tr')
 
         # Get the analysis of the table.
-        el = tables[1].find_previous('h4')
+        el = table.find_previous('h4')
         text = strip_whitespace(el.text)
         text = text \
             .replace('Screen', '') \
             .replace('Contaminant', '') \
             .replace('Profile', '')
         analysis = snake_case(text.strip())
+        analysis = standard_analyses.get(analysis, analysis)
         analyses.append(analysis)
+
+        # Optional: Break up aflatoxins and ochratoxin A.
+        # Aflatoxin (B1, B2, G1, G2) &amp; Ochratoxin A
 
         # Get each result field.
         current_units = None
+        rows = table.find('tbody').find_all('tr')
         for row in rows:
             result = {'analysis': analysis}
-            cells = row.find_all('td')
 
-            # Get all of the detects, identifying the current units.
-            # FIXME: heavy metals, microbes, pesticides, residual solvents
-            # - [ ] wrong `analysis`
-            # - [ ] Missing `value` and `units`
-            # FIXME: 'aflatoxin_b_1_b_2_g_1_g_2_and_ochratoxin_a
-            if len(cells) > 1:
-                for i, cell in enumerate(cells):
-                    try:
-                        key = values[i]
-                    except IndexError:
-                        key = f'limit_{i}'
-                    if key == 'name':
-                        result['key'] = snake_case(cell.text)
-                    elif key == 'value':
-                        value = cell.text
-                        units = re.sub('[\d\.]', '', value) \
-                            .replace('%', 'percent') \
-                            .replace('<', '') \
-                            .strip()
-                        if not units or units == 'ND' or units == 'Not Detected':
-                            limit = result.get('lod', result.get('loq', result.get('limit', '')))
-                            units = re.sub('[\d\.]', '', limit).replace('%', 'percent').strip()
-                        if units != 'Negative' and units != 'Positive':
-                            result['value'] = convert_to_numeric(re.sub('[^\d\.]', '', value))
-                            result['units'] = units
-                            current_units = units
-                        else:
-                            result['value'] = units
-                            result['units'] = current_units
-                    else:
-                        result[key] = convert_to_numeric(cell.text, strip=True)
-
-                # Record the result
+            # Precisely extract results if possible.
+            try:
+                name = row.find('td', attrs={'class': 'sr_label'}).text.strip()
+            except AttributeError:
+                name = None
+            try:
+                value = row.find('td', attrs={'class': 'sr_result'}).text.strip()
+            except:
+                value = None
+            units = None
+            try:
+                lod = row.find('td', attrs={'class': 'sr_limit'}).text
+                loq = row.find('td', attrs={'class': 'sr_limit'}).text
+                result['lod'] = convert_to_numeric(lod, strip=True)
+                result['loq'] = convert_to_numeric(loq, strip=True)
+                result['units'] = re.sub('[\d\.]', '', lod).strip()
+            except AttributeError:
+                pass
+            if name and value:
+                analyte = snake_case(name)
+                analyte = standard_analytes.get(analyte, analyte)
+                result['key'] = analyte
+                result['value'] = convert_to_numeric(value)
                 results.append(result)
 
-            # Get all of the non-detects, using the current units.
-            elif row.has_attr('class') and row.attrs['class'][0] == 'not-detected--substances':
-                par = row.find('td').text.replace('Not detected:', '')
-                block = [strip_whitespace(x) for x in par.split(',')]
-                for analyte in block:
-                    results.append({
-                        'analysis': analysis,
-                        'key': snake_case(analyte),
-                        'name': analyte,
-                        'value': 'ND',
-                        'units': current_units,
-                    })
+            # Otherwise, parse results to the best of our abilities.
+            if name is None and value is None:
+                cells = row.find_all('td')
+                if len(cells) > 1:
+                    for i, cell in enumerate(cells):
+                        value, units = None, None
+                        try:
+                            key = values[i]
+                        except IndexError:
+                            key = f'limit_{i}'
+                        if key == 'name':
+                            analyte = snake_case(cell.text)
+                            analyte = standard_analytes.get(analyte, analyte)
+                            result['key'] = analyte
+                        elif key == 'value':
+                            value = cell.text
+                            units = re.sub('[\d\.]', '', value) \
+                                .replace('%', 'percent') \
+                                .replace('<', '') \
+                                .strip()
+                            if not units or units == 'ND' or units == 'Not Detected':
+                                limit = result.get('lod', result.get('loq', result.get('limit', '')))
+                                units = re.sub('[\d\.]', '', limit).replace('%', 'percent').strip()
+                            if units != 'Negative' and units != 'Positive':
+                                value = convert_to_numeric(re.sub('[^\d\.]', '', value))
+                                result['value'] = value
+                                result['units'] = units
+                                current_units = units
+                            else:
+                                result['value'] = units
+                                result['units'] = current_units
+                        else:
+                            result[key] = convert_to_numeric(cell.text, strip=True)
 
-    # Create or re-mint the `sample_id`.
+                    # Record the result, if present.
+                    if not value and not units:
+                        continue
+                    results.append(result)
+
+                # Get all of the non-detects, using the current units.
+                # Note: This is crudely using units from the prior table.
+                elif row.has_attr('class') and row.attrs['class'][0] == 'not-detected--substances':
+                    par = row.find('td').text.replace('Not detected:', '')
+                    block = [strip_whitespace(x) for x in par.split(',')]
+                    for analyte in block:
+                        results.append({
+                            'analysis': analysis,
+                            'key': snake_case(analyte),
+                            'name': analyte,
+                            'value': 'ND',
+                            'units': current_units,
+                        })
+    
+    # Turn dates to ISO format.
+    date_columns = [x for x in obs.keys() if x.startswith('date')]
+    for date_column in date_columns:
+        try:
+            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+        except:
+            pass
+
+    # Return the sample details with a new or re-minted `sample_id`.
+    obs['analyses'] = list(set(analyses))
+    obs['lab_results_url'] = url
+    obs['results'] = results
     obs['sample_id'] = create_sample_id(
         private_key=obs['producer'],
         public_key=obs['product_name'],
         salt=obs['date_tested'],
     )
-
-    # Return the sample details.
-    obs['analyses'] = list(set(analyses))
-    obs['lab_results_url'] = url
-    obs['results'] = results
     return {**MCR_LABS, **obs}
 
 
@@ -483,7 +577,11 @@ if __name__ == '__main__':
     # assert samples is not None
 
     # [✓] TEST: Get a sample's details.
-    details = get_mcr_labs_sample_details(None, 'rooted-labs-distillate_2')
+    # details = get_mcr_labs_sample_details(None, 'rooted-labs-distillate_2')
+    # assert details is not None
+
+    # FIXME: Handle infused products (`product_type == 'mip'`)
+    details = get_mcr_labs_sample_details(None, '67545')
     assert details is not None
 
     # [✓] TEST: Get a range of the samples.

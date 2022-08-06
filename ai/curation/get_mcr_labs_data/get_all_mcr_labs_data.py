@@ -13,6 +13,8 @@ Description:
 
     Collect all of MCR Labs' publicly published lab results.
 
+Data Points: See `cannlytics.data.coas.mcrlabs.py`.
+
 Data Sources:
     
     - MCR Labs Test Results
