@@ -424,7 +424,21 @@ def get_mcr_labs_sample_details(
     block = strip_whitespace(block).replace(' ', '').replace(',]', ']')
     cannabinoids = json.loads(block)
     analyses.append('cannabinoids')
+
+    # Determine the cannabinoids units.
+    units = None
+    try:
+        assert '%' in soup.find('div', attrs={'class': 'rd_can_table'}).text
+        units = 'percent'
+    except AttributeError:
+        table = soup.find('table', attrs={'class': 'safetytable'})
+        thead = table.find('thead')
+        units = snake_case(thead.find_all('th', limit=2)[-1].text)
+
+    # Record the cannabinoids.
     for analyte in cannabinoids:
+        if analyte['label'] == 'TotalCannabinoids':
+            continue
         key = snake_case(analyte['key'].replace('-', ''))
         key = standard_analytes.get(key, key)
         results.append({
@@ -432,7 +446,7 @@ def get_mcr_labs_sample_details(
             'key': key,
             'name': analyte['label'],
             'value': analyte['perc'],
-            'units': 'percent',
+            'units': units,
         })
 
     # Get the results for all other analyses.
@@ -442,13 +456,17 @@ def get_mcr_labs_sample_details(
 
         # Get the analysis of the table.
         el = table.find_previous('h4')
-        text = strip_whitespace(el.text)
-        text = text \
-            .replace('Screen', '') \
-            .replace('Contaminant', '') \
-            .replace('Profile', '')
-        analysis = snake_case(text.strip())
-        analysis = standard_analyses.get(analysis, analysis)
+        try:
+            assert el.parent['id'] == 'client'
+            analysis = 'cannabinoids'
+        except KeyError:
+            text = strip_whitespace(el.text)
+            text = text \
+                .replace('Screen', '') \
+                .replace('Contaminant', '') \
+                .replace('Profile', '')
+            analysis = snake_case(text.strip())
+            analysis = standard_analyses.get(analysis, analysis)
         analyses.append(analysis)
 
         # Optional: Break up aflatoxins and ochratoxin A.
@@ -580,9 +598,9 @@ if __name__ == '__main__':
     # details = get_mcr_labs_sample_details(None, 'rooted-labs-distillate_2')
     # assert details is not None
 
-    # FIXME: Handle infused products (`product_type == 'mip'`)
-    details = get_mcr_labs_sample_details(None, '67545')
-    assert details is not None
+    # [✓] TEST: Get an infused products's results (`product_type == 'mip'`).
+    # details = get_mcr_labs_sample_details(None, '67545')
+    # assert details is not None
 
     # [✓] TEST: Get a range of the samples.
     # print('Getting range of the samples.')
