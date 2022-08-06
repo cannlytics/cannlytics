@@ -381,12 +381,13 @@ def parse_sc_labs_pdf(doc: Any) -> dict:
     for page in report.pages[1:]:
 
         # Get the results from each result page.
+        # FIXME: Analysis doesn't parse well...
         # Hot-Fix: Determine the analysis from the first cell.
         tables = page.extract_tables()
         for table in tables:
             for i, row in enumerate(table):
                 if i == 0:
-                    analysis = standard_analyses.get(row[0].lower())
+                    analysis = standard_analyses.get(row[0].lower(), 'terpenes')
                 key = snake_case(row[0])
                 key = standard_analytes.get(key, key)
                 parts = row[1].split(' / ')
@@ -932,10 +933,10 @@ if __name__ == '__main__':
     # assert data is not None
 
     # [✓] Test parsing a SC Labs CoA PDF.
-    # directory = '../../../.datasets/coas/Flore COA'
-    # doc = f'{directory}/Dylan Mattole/Mattole Valley - Marshmellow OG.pdf'
-    # parser = CoADoc()
-    # lab = parser.identify_lims(doc)
-    # assert lab == 'SC Labs'
-    # data = parse_sc_labs_pdf(doc)
-    # assert data is not None
+    directory = '../../../.datasets/coas/Flore COA'
+    doc = f'{directory}/Dylan Mattole/Mattole Valley Jack H.pdf'
+    parser = CoADoc()
+    lab = parser.identify_lims(doc)
+    assert lab == 'SC Labs'
+    data = parse_sc_labs_pdf(doc)
+    assert data is not None
