@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/8/2022
-Updated: 7/26/2022
+Updated: 8/6/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -90,15 +90,13 @@ Future work:
     - Optional: Standardize the `product_type` and `status`.
     - Optional: Find the `county` given the `producer_zipcode`.
     - Future work: Identify a `strain_name` from the `product_name`.
-    - Future work: Standardize `analyses`. 
-    - Future work: Standardize analytes (`results` `key`).
 
 """
 # Internal imports.
 from ast import literal_eval
 import re
 from time import sleep
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urljoin
 
 # External imports.
@@ -142,7 +140,14 @@ SC_LABS = {
 
 # It is assumed that the CoA has the following parameters.
 SC_LABS_COA = {
-    'analyses': {
+    'coa_page_area': '(0, 350, 612, 520)',
+    'coa_distributor_area': '(205, 150, 400, 230)',
+    'coa_producer_area': '(0, 150, 204.0, 230)',
+    'coa_sample_details_area': [
+        (0, 225, 200, 350),
+        (200, 225, 400, 350),
+    ],
+    'coa_analyses': {
         'cannabinoid': 'cannabinoids',
         'terpenoid': 'terpenes',
         'pesticide': 'pesticides',
@@ -151,14 +156,24 @@ SC_LABS_COA = {
         'heavy_metals': 'heavy_metals',
         'microbiology': 'microbes',
         'foreign_material': 'foreign_matter',
+        'limonene': 'terpenes',
+        'thca': 'cannabinoids',
+        'fenchol': 'terpenes',
     },
-    'coa_page_area': '(0, 350, 612, 520)',
-    'coa_distributor_area': '(205, 150, 400, 230)',
-    'coa_producer_area': '(0, 150, 204.0, 230)',
-    'coa_sample_details_area': [
-        (0, 225, 200, 350),
-        (200, 225, 400, 350),
-    ],
+    'coa_analytes': {
+        'b_caryophyllene': 'beta_caryophyllene',
+        'a_humulene': 'humulene',
+        'b_pinene': 'beta_pinene',
+        'a_bisabolol': 'alpha_bisabolol',
+        'a_pinene': 'alpha_pinene',
+        'a_cedrene': 'alpha_cedrene',
+        '3_carene': 'delta_3_carene',
+        'g_terpinene': 'gamma_terpinene',
+        'r_pulegone': 'pulegone',
+        'a_phellandrene': 'alpha_phellandrene',
+        'a_terpinene': 'alpha_terpinene',
+        'trans_b_farnesene': 'trans_beta_farnesene',
+    },
     'coa_fields': {
         'batch_number': 'batch_number',
         'batch_size': 'batch_size',
@@ -197,20 +212,6 @@ SC_LABS_COA = {
         'action-limit': 'limit',
         'result-pf': 'status',
     },
-    'coa_replacements': {
-        'b_caryophyllene': 'beta_caryophyllene',
-        'a_humulene': 'humulene',
-        'b_pinene': 'beta_pinene',
-        'a_bisabolol': 'alpha_bisabolol',
-        'a_pinene': 'alpha_pinene',
-        'a_cedrene': 'alpha_cedrene',
-        '3_carene': 'delta_3_carene',
-        'g_terpinene': 'gamma_terpinene',
-        'r_pulegone': 'pulegone',
-        'a_phellandrene': 'alpha_phellandrene',
-        'a_terpinene': 'alpha_terpinene',
-        'trans_b_farnesene': 'trans_beta_farnesene',
-    },
 }
 
 
@@ -248,10 +249,10 @@ def parse_sc_labs_coa(
         (dict): The sample data.
     """
     # Pythonic try first, ask later approach.
-    # FIXME: Be more precise and check if there is a URL and if it is private.
+    # Optional: Be more precise and check if there is a URL and if it is private.
     try:
         data = get_sc_labs_sample_details(doc)
-    except:
+    except (AttributeError, ConnectionError):
         data = parse_sc_labs_pdf(doc)
         data['public'] = False
     return data
@@ -277,6 +278,10 @@ def parse_sc_labs_pdf(doc: Any) -> dict:
     distributor_area = literal_eval(SC_LABS_COA['coa_distributor_area'])
     producer_area = literal_eval(SC_LABS_COA['coa_producer_area'])
     sample_details_area = SC_LABS_COA['coa_sample_details_area']
+
+    # Get the standard analyses and analytes.
+    standard_analyses = SC_LABS_COA['coa_analyses']
+    standard_analytes = SC_LABS_COA['coa_analytes']
 
     # Get producer details.
     crop = front_page.within_bbox(producer_area)
@@ -344,14 +349,12 @@ def parse_sc_labs_pdf(doc: Any) -> dict:
     product_name = lines[0]
     obs['product_type'] = lines[1]
 
-    # FIXME: Get analyses.
-    # rects = front_page.rects
-    # for rect in rects:
-    #     crop = front_page.within_bbox((rect['x0'], rect['y0'], rect['x1'], rect['y1']))
-    #     text = crop.extract_text()
-    #     if 'ANALYSIS' in text:
-    #         print(text)
-    #         break
+    # Get the analyses.
+    analyses = []
+    for line in lines:
+        if 'ANALYSIS' in line:
+            analysis = line.split(' ANALYSIS')[0].lower()
+            analysis = standard_analyses.get(analysis, analysis)
 
     # Get the totals.
 
@@ -375,21 +378,22 @@ def parse_sc_labs_pdf(doc: Any) -> dict:
 
     # Get the results.
     results = []
-    standard_analytes = SC_LABS_COA['coa_replacements']
     for page in report.pages[1:]:
 
-        # FIXME: Is it possible to add `analysis` to the results? NLP?
-
         # Get the results from each result page.
+        # Hot-Fix: Determine the analysis from the first cell.
         tables = page.extract_tables()
         for table in tables:
-            for row in table:
+            for i, row in enumerate(table):
+                if i == 0:
+                    analysis = standard_analyses.get(row[0].lower())
                 key = snake_case(row[0])
                 key = standard_analytes.get(key, key)
                 parts = row[1].split(' / ')
                 subparts = parts[-1].strip().split(' ')
                 mg_g, value = tuple(row[-1].split(' '))
                 results.append({
+                    'analysis': analysis,
                     'key': key,
                     'lod': convert_to_numeric(parts[0].strip()),
                     'loq': convert_to_numeric(subparts[0]),
@@ -397,20 +401,23 @@ def parse_sc_labs_pdf(doc: Any) -> dict:
                     'mg_g': convert_to_numeric(mg_g),
                     'name': row[0].replace('\n', ' ').strip(),
                     'value': convert_to_numeric(value),
+                    # FIXME: Dynamically determine the units!
+                    'units': 'percent',
                 })
 
-        # FIXME:
+        # FIXME: It is difficult to get methods due to wrapped text.
         # Get the methods from the result page text.
         # page_text = page.extract_text()
         # texts = page_text.split('Method:')
         # for text in texts[1:]:
         #     if 'Analysis' in text:
-        #         method = text.split('.')[0]
+        #         method = text.split('.')[0].replace('\n', ' ')
         #         analysis = method.split('Analysis of ')[-1].split(' by')[0].lower()
-        #         print(analysis, method)
+        #         # method = re.sub(r'\b[A-Z]+\b', '', method) # Remove all-cap words.
+        #         method = re.sub('[\(\[].*?[\)\]]', '', method) # Remove words in parentheses.
 
     # Aggregate results.
-    obs['analyses'] = []
+    obs['analyses'] = analyses
     obs['date_tested'] = date_tested
     obs['product_name'] = product_name
     obs['results'] = results
@@ -478,7 +485,7 @@ def get_sc_labs_test_results(
                 print('Client not found: %s' % (producer_id))
                 break
 
-        # FIXME: This may not be working as intended.
+        # Note: This may not be working as intended.
         # Break the iteration if the page max is reached.
         try:
             current_sample = soup.find('h3').text
@@ -545,7 +552,7 @@ def get_sc_labs_test_results(
             total_terpenes = values[2].text.split(':')[-1].replace('%', '')
             
             # Create a sample ID.
-            # FIXME: Test that this works as intended if any lab results
+            # Note: This may not work as intended if any lab results
             # do not have tested at dates.
             sample_id = create_sample_id(producer, product_name, date)
 
@@ -639,6 +646,8 @@ def get_sc_labs_sample_details(
         obs['producer_city'] = ''
         obs['producer_zipcode'] = ''
     
+    # FIXME: Lookup producer / distributor address for latitude / longitude.
+    
     # Remove the `address` field to avoid confusion.
     try:
         del obs['address']
@@ -716,7 +725,7 @@ def get_sc_labs_sample_details(
         obs['date_received'] = ''
     
     # Rename desired fields.
-    # FIXME: Test that this is working as intended.
+    # Note: This may not be working as intended.
     for key, field in SC_LABS_COA['coa_fields'].items():
         try:
             value = obs.pop(key)
@@ -745,6 +754,7 @@ def get_sc_labs_sample_details(
     results = []
     notes = None
     coa_results_fields = SC_LABS_COA['coa_results_fields']
+    standard_analyses = SC_LABS_COA['coa_analyses']
     cards = soup.find_all('div', attrs={'class': 'analysis-container'})    
     for element in cards:
 
@@ -756,7 +766,7 @@ def get_sc_labs_sample_details(
         if 'Analysis' not in analysis:
             continue
         analysis = snake_case(analysis.split(' Analysis')[0])
-        analysis = SC_LABS_COA['analyses'].get(analysis, analysis)
+        analysis = standard_analyses.get(analysis, analysis)
         analyses.append(analysis)
 
         # Get the method for the analysis.
@@ -834,7 +844,7 @@ def get_sc_labs_sample_details(
             result['loq'] = values[1]
             del result['lodloq']
             results[i] = result
-    
+
     # Clean results.
     for i, result in enumerate(results):
 
@@ -863,7 +873,7 @@ def get_sc_labs_sample_details(
 
         # Update the result.
         results[i] = result
-    
+
     # Clean `total_{analyte}`s and `sum_of_cannabinoids`.
     columns = [x for x in obs.keys() if x.startswith('total_') or x.startswith('sum_')]
     for key in columns:
@@ -876,7 +886,7 @@ def get_sc_labs_sample_details(
 
     # Separate `batch_units` from `batch_size`.
     obs['batch_size'], obs['batch_units'] = tuple(obs['batch_size'].split(' '))
-    
+
     # Turn dates to ISO format.
     date_columns = [x for x in obs.keys() if x.startswith('date')]
     for date_column in date_columns:
@@ -903,6 +913,7 @@ def get_sc_labs_sample_details(
 if __name__ == '__main__':
 
     # === Tests ===
+    from cannlytics.data.coas import CoADoc
 
     # # [✓] TEST: Get all test results for a specific client.
     # test_results = get_sc_labs_test_results(sample='2821')
@@ -914,11 +925,17 @@ if __name__ == '__main__':
 
     # [✓] TEST: Get details for a specific sample URL.
     # sc_labs_coa_url = 'https://client.sclabs.com/sample/858084'
+    # parser = CoADoc()
+    # lab = parser.identify_lims(sc_labs_coa_url)
+    # assert lab == 'SC Labs'
     # data = get_sc_labs_sample_details(sc_labs_coa_url)
     # assert data is not None
 
     # [✓] Test parsing a SC Labs CoA PDF.
-    directory = '../../../.datasets/coas/Flore COA'
-    doc = f'{directory}/Dylan Mattole/Mattole Valley - Marshmellow OG.pdf'
-    data = parse_sc_labs_pdf(doc)
-    assert data is not None
+    # directory = '../../../.datasets/coas/Flore COA'
+    # doc = f'{directory}/Dylan Mattole/Mattole Valley - Marshmellow OG.pdf'
+    # parser = CoADoc()
+    # lab = parser.identify_lims(doc)
+    # assert lab == 'SC Labs'
+    # data = parse_sc_labs_pdf(doc)
+    # assert data is not None
