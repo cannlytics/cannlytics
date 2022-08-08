@@ -519,8 +519,8 @@ def get_sc_labs_test_results(
         # Get producer website.
         try:
             attributes = {'class': 'pp-social-web'}
-            element = details.find('span', attrs=attributes)
-            producer_url = element.find('a')['href']
+            el = details.find('span', attrs=attributes)
+            producer_url = el.find('a')['href']
         except:
             producer_url = ''
 
@@ -613,8 +613,8 @@ def get_sc_labs_sample_details(
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # Get the bulk of the details.
-    elements = soup.find_all('p', attrs={'class': 'sdp-summary-data'})
-    obs = parse_data_block(elements)
+    els = soup.find_all('p', attrs={'class': 'sdp-summary-data'})
+    obs = parse_data_block(els)
 
     # Get the product name.
     obs['product_name'] = soup.find('h2').text
@@ -631,8 +631,8 @@ def get_sc_labs_sample_details(
         obs['distributor_zipcode'] = ''
     
     # Get the producer details.
-    element = soup.find('div', attrs={'id': 'cultivator-details'})
-    producer_details = parse_data_block(element)
+    el = soup.find('div', attrs={'id': 'cultivator-details'})
+    producer_details = parse_data_block(el)
     obs['producer'] = producer_details['business_name']
     obs['producer_license_number'] = producer_details['license_number']
 
@@ -700,8 +700,8 @@ def get_sc_labs_sample_details(
 
     # Get the date tested.
     try:
-        element = soup.find('div', attrs={'class': 'sdp-masthead-data'})
-        mm, dd, yyyy = element.find('p').text.split('/')
+        el = soup.find('div', attrs={'class': 'sdp-masthead-data'})
+        mm, dd, yyyy = el.find('p').text.split('/')
         obs['date_tested'] = '-'.join([yyyy, mm, dd])
     except AttributeError:
         obs['date_tested'] = ''
@@ -757,12 +757,12 @@ def get_sc_labs_sample_details(
     coa_results_fields = SC_LABS_COA['coa_results_fields']
     standard_analyses = SC_LABS_COA['coa_analyses']
     cards = soup.find_all('div', attrs={'class': 'analysis-container'})    
-    for element in cards:
+    for card in cards:
 
         # Get the analysis.
-        analysis = element.find('h4').text
+        analysis = card.find('h4').text
         if 'Notes' in analysis:
-            div = element.find('div', attrs={'class': 'section-inner'})
+            div = card.find('div', attrs={'class': 'section-inner'})
             notes = div.find('p').text
         if 'Analysis' not in analysis:
             continue
@@ -771,14 +771,14 @@ def get_sc_labs_sample_details(
         analyses.append(analysis)
 
         # Get the method for the analysis.
-        bold = element.find('b')
+        bold = card.find('b')
         method = bold.parent.text.replace('Method: ', '')
         key = '_'.join([analysis, 'method'])
         obs[key] = method
 
         # Get all of the results for the analysis.
         # - value, units, margin_of_error, lod, loq
-        table = element.find('table')
+        table = card.find('table')
         rows = table.find_all('tr')
         for row in rows[1:]:
             cells = row.find_all('td')
@@ -795,8 +795,8 @@ def get_sc_labs_sample_details(
     if not results:
 
         # Get details.
-        element = soup.find('div', attrs={'id': 'detailQuickView'})
-        items = element.find_all('li')
+        el = soup.find('div', attrs={'id': 'detailQuickView'})
+        items = el.find_all('li')
         mm, dd, yyyy = items[0].text.split(': ')[-1].split('-')
         obs['date_tested'] = f'{yyyy}-{mm}-{dd}'
         obs['product_type'] = items[-1].text.split(': ')[-1]

@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/2/2022
-Updated: 8/3/2022
+Updated: 8/7/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -17,8 +17,6 @@ Data Points:
     - {analysis}_method
     - {analysis}_status
     ✓ batch_number
-    - classification
-    - coa_urls
     ✓ date_tested
     - date_received
     ✓ images
@@ -31,12 +29,11 @@ Data Points:
     - predicted_aromas
     - results
     ✓ sample_weight
-    - total_cannabinoids (calculated)
+    - total_cannabinoids
     - total_thc
     - total_cbd
-    - total_terpenes (calculated)
+    - total_terpenes
     ✓ sample_id (generated)
-    - strain_name
     - lab_id
     - lab
     - lab_image_url
@@ -50,8 +47,6 @@ Data Points:
     - lab_email
     - lab_latitude (augmented)
     - lab_longitude (augmented)
-
-Static Data Points:
 
 """
 # Standard imports.
