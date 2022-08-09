@@ -933,10 +933,10 @@ if __name__ == '__main__':
     # assert data is not None
 
     # [✓] Test parsing a SC Labs CoA PDF.
-    directory = '../../../.datasets/coas/Flore COA'
-    doc = f'{directory}/Dylan Mattole/Mattole Valley Jack H.pdf'
-    parser = CoADoc()
-    lab = parser.identify_lims(doc)
-    assert lab == 'SC Labs'
-    data = parse_sc_labs_pdf(doc)
-    assert data is not None
+    # directory = '../../../.datasets/coas/Flore COA'
+    # doc = f'{directory}/Dylan Mattole/Mattole Valley Jack H.pdf'
+    # parser = CoADoc()
+    # lab = parser.identify_lims(doc)
+    # assert lab == 'SC Labs'
+    # data = parse_sc_labs_pdf(doc)
+    # assert data is not None

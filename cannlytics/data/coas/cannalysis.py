@@ -165,7 +165,6 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
         report = pdfplumber.open(doc)
     else:
         report = doc
-    front_page = report.pages[0]
 
     # Get the QR code from the last page.
     obs = {}
@@ -173,11 +172,11 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
 
     # Get the lab specifics.
     coa_parameters = CANNALYSIS_COA
-    standard_analyses = CANNALYSIS_COA['coa_analyses']
-    standard_analytes = CANNALYSIS_COA['coa_analytes']
-    standard_fields = CANNALYSIS_COA['coa_fields']
-    standard_result_fields = CANNALYSIS_COA['coa_result_fields']
-    skip_fields = CANNALYSIS_COA['coa_skip_fields']
+    standard_analyses = coa_parameters['coa_analyses']
+    standard_analytes = coa_parameters['coa_analytes']
+    standard_fields = coa_parameters['coa_fields']
+    standard_result_fields = coa_parameters['coa_result_fields']
+    skip_fields = coa_parameters['coa_skip_fields']
 
     # Optional: Get the image data.
 
@@ -186,6 +185,7 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
     results = []
 
     # Get the sample details.
+    front_page = report.pages[0]
     sample_details_area = coa_parameters['coa_sample_details_area']
     if isinstance(sample_details_area, str):
         sample_details_area = [sample_details_area]
@@ -231,7 +231,7 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
                 collect = True
                 continue
 
-    # Get all page text.
+    # Get all page text, from the 2nd page on.
     areas = coa_parameters['coa_page_area']
     lines = []
     for page in report.pages[1:]:

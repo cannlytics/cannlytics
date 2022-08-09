@@ -16,7 +16,6 @@ Data Points:
     ✓ analyses
     - {analysis}_method
     ✓ {analysis}_status
-    - classification
     - coa_urls
     ✓ date_tested
     - date_received
@@ -40,7 +39,6 @@ Data Points:
     ✓ total_cbd
     - total_terpenes (calculated)
     ✓ sample_id (generated)
-    - strain_name (predict later)
     - lab_id
     ✓ lab
     ✓ lab_image_url
