@@ -9,7 +9,7 @@ License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Parse a TagLeaf LIMS CoA.
+    Parse a TagLeaf LIMS CoA PDF or URL.
 
 Data Points:
 
@@ -64,7 +64,7 @@ from requests import Session
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
-from cannlytics.utils.utils import snake_case, strip_whitespace
+from cannlytics.utils.utils import convert_to_numeric, snake_case, strip_whitespace
 
 
 TAGLEAF = {
@@ -74,6 +74,31 @@ TAGLEAF = {
     'lims': 'lims.tagleaf',
     'url': 'https://lims.tagleaf.com',
     'public': True,
+}
+
+TAGLEAF_COA = {
+    'coa_analyses': {
+        'Potency': 'cannabinoids',
+        'Terpenes': 'terpenes',
+        'Moisture Analysis': 'moisture',
+        'Microbiological Contaminants': 'microbes',
+        'Mycotoxins': 'mycotoxins',
+        'Pesticides': 'pesticides',
+        'Heavy Metals': 'heavy_metals',
+        'Water Activity': 'water_activity',
+        'Foreign Material (Visual Inspection)': 'foreign_matter',
+    },
+    'coa_units': {
+        'cannabinoids': 'percent',
+        'terpenes': 'percent',
+        'moisture': 'percent',
+        'microbes': 'CFU/g',
+        'mycotoxins': 'µg/kg',
+        'pesticides': 'µg/g',
+        'heavy_metals': 'µg/g',
+        'water_activity': 'aW',
+        'foreign_matter': 'percent',
+    },
 }
 
 
@@ -125,7 +150,6 @@ def parse_tagleaf_url(
     Returns:
         (dict): The sample data.
     """
-    lims = 'TagLeaf LIMS'
 
     # Get the HTML.
     if keys is None:
@@ -137,8 +161,12 @@ def parse_tagleaf_url(
     response = self.session.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
 
+    # Get the standard fields and analyses.
+    standard_analyses = TAGLEAF_COA['coa_analyses']
+    standard_units = TAGLEAF_COA['coa_units']
+
     # Get the date tested.
-    obs = {'analyses': [], 'results': [], 'lims': lims}
+    obs = {'analyses': [], 'results': [], 'lims': 'TagLeaf LIMS'}
     el = soup.find('p', attrs={'class': 'produced-statement'})
     date_tested = pd.to_datetime(el.text.split(': ')[-1]).isoformat()
     obs['date_tested'] = date_tested
@@ -169,6 +197,10 @@ def parse_tagleaf_url(
         pars = row.find_all('p')
         key = snake_case(strip_whitespace(pars[1].text))
         value = strip_whitespace(pars[0].text)
+        if key == 'sample_weight':
+            continue
+        if key in ['value', 'mg_g', 'lod', 'loq']:
+            value = convert_to_numeric(value, strip=True)
         obs[key] = value
 
     # Get cultivator and distributor details.
@@ -241,24 +273,52 @@ def parse_tagleaf_url(
     # noting that `value` is repeated for `mg_g`.
     tables = soup.find_all('table')
     for table in tables:
+
+        # Find the analysis of the table.
+        title = table.find_previous('h3').contents
+        text = ''.join([x for x in title if type(x) == NavigableString])
+        analysis = strip_whitespace(text).split(':')[-1].split('by')[0].strip()
+        analysis = standard_analyses.get(analysis, snake_case(analysis))
+        units = standard_units.get(analysis)
+
+        # Find the columns of the table.
         headers = table.find_all('th')
         columns = [keys[strip_whitespace(x.text)] for x in headers]
+
+        # Iterate over all of the rows of the table.
         rows = table.find_all('tr')[1:]
         for row in rows:
+            analyte = None
             mg_g = False
-            result = {}
+            result = {
+                'analysis': analysis,
+                'units': units,
+            }
             cells = row.find_all('td')
             for i, cell in enumerate(cells):
                 key = columns[i]
                 value = strip_whitespace(cell.text)
                 if key == 'name':
-                    value = self.analytes.get(value, snake_case(value))
+                    analyte = self.analytes.get(value, snake_case(value))
+                    result['key'] = analyte
                 if key == 'value' and mg_g:
                     key = 'mg_g'
                 if key == 'value':
                     mg_g = True
+                if key in ['value', 'mg_g', 'lod', 'loq', 'limit'] and value != 'ND':
+                    value = value.replace('< 1 mg/g', 'ND')
+                    value = convert_to_numeric(value, strip=True)
                 result[key] = value
-            obs['results'].append(result)
+
+            # Hot-fix: Handle status.
+            if result.get('status') == 'N/A':
+                result['status'] = None
+
+            # Handle totals.
+            if analyte.startswith('total') and obs.get(analyte) is None:
+                obs[analyte] = convert_to_numeric(value, strip=True)
+            else:
+                obs['results'].append(result)
 
     # Return the sample with a freshly minted sample ID.
     obs['sample_id'] = create_sample_id(

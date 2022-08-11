@@ -3,6 +3,7 @@
 # Updated: 7/16/2022
 
 beautifulsoup4
+cv2
 firebase_admin
 fredapi
 google-cloud-secret-manager

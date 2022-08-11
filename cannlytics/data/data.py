@@ -127,6 +127,12 @@ def create_sample_id(private_key, public_key, salt='') -> str:
 
 # === Data analysis tools. ===
 
+def random_sample(data, count=10_000):
+    """Create a random sample of a given dataset."""
+    # TODO: Implement !
+    raise NotImplementedError
+
+
 def shard_datasets(data, directory, count=10_000):
     """Shard a dataset for ease of use."""
     # TODO: Implement !

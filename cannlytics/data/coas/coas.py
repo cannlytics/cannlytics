@@ -26,7 +26,7 @@ Note:
 
 Supported Labs:
 
-    - Anresco Laboratories
+    ✓ Anresco Laboratories
     ✓ Cannalysis
     ✓ Green Leaf Lab
     ✓ MCR Labs
@@ -96,7 +96,7 @@ from cannlytics.utils.constants import (
 )
 
 # Lab and LIMS CoA parsing algorithms.
-# from cannlytics.data.coas.anresco import ANRESCO
+from cannlytics.data.coas.anresco import ANRESCO
 from cannlytics.data.coas.cannalysis import CANNALYSIS
 from cannlytics.data.coas.confidentcannabis import CONFIDENT_CANNABIS
 from cannlytics.data.coas.greenleaflab import GREEN_LEAF_LAB
@@ -109,7 +109,7 @@ from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
 
 # Labs and LIMS that CoADoc can parse.
 LIMS = {
-    # 'Anresco Laboratories': ANRESCO,
+    'Anresco Laboratories': ANRESCO,
     'Cannalysis': CANNALYSIS,
     'Confident Cannabis': CONFIDENT_CANNABIS,
     'Green Leaf Lab': GREEN_LEAF_LAB,
@@ -236,9 +236,10 @@ class CoADoc:
         # Assign all of the parsing routines.
         if init_all:
             for values in self.lims.values():
-                key = values['coa_algorithm'].replace('.py', '')
-                module = f'cannlytics.data.coas.{key}'
-                self.__dict__[key] = importlib.import_module(module)
+                script = values['coa_algorithm'].replace('.py', '')
+                module = f'cannlytics.data.coas.{script}'
+                entry_point = values['coa_algorithm_entry_point']
+                setattr(self, entry_point, importlib.import_module(module))
 
     def decode_pdf_qr_code(
             self,
@@ -598,7 +599,7 @@ class CoADoc:
 
         # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
-        algorithm = getattr(self, algorithm_name)
+        algorithm = getattr(getattr(self, algorithm_name), algorithm_name)
         
         # Use the URL if found, then try the PDF if the URL fails or is missing.
         if url:
@@ -670,7 +671,7 @@ class CoADoc:
         
         # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
-        algorithm = getattr(self, algorithm_name)
+        algorithm = getattr(getattr(self, algorithm_name), algorithm_name)
         data = algorithm(
             self,
             url,
@@ -748,7 +749,7 @@ class CoADoc:
                 'product_type': item['product_type'],
             }
             for result in item['results']:
-                value[result['key']] = result['value']
+                value[result['key']] = result.get('value', result.get('percent'))
             values.append(value)
 
         # Add a values sheet.
@@ -850,11 +851,11 @@ if __name__ == '__main__':
 
     # Specify where your data lives for testing.
     DATA_DIR = '../../../.datasets/coas'
-    cc_coa_pdf = f'{DATA_DIR}/Classic Jack.pdf'
-    cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
-    tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
-    tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
-    tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
+    # cc_coa_pdf = f'{DATA_DIR}/Classic Jack.pdf'
+    # cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
+    # tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
+    # tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
+    # tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
 
     # [✓] TEST: `decode_pdf_qr_code` via `find_pdf_qr_code_url`.
     # qr_code_url = parser.find_pdf_qr_code_url(cc_coa_pdf)
@@ -881,18 +882,6 @@ if __name__ == '__main__':
     # [✓] TEST: Parse a URL.
     # data = parser.parse_url(cc_coa_url)
 
-    # [✓] TEST: Parse a Confident Cannabis CoA.
-    # data = parser.parse(cc_coa_pdf)
-    # sleep(3)
-    # data = parser.parse(cc_coa_url)
-
-    # [✓] TEST: Parse a TagLeaf LIMS CoA.
-    # data = parser.parse(tagleaf_coa_pdf)
-    # sleep(3)
-    # data = parser.parse(tagleaf_coa_url)
-    # sleep(3)
-    # data = parser.parse(tagleaf_coa_short_url)
-
     # [✓] TEST: Parse a list of CoA URLs.
     # urls = [cc_coa_url, tagleaf_coa_url]
     # data = parser.parse(urls)
@@ -907,39 +896,6 @@ if __name__ == '__main__':
     # [ ] TEST: Parse all CoAs in a zipped folder!
     zip_folder = '../../../.datasets/tests/coas.zip'
     # data = parser.parse(zip_folder)
-    # assert data is not None
-
-    # [✓] TEST: Green Leaf Lab CoA parsing algorithm.
-    # green_leaf_lab_coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
-    # data = parser.parse(green_leaf_lab_coa_pdf)
-    # assert data is not None
-
-    # [ ] TEST: Parse a Veda Scientific CoA.
-    veda_coa_pdf = f'{DATA_DIR}/Veda Scientific Sample COA.pdf'
-    # lab = parser.identify_lims(veda_coa_pdf)
-    # assert lab == 'Veda Scientific'
-    # data = parser.parse(veda_coa_pdf)
-    # assert data is not None
-
-    # [ ] TEST: Parse a MCR Labs URL.
-    mcr_labs_coa_url = 'https://reports.mcrlabs.com/reports/critical-kush_24'
-    lab = parser.identify_lims(mcr_labs_coa_url)
-    assert lab == 'MCR Labs'
-    data = parser.parse(mcr_labs_coa_url)
-    assert data is not None
-
-    # [ ] TEST: Parse a SC Labs sample URL.
-    # sc_labs_coa_url = 'https://client.sclabs.com/sample/796684/'
-    # lab = parser.identify_lims(sc_labs_coa_url)
-    # assert lab == 'SC Labs'
-    # data = parser.parse(sc_labs_coa_url)
-    # assert data is not None
-
-    # [ ] TEST: Parse a SC Labs CoA.
-    sc_labs_coa_pdf = f'{DATA_DIR}/SC Labs Test CoA.pdf'
-    # lab = parser.identify_lims(sc_labs_coa_pdf)
-    # assert lab == 'SC Labs'
-    # data = parser.parse(sc_labs_coa_pdf)
     # assert data is not None
 
     # [ ] TEST: Find results by known metrc IDs.

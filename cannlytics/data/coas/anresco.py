@@ -56,38 +56,37 @@ import re
 from typing import Any, Optional
 
 # External imports.
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 import pandas as pd
 import pdfplumber
-import requests
-from cannlytics.data.coas import CoADoc
+# import requests
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
-from cannlytics.utils.constants import DEFAULT_HEADERS
+# from cannlytics.utils.constants import DEFAULT_HEADERS
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
-    split_list,
-    strip_whitespace,
+    # split_list,
+    # strip_whitespace,
 )
 
 # External imports.
 import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.common.exceptions import (
-    ElementNotInteractableException,
-    TimeoutException,
-)
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-try:
-    import chromedriver_binary  # Adds chromedriver binary to path.
-except ImportError:
-    print('Proceeding assuming that you have ChromeDriver in your path.')
+# from selenium import webdriver
+# from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.chrome.service import Service
+# from selenium.common.exceptions import (
+#     ElementNotInteractableException,
+#     TimeoutException,
+# )
+# from selenium.webdriver.support import expected_conditions as EC
+# from selenium.webdriver.support.ui import WebDriverWait
+# try:
+#     import chromedriver_binary  # Adds chromedriver binary to path.
+# except ImportError:
+#     print('Proceeding assuming that you have ChromeDriver in your path.')
 
 
 # It is assumed that the lab has the following details.
@@ -158,7 +157,7 @@ ANRESCO_COA = {
         'Status': 'status',
         'Instrument': 'instrument',
         'mg/g': 'mg_g',
-        '%': 'percent',
+        '%': 'value',
     },
     'coa_drop_columns': [
         'sample_weight_to',
@@ -195,214 +194,259 @@ def find_first_value(
         return None
 
 
-def parse_anresco_coa(**kwargs):
-    """Parse an Anresco Laboratories CoA PDF or URL."""
-    raise NotImplementedError
+def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
+    """Parse a Anresco Laboratories CoA PDF.
+    Args:
+        parser (CoADoc): A CoADoc parsing client.
+        doc (str or PDF): A PDF file path or pdfplumber PDF.
+    Returns:
+        (dict): The sample data.
+    """
+    if isinstance(doc, str):
+        report = pdfplumber.open(doc)
+    else:
+        report = doc
+    front_page = report.pages[0]
 
+    # Get the QR code from the last page.
+    obs = {}
+    obs['lab_results_url'] = parser.find_pdf_qr_code_url(report, page_index=-1)
 
-# === Tests ===
-# if __name__ == '__main__':
+    # Get the standard analyses, analytes, and fields.
+    coa_parameters = ANRESCO_COA
+    standard_analytes = coa_parameters['coa_analytes']
+    standard_fields = coa_parameters['coa_fields']
+    standard_result_fields = coa_parameters['coa_result_fields']
 
-# Test parsing Anresco Laboratories CoAs.
-parser = CoADoc()
-doc = '../../../.datasets/coas/Flore COA/Betty Project/Peanutbutter Breath.pdf'
-coa_url = 'https://portal.anresco.com/#/ps/68bcb967c0f2b39d'
-
-
-#--------------------------
-# Development
-#--------------------------
-
-# Create the observation.
-obs = {}
-
-# Read the PDF.
-if isinstance(doc, str):
-    report = pdfplumber.open(doc)
-else:
-    report = doc
-front_page = report.pages[0]
-
-# Get the QR code from the last page.
-lab_results_url = parser.find_pdf_qr_code_url(report, page_index=-1)
-
-
-#--------------------------------------------
-# TODO: Parse a Anresco Laboratories CoA PDF.
-#--------------------------------------------
-
-# Get the standard analyses, analytes, and fields.
-coa_parameters = ANRESCO_COA
-standard_analytes = coa_parameters['coa_analytes']
-standard_fields = coa_parameters['coa_fields']
-standard_result_fields = coa_parameters['coa_result_fields']
-
-# Get the sample details based on page area.
-sample_details_area = coa_parameters['coa_sample_details_area']
-if isinstance(sample_details_area, str):
-    sample_details_area = [sample_details_area]
-for area in sample_details_area:
-    crop = front_page.within_bbox(literal_eval(area))
-    lines = crop.extract_text().split('\n')
-    for line in lines:
-        parts = line.replace('\xa0', ' ').split(':')
-        key = snake_case(parts[0])
-        key = standard_fields.get(key, key)
-        if not key:
-            continue
-        value = parts[-1].replace('✔', '')
-        obs[key] = value.strip()
-
-# Hot-fix.
-drop_columns = coa_parameters['coa_drop_columns']
-for column in drop_columns:
-    try:
-        del obs[column]
-    except:
-        pass
-
-# Get the lab data based on page area.
-area = coa_parameters['coa_lab_area']
-crop = front_page.within_bbox(literal_eval(area))
-lines = crop.extract_text().split('\n')[1:]
-obs['lab'] = lines[0]
-obs['lab_address'] = ', '.join([lines[1], lines[2]])
-obs['lab_license_number'] = lines[-1]
-
-# Get the producer data based on page area.
-area = coa_parameters['coa_producer_area']
-crop = front_page.within_bbox(literal_eval(area))
-lines = crop.extract_text().split('\n')[1:]
-obs['producer'] = lines[0]
-obs['producer_address'] = ', '.join([lines[1], lines[2]])
-obs['producer_license_number'] = lines[-1]
-
-# Get the distributor data based on page area.
-area = coa_parameters['coa_distributor_area']
-crop = front_page.within_bbox(literal_eval(area))
-lines = crop.extract_text().split('\n')[1:]
-obs['distributor'] = lines[0]
-obs['distributor_address'] = ' '.join([lines[1], lines[2]])
-obs['distributor_license_number'] = lines[-1]
-
-# Future work: Get all GIS data for `lab`, `producer`, and `distributor`.
-
-# Get the result data.
-# TODO: Get the `analyses` and `{analysis}_status`.
-# TODO: Add `analysis` to results.
-analyses = []
-analysis = None
-columns = []
-results = []
-units = None
-for page in report.pages:
-
-    # Iterate over the lines of text on the page.
-    lines = page.extract_text().split('www.anresco.com')[0].split('\n')
-    for line in lines:
-
-        # TODO: Get the analysis.
-
-        # Get the totals.
-        if line.startswith('Total'):
-
-            first_value = find_first_value(line)
-            name = line[:first_value].strip()
-            key = snake_case(name)
+    # Get the sample details based on page area.
+    sample_details_area = coa_parameters['coa_sample_details_area']
+    if isinstance(sample_details_area, str):
+        sample_details_area = [sample_details_area]
+    for area in sample_details_area:
+        crop = front_page.within_bbox(literal_eval(area))
+        lines = crop.extract_text().split('\n')
+        for line in lines:
+            parts = line.replace('\xa0', ' ').split(':')
+            key = snake_case(parts[0])
             key = standard_fields.get(key, key)
-            values = line[first_value:].strip().split(' ')
-            values = [x for x in values if x]
-            obs[key] = convert_to_numeric(values[-1])
-
-        # Get the columns.
-        # Note: Hot-fix for cannabinoids.
-        elif line.startswith('Analyte') or line.startswith('Cannabinoid mg/g'):
-
-            # Try to get the units.
-            if '(' in line:
-                units = line.split('(')[-1].split(')')[0]
-            elif line.startswith('Cannabinoid'):
-                units = 'percent'
-            else:
-                units = None # FIXME: Determine units another way.
-
-            # Get the standard columns.
-            text = re.sub('[\(\[].*?[\)\]]', '', line)
-            columns = [
-                standard_result_fields[x] for x in text.split(' ') if x
-            ]
-
-        # Get the analysis method.
-        # FIXME: Not all analyses have a method and instrument.
-        elif 'Method:' in line:
-            continue
-
-        elif 'Instrument:' in line:
-            continue
-
-        # SKip extraneous rows.
-        elif not line or not columns or '✔' in line or 'Anresco Laboratories' in line:
-            continue
-
-        # Extract the results!
-        else:
-
-            # Find the first value.
-            first_value = find_first_value(line)
-            if not first_value or line.startswith('STEC'):
-                # FIXME: Microbes have text values.
-                print('FIX:', line)
+            if not key:
                 continue
-        
-            # FIXME: Hot-fix for foreign matter.
-            line = line.replace('1 per 3g', '1/3g')
+            value = parts[-1].replace('✔', '')
+            obs[key] = value.strip()
 
-            # FIXME: Also exclude other analyses and the dates.
+    # Hot-fix.
+    drop_columns = coa_parameters['coa_drop_columns']
+    for column in drop_columns:
+        try:
+            del obs[column]
+        except:
+            pass
 
-            # Parse the result values.
-            print('Processing:', line)
-            name = line[:first_value].strip()
-            analyte = standard_analytes.get(snake_case(name), snake_case(name))
-            values = line[first_value:].strip().split(' ')
-            values = [x for x in values if x]
-            result = {
-                'analysis': None, # FIXME: <-- Add this data point!
-                'key': analyte,
-                'name': name,
-                'units': None, # FIXME: <-- Add this data point!
-            }
-            try:
-                for i, value in enumerate(values):
-                    key = columns[i + 1]
-                    result[key] = convert_to_numeric(value)
-            except IndexError:
-                continue 
-            results.append(result)
+    # Get the lab data based on page area.
+    area = coa_parameters['coa_lab_area']
+    crop = front_page.within_bbox(literal_eval(area))
+    lines = crop.extract_text().split('\n')[1:]
+    obs['lab'] = lines[0]
+    obs['lab_address'] = ', '.join([lines[1], lines[2]])
+    obs['lab_license_number'] = lines[-1]
 
-# Turn dates to ISO format.
-date_columns = [x for x in obs.keys() if x.startswith('date')]
-for date_column in date_columns:
-    try:
-        obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
-    except:
-        pass
+    # Get the producer data based on page area.
+    area = coa_parameters['coa_producer_area']
+    crop = front_page.within_bbox(literal_eval(area))
+    lines = crop.extract_text().split('\n')[1:]
+    obs['producer'] = lines[0]
+    obs['producer_address'] = ', '.join([lines[1], lines[2]])
+    obs['producer_license_number'] = lines[-1]
 
-# Finish data collection with a freshly minted sample ID.
-obs['analyses'] = analyses
-obs['lab_results_url'] = lab_results_url
-obs['results'] = results
-obs['sample_id'] = create_sample_id(
-    private_key=obs['producer'],
-    public_key=obs['product_name'],
-    salt=obs['date_tested'],
-)
+    # Get the distributor data based on page area.
+    area = coa_parameters['coa_distributor_area']
+    crop = front_page.within_bbox(literal_eval(area))
+    lines = crop.extract_text().split('\n')[1:]
+    obs['distributor'] = lines[0]
+    obs['distributor_address'] = ' '.join([lines[1], lines[2]])
+    obs['distributor_license_number'] = lines[-1]
 
-# print('Obs fields:', len(obs.keys()))
+    # Future work: Get all GIS data for `lab`, `producer`, and `distributor`.
+
+    # Get the result data.
+    # TODO: Get the `analyses` and `{analysis}_status`.
+    # TODO: Add `analysis` to results.
+    analyses = []
+    # analysis = None
+    columns = []
+    results = []
+    # units = None
+    for page in report.pages:
+
+        # Iterate over the lines of text on the page.
+        lines = page.extract_text().split('www.anresco.com')[0].split('\n')
+        for line in lines:
+
+            # TODO: Get the analysis.
+
+            # Get the totals.
+            if line.startswith('Total'):
+
+                first_value = find_first_value(line)
+                name = line[:first_value].strip()
+                key = snake_case(name)
+                key = standard_fields.get(key, key)
+                values = line[first_value:].strip().split(' ')
+                values = [x for x in values if x]
+                obs[key] = convert_to_numeric(values[-1])
+
+            # Get the columns.
+            # Note: Hot-fix for cannabinoids.
+            elif line.startswith('Analyte') or line.startswith('Cannabinoid mg/g'):
+
+                # Try to get the units.
+                # FIXME: Determine units another way?
+                # if '(' in line:
+                #     units = line.split('(')[-1].split(')')[0]
+                # elif line.startswith('Cannabinoid'):
+                #     units = 'percent'
+                # else:
+                #     units = None
+
+                # Get the standard columns.
+                text = re.sub('[\(\[].*?[\)\]]', '', line)
+                columns = [
+                    standard_result_fields[x] for x in text.split(' ') if x
+                ]
+
+            # Get the analysis method.
+            # FIXME: Not all analyses have a method and instrument.
+            elif 'Method:' in line:
+                continue
+
+            elif 'Instrument:' in line:
+                continue
+
+            # Skip extraneous rows.
+            elif not line or not columns or '✔' in line:
+                continue
+
+            # Break at the end of the CoA.
+            elif line.startswith('(-) = Not Tested'):
+                break
+
+            # Extract the results!
+            else:
+
+                # Find the first value.
+                first_value = find_first_value(line)
+                if not first_value:
+                    # FIXME: Microbes have text values.
+                    continue
+
+                # FIXME: Hot-fix to collect STEC result.
+                elif line.startswith('STEC'):
+                    values = line.split(' ')
+                    results.append({
+                        'analysis': 'microbes',
+                        'name': values[0],
+                        'key': snake_case(name),
+                        'method': ' '.join(parts[1:-3]).strip(),
+                        'value': values[-3],
+                        'status': values[-1],
+                    })
+                    continue
+
+                # FIXME: Hot-fix for foreign matter units.
+                line = line.replace('1 per 3g', '1/3g')
+
+                # Parse the result values.
+                name = line[:first_value].strip()
+                analyte = standard_analytes.get(snake_case(name), snake_case(name))
+                values = line[first_value:].strip().split(' ')
+                values = [x for x in values if x]
+                result = {
+                    'analysis': None, # FIXME: <-- Add this data point!
+                    'key': analyte,
+                    'name': name,
+                    'units': None, # FIXME: <-- Add this data point!
+                }
+                try:
+                    for i, value in enumerate(values):
+                        key = columns[i + 1]
+                        result[key] = convert_to_numeric(value)
+                except IndexError:
+                    continue 
+                results.append(result)
+
+    # Hot-fix: Collect the microbes!
+    columns = []
+    area = (0, 600, 595, 680)
+    crop = front_page.within_bbox(area)
+    table = crop.extract_table({
+        'vertical_strategy': 'text',
+    })
+    for row in table:
+        name = ' '.join(row[0:2]).strip()
+        key = snake_case(name)
+        method = ' '.join(row[2:-2]).strip()
+        results.append({
+            'analysis': 'microbes',
+            'key': key,
+            'name': name,
+            'value': row[-2],
+            'status': row[-1],
+            'method': method,
+        })
+    
+    # Hot-fix: Remove any results without values.
+    results = [x for x in results if 'value' in x]
+
+    # Turn dates to ISO format.
+    date_columns = [x for x in obs.keys() if x.startswith('date')]
+    for date_column in date_columns:
+        try:
+            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+        except:
+            pass
+
+    # Finish data collection with a freshly minted sample ID.
+    obs['analyses'] = analyses
+    obs['results'] = results
+    obs['sample_id'] = create_sample_id(
+        private_key=obs['producer'],
+        public_key=obs['product_name'],
+        salt=obs['date_tested'],
+    )
+    return {**ANRESCO, **obs}
 
 
 #--------------------------------------------
 # TODO: Parse a Anresco Laboratories CoA URL.
 #--------------------------------------------
+
+def parse_anresco_url(parser, doc: Any, **kwargs) -> Any:
+    """Parse a Anresco Laboratories CoA URL.
+    Args:
+        parser (CoADoc): A CoADoc parsing client.
+        doc (str or PDF): A PDF file path or pdfplumber PDF or URL.
+    Returns:
+        (dict): The sample data.
+    """
+    # FIXME: Allow the user to pass a URL directly
+    if isinstance(doc, str):
+        report = pdfplumber.open(doc)
+    else:
+        report = doc
+    front_page = report.pages[0]
+
+    # Get the QR code from the last page.
+    obs = {}
+    obs['lab_results_url'] = parser.find_pdf_qr_code_url(report, page_index=-1)
+
+    # TODO: Parse the data from the Anresco portal.
+
+    raise NotImplementedError
+
+
+#--------------------------
+# Under development
+#--------------------------
 
 # DEV: Default parameters
 # max_delay = 7
@@ -502,6 +546,21 @@ obs['sample_id'] = create_sample_id(
 # print({**ANRESCO, **obs})
 
 
+def parse_anresco_coa(parser, doc: Any, **kwargs) -> Any:
+    """Parse an Anresco Laboratories CoA PDF or URL."""
+    # FIXME: Handle both PDFs and URLs.
+    # # Read the PDF.
+    # if isinstance(doc, str):
+    #     report = pdfplumber.open(doc)
+    # else:
+    #     report = doc
+    # front_page = report.pages[0]
+
+    # # Get the QR code from the last page.
+    # lab_results_url = parser.find_pdf_qr_code_url(report, page_index=-1)
+    return parse_anresco_pdf(parser, doc, **kwargs)
+
+
 #--------------------------
 # Future work
 #--------------------------
@@ -509,4 +568,26 @@ obs['sample_id'] = create_sample_id(
 # Standardize analytes with NLP!
 
 
-# [ ] TEST: Parse an Anresco Laboratories CoA PDF.
+# === Tests ===
+if __name__ == '__main__':
+
+    from cannlytics.data.coas import CoADoc
+
+    # Test parsing Anresco Laboratories CoAs.
+    parser = CoADoc()
+    doc = '../../../.datasets/coas/Flore COA/Betty Project/Peanutbutter Breath.pdf'
+    coa_url = 'https://portal.anresco.com/#/ps/68bcb967c0f2b39d'
+
+    # [✓] TEST: Identify a given PDF or URL as an Anresco CoA.
+    lab = parser.identify_lims(doc, lims={'Anresco Laboratories': ANRESCO})
+    assert lab == 'Anresco Laboratories'
+
+    # [ ] TEST: Parse an Anresco Laboratories CoA PDF.
+    parser = CoADoc()
+    data = parse_anresco_pdf(parser, doc)
+    assert data is not None
+
+    # [ ] TEST: Parse an Anresco Laboratories CoA URL.
+    # parser = CoADoc()
+    # data = parse_anresco_url(parser, doc)
+    # assert data is not None
