@@ -70,9 +70,9 @@ import base64
 import importlib
 from io import BytesIO
 from typing import Any, Optional
-import numpy as np
+# import numpy as np
 import openpyxl
-from openpyxl.utils import get_column_letter
+# from openpyxl.utils import get_column_letter
 from openpyxl.utils.dataframe import dataframe_to_rows
 import pandas as pd
 import requests
@@ -91,7 +91,7 @@ from cannlytics.utils import (
 from cannlytics.utils.constants import (
     ANALYSES,
     ANALYTES,
-    DECARB,
+    # DECARB,
     DEFAULT_HEADERS,
 )
 
@@ -104,7 +104,7 @@ from cannlytics.data.coas.mcrlabs import MCR_LABS
 from cannlytics.data.coas.sclabs import SC_LABS
 from cannlytics.data.coas.sonoma import SONOMA
 from cannlytics.data.coas.tagleaf import TAGLEAF
-from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
+# from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
 
 
 # Labs and LIMS that CoADoc can parse.
@@ -117,15 +117,15 @@ LIMS = {
     'SC Labs': SC_LABS,
     'Sonoma Lab Works': SONOMA,
     'TagLeaf LIMS': TAGLEAF,
-    'Veda Scientific': VEDA_SCIENTIFIC,
+    # 'Veda Scientific': VEDA_SCIENTIFIC,
 }
 
 # General decodings to use for normalization of results.
 DECODINGS = {
-    '<LOQ': 0,
-    '<LOD': 0,
+    '<LOQ': 0.000000001,
+    '<LOD': 0.000000001,
     # '≥ LOD': 0,
-    'ND': 0,
+    'ND': 0.000000001,
     'NR': None,
     'N/A': None,
     'na': None,
@@ -898,7 +898,7 @@ if __name__ == '__main__':
     # data = parser.parse(zip_folder)
     # assert data is not None
 
-    # [ ] TEST: Find results by known metrc IDs.
+    # [ ] TEST: Find results by known Metrc IDs.
     metrc_ids = [
         '1A4060300002A3B000000053', # Green Leaf Lab
         '1A4060300017A85000001289', # Green Leaf Lab

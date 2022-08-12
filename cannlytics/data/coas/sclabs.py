@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/8/2022
-Updated: 8/6/2022
+Updated: 8/11/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -61,9 +61,6 @@ Data Points:
     ✓ total_terpenes
     ✓ sample_id (generated)
     - strain_name (augmented)
-
-Static Data Points:
-
     ✓ lab
     ✓ lab_image_url
     - lab_license_number
@@ -940,3 +937,6 @@ if __name__ == '__main__':
     # assert lab == 'SC Labs'
     # data = parse_sc_labs_pdf(doc)
     # assert data is not None
+
+    # TODO: Test more SC Labs CoA PDFs
+    

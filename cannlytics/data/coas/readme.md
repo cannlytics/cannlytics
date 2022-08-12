@@ -8,12 +8,15 @@ Certificates of analysis (CoAs) are abundant for cultivators, processors, retail
 
 | Algorithm | Lab / LIMS | Status |
 |-----------|------------|--------|
+| `parse_anresco_coa` | Anresco Laboratories | 🟢 |
+| `parse_cannalysis_coa` | Cannalysis | 🟢 |
 | `parse_cc_coa` | Confident Cannabis | 🟢 |
-| `parse_tagleaf_coa` | TagLeaf LIMS | 🟢 |
 | `parse_green_leaf_lab_coa` | Green Leaf Lab | 🟢 |
-| `parse_veda_coa` | Veda Scientific | 🟡 |
 | `parse_mcr_labs_coa` | MCR Labs | 🔴 |
-| `parse_sc_labs_coa` | SC Labs | 🟢 |
+| `parse_sc_labs_coa` | SC Labs | 🔴 |
+| `parse_sonoma_coa` | Sonoma Lab Works | 🟢 |
+| `parse_tagleaf_coa` | TagLeaf LIMS | 🟢 |
+| `parse_veda_coa` | Veda Scientific | 🔴 |
 
 ## Introduction
 

@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/1/2022
-Updated: 8/9/2022
+Updated: 8/11/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -49,7 +49,7 @@ skip = [
     # 'BlueDream.pdf', # Peak (Sonoma Lab Works)
     # 'LemonTree.pdf', # Peak (Sonoma Lab Works)
     # 'RainbowBeltz.pdf' # Peak (Sonoma Lab Works)
-    '../../../.datasets/coas/Flore COA\\Flore Brand\\2109CBL2661.7053 - Cheese Cake.pdf',
+    # '../../../.datasets/coas/Flore COA\\Flore Brand\\2109CBL2661.7053 - Cheese Cake.pdf',
 ]
 for path, subdirs, files in os.walk(DATA_DIR):
     for name in files:
@@ -79,29 +79,29 @@ for path, subdirs, files in os.walk(DATA_DIR):
             unidentified.append(file_name)
 
         # DEV: Only collect CoAs from a specific lab / LIMS.
-        if lab == 'TagLeaf LIMS':
+        if lab != 'Confident Cannabis':
             continue
 
-        try:
+        # try:
 
-            # Parse CoA PDFs one by one.
-            file_name = os.path.join(path, name)
-            coa_data = parser.parse(file_name)
-            all_data.extend(coa_data)
+        # Parse CoA PDFs one by one.
+        file_name = os.path.join(path, name)
+        coa_data = parser.parse(file_name)
+        all_data.extend(coa_data)
 
-            # Save the individual data files.
-            timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-            outfile = f'{datafile_dir}/coa-data-{timestamp}.xlsx'
-            parser.save(coa_data, outfile)
-            # to_excel_with_style(pd.DataFrame(coa_data), outfile)
-            print('Parsed:', name)
-            identified.append(file_name)
+        # Save the individual data files.
+        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+        outfile = f'{datafile_dir}/coa-data-{timestamp}.xlsx'
+        parser.save(coa_data, outfile)
+        # to_excel_with_style(pd.DataFrame(coa_data), outfile)
+        print('Parsed:', name)
+        identified.append(file_name)
 
-        except:
+        # except:
 
-            print('Failed to parse:', name)
-            unidentified.append(file_name)
-            skip.append(file_name)
+        #     print('Failed to parse:', name)
+        #     unidentified.append(file_name)
+        #     skip.append(file_name)
 
 percent = len(identified) / (len(identified) + len(unidentified)) * 100
 print('Identified %.2f%% of the CoAs.' % percent)

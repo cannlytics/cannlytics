@@ -94,7 +94,7 @@ from cannlytics.utils.utils import snake_case, split_list, strip_whitespace
 # It is assumed that the lab has the following details.
 VEDA_SCIENTIFIC = {
     'coa_algorithm': 'veda.py',
-    'coa_algorithm_entry_point': 'parse_veda_pdf',
+    'coa_algorithm_entry_point': 'parse_veda_coa',
     'lims': 'Veda Scientific',
     'lab': 'Veda Scientific',
     'lab_image_url': 'https://images.squarespace-cdn.com/content/v1/5fab1470f012f739139935ac/58792970-f502-4e1a-ac29-ddca27b43266/Veda_Logo_Horizontal_RGB_Large.png?format=1500w', # <- Get this data.
@@ -189,6 +189,18 @@ VEDA_SCIENTIFIC_COA = {
     'coa_distributor_area': '(0, 79.2, 306, 170.28)',
     'coa_producer_area': '(306, 79.2, 612, 170.28)',
     'coa_sample_details_area': '(0, 170.28, 612, 297)',
+    'coa_analyses': {
+        'CANNABINOID': 'cannabinoids',
+        'TERPENES': 'terpenes',
+        'MOISTURE': 'moisture',
+        'WATER ACTIVITY': 'water_activity',
+        'PESTICIDES': 'pesticides',
+        'MYCOTOXIN': 'mycotoxins',
+        'FOREIGN MATERIALS': 'foreign_matter',
+        'RESIDUAL SOLVENTS': 'residual_solvents',
+        'HEAVY METALS': 'heavy_metals',
+        'MICROBIAL IMPURITIES': 'microbes',
+    },
     'coa_fields': {
         'Sample Name': 'product_name',
         'Collected': 'date_collected',
@@ -214,7 +226,33 @@ VEDA_SCIENTIFIC_COA = {
 }
 
 
-def parse_veda_pdf(
+def find_first_value(
+        string: str,
+        breakpoints: Optional[list]=None,
+    ) -> str:
+    """Find the first value of a string, be it a digit, a 'ND', '<',
+    or other specified breakpoints.
+    Args:
+        string (str): The string containing a value.
+        breakpoints (list): A list of breakpoints (optional).
+    Returns:
+        (int): Returns the index of the first value.
+    """
+    if breakpoints is None:
+        breakpoints = [' \d+', 'ND', '<']
+    detects = []
+    for breakpoint in breakpoints:
+        try:
+            detects.append(string.index(re.search(breakpoint, string).group()))
+        except AttributeError:
+            pass
+    try:
+        return min([x for x in detects if x])
+    except ValueError:
+        return None
+
+
+def parse_veda_coa(
         self,
         doc: Any,
         headers: Optional[dict] = None,
@@ -290,7 +328,7 @@ if __name__ == '__main__':
 
     # Test parsing a Veda Scientific CoA.
     from cannlytics.data.coas import CoADoc
-    from cannlytics.utils.constants import ANALYTES
+    # from cannlytics.utils.constants import ANALYTES
 
     # Initialize the CoA parser.
     parser = CoADoc()
@@ -304,9 +342,6 @@ if __name__ == '__main__':
     known_lims = parser.identify_lims(coa_pdf, 'veda scientific')
     assert known_lims == 'veda scientific'
 
-    # DEV:
-    coa_parameters = VEDA_SCIENTIFIC_COA
-
     # Read the PDF.
     if isinstance(coa_pdf, str):
         report = pdfplumber.open(coa_pdf)
@@ -315,6 +350,7 @@ if __name__ == '__main__':
     front_page = report.pages[0]
 
     # Get the lab-specific CoA page areas.
+    coa_parameters = VEDA_SCIENTIFIC_COA
     page_area = literal_eval(coa_parameters['coa_page_area'])
     distributor_area = literal_eval(coa_parameters['coa_distributor_area'])
     producer_area = literal_eval(coa_parameters['coa_producer_area'])
@@ -324,6 +360,7 @@ if __name__ == '__main__':
     coa_fields = coa_parameters['coa_fields']
     coa_replacements = coa_parameters['coa_replacements']
     sample_details_fields = list(coa_fields.keys())
+    standard_analyses = coa_parameters['coa_analyses']
     # skip_values = coa_parameters['coa_skip_values']
 
     # Create the observation.
@@ -445,89 +482,125 @@ if __name__ == '__main__':
         if 'license' in detail.lower():
             obs['lab_license_number'] = detail.split(':')[-1].strip()
 
-
-    #---------------------------
-
-    # TODO: Identify `{analysis}_method`s.
-    # TODO: Get all of the `results` rows.
-    # Iterate over all rows to get the `results` rows
-    # seeing if row starts with an analysis or analyte.
-
-    # Get all page rows.
-    # index = range(1, len(report.pages))
-    # page_rows = get_page_rows(report, index=index, analytes=ANALYTES)
-
-
     # Get all of the `results` rows.
-    all_rows = []
-    # for page in report.pages[1:]:
-    page = report.pages[1]
-    crop = page.within_bbox(page_area)
-    rows = parser.get_page_rows(crop)
-    for row in rows:
-        if row in all_rows:
-            pass
-        else:
-            all_rows.append(row)
+    all_lines = []
+    for page in report.pages[1:]:
+        crop = page.within_bbox(page_area)
+        rows = parser.get_page_rows(crop)
+        for row in rows:
+            if row in all_lines:
+                pass
+            else:
+                all_lines.append(row)
 
-    # Try to find lines to split the page?
+    # Brute-force: The following probably needs to be refactored.
+    analysis_keys = list(standard_analyses.keys())
 
-
-
-    # # FIXME: Get all of the `results` and `{analysis}_method`s!
-    # current_analysis = None
-    # collected_analytes = []
-    # methods = []
+    # Get all of the `results`!
+    current_analysis = []
+    collected_analytes = []
     results = []
-    # for row in page_rows:
+    for line in all_lines:
 
-    #     # Try to get all sample details.
-
-    #     # Try to identify analysis.
-    #     initial_value = row[0].replace(',', '')
-    #     analyte_key =  snake_case(strip_whitespace(initial_value))
-    #     analysis_key = analyte_key.rstrip('s') # replace('_', ' ').title()
-    #     print(row)
-    #     if analysis_key in analysis_keys:
-    #         current_analysis = analysis_names[
-    #             analysis_keys.index(analysis_key)
-    #         ]
-    #         print('Current analysis:', current_analysis)
-    #         analyses.append(current_analysis)
+        # Get the analysis of the table, handling two columns.
+        if 'RESULTS' in line:
+            current_analysis = []
+            for key in analysis_keys:
+                if key in line:
+                    current_analysis.append(standard_analyses[key])
         
-    #     # Handle Aspergillus and totals.
-    #     elif initial_value == 'Total' or initial_value == 'Aspergillus':
-    #         analyte_key = ' '.join([analyte_key, snake_case(row[1])])
-    #         initial_value = ' '.join([initial_value, row[1]])
+        # Get the analysis methods.
+        elif 'Method:' in line:
+            parts = line.split('Method:')
+            methods = [
+                x.split(' ,')[0].split('Procedures:')[0].strip() for x in parts if x
+            ]
+            for i, analysis in enumerate(current_analysis):
+                try:
+                    obs[f'{analysis}_method'] = methods[i]
+                except IndexError:
+                    pass
 
-    #     # Try to identify analytes.
-    #     if analyte_key in analyte_keys:
+        # Optional: Identify the columns?
+        
+        # Skip nuisance lines.
+        elif len(line) == 1 or ':' in line:
+            continue
+
+        # TODO: Collect each individual result.
+        else:
+
+            first_value = find_first_value(line)
+            name = line[:first_value].strip()
+            key = snake_case(name)
+            print(name)
+            # key = standard_fields.get(key, key)
+            # values = line[first_value:].strip().split(' ')
+            # values = [x for x in values if x]
+            # obs[key] = convert_to_numeric(values[-1])
+        # FIXME:
+        # Handle Aspergillus and totals.
+        # elif initial_value == 'Total' or initial_value == 'Aspergillus':
+        #     analyte_key = ' '.join([analyte_key, snake_case(row[1])])
+        #     initial_value = ' '.join([initial_value, row[1]])
+    
+
+        # # Try to identify analytes.
+        # if analyte_key in analyte_keys:
             
-    #         # Find the analyte columns (this can probably be improved).
-    #         analyte_columns = ANALYSES.get(current_analysis)
+        #     # Find the analyte columns (this can probably be improved).
+        #     analyte_columns = ANALYSES.get(current_analysis)
 
-    #         # Collect results if the analyte hasn't been collected.
-    #         if analyte_key in collected_analytes:
-    #             continue
-    #         else:
-    #             print('%s analyte:' % current_analysis, initial_value)
-    #             collected_analytes.append(analyte_key)
-    #             result = {'analyte': analyte_key}
-    #             for i, value in enumerate(row):
-    #                 analyte_column = analyte_columns[i]
-    #                 result[analyte_column] = value
-    #             results.append(result)
+        #     # Collect results if the analyte hasn't been collected.
+        #     if analyte_key in collected_analytes:
+        #         continue
+        #     else:
+        #         print('%s analyte:' % current_analysis, initial_value)
+        #         collected_analytes.append(analyte_key)
+        #         result = {'analyte': analyte_key}
+        #         for i, value in enumerate(row):
+        #             analyte_column = analyte_columns[i]
+        #             result[analyte_column] = value
+        #         results.append(result)
 
-    #             # TODO: Match result `analysis` afterwards?
-    #             # 'analysis': '',
+        #         # TODO: Match result `analysis` afterwards?
+        #         # 'analysis': '',
 
-    #     # Try to identify all methods.
-    #     if analyte_key == 'method':
-    #         method = ' '.join([x.strip() for x in row[1:] if x])
-    #         if 'Change:' in method:
-    #             continue
-    #         method = method.split(':')[0].split(',')[0].strip()
-    #         methods.append(method)
+
+#-----------------------------------------------------------------------
+# SCRAP
+#-----------------------------------------------------------------------
+        
+# Identify `{analysis}_method`s.
+# Get all of the `results` rows.
+# Iterate over all rows to get the `results` rows
+# seeing if row starts with an analysis or analyte.
+
+# Get all page rows.
+# index = range(1, len(report.pages))
+# page_rows = get_page_rows(report, index=index, analytes=ANALYTES)
+
+# Try to find lines to split the page?
+        
+        # Try to identify analysis.
+        # initial_value = row[0].replace(',', '')
+        # analyte_key =  snake_case(strip_whitespace(initial_value))
+        # analysis_key = analyte_key.rstrip('s') # replace('_', ' ').title()
+        # print(row)
+        # if analysis_key in analysis_keys:
+        #     current_analysis = analysis_names[
+        #         analysis_keys.index(analysis_key)
+        #     ]
+        #     print('Current analysis:', current_analysis)
+        #     analyses.append(current_analysis)
+
+        # # Try to identify all methods.
+        # if analyte_key == 'method':
+        #     method = ' '.join([x.strip() for x in row[1:] if x])
+        #     if 'Change:' in method:
+        #         continue
+        #     method = method.split(':')[0].split(',')[0].strip()
+        #     methods.append(method)
 
     # # Match methods to analyses.
     # for method in methods:
@@ -535,18 +608,7 @@ if __name__ == '__main__':
     #         analysis_name = analysis_key.replace('_', ' ').title()
     #         if analysis_name in method:
     #             obs[f'{analysis_key}_method'] = method
-            
-    # Aggregate the data.
-    obs['date_tested'] = date_tested
-    obs['results'] = results
-    obs['analyses'] = list(set(analyses))
-
-    # Return the sample with a freshly minted sample ID.
-    obs['sample_id'] = create_sample_id(
-        private_key=producer,
-        public_key=obs['product_name'],
-        salt=date_tested,
-    )
+#-----------------------------------------------------------------------
 
     # Turn dates to ISO format.
     date_columns = [x for x in obs.keys() if x.startswith('date')]
@@ -556,9 +618,12 @@ if __name__ == '__main__':
         except:
             pass
 
-
-    #-------------------------------------------------
-    # FINAL: Test Veda Scientific CoA parsing in full.
-    # parser = CoADoc()
-    # data = parse_veda_pdf(parser, coa_pdf)
-    # assert data is not None
+    # Return the sample with a freshly minted sample ID.
+    obs['date_tested'] = date_tested
+    obs['results'] = results
+    obs['analyses'] = list(set(analyses))
+    obs['sample_id'] = create_sample_id(
+        private_key=producer,
+        public_key=obs['product_name'],
+        salt=date_tested,
+    )

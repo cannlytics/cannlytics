@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 7/26/2022
+Updated: 8/11/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -58,10 +58,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from selenium.common.exceptions import (
-    ElementNotInteractableException,
-    TimeoutException,
-)
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 try:
@@ -71,51 +68,28 @@ except ImportError:
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
-from cannlytics.utils.utils import snake_case, strip_whitespace
+from cannlytics.utils.utils import (
+    convert_to_numeric,
+    snake_case,
+    strip_whitespace,
+)
 
 
+# It is assumed that the lab has the following details.
 CONFIDENT_CANNABIS = {
     'coa_algorithm': 'confidentcannabis.py',
-    'coa_algorithm_entry_point': 'parse_cc_url',
-    'coa_qr_code_index': 3,
+    'coa_algorithm_entry_point': 'parse_cc_coa',
     'lims': 'Con\x00dent Cannabis',
     'url': 'https://orders.confidentcannabis.com',
     'public': True,
 }
 
 
-def parse_cc_pdf(
-        self,
-        doc: Any,
-        max_delay: Optional[float] = 7,
-        persist: Optional[bool] = False,
-        **kwargs
-    ) -> dict:
-    """Parse a Confident Cannabis CoA PDF.
-    Args:
-        doc (str or PDF): A file path to a PDF or a pdfplumber PDF.
-        max_delay (float): The maximum number of seconds to wait
-            for the page to load.
-        persist (bool): Whether to persist the driver.
-            The default is `False`. If you do persist
-            the driver, then make sure to call `quit`
-            when you are finished.
-    Returns:
-        (dict): The sample data.
-    """
-    return self.parse_pdf(
-        self,
-        doc,
-        lims='Confident Cannabis',
-        max_delay=max_delay,
-        persist=persist,
-    )
-
 def parse_cc_url(
-        self,
+        parser,
         url: str,
         headers: Optional[Any] = None,
-        max_delay: Optional[float] = 7,
+        max_delay: Optional[float] = 60,
         persist: Optional[bool] = False,
         **kwargs
     ) -> dict:
@@ -132,37 +106,46 @@ def parse_cc_url(
     Returns:
         (dict): The sample data.
     """
-    lims = 'Confident Cannabis'
 
     # Load the lab results with Selenium.
-    if self.service is None:
-        self.service = Service()
-        self.options = Options()
-        self.options.add_argument('--window-size=1920,1200')
-        # Uncomment for dev:
-        # self.options.headless = False
-        # Uncomment for production!!!
-        self.options.add_argument('--headless')
-        self.options.add_argument('--disable-gpu')
-        self.options.add_argument('--no-sandbox')
-    if self.driver is None:
-        self.driver = webdriver.Chrome(
-            options=self.options,
-            service=self.service,
+    if parser.service is None:
+        parser.service = Service()
+        parser.options = Options()
+        parser.options.add_argument('--window-size=1920,1200')
+
+        # DEV: Uncomment for development / comment for production.
+        # parser.options.headless = False
+
+        # PRODUCTION: Uncomment for production / comment for development.
+        parser.options.add_argument('--headless')
+        parser.options.add_argument('--disable-gpu')
+        parser.options.add_argument('--no-sandbox')
+
+    # Create a driver.
+    if parser.driver is None:
+        parser.driver = webdriver.Chrome(
+            options=parser.options,
+            service=parser.service,
         )
-    self.driver.get(url)
+
+    # Get the URL.
+    parser.driver.get(url)
+
+    # Wait for the page to load by waiting to detect the image.
     try:
         el = (By.CLASS_NAME, 'product-box-cc')
         detect = EC.presence_of_element_located(el)
-        WebDriverWait(self.driver, max_delay).until(detect)
+        WebDriverWait(parser.driver, max_delay).until(detect)
     except TimeoutException:
         print('Failed to load page within %i seconds.' % max_delay)
 
     # Get sample observation.
-    obs = {'analyses': [], 'results': [], 'lims': lims}
+    analyses = []
+    results = []
+    obs = {'lims': 'Confident Cannabis'}
 
     # Find the sample image.
-    el = self.driver.find_element(
+    el = parser.driver.find_element(
         by=By.CLASS_NAME,
         value='product-box-cc'
     )
@@ -172,7 +155,7 @@ def parse_cc_url(
     obs['images'] = [{'url': image_url, 'filename': filename}]
 
     # Try to get sample details.
-    el = self.driver.find_element(
+    el = parser.driver.find_element(
         by=By.CLASS_NAME,
         value='product-desc',
     )
@@ -186,7 +169,7 @@ def parse_cc_url(
     obs['product_type'] = strip_whitespace(product_type)
 
     # Get the date tested.
-    el = self.driver.find_element(by=By.CLASS_NAME, value='report')
+    el = parser.driver.find_element(by=By.CLASS_NAME, value='report')
     span = el.find_element(by=By.TAG_NAME, value='span')
     tooltip = span.get_attribute('uib-tooltip')
     tested_at = tooltip.split(': ')[-1]
@@ -202,7 +185,7 @@ def parse_cc_url(
     obs['coa_urls'] = [{'url': coa_url, 'filename': filename}]
 
     # Find the `analyses` and `results`.
-    els = self.driver.find_elements(by=By.CLASS_NAME, value='ibox')
+    els = parser.driver.find_elements(by=By.CLASS_NAME, value='ibox')
     for i, el in enumerate(els):
         try:
             title = el.find_element(
@@ -232,23 +215,26 @@ def parse_cc_url(
                     value='name',
                 ).text
                 key = snake_case(name)
-                obs[key] = value
+                obs[key] = convert_to_numeric(value)
                 obs[f'{key}_units'] = units.replace('%', 'percent')
+
+            # TODO: Generalize the below functionality into a function.
 
             # Get the cannabinoids totals.
             columns = ['name', 'value', 'mg_g']
             table = el.find_element(by=By.TAG_NAME, value='table')
             rows = table.find_elements(by=By.TAG_NAME, value='tr')
             for row in rows[1:]:
-                result = {}
+                result = {'analysis': 'cannabinoids', 'units': 'percent'}
                 cells = row.find_elements(by=By.TAG_NAME, value='td')
                 for i, cell in enumerate(cells):
                     key = columns[i]
                     value = cell.get_attribute('textContent').strip()
                     if key == 'name':
-                        value = self.analytes.get(value, snake_case(value))
-                    result[key] = value
-                obs['results'].append(result)
+                        result['key'] = parser.analytes.get(value, snake_case(value))
+                    value = value.replace('%', '').replace('mg/g', '').strip()
+                    result[key] = convert_to_numeric(value)
+                results.append(result)
 
         # Try to get terpene data.
         if title == 'terpenes':
@@ -256,15 +242,16 @@ def parse_cc_url(
             table = el.find_element(by=By.TAG_NAME, value='table')
             rows = table.find_elements(by=By.TAG_NAME, value='tr')
             for row in rows[1:]:
-                result = {}
+                result = {'analysis': 'terpenes', 'units': 'percent'}
                 cells = row.find_elements(by=By.TAG_NAME, value='td')
                 for i, cell in enumerate(cells):
                     key = columns[i]
                     value = cell.get_attribute('textContent').strip()
                     if key == 'name':
-                        value = self.analytes.get(value, snake_case(value))
-                    result[key] = value
-                obs['results'].append(result)
+                        value = parser.analytes.get(value, snake_case(value))
+                    value = value.replace('%', '').replace('mg/g', '').strip()
+                    result[key] = convert_to_numeric(value)
+                results.append(result)
 
             # Try to get predicted aromas.
             container = el.find_element(by=By.CLASS_NAME, value='row')
@@ -273,30 +260,30 @@ def parse_cc_url(
 
         # Ty to get screening data.
         if title == 'safety':
-            obs['status'] = el.find_element(
-                by=By.CLASS_NAME,
-                value='sample-status',
-            ).text
+            v = 'sample-status'
+            obs['status'] = el.find_element(by=By.CLASS_NAME, value=v).text
             table = el.find_element(by=By.TAG_NAME, value='table')
             rows = table.find_elements(by=By.TAG_NAME, value='tr')
             for row in rows[1:]:
+
+                # Get the screening analysis.
                 cells = row.find_elements(by=By.TAG_NAME, value='td')
                 status = cells[1].get_attribute('textContent').strip()
                 if status == 'Not Tested':
                     continue
                 analysis = snake_case(cells[0].get_attribute('textContent'))
                 obs[f'{analysis}_status'] = status.lower()
-                obs['analyses'].append(analysis)
+                analyses.append(analysis)
+
+                # Scroll the row into view!
+                parser.driver.execute_script('arguments[0].scrollIntoView(true);', row)
 
                 # Click the row. and get all of the results from the modal!
                 # Future work: Make these columns dynamic.
                 columns = ['name', 'status', 'value', 'limit', 'loq']
                 if row.get_attribute('class') == 'clickable-content':
-                    try:
-                        row.click()
-                    except ElementNotInteractableException:
-                        continue
-                    modal = self.driver.find_element(
+                    row.click()
+                    modal = parser.driver.find_element(
                         by=By.ID,
                         value='safety-modal-table'
                     )
@@ -314,7 +301,7 @@ def parse_cc_url(
                     )
                     units = headers[-1].text.split('(')[-1].replace(')', '')
                     for modal_row in modal_rows:
-                        result = {'units': units}
+                        result = {'analysis': analysis, 'units': units}
                         modal_cells = modal_row.find_elements(
                             by=By.TAG_NAME,
                             value='td'
@@ -325,17 +312,16 @@ def parse_cc_url(
                                 'textContent'
                             ).strip()
                             if key == 'name':
-                                value = self.analytes.get(value, snake_case(value))
+                                value = parser.analytes.get(value, snake_case(value))
                             result[key] = value
-                        obs['results'].append(result)   
-                    try:
-                        body = self.driver.find_element(
-                            by=By.TAG_NAME,
-                            value='body'
-                        )
-                        body.click()
-                    except ElementNotInteractableException:
-                        continue  
+                        results.append(result)
+
+                    # Close the modal.  
+                    button = parser.driver.find_element(
+                        by=By.CLASS_NAME,
+                        value='close',
+                    )
+                    button.click()
 
         # Try to get lab data.
         producer = ''
@@ -378,16 +364,55 @@ def parse_cc_url(
             obs['producer'] = producer
 
     # Return the sample with a freshly minted sample ID.
+    obs['analyses'] = analyses
+    obs['lab_results_url'] = url
+    obs['results'] = results
     obs['sample_id'] = create_sample_id(
         private_key=producer,
         public_key=product_name,
         salt=date_tested,
     )
-
-    # Close the Chrome driver once all PDFs have been parsed.
     if not persist:
-        self.quit()
-    return obs
+        parser.quit()
+    return {**CONFIDENT_CANNABIS, **obs}
+
+
+def parse_cc_pdf(
+        parser,
+        doc: Any,
+        **kwargs
+    ) -> dict:
+    """Parse a Confident Cannabis CoA PDF.
+    Args:
+        doc (str or PDF): A file path to a PDF or a pdfplumber PDF.
+    Returns:
+        (dict): The sample data.
+    """
+    url = parser.find_pdf_qr_code_url(doc)
+    return parse_cc_url(parser, url, **kwargs)
+
+
+def parse_cc_coa(
+        parser,
+        doc: Any,
+        **kwargs,
+    ) -> dict:
+    """Parse a Confident Cannabis CoA PDF or URL.
+    Args:
+        doc (str or PDF): A PDF file path or pdfplumber PDF.
+    Returns:
+        (dict): The sample data.
+    """
+    if isinstance(doc, str):
+        if doc.startswith('http'):
+            return parse_cc_url(parser, doc, **kwargs)
+        elif doc.endswith('.pdf'):
+            return parse_cc_pdf(parser, doc, **kwargs)
+        else:
+            return parse_cc_pdf(parser, doc, **kwargs)
+    else:
+        return parse_cc_pdf(parser, doc, **kwargs)
+
 
 if __name__ == '__main__':
 
@@ -396,15 +421,24 @@ if __name__ == '__main__':
 
     # Specify where your test data lives.
     DATA_DIR = '../../../.datasets/coas'
-    cc_coa_pdf = f'{DATA_DIR}/Classic Jack.pdf'
-    cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
 
-    # [✓] TEST: Parse a CoA URL.
-    parser = CoADoc()
-    data = parse_cc_url(parser, cc_coa_url)
-    assert data is not None
+    # # [✓] TEST: Parse a CoA URL.
+    # cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
+    # parser = CoADoc()
+    # data = parse_cc_url(parser, cc_coa_url)
+    # assert data is not None
 
-    # [✓] TEST: Parse a CoA PDF.
+    # # [✓] TEST: Parse a CoA PDF.
+    # cc_coa_pdf = f'{DATA_DIR}/Classic Jack.pdf'
+    # parser = CoADoc()
+    # data = parse_cc_pdf(parser, cc_coa_pdf)
+    # assert data is not None
+
+    # [✓] TEST: Parse a CoA PDF, figuring out that it's a CC CoA PDF.
+    directory = '../../../.datasets/coas/Flore COA'
+    doc = f'{directory}/GB2/GDP.pdf'
     parser = CoADoc()
-    data = parse_cc_pdf(parser, cc_coa_pdf)
+    lab = parser.identify_lims(doc)
+    assert lab == 'Confident Cannabis'
+    data = parse_cc_coa(parser, doc)
     assert data is not None
