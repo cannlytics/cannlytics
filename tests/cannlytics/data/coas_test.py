@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/1/2022
-Updated: 8/11/2022
+Updated: 8/12/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -43,28 +43,21 @@ all_data = []
 identified = []
 unidentified = []
 skip = [
-    # FIXME:
     # 'Peanutbutter Breath.pdf', # Betty Project (Anresco Laboratories)
     # 'MothersMilk.pdf', # Kiva (Cannalysis)
     # 'BlueDream.pdf', # Peak (Sonoma Lab Works)
     # 'LemonTree.pdf', # Peak (Sonoma Lab Works)
     # 'RainbowBeltz.pdf' # Peak (Sonoma Lab Works)
-    # '../../../.datasets/coas/Flore COA\\Flore Brand\\2109CBL2661.7053 - Cheese Cake.pdf',
 ]
 for path, subdirs, files in os.walk(DATA_DIR):
-    for name in files:
+    for name in reversed(files):
 
-        # DEV: Look at the 1st one!
+        # DEV: Look at the 1st CoA.
         # if len(identified) > 1:
         #     break
 
         # Only parse PDFs.
         if not name.endswith('.pdf'):
-            continue
-
-        # Dev: Skip recorded CoAs.
-        file_name = os.path.join(path, name)
-        if file_name in identified or file_name in skip:
             continue
 
         # [✓] Test: Identify the lab or LIMS from the CoA PDF.
@@ -79,8 +72,13 @@ for path, subdirs, files in os.walk(DATA_DIR):
             unidentified.append(file_name)
 
         # DEV: Only collect CoAs from a specific lab / LIMS.
-        if lab != 'Confident Cannabis':
+        if lab != 'SC Labs':
             continue
+
+        # Dev: Skip recorded CoAs.
+        # file_name = os.path.join(path, name)
+        # if file_name in identified or file_name in skip:
+        #     continue
 
         # try:
 
@@ -98,7 +96,6 @@ for path, subdirs, files in os.walk(DATA_DIR):
         identified.append(file_name)
 
         # except:
-
         #     print('Failed to parse:', name)
         #     unidentified.append(file_name)
         #     skip.append(file_name)
@@ -107,28 +104,20 @@ percent = len(identified) / (len(identified) + len(unidentified)) * 100
 print('Identified %.2f%% of the CoAs.' % percent)
 
 # FIXME:
-data = pd.read_excel(f'{datafile_dir}/coa-aggregated-data-2022-08-09T15-12-38.xlsx')
-data['results'] = data['results'].apply(literal_eval)
+# data = pd.read_excel(f'{datafile_dir}/coa-aggregated-data-2022-08-09T15-12-38.xlsx')
+# data['results'] = data['results'].apply(literal_eval)
+
+# Format the data.
+data = pd.DataFrame(all_data)
 
 # Aggregate all of the individual data files.
 timestamp = datetime.now().isoformat()[:19].replace(':', '-')
 outfile = f'{datafile_dir}/coa-aggregated-data-{timestamp}.xlsx'
-# data = pd.DataFrame(all_data)
 data.index = data['sample_id']
 parser.save(data, outfile)
 
-# # Widen and elongate the data.
-# long_data = pd.json_normalize(data['results'])
 
-# # Save the data.
-# timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-# outfile = f'{DATA_DIR}/datafiles/coa-data-{timestamp}.xlsx'
-# writer = pd.ExcelWriter(outfile)
-# pd.DataFrame(data).to_excel(writer, 'Details')
-# pd.DataFrame(long_data).to_excel(writer, 'Results')
-# writer.save()
-# writer.close()
-
+# TODO:
 # # Format any public data to upload to Firestore.
 # refs, updates = [], []
 # for index, values in data.iterrows():

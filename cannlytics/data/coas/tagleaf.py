@@ -66,16 +66,17 @@ from requests import Session
 from cannlytics.data.data import create_sample_id
 from cannlytics.utils.utils import convert_to_numeric, snake_case, strip_whitespace
 
-
+# It is assumed that the lab has the following details.
 TAGLEAF = {
     'coa_algorithm': 'tagleaf.py',
-    'coa_algorithm_entry_point': 'parse_tagleaf_url',
-    'coa_qr_code_index': 2,
+    'coa_algorithm_entry_point': 'parse_tagleaf_coa',
     'lims': 'lims.tagleaf',
     'url': 'https://lims.tagleaf.com',
     'public': True,
 }
 
+# It is assumed that the CoA has the following parameters.
+# FIXME: Use cannlytics.utils.constants
 TAGLEAF_COA = {
     'coa_analyses': {
         'Potency': 'cannabinoids',
@@ -102,35 +103,8 @@ TAGLEAF_COA = {
 }
 
 
-def parse_tagleaf_pdf(
-        self,
-        doc: Any,
-        headers: Optional[dict] = None,
-        persist: Optional[bool] = False,
-        **kwargs,
-    ) -> dict:
-    """Parse a TagLeaf LIMS CoA PDF.
-    Args:
-        doc (str or PDF): A PDF file path or pdfplumber PDF.
-        headers (dict): Headers for HTTP requests.
-        persist (bool): Whether to persist the session.
-            The default is `False`. If you do persist
-            the driver, then make sure to call `quit`
-            when you are finished.
-    Returns:
-        (dict): The sample data.
-    """
-    return self.parse_pdf(
-        self,
-        doc,
-        lims='TagLeaf LIMS',
-        headers=headers,
-        persist=persist,
-    )
-
-
 def parse_tagleaf_url(
-        self,
+        parser,
         url: str,
         headers: Optional[dict] = None,
         keys: Optional[dict] = None,
@@ -153,12 +127,12 @@ def parse_tagleaf_url(
 
     # Get the HTML.
     if keys is None:
-        keys = self.keys
+        keys = parser.fields
     if headers is None:
-        headers = self.headers
-    if self.session is None:
-        self.session = Session()
-    response = self.session.get(url, headers=headers)
+        headers = parser.headers
+    if parser.session is None:
+        parser.session = Session()
+    response = parser.session.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # Get the standard fields and analyses.
@@ -299,7 +273,7 @@ def parse_tagleaf_url(
                 key = columns[i]
                 value = strip_whitespace(cell.text)
                 if key == 'name':
-                    analyte = self.analytes.get(value, snake_case(value))
+                    analyte = parser.analytes.get(value, snake_case(value))
                     result['key'] = analyte
                 if key == 'value' and mg_g:
                     key = 'mg_g'
@@ -327,8 +301,45 @@ def parse_tagleaf_url(
         salt=date_tested,
     )
     if not persist:
-        self.quit()
+        parser.quit()
     return obs
+
+
+def parse_tagleaf_pdf(
+        parser,
+        doc: Any,
+        **kwargs,
+    ) -> dict:
+    """Parse a TagLeaf LIMS CoA PDF.
+    Args:
+        doc (str or PDF): A PDF file path or pdfplumber PDF.
+    Returns:
+        (dict): The sample data.
+    """
+    url = parser.find_pdf_qr_code_url(doc)
+    return parse_tagleaf_url(parser, url, **kwargs)
+
+
+def parse_tagleaf_coa(
+        parser,
+        doc: Any,
+        **kwargs,
+    ) -> dict:
+    """Parse a TagLeaf LIMS CoA PDF or URL.
+    Args:
+        doc (str or PDF): A PDF file path or pdfplumber PDF.
+    Returns:
+        (dict): The sample data.
+    """
+    if isinstance(doc, str):
+        if doc.startswith('http'):
+            return parse_tagleaf_url(parser, doc, **kwargs)
+        elif doc.endswith('.pdf'):
+            return parse_tagleaf_pdf(parser, doc, **kwargs)
+        else:
+            return parse_tagleaf_pdf(parser, doc, **kwargs)
+    else:
+        return parse_tagleaf_pdf(parser, doc, **kwargs)
 
 
 if __name__ == '__main__':

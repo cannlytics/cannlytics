@@ -106,6 +106,7 @@ SONOMA =  {
 }
 
 # Specify lab-specific CoA nuisances.
+# FIXME: Use cannlytics.utils.constants
 SONOMA_COA = {
     'coa_analyses': {
         'Foreign Material': 'foreign_matter',
@@ -171,7 +172,7 @@ SONOMA_COA = {
 }
 
 
-def parse_sonomoa_coa(self, doc: Any, google_maps_api_key: str) -> Any:
+def parse_sonomoa_coa(parser, doc: Any, google_maps_api_key: str) -> Any:
     """Parse a Sonoma Lab Works CoA PDF.
     Args:
         doc (str or PDF): A PDF file path or pdfplumber PDF.

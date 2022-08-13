@@ -158,9 +158,9 @@ GREEN_LEAF_LAB_ANALYSES = {
 }
 
 # It is assumed that the CoA has the following parameters.
+# FIXME: Use cannlytics.utils.constants
 GREEN_LEAF_LAB_COA = {
     'coa_qr_code_index': None,
-    'coa_image_index': 2,
     'coa_page_area': '(0, 198, 612, 693)',
     'coa_distributor_area': '(0, 79.2, 244.8, 142.56)',
     'coa_producer_area': '(244.8, 79.2, 612, 142.56)',
@@ -257,7 +257,7 @@ def augment_analyte_result(result, columns, parts):
 
 
 def parse_green_leaf_lab_pdf(
-        self,
+        parser,
         doc: Any,
         **kwargs,
     ) -> dict:
@@ -269,7 +269,6 @@ def parse_green_leaf_lab_pdf(
     """
     # Get the lab / LIMS analyses and CoA parameters.
     obs = {}
-    lab = GREEN_LEAF_LAB
     lab_analyses = GREEN_LEAF_LAB_ANALYSES
     coa_parameters = GREEN_LEAF_LAB_COA
 
@@ -333,7 +332,7 @@ def parse_green_leaf_lab_pdf(
 
     # Optional: Get the image data.
     # image_index = coa_parameters['coa_image_index']
-    # obs['image_data'] = self.get_pdf_image_data(report.pages[0], image_index)
+    # obs['image_data'] = parser.get_pdf_image_data(report.pages[0], image_index)
     obs['images'] = []
 
     # Get the sample details.
@@ -392,7 +391,7 @@ def parse_green_leaf_lab_pdf(
     all_rows = []
     for page in report.pages[1:]:
         crop = page.within_bbox(page_area)
-        rows = self.get_page_rows(crop)
+        rows = parser.get_page_rows(crop)
         for row in rows:
             if row in all_rows:
                 pass
@@ -471,13 +470,6 @@ def parse_green_leaf_lab_pdf(
         
         # FIXME: Add `units` to results!
 
-    # Data aggregation.
-    obs['analyses'] = analyses
-    obs['date_tested'] = date_tested
-    obs['methods'] = methods
-    obs['product_name'] = product_name
-    obs['results'] = results
-
     # Turn dates to ISO format.
     date_columns = [x for x in obs.keys() if x.startswith('date')]
     for date_column in date_columns:
@@ -487,6 +479,11 @@ def parse_green_leaf_lab_pdf(
             pass
     
     # Finish data collection with a freshly minted sample ID.
+    obs['analyses'] = analyses
+    obs['date_tested'] = date_tested
+    obs['methods'] = methods
+    obs['product_name'] = product_name
+    obs['results'] = results
     obs['sample_id'] = create_sample_id(
         private_key=producer,
         public_key=product_name,
@@ -516,7 +513,7 @@ def parse_green_leaf_lab_pdf(
 
     # Optional: Calculate total_cbg, total_thcv, total_cbc, etc.
 
-    return {**lab, **obs}
+    return {**GREEN_LEAF_LAB, **obs}
 
 
 if __name__ == '__main__':

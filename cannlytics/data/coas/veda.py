@@ -86,7 +86,7 @@ import pandas as pd
 import pdfplumber
 
 # Internal imports.
-from cannlytics.data.data import create_sample_id
+from cannlytics.data.data import create_sample_id, find_first_value
 # from cannlytics.utils.constants import ANALYSES, ANALYTES
 from cannlytics.utils.utils import snake_case, split_list, strip_whitespace
 
@@ -226,34 +226,8 @@ VEDA_SCIENTIFIC_COA = {
 }
 
 
-def find_first_value(
-        string: str,
-        breakpoints: Optional[list]=None,
-    ) -> str:
-    """Find the first value of a string, be it a digit, a 'ND', '<',
-    or other specified breakpoints.
-    Args:
-        string (str): The string containing a value.
-        breakpoints (list): A list of breakpoints (optional).
-    Returns:
-        (int): Returns the index of the first value.
-    """
-    if breakpoints is None:
-        breakpoints = [' \d+', 'ND', '<']
-    detects = []
-    for breakpoint in breakpoints:
-        try:
-            detects.append(string.index(re.search(breakpoint, string).group()))
-        except AttributeError:
-            pass
-    try:
-        return min([x for x in detects if x])
-    except ValueError:
-        return None
-
-
 def parse_veda_coa(
-        self,
+        parser,
         doc: Any,
         headers: Optional[dict] = None,
         persist: Optional[bool] = False,

@@ -11,9 +11,11 @@ License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 from hashlib import sha256
 import hmac
 import os
+import re
 from typing import Optional
 
 # External imports.
+from openpyxl.utils.dataframe import dataframe_to_rows
 import pandas as pd
 
 # Internal imports.
@@ -103,6 +105,31 @@ def aggregate_datasets(
 
 # === Data cleaning tools. ===
 
+def find_first_value(
+        string: str,
+        breakpoints: Optional[list]=None,
+    ) -> str:
+    """Find the first value of a string, be it a digit, a 'ND', '<',
+    or other specified breakpoints.
+    Args:
+        string (str): The string containing a value.
+        breakpoints (list): A list of breakpoints (optional).
+    Returns:
+        (int): Returns the index of the first value.
+    """
+    if breakpoints is None:
+        breakpoints = [' \d+', 'ND', '<']
+    detects = []
+    for breakpoint in breakpoints:
+        try:
+            detects.append(string.index(re.search(breakpoint, string).group()))
+        except AttributeError:
+            pass
+    try:
+        return min([x for x in detects if x])
+    except ValueError:
+        return None
+
 
 # === Data augmentation tools. ===
 
@@ -137,6 +164,25 @@ def shard_datasets(data, directory, count=10_000):
     """Shard a dataset for ease of use."""
     # TODO: Implement !
     raise NotImplementedError
+
+
+# === Data saving tools. ===
+
+def write_to_worksheet(ws, values):
+    """Write data to an Excel Worksheet.
+    Credit: Charlie Clark <https://stackoverflow.com/a/36664027>
+    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
+    Args:
+        ws (Worksheet) An openpyxl Worksheet.
+        values (list): A list of values to print to the worksheet.
+    """
+    rows = dataframe_to_rows(pd.DataFrame(values), index=False)
+    for r_idx, row in enumerate(rows, 1):
+        for c_idx, value in enumerate(row, 1):
+            try:
+                ws.cell(row=r_idx, column=c_idx, value=value)
+            except ValueError:
+                ws.cell(row=r_idx, column=c_idx, value=str(value))
 
 
 if __name__ == '__main__':

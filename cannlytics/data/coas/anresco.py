@@ -62,7 +62,7 @@ import pdfplumber
 # import requests
 
 # Internal imports.
-from cannlytics.data.data import create_sample_id
+from cannlytics.data.data import create_sample_id, find_first_value
 # from cannlytics.utils.constants import DEFAULT_HEADERS
 from cannlytics.utils.utils import (
     convert_to_numeric,
@@ -106,6 +106,8 @@ ANRESCO =  {
     'public': True,
 }
 
+# It is assumed that the CoA has the following parameters.
+# FIXME: Use cannlytics.utils.constants
 ANRESCO_COA = {
     'coa_distributor_area': '(200, 60, 380, 130)',
     'coa_lab_area': '(0, 60, 200, 130)',
@@ -166,32 +168,6 @@ ANRESCO_COA = {
         'harvest',
     ],
 }
-
-
-def find_first_value(
-        string: str,
-        breakpoints: Optional[list]=None,
-    ) -> str:
-    """Find the first value of a string, be it a digit, a 'ND', '<',
-    or other specified breakpoints.
-    Args:
-        string (str): The string containing a value.
-        breakpoints (list): A list of breakpoints (optional).
-    Returns:
-        (int): Returns the index of the first value.
-    """
-    if breakpoints is None:
-        breakpoints = [' \d+', 'ND', '<']
-    detects = []
-    for breakpoint in breakpoints:
-        try:
-            detects.append(string.index(re.search(breakpoint, string).group()))
-        except AttributeError:
-            pass
-    try:
-        return min([x for x in detects if x])
-    except ValueError:
-        return None
 
 
 def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
@@ -459,7 +435,7 @@ def parse_anresco_url(parser, doc: Any, **kwargs) -> Any:
 # options = Options()
 # options.add_argument('--window-size=1920,1200')
 # # Uncomment for dev:
-# # self.options.headless = False
+# # parser.options.headless = False
 # # Uncomment for production!!!
 # # options.add_argument('--headless')
 # # options.add_argument('--disable-gpu')

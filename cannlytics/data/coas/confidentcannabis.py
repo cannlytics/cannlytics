@@ -4,12 +4,12 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 8/11/2022
+Updated: 8/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Parse a Confident Cannabis CoA.
+    Parse a Confident Cannabis CoA PDF or URL.
 
 Data Points:
 
@@ -50,6 +50,7 @@ Data Points:
 
 """
 # Standard imports.
+from time import sleep
 from typing import Any, Optional
 
 # External imports.
@@ -58,7 +59,11 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import (
+    ElementNotInteractableException,
+    NoSuchElementException,
+    TimeoutException,
+)
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 try:
@@ -139,7 +144,7 @@ def parse_cc_url(
     except TimeoutException:
         print('Failed to load page within %i seconds.' % max_delay)
 
-    # Get sample observation.
+    # Create a sample observation.
     analyses = []
     results = []
     obs = {'lims': 'Confident Cannabis'}
@@ -154,7 +159,7 @@ def parse_cc_url(
     filename = image_url.split('/')[-1]
     obs['images'] = [{'url': image_url, 'filename': filename}]
 
-    # Try to get sample details.
+    # Try to get the sample details.
     el = parser.driver.find_element(
         by=By.CLASS_NAME,
         value='product-desc',
@@ -221,6 +226,7 @@ def parse_cc_url(
             # TODO: Generalize the below functionality into a function.
 
             # Get the cannabinoids totals.
+            # Future work: Make the columns dynamic.
             columns = ['name', 'value', 'mg_g']
             table = el.find_element(by=By.TAG_NAME, value='table')
             rows = table.find_elements(by=By.TAG_NAME, value='tr')
@@ -232,14 +238,19 @@ def parse_cc_url(
                     value = cell.get_attribute('textContent').strip()
                     if key == 'name':
                         result['key'] = parser.analytes.get(value, snake_case(value))
-                    value = value.replace('%', '').replace('mg/g', '').strip()
+                    else:
+                        value = value.replace('%', '').replace('mg/g', '').strip()
                     result[key] = convert_to_numeric(value)
                 results.append(result)
 
         # Try to get terpene data.
+        # Future work: Make the columns dynamic.
         if title == 'terpenes':
             columns = ['name', 'value', 'mg_g']
-            table = el.find_element(by=By.TAG_NAME, value='table')
+            try:
+                table = el.find_element(by=By.TAG_NAME, value='table')
+            except NoSuchElementException:
+                continue
             rows = table.find_elements(by=By.TAG_NAME, value='tr')
             for row in rows[1:]:
                 result = {'analysis': 'terpenes', 'units': 'percent'}
@@ -248,8 +259,9 @@ def parse_cc_url(
                     key = columns[i]
                     value = cell.get_attribute('textContent').strip()
                     if key == 'name':
-                        value = parser.analytes.get(value, snake_case(value))
-                    value = value.replace('%', '').replace('mg/g', '').strip()
+                        result['key'] = parser.analytes.get(value, snake_case(value))
+                    else:
+                        value = value.replace('%', '').replace('mg/g', '').strip()
                     result[key] = convert_to_numeric(value)
                 results.append(result)
 
@@ -258,10 +270,12 @@ def parse_cc_url(
             aromas = container.text.split('\n')
             obs['predicted_aromas'] = [snake_case(x) for x in aromas]
 
-        # Ty to get screening data.
+        # Try to get screening data.
         if title == 'safety':
-            v = 'sample-status'
-            obs['status'] = el.find_element(by=By.CLASS_NAME, value=v).text
+            obs['status'] = el.find_element(
+                by=By.CLASS_NAME,
+                value='sample-status'
+            ).text
             table = el.find_element(by=By.TAG_NAME, value='table')
             rows = table.find_elements(by=By.TAG_NAME, value='tr')
             for row in rows[1:]:
@@ -279,7 +293,7 @@ def parse_cc_url(
                 parser.driver.execute_script('arguments[0].scrollIntoView(true);', row)
 
                 # Click the row. and get all of the results from the modal!
-                # Future work: Make these columns dynamic.
+                # Future work: Make the columns dynamic.
                 columns = ['name', 'status', 'value', 'limit', 'loq']
                 if row.get_attribute('class') == 'clickable-content':
                     row.click()
@@ -312,16 +326,20 @@ def parse_cc_url(
                                 'textContent'
                             ).strip()
                             if key == 'name':
-                                value = parser.analytes.get(value, snake_case(value))
-                            result[key] = value
+                                result['key'] = parser.analytes.get(value, snake_case(value))
+                            result[key] = convert_to_numeric(value)
                         results.append(result)
 
-                    # Close the modal.  
-                    button = parser.driver.find_element(
-                        by=By.CLASS_NAME,
-                        value='close',
-                    )
-                    button.click()
+                    # Close the modal.
+                    try:
+                        button = parser.driver.find_element(
+                            by=By.CLASS_NAME,
+                            value='close',
+                        )
+                        button.click()
+                    except ElementNotInteractableException:
+                        continue
+                    sleep(0.2) # Brief pause to give modal time to close.
 
         # Try to get lab data.
         producer = ''
@@ -435,10 +453,17 @@ if __name__ == '__main__':
     # assert data is not None
 
     # [✓] TEST: Parse a CoA PDF, figuring out that it's a CC CoA PDF.
+    # directory = '../../../.datasets/coas/Flore COA'
+    # doc = f'{directory}/GB2/GDP.pdf'
+    # parser = CoADoc()
+    # lab = parser.identify_lims(doc)
+    # assert lab == 'Confident Cannabis'
+    # data = parse_cc_coa(parser, doc)
+    # assert data is not None
+
+    # [✓] TEST: Parse a CoA PDF, with safety screening but no terpenes.
     directory = '../../../.datasets/coas/Flore COA'
-    doc = f'{directory}/GB2/GDP.pdf'
+    doc = f'{directory}/Humboldt Growers Network/HGN_SOUR .pdf'
     parser = CoADoc()
-    lab = parser.identify_lims(doc)
-    assert lab == 'Confident Cannabis'
     data = parse_cc_coa(parser, doc)
     assert data is not None

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 8/6/2022
+Updated: 8/13/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -84,6 +84,7 @@ MCR_LABS = {
 }
 
 # It is assumed that the following mappings are valid for the CoA.
+# FIXME: Use cannlytics.utils.constants
 MCR_LABS_COA = {
     'coa_analyses': {
         'terpene': 'terpenes',

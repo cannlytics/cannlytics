@@ -6,21 +6,39 @@
 
 Certificates of analysis (CoAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! CoADoc puts these vital data points in your hands by parsing PDFs and URLs, finding all the data, standardizing the data, and cleanly returning the data to you.
 
+## Algorithms
+
+Getting data from CoAs is inevitable and with modern tools, plus a little human ingenuity, we can methodically parse CoAs produced by various labs that test cannabis. All CoAs that are extracted through manually written routines are quite useful because these can then be used for training natural language processing (NLP) models to further extract data!
+
+| Status | | |
+|---|---|---|
+| 🟠 Development | 🟡 Operational | 🟢 Live |
+
 | Algorithm | Lab / LIMS | Status |
 |-----------|------------|--------|
 | `parse_anresco_coa` | Anresco Laboratories | 🟢 |
 | `parse_cannalysis_coa` | Cannalysis | 🟢 |
 | `parse_cc_coa` | Confident Cannabis | 🟢 |
 | `parse_green_leaf_lab_coa` | Green Leaf Lab | 🟢 |
-| `parse_mcr_labs_coa` | MCR Labs | 🔴 |
-| `parse_sc_labs_coa` | SC Labs | 🔴 |
+| `parse_mcr_labs_coa` | MCR Labs | 🟡 |
+| `parse_sc_labs_coa` | SC Labs | 🟢 |
 | `parse_sonoma_coa` | Sonoma Lab Works | 🟢 |
 | `parse_tagleaf_coa` | TagLeaf LIMS | 🟢 |
-| `parse_veda_coa` | Veda Scientific | 🔴 |
+| `parse_veda_coa` | Veda Scientific | 🟠 |
 
-## Introduction
+## Core Methods
 
-Getting data from CoAs is inevitable and with modern tools, plus a little human ingenuity, we can methodically parse CoAs produced by various labs that test cannabis. All CoAs that are extracted through manually written routines are quite useful because these can then be used for training natural language processing (NLP) models to further extract data!
+CoADoc comes ready to rumble, but to unleash CoADoc's true power, ensure that you have installed [ChromeDriver](https://chromedriver.chromium.org/downloads) and that CoADoc can find your ChromeDriver in your PATH.
+
+| Function | Description |
+|----------|-------------|
+| `identify_lims(doc, lims=None)` | Identify if a CoA was created by a common LIMS. Search all of the text of the LIMS name or URL. If no LIMS is identified from the text, then the images are attempted to be decoded, searching for a QR code URL.|
+| `parse(data, headers = {}, kind = 'url', lims = None, max_delay = 7, persist = True)` | Parse all CoAs given a directory, a list of files, or a list of URLs. |
+| `parse(pdf, headers = {}, kind = 'url', lims = None, max_delay = 7, persist = True)` | Parse a CoA PDF. Searches the best guess image, then all images, for a QR code URL to find results online. |
+| `parse(url, headers = {}, kind = 'url', lims = None, max_delay = 7, persist = True)` | Parse a CoA URL. |
+| `save(data, outfile, alphabetize=True)` | Save all CoA data, flattening results, images, etc. |
+| `standardize(data)` | *Under Development* |
+| `quit()` | Close any driver, end any session, and reset the parameters. |
 
 ## Usage
 

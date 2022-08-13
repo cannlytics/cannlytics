@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/8/2022
-Updated: 8/11/2022
+Updated: 8/13/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -93,7 +93,7 @@ Future work:
 from ast import literal_eval
 import re
 from time import sleep
-from typing import Any
+from typing import Any, Optional
 from urllib.parse import urljoin
 
 # External imports.
@@ -132,12 +132,16 @@ SC_LABS = {
     'lab_website': 'https://sclabs.com',
     'lab_latitude': 36.987869,
     'lab_longitude': -122.033162,
-    'public': True,
 }
 
 # It is assumed that the CoA has the following parameters.
+# FIXME: Use cannlytics.utils.constants
 SC_LABS_COA = {
-    'coa_page_area': '(0, 350, 612, 520)',
+    # 'coa_page_area': '(0, 350, 612, 520)',
+    'coa_page_area': [
+        '(0, 80, 305, 720)',
+        '(305, 80, 612, 720)',
+    ],
     'coa_distributor_area': '(205, 150, 400, 230)',
     'coa_producer_area': '(0, 150, 204.0, 230)',
     'coa_sample_details_area': [
@@ -145,6 +149,17 @@ SC_LABS_COA = {
         (200, 225, 400, 350),
     ],
     'coa_analyses': {
+        'Cannabinoid': 'cannabinoids',
+        'Moisture': 'moisture',
+        'Terpenoid': 'terpenes',
+        'Category 1 Pesticide': 'pesticides',
+        'Category 2 Pesticide': 'pesticides',
+        'Category 2 Pesticide': 'pesticides',
+        'Mycotoxin': 'mycotoxins',
+        'Heavy Metals': 'heavy_metals',
+        'Microbiology': 'microbes',
+        'Foreign Material': 'foreign_matter',
+        'Water Activity': 'water_activity',
         'cannabinoid': 'cannabinoids',
         'terpenoid': 'terpenes',
         'pesticide': 'pesticides',
@@ -153,9 +168,6 @@ SC_LABS_COA = {
         'heavy_metals': 'heavy_metals',
         'microbiology': 'microbes',
         'foreign_material': 'foreign_matter',
-        'limonene': 'terpenes',
-        'thca': 'cannabinoids',
-        'fenchol': 'terpenes',
     },
     'coa_analytes': {
         'b_caryophyllene': 'beta_caryophyllene',
@@ -209,7 +221,44 @@ SC_LABS_COA = {
         'action-limit': 'limit',
         'result-pf': 'status',
     },
+    'coa_units': {
+        'cannabinoids': 'percent',
+        'foreign_matter': 'percent',
+        'microbes': 'μg/g',
+        'heavy_metals': 'μg/g',
+        'microbes': 'CFU/g',
+        'moisture': 'percent',
+        'pesticides': 'μg/g',
+        'terpenes': 'percent',
+        'water_activity': 'Aw',
+    },
 }
+
+
+def find_first_value(
+        string: str,
+        breakpoints: Optional[list]=None,
+    ) -> str:
+    """Find the first value of a string, be it a digit, a 'ND', '<',
+    or other specified breakpoints.
+    Args:
+        string (str): The string containing a value.
+        breakpoints (list): A list of breakpoints (optional).
+    Returns:
+        (int): Returns the index of the first value.
+    """
+    if breakpoints is None:
+        breakpoints = [' \d+', 'ND', '<']
+    detects = []
+    for breakpoint in breakpoints:
+        try:
+            detects.append(string.index(re.search(breakpoint, string).group()))
+        except AttributeError:
+            pass
+    try:
+        return min([x for x in detects if x])
+    except ValueError:
+        return None
 
 
 def parse_data_block(div, tag='span') -> dict:
@@ -232,209 +281,6 @@ def parse_data_block(div, tag='span') -> dict:
         except AttributeError:
             pass
     return data
-
-
-def parse_sc_labs_coa(
-        self,
-        doc: Any,
-        **kwargs,
-    ) -> dict:
-    """Parse a TagLeaf LIMS CoA PDF.
-    Args:
-        doc (str or PDF): A PDF file path or pdfplumber PDF.
-    Returns:
-        (dict): The sample data.
-    """
-    # Pythonic try first, ask later approach.
-    # Optional: Be more precise and check if there is a URL and if it is private.
-    try:
-        data = get_sc_labs_sample_details(doc)
-    except (AttributeError, ConnectionError):
-        data = parse_sc_labs_pdf(doc)
-        data['public'] = False
-    return data
-
-
-def parse_sc_labs_pdf(doc: Any) -> dict:
-    """Parse a SC Labs CoA PDF.
-    Args:
-        doc (str or PDF): A PDF file path or pdfplumber PDF.
-    Returns:
-        (dict): The sample data.
-    """
-    obs = {}
-
-    # Read the PDF.
-    if isinstance(doc, str):
-        report = pdfplumber.open(doc)
-    else:
-        report = doc
-    front_page = report.pages[0]
-
-    # Get the lab-specific CoA page areas.
-    distributor_area = literal_eval(SC_LABS_COA['coa_distributor_area'])
-    producer_area = literal_eval(SC_LABS_COA['coa_producer_area'])
-    sample_details_area = SC_LABS_COA['coa_sample_details_area']
-
-    # Get the standard analyses and analytes.
-    standard_analyses = SC_LABS_COA['coa_analyses']
-    standard_analytes = SC_LABS_COA['coa_analytes']
-
-    # Get producer details.
-    crop = front_page.within_bbox(producer_area)
-    details = crop.extract_text().replace('\n', '')
-    address = details.split('Address:')[-1].strip()
-    business = details.split('Business Name:')[-1].split('License Number:')[0].strip()
-    license_number = details.split('License Number:')[-1].split('Address:')[0].strip()
-    parts = address.split(',')
-    street = parts[0]
-    subparts = parts[-1].strip().split(' ')
-    city = ' '.join(subparts[:-2])
-    try:
-        state, zipcode = subparts[-2], subparts[-1]
-    except IndexError:
-        state, zipcode = '', ''
-    obs['producer'] = business
-    obs['producer_address'] = address
-    obs['producer_street'] = street
-    obs['producer_city'] = city
-    obs['producer_state'] = state
-    obs['producer_zipcode'] = zipcode
-    obs['producer_license_number'] = license_number
-
-    # Get distributor details.
-    crop = front_page.within_bbox(distributor_area)
-    details = crop.extract_text().replace('\n', ' ')
-    address = details.split('Address:')[-1].strip()
-    business = details.split('Business Name:')[-1].split('License Number:')[0].strip()
-    license_number = details.split('License Number:')[-1].split('Address:')[0].strip()
-    parts = address.split(',')
-    street = parts[0]
-    subparts = parts[-1].strip().split(' ')
-    city = ' '.join(subparts[:-2])
-    try:
-        state, zipcode = subparts[-2], subparts[-1]
-    except IndexError:
-        state, zipcode = '', ''
-    obs['distributor'] = business
-    obs['distributor_address'] = address
-    obs['distributor_street'] = street
-    obs['distributor_city'] = city
-    obs['distributor_state'] = state
-    obs['distributor_zipcode'] = zipcode
-    obs['distributor_license_number'] = license_number
-
-    # Get sample details.
-    standard_fields = SC_LABS_COA['coa_fields']
-    if isinstance(sample_details_area, str):
-        sample_details_area = [sample_details_area]
-    for area in sample_details_area:
-        crop = front_page.within_bbox(area)
-        details = crop.extract_text().split('\n')
-        for d in details:
-            if ':' not in d:
-                continue
-            values = d.split(':')
-            key = snake_case(values[0])
-            key = standard_fields.get(key, key)
-            obs[key] = values[-1]
-
-    # Get the date tested, product name, and sample type.
-    front_page_text = front_page.extract_text()
-    date_tested = front_page_text.split('DATE ISSUED')[-1].split('|')[0].strip()
-    lines = front_page_text.split('SAMPLE NAME:')[1].split('\n')
-    product_name = lines[0]
-    obs['product_type'] = lines[1]
-
-    # Get the analyses.
-    analyses = []
-    for line in lines:
-        if 'ANALYSIS' in line:
-            analysis = line.split(' ANALYSIS')[0].lower()
-            analysis = standard_analyses.get(analysis, analysis)
-
-    # Get the totals.
-
-    value = front_page_text.split('Sum of Cannabinoids:')[-1].split('%')[0]
-    obs['sum_of_cannabinoids'] = convert_to_numeric(value, strip=True)
-
-    value = front_page_text.split('Total Cannabinoids:')[-1].split('%')[0]
-    obs['total_cannabinoids'] = convert_to_numeric(value, strip=True)
-
-    value = front_page_text.split('Total THC:')[-1].split('%')[0]
-    obs['total_thc'] = convert_to_numeric(value, strip=True)
-
-    value = front_page_text.split('Total CBD:')[-1].split('%')[0]
-    obs['total_cbd'] = convert_to_numeric(value, strip=True)
-
-    value = front_page_text.split('Total Terpenoids:')[-1].split('%')[0]
-    obs['total_terpenes'] = convert_to_numeric(value, strip=True)
-
-    value = front_page_text.split('Moisture:')[-1].split('%')[0]
-    obs['moisture'] = convert_to_numeric(value, strip=True)
-
-    # Get the results.
-    results = []
-    for page in report.pages[1:]:
-
-        # Get the results from each result page.
-        # FIXME: Analysis doesn't parse well...
-        # Hot-Fix: Determine the analysis from the first cell.
-        tables = page.extract_tables()
-        for table in tables:
-            for i, row in enumerate(table):
-                if i == 0:
-                    analysis = standard_analyses.get(row[0].lower(), 'terpenes')
-                key = snake_case(row[0])
-                key = standard_analytes.get(key, key)
-                parts = row[1].split(' / ')
-                subparts = parts[-1].strip().split(' ')
-                mg_g, value = tuple(row[-1].split(' '))
-                results.append({
-                    'analysis': analysis,
-                    'key': key,
-                    'lod': convert_to_numeric(parts[0].strip()),
-                    'loq': convert_to_numeric(subparts[0]),
-                    'margin_of_error': convert_to_numeric(subparts[-1].replace('±', '')),
-                    'mg_g': convert_to_numeric(mg_g),
-                    'name': row[0].replace('\n', ' ').strip(),
-                    'value': convert_to_numeric(value),
-                    # FIXME: Dynamically determine the units!
-                    'units': 'percent',
-                })
-
-        # FIXME: It is difficult to get methods due to wrapped text.
-        # Get the methods from the result page text.
-        # page_text = page.extract_text()
-        # texts = page_text.split('Method:')
-        # for text in texts[1:]:
-        #     if 'Analysis' in text:
-        #         method = text.split('.')[0].replace('\n', ' ')
-        #         analysis = method.split('Analysis of ')[-1].split(' by')[0].lower()
-        #         # method = re.sub(r'\b[A-Z]+\b', '', method) # Remove all-cap words.
-        #         method = re.sub('[\(\[].*?[\)\]]', '', method) # Remove words in parentheses.
-
-    # Aggregate results.
-    obs['analyses'] = analyses
-    obs['date_tested'] = date_tested
-    obs['product_name'] = product_name
-    obs['results'] = results
-
-    # Turn dates to ISO format.
-    date_columns = [x for x in obs.keys() if x.startswith('date')]
-    for date_column in date_columns:
-        try:
-            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
-        except:
-            pass
-
-    # Finish data collection with a freshly minted sample ID.
-    obs['sample_id'] = create_sample_id(
-        private_key=obs['producer'],
-        public_key=obs['product_name'],
-        salt=obs['date_tested'],
-    )
-    return {**SC_LABS, **obs}
 
 
 def get_sc_labs_test_results(
@@ -908,6 +754,269 @@ def get_sc_labs_sample_details(
     return { **SC_LABS, **obs}
 
 
+def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
+    """Parse a SC Labs CoA PDF.
+    Args:
+        doc (str or PDF): A PDF file path or pdfplumber PDF.
+    Returns:
+        (dict): The sample data.
+    """
+    # Read the PDF.
+    if isinstance(doc, str):
+        report = pdfplumber.open(doc)
+    else:
+        report = doc
+
+    # Get the lab-specific CoA page areas, standard analyses and analytes.
+    obs = {}
+    coa_parameters = SC_LABS_COA
+    distributor_area = literal_eval(coa_parameters['coa_distributor_area'])
+    producer_area = literal_eval(coa_parameters['coa_producer_area'])
+    sample_details_area = coa_parameters['coa_sample_details_area']
+    standard_analyses = coa_parameters['coa_analyses']
+    standard_analytes = coa_parameters['coa_analytes']
+    standard_units = coa_parameters['coa_units']
+
+    # Get producer details.
+    front_page = report.pages[0]
+    crop = front_page.within_bbox(producer_area)
+    details = crop.extract_text().replace('\n', '')
+    address = details.split('Address:')[-1].strip()
+    business = details.split('Business Name:')[-1].split('License Number:')[0].strip()
+    license_number = details.split('License Number:')[-1].split('Address:')[0].strip()
+    parts = address.split(',')
+    street = parts[0]
+    subparts = parts[-1].strip().split(' ')
+    city = ' '.join(subparts[:-2])
+    try:
+        state, zipcode = subparts[-2], subparts[-1]
+    except IndexError:
+        state, zipcode = '', ''
+    obs['producer'] = business
+    obs['producer_address'] = address
+    obs['producer_street'] = street
+    obs['producer_city'] = city
+    obs['producer_state'] = state
+    obs['producer_zipcode'] = zipcode
+    obs['producer_license_number'] = license_number
+
+    # Get distributor details.
+    crop = front_page.within_bbox(distributor_area)
+    details = crop.extract_text().replace('\n', ' ')
+    address = details.split('Address:')[-1].strip()
+    business = details.split('Business Name:')[-1].split('License Number:')[0].strip()
+    license_number = details.split('License Number:')[-1].split('Address:')[0].strip()
+    parts = address.split(',')
+    street = parts[0]
+    subparts = parts[-1].strip().split(' ')
+    city = ' '.join(subparts[:-2])
+    try:
+        state, zipcode = subparts[-2], subparts[-1]
+    except IndexError:
+        state, zipcode = '', ''
+    obs['distributor'] = business
+    obs['distributor_address'] = address
+    obs['distributor_street'] = street
+    obs['distributor_city'] = city
+    obs['distributor_state'] = state
+    obs['distributor_zipcode'] = zipcode
+    obs['distributor_license_number'] = license_number
+
+    # Get sample details.
+    standard_fields = SC_LABS_COA['coa_fields']
+    if isinstance(sample_details_area, str):
+        sample_details_area = [sample_details_area]
+    for area in sample_details_area:
+        crop = front_page.within_bbox(area)
+        details = crop.extract_text().split('\n')
+        for d in details:
+            if ':' not in d:
+                continue
+            values = d.split(':')
+            key = snake_case(values[0])
+            key = standard_fields.get(key, key)
+            obs[key] = values[-1]
+
+    # Get the date tested, product name, and sample type.
+    front_page_text = front_page.extract_text()
+    date_tested = front_page_text.split('DATE ISSUED')[-1].split('|')[0].strip()
+    lines = front_page_text.split('SAMPLE NAME:')[1].split('\n')
+    product_name = lines[0].strip()
+    obs['product_type'] = lines[1]
+
+    # Get the analyses.
+    analyses = []
+    for i, line in enumerate(lines):
+        if 'ANALYSIS' in line:
+            analysis = line.split(' ANALYSIS')[0].lower()
+            analysis = standard_analyses.get(analysis, analysis)
+            if analysis == 'safety':
+                parts = ' '.join(lines[i+1:i+3]).split(':')
+                parts = [x.replace('PASS', '').replace('FAIL', '').strip() for x in parts]
+                parts = [standard_analyses.get(x, snake_case(x)) for x in parts if x]
+                analyses.extend(parts)
+            else:
+                analyses.append(analysis)
+
+    # Get the cannabinoid and terpene totals.
+
+    value = front_page_text.split('Sum of Cannabinoids:')[-1].split('%')[0]
+    obs['sum_of_cannabinoids'] = convert_to_numeric(value, strip=True)
+
+    value = front_page_text.split('Total Cannabinoids:')[-1].split('%')[0]
+    obs['total_cannabinoids'] = convert_to_numeric(value, strip=True)
+
+    value = front_page_text.split('Total THC:')[-1].split('%')[0]
+    obs['total_thc'] = convert_to_numeric(value, strip=True)
+
+    value = front_page_text.split('Total CBD:')[-1].split('%')[0]
+    obs['total_cbd'] = convert_to_numeric(value, strip=True)
+
+    value = front_page_text.split('Total Terpenoids:')[-1].split('%')[0]
+    obs['total_terpenes'] = convert_to_numeric(value, strip=True)
+
+    # Get the moisture content analysis if present.
+    try:
+        value = front_page_text.split('Moisture:')[-1].split('%')[0]
+        obs['moisture_content'] = convert_to_numeric(value, strip=True)
+        analyses.append('moisture')
+    except:
+        pass
+
+    # Get all page text, from the 2nd page on, column by column.
+    areas = coa_parameters['coa_page_area']
+    lines = []
+    for page in report.pages[1:]:
+        for area in areas:
+            crop = page.within_bbox(literal_eval(area))
+            lines += crop.extract_text().split('\n')
+    
+    # Map all the analytes to analyses.
+    analyte_analysis_map = {
+        'Total Sample Area Covered by Sand, Soil, Cinders, or Dirt': 'foreign_matter',
+        'Caryophyllene Oxide': 'terpenes',
+        'Pentachloronitro- benzene*': 'pesticides',
+        'Piperonylbu- toxide': 'pesticides',
+        'DDVP (Dichlorvos)': 'pesticides',
+        'Methyl parathion': 'pesticides',
+        'Chlorantranilip- role': 'pesticides',
+        'Clofentezine': 'pesticides',
+        'Total Sample Area Covered by Sand, Soil, Cinders, or Dirt': 'foreign_matter',
+        'Total Sample Area Covered by Mold': 'foreign_matter',
+        'Total Sample Area Covered by an Imbedded Foreign Material': 'foreign_matter',
+        'Insect Fragment Count': 'foreign_matter',
+        'Hair Count': 'foreign_matter',
+        'Mammalian Excreta Count': 'foreign_matter',
+        'Shiga toxin-producing Escherichia coli': 'microbes',
+        'Salmonella spp.': 'microbes',
+        'Aspergillus fumigatus': 'microbes',
+        'Aspergillus flavus': 'microbes',
+        'Aspergillus niger': 'microbes',
+        'Aspergillus terreus': 'microbes',
+    }
+    for line in lines:
+        if 'TEST RESULT' in line:
+            analysis_name = line.split('TEST RESULT')[0].strip().title()
+            analysis = standard_analyses.get(analysis_name)
+        elif 'Method:' in line:
+            # FIXME: Imperfect method collect (missing text on next line).
+            obs[f'{analysis}_method'] = line.split('Method:')[-1].strip()
+        else:
+            first_value = find_first_value(line)
+            name = line[:first_value].replace('\n', ' ').strip()
+            analyte_analysis_map[name] = analysis
+
+    # Get the results.
+    results = []
+    for page in report.pages[1:]:
+
+        # Get the results from each result page.
+        tables = page.extract_tables()
+        for table in tables:
+            for i, row in enumerate(table):
+
+                # Determine the analysis, then the units.
+                analyte = row[0].replace('\n', ' ').strip()
+                analysis = analyte_analysis_map.get(analyte)
+                key = snake_case(analyte)
+                key = standard_analytes.get(key, key)
+                units = standard_units.get(analysis)
+
+                # Skip per unit values.
+                if 'per_unit' in key:
+                    continue
+
+                # Determine the values, handling screens differently.
+                parts = row[1].split(' / ')
+                subparts = parts[-1].strip().split(' ')
+                limit = None
+                status = None
+                if len(subparts) == 3:
+                    limit = subparts[1]
+                    value, status = tuple(row[-1].split(' '))
+                else:
+                    try:
+                        mg_g, value = tuple(row[-1].split(' '))
+                    except ValueError:
+                        value = row[-1]
+
+                # Record the result
+                results.append({
+                    'analysis': analysis,
+                    'key': key,
+                    'limit': limit,
+                    'lod': convert_to_numeric(parts[0].strip()),
+                    'loq': convert_to_numeric(subparts[0]),
+                    'margin_of_error': convert_to_numeric(subparts[-1].replace('±', '')),
+                    'mg_g': convert_to_numeric(mg_g),
+                    'name': analyte,
+                    'status': status,
+                    'units': units,
+                    'value': convert_to_numeric(value),
+                })
+
+    # Turn dates to ISO format.
+    date_columns = [x for x in obs.keys() if x.startswith('date')]
+    for date_column in date_columns:
+        try:
+            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+        except:
+            pass
+
+    # Finish data collection with a freshly minted sample ID.
+    obs['analyses'] = analyses
+    obs['date_tested'] = date_tested
+    obs['product_name'] = product_name
+    obs['results'] = results
+    obs['sample_id'] = create_sample_id(
+        private_key=obs['producer'],
+        public_key=obs['product_name'],
+        salt=obs['date_tested'],
+    )
+    return {**SC_LABS, **obs}
+
+
+def parse_sc_labs_coa(
+        parser,
+        doc: Any,
+        **kwargs,
+    ) -> dict:
+    """Parse a TagLeaf LIMS CoA PDF.
+    Args:
+        doc (str or PDF): A PDF file path or pdfplumber PDF.
+    Returns:
+        (dict): The sample data.
+    """
+    # Pythonic try first, ask later approach.
+    # Optional: Be more precise and check if there is a URL and if it is private.
+    try:
+        data = get_sc_labs_sample_details(doc)
+    except (AttributeError, ConnectionError):
+        data = parse_sc_labs_pdf(parser, doc)
+        data['public'] = False
+    return data
+
+
 if __name__ == '__main__':
 
     # === Tests ===
@@ -929,14 +1038,20 @@ if __name__ == '__main__':
     # data = get_sc_labs_sample_details(sc_labs_coa_url)
     # assert data is not None
 
-    # [✓] Test parsing a SC Labs CoA PDF.
+    # [✓] TEST: Parse a SC Labs CoA PDF (with cannabinoids and terpenes).
     # directory = '../../../.datasets/coas/Flore COA'
     # doc = f'{directory}/Dylan Mattole/Mattole Valley Jack H.pdf'
     # parser = CoADoc()
     # lab = parser.identify_lims(doc)
     # assert lab == 'SC Labs'
-    # data = parse_sc_labs_pdf(doc)
+    # data = parse_sc_labs_pdf(parser, doc)
     # assert data is not None
 
-    # TODO: Test more SC Labs CoA PDFs
-    
+    # [✓] TEST: Parse a SC Labs CoA PDF (with safety screening).
+    directory = '../../../.datasets/coas/Flore COA'
+    doc = f'{directory}/Redwood Roots/Cherry Punch.pdf'
+    parser = CoADoc()
+    lab = parser.identify_lims(doc)
+    assert lab == 'SC Labs'
+    data = parse_sc_labs_pdf(parser, doc)
+    assert data is not None

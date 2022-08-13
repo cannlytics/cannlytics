@@ -74,6 +74,8 @@ CANNALYSIS =  {
     'lab_website': 'www.cannalysis.com',
 }
 
+# It is assumed that the CoA has the following parameters.
+# FIXME: Use cannlytics.utils.constants
 CANNALYSIS_COA = {
     'coa_page_area': [
         '(0, 80, 305, 720)',
@@ -138,7 +140,7 @@ CANNALYSIS_COA = {
         'lod',
         'loq', 
         'limit',
-        'status'
+        'status',
     ],
     'coa_skip_fields': [
         'ADDITIONAL',

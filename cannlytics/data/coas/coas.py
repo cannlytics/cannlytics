@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/4/2022
+Updated: 8/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -24,23 +24,17 @@ Note:
     specific lab or LIMS CoA parsed, then please contact the team!
     Email: <dev@cannlytics.com>
 
-Supported Labs:
+Supported Labs and LIMS:
 
     ✓ Anresco Laboratories
     ✓ Cannalysis
+    ✓ Confident Cannabis
     ✓ Green Leaf Lab
     ✓ MCR Labs
     ✓ SC Labs
     ✓ Sonoma Lab Works
-    - Veda Scientific
-
-Supported LIMS:
-
-    ✓ Confident Cannabis
-        - CB Labs (FIXME)
     ✓ TagLeaf LIMS
-        - BelCosta Labs (FIXME)
-        - California AG Labs (FIXME)
+    - Veda Scientific
 
 Future work:
 
@@ -53,16 +47,18 @@ Future work:
         - Handle non-font parameters and page scaling.
         - Detect words, lines, columns, white-space, etc.
 
-    NLP tools:
+    Ideally, CoADoc can utilize NLP tools:
 
         - Entity recognition.
         - Pattern exploitation training.
         - Wikipedia requests to identify terpenes, pesticides, etc.
         - Custom lexicon
         - Word embeddings
-
-        1. Candidate generation
-        2. Disambiguation.
+        - Candidate generation
+        - Disambiguation.
+    
+    Let's keep onboarding labs and LIMS until CoADoc
+    is robust enough to parse any given cannabis CoA!
 
 """
 # Standard imports.
@@ -70,10 +66,7 @@ import base64
 import importlib
 from io import BytesIO
 from typing import Any, Optional
-# import numpy as np
 import openpyxl
-# from openpyxl.utils import get_column_letter
-from openpyxl.utils.dataframe import dataframe_to_rows
 import pandas as pd
 import requests
 from wand.image import Image as wi
@@ -83,6 +76,7 @@ import pdfplumber
 from pyzbar.pyzbar import decode
 
 # Internal imports.
+from cannlytics.data.data import write_to_worksheet
 from cannlytics.utils import (
     get_directory_files,
     sandwich_list,
@@ -91,8 +85,9 @@ from cannlytics.utils import (
 from cannlytics.utils.constants import (
     ANALYSES,
     ANALYTES,
-    # DECARB,
+    CODINGS,
     DEFAULT_HEADERS,
+    STANDARD_FIELDS,
 )
 
 # Lab and LIMS CoA parsing algorithms.
@@ -120,55 +115,6 @@ LIMS = {
     # 'Veda Scientific': VEDA_SCIENTIFIC,
 }
 
-# General decodings to use for normalization of results.
-DECODINGS = {
-    '<LOQ': 0.000000001,
-    '<LOD': 0.000000001,
-    # '≥ LOD': 0,
-    'ND': 0.000000001,
-    'NR': None,
-    'N/A': None,
-    'na': None,
-}
-
-# General keys to use for standardization of fields.
-KEYS = {
-    'Analyte': 'name',
-    'Labeled Amount': 'sample_weight',
-    'Limit': 'limit',
-    'Detected': 'value',
-    'LOD': 'lod',
-    'LOQ': 'loq',
-    'Pass/Fail': 'status',
-    'metrc_src_uid': 'source_metrc_uid',
-    'matrix': 'product_type',
-    'collected_on': 'date_collected',
-    'received_on': 'date_received',
-    'moisture': 'moisture_content',
-    'terpenoids': 'terpenes',
-    'foreign_materials': 'foreign_matter',
-}
-
-
-def write_to_worksheet(ws, values):
-    """Write data to an Excel Worksheet.
-    Credit: Charlie Clark <https://stackoverflow.com/a/36664027>
-    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
-    """
-    rows = dataframe_to_rows(pd.DataFrame(values), index=False)
-    for r_idx, row in enumerate(rows, 1):
-        for c_idx, value in enumerate(row, 1):
-            try:
-                ws.cell(row=r_idx, column=c_idx, value=value)
-            except ValueError:
-                ws.cell(row=r_idx, column=c_idx, value=str(value))
-
-
-# Optional: Create a "smart" CoA class?
-class CoA:
-    def __ini__():
-        return None
-
 
 class CoADoc:
     """Parse data from certificate of analysis (CoA) PDFs or URLs."""
@@ -177,22 +123,32 @@ class CoADoc:
             self,
             analyses: Optional[dict] = None,
             analytes: Optional[dict] = None,
-            decodings: Optional[dict] = None,
+            codings: Optional[dict] = None,
+            fields: Optional[dict] = None,
             headers: Optional[dict] = None,
-            keys: Optional[dict] = None,
             lims: Optional[Any] = None,
             init_all: Optional[bool] = True,
             google_maps_api_key: Optional[str] = None,
         ) -> None:
         """Initialize CoA parser.
         Args:
-            analyses (dict): A dictionary of analyses for standardization.
-            analytes (dict): A dictionary of analytes for standardization.
-            decodings (dict): A dictionary of decodings for standardization.
-            headers (dict): Headers for HTTP requests.
-            keys (dict): A dictionary of keys for standardization.
-            lims (str or dict): Specific LIMS to parse CoAs.
-            init_all (bool): Initialize all of the parsing routines.
+            analyses (dict): A dictionary of analyses,
+                standard analyses are used by default.
+            analytes (dict): A dictionary of analytes,
+                standard analytes are used by default.
+            codings (dict): A dictionary of value codings,
+                standard codings are used by default.
+            fields (dict): A dictionary of field keys,
+                standard fields are used by default.
+            headers (dict): Headers for HTTP requests,
+                standard headers are used by default.
+            lims (str or dict): Specific LIMS to parse CoAs,
+                all verified LIMS are checked by default,
+                until a matching LIMS is found.
+            init_all (bool): Initialize all of the parsing routines
+                for all verified LIMS.
+            google_maps_api_key (str): A Google Maps API key
+                if you also want GIS data included.
         """
         # Setup.
         self.driver = None
@@ -210,20 +166,20 @@ class CoADoc:
         if analytes is None:
             self.analytes = ANALYTES
 
-        # Define decodings
-        self.decodings = decodings
-        if decodings is None:
-            self.decodings = DECODINGS
+        # Define codings.
+        self.codings = codings
+        if codings is None:
+            self.codings = CODINGS
+        
+        # Define fields.
+        self.fields = fields
+        if fields is None:
+            self.fields = STANDARD_FIELDS
 
         # Define headers.
         self.headers = headers
         if headers is None:
             self.headers = DEFAULT_HEADERS
-
-        # Define keys.
-        self.keys = keys
-        if keys is None:
-            self.keys = KEYS
 
         # Define LIMS.
         self.lims = lims
@@ -761,7 +717,7 @@ class CoADoc:
         wb.save(outfile)
         return wb
 
-    def standardize(self, obs) -> Any:
+    def standardize(self, data) -> Any:
         """Standardize (and normalize) given data.
         Args:
             data (dict or list or DataFrame): The data to standardize.
@@ -810,20 +766,20 @@ class CoADoc:
         # - lab_longitude
         
         # Turn dates to ISO format.
-        date_columns = [x for x in obs.keys() if x.startswith('date')]
+        date_columns = [x for x in data.keys() if x.startswith('date')]
         for date_column in date_columns:
             try:
-                obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+                data[date_column] = pd.to_datetime(data[date_column]).isoformat()
             except:
                 pass
 
         # Drop `coa_{field}` helper fields.
-        drop = [x for x in obs.keys() if x.startswith('coa_')]
+        drop = [x for x in data.keys() if x.startswith('coa_')]
         for k in drop:
-            del obs[k]
+            del data[k]
 
         # Return the standardized observation.
-        return obs
+        return data
     
     def quit(self):
         """Close any driver, end any session, and reset the parameters."""
