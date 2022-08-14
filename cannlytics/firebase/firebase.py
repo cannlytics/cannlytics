@@ -50,12 +50,47 @@ from cannlytics.utils import get_random_string, snake_case
 
 # The maximum number of documents to include in batch updates.
 # The official limit is 500, but pushing too close to the limit
-# increses the likelihood of failure to commit.
+# increases the likelihood of failure to commit.
 MAX_BATCH_SIZE = 420
 
-#------------------------------------------------------------------------------
-# Firestore
-#------------------------------------------------------------------------------
+
+# === Core ===
+
+def initialize_firebase(
+        env_file: Optional[str] = None,
+        key_path: Optional[str] = None,
+        bucket_name: Optional[str] = None,
+        project_id: Optional[str] = None,
+):
+    """Initialize Firebase, unless already initialized. Searches for environment
+    credentials if `key_path` is not specified.
+    Args:
+        env_file (str): An .env file that contains `GOOGLE_APPLICATION_CREDENTIALS`.
+        key_path (str): A path to your service account credentials (optional).
+        project_id (str): A Firebase project ID (optional).
+        bucket_name (str): A Cloud Storage bucket name (optional).
+    Returns:
+        (Firestore client): A Firestore database instance.
+    """
+    cred = None
+    options = {}
+    if env_file:
+        config = dotenv_values(env_file)
+        key_path = config['GOOGLE_APPLICATION_CREDENTIALS']
+    elif key_path:
+        cred = credentials.Certificate(key_path)
+    if bucket_name:
+        options['storageBucket'] = bucket_name.replace('gs://', '')
+    if project_id:
+        options['projectId'] = project_id
+    try:
+        initialize_app(cred, options)
+    except ValueError:
+        pass
+    return firestore.client()
+
+
+# === Firestore ===
 
 def add_to_array(ref, field, value, database=None):
     """Add an element to a given field for a given reference.
@@ -171,40 +206,6 @@ def increment_value(ref: str, field: str, amount: int = 1, database=None):
         database = firestore.client()
     doc = create_reference(database, ref)
     doc.set({field: Increment(amount)}, merge=True)
-
-
-def initialize_firebase(
-        env_file: Optional[str] = None,
-        key_path: Optional[str] = None,
-        bucket_name: Optional[str] = None,
-        project_id: Optional[str] = None,
-):
-    """Initialize Firebase, unless already initialized. Searches for environment
-    credentials if `key_path` is not specified.
-    Args:
-        env_file (str): An .env file that contains `GOOGLE_APPLICATION_CREDENTIALS`.
-        key_path (str): A path to your service account credentials (optional).
-        project_id (str): A Firebase project ID (optional).
-        bucket_name (str): A Cloud Storage bucket name (optional).
-    Returns:
-        (Firestore client): A Firestore database instance.
-    """
-    cred = None
-    options = {}
-    if env_file:
-        config = dotenv_values(env_file)
-        key_path = config['GOOGLE_APPLICATION_CREDENTIALS']
-    elif key_path:
-        cred = credentials.Certificate(key_path)
-    if bucket_name:
-        options['storageBucket'] = bucket_name.replace('gs://', '')
-    if project_id:
-        options['projectId'] = project_id
-    try:
-        initialize_app(cred, options)
-    except ValueError:
-        pass
-    return firestore.client()
 
 
 def update_document(ref: str, values: dict, database=None):
@@ -360,7 +361,7 @@ def import_data(database, ref: str, data_file: str):
 
 
 def export_data(database, ref: str, data_file: str):
-    """Export data from Firestore.    
+    """Export data from Firestore.
     Args:
         database (Firestore Client):
         ref (str): A collection or document reference.
@@ -426,9 +427,7 @@ def get_id_timestamp(uid: str) -> datetime:
     return ulid.from_str(uid).timestamp().datetime
 
 
-#------------------------------------------------------------------------------
-# Authentication
-#------------------------------------------------------------------------------
+# === Authentication ===
 
 def create_user(name: str, email: str) -> Tuple[str]:
     """
@@ -458,7 +457,11 @@ def create_user(name: str, email: str) -> Tuple[str]:
         return None, None
 
 
-def create_custom_claims(uid: str , email: str = None, claims: dict = None):
+def create_custom_claims(
+        uid: str ,
+        email: str = None,
+        claims: dict = None,
+    ) -> None:
     """Create custom claims for a user to grant granular permission.
     The new custom claims will propagate to the user's ID token the
     next time a new one is issued.
@@ -527,7 +530,10 @@ def create_custom_token(
     return auth.create_custom_token(uid, claims)
 
 
-def create_session_cookie(id_token: str, expires_in: timedelta = None) -> bytes:
+def create_session_cookie(
+        id_token: str,
+        expires_in: timedelta = None,
+    ) -> bytes:
     """Create a session cookie.
     Args:
         id_token (str): A user ID token passed from the client.
@@ -558,7 +564,11 @@ def verify_token(token: str) -> dict:
     return auth.verify_id_token(token)
 
 
-def verify_session_cookie(session_cookie: str, check_revoked: bool = True, app=None) -> dict:
+def verify_session_cookie(
+        session_cookie: str,
+        check_revoked: bool = True,
+        app=None,
+    ) -> dict:
     """Verify a user's session cookie.
     Args:
         session_cookie (str): A session cookie to authenticate a user.
@@ -656,9 +666,7 @@ def generate_password_reset_link(email: str) -> str:
     return auth.generate_password_reset_link(email)
 
 
-#------------------------------------------------------------------------------
-# Secret Management
-#------------------------------------------------------------------------------
+# === Secret Management ===
 
 def create_secret(project_id: str, secret_id: str, secret: Any) -> str:
     """Create a new secret with the given name. A secret is a logical wrapper
@@ -724,9 +732,7 @@ def access_secret_version(project_id: str, secret_id: str, version_id: str) -> s
     return response.payload.data.decode('UTF-8')
 
 
-#------------------------------------------------------------------------------
-# Storage
-#------------------------------------------------------------------------------
+# === Storage ===
 
 def create_short_url(api_key: str, long_url: str, project_name: str) -> str:
     """Create a short URL to a specified file.
@@ -757,7 +763,7 @@ def download_file(
         source_blob_name: str,
         destination_file_name: str,
         bucket_name: Optional[str] = None
-):
+    ):
     """Downloads a file from Firebase Storage.
     Args:
         source_blob_name (str): The file name to upload.
@@ -769,7 +775,11 @@ def download_file(
     blob.download_to_filename(destination_file_name)
 
 
-def download_files(bucket_folder: str, local_folder: str, bucket_name: Optional[str] = None):
+def download_files(
+        bucket_folder: str,
+        local_folder: str,
+        bucket_name: Optional[str] = None,
+    ):
     """Download all files in a given Firebase Storage folder.
     Args:
         bucket_folder (str): A folder in the storage bucket.
@@ -784,7 +794,11 @@ def download_files(bucket_folder: str, local_folder: str, bucket_name: Optional[
         blob.download_to_filename(local_folder + '/' + file_name)
 
 
-def get_file_url(ref: str, bucket_name: Optional[str] = None, expiration=None) -> str:
+def get_file_url(
+        ref: str,
+        bucket_name: Optional[str] = None,
+        expiration=None,
+    ) -> str:
     """Return the storage URL of a given file reference.
     Args:
         ref (str): The storage location of the file.
@@ -823,7 +837,11 @@ def upload_file(
         blob.upload_from_string(data_url, content_type=content_type)
 
 
-def upload_files(bucket_folder: str, local_folder: str, bucket_name: Optional[str] = None):
+def upload_files(
+        bucket_folder: str,
+        local_folder: str,
+        bucket_name: Optional[str] = None,
+    ):
     """Upload multiple files to Firebase Storage.
     Args:
         bucket_folder (str): A folder in the storage bucket to upload files.
@@ -838,7 +856,10 @@ def upload_files(bucket_folder: str, local_folder: str, bucket_name: Optional[st
         blob.upload_from_filename(local_file)
 
 
-def list_files(bucket_folder: str, bucket_name: Optional[str] = None) -> List[str]:
+def list_files(
+        bucket_folder: str,
+        bucket_name: Optional[str] = None,
+    ) -> List[str]:
     """List all files in GCP bucket folder.
     Args:
         bucket_folder (str): A folder in the storage bucket to list files.
@@ -879,9 +900,7 @@ def rename_file(
     bucket.rename_blob(blob, new_name=newfile_name)
 
 
-#------------------------------------------------------------------------------
-# Misc
-#------------------------------------------------------------------------------
+# === Misc===
 
 def create_log( #pylint: disable=too-many-arguments
         ref: str,

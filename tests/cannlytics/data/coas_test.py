@@ -50,7 +50,7 @@ skip = [
     # 'RainbowBeltz.pdf' # Peak (Sonoma Lab Works)
 ]
 for path, subdirs, files in os.walk(DATA_DIR):
-    for name in reversed(files):
+    for name in files:
 
         # DEV: Look at the 1st CoA.
         # if len(identified) > 1:
@@ -72,7 +72,7 @@ for path, subdirs, files in os.walk(DATA_DIR):
             unidentified.append(file_name)
 
         # DEV: Only collect CoAs from a specific lab / LIMS.
-        if lab != 'SC Labs':
+        if lab == 'SC Labs' or lab == 'Confident Cannabis' or lab == 'TagLeaf LIMS':
             continue
 
         # Dev: Skip recorded CoAs.
@@ -88,12 +88,12 @@ for path, subdirs, files in os.walk(DATA_DIR):
         all_data.extend(coa_data)
 
         # Save the individual data files.
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-        outfile = f'{datafile_dir}/coa-data-{timestamp}.xlsx'
-        parser.save(coa_data, outfile)
-        # to_excel_with_style(pd.DataFrame(coa_data), outfile)
-        print('Parsed:', name)
-        identified.append(file_name)
+        # timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+        # outfile = f'{datafile_dir}/coa-data-{timestamp}.xlsx'
+        # parser.save(coa_data, outfile)
+        # # to_excel_with_style(pd.DataFrame(coa_data), outfile)
+        # print('Parsed:', name)
+        # identified.append(file_name)
 
         # except:
         #     print('Failed to parse:', name)
@@ -103,7 +103,7 @@ for path, subdirs, files in os.walk(DATA_DIR):
 percent = len(identified) / (len(identified) + len(unidentified)) * 100
 print('Identified %.2f%% of the CoAs.' % percent)
 
-# FIXME:
+# DEV: Read in a specific datafile.
 # data = pd.read_excel(f'{datafile_dir}/coa-aggregated-data-2022-08-09T15-12-38.xlsx')
 # data['results'] = data['results'].apply(literal_eval)
 
@@ -115,7 +115,6 @@ timestamp = datetime.now().isoformat()[:19].replace(':', '-')
 outfile = f'{datafile_dir}/coa-aggregated-data-{timestamp}.xlsx'
 data.index = data['sample_id']
 parser.save(data, outfile)
-
 
 # TODO:
 # # Format any public data to upload to Firestore.

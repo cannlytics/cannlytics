@@ -93,7 +93,7 @@ Future work:
 from ast import literal_eval
 import re
 from time import sleep
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urljoin
 
 # External imports.
@@ -103,8 +103,18 @@ import pdfplumber
 import requests
 
 # Internal imports.
-from cannlytics.data.data import create_sample_id
-from cannlytics.utils.constants import DEFAULT_HEADERS
+from cannlytics.data.data import (
+    create_sample_id,
+    find_first_value,
+    parse_data_block,
+)
+from cannlytics.utils.constants import (
+    ANALYSES,
+    ANALYTES,
+    DEFAULT_HEADERS,
+    STANDARD_FIELDS,
+    STANDARD_UNITS,
+)
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
@@ -135,152 +145,18 @@ SC_LABS = {
 }
 
 # It is assumed that the CoA has the following parameters.
-# FIXME: Use cannlytics.utils.constants
 SC_LABS_COA = {
-    # 'coa_page_area': '(0, 350, 612, 520)',
+    'coa_distributor_area': '(205, 150, 400, 230)',
+    'coa_producer_area': '(0, 150, 204.0, 230)',
     'coa_page_area': [
         '(0, 80, 305, 720)',
         '(305, 80, 612, 720)',
     ],
-    'coa_distributor_area': '(205, 150, 400, 230)',
-    'coa_producer_area': '(0, 150, 204.0, 230)',
     'coa_sample_details_area': [
-        (0, 225, 200, 350),
-        (200, 225, 400, 350),
+        '(0, 225, 200, 350)',
+        '(200, 225, 400, 350)',
     ],
-    'coa_analyses': {
-        'Cannabinoid': 'cannabinoids',
-        'Moisture': 'moisture',
-        'Terpenoid': 'terpenes',
-        'Category 1 Pesticide': 'pesticides',
-        'Category 2 Pesticide': 'pesticides',
-        'Category 2 Pesticide': 'pesticides',
-        'Mycotoxin': 'mycotoxins',
-        'Heavy Metals': 'heavy_metals',
-        'Microbiology': 'microbes',
-        'Foreign Material': 'foreign_matter',
-        'Water Activity': 'water_activity',
-        'cannabinoid': 'cannabinoids',
-        'terpenoid': 'terpenes',
-        'pesticide': 'pesticides',
-        'mycotoxin': 'mycotoxins',
-        'residual_solvents': 'residual_solvents',
-        'heavy_metals': 'heavy_metals',
-        'microbiology': 'microbes',
-        'foreign_material': 'foreign_matter',
-    },
-    'coa_analytes': {
-        'b_caryophyllene': 'beta_caryophyllene',
-        'a_humulene': 'humulene',
-        'b_pinene': 'beta_pinene',
-        'a_bisabolol': 'alpha_bisabolol',
-        'a_pinene': 'alpha_pinene',
-        'a_cedrene': 'alpha_cedrene',
-        '3_carene': 'delta_3_carene',
-        'g_terpinene': 'gamma_terpinene',
-        'r_pulegone': 'pulegone',
-        'a_phellandrene': 'alpha_phellandrene',
-        'a_terpinene': 'alpha_terpinene',
-        'trans_b_farnesene': 'trans_beta_farnesene',
-    },
-    'coa_fields': {
-        'batch_number': 'batch_number',
-        'batch_size': 'batch_size',
-        'business_name': 'distributor',
-        'coa_id': 'lab_id',
-        'license_number': 'distributor_license_number',
-        'sum_of_cannabinoids': 'sum_of_cannabinoids',
-        'total_cannabinoids': 'total_cannabinoids',
-        'total_thc': 'total_thc',
-        'total_cbd': 'total_cbd',
-        'total_cbg': 'total_cbg',
-        'total_thcv': 'total_thcv',
-        'total_cbc': 'total_cbc',
-        'total_cbdv': 'total_cbdv',
-        'total_terpenoids': 'total_terpenes',
-        '9_thc_per_unit': 'cannabinoids_status',
-        'pesticides': 'pesticides_status',
-        'mycotoxins': 'mycotoxins_status',
-        'residual_solvents': 'residual_solvents_status',
-        'heavy_metals': 'heavy_metals_status',
-        'microbiology': 'microbiology_status',
-        'foreign_material': 'foreign_matter_status',
-        'foreign_material_method': 'foreign_matter_method',
-        'total_terpenoids_percent': 'total_terpenes',
-        'total_terpenoids_mgtog': '',
-        'sample_id': 'lab_id',
-        'source_metrc_uid': 'metrc_source_id',
-        'sample_size': 'sample_weight',
-        'unit_mass': 'product_size',
-    },
-    'coa_results_fields': {
-        'compound': 'name',
-        'mu': 'margin_of_error',
-        'result-mass': 'mg_g',
-        'result-percent': 'value',
-        'action-limit': 'limit',
-        'result-pf': 'status',
-    },
-    'coa_units': {
-        'cannabinoids': 'percent',
-        'foreign_matter': 'percent',
-        'microbes': 'μg/g',
-        'heavy_metals': 'μg/g',
-        'microbes': 'CFU/g',
-        'moisture': 'percent',
-        'pesticides': 'μg/g',
-        'terpenes': 'percent',
-        'water_activity': 'Aw',
-    },
 }
-
-
-def find_first_value(
-        string: str,
-        breakpoints: Optional[list]=None,
-    ) -> str:
-    """Find the first value of a string, be it a digit, a 'ND', '<',
-    or other specified breakpoints.
-    Args:
-        string (str): The string containing a value.
-        breakpoints (list): A list of breakpoints (optional).
-    Returns:
-        (int): Returns the index of the first value.
-    """
-    if breakpoints is None:
-        breakpoints = [' \d+', 'ND', '<']
-    detects = []
-    for breakpoint in breakpoints:
-        try:
-            detects.append(string.index(re.search(breakpoint, string).group()))
-        except AttributeError:
-            pass
-    try:
-        return min([x for x in detects if x])
-    except ValueError:
-        return None
-
-
-def parse_data_block(div, tag='span') -> dict:
-    """Parse an HTML data block into a dictionary.
-    Args:
-        div (bs4.element): An HTML element.
-        tag (string): The type of tag that is repeated in the block.
-    Returns:
-        (dict): A dictionary of key and value pairs.
-    """
-    data = {}
-    for el in div:
-        try:
-            label = el.find(tag).text
-            value = el.text
-            value = value.replace(label, '')
-            value = value.replace('\n', '').strip()
-            label = label.replace(':', '')
-            data[snake_case(label)] = value
-        except AttributeError:
-            pass
-    return data
 
 
 def get_sc_labs_test_results(
@@ -569,14 +445,15 @@ def get_sc_labs_sample_details(
         obs['date_received'] = ''
     
     # Rename desired fields.
-    # Note: This may not be working as intended.
-    for key, field in SC_LABS_COA['coa_fields'].items():
+    # Note: There may be a better way to do this.
+    rename = {}
+    for key, value in obs.items():
         try:
-            value = obs.pop(key)
-            if field:
-                obs[field] = value
+            standard_field = STANDARD_FIELDS[key]
+            rename[standard_field] = value
         except KeyError:
-            pass
+            rename[key] = value
+    obs = rename
 
     # Get the CoA ID.
     try:
@@ -597,8 +474,6 @@ def get_sc_labs_sample_details(
     analyses = []
     results = []
     notes = None
-    coa_results_fields = SC_LABS_COA['coa_results_fields']
-    standard_analyses = SC_LABS_COA['coa_analyses']
     cards = soup.find_all('div', attrs={'class': 'analysis-container'})    
     for card in cards:
 
@@ -610,7 +485,7 @@ def get_sc_labs_sample_details(
         if 'Analysis' not in analysis:
             continue
         analysis = snake_case(analysis.split(' Analysis')[0])
-        analysis = standard_analyses.get(analysis, analysis)
+        analysis = ANALYSES.get(analysis, analysis)
         analyses.append(analysis)
 
         # Get the method for the analysis.
@@ -628,7 +503,7 @@ def get_sc_labs_sample_details(
             result = {}
             for cell in cells:
                 key = cell['class'][0].replace('table-', '')
-                key = coa_results_fields.get(key, key)
+                key = STANDARD_FIELDS.get(key, key)
                 value = cell.text.replace('\n', '').strip()
                 result[key] = value
                 result['analysis'] = analysis
@@ -673,7 +548,7 @@ def get_sc_labs_sample_details(
                 result = {}
                 for cell in cells:
                     key = cell['class'][0].replace('table-', '')
-                    key = coa_results_fields.get(key, key)
+                    key = STANDARD_FIELDS.get(key, key)
                     value = cell.text.replace('\n', '').strip()
                     result[key] = value
                     result['analysis'] = analysis
@@ -773,9 +648,6 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
     distributor_area = literal_eval(coa_parameters['coa_distributor_area'])
     producer_area = literal_eval(coa_parameters['coa_producer_area'])
     sample_details_area = coa_parameters['coa_sample_details_area']
-    standard_analyses = coa_parameters['coa_analyses']
-    standard_analytes = coa_parameters['coa_analytes']
-    standard_units = coa_parameters['coa_units']
 
     # Get producer details.
     front_page = report.pages[0]
@@ -823,18 +695,17 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
     obs['distributor_license_number'] = license_number
 
     # Get sample details.
-    standard_fields = SC_LABS_COA['coa_fields']
     if isinstance(sample_details_area, str):
         sample_details_area = [sample_details_area]
     for area in sample_details_area:
-        crop = front_page.within_bbox(area)
+        crop = front_page.within_bbox(literal_eval(area))
         details = crop.extract_text().split('\n')
         for d in details:
             if ':' not in d:
                 continue
             values = d.split(':')
             key = snake_case(values[0])
-            key = standard_fields.get(key, key)
+            key = STANDARD_FIELDS.get(key, key)
             obs[key] = values[-1]
 
     # Get the date tested, product name, and sample type.
@@ -849,11 +720,11 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
     for i, line in enumerate(lines):
         if 'ANALYSIS' in line:
             analysis = line.split(' ANALYSIS')[0].lower()
-            analysis = standard_analyses.get(analysis, analysis)
+            analysis = ANALYSES.get(analysis, analysis)
             if analysis == 'safety':
                 parts = ' '.join(lines[i+1:i+3]).split(':')
                 parts = [x.replace('PASS', '').replace('FAIL', '').strip() for x in parts]
-                parts = [standard_analyses.get(x, snake_case(x)) for x in parts if x]
+                parts = [ANALYSES.get(x, snake_case(x)) for x in parts if x]
                 analyses.extend(parts)
             else:
                 analyses.append(analysis)
@@ -890,8 +761,10 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
         for area in areas:
             crop = page.within_bbox(literal_eval(area))
             lines += crop.extract_text().split('\n')
-    
+
     # Map all the analytes to analyses.
+    # TODO: Is it possible to either make these field dynamic or
+    # add these fields to the constants?
     analyte_analysis_map = {
         'Total Sample Area Covered by Sand, Soil, Cinders, or Dirt': 'foreign_matter',
         'Caryophyllene Oxide': 'terpenes',
@@ -917,7 +790,7 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
     for line in lines:
         if 'TEST RESULT' in line:
             analysis_name = line.split('TEST RESULT')[0].strip().title()
-            analysis = standard_analyses.get(analysis_name)
+            analysis = ANALYSES.get(analysis_name)
         elif 'Method:' in line:
             # FIXME: Imperfect method collect (missing text on next line).
             obs[f'{analysis}_method'] = line.split('Method:')[-1].strip()
@@ -939,8 +812,8 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
                 analyte = row[0].replace('\n', ' ').strip()
                 analysis = analyte_analysis_map.get(analyte)
                 key = snake_case(analyte)
-                key = standard_analytes.get(key, key)
-                units = standard_units.get(analysis)
+                key = ANALYTES.get(key, key)
+                units = STANDARD_UNITS.get(analysis)
 
                 # Skip per unit values.
                 if 'per_unit' in key:
@@ -1031,12 +904,12 @@ if __name__ == '__main__':
     # assert sample_details is not None
 
     # [✓] TEST: Get details for a specific sample URL.
-    # sc_labs_coa_url = 'https://client.sclabs.com/sample/858084'
-    # parser = CoADoc()
-    # lab = parser.identify_lims(sc_labs_coa_url)
-    # assert lab == 'SC Labs'
-    # data = get_sc_labs_sample_details(sc_labs_coa_url)
-    # assert data is not None
+    sc_labs_coa_url = 'https://client.sclabs.com/sample/858084'
+    parser = CoADoc()
+    lab = parser.identify_lims(sc_labs_coa_url)
+    assert lab == 'SC Labs'
+    data = get_sc_labs_sample_details(sc_labs_coa_url)
+    assert data is not None
 
     # [✓] TEST: Parse a SC Labs CoA PDF (with cannabinoids and terpenes).
     # directory = '../../../.datasets/coas/Flore COA'
@@ -1048,10 +921,10 @@ if __name__ == '__main__':
     # assert data is not None
 
     # [✓] TEST: Parse a SC Labs CoA PDF (with safety screening).
-    directory = '../../../.datasets/coas/Flore COA'
-    doc = f'{directory}/Redwood Roots/Cherry Punch.pdf'
-    parser = CoADoc()
-    lab = parser.identify_lims(doc)
-    assert lab == 'SC Labs'
-    data = parse_sc_labs_pdf(parser, doc)
-    assert data is not None
+    # directory = '../../../.datasets/coas/Flore COA'
+    # doc = f'{directory}/Redwood Roots/Cherry Punch.pdf'
+    # parser = CoADoc()
+    # lab = parser.identify_lims(doc)
+    # assert lab == 'SC Labs'
+    # data = parse_sc_labs_pdf(parser, doc)
+    # assert data is not None

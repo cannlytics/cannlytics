@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/2/2022
-Updated: 8/4/2022
+Updated: 8/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -79,6 +79,11 @@ import pdfplumber
 # Internal imports.
 from cannlytics.data.data import create_sample_id
 from cannlytics.data.gis import search_for_address
+from cannlytics.utils.constants import (
+    ANALYSES,
+    ANALYTES,
+    STANDARD_FIELDS,
+)
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
@@ -105,72 +110,6 @@ SONOMA =  {
     'lab_website': 'https://www.sonomalabworks.com/',
 }
 
-# Specify lab-specific CoA nuisances.
-# FIXME: Use cannlytics.utils.constants
-SONOMA_COA = {
-    'coa_analyses': {
-        'Foreign Material': 'foreign_matter',
-        'Heavy Metals Screen': 'heavy_metals',
-        'Microbial Result': 'microbes',
-        'Microbial Screen': 'microbes',
-        'Mycotoxin Screen': 'mycotoxins',
-        'Percent Moisture (%)': 'moisture_content',
-        'Potency Test Result': 'cannabinoids',
-        'Pesticide Screen': 'pesticides',
-        'Pesticide Screen Result - Category 1': 'pesticides',
-        'Pesticide Screen Result - Category 2': 'pesticides',
-        'Residual Solvent Screen - Category 1': 'residual_solvents',
-        'Residual Solvent Screen - Category 2': 'residual_solvents',
-        'Terpene Test Result': 'terpenes',
-        'Water Activity (Aw)': 'water_activity',
-    },
-    'coa_analytes': {
-        'delta_9_thc_d_9_thc': 'delta_9_thc',
-        'delta_8_thc_d_8_thc': 'delta_8_thc',
-        'escherichia_coli_stec': 'e_coli',
-        'avermectin_b_1_a_abamectin': 'avermectin_b1a',
-        'avermectin_b_1_a_abamectin': 'avermectin_b1b',
-        'delta_limonene': 'd_limonene',
-        'gama_terpinene': 'gamma_terpinene',
-    },
-    'coa_fields': {
-        'client': 'producer',
-        'client_address': 'producer_address',
-        'client_license_number': 'producer_license_number',
-        'dates_of_analysis': 'date_tested',
-        'sample_code': 'lab_id',
-        'sample_type': 'product_type',
-        'sample_matrix': 'matrix',
-        'sample_name': 'product_name',
-        'metrc_tag': 'metrc_source_id',
-        'total_batch': 'batch_size',
-        'primary_sample': 'sample_weight',
-        'Target Analyte': 'name',
-        '% Test': 'value',
-        'mg/g': 'mg_g',
-        'LOD mg/g': 'lod',
-        'LOQ mg/g': 'loq',
-        'LOD (mg/g)': 'lod',
-        'LOQ (mg/g)': 'loq',
-        'LOD (ug/g)': 'lod',
-        'LOQ (ug/g)': 'loq',
-        'LOD (ug/kg)': 'lod',
-        'LOQ (ug/kg)': 'loq',
-        'Pass/Fail': 'status',
-        'PPM': 'value',
-        'PPM (ug/g)': 'value',
-        'PPM (ug/kg)': 'value',
-        'PPB (ug/g)': 'value',
-        'PPB (ug/kg)': 'value',
-        'Threshold': 'value',
-        'Microbiological Assay': 'name',
-        'Total Cannabinoids (%)': 'total_cannabinoids',
-        'Total Calculated d9-THC (%)': 'total_thc',
-        'Total Calculated CBD (%)': 'total_cbd',
-        'Total Terpenes (%)': 'total_terpenes',
-    },
-}
-
 
 def parse_sonomoa_coa(parser, doc: Any, google_maps_api_key: str) -> Any:
     """Parse a Sonoma Lab Works CoA PDF.
@@ -179,7 +118,6 @@ def parse_sonomoa_coa(parser, doc: Any, google_maps_api_key: str) -> Any:
     Returns:
         (dict): The sample data.
     """
-    
     # Read the PDF.
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
@@ -193,11 +131,6 @@ def parse_sonomoa_coa(parser, doc: Any, google_maps_api_key: str) -> Any:
     columns = []
     results = []
     units = None
-
-    # Get the fields.
-    standard_analyses = SONOMA_COA['coa_analyses']
-    standard_analytes = SONOMA_COA['coa_analytes']
-    standard_fields = SONOMA_COA['coa_fields']
 
     # Get all of the tables.
     tables = []
@@ -218,28 +151,28 @@ def parse_sonomoa_coa(parser, doc: Any, google_maps_api_key: str) -> Any:
             if ':' in initial_value:
                 if len(row) == 2:
                     key = snake_case(initial_value)
-                    key = standard_fields.get(key, key)
+                    key = STANDARD_FIELDS.get(key, key)
                     value = row[1]
                     obs[key] = value
                 elif len(row) == 4:
                     key = snake_case(initial_value)
-                    key = standard_fields.get(key, key)
+                    key = STANDARD_FIELDS.get(key, key)
                     value = row[1]
                     second_key = snake_case(row[2])
-                    second_key = standard_fields.get(second_key, second_key)
+                    second_key = STANDARD_FIELDS.get(second_key, second_key)
                     second_value = row[3]
                     obs[key] = value
                     obs[second_key] = second_value
 
             # Get totals.
             elif 'Total' in initial_value:
-                key = standard_fields.get(initial_value, snake_case(initial_value))
+                key = STANDARD_FIELDS.get(initial_value, snake_case(initial_value))
                 obs[key] = convert_to_numeric(row[1])
 
             # Get analysis statuses and minor analysis results.
             elif 'Pass' in str(row[-1]) or 'Fail' in str(row[-1]):
                 name = initial_value.split('(')[0].strip()
-                analysis = standard_analyses.get(name, snake_case(name))
+                analysis = ANALYSES.get(name, snake_case(name))
                 status = row[-1].lower()
                 obs[f'{analysis}_status'] = status
 
@@ -272,7 +205,7 @@ def parse_sonomoa_coa(parser, doc: Any, google_maps_api_key: str) -> Any:
             # Find the analysis.
             elif '\n' in row[0]:
                 parts = row[0].split('\n')
-                analysis = standard_analyses.get(parts[0], snake_case(parts[0]))
+                analysis = ANALYSES.get(parts[0], snake_case(parts[0]))
                 analyses.append(analysis)
                 for part in parts:
                     if 'Method:' in part:
@@ -303,8 +236,8 @@ def parse_sonomoa_coa(parser, doc: Any, google_maps_api_key: str) -> Any:
                         continue
                     elif i == 0:
                         analyte = snake_case(values[i])
-                        result['key'] = standard_analytes.get(analyte, analyte)
-                    key = standard_fields.get(column, snake_case(column))
+                        result['key'] = ANALYTES.get(analyte, analyte)
+                    key = STANDARD_FIELDS.get(column, snake_case(column))
                     if key in recorded_keys:
                         continue
                     try:

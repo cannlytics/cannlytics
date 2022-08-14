@@ -1,10 +1,10 @@
 """
-Web Utilities | Cannlytics
+Web Data Functionality | Cannlytics
 Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/10/2021
-Updated: 11/6/2021
+Updated: 8/13/2021
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Resources:
@@ -19,13 +19,13 @@ TODO:
         r.html.search('Python is a {} language')[0]
 """
 import re
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple
 import requests
 from bs4 import BeautifulSoup
 
 
 def format_params(parameters, **kwargs):
-    """Format Metrc request parameters.
+    """Format given keyword arguments HTTP request parameters.
     Returns:
         (dict): Returns the parameters as a dictionary.
     """
@@ -38,7 +38,7 @@ def format_params(parameters, **kwargs):
 
 
 def get_page_metadata(url: str) -> Tuple:
-    """Scrape target URL for metadata.
+    """Get the metadata of a web page.
     Args:
         url (str): The URL to scrape.
     Returns:
@@ -69,7 +69,7 @@ def get_page_metadata(url: str) -> Tuple:
 
 
 def get_page_description(html: str) -> str:
-    """Scrape page description.
+    """Get the description of a web page.
     Args:
         html (str): A body of HTML text.
     Returns:
@@ -92,8 +92,8 @@ def get_page_description(html: str) -> str:
     return description
 
 
-def get_page_image(html: str) -> str:
-    """Scrape share image.
+def get_page_image(html: str, index: Optional[int] = 0) -> str:
+    """Get an image on a web page, the first image by default.
     Args:
         html (str): A body of HTML text.
     Returns:
@@ -107,12 +107,12 @@ def get_page_image(html: str) -> str:
     elif html.find('meta', property='twitter:image'):
         image = html.find('meta', property='twitter:image').get('content')
     elif html.find('img', src=True):
-        image = html.find_all('img')[0].get('src')
+        image = html.find_all('img')[index].get('src')
     return image
 
 
-def get_page_favicon(html: str, url: str) -> str:
-    """Scrape favicon.
+def get_page_favicon(html: str, url: Optional[str] = '') -> str:
+    """Get the favicon from a web page.
     Args:
         html (str): A body of HTML text.
         url (str): The URL of the page.
@@ -129,7 +129,7 @@ def get_page_favicon(html: str, url: str) -> str:
 
 
 def get_page_theme_color(html: str) -> str:
-    """Scrape brand color.
+    """Get the theme color of a web page.
     Args:
         html (str): A body of HTML text.
     Returns:
@@ -142,8 +142,8 @@ def get_page_theme_color(html: str) -> str:
         return None
 
 
-def get_page_phone_number(html: str, response: Any) -> str:
-    """Scrape phone number.
+def get_page_phone_number(html: str, response: Any, index=0) -> str:
+    """Get a phone number on a web page, the first found by default.
     Args:
         html (str): A body of HTML text.
         response (HTTPResponse): An HTTP response.
@@ -151,7 +151,7 @@ def get_page_phone_number(html: str, response: Any) -> str:
         (str): Returns the first phone number found.
     """
     try:
-        phone = html.select('a[href*=callto]')[0].text
+        phone = html.select('a[href*=callto]')[index].text
         return phone
     except:
         pass
@@ -173,8 +173,12 @@ def get_page_phone_number(html: str, response: Any) -> str:
         return phone
 
 
-def get_page_email(html: str, response: Any) -> str:
-    """Get email.
+def get_page_email(
+        html: str,
+        response: Any,
+        index: Optional[int] = -1,
+    ) -> str:
+    """Get an email on a web page, the last email by default.
     Args:
         html (str): A body of HTML text.
         response (HTTPResponse): An HTTP response.
@@ -189,7 +193,7 @@ def get_page_email(html: str, response: Any) -> str:
     except:
         pass
     try:
-        email = html.select('a[href*=mailto]')[-1].text
+        email = html.select('a[href*=mailto]')[index].text
     except:
         print('Email not found')
         email = ''

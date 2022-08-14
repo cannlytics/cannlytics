@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/16/2021
-Updated: 7/31/2022
+Updated: 8/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Figures:
@@ -168,7 +168,7 @@ def crispy_scatterplot(
         font_family='serif',
         font_style='Times New Roman',
         text_color='#333F4B',
-):
+    ):
     """Create a beautiful scatter plot given data.
     Args:
         TODO: Write docs!

@@ -28,12 +28,16 @@ STANDARD_ANALYSES = {
 
 # A map of encountered analyses to their standardized analysis.
 ANALYSES = {
+    'cannabinoids': 'cannabinoids',
     'cannabinoid': 'cannabinoids',
     'Cannabinoid': 'cannabinoids',
+    'POT': 'cannabinoids',
     'Potency Analysis by HPLC': 'cannabinoids',
     'Potency Test Result': 'cannabinoids',
     'CANNABINOID': 'cannabinoids',
     'Potency': 'cannabinoids',
+    'foreign_materials': 'foreign_matter',
+    'foreign_matter': 'foreign_matter',
     'Foreign Material': 'foreign_matter',
     'foreign_material': 'foreign_matter',
     'Filth and Foreign Material': 'foreign_matter',
@@ -41,11 +45,15 @@ ANALYSES = {
     'Filth and Foreign Material Inspection by Magnification': 'foreign_matter',
     'FOREIGN MATERIALS': 'foreign_matter',
     'Foreign Materials': 'foreign_matter',
-    'Heavy Metals': 'heavy_metals',
+    'metal': 'heavy_metals',
+    'MET': 'heavy_metals',
     'heavy_metals': 'heavy_metals',
+    'Heavy Metals': 'heavy_metals',
     'Metals Analysis by ICPMS': 'heavy_metals',
     'Heavy Metals Screen': 'heavy_metals',
     'HEAVY METALS': 'heavy_metals',
+    'microbial': 'microbes',
+    'microbes': 'microbes',
     'microbiological': 'microbes',
     'Microbiology': 'microbes',
     'microbiology': 'microbes',
@@ -55,17 +63,23 @@ ANALYSES = {
     'Microbial Screen': 'microbes',
     'MICROBIAL IMPURITIES': 'microbes',
     'Microbials by PCR': 'microbials',
+    'moisture': 'moisture',
     'Moisture': 'moisture',
     'MOISTURE': 'moisture',
+    'moisture_content': 'moisture_content',
     'Moisture Content': 'moisture_content',
     'Moisture by Moisture Balance': 'moisture_content',
     'Percent Moisture (%)': 'moisture_content',
+    'mycotoxins': 'mycotoxins',
+    'MYCO': 'mycotoxins',
     'mycotoxin': 'mycotoxins',
     'Mycotoxin': 'mycotoxins',
     'Mycotoxins': 'mycotoxins',
     'Mycotoxins by LCMSMS': 'mycotoxins',
     'Mycotoxin Screen': 'mycotoxins',
     'MYCOTOXIN': 'mycotoxins',
+    'PEST': 'pesticides',
+    'pesticides': 'pesticides',
     'pesticide': 'pesticides',
     'Category 1 Pesticide': 'pesticides',
     'Category 2 Pesticide': 'pesticides',
@@ -77,11 +91,16 @@ ANALYSES = {
     'Pesticide Screen Result - Category 1': 'pesticides',
     'Pesticide Screen Result - Category 2': 'pesticides',
     'PESTICIDES': 'pesticides',
-    'residual_solvent': 'residual_solvents',
+    'solvent': 'residual_solvents',
+    'RST': 'residual_solvents',
     'residual_solvents': 'residual_solvents',
+    'residual_solvent': 'residual_solvents',
     'Residual Solvent Screen - Category 1': 'residual_solvents',
     'Residual Solvent Screen - Category 2': 'residual_solvents',
     'RESIDUAL SOLVENTS': 'residual_solvents',
+    'terpenoids': 'terpenes',
+    'TERP': 'terpenes',
+    'terpenes': 'terpenes',
     'terpene': 'terpenes',
     'Terpenoid': 'terpenes',
     'terpenoid': 'terpenes',
@@ -89,10 +108,12 @@ ANALYSES = {
     'Terpene Analysis by GCMS': 'terpenes',
     'Terpene Test Result': 'terpenes',
     'TERPENES': 'terpenes',
+    'WA': 'water_activity',
+    'water_activity': 'water_activity',
     'Water Activity': 'water_activity',
     'Water Activity by Aqua Lab': 'water_activity',
     'Water Activity (Aw)': 'water_activity',
-    'WATER ACTIVITY': 'water_activity',
+    'WATER ACTIVITY': 'water_activity'
 }
 
 # A map of encountered analytes to their standardized analyte.
@@ -290,7 +311,7 @@ ANALYTES = {
 
 # A map of encountered fields to their standardized field.
 STANDARD_FIELDS = {
-    'total_terpenoids_mgtog': '',
+    'total_terpenoids_mgtog': 'total_terpenes_mg_g',
     'Source Batch ID': 'batch_id',
     'batch_number': 'batch_number',
     'batch_size': 'batch_size',
@@ -658,8 +679,8 @@ if __name__ == '__main__':
     # Sort a given dictionary and remove duplicate fields.
     # This is useful when adding new fields to a constant in development.
     x = {}
-    for k, v in STANDARD_FIELDS.items():
-        if v not in x.keys():
+    for k, v in ANALYSES.items():
+        if k not in x.keys():
             x[k] = v
     x = {k: v for k, v in sorted(x.items(), key=lambda item: item[1])}
     print(x)

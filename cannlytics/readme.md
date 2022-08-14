@@ -6,13 +6,33 @@
 
 <https://cannlytics.com>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-darkgreen.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/pypi/v/cannlytics.svg)](https://pypi.org/project/cannlytics)
-[![PyPI download month](https://img.shields.io/pypi/dm/cannlytics.svg)](https://pypi.python.org/pypi/cannlytics/)
+[![PyPI download month](https://img.shields.io/pypi/dm/cannlytics.svg?color=orange)](https://pypi.python.org/pypi/cannlytics/)
 
 </div>
 
+<!-- FIXME: Re-write -->
+
 🔥 Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software designed to make your data and information accessible. We believe that everyone in the cannabis industry should be able to access their rich, valuable data quickly and easily and that everyone will be better off for it. The Cannlytics Engine comes with **batteries included**, but you are always welcome to supercharge your setup with modifications and custom components.
+
+<!-- FIXME: Make sections focus around actual components:
+
+  - [ ] `auth`
+  - [ ] `data`
+    - [ ] `data.ccrs`
+    - [ ] `data.coas`
+    - [ ] `data.market`
+  - [ ] `firebase`
+  - [ ] `lims`
+  - [ ] `metrc`
+  - [ ] `models`
+  - [ ] `paypal`
+  - [ ] `quickbooks`
+  - [ ] `stats`
+  - [ ] `utils`   
+
+-->
 
 - [🚀 Installation](#installation)
 - [👩‍🏫 Documentation](#documentation)
@@ -157,4 +177,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```
+
+Please cite the following if you use the code examples in your research:
+
+```bibtex
+@misc{cannlytics2022,
+  title={Cannabis Data Science},
+  author={Skeate, Keegan and Rice, Charles and O'Sullivan-Sutherland, Candace},
+  journal={https://github.com/cannlytics/cannabis-data-science},
+  year={2022}
+}
 ```

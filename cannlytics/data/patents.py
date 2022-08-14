@@ -56,7 +56,6 @@ import pandas as pd
 import requests
 
 
-
 def curate_lab_results(
         data_dir,
         compound_folder='Terpene and Cannabinoid data',
@@ -280,6 +279,8 @@ def get_patent_details(
         field_list = fields
     else:
         field_list = ','.join(fields)
+
+    # TODO: Simply use DEFAULT_HEADERS if no headers provided.
         
     # Request fields for the patent.
     base = 'https://ped.uspto.gov/api/queries'

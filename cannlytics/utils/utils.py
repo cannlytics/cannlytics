@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 8/1/2022
+Updated: 8/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains general utility functions.
@@ -158,7 +158,7 @@ def get_random_string(length, allowed_chars=RANDOM_STRING_CHARS):
 
 
 def sentence_case(s):
-    """
+    """Format a string as a sentence.
     Author: Zizouz212 https://stackoverflow.com/a/39969233/5021266
     License: CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0/
     """
@@ -238,6 +238,7 @@ def sandwich_list(a) -> list:
         (list): The sandwich index.
     """
     return [a[-i//2] if i % 2 else a[i//2] for i in range(len(a))]
+
 
 def sorted_nicely(unsorted_list: List[str]) -> List[str]:
     """Sort the given iterable in the way that humans expect.
@@ -343,7 +344,7 @@ def update_dict(context: dict, function: Callable = camel_to_snake, **kwargs) ->
 #-----------------------------------------------------------------------
 
 def clean_column_strings(data: Any, column: str) -> Any:
-    """
+    """Clean the column names of a given DataFrame.
     Args:
         data (DataFrame): A DataFrame with any column names.
         column (str): The column of the DataFrame to clean.

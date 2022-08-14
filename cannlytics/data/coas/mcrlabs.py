@@ -63,7 +63,7 @@ import requests
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
-from cannlytics.utils.constants import DEFAULT_HEADERS
+from cannlytics.utils.constants import ANALYSES, ANALYTES, DEFAULT_HEADERS
 from cannlytics.utils.utils import (
     convert_to_numeric,
     format_iso_date,
@@ -81,26 +81,6 @@ MCR_LABS = {
     'lab': 'MCR Labs',
     'lab_website': 'https://mcrlabs.com',
     'public': True,
-}
-
-# It is assumed that the following mappings are valid for the CoA.
-# FIXME: Use cannlytics.utils.constants
-MCR_LABS_COA = {
-    'coa_analyses': {
-        'terpene': 'terpenes',
-        'cannabinoid': 'cannabinoids',
-        'pesticide': 'pesticides',
-        'residual_solvent': 'residual_solvents',
-        'microbiological': 'microbes',
-        'mycotoxin': 'mycotoxins',
-    },
-    'coa_analytes': {
-        'd_8_thc': 'delta_8_thc',
-        'beta_myrcene': 'myrcene',
-        'para_cymene': 'p_cymene',
-        'aflatoxin_b_1_b_2_g_1_g_2_and_ochratoxin_a': 'mycotoxins',
-        'n_butane': 'butane',
-    }
 }
 
 
@@ -356,9 +336,9 @@ def get_mcr_labs_sample_details(
     
     # Get a map of lab-specific analyses, analytes, and fields to the standard.
     if standard_analyses is None:
-        standard_analyses = MCR_LABS_COA['coa_analyses']
+        standard_analyses = ANALYSES
     if standard_analytes is None:
-        standard_analytes = MCR_LABS_COA['coa_analytes']
+        standard_analytes = ANALYTES
     
     # Get the sample image, if not already collected.
     if not obs.get('images'):

@@ -28,7 +28,7 @@ DATA_URL = 'https://cannlytics.com/api/data'
 
 # Library of Cannlytics datasets.
 CANNLYTICS_DATASETS = [
-    'aggregated-cannabis-test-results'
+    'aggregated-cannabis-test-results',
 ]
 
 
@@ -129,6 +129,28 @@ def find_first_value(
         return min([x for x in detects if x])
     except ValueError:
         return None
+
+
+def parse_data_block(div, tag='span') -> dict:
+    """Parse an HTML data block into a dictionary.
+    Args:
+        div (bs4.element): An HTML element.
+        tag (string): The type of tag that is repeated in the block.
+    Returns:
+        (dict): A dictionary of key and value pairs.
+    """
+    data = {}
+    for el in div:
+        try:
+            label = el.find(tag).text
+            value = el.text
+            value = value.replace(label, '')
+            value = value.replace('\n', '').strip()
+            label = label.replace(':', '')
+            data[snake_case(label)] = value
+        except AttributeError:
+            pass
+    return data
 
 
 # === Data augmentation tools. ===

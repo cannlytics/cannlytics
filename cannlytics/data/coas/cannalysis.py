@@ -47,6 +47,7 @@ import pdfplumber
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
+from cannlytics.utils.constants import ANALYSES, ANALYTES, STANDARD_FIELDS
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
@@ -75,7 +76,6 @@ CANNALYSIS =  {
 }
 
 # It is assumed that the CoA has the following parameters.
-# FIXME: Use cannlytics.utils.constants
 CANNALYSIS_COA = {
     'coa_page_area': [
         '(0, 80, 305, 720)',
@@ -85,55 +85,6 @@ CANNALYSIS_COA = {
         '(220, 135, 612, 700)',
         '(0, 135, 220, 700)',
     ],
-    'coa_analyses': {
-        'Cannabinoid': 'cannabinoids',
-        'Chemical Residue': 'pesticides',
-        'Chemical Residue GC': 'pesticides',
-        'Chemical Residue Gc': 'pesticides',
-        'Compliance Microbial': 'microbes',
-        'Filth and Foreign Material': 'foreign_matter',
-        'Filth & Foreign Material': 'foreign_matter',
-        'Heavy Metals': 'heavy_metals',
-        'Microbial Qpcr': 'microbes',
-        'Moisture Content': 'moisture_content',
-        'Mycotoxins': 'mycotoxins',
-        'Terpene': 'terpenes',
-        'Water Activity': 'water_activity',
-    },
-    'coa_analytes': {
-        'A. flavus': 'aspergillus_flavus',
-        'A. terreus': 'aspergillus_terreus',
-        'A. niger': 'aspergillus_niger',
-        'A.fumigatus': 'aspergillus_fumigatus',
-        'D9THC': 'delta_9_thc',
-        'D8THC': 'delta_8_thc',
-        'AW': 'water_activity',
-        'IF RH ME': 'foreign_matter',
-        'IFM': 'foreign_material',
-        'SSCD': 'dirt',
-        'Salmonella spp': 'salmonella',
-        '3-Carene': 'delta_3_carene',
-    },
-    'coa_fields': {
-        'batch_id': 'metrc_source_id',
-        'batch_size_sample_size': 'batch_size',
-        'collected': 'date_collected',
-        'manufacture_date': 'date_produced',
-        'matrix': 'product_type',
-        'received': 'date_received',
-        'sample_id': 'lab_id',
-        'sample_name': 'product_name',
-        'sample_size': '',
-        'track_and_trace_test_package': 'metrc_lab_id',
-        'track_and_trace_source_package_s': 'metrc_source_id',
-        'collected_received': 'date_collected',
-        'analyte': 'name',
-        'result': 'value',
-        'lod': 'lod',
-        'lloq': 'loq',
-        'action': 'limit',
-        'level': 'status'
-    },
     'coa_result_fields': [
         'name',
         'value',
@@ -174,9 +125,6 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
 
     # Get the lab specifics.
     coa_parameters = CANNALYSIS_COA
-    standard_analyses = coa_parameters['coa_analyses']
-    standard_analytes = coa_parameters['coa_analytes']
-    standard_fields = coa_parameters['coa_fields']
     standard_result_fields = coa_parameters['coa_result_fields']
     skip_fields = coa_parameters['coa_skip_fields']
 
@@ -200,7 +148,7 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
         for line in lines:
 
             # Determine any fields.
-            potential_field = standard_fields.get(snake_case(line))
+            potential_field = STANDARD_FIELDS.get(snake_case(line))
             if potential_field:
                 field = potential_field
                 collect = True
@@ -226,7 +174,7 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
                 analysis = None
 
             # Determine any analyses.
-            potential_analysis = standard_analyses.get(line)
+            potential_analysis = ANALYSES.get(line)
             if potential_analysis:
                 analysis = potential_analysis
                 analyses.append(potential_analysis)
@@ -250,7 +198,7 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
         # Note: Hot-Fix for foreign matter.
         if 'ANALYSIS' in line or 'FILTH' in line:
             analysis = line.split(' ANA')[0].title()
-            analysis = standard_analyses.get(analysis)
+            analysis = ANALYSES.get(analysis)
 
         # Identify the columns (unnecessary).
         elif 'ANALYTE' in line:
@@ -319,7 +267,7 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
 
             # Standardize analytes.
             name = text[:split_at].strip()
-            analyte = standard_analytes.get(name, snake_case(name))
+            analyte = ANALYTES.get(name, snake_case(name))
 
             # Record the result value by using standard columns.
             result = {

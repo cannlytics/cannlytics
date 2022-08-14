@@ -4,12 +4,12 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 7/26/2022
+Updated: 8/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Parse a Veda Scientific CoA.
+    Parse a Veda Scientific CoA PDF.
 
 Data Points:
 
@@ -56,10 +56,6 @@ Data Points:
     - total_cbd
     - total_terpenes (calculated)
     ✓ sample_id (generated)
-    - strain_name (augmented)
-
-Static Data Points:
-
     ✓ lab
     ✓ lab_image_url
     ✓ lab_license_number
@@ -74,6 +70,11 @@ Static Data Points:
     ✓ lab_website
     ✓ lab_latitude (augmented)
     ✓ lab_longitude (augmented)
+
+Note:
+
+    This algorithm is under development!
+    Please email dev@cannlytics.com if you want to help out.
 
 """
 # Standard imports.
@@ -601,3 +602,5 @@ if __name__ == '__main__':
         public_key=obs['product_name'],
         salt=date_tested,
     )
+
+    print({**VEDA_SCIENTIFIC, **obs})

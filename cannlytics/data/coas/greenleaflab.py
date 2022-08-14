@@ -4,12 +4,12 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/23/2022
-Updated: 7/26/2022
+Updated: 8/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Parse a Green Leaf Labs CoA.
+    Parse a Green Leaf Labs CoA PDF.
 
 Data Points:
 
@@ -55,9 +55,6 @@ Data Points:
     ✓ sample_id (generated)
     - strain_name (augmented)
     ✓ lab_id
-
-Static Data Points:
-
     ✓ lab
     ✓ lab_image_url
     ✓ lab_license_number (should be dynamic)
@@ -85,6 +82,7 @@ import pdfplumber
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
+from cannlytics.utils.constants import STANDARD_FIELDS
 from cannlytics.utils.utils import (
     snake_case,
     split_list,
@@ -158,48 +156,12 @@ GREEN_LEAF_LAB_ANALYSES = {
 }
 
 # It is assumed that the CoA has the following parameters.
-# FIXME: Use cannlytics.utils.constants
 GREEN_LEAF_LAB_COA = {
     'coa_qr_code_index': None,
     'coa_page_area': '(0, 198, 612, 693)',
     'coa_distributor_area': '(0, 79.2, 244.8, 142.56)',
     'coa_producer_area': '(244.8, 79.2, 612, 142.56)',
     'coa_sample_details_area': '(0, 126.72, 612, 205.92)',
-    # Optional: Clean up the fields!
-    'coa_fields': {
-        'licensenumber': 'lab_license_number',
-        'lab_sample_id': 'lab_id',
-        'matrix': 'product_type',
-        'batch_size': 'batch_size',
-        'sample_size': 'sample_size',
-        'date_sampled': 'date_sampled',
-        'date_received': 'date_received',
-        'harvesttoprocessing_date': 'date_harvested',
-        'product_density': 'sample_weight',
-        'overall_batch': 'status',
-        'cannabinoids': 'cannabinoids_status',
-        'pesticides': 'pesticides_status',
-        'water_activity': 'water_activity_status',
-        'moisture_content': 'moisture_content_status',
-        'terpene_analysis_add_on': 'terpenes_status',
-        'microbials': 'microbials_status',
-        'metals': 'heavy_metals_status',
-        'foreign_material': 'foreign_matter_status',
-        'mycotoxins': 'mycotoxins_status',
-        'sampling_method': 'sampling_method',
-        'Test RFID': 'metrc_lab_id',
-        'Source RFID': 'metrc_source_id',
-        'Lab Sample ID': 'lab_id',
-        'Sampling Method/SOP': 'sampling_method',
-        'Source Batch ID': 'batch_id',
-        'Matrix': 'product_type',
-        'Batch Size': 'batch_size',
-        'Sample Size': 'sample_size',
-        'Date Sampled': 'date_sampled',
-        'Date Received': 'date_received',
-        'Harvest/Processing Date': 'date_harvested',
-        'Product Density': 'sample_weight',
-    },
     'coa_sample_detail_fields': [
         'Test RFID',
         'Source RFID',
@@ -290,7 +252,7 @@ def parse_green_leaf_lab_pdf(
     sample_details_area = literal_eval(coa_parameters['coa_sample_details_area'])
 
     # Get lab CoA specific fields.
-    coa_fields = coa_parameters['coa_fields']
+    # coa_fields = coa_parameters['coa_fields']
     coa_replacements = coa_parameters['coa_replacements']
     sample_details_fields = coa_parameters['coa_sample_detail_fields']
     skip_values = coa_parameters['coa_skip_values']
@@ -344,7 +306,7 @@ def parse_green_leaf_lab_pdf(
     for i, detail in enumerate(details[1:]):
         if detail:
             field = sample_details_fields[index]
-            key = coa_fields[field]
+            key = STANDARD_FIELDS[field]
             obs[key] = detail.replace(':', '').strip()
             index += 1  
 
@@ -361,7 +323,7 @@ def parse_green_leaf_lab_pdf(
                     value = strip_whitespace(parts[1])
                 except IndexError:
                     continue
-                field = coa_fields.get(key, key)
+                field = STANDARD_FIELDS.get(key, key)
                 obs[field] = value.lower()
                 if field != 'status':
                     analysis = field.replace('_status', '')

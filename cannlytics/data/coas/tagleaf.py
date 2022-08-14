@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 7/26/2022
+Updated: 8/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -64,7 +64,12 @@ from requests import Session
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
-from cannlytics.utils.utils import convert_to_numeric, snake_case, strip_whitespace
+from cannlytics.utils.constants import ANALYSES, STANDARD_UNITS
+from cannlytics.utils.utils import (
+    convert_to_numeric,
+    snake_case,
+    strip_whitespace,
+)
 
 # It is assumed that the lab has the following details.
 TAGLEAF = {
@@ -73,33 +78,6 @@ TAGLEAF = {
     'lims': 'lims.tagleaf',
     'url': 'https://lims.tagleaf.com',
     'public': True,
-}
-
-# It is assumed that the CoA has the following parameters.
-# FIXME: Use cannlytics.utils.constants
-TAGLEAF_COA = {
-    'coa_analyses': {
-        'Potency': 'cannabinoids',
-        'Terpenes': 'terpenes',
-        'Moisture Analysis': 'moisture',
-        'Microbiological Contaminants': 'microbes',
-        'Mycotoxins': 'mycotoxins',
-        'Pesticides': 'pesticides',
-        'Heavy Metals': 'heavy_metals',
-        'Water Activity': 'water_activity',
-        'Foreign Material (Visual Inspection)': 'foreign_matter',
-    },
-    'coa_units': {
-        'cannabinoids': 'percent',
-        'terpenes': 'percent',
-        'moisture': 'percent',
-        'microbes': 'CFU/g',
-        'mycotoxins': 'µg/kg',
-        'pesticides': 'µg/g',
-        'heavy_metals': 'µg/g',
-        'water_activity': 'aW',
-        'foreign_matter': 'percent',
-    },
 }
 
 
@@ -134,10 +112,6 @@ def parse_tagleaf_url(
         parser.session = Session()
     response = parser.session.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
-
-    # Get the standard fields and analyses.
-    standard_analyses = TAGLEAF_COA['coa_analyses']
-    standard_units = TAGLEAF_COA['coa_units']
 
     # Get the date tested.
     obs = {'analyses': [], 'results': [], 'lims': 'TagLeaf LIMS'}
@@ -252,8 +226,8 @@ def parse_tagleaf_url(
         title = table.find_previous('h3').contents
         text = ''.join([x for x in title if type(x) == NavigableString])
         analysis = strip_whitespace(text).split(':')[-1].split('by')[0].strip()
-        analysis = standard_analyses.get(analysis, snake_case(analysis))
-        units = standard_units.get(analysis)
+        analysis = ANALYSES.get(analysis, snake_case(analysis))
+        units = STANDARD_UNITS.get(analysis)
 
         # Find the columns of the table.
         headers = table.find_all('th')

@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/2/2022
-Updated: 8/8/2022
+Updated: 8/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -26,7 +26,6 @@ Data Points:
     ✓ project_id
     ✓ producer
     ✓ producer_address
-
     ✓ product_name
     ✓ product_type
     - results
@@ -53,7 +52,7 @@ Data Points:
 # Standard imports.
 from ast import literal_eval
 import re
-from typing import Any, Optional
+from typing import Any
 
 # External imports.
 # from bs4 import BeautifulSoup
@@ -63,7 +62,7 @@ import pdfplumber
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id, find_first_value
-# from cannlytics.utils.constants import DEFAULT_HEADERS
+from cannlytics.utils.constants import ANALYTES, STANDARD_FIELDS
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
@@ -107,7 +106,6 @@ ANRESCO =  {
 }
 
 # It is assumed that the CoA has the following parameters.
-# FIXME: Use cannlytics.utils.constants
 ANRESCO_COA = {
     'coa_distributor_area': '(200, 60, 380, 130)',
     'coa_lab_area': '(0, 60, 200, 130)',
@@ -116,51 +114,6 @@ ANRESCO_COA = {
         '(200, 130, 385, 310)',
         '(385, 130, 590, 310)',
     ],
-    'coa_analyses': {},
-    'coa_analytes': {
-        '8_thc': 'delta_8_thc',
-        '9_thc': 'delta_9_thc',
-        '9_thca': 'thca',
-        'moisture': 'moisture_content',
-        'salmonella_aoac': 'salmonella',
-    },
-    'coa_fields': {
-        'Company': 'producer',
-        'Anresco ID': 'lab_id',
-        'Order ID': 'project_id',
-        'Lot/Batch Number': 'batch_number',
-        'Sample Wt': 'sample_weight',
-        'Type': 'product_type',
-        'Date': 'date_tested',
-        'date_reported': 'date_tested',
-        'total_sample_weight_g': 'sample_weight',
-        'increment_g': 'sample_weight_used',
-        'sample_no': 'lab_id',
-        'matrix': 'product_type',
-        'cannabinoid_pro_le': 'cannabinoids_status',
-        'pesticide_residue_screen': 'pesticides_status',
-        'foreign_material': 'foreign_matter_status',
-        'water_activity': 'water_activity_status',
-        'microbiological_screen': 'microbes_status',
-        'heavy_metal_screen': 'heavy_metals_status',
-        'mycotoxin_screen': 'mycotoxins_status',
-        'other_analyses': 'moisture_status',
-        'overall': 'status',
-        'total_cannabinoids': 'sum_of_cannabinoids',
-        'total_active_cannabinoids': 'total_cannabinoids',
-    },
-    'coa_result_fields': {
-        'Analyte': 'name',
-        'Cannabinoid': 'name',
-        'Findings': 'value',
-        'Limit': 'limit',
-        'LOD/LOQ': 'lod',
-        'Method': 'method',
-        'Status': 'status',
-        'Instrument': 'instrument',
-        'mg/g': 'mg_g',
-        '%': 'value',
-    },
     'coa_drop_columns': [
         'sample_weight_to',
         'sample_information',
@@ -190,9 +143,6 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
 
     # Get the standard analyses, analytes, and fields.
     coa_parameters = ANRESCO_COA
-    standard_analytes = coa_parameters['coa_analytes']
-    standard_fields = coa_parameters['coa_fields']
-    standard_result_fields = coa_parameters['coa_result_fields']
 
     # Get the sample details based on page area.
     sample_details_area = coa_parameters['coa_sample_details_area']
@@ -204,7 +154,7 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
         for line in lines:
             parts = line.replace('\xa0', ' ').split(':')
             key = snake_case(parts[0])
-            key = standard_fields.get(key, key)
+            key = STANDARD_FIELDS.get(key, key)
             if not key:
                 continue
             value = parts[-1].replace('✔', '')
@@ -266,7 +216,7 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
                 first_value = find_first_value(line)
                 name = line[:first_value].strip()
                 key = snake_case(name)
-                key = standard_fields.get(key, key)
+                key = STANDARD_FIELDS.get(key, key)
                 values = line[first_value:].strip().split(' ')
                 values = [x for x in values if x]
                 obs[key] = convert_to_numeric(values[-1])
@@ -287,7 +237,7 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
                 # Get the standard columns.
                 text = re.sub('[\(\[].*?[\)\]]', '', line)
                 columns = [
-                    standard_result_fields[x] for x in text.split(' ') if x
+                    STANDARD_FIELDS[x] for x in text.split(' ') if x
                 ]
 
             # Get the analysis method.
@@ -333,7 +283,7 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
 
                 # Parse the result values.
                 name = line[:first_value].strip()
-                analyte = standard_analytes.get(snake_case(name), snake_case(name))
+                analyte = ANALYTES.get(snake_case(name), snake_case(name))
                 values = line[first_value:].strip().split(' ')
                 values = [x for x in values if x]
                 result = {

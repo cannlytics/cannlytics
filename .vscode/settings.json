@@ -290,6 +290,7 @@
     "guaiol",
     "hardbreak",
     "heatmap",
+    "Heckman",
     "heptanea",
     "Heptanea",
     "Herer",
@@ -334,6 +335,7 @@
     "krefft",
     "kresoxim",
     "Kresoxim",
+    "kwargs",
     "labelpad",
     "labelsize",
     "Lathrop",
@@ -586,7 +588,8 @@
     "yticklabels",
     "yticks",
     "zipcode",
-    "zipcodes"
+    "zipcodes",
+    "zoneinfo"
   ],
   "todo-tree.tree.showBadges": false,
 }
