@@ -186,6 +186,7 @@ GREEN_LEAF_LAB_COA = {
         'Sesquiterpenes',
         'Monoterpenes',
     ],
+    # TODO: Make this field obsolete.
     'coa_replacements': [
         {'text': '< LOQ', 'key': '<LOQ'},
         {'text': '< LOD', 'key': '<LOD'},
@@ -258,6 +259,7 @@ def parse_green_leaf_lab_pdf(
     skip_values = coa_parameters['coa_skip_values']
 
     # Get all distributor details.
+    # FIXME: This should be more general.
     crop = front_page.within_bbox(distributor_area)
     details = crop.extract_text().split('\n')
     address = details[2]
@@ -276,13 +278,14 @@ def parse_green_leaf_lab_pdf(
     obs['distributor_license_number'] = details[-1]
     
     # Get all producer details.
+    # FIXME: This should be more general.
     crop = front_page.within_bbox(producer_area)
     details = crop.extract_text().split('\n')
     producer = details[1]
     street = details[2]
     parts = details[3].split(',')
     city = parts[0]
-    state, zipcode = tuple(parts[-1].strip().split(' '))
+    state, zipcode = tuple(parts[-1].strip().split(' ')[-2:])
     address = ','.join([street, details[3]])
     obs['producer'] = producer
     obs['producer_address'] = address

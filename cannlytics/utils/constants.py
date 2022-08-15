@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/8/2021
-Updated: 8/13/2022
+Updated: 8/15/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains useful constant.
@@ -311,14 +311,27 @@ ANALYTES = {
 
 # A map of encountered fields to their standardized field.
 STANDARD_FIELDS = {
-    'total_terpenoids_mgtog': 'total_terpenes_mg_g',
+    'Analyte': 'name',
+    'Labeled Amount': 'sample_weight',
+    'Limit': 'limit',
+    'Detected': 'value',
+    'LOD': 'lod',
+    'LOQ': 'loq',
+    'Pass/Fail': 'status',
+    'metrc_src_uid': 'source_metrc_uid',
+    'matrix': 'product_type',
+    'collected_on': 'date_collected',
+    'received_on': 'date_received',
+    'moisture': 'moisture_content',
+    'terpenoids': 'terpenes',
+    'foreign_materials': 'foreign_matter',
+    'total_terpenoids_mgtog': '',
     'Source Batch ID': 'batch_id',
     'batch_number': 'batch_number',
     'batch_size': 'batch_size',
     '9_thc_per_unit': 'cannabinoids_status',
     'collected': 'date_collected',
     'Collected': 'date_collected',
-    'collected_on': 'date_collected',
     'harvesttoprocessing_date': 'date_harvested',
     'Harvest/Processing Date': 'date_harvested',
     'manufacture_date': 'date_produced',
@@ -330,7 +343,6 @@ STANDARD_FIELDS = {
     'dates_of_analysis': 'date_tested',
     'business_name': 'distributor',
     'license_number': 'distributor_license_number',
-    'foreign_materials': 'foreign_matter',
     'foreign_material_method': 'foreign_matter_method',
     'foreign_material': 'foreign_matter_status',
     'heavy_metals': 'heavy_metals_status',
@@ -344,7 +356,6 @@ STANDARD_FIELDS = {
     'Lab ID': 'lab_id',
     'licensenumber': 'lab_license_number',
     'action-limit': 'limit',
-    'Limit': 'limit',
     'action': 'limit',
     'limit': 'limit',
     'LOD mg/g': 'lod',
@@ -373,12 +384,10 @@ STANDARD_FIELDS = {
     'mg/g': 'mg_g',
     'result-mass': 'mg_g',
     'microbiology': 'microbiology_status',
-    'moisture': 'moisture_content',
     'mycotoxins': 'mycotoxins_status',
     'Target Analyte': 'name',
     'Microbiological Assay': 'name',
     'compound': 'name',
-    'Analyte': 'name',
     'Cannabinoid': 'name',
     'analyte': 'name',
     'name': 'name',
@@ -391,35 +400,31 @@ STANDARD_FIELDS = {
     'sample_name': 'product_name',
     'Sample Name': 'product_name',
     'unit_mass': 'product_size',
-    'matrix': 'product_type',
     'Type': 'product_type',
     'Matrix': 'product_type',
     'sample_type': 'product_type',
     'Matrix Type': 'product_type',
     'Order ID': 'project_id',
     'residual_solvents': 'residual_solvents_status',
-    'sample_size': 'sample_size',
+    'sample_size': '',
     'Sample Wt': 'sample_weight',
     'total_sample_weight_g': 'sample_weight',
     'product_density': 'sample_weight',
     'Product Density': 'sample_weight',
     'primary_sample': 'sample_weight',
     'Density': 'sample_weight',
-    'Labeled Amount': 'sample_weight',
     'increment_g': 'sample_weight_used',
     'sampling_method': 'sampling_method',
     'Serving Size': 'serving_size',
     'Servings': 'servings_per_package',
     'overall': 'status',
     'overall_batch': 'status',
-    'Pass/Fail': 'status',
     'result-pf': 'status',
     'Status': 'status',
     'level': 'status',
     'status': 'status',
     'sum_of_cannabinoids': 'sum_of_cannabinoids',
-    'terpenoids': 'terpenes',
-    'total_cannabinoids': 'total_cannabinoids',
+    'total_cannabinoids': 'sum_of_cannabinoids',
     'total_cbc': 'total_cbc',
     'total_cbd': 'total_cbd',
     'total_cbdv': 'total_cbdv',
@@ -440,7 +445,34 @@ STANDARD_FIELDS = {
     'Findings': 'value',
     '%': 'value',
     'result': 'value',
-    'value': 'value'
+    'value': 'value',
+    'cannabinoids': 'cannabinoids_status',
+    'water_activity': 'water_activity_status',
+    'moisture_content': 'moisture_content_status',
+    'terpene_analysis_add_on': 'terpenes_status',
+    'microbials': 'microbials_status',
+    'metals': 'heavy_metals_status',
+    'Sampling Method/SOP': 'sampling_method',
+    'Batch Size': 'batch_size',
+    'Sample Size': 'sample_size',
+    'Date Sampled': 'date_sampled',
+    'Date Received': 'date_received',
+    'total_batch': 'batch_size',
+    'Total Cannabinoids (%)': 'total_cannabinoids',
+    'Total Calculated d9-THC (%)': 'total_thc',
+    'Total Calculated CBD (%)': 'total_cbd',
+    'batch_size_sample_size': 'batch_size',
+    'collected_received': 'date_collected',
+    'lloq': 'loq',
+    'Anresco ID': 'lab_id',
+    'Lot/Batch Number': 'batch_number',
+    'cannabinoid_pro_le': 'cannabinoids_status',
+    'pesticide_residue_screen': 'pesticides_status',
+    'microbiological_screen': 'microbes_status',
+    'heavy_metal_screen': 'heavy_metals_status',
+    'mycotoxin_screen': 'mycotoxins_status',
+    'other_analyses': 'moisture_status',
+    'total_active_cannabinoids': 'total_cannabinoids'
 }
 
 # A map of standard units by analysis to use when no units are obtainable.
@@ -712,7 +744,7 @@ if __name__ == '__main__':
     # Sort a given dictionary and remove duplicate fields.
     # This is useful when adding new fields to a constant in development.
     x = {}
-    for k, v in ANALYSES.items():
+    for k, v in STANDARD_FIELDS.items():
         if k not in x.keys():
             x[k] = v
     x = {k: v for k, v in sorted(x.items(), key=lambda item: item[1])}

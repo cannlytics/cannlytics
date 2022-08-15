@@ -764,6 +764,9 @@ class CoADoc:
         # - lab_zipcode
         # - lab_latitude
         # - lab_longitude
+
+        # TODO: Sort the columns.
+        # product_name near the beginning.
         
         # Turn dates to ISO format.
         date_columns = [x for x in data.keys() if x.startswith('date')]
@@ -876,6 +879,7 @@ if __name__ == '__main__':
 
 
     # [ ] TEST: Save CoA data.
+    # parser.save(data, '../../../.datasets/tests/test-coas.xlsx')
 
    
     # [✓] TEST: Close the parser.

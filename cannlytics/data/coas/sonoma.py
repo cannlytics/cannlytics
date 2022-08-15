@@ -69,7 +69,7 @@ Data Points:
 
 """
 # Standard imports.
-from typing import Any
+from typing import Any, Optional
 
 # External imports.
 from dotenv import dotenv_values
@@ -111,7 +111,12 @@ SONOMA =  {
 }
 
 
-def parse_sonomoa_coa(parser, doc: Any, google_maps_api_key: str) -> Any:
+def parse_sonoma_coa(
+        parser,
+        doc: Any,
+        google_maps_api_key: Optional[str] = None,
+        **kwargs,
+    ) -> Any:
     """Parse a Sonoma Lab Works CoA PDF.
     Args:
         doc (str or PDF): A PDF file path or pdfplumber PDF.
@@ -310,5 +315,5 @@ if __name__ == '__main__':
     doc = '../../../.datasets/coas/Flore COA/Peak/LemonTree.pdf'
     lab = parser.identify_lims(doc)
     assert lab == 'Sonoma Lab Works'
-    data = parse_sonomoa_coa(parser, doc, google_maps_api_key=google_maps_api_key)
+    data = parse_sonoma_coa(parser, doc, google_maps_api_key=google_maps_api_key)
     assert data is not None
