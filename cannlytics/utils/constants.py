@@ -457,7 +457,40 @@ STANDARD_UNITS = {
 }
 
 # A map of encountered product types to their standardized product type.
-PRODUCT_TYPES = {}
+PRODUCT_TYPES = {
+    'Flower & Buds': 'flower',
+    'Immature Plants': 'immature_plant',
+    'Concentrate (Non-Solvent Based) (Count-Volume)': 'non_solvent_concentrate',
+    'Concentrate (Non-Solvent Based) (Count-Weight)': 'non_solvent_concentrate',
+    'Concentrate (Weight Based)': 'concentrate',
+    'Edibles (Count-Volume)': 'solid_edible',
+    'Edibles (Count-Weight)': 'solid_edible',
+    'Extracts (Solvent Based) (Count-Volume)': 'concentrate',
+    'Extracts (Solvent Based) (Count-Weight)': 'concentrate',
+    'Kief': 'kief',
+    'Mature Plants': 'mature_plant',
+    'Metered Dose Nasal Spray Products': 'nasal_spray',
+    'MMJ Waste': 'waste',
+    'Pre-Roll (Flower Only)': 'pre_roll',
+    'Pre-Roll (Infused)': 'infused_pre_roll',
+    'Pressurized Metered Dose Inhaler Products': 'nasal_spray',
+    'Rectal/Vaginal Administration Products (Count-Volume)': 'suppository',
+    'Rectal/Vaginal Administration Products (Count-Weight)': 'suppository',
+    'Seeds': 'seeds',
+    'Shake/Trim': 'shake',
+    'Shake/Trim (by Strain)': 'shake',
+    'Tinctures (Count-Volume)': 'tincture',
+    'Tinctures (Count-Weight)': 'tincture',
+    'Topicals (Count-Volume)': 'topical',
+    'Topicals (Count-Weight)': 'topical',
+    'Transdermal Patches': 'transdermal',
+    'Vape Cartridges': 'vape_cartridge',
+    'Whole Wet Plant': 'plant',
+    'Buds': 'flower',
+    'Infused': 'solid_edible',
+    'InfusedEdible': 'solid_edible',
+    'Infused Liquid': 'liquid_edible',
+}
 
 # A map of encountered strains to their standardized strain name.
 STRAINS = {

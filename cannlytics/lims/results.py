@@ -3,7 +3,7 @@ Result Calculation | Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>  
 Created: 6/23/2021  
-Updated: 7/19/2021  
+Updated: 8/14/2021  
 License: MIT License <https://opensource.org/licenses/MIT>  
 
 Use analyte limits and formulas and instrument measurements to calculate
@@ -15,8 +15,8 @@ from email.mime.multipart import MIMEMultipart
 from smtplib import SMTP
 
 # Internal imports.
-from ..firebase import get_collection, update_documents
-from ..metrc.utils import encode_pdf
+from cannlytics.firebase import get_collection, update_documents
+from cannlytics.utils import encode_pdf
 
 
 def calculate_results(sample_data, analysis, mass, dilution_factor=10, correction_factor=10000):

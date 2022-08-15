@@ -1,4 +1,8 @@
-# Cannlytics Statistics
+# Cannlytics Statistics as a Service
+
+<div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
+  <img width="150px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_staas_logo.png?alt=media&token=fc71a230-90cf-4f72-b6e3-d1a6c52a726f">
+</div>
 
 | Function | Description |
 |----------|-------------|
@@ -10,13 +14,13 @@
 
 <!-- TODO: Examples -->
 
-## Models
+<!-- ## Models
 
 - ARIMA
 - Bayesian Regression
 - Heckman
 - Tobit
-- VAR
+- VAR -->
 <!-- TODO: Write documentation about statistical models!
 
   - OLS
@@ -37,7 +41,7 @@
 
 <!-- TODO: Examples -->
 
-## Natural Language Processing (NLP)
+<!-- ## Natural Language Processing (NLP) -->
 
 <!-- TODO: Documentation for NLP tools -->
 

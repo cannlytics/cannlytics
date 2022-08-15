@@ -199,7 +199,7 @@ class Employee(Model):
     ```js
         {
             "FullName": "Keegan Skeate",
-            "License": None
+            "License": null
         }
     ```
     """
@@ -253,7 +253,7 @@ class Facility(Model):
         return response
 
     def create_location(self, name, location_type='default'):
-        """Create locations at the facility.
+        """Create a location at the facility.
         Args:
             name (str): A location name.
             location_type (str): An optional location type:
@@ -436,7 +436,7 @@ class Location(Model):
         }
 
     def update(self, **kwargs):
-        """Update location."""
+        """Update the location."""
         data = self.to_dict()
         update = clean_dictionary(data, camelcase)
         for param in kwargs:
@@ -445,7 +445,7 @@ class Location(Model):
         self.client.update_locations([update])
 
     def delete(self):
-        """Delete location."""
+        """Delete the location."""
         self.client.delete_location(self.id)
 
 
@@ -455,24 +455,24 @@ class Harvest(Model):
     A harvest batch is created and given a unique Harvest Name when plants
     or plant material are harvested. [The following 7 conditions must be met.]
 
-    1. Harvest Name – Harvests must be strain specific. The Harvest Name must
+    1. Harvest Name - Harvests must be strain specific. The Harvest Name must
     be unique. It is a best practice for the harvest name to include the Strain
     Name and Harvest Date, but it is not required by the State.
 
-    2. Weight – The plant is weighed individually in its entirety after being
+    2. Weight - The plant is weighed individually in its entirety after being
     cut from root ball (stem, stalk, bud/flower, leaves, trim leaves, etc.).
 
-    3. Waste – This can be recorded using multiple entries but must be reported
+    3. Waste - This can be recorded using multiple entries but must be reported
     within three days of destruction.
 
-    4. Package – Package and tag the product from the Harvest Batch (Fresh
+    4. Package - Package and tag the product from the Harvest Batch (Fresh
     Cannabis Plant, Flower, Leaf or Kief). These packages must be strain
     specific.
 
-    5. Transfer – Licensee must create transfer manifest to move product to a
+    5. Transfer - Licensee must create transfer manifest to move product to a
     Processor, Distributor, or Manufacturer.
 
-    6. Finish – When the Harvest Batch (HB) has been fully packaged, there
+    6. Finish - When the Harvest Batch (HB) has been fully packaged, there
     should be remaining wet weight to account for moisture loss. Selecting
     Finish Harvest will attribute any remaining weight to moisture loss.
 
@@ -978,7 +978,7 @@ class Plant(Model):
             location=None,
             note='',
             patient_license=None,
-    ):
+        ):
         """Create a package of immature plants from the plant.
         Args:
             name (str): The name of the item to create.
@@ -1058,7 +1058,7 @@ class Plant(Model):
             note='n/a',
             reason='Contamination',
             uom='grams',
-    ):
+        ):
         """Destroy the plant.
         Args:
             weight (float): Required weight of the waste.
@@ -1091,7 +1091,7 @@ class Plant(Model):
             location_name=None,
             patient_license=None,
             uom='Grams',
-    ):
+        ):
         """Manicure the plant.
         Args:
             weight (float): Required harvest weight.
@@ -1125,7 +1125,7 @@ class Plant(Model):
             location_name=None,
             patient_license=None,
             uom='Grams',
-    ):
+        ):
         """Harvest the plant.
         Args:
             harvest_name (str): Required harvest name.
@@ -1231,7 +1231,7 @@ class PlantBatch(Model):
             note='',
             trade_sample=False,
             donation=False,
-    ):
+        ):
         """Create a package from the plant batch."""
         data = {
             'id': self.uid,
@@ -1259,7 +1259,7 @@ class PlantBatch(Model):
             note='',
             trade_sample=False,
             donation=False,
-    ):
+        ):
         """Create a package from the plant batch mother plant."""
         data = {
             'PlantBatch': self.name,
@@ -1287,7 +1287,7 @@ class PlantBatch(Model):
             growth_phase='Vegetative',
             location=None,
             patient_license=None,
-    ):
+        ):
         """Change the growth phase of the batch.
         Args:
             tag (str): A plant tag for the new growth phase for the plants.

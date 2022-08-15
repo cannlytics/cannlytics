@@ -7,7 +7,10 @@ Created: 8/3/2021
 Updated: 12/21/2021
 License: MIT License <https://opensource.org/licenses/MIT>
 
-Description: Manage scientific instruments and measurements from the instruments.
+Description:
+    
+    Manage scientific instruments and measurements from the instruments.
+
 """
 # Standard imports
 import os

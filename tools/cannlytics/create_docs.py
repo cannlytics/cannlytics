@@ -30,8 +30,10 @@ rows.append({
 # Create the title.
 title = '# Cannlytics Utility Functions'
 
+from cannlytics.metrc import client
+
 # Get the heading.
-heading = package.__doc__
+heading = client.__doc__
 
 # Create the markdown table.
 data = pd.DataFrame(rows)

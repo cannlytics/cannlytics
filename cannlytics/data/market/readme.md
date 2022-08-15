@@ -1,5 +1,10 @@
 # 🔥Cannlytics 🪙 Cannabis Data Market and 🎑 Algorithm Farm
 
+<div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
+  <img height="125px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_data_market.png?alt=media&token=f632504b-d00f-4b81-9182-6d5c64956436">
+  <img height="125px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_algorithm_farm.png?alt=media&token=5a708351-a5e3-4437-b6bb-19bd6ec339f6">
+</div>
+
 Welcome to the [Cannabis Data Market](https://cannabisdatamarket.com) and [Algorithm Farm](algorithmfarm.com), a first of their kind. The idea is that algorithms and data can be published, purchased, and consumed in a decentralized manner as NFTs, through [smart contracts](https://en.wikipedia.org/wiki/Smart_contract), empowering both algorithm and data suppliers and consumers. It's a win-win mechanism that potentially millions can make a good living from creating, curating, and consuming data and algorithms in the cannabis space. Please feel free to begin to share any initial ideas, questions, comments, etc. and join in on the fun as we populate the first cannabis-specific data NFT and algorithm NFT marketplace.
 
 ## Introduction to Digital Assets: Data and Algorithm NFTs

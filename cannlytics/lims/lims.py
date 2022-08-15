@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/10/2021
-Updated: 12/10/2021
+Updated: 8/14/2022
 License: MIT License
 """
 # Standard imports.
@@ -21,7 +21,7 @@ from requests import Session
 # from .models import *
 # from .urls import *
 # from ..utils.utils import clean_dictionary
-from ..exceptions import CannlyticsAPIError
+from cannlytics.models.exceptions import CannlyticsAPIError
 
 
 class LIMS(object):
@@ -31,7 +31,7 @@ class LIMS(object):
             self,
             logs=True,
             test=True,
-    ):
+        ) -> None:
         """Initialize a Metrc API client.
         Args:
             logs (bool): Whether or not to log Metrc API requests, True by default.
