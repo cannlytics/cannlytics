@@ -15,7 +15,7 @@ from cannlytics.utils.utils import *
 
 # Create table of `utils` functions.
 filename = '../../cannlytics/utils/utils.py'
-doc = '../../cannlytics/utils/readme.md'
+
 
 # TODO: Read all doc strings and arguments.
 rows = []
@@ -46,6 +46,9 @@ table = data.to_html(index=False, render_links=True, escape=False)
     # beginning = readme.split('<table')[0]
     # end = readme.split('</table>')[-1]
     # updated_doc = ''.join([beginning, table, end])
+
+# Save the documentation.
+doc = '../../cannlytics/utils/readme.md'
 with open(doc, 'w') as f:
     markdown = '\n'.join([title, heading, table])
     f.write(markdown)

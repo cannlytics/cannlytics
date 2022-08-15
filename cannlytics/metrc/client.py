@@ -260,7 +260,7 @@ class Metrc(object):
             end='',
             sales_start='',
             sales_end='',
-    ):
+        ):
         """Get sale(s).
         Args:
             uid (str): The UID for a delivery.
@@ -309,7 +309,7 @@ class Metrc(object):
 
 
     def complete_deliveries(self, data, license_number=''):
-        """Complete home deliver(ies).
+        """Complete home delivery(ies).
         Args:
             data (list): A list of deliveries (dict) to complete.
             license_number (str): A specific license number.
@@ -331,7 +331,7 @@ class Metrc(object):
 
 
     def update_deliveries(self, data, license_number=''):
-        """Update home deliver(ies).
+        """Update home delivery(ies).
         Args:
             data (list): A list of deliveries (dict) to create.
             license_number (str): A specific license number.
@@ -475,7 +475,7 @@ class Metrc(object):
             action='active',
             license_number='',
     ):
-        """
+        """Get an item.
         Args:
             uid (str): The UID of an item.
             action (str): A specific type of item to filter by:
@@ -496,7 +496,7 @@ class Metrc(object):
             uid='',
             action='active',
             license_number='',
-    ):
+        ):
         """Get items.
         Args:
             uid (str): The UID of an item.
@@ -522,7 +522,7 @@ class Metrc(object):
 
 
     def create_item(self, data, license_number='', return_obs=False):
-        """Create items.
+        """Create an item.
         Args:
             data (dict): An item to create.
             license_number (str): A specific license number.
@@ -596,15 +596,15 @@ class Metrc(object):
 
 
     #------------------------------------------------------------------
-    # Lab Tests
+    # Lab Results
     #------------------------------------------------------------------
 
     def get_lab_result(
             self,
             uid='',
             license_number='',
-    ):
-        """
+        ):
+        """Get lab results.
         Args:
             uid (str): The UID of a lab result.
             license_number (str): A specific license number.
@@ -622,7 +622,7 @@ class Metrc(object):
             self,
             uid='',
             license_number='',
-    ):
+        ):
         """Get lab results.
         Args:
             uid (str): The UID for a package.
@@ -713,8 +713,8 @@ class Metrc(object):
             self,
             uid='',
             license_number='',
-    ):
-        """
+        ):
+        """Get a location.
         Args:
             uid (str): The UID of a location.
             license_number (str): A specific license number.
@@ -733,7 +733,7 @@ class Metrc(object):
             uid='',
             action='active',
             license_number='',
-    ):
+        ):
         """Get locations.
         Args:
             uid (str): The UID of a location, takes precedent over action.
@@ -762,8 +762,8 @@ class Metrc(object):
             location_type='default',
             license_number='',
             return_obs=False,
-    ):
-        """Create location(s).
+        ):
+        """Create location.
         Args:
             name (str): A location name.
             location_type (str): An optional location type:
@@ -851,8 +851,8 @@ class Metrc(object):
             label='active',
             action='active',
             license_number='',
-    ):
-        """
+        ):
+        """Get a package.
         Args:
             uid (str): The UID of an item.
             label (str): The tag label for a package.
@@ -877,7 +877,7 @@ class Metrc(object):
             license_number='',
             start='',
             end='',
-    ):
+        ):
         """Get package(s).
         Args:
             uid (str): The UID for a package.
@@ -921,7 +921,7 @@ class Metrc(object):
             qa=False,
             plantings=False,
             return_obs=False,
-    ):
+        ):
         """Create packages.
         Args:
             data (list): A list of packages (dict) to create.
@@ -1095,7 +1095,7 @@ class Metrc(object):
     #------------------------------------------------------------------
 
     def create_plant_batch(self, data, license_number='', return_obs=False):
-        """
+        """Create a plant batch.
         Args:
             data (dict): A plant batch to create.
             license_number (str): A specific license number.
@@ -1117,7 +1117,7 @@ class Metrc(object):
 
 
     def create_plant_batches(self, data, license_number='', return_obs=False):
-        """
+        """Create plant batches.
         Args:
             data (list): A list of plant batches (dict) to create.
             license_number (str): A specific license number.
@@ -1164,7 +1164,7 @@ class Metrc(object):
             license_number='',
             start='',
             end=''
-    ):
+        ):
         """Get plant batches(s).
         Args:
             uid (str): The UID for a plant batch.
@@ -1263,7 +1263,7 @@ class Metrc(object):
     #------------------------------------------------------------------
 
     def create_plant(self, data, license_number='', return_obs=False):
-        """
+        """Create a plant.
         Args:
             data (dict): A plant to create.
             license_number (str): A specific license number.
@@ -1332,7 +1332,7 @@ class Metrc(object):
             license_number='',
             start='',
             end=''
-    ):
+        ):
         """Get plant(s).
         Args:
             uid (str): The UID for a plant.
@@ -1421,7 +1421,7 @@ class Metrc(object):
             end='',
             sales_start='',
             sales_end='',
-    ):
+        ):
         """Get sale(s).
         Args:
             uid (str): The UID for a plant batch.
@@ -1462,7 +1462,7 @@ class Metrc(object):
             license_number='',
             start='',
             end='',
-    ):
+        ):
         """Get transaction(s).
         Args:
             license_number (str): A specific license number.
@@ -1486,7 +1486,7 @@ class Metrc(object):
 
 
     def get_customer_types(self, license_number=''):
-        """Get all facilities.
+        """Get all customer types.
         Args:
             license_number (str): A specific license number.
         Returns:

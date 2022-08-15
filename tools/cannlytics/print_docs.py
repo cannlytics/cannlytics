@@ -19,17 +19,17 @@ def print_docs(module):
         doc = inspect.getdoc(child[1])
         if not doc:
             doc = default
-        print(child[0], doc, sep = '\n')
+        print(child[0], doc, sep = ' ')
 
         if inspect.isclass(child[1]):
             for grandchild in inspect.getmembers(child[1], is_relevant):
                 doc = inspect.getdoc(grandchild[1])
                 if doc:
-                    doc = doc.replace('\n', '\n    ')
+                    doc = doc.replace('\n', ' ')
                 else:
                     doc = default 
-                print('\n    ' + grandchild[0], doc, sep = '\n    ')
+                print('\n    ' + grandchild[0], doc, sep = ' ')
 
 
-import your_module
-print_docs(your_module)
+from cannlytics.metrc.client import Metrc
+print_docs(Metrc)

@@ -90,7 +90,7 @@ track = Metrc(
 *Employees and Facilities*
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `get_employees(license_number='')` | Get all employees. | `/employees/v1/`|
+| `get_employees(license_number='')` | Get all employees. Args: `license_number` (str): A licensee's license number. | `/employees/v1/`|
 | `get_facilities()` | Get all facilities. | `/employees/v1/`|
 | `get_facility(license_number='')` | Get a given facility by its license number. | `/employees/v1/`|
 
@@ -98,124 +98,153 @@ track = Metrc(
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `/sales/v1/deliveries` |
-| `` |  | `/sales/v1/deliveries` |
-| `` |  | `/sales/v1/deliveries` |
-| `` |  | `/sales/v1/deliveries` |
-| `` |  | `/sales/v1/deliveries` |
+| `create_deliveries(data, license_number='', return_obs=False)` | Create home deliver(ies). Args: `data` (list): A list of deliveries (dict) to create. `license_number` (str): A specific license number. | `/sales/v1/deliveries` |
+| `get_deliveries(uid='', action='active', license_number='', start='', end='', sales_start='', sales_end='')` | Get sale(s). | `/sales/v1/deliveries` |
+| `get_return_reasons(license_number='')` | Get the possible return reasons for home delivery items. | `/sales/v1/deliveries/delivery/returnreasons` |
+| `complete_deliveries(data, license_number='')` | Complete home delivery(ies). | `/sales/v1/deliveries` |
+| `delete_delivery(uid, license_number='')` | Delete a home delivery. | `/sales/v1/deliveries` |
+| `update_deliveries(data, license_number='')` | Update home delivery(ies). | `/sales/v1/deliveries` |
 
 *Harvests*
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `/harvests/v1/` |
-| `` |  | `/harvests/v1/finish` |
-| `` |  | `/harvests/v1/unfinish` |
-| `` |  | `/harvests/v1/removewaste` |
-| `` |  | `/harvests/v1/move` |
-| `` |  | `/harvests/v1/create/packages` |
-| `create_harvest_testing_packages(self, data, license_number='', return_obs=False)` | Create packages from a harvest for testing. | `/harvests/v1/create/packages/testing` |
+| `get_harvests(uid='', action='active', license_number='', start='', end='')` | Get harvests. | `/harvests/v1/` |
+| `finish_harvests(data, license_number='')` | Finish harvests. | `/harvests/v1/finish` |
+| `unfinish_harvests(data, license_number='')` | Unfinish harvests. | `/harvests/v1/unfinish` |
+| `remove_waste(data, license_number='')` | Remove's waste from a harvest. | `/harvests/v1/removewaste` |
+| `move_harvests(data, license_number='')` | Move a harvests. | `/harvests/v1/move` |
+| `create_harvest_packages(data, license_number='', return_obs=False)` | Create packages from a harvest. | `/harvests/v1/create/packages` |
+| `create_harvest_testing_packages(data, license_number='', return_obs=False)` | Create packages from a harvest for testing. | `/harvests/v1/create/packages/testing` |
 
 *Items*
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
+| `get_item_categories(license_number='')` | Get all item categories. | `/items/v1/categories` |
+| `get_item(uid='', action='active', license_number='')` | Get an item. | `/items/v1/` |
+| `get_items(uid='', action='active', license_number='')` | Get items. | `/items/v1/` |
+| `create_item(data, license_number='', return_obs=False)` | Create an item. | `/items/v1/create` |
+| `create_items(data, license_number='', return_obs=False)` | Create items. | `/items/v1/create` |
+| `update_item(data, license_number='', return_obs=False)` | Update an item. | `/items/v1/update` |
+| `update_items(data, license_number='', return_obs=False)` | Update items. | `/items/v1/update` |
+| `delete_item(uid, license_number='')` | Delete item. | `/items/v1/` |
 
 *Lab Results*
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
+| `get_lab_results(uid='', license_number='')` | Get lab results. | `/labtests/v1/results` |
+| `get_test_types(license_number='')` | Get required quality assurance analyses. | `/labtests/v1/types` |
+| `get_test_statuses(license_number='')` | Get pre-defined lab statuses. | `/labtests/v1/states` |
+| `post_lab_results(data, license_number='', return_obs=False)` | Post lab result(s). | `/labtests/v1/record` |
+| `upload_coas(data, license_number='')` | Upload lab result CoA(s). | `/labtests/v1/labtestdocument` |
+| `release_lab_results(data, license_number='')` | Release lab result(s). | `/labtests/v1/results/release` |
 
 *Locations*
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
+| `get_location_types(license_number='')` | Get all location types for a given license. | `/locations/v1/types` |
+| `get_location(uid='', license_number='')` | Get a location. | `/locations/v1/` |
+| `get_locations(uid='', action='active', license_number='')` | Get locations. | `/locations/v1/` |
+| `create_location(name, location_type='default', license_number='', return_obs=False)` | Create location. | `/locations/v1/create` |
+| `create_locations(names, types=[], license_number='', return_obs=False)` | Create location(s). | `/locations/v1/create` |
+| `update_locations(data, license_number='', return_obs=False)` | Update location(s). | `/locations/v1/update` |
+| `delete_location(uid, license_number='')` | Delete location. | `/locations/v1/` |
 
 *Packages*
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
+| `get_adjustment_reasons(license_number='')` | Get reasons for adjusting packages. | `/packages/v1/adjust/reasons` |
+| `get_package_types(license_number='')` | Get all facilities. | `/packages/v1/types` |
+| `get_package(uid='', label='active', action='active', license_number='')` | Get a package. | `/packages/v1/` |
+| `get_packages( uid='', label='', action='active', license_number='', start='', end='')` | Get package(s). | `/packages/v1/` |
+| `create_packages( data, license_number='', qa=False, plantings=False, return_obs=False)` | Create packages. | `/packages/v1/create` |
+| `update_packages(data, license_number='', return_obs=False)` | Update packages. | `/packages/v1/update` |
+| `delete_package(uid, license_number='')` | Delete a package. | `/packages/v1/` |
+| `change_package_items(data, license_number='', return_obs=False)` | Update package items. | `/packages/v1/change/item` |
+| `update_package_item_locations(data, license_number='', return_obs=False)` | Update package item location(s). | `/packages/v1/change/locations` |
+| `manage_packages(data, action='adjust', license_number='', return_obs=False)` | Adjust package(s). Actions: `adjust`, `finish`, `unfinish`, `remediate`. | `/packages/v1/` |
+| `update_package_notes(data, license_number='', return_obs=False)` | Update package note(s). | `/packages/v1/change/note` |
 
 *Patients*
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
+| `get_patients(uid='', action='active', license_number='')` | Get licensee member patients. | `/patients/v1/` |
+| `create_patients(data, license_number='', return_obs=False)` | Create patient(s). | `/patients/v1/` |
+| `update_patients(data, license_number='', return_obs=False)` | Update strain(s). | `/patients/v1/` |
+| `delete_patient(uid, license_number='')` | Delete patient. | `/patients/v1/` |
 
 *Plant Batches*
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
+| `create_plant_batch(self, data, license_number='', return_obs=False)` | Create a plant batch. | `/plantbatches/v1/createplantings` |
+| `create_plant_batches(self, data, license_number='', return_obs=False)` | Create plant batches. | `/plantbatches/v1/createplantings` |
+| `get_batch_types(self, license_number='')` | Get plant batch types. | `/plantbatches/v1/types` |
+| `get_batches(
+            self,
+            uid='',
+            action='active',
+            license_number='',
+            start='',
+            end=''
+        )` | Get plant batches(s). | `/plantbatches/v1/` |
+| `manage_batches(self, data, action, license_number='', from_mother=False, return_obs=False)` | Manage plant batch(es) by applying a given action. Actions: `createplantings`, `createpackages`, `split`, `/create/packages/frommotherplant`, `changegrowthphase`,`additives`, `destroy`. | `/plantbatches/v1/` |
+| `create_plant_package_from_batch(self, data, license_number='', return_obs=False)` | Create a plant package from a batch. | `/plantbatches/v1/create/packages/frommotherplant` |
+| `move_batch(self, data, license_number='', return_obs=False)` | Move plant batch(es). | `/plantbatches/v1/moveplantbatches` |
+| `split_batch(self, data, license_number='', return_obs=False)` | Split a given batch. | `/plantbatches/v1/split` |
+| `split_batches(self, data, license_number='', return_obs=False)` | Split multiple batches. | `/plantbatches/v1/split` |
 
 *Plants*
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
+| `create_plant(self, data, license_number='', return_obs=False)` | Create a plant. | `/plants/v1/` |
+| `create_plants(self, data, license_number='', return_obs=False)` | Use a plant to create an immature plant batch. | `/plants/v1/` |
+| `create_plant_packages(self, data, license_number='')` | Create plant packages. | `/plants/v1/create/plantbatch/packages` |
+| `get_plants(
+            self,
+            uid='',
+            label='',
+            action='',
+            license_number='',
+            start='',
+            end=''
+        )` | Get plant(s). | `/plants/v1/` |
+| `manage_plants(self, data, action, license_number='', return_obs=False)` | Manage plant(s) by applying a given action. Actions: `moveplants`, `changegrowthphases`, `destroyplants`, `additives`, `additives/bylocation`,`create/plantings`, `create/plantbatch/packages`, `manicureplants`, `harvestplants`. | `/plants/v1/` |
+| `move_plants(self, data, license_number='', return_obs=False)` | Move multiple plants. | `/plants/v1/moveplants` |
 
 *Sales*
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
+| `get_receipts(
+            self,
+            uid='',
+            action='active',
+            license_number='',
+            start='',
+            end='',
+            sales_start='',
+            sales_end='',
+        )` | Get sale(s). | `/sales/v1/receipts/` |
+| `get_transactions(
+            self,
+            license_number='',
+            start='',
+            end='',
+        )` | Get transaction(s). | `/sales/v1/transactions/` |
+| `get_customer_types(self, license_number='')` | Get all customer types. | `/sales/v1/customertypes` |
+| `create_receipt(self, data, license_number='', return_obs=False)` | Create a receipt. | `/sales/v1/receipts` |
+| `create_receipts(self, data, license_number='', return_obs=False)` | Create receipt(s). | `/sales/v1/receipts` |
+| `update_receipts(self, data, license_number='', return_obs=False)` | Update receipt(s). | `/sales/v1/receipts` |
+| `delete_receipt(self, uid, license_number='')` | Delete receipt. | `/sales/v1/receipts` |
+| `create_transactions(self, data, date, license_number='', return_obs=False)` | Create transaction(s). | `/sales/v1/transactions` |
+| `update_transactions(self, data, date, license_number='', return_obs=False)` | Update transaction(s). | `/sales/v1/transactions` |
 
 *Strains*
 
@@ -257,17 +286,17 @@ track = Metrc(
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
+| `` |  | `/plants/v1/waste/methods` |
+| `` |  | `/plants/v1/waste/reasons` |
+| `` |  | `/harvests/v1/waste/types` |
 
 *Misc*
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
-| `` |  | `` |
-| `` |  | `` |
-| `` |  | `` |
+| `get_units_of_measure(self, license_number='')` | Get all units of measurement. | `/unitsofmeasure/v1/active` |
+| `import_tags(self, file_path, row_start=0, row_end=None, number=10)` | Import plant and package tags. | N/A |
+| `format_params(self, **kwargs)` | Format Metrc request parameters. | N/A |
 
 Note the following [rate limits](https://www.metrc.com/wp-content/uploads/2021/10/4-Metrc-Rate-Limiting-1.pdf):
 - 50 GET calls per second per facility.
