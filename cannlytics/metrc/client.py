@@ -265,7 +265,7 @@ class Metrc(object):
         Args:
             uid (str): The UID for a delivery.
             action (str): The action to apply to the delivery, with options:
-                `active` or `inactive`
+                `active` or `inactive`.
             license_number (str): A specific license number.
             start (str): An ISO 8601 formatted string to restrict the start
                 by the last modified time.
@@ -884,7 +884,7 @@ class Metrc(object):
             label (str): The tag label for a package.
             license_number (str): A specific license number.
             action (str): `active`, `onhold`, `inactive`, `types`,
-                `adjust/reasons`,
+                `adjust/reasons`.
             start (str): Optional ISO date to restrict earliest modified transfers.
             end (str): Optional ISO date to restrict latest modified transfers.
         Returns:
@@ -1169,7 +1169,7 @@ class Metrc(object):
         Args:
             uid (str): The UID for a plant batch.
             action (str): The action to apply to the plants, with options:
-                `active`, `inactive`, `types`
+                `active`, `inactive`, `types`.
             license_number (str): A specific license number.
             start (str): An ISO 8601 formatted string to restrict the start
                 by the last modified time.
@@ -1597,7 +1597,7 @@ class Metrc(object):
 
 
     def create_strain(self, data, license_number='', return_obs=False):
-        """
+        """Create a strain.
         Args:
             data (dict): A strain to create.
             license_number (str): A specific license number.
@@ -1643,7 +1643,7 @@ class Metrc(object):
 
 
     def update_strain(self, data, license_number='', return_obs=False):
-        """Update strain(s).
+        """Update strain.
         Args:
             data (list): A strain (dict) to update.
             license_number (str): A specific license number.
@@ -1706,7 +1706,7 @@ class Metrc(object):
             license_number='',
             start='',
             end='',
-    ):
+        ):
         """Get transfers.
         Args:
             uid (str): The UID for a transfer, takes precedent in query.
@@ -1894,7 +1894,7 @@ class Metrc(object):
             license_number='',
             start='',
             end='',
-    ):
+        ):
         """Get transfer template(s).
         Args:
             uid (str): A UID for a transfer template.

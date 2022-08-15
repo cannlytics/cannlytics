@@ -1,5 +1,7 @@
 # Cannlytics LIMS
 
+*Module Under Development*
+
 <!-- TODO: Create a Cannlytics LIMS logo! -->
 
 <!-- ## LIMS -->

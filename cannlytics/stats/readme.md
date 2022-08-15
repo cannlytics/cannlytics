@@ -4,6 +4,10 @@
   <img width="150px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_staas_logo.png?alt=media&token=fc71a230-90cf-4f72-b6e3-d1a6c52a726f">
 </div>
 
+## Statistical Model Management
+
+The `cannlytics.stats.stats` submodule contains a number of functions for estimating, saving, and using statistical models.
+
 | Function | Description |
 |----------|-------------|
 | `calculate_model_statistics(models, Y, X)` | Determine prediction thresholds for a given model. Calculate a confusion matrix and returns prediction statistics. |
@@ -14,15 +18,12 @@
 
 <!-- TODO: Examples -->
 
-<!-- ## Models
-
-- ARIMA
-- Bayesian Regression
-- Heckman
-- Tobit
-- VAR -->
 <!-- TODO: Write documentation about statistical models!
-
+  - ARIMA
+  - Bayesian Regression
+  - Heckman
+  - Tobit
+  - VAR
   - OLS
   - IV (instrumental variables)
   - Logit
@@ -44,7 +45,6 @@
 <!-- ## Natural Language Processing (NLP) -->
 
 <!-- TODO: Documentation for NLP tools -->
-
 
 <!-- TODO: Examples -->
 
@@ -129,3 +129,8 @@ test = {
     '50': 3,
 }
 score = score_personality_test(test)
+```
+
+## Models Under Development
+
+*More statistics coming soon!*
