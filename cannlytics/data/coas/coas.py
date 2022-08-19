@@ -103,6 +103,7 @@ from cannlytics.data.coas.mcrlabs import MCR_LABS
 from cannlytics.data.coas.sclabs import SC_LABS
 from cannlytics.data.coas.sonoma import SONOMA
 from cannlytics.data.coas.tagleaf import TAGLEAF
+from cannlytics.utils.utils import snake_case
 # from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
 
 # Labs and LIMS that CoADoc can parse.
@@ -127,20 +128,26 @@ DEFAULT_NUISANCE_COLUMNS = ['received_by', 'sampled_by', 'Unnamed: 1',
     'None_method', 'loss_on_drying_moisture', '_3_5_grams',
     'index', 'other_analyses', 'wildcard']
 
+# Default columns to apply codings and be treated as numeric.
+DEFAULT_NUMERIC_COLUMNS = ['value', 'mg_g', 'lod', 'loq', 'limit', 'margin_of_error']
+
 
 class CoADoc:
     """Parse data from certificate of analysis (CoA) PDFs or URLs."""
 
     def __init__(
             self,
+            lims: Optional[Any] = None,
             analyses: Optional[dict] = None,
             analytes: Optional[dict] = None,
             codings: Optional[dict] = None,
-            fields: Optional[dict] = None,
-            headers: Optional[dict] = None,
-            lims: Optional[Any] = None,
-            init_all: Optional[bool] = True,
+            column_order: Optional[list] = None,
+            nuisance_columns: Optional[list] = None,
+            numeric_columns: Optional[list] = None,
+            standard_fields: Optional[dict] = None,
             google_maps_api_key: Optional[str] = None,
+            headers: Optional[dict] = None,
+            init_all: Optional[bool] = True,
         ) -> None:
         """Initialize CoA parser.
         Args:
@@ -150,7 +157,7 @@ class CoADoc:
                 standard analytes are used by default.
             codings (dict): A dictionary of value codings,
                 standard codings are used by default.
-            fields (dict): A dictionary of field keys,
+            standard_fields (dict): A dictionary of field keys,
                 standard fields are used by default.
             headers (dict): Headers for HTTP requests,
                 standard headers are used by default.
@@ -182,10 +189,25 @@ class CoADoc:
         self.codings = codings
         if codings is None:
             self.codings = CODINGS
+
+        # Define default column / field order.
+        self.column_order = column_order
+        if column_order is None:
+            self.column_order = DEFAULT_COLUMN_ORDER
+        
+        # Define default nuisance columns / fields to remove.
+        self.nuisance_columns = nuisance_columns
+        if nuisance_columns is None:
+            self.nuisance_columns = DEFAULT_NUISANCE_COLUMNS
+        
+        # Define default columns / fields to treat as numeric.
+        self.numeric_columns = numeric_columns
+        if numeric_columns is None:
+            self.numeric_columns = DEFAULT_NUMERIC_COLUMNS 
         
         # Define fields.
-        self.fields = fields
-        if fields is None:
+        self.fields = standard_fields
+        if standard_fields is None:
             self.fields = STANDARD_FIELDS
 
         # Define headers.
@@ -659,8 +681,14 @@ class CoADoc:
             self,
             data: Any,
             outfile:str,
+            codings: Optional[dict] = None,
             column_order: Optional[list] = None,
             nuisance_columns: Optional[list] = None,
+            numeric_columns: Optional[list] = None,
+            standard_analyses: Optional[dict] = None,
+            standard_analytes: Optional[dict] = None,
+            standard_fields: Optional[dict] = None,
+            google_maps_api_key: Optional[str] = None,
         ) -> Any:
         """Save all CoA data, elongating results and widening values.
         That is, a Workbook is created with a "Details" worksheet that
@@ -672,8 +700,19 @@ class CoADoc:
             data (dict or list or DataFrame): The data to save.
             outfile (str): The file that you wish to save. Accepts a
                 response object for returning in an HTTP request.
+            codings (dict): A map of value codings, from actual to coding.
             column_order (list): Desired order for columns.
             nuisance_columns (list): A list of column suffixes to remove.
+            numeric_columns (list): A list of columns to treat as numeric
+                and apply codings.
+            standard_analyses (dict): A mapping of encountered analyses to
+                standard analyses.
+            standard_analytes (dict): A mapping of encountered analytes to
+                standard analytes.
+            standard_fields (dict): A mapping of encountered fields to
+                standard fields.
+            google_maps_api_key (str): A Google Maps API Key to supplement
+                addresses with latitude and longitude.
         Returns:
             (Workbook): An openpyxl Workbook.
         """
@@ -690,40 +729,53 @@ class CoADoc:
             details_data = data
 
         # Specify the desired order for columns / fields.
-        if column_order is None:
-            column_order = DEFAULT_COLUMN_ORDER
-        if nuisance_columns is None:
-            nuisance_columns = DEFAULT_NUISANCE_COLUMNS
+        if codings is None:
+            codings = self.codings
 
         # Standardize details.
         details_data = self.standardize(
             data,
             column_order=column_order,
             nuisance_columns=nuisance_columns,
+            numeric_columns=numeric_columns,
+            standard_analyses=standard_analyses,
+            standard_analytes=standard_analytes,
+            standard_fields=standard_fields,
+            google_maps_api_key=google_maps_api_key,
         )
 
         # Standardize results.
         results_data = self.standardize(
             details_data,
+            how='long',
             column_order=column_order,
             nuisance_columns=nuisance_columns,
-            how='long',
+            numeric_columns=numeric_columns,
+            standard_analyses=standard_analyses,
+            standard_analytes=standard_analytes,
+            standard_fields=standard_fields,
+            google_maps_api_key=google_maps_api_key,
         )
 
         # Standardize values.
         values_data = self.standardize(
             details_data,
-            column_order=column_order,
-            nuisance_columns=nuisance_columns,
+            how='wide',
             details_data=details_data,
             results_data=results_data,
-            how='wide'
+            column_order=column_order,
+            nuisance_columns=nuisance_columns,
+            numeric_columns=numeric_columns,
+            standard_analyses=standard_analyses,
+            standard_analytes=standard_analytes,
+            standard_fields=standard_fields,
+            google_maps_api_key=google_maps_api_key,
         )
 
         # Add a Codings worksheet.
         coding_data = pd.DataFrame({
-            'Coding': CODINGS.values(),
-            'Actual': CODINGS.keys(),
+            'Coding': codings.values(),
+            'Actual': codings.keys(),
         })
 
         # Create a workbook for saving the data.
@@ -746,20 +798,32 @@ class CoADoc:
     def standardize(
             self,
             data: Any,
-            google_maps_api_key: Optional[str] = None,
+            codings: Optional[dict] = None,
             column_order: Optional[list] = None,
             nuisance_columns: Optional[list] = None,
+            numeric_columns: Optional[list] = None,
             how: Optional[str] = 'details',
-            details_data: Optional[pd.DataFrame] = None,
-            results_data: Optional[pd.DataFrame] = None,
+            details_data: Optional[Any] = None,
+            results_data: Optional[Any] = None,
+            standard_analyses: Optional[dict] = None,
+            standard_analytes: Optional[dict] = None,
+            standard_fields: Optional[dict] = None,
+            google_maps_api_key: Optional[str] = None,
         ) -> Any:
         """Standardize (and normalize) given data.
         Args:
             data (dict or list or DataFrame): The data to standardize.
-            google_maps_api_key (str): A Google Maps API Key to supplement
-                addresses with latitude and longitude.
+            codings (dict): A map of value codings, from actual to coding.
             column_order (list): A list of columns in desired order.
             nuisance_columns (list): A list of column suffixes to remove.
+            numeric_columns (list): A list of columns to treat as numeric
+                and apply codings.
+            standard_analyses (dict): A mapping of encountered analyses to
+                standard analyses.
+            standard_analytes (dict): A mapping of encountered analytes to
+                standard analytes.
+            standard_fields (dict): A mapping of encountered fields to
+                standard fields.
             how (str): How to standardize, a simple clean of the data
                 `details` by default. Alternatively specify `wide` for a
                 wide-form DataFrame of values or `long` for a long-form
@@ -768,18 +832,30 @@ class CoADoc:
                 May provide a speed increase provided when formatting `values`.
             results_data (DataFrame): The data pre-formatted as `results`.
                 May provide a speed increase provided when formatting `values`.
+            google_maps_api_key (str): A Google Maps API Key to supplement
+                addresses with latitude and longitude.
         Returns:
             (dict or list or DataFrame): Returns the data with standardized
                 fields, analyses, analytes, product types, normalized
                 results, and augmented with strain name and GIS data.
         """
         # Specify the desired order for columns / fields.
+        if codings is None:
+            codings = self.codings
         if column_order is None:
-            column_order = DEFAULT_COLUMN_ORDER
+            column_order = self.column_order
         if nuisance_columns is None:
-            nuisance_columns = DEFAULT_NUISANCE_COLUMNS
-        
-        # TODO: Ensure that all calculable fields are present, such as `total_cannabinoids` and `total_terpenes`.
+            nuisance_columns = self.nuisance_columns
+        if numeric_columns is None:
+            numeric_columns = self.numeric_columns
+        if standard_analyses is None:
+            standard_analyses = self.analyses
+        if standard_analytes is None:
+            standard_analytes = self.analytes
+        if standard_fields is None:
+            standard_fields = self.fields
+
+        # TODO: Calculate all totals:`total_cannabinoids`, `total_terpenes`, etc.
         # TODO: Remove and keep `units` from `value`.
         # TODO: Standardize `units`
         # TODO: Create a standard `product_type_key`
@@ -789,12 +865,12 @@ class CoADoc:
         # Standardize a dictionary.
         if isinstance(data, dict):
 
-            # Identify fields:
-            fields = STANDARD_FIELDS
+            # Identify standard fields, adding analytes for `wide` data.
+            fields = standard_fields
             if how == 'wide':
-                fields.extend(ANALYTES)
+                fields = {**standard_fields, **standard_analytes}
 
-            # Standardize fields (and analytes for `wide` data).
+            # Standardize fields.
             std = {}
             for k, v in data.items():
                 key = fields.get(k, k)
@@ -802,42 +878,81 @@ class CoADoc:
 
             # Standardize `analyses` of details.
             if how == 'details':
-                std['analyses'] = [ANALYSES.get(x, x) for x in std['analyses']]
+                std['analyses'] = [standard_analyses.get(x, x) for x in std['analyses']]
 
-                # TODO: Standardize the `analysis` of reach of the results.
-
+                # Standardize the `analysis` of reach of the `results`.
+                # Also, normalize the `results`, converting to numeric
+                # and applying codings.
+                standardized_results = []
+                sample_results = data['results']
+                if isinstance(sample_results, str):
+                    sample_results = literal_eval(sample_results)
+                for result in sample_results:
+                    analysis = result.get('analysis')
+                    result['analysis'] = standard_analyses.get(analysis, analysis)
+                    for c in numeric_columns:
+                        value = result.get(c)
+                        value = codings.get(value, value)
+                        if isinstance(value, str):
+                            value = convert_to_numeric(value, strip=True)
+                        result[c] = pd.to_numeric(value, errors='coerce')
+                    standardized_results.append(result)
+                std['results'] = standardized_results
+                
             # Standard `analysis` of long-form data.
             elif how == 'long':
                 analysis = std.get('analysis')
-                std['analysis'] = ANALYSES.get(analysis, analysis)
+                std['analysis'] = standard_analyses.get(analysis, analysis)
 
-            # TODO: Normalize the `results` (for details, wide, and long data).
+            # Normalize the numeric fields for `wide` data.
+            if how == 'wide':
+                analytes = list([a for a in data.keys() if a not in column_order])
+                for c in analytes:
+                    value = std.get(c)
+                    try:
+                        value = codings.get(value, value)
+                    except TypeError:
+                        pass
+                    if isinstance(value, str):
+                        value = convert_to_numeric(value, strip=True)
+                    std[c] = pd.to_numeric(value, errors='coerce')
 
-            # TODO: Map `CODINGS` on number fields (for details, wide, and long data).
+            # Normalize numeric fields for `wide` data.
+            elif how == 'long':
+                for c in numeric_columns:
+                    value = std.get(c)
+                    value = codings.get(value, value)
+                    if isinstance(value, str):
+                        value = convert_to_numeric(value, strip=True)
+                    std[c] = pd.to_numeric(value, errors='coerce')
 
             # Turn dates values to ISO format.
-            dates = [x for x in data.keys() if x.startswith('date')]
+            dates = [x for x in std.keys() if x.startswith('date')]
             for k in dates:
                 try:
-                    data[k] = pd.to_datetime(data[k]).isoformat()
+                    std[k] = pd.to_datetime(std[k]).isoformat()
                 except:
                     pass
 
             # Return the standardized observation.
-            return data
+            return std
 
-        # Standardize a list of dictionaries.
+        # Standardize a list of dictionaries, series, or DataFrames.
         elif isinstance(data, list):
             return [self.standardize(
                 x,
-                google_maps_api_key=google_maps_api_key,
+                how=how,
+                codings=codings,
                 column_order=column_order,
                 nuisance_columns=nuisance_columns,
-                how=how,
-                details_data=details_data,
-                results_data=results_data,
+                numeric_columns=numeric_columns,
+                standard_analyses=standard_analyses,
+                standard_analytes=standard_analytes,
+                standard_fields=standard_fields,
+                google_maps_api_key=google_maps_api_key,
             ) for x in data]
 
+        # FIXME:
         # Standardize a DataFrame.
         elif isinstance(data, pd.DataFrame):
 
@@ -847,7 +962,7 @@ class CoADoc:
                 # Standardize detail columns.
                 details_data = data.copy()
                 details_data.rename(
-                    STANDARD_FIELDS,
+                    standard_fields,
                     axis=1,
                     inplace=True,
                     errors='ignore',
@@ -860,7 +975,7 @@ class CoADoc:
                     details_data = details_data.loc[:, ~criterion]
 
                 # Apply codings
-                details_data.replace(CODINGS, inplace=True)
+                details_data.replace(codings, inplace=True)
         
                 # Convert totals to numeric.
                 # TODO: Calculate totals if they don't already exist:
@@ -886,27 +1001,26 @@ class CoADoc:
                 results = []
                 details_data = data.copy()
                 for _, item in details_data.iterrows():
-                    try:
-                        sample_results = literal_eval(item['results'])
-                    except:
-                        print('Failed to format:', item['product_name'])
-                        continue
+
+                    # Get the sample results.
+                    sample_results = item['results']
+                    if isinstance(sample_results, str):
+                        sample_results = literal_eval(sample_results)
+                    
+                    # Add each entry.
                     for result in sample_results:
-                        sample = {
-                            'sample_id': item['sample_id'],
-                            'product_name': item['product_name'],
-                            'producer': item['producer'],
-                            'date_tested': item['date_tested'],
-                        }
-                        results.append({**sample, **result})
-                results_data = pd.DataFrame(results)
+                        std = {}
+                        for c in column_order:
+                            std[c] = item.get(c)
+                        results.append({**std, **result})
 
                 # Apply codings (redundant?).
-                results_data.replace(CODINGS, inplace=True)
+                results_data = pd.DataFrame(results)
+                results_data[numeric_columns] = results_data[numeric_columns].replace(codings)
 
                 # Standardize the results columns.
                 results_data.rename(
-                    STANDARD_FIELDS,
+                    standard_fields,
                     axis=1,
                     inplace=True,
                     errors='ignore',
@@ -925,22 +1039,33 @@ class CoADoc:
             # Standardize values (`wide` data).
             elif how == 'wide':
 
-                # Get results data (if not passed for speed).
+                # Get details and results data (if not passed for speed).
                 if details_data is None:
                     details_data = self.standardize(
                         data,
+                        codings=codings,
                         column_order=column_order,
                         nuisance_columns=nuisance_columns,
+                        numeric_columns=numeric_columns,
+                        standard_analyses=standard_analyses,
+                        standard_analytes=standard_analytes,
+                        standard_fields=standard_fields,
+                        google_maps_api_key=google_maps_api_key,
                     )
                 if results_data is None:
                     results_data = self.standardize(
                         data,
+                        how='wide',
+                        codings=codings,
                         column_order=column_order,
                         nuisance_columns=nuisance_columns,
-                        how='wide'
+                        numeric_columns=numeric_columns,
+                        standard_analyses=standard_analyses,
+                        standard_analytes=standard_analytes,
+                        standard_fields=standard_fields,
+                        google_maps_api_key=google_maps_api_key,
                     )
                     
-                # Standardize results (long data).
                 # Map keys to analysis for ordering for Values worksheet columns.
                 pairs = []
                 analytes = list(results_data['key'].unique())
@@ -951,9 +1076,12 @@ class CoADoc:
                         analyses = [x for x in analyses if x is not None]
                         analysis = analyses[0]
                         place = ord(analysis[0])
-                        if place == 116: place = 100 # Hot-fix to order terpenes right after cannabinoids.
+                        # Hot-fix to order terpenes right after cannabinoids.
+                        if place == 116:
+                            place = 100 
                         pairs.append((a, analysis, place))
                     except:
+                        # Hot-fix to place unidentified analyses at the end.
                         pairs.append((a, None, 122))
 
                 # Sort the pairs of analytes/analyses.
@@ -962,28 +1090,28 @@ class CoADoc:
                 # Create a wide table of values data.
                 values = []
                 for _, item in details_data.iterrows():
-                    value = {
-                        'sample_id': item['sample_id'],
-                        'product_name': item['product_name'],
-                        'producer': item['producer'],
-                        'date_tested': item['date_tested'],
-                        'product_type': item['product_type'],
-                    }
-                    try:
-                        sample_results = literal_eval(item['results'])
-                    except:
-                        print('Failed to format:', item['product_name'])
-                        continue
+
+                    # Specify the default columns.
+                    std = {}
+                    for c in column_order:
+                        std[c] = item[c]
+
+                    # Get the sample results.
+                    sample_results = item['results']
+                    if isinstance(sample_results, str):
+                        sample_results = literal_eval(sample_results)
+
+                    # Keep the values from each result.
                     for result in sample_results:
-                        analyte = result['key']
-                        analyte = ANALYTES.get(analyte, analyte)
-                        value[analyte] = result.get('value', result.get('percent'))
-                    values.append(value)
-                values_data = pd.DataFrame(values)
+                        analyte = result.get('key', snake_case(result.get('name')))
+                        analyte = standard_analytes.get(analyte, analyte)
+                        std[analyte] = result.get('value', result.get('percent'))
+                    values.append(std)
 
                 # Rename and combine columns.
+                values_data = pd.DataFrame(values)
                 values_data.rename(
-                    ANALYTES,
+                    standard_analytes,
                     axis=1,
                     inplace=True,
                     errors='ignore',
@@ -991,7 +1119,7 @@ class CoADoc:
                 values_data = values_data.groupby(level=0, axis=1).first()
 
                 # Apply codings to columns.
-                values_data.replace(CODINGS, inplace=True)
+                values_data.replace(codings, inplace=True)
 
                 # Drop nuisance columns.
                 for c in nuisance_columns:
@@ -1004,20 +1132,23 @@ class CoADoc:
                 values_data = values_data.loc[:, ~criterion]
 
                 # Move certain columns to the beginning.
-                column_order.extend([pair[0] for pair in pairs])
-                values_data = reorder_columns(values_data, column_order)
+                columns = column_order + [x[0] for x in pairs]
+                values_data = reorder_columns(values_data, columns)
                 return values_data
         
         # Standardize a series.
         elif isinstance(data, pd.Series):
             return pd.Series(self.standardize(
                 data.to_dict(),
-                google_maps_api_key=google_maps_api_key,
+                how=how,
+                codings=codings,
                 column_order=column_order,
                 nuisance_columns=nuisance_columns,
-                how=how,
-                details_data=details_data,
-                results_data=results_data,
+                numeric_columns=numeric_columns,
+                standard_analyses=standard_analyses,
+                standard_analytes=standard_analytes,
+                standard_fields=standard_fields,
+                google_maps_api_key=google_maps_api_key,
             ))
 
         # Raise an error if an incorrect type is passed.
@@ -1093,35 +1224,52 @@ if __name__ == '__main__':
     # data = parser.parse(DATA_DIR)
 
     # [ ] TEST: Parse all CoAs in a zipped folder!
-    zip_folder = '../../../.datasets/tests/coas.zip'
+    # zip_folder = '../../../.datasets/tests/coas.zip'
     # data = parser.parse(zip_folder)
     # assert data is not None
 
     # [ ] TEST: Find results by known Metrc IDs.
-    metrc_ids = [
-        '1A4060300002A3B000000053', # Green Leaf Lab
-        '1A4060300017A85000001289', # Green Leaf Lab
-        '1A4060300002459000017049', # SC Labs
-        '1A4060300004088000010948', # Sonoma Lab Works
-    ]
+    # metrc_ids = [
+    #     '1A4060300002A3B000000053', # Green Leaf Lab
+    #     '1A4060300017A85000001289', # Green Leaf Lab
+    #     '1A4060300002459000017049', # SC Labs
+    #     '1A4060300004088000010948', # Sonoma Lab Works
+    # ]
     # sample = parser.parse(metrc_ids[0])
     # assert sample is not None
     # data = parser.parse(metrc_ids)
     # assert data is not None
 
     # [✓] TEST: Parse a custom CoA (accept an error for now).
-    try:
-        parser.parse('https://cannlytics.page.link/partial-equilibrium-notes')
-    except NotImplementedError:
-        pass
+    # try:
+    #     parser.parse('https://cannlytics.page.link/partial-equilibrium-notes')
+    # except NotImplementedError:
+    #     pass
 
-    # [ ] TEST: Standardize CoA data.
+    # [✓] TEST: Standardize CoA data.
+    tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
+    data = parser.parse(tagleaf_coa_short_url)
+    dataframe = pd.DataFrame(data)
+    clean_data = parser.standardize(data[0])
+    clean_data_list = parser.standardize(data)
+    details_dataframe = parser.standardize(dataframe)
+    results_dataframe = parser.standardize(
+        dataframe,
+        how='long'
+    )
+    values_dataframe = parser.standardize(
+        dataframe,
+        how='wide',
+        details_data=details_dataframe,
+        results_data=results_dataframe,
+    )
 
-
+    # FIXME:
     # [ ] TEST: Save CoA data.
+    parser.save(dataframe, '../../../.datasets/tests/test-coas.xlsx')
+    # parser.save(clean_data_list, '../../../.datasets/tests/test-coas.xlsx')
     # parser.save(data, '../../../.datasets/tests/test-coas.xlsx')
 
-   
     # [✓] TEST: Close the parser.
     parser.quit()
 

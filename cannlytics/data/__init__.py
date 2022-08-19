@@ -7,7 +7,7 @@ Created: 4/21/2022
 Updated: 8/18/2022
 """
 from .opendata import OpenData
-from data import (
+from .data import (
     aggregate_datasets,
     create_sample_id,
     find_first_value,

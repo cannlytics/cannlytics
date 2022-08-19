@@ -4,10 +4,9 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 8/1/2022
+Updated: 8/18/2022
 """
-import constants
-from utils import (
+from .utils import (
     camelcase,
     camel_to_snake,
     clean_column_strings,

@@ -416,7 +416,7 @@ def combine_columns(
     return df
 
 
-def reorder_columns(data: Any, columns: list) -> Any:
+def reorder_columns(df: Any, columns: list) -> Any:
     """Re-order a DataFrame given a specific order of columns.
     Remaining columns will be appended to the end of the DataFrame.
     Args:
@@ -425,12 +425,12 @@ def reorder_columns(data: Any, columns: list) -> Any:
     Returns:
         (DataFrame): Returns the re-ordered DataFrame
     """
-    df = data.copy()
-    excluded = list([a for a in df.columns if a not in columns])
+    rdf = df.copy()
+    excluded = list([a for a in rdf.columns if a not in columns])
     ordered_columns = (columns + excluded)
-    df = df.reindex(columns=sorted(df.columns))
-    df = df.reindex(columns=ordered_columns)
-    return df
+    rdf = rdf.reindex(columns=sorted(rdf.columns))
+    rdf = rdf.reindex(columns=ordered_columns)
+    return rdf
 
 
 def reverse_dataframe(data: Any) -> Any:
