@@ -1,4 +1,4 @@
-# 🥸 CoADoC | Cannlytics CoA Data Parser
+# 🥸 CoADoC | CoA Data Parser
 
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
   <img width="150px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3">
@@ -14,17 +14,17 @@ Getting data from CoAs is inevitable and with modern tools, plus a little human 
 |---|---|---|
 | 🟠 Development | 🟡 Operational | 🟢 Live |
 
-| Algorithm | Lab / LIMS | Status |
-|-----------|------------|--------|
-| `parse_anresco_coa` | Anresco Laboratories | 🟢 |
-| `parse_cannalysis_coa` | Cannalysis | 🟢 |
-| `parse_cc_coa` | Confident Cannabis | 🟢 |
-| `parse_green_leaf_lab_coa` | Green Leaf Lab | 🟢 |
-| `parse_mcr_labs_coa` | MCR Labs | 🟡 |
-| `parse_sc_labs_coa` | SC Labs | 🟢 |
-| `parse_sonoma_coa` | Sonoma Lab Works | 🟢 |
-| `parse_tagleaf_coa` | TagLeaf LIMS | 🟢 |
-| `parse_veda_coa` | Veda Scientific | 🟠 |
+| Lab / LIMS | Algorithm | Status |
+|------------|-----------|--------|
+| Anresco Laboratories | `parse_anresco_coa` | 🟢 |
+| Cannalysis | `parse_cannalysis_coa` | 🟢 |
+| Confident Cannabis | `parse_cc_coa` | 🟢 |
+| Green Leaf Lab | `parse_green_leaf_lab_coa` | 🟢 |
+| MCR Labs | `parse_mcr_labs_coa` | 🟡 |
+| SC Labs | `parse_sc_labs_coa` | 🟢 |
+| Sonoma Lab Works | `parse_sonoma_coa` | 🟢 |
+| TagLeaf LIMS | `parse_tagleaf_coa` | 🟢 |
+| Veda Scientific | `parse_veda_coa` | 🟠 |
 
 ## Core Methods
 
@@ -33,11 +33,11 @@ CoADoc comes ready to rumble, but to unleash CoADoc's true power, ensure that yo
 | Function | Description |
 |----------|-------------|
 | `identify_lims(doc, lims=None)` | Identify if a CoA was created by a common LIMS. Search all of the text of the LIMS name or URL. If no LIMS is identified from the text, then the images are attempted to be decoded, searching for a QR code URL.|
-| `parse(data, headers = {}, kind = 'url', lims = None, max_delay = 7, persist = True)` | Parse all CoAs given a directory, a list of files, or a list of URLs. |
-| `parse(pdf, headers = {}, kind = 'url', lims = None, max_delay = 7, persist = True)` | Parse a CoA PDF. Searches the best guess image, then all images, for a QR code URL to find results online. |
+| `parse(data, headers={}, kind='url', lims=None, max_delay=7, persist=True)` | Parse all CoAs given a directory, a list of files, or a list of URLs. |
+| `parse(pdf, headers={}, kind='url', lims=None, max_delay=7, persist=True)` | Parse a CoA PDF. Searches images, alternating from the first then the last, for a QR code URL to find results online. |
 | `parse(url, headers = {}, kind = 'url', lims = None, max_delay = 7, persist = True)` | Parse a CoA URL. |
-| `save(data, outfile, alphabetize=True)` | Save all CoA data, flattening results, images, etc. |
-| `standardize(data)` | *Under Development* |
+| `save(data, outfile, column_order=None, nuisance_columns=None)` | Save all CoA data, elongating results and widening values. That is, a Workbook is created with a "Details" worksheet that has all of the raw data, a "Results" worksheet with long-form data where each row is a result for an analyte, and a "Values" worksheet with wide-form data where each row is an observation and each column is the `value` field for each of the `results`. |
+| `standardize(data, google_maps_api_key=None, column_order=None, nuisance_columns=None, how='details', details_data=None, results_data=None)` | Standardize (and normalize) given data. Pass A `google_maps_api_key` to supplement addresses with latitude and longitude. Specify `column_order` as a list of columns in desired order. Specify `nuisance_columns` as a list of column suffixes to remove. Specify `how` for a simple clean of the data `details` by default. Alternatively specify `wide` for a wide-form DataFrame of values or `long` for a long-form DataFrame of results.|
 | `quit()` | Close any driver, end any session, and reset the parameters. |
 
 ## Usage
@@ -148,78 +148,108 @@ Each result can contain the following fields.
 ## Advanced Usage
 
 If you are developing a new parsing routine for a lab or LIMS, then you will need to follow these steps.
-1. Implement a `parse_{lab}_pdf` and/or a `parse_{lab}_url` function to parse results from a given CoA.
-2. Import your functions in `coas.py` and
-3. Add the lab details to the `LIMS` constant.
-3. Add your function to the `CoADoc` class `__init__` function.
+1. Implement a `parse_{lab}_coa`, `parse_{lab}_pdf` and/or a `parse_{lab}_url` function to parse results from a given CoA. If there is a QR code on the CoA containing the sample's `lab_results_url`, then the PDF parsing routine can be as simple as follows. If not, then you can implement your own PDF parsing logic.
+    ```py
+    def parse_cc_pdf(
+            self,
+            doc: Any,
+            max_delay: Optional[float] = 7,
+            persist: Optional[bool] = False,
+        ) -> dict:
+        """Parse a Confident Cannabis CoA PDF.
+        Args:
+            doc (str or PDF): A file path to a PDF or a pdfplumber PDF.
+            max_delay (float): The maximum number of seconds to wait
+                for the page to load.
+            persist (bool): Whether to persist the driver.
+                The default is `False`. If you do persist
+                the driver, then make sure to call `quit`
+                when you are finished.
+        Returns:
+            (dict): The sample data.
+        """
+        # TODO: Implement any custom PDF parsing here....
 
-If there is a QR code on the CoA containing the sample's `lab_results_url`, then the PDF parsing routine can be as simple as follows. If not, then you can implement your own PDF parsing logic.
+        return self.parse_pdf(
+            self,
+            doc,
+            lims='Confident Cannabis',
+            max_delay=max_delay,
+            persist=persist,
+        )
+    ```
+    Your algorithm to parse from a lab or LIMS CoA URL can be as simple or as complex as necessary. If the lab or LIMS has implemented an API, then the algorithm can simply be a function to make a request to the lab's API. Be sure to create a unique `sample_id` before returning the observation (`obs`) data.
+    ```py
+    from cannlytics.data.data import create_sample_id
 
-```py
-def parse_cc_pdf(
-        self,
+    def parse_cc_url(
+            self,
+            url: str,
+            headers: Optional[Any] = None,
+            max_delay: Optional[float] = 7,
+            persist: Optional[bool] = False,
+        ) -> dict:
+        """Parse a Confident Cannabis CoA URL.
+        Args:
+            url (str): The CoA URL.
+            headers (Any): Optional headers for standardization.
+            max_delay (float): The maximum number of seconds to wait
+                for the page to load.
+            persist (bool): Whether to persist the driver.
+                The default is `False`. If you do persist
+                the driver, then make sure to call `quit`
+                when you are finished.
+        Returns:
+            (dict): The sample data.
+        """
+        # TODO: Implement API request and parsing here....
+
+        # Return the sample with a freshly minted sample ID.
+        obs['sample_id'] = create_sample_id(
+            private_key=producer,
+            public_key=product_name,
+            salt=date_tested,
+        )
+        return obs
+    ```
+    Finally, you can create a `parse_{lab}_coa` function to parse either a PDF or a URL.
+    ```py
+    def parse_cc_coa(
+        parser,
         doc: Any,
-        max_delay: Optional[float] = 7,
-        persist: Optional[bool] = False,
+        **kwargs,
     ) -> dict:
-    """Parse a Confident Cannabis CoA PDF.
+    """Parse a Confident Cannabis CoA PDF or URL.
     Args:
-        doc (str or PDF): A file path to a PDF or a pdfplumber PDF.
-        max_delay (float): The maximum number of seconds to wait
-            for the page to load.
-        persist (bool): Whether to persist the driver.
-            The default is `False`. If you do persist
-            the driver, then make sure to call `quit`
-            when you are finished.
+        doc (str or PDF): A PDF file path or pdfplumber PDF.
     Returns:
         (dict): The sample data.
     """
-    # TODO: Implement any custom PDF parsing here....
-
-    return self.parse_pdf(
-        self,
-        doc,
-        lims='Confident Cannabis',
-        max_delay=max_delay,
-        persist=persist,
-    )
-```
-
-Your algorithm to parse from a lab or LIMS CoA URL can be as simple or as complex as necessary. If the lab or LIMS has implemented an API, then the algorithm can simply be a function to make a request to the lab's API. Be sure to create a unique `sample_id` before returning the observation (`obs`) data.
-
-```py
-from cannlytics.data.data import create_sample_id
-
-def parse_cc_url(
-        self,
-        url: str,
-        headers: Optional[Any] = None,
-        max_delay: Optional[float] = 7,
-        persist: Optional[bool] = False,
-    ) -> dict:
-    """Parse a Confident Cannabis CoA URL.
-    Args:
-        url (str): The CoA URL.
-        headers (Any): Optional headers for standardization.
-        max_delay (float): The maximum number of seconds to wait
-            for the page to load.
-        persist (bool): Whether to persist the driver.
-            The default is `False`. If you do persist
-            the driver, then make sure to call `quit`
-            when you are finished.
-    Returns:
-        (dict): The sample data.
-    """
-    # TODO: Implement API request and parsing here....
-
-    # Return the sample with a freshly minted sample ID.
-    obs['sample_id'] = create_sample_id(
-        private_key=producer,
-        public_key=product_name,
-        salt=date_tested,
-    )
-    return obs
-```
+    if isinstance(doc, str):
+        if doc.startswith('http'):
+            return parse_cc_url(parser, doc, **kwargs)
+        elif doc.endswith('.pdf'):
+            return parse_cc_pdf(parser, doc, **kwargs)
+        else:
+            return parse_cc_pdf(parser, doc, **kwargs)
+    else:
+        return parse_cc_pdf(parser, doc, **kwargs)
+    ```
+2. Import the details for your lab / LIMS in `coas.py`, where your lab or LIMS details contain the following fields:
+    ```py
+    YOUR_FAVORITE_LIMS = {
+        'coa_algorithm': 'favorite.py',
+        'coa_algorithm_entry_point': 'parse_favorite_coa',
+        'lims': 'Your Favorite LIMS',
+        'url': 'https://cannlytics.com',
+    }
+    ```
+3. Add the lab details to the `LIMS` dictionary with the preferred name of your lab / LIMS as the key. For Example:
+    ```py
+    LIMS = {
+      'Your Favorite LIMS': YOUR_FAVORITE_LIMS,
+    }
+    ```
 
 You can use `CoADoc`'s built-in helper functions in your parsing algorithms.
 
@@ -232,4 +262,4 @@ You can use `CoADoc`'s built-in helper functions in your parsing algorithms.
 | `get_pdf_creation_date(pdf)` | Get the creation date of a PDF in ISO format. |
 | `identify_lims(doc)` | Identify if a CoA was created by a common LIMS. |
 
-Once you have created a function or functions to parse CoAs for a new lab or LIMS, then you can create a pull request to have your algorithm reviewed and included in the main Cannlytics repository upon approval. Then your algorithm can be used to parse CoAs for anyone in the world who needs your service.
+Once you have created a function or functions to parse CoAs for a new lab or LIMS, then you can create a pull request to have your algorithm reviewed and included in the main Cannlytics repository upon approval. Once published, your algorithm and the knowledge that it generates can be used to help parse CoAs all around the world. As more and more CoAs are parsed, the knowledge base will grow and grow. Now you have rich CoA data, cleverly unlocked, continuously being polished, and ripe for your plundering.

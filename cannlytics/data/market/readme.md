@@ -5,7 +5,7 @@
   <img height="125px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_algorithm_farm.png?alt=media&token=5a708351-a5e3-4437-b6bb-19bd6ec339f6">
 </div>
 
-Welcome to the [Cannabis Data Market](https://cannabisdatamarket.com) and [Algorithm Farm](algorithmfarm.com), a first of their kind. The idea is that algorithms and data can be published, purchased, and consumed in a decentralized manner as NFTs, through [smart contracts](https://en.wikipedia.org/wiki/Smart_contract), empowering both algorithm and data suppliers and consumers. It's a win-win mechanism that potentially millions can make a good living from creating, curating, and consuming data and algorithms in the cannabis space. Please feel free to begin to share any initial ideas, questions, comments, etc. and join in on the fun as we populate the first cannabis-specific data NFT and algorithm NFT marketplace.
+Welcome to the [Cannabis Data Market](https://cannabisdatamarket.com) and [Algorithm Farm](algorithmfarm.com), firsts of their kind. The idea is that algorithms and data can be published, purchased, and consumed in a decentralized manner as NFTs, through [smart contracts](https://en.wikipedia.org/wiki/Smart_contract), empowering both algorithm and data suppliers and consumers. It's a win-win mechanism that potentially millions can make a good living from creating, curating, and consuming data and algorithms in the cannabis space. Please feel free to begin to share any initial ideas, questions, comments, etc. and join in on the fun as we populate the first cannabis-specific data NFT and algorithm NFT marketplace.
 
 ## Introduction to Digital Assets: Data and Algorithm NFTs
 
@@ -26,7 +26,7 @@ The key features are:
 - Operates efficiently at all times;
 - Discloses risks and fees;
 - Discloses how your assets are being protected;
-- People can opt-in;
+- People can opt-in.
 
 That is the beauty of smart contracts, they are built in an open-source manner, transparent and open to all, thanks to tireless work of people voluntarily coming together from around the world. An instance of the service can be re-created anywhere, giving you the freedom to find an option suited to you.
 
@@ -57,14 +57,14 @@ The idea is for data collection, processing, and analysis algorithms and data to
 A rough list of tasks that need to be done, include:
 
 1. Refactor:
-  - [] Write thorough doc-strings for all functions.
-  - [] Allow selling data as a pool.
-  - [] Allow user to pass a Wallet instead of private_key.
+  - [ ] Write thorough doc-strings for all functions.
+  - [ ] Allow selling data as a pool.
+  - [ ] Allow user to pass a Wallet instead of private_key.
 
 2. Publish assets metadata and associated services:
-  - [] Each asset is assigned a unique DID and a DID Document (DDO).
-  - [] The DDO contains the asset's services including the metadata.
-  - [] The DID is registered on-chain with a URL of the metadata store to retrieve the DDO from
+  - [ ] Each asset is assigned a unique DID and a DID Document (DDO).
+  - [ ] The DDO contains the asset's services including the metadata.
+  - [ ] The DID is registered on-chain with a URL of the metadata store to retrieve the DDO from
 
   ```python
   asset = ocean.assets.create(metadata, publisher_wallet)

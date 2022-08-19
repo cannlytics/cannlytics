@@ -6,7 +6,8 @@ Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
 Updated: 8/1/2022
 """
-from .utils import (
+import constants
+from utils import (
     camelcase,
     camel_to_snake,
     clean_column_strings,
@@ -44,9 +45,11 @@ from .utils import (
     encode_pdf,
     get_number_of_lines,
     unzip_files,
+    reorder_columns,
 )
 
 __all__ = [
+    'constants',
     'camelcase',
     'camel_to_snake',
     'clean_column_strings',
@@ -85,4 +88,5 @@ __all__ = [
     'get_number_of_lines',
     'decode_pdf',
     'encode_pdf',
+    'reorder_columns',
 ]

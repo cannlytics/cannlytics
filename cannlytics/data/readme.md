@@ -14,7 +14,7 @@ The core data manipulation tools are found in `cannlytics.data.data`.
 
 | Function | Description |
 |----------|-------------|
-| `aggregate_datasets(directory, on='sample_id', how='left', replace='right', reverse=True, concat=False)` | Aggregate datasets. Leverages `rmerge` to combine each dataset in the given directory. |
+| `aggregate_datasets(directory, on='sample_id', how='left', replace='right', reverse=True, concat=False)` | Aggregate datasets. Leverages `rmerge` to combine each dataset in a given directory. |
 
 *Data Cleaning*
 
@@ -41,7 +41,7 @@ The core data manipulation tools are found in `cannlytics.data.data`.
 
 | Function | Description |
 |----------|-------------|
-| `crispy_barchart(df, annotations=False, key=0, fig_size=(5, 3.5), font_family='serif', font_style='Times NEw Roman', text_color='#333F4B', notes='', notes_offset=.15, palette=None, percentage=False, title='', save='', x_label=None, y_label=None, y_ticks=None, zero_bound=False,)` | Create a beautiful bar chart given data. |
+| `crispy_barchart(df, annotations=False, key=0, fig_size=(5, 3.5), font_family='serif', font_style='Times New Roman', text_color='#333F4B', notes='', notes_offset=.15, palette=None, percentage=False, title='', save='', x_label=None, y_label=None, y_ticks=None, zero_bound=False,)` | Create a beautiful bar chart given data. |
 | `crispy_scatterplot(data, x, y, category_key, categories, colors, label_size=20, legend_loc='upper left', notes='', notes_offset=.15, note_size=14, percentage=False, save='', title='', title_size=24, font_size=18, fig_size=(15, 7.5), font_family='serif', font_style='Times New Roman', text_color='#333F4B',)` | Create a beautiful scatter plot given data. |
 
 <!-- TODO: Examples -->
@@ -70,20 +70,20 @@ art.cartoonize_image('model.jpg', 'strain-nft.jpg')
 
 ## GIS Data
 
-There are a number of geographic information system tools in `cannlytics.data.gis`. The tools primarily leverage Google Maps and expect a [Google Maps API Key](https://developers.google.com/maps/documentation/javascript/get-api-key).
+There are a number of geographic information system (GIS) tools in `cannlytics.data.gis`. Certain tools leverage Google Maps or Fed FRED and expect either a [Google Maps API key](https://developers.google.com/maps/documentation/javascript/get-api-key) or a [Fed FRED API key](http://research.stlouisfed.org/fred2/).
 
 | Function | Description |
 |----------|-------------|
-| `get_state_population(state, api_key, district='', obs_start=None, obs_end=None, multiplier=1000)` | Get a given state's latest population from the Fed Fred API, getting the number in 1000's and returning the absolute value. |
-| `geocode_addresses(data, api_key=None, pause=0.0, address_field='')` | Geocode addresses in a dataframe. |
-| `search_for_address(query, api_key=None, fields=None)` | Search for the address of a given name. |
+| `get_state_population(state, fred_api_key, district='', obs_start=None, obs_end=None, multiplier=1000)` | Get a given state's population from the Fed Fred API. The `state` abbreviation can be upper or lower case. You can either pass your Fed FRED API key to `fred_api_key` or specify `fred_api_key=None` and set the environment variable 'FRED_API_KEY' to the value of your API key. You can specify `obs_start` and/or `obs_end` to get a timeseries of population. The latest population is retrieved by default. |
+| `geocode_addresses(data, api_key=None, pause=0.0, address_field='')` | Geocode addresses in a dataframe. Expects a Google Maps API key. |
+| `search_for_address(query, api_key=None, fields=None)` | Search for the address of a given name. Expects a Google Maps API key. |
 |
 
 <!-- TODO: Examples -->
 
 ## Cannabis OpenData
 
-The `cannlytics.data.opendata` submodule contains a `OpenData` class. An instance of the `OpenData` class communicates with the [Cannabis Control Commission of the Commonwealth of Massachusetts' Open Data catalog](https://masscannabiscontrol.com/open-data/data-catalog/).
+The `cannlytics.data.opendata` submodule contains an `OpenData` class. An instance of the `OpenData` class communicates with the [Cannabis Control Commission of the Commonwealth of Massachusetts' Open Data catalog](https://masscannabiscontrol.com/open-data/data-catalog/).
 
 | Method | Description |
 |----------|-------------|

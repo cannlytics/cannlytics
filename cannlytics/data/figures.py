@@ -34,7 +34,7 @@ def crispy_barchart(
         key=0,
         fig_size=(5, 3.5),
         font_family='serif',
-        font_style='Times NEw Roman',
+        font_style='Times New Roman',
         text_color='#333F4B',
         notes='',
         notes_offset=.15,

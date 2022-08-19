@@ -91,7 +91,7 @@ track = Metrc(
 )
 ```
 
-The table below contains all of the methods of the `Metrc` class. In general, you can pass ISO-formatted times to `start` and `end` arguments, specify `action` where applicable, and specify `license_number` to perform operations for a specific licensee. Methods that create or update data accept an optional argument `return_obs` for you to specify if you wish for the created or updated data to be returned. Note that this requires subsequent requests to the Metrc API, so, the default is for create or update methods to return `None`. Methods to get data usually accept a `uid` argument for you to specify a specific Metrc tag or label.
+The tables below contain all of the methods of the `Metrc` class. In general, you can pass ISO-formatted times to `start` and `end` arguments, specify `action` where applicable, and specify `license_number` to perform operations for a specific licensee. Methods that create or update data accept an optional argument `return_obs` for you to specify if you wish for the created or updated data to be returned. Note that this requires subsequent requests to the Metrc API, so, the default behavior is for create or update methods to return `None`. Methods to get data usually accept a `uid` argument for you to specify a specific Metrc tag or label.
 
 *Employees and Facilities*
 | Method | Description | Endpoint |
@@ -283,7 +283,7 @@ Note the following [rate limits](https://www.metrc.com/wp-content/uploads/2021/1
 
 ## Metrc Models
 
-The `cannlytics.metrc.models` contains common Metrc models. Certain models have methods for self-management. Using the methods of the models in tandem with the `Metrc` client allows for powerful management of your Metrc data.
+The `cannlytics.metrc.models` submodule contains common Metrc models. Certain models have methods for self-management. Using the methods of the models in tandem with the `Metrc` client allows for powerful management of your Metrc data.
 
 - `Category` - A class representing an item category.
     ```py
@@ -705,7 +705,7 @@ The `cannlytics.metrc.models` contains common Metrc models. Certain models have 
 
 | Constant | Description |
 |----------|-------------|
-| `DEFAULT_HISTORY = 5` | The number of minutes in the past to check the Metrc API when creating and updating objects and returning observations. |
+| `DEFAULT_HISTORY` | The number of minutes (5 by default) in the past to check the Metrc API when creating and updating objects and returning observations. |
 | `additive_types` | Types of additives that may be used during cultivation: `Fertilizer`, `Pesticide`, `Other`.  |
 | `adjustment_reasons` | Objects representing reasons for adjusting inventory, e.g. `{'Name': 'Drying', ...}`. |
 | `analyses` | State mandated quality control analysis objects, e.g. `{'Name': 'THC', ...}`. |

@@ -283,7 +283,8 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
 
                 # Parse the result values.
                 name = line[:first_value].strip()
-                analyte = ANALYTES.get(snake_case(name), snake_case(name))
+                analyte = snake_case(name)
+                analyte = ANALYTES.get(analyte, analyte)
                 values = line[first_value:].strip().split(' ')
                 values = [x for x in values if x]
                 result = {

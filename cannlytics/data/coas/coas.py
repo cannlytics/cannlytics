@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/13/2022
+Updated: 8/18/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -62,9 +62,11 @@ Future work:
 
 """
 # Standard imports.
+from ast import literal_eval
 import base64
 import importlib
 from io import BytesIO
+import operator
 from typing import Any, Optional
 import openpyxl
 import pandas as pd
@@ -78,8 +80,10 @@ from pyzbar.pyzbar import decode
 # Internal imports.
 from cannlytics.data.data import write_to_worksheet
 from cannlytics.utils import (
+    convert_to_numeric,
     get_directory_files,
     sandwich_list,
+    reorder_columns,
     unzip_files,
 )
 from cannlytics.utils.constants import (
@@ -101,7 +105,6 @@ from cannlytics.data.coas.sonoma import SONOMA
 from cannlytics.data.coas.tagleaf import TAGLEAF
 # from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
 
-
 # Labs and LIMS that CoADoc can parse.
 LIMS = {
     'Anresco Laboratories': ANRESCO,
@@ -114,6 +117,15 @@ LIMS = {
     'TagLeaf LIMS': TAGLEAF,
     # 'Veda Scientific': VEDA_SCIENTIFIC,
 }
+
+# Default preferred order for DataFrame columns.
+DEFAULT_COLUMN_ORDER = ['sample_id', 'product_name', 'producer',
+    'product_type', 'date_tested']
+
+# Default nuisance columns to remove during standardization.
+DEFAULT_NUISANCE_COLUMNS = ['received_by', 'sampled_by', 'Unnamed: 1',
+    'None_method', 'loss_on_drying_moisture', '_3_5_grams',
+    'index', 'other_analyses', 'wildcard']
 
 
 class CoADoc:
@@ -647,142 +659,370 @@ class CoADoc:
             self,
             data: Any,
             outfile:str,
-            alphabetize: Optional[bool] = True,
+            column_order: Optional[list] = None,
+            nuisance_columns: Optional[list] = None,
         ) -> Any:
-        """Save all CoA data, flattening results, images, etc.
+        """Save all CoA data, elongating results and widening values.
+        That is, a Workbook is created with a "Details" worksheet that
+        has all of the raw data, a "Results" worksheet with long-form
+        data where each row is a result for an analyte, and a "Values"
+        worksheet with wide-form data where each row is an observation
+        and each column is the `value` field for each of the `results`.
         Args:
             data (dict or list or DataFrame): The data to save.
             outfile (str): The file that you wish to save. Accepts a
                 response object for returning in an HTTP request.
-            alphabetize (bool): Whether or not to alphabetize the sample
-                details, True by default (optional).
+            column_order (list): Desired order for columns.
+            nuisance_columns (list): A list of column suffixes to remove.
         Returns:
             (Workbook): An openpyxl Workbook.
         """
-
         # Create a workbook for saving the data.
         wb = openpyxl.Workbook()
 
-        # Format the data.
-        df = None
+        # Initialize the details data.
+        details_data = None
         if isinstance(data, dict):
-            df = pd.DataFrame([data])
+            details_data = pd.DataFrame([data])
         elif isinstance(data, list):
-            df = pd.DataFrame(data)
+            details_data = pd.DataFrame(data)
         else:
-            df = data
+            details_data = data
 
-        # Alphabetize the results!
-        if alphabetize:
-            df = df.reindex(sorted(df.columns), axis=1)
+        # Specify the desired order for columns / fields.
+        if column_order is None:
+            column_order = DEFAULT_COLUMN_ORDER
+        if nuisance_columns is None:
+            nuisance_columns = DEFAULT_NUISANCE_COLUMNS
 
-        # Save the results, cell by cell.
-        df = df[ ['sample_id'] + [col for col in df.columns if col != 'sample_id']]
+        # Standardize details.
+        details_data = self.standardize(
+            data,
+            column_order=column_order,
+            nuisance_columns=nuisance_columns,
+        )
+
+        # Standardize results.
+        results_data = self.standardize(
+            details_data,
+            column_order=column_order,
+            nuisance_columns=nuisance_columns,
+            how='long',
+        )
+
+        # Standardize values.
+        values_data = self.standardize(
+            details_data,
+            column_order=column_order,
+            nuisance_columns=nuisance_columns,
+            details_data=details_data,
+            results_data=results_data,
+            how='wide'
+        )
+
+        # Add a Codings worksheet.
+        coding_data = pd.DataFrame({
+            'Coding': CODINGS.values(),
+            'Actual': CODINGS.keys(),
+        })
+
+        # Create a workbook for saving the data.
+        wb = openpyxl.Workbook()
         ws = wb.worksheets[0]
-        ws.title = 'Details'
-        write_to_worksheet(ws, df)
-        
-        # Create a long table of results.
-        results = []
-        for _, item in df.iterrows():
-            for result in item['results']:
-                sample = {'sample_id': item['sample_id']}
-                results.append({**sample, **result})
-
-        # Create a worksheet of all sample results.
-        wb.create_sheet(title='Results')
+        ws.title = 'Values'
+        write_to_worksheet(ws, values_data)
+        wb.create_sheet(title='Details')
         ws = wb.worksheets[1]
-        write_to_worksheet(ws, pd.DataFrame(results))
-
-        # Format the values.
-        values = []
-        for _, item in df.iterrows():
-            value = {
-                'sample_id': item['sample_id'],
-                'product_name': item['product_name'],
-                'producer': item['producer'],
-                'date_tested': item['date_tested'],
-                'product_type': item['product_type'],
-            }
-            for result in item['results']:
-                value[result['key']] = result.get('value', result.get('percent'))
-            values.append(value)
-
-        # Add a values sheet.
-        wb.create_sheet(title='Values')
+        write_to_worksheet(ws, details_data)
+        wb.create_sheet(title='Results')
         ws = wb.worksheets[2]
-        write_to_worksheet(ws, pd.DataFrame(values))
-
-        # Save and return the datafile.
+        write_to_worksheet(ws, results_data)
+        wb.create_sheet(title='Codings')
+        ws = wb.worksheets[3]
+        write_to_worksheet(ws, coding_data)
         wb.save(outfile)
         return wb
 
-    def standardize(self, data) -> Any:
+    def standardize(
+            self,
+            data: Any,
+            google_maps_api_key: Optional[str] = None,
+            column_order: Optional[list] = None,
+            nuisance_columns: Optional[list] = None,
+            how: Optional[str] = 'details',
+            details_data: Optional[pd.DataFrame] = None,
+            results_data: Optional[pd.DataFrame] = None,
+        ) -> Any:
         """Standardize (and normalize) given data.
         Args:
             data (dict or list or DataFrame): The data to standardize.
+            google_maps_api_key (str): A Google Maps API Key to supplement
+                addresses with latitude and longitude.
+            column_order (list): A list of columns in desired order.
+            nuisance_columns (list): A list of column suffixes to remove.
+            how (str): How to standardize, a simple clean of the data
+                `details` by default. Alternatively specify `wide` for a
+                wide-form DataFrame of values or `long` for a long-form
+                DataFrame of results.
+            details_data (DataFrame): The data pre-formatted as `details`.
+                May provide a speed increase provided when formatting `values`.
+            results_data (DataFrame): The data pre-formatted as `results`.
+                May provide a speed increase provided when formatting `values`.
         Returns:
             (dict or list or DataFrame): Returns the data with standardized
                 fields, analyses, analytes, product types, normalized
                 results, and augmented with strain name and GIS data.
         """
-
-        # TODO: Calculate totals if missing:
-        # - `total_cannabinoids`
-        # - `total_terpenes`
-        # - `total_thc`
-        # - `total_cbd`
-        # - `total_cbg`
-        # - `total_thcv`
-
-        # TODO: Normalize terpenes:
-        # - Calculate `ocimene` as the sum of: `ocimene`, `beta_ocimene`, `trans_ocimene`.
-        # - Calculate `nerolidol` as the sum of: `trans_nerolidol`, `cis_nerolidol`
-        # - Calculate `terpinenes` as the sum of: `alpha_terpinene``,
-        #   `gamma_terpinene`, `terpinolene`, `terpinene`
-
-        # TODO: Standardize analyses.
-
-        # TODO: Standardize analytes.
-
-        # TODO: Standardize fields.
-
-        # TODO: Normalize the `results`:
-        # - Remove and keep `units` from `value`.
-        # - Map `DECODINGS` with `value` and `mg_g`.
-
-        # TODO: Standardize `units`, `product_type`, etc.
-
-        # TODO: Try to parse a `strain_name` from `product_name`.
-
-        # TODO: Augment any missing latitude and longitude or address field.
-        # E.g. Get missing address fields for TagLeaf LIMS:
-        # - lab_street
-        # - lab_city
-        # - lab_county
-        # - lab_state
-        # - lab_zipcode
-        # - lab_latitude
-        # - lab_longitude
-
-        # TODO: Sort the columns.
-        # product_name near the beginning.
+        # Specify the desired order for columns / fields.
+        if column_order is None:
+            column_order = DEFAULT_COLUMN_ORDER
+        if nuisance_columns is None:
+            nuisance_columns = DEFAULT_NUISANCE_COLUMNS
         
-        # Turn dates to ISO format.
-        date_columns = [x for x in data.keys() if x.startswith('date')]
-        for date_column in date_columns:
-            try:
-                data[date_column] = pd.to_datetime(data[date_column]).isoformat()
-            except:
-                pass
+        # TODO: Ensure that all calculable fields are present, such as `total_cannabinoids` and `total_terpenes`.
+        # TODO: Remove and keep `units` from `value`.
+        # TODO: Standardize `units`
+        # TODO: Create a standard `product_type_key`
+        # TODO: Augment any missing GIS data, such as latitude, longitude, or address field.
+        # TODO: Try to parse a `strain_name` from `product_name` with NLP.
 
-        # Drop `coa_{field}` helper fields.
-        drop = [x for x in data.keys() if x.startswith('coa_')]
-        for k in drop:
-            del data[k]
+        # Standardize a dictionary.
+        if isinstance(data, dict):
 
-        # Return the standardized observation.
-        return data
+            # Identify fields:
+            fields = STANDARD_FIELDS
+            if how == 'wide':
+                fields.extend(ANALYTES)
+
+            # Standardize fields (and analytes for `wide` data).
+            std = {}
+            for k, v in data.items():
+                key = fields.get(k, k)
+                std[key] = v
+
+            # Standardize `analyses` of details.
+            if how == 'details':
+                std['analyses'] = [ANALYSES.get(x, x) for x in std['analyses']]
+
+                # TODO: Standardize the `analysis` of reach of the results.
+
+            # Standard `analysis` of long-form data.
+            elif how == 'long':
+                analysis = std.get('analysis')
+                std['analysis'] = ANALYSES.get(analysis, analysis)
+
+            # TODO: Normalize the `results` (for details, wide, and long data).
+
+            # TODO: Map `CODINGS` on number fields (for details, wide, and long data).
+
+            # Turn dates values to ISO format.
+            dates = [x for x in data.keys() if x.startswith('date')]
+            for k in dates:
+                try:
+                    data[k] = pd.to_datetime(data[k]).isoformat()
+                except:
+                    pass
+
+            # Return the standardized observation.
+            return data
+
+        # Standardize a list of dictionaries.
+        elif isinstance(data, list):
+            return [self.standardize(
+                x,
+                google_maps_api_key=google_maps_api_key,
+                column_order=column_order,
+                nuisance_columns=nuisance_columns,
+                how=how,
+                details_data=details_data,
+                results_data=results_data,
+            ) for x in data]
+
+        # Standardize a DataFrame.
+        elif isinstance(data, pd.DataFrame):
+
+            # Standardize details (`details` data).
+            if how == 'details':
+
+                # Standardize detail columns.
+                details_data = data.copy()
+                details_data.rename(
+                    STANDARD_FIELDS,
+                    axis=1,
+                    inplace=True,
+                    errors='ignore',
+                )
+                details_data = details_data.groupby(level=0, axis=1).first()
+
+                # Drop nuisance columns.
+                for c in nuisance_columns:
+                    criterion = details_data.columns.str.endswith(c)
+                    details_data = details_data.loc[:, ~criterion]
+
+                # Apply codings
+                details_data.replace(CODINGS, inplace=True)
+        
+                # Convert totals to numeric.
+                # TODO: Calculate totals if they don't already exist:
+                # - total_cannabinoids
+                # - total_terpenes
+                # - total_cbd
+                # - total_thc
+                # - total_cbg
+                # - total_thcv
+                totals = [x for x in details_data.keys() if x.startswith('total_')]
+                for c in totals:
+                    details_data[c] = details_data[c].astype(str).apply(convert_to_numeric, strip=True)
+                    details_data[c] = details_data[c].apply(pd.to_numeric, errors='coerce')
+
+                # Re-order columns.
+                details_data = reorder_columns(details_data, column_order)
+                return details_data            
+
+            # Standardize results (`long` data).
+            elif how == 'long':
+
+                # Create a long table of results data.
+                results = []
+                details_data = data.copy()
+                for _, item in details_data.iterrows():
+                    try:
+                        sample_results = literal_eval(item['results'])
+                    except:
+                        print('Failed to format:', item['product_name'])
+                        continue
+                    for result in sample_results:
+                        sample = {
+                            'sample_id': item['sample_id'],
+                            'product_name': item['product_name'],
+                            'producer': item['producer'],
+                            'date_tested': item['date_tested'],
+                        }
+                        results.append({**sample, **result})
+                results_data = pd.DataFrame(results)
+
+                # Apply codings (redundant?).
+                results_data.replace(CODINGS, inplace=True)
+
+                # Standardize the results columns.
+                results_data.rename(
+                    STANDARD_FIELDS,
+                    axis=1,
+                    inplace=True,
+                    errors='ignore',
+                )
+                results_data = results_data.groupby(level=0, axis=1).first()
+
+                # Standardize the key column (redundant?).
+                results_data['key'] = results_data['key'].apply(
+                    lambda x: ANALYTES.get(x, x)
+                )
+
+                # Re-order columns.
+                results_data = reorder_columns(results_data, column_order)
+                return results_data
+
+            # Standardize values (`wide` data).
+            elif how == 'wide':
+
+                # Get results data (if not passed for speed).
+                if details_data is None:
+                    details_data = self.standardize(
+                        data,
+                        column_order=column_order,
+                        nuisance_columns=nuisance_columns,
+                    )
+                if results_data is None:
+                    results_data = self.standardize(
+                        data,
+                        column_order=column_order,
+                        nuisance_columns=nuisance_columns,
+                        how='wide'
+                    )
+                    
+                # Standardize results (long data).
+                # Map keys to analysis for ordering for Values worksheet columns.
+                pairs = []
+                analytes = list(results_data['key'].unique())
+                for a in analytes:
+                    try:
+                        analyses = results_data.loc[results_data['key'] == a]
+                        analyses = list(analyses['analysis'].unique())
+                        analyses = [x for x in analyses if x is not None]
+                        analysis = analyses[0]
+                        place = ord(analysis[0])
+                        if place == 116: place = 100 # Hot-fix to order terpenes right after cannabinoids.
+                        pairs.append((a, analysis, place))
+                    except:
+                        pairs.append((a, None, 122))
+
+                # Sort the pairs of analytes/analyses.
+                pairs.sort(key=operator.itemgetter(2))
+
+                # Create a wide table of values data.
+                values = []
+                for _, item in details_data.iterrows():
+                    value = {
+                        'sample_id': item['sample_id'],
+                        'product_name': item['product_name'],
+                        'producer': item['producer'],
+                        'date_tested': item['date_tested'],
+                        'product_type': item['product_type'],
+                    }
+                    try:
+                        sample_results = literal_eval(item['results'])
+                    except:
+                        print('Failed to format:', item['product_name'])
+                        continue
+                    for result in sample_results:
+                        analyte = result['key']
+                        analyte = ANALYTES.get(analyte, analyte)
+                        value[analyte] = result.get('value', result.get('percent'))
+                    values.append(value)
+                values_data = pd.DataFrame(values)
+
+                # Rename and combine columns.
+                values_data.rename(
+                    ANALYTES,
+                    axis=1,
+                    inplace=True,
+                    errors='ignore',
+                )
+                values_data = values_data.groupby(level=0, axis=1).first()
+
+                # Apply codings to columns.
+                values_data.replace(CODINGS, inplace=True)
+
+                # Drop nuisance columns.
+                for c in nuisance_columns:
+                    criterion = values_data.columns.str.endswith(c)
+                    values_data = values_data.loc[:, ~criterion]
+
+                # Drop totals.
+                # TODO: Add totals back from the Details worksheet?
+                criterion = values_data.columns.str.startswith('total_')
+                values_data = values_data.loc[:, ~criterion]
+
+                # Move certain columns to the beginning.
+                column_order.extend([pair[0] for pair in pairs])
+                values_data = reorder_columns(values_data, column_order)
+                return values_data
+        
+        # Standardize a series.
+        elif isinstance(data, pd.Series):
+            return pd.Series(self.standardize(
+                data.to_dict(),
+                google_maps_api_key=google_maps_api_key,
+                column_order=column_order,
+                nuisance_columns=nuisance_columns,
+                how=how,
+                details_data=details_data,
+                results_data=results_data,
+            ))
+
+        # Raise an error if an incorrect type is passed.
+        else:
+            raise ValueError
     
     def quit(self):
         """Close any driver, end any session, and reset the parameters."""

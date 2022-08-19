@@ -5,12 +5,12 @@ Copyright (c) 2022 Cannlytics
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/29/2022
 Updated: 8/10/2022
-License: MIT License <https://opensource.org/licenses/MIT>
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
     Programmatically create flower art given effects and aromas.
-    E.g. skunk -> green heat wave coming off of flower
+    E.g. skunk -> green heat wave coming off of flower.
 
 Resources:
 

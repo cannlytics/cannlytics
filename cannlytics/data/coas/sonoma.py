@@ -270,7 +270,7 @@ def parse_sonoma_coa(
         except:
             pass
 
-    # Get the producer's address.
+    # Try to get the producer's address.
     try:
         location = search_for_address(obs['producer_address'], api_key=google_maps_api_key)
         for key, value in location.items():
@@ -278,7 +278,7 @@ def parse_sonoma_coa(
     except:
         pass
 
-    # Get the distributor's address.
+    # Try to get the distributor's address.
     try:
         location = search_for_address(obs['distributor_address'], api_key=google_maps_api_key)
         for key, value in location.items():
@@ -307,8 +307,11 @@ if __name__ == '__main__':
     from cannlytics.data.coas import CoADoc
 
     # Get Google Maps API Key.
-    config = dotenv_values('../../../.env')
-    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
+    try:
+        config = dotenv_values('../../../.env')
+        google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
+    except:
+        google_maps_api_key = None
 
     # [✓] TEST: Parse a Sonoma Lab Works CoA PDF.
     parser = CoADoc()

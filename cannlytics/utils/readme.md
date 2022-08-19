@@ -74,6 +74,7 @@ There are a number of useful constants in the `cannlytics.utils.constants` submo
 | `nonzero_columns(data)` | Return the non-zero column names of a DataFrame. |
 | `nonzero_rows(data)` | Return the non-zero row keys of a DataFrame. |
 | `combine_columns(data, new_key, old_key, drop=True)` | Combine two numeric columns of a DataFrame. |
+| `reorder_columns(data, columns)` | Re-order a DataFrame given a specific order of columns. Remaining columns will be appended to the end of the DataFrame. |
 | `reverse_dataframe(data)` | Reverse the ordering of a DataFrame. |
 | `sum_columns(data, new_key, columns, drop=True)` | Sum multiple numeric columns of a DataFrame. |
 | `rmerge(left, right, **kwargs)` | Perform a merge using pandas with optional removal of overlapping column names not associated with the join. |

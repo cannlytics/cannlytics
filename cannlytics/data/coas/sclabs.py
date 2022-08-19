@@ -465,7 +465,7 @@ def get_sc_labs_sample_details(
 
     # Remove any keys that begin with a digit.
     for key in list(obs.keys()):
-        if key[0].isdigit():
+        if not key or key[0].isdigit():
             del obs[key]
 
     # Optional: Try to get sample_weight.
@@ -695,6 +695,8 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
     obs['distributor_license_number'] = license_number
 
     # Get sample details.
+    # FIXME: This may not be handling `sum_of_cannabinoids` and
+    # `total_cannabinoids` correctly.
     if isinstance(sample_details_area, str):
         sample_details_area = [sample_details_area]
     for area in sample_details_area:
@@ -798,6 +800,9 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
             first_value = find_first_value(line)
             name = line[:first_value].replace('\n', ' ').strip()
             analyte_analysis_map[name] = analysis
+
+    # FIXME: There are odd result fields showing up.
+    # E.g. `13_1_percent_tested_06_to_05_to_2021_method_qsp_1224_loss_on_drying_moisture`
 
     # Get the results.
     results = []

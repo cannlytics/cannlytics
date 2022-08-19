@@ -39,7 +39,7 @@ def get_google_maps_api_key() -> str:
 
 def get_state_population(
         state: str,
-        api_key: Optional[str] = None,
+        fred_api_key: Optional[str] = None,
         district: Optional[str] = '',
         obs_start: Optional[Any] = None,
         obs_end: Optional[Any] = None,
@@ -50,7 +50,7 @@ def get_state_population(
     Args:
         state (str): The state abbreviation for the state to retrieve
             population data. The abbreviation can be upper or lower case.
-        api_key (str): A Fed FRED API key. You can sign up for a free API key at
+        fred_api_key (str): A Fed FRED API key. You can sign up for a free API key at
             http://research.stlouisfed.org/fred2/. You can also pass `None`
             and set the environment variable 'FRED_API_KEY' to the value of
             your API key.
@@ -58,7 +58,7 @@ def get_state_population(
         (dict): Returns a dictionary with population values and source.
     """
     pops = []
-    fred = Fred(api_key=api_key)
+    fred = Fred(api_key=fred_api_key)
     code = f'{state.upper()}POP{district.upper()}'
     series = fred.get_series(code, obs_start, obs_end)
     for index, value in series.iteritems():
