@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and the Cannabis Data Science Team
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/8/2021
-Updated: 8/18/2022
+Updated: 8/19/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains useful constants. In particular, there
@@ -122,7 +122,13 @@ ANALYSES = {
     'Water Activity by Aqua Lab': 'water_activity',
     'Water Activity (Aw)': 'water_activity',
     'WATER ACTIVITY': 'water_activity',
-    'terpenoid_testing': 'terpenes'
+    'terpenoid_testing': 'terpenes',
+    # Necessary?
+    'mycotoxins_status': 'mycotoxins',
+    'pesticides_status': 'pesticides',
+    'cannabinoids_status': 'cannabinoids',
+    'heavy_metals_status': 'heavy_metals',
+    'water_activity_status': 'water_activity',
 }
 
 # A map of encountered analytes to their standardized analyte,

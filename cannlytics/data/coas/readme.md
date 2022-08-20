@@ -6,40 +6,6 @@
 
 Certificates of analysis (CoAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! CoADoc puts these vital data points in your hands by parsing PDFs and URLs, finding all the data, standardizing the data, and cleanly returning the data to you.
 
-## Algorithms
-
-Getting data from CoAs is inevitable and with modern tools, plus a little human ingenuity, we can methodically parse CoAs produced by various labs that test cannabis. All CoAs that are extracted through manually written routines are quite useful because these can then be used for training natural language processing (NLP) models to further extract data!
-
-| Status | | |
-|---|---|---|
-| 🟠 Development | 🟡 Operational | 🟢 Live |
-
-| Lab / LIMS | Algorithm | Status |
-|------------|-----------|--------|
-| Anresco Laboratories | `parse_anresco_coa` | 🟢 |
-| Cannalysis | `parse_cannalysis_coa` | 🟢 |
-| Confident Cannabis | `parse_cc_coa` | 🟢 |
-| Green Leaf Lab | `parse_green_leaf_lab_coa` | 🟢 |
-| MCR Labs | `parse_mcr_labs_coa` | 🟡 |
-| SC Labs | `parse_sc_labs_coa` | 🟢 |
-| Sonoma Lab Works | `parse_sonoma_coa` | 🟢 |
-| TagLeaf LIMS | `parse_tagleaf_coa` | 🟢 |
-| Veda Scientific | `parse_veda_coa` | 🟠 |
-
-## Core Methods
-
-CoADoc comes ready to rumble, but to unleash CoADoc's true power, ensure that you have installed [ChromeDriver](https://chromedriver.chromium.org/downloads) and that CoADoc can find your ChromeDriver in your PATH.
-
-| Function | Description |
-|----------|-------------|
-| `identify_lims(doc, lims=None)` | Identify if a CoA was created by a common LIMS. Search all of the text of the LIMS name or URL. If no LIMS is identified from the text, then the images are attempted to be decoded, searching for a QR code URL.|
-| `parse(data, headers={}, kind='url', lims=None, max_delay=7, persist=True)` | Parse all CoAs given a directory, a list of files, or a list of URLs. |
-| `parse(pdf, headers={}, kind='url', lims=None, max_delay=7, persist=True)` | Parse a CoA PDF. Searches images, alternating from the first then the last, for a QR code URL to find results online. |
-| `parse(url, headers = {}, kind = 'url', lims = None, max_delay = 7, persist = True)` | Parse a CoA URL. |
-| `save(data, outfile, column_order=None, nuisance_columns=None)` | Save all CoA data, elongating results and widening values. That is, a Workbook is created with a "Details" worksheet that has all of the raw data, a "Results" worksheet with long-form data where each row is a result for an analyte, and a "Values" worksheet with wide-form data where each row is an observation and each column is the `value` field for each of the `results`. |
-| `standardize(data, google_maps_api_key=None, column_order=None, nuisance_columns=None, how='details', details_data=None, results_data=None)` | Standardize (and normalize) given data. Pass A `google_maps_api_key` to supplement addresses with latitude and longitude. Specify `column_order` as a list of columns in desired order. Specify `nuisance_columns` as a list of column suffixes to remove. Specify `how` for a simple clean of the data `details` by default. Alternatively specify `wide` for a wide-form DataFrame of values or `long` for a long-form DataFrame of results.|
-| `quit()` | Close any driver, end any session, and reset the parameters. |
-
 ## Usage
 
 Initialize a `CoADoc` parsing client.
@@ -79,6 +45,40 @@ Close the client when you are finished to perform garbage cleaning.
 # Close the parser.
 parser.quit()
 ```
+
+## Algorithms
+
+Getting data from CoAs is inevitable and with modern tools, plus a little human ingenuity, we can methodically parse CoAs produced by various labs that test cannabis. All CoAs that are extracted through manually written routines are quite useful because these can then be used for training natural language processing (NLP) models to further extract data!
+
+| Status | | |
+|---|---|---|
+| 🟠 Development | 🟡 Operational | 🟢 Live |
+
+| Lab / LIMS | Algorithm | Status |
+|------------|-----------|--------|
+| Anresco Laboratories | `parse_anresco_coa` | 🟢 |
+| Cannalysis | `parse_cannalysis_coa` | 🟢 |
+| Confident Cannabis | `parse_cc_coa` | 🟢 |
+| Green Leaf Lab | `parse_green_leaf_lab_coa` | 🟢 |
+| MCR Labs | `parse_mcr_labs_coa` | 🟡 |
+| SC Labs | `parse_sc_labs_coa` | 🟢 |
+| Sonoma Lab Works | `parse_sonoma_coa` | 🟢 |
+| TagLeaf LIMS | `parse_tagleaf_coa` | 🟢 |
+| Veda Scientific | `parse_veda_coa` | 🟠 |
+
+## Core Methods
+
+CoADoc comes ready to rumble, but to unleash CoADoc's true power, ensure that you have installed [ChromeDriver](https://chromedriver.chromium.org/downloads) and that CoADoc can find your ChromeDriver in your PATH.
+
+| Function | Description |
+|----------|-------------|
+| `identify_lims(doc, lims=None)` | Identify if a CoA was created by a common LIMS. Search all of the text of the LIMS name or URL. If no LIMS is identified from the text, then the images are attempted to be decoded, searching for a QR code URL.|
+| `parse(data, headers={}, kind='url', lims=None, max_delay=7, persist=True)` | Parse all CoAs given a directory, a list of files, or a list of URLs. |
+| `parse_pdf(pdf, headers={}, kind='url', lims=None, max_delay=7, persist=True)` | Parse a CoA PDF. The method searches PDF images, alternating from the first then the last to the middle, for a QR code that decodes to a URL. If a URL is found, then results are attempted to be collected from the web. If no QR code is found or results can't be found on the web, then data is extracted from the PDF. |
+| `parse_url(url, headers={}, kind='url', lims=None, max_delay=7, persist=True)` | Parse a CoA URL using web data collection methods. |
+| `save(data, outfile, codings=None, column_order=None, nuisance_columns=None, numeric_columns=None, standard_analyses=None, standard_analytes=None, standard_fields=None, google_maps_api_key=None)` | Save all CoA data, elongating results and widening values. That is, a Workbook is created with a "Details" worksheet that has all of the raw data, a "Results" worksheet with long-form data where each row is a result for an analyte, and a "Values" worksheet with wide-form data where each row is an observation and each column is the `value` field for each of the `results`. |
+| `standardize(data, codings=None, column_order=None, nuisance_columns=None, numeric_columns=None, how='details', details_data=None, results_data=None, standard_analyses=None, standard_analytes=None, standard_fields=None, google_maps_api_key=None)` | Standardize (and normalize) given data. Pass A `google_maps_api_key` to supplement addresses with latitude and longitude. Specify `column_order` as a list of columns in desired order. Specify `nuisance_columns` as a list of column suffixes to remove. Specify `numeric_columns` as a list of columns to apply codings and convert to numeric values. Specify `how` for a simple clean of the data `details` by default. Alternatively specify `wide` for a wide-form DataFrame of values or `long` for a long-form DataFrame of results. Specify `standard_analyses`, `standard_analytes`, `standard_fields` to use custom standardization mappings.|
+| `quit()` | Close any driver, end any session, and reset the parameters. |
 
 ## Common CoA Data Points
 

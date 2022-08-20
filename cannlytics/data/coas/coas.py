@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/18/2022
+Updated: 8/19/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -68,12 +68,12 @@ import importlib
 from io import BytesIO
 import operator
 from typing import Any, Optional
-import openpyxl
-import pandas as pd
-import requests
 from wand.image import Image as wi
 
 # External imports.
+import openpyxl
+import pandas as pd
+import requests
 import pdfplumber
 from pyzbar.pyzbar import decode
 
@@ -194,17 +194,17 @@ class CoADoc:
         self.column_order = column_order
         if column_order is None:
             self.column_order = DEFAULT_COLUMN_ORDER
-        
+
         # Define default nuisance columns / fields to remove.
         self.nuisance_columns = nuisance_columns
         if nuisance_columns is None:
             self.nuisance_columns = DEFAULT_NUISANCE_COLUMNS
-        
+
         # Define default columns / fields to treat as numeric.
         self.numeric_columns = numeric_columns
         if numeric_columns is None:
             self.numeric_columns = DEFAULT_NUMERIC_COLUMNS 
-        
+
         # Define fields.
         self.fields = standard_fields
         if standard_fields is None:
@@ -222,7 +222,7 @@ class CoADoc:
 
         # Google Maps integration.
         self.google_maps_api_key = google_maps_api_key
-        
+    
         # Assign all of the parsing routines.
         if init_all:
             for values in self.lims.values():
@@ -297,7 +297,7 @@ class CoADoc:
 
     def find_metrc_id(self, pdf: Any) -> str:
         """Find any Metrc ID that may be in a given CoA PDF."""
-        # FIXME: Implement!
+        # TODO: Implement!
         # - 24 characters long (always?)
         # - Looks like '1A40603000...'
         if isinstance(pdf, str):
@@ -305,7 +305,7 @@ class CoADoc:
         else:
             pdf_file = pdf
         raise NotImplementedError
-    
+
     def get_metrc_results(self, metrc_id: str) -> dict:
         """Get Metrc lab results that have been archived
         in the Cannlytics library via the Cannlytics API.
@@ -317,7 +317,7 @@ class CoADoc:
         url = f'https://cannlytics.com/api/data/results?metrc_id={metrc_id}'
         response = requests.get(url)
         return response['data']
-    
+
     def get_page_rows(self, page: Any, **kwargs) -> list:
         """Get the rows a given page.
         Args:
@@ -347,7 +347,7 @@ class CoADoc:
         isoformat = f'{date[0:4]}-{date[4:6]}-{date[6:8]}'
         isoformat += f'T{date[8:10]}:{date[10:12]}:{date[12:14]}'
         return isoformat
-    
+
     def get_pdf_image_data(
             self,
             page: Any,
@@ -495,7 +495,7 @@ class CoADoc:
             # Parse a directory.
             else:
                 docs = get_directory_files(data)
-        
+
         # Handle a list of URLs, PDFs, and/or ZIPs.
         else:
             docs = data
@@ -562,8 +562,8 @@ class CoADoc:
             with open(wi(file=pdf, resolution=300)) as temp_file:
                 temp_file.save('/tmp/coa.pdf')
             pdf_file = pdfplumber.open('/tmp/coa.pdf')
-        
-        # FIXME: Try to read a Metrc ID from the PDF and use the Metrc ID
+
+        # TODO: Try to read a Metrc ID from the PDF and use the Metrc ID
         # to query the Cannlytics API.
         # metrc_id = self.find_metrc_id(pdf_file)
         # if metrc_id:
@@ -590,7 +590,7 @@ class CoADoc:
         # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
         algorithm = getattr(getattr(self, algorithm_name), algorithm_name)
-        
+
         # Use the URL if found, then try the PDF if the URL fails or is missing.
         if url:
             try:
@@ -651,14 +651,14 @@ class CoADoc:
         """
         if lims is None:
             lims = self.lims
-        
+
         # Identify the LIMS.
         known_lims = self.identify_lims(url, lims=lims)
-        
-        # FIXME: Parse custom / unidentified CoAs as well as possible?
+
+        # TODO: Parse custom / unidentified CoAs as well as possible?
         if known_lims is None:
             raise NotImplementedError
-        
+
         # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
         algorithm = getattr(getattr(self, algorithm_name), algorithm_name)
@@ -722,10 +722,13 @@ class CoADoc:
         # Initialize the details data.
         details_data = None
         if isinstance(data, dict):
+            print('Saving dict')
             details_data = pd.DataFrame([data])
         elif isinstance(data, list):
+            print('Saving list')
             details_data = pd.DataFrame(data)
         else:
+            print('Saving DataFrame')
             details_data = data
 
         # Specify the desired order for columns / fields.
@@ -734,7 +737,7 @@ class CoADoc:
 
         # Standardize details.
         details_data = self.standardize(
-            data,
+            details_data,
             column_order=column_order,
             nuisance_columns=nuisance_columns,
             numeric_columns=numeric_columns,
@@ -960,7 +963,7 @@ class CoADoc:
             if how == 'details':
 
                 # Standardize detail columns.
-                details_data = data.copy()
+                details_data = data.copy(deep=True)
                 details_data.rename(
                     standard_fields,
                     axis=1,
@@ -976,7 +979,7 @@ class CoADoc:
 
                 # Apply codings
                 details_data.replace(codings, inplace=True)
-        
+
                 # Convert totals to numeric.
                 # TODO: Calculate totals if they don't already exist:
                 # - total_cannabinoids
@@ -999,14 +1002,14 @@ class CoADoc:
 
                 # Create a long table of results data.
                 results = []
-                details_data = data.copy()
+                details_data = data.copy(deep=True)
                 for _, item in details_data.iterrows():
 
                     # Get the sample results.
                     sample_results = item['results']
                     if isinstance(sample_results, str):
                         sample_results = literal_eval(sample_results)
-                    
+
                     # Add each entry.
                     for result in sample_results:
                         std = {}
@@ -1065,7 +1068,7 @@ class CoADoc:
                         standard_fields=standard_fields,
                         google_maps_api_key=google_maps_api_key,
                     )
-                    
+
                 # Map keys to analysis for ordering for Values worksheet columns.
                 pairs = []
                 analytes = list(results_data['key'].unique())
@@ -1132,10 +1135,10 @@ class CoADoc:
                 values_data = values_data.loc[:, ~criterion]
 
                 # Move certain columns to the beginning.
-                columns = column_order + [x[0] for x in pairs]
-                values_data = reorder_columns(values_data, columns)
+                cols = column_order + [x[0] for x in pairs]
+                values_data = reorder_columns(values_data, cols)
                 return values_data
-        
+
         # Standardize a series.
         elif isinstance(data, pd.Series):
             return pd.Series(self.standardize(
@@ -1154,7 +1157,7 @@ class CoADoc:
         # Raise an error if an incorrect type is passed.
         else:
             raise ValueError
-    
+
     def quit(self):
         """Close any driver, end any session, and reset the parameters."""
         try:
@@ -1249,9 +1252,15 @@ if __name__ == '__main__':
     # [✓] TEST: Standardize CoA data.
     tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
     data = parser.parse(tagleaf_coa_short_url)
-    dataframe = pd.DataFrame(data)
+
+    # [✓] TEST: Standardize CoA data dictionary.
     clean_data = parser.standardize(data[0])
+
+    # [✓] TEST: Standardize CoA data list of dictionaries.
     clean_data_list = parser.standardize(data)
+
+    # [✓] TEST: Standardize CoA data DataFrame.
+    dataframe = pd.DataFrame(data)
     details_dataframe = parser.standardize(dataframe)
     results_dataframe = parser.standardize(
         dataframe,
@@ -1264,11 +1273,14 @@ if __name__ == '__main__':
         results_data=results_dataframe,
     )
 
-    # FIXME:
-    # [ ] TEST: Save CoA data.
+    # [✓] TEST: Save CoA data from DataFrame.
     parser.save(dataframe, '../../../.datasets/tests/test-coas.xlsx')
-    # parser.save(clean_data_list, '../../../.datasets/tests/test-coas.xlsx')
-    # parser.save(data, '../../../.datasets/tests/test-coas.xlsx')
+
+    # [✓] TEST: Save CoA data from list of dictionaries.
+    parser.save(data, '../../../.datasets/tests/test-coas.xlsx')
+
+    # [✓] TEST: Save CoA data from dictionary.
+    parser.save(data[0], '../../../.datasets/tests/test-coas.xlsx')
 
     # [✓] TEST: Close the parser.
     parser.quit()
