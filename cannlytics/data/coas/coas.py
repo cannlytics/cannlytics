@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/19/2022
+Updated: 8/20/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -66,6 +66,8 @@ from ast import literal_eval
 import base64
 import importlib
 from io import BytesIO
+import json
+import math
 import operator
 from typing import Any, Optional
 from wand.image import Image as wi
@@ -781,6 +783,14 @@ class CoADoc:
             'Actual': codings.keys(),
         })
 
+        
+        # Format details `results` as proper JSON.
+        details_data['results'] = details_data['results'].apply(json.dumps)
+
+        # FIXME: Also parse `images` and `coa_urls` into JSON.
+        # details_data['coa_urls'] = details_data.get('coa_urls', []).apply(json.dumps)
+        # details_data['images'] = details_data.get('images', []).apply(json.dumps)
+
         # Create a workbook for saving the data.
         wb = openpyxl.Workbook()
         ws = wb.worksheets[0]
@@ -796,6 +806,7 @@ class CoADoc:
         ws = wb.worksheets[3]
         write_to_worksheet(ws, coding_data)
         wb.save(outfile)
+        wb.close()
         return wb
 
     def standardize(
@@ -955,7 +966,6 @@ class CoADoc:
                 google_maps_api_key=google_maps_api_key,
             ) for x in data]
 
-        # FIXME:
         # Standardize a DataFrame.
         elif isinstance(data, pd.DataFrame):
 
@@ -982,12 +992,12 @@ class CoADoc:
 
                 # Convert totals to numeric.
                 # TODO: Calculate totals if they don't already exist:
-                # - total_cannabinoids
-                # - total_terpenes
-                # - total_cbd
-                # - total_thc
-                # - total_cbg
-                # - total_thcv
+                # - `total_cannabinoids`
+                # - `total_terpenes`
+                # - `total_cbd`
+                # - `total_thc`
+                # - `total_cbg`
+                # - `total_thcv`
                 totals = [x for x in details_data.keys() if x.startswith('total_')]
                 for c in totals:
                     details_data[c] = details_data[c].astype(str).apply(convert_to_numeric, strip=True)
@@ -1019,7 +1029,11 @@ class CoADoc:
 
                 # Apply codings (redundant?).
                 results_data = pd.DataFrame(results)
-                results_data[numeric_columns] = results_data[numeric_columns].replace(codings)
+                for c in numeric_columns:
+                    try:
+                        results_data[c] = results_data[c].replace(codings)
+                    except KeyError:
+                        pass
 
                 # Standardize the results columns.
                 results_data.rename(
@@ -1031,9 +1045,17 @@ class CoADoc:
                 results_data = results_data.groupby(level=0, axis=1).first()
 
                 # Standardize the key column (redundant?).
-                results_data['key'] = results_data['key'].apply(
-                    lambda x: ANALYTES.get(x, x)
-                )
+                try:
+                    results_data['key'] = results_data['key'].apply(
+                        lambda x: ANALYTES.get(x, x)
+                    )
+                except KeyError:
+                    try:
+                        results_data['key'] = results_data['name'].apply(
+                            lambda x: ANALYTES.get(snake_case(x), snake_case(x))
+                        )
+                    except KeyError:
+                        pass 
 
                 # Re-order columns.
                 results_data = reorder_columns(results_data, column_order)
@@ -1106,9 +1128,11 @@ class CoADoc:
 
                     # Keep the values from each result.
                     for result in sample_results:
+                        result = {k: v for k, v in result.items() if v == v}
                         analyte = result.get('key', snake_case(result.get('name')))
                         analyte = standard_analytes.get(analyte, analyte)
-                        std[analyte] = result.get('value', result.get('percent'))
+                        value = result.get('value', result.get('percent', result.get('mg_g')))
+                        std[analyte] = value
                     values.append(std)
 
                 # Rename and combine columns.
@@ -1250,8 +1274,9 @@ if __name__ == '__main__':
     #     pass
 
     # [✓] TEST: Standardize CoA data.
-    tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
-    data = parser.parse(tagleaf_coa_short_url)
+    coa = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
+    # coa = '../../../.datasets/coas/Flore COA/Flore Brand/220121OgreInfused.pdf'
+    data = parser.parse(coa)
 
     # [✓] TEST: Standardize CoA data dictionary.
     clean_data = parser.standardize(data[0])

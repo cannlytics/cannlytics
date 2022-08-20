@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 7/17/2022
-  Updated: 7/30/2022
+  Updated: 8/20/2022
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -307,9 +307,10 @@
       <!-- Sample Results Placeholder -->
       <p
         id="coa-sample-results-placeholder"
-        class="text-secondary text-center fs-5 mb-5"
+        class="text-dark text-center fs-5 mb-5 lh-md mt-4"
       >
-        🥸 Waiting on your CoAs Boss!
+        🥸 Waiting on your CoAs Boss!<br>
+        <span class="fs-6"><small class="serif">Upload your CoAs above to being parsing.</small></span>
       </p>
 
       <!-- Sample Results -->
@@ -353,7 +354,7 @@
               <!-- Sample card template -->
               <div
                 id="sample-placeholder-template"
-                class="sample-placeholder-template col-12 col-md-4 col-lg-3 px-3 pe-lg-5 pb-3 text-start d-none"
+                class="sample-placeholder-template col-12 col-md-4 px-3 pe-lg-5 pb-3 text-start d-none"
               >
                 <div class="card rounded">
                   <button
@@ -376,9 +377,9 @@
               <!-- Sample card -->
               <div
                 id="sample-card-template"
-                class="sample-card-template col-12 col-md-4 col-lg-3 px-3 pb-3 text-start d-none"
+                class="sample-card-template col-12 col-md-4 px-3 pb-3 text-start d-none"
               >
-                <div class="card rounded" style="height:200px;">
+                <div class="card rounded">
                   <button
                     class="btn btn-sm-light position-absolute text-dark text-center"
                     style="z-index:99;right:0;"
@@ -390,6 +391,8 @@
                   <!-- Add more details:
                     - [ ] Chips for `analyses`.
                     - [ ] Number of `results`.
+                    - [ ] Style product type?
+                    - [ ] Format date as a human-readable date.
                   -->
                   <div class="card-body bg-transparent sample-details text-dark">
                     <img class="sample-image d-none text-center" src="" height="75px;">
@@ -499,13 +502,16 @@
           >
             Close
           </button>
-          {% comment %} <button
+          {% comment %}
+          <!-- TODO: Allow user to save lab results to their account.
+          <button
             id="save-sample-results-button"
             class="btn btn-sm bg-gradient-green text-white serif"
             type="button"
           >
             Save
-          </button> {% endcomment %}
+          </button>
+          {% endcomment %}
           <button
             id="download-sample-results-button"
             class="btn btn-sm bg-gradient-purple text-white serif"
@@ -525,71 +531,112 @@
 <section class="container markdown">
 
   <!-- Custom parsing algorithms-->
-  <div class="row mx-auto mx-lg-0 my-5 pt-5" style="max-width:560px">
-    <h2 class="fs-3 text-dark fw-bold mt-0 mb-0">
-      <a class="serif" href="#">
-        <svg style="width:50px;height:50px;">
-          <use href="{% static "website/images/emojies/alembic.svg" %}#alembic-emoji"></use>
-        </svg>
-        Custom CoA Parsing
-      </a>
-    </h2>
-    <p class="fs-6 double-line mb-2 mt-0" style="max-width:560px;">
-      At this time, CoADoc can only parse certificates of analysis (CoAs)
-      from labs and LIMS with validated parsing algorithms. We've currently validated:
-    </p>
-    <div class="d-flex justify-content-between text-dark"  style="max-width:420px;">
-      <ul class="my-2">
-        <li class="mb-2">
-          <a href="#">
-            Green Leaf Lab
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            MCR Labs
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            SC Labs
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            Veda Scientific
-          </a>
-        </li>
-      </ul>
-      <ul class="my-2">
-        <li class="mb-2">
-          <a href="#">
-            Confident Cannabis
-          </a>
-        </li>
-        <li class="mb-2">
-          <a href="#">
-            TagLeaf LIMS
-          </a>
-        </li>
-      </ul>
+  <!-- Optional: Render these labs / LIMS dynamically -->
+  <div class="row justify-content-center mx-lg-0 my-5 pt-5">
+
+    <div class="col-12 col-md-6 px-3 pe-lg-5 text-start">
+
+      <h2 class="fs-3 text-dark fw-bold mt-0 mb-0">
+        <a class="serif" href="#">
+          <svg style="width:50px;height:50px;">
+            <use href="{% static "website/images/emojies/alembic.svg" %}#alembic-emoji"></use>
+          </svg>
+          Custom CoA Parsing
+        </a>
+      </h2>
+      <p class="fs-6 double-line mb-2 mt-0" style="max-width:560px;">
+        At this time, CoADoc can only parse certificates of analysis (CoAs)
+        from labs and LIMS with validated parsing algorithms. We've validated:
+      </p>
+      <table class="markdown my-3">
+        <tbody>
+          <tr>
+            <th>Labs</th>
+            <th>LIMS</th>
+          </tr>
+          <tr>
+            <td>
+              <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas/anresco.py">
+                <small class="serif">Anresco Laboratories</small>
+              </a>
+            </td>
+            <td>
+              <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas/confidentcannabis.py">
+                <small class="serif">Confident Cannabis</small>
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas/cannalysis.py">
+                <small class="serif">Cannalysis</small>
+              </a>
+            </td>
+            <td>
+              <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas/tagleaf.py">
+                <small class="serif">TagLeaf LIMS</small>
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>
+            <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas/greenleaflab.py">
+              <small class="serif">Green Leaf Lab</small>
+            </a>
+          </td>
+          <td></td>
+        </tr>
+          <tr>
+            <td>
+            <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas/mcrlabs.py">
+              <small class="serif">MCR Labs</small>
+            </a>
+          </td>
+          <td></td>
+        </tr>
+          <tr>
+            <td>
+            <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas/sclabs.py">
+              <small class="serif">SC Labs</small>
+            </a>
+          </td>
+          <td></td>
+        </tr>
+          <tr>
+            <td>
+            <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas/sonoma.py">
+              <small class="serif">Sonoma Lab Works</small>
+            </a>
+          </td>
+          <td></td>
+        </tr>
+        </tbody>
+      </table>
+      <p class="fs-6 double-line mb-2 mt-0" style="max-width:560px;">
+        If you want your favorite lab or LIMS added,
+        then please email <a href="mailto:dev@cannlytics.com">dev@cannlytics.com</a>
+        and chances are that they can be included.
+        Alternatively, because Cannlytics is open source, you can clone the
+        <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas">source code</a>
+        and write a custom parsing algorithm for your lab or LIMS for free!
+        It is as easy as 1, 2, 3 to add a new lab.
+      </p>
+      <div class="d-none d-lg-flex mt-2">
+        <a
+          class="btn btn-sm bg-gradient-orange text-white serif"
+          href="{% url "page" page="contact" %}?topic=coas"
+        >
+          Request a New Lab / LIMS &rarr;
+        </a>
+      </div>
     </div>
-    <p class="fs-6 double-line mb-2 mt-0" style="max-width:560px;">
-      If you want your favorite lab or LIMS added,
-      then please email <a href="mailto:dev@cannlytics.com">dev@cannlytics.com</a>
-      and chances are that they can be included.
-      Alternatively, because Cannlytics is open source, you can clone the
-      <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas">source code</a>
-      and write a custom parsing algorithm for your lab or LIMS for free!
-      It is as easy as 1, 2, 3 to add a new lab.
-    </p>
-    <div class="d-none d-lg-flex mt-2">
-      <a
-        class="btn btn-sm bg-gradient-orange text-white serif"
-        href="{% url "page" page="contact" %}?topic=coas"
+    <div class="col-11 col-md-8 col-lg-6">
+      <img
+        src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fexamples%2Fsample-coa-parse.png?alt=media&token=2dbc139e-7730-4484-89fc-b825071d081c"
+        class="rounded shadow"
+        width="100%"
+        style="max-width:420px;"
       >
-        Request a New Lab / LIMS &rarr;
-      </a>
     </div>
   </div>
 

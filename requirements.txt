@@ -54,3 +54,5 @@ zipcodes==1.2.0
 
 # Dev requirements:
 # ocean-lib==0.8.5
+# pyzmq
+# traitlets

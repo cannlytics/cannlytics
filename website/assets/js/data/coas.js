@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 7/19/2022
- * Updated: 7/30/2022
+ * Updated: 8/20/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
 import { Modal } from 'bootstrap';
@@ -135,7 +135,7 @@ export const CoADoc = {
           const key = snakeCase(name);
           formData.append(key, file);
         });
-        this.uploadCoAFile(formData);
+        cannlytics.data.coas.uploadCoAFile(formData);
     });
   },
   
@@ -222,11 +222,13 @@ export const CoADoc = {
     // Show a loading placeholder, record the ID for updating later.
     renderSamplePlaceholder();
   
-    // Get the form.
+    // Get the form if no data is passed.
     if (!formData) formData = new FormData(document.forms[formId]);
   
     // Optional: It would be good to do further / better file checking before posting the form.
     // https://stackoverflow.com/questions/7977084/check-file-type-when-form-submit
+
+    // TODO: Show loading.
 
     const successCallback = this.renderCoAResults;
   
@@ -246,6 +248,7 @@ export const CoADoc = {
       error: function() {
         const message = 'An error occurred when uploading your CoA for parsing. Please try again later or email support.';
         showNotification('Error Uploading CoA for Parsing', message, /* type = */ 'error');
+        
       }
     });
   },
@@ -402,7 +405,7 @@ async function downloadCoAData(data) {
   try {
     const response = await authRequest('/api/data/coas/download', postData, { file: true });
     const blob = await response.blob();
-    downloadBlob(blob, /* filename = */ `coa-data-${timestamp}.csv`);
+    downloadBlob(blob, /* filename = */ `coa-data-${timestamp}.xlsx`);
   } catch(error) {
     const message = 'Error downloading CoA data. Please try again later and/or contact support.';
     showNotification('Download Error', message, /* type = */ 'error' );
@@ -431,6 +434,34 @@ function openResults(event) {
     renderSampleResults(sampleId);
   } catch (error) {
     // Results rendered through table click.
+  }
+}
+
+function renderSampleImage(el, sample) {
+  /**
+   * Render a sample's image given it's data.
+   * @param {Element} el An element containing an image element with a ".sample-image" class.
+   * @param {Map} sample The sample.
+   */
+  if (sample.images) {
+    if (sample.images.length) {
+      const img = el.querySelector('.sample-image');
+      img.src = sample.images[0]['url'];
+      img.classList.remove('d-none');
+    }
+  } else if (sample.image_data) {
+    const img = el.querySelector('.sample-image');
+    img.src = sample.image_data;
+    img.classList.remove('d-none');
+  } else if (sample.lab_image_url) {
+    const img = el.querySelector('.sample-image');
+    img.src = sample.lab_image_url;
+    img.classList.remove('d-none');
+  } else {
+    // FIXME: Render a default image.
+    // const img = el.querySelector('.sample-image');
+    // img.src = obs.lab_image_url;
+    // img.classList.remove('d-none');
   }
 }
 
@@ -515,15 +546,7 @@ function renderSampleResults(sampleId) {
 
   */
   const el = document.querySelector('.modal-sample-details');
-  if (obs.images.length) {
-    const img = el.querySelector('.sample-image');
-    img.src = obs.images[0]['url'];
-    img.classList.remove('d-none');
-  } else if (obs.image_data) {
-    const img = el.querySelector('.sample-image');
-    img.src = obs.image_data;
-    img.classList.remove('d-none');
-  }
+  renderSampleImage(el, obs);
   el.querySelector('.product-name').innerText = obs.product_name;
   el.querySelector('.product-type').innerText = obs.product_type;
   if (obs.producer) el.querySelector('.producer').innerText = obs.producer;
@@ -587,13 +610,18 @@ function renderSamplePlaceholder() {
   
   // Hide the general placeholder.
   document.getElementById('coa-sample-results-placeholder').classList.add('d-none');
+  document.getElementById('coa-results-tabs').classList.remove('d-none');
+  document.getElementById('coa-results-content').classList.remove('d-none');
 
   // FIXME: This throws an error on subsequent renders.
+  console.log('Rendering placeholder...');
+
   // Clone the sample template.
   const timestamp = new Date().toISOString().slice(0, 19).replaceAll(':', '-');
   const docFrag = document.createDocumentFragment();
   const el = document.getElementById('sample-placeholder-template').cloneNode(true);
   el.classList.add('sample-card');
+  el.classList.remove('d-none');
   el.id = `${el.id}-${timestamp}`;
 
   // Wire-up the remove button.
@@ -606,7 +634,6 @@ function renderSamplePlaceholder() {
   };
 
   // Add the card to the UI.
-  el.classList.remove('d-none');
   docFrag.appendChild(el);
   const grid = document.getElementById('coa-grid-container');
   grid.insertBefore(docFrag, grid.firstChild);
@@ -638,15 +665,7 @@ function renderCoAResult(obs) {
 
   // Add the sample details.
   // Optional: Add more sample details.
-  if (obs.images.length) {
-    const img = el.querySelector('.sample-image');
-    img.src = obs.images[0]['url'];
-    img.classList.remove('d-none');
-  } else if (obs.image_data) {
-    const img = el.querySelector('.sample-image');
-    img.src = obs.image_data;
-    img.classList.remove('d-none');
-  }
+  renderSampleImage(el, obs);
   el.querySelector('.product-name').innerText = obs.product_name;
   el.querySelector('.product-type').innerText = obs.product_type;
   if (obs.producer) el.querySelector('.producer').innerText = obs.producer;
@@ -671,16 +690,16 @@ function renderCoAResult(obs) {
   grid.insertBefore(docFrag, grid.firstChild);
 }
 
-function saveSampleResults() {
-  /**
-   * Save edited sample results for downloading.
-   */
+// function saveSampleResults() {
+//   /**
+//    * Save edited sample results for downloading.
+//    */
 
-  // FIXME: Get the edited data.
-  console.log('Save the sample results!')
+//   // Future work: Get the edited data.
+//   console.log('Save the sample results!')
 
-  // FIXME: Update the sample `el` by sampleId!
-  // const sampleId = event.getAttribute('data-bs-sample');
-  // const sampleCard = document.getElementById(`sample-${sampleId}`);
-  // el.querySelector('.sample-data').textContent = JSON.stringify(obs);
-}
+//   // Future work: Update the sample `el` by sampleId!
+//   // const sampleId = event.getAttribute('data-bs-sample');
+//   // const sampleCard = document.getElementById(`sample-${sampleId}`);
+//   // el.querySelector('.sample-data').textContent = JSON.stringify(obs);
+// }

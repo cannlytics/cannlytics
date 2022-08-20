@@ -38,15 +38,15 @@ Data Points:
     ✓ sample_id (generated)
     ✓ lab_id
     ✓ lab
-    - lab_image_url
+    ✓ lab_image_url
     ✓ lab_license_number
     ✓ lab_address
-    - lab_city (augmented)
-    - lab_county (augmented)
-    - lab_state (augmented)
-    - lab_zipcode (augmented)
-    - lab_latitude (augmented)
-    - lab_longitude (augmented)
+    ✓ lab_city (augmented)
+    ✓ lab_county (augmented)
+    ✓ lab_state (augmented)
+    ✓ lab_zipcode (augmented)
+    ✓ lab_latitude (augmented)
+    ✓ lab_longitude (augmented)
 
 """
 # Standard imports.
@@ -94,6 +94,7 @@ ANRESCO =  {
     'coa_algorithm_entry_point': 'parse_anresco_coa',
     'lims': 'Anresco Laboratories',
     'lab': 'Anresco Laboratories',
+    'lab_image_url': 'https://anresco.com/wp-content/uploads/thegem-logos/logo_2258c6b0a6f4e626a22edd2f64dc588b_2x.png',
     'lab_website': 'www.anresco.com',
     'lab_address': '1375 Van Dyke Ave, San Francisco, CA 94124',
     'lab_street': '1375 Van Dyke Ave',
@@ -509,7 +510,7 @@ if __name__ == '__main__':
     lab = parser.identify_lims(doc, lims={'Anresco Laboratories': ANRESCO})
     assert lab == 'Anresco Laboratories'
 
-    # [ ] TEST: Parse an Anresco Laboratories CoA PDF.
+    # [✓] TEST: Parse an Anresco Laboratories CoA PDF.
     parser = CoADoc()
     data = parse_anresco_pdf(parser, doc)
     assert data is not None
