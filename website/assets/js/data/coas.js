@@ -228,8 +228,7 @@ export const CoADoc = {
     // Optional: It would be good to do further / better file checking before posting the form.
     // https://stackoverflow.com/questions/7977084/check-file-type-when-form-submit
 
-    // TODO: Show loading.
-
+    // Define the success callback.
     const successCallback = this.renderCoAResults;
   
     // Make a request to the CoADoc API.
@@ -246,9 +245,15 @@ export const CoADoc = {
         successCallback(response.data);
       },
       error: function() {
+        // Show and error and remove the placeholder.
         const message = 'An error occurred when uploading your CoA for parsing. Please try again later or email support.';
         showNotification('Error Uploading CoA for Parsing', message, /* type = */ 'error');
-        
+        try {
+          const placeholder = document.querySelector('.sample-placeholder-template');
+          placeholder.parentNode.removeChild(placeholder);
+        } catch (error) {
+          // No placeholder to hide.
+        }
       }
     });
   },
@@ -439,30 +444,17 @@ function openResults(event) {
 
 function renderSampleImage(el, sample) {
   /**
-   * Render a sample's image given it's data.
+   * Render a sample's image given it's data. Render's a default image if no image is found.
    * @param {Element} el An element containing an image element with a ".sample-image" class.
-   * @param {Map} sample The sample.
+   * @param {Map} sample The sample data, including a `images`, `image_url`, `image_data, or `lab_image_url` field.
    */
-  if (sample.images) {
-    if (sample.images.length) {
-      const img = el.querySelector('.sample-image');
-      img.src = sample.images[0]['url'];
-      img.classList.remove('d-none');
-    }
-  } else if (sample.image_data) {
-    const img = el.querySelector('.sample-image');
-    img.src = sample.image_data;
-    img.classList.remove('d-none');
-  } else if (sample.lab_image_url) {
-    const img = el.querySelector('.sample-image');
-    img.src = sample.lab_image_url;
-    img.classList.remove('d-none');
-  } else {
-    // FIXME: Render a default image.
-    // const img = el.querySelector('.sample-image');
-    // img.src = obs.lab_image_url;
-    // img.classList.remove('d-none');
-  }
+  const img = el.querySelector('.sample-image');
+  if (sample.images !== null && sample.images.length) img.src = sample.images[0]['url'];
+  else if (sample.image_data) img.src = sample.image_data;
+  else if (sample.image_url) img.src = sample.image_url;
+  else if (sample.lab_image_url) img.src = sample.lab_image_url;
+  else img.src = 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fmisc%2Fsample-placeholder.png?alt=media&token=e8b96368-5d80-49ec-bbd0-3d21654b677f';
+  img.classList.remove('d-none');
 }
 
 function renderSampleResults(sampleId) {
@@ -476,7 +468,7 @@ function renderSampleResults(sampleId) {
   const obs = JSON.parse(sampleCard.querySelector('.sample-data').textContent);
   
   console.log('Render:', obs);
-  /* FIXME: Render all of the sample details.
+  /* TODO: Render all of the sample details.
 
     Sample Details
     - product_name
@@ -607,14 +599,13 @@ function renderSamplePlaceholder() {
   /**
    * Render a placeholder for a loading sample.
    */
+
+  // FIXME: This throws an error on subsequent renders.
   
   // Hide the general placeholder.
   document.getElementById('coa-sample-results-placeholder').classList.add('d-none');
   document.getElementById('coa-results-tabs').classList.remove('d-none');
   document.getElementById('coa-results-content').classList.remove('d-none');
-
-  // FIXME: This throws an error on subsequent renders.
-  console.log('Rendering placeholder...');
 
   // Clone the sample template.
   const timestamp = new Date().toISOString().slice(0, 19).replaceAll(':', '-');
@@ -690,6 +681,7 @@ function renderCoAResult(obs) {
   grid.insertBefore(docFrag, grid.firstChild);
 }
 
+// TODO: Add the ability for user's to save their lab results to their account.
 // function saveSampleResults() {
 //   /**
 //    * Save edited sample results for downloading.

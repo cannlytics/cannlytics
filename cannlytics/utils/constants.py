@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and the Cannabis Data Science Team
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/8/2021
-Updated: 8/19/2022
+Updated: 8/20/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains useful constants. In particular, there
@@ -562,20 +562,20 @@ STRAINS = {
 
 # Standard value codings.
 CODINGS = {
-    '<LOQ': 0.000000001,
-    '< LOQ': 0.000000001,
     '<LOD': 0.000000001,
     '< LOD': 0.000000001,
-    '<LLOQ': 0.000000001,
+    '<LOQ': 0.00000001,
+    '< LOQ': 0.00000001,
+    '<LLOQ': 0.00000001,
     '≥ LOD': 10_001,
     'ND': 0.000000001,
+    'No detection in 1 gram': 0.000000001,
+    'Negative/1g': 0.00000001,
+    'PASS': 0.00000001,
     'NR': None,
     'N/A': None,
     'na': None,
     'NT': None,
-    'No detection in 1 gram': 0.000000001,
-    'PASS': 0.00000001,
-    'Negative/1g': 0.00000001,
 }
 
 # Cannabinoid decarboxylation rate.

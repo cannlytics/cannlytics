@@ -67,7 +67,6 @@ import base64
 import importlib
 from io import BytesIO
 import json
-import math
 import operator
 from typing import Any, Optional
 from wand.image import Image as wi
@@ -657,6 +656,7 @@ class CoADoc:
         # Identify the LIMS.
         known_lims = self.identify_lims(url, lims=lims)
 
+        # Restrict to known labs / LIMS for safety.
         # TODO: Parse custom / unidentified CoAs as well as possible?
         if known_lims is None:
             raise NotImplementedError
@@ -724,13 +724,10 @@ class CoADoc:
         # Initialize the details data.
         details_data = None
         if isinstance(data, dict):
-            print('Saving dict')
             details_data = pd.DataFrame([data])
         elif isinstance(data, list):
-            print('Saving list')
             details_data = pd.DataFrame(data)
         else:
-            print('Saving DataFrame')
             details_data = data
 
         # Specify the desired order for columns / fields.

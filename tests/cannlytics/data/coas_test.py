@@ -4,13 +4,10 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/1/2022
-Updated: 8/15/2022
+Updated: 8/20/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-Description:
-
-    A rigorous test of CoADoc parsing.
-
+Description:  A rigorous test of CoADoc parsing.
 """
 # Standard imports.
 from datetime import datetime
@@ -36,23 +33,11 @@ if not os.path.exists(datafile_dir):
 
 # Iterate over PDF directory.
 all_data = []
-identified = []
-unidentified = []
 for path, subdirs, files in os.walk(DATA_DIR):
     for name in files:
 
         # Only parse PDFs.
         if not name.endswith('.pdf'):
-            continue
-
-        # [✓] TEST: Identify the lab or LIMS from the CoA PDF.
-        file_name = os.path.join(path, name)
-        lab = parser.identify_lims(file_name)
-        if lab:
-            identified.append(file_name)
-            print('Identified:', lab, file_name.split('/')[-1])
-        else:
-            unidentified.append(file_name)
             continue
 
         # [✓] TEST: Parse CoA PDFs one by one.
@@ -61,14 +46,10 @@ for path, subdirs, files in os.walk(DATA_DIR):
         all_data.extend(coa_data)
         print('Parsed:', file_name)
 
-# Print the percent identified.
-percent = len(identified) / (len(identified) + len(unidentified)) * 100
-print('Identified %.2f%% of CoAs.' % percent)
-
 # Format the data.
 data = pd.DataFrame(all_data)
 
-# Save the CoA data.
+# [✓] TEST: Standardize and save the CoA data.
 timestamp = datetime.now().isoformat()[:19].replace(':', '-')
 outfile = f'{datafile_dir}/coa-data-{timestamp}.xlsx'
 data.index = data['sample_id']
