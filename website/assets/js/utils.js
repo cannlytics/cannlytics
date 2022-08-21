@@ -60,6 +60,7 @@ export const apiRequest = async (endpoint, data, options, idToken = null) => {
       init.method = 'DELETE';
     }
     if (options.params) {
+      // TEST: Does this handle production URLs correctly?
       endpoint = new URL(endpoint)
       endpoint.search = new URLSearchParams(options.params).toString();
     }

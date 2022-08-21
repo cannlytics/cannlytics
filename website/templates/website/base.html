@@ -36,7 +36,8 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 
   <!-- Cannlytics JavaScript and CSS Module -->
-  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{% if DEBUG %}{% now 'U' %}{% else %}{{ APP_VERSION_NUMBER }}{% endif %}"></script>
+  <!-- FIXME: `APP_VERSION_NUMBER` is missing in production. -->
+  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{% if DEBUG %}{% now 'U' %}{% elif APP_VERSION_NUMBER %}{{ APP_VERSION_NUMBER }}{% else %}0.0.420{% endif %}"></script>
 
   <!-- Page-specific stylesheets -->
   {% block page_css %}{% endblock page_css %}

@@ -146,6 +146,7 @@ def download_regulation_data(request):
 # Download Utilities
 #------------------------------------------------------------------------------
 
+@csrf_exempt
 def download_dataset(claims, collection, data_points):
     """Download a given dataset."""
 

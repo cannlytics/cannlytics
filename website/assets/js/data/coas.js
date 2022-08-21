@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 7/19/2022
- * Updated: 8/20/2022
+ * Updated: 8/21/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
 import { Modal } from 'bootstrap';
@@ -65,7 +65,7 @@ export const CoADoc = {
     // Wire-up download buttons.
     document.getElementById('coa-doc-export-button').onclick = downloadAllResults;
     document.getElementById('download-sample-results-button').onclick = function() {
-      cannlytics.data.coas.downloadSampleResults(this);
+      cannlytics.data.coas.downloadSampleResults(document.getElementById('download-sample-results-button'));
     }
 
     // Wire-up save button.
@@ -407,6 +407,7 @@ async function downloadCoAData(data) {
    */
   const postData = { data };
   const timestamp = new Date().toISOString().slice(0, 19).replace(/T|:/g, '-');
+  // FIXME: This is throwing a 403 error.
   try {
     const response = await authRequest('/api/data/coas/download', postData, { file: true });
     const blob = await response.blob();
@@ -422,7 +423,6 @@ function onRowClicked(row) {
    * Open the modal of sample results when a row of the table is clicked.
    * @param {RowNode} row A table row.
    */
-  console.log('Open modal!', row.data);
   const modal = new Modal(document.getElementById('results-modal'), {});;
   modal.show();
   renderSampleResults(row.data.sample_id);
@@ -449,11 +449,20 @@ function renderSampleImage(el, sample) {
    * @param {Map} sample The sample data, including a `images`, `image_url`, `image_data, or `lab_image_url` field.
    */
   const img = el.querySelector('.sample-image');
-  if (sample.images !== null && sample.images.length) img.src = sample.images[0]['url'];
-  else if (sample.image_data) img.src = sample.image_data;
-  else if (sample.image_url) img.src = sample.image_url;
-  else if (sample.lab_image_url) img.src = sample.lab_image_url;
-  else img.src = 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fmisc%2Fsample-placeholder.png?alt=media&token=e8b96368-5d80-49ec-bbd0-3d21654b677f';
+  const defaultImage = 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fmisc%2Fsample-placeholder.png?alt=media&token=e8b96368-5d80-49ec-bbd0-3d21654b677f';
+  if (sample.images === null) {
+    if (sample.image_data) img.src = sample.image_data;
+    else if (sample.image_url) img.src = sample.image_url;
+    else if (sample.lab_image_url) img.src = sample.lab_image_url;
+    else img.src = defaultImage;
+  } else {
+    try {
+      if (sample.images.length) img.src = sample.images[0]['url'];
+      else img.src = defaultImage;
+    } catch(error) {
+      img.src = defaultImage;
+    }
+  }
   img.classList.remove('d-none');
 }
 
@@ -467,7 +476,6 @@ function renderSampleResults(sampleId) {
   const sampleCard = document.getElementById(`sample-${sampleId}`);
   const obs = JSON.parse(sampleCard.querySelector('.sample-data').textContent);
   
-  console.log('Render:', obs);
   /* TODO: Render all of the sample details.
 
     Sample Details
@@ -599,8 +607,6 @@ function renderSamplePlaceholder() {
   /**
    * Render a placeholder for a loading sample.
    */
-
-  // FIXME: This throws an error on subsequent renders.
   
   // Hide the general placeholder.
   document.getElementById('coa-sample-results-placeholder').classList.add('d-none');
@@ -611,7 +617,7 @@ function renderSamplePlaceholder() {
   const timestamp = new Date().toISOString().slice(0, 19).replaceAll(':', '-');
   const docFrag = document.createDocumentFragment();
   const el = document.getElementById('sample-placeholder-template').cloneNode(true);
-  el.classList.add('sample-card');
+  el.classList.add('sample-card', 'sample-placeholder-rendered');
   el.classList.remove('d-none');
   el.id = `${el.id}-${timestamp}`;
 
@@ -642,7 +648,7 @@ function renderCoAResult(obs) {
   
   // Remove the first placeholder.
   try {
-    const placeholder = document.querySelector('.sample-placeholder-template');
+    const placeholder = document.querySelector('.sample-placeholder-rendered');
     placeholder.parentNode.removeChild(placeholder);
   } catch (error) {
     // No placeholder to hide.

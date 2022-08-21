@@ -69,14 +69,22 @@ from io import BytesIO
 import json
 import operator
 from typing import Any, Optional
-from wand.image import Image as wi
+# FIXME: Determine if this package is necessary.
+try:
+    from wand.image import Image as wi
+except ImportError:
+    print('You probably have not installed ImageMagick library. This tool is used in case pdfplumber fails.')
 
 # External imports.
 import openpyxl
 import pandas as pd
 import requests
 import pdfplumber
+# FIXME: Ensure dependencies are installed for production!
+# try:
 from pyzbar.pyzbar import decode
+# except ImportError:
+#     print('Unable to find zbar shared library. This tool is used for decoding QR codes.')
 
 # Internal imports.
 from cannlytics.data.data import write_to_worksheet
@@ -559,6 +567,8 @@ class CoADoc:
             pdf_file = pdfplumber.open(pdf)
         elif isinstance(pdf, pdfplumber.pdf.PDF):
             pdf_file = pdf
+        # FIXME: Is this necessary? It requires ImageMagick which is
+        # an entire dependency to add if we do not need to do so.
         else:
             with open(wi(file=pdf, resolution=300)) as temp_file:
                 temp_file.save('/tmp/coa.pdf')

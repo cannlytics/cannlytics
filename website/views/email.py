@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/22/2021
-Updated: 1/14/2022
+Updated: 8/21/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # Standard imports.
@@ -13,6 +13,7 @@ import json
 # External imports
 from django.core.mail import send_mail
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 # Internal imports
 from cannlytics.auth.auth import authenticate_request
@@ -20,11 +21,11 @@ from cannlytics.firebase import create_log
 from website.settings import LIST_OF_EMAIL_RECIPIENTS
 
 
+@csrf_exempt
 def send_message(request):
     """Send a message from the website to the Cannlytics admin through email.
     The user must provide an `email`, `subject`, and `message` in their POST.
     """
-    # FIXME: IS CSRF token passed? It appears that this throws a 403 error.
     try:
         request.POST['math_input'] == request.POST['math_total']
     except KeyError:
@@ -63,6 +64,7 @@ def send_message(request):
     return JsonResponse(response)
 
 
+@csrf_exempt
 def suggest_edit(request):
     """Send a data edit suggestion to the staff. The user must be signed into 
     their account to suggest an edit."""

@@ -17,9 +17,12 @@ firebase_admin==5.2.0
 fredapi==0.5.0
 google-auth==2.3.3
 google-cloud-secret-manager==2.8.0
+google-cloud-firestore
+googlemaps
 gunicorn==20.1.0
 Markdown==3.3.4
 openpyxl==3.0.9
+opencv-python
 pandas==1.4.1
 pdfplumber==0.7.3
 python-dateutil==2.8.2

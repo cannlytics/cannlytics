@@ -1,8 +1,8 @@
 # Python Requirements | Cannlytics Website
 # Created 1/5/2021
-# Updated: 7/18/2022
+# Updated: 8/21/2022
 
-# cannlytics==0.0.10 # Soon to be v0.0.11
+cannlytics==0.0.11
 chromedriver-binary==104.0.5112.29.0
 datetime==4.3
 django==4.0
@@ -21,6 +21,7 @@ Markdown==3.3.4
 openpyxl==3.0.10
 pandas==1.4.1
 pdfplumber==0.7.3
+Pillow==6.2.2 # TEST: Is this necessary?
 python-dateutil==2.8.2
 python-dotenv==0.19.2
 pymdown-extensions==9.1

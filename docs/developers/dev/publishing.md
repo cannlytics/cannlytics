@@ -3,7 +3,7 @@
 First, you will need to save your environment variables as a secret. Then, you may want to walk through the build process one time manually. Afterwards, publishing the website is done with one command:
 
 ```shell
-npm run publish
+npm run website:publish
 ```
 
 ## Create your secret environment variables

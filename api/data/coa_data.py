@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 8/20/2022
+Updated: 8/21/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with CoA data.
@@ -18,6 +18,7 @@ import tempfile
 # External imports
 from django.http import HttpResponse
 from django.http.response import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -27,7 +28,7 @@ from cannlytics.data.coas import CoADoc
 from cannlytics.firebase.firebase import create_log, update_documents
 
 # Maximum number of files that can be parsed in 1 request.
-MAX_NUMBER_OF_FILES = 420
+MAX_NUMBER_OF_FILES = 120
 
 # Maximum file size for a single file: 100 MB.
 MAX_FILE_SIZE = 1024 * 1000 * 100
@@ -138,6 +139,7 @@ def coa_data(request, sample_id=None):
         return Response(response, status=200)
 
 
+@csrf_exempt
 def download_coa_data(request):
     """Download posted data as a .xlsx file. Pass a `data` field in the
     body with the data, an object or an array of objects, to standardize
