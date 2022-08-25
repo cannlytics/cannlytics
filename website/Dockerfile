@@ -22,10 +22,23 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # promptly appear in Cloud Logging.
 ENV PYTHONUNBUFFERED True
 
+# Install Image libs?
+RUN apt-get install -y zlib1g-dev libjpeg-dev libwebp-dev libpng-dev libtiff5-dev libjasper-dev libopenexr-dev libgdal-dev
+
+# FIXME: Install `zbar`.
+# RUN apt-get update
+# RUN apt-get install -y zbar-tools libzbar-dev python-zbar
+# RUN dpkg -L libzbar-dev; ls -l /usr/include/zbar.h
+
 # Install manually all the missing libraries.
-# Install `imagemagick` and `libzbar0` (for parsing CoAs).
 RUN apt-get update
-RUN apt-get install -y gconf-service libasound2 libatk1.0-0 libcairo2 libcups2 libfontconfig1 libgdk-pixbuf2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libxss1 fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils imagemagick libzbar0
+RUN apt-get install -y gconf-service libasound2 libatk1.0-0 libcairo2 libcups2 libfontconfig1 libgdk-pixbuf2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libxss1 fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils
+
+# Install `imagemagick` (for parsing CoAs). `libzbar0`?
+RUN apt-get update && apt-get install -y imagemagick
+
+# Get's shared library for zbar
+RUN apt-get update && apt-get install -y libzbar0 zbar-tools libzbar-dev python-zbar
 
 # Setup `zbar` environment variables.
 ENV LC_ALL C.UTF-8
@@ -35,10 +48,18 @@ ENV LANG C.UTF-8
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
 
-# Install dependencies.
+# Install Python dependencies, with `pyzbar` through pip.
+RUN pip install --upgrade pip setuptools wheel pyzbar
+COPY wheeldir /app/wheeldir
 COPY requirements.txt .
-RUN python -m pip install --upgrade pip
-RUN python -m pip install -r requirements.txt
+RUN pip install --use-wheel --no-index --find-links=/app/wheeldir \
+-r requirements.txt
+RUN pip install -y pyzbar
+
+# Install Python dependencies.
+# COPY requirements.txt .
+# RUN python -m pip install --upgrade pip
+# RUN python -m pip install -r requirements.txt
 
 # Specificy directory.
 ENV APP_HOME /app
@@ -47,7 +68,7 @@ WORKDIR $APP_HOME
 # Copy local code to the container image.
 COPY .. ./
 
-# Switching to a non-root user, please refer to https://aka.ms/vscode-docker-python-user-rights
+# Switch to a non-root user, please refer to https://aka.ms/vscode-docker-python-user-rights
 RUN useradd appuser && chown -R appuser /app
 USER appuser
 

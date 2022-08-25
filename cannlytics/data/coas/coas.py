@@ -81,10 +81,10 @@ import pandas as pd
 import requests
 import pdfplumber
 # FIXME: Ensure dependencies are installed for production!
-# try:
-from pyzbar.pyzbar import decode
-# except ImportError:
-#     print('Unable to find zbar shared library. This tool is used for decoding QR codes.')
+try:
+    from pyzbar.pyzbar import decode
+except ImportError:
+    print('Unable to find zbar shared library. This tool is used for decoding QR codes.')
 
 # Internal imports.
 from cannlytics.data.data import write_to_worksheet
