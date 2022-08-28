@@ -73,6 +73,7 @@ Data Points:
 """
 # Standard imports.
 from ast import literal_eval
+import json
 import re
 from typing import Any
 
@@ -450,11 +451,11 @@ def parse_green_leaf_lab_pdf(
     obs['product_name'] = product_name
     obs['results'] = results
     obs['sample_id'] = create_sample_id(
-        private_key=producer,
+        private_key=json.dumps(results),
         public_key=product_name,
-        salt=date_tested,
+        salt=producer,
     )
-    
+
     # TODO: Lowercase `results` `status`.
 
     # TODO: Standardize `results` `units`.

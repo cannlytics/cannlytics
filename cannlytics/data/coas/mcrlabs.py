@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 8/13/2022
+Updated: 8/28/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -107,196 +107,9 @@ def get_mcr_labs_sample_count(
     return {'count': count, 'pages': pages}
 
 
-def get_mcr_labs_test_results(
-        starting_page: Optional[int] = 1,
-        ending_page: Optional[int] = None,
-        pause: Optional[float] = 3,
-        verbose: Optional[bool] = True
-    ) -> list:
-    """Get all MCR Labs test results.
-    Args:
-        starting_page (int): The page to start collecting results,
-            `1` by default (optional).
-        ending_page (int): The page to end collecting results,
-            `None` by default, which will collect to the end (optional).
-        pause (float): The amount of time to wait between requests.
-        verbose (bool): Whether to print out status, `True` by default
-            (optional).
-    Returns:
-        (list): The complete sample data.
-    """
-    # Determine the pages to collect.
-    page_count = get_mcr_labs_sample_count()
-    total_pages = page_count['pages']
-    if not ending_page:
-        ending_page = total_pages
-    if verbose:
-        print('Getting samples for pages %i to %i.' % (starting_page, ending_page))
-    samples = []
-
-    # Iterate over all of the pages, index starting at 1.
-    for page_id in range(starting_page, ending_page + 1):
-        sample_data = get_mcr_labs_samples(page_id)
-        samples += sample_data
-        if page_id > 1 and page_id <= ending_page:
-            sleep(pause)
-    if verbose:
-        print('Found %i samples.' % len(samples))
-
-    # Get all of the sample details.
-    # Optional: Log errors?
-    rows = []
-    for i, sample in enumerate(samples):
-        try:
-            sample_id = sample['lab_results_url'].split('/')[-1]
-            details = get_mcr_labs_sample_details(None, sample_id=sample_id)
-            rows.append({**sample, **details})
-            if i > 1:
-                sleep(pause)
-            if verbose:
-                print('Collected sample:', sample_id)
-        except:
-            print('Failed to collect sample:', sample_id)
-            continue
-
-    # Return all of the sample data.
-    return rows
-
-
-def get_mcr_labs_samples(
-        page_id: Any,
-        cat: Optional[str] = 'all',
-        order: Optional[str] = 'date-desc',
-        search: Optional[str] = '',
-        headers: Optional[Any] = None,
-    ) -> list:
-    """Get all test results from MCR Labs on a specific page.
-    Args:
-        page_id (str|int): The page number to get samples.
-        cat (str): The category, `all` by default (optional). Options:
-            `flower`, `concentrate`, `extract`, `mip`.
-        order (str): The order to list results, `date-desc` by default
-            (optional). Options: `date-desc`, `samplename`, `client`,
-            `totalcann-desc`, `totalterp-desc`, `maxthc-desc`, `maxcbd-desc`.
-        search (str): A particular search query.
-        headers (dict): Headers for the HTTP request (optional).
-    Returns:
-        (list): A list of dictionaries of sample data.
-    """
-    # Get a page.
-    base = MCR_LABS['url']
-    url = f'{base}/ProductWeVeTested/AjaxSearch'
-    params = {
-        'category': cat,
-        'order': order,
-        'page': str(page_id),
-        'searchString': search,
-    }
-    if headers is None:
-        headers = DEFAULT_HEADERS
-    response = requests.get(url, headers=headers, params=params)
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    # Get all of the products on the page.
-    samples = []
-    products = soup.find_all('li', attrs={'class': 'grid-item'})
-    for product in products:
-
-        # Get the sample details.
-        sample = {}
-        details = product.find('div', attrs={'class': 'reportTable'})
-
-        # Get the product name.
-        attrs = {'class': 'fth_name'}
-        sample['product_name'] = details.find('div', attrs=attrs).text
-
-        # Get the producer.
-        attrs = {'class': 'fth_client'}
-        sample['producer'] = details.find('div', attrs=attrs).text
-
-        # Get the product type.
-        # Optional: Standardize product types.
-        attrs = {'class': 'fth_category'}
-        sample['product_type'] = details.find('div', attrs=attrs).text
-
-        # Get the total cannabinoids.
-        attrs = {'class': 'fth_cannabinoids'}
-        value = details.find('div', attrs=attrs).text
-        sample['total_cannabinoids'] = strip_whitespace(value)
-
-        # Get the total terpenes.
-        attrs = {'class': 'fth_terpenes'}
-        value = details.find('div', attrs=attrs).text
-        sample['total_terpenes'] = strip_whitespace(value)
-
-        # Get the date tested.
-        try:
-            sample['date_tested'] = format_iso_date(details.find('div', \
-                attrs={'class': 'fth_date'}).text)
-        except ValueError:
-            print('Error:', sample)
-            sample['date_tested'] = ''
-
-        # Try to get the producer's URL.
-        try:
-            element = product.find('span', attrs={'class': 'url-linked'})
-            href = element.attrs['data-url']
-            sample['producer_url'] = '/'.join([base, href])
-        except AttributeError:
-            sample['producer_url'] = ''
-
-        # Get the lab results URL.
-        href = product.find('a')['href']
-        sample['lab_results_url'] = '/'.join([base, href])
-
-        # Get the image.
-        image_url = product.find('img')['src']
-        filename = image_url.split('/')[-1]
-        sample['images'] = [{'url': image_url, 'filename': filename}]
-
-        # Turn dates to ISO format.
-        date_columns = [x for x in sample.keys() if x.startswith('date')]
-        for date_column in date_columns:
-            try:
-                sample[date_column] = pd.to_datetime(sample[date_column]).isoformat()
-            except:
-                pass
-
-        # Create a sample ID.
-        sample['sample_id'] = create_sample_id(
-            private_key=sample['producer'],
-            public_key=sample['product_name'],
-            salt=sample['date_tested'],
-        )
-
-        # Aggregate sample data.
-        samples.append({**MCR_LABS, **sample})
-
-    # Return the samples.
-    return samples
-
-
-def get_mcr_labs_producer_test_results():
-    """Get all test results from MCR Labs for a specific producer.
-    Returns:
-        (list): A list of dictionaries of sample data.
-    """
-    # TODO: Implement.
-    raise NotImplementedError
-
-
-def get_mcr_labs_client_details():
-    """Find details for any known producer of a given lab sample..
-    Returns:
-        (dict): The client's details data.
-    """
-    # TODO: Implement.
-    raise NotImplementedError
-
-
 def get_mcr_labs_sample_details(
         parser,
-        sample_id: str,
+        lab_id: str,
         headers: Optional[Any] = None,
         standard_analyses: Optional[Any] = None,
         standard_analytes: Optional[Any] = None,
@@ -305,7 +118,7 @@ def get_mcr_labs_sample_details(
     """Get the details for a specific MCR Labs test sample.
     Args:
         parser (CoADoc): A CoADoc client for standardization.
-        sample_id (str): A sample ID number or the `lab_results_url`.
+        lab_id (str): A sample ID number or the `lab_results_url`.
         headers (dict): Headers for the HTTP request (optional).
         standard_analyses (dict): An optional mapping of lab-specific
             analyses to standard analyses.
@@ -316,11 +129,11 @@ def get_mcr_labs_sample_details(
     """
     # Get the sample page.
     obs = {}
-    if sample_id.startswith('https'):
-        url = sample_id
+    if lab_id.startswith('https'):
+        url = lab_id
     else:
         base = MCR_LABS['url']
-        url = f'{base}/reports/{sample_id}'
+        url = f'{base}/reports/{lab_id}'
     if headers is None:
         headers = DEFAULT_HEADERS
     response = requests.get(url, headers=headers)
@@ -331,7 +144,7 @@ def get_mcr_labs_sample_details(
         element = soup.find('div', attrs={'class': 'rd_date'})
         obs['lab'] = strip_whitespace(element.text).split('by ')[-1]
     except:
-        print('Failed to find lab:', sample_id)
+        print('Failed to find lab:', lab_id)
         obs['lab'] = ''
     
     # Get a map of lab-specific analyses, analytes, and fields to the standard.
@@ -550,11 +363,191 @@ def get_mcr_labs_sample_details(
     obs['lab_results_url'] = url
     obs['results'] = results
     obs['sample_id'] = create_sample_id(
-        private_key=obs['producer'],
+        private_key=json.dumps(obs['results']),
         public_key=obs['product_name'],
-        salt=obs['date_tested'],
+        salt=obs['producer'],
     )
     return {**MCR_LABS, **obs}
+
+
+def get_mcr_labs_samples(
+        page_id: Any,
+        cat: Optional[str] = 'all',
+        order: Optional[str] = 'date-desc',
+        search: Optional[str] = '',
+        headers: Optional[Any] = None,
+    ) -> list:
+    """Get all test results from MCR Labs on a specific page.
+    Args:
+        page_id (str|int): The page number to get samples.
+        cat (str): The category, `all` by default (optional). Options:
+            `flower`, `concentrate`, `extract`, `mip`.
+        order (str): The order to list results, `date-desc` by default
+            (optional). Options: `date-desc`, `samplename`, `client`,
+            `totalcann-desc`, `totalterp-desc`, `maxthc-desc`, `maxcbd-desc`.
+        search (str): A particular search query.
+        headers (dict): Headers for the HTTP request (optional).
+    Returns:
+        (list): A list of dictionaries of sample data.
+    """
+    # Get a page.
+    base = MCR_LABS['url']
+    url = f'{base}/ProductWeVeTested/AjaxSearch'
+    params = {
+        'category': cat,
+        'order': order,
+        'page': str(page_id),
+        'searchString': search,
+    }
+    if headers is None:
+        headers = DEFAULT_HEADERS
+    response = requests.get(url, headers=headers, params=params)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # Get all of the products on the page.
+    samples = []
+    products = soup.find_all('li', attrs={'class': 'grid-item'})
+    for product in products:
+
+        # Get the sample details.
+        obs = {}
+        details = product.find('div', attrs={'class': 'reportTable'})
+
+        # Get the product name.
+        attrs = {'class': 'fth_name'}
+        obs['product_name'] = details.find('div', attrs=attrs).text
+
+        # Get the producer.
+        attrs = {'class': 'fth_client'}
+        obs['producer'] = details.find('div', attrs=attrs).text
+
+        # Get the product type.
+        # Optional: Standardize product types.
+        attrs = {'class': 'fth_category'}
+        obs['product_type'] = details.find('div', attrs=attrs).text
+
+        # Get the total cannabinoids.
+        attrs = {'class': 'fth_cannabinoids'}
+        value = details.find('div', attrs=attrs).text
+        obs['total_cannabinoids'] = strip_whitespace(value)
+
+        # Get the total terpenes.
+        attrs = {'class': 'fth_terpenes'}
+        value = details.find('div', attrs=attrs).text
+        obs['total_terpenes'] = strip_whitespace(value)
+
+        # Get the date tested.
+        try:
+            obs['date_tested'] = format_iso_date(details.find('div', \
+                attrs={'class': 'fth_date'}).text)
+        except ValueError:
+            print('Error parsing date:', obs)
+            obs['date_tested'] = ''
+
+        # Try to get the producer's URL.
+        try:
+            element = product.find('span', attrs={'class': 'url-linked'})
+            href = element.attrs['data-url']
+            obs['producer_url'] = '/'.join([base, href])
+        except AttributeError:
+            obs['producer_url'] = ''
+
+        # Get the lab results URL.
+        href = product.find('a')['href']
+        obs['lab_results_url'] = '/'.join([base, href])
+
+        # Get the image.
+        image_url = product.find('img')['src']
+        filename = image_url.split('/')[-1]
+        obs['images'] = [{'url': image_url, 'filename': filename}]
+
+        # Turn dates to ISO format.
+        date_columns = [x for x in obs.keys() if x.startswith('date')]
+        for date_column in date_columns:
+            try:
+                obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+            except:
+                pass
+
+        # Aggregate sample data.
+        samples.append({**MCR_LABS, **obs})
+
+    # Return the samples.
+    return samples
+
+
+def get_mcr_labs_test_results(
+        starting_page: Optional[int] = 1,
+        ending_page: Optional[int] = None,
+        pause: Optional[float] = 3,
+        verbose: Optional[bool] = True
+    ) -> list:
+    """Get all MCR Labs test results.
+    Args:
+        starting_page (int): The page to start collecting results,
+            `1` by default (optional).
+        ending_page (int): The page to end collecting results,
+            `None` by default, which will collect to the end (optional).
+        pause (float): The amount of time to wait between requests.
+        verbose (bool): Whether to print out status, `True` by default
+            (optional).
+    Returns:
+        (list): The complete sample data.
+    """
+    # Determine the pages to collect.
+    page_count = get_mcr_labs_sample_count()
+    total_pages = page_count['pages']
+    if not ending_page:
+        ending_page = total_pages
+    if verbose:
+        print('Getting samples for pages %i to %i.' % (starting_page, ending_page))
+    samples = []
+
+    # Iterate over all of the pages, index starting at 1.
+    for page_id in range(starting_page, ending_page + 1):
+        sample_data = get_mcr_labs_samples(page_id)
+        samples += sample_data
+        if page_id > 1 and page_id <= ending_page:
+            sleep(pause)
+    if verbose:
+        print('Found %i samples.' % len(samples))
+
+    # Get all of the sample details.
+    # Optional: Log errors?
+    rows = []
+    for i, sample in enumerate(samples):
+        try:
+            lab_id = sample['lab_results_url'].split('/')[-1]
+            details = get_mcr_labs_sample_details(None, lab_id)
+            rows.append({**sample, **details})
+            if i > 1:
+                sleep(pause)
+            if verbose:
+                print('Collected sample:', lab_id)
+        except:
+            print('Failed to collect sample:', lab_id)
+            continue
+
+    # Return all of the sample data.
+    return rows
+
+
+def get_mcr_labs_producer_test_results():
+    """Get all test results from MCR Labs for a specific producer.
+    Returns:
+        (list): A list of dictionaries of sample data.
+    """
+    # TODO: Implement.
+    raise NotImplementedError
+
+
+def get_mcr_labs_client_details():
+    """Find details for any known producer of a given lab sample..
+    Returns:
+        (dict): The client's details data.
+    """
+    # TODO: Implement.
+    raise NotImplementedError
 
 
 if __name__ == '__main__':
@@ -576,8 +569,8 @@ if __name__ == '__main__':
     # assert samples is not None
 
     # [✓] TEST: Get a sample's details.
-    # details = get_mcr_labs_sample_details(None, 'rooted-labs-distillate_2')
-    # assert details is not None
+    # sample = get_mcr_labs_sample_details(None, 'rooted-labs-distillate_2')
+    # assert sample is not None
 
     # [✓] TEST: Get an infused products's results (`product_type == 'mip'`).
     # details = get_mcr_labs_sample_details(None, '67545')

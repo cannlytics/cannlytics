@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 8/20/2022
+Updated: 8/28/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -79,6 +79,7 @@ Note:
 """
 # Standard imports.
 from ast import literal_eval
+import json
 import re
 from typing import Any, Optional
 
@@ -598,9 +599,8 @@ if __name__ == '__main__':
     obs['results'] = results
     obs['analyses'] = list(set(analyses))
     obs['sample_id'] = create_sample_id(
-        private_key=producer,
+        private_key=json.dumps(results),
         public_key=obs['product_name'],
-        salt=date_tested,
+        salt=producer,
     )
-
     print({**VEDA_SCIENTIFIC, **obs})

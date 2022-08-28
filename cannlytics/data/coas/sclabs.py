@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/8/2022
-Updated: 8/13/2022
+Updated: 8/28/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -91,6 +91,7 @@ Future work:
 """
 # Internal imports.
 from ast import literal_eval
+import json
 import re
 from time import sleep
 from typing import Any
@@ -271,10 +272,14 @@ def get_sc_labs_test_results(
             total_cbd = values[1].text.split(':')[-1].replace('%', '')
             total_terpenes = values[2].text.split(':')[-1].replace('%', '')
             
-            # Create a sample ID.
-            # Note: This may not work as intended if any lab results
-            # do not have tested at dates.
-            sample_id = create_sample_id(producer, product_name, date)
+            # # Create a sample ID.
+            # # Note: This may not work as intended if any lab results
+            # # do not have tested at dates.
+            # sample_id = create_sample_id(
+            #     private_key=json.dumps(results),
+            #     public_key=product_name,
+            #     salt=producer,
+            # )
 
             # Aggregate sample data.
             sample = {
@@ -286,7 +291,7 @@ def get_sc_labs_test_results(
                 'producer_image_url': producer_image_url,
                 'product_name': product_name,
                 'producer_url': producer_url,
-                'sample_id': sample_id,
+                'sample_id': None,
                 'total_cbd': total_cbd,
                 'total_thc': total_thc,
                 'total_terpenes': total_terpenes,
@@ -622,9 +627,9 @@ def get_sc_labs_sample_details(
     obs['notes'] = notes
     obs['results'] = results
     obs['sample_id'] = create_sample_id(
-        private_key=obs['producer'],
+        private_key=json.dumps(results),
         public_key=obs['product_name'],
-        salt=obs['date_tested'],
+        salt=obs['producer'],
     )
     return { **SC_LABS, **obs}
 
@@ -867,9 +872,9 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
     obs['product_name'] = product_name
     obs['results'] = results
     obs['sample_id'] = create_sample_id(
-        private_key=obs['producer'],
+        private_key=json.dumps(results),
         public_key=obs['product_name'],
-        salt=obs['date_tested'],
+        salt=obs['producer'],
     )
     return {**SC_LABS, **obs}
 

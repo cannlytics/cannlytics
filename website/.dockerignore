@@ -32,7 +32,9 @@ README.md
 **/.vscode
 /ai
 /build
+# /cannlytics
 /cannlytics.egg-info
+/dist
 /docs
 /tests
 /tools

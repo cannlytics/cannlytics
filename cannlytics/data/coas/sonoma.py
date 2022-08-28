@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/2/2022
-Updated: 8/13/2022
+Updated: 8/28/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -69,6 +69,7 @@ Data Points:
 
 """
 # Standard imports.
+import json
 from typing import Any, Optional
 
 # External imports.
@@ -294,9 +295,9 @@ def parse_sonoma_coa(
 
     # Finish data collection with a freshly minted sample ID.
     obs['sample_id'] = create_sample_id(
-        private_key=obs['producer'],
+        private_key=json.dumps(results),
         public_key=obs['product_name'],
-        salt=obs['date_tested'],
+        salt=obs['producer'],
     )
     return {**SONOMA, **obs}
 

@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 8/13/2022
+Updated: 8/28/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -50,6 +50,7 @@ Data Points:
 
 """
 # Standard imports.
+import json
 from time import sleep
 from typing import Any, Optional
 
@@ -386,9 +387,9 @@ def parse_cc_url(
     obs['lab_results_url'] = url
     obs['results'] = results
     obs['sample_id'] = create_sample_id(
-        private_key=producer,
+        private_key=json.dumps(results),
         public_key=product_name,
-        salt=date_tested,
+        salt=producer,
     )
     if not persist:
         parser.quit()

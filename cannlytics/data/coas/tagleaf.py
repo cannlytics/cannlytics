@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 8/13/2022
+Updated: 8/28/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -55,6 +55,7 @@ Data Points:
 
 """
 # Standard imports.
+import json
 from typing import Any, Optional
 
 # External imports.
@@ -114,7 +115,7 @@ def parse_tagleaf_url(
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # Get the date tested.
-    obs = {'analyses': [], 'results': [], 'lims': 'TagLeaf LIMS'}
+    obs = {}
     el = soup.find('p', attrs={'class': 'produced-statement'})
     date_tested = pd.to_datetime(el.text.split(': ')[-1]).isoformat()
     obs['date_tested'] = date_tested
@@ -219,6 +220,7 @@ def parse_tagleaf_url(
 
     # Get the `results`, using the table header for the columns,
     # noting that `value` is repeated for `mg_g`.
+    results = []
     tables = soup.find_all('table')
     for table in tables:
 
@@ -266,17 +268,18 @@ def parse_tagleaf_url(
             if analyte.startswith('total') and obs.get(analyte) is None:
                 obs[analyte] = convert_to_numeric(value, strip=True)
             else:
-                obs['results'].append(result)
+                results.append(result)
 
     # Return the sample with a freshly minted sample ID.
+    obs['results'] = results
     obs['sample_id'] = create_sample_id(
-        private_key=producer,
+        private_key=json.dumps(results),
         public_key=product_name,
-        salt=date_tested,
+        salt=producer,
     )
     if not persist:
         parser.quit()
-    return obs
+    return {**TAGLEAF, **obs}
 
 
 def parse_tagleaf_pdf(

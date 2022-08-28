@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/2/2022
-Updated: 8/7/2022
+Updated: 8/28/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -38,6 +38,7 @@ Data Points:
 """
 # Standard imports.
 from ast import literal_eval
+import json
 import re
 from typing import Any
 
@@ -302,9 +303,9 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
     obs['analyses'] = list(set(analyses))
     obs['results'] = results
     obs['sample_id'] = create_sample_id(
-        private_key=obs['producer'],
+        private_key=json.dumps(results),
         public_key=obs['product_name'],
-        salt=obs['date_tested'],
+        salt=obs['producer'],
     )
     return {**CANNALYSIS, **obs}
 

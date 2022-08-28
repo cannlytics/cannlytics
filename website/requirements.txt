@@ -21,7 +21,7 @@ Markdown==3.3.4
 openpyxl==3.0.10
 pandas==1.4.1
 pdfplumber==0.7.3
-Pillow==6.2.2 # TEST: Is this necessary?
+Pillow==9.2.0 # FIXME: Does `pyzbar` need 6.2.2?
 python-dateutil==2.8.2
 python-dotenv==0.19.2
 pymdown-extensions==9.1

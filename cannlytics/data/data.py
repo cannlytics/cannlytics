@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2022
-Updated: 7/31/2022
+Updated: 8/28/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Internal imports.
@@ -158,9 +158,9 @@ def parse_data_block(div, tag='span') -> dict:
 def create_sample_id(private_key, public_key, salt='') -> str:
     """Create a hash to be used as a sample ID.
     The standard is to use:
-        1. `private_key = producer`
+        1. `private_key = results`
         2. `public_key = product_name`
-        3. `salt = date_tested`
+        3. `salt = producer`
     Args:
         private_key (str): A string to be used as the private key.
         public_key (str): A string to be used as the public key.
