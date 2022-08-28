@@ -93,10 +93,11 @@ def subscribe(request):
     # Send a welcome / thank you email.
     # (Optional: Use HTML template.)
     # template_url = 'website/emails/newsletter_subscription_thank_you.html'
+    # FIXME:
     send_mail(
         subject=subject,
         message=message,
-        from_email=DEFAULT_FROM_EMAIL,
+        from_email=None,
         recipient_list=[user_email, DEFAULT_FROM_EMAIL],
         fail_silently=False,
         # html_message = render_to_string(template_url, {'context': 'values'})
@@ -171,10 +172,11 @@ def unsubscribe(request):
     Plan: {}
     Subscription ID: {}
     """.format(uid, user_email, plan_name, subscription_id)
+    # FIXME:
     send_mail(
         subject='User unsubscribed from a PayPal subscription.',
         message=staff_message,
-        from_email=DEFAULT_FROM_EMAIL,
+        from_email=None,
         recipient_list=[DEFAULT_FROM_EMAIL],
         fail_silently=False,
     )

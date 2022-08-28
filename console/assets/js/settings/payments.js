@@ -110,6 +110,10 @@ export const payments = {
      * then navigate to the confirmation page.
      * @param {String} subscription A specific subscription for the user.
      */
+    if (!subscription) {
+      const email = document.getElementById('sign-up-email').value;
+      subscription = { email };
+    }
     const response = await authRequest('/src/payments/subscribe', subscription);
     if (response.success) {
       document.getElementById('pin_input').value = '';

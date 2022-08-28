@@ -26,10 +26,10 @@ def send_message(request):
     """Send a message from the website to the Cannlytics admin through email.
     The user must provide an `email`, `subject`, and `message` in their POST.
     """
-    try:
-        request.POST['math_input'] == request.POST['math_total']
-    except KeyError:
-        return JsonResponse({'success': False, 'message': 'Bugger off.'}, status=401)
+    # try:
+    #     request.POST['math_input'] == request.POST['math_total']
+    # except KeyError:
+    #     return JsonResponse({'success': False, 'message': 'Bugger off.'}, status=401)
     claims = authenticate_request(request)
     uid = claims.get('uid', 'User not signed in.')
     user_email = claims.get('email', 'Unknown')
@@ -45,10 +45,11 @@ def send_message(request):
     template = 'New message from the Cannlytics website:' \
                '\n\n{0}\n\nUser: {0}\nUser Email: {0}\n\nFrom,\n{0}'
     text = template.format(message, uid, user_email, name)
+    # FIXME:
     send_mail(
         subject=subject.strip(),
         message=text,
-        from_email=sender,
+        from_email=None,
         recipient_list=recipients,
         fail_silently=False,
     )
@@ -83,10 +84,11 @@ def suggest_edit(request):
     template = 'New data edit recommendation from the Cannlytics website:' \
                '\n\n{0}\n\nUser: {0}\nUser Email: {0}\n\nFrom,\n{0}'
     text = template.format(message, uid, user_email, name)
+    # FIXME:
     send_mail(
         subject=subject.strip(),
         message=text,
-        from_email=user_email,
+        from_email=None,
         recipient_list=recipients,
         fail_silently=False,
     )

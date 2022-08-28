@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/23/2022
-Updated: 8/13/2022
+Updated: 8/28/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -83,8 +83,9 @@ import pdfplumber
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
-from cannlytics.utils.constants import STANDARD_FIELDS
+from cannlytics.utils.constants import STANDARD_UNITS
 from cannlytics.utils.utils import (
+    convert_to_numeric,
     snake_case,
     split_list,
     strip_whitespace,
@@ -196,27 +197,45 @@ GREEN_LEAF_LAB_COA = {
         {'text': 'Ocimene isomer I', 'key': 'alpha-ocimene'},
         {'text': 'p-Mentha-1,5-diene', 'key': 'p-Mentha-1-5-diene'},
         {'text': 'Methyl parathion', 'key': 'Methyl-parathion'},
+        {'text': 'Caryophyllene Oxide', 'key': 'beta_caryophyllene_oxide'},
     ],
 }
 
 
-def augment_analyte_result(result, columns, parts):
-    """Quickly augment an analyte result."""
+def augment_analyte_result(
+        analytes: dict,
+        result: dict,
+        columns: list,
+        parts: list,
+    ) -> dict:
+    """Quickly augment / add keys and values to an analyte result.
+    Args:
+        analytes (dict): A map of analytes to standard analytes.
+        result (dict): A dictionary of results.
+        columns (list): A list of keys to add to the result.
+        parts (list): A list of values to add to the result.
+    Returns:
+        (dict): The updated result.
+    """
     r = result.copy()
     if len(parts) > len(columns):
         break_point = len(parts) - len(columns) + 1
         name = ' '.join(parts[:break_point])
+        analyte = snake_case(name)
+        analyte = analytes.get(analyte, analyte)
         r['name'] = name
-        r['key'] = snake_case(name)
+        r['key'] = analyte
         for i, part in enumerate(parts[break_point:]):
-            r[columns[i + 1]] = part
+            r[columns[i + 1]] = convert_to_numeric(part)
     else:
         for i, part in enumerate(parts):
             if i == 0:
-                r[columns[i]] = part
-                r['key'] = snake_case(part)
+                analyte = snake_case(part)
+                analyte = analytes.get(analyte, analyte)
+                r['name'] = part
+                r['key'] = analyte
             else:
-                r[columns[i]] = part
+                r[columns[i]] = convert_to_numeric(part)
     return r
 
 
@@ -260,7 +279,7 @@ def parse_green_leaf_lab_pdf(
     skip_values = coa_parameters['coa_skip_values']
 
     # Get all distributor details.
-    # FIXME: This should be more general.
+    # Note: This could / should be more general.
     crop = front_page.within_bbox(distributor_area)
     details = crop.extract_text().split('\n')
     address = details[2]
@@ -279,7 +298,7 @@ def parse_green_leaf_lab_pdf(
     obs['distributor_license_number'] = details[-1]
     
     # Get all producer details.
-    # FIXME: This should be more general.
+    # Note: This could / should be more general.
     crop = front_page.within_bbox(producer_area)
     details = crop.extract_text().split('\n')
     producer = details[1]
@@ -310,7 +329,7 @@ def parse_green_leaf_lab_pdf(
     for i, detail in enumerate(details[1:]):
         if detail:
             field = sample_details_fields[index]
-            key = STANDARD_FIELDS[field]
+            key = parser.fields[field]
             obs[key] = detail.replace(':', '').strip()
             index += 1  
 
@@ -327,13 +346,13 @@ def parse_green_leaf_lab_pdf(
                     value = strip_whitespace(parts[1])
                 except IndexError:
                     continue
-                field = STANDARD_FIELDS.get(key, key)
+                field = parser.fields.get(key, key)
                 obs[field] = value.lower()
                 if field != 'status':
                     analysis = field.replace('_status', '')
                     analyses.append(analysis)
 
-    # FIXME: Identify `{analysis}_method`s.
+    # Identify `{analysis}_method`s.
     # Also find the times for all of the tests and find when all
     # tests were completed. Future work: record finish time of analyses.
     methods = []
@@ -400,41 +419,60 @@ def parse_green_leaf_lab_pdf(
             values = values.replace(replacement['text'], replacement['key'])
         values = values.split(' ')
         values = [x for x in values if x]
-        result = {'analysis': analysis}
+        units = STANDARD_UNITS.get(analysis)
+        result = {'analysis': analysis, 'units': units}
 
-        # FIXME: Skip the analysis title here.
-        if snake_case(values[0]) == current_analysis:
+        # Skip the analysis title row and short detail rows.
+        # Note: There is probably a better way to do this that can not
+        # accidentally exclude results. This method may not be perfect.
+        if snake_case(values[0]) == current_analysis or len(values) < len(columns):
             continue
 
-        # FIXME: There is probably a better way to do this.
-        # This may exclude results by accident.
-        if len(values) < len(columns):
-            continue
-
-        # FIXME: Hot-fix for `total_terpenes`.
+        # Hot-fix for `total_terpenes`.
+        # Note: There may be a better way to do this.
         if values[0] == 'Total' and values[1] == 'Terpenes':
             values = ['Total Terpenes'] + values[2:]
 
-        # FIXME: Hot-fix for `mycotoxins`.
+        # Hot-fix for `mycotoxins`.
+        # Note: There may be a better way to do this.
         if values[0] == 'aflatoxin':
             values.insert(2, 20)
 
         # Split the row if double_column.
-        # Future work: This code could probably be refactored.
+        # Note: This code could probably be refactored.
         if double_column and len(values) > len(columns):
             multi_part = split_list(values, int(len(values) / 2))
-            entry = augment_analyte_result(result, columns, multi_part[0])
+
+            # Parse the first column.
+            entry = augment_analyte_result(
+                parser.analytes,
+                result,
+                columns,
+                multi_part[0],
+            )
             if entry['name'] != 'mgtog' and entry['name'] != 'action':
                 results.append(entry)
-            entry = augment_analyte_result(result, columns, multi_part[1])
-            if entry['name'] != 'mgtog' and entry['name'] != 'action':
-                results.append(entry)
-        else:
-            entry = augment_analyte_result(result, columns, values)
+
+            # Parse the second column.
+            entry = augment_analyte_result(
+                parser.analytes,
+                result,
+                columns,
+                multi_part[1],
+            )
             if entry['name'] != 'mgtog' and entry['name'] != 'action':
                 results.append(entry)
         
-        # FIXME: Add `units` to results!
+        # Parse a single column.
+        else:
+            entry = augment_analyte_result(
+                parser.analytes,
+                result,
+                columns,
+                values,
+            )
+            if entry['name'] != 'mgtog' and entry['name'] != 'action':
+                results.append(entry)
 
     # Turn dates to ISO format.
     date_columns = [x for x in obs.keys() if x.startswith('date')]
@@ -456,28 +494,11 @@ def parse_green_leaf_lab_pdf(
         salt=producer,
     )
 
-    # TODO: Lowercase `results` `status`.
-
-    # TODO: Standardize `results` `units`.
+    # Optional: Lowercase `status` in each of the `results`.
 
     # Future work: Standardize the `product_type`.
 
     # Future work: Attempt to identify `strain_name` from `product_name`.
-
-    # Optional: Calculate THC to CBD ratio.
-
-    # Optional: Calculate terpene ratios:
-    # - beta-pinene to d-limonene ratio
-    # - humulene to caryophyllene
-    # - linalool and myrcene? (Research these!)
-
-    # Optional: Calculate terpinenes total.
-    # analytes = ['alpha_terpinene', 'gamma_terpinene', 'terpinolene', 'terpinene']
-    # compounds = sum_columns(compounds, 'terpinenes', analytes, drop=False)
-
-    # Optional: Sum `nerolidol`s and `ocimene`s.
-
-    # Optional: Calculate total_cbg, total_thcv, total_cbc, etc.
 
     return {**GREEN_LEAF_LAB, **obs}
 
@@ -489,7 +510,8 @@ if __name__ == '__main__':
 
     # Specify where your test CoA lives.
     DATA_DIR = '../../../.datasets/coas'
-    coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
+    # coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
+    coa_pdf = f'{DATA_DIR}/Flore COA/Swami Select/MagicMelon.pdf'
 
     # [✓] TEST: Detect the lab / LIMS that generated the CoA.
     parser = CoADoc()
