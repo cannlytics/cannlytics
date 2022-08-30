@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 8/28/2022
+Updated: 8/30/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -50,6 +50,7 @@ Data Points:
 
 """
 # Standard imports.
+from datetime import datetime
 import json
 from time import sleep
 from typing import Any, Optional
@@ -391,6 +392,7 @@ def parse_cc_url(
         public_key=product_name,
         salt=producer,
     )
+    obs['coa_parsed_at'] = datetime.now().isoformat()
     if not persist:
         parser.quit()
     return {**CONFIDENT_CANNABIS, **obs}
@@ -426,11 +428,13 @@ def parse_cc_coa(
         if doc.startswith('http'):
             return parse_cc_url(parser, doc, **kwargs)
         elif doc.endswith('.pdf'):
-            return parse_cc_pdf(parser, doc, **kwargs)
+            data = parse_cc_pdf(parser, doc, **kwargs)
         else:
-            return parse_cc_pdf(parser, doc, **kwargs)
+            data = parse_cc_pdf(parser, doc, **kwargs)
     else:
-        return parse_cc_pdf(parser, doc, **kwargs)
+        data = parse_cc_pdf(parser, doc, **kwargs)
+    data['coa_pdf'] = doc.split('/')[-1]
+    return data
 
 
 if __name__ == '__main__':

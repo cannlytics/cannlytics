@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/2/2022
-Updated: 8/28/2022
+Updated: 8/30/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -51,6 +51,7 @@ Data Points:
 """
 # Standard imports.
 from ast import literal_eval
+from datetime import datetime
 import json
 import re
 from typing import Any
@@ -133,14 +134,15 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
     Returns:
         (dict): The sample data.
     """
+    obs = {}
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
+        obs['coa_pdf'] = doc.split('/')[-1]
     else:
         report = doc
     front_page = report.pages[0]
 
     # Get the QR code from the last page.
-    obs = {}
     obs['lab_results_url'] = parser.find_pdf_qr_code_url(report, page_index=-1)
 
     # Get the standard analyses, analytes, and fields.
@@ -342,6 +344,7 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
         public_key=obs['product_name'],
         salt=obs['producer'],
     )
+    obs['coa_parsed_at'] = datetime.now().isoformat()
     return {**ANRESCO, **obs}
 
 

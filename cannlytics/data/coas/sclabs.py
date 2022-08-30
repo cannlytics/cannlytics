@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/8/2022
-Updated: 8/28/2022
+Updated: 8/30/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -91,6 +91,7 @@ Future work:
 """
 # Internal imports.
 from ast import literal_eval
+from datetime import datetime
 import json
 import re
 from time import sleep
@@ -371,7 +372,7 @@ def get_sc_labs_sample_details(
         obs['producer_city'] = ''
         obs['producer_zipcode'] = ''
     
-    # FIXME: Lookup producer / distributor address for latitude / longitude.
+    # TODO: Lookup producer / distributor address for latitude / longitude.
     
     # Remove the `address` field to avoid confusion.
     try:
@@ -631,6 +632,7 @@ def get_sc_labs_sample_details(
         public_key=obs['product_name'],
         salt=obs['producer'],
     )
+    obs['coa_parsed_at'] = datetime.now().isoformat()
     return { **SC_LABS, **obs}
 
 
@@ -700,8 +702,7 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
     obs['distributor_license_number'] = license_number
 
     # Get sample details.
-    # FIXME: This may not be handling `sum_of_cannabinoids` and
-    # `total_cannabinoids` correctly.
+    # FIXME: May be mishandling `sum_of_cannabinoids` and `total_cannabinoids`.
     if isinstance(sample_details_area, str):
         sample_details_area = [sample_details_area]
     for area in sample_details_area:
@@ -876,6 +877,7 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
         public_key=obs['product_name'],
         salt=obs['producer'],
     )
+    obs['coa_parsed_at'] = datetime.now().isoformat()
     return {**SC_LABS, **obs}
 
 
@@ -897,6 +899,7 @@ def parse_sc_labs_coa(
     except (AttributeError, ConnectionError):
         data = parse_sc_labs_pdf(parser, doc)
         data['public'] = False
+        data['coa_pdf'] = doc.split('/')[-1]
     return data
 
 

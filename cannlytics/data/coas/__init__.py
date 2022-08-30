@@ -4,6 +4,9 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/21/2022
-Updated: 7/21/2022
+Updated: 8/30/2022
 """
-from .coas import CoADoc
+try:
+    from .coas import CoADoc
+except ImportError:
+    pass

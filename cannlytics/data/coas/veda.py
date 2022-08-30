@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 8/28/2022
+Updated: 8/30/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -79,6 +79,7 @@ Note:
 """
 # Standard imports.
 from ast import literal_eval
+from datetime import datetime
 import json
 import re
 from typing import Any, Optional
@@ -514,6 +515,7 @@ if __name__ == '__main__':
             # values = line[first_value:].strip().split(' ')
             # values = [x for x in values if x]
             # obs[key] = convert_to_numeric(values[-1])
+
         # FIXME:
         # Handle Aspergillus and totals.
         # elif initial_value == 'Total' or initial_value == 'Aspergillus':

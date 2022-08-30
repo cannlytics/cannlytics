@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/23/2022
-Updated: 8/28/2022
+Updated: 8/30/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -73,6 +73,7 @@ Data Points:
 """
 # Standard imports.
 from ast import literal_eval
+from datetime import datetime
 import json
 import re
 from typing import Any
@@ -262,6 +263,7 @@ def parse_green_leaf_lab_pdf(
     # Read the PDF.
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
+        obs['coa_pdf'] = doc.split('/')[-1]
     else:
         report = doc
     front_page = report.pages[0]
@@ -493,6 +495,7 @@ def parse_green_leaf_lab_pdf(
         public_key=product_name,
         salt=producer,
     )
+    obs['coa_parsed_at'] = datetime.now().isoformat()
 
     # Optional: Lowercase `status` in each of the `results`.
 

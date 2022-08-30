@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/2/2022
-Updated: 8/28/2022
+Updated: 8/30/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -69,6 +69,7 @@ Data Points:
 
 """
 # Standard imports.
+from datetime import datetime
 import json
 from typing import Any, Optional
 
@@ -125,13 +126,14 @@ def parse_sonoma_coa(
         (dict): The sample data.
     """
     # Read the PDF.
+    obs = {}
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
+        obs['coa_pdf'] = doc.split('/')[-1]
     else:
         report = doc
 
     # Define fields to collect.
-    obs = {}
     analysis = None
     analyses = []
     columns = []
@@ -299,6 +301,7 @@ def parse_sonoma_coa(
         public_key=obs['product_name'],
         salt=obs['producer'],
     )
+    obs['coa_parsed_at'] = datetime.now().isoformat()
     return {**SONOMA, **obs}
 
 

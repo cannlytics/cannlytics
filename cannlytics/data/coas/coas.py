@@ -684,11 +684,6 @@ class CoADoc:
         )
         return data
 
-    def upload(self, data):
-        """Upload any public lab results to Firestore."""
-        # TODO: Archive the lab results if they are public.
-        raise NotImplementedError
-
     def save(
             self,
             data: Any,
@@ -784,19 +779,26 @@ class CoADoc:
             google_maps_api_key=google_maps_api_key,
         )
 
-        # Add a Codings worksheet.
+        # Add a "Codings" worksheet.
         coding_data = pd.DataFrame({
             'Coding': codings.values(),
             'Actual': codings.keys(),
         })
-
         
-        # Format details `results` as proper JSON.
-        details_data['results'] = details_data['results'].apply(json.dumps)
-
-        # FIXME: Also parse `images` and `coa_urls` into JSON.
-        # details_data['coa_urls'] = details_data.get('coa_urls', []).apply(json.dumps)
-        # details_data['images'] = details_data.get('images', []).apply(json.dumps)
+        # Format details `results`, `coa_urls`, `images` as proper JSON.
+        # TODO: Make errors specific.
+        try:
+            details_data['results'] = details_data['results'].apply(json.dumps)
+        except:
+            pass
+        try:
+            details_data['coa_urls'] = details_data['coa_urls'].apply(json.dumps)
+        except:
+            pass
+        try:
+            details_data['images'] = details_data.get['images'].apply(json.dumps)
+        except:
+            pass
 
         # Create a workbook for saving the data.
         wb = openpyxl.Workbook()
@@ -876,12 +878,13 @@ class CoADoc:
         if standard_fields is None:
             standard_fields = self.fields
 
-        # TODO: Calculate all totals:`total_cannabinoids`, `total_terpenes`, etc.
-        # TODO: Remove and keep `units` from `value`.
-        # TODO: Standardize `units`
-        # TODO: Create a standard `product_type_key`
-        # TODO: Augment any missing GIS data, such as latitude, longitude, or address field.
-        # TODO: Try to parse a `strain_name` from `product_name` with NLP.
+        # TODO:
+        # [ ] Calculate all missing totals:`total_cannabinoids`, `total_terpenes`, etc.
+        # [ ] Remove and keep `units` from `value`.
+        # [ ] Standardize `units`
+        # [ ] Create a standard `product_type_key`
+        # [ ] Augment any missing GIS data, such as latitude, longitude, or address field.
+        # [ ] Try to parse a `strain_name` from `product_name` with NLP.
 
         # Standardize a dictionary.
         if isinstance(data, dict):
@@ -1281,38 +1284,38 @@ if __name__ == '__main__':
     #     pass
 
     # [✓] TEST: Standardize CoA data.
-    coa = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
-    # coa = '../../../.datasets/coas/Flore COA/Flore Brand/220121OgreInfused.pdf'
-    data = parser.parse(coa)
+    # coa = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
+    # # coa = '../../../.datasets/coas/Flore COA/Flore Brand/220121OgreInfused.pdf'
+    # data = parser.parse(coa)
 
     # [✓] TEST: Standardize CoA data dictionary.
-    clean_data = parser.standardize(data[0])
+    # clean_data = parser.standardize(data[0])
 
     # [✓] TEST: Standardize CoA data list of dictionaries.
-    clean_data_list = parser.standardize(data)
+    # clean_data_list = parser.standardize(data)
 
     # [✓] TEST: Standardize CoA data DataFrame.
-    dataframe = pd.DataFrame(data)
-    details_dataframe = parser.standardize(dataframe)
-    results_dataframe = parser.standardize(
-        dataframe,
-        how='long'
-    )
-    values_dataframe = parser.standardize(
-        dataframe,
-        how='wide',
-        details_data=details_dataframe,
-        results_data=results_dataframe,
-    )
+    # dataframe = pd.DataFrame(data)
+    # details_dataframe = parser.standardize(dataframe)
+    # results_dataframe = parser.standardize(
+    #     dataframe,
+    #     how='long'
+    # )
+    # values_dataframe = parser.standardize(
+    #     dataframe,
+    #     how='wide',
+    #     details_data=details_dataframe,
+    #     results_data=results_dataframe,
+    # )
 
     # [✓] TEST: Save CoA data from DataFrame.
-    parser.save(dataframe, '../../../.datasets/tests/test-coas.xlsx')
+    # parser.save(dataframe, '../../../.datasets/tests/test-coas.xlsx')
 
     # [✓] TEST: Save CoA data from list of dictionaries.
-    parser.save(data, '../../../.datasets/tests/test-coas.xlsx')
+    # parser.save(data, '../../../.datasets/tests/test-coas.xlsx')
 
     # [✓] TEST: Save CoA data from dictionary.
-    parser.save(data[0], '../../../.datasets/tests/test-coas.xlsx')
+    # parser.save(data[0], '../../../.datasets/tests/test-coas.xlsx')
 
     # [✓] TEST: Close the parser.
     parser.quit()

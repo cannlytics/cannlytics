@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 8/28/2022
+Updated: 8/30/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -50,7 +50,8 @@ Future development:
     - Optional: Function to download any pre-existing results.
 
 """
-# Internal imports.
+# Standard imports.
+from datetime import datetime
 import json
 import math
 import re
@@ -367,6 +368,7 @@ def get_mcr_labs_sample_details(
         public_key=obs['product_name'],
         salt=obs['producer'],
     )
+    obs['coa_parsed_at'] = datetime.now().isoformat()
     return {**MCR_LABS, **obs}
 
 
