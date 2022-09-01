@@ -51,7 +51,7 @@
     "website:publish": "npm run website:build & npm run website:container & npm run website:cloud && npm run website:deploy"
   },
   "dependencies": {
-    "@popperjs/core": "^2.10.2",
+    "@popperjs/core": "^2.11.6",
     "@primer/octicons": "^11.3.0",
     "axios": "^0.24.0",
     "bootstrap": "^5.2.0-beta1",
