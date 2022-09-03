@@ -917,12 +917,12 @@ if __name__ == '__main__':
     # assert sample_details is not None
 
     # [✓] TEST: Get details for a specific sample URL.
-    sc_labs_coa_url = 'https://client.sclabs.com/sample/858084'
-    parser = CoADoc()
-    lab = parser.identify_lims(sc_labs_coa_url)
-    assert lab == 'SC Labs'
-    data = get_sc_labs_sample_details(sc_labs_coa_url)
-    assert data is not None
+    # sc_labs_coa_url = 'https://client.sclabs.com/sample/858084'
+    # parser = CoADoc()
+    # lab = parser.identify_lims(sc_labs_coa_url)
+    # assert lab == 'SC Labs'
+    # data = get_sc_labs_sample_details(sc_labs_coa_url)
+    # assert data is not None
 
     # [✓] TEST: Parse a SC Labs CoA PDF (with cannabinoids and terpenes).
     # directory = '../../../.datasets/coas/Flore COA'

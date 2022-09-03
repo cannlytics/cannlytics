@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/20/2022
+Updated: 9/2/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -60,6 +60,16 @@ Future work:
     Let's keep onboarding labs and LIMS until CoADoc
     is robust enough to parse any given cannabis CoA!
 
+Setup:
+
+    1. Install Tesseract.
+    For Windows: <https://github.com/UB-Mannheim/tesseract/wiki>
+    For all other OS: <https://github.com/madmaze/pytesseract>
+
+    2. Install ImageMagick
+    Download: <https://imagemagick.org/script/download.php#windows>
+    Cloud: <https://stackoverflow.com/questions/43036268/do-i-have-access-to-graphicsmagicks-or-imagemagicks-in-a-google-cloud-function>
+
 """
 # Standard imports.
 from ast import literal_eval
@@ -68,23 +78,28 @@ import importlib
 from io import BytesIO
 import json
 import operator
+import os
 from typing import Any, Optional
-# FIXME: Determine if this package is necessary.
 try:
     from wand.image import Image as wi
+    from wand.color import Color
 except ImportError:
-    print('You probably have not installed ImageMagick library. This tool is used in case pdfplumber fails.')
+    print('Unable to find `ImageMagick` library. This tool is used for OCR.')
 
 # External imports.
 import openpyxl
 import pandas as pd
 import requests
 import pdfplumber
-# FIXME: Ensure dependencies are installed for production!
+from PyPDF2 import PdfMerger
 try:
     from pyzbar.pyzbar import decode
 except ImportError:
-    print('Unable to find zbar shared library. This tool is used for decoding QR codes.')
+    print('Unable to find `zbar` library. This tool is used for decoding QR codes.')
+try:
+    from pytesseract import image_to_pdf_or_hocr
+except ImportError:
+    print('Unable to find `Tesseract` library. This tool is used for OCR.')
 
 # Internal imports.
 from cannlytics.data.data import write_to_worksheet
@@ -139,6 +154,32 @@ DEFAULT_NUISANCE_COLUMNS = ['received_by', 'sampled_by', 'Unnamed: 1',
 
 # Default columns to apply codings and be treated as numeric.
 DEFAULT_NUMERIC_COLUMNS = ['value', 'mg_g', 'lod', 'loq', 'limit', 'margin_of_error']
+
+
+def convert_pdf_to_images(filename, output_path, resolution=150):
+    """ Convert a PDF into images. All the pages will be named:
+
+        {pdf_filename}-{page_number}.png
+
+    The function removes the alpha channel from the image and
+    replace it with a white background.
+
+    Authors: Thibaut Mattio, Averner <https://stackoverflow.com/a/42525093/5021266>
+    License: CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>
+    """
+    image_files = []
+    all_pages = wi(filename=filename, resolution=resolution)
+    for i, page in enumerate(all_pages.sequence):
+        with wi(page) as img:
+            img.format = 'png'
+            img.background_color = Color('white')
+            img.alpha_channel = 'remove'
+            image_filename = os.path.splitext(os.path.basename(filename))[0]
+            image_filename = '{}-{}.png'.format(image_filename, i)
+            image_filename = os.path.join(output_path, image_filename)
+            img.save(filename=image_filename)
+            image_files.append(image_filename)
+    return image_files
 
 
 class CoADoc:
@@ -547,6 +588,7 @@ class CoADoc:
             lims: Optional[Any] = None,
             max_delay: Optional[float] = 7,
             persist: Optional[bool] = False,
+            temp_path: Optional[str] = '/tmp',
         ) -> dict:
         """Parse a CoA PDF. Searches the best guess image, then all
         images, for a QR code URL to find results online.
@@ -556,6 +598,11 @@ class CoADoc:
             lims (str or dict): Specific LIMS to parse CoAs.
             max_delay (float): The maximum number of seconds to wait
                 for the page to load.
+            persist (bool): Whether to persist the driver
+                and / or session between CoA parses, the
+                default is `True`, with any driver and session
+                being closed at the end (optional).
+            temp_path (str): A temporary directory used for OCR.
         Returns:
             (dict): The sample data.
         """
@@ -567,12 +614,10 @@ class CoADoc:
             pdf_file = pdfplumber.open(pdf)
         elif isinstance(pdf, pdfplumber.pdf.PDF):
             pdf_file = pdf
-        # FIXME: Is this necessary? It requires ImageMagick which is
-        # an entire dependency to add if we do not need to do so.
         else:
             with open(wi(file=pdf, resolution=300)) as temp_file:
-                temp_file.save('/tmp/coa.pdf')
-            pdf_file = pdfplumber.open('/tmp/coa.pdf')
+                temp_file.save(f'{temp_path}/coa.pdf')
+            pdf_file = pdfplumber.open(f'{temp_path}/coa.pdf')
 
         # TODO: Try to read a Metrc ID from the PDF and use the Metrc ID
         # to query the Cannlytics API.
@@ -582,8 +627,23 @@ class CoADoc:
         #     if data is not None:
         #         return data
 
-        # Identify any known LIMS.
+        # Identify any known LIMS, trying OCR if the PDF is not recognized,
+        # then raise an error if the labs / LIMS is unknown for safety.
         known_lims = self.identify_lims(pdf_file, lims=lims)
+        if known_lims is None:
+            temp_pdf = f'{temp_path}/ocr-coa.pdf'
+            if isinstance(pdf, str):
+                filename = pdf
+            elif isinstance(pdf, pdfplumber.pdf.PDF):
+                filename = pdf.stream.name
+            else:
+                filename = f'{temp_path}/coa.pdf'
+            self.pdf_ocr(filename, temp_pdf, temp_path)
+            pdf_file = pdfplumber.open(temp_pdf)
+            known_lims = self.identify_lims(pdf_file, lims=lims)
+            if known_lims is None:
+                # TODO: Parse unidentified CoAs as well as possible?   
+                raise NotImplementedError
 
         # Get the time the CoA was created, if known.
         date_tested = self.get_pdf_creation_date(pdf_file)
@@ -683,6 +743,54 @@ class CoADoc:
             google_maps_api_key=self.google_maps_api_key,
         )
         return data
+
+    def pdf_ocr(
+            self,
+            filename: str,
+            outfile: str,
+            temp_path: Optional[str] = '/tmp',
+            resolution: Optional[int] = 300,
+            cleanup: Optional[bool] = True,
+        ) -> None:
+        """Pass a PDF through OCR to recognize its text. Outputs a new PDF.
+        A temporary directory is used, because the algorithm is to:
+            1. Convert all PDF pages to images.
+            2. Convert each image to PDF with text.
+            3. Compile the PDFs with text to a single PDF.
+        The rendered images and individual PDF files are removed by default.
+        """
+        # Create a directory to store images and rendered PDFs.
+        if not os.path.exists(temp_path): os.makedirs(temp_path)
+
+        # Convert each PDF page to an image.
+        image_files = convert_pdf_to_images(
+            filename,
+            temp_path,
+            resolution=resolution,
+        )
+
+        # Convert each image to PDF with text.
+        pdf_files = []
+        for image_file in image_files:
+            pdf = image_to_pdf_or_hocr(image_file, extension='pdf')
+            pdf_file = image_file.replace('.png', '.pdf')
+            pdf_files.append(pdf_file)
+            with open(pdf_file, 'w+b') as f:
+                f.write(pdf)
+            if cleanup:
+                os.remove(image_file)
+
+        # Compile the PDFs with text to a single PDF.
+        merger = PdfMerger()
+        for pdf in pdf_files:
+            merger.append(pdf)
+        merger.write(outfile)
+        merger.close()
+
+        # Remove individual PDF files.
+        if cleanup:
+            for pdf in pdf_files:
+                os.remove(pdf)
 
     def save(
             self,

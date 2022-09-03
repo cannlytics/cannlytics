@@ -1,6 +1,6 @@
 # Python Requirements | Cannlytics
 # Created 3/14/2022
-# Updated: 7/16/2022
+# Updated: 9/2/2022
 
 beautifulsoup4
 firebase_admin
@@ -14,6 +14,8 @@ openpyxl
 opencv-python
 pandas
 pdfplumber
+PyPDF2
+pytesseract
 python-dateutil
 python-dotenv
 pyzbar

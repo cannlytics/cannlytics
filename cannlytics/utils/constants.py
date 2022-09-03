@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and the Cannabis Data Science Team
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/8/2021
-Updated: 8/20/2022
+Updated: 9/2/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains useful constants. In particular, there
@@ -209,6 +209,7 @@ ANALYTES = {
     'Salmonella spp': 'salmonella',
     'Sand, Soil, Cinders, Dirt': 'soil',
     'Sand': 'soil',
+    'SscD': 'soil',
     'spinetoram_j': 'spinetoram',
     'spinetoram_l': 'spinetoram',
     'a_terpineol': 'alpha_terpineol',
