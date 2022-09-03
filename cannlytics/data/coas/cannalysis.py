@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/2/2022
-Updated: 9/2/2022
+Updated: 9/3/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -24,7 +24,7 @@ Data Points:
     ✓ date_produced
     ✓ batch_size
     ✓ lab_id
-    ✓ lab_results_url
+    - lab_results_url
     ✓ metrc_lab_id
     ✓ metrc_source_id
     ✓ product_name
@@ -142,10 +142,10 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
     # Note: After OCR, QR code decoding raises warning:
     # DecompressionBombWarning: Image size (154554704 pixels) exceeds
     # limit of 89478485 pixels, could be decompression bomb DOS attack.
-    try:
-        obs['lab_results_url'] = parser.find_pdf_qr_code_url(report)
-    except Image.DecompressionBombWarning:
-        obs['lab_results_url'] = ''
+    # try:
+    #     obs['lab_results_url'] = parser.find_pdf_qr_code_url(report)
+    # except Image.DecompressionBombWarning:
+    #     obs['lab_results_url'] = ''
 
     # Optional: Get the image data.
 
@@ -254,6 +254,13 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
                 collect = True
                 continue
 
+    # Get the product name if it wasn't collected from the details.
+    # Hot-fix: OCR misreads "Pass" as "G=>". How does OCR read "Fail"?
+    if obs.get('product_name') is None:
+        text = front_page.extract_text().split('Testing')[-1].split('\n')
+        text = [x.replace('  ', ' ') for x in text if x.strip()]
+        obs['product_name'] = text[0].replace('G=>', '').strip()
+
     # Get all page text, from the 2nd page on.
     results, date_tested = [], []
     for page_number, page in enumerate(report.pages[1:]):
@@ -297,7 +304,7 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
                     continue
 
                 # Get the totals.
-                elif 'TOTAL' in line:
+                elif 'TOTAL' in line and '@' not in line:
                     parts = line.split(':')
                     key = snake_case(parts[0].lower())
                     value = parts[1].strip()
@@ -401,10 +408,17 @@ if __name__ == '__main__':
     # data = parse_cannalysis_coa(parser, doc)
     # assert data is not None
 
-    # [✓] TEST: Parse a Cannalysis CoA PDF after OCR.
-    parser = CoADoc()
-    doc = '../../../.datasets/tests/test.pdf'
-    lab = parser.identify_lims(doc, lims={'Cannalysis': CANNALYSIS})
-    assert lab == 'Cannalysis'
-    data = parse_cannalysis_coa(parser, doc)
-    assert data is not None
+    # [✓] TEST: Parse a Cannalysis CoA PDF after OCR is applied.
+    # parser = CoADoc()
+    # doc = '../../../.datasets/tests/test.pdf'
+    # lab = parser.identify_lims(doc, lims={'Cannalysis': CANNALYSIS})
+    # assert lab == 'Cannalysis'
+    # data = parse_cannalysis_coa(parser, doc)
+    # assert data is not None
+
+    # [✓] TEST: Parse a Cannalysis CoA PDF, applying OCR.
+    # parser = CoADoc()
+    # doc = '../../../.datasets/tests/mist.pdf'
+    # temp_path = '../../../.datasets/tests/tmp'
+    # data = parser.parse_pdf(doc, temp_path=temp_path)
+    # assert data is not None

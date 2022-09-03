@@ -2,7 +2,8 @@
 # Created 1/5/2021
 # Updated: 8/21/2022
 
-cannlytics==0.0.11
+# DEV: Uncomment in production.
+# cannlytics==0.0.12
 chromedriver-binary==104.0.5112.29.0
 datetime==4.3
 django==4.0
@@ -33,3 +34,26 @@ statsmodels==0.13.2
 ulid-py==1.1.0
 waitress==2.1.1
 whitenoise==5.3.0
+
+# DEV: `cannlytics` requirements.
+# beautifulsoup4
+# firebase_admin
+# fredapi
+# google-cloud-secret-manager
+# google-cloud-firestore
+# googlemaps
+# matplotlib
+# numpy
+# openpyxl
+# opencv-python
+# pandas
+# pdfplumber
+# PyPDF2
+# pytesseract
+# python-dateutil
+# python-dotenv
+# pyzbar
+# selenium
+# statsmodels
+# ulid-py
+# zipcodes

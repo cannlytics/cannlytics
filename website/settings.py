@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 1/5/2021
-Updated: 12/23/2021
+Updated: 9/3/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Django settings powered by environment variables and
@@ -24,9 +24,9 @@ from django.template import base
 # Internal imports.
 from cannlytics.firebase import access_secret_version
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Project variables.
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # Define project namespaces.
 PROJECT_NAME = 'website'
@@ -39,12 +39,12 @@ with open(os.path.join(BASE_DIR, 'package.json')) as v_file:
     package = json.loads(v_file.read())
     APP_VERSION_NUMBER = package['version']
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Environment variables.
 # Pulling django-environ settings file, stored in Secret Manager.
 # Docs: https://cloud.google.com/secret-manager/docs/overview
 # Example: https://codelabs.developers.google.com/codelabs/cloud-run-django
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # Load secrets stored as environment variables.
 env = environ.Env(DEBUG=(bool, False))
@@ -83,10 +83,10 @@ if PRODUCTION == 'True':
 else:
     DEBUG = True
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Apps
 # https://docs.djangoproject.com/en/3.1/ref/applications/
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # Define apps used in the project.
 INSTALLED_APPS = [
@@ -104,10 +104,10 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 ]
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Middleware
 # https://docs.djangoproject.com/en/3.1/topics/http/middleware/
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # Define middleware that is executed by Django.
 # WhiteNoise should be below SecurityMiddleWare and above all others.
@@ -126,10 +126,10 @@ MIDDLEWARE = [
     # 'csp.context_processors.nonce',
 ]
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Livereload
 # https://github.com/tjwalch/django-livereload-server
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # Hot-reload for development.
 if PRODUCTION == 'False':
@@ -137,10 +137,10 @@ if PRODUCTION == 'False':
     MIDDLEWARE.insert(0, 'livereload.middleware.LiveReloadScript')
     MIDDLEWARE_CLASSES = 'livereload.middleware.LiveReloadScript'
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Templates
 # https://docs.djangoproject.com/en/3.1/ref/templates/language/
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # Define where templates can be found and should be processed.
 TEMPLATES = [
@@ -161,10 +161,10 @@ TEMPLATES = [
     },
 ]
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # Define default language.
 LANGUAGE_CODE = 'en-us'
@@ -173,13 +173,13 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Security
 # https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/web_application_security
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # Specify allowed domains depending on production or development status.
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 if PRODUCTION != 'True':
     ALLOWED_HOSTS.extend(['*'])
 try:
@@ -195,6 +195,7 @@ try:
 except KeyError:
     pass
 
+# TODO: Implement Content Security Policy and Permissions Policy.
 # FIXME: PAYPAL DOES NOT WORK ANYMORE!!!
 # CSP_DEFAULT_SRC = [
 #     # "'none'",
@@ -249,12 +250,16 @@ except KeyError:
 #     # "style-src-elem"
 # ]
 
-# SECURE_BROWSER_XSS_FILTER = True # Provides a little extra protection against Cross-Site Scripting.
+# Provides a little extra protection against Cross-Site Scripting.
+# SECURE_BROWSER_XSS_FILTER = True
 SECURE_SSL_REDIRECT = False
-# SECURE_HSTS_SECONDS = 30 # Enable Strict-Transport-Security. Gradually work up to 1 year (31536000).
+
+# Enable Strict-Transport-Security. Gradually work up to 1 year (31536000).
+# SECURE_HSTS_SECONDS = 30 
 # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 # SECURE_HSTS_PRELOAD = True
 
+# Define permissions policy.
 # PERMISSIONS_POLICY = {
 #     'accelerometer': [],
 #     'autoplay': [],
@@ -272,10 +277,10 @@ SECURE_SSL_REDIRECT = False
 #     'usb': [],
 # }
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # An unused (under-utilized) SQL database required by Django.
 DATABASES = {
@@ -285,10 +290,10 @@ DATABASES = {
     }
 }
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Email
 # https://docs.djangoproject.com/en/3.1/topics/email/
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # Define variables to be able to send emails.
 EMAIL_HOST = 'smtp.gmail.com'
@@ -299,10 +304,10 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 LIST_OF_EMAIL_RECIPIENTS = [env('EMAIL_HOST_USER')]
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # List of directories where Django will also look for static files
 STATICFILES_DIRS = (
@@ -321,10 +326,10 @@ STATIC_URL = '/static/'
 # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # WHITENOISE_MANIFEST_STRICT = False
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Sessions
 # https://docs.djangoproject.com/en/3.1/topics/http/sessions/
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # Enable Django's session engine for storing user sessions.
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
@@ -335,9 +340,9 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # The age of session cookies, in seconds. (Currently: 30 days)
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 # Customization
-# ------------------------------------------------------------#
+#----------------------------------------------------------------------#
 
 # Remove trailing slash from URLs.
 APPEND_SLASH = False

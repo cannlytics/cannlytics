@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/5/2021
-Updated: 1/7/2022
+Updated: 9/3/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # Standard imports
@@ -80,7 +80,6 @@ def subscribe(request):
         pass
 
     # Create an account if one does not exist.
-    # Optional: Load messages from state?
     try:
         name = (data.get('first_name', '') + data.get('last_name', '')).strip()
         _, password = create_user(name, user_email)
@@ -90,19 +89,6 @@ def subscribe(request):
         message = f'Congratulations,\n\nYou are now subscribed to Cannlytics.\n\nPlease stay tuned for more material or email {DEFAULT_FROM_EMAIL} to begin.\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
         subject = 'Welcome to the Cannlytics Newsletter'
 
-    # Send a welcome / thank you email.
-    # (Optional: Use HTML template.)
-    # template_url = 'website/emails/newsletter_subscription_thank_you.html'
-    # FIXME:
-    send_mail(
-        subject=subject,
-        message=message,
-        from_email=None,
-        recipient_list=[user_email, DEFAULT_FROM_EMAIL],
-        fail_silently=False,
-        # html_message = render_to_string(template_url, {'context': 'values'})
-    )
-
     # Create an activity log.
     create_log(
         ref='logs/website/subscriptions',
@@ -111,6 +97,18 @@ def subscribe(request):
         log_type='subscription',
         key='subscribe',
         changes=data,
+    )
+
+    # Send a welcome / thank you email.
+    # TODO: Use HTML template and load messages / templates from state.
+    # template_url = 'website/emails/newsletter_subscription_thank_you.html'
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=DEFAULT_FROM_EMAIL,
+        recipient_list=[user_email, DEFAULT_FROM_EMAIL],
+        fail_silently=False,
+        # html_message = render_to_string(template_url, {'context': 'values'})
     )
 
     # Return a success message.
@@ -165,22 +163,6 @@ def unsubscribe(request):
     except:
         subscription_id = 'Unidentified'
 
-    # Notify the staff.
-    staff_message = """Confirm that the following subscription has been canceled:
-    User: {}
-    Email: {}
-    Plan: {}
-    Subscription ID: {}
-    """.format(uid, user_email, plan_name, subscription_id)
-    # FIXME:
-    send_mail(
-        subject='User unsubscribed from a PayPal subscription.',
-        message=staff_message,
-        from_email=None,
-        recipient_list=[DEFAULT_FROM_EMAIL],
-        fail_silently=False,
-    )
-
     # Create an activity log.
     create_log(
         ref='logs/website/subscriptions',
@@ -189,6 +171,21 @@ def unsubscribe(request):
         log_type='subscription',
         key='subscribe',
         changes=data,
+    )
+
+    # Notify the staff.
+    staff_message = """Confirm that the following subscription has been canceled:
+    User: {}
+    Email: {}
+    Plan: {}
+    Subscription ID: {}
+    """.format(uid, user_email, plan_name, subscription_id)
+    send_mail(
+        subject='User unsubscribed from a PayPal subscription.',
+        message=staff_message,
+        from_email=DEFAULT_FROM_EMAIL,
+        recipient_list=[DEFAULT_FROM_EMAIL],
+        fail_silently=False,
     )
 
     # Return a success message.

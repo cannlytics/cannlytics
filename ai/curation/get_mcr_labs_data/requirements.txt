@@ -1,6 +1,6 @@
 # Function dependencies, for example:
 # package>=version
 beautifulsoup4==4.11.1
-cannlytics==0.0.11
+cannlytics==0.0.12
 firebase_admin==5.2.0
 pandas==1.4.3
