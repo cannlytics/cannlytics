@@ -314,8 +314,9 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
                     obs[key] = value
 
                 # Get the dates tested.
-                elif 'SampleApproved:' in line_text:
-                    date = line_text.split('Approved:')[-1].strip()
+                elif 'SampleApproved' in line_text:
+                    date = line_text.split('Approved')[-1]
+                    date = date.strip().lstrip(':').strip()
                     date = date[0:-5] + ' ' + date[-5:]
                     date = pd.to_datetime(date)
                     date_tested.append(date)
