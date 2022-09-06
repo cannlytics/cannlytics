@@ -64,7 +64,7 @@ Getting data from CoAs is inevitable and with modern tools, plus a little human 
 | SC Labs | `parse_sc_labs_coa` | 🟢 |
 | Sonoma Lab Works | `parse_sonoma_coa` | 🟢 |
 | TagLeaf LIMS | `parse_tagleaf_coa` | 🟢 |
-| Veda Scientific | `parse_veda_coa` | 🟠 |
+| Veda Scientific | `parse_veda_coa` | 🟡 |
 
 ## Core Methods
 

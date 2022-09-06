@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/8/2022
-Updated: 8/30/2022
+Updated: 9/5/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -941,3 +941,15 @@ if __name__ == '__main__':
     # assert lab == 'SC Labs'
     # data = parse_sc_labs_pdf(parser, doc)
     # assert data is not None
+
+    # FIXME:
+    # 220000981-Lime-Mojito-Joints.pdf
+    # 220001004-Birthday-Cake-Joints.pdf
+    # 220001026-Sweet-N-Sour-Joints.pdf
+    # 220001027-Guava-Breeze-Joints.pdf
+    # 220001033-Purple-Passion-Joints.pdf
+    # 220001034-Unicorn-Cake-Joints.pdf
+    # 220001035-Cr確e-de-Citron-Joints.pdf
+    # 220001036-Kimbo-Cookie-Dough-Joints.pdf
+    # 220001055-Cherry-Limeade-Joints.pdf
+    # 220001061-Ice-Cream-Sandwich-Joints.pdf

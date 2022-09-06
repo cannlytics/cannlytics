@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/2/2022
-Updated: 9/3/2022
+Updated: 9/5/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -156,40 +156,29 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
 
     # Get the front page and page dimensions.
     front_page = report.pages[0]
-    page_width = front_page.width
-    page_height = front_page.height
+    w, h = front_page.width, front_page.height
 
     # Get the distributor area.
     x0, y0, x1, y1 = tuple(coa_parameters['coa_distributor_area'])
-    coa_distributor_area = (
-        x0 * page_width, y0 * page_height,
-        x1 * page_width, y1 * page_height,
-    )
+    coa_distributor_area = (x0 * w, y0 * h, x1 * w, y1 * h)
 
     # Get the producer area.
     x0, y0, x1, y1 = tuple(coa_parameters['coa_producer_area'])
-    coa_producer_area = (
-        x0 * page_width, y0 * page_height,
-        x1 * page_width, y1 * page_height,
-    ) 
+    coa_producer_area = (x0 * w, y0 * h, x1 * w, y1 * h)
 
     # Get the page areas.
     coa_page_area = []
     for dimensions in coa_parameters['coa_page_area']:
         x0, y0, x1, y1 = tuple(dimensions)
-        coa_page_area.append((
-            x0 * page_width, y0 * page_height,
-            x1 * page_width, y1 * page_height,
-        ))    
-    
+        area = (x0 * w, y0 * h, x1 * w, y1 * h)
+        coa_page_area.append(area)    
+
     # Get the sample details areas.
     coa_sample_details_area = []
     for dimensions in coa_parameters['coa_sample_details_area']:
         x0, y0, x1, y1 = tuple(dimensions)
-        coa_sample_details_area.append((
-            x0 * page_width, y0 * page_height,
-            x1 * page_width, y1 * page_height,
-        ))
+        area = (x0 * w, y0 * h, x1 * w, y1 * h)
+        coa_sample_details_area.append(area)
 
     # Get the distributor data based on page area.
     crop = front_page.within_bbox(coa_distributor_area)
@@ -206,7 +195,7 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
     obs['producer_license_number'] = lines[-1].replace('License:', '').strip()
 
     # Optional: Is there any way to identify the `producer` and
-    # `distributor` with their license numbers?
+    # `distributor` with their license numbers? Query Cannlytics API?
 
     # Get the sample details.
     analyses = []

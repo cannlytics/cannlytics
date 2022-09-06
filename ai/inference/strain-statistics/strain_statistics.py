@@ -157,6 +157,14 @@ print('Identified %i strains.' % len(strain_count))
 
 #-----------------------------------------------------------------------
 # Preprocessing the data.
+# See: https://medium.com/product-ai/text-preprocessing-in-python-steps-tools-and-examples-bf025f872908
+# - Convert all letters to lower or upper case.
+# - Convert numbers into words or removing numbers.
+# - Remove punctuations, accent marks and other diacritics.
+# - Remove white spaces.
+# - Expand abbreviations.
+# - Remove stop words, sparse terms, and particular words.
+# - Text canonicalization.
 #-----------------------------------------------------------------------
 
 # De-duplicate the reviews.

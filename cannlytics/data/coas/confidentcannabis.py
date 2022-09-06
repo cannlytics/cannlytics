@@ -73,7 +73,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 try:
     import chromedriver_binary  # Adds chromedriver binary to path.
 except ImportError:
-    print('Proceeding assuming that you have ChromeDriver in your path.')
+    pass # Otherwise, ChromeDriver should be in your path.
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id

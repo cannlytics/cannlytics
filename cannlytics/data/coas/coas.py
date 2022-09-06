@@ -6,23 +6,29 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 9/2/2022
+Updated: 9/5/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Certificates of analysis (CoAs) are abundant for cultivators,
+    Certificates of analysis (CoAs) are abundant for cannabis cultivators,
     processors, retailers, and consumers too, but the data is often
     locked away. Rich, valuable laboratory data so close, yet so far
     away! CoADoc puts these vital data points in your hands by
     parsing PDFs and URLs, finding all the data, standardizing the data,
     and cleanly returning the data to you.
 
-Note:
+    In order to parse CoAs well, CoADoc takes into consideration:
+
+        - The lab or LIMS that generated the CoA;
+        - PDF properties, such as the fonts used and the page dimensions;
+        - All detected words, lines, columns, white-space, etc.
     
-    Custom CoA parsing is still under development. If you want a
-    specific lab or LIMS CoA parsed, then please contact the team!
-    Email: <dev@cannlytics.com>
+    The roadmap for CoADoc is to continue adding lab and LIMS CoA
+    parsing algorithms until a general CoA parsing algorithm may be able
+    to be created. As CoA parsing algorithms are still under development,
+    if you want a specific lab or LIMS CoA parsed, then please contact
+    The Cannlytics Team: <dev@cannlytics.com>
 
 Supported Labs and LIMS:
 
@@ -38,27 +44,8 @@ Supported Labs and LIMS:
 
 Future work:
 
-    The roadmap for CoADoc is to continue adding labs and LIMS CoA
-    parsing routines until a general CoA parsing routine can be created.
-    In order to implement a good custom CoA parsing algorithm, we will
-    need to handle:
-
-        - PDF properties, such as the fonts used, glyph sizes, etc.
-        - Handle non-font parameters and page scaling.
-        - Detect words, lines, columns, white-space, etc.
-
-    Ideally, CoADoc can utilize NLP tools:
-
-        - Entity recognition.
-        - Pattern exploitation training.
-        - Wikipedia requests to identify terpenes, pesticides, etc.
-        - Custom lexicon
-        - Word embeddings
-        - Candidate generation
-        - Disambiguation.
-    
-    Let's keep onboarding labs and LIMS until CoADoc
-    is robust enough to parse any given cannabis CoA!
+    - [ ] Parse unidentified CoAs to the best of our abilities.
+    - [ ] Improve the `standardize` method.
 
 Setup:
 
@@ -79,12 +66,7 @@ from io import BytesIO
 import json
 import operator
 import os
-from typing import Any, Optional
-try:
-    from wand.image import Image as wi
-    from wand.color import Color
-except ImportError:
-    print('Unable to find `ImageMagick` library. This tool is used for OCR.')
+from typing import Any, List, Optional
 
 # External imports.
 import openpyxl
@@ -100,6 +82,11 @@ try:
     from pytesseract import image_to_pdf_or_hocr
 except ImportError:
     print('Unable to find `Tesseract` library. This tool is used for OCR.')
+try:
+    from wand.image import Image as wi
+    from wand.color import Color
+except ImportError:
+    print('Unable to find `ImageMagick` library. This tool is used for OCR.')
 
 # Internal imports.
 from cannlytics.data.data import write_to_worksheet
@@ -128,7 +115,7 @@ from cannlytics.data.coas.sclabs import SC_LABS
 from cannlytics.data.coas.sonoma import SONOMA
 from cannlytics.data.coas.tagleaf import TAGLEAF
 from cannlytics.utils.utils import snake_case
-# from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
+from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
 
 # Labs and LIMS that CoADoc can parse.
 LIMS = {
@@ -140,7 +127,7 @@ LIMS = {
     'SC Labs': SC_LABS,
     'Sonoma Lab Works': SONOMA,
     'TagLeaf LIMS': TAGLEAF,
-    # 'Veda Scientific': VEDA_SCIENTIFIC,
+    'Veda Scientific': VEDA_SCIENTIFIC,
 }
 
 # Default preferred order for DataFrame columns.
@@ -155,15 +142,28 @@ DEFAULT_NUISANCE_COLUMNS = ['received_by', 'sampled_by', 'Unnamed: 1',
 # Default columns to apply codings and be treated as numeric.
 DEFAULT_NUMERIC_COLUMNS = ['value', 'mg_g', 'lod', 'loq', 'limit', 'margin_of_error']
 
+# Encountered Metrc prefixes used to identify Metrc IDs.
+METRC_PREFIXES = ['1A40603']
 
-def convert_pdf_to_images(filename, output_path, resolution=150):
-    """ Convert a PDF into images. All the pages will be named:
+# A custom `ValueError` message to raise when no known LIMS is identified.
+UNIDENTIFIED_LIMS = 'CoA not recognized as a CoA from a supported LIMS: '
+UNIDENTIFIED_LIMS += ', '.join([f'"{x}"' for x in LIMS.keys()])
 
-        {pdf_filename}-{page_number}.png
 
-    The function removes the alpha channel from the image and
-    replace it with a white background.
-
+def convert_pdf_to_images(
+        filename: str,
+        output_path: str,
+        resolution: Optional[int] = 90,
+    ) -> List[str]:
+    """Convert a PDF into images, with images named as `{filename}-{#}.png`.
+    The function replaces the images' alpha channels with a white background.
+    Args:
+        filename (str): The name of a PDF to convert to images.
+        output_path (str): A directory where the images should be generated.
+        resolution (int): The resolution of the generated images, 90 by
+            default (optional.)
+    Returns:
+        (list): Returns a list of the filenames of the images generated.
     Authors: Thibaut Mattio, Averner <https://stackoverflow.com/a/42525093/5021266>
     License: CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>
     """
@@ -270,7 +270,7 @@ class CoADoc:
         if lims is None:
             self.lims = LIMS
 
-        # Google Maps integration.
+        # Optional Google Maps integration to retrieve GIS data.
         self.google_maps_api_key = google_maps_api_key
     
         # Assign all of the parsing routines.
@@ -285,14 +285,14 @@ class CoADoc:
             self,
             page: Any,
             img: Any,
-            resolution: Optional[int] = 300,
+            resolution: Optional[int] = 90,
         ) -> list:
         """Decode a PDF QR Code from a given image.
         Args:
             page (Page): A pdfplumber Page containing the image.
             img (Image): A pdfplumber Image.
             resolution (int): The resolution to render the QR code,
-                `300` by default (optional).
+                `90` by default (optional).
         Returns:
             (list): The QR code data.
         """
@@ -313,7 +313,7 @@ class CoADoc:
         decoded until a QR code is found. If no QR code is found, then a
         `IndexError` is raised.
         Args:
-            doc (PDF or Page): A pdfplumber PDF or Page.
+            pdf (PDF or Page): A pdfplumber PDF or Page.
             image_index (int): A known image index for the QR code.
             page_index (int): The page to search, 0 by default (optional).
         Returns:
@@ -332,10 +332,8 @@ class CoADoc:
             decoded_image = self.decode_pdf_qr_code(page, img)
             image_data = decoded_image[0].data.decode('utf-8')
         else:
-            # Cycle from start to end to the middle.
             image_range = sandwich_list(page.images)
             for img in image_range:
-                # img = page.images[index]
                 try:
                     decoded_image = self.decode_pdf_qr_code(page, img)
                     image_data = decoded_image[0].data.decode('utf-8')
@@ -345,16 +343,39 @@ class CoADoc:
                     continue
         return image_data
 
-    def find_metrc_id(self, pdf: Any) -> str:
-        """Find any Metrc ID that may be in a given CoA PDF."""
-        # TODO: Implement!
-        # - 24 characters long (always?)
-        # - Looks like '1A40603000...'
-        if isinstance(pdf, str):
-            pdf_file = pdfplumber.open(pdf)
+    def find_metrc_ids(
+            self,
+            doc: Any,
+            prefixes: Optional[List[str]] = None,
+            id_length: Optional[int] = 24,
+        ) -> List[str]:
+        """Find any Metrc IDs that may be in a given CoA PDF by searching
+        for known Metrc prefixes and assuming that the ID is 24 characters.
+        Arg:
+            doc (str or PDF or Page): A filename, PDF, or Page.
+            prefixes (list): A list of Metrc prefixes (optional).
+            id_length (int): The length of a Metrc ID, 24 by default (optional).
+        Returns:
+            (list): Returns a list of Metrc IDs.
+        """
+        if isinstance(doc, str):
+            pdf_file = pdfplumber.open(doc)
+            pages = pdf_file.pages
+        elif isinstance(doc, pdfplumber.pdf.Page):
+            pages = [doc]
         else:
-            pdf_file = pdf
-        raise NotImplementedError
+            pages = doc.pages
+        if prefixes is None:
+            prefixes = METRC_PREFIXES
+        metrc_ids = []
+        for prefix in prefixes:
+            for page in pages:
+                text = page.extract_text().replace('\n', '')
+                words = text.split(' ')
+                ids = [x for x in words if x.startswith(prefix) and \
+                    len(x) == id_length]
+                metrc_ids.extend(ids)
+        return list(set(metrc_ids))
 
     def get_metrc_results(self, metrc_id: str) -> dict:
         """Get Metrc lab results that have been archived
@@ -366,7 +387,10 @@ class CoADoc:
         """
         url = f'https://cannlytics.com/api/data/results?metrc_id={metrc_id}'
         response = requests.get(url)
-        return response['data']
+        try:
+            return response.json()['data']
+        except (json.decoder.JSONDecodeError, KeyError):
+            return None
 
     def get_page_rows(self, page: Any, **kwargs) -> list:
         """Get the rows a given page.
@@ -402,13 +426,13 @@ class CoADoc:
             self,
             page: Any,
             image_index: Optional[int] = 0, 
-            resolution: Optional[int] = 300,
+            resolution: Optional[int] = 90,
         ) -> str:
         """Get the image data for a given PDF page image.
         Args:
             page (Page): A pdfplumber Page.
-            image_index (int): The index of the image.
-            resolution (int): The resolution for the image.
+            image_index (int): The index of the image, 0 by default (optional).
+            resolution (int): The resolution for the image, 90 by default (optional).
         Returns:
             (str): The image data.
         """
@@ -486,17 +510,23 @@ class CoADoc:
     def parse(
             self,
             data: Any,
+            cleanup: Optional[bool] = True,
             headers: Optional[dict] = {},
             kind: Optional[str] = 'url',
             lims: Optional[Any] = None,
             max_delay: Optional[float] = 7,
             persist: Optional[bool] = True,
+            resolution: Optional[int] = 90,
+            temp_path: Optional[str] = '/tmp',
+            use_cached: Optional[bool] = False,
         ) -> list:
         """Parse all CoAs given a directory, a list of files,
         or a list of URLs.
         Args:
             data (str or list): A directory (str) or a list
                 of PDF file paths or a list of CoA URLs.
+            cleanup (bool): Whether or not to remove the files generated
+                during OCR, `True` by default (optional).
             headers (dict): Headers for HTTP requests (optional).
             kind (str): The kind of CoA input, PDF or URL, `url`
                 by default (optional).
@@ -507,6 +537,10 @@ class CoADoc:
                 and / or session between CoA parses, the
                 default is `True`, with any driver and session
                 being closed at the end (optional).
+            temp_path (str): A temporary directory to store files used
+                during PDF OCR, `/tmp` by default (optional).
+            resolution (int): The resolution of rendered PDF images,
+                90 by default (optional).
         Returns:
             (list): Returns a list of all of the PDFs.
         """
@@ -530,10 +564,14 @@ class CoADoc:
             elif '.pdf' in data:
                 coa_data = self.parse_pdf(
                     data,
+                    cleanup=cleanup,
                     headers=headers,
                     lims=lims,
                     max_delay=max_delay,
                     persist=persist,
+                    resolution=resolution,
+                    temp_path=temp_path,
+                    use_cached=use_cached,
                 )
                 coas.append(coa_data)
 
@@ -556,17 +594,27 @@ class CoADoc:
                 for pdf_file in pdf_files:
                     coa_data = self.parse_pdf(
                         pdf_file,
+                        cleanup=cleanup,
+                        headers=headers,
                         lims=lims,
                         max_delay=max_delay,
                         persist=persist,
+                        resolution=resolution,
+                        temp_path=temp_path,
+                        use_cached=use_cached,
                     )
                     coas.append(coa_data)
             elif '.pdf' in doc and kind != 'url':
                 coa_data = self.parse_pdf(
                     doc,
+                    cleanup=cleanup,
+                    headers=headers,
                     lims=lims,
                     max_delay=max_delay,
                     persist=persist,
+                    resolution=resolution,
+                    temp_path=temp_path,
+                    use_cached=use_cached,
                 )
             else:
                 coa_data = self.parse_url(
@@ -584,25 +632,34 @@ class CoADoc:
     def parse_pdf(
             self,
             pdf: Any,
+            cleanup: Optional[bool] = True,
             headers: Optional[dict] = {},
             lims: Optional[Any] = None,
             max_delay: Optional[float] = 7,
             persist: Optional[bool] = False,
+            resolution: Optional[int] = 90,
             temp_path: Optional[str] = '/tmp',
+            use_cached: Optional[bool] = False,
         ) -> dict:
         """Parse a CoA PDF. Searches the best guess image, then all
         images, for a QR code URL to find results online.
         Args:
             pdf (PDF): A file path to a PDF or a pdfplumber PDF.
-            headers (dict): Headers for HTTP requests.
-            lims (str or dict): Specific LIMS to parse CoAs.
+            cleanup (bool): Whether or not to remove the files generated
+                during OCR, `True` by default (optional).
+            headers (dict): Headers for HTTP requests (optional).
+            lims (str or dict): Specific LIMS to parse CoAs (optional).
             max_delay (float): The maximum number of seconds to wait
-                for the page to load.
+                for the page to load (optional).
             persist (bool): Whether to persist the driver
                 and / or session between CoA parses, the
                 default is `True`, with any driver and session
                 being closed at the end (optional).
             temp_path (str): A temporary directory used for OCR.
+            temp_path (str): A temporary directory to store files used
+                during PDF OCR, `/tmp` by default (optional).
+            resolution (int): The resolution of rendered PDF images,
+                90 by default (optional).
         Returns:
             (dict): The sample data.
         """
@@ -615,20 +672,23 @@ class CoADoc:
         elif isinstance(pdf, pdfplumber.pdf.PDF):
             pdf_file = pdf
         else:
-            with open(wi(file=pdf, resolution=300)) as temp_file:
+            with open(wi(file=pdf, resolution=resolution)) as temp_file:
                 temp_file.save(f'{temp_path}/coa.pdf')
             pdf_file = pdfplumber.open(f'{temp_path}/coa.pdf')
 
-        # TODO: Try to read a Metrc ID from the PDF and use the Metrc ID
-        # to query the Cannlytics API.
-        # metrc_id = self.find_metrc_id(pdf_file)
-        # if metrc_id:
-        #     data = self.get_metrc_results(metrc_id)
-        #     if data is not None:
-        #         return data
+        # Optional: Try to find any Metrc IDs to query the Cannlytics API.
+        # Return cached results instead of parsing the CoA from scratch.
+        if use_cached is True:
+            metrc_ids = self.find_metrc_ids(pdf_file.pages[0])
+            if metrc_ids:
+                for metrc_id in metrc_ids:
+                    data = self.get_metrc_results(metrc_id)
+                    if data is not None:
+                        return data
 
         # Identify any known LIMS, trying OCR if the PDF is not recognized,
         # then raise an error if the labs / LIMS is unknown for safety.
+        # TODO: Parse unidentified CoAs to the best of our abilities.
         known_lims = self.identify_lims(pdf_file, lims=lims)
         if known_lims is None:
             temp_pdf = f'{temp_path}/ocr-coa.pdf'
@@ -638,12 +698,17 @@ class CoADoc:
                 filename = pdf.stream.name
             else:
                 filename = f'{temp_path}/coa.pdf'
-            self.pdf_ocr(filename, temp_pdf, temp_path)
+            self.pdf_ocr(
+                filename,
+                temp_pdf,
+                temp_path=temp_path,
+                resolution=resolution,
+                cleanup=cleanup,
+            )
             pdf_file = pdfplumber.open(temp_pdf)
             known_lims = self.identify_lims(pdf_file, lims=lims)
             if known_lims is None:
-                # TODO: Parse unidentified CoAs as well as possible?   
-                raise NotImplementedError
+                raise ValueError(UNIDENTIFIED_LIMS)
 
         # Get the time the CoA was created, if known.
         date_tested = self.get_pdf_creation_date(pdf_file)
@@ -727,9 +792,9 @@ class CoADoc:
         known_lims = self.identify_lims(url, lims=lims)
 
         # Restrict to known labs / LIMS for safety.
-        # TODO: Parse custom / unidentified CoAs as well as possible?
+        # TODO: Parse unidentified CoAs to the best of our abilities.
         if known_lims is None:
-            raise NotImplementedError
+            raise ValueError(UNIDENTIFIED_LIMS)
 
         # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
@@ -749,7 +814,7 @@ class CoADoc:
             filename: str,
             outfile: str,
             temp_path: Optional[str] = '/tmp',
-            resolution: Optional[int] = 300,
+            resolution: Optional[int] = 90,
             cleanup: Optional[bool] = True,
         ) -> None:
         """Pass a PDF through OCR to recognize its text. Outputs a new PDF.
@@ -758,6 +823,15 @@ class CoADoc:
             2. Convert each image to PDF with text.
             3. Compile the PDFs with text to a single PDF.
         The rendered images and individual PDF files are removed by default.
+        Args:
+            filename (str): The filename of the PDF to apply OCR.
+            outfile (str): A new PDF file to generate.
+            temp_path (str): A temporary directory to store files used
+                during PDF OCR, `/tmp` by default (optional).
+            resolution (int): The resolution of rendered PDF images,
+                90 by default (optional).
+            cleanup (bool): Whether or not to remove the files generated
+                during OCR, `True` by default (optional).
         """
         # Create a directory to store images and rendered PDFs.
         if not os.path.exists(temp_path): os.makedirs(temp_path)
@@ -894,7 +968,6 @@ class CoADoc:
         })
         
         # Format details `results`, `coa_urls`, `images` as proper JSON.
-        # TODO: Make errors specific.
         try:
             details_data['results'] = details_data['results'].apply(json.dumps)
         except:
@@ -986,7 +1059,7 @@ class CoADoc:
         if standard_fields is None:
             standard_fields = self.fields
 
-        # TODO:
+        # Future standardization work:
         # [ ] Calculate all missing totals:`total_cannabinoids`, `total_terpenes`, etc.
         # [ ] Remove and keep `units` from `value`.
         # [ ] Standardize `units`
@@ -1110,12 +1183,6 @@ class CoADoc:
 
                 # Convert totals to numeric.
                 # TODO: Calculate totals if they don't already exist:
-                # - `total_cannabinoids`
-                # - `total_terpenes`
-                # - `total_cbd`
-                # - `total_thc`
-                # - `total_cbg`
-                # - `total_thcv`
                 totals = [x for x in details_data.keys() if x.startswith('total_')]
                 for c in totals:
                     details_data[c] = details_data[c].astype(str).apply(convert_to_numeric, strip=True)
@@ -1373,18 +1440,6 @@ if __name__ == '__main__':
     # data = parser.parse(zip_folder)
     # assert data is not None
 
-    # [ ] TEST: Find results by known Metrc IDs.
-    # metrc_ids = [
-    #     '1A4060300002A3B000000053', # Green Leaf Lab
-    #     '1A4060300017A85000001289', # Green Leaf Lab
-    #     '1A4060300002459000017049', # SC Labs
-    #     '1A4060300004088000010948', # Sonoma Lab Works
-    # ]
-    # sample = parser.parse(metrc_ids[0])
-    # assert sample is not None
-    # data = parser.parse(metrc_ids)
-    # assert data is not None
-
     # [✓] TEST: Parse a custom CoA (accept an error for now).
     # try:
     #     parser.parse('https://cannlytics.page.link/partial-equilibrium-notes')
@@ -1425,7 +1480,22 @@ if __name__ == '__main__':
     # [✓] TEST: Save CoA data from dictionary.
     # parser.save(data[0], '../../../.datasets/tests/test-coas.xlsx')
 
+    # [✓] TEST: Pass a PDF through OCR.
+    # doc = '../../../.datasets/tests/210000068-Cloud-Cake-1g.pdf'
+    # temp_path = '../../../.datasets/tests/tmp'
+    # temp_file = '../../../.datasets/tests/tmp/ocr-coa.pdf'
+    # parser.pdf_ocr(doc, temp_file, temp_path=temp_path)
+
+    # [ ] TEST: Parse a COA using OCR using `parse_pdf`.
+    doc = '../../../.datasets/tests/210000068-Cloud-Cake-1g.pdf'
+    temp_path = '../../../.datasets/tests/tmp'
+    data = parser.parse_pdf(doc, temp_path=temp_path)
+
+    # [ ] TEST: Parse a COA using OCR using `parse`.
+    doc = '../../../.datasets/tests/210000068-Cloud-Cake-1g.pdf'
+    temp_path = '../../../.datasets/tests/tmp'
+    data = parser.parse_pdf(doc, temp_path=temp_path)
+
     # [✓] TEST: Close the parser.
     parser.quit()
-
     print('All CoADoc tests finished.')
