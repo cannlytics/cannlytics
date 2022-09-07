@@ -12,7 +12,7 @@
 
 </div>
 
-🔥Cannlytics is a set of useful tools to get (wrangle), curate, augment, analyze, archive, and market cannabis data. The mission of Cannlytics is to help cannabis data be accessible, simply, easily, and for everyone. From seed to sale and beyond, Cannlytics can help you organize and analyze cannabis data. The `cannlytics` package is extensive and you are welcome to use any and all of the components that you find useful.
+🔥Cannlytics is a set of useful tools to get (wrangle), curate, augment, analyze, archive, and market cannabis data. The mission of Cannlytics is to help cannabis data be accessible, simply, easily, and for everyone. From seed to sale and beyond, Cannlytics can help you organize, analyze, and profit from your cannabis data. The `cannlytics` package is extensive and you are welcome to use any and all of the components that you find useful.
 
 - [🚀 Installation](#installation)
 - [🗝️ Authentication](#auth)

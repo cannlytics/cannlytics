@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 9/5/2022
+Updated: 9/7/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -288,29 +288,21 @@ def get_page_rows(
     return page_rows
 
 
-def parse_veda_coa(
-        parser,
-        doc: Any,
-        headers: Optional[dict] = None,
-        persist: Optional[bool] = False,
-        **kwargs,
-    ) -> dict:
+def parse_veda_coa(parser, doc: Any, **kwargs) -> dict:
     """Parse a Veda Scientific CoA PDF.
     Args:
         doc (str or PDF): A PDF file path or pdfplumber PDF.
-        headers (dict): Headers for HTTP requests.
-        persist (bool): Whether to persist the session.
-            The default is `False`. If you do persist
-            the driver, then make sure to call `quit`
-            when you are finished.
     Returns:
         (dict): The sample data.
     """
     # Read the PDF.
+    obs = {}
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
+        obs['coa_pdf'] = doc.split('/')[-1]
     else:
         report = doc
+        obs['coa_pdf'] = report.stream.name.split('/')[-1]
     front_page = report.pages[0]
     w, h = front_page.width, front_page.height
 
@@ -323,9 +315,6 @@ def parse_veda_coa(
     sample_details_fields = list(coa_fields.keys())
     standard_analyses = coa_parameters['coa_analyses']
     # skip_values = coa_parameters['coa_skip_values']
-
-    # Create the observation.
-    obs = {}
 
     # Optional: Get the image data.
     # image_index = coa_parameters['coa_image_index']

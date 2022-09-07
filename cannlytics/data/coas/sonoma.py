@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/2/2022
-Updated: 8/30/2022
+Updated: 9/7/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -134,6 +134,7 @@ def parse_sonoma_coa(
         obs['coa_pdf'] = doc.split('/')[-1]
     else:
         report = doc
+        obs['coa_pdf'] = report.stream.name.split('/')[-1]
 
     # Define fields to collect.
     analysis = None
