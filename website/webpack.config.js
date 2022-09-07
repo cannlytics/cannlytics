@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 1/5/2021
- * Updated: 3/14/2022
+ * Updated: 7/30/2022
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 */
 const appName = 'website';
@@ -20,8 +20,8 @@ module.exports = env => {
       devMiddleware: {
       	writeToDisk: true, // Write files to disk in dev mode, so that Django can serve the assets.
       },
-      // hot: false,
-      // liveReload: false,
+      hot: true,
+      liveReload: true,
     },
     resolve: {
       extensions: ['.js'],

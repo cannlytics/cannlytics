@@ -8,9 +8,10 @@
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { authRequest, showNotification } from '../utils.js';
-import { addSelectOptions, setTableTheme } from '../ui/ui.js';
+import { addSelectOptions } from '../ui/ui.js';
 import { downloadBlob, sortArrayOfObjects } from '../utils.js';
 import { getCurrentUser } from '../firebase.js';
+import { theme } from '../ui/theme.js';
 
 export const labs = {
 
@@ -105,7 +106,7 @@ export const labs = {
       ensureDomOrder: true,
       pagination: true,
       paginationAutoPageSize: true,
-      onGridReady: event => setTableTheme(),
+      onGridReady: event => theme.setTableTheme(),
     };
 
     // Hide the placeholder and show the table.

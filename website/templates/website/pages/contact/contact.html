@@ -6,11 +6,13 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/6/2021
-  Updated: 1/9/2022
+  Updated: 9/3/2022
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
   
-  Optional Improvements:
-    - Loading button
+  TODO:
+
+    - [ ] Implement loading button.
+
 -->
 {% extends "website/index.html" %}
 {% block title %}Contact | Cannlytics{% endblock %}
@@ -101,7 +103,9 @@
                 onchange="cannlytics.website.setContactFormTopic(this.value);"
               >
                 <option selected value="general">General Inquiry</option>
+                <option value="algorithms">Algorithm Development</option>
                 <option value="lims">Cannlytics LIMS</option>
+                <option value="coas">CoA Data Extraction</option>
                 <option value="custom">Custom Development</option>
                 <option value="join">Joining Cannlytics</option>
                 <option value="metrc">Metrc Integration</option>
@@ -134,23 +138,24 @@
           <!-- Submit with simple math check -->
           <div class="d-flex align-items-center justify-content-between mt-1">
             <div class="row">
-              <label class="col col-9 col-form-label col-form-label-sm serif">
-                🤖 Check: What is <span id="math-check-min"></span> + <span id="math-check-max"></span>?
+              <label class="col col-8 col-form-label col-form-label-sm serif text-nowrap">
+                🤖 Human Test: <span id="math-check-min"></span> + <span id="math-check-max"></span> =
               </label>
               <div class="col-sm-3">
                 <input
                   id="math_input"
                   type="text"
                   class="form-control form-control-sm"
-                  name="math"
+                  name="math_input"
                   spellcheck="false"
                   type="number"
                   min="0"
                   max="99"
                 >
-                <input id="math_total" class="visually-hidden">
+                <input id="math_total" name="math_total" class="visually-hidden">
               </div>
             </div>
+            <input name="redirect" value="true" class="visually-hidden">
             <input
               class="btn btn-sm bg-gradient-green text-white ms-2"
               type="submit"

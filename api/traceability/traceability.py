@@ -28,7 +28,7 @@ from cannlytics.firebase import (
     update_document
 )
 from cannlytics.metrc import initialize_metrc
-from api.auth.auth import authenticate_request #pylint: disable=import-error
+from cannlytics.auth.auth import authenticate_request #pylint: disable=import-error
 
 
 AUTH_ERROR = 'Authentication failed. Please login to the console or \

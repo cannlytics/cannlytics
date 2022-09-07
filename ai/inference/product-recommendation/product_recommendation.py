@@ -254,3 +254,8 @@ reviews = pd.read_excel(dataset)
 # print(f"Since you watched {movie_title}")
 # for i in similar_ids:
 #     print(movie_titles[i])
+
+
+# Option 1. Recommend based on reviews.
+
+# Option 2. Recommend based on chemotype.

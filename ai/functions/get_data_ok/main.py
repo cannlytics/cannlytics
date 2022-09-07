@@ -254,6 +254,7 @@ def clean_licensee_records(records):
     return data
 
 
+# FIXME: Import this from cannlytics.data.gis
 def get_state_current_population(state):
     """Get a given state's latest population from the Fed Fred API,
     getting the number in 1000's and returning the absolute value."""

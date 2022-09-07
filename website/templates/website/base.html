@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/7/2021
-  Updated: 12/28/2021
+  Updated: 9/3/2022
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% load static %}
@@ -18,12 +18,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <!-- Icons and Manifest -->
-  <link rel="icon" href="{% static 'images/logos/favicon.ico' %}">
-  <link rel="icon" sizes="32x32" type="image/png" href="{% static 'images/logos/favicon-32x32.png' %}">
-  <link rel="icon" sizes="16x16" type="image/png" href="{% static 'images/logos/favicon-16x16.png' %}">
-  <link rel="apple-touch-icon" sizes="180x180" href="{% static '/images/logos/apple-touch-icon.png' %}">
-  <link rel="mask-icon" color="#e48632" href="{% static '/images/logos/safari-pinned-tab.svg' %}">
-  <link rel="shortcut icon" href="{% static '/images/logos/favicon.ico' %}" type="image/x-icon">
+  <link rel="icon" href="{% static 'website/images/logos/favicon.ico' %}">
+  <link rel="icon" sizes="32x32" type="image/png" href="{% static 'website/images/logos/favicon-32x32.png' %}">
+  <link rel="icon" sizes="16x16" type="image/png" href="{% static 'website/images/logos/favicon-16x16.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'website/images/logos/apple-touch-icon.png' %}">
+  <link rel="mask-icon" color="#e48632" href="{% static 'website/images/logos/safari-pinned-tab.svg' %}">
+  <link rel="shortcut icon" href="{% static 'website/images/logos/favicon.ico' %}" type="image/x-icon">
   
   <!-- Manifest -->
   <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
@@ -36,7 +36,8 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 
   <!-- Cannlytics JavaScript and CSS Module -->
-  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{% if DEBUG %}{% now 'U' %}{% else %}{{ APP_VERSION_NUMBER }}{% endif %}"></script>
+  <!-- FIXME: `APP_VERSION_NUMBER` is missing in production. -->
+  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{% if DEBUG %}{% now 'U' %}{% elif APP_VERSION_NUMBER %}{{ APP_VERSION_NUMBER }}{% else %}0.0.420{% endif %}"></script>
 
   <!-- Page-specific stylesheets -->
   {% block page_css %}{% endblock page_css %}

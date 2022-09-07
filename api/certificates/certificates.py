@@ -18,9 +18,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from api.results.results import calculate_results
-from api.auth.auth import authenticate_request, sha256_hmac, verify_user_pin
 from api.api import get_objects, update_object, delete_object
+from api.auth.auth import verify_user_pin # Does this belong in `cannlytics`?
+from api.results.results import calculate_results
+from cannlytics.auth.auth import authenticate_request, sha256_hmac
 from cannlytics.firebase import get_collection, get_document
 from cannlytics.lims.certificates import generate_coas
 

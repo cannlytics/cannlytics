@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 5/27/2021
-  Updated: 6/26/2022
+  Updated: 8/20/2022
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -113,6 +113,57 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- Data tools
+    
+    - Future work:
+      - [ ] Make the lsit of data tools dynamic (retrived from the database).
+
+  -->
+  <div class="w-100">
+    <h2 class="my-3 text-dark serif">Data Tools</h2>
+    <table
+      class="table table-hover table-sm w-100"
+      style="background-color: transparent !important;"
+    >
+      <caption class="markdown lh-sm" style="max-width:560px;">
+        <small class="serif">
+          Note: All data tools are
+          <a class="serif" href="https://github.com/cannlytics/cannlytics">open-source</a>, so,
+          if you notice any shortcomings, then please
+          <a class="serif" href="https://github.com/cannlytics/cannlytics/issues">
+            create an issue for our devs to tackle
+          </a>
+          or tinker on a solution yourself!
+        </small>
+      </caption>
+      <thead>
+        <tr>
+          <th class="col-3">Tool</th>
+          <th class="col-6">Description</th>
+          <th class="col-3 text-center">Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr role='button' onclick="window.location='{% url 'section' page='data' section='coas' %}';">
+          <th class="align-middle fs-5 lh-sm">
+            <h5 class="fw-bold serif">🥸CoADoc</h5>
+            <h6 class="serif text-secondary">Certificate of Analysis Parser</h6>
+          </th>
+          <td class="text-dark">
+            Certificates of analysis (CoAs) are abundant for cultivators,
+            processors, retailers, and consumers too, but the data is often locked away.
+            Rich, valuable laboratory data so close, yet so far away!
+            Cannlytics puts these vital data points in your hands by
+            parsing PDFs and URLs, finding all the data, standardizing the data, and cleanly returning the data to you.
+          </td>
+          <td class="align-middle text-center text-nowrap">
+            <h4>🤗 <span class="fw-bold serif text-gradient">Free</span></h4>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- About -->

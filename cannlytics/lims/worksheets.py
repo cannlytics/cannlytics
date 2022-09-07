@@ -110,7 +110,7 @@ def import_worksheet(
         filename: str,
         sheetname: str,
         range_start: Optional[str] = 'A1',
-) -> List[dict]:
+    ) -> List[dict]:
     """Read the data from a given worksheet using xlwings.
     Args:
         filename (str): The name of the Excel workbook to read.

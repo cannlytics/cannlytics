@@ -19,7 +19,7 @@ from typing import Any, Callable, Dict, Tuple
 from rest_framework.response import Response
 
 # Internal imports.
-from api.auth.auth import authenticate_request
+from cannlytics.auth.auth import authenticate_request
 from cannlytics.firebase import (
     add_to_array,
     create_log,

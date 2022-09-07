@@ -16,7 +16,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports.
-from api.auth.auth import authenticate_request
+from cannlytics.auth.auth import authenticate_request
 from cannlytics.firebase import (
     create_log,
     get_document,

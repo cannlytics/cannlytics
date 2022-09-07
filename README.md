@@ -26,7 +26,7 @@
 
 ## 🧑‍🚀 Cannabis Data Science
 
-Do you want to join a team of data scientists from around the world who are advancing cannabis science one 🧬 molecule at a time? Come to the [Cannabis Data Science Meetup Group](https://www.meetup.com/cannabis-data-science)! At the meetup, you will be introduced to many useful notes, notebooks, and video tutorials to help you get, wrangle, and analyze cannabis data with the best of them. Join the fun every Wednesday at 8:30am PST / 9:30am MT / 10:30am CDT / 11:30am EST / [your time](http://www.timebie.com/std/pst.php?q=8.5). You are always welcome to use the [code](https://github.com/cannlytics/cannabis-data-science), watch the [videos](https://cannlytics.com/videos), and make contributions of your own! Please tune in 🚀
+Do you want to join a team of data scientists from around the world who are advancing cannabis science one 🧬 molecule at a time? Come to the [Cannabis Data Science Meetup Group](https://www.meetup.com/cannabis-data-science)! At the meetup, you will be introduced to many useful notes, notebooks, and video tutorials to help you get, wrangle, and analyze cannabis data with the best of them. Join the fun every Wednesday at 1:20pm PST / 2:20pm MT / 3:20pm CT / 4:20pm EST. You are always welcome to use the [code](https://github.com/cannlytics/cannabis-data-science), watch the [videos](https://cannlytics.com/videos), and make contributions of your own! Please tune in 🚀
 
 <!-- **Cannlytics Data Catalogue**
 
@@ -58,7 +58,7 @@ Cannlytics is made available with ❤️ and your good will. Please consider mak
 ## 🏛️ License <a name="license"></a>
 
 ```
-Copyright (c) 2020-2022 Cannlytics and the Cannabis Data Science Team
+Copyright (c) 2020-2022 Cannlytics and The Cannabis Data Science Team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

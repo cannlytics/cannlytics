@@ -5,18 +5,19 @@ Copyright (c) 2021-2022 Cannlytics
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Contact: <keegan@cannlytics.com>
 Created: 1/21/2021
-Updated: 7/10/2022
+Updated: 9/3/2022
 License: MIT <https://opensource.org/licenses/MIT>
 """
 from setuptools import find_packages, setup
 
 # Define the package version.
-# TODO: Read from package.json?
-version = '0.0.11'
+# Optional: Read from package.json? Pros and cons to tieing Python
+# package version to the Cannlytics project version.
+version = '0.0.12'
 
 # Get the project description.
 README = ''
-with open('./cannlytics/README.md', 'r', encoding='utf-8') as readme_file:
+with open('./cannlytics/readme.md', 'r', encoding='utf-8') as readme_file:
     README = readme_file.read()
 
 # Specify requirements installed by `pip install cannlytics`.

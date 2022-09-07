@@ -2,7 +2,9 @@
 PSI Labs Test Result Data Collection
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+    Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: July 4th, 2022
 Updated: 7/12/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
@@ -515,6 +517,13 @@ long_data.rename(columns=analyses, inplace=True)
 
 
 # Optional: Add `status` variables for pass / fail tests.
+
+
+# TODO: Augment with:
+# - lab details: lab, lab_url, lab_license_number, etc.
+# - lab_latitude, lab_longitude
+
+# Future work: Calculate average results by state, county, and zip code.
 
 
 #------------------------------------------------------------------------------

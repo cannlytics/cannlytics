@@ -4,117 +4,59 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2022
-Updated: 7/12/2022
+Updated: 8/28/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Internal imports.
-from datetime import datetime
 from hashlib import sha256
 import hmac
 import os
-from typing import Any, List, Optional
+import re
+from typing import Optional
 
 # External imports.
-from fredapi import Fred
+from openpyxl.utils.dataframe import dataframe_to_rows
 import pandas as pd
 
 # Internal imports.
 from cannlytics.utils import rmerge
 from cannlytics.utils.utils import snake_case
 
-
+# === Constants ===
+DATA_PROVIDER = 'cannlytics'
 DATA_URL = 'https://cannlytics.com/api/data'
 
+# Library of Cannlytics datasets.
+CANNLYTICS_DATASETS = [
+    'aggregated-cannabis-test-results',
+]
 
-#-----------------------------------------------------------------------
-# Data collection tools.
-#-----------------------------------------------------------------------
 
-# TODO:
+# === Data collection tools. ===
+
+# FIXME: Simply use Hugging Face's `datasets` package?
+# from datasets import load_dataset
+# dataset = load_dataset("cannlytics/aggregated-cannabis-test-results")
+
 def download_dataset():
     """Download a specific dataset."""
-
+    # TODO: Implement !
     raise NotImplementedError
 
 
-# TODO:
 def load_dataset():
     """Load a specific dataset."""
-
+    # TODO: Implement !
     raise NotImplementedError
 
 
-# TODO:
 def list_datasets():
     """Get the Cannlytics data catalogue."""
-
+    # TODO: Implement !
     raise NotImplementedError
 
 
-# if __name__ == '__main__':
-
-#     # Test listing all of the available datasets.
-#     print(list_datasets())
-
-#     # Load a dataset and print the first observation.
-#     dataset = load_dataset('nsduh')
-#     print(dataset.iloc[0].to_dict())
-
-
-# === GIS ===
-
-# FIXME: Can these 2 functions be combined?
-def get_state_population(
-        api_key: str,
-        state: str,
-        district: Optional[str] = '',
-        obs_start: Optional[Any] = None,
-        obs_end: Optional[Any] = None,
-        multiplier: Optional[float] = 1000.0,
-    ) -> List[int]:
-    """Get a given state's population from the Fed Fred API."""
-    fred = Fred(api_key=api_key)
-    population = fred.get_series(f'{state}POP{district}', obs_start, obs_end)
-    try:
-        population = [int(x * multiplier) for x in population.values]
-        if len(population) == 1:
-            return population[0]
-    except ValueError:
-        pass
-    return population
-
-
-def get_state_current_population(state: str, api_key: Optional[str] = None) -> dict:
-    """Get a given state's latest population from the Fed Fred API,
-    getting the number in 1000's and returning the absolute value.
-    Args:
-        state (str): The state abbreviation for the state to retrieve population
-            data. The abbreviation can be upper or lower case.
-        api_key (str): A Fed FRED API key. You can sign up for a free API key at
-            http://research.stlouisfed.org/fred2/. You can also pass `None`
-            and set the environment variable 'FRED_API_KEY' to the value of
-            your API key.
-    Returns:
-        (dict): Returns a dictionary with population values and source.
-    """
-    fred = Fred(api_key=api_key)
-    state_code = state.upper()
-    population_source_code = f'{state_code}POP'
-    population = fred.get_series(population_source_code)
-    real_population = int(population.iloc[-1] * 1000)
-    population_date = population.index[-1].isoformat()[:10]
-    return {
-        'population': real_population,
-        'population_formatted': f'{real_population:,}',
-        'population_source_code': population_source_code,
-        'population_source': f'https://fred.stlouisfed.org/series/{population_source_code}',
-        'population_at': population_date,
-    }
-
-
-#-----------------------------------------------------------------------
-# Data aggregation tools.
-#-----------------------------------------------------------------------
+# === Data aggregation tools. ===
 
 def aggregate_datasets(
         directory: str,
@@ -161,28 +103,64 @@ def aggregate_datasets(
     return all_data
 
 
-# TODO:
-def shard_datasets(data, directory, count=10_000):
-    """Shard a dataset for ease of use."""
+# === Data cleaning tools. ===
 
-    raise NotImplementedError
+def find_first_value(
+        string: str,
+        breakpoints: Optional[list]=None,
+    ) -> str:
+    """Find the first value of a string, be it a digit, a 'ND', '<',
+    or other specified breakpoints.
+    Args:
+        string (str): The string containing a value.
+        breakpoints (list): A list of breakpoints (optional).
+    Returns:
+        (int): Returns the index of the first value.
+    """
+    if breakpoints is None:
+        breakpoints = [' \d+', 'ND', '<']
+    detects = []
+    for breakpoint in breakpoints:
+        try:
+            detects.append(string.index(re.search(breakpoint, string).group()))
+        except AttributeError:
+            pass
+    try:
+        return min([x for x in detects if x])
+    except ValueError:
+        return None
 
 
-#-----------------------------------------------------------------------
-# Data cleaning tools.
-#-----------------------------------------------------------------------
+def parse_data_block(div, tag='span') -> dict:
+    """Parse an HTML data block into a dictionary.
+    Args:
+        div (bs4.element): An HTML element.
+        tag (string): The type of tag that is repeated in the block.
+    Returns:
+        (dict): A dictionary of key and value pairs.
+    """
+    data = {}
+    for el in div:
+        try:
+            label = el.find(tag).text
+            value = el.text
+            value = value.replace(label, '')
+            value = value.replace('\n', '').strip()
+            label = label.replace(':', '')
+            data[snake_case(label)] = value
+        except AttributeError:
+            pass
+    return data
 
 
-#-----------------------------------------------------------------------
-# Data augmentation tools.
-#-----------------------------------------------------------------------
+# === Data augmentation tools. ===
 
 def create_sample_id(private_key, public_key, salt='') -> str:
     """Create a hash to be used as a sample ID.
     The standard is to use:
-        1. `private_key = producer`
+        1. `private_key = results`
         2. `public_key = product_name`
-        3. `salt = date_tested`
+        3. `salt = producer`
     Args:
         private_key (str): A string to be used as the private key.
         public_key (str): A string to be used as the public key.
@@ -196,30 +174,72 @@ def create_sample_id(private_key, public_key, salt='') -> str:
     return sample_id
 
 
+# === Data analysis tools. ===
+
+def random_sample(data, count=10_000):
+    """Create a random sample of a given dataset."""
+    # TODO: Implement !
+    raise NotImplementedError
+
+
+def shard_datasets(data, directory, count=10_000):
+    """Shard a dataset for ease of use."""
+    # TODO: Implement !
+    raise NotImplementedError
+
+
+# === Data saving tools. ===
+
+def write_to_worksheet(ws, values):
+    """Write data to an Excel Worksheet.
+    Credit: Charlie Clark <https://stackoverflow.com/a/36664027>
+    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
+    Args:
+        ws (Worksheet) An openpyxl Worksheet.
+        values (list): A list of values to print to the worksheet.
+    """
+    rows = dataframe_to_rows(pd.DataFrame(values), index=False)
+    for r_idx, row in enumerate(rows, 1):
+        for c_idx, value in enumerate(row, 1):
+            try:
+                ws.cell(row=r_idx, column=c_idx, value=value)
+            except ValueError:
+                ws.cell(row=r_idx, column=c_idx, value=str(value))
+
+
 if __name__ == '__main__':
 
-    print('Performing tests...')
+    # === Tests ===
 
-    # TODO: Test each function here!
+    # [ ] TEST: List all of the available datasets.
+    print(list_datasets())
 
-    # Test `aggregate_datasets` with MCR Labs data.
-    data_dir = '../../../.datasets/lab_results/raw_data/mcr_labs'
-    data = aggregate_datasets(data_dir, concat=True)
-    subset = data.loc[~data['results'].isnull()]
-    subset.drop_duplicates(subset='sample_id', keep='first', inplace=True)
-    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-    datafile = f'../../../.datasets/lab_results/mcr_labs_test_results-{timestamp}.xlsx'
-    subset.to_excel(datafile, sheet_name='mcr_labs_raw_data')
-    print(len(subset))
+    # [ ] TEST: Load a dataset and print the first observation.
+    dataset = load_dataset('aggregated-cannabis-test-results')
+    print(dataset.iloc[0].to_dict())
 
-    # Test `aggregate_datasets` with PSI Labs data.
+    # [✓] TEST: `aggregate_datasets` with MCR Labs data.
+    # data_dir = '../../../.datasets/lab_results/raw_data/mcr_labs'
+    # data = aggregate_datasets(data_dir, concat=True)
+    # subset = data.loc[~data['results'].isnull()]
+    # subset.drop_duplicates(
+    #     subset=['sample_id', 'total_cannabinoids'],
+    #     keep='last',
+    #     inplace=True
+    # )
+    # timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+    # datafile = f'../../../.datasets/lab_results/mcr_labs_test_results-{timestamp}.xlsx'
+    # subset.to_excel(datafile, sheet_name='mcr_labs_raw_data')
+    # print('Aggregated %i samples.' % len(subset))
+
+    # [✓] TEST: `aggregate_datasets` with PSI Labs data.
     # data_dir = '../../.datasets/lab_results/raw_data/psi_labs'
     # data = aggregate_datasets(data_dir)
     # subset = data.loc[~data['results'].isnull()]
     # subset.drop_duplicates(subset='sample_id', keep='first', inplace=True)
     # subset.to_excel('../../.datasets/lab_results/psi_labs_test_results.xlsx')
 
-    # Test `aggregate_datasets` with SC Labs data.
+    # [✓] TEST: `aggregate_datasets` with SC Labs data.
     # data_dir = '../../.datasets/lab_results/raw_data/sc_labs'
     # data = aggregate_datasets(data_dir, concat=True)
     # subset = data.loc[~data['results'].isnull()]

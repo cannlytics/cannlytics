@@ -116,8 +116,6 @@ categories = [
     'Edibles (Count-Weight)',
     'Extracts (Solvent Based) (Count-Volume)',
     'Extracts (Solvent Based) (Count-Weight)',
-    'Flower & Buds',
-    'Immature Plants',
     'Kief',
     'Mature Plants',
     'Metered Dose Nasal Spray Products',
@@ -144,6 +142,12 @@ customer_types = [
     'Patient',
     'Caregiver',
     'ExternalPatient',
+]
+
+growth_phases = [
+    'Young',
+    'Vegetative',
+    'Flowering',
 ]
 
 item_types = [
@@ -252,26 +256,6 @@ item_types = [
         'CanBeRemediated': True
     }
 ]
-
-growth_phases = [
-    'Young',
-    'Vegetative',
-    'Flowering',
-]
-
-# TODO: Waste types vary by state...
-# harvest_waste_types = [
-#     'Plant Material',
-#     'Fibrous',
-#     'Root Ball',
-# ]
-# harvest_waste_types = [
-#     'MMJ Waste',
-#     'Waste',
-# ]
-waste_types = {
-    'ca': ['Plant Material'],
-}
 
 location_types = [
     {
@@ -440,3 +424,17 @@ waste_reasons = [
         'RequiresNote': False,
     }
 ]
+
+# TODO: Waste types vary by state...
+# harvest_waste_types = [
+#     'Plant Material',
+#     'Fibrous',
+#     'Root Ball',
+# ]
+# harvest_waste_types = [
+#     'MMJ Waste',
+#     'Waste',
+# ]
+waste_types = {
+    'ca': ['Plant Material'],
+}

@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 7/11/2022
+Updated: 8/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains general utility functions.
@@ -13,9 +13,9 @@ Description: This module contains general utility functions.
 from base64 import b64encode, decodebytes
 from datetime import datetime, timedelta
 import os
-from re import sub, findall
+from re import split, sub, findall
 import secrets
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Tuple
 from zipfile import ZipFile
 try:
     from zoneinfo import ZoneInfo
@@ -31,7 +31,10 @@ import requests
 
 # Internal imports.
 try:
-    from cannlytics.utils.constants import state_time_zones
+    from cannlytics.utils.constants import (
+        RANDOM_STRING_CHARS,
+        state_time_zones,
+    )
 except ImportError:
     print('Failed to load constants.')
 
@@ -99,36 +102,6 @@ def format_thousands(value: float, pos: Optional[int] = None) -> str: #pylint: d
     return '%1.0fK' % (value * 1e-3)
 
 
-def sentence_case(s):
-    """
-    Author: Zizouz212 https://stackoverflow.com/a/39969233/5021266
-    License: CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0/
-    """
-    return '. '.join(i.capitalize() for i in s.split('. ')).strip()
-
-
-def snake_case(string: str) -> str:
-    """Turn a given string to snake case.
-    Handles CamelCase, replaces known special characters with
-    preferred namespaces, replaces spaces with underscores,
-    and removes all other nuisance characters.
-    Args:
-        string (str): The string to turn to snake case.
-    Returns:
-        (str): A snake case string.
-    """
-    key = string.replace(' ', '_')
-    key = key.replace('&', 'and')
-    key = key.replace('%', 'percent')
-    key = key.replace('#', 'number')
-    key = key.replace('$', 'dollars')
-    key = key.replace('/', 'to')
-    key = key.replace(r'\\', '_').lower()
-    key = sub('[!@#$%^&*()[]{};:,./<>?\|`~-=+]', ' ', key)
-    keys = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', key)
-    return '_'.join(map(str.lower, keys))
-
-
 def get_keywords(string: str) -> List[str]:
     """Get keywords for a given string.
     Args:
@@ -141,8 +114,6 @@ def get_keywords(string: str) -> List[str]:
     keywords = list(set(keywords))
     return keywords
 
-
-RANDOM_STRING_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 
 def get_random_string(length, allowed_chars=RANDOM_STRING_CHARS):
     """
@@ -186,9 +157,88 @@ def get_random_string(length, allowed_chars=RANDOM_STRING_CHARS):
     return ''.join(secrets.choice(allowed_chars) for i in range(length))
 
 
+def sentence_case(s):
+    """Format a string as a sentence.
+    Author: Zizouz212 https://stackoverflow.com/a/39969233/5021266
+    License: CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0/
+    """
+    return '. '.join(i.capitalize() for i in s.split('. ')).strip()
+
+
+REPLACEMENTS = [
+    {'text': ' ', 'key': '_'},
+    {'text': '&', 'key': 'and'},
+    {'text': '%', 'key': 'percent'},
+    {'text': '#', 'key': 'number'},
+    {'text': '$', 'key': 'dollars'},
+    {'text': '/', 'key': 'to'},
+    {'text': 'α', 'key': 'alpha'},
+    {'text': 'β', 'key': 'beta'},
+    {'text': 'γ', 'key': 'gamma'},
+    {'text': 'Δ', 'key': 'delta'},
+    {'text': 'δ', 'key': 'delta'},
+]
+
+def snake_case(string: str) -> str:
+    """Turn a given string to snake case.
+    Handles CamelCase, replaces known special characters with
+    preferred namespaces, replaces spaces with underscores,
+    and removes all other nuisance characters.
+    Args:
+        string (str): The string to turn to snake case.
+    Returns:
+        (str): A snake case string.
+    """
+    key = string.replace(r'\\', '_').lower()
+    for x in REPLACEMENTS:
+        key = key.replace(x['text'], x['key'])
+    key = sub('[!@#$%^&*()[]{};:,./<>?\|`~-=+]', ' ', key)
+    keys = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', key)
+    return '_'.join(map(str.lower, keys))
+
+
+def strip_whitespace(string: str) -> str:
+    """Strip whitespace from a string."""
+    return string.replace('\n', '').strip()
+
+
+#-----------------------------------------------------------------------
+# Number utilities.
+#-----------------------------------------------------------------------
+
+def convert_to_numeric(string: str, strip: Optional[str] = False) -> str:
+    """Convert a string to numeric, optionally replacing non-numeric
+    characters.
+    Args:
+        string (str): The string to attempt to parse to a number.
+    Returns:
+        (float): Returns either the original or the parsed number.
+    """
+    if strip:
+        s = sub('[^\d\.]', '', string)
+    else:
+        s = string
+    try:
+       return float(s)
+    except (TypeError, ValueError):
+        return s
+
+
 #-----------------------------------------------------------------------
 # List utilities.
 #-----------------------------------------------------------------------
+
+def sandwich_list(a) -> list:
+    """Create a range that cycles from start to the end to the middle.
+    Credit: Norman <https://stackoverflow.com/a/36533868/5021266>
+    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
+    Args:
+        a (str): The iterable to sandwich.
+    Returns:
+        (list): The sandwich index.
+    """
+    return [a[-i//2] if i % 2 else a[i//2] for i in range(len(a))]
+
 
 def sorted_nicely(unsorted_list: List[str]) -> List[str]:
     """Sort the given iterable in the way that humans expect.
@@ -196,8 +246,20 @@ def sorted_nicely(unsorted_list: List[str]) -> List[str]:
     License: CC BY-SA 2.5 <https://creativecommons.org/licenses/by-sa/2.5/>
     """
     convert = lambda text: int(text) if text.isdigit() else text
-    alpha = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
+    alpha = lambda key: [convert(c) for c in split('([0-9]+)', key)]
     return sorted(unsorted_list, key=alpha)
+
+
+def split_list(a_list: list, at_index: Optional[int] = None) -> Tuple:
+    """Split a list in half or at a given index.
+    Credit: Jason Coon <https://stackoverflow.com/a/752330/5021266>
+    License: CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>
+    """
+    if at_index:
+        half = at_index
+    else:
+        half = len(a_list)//2
+    return a_list[:half], a_list[half:]
 
 
 #-----------------------------------------------------------------------
@@ -282,7 +344,7 @@ def update_dict(context: dict, function: Callable = camel_to_snake, **kwargs) ->
 #-----------------------------------------------------------------------
 
 def clean_column_strings(data: Any, column: str) -> Any:
-    """
+    """Clean the column names of a given DataFrame.
     Args:
         data (DataFrame): A DataFrame with any column names.
         column (str): The column of the DataFrame to clean.
@@ -352,6 +414,23 @@ def combine_columns(
     if drop:
         df.drop(columns=[old_key], inplace=True)
     return df
+
+
+def reorder_columns(df: Any, columns: list) -> Any:
+    """Re-order a DataFrame given a specific order of columns.
+    Remaining columns will be appended to the end of the DataFrame.
+    Args:
+        data (DataFrame): A DataFrame to be re-ordered.
+        columns (list): A list of columns in desired order.
+    Returns:
+        (DataFrame): Returns the re-ordered DataFrame
+    """
+    rdf = df.copy()
+    excluded = list([a for a in rdf.columns if a not in columns])
+    ordered_columns = (columns + excluded)
+    rdf = rdf.reindex(columns=sorted(rdf.columns))
+    rdf = rdf.reindex(columns=ordered_columns)
+    return rdf
 
 
 def reverse_dataframe(data: Any) -> Any:
@@ -555,6 +634,24 @@ def end_of_year(value: datetime) -> str:
     return f'{value.year}-12-31'
 
 
+def format_iso_date(date: str, sep: Optional[str] = '/') -> str:
+    """Format a human-written date into an ISO formatted date.
+    Ags:
+        date (str): A human-written date.
+        sep (str): The separating character, '/' by default (optional).
+    Returns:
+        (str): An ISO formatted date string.
+    """
+    mm, dd, yyyy = tuple(date.split(sep))
+    if len(mm) == 1:
+        mm = f'0{mm}'
+    if len(dd) == 1:
+        dd = f'0{dd}'
+    if len(yyyy) == 2:
+        yyyy = f'20{yyyy}'
+    return '-'.join([yyyy, mm, dd])
+
+
 def get_timestamp(
         date: Optional[str] = None,
         past: Optional[int] = 0,
@@ -621,6 +718,23 @@ def encode_pdf(filename: str) -> str:
         return b64encode(pdf.read())
 
 
+def get_directory_files(
+        target_dir: str,
+        file_type: Optional[str] = 'pdf',
+    ) -> list:
+    """Get all of the files of a specified type in a given directory.
+    Args:
+        target_dir (str): The directory containing the files.
+        file_type (str): The file type extension, 'pdf' by default (optional).
+    Returns:
+    """
+    return [
+        os.path.join(target_dir, f) for f in os.listdir(target_dir) \
+        if os.path.isfile(os.path.join(target_dir, f)) \
+        and f.endswith(file_type)
+    ]
+
+
 def get_blocks(files, size=65536):
     """Get a block of a file by the given size."""
     while True:
@@ -656,18 +770,36 @@ def download_file_from_url(url, destination='', ext=''):
     return file_path
 
 
-def unzip_files(_dir, extension='.zip'):
-    """Unzip all files in a specified folder.
+def unzip_files(zip_dir, extension='.zip'):
+    """Unzip all files in a specified folder. Alternatively,
+    pass a .zip file to extract that file.
     Author: nlavr https://stackoverflow.com/a/69101930
     License: CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/
     """
-    for item in os.listdir(_dir):
-        abs_path = os.path.join(_dir, item)
+    single = ''
+    zip_destinations = []
+    if isinstance(zip_dir, str):
+        parts = zip_dir.split('/')
+        single = parts[-1]
+        doc_dir = '/'.join(parts[:-1])
+        if doc_dir == '':
+            doc_dir = '.'
+    else:
+        doc_dir = zip_dir
+    for item in os.listdir(doc_dir):
+        if single and single not in item:
+            continue
+        abs_path = os.path.join(doc_dir, item)
         if item.endswith(extension):
             file_name = os.path.abspath(abs_path)
+            zip_dest = os.path.join(doc_dir, item)
+            if not os.path.exists(zip_dest):
+                os.makedirs(zip_dest)
             zip_ref = ZipFile(file_name)
-            zip_ref.extractall(_dir)
+            zip_ref.extractall(zip_dest)
             zip_ref.close()
             os.remove(file_name)
+            zip_destinations.append(zip_dest)
         elif os.path.isdir(abs_path):
             unzip_files(abs_path)
+    return zip_destinations

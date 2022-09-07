@@ -9,9 +9,9 @@
  */
 import { Modal } from 'bootstrap';
 import { authRequest, showNotification } from '../utils.js';
-import { setTableTheme } from '../ui/ui.js';
 import { downloadBlob, sortArrayOfObjects } from '../utils.js';
 import { getCurrentUser } from '../firebase.js';
+import { theme } from '../ui/theme.js';
 
 export const labAnalyses = {
 
@@ -56,7 +56,7 @@ export const labAnalyses = {
       },
       pagination: true,
       paginationAutoPageSize: true,
-      onGridReady: event => setTableTheme(),
+      onGridReady: event => theme.setTableTheme(),
     };
 
     // Hide the placeholder and show the table.

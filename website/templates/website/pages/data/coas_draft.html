@@ -1,0 +1,180 @@
+
+  <!-- <div class='d-flex justify-content-between text-dark'  style='max-width:420px;'><ul class='my-2'><li class='mb-2'><a href='#'><small class='serif'>Green Leaf Lab</small></a></li><li class='mb-2'><a href='#'><small class='serif'>MCR Labs</small></a></li><li class='mb-2'><a href='#'><small class='serif'>SC Labs</small></a></li><li class='mb-2'><a href='#'><small class='serif'>Veda Scientific</small></a></li></ul><ul class='my-2'><li class='mb-2'><a href='#'><small class='serif'>Confident Cannabis</small></a></li><li class='mb-2'><a href='#'><small class='serif'>TagLeaf LIMS</small></a></li></ul></div> -->
+  {% comment %} <!-- TODO: Make supoorted labs / LIMS minimizable? -->
+  <h4 class="serif fw-bold text-dark mb-2 mt-3">
+    Supported Labs and LIMS
+  </h4>
+  <!-- TODO: Make this a tooltip -->
+  <p class="lh-sm mt-0 text-dark">
+    <small class="serif">
+      If you want your favorite lab or LIMS included,
+      then please email <a href="mailto:dev@cannlytics.com">
+        <small class="serif">dev@cannlytics.com</small>
+      </a> and chances are that they can be added to the
+      parsing algorithm. Alternatively, clone the
+      <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas">
+        <small class="serif">source code</small>
+      </a>
+      and you can write your own parsing algorithm!
+    </small>
+  </p>
+  <div class="d-flex justify-content-between text-dark"  style="max-width:420px;">
+    <ul class="my-2">
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">Green Leaf Lab</small>
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">MCR Labs</small>
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">SC Labs</small>
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">Veda Scientific</small>
+        </a>
+      </li>
+    </ul>
+    <ul class="my-2">
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">Confident Cannabis</small>
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">TagLeaf LIMS</small>
+        </a>
+      </li>
+    </ul>
+  </div> {% endcomment %}
+
+  {% comment %} <!-- Optional: Table Notes -->
+<caption class="markdown">
+  <p class="text-secondary lh-sm" style="max-width:560px;">
+    <b class="serif">Notes</b>
+    <small class="serif">
+      At this time, CoADoc can only parse certificates of analysis (CoAs)
+      from labs and LIMS with approved parsing algorithms.
+      If you want your favorite lab or LIMS added,
+      then please email <a href="mailto:dev@cannlytics.com">
+        <small class="serif">dev@cannlytics.com</small>
+      </a> and chances are that they can be included.
+      Alternatively, you can clone the
+      <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas">
+        <small class="serif">source code</small>
+      </a>
+      and you can write a custom parsing algorithm for your lab or LIMS!
+    </small>
+  </p>
+  <p class="text-secondary lh-sm" style="max-width:560px;">
+    <b class="serif">Supported Labs and LIMS</b>
+  </p>
+  <div class="d-flex justify-content-between text-dark"  style="max-width:420px;">
+    <ul class="my-2">
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">Green Leaf Lab</small>
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">MCR Labs</small>
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">SC Labs</small>
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">Veda Scientific</small>
+        </a>
+      </li>
+    </ul>
+    <ul class="my-2">
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">Confident Cannabis</small>
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="#">
+          <small class="serif">TagLeaf LIMS</small>
+        </a>
+      </li>
+    </ul>
+  </div>
+</caption> {% endcomment %}
+
+{% comment %}
+  Certificates of analysis (CoAs) from
+      <a href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas.py"><small class="serif">validated LIMS providers</small></a>
+      can usually be parsed directly from the web. CoAs from
+      yet-to-be-incorporated labs or LIMS can be parsed to the
+      best of CoADoc's abilities.
+{% endcomment %}
+
+{% comment %}
+<!-- Optional: Request a lab or LIMS form -->
+<div class="mt-5 mb-4">
+  <h3 class="serif mb-0">Is your favorite lab or LIMS missing?</h3>
+  <p class="fs-6 font-weight-light serif text-left lh-md mt-2 mb-3 text-secondary">
+    Request an addition to the CoA parsing algorithm.
+  </p>
+    <div class="col-auto mb-3">
+      <label
+        for="requested-lims"
+        class="form-label serif"
+      >
+        Lab or LIMS
+      </label>
+      <input
+        id="requested-lims"
+        class="form-control serif"
+        style="max-width:350px;"
+        spellcheck="false"
+        type="text"
+        value=""
+      >
+    </div>
+    <button
+      id="request-lims-button"
+      class="btn bg-gradient-green serif text-white"
+      style="width: 191px;"
+      type="button"
+      onclick=""
+    >
+      Request Addition
+    </button>
+</div>
+{% endcomment %}
+
+{% comment %}
+<!-- Optional: Report an error functionality. -->
+<div class="mt-5 mb-4">
+  <h4 class="serif mb-0">Unknown Parsing Error!</h4>
+  <p class="fs-6 font-weight-light serif text-left lh-md mt-2 mb-4 text-secondary">
+    An error occurred when parsing the CoA.<br>
+    Please try again later or email support.
+  </p>
+  <div class="simple-flex">
+    <button
+      id="coa-doc-report-error-button"
+      class="btn bg-gradient-green serif text-white"
+      style="width: 191px;"
+      type="button"
+      onclick=""
+    >
+      Report Error
+    </button>
+  </div>
+</div>
+{% endcomment %}

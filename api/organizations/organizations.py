@@ -34,7 +34,7 @@ from cannlytics.firebase import (
     update_document,
     update_documents,
 )
-from api.auth.auth import authenticate_request #pylint: disable=import-error
+from cannlytics.auth.auth import authenticate_request
 from api.traceability.traceability import initialize_traceability
 from console.settings import DEFAULT_FROM_EMAIL, LIST_OF_EMAIL_RECIPIENTS
 
@@ -71,7 +71,6 @@ def organization_team(request, organization_id=None, user_id=None):
     request from a member of the organization.
     """
     claims = authenticate_request(request)
-    print('Claims:', claims)
     try:
         if organization_id in claims['team']:
             organization_data = get_document(f'organizations/{organization_id}')

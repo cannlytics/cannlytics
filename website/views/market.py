@@ -153,6 +153,7 @@ def buy_data(request):
     # Email the data to the user.
     message = f'Congratulations on your new dataset,\n\nYou can access your data with the following link:\n\n{short_url}\n\nYou can monitor the market for new datasets.\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
     subject = 'Dataset Purchased - Your Dataset is Attached'
+    # FIXME:
     send_mail(
         subject=subject,
         message=message,
