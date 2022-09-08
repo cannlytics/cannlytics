@@ -1,53 +1,35 @@
 # <img height="32" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics API
 
-[![license](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cannlytics/cannlytics-api/fork)
+The Cannlytics API allows users to seamlessly integrate with all of the functionality that Cannlytics has to offer. The Cannlytics API endpoints are simply an interface to the logic implemented in the `cannlytics` module. The API endpoints handle authentication, error handling, and identifying the precise logic to perform.
 
+## API Endpoints <a name="endpoints"></a>
 
-The Cannlytics API provides an interface to quickly receive samples, perform analyses, collect and review results, and publish certificates of analysis (CoAs). There are also logistics, CRM (client relationship management), inventory management, and invoicing tools. The Cannlytics API comes with [**batteries included**](https://cannlytics.com/support/), but you are always welcome to supercharge your setup with custom modifications. You can get an API key by signing up at <https://cannlytics.com/api> and start exploring!
+| Endpoint | Methods | Description |
+| -------- | ------- | ----------- |
+| `\auth\authenticate`   | `POST`   | Create an authorized session. |
+| `\auth\login`   | `POST`   | Sign into your Firebase user account. |
+| `\auth\logout`   | `POST`   | Sign out of your Firebase user account and end your authorized session. |
+| `\analyses` | `GET`, `POST`, `DELETE` | Manage analyses. |
+| `\analytes` | `GET`, `POST`, `DELETE` | Manage analyses. |
+| `\instruments` | `GET`, `POST`, `DELETE` | Manage instruments. |
+| `\inventory` | `GET`, `POST`, `DELETE` | Manage inventory items. |
+| `\invoices` | `GET`, `POST`, `DELETE` | Manage invoices. |
+| `\organizations` | `GET`, `POST` | Manage organizations. |
+| `\projects` | `GET`, `POST`, `DELETE` | Manage projects. |
+| `\results` | `GET`, `POST`, `DELETE` | Manage results. |
+| `\samples` | `GET`, `POST`, `DELETE` | Manage samples. |
+| `\traceability` | `GET`, `POST`, `DELETE` | Manage interactions with your state traceability system. |
+| `\transfers` | `GET`, `POST`, `DELETE` | Manage transfers. |
+| `\users` | `GET`, `POST` | Manage user data. |
 
-- [🪴 Installation](#installation)
-- [🚜 Development](#development)
-- [🧪 Testing](#testing)
-- [🚀 Publishing](#publishing)
+<!-- | `\regulations` | Get regulatory data for different states. | -->
+<!-- | `\limits` | Get action limits for certain compounds in different states. | -->
+<!--  Data about cannabis testing labs can be retrieved from the Cannlytics API. -->
 
-## 🪴 Installation<a name="installation"></a>
+## Get Started with the Cannlytics API
 
-Installing the Cannlytics API is simple.
+Getting started making requests to the Cannlytics API can be done in 3 quick steps.
 
-```shell
-git clone https://github.com/cannlytics.com/cannlytics-api
-```
-
-## 🚜 Development<a name="development"></a>
-
-Running the Cannlytics API locally for development is easy.
-
-```shell
-python manage.py runserver 4200
-```
-
-or
-
-```shell
-npm run dev
-```
-
-> Note that the API is run on port 4200 to allow for simultaneous development with other pieces of the Cannlytics engine.
-
-## 🧪 Testing<a name="testing"></a>
-
-Tests are performed with [`pytest`](https://docs.pytest.org/en/stable/). You can perform the tests by executing the `pytest` command from the `tests` directory.
-
-```shell
-cd tests
-pytest
-```
-
-## 🚀 Publishing<a name="publishing"></a>
-
-See [`docs/publishing.md`](docs/publishing.md) for instructions on how to publish the API. Publishing entails containerizing the API, deploying the container to Cloud Run, and directing hosting requests to the containerized app from Firebase Hosting. You can publish using Node.js with one quick command:
-
-```shell
-npm run publish
-```
+1. First, [create a Cannlytics account](https://console.cannlytics.com/account/sign-up).
+2. Second, [create an API key](https://console.cannlytics.com/settings/api).
+3. Third, begin making requests to the Cannlytics API with your API Key in an `Authorization: Bearer <token>` header.

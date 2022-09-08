@@ -33,7 +33,7 @@ copyright: Copyright &copy; 2021 Cannlytics
 repo_name: Cannlytics
 repo_url: https://github.com/cannlytics/cannlytics
 edit_uri: ""
-docs_dir: docs
+docs_dir: ./
 site_dir: docs/build
 
 # Configuration
@@ -175,129 +175,102 @@ plugins:
 
 # Site map
 nav:
-  - Home: index.md
+  - Home: docs/index.md
 
   # About
   #------------
   - About:
-    - Overview: about/about.md
-    - FAQ: about/faq.md
-    - Support: about/support.md
-    - License: about/license.md
-    - Privacy policy: about/privacy-policy.md
-    - Security policy: about/security-policy.md
-    - Terms of service: about/terms-of-service.md
+    - Overview: docs/about/about.md
+    - FAQ: docs/about/faq.md
+    - Support: docs/about/support.md
+    - License: docs/about/license.md
+    - Privacy policy: docs/about/privacy-policy.md
+    - Security policy: docs/about/security-policy.md
+    - Terms of service: docs/about/terms-of-service.md
 
   # API
   #------------
   - API:
-    - Overview: api/about.md
-    # FIXME: Touch up, remove, or condense this document.
-    # - Getting Started: api/get-started.md
-    - Authentication: api/authentication.md
-    - Endpoints:
-      - Analyses: api/endpoints/analyses.md
-      - Analytes: api/endpoints/analytes.md
-      - Areas: api/endpoints/areas.md
-      - Contacts: api/endpoints/contacts.md
-      - Instruments: api/endpoints/instruments.md
-      - Inventory: api/endpoints/inventory.md
-      # FIXME: Touch up, remove, or condense this document.
-      # - Invoices: api/endpoints/invoices.md
-      - Measurements: api/endpoints/measurements.md
-      - Organizations: api/endpoints/organizations.md
-      - Projects: api/endpoints/projects.md
-      - Results: api/endpoints/results.md
-      - Samples: api/endpoints/samples.md
-      - Settings: api/endpoints/settings.md
-      - Traceability: api/endpoints/traceability.md
-      - Transfers: api/endpoints/transfers.md
-      - Users: api/endpoints/users.md
+    - Overview: api/readme.md
+    - Authentication: api/auth/readme.md
+    - Data: api/data/readme.md
+    - LIMS:
+      - Analyses: api/analyses/readme.md
+      - Analytes: api/analytes/readme.md
+      - Areas: api/areas/readme.md
+      - Contacts: api/contacts/readme.md
+      - Instruments: api/instruments/readme.md
+      - Inventory: api/inventory/readme.md
+      - Invoices: invoices/readme.md
+      - Measurements: api/measurements/readme.md
+      - Projects: api/projects/readme.md
+      - Results: api/results/readme.md
+      - Samples: api/samples/readme.md
+      - Transfers: api/transfers/readme.md
+      # TODO: Add waste docs
+    - Organizations: api/organizations/readme.md
+    - Users: api/users/readme.md
+    - Settings: api/settings/readme.md
+    - Traceability: api/traceability/readme.md
   
   # Users
   #------------
   - Users:
-    - Getting Started: console/get-started.md
-    - Authentication: console/authentication.md
-    - Analyses: console/lims/analyses.md
-    - Analytes: console/lims/analytes.md
-    - Areas: console/lims/areas.md
-    - Contacts: console/lims/contacts.md
+    - Getting Started: docs/console/get-started.md
+    - Authentication: docs/console/authentication.md
+    - Analyses: docs/console/lims/analyses.md
+    - Analytes: docs/console/lims/analytes.md
+    - Areas: docs/console/lims/areas.md
+    - Contacts: docs/console/lims/contacts.md
+    # FIXME: Touch up, remove, or condense these documents.
     - Data:
-      # FIXME: Touch up, remove, or condense these documents.
       # - Overview: console/lims/data/data.md
-      - Data Collection: console/lims/data/data_collection.md
+      - Data Collection: docs/console/lims/data/data_collection.md
       # - Data Analysis: console/lims/data/data_analysis.md
       # - Data Review: console/lims/data/data_review.md
       # - Importing and exporting data: console/lims/data/exports.md
       # - Generating CoAs: console/lims/generating_coas.md
       # - Posting Results: console/lims/posting_results.md
       # - Quality Control: console/lims/qc.md
-      - Logs: console/lims/data/logs.md
-    - Instruments: console/lims/instruments.md
-    - Inventory: console/lims/inventory.md
-    - Invoices: console/lims/invoices.md
-    - Organizations: console/lims/organizations.md
-    - Projects: console/lims/projects.md
-    - Results: console/lims/results.md
-    - Samples: console/lims/samples.md
-    - Transfers: console/lims/transfers.md
-    - Traceability: console/lims/traceability.md
-    - Worksheets: console/lims/worksheets.md
-    - Settings: console/lims/settings.md
+      - Logs: docs/console/lims/data/logs.md
+    - Instruments: docs/console/lims/instruments.md
+    - Inventory: docs/console/lims/inventory.md
+    - Invoices: docs/console/lims/invoices.md
+    - Organizations: docs/console/lims/organizations.md
+    - Projects: docs/console/lims/projects.md
+    - Results: docs/console/lims/results.md
+    - Samples: docs/console/lims/samples.md
+    - Transfers: docs/console/lims/transfers.md
+    - Traceability: docs/console/lims/traceability.md
+    - Worksheets: docs/console/lims/worksheets.md
+    - Settings: docs/console/lims/settings.md
+
+  # Cannlytics SDK
+  #---------------
+  - Cannlytics SDK:
+    - Overview: cannlytics/readme.md
+    - Auth: cannlytics/auth/readme.md
+    - Data: cannlytics/data/readme.md
+      - CoAs: cannlytics/data/coas/readme.md
+      - Market: cannlytics/data/market/readme.md
+    - Firebase: cannlytics/firebase/readme.md
+    - LIMS: cannlytics/lims/readme.md
+    - Metrc: cannlytics/metrc/readme.md
+    - Stats: cannlytics/stats/readme.md
+    - Utils: cannlytics/utils/readme.md
   
   # Developers
   #------------
   - Developers:
     - Dev:
-      - Getting Started: developers/dev/development.md
-      - Installation: developers/dev/installation.md
-      - Contributing: developers/dev/contributing.md
-      - Packaging: developers/dev/packaging.md
-      - Publishing: developers/dev/publishing.md
-      - Roadmap: developers/dev/roadmap.md
-      - Security: developers/dev/security.md
-      - Testing: developers/dev/testing.md
-      - Version control: developers/dev/version_control.md
+      - Getting Started: docs/developers/dev/development.md
+      - Installation: docs/developers/dev/installation.md
+      - Contributing: docs/developers/dev/contributing.md
+      - Packaging: docs/developers/dev/packaging.md
+      - Publishing: docs/developers/dev/publishing.md
+      - Roadmap: docs/developers/dev/roadmap.md
+      - Security: docs/developers/dev/security.md
+      - Testing: docs/developers/dev/testing.md
+      - Version control: docs/developers/dev/version_control.md
     - SOPs:
-      - Control of Documents: developers/sops/control-of-documents.md
-    - Modules:
-      - Firebase:
-        - Overview: cannlytics/firebase/firebase.md
-        - API reference: cannlytics/firebase/firebase-reference.md
-      - LIMS:
-        - Overview: cannlytics/lims/lims.md
-        - Calculations: cannlytics/lims/calculations.md
-        - Certificates: cannlytics/lims/certificates.md
-        - Data: cannlytics/lims/data.md
-        - Quality Control: cannlytics/lims/qc.md
-        - Results: cannlytics/lims/results.md
-        - Samples: cannlytics/lims/samples.md
-        - Transfers: cannlytics/lims/transfers.md
-        # FIXME: Touch up, remove, or condense this document.
-        # - Worksheets: cannlytics/lims/worksheets.md
-      - Metrc:
-        - Overview: cannlytics/metrc/metrc.md
-        - Client: cannlytics/metrc/metrc-client.md
-        - Models: cannlytics/metrc/metrc-models.md
-      - Utils:
-        - Main Utils: cannlytics/utils/utils.md
-        - Logistics: cannlytics/utils/logistics.md
-
-      # FIXME: Add the following documents or condense them into existing documents.
-      # - api/endpoints/invoices.md
-      # - cannlytics/installation.md
-      # - cannlytics/lims/worksheets.md
-      # - cannlytics/metrc/metrc-exceptions.md
-      # - cannlytics/metrc/metrc-urls.md
-      # - cannlytics/metrc/metrc-utils.md
-      # - console/lims/generating_coas.md
-      # - console/lims/posting_results.md
-      # - console/lims/qc.md
-      # - console/lims/data/data.md
-      # - console/lims/data/data_analysis.md
-      # - console/lims/data/data_review.md
-      # - console/lims/data/exports.md
-      # - developers/dev/blockchain.md
-      # - developers/dev/bugs.md
-      # - developers/dev/documentation.md
+      - Control of Documents: docs/developers/sops/control-of-documents.md

@@ -4,15 +4,16 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2022
-Updated: 8/28/2022
+Updated: 9/8/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Internal imports.
 from hashlib import sha256
 import hmac
+import json
 import os
 import re
-from typing import Optional
+from typing import Any, Optional
 
 # External imports.
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -22,38 +23,25 @@ import pandas as pd
 from cannlytics.utils import rmerge
 from cannlytics.utils.utils import snake_case
 
-# === Constants ===
+# Constants.
 DATA_PROVIDER = 'cannlytics'
 DATA_URL = 'https://cannlytics.com/api/data'
+HASH_ERROR = """Unrecognized `public_key`. Expecting a str, list, dict,
+int, bytes, or DataFrame."""
 
 # Library of Cannlytics datasets.
 CANNLYTICS_DATASETS = [
     'aggregated-cannabis-test-results',
 ]
 
-
 # === Data collection tools. ===
 
-# FIXME: Simply use Hugging Face's `datasets` package?
-# from datasets import load_dataset
-# dataset = load_dataset("cannlytics/aggregated-cannabis-test-results")
-
-def download_dataset():
-    """Download a specific dataset."""
-    # TODO: Implement !
-    raise NotImplementedError
-
-
-def load_dataset():
-    """Load a specific dataset."""
-    # TODO: Implement !
-    raise NotImplementedError
-
-
-def list_datasets():
-    """Get the Cannlytics data catalogue."""
-    # TODO: Implement !
-    raise NotImplementedError
+def list_datasets() -> list:
+    """Get the Cannlytics Hugging Face data catalogue.
+    Returns:
+        (list): A list of dataset names.
+    """
+    return CANNLYTICS_DATASETS
 
 
 # === Data aggregation tools. ===
@@ -155,6 +143,42 @@ def parse_data_block(div, tag='span') -> dict:
 
 # === Data augmentation tools. ===
 
+def create_hash(
+        public_key: Any,
+        private_key: Optional[str] = 'cannlytics.eth',
+    ) -> str:
+    """Create a hash (HMAC-SHA256) that is unique to the provided data.
+    Args:
+        public_key (str): A string to be used as the public key.
+        private_key (str): A string to be used as the private key,
+            "cannlytics.eth" by default (optional).
+    Returns:
+        (str): A sample ID hash.
+    References:
+        - HMAC: Keyed-Hashing for Message Authentication
+        URL: <https://www.ietf.org/rfc/rfc2104.txt>
+        - What's the difference between HMAC-SHA256(key, data) and SHA256(key + data)
+        URL: <https://security.stackexchange.com/questions/79577/whats-the-difference-between-hmac-sha256key-data-and-sha256key-data>
+    """
+    if isinstance(public_key, str) or isinstance(public_key, bytes):
+        msg = public_key
+    elif isinstance(public_key, list):
+        msg = str(public_key)
+    elif isinstance(public_key, dict):
+        msg = json.dumps(public_key)
+    elif isinstance(public_key, pd.DataFrame):
+        msg = public_key.to_json()
+    elif isinstance(public_key, int):
+        msg = str(public_key)
+    else:
+        raise ValueError(HASH_ERROR)
+    try:
+        msg = msg.encode()
+    except AttributeError:
+        pass
+    return hmac.new(bytes(private_key, 'UTF-8'), msg, sha256).hexdigest()
+
+
 def create_sample_id(private_key, public_key, salt='') -> str:
     """Create a hash to be used as a sample ID.
     The standard is to use:
@@ -210,13 +234,12 @@ def write_to_worksheet(ws, values):
 if __name__ == '__main__':
 
     # === Tests ===
+    import cannlytics.data
 
-    # [ ] TEST: List all of the available datasets.
-    print(list_datasets())
-
-    # [ ] TEST: Load a dataset and print the first observation.
-    dataset = load_dataset('aggregated-cannabis-test-results')
-    print(dataset.iloc[0].to_dict())
+    # [✓] TEST: List all of the available datasets.
+    # dataset_names = list_datasets()
+    # for name in dataset_names:
+    #     assert name in CANNLYTICS_DATASETS
 
     # [✓] TEST: `aggregate_datasets` with MCR Labs data.
     # data_dir = '../../../.datasets/lab_results/raw_data/mcr_labs'
