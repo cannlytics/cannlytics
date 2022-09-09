@@ -899,7 +899,10 @@ def parse_sc_labs_coa(
     except (AttributeError, ConnectionError):
         data = parse_sc_labs_pdf(parser, doc)
         data['public'] = False
-        data['coa_pdf'] = doc.split('/')[-1]
+        if isinstance(doc, str):
+            data['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
+        elif isinstance(doc, pdfplumber.pdf.PDF):
+            data['coa_pdf'] = doc.stream.name.replace('\\', '/').split('/')[-1]
     return data
 
 

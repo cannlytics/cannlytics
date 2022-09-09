@@ -148,10 +148,10 @@ def parse_cannalysis_coa(
     obs = {}
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
-        obs['coa_pdf'] = coa_pdf or doc.split('/')[-1]
+        obs['coa_pdf'] = coa_pdf or doc.replace('\\', '/').split('/')[-1]
     else:
         report = doc
-        obs['coa_pdf'] = coa_pdf or report.stream.name.split('/')[-1]
+        obs['coa_pdf'] = coa_pdf or report.stream.name.replace('\\', '/').split('/')[-1]
 
     # Get the QR code from the last page.
     # Note: After OCR, QR code decoding raises warning:

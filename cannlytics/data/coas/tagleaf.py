@@ -64,6 +64,7 @@ from typing import Any, Optional
 # External imports.
 from bs4 import BeautifulSoup, NavigableString
 import pandas as pd
+import pdfplumber
 from requests import Session
 
 # Internal imports.
@@ -321,7 +322,10 @@ def parse_tagleaf_coa(
             data = parse_tagleaf_pdf(parser, doc, **kwargs)
     else:
         data = parse_tagleaf_pdf(parser, doc, **kwargs)
-    data['coa_pdf'] = doc.split('/')[-1]
+    if isinstance(doc, str):
+        data['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
+    elif isinstance(doc, pdfplumber.pdf.PDF):
+        data['coa_pdf'] = doc.stream.name.replace('\\', '/').split('/')[-1]
     return data
 
 

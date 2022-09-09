@@ -168,7 +168,7 @@ def create_hash(
         msg = json.dumps(public_key)
     elif isinstance(public_key, pd.DataFrame):
         msg = public_key.to_json()
-    elif isinstance(public_key, int):
+    elif isinstance(public_key, int) or isinstance(public_key, float):
         msg = str(public_key)
     else:
         raise ValueError(HASH_ERROR)

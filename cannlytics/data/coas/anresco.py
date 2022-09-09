@@ -139,10 +139,10 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
     obs = {}
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
-        obs['coa_pdf'] = doc.split('/')[-1]
+        obs['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
     else:
         report = doc
-        obs['coa_pdf'] = report.stream.name.split('/')[-1]
+        obs['coa_pdf'] = report.stream.name.replace('\\', '/').split('/')[-1]
     front_page = report.pages[0]
 
     # Get the QR code from the last page.

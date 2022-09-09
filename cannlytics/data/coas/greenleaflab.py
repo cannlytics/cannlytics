@@ -265,10 +265,10 @@ def parse_green_leaf_lab_pdf(
     # Read the PDF.
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
-        obs['coa_pdf'] = doc.split('/')[-1]
+        obs['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
     else:
         report = doc
-        obs['coa_pdf'] = report.stream.name.split('/')[-1]
+        obs['coa_pdf'] = report.stream.name.replace('\\', '/').split('/')[-1]
     front_page = report.pages[0]
 
     # Get the lab-specific CoA page areas.

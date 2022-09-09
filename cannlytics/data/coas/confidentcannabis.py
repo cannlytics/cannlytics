@@ -59,6 +59,7 @@ from typing import Any, Optional
 
 # External imports.
 import pandas as pd
+from pdfplumber.pdf import PDF
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -435,7 +436,10 @@ def parse_cc_coa(
             data = parse_cc_pdf(parser, doc, **kwargs)
     else:
         data = parse_cc_pdf(parser, doc, **kwargs)
-    data['coa_pdf'] = doc.split('/')[-1]
+    if isinstance(doc, str):
+        data['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
+    elif isinstance(doc, PDF):
+        data['coa_pdf'] = doc.stream.name.replace('\\', '/').split('/')[-1]
     return data
 
 

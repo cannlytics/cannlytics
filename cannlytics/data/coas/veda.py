@@ -299,10 +299,10 @@ def parse_veda_coa(parser, doc: Any, **kwargs) -> dict:
     obs = {}
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
-        obs['coa_pdf'] = doc.split('/')[-1]
+        obs['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
     else:
         report = doc
-        obs['coa_pdf'] = report.stream.name.split('/')[-1]
+        obs['coa_pdf'] = report.stream.name.replace('\\', '/').split('/')[-1]
     front_page = report.pages[0]
     w, h = front_page.width, front_page.height
 
