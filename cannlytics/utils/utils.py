@@ -497,27 +497,27 @@ def rmerge(left, right, **kwargs):
     2  3  6  11    2  3  9  15
     3  4  7  12
 
-    >>> rmerge(left,right,on='a')
+    >>> rmerge(left, right, on='a')
        a  b  c   d
     0  1  4  7  13
     1  2  5  8  14
     2  3  6  9  15
 
-    >>> rmerge(left,right,on='a',how='left')
+    >>> rmerge(left, right, on='a', how='left')
        a  b   c   d
     0  1  4   7  13
     1  2  5   8  14
     2  3  6   9  15
     3  4  7 NaN NaN
 
-    >>> rmerge(left,right,on='a',how='left',replace='right')
+    >>> rmerge(left, right, on='a', how='left', replace='right')
        a  b   c   d
     0  1  4   9  13
     1  2  5  10  14
     2  3  6  11  15
     3  4  7  12 NaN
 
-    >>> rmerge(left,right,on='a',how='left',replace=None)
+    >>> rmerge(left, right, on='a', how='left', replace=None)
        a  b  c_x  c_y   d
     0  1  4    9    7  13
     1  2  5   10    8  14

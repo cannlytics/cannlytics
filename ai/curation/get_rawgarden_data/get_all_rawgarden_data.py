@@ -23,6 +23,11 @@ Data Source:
     - Raw Garden Lab Results
     URL: <https://rawgarden.farm/lab-results/>
 
+Command line usage:
+
+    python ai/curation/get_rawgarden_data/get_rawgarden_data.py \
+        --days_ago=1 --get_all=False
+
 """
 # Standard imports.
 from datetime import datetime, timedelta
@@ -37,6 +42,7 @@ import requests
 
 # Internal imports.
 from cannlytics.data.coas import CoADoc
+from cannlytics.data.data import create_hash
 from cannlytics.firebase import (
     get_document,
     initialize_firebase,
@@ -53,8 +59,8 @@ STORAGE_REF = 'data/lab_results/raw_garden'
 
 # Create directories if they don't already exist.
 # TODO: Edit `ENV_FILE` and `DATA_DIR` as needed for your desired setup.
-ENV_FILE = '.env'
-DATA_DIR = '.datasets'
+ENV_FILE = '../../../.env'
+DATA_DIR = '../../../.datasets'
 COA_DATA_DIR = f'{DATA_DIR}/lab_results/raw_garden'
 COA_PDF_DIR = f'{COA_DATA_DIR}/pdfs'
 TEMP_PATH = f'{COA_DATA_DIR}/tmp'
@@ -277,9 +283,27 @@ def upload_lab_results(
 #-----------------------------------------------------------------------
 if __name__ == '__main__':
 
+    import argparse
+
+    # Support command line usage.
+    try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--days_ago', dest='days_ago', type=int)
+        parser.add_argument('--get_all', dest='get_all', type=bool)
+        args = parser.parse_args()
+    except SystemExit:
+        args = {}
+    
+    # Future work: Allow data dirs to be specified from the command line.
+
+    # Specify collection period.
+    DAYS_AGO = args.get('days_ago', 1)
+    GET_ALL =  args.get('get_all', False)
+
     # Get the most recent Raw Garden products.
-    DAYS_AGO = 1
     start = datetime.now() - timedelta(days=DAYS_AGO)
+    if GET_ALL:
+        start = datetime(year=2018, month=1, day=1)
     products = get_rawgarden_products(start=start)
 
     # Download Raw Garden product COAs to `product_subtype` folders.
@@ -294,7 +318,7 @@ if __name__ == '__main__':
     )
 
     # Merge the `products`'s `product_subtype` with the COA data.
-    coa_dataframe = rmerge(
+    coa_df = rmerge(
         pd.DataFrame(coa_data),
         products,
         on='coa_pdf',
@@ -302,14 +326,25 @@ if __name__ == '__main__':
         replace='right',
     )
 
+    # Create hashes.
+    coa_df = coa_df.where(pd.notnull(coa_df), None)
+    coa_df['results_hash'] = coa_df['results'].apply(
+        lambda x: create_hash(x),
+    )
+    coa_df['sample_hash'] = coa_df.loc[:, coa_df.columns != 'sample_hash'].apply(
+        lambda x: create_hash(x.to_dict()),
+        axis=1,
+    )
+    datafile_hash = create_hash(coa_df)
+
     # Optional: Save the COA data to a workbook.
     parser = CoADoc()
-    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-    datafile = f'{COA_DATA_DIR}/rawgarden-coa-data-{timestamp}.xlsx'
-    parser.save(coa_dataframe, datafile)
+    datafile = f'{COA_DATA_DIR}/{datafile_hash}.xlsx'
+    parser.save(coa_df, datafile)
 
     # Optional: Save the unidentified COA data.
     errors = [x['coa_pdf'] for x in unidentified_coas]
+    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
     error_file = f'{COA_DATA_DIR}/rawgarden-unidentified-coas-{timestamp}.xlsx'
     products.loc[products['coa_pdf'].isin(errors)].to_excel(error_file)
 
@@ -318,7 +353,7 @@ if __name__ == '__main__':
 
     # Optional: Upload the lab results to Firestore.
     upload_lab_results(
-        coa_dataframe.to_dict(orient='records'),
+        coa_df.to_dict(orient='records'),
         update=True,
         verbose=True
     )
