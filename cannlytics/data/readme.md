@@ -1,14 +1,14 @@
 # Cannlytics Data Module
 
 <div style="margin-top:1rem; margin-bottom: 1rem;">
-  <img height="125px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fmisc%2Fdata-pipeline.png?alt=media&token=7a8ec568-5acd-41ca-96c1-a499bf83deb5">
+  <img height="100px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fmisc%2Fdata-pipeline.png?alt=media&token=7a8ec568-5acd-41ca-96c1-a499bf83deb5">
 </div>
 
-The `cannlytics.data` module is a large toolbox for accessing, collecting, cleaning, augmenting, standardizing, saving, and analyzing cannabis data.
+The `cannlytics.data` module is a digital toolbox for accessing, collecting, cleaning, augmenting, standardizing, saving, and analyzing cannabis data.
 
-## Core Data Functions
+## Data Management
 
-The core data manipulation tools are found in `cannlytics.data.data`.
+The core data management tools found in `cannlytics.data.data` include:
 
 *Data Aggregation*
 
@@ -41,6 +41,7 @@ References:
 
 | Function | Description |
 |----------|-------------|
+| `create_hash(public_key, private_key = 'cannlytics.eth')` | Create a hash (HMAC-SHA256) that is unique to the provided data, the `public_key`. The `private_key` can be used to sign your data, with the default being Cannlytics' public key, `'cannlytics.eth'`. |
 | `create_sample_id(private_key, public_key, salt='')` | Create a hash to be used as a sample ID. The standard is to use: 1. `private_key = producer` 2. `public_key = product_name` 3. `salt = date_tested` |
 
 *Data Saving*
@@ -157,7 +158,7 @@ patent = get_patent_details(
 
 ## Web Data
 
-There are a number of web data tools in `cannlytics.data.web`.
+There are a number of web data tools in `cannlytics.data.web`, including:
 
 | Function | Description |
 |----------|-------------|

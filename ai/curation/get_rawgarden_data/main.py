@@ -211,6 +211,8 @@ def parse_rawgarden_coas(
                     continue
             doc = os.path.join(path, filename)
             try:
+                # FIXME: Make API request to Cannlytics? Tesseract, etc.
+                # are going to be too heavy for a cloud function.
                 coa  = parser.parse(doc, temp_path=temp_path, **kwargs)
                 subtype = path.split('\\')[-1]
                 coa[0]['product_subtype'] = subtype
@@ -339,6 +341,29 @@ def get_rawgarden_data(event, context):
 # === Test ===
 if __name__ == '__main__':
 
+    from cannlytics.utils import encode_pdf
+    from cannlytics.utils.constants import DEFAULT_HEADERS
+    import requests
+
     # [✓] TEST: Mock the Google Cloud Function scheduled routine.
-    event = {'data': base64.b64encode('success'.encode())}
-    get_rawgarden_data(event, context={})
+    # event = {'data': base64.b64encode('success'.encode())}
+    # get_rawgarden_data(event, context={})
+
+    # [ ] Test: Post a PDF to the Cannlytics API for parsing.
+    # FIXME:
+    coa_doc_api = 'https://cannlytics.com/api/data/coas'
+    folder = 'tests/assets/coas/'
+    filename = f'{folder}/210000525-Citrus-Slurm-Diamonds.pdf'
+    # files = {'upload_file': open(filename, 'rb')}
+    # values = {'lims': 'Cannalysis'}
+    # response = requests.post(base, files=files, data=values)
+    with open(filename, 'rb') as f:
+        response = requests.post(
+            coa_doc_api,
+            headers=DEFAULT_HEADERS,
+            files={'file': f}
+        )
+        print(response.status_code)
+
+    # Optional: Also allow for encoding of PDFs.
+    encoded_pdf = encode_pdf(filename)

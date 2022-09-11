@@ -153,14 +153,14 @@ UNIDENTIFIED_LIMS += ', '.join([f'"{x}"' for x in LIMS.keys()])
 def convert_pdf_to_images(
         filename: str,
         output_path: str,
-        resolution: Optional[int] = 180,
+        resolution: Optional[int] = 300,
     ) -> List[str]:
     """Convert a PDF into images, with images named as `{filename}-{#}.png`.
     The function replaces the images' alpha channels with a white background.
     Args:
         filename (str): The name of a PDF to convert to images.
         output_path (str): A directory where the images should be generated.
-        resolution (int): The resolution of the generated images, 180 by
+        resolution (int): The resolution of the generated images, 300 by
             default (optional.)
     Returns:
         (list): Returns a list of the filenames of the images generated.
@@ -285,14 +285,14 @@ class CoADoc:
             self,
             page: Any,
             img: Any,
-            resolution: Optional[int] = 180,
+            resolution: Optional[int] = 300,
         ) -> list:
         """Decode a PDF QR Code from a given image.
         Args:
             page (Page): A pdfplumber Page containing the image.
             img (Image): A pdfplumber Image.
             resolution (int): The resolution to render the QR code,
-                `180` by default (optional).
+                `300` by default (optional).
         Returns:
             (list): The QR code data.
         """
@@ -426,13 +426,13 @@ class CoADoc:
             self,
             page: Any,
             image_index: Optional[int] = 0, 
-            resolution: Optional[int] = 180,
+            resolution: Optional[int] = 300,
         ) -> str:
         """Get the image data for a given PDF page image.
         Args:
             page (Page): A pdfplumber Page.
             image_index (int): The index of the image, 0 by default (optional).
-            resolution (int): The resolution for the image, 180 by default (optional).
+            resolution (int): The resolution for the image, 300 by default (optional).
         Returns:
             (str): The image data.
         """
@@ -516,7 +516,7 @@ class CoADoc:
             lims: Optional[Any] = None,
             max_delay: Optional[float] = 7,
             persist: Optional[bool] = True,
-            resolution: Optional[int] = 180,
+            resolution: Optional[int] = 300,
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
         ) -> list:
@@ -540,7 +540,7 @@ class CoADoc:
             temp_path (str): A temporary directory to store files used
                 during PDF OCR, `/tmp` by default (optional).
             resolution (int): The resolution of rendered PDF images,
-                180 by default (optional).
+                300 by default (optional).
         Returns:
             (list): Returns a list of all of the PDFs.
         """
@@ -637,7 +637,7 @@ class CoADoc:
             lims: Optional[Any] = None,
             max_delay: Optional[float] = 7,
             persist: Optional[bool] = False,
-            resolution: Optional[int] = 180,
+            resolution: Optional[int] = 300,
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
         ) -> dict:
@@ -659,7 +659,7 @@ class CoADoc:
             temp_path (str): A temporary directory to store files used
                 during PDF OCR, `/tmp` by default (optional).
             resolution (int): The resolution of rendered PDF images,
-                180 by default (optional).
+                300 by default (optional).
         Returns:
             (dict): The sample data.
         """
@@ -814,7 +814,7 @@ class CoADoc:
             filename: str,
             outfile: str,
             temp_path: Optional[str] = '/tmp',
-            resolution: Optional[int] = 180,
+            resolution: Optional[int] = 300,
             cleanup: Optional[bool] = True,
         ) -> None:
         """Pass a PDF through OCR to recognize its text. Outputs a new PDF.
@@ -829,7 +829,7 @@ class CoADoc:
             temp_path (str): A temporary directory to store files used
                 during PDF OCR, `/tmp` by default (optional).
             resolution (int): The resolution of rendered PDF images,
-                180 by default (optional).
+                300 by default (optional).
             cleanup (bool): Whether or not to remove the files generated
                 during OCR, `True` by default (optional).
         """

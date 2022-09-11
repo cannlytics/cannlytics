@@ -1,12 +1,19 @@
 # Data API Endpoints
 
-## Licensee Data
+You can use the Cannlytics Data API, `https://cannlytics.com/api/data`, to access cannabis datasets. You can query:
 
-## Lab Result Data
+- [Lab Result Data](#lab-result-data)
+- [Licensee Data](#licensee-data)
+- [State Data](#state-data)
+- [Strain Data](#strain-data)
 
-## State Data
+## Lab Result Data <a name="lab-result-data"></a>
 
-##  Strain Data
+## Licensee Data <a name="licensee-data"></a>
+
+## State Data <a name="state-data"></a>
+
+##  Strain Data <a name="strain-data"></a>
 
 <div style="margin-top:1rem; margin-bottom: 1rem;">
   <img width="240px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30">

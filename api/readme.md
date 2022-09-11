@@ -2,7 +2,18 @@
 
 The Cannlytics API allows users to seamlessly integrate with all of the functionality that Cannlytics has to offer. The Cannlytics API endpoints are simply an interface to the logic implemented in the `cannlytics` module. The API endpoints handle authentication, error handling, and identifying the precise logic to perform.
 
-## API Endpoints <a name="endpoints"></a>
+- [Getting Started with the Cannlytics API](#getting-started)
+- [LIMS API Endpoints](#lims-api-endpoints)
+
+## Getting Started with the Cannlytics API <a name="getting-started"></a>
+
+Getting started making requests to the Cannlytics API can be done in 3 quick steps.
+
+1. First, [create a Cannlytics account](https://console.cannlytics.com/account/sign-up).
+2. Second, [create an API key](https://console.cannlytics.com/settings/api).
+3. Third, begin making requests to the Cannlytics API with your API Key in an `Authorization: Bearer <token>` header.
+
+## LIMS API Endpoints <a name="lims-api-endpoints"></a>
 
 | Endpoint | Methods | Description |
 | -------- | ------- | ----------- |
@@ -25,11 +36,3 @@ The Cannlytics API allows users to seamlessly integrate with all of the function
 <!-- | `\regulations` | Get regulatory data for different states. | -->
 <!-- | `\limits` | Get action limits for certain compounds in different states. | -->
 <!--  Data about cannabis testing labs can be retrieved from the Cannlytics API. -->
-
-## Get Started with the Cannlytics API
-
-Getting started making requests to the Cannlytics API can be done in 3 quick steps.
-
-1. First, [create a Cannlytics account](https://console.cannlytics.com/account/sign-up).
-2. Second, [create an API key](https://console.cannlytics.com/settings/api).
-3. Third, begin making requests to the Cannlytics API with your API Key in an `Authorization: Bearer <token>` header.

@@ -344,11 +344,13 @@ def parse_cannalysis_coa(
                     date_time = date_time.replace(':', '') \
                         .replace('.', '') \
                         .replace(',', '') \
+                        .replace('-', '') \
                         .replace('_', '')
                     date, at = date_time[:10], date_time[10:]
-                    if len(at) == 3:
-                        at = f'0{at}'
-                    date_time = pd.to_datetime(' '.join([date, at]))
+                    if len(at) != 4:
+                        date_time = pd.to_datetime(date)
+                    else:
+                        date_time = pd.to_datetime(' '.join([date, at]))
                     date_tested.append(date_time)
 
                 # Skip informational rows.
@@ -454,10 +456,17 @@ if __name__ == '__main__':
     # data = parser.parse_pdf(doc, temp_path=temp_path)
     # assert data is not None
 
+    # FIXME: Unknown string format "-02/18/202 11919"
+    # Is someone using military time?
+    # FIXME: list index out of range
     parser = CoADoc()
-    doc = '../../../.datasets/tests/210000043-Kush-Clouds-0.5g.pdf'
-    temp_path = '../../../.datasets/tests/tmp'
-    # temp_file = '../../.datasets/tests/tmp/ocr_coa.pdf'
-    # parser.pdf_ocr(doc, temp_file, temp_path, resolution=180)
-    data = parser.parse_pdf(doc, temp_path=temp_path)
+    doc = '.datasets/tests/errors/RV2000202BR-Lemon-Cream-Pie-Ready-to-Use.pdf'
+    temp_path = '.datasets/tests/tmp'
+    temp_file = '.datasets/tests/tmp/ocr_coa.pdf'
+    parser.pdf_ocr(doc, temp_file, temp_path, resolution=300)
+    data = parser.parse_pdf(temp_file, temp_path=temp_path)
     assert data is not None
+
+    # url = 'https://client.sclabs.com/verify/220719M012/'
+    # data = parser.parse_url(url)
+    # assert data is not None

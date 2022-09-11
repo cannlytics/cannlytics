@@ -293,12 +293,12 @@ if __name__ == '__main__':
         args = parser.parse_args()
     except SystemExit:
         args = {}
-    
+
     # Future work: Allow data dirs to be specified from the command line.
 
     # Specify collection period.
     DAYS_AGO = args.get('days_ago', 1)
-    GET_ALL =  args.get('get_all', False)
+    GET_ALL =  args.get('get_all', True)
 
     # Get the most recent Raw Garden products.
     start = datetime.now() - timedelta(days=DAYS_AGO)
