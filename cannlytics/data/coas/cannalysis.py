@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/2/2022
-Updated: 9/7/2022
+Updated: 9/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -36,6 +36,11 @@ Data Points:
     ✓ total_cbd
     ✓ total_thc
     ✓ total_terpenes
+
+FIXME:
+
+    - [ ] Occasional: Unknown string format "-02/18/202 11919" from OCR.
+    - [ ] Occasional: list index out of range
 
 """
 # Standard imports.
@@ -162,7 +167,7 @@ def parse_cannalysis_coa(
     # except Image.DecompressionBombWarning:
     #     obs['lab_results_url'] = ''
 
-    # Optional: Get the image data.
+    # TODO: Get the image data, `images` and `image_url`.
 
     # Get the lab specifics.
     coa_parameters = CANNALYSIS_COA
@@ -339,6 +344,7 @@ def parse_cannalysis_coa(
                     obs[key] = value
 
                 # Get the dates tested.
+                # FIXME: This is highly suboptimal and causes many errors.
                 elif 'SampleApproved' in line_text:
                     date_time = line_text.split('Approved')[-1]
                     date_time = date_time.replace(':', '') \
@@ -347,11 +353,14 @@ def parse_cannalysis_coa(
                         .replace('-', '') \
                         .replace('_', '')
                     date, at = date_time[:10], date_time[10:]
-                    if len(at) != 4:
-                        date_time = pd.to_datetime(date)
-                    else:
-                        date_time = pd.to_datetime(' '.join([date, at]))
-                    date_tested.append(date_time)
+                    try:
+                        if len(at) != 4:
+                            date_time = pd.to_datetime(date)
+                        else:
+                            date_time = pd.to_datetime(' '.join([date, at]))
+                        date_tested.append(date_time)
+                    except:
+                        pass
 
                 # Skip informational rows.
                 elif any(s in line for s in skip_fields):
@@ -405,6 +414,9 @@ def parse_cannalysis_coa(
                     # Record the result.
                     results.append(result)
 
+    # Close the report.
+    report.close()
+
     # Get the latest tested at date.
     obs['date_tested'] = max(date_tested)
 
@@ -435,7 +447,7 @@ if __name__ == '__main__':
 
     # [✓] TEST: Parse a Cannalysis CoA PDF.
     # parser = CoADoc()
-    # doc = '../../../.datasets/coas/Flore COA/Kiva/MothersMilk.pdf'
+    # doc = '../../../tests/assets/coas/MothersMilk.pdf'
     # lab = parser.identify_lims(doc, lims={'Cannalysis': CANNALYSIS})
     # assert lab == 'Cannalysis'
     # data = parse_cannalysis_coa(parser, doc)
@@ -454,19 +466,4 @@ if __name__ == '__main__':
     # doc = '../../../.datasets/tests/mist.pdf'
     # temp_path = '../../../.datasets/tests/tmp'
     # data = parser.parse_pdf(doc, temp_path=temp_path)
-    # assert data is not None
-
-    # FIXME: Unknown string format "-02/18/202 11919"
-    # Is someone using military time?
-    # FIXME: list index out of range
-    parser = CoADoc()
-    doc = '.datasets/tests/errors/RV2000202BR-Lemon-Cream-Pie-Ready-to-Use.pdf'
-    temp_path = '.datasets/tests/tmp'
-    temp_file = '.datasets/tests/tmp/ocr_coa.pdf'
-    parser.pdf_ocr(doc, temp_file, temp_path, resolution=300)
-    data = parser.parse_pdf(temp_file, temp_path=temp_path)
-    assert data is not None
-
-    # url = 'https://client.sclabs.com/verify/220719M012/'
-    # data = parser.parse_url(url)
     # assert data is not None

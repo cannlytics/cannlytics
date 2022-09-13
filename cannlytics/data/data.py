@@ -160,7 +160,6 @@ def create_hash(
         - What's the difference between HMAC-SHA256(key, data) and SHA256(key + data)
         URL: <https://security.stackexchange.com/questions/79577/whats-the-difference-between-hmac-sha256key-data-and-sha256key-data>
     """
-    # FIXME: Handle series!
     if isinstance(public_key, str) or isinstance(public_key, bytes):
         msg = public_key
     elif isinstance(public_key, list):
@@ -168,7 +167,9 @@ def create_hash(
     elif isinstance(public_key, dict):
         msg = json.dumps(public_key)
     elif isinstance(public_key, pd.DataFrame):
-        msg = public_key.to_json()
+        msg = json.dumps(public_key.to_dict('records'))
+    elif isinstance(public_key, pd.Series):
+        msg = json.dumps(public_key.to_dict())
     elif isinstance(public_key, int) or isinstance(public_key, float):
         msg = str(public_key)
     else:

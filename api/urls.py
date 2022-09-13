@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2021
-Updated: 9/8/2022
+Updated: 9/11/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Description: API URLs to interface with cannabis analytics.
@@ -47,22 +47,6 @@ urlpatterns = [
         path('/get-keys', auth.get_api_key_hmacs),
         path('/get-signature', auth.get_signature),
         path('/verify-pin', auth.verify_user_pin),
-    ])),
-
-    # Organization API endpoints.
-    path('organizations', include([
-        path('/<organization_id>', organizations.organizations),
-        path('/<organization_id>/settings', organizations.organizations),
-        path('/<organization_id>/team', organizations.organization_team),
-        path('/<organization_id>/team/<user_id>', organizations.organization_team),
-        path('/<organization_id>/join', organizations.join_organization),
-    ])),
-
-    # User API Endpoints
-    path('users', include([
-        path('', users.users),
-        path('/<user_id>', users.users),
-        path('/<user_id>/settings', users.users),
     ])),
 
     # Data API endpoints.
@@ -123,6 +107,12 @@ urlpatterns = [
         path('/states/ok', api.data.state_data.state_data_ok),
         path('/states/or', api.data.state_data.state_data_or),
         path('/states/wa', api.data.state_data.state_data_wa),
+
+        # TODO: Lab result data API endpoints.
+        path('/results', include([
+            path('', api.data.strain_data.strain_data),
+            path('/<lab_result_id>', api.data.strain_data.strain_data),
+        ])),
 
         # Strain data API endpoints.
         path('/strains', include([
@@ -253,9 +243,24 @@ urlpatterns = [
         path('/transfers/<transfer_id>', api.traceability.traceability.transfers),
     ])),
 
-    # Logs API Endpoints.
-    path('logs', include([
-        path('', settings.logs),
-        path('/<log_id>', settings.logs),
+    # Organization API endpoints.
+    path('organizations', include([
+        path('/<organization_id>', organizations.organizations),
+        path('/<organization_id>/settings', organizations.organizations),
+        path('/<organization_id>/team', organizations.organization_team),
+        path('/<organization_id>/team/<user_id>', organizations.organization_team),
+        path('/<organization_id>/join', organizations.join_organization),
     ])),
+
+    # User API Endpoints
+    path('users', include([
+        path('', users.users),
+        path('/<user_id>', users.users),
+        path('/<user_id>/logs', include([
+            path('', settings.logs),
+            path('/<log_id>', settings.logs),
+        ])),
+        path('/<user_id>/settings', users.users),
+    ])),
+
 ]

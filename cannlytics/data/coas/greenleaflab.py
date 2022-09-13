@@ -515,8 +515,8 @@ if __name__ == '__main__':
     from cannlytics.data.coas import CoADoc
 
     # Specify where your test CoA lives.
-    DATA_DIR = '../../../.datasets/coas'
-    # coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
+    DATA_DIR = '../../../tests/assets/coas'
+    # coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf' # Alternative.
     coa_pdf = f'{DATA_DIR}/Flore COA/Swami Select/MagicMelon.pdf'
 
     # [✓] TEST: Detect the lab / LIMS that generated the CoA.

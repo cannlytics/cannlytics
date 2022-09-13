@@ -449,7 +449,7 @@ if __name__ == '__main__':
     from cannlytics.data.coas import CoADoc
 
     # Specify where your test data lives.
-    DATA_DIR = '../../../.datasets/coas'
+    DATA_DIR = '../../../tests/assets/coas'
 
     # # [✓] TEST: Parse a CoA URL.
     # cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
@@ -464,8 +464,8 @@ if __name__ == '__main__':
     # assert data is not None
 
     # [✓] TEST: Parse a CoA PDF, figuring out that it's a CC CoA PDF.
-    # directory = '../../../.datasets/coas/Flore COA'
-    # doc = f'{directory}/GB2/GDP.pdf'
+    # directory = '../../../tests/assets/coas'
+    # doc = f'{directory}/GDP.pdf'
     # parser = CoADoc()
     # lab = parser.identify_lims(doc)
     # assert lab == 'Confident Cannabis'
@@ -473,8 +473,8 @@ if __name__ == '__main__':
     # assert data is not None
 
     # [✓] TEST: Parse a CoA PDF, with safety screening but no terpenes.
-    directory = '../../../.datasets/coas/Flore COA'
-    doc = f'{directory}/Humboldt Growers Network/HGN_SOUR .pdf'
-    parser = CoADoc()
-    data = parse_cc_coa(parser, doc)
-    assert data is not None
+    # directory = '../../../tests/assets/coas'
+    # doc = f'{directory}/HGN_SOUR .pdf'
+    # parser = CoADoc()
+    # data = parse_cc_coa(parser, doc)
+    # assert data is not None

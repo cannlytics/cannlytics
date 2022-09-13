@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/23/2022
-Updated: 9/9/2022
+Updated: 9/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -31,6 +31,7 @@ Command line usage:
 """
 # Standard imports.
 from datetime import datetime, timedelta
+import gc
 import os
 from time import sleep
 from typing import Any, List, Optional, Tuple
@@ -198,7 +199,6 @@ def parse_rawgarden_coas(
     Returns:
         (tuple): Returns both a list of parsed and unidentified COA data.
     """
-    parser = CoADoc()
     parsed, unidentified = [], []
     started = False
     for path, _, files in os.walk(directory):
@@ -215,20 +215,54 @@ def parse_rawgarden_coas(
             if filenames is not None:
                 if filename not in filenames:
                     continue
-            doc = os.path.join(path, filename)
+            file_path = os.path.join(path, filename)
+
+            # Parse the COA, by any means necessary!
+            parser = CoADoc()
             try:
-                coa  = parser.parse(doc, temp_path=temp_path, **kwargs)
-                subtype = path.split('\\')[-1]
-                coa[0]['product_subtype'] = subtype
-                parsed.extend(coa)
-                if verbose:
-                    print('Parsed:', filename)
-            except Exception as e:
-                unidentified.append({'coa_pdf': filename})
-                if verbose:
-                    print('Error:', filename)
-                    print(e)
-                pass
+                new_data = parser.parse_pdf(
+                    file_path,
+                    temp_path=temp_path,
+                    **kwargs
+                )
+            except:
+                try:
+                    # FIXME: This should work without directly calling OCR.
+                    temp_file = f'{temp_path}/ocr_coa.pdf'
+                    parser.pdf_ocr(
+                        file_path,
+                        temp_file,
+                        temp_path,
+                        resolution=180,
+                    )
+                    new_data = parser.parse_pdf(
+                        temp_file,
+                        temp_path=temp_path,
+                        **kwargs
+                    )
+                except Exception as e:
+                    # Hot-fix: Remove temporary `magick-*` files.
+                    for i in os.listdir(temp_path):
+                        magick_path = os.path.join(temp_path, i)
+                        if os.path.isfile(magick_path) and i.startswith('magick-'):
+                            os.remove(magick_path)
+                    unidentified.append({'coa_pdf': filename})
+                    if verbose:
+                        print('Error:', filename)
+                        print(e)
+                    continue
+
+            # Add the subtype key and record the data.
+            subtype = path.split('\\')[-1]
+            if isinstance(new_data, dict):
+                new_data = [new_data]
+            new_data[0]['product_subtype'] = subtype
+            parsed.extend(new_data)
+            parser.quit()
+            gc.collect()
+            if verbose:
+                print('Parsed:', filename)
+
     return parsed, unidentified
 
 
@@ -283,9 +317,11 @@ def upload_lab_results(
 #-----------------------------------------------------------------------
 if __name__ == '__main__':
 
-    import argparse
+    # === Setup ===
 
     # Support command line usage.
+    # Future work: Allow data dirs to be specified from the command line.
+    import argparse
     try:
         parser = argparse.ArgumentParser()
         parser.add_argument('--days_ago', dest='days_ago', type=int)
@@ -294,25 +330,28 @@ if __name__ == '__main__':
     except SystemExit:
         args = {}
 
-    # Future work: Allow data dirs to be specified from the command line.
-
     # Specify collection period.
     DAYS_AGO = args.get('days_ago', 1)
     GET_ALL =  args.get('get_all', True)
+
+    # === Data Collection ===
 
     # Get the most recent Raw Garden products.
     start = datetime.now() - timedelta(days=DAYS_AGO)
     if GET_ALL:
         start = datetime(year=2018, month=1, day=1)
     products = get_rawgarden_products(start=start)
+    filenames = products['coa_pdf'].to_list()
 
     # Download Raw Garden product COAs to `product_subtype` folders.
     download_rawgarden_coas(products, pause=0.24, verbose=True)
 
+    # === Data Curation ===
+
     # Parse COA PDFs with CoADoc.
     coa_data, unidentified_coas = parse_rawgarden_coas(
         COA_PDF_DIR,
-        filenames=products['coa_pdf'].to_list(),
+        filenames=filenames,
         temp_path=TEMP_PATH,
         verbose=True,
     )
@@ -337,16 +376,26 @@ if __name__ == '__main__':
     )
     datafile_hash = create_hash(coa_df)
 
+    # === Data Archiving ===
+
+    # Create custom column order.
+    column_order = ['sample_hash', 'results_hash']
+    column_order += list(parser.column_order)
+    index = column_order.index('product_type') + 1
+    column_order.insert(index, 'product_subtype')
+
     # Optional: Save the COA data to a workbook.
     parser = CoADoc()
     datafile = f'{COA_DATA_DIR}/{datafile_hash}.xlsx'
-    parser.save(coa_df, datafile)
+    parser.save(coa_df, datafile, column_order=column_order)
 
     # Optional: Save the unidentified COA data.
     errors = [x['coa_pdf'] for x in unidentified_coas]
     timestamp = datetime.now().isoformat()[:19].replace(':', '-')
     error_file = f'{COA_DATA_DIR}/rawgarden-unidentified-coas-{timestamp}.xlsx'
     products.loc[products['coa_pdf'].isin(errors)].to_excel(error_file)
+
+    # === Firebase Database and Storage ===
 
     # Optional: Initialize Firebase.
     initialize_firebase(ENV_FILE)
@@ -363,3 +412,29 @@ if __name__ == '__main__':
     storage_error_file = '/'.join([STORAGE_REF, error_file.split('/')[-1]])
     upload_file(storage_datafile, datafile, bucket_name=BUCKET_NAME)
     upload_file(storage_error_file, error_file, bucket_name=BUCKET_NAME)
+
+    # == Data Aggregation ===
+
+    # # Initialize the COA parser.
+    # parser = CoADoc()
+
+    # # Stack COA datafiles, re-hash, and re-save!
+    # datafiles = [
+    #     f'{COA_DATA_DIR}/d7815fd2a097d06b719aadcc00233026f86076a680db63c532a11b67d7c8bc70.xlsx',
+    #     f'{COA_DATA_DIR}/01880e30f092cf5739f9f2b58de705fc4c245d6859c00b50505a3a802ff7c2b2.xlsx',
+    #     f'{COA_DATA_DIR}/154de9b1992a1bfd9a07d2e52c702e8437596923f34bee43f62f3e24f042b81c.xlsx',
+    # ]
+
+    # # Create custom column order.
+    # column_order = ['sample_hash', 'results_hash']
+    # column_order += list(parser.column_order)
+    # index = column_order.index('product_type') + 1
+    # column_order.insert(index, 'product_subtype')
+
+    # # Aggregate the datafiles.
+    # master_data = parser.aggregate(
+    #     datafiles,
+    #     output=COA_DATA_DIR,
+    #     sheet_name='Details',
+    #     column_order=column_order,
+    # )

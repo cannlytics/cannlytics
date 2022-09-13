@@ -335,7 +335,7 @@ if __name__ == '__main__':
     from cannlytics.data.coas import CoADoc
 
      # Specify where your test data lives.
-    DATA_DIR = '../../../.datasets/coas'
+    DATA_DIR = '../../../tests/assets/coas'
     tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
     tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
     tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'

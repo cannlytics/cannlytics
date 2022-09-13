@@ -928,8 +928,8 @@ if __name__ == '__main__':
     # assert data is not None
 
     # [✓] TEST: Parse a SC Labs CoA PDF (with cannabinoids and terpenes).
-    # directory = '../../../.datasets/coas/Flore COA'
-    # doc = f'{directory}/Dylan Mattole/Mattole Valley Jack H.pdf'
+    # directory = '../../../tests/assets/coas'
+    # doc = f'{directory}/Mattole Valley Jack H.pdf'
     # parser = CoADoc()
     # lab = parser.identify_lims(doc)
     # assert lab == 'SC Labs'
@@ -937,8 +937,8 @@ if __name__ == '__main__':
     # assert data is not None
 
     # [✓] TEST: Parse a SC Labs CoA PDF (with safety screening).
-    # directory = '../../../.datasets/coas/Flore COA'
-    # doc = f'{directory}/Redwood Roots/Cherry Punch.pdf'
+    # directory = '../../../tests/assets/coas'
+    # doc = f'{directory}/Cherry Punch.pdf'
     # parser = CoADoc()
     # lab = parser.identify_lims(doc)
     # assert lab == 'SC Labs'

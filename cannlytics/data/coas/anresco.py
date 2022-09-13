@@ -510,7 +510,7 @@ if __name__ == '__main__':
 
     # Test parsing Anresco Laboratories CoAs.
     parser = CoADoc()
-    doc = '../../../.datasets/coas/Flore COA/Betty Project/Peanutbutter Breath.pdf'
+    doc = '../../../tests/assets/coas/Peanutbutter Breath.pdf'
     coa_url = 'https://portal.anresco.com/#/ps/68bcb967c0f2b39d'
 
     # [✓] TEST: Identify a given PDF or URL as an Anresco CoA.

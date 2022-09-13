@@ -22,8 +22,7 @@
 site_name: Cannlytics
 site_url: https://docs.cannlytics.com/
 site_author: Keegan Skeate
-site_description: >-
-  Cannlytics is simple, easy-to-use, end-to-end cannabis analytics software
+site_description: Cannlytics is simple, easy-to-use, end-to-end cannabis analytics software
   designed to make data and information accessible. We believe that everyone in the
   cannabis industry should be able to access rich, valuable data quickly and easily and
   that everyone, especially yourself, will be better off for it.
@@ -33,13 +32,13 @@ copyright: Copyright &copy; 2021 Cannlytics
 repo_name: Cannlytics
 repo_url: https://github.com/cannlytics/cannlytics
 edit_uri: ""
-docs_dir: ./
-site_dir: docs/build
+docs_dir: ../
+site_dir: ./build
 
 # Configuration
 theme:
   name: material
-  custom_dir: docs/theme
+  custom_dir: ./theme
 
   # Static files
   static_templates:
@@ -250,7 +249,8 @@ nav:
   - Cannlytics SDK:
     - Overview: cannlytics/readme.md
     - Auth: cannlytics/auth/readme.md
-    - Data: cannlytics/data/readme.md
+    - Data:
+      - Overview: cannlytics/data/readme.md
       - CoAs: cannlytics/data/coas/readme.md
       - Market: cannlytics/data/market/readme.md
     - Firebase: cannlytics/firebase/readme.md

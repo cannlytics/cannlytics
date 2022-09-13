@@ -9,9 +9,18 @@ You can use the Cannlytics Data API, `https://cannlytics.com/api/data`, to acces
 
 ## Lab Result Data <a name="lab-result-data"></a>
 
+<!-- TODO: Describe and give examples -->
+
+
 ## Licensee Data <a name="licensee-data"></a>
 
+<!-- TODO: Describe and give examples -->
+
+
 ## State Data <a name="state-data"></a>
+
+<!-- TODO: Describe and give examples -->
+
 
 ##  Strain Data <a name="strain-data"></a>
 

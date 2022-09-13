@@ -12,6 +12,7 @@ Description: This module contains general utility functions.
 # Standard imports.
 from base64 import b64encode, decodebytes
 from datetime import datetime, timedelta
+import json
 import os
 from re import split, sub, findall
 import secrets
@@ -366,6 +367,14 @@ def clean_column_strings(data: Any, column: str) -> Any:
     data[column] = data[column].str.replace('α', 'alpha', regex=True)
     data[column] = data[column].str.replace('__', '', regex=True)
     return data
+
+
+def dump_column(x):
+    """Turn a column from JSON to dictionaries, handling errors."""
+    try:
+        return json.loads(x)
+    except:
+        return None
 
 
 def end_of_period_timeseries(data: Any, period: Optional[str] = 'M') -> Any:

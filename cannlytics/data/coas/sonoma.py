@@ -322,7 +322,7 @@ if __name__ == '__main__':
 
     # [✓] TEST: Parse a Sonoma Lab Works CoA PDF.
     parser = CoADoc()
-    doc = '../../../.datasets/coas/Flore COA/Peak/LemonTree.pdf'
+    doc = '../../../tests/assets/coas/LemonTree.pdf'
     lab = parser.identify_lims(doc)
     assert lab == 'Sonoma Lab Works'
     data = parse_sonoma_coa(parser, doc, google_maps_api_key=google_maps_api_key)
