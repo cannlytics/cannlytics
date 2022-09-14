@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 9/13/2022
+Updated: 9/14/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -40,14 +40,14 @@ Supported Labs and LIMS:
     ✓ SC Labs
     ✓ Sonoma Lab Works
     ✓ TagLeaf LIMS
-    - Veda Scientific
+    ✓ Veda Scientific
 
 Future work:
 
     - [ ] Integrate `create_hash` into `save` and `standardize`.
-    - [ ] Parse unidentified CoAs to the best of our abilities.
     - [ ] Improve the `standardize` method.
-
+    - [ ] Parse unidentified CoAs to the best of our abilities.
+    
 Setup:
 
     1. Install `Tesseract`.
@@ -1261,8 +1261,9 @@ class CoADoc:
                     criterion = details_data.columns.str.endswith(c)
                     details_data = details_data.loc[:, ~criterion]
 
-                # Apply codings
-                details_data.replace(codings, inplace=True)
+                # FIXME: Apply codings to results.
+                # Note: This is super slow (2-3 mins for 2.5k observations)!
+                details_data['results'].replace(codings, inplace=True)
 
                 # Convert totals to numeric.
                 # TODO: Calculate totals if they don't already exist:

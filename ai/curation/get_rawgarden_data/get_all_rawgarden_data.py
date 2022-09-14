@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/23/2022
-Updated: 9/13/2022
+Updated: 9/14/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -317,103 +317,104 @@ def upload_lab_results(
 #-----------------------------------------------------------------------
 if __name__ == '__main__':
 
-    # === Setup ===
+    # # === Setup ===
+    from cannlytics.data.coas import CoADoc
 
-    # Support command line usage.
-    # Future work: Allow data dirs to be specified from the command line.
-    import argparse
-    try:
-        parser = argparse.ArgumentParser()
-        parser.add_argument('--days_ago', dest='days_ago', type=int)
-        parser.add_argument('--get_all', dest='get_all', type=bool)
-        args = parser.parse_args()
-    except SystemExit:
-        args = {}
+    # # Support command line usage.
+    # # Future work: Allow data dirs to be specified from the command line.
+    # import argparse
+    # try:
+    #     parser = argparse.ArgumentParser()
+    #     parser.add_argument('--days_ago', dest='days_ago', type=int)
+    #     parser.add_argument('--get_all', dest='get_all', type=bool)
+    #     args = parser.parse_args()
+    # except SystemExit:
+    #     args = {}
 
-    # Specify collection period.
-    DAYS_AGO = args.get('days_ago', 1)
-    GET_ALL =  args.get('get_all', True)
+    # # Specify collection period.
+    # DAYS_AGO = args.get('days_ago', 1)
+    # GET_ALL =  args.get('get_all', True)
 
-    # === Data Collection ===
+    # # === Data Collection ===
 
-    # Get the most recent Raw Garden products.
-    start = datetime.now() - timedelta(days=DAYS_AGO)
-    if GET_ALL:
-        start = datetime(year=2018, month=1, day=1)
-    products = get_rawgarden_products(start=start)
-    filenames = products['coa_pdf'].to_list()
+    # # Get the most recent Raw Garden products.
+    # start = datetime.now() - timedelta(days=DAYS_AGO)
+    # if GET_ALL:
+    #     start = datetime(year=2018, month=1, day=1)
+    # products = get_rawgarden_products(start=start)
+    # filenames = products['coa_pdf'].to_list()
 
-    # Download Raw Garden product COAs to `product_subtype` folders.
-    download_rawgarden_coas(products, pause=0.24, verbose=True)
+    # # Download Raw Garden product COAs to `product_subtype` folders.
+    # download_rawgarden_coas(products, pause=0.24, verbose=True)
 
-    # === Data Curation ===
+    # # === Data Curation ===
 
-    # Parse COA PDFs with CoADoc.
-    coa_data, unidentified_coas = parse_rawgarden_coas(
-        COA_PDF_DIR,
-        filenames=filenames,
-        temp_path=TEMP_PATH,
-        verbose=True,
-    )
+    # # Parse COA PDFs with CoADoc.
+    # coa_data, unidentified_coas = parse_rawgarden_coas(
+    #     COA_PDF_DIR,
+    #     filenames=filenames,
+    #     temp_path=TEMP_PATH,
+    #     verbose=True,
+    # )
 
-    # Merge the `products`'s `product_subtype` with the COA data.
-    coa_df = rmerge(
-        pd.DataFrame(coa_data),
-        products,
-        on='coa_pdf',
-        how='left',
-        replace='right',
-    )
+    # # Merge the `products`'s `product_subtype` with the COA data.
+    # coa_df = rmerge(
+    #     pd.DataFrame(coa_data),
+    #     products,
+    #     on='coa_pdf',
+    #     how='left',
+    #     replace='right',
+    # )
 
-    # Create hashes.
-    coa_df = coa_df.where(pd.notnull(coa_df), None)
-    coa_df['results_hash'] = coa_df['results'].apply(
-        lambda x: create_hash(x),
-    )
-    coa_df['sample_hash'] = coa_df.loc[:, coa_df.columns != 'sample_hash'].apply(
-        lambda x: create_hash(x.to_dict()),
-        axis=1,
-    )
-    datafile_hash = create_hash(coa_df)
+    # # Create hashes.
+    # coa_df = coa_df.where(pd.notnull(coa_df), None)
+    # coa_df['results_hash'] = coa_df['results'].apply(
+    #     lambda x: create_hash(x),
+    # )
+    # coa_df['sample_hash'] = coa_df.loc[:, coa_df.columns != 'sample_hash'].apply(
+    #     lambda x: create_hash(x.to_dict()),
+    #     axis=1,
+    # )
+    # datafile_hash = create_hash(coa_df)
 
-    # === Data Archiving ===
+    # # === Data Archiving ===
 
-    # Create custom column order.
-    column_order = ['sample_hash', 'results_hash']
-    column_order += list(parser.column_order)
-    index = column_order.index('product_type') + 1
-    column_order.insert(index, 'product_subtype')
+    # # Create custom column order.
+    # column_order = ['sample_hash', 'results_hash']
+    # column_order += list(parser.column_order)
+    # index = column_order.index('product_type') + 1
+    # column_order.insert(index, 'product_subtype')
 
-    # Optional: Save the COA data to a workbook.
-    parser = CoADoc()
-    datafile = f'{COA_DATA_DIR}/{datafile_hash}.xlsx'
-    parser.save(coa_df, datafile, column_order=column_order)
+    # # Optional: Save the COA data to a workbook.
+    # parser = CoADoc()
+    # datafile = f'{COA_DATA_DIR}/{datafile_hash}.xlsx'
+    # parser.save(coa_df, datafile, column_order=column_order)
 
-    # Optional: Save the unidentified COA data.
-    errors = [x['coa_pdf'] for x in unidentified_coas]
-    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-    error_file = f'{COA_DATA_DIR}/rawgarden-unidentified-coas-{timestamp}.xlsx'
-    products.loc[products['coa_pdf'].isin(errors)].to_excel(error_file)
+    # # Optional: Save the unidentified COA data.
+    # errors = [x['coa_pdf'] for x in unidentified_coas]
+    # timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+    # error_file = f'{COA_DATA_DIR}/rawgarden-unidentified-coas-{timestamp}.xlsx'
+    # products.loc[products['coa_pdf'].isin(errors)].to_excel(error_file)
 
-    # === Firebase Database and Storage ===
+    # # === Firebase Database and Storage ===
 
-    # Optional: Initialize Firebase.
-    initialize_firebase(ENV_FILE)
+    # # Optional: Initialize Firebase.
+    # initialize_firebase(ENV_FILE)
 
-    # Optional: Upload the lab results to Firestore.
-    upload_lab_results(
-        coa_df.to_dict(orient='records'),
-        update=True,
-        verbose=True
-    )
+    # # Optional: Upload the lab results to Firestore.
+    # upload_lab_results(
+    #     coa_df.to_dict(orient='records'),
+    #     update=True,
+    #     verbose=True
+    # )
 
-    # Optional: Upload datafiles to Firebase Storage.
-    storage_datafile = '/'.join([STORAGE_REF, datafile.split('/')[-1]])
-    storage_error_file = '/'.join([STORAGE_REF, error_file.split('/')[-1]])
-    upload_file(storage_datafile, datafile, bucket_name=BUCKET_NAME)
-    upload_file(storage_error_file, error_file, bucket_name=BUCKET_NAME)
+    # # Optional: Upload datafiles to Firebase Storage.
+    # storage_datafile = '/'.join([STORAGE_REF, datafile.split('/')[-1]])
+    # storage_error_file = '/'.join([STORAGE_REF, error_file.split('/')[-1]])
+    # upload_file(storage_datafile, datafile, bucket_name=BUCKET_NAME)
+    # upload_file(storage_error_file, error_file, bucket_name=BUCKET_NAME)
 
-    # == Data Aggregation ===
+    # # == Data Aggregation ===
 
     # # Initialize the COA parser.
     # parser = CoADoc()
@@ -432,9 +433,12 @@ if __name__ == '__main__':
     # column_order.insert(index, 'product_subtype')
 
     # # Aggregate the datafiles.
+    # timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+    # outfile = f'{COA_DATA_DIR}/rawgarden-{timestamp}.xlsx'
     # master_data = parser.aggregate(
     #     datafiles,
-    #     output=COA_DATA_DIR,
+    #     output=outfile,
     #     sheet_name='Details',
     #     column_order=column_order,
     # )
+    # parser.save(master_data, outfile)
