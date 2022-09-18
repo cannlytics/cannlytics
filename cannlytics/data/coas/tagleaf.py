@@ -64,6 +64,7 @@ from typing import Any, Optional
 # External imports.
 from bs4 import BeautifulSoup, NavigableString
 import pandas as pd
+import pdfplumber
 from requests import Session
 
 # Internal imports.
@@ -321,7 +322,10 @@ def parse_tagleaf_coa(
             data = parse_tagleaf_pdf(parser, doc, **kwargs)
     else:
         data = parse_tagleaf_pdf(parser, doc, **kwargs)
-    data['coa_pdf'] = doc.split('/')[-1]
+    if isinstance(doc, str):
+        data['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
+    elif isinstance(doc, pdfplumber.pdf.PDF):
+        data['coa_pdf'] = doc.stream.name.replace('\\', '/').split('/')[-1]
     return data
 
 
@@ -331,7 +335,7 @@ if __name__ == '__main__':
     from cannlytics.data.coas import CoADoc
 
      # Specify where your test data lives.
-    DATA_DIR = '../../../.datasets/coas'
+    DATA_DIR = '../../../tests/assets/coas'
     tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
     tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
     tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'

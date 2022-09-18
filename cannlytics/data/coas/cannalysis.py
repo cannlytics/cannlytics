@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/2/2022
-Updated: 9/5/2022
+Updated: 9/13/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -37,12 +37,17 @@ Data Points:
     ✓ total_thc
     ✓ total_terpenes
 
+FIXME:
+
+    - [ ] Occasional: Unknown string format "-02/18/202 11919" from OCR.
+    - [ ] Occasional: list index out of range
+
 """
 # Standard imports.
 from datetime import datetime
 import json
 import re
-from typing import Any
+from typing import Any, Optional
 import warnings
 
 # External imports.
@@ -121,11 +126,25 @@ CANNALYSIS_COA = {
 }
 
 
-def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
+def parse_cannalysis_coa(
+        parser,
+        doc: Any,
+        cleanup: Optional[bool] = True,
+        resolution: Optional[int] = 180,
+        temp_path: Optional[str] = '/tmp',
+        coa_pdf: Optional[str] = None,
+        **kwargs,
+    ) -> Any:
     """Parse a Cannalysis CoA PDF.
     Args:
         parser (CoADoc): A CoADoc parsing client.
         doc (str or PDF): A PDF file path or pdfplumber PDF.
+        cleanup (bool): Whether or not to remove the files generated
+            during OCR, `True` by default (optional).
+        temp_path (str): A temporary directory to use for OCR.
+        resolution (int): The resolution of rendered PDF images,
+            180 by default (optional).
+        coa_pdf (str): A filename to use for the `coa_pdf` field (optional).
     Returns:
         (dict): The sample data.
     """
@@ -134,9 +153,10 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
     obs = {}
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
-        obs['coa_pdf'] = doc.split('/')[-1]
+        obs['coa_pdf'] = coa_pdf or doc.replace('\\', '/').split('/')[-1]
     else:
         report = doc
+        obs['coa_pdf'] = coa_pdf or report.stream.name.replace('\\', '/').split('/')[-1]
 
     # Get the QR code from the last page.
     # Note: After OCR, QR code decoding raises warning:
@@ -147,7 +167,7 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
     # except Image.DecompressionBombWarning:
     #     obs['lab_results_url'] = ''
 
-    # Optional: Get the image data.
+    # TODO: Get the image data, `images` and `image_url`.
 
     # Get the lab specifics.
     coa_parameters = CANNALYSIS_COA
@@ -196,6 +216,27 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
 
     # Optional: Is there any way to identify the `producer` and
     # `distributor` with their license numbers? Query Cannlytics API?
+
+    # Check if OCR is required then re-run the routine.
+    line = lines[0]
+    if re.match(r'^\(cid:\d+\)', line):
+        temp_file = f'{temp_path}/ocr-coa.pdf'
+        parser.pdf_ocr(
+            report.stream.name,
+            temp_file,
+            temp_path=temp_path,
+            resolution=resolution,
+            cleanup=cleanup,
+        )
+        return parse_cannalysis_coa(
+            parser,
+            report,
+            cleanup=cleanup,
+            resolution=resolution,
+            temp_path=temp_path,
+            coa_pdf=report.stream.name,
+            **kwargs,
+        )
 
     # Get the sample details.
     analyses = []
@@ -303,12 +344,23 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
                     obs[key] = value
 
                 # Get the dates tested.
+                # FIXME: This is highly suboptimal and causes many errors.
                 elif 'SampleApproved' in line_text:
-                    date = line_text.split('Approved')[-1]
-                    date = date.strip().lstrip(':').strip()
-                    date = date[0:-5] + ' ' + date[-5:]
-                    date = pd.to_datetime(date)
-                    date_tested.append(date)
+                    date_time = line_text.split('Approved')[-1]
+                    date_time = date_time.replace(':', '') \
+                        .replace('.', '') \
+                        .replace(',', '') \
+                        .replace('-', '') \
+                        .replace('_', '')
+                    date, at = date_time[:10], date_time[10:]
+                    try:
+                        if len(at) != 4:
+                            date_time = pd.to_datetime(date)
+                        else:
+                            date_time = pd.to_datetime(' '.join([date, at]))
+                        date_tested.append(date_time)
+                    except:
+                        pass
 
                 # Skip informational rows.
                 elif any(s in line for s in skip_fields):
@@ -362,6 +414,9 @@ def parse_cannalysis_coa(parser, doc: Any, **kwargs) -> Any:
                     # Record the result.
                     results.append(result)
 
+    # Close the report.
+    report.close()
+
     # Get the latest tested at date.
     obs['date_tested'] = max(date_tested)
 
@@ -392,7 +447,7 @@ if __name__ == '__main__':
 
     # [✓] TEST: Parse a Cannalysis CoA PDF.
     # parser = CoADoc()
-    # doc = '../../../.datasets/coas/Flore COA/Kiva/MothersMilk.pdf'
+    # doc = '../../../tests/assets/coas/MothersMilk.pdf'
     # lab = parser.identify_lims(doc, lims={'Cannalysis': CANNALYSIS})
     # assert lab == 'Cannalysis'
     # data = parse_cannalysis_coa(parser, doc)

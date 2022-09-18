@@ -73,6 +73,13 @@
         "**/development/**"
       ],
       "appAssociation": "AUTO",
+      "redirects": [
+        {
+          "source": "/wp-login.php",
+          "destination": "https://google.com",
+          "type": 301
+        }
+      ],
       "rewrites": [
         {
           "source": "!/sitemap",
@@ -83,6 +90,13 @@
         },
         {
           "source": "!/static",
+          "run": {
+            "serviceId": "cannlytics-website",
+            "region": "us-central1"
+          }
+        },
+        {
+          "source": "!/robots.txt",
           "run": {
             "serviceId": "cannlytics-website",
             "region": "us-central1"

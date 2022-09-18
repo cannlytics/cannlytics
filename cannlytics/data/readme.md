@@ -1,14 +1,14 @@
 # Cannlytics Data Module
 
-<div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
-  <img height="150px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fmisc%2Fdata-pipeline.png?alt=media&token=7a8ec568-5acd-41ca-96c1-a499bf83deb5">
+<div style="margin-top:1rem; margin-bottom: 1rem;">
+  <img height="100px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fmisc%2Fdata-pipeline.png?alt=media&token=7a8ec568-5acd-41ca-96c1-a499bf83deb5">
 </div>
 
-The `cannlytics.data` module is a large toolbox for accessing, collecting, cleaning, augmenting, standardizing, saving, and analyzing cannabis data.
+The `cannlytics.data` module is a digital toolbox for accessing, collecting, cleaning, augmenting, standardizing, saving, and analyzing cannabis data.
 
-## Core Data Functions
+## Data Management
 
-The core data manipulation tools are found in `cannlytics.data.data`.
+The core data management tools found in `cannlytics.data.data` include:
 
 *Data Aggregation*
 
@@ -25,8 +25,23 @@ The core data manipulation tools are found in `cannlytics.data.data`.
 
 *Data Augmentation*
 
+<!-- TODO: Better explain data hashing
+
+Reading:
+  https://www.quora.com/What-is-the-difference-between-a-HMAC-and-a-hash-of-data
+  https://security.stackexchange.com/questions/79577/whats-the-difference-between-hmac-sha256key-data-and-sha256key-data
+  https://security.stackexchange.com/questions/20129/how-and-when-do-i-use-hmac
+  https://security.stackexchange.com/questions/232321/is-hmac-sha256-more-secure-to-hide-information-than-sha256
+  https://security.stackexchange.com/questions/177437/hmac-sha256-for-jwt-token-signature
+  https://security.stackexchange.com/questions/29951/salted-hashes-vs-hmac
+  
+References:
+  https://www.ietf.org/rfc/rfc2104.txt
+-->
+
 | Function | Description |
 |----------|-------------|
+| `create_hash(public_key, private_key = 'cannlytics.eth')` | Create a hash (HMAC-SHA256) that is unique to the provided data, the `public_key`. The `private_key` can be used to sign your data, with the default being Cannlytics' public key, `'cannlytics.eth'`. |
 | `create_sample_id(private_key, public_key, salt='')` | Create a hash to be used as a sample ID. The standard is to use: 1. `private_key = producer` 2. `public_key = product_name` 3. `salt = date_tested` |
 
 *Data Saving*
@@ -143,7 +158,7 @@ patent = get_patent_details(
 
 ## Web Data
 
-There are a number of web data tools in `cannlytics.data.web`.
+There are a number of web data tools in `cannlytics.data.web`, including:
 
 | Function | Description |
 |----------|-------------|

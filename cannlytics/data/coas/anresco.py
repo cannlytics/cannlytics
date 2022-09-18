@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/2/2022
-Updated: 8/30/2022
+Updated: 9/7/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -139,9 +139,10 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
     obs = {}
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
-        obs['coa_pdf'] = doc.split('/')[-1]
+        obs['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
     else:
         report = doc
+        obs['coa_pdf'] = report.stream.name.replace('\\', '/').split('/')[-1]
     front_page = report.pages[0]
 
     # Get the QR code from the last page.
@@ -509,7 +510,7 @@ if __name__ == '__main__':
 
     # Test parsing Anresco Laboratories CoAs.
     parser = CoADoc()
-    doc = '../../../.datasets/coas/Flore COA/Betty Project/Peanutbutter Breath.pdf'
+    doc = '../../../tests/assets/coas/Peanutbutter Breath.pdf'
     coa_url = 'https://portal.anresco.com/#/ps/68bcb967c0f2b39d'
 
     # [✓] TEST: Identify a given PDF or URL as an Anresco CoA.

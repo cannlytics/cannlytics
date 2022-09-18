@@ -57,11 +57,11 @@
     "website:publish": "npm run website:build & npm run website:container & npm run website:cloud && npm run website:deploy"
   },
   "dependencies": {
-    "@popperjs/core": "^2.11.5",
+    "@popperjs/core": "^2.11.6",
     "@primer/octicons": "17.3.0",
     "axios": "0.27.2",
     "bootstrap": "5.2.0-beta1",
-    "firebase": "9.9.1",
+    "firebase": "9.9.2",
     "html5-qrcode": "^2.2.1",
     "particles.js": "2.0.0",
     "popper.js": "1.16.1",

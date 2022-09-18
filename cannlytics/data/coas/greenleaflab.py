@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/23/2022
-Updated: 8/30/2022
+Updated: 9/7/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -265,9 +265,10 @@ def parse_green_leaf_lab_pdf(
     # Read the PDF.
     if isinstance(doc, str):
         report = pdfplumber.open(doc)
-        obs['coa_pdf'] = doc.split('/')[-1]
+        obs['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
     else:
         report = doc
+        obs['coa_pdf'] = report.stream.name.replace('\\', '/').split('/')[-1]
     front_page = report.pages[0]
 
     # Get the lab-specific CoA page areas.
@@ -514,8 +515,8 @@ if __name__ == '__main__':
     from cannlytics.data.coas import CoADoc
 
     # Specify where your test CoA lives.
-    DATA_DIR = '../../../.datasets/coas'
-    # coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf'
+    DATA_DIR = '../../../tests/assets/coas'
+    # coa_pdf = f'{DATA_DIR}/Raspberry Parfait.pdf' # Alternative.
     coa_pdf = f'{DATA_DIR}/Flore COA/Swami Select/MagicMelon.pdf'
 
     # [✓] TEST: Detect the lab / LIMS that generated the CoA.

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 9/5/2022
+Updated: 9/14/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -40,26 +40,31 @@ Supported Labs and LIMS:
     ✓ SC Labs
     ✓ Sonoma Lab Works
     ✓ TagLeaf LIMS
-    - Veda Scientific
+    ✓ Veda Scientific
 
 Future work:
 
-    - [ ] Parse unidentified CoAs to the best of our abilities.
+    - [ ] Integrate `create_hash` into `save` and `standardize`.
     - [ ] Improve the `standardize` method.
-
+    - [ ] Parse unidentified CoAs to the best of our abilities.
+    
 Setup:
 
-    1. Install Tesseract.
+    1. Install `Tesseract`.
     For Windows: <https://github.com/UB-Mannheim/tesseract/wiki>
     For all other OS: <https://github.com/madmaze/pytesseract>
 
-    2. Install ImageMagick
+    2. Install `ImageMagick`
     Download: <https://imagemagick.org/script/download.php#windows>
     Cloud: <https://stackoverflow.com/questions/43036268/do-i-have-access-to-graphicsmagicks-or-imagemagicks-in-a-google-cloud-function>
 
+    3. Install `zbar`.
+    Download: <http://zbar.sourceforge.net/download.html>
+    Cloud: TODO: Install in the cloud!
+
 """
 # Standard imports.
-from ast import literal_eval
+import ast
 import base64
 import importlib
 from io import BytesIO
@@ -83,18 +88,20 @@ try:
 except ImportError:
     print('Unable to find `Tesseract` library. This tool is used for OCR.')
 try:
-    from wand.image import Image as wi
+    from wand.image import Image as magick_wand
     from wand.color import Color
 except ImportError:
     print('Unable to find `ImageMagick` library. This tool is used for OCR.')
 
 # Internal imports.
-from cannlytics.data.data import write_to_worksheet
+from cannlytics.data.data import create_hash, write_to_worksheet
 from cannlytics.utils import (
     convert_to_numeric,
+    dump_column,
     get_directory_files,
     sandwich_list,
     reorder_columns,
+    snake_case,
     unzip_files,
 )
 from cannlytics.utils.constants import (
@@ -114,7 +121,6 @@ from cannlytics.data.coas.mcrlabs import MCR_LABS
 from cannlytics.data.coas.sclabs import SC_LABS
 from cannlytics.data.coas.sonoma import SONOMA
 from cannlytics.data.coas.tagleaf import TAGLEAF
-from cannlytics.utils.utils import snake_case
 from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
 
 # Labs and LIMS that CoADoc can parse.
@@ -153,14 +159,14 @@ UNIDENTIFIED_LIMS += ', '.join([f'"{x}"' for x in LIMS.keys()])
 def convert_pdf_to_images(
         filename: str,
         output_path: str,
-        resolution: Optional[int] = 90,
+        resolution: Optional[int] = 300,
     ) -> List[str]:
     """Convert a PDF into images, with images named as `{filename}-{#}.png`.
     The function replaces the images' alpha channels with a white background.
     Args:
         filename (str): The name of a PDF to convert to images.
         output_path (str): A directory where the images should be generated.
-        resolution (int): The resolution of the generated images, 90 by
+        resolution (int): The resolution of the generated images, 300 by
             default (optional.)
     Returns:
         (list): Returns a list of the filenames of the images generated.
@@ -168,17 +174,24 @@ def convert_pdf_to_images(
     License: CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>
     """
     image_files = []
-    all_pages = wi(filename=filename, resolution=resolution)
+    os.environ['MAGICK_TMPDIR'] = output_path
+    all_pages = magick_wand(filename=filename, resolution=resolution)
     for i, page in enumerate(all_pages.sequence):
-        with wi(page) as img:
+        with magick_wand(page) as img:
             img.format = 'png'
             img.background_color = Color('white')
             img.alpha_channel = 'remove'
-            image_filename = os.path.splitext(os.path.basename(filename))[0]
+            image_filename = os.path.basename(filename)
+            image_filename = os.path.splitext(image_filename)[0]
             image_filename = '{}-{}.png'.format(image_filename, i)
             image_filename = os.path.join(output_path, image_filename)
             img.save(filename=image_filename)
             image_files.append(image_filename)
+    # Help `ImageMagick` remove temporary files.
+    for i in os.listdir(output_path):
+        magick_path = os.path.join(output_path, i)
+        if os.path.isfile(magick_path) and i.startswith('magick-'):
+            os.remove(magick_path)
     return image_files
 
 
@@ -281,18 +294,75 @@ class CoADoc:
                 entry_point = values['coa_algorithm_entry_point']
                 setattr(self, entry_point, importlib.import_module(module))
 
+    def aggregate(
+            self,
+            datafiles,
+            output: Optional[str] = None,
+            sheet_name: Optional[str] = None,
+            **kwargs,
+        ) -> pd.DataFrame:
+        """Aggregate multiple datafiles into a single dataset.
+        Args:
+            datafiles (iterable): A list of filenames, DataFrames, or 
+                lists of dictionaries to aggregate into a single DataFrame.
+            output (str): A path or file where data should be output (optional).
+            sheet_name (str): A specific sheet to read data (optional).
+            kwargs (Keywords): Keywords to pass to `save`.
+        Returns:
+            (list): Returns a list of data dictionaries.
+        """
+        # Aggregate DataFrames.
+        agg = pd.DataFrame()
+        for d in datafiles:
+            if isinstance(d, str):
+                df = pd.read_excel(d, sheet_name=sheet_name)
+                agg = pd.concat([agg, df])
+            elif isinstance(d, pd.DataFrame):
+                agg = pd.concat([agg, d])
+            elif isinstance(d, list):
+                agg = pd.concat([agg, pd.DataFrame(d)])
+
+        # Replace NaN values with `None`.
+        agg = agg.where(pd.notnull(agg), None)
+
+        # Remove duplicates.
+        agg.drop_duplicates('sample_hash', inplace=True)
+
+        # Create aggregation columns.
+        agg['results'] = agg['results'].apply(dump_column)
+        agg = agg.loc[agg['results'].notnull()]
+
+        # TODO: Also handle `images` and `coa_urls`.
+        # agg['images'] = agg['images'].apply(dump_column)
+        # agg['coa_urls'] = agg['coa_urls'].apply(dump_column)
+
+        # Re-hash the dataset.
+        datafile_hash = create_hash(agg)
+
+        # Save the data.
+        datafile = None
+        if os.path.isdir(output):
+            datafile = f'{output}/{datafile_hash}.xlsx'
+        elif os.path.isfile(output):
+            datafile = output
+        elif output is True:
+            datafile = f'{datafile_hash}.xlsx'
+        if datafile:
+            self.save(agg, datafile, **kwargs)
+        return agg
+
     def decode_pdf_qr_code(
             self,
             page: Any,
             img: Any,
-            resolution: Optional[int] = 90,
+            resolution: Optional[int] = 300,
         ) -> list:
         """Decode a PDF QR Code from a given image.
         Args:
             page (Page): A pdfplumber Page containing the image.
             img (Image): A pdfplumber Image.
             resolution (int): The resolution to render the QR code,
-                `90` by default (optional).
+                `300` by default (optional).
         Returns:
             (list): The QR code data.
         """
@@ -426,13 +496,13 @@ class CoADoc:
             self,
             page: Any,
             image_index: Optional[int] = 0, 
-            resolution: Optional[int] = 90,
+            resolution: Optional[int] = 300,
         ) -> str:
         """Get the image data for a given PDF page image.
         Args:
             page (Page): A pdfplumber Page.
             image_index (int): The index of the image, 0 by default (optional).
-            resolution (int): The resolution for the image, 90 by default (optional).
+            resolution (int): The resolution for the image, 300 by default (optional).
         Returns:
             (str): The image data.
         """
@@ -516,7 +586,7 @@ class CoADoc:
             lims: Optional[Any] = None,
             max_delay: Optional[float] = 7,
             persist: Optional[bool] = True,
-            resolution: Optional[int] = 90,
+            resolution: Optional[int] = 300,
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
         ) -> list:
@@ -540,7 +610,7 @@ class CoADoc:
             temp_path (str): A temporary directory to store files used
                 during PDF OCR, `/tmp` by default (optional).
             resolution (int): The resolution of rendered PDF images,
-                90 by default (optional).
+                300 by default (optional).
         Returns:
             (list): Returns a list of all of the PDFs.
         """
@@ -637,7 +707,7 @@ class CoADoc:
             lims: Optional[Any] = None,
             max_delay: Optional[float] = 7,
             persist: Optional[bool] = False,
-            resolution: Optional[int] = 90,
+            resolution: Optional[int] = 300,
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
         ) -> dict:
@@ -659,7 +729,7 @@ class CoADoc:
             temp_path (str): A temporary directory to store files used
                 during PDF OCR, `/tmp` by default (optional).
             resolution (int): The resolution of rendered PDF images,
-                90 by default (optional).
+                300 by default (optional).
         Returns:
             (dict): The sample data.
         """
@@ -672,7 +742,7 @@ class CoADoc:
         elif isinstance(pdf, pdfplumber.pdf.PDF):
             pdf_file = pdf
         else:
-            with open(wi(file=pdf, resolution=resolution)) as temp_file:
+            with open(magick_wand(file=pdf, resolution=resolution)) as temp_file:
                 temp_file.save(f'{temp_path}/coa.pdf')
             pdf_file = pdfplumber.open(f'{temp_path}/coa.pdf')
 
@@ -756,6 +826,7 @@ class CoADoc:
                 google_maps_api_key=self.google_maps_api_key,
             )
 
+        pdf_file.close()
         sample = {
             'date_tested': date_tested,
             'lab_results_url': url,
@@ -814,7 +885,7 @@ class CoADoc:
             filename: str,
             outfile: str,
             temp_path: Optional[str] = '/tmp',
-            resolution: Optional[int] = 90,
+            resolution: Optional[int] = 300,
             cleanup: Optional[bool] = True,
         ) -> None:
         """Pass a PDF through OCR to recognize its text. Outputs a new PDF.
@@ -829,7 +900,7 @@ class CoADoc:
             temp_path (str): A temporary directory to store files used
                 during PDF OCR, `/tmp` by default (optional).
             resolution (int): The resolution of rendered PDF images,
-                90 by default (optional).
+                300 by default (optional).
             cleanup (bool): Whether or not to remove the files generated
                 during OCR, `True` by default (optional).
         """
@@ -851,6 +922,7 @@ class CoADoc:
             pdf_files.append(pdf_file)
             with open(pdf_file, 'w+b') as f:
                 f.write(pdf)
+                f.close()
             if cleanup:
                 os.remove(image_file)
 
@@ -865,6 +937,12 @@ class CoADoc:
         if cleanup:
             for pdf in pdf_files:
                 os.remove(pdf)
+
+        # Remove all `magick-*` files from the temp directory.
+        # for i in os.listdir(temp_path):
+        #     path = os.path.join(temp_path, i)
+        #     if os.path.isfile(path) and i.startswith('magick-'):
+        #         os.remove(path)
 
     def save(
             self,
@@ -1091,7 +1169,12 @@ class CoADoc:
                 standardized_results = []
                 sample_results = data['results']
                 if isinstance(sample_results, str):
-                    sample_results = literal_eval(sample_results)
+                    try:
+                        sample_results = ast.literal_eval(sample_results)
+                        if isinstance(sample_results, str):
+                            sample_results = json.load(json.dumps(sample_results))
+                    except:
+                        json.loads(sample_results)
                 for result in sample_results:
                     analysis = result.get('analysis')
                     result['analysis'] = standard_analyses.get(analysis, analysis)
@@ -1178,8 +1261,9 @@ class CoADoc:
                     criterion = details_data.columns.str.endswith(c)
                     details_data = details_data.loc[:, ~criterion]
 
-                # Apply codings
-                details_data.replace(codings, inplace=True)
+                # FIXME: Apply codings to results.
+                # Note: This is super slow (2-3 mins for 2.5k observations)!
+                details_data['results'].replace(codings, inplace=True)
 
                 # Convert totals to numeric.
                 # TODO: Calculate totals if they don't already exist:
@@ -1202,15 +1286,26 @@ class CoADoc:
 
                     # Get the sample results.
                     sample_results = item['results']
-                    if isinstance(sample_results, str):
-                        sample_results = literal_eval(sample_results)
+                    # if isinstance(sample_results, str):
+                    try:
+                        sample_results = ast.literal_eval(sample_results)
+                        if isinstance(sample_results, str):
+                            sample_results = json.load(json.dumps(sample_results))
+                    except:
+                        try:
+                            sample_results = json.loads(sample_results)
+                        except:
+                            pass
 
                     # Add each entry.
                     for result in sample_results:
                         std = {}
                         for c in column_order:
                             std[c] = item.get(c)
-                        results.append({**std, **result})
+                        try:
+                            results.append({**std, **result})
+                        except TypeError:
+                            results.append({**std, **json.loads(result)})
 
                 # Apply codings (redundant?).
                 results_data = pd.DataFrame(results)
@@ -1309,7 +1404,12 @@ class CoADoc:
                     # Get the sample results.
                     sample_results = item['results']
                     if isinstance(sample_results, str):
-                        sample_results = literal_eval(sample_results)
+                        try:
+                            sample_results = ast.literal_eval(sample_results)
+                            if isinstance(sample_results, str):
+                                sample_results = json.load(json.dumps(sample_results))
+                        except:
+                            sample_results = json.loads(sample_results)
 
                     # Keep the values from each result.
                     for result in sample_results:
@@ -1436,7 +1536,7 @@ if __name__ == '__main__':
     # data = parser.parse(DATA_DIR)
 
     # [ ] TEST: Parse all CoAs in a zipped folder!
-    # zip_folder = '../../../.datasets/tests/coas.zip'
+    # zip_folder = '../../../tests/assets/coas/coas.zip'
     # data = parser.parse(zip_folder)
     # assert data is not None
 
@@ -1472,29 +1572,29 @@ if __name__ == '__main__':
     # )
 
     # [✓] TEST: Save CoA data from DataFrame.
-    # parser.save(dataframe, '../../../.datasets/tests/test-coas.xlsx')
+    # parser.save(dataframe, '../../../tests/assets/coas/test-coas.xlsx')
 
     # [✓] TEST: Save CoA data from list of dictionaries.
-    # parser.save(data, '../../../.datasets/tests/test-coas.xlsx')
+    # parser.save(data, '../../../tests/assets/coas/test-coas.xlsx')
 
     # [✓] TEST: Save CoA data from dictionary.
-    # parser.save(data[0], '../../../.datasets/tests/test-coas.xlsx')
+    # parser.save(data[0], '../../../tests/assets/coas/test-coas.xlsx')
 
     # [✓] TEST: Pass a PDF through OCR.
-    # doc = '../../../.datasets/tests/210000068-Cloud-Cake-1g.pdf'
-    # temp_path = '../../../.datasets/tests/tmp'
-    # temp_file = '../../../.datasets/tests/tmp/ocr-coa.pdf'
+    # doc = '../../../tests/assets/coas/210000068-Cloud-Cake-1g.pdf'
+    # temp_path = '../../../tests/assets/coas/tmp'
+    # temp_file = '../../../tests/assets/coas/tmp/ocr-coa.pdf'
     # parser.pdf_ocr(doc, temp_file, temp_path=temp_path)
 
-    # [ ] TEST: Parse a COA using OCR using `parse_pdf`.
-    doc = '../../../.datasets/tests/210000068-Cloud-Cake-1g.pdf'
-    temp_path = '../../../.datasets/tests/tmp'
-    data = parser.parse_pdf(doc, temp_path=temp_path)
+    # [✓] TEST: Parse a COA using OCR using `parse_pdf`.
+    # doc = '../../../tests/assets/coas/210000068-Cloud-Cake-1g.pdf'
+    # temp_path = '../../../tests/assets/tmp'
+    # data = parser.parse_pdf(doc, temp_path=temp_path)
 
-    # [ ] TEST: Parse a COA using OCR using `parse`.
-    doc = '../../../.datasets/tests/210000068-Cloud-Cake-1g.pdf'
-    temp_path = '../../../.datasets/tests/tmp'
-    data = parser.parse_pdf(doc, temp_path=temp_path)
+    # [✓] TEST: Parse a COA using OCR using `parse`.
+    # doc = '../../../tests/assets/coas/210000068-Cloud-Cake-1g.pdf'
+    # temp_path = '../../../tests/assets/coas/tmp'
+    # data = parser.parse_pdf(doc, temp_path=temp_path)
 
     # [✓] TEST: Close the parser.
     parser.quit()

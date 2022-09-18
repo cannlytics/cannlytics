@@ -4,13 +4,12 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/1/2022
-Updated: 8/20/2022
+Updated: 9/10/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:  A rigorous test of CoADoc parsing.
 """
 # Standard imports.
-from datetime import datetime
 import os
 
 # External imports.
@@ -18,10 +17,12 @@ import pandas as pd
 
 # Internal imports.
 from cannlytics.data.coas import CoADoc
+from cannlytics.data.data import create_hash
 
 
 # Specify where your data lives.
-DATA_DIR = '../../../.datasets/coas/Flore COA'
+DATA_DIR = '.datasets/coas/Flore COA'
+TEMP_PATH = '.datasets/coas/tmp'
 
 # Initialize a parser.
 parser = CoADoc()
@@ -41,17 +42,29 @@ for path, subdirs, files in os.walk(DATA_DIR):
             continue
 
         # [✓] TEST: Parse CoA PDFs one by one.
-        file_name = os.path.join(path, name)
-        coa_data = parser.parse(file_name)
-        all_data.extend(coa_data)
-        print('Parsed:', file_name)
+        try:
+            filename = os.path.join(path, name)
+            coa_data = parser.parse(filename, temp_path=TEMP_PATH)
+            all_data.extend(coa_data)
+            print('Parsed:', filename)
+        except:
+            print('Error:', filename)
 
-# Format the data.
+# Format the data as a DataFrame.
 data = pd.DataFrame(all_data)
 
+# [✓] TEST: Create hashes.
+coa_df = data.where(pd.notnull(data), None)
+coa_df['results_hash'] = coa_df['results'].apply(
+    lambda x: create_hash(x),
+)
+coa_df['sample_hash'] = coa_df.loc[:, coa_df.columns != 'sample_hash'].apply(
+    lambda x: create_hash(x.to_dict()),
+    axis=1,
+)
+data_hash = create_hash(coa_df)
+
 # [✓] TEST: Standardize and save the CoA data.
-timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-outfile = f'{datafile_dir}/coa-data-{timestamp}.xlsx'
-data.index = data['sample_id']
-parser.save(data, outfile)
+outfile = f'{datafile_dir}/{data_hash}.xlsx'
+parser.save(coa_df, outfile)
 print('Saved CoA data:', outfile)

@@ -1,10 +1,32 @@
 # Data API Endpoints
 
-<div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
+You can use the Cannlytics Data API, `https://cannlytics.com/api/data`, to access cannabis datasets. You can query:
+
+- [Lab Result Data](#lab-result-data)
+- [Licensee Data](#licensee-data)
+- [State Data](#state-data)
+- [Strain Data](#strain-data)
+
+## Lab Result Data <a name="lab-result-data"></a>
+
+<!-- TODO: Describe and give examples -->
+
+
+## Licensee Data <a name="licensee-data"></a>
+
+<!-- TODO: Describe and give examples -->
+
+
+## State Data <a name="state-data"></a>
+
+<!-- TODO: Describe and give examples -->
+
+
+##  Strain Data <a name="strain-data"></a>
+
+<div style="margin-top:1rem; margin-bottom: 1rem;">
   <img width="240px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30">
 </div>
-
-##  Strain Data
 
 You can get data about common cannabis strains with the `/data/strains` endpoint. You can request data for a specific strain with the `/data/strains/<strain_name>` endpoint.
 

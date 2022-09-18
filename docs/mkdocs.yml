@@ -1,0 +1,276 @@
+# Copyright (c) 2021 Cannlytics <contact@cannlytics.com>
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+# Project information
+site_name: Cannlytics
+site_url: https://docs.cannlytics.com/
+site_author: Keegan Skeate
+site_description: Cannlytics is simple, easy-to-use, end-to-end cannabis analytics software
+  designed to make data and information accessible. We believe that everyone in the
+  cannabis industry should be able to access rich, valuable data quickly and easily and
+  that everyone, especially yourself, will be better off for it.
+copyright: Copyright &copy; 2021 Cannlytics
+
+# Repository
+repo_name: Cannlytics
+repo_url: https://github.com/cannlytics/cannlytics
+edit_uri: ""
+docs_dir: ../
+site_dir: ./build
+
+# Configuration
+theme:
+  name: material
+  custom_dir: ./theme
+
+  # Static files
+  static_templates:
+    - 404.html   
+
+  # Logos
+  favicon: assets/images/favicon.ico
+  logo: assets/images/cannlytics_calyx_512.svg
+
+  # Features
+  features:
+    - content.code.annotate
+    - navigation.tabs
+    - navigation.tracking
+
+  # Theme
+  palette:
+    - scheme: default
+      primary: white
+      accent: green
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  font:
+    text: Lora
+    code: Roboto Mono
+      
+# Extensions
+markdown_extensions:
+  - markdown.extensions.toc:
+      slugify: !!python/name:pymdownx.slugs.uslugify
+      permalink: ""
+  - markdown.extensions.admonition:
+  - markdown.extensions.smarty:
+      smart_quotes: false
+  - pymdownx.betterem:
+  - markdown.extensions.attr_list:
+  - markdown.extensions.def_list:
+  - markdown.extensions.tables:
+  - markdown.extensions.abbr:
+  - markdown.extensions.footnotes:
+  - markdown.extensions.md_in_html:
+  - pymdownx.tabbed:
+  - pymdownx.superfences:
+  - pymdownx.highlight:
+      extend_pygments_lang:
+        - name: php-inline
+          lang: php
+          options:
+            startinline: true
+        - name: pycon3
+          lang: pycon
+          options:
+            python3: true
+      linenums_style: pymdownx-inline
+  - pymdownx.inlinehilite:
+      custom_inline:
+        - name: math
+          class: arithmatex
+          format: !!python/name:pymdownx.arithmatex.inline_mathjax_format
+  - pymdownx.magiclink:
+      repo_url_shortener: true
+      repo_url_shorthand: true
+      social_url_shorthand: true
+      social_url_shortener: true
+      user: cannlytics
+      repo: cannlytics
+  - pymdownx.tilde:
+  - pymdownx.caret:
+  - pymdownx.smartsymbols:
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.escapeall:
+      hardbreak: True
+      nbsp: True
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.arithmatex:
+  - pymdownx.mark:
+  - pymdownx.striphtml:
+  - pymdownx.keys:
+      separator: "\uff0b"
+  - pymdownx.details:
+  - pymdownx.tabbed:
+  - pymdownx.saneheaders:
+
+# Customization
+extra:
+  analytics:
+    provider: google
+    property: !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/cannlytics
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/cannlytics/
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/company/cannlytics
+
+# Plugins
+plugins:
+  - autorefs
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            - from unittest.mock import MagicMock as mock
+            - sys.path.append('cannlytics')
+            - sys.modules["numpy"] = mock()
+            - sys.modules["pandas"] = mock()
+            - sys.modules["firebase_admin"] = mock()
+            - sys.modules["googlemaps"] = mock()
+            - sys.modules["google-cloud"] = mock()
+            - sys.modules["google-cloud-firestore"] = mock()
+            - sys.modules["ulid"] = mock()
+            - sys.modules["requests"] = mock()
+            - sys.modules["django"] = mock()
+            - sys.modules["xlwings"] = mock()
+            - sys.modules["dotenv"] = mock()
+            - sys.modules["enforce_typing"] = mock()
+            - sys.modules["pytz"] = mock()
+  - minify:
+      minify_html: true
+
+# Site map
+nav:
+  - Home: docs/index.md
+
+  # About
+  #------------
+  - About:
+    - Overview: docs/about/about.md
+    - FAQ: docs/about/faq.md
+    - Support: docs/about/support.md
+    - License: docs/about/license.md
+    - Privacy policy: docs/about/privacy-policy.md
+    - Security policy: docs/about/security-policy.md
+    - Terms of service: docs/about/terms-of-service.md
+
+  # API
+  #------------
+  - API:
+    - Overview: api/readme.md
+    - Authentication: api/auth/readme.md
+    - Data: api/data/readme.md
+    - LIMS:
+      - Analyses: api/analyses/readme.md
+      - Analytes: api/analytes/readme.md
+      - Areas: api/areas/readme.md
+      - Contacts: api/contacts/readme.md
+      - Instruments: api/instruments/readme.md
+      - Inventory: api/inventory/readme.md
+      - Invoices: invoices/readme.md
+      - Measurements: api/measurements/readme.md
+      - Projects: api/projects/readme.md
+      - Results: api/results/readme.md
+      - Samples: api/samples/readme.md
+      - Transfers: api/transfers/readme.md
+      # TODO: Add waste docs
+    - Organizations: api/organizations/readme.md
+    - Users: api/users/readme.md
+    - Settings: api/settings/readme.md
+    - Traceability: api/traceability/readme.md
+  
+  # Users
+  #------------
+  - Users:
+    - Getting Started: docs/console/get-started.md
+    - Authentication: docs/console/authentication.md
+    - Analyses: docs/console/lims/analyses.md
+    - Analytes: docs/console/lims/analytes.md
+    - Areas: docs/console/lims/areas.md
+    - Contacts: docs/console/lims/contacts.md
+    # FIXME: Touch up, remove, or condense these documents.
+    - Data:
+      # - Overview: console/lims/data/data.md
+      - Data Collection: docs/console/lims/data/data_collection.md
+      # - Data Analysis: console/lims/data/data_analysis.md
+      # - Data Review: console/lims/data/data_review.md
+      # - Importing and exporting data: console/lims/data/exports.md
+      # - Generating CoAs: console/lims/generating_coas.md
+      # - Posting Results: console/lims/posting_results.md
+      # - Quality Control: console/lims/qc.md
+      - Logs: docs/console/lims/data/logs.md
+    - Instruments: docs/console/lims/instruments.md
+    - Inventory: docs/console/lims/inventory.md
+    - Invoices: docs/console/lims/invoices.md
+    - Organizations: docs/console/lims/organizations.md
+    - Projects: docs/console/lims/projects.md
+    - Results: docs/console/lims/results.md
+    - Samples: docs/console/lims/samples.md
+    - Transfers: docs/console/lims/transfers.md
+    - Traceability: docs/console/lims/traceability.md
+    - Worksheets: docs/console/lims/worksheets.md
+    - Settings: docs/console/lims/settings.md
+
+  # Cannlytics SDK
+  #---------------
+  - Cannlytics SDK:
+    - Overview: cannlytics/readme.md
+    - Auth: cannlytics/auth/readme.md
+    - Data:
+      - Overview: cannlytics/data/readme.md
+      - CoAs: cannlytics/data/coas/readme.md
+      - Market: cannlytics/data/market/readme.md
+    - Firebase: cannlytics/firebase/readme.md
+    - LIMS: cannlytics/lims/readme.md
+    - Metrc: cannlytics/metrc/readme.md
+    - Stats: cannlytics/stats/readme.md
+    - Utils: cannlytics/utils/readme.md
+  
+  # Developers
+  #------------
+  - Developers:
+    - Dev:
+      - Getting Started: docs/developers/dev/development.md
+      - Installation: docs/developers/dev/installation.md
+      - Contributing: docs/developers/dev/contributing.md
+      - Packaging: docs/developers/dev/packaging.md
+      - Publishing: docs/developers/dev/publishing.md
+      - Roadmap: docs/developers/dev/roadmap.md
+      - Security: docs/developers/dev/security.md
+      - Testing: docs/developers/dev/testing.md
+      - Version control: docs/developers/dev/version_control.md
+    - SOPs:
+      - Control of Documents: docs/developers/sops/control-of-documents.md

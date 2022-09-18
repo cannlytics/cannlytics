@@ -1,0 +1,3 @@
+
+
+mkdocs-autorefs==0.4.1
