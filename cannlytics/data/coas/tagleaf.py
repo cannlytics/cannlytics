@@ -11,7 +11,10 @@ License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Parse a TagLeaf LIMS CoA PDF or URL.
+    Parse a TagLeaf LIMS CoA PDF or URL. Labs include:
+
+        - 2 River Labs, Inc
+        - BelCosta Labs
 
 Data Points:
 
