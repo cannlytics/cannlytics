@@ -28,6 +28,8 @@ def send_message(request):
     """
 
     # Check if the user passed math input, to prevent spam.
+    # FIXME: Implement ReCaptcha:
+    # https://firebase.google.com/docs/app-check/web/recaptcha-provider
     try:
         request.POST['math_input'] == request.POST['math_total']
     except KeyError:

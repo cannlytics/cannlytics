@@ -137,7 +137,8 @@ LIMS = {
 }
 
 # Default preferred order for DataFrame columns.
-DEFAULT_COLUMN_ORDER = ['sample_id', 'product_name', 'producer',
+# TODO: Add `sample_hash` and `results_hash` to the beginning.
+DEFAULT_COLUMN_ORDER = ['product_name', 'producer',
     'product_type', 'date_tested']
 
 # Default nuisance columns to remove during standardization.
@@ -377,6 +378,7 @@ class CoADoc:
             pdf: Any,
             image_index: Optional[int] = None,
             page_index: Optional[int] = 0,
+            resolution: Optional[int] = 300,
         ) -> str:
         """Find the QR code given a CoA PDF or page.
         If no `image_index` is provided, then all images are tried to be
@@ -386,6 +388,8 @@ class CoADoc:
             pdf (PDF or Page): A pdfplumber PDF or Page.
             image_index (int): A known image index for the QR code.
             page_index (int): The page to search, 0 by default (optional).
+            resolution (int): The resolution to render the QR code,
+                `300` by default (optional).
         Returns:
             (str): The QR code URL.
         """
@@ -399,13 +403,13 @@ class CoADoc:
             page = pdf
         if image_index:
             img = page.images[image_index]
-            decoded_image = self.decode_pdf_qr_code(page, img)
+            decoded_image = self.decode_pdf_qr_code(page, img, resolution)
             image_data = decoded_image[0].data.decode('utf-8')
         else:
             image_range = sandwich_list(page.images)
             for img in image_range:
                 try:
-                    decoded_image = self.decode_pdf_qr_code(page, img)
+                    decoded_image = self.decode_pdf_qr_code(page, img, resolution)
                     image_data = decoded_image[0].data.decode('utf-8')
                     if image_data:
                         break
@@ -495,6 +499,7 @@ class CoADoc:
     def get_pdf_image_data(
             self,
             page: Any,
+            bbox: Optional[tuple] = None,
             image_index: Optional[int] = 0, 
             resolution: Optional[int] = 300,
         ) -> str:
@@ -506,9 +511,10 @@ class CoADoc:
         Returns:
             (str): The image data.
         """
-        y = page.height
-        img = page.images[image_index]
-        bbox = (img['x0'], y - img['y1'], img['x1'], y - img['y0'])
+        if bbox is None:
+            y = page.height
+            img = page.images[image_index]
+            bbox = (img['x0'], y - img['y1'], img['x1'], y - img['y0'])
         crop = page.crop(bbox)
         obj = crop.to_image(resolution=resolution)
         buffered = BytesIO()
@@ -1151,7 +1157,8 @@ class CoADoc:
             # Identify standard fields, adding analytes for `wide` data.
             fields = standard_fields
             if how == 'wide':
-                fields = {**standard_fields, **standard_analytes}
+                current_fields = {x:x for x in data.keys()}
+                fields = {**current_fields, **standard_analytes}
 
             # Standardize fields.
             std = {}
@@ -1261,8 +1268,8 @@ class CoADoc:
                     criterion = details_data.columns.str.endswith(c)
                     details_data = details_data.loc[:, ~criterion]
 
-                # FIXME: Apply codings to results.
-                # Note: This is super slow (2-3 mins for 2.5k observations)!
+                # Apply codings to results.
+                # FIXME: This is super slow (2-3 mins for 2.5k observations)!
                 details_data['results'].replace(codings, inplace=True)
 
                 # Convert totals to numeric.
@@ -1389,17 +1396,20 @@ class CoADoc:
                         # Hot-fix to place unidentified analyses at the end.
                         pairs.append((a, None, 122))
 
-                # Sort the pairs of analytes/analyses.
+                # Sort the pairs of analyses / analytes.
                 pairs.sort(key=operator.itemgetter(2))
 
                 # Create a wide table of values data.
                 values = []
                 for _, item in details_data.iterrows():
 
-                    # Specify the default columns.
-                    std = {}
-                    for c in column_order:
-                        std[c] = item[c]
+                    # Use all of the details in the values.
+                    std = item.to_dict()
+
+                    # Old: Only use the default columns. Make optional?
+                    # std = {}
+                    # for c in column_order:
+                    #     std[c] = item[c]
 
                     # Get the sample results.
                     sample_results = item['results']
@@ -1438,13 +1448,12 @@ class CoADoc:
                     criterion = values_data.columns.str.endswith(c)
                     values_data = values_data.loc[:, ~criterion]
 
-                # Drop totals.
-                # TODO: Add totals back from the Details worksheet?
-                criterion = values_data.columns.str.startswith('total_')
-                values_data = values_data.loc[:, ~criterion]
+                # Old: Drop totals. Make optional?
+                # criterion = values_data.columns.str.startswith('total_')
+                # values_data = values_data.loc[:, ~criterion]
 
                 # Move certain columns to the beginning.
-                cols = column_order + [x[0] for x in pairs]
+                cols = list(details_data.columns) + [x[0] for x in pairs]
                 values_data = reorder_columns(values_data, cols)
                 return values_data
 

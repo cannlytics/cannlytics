@@ -12,7 +12,7 @@ from .cannlytics import *
 # __all__ = ['Cannlytics']
 
 __title__ = 'cannlytics'
-__version__ = '0.0.11'
+__version__ = '0.0.13'
 __author__ = 'Keegan Skeate <https://github.com/keeganskeate>'
 __license__ = 'MIT <https://opensource.org/licenses/MIT>'
 __copyright__ = 'Copyright (c) 2022 Cannlytics'

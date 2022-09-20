@@ -111,6 +111,23 @@ def parse_cannasafe_coa(
 # TEST:
 url = 'https://tracker.csalabs.com/public/samples/lllora'
 doc = '../../../tests/assets/coas/cannasafe/Grape-CBD-Gummies.pdf'
+
+# Read the PDF.
+obs = {}
 report = pdfplumber.open(doc)
+front_page = report.pages[0]
 
 
+# TODO: Get the image.
+# - Save the image locally from the image data.
+# - Upload the image to Firebase Storage.
+# - Create a dynamic link for the image (`sample_image_url`).
+# img = front_page.images[3]
+
+# Get the front page text.
+text = front_page.extract_text()
+# split = re.split('\d+ of \d+', text)
+# header = split[0]
+# body = split[-1].split('ND = Not Detected')[0]
+# lines = body.split('\n')
+# lines = [x for x in lines if x.strip()]
