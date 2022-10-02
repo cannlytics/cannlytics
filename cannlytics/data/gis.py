@@ -37,6 +37,33 @@ def get_google_maps_api_key() -> str:
     return data['google_maps_api_key']
 
 
+def get_state_data(
+        state: str,
+        code: str,
+        fred_api_key: Optional[str] = None,
+        district: Optional[str] = '',
+        obs_start: Optional[Any] = None,
+        obs_end: Optional[Any] = None,
+    ) -> dict:
+    """Get a given state's data from the Fed Fred API, given a data code.
+    Args:
+        state (str): The state abbreviation for the state to retrieve data.
+        code (str): The FRED code for the data, for example "POP".
+        fred_api_key (str): A Fed FRED API key. You can sign up for a free API key at
+            http://research.stlouisfed.org/fred2/. You can also pass `None`
+            and set the environment variable 'FRED_API_KEY' to the value of
+            your API key.
+    Returns:
+        (dict): Returns a dictionary with population values and source.
+    """
+    fred = Fred(api_key=fred_api_key)
+    code = f'{state.upper()}{code.upper()}{district.upper()}'
+    series = fred.get_series(code, obs_start, obs_end)
+    if len(series) == 1:
+        return series[0]
+    return series
+
+
 def get_state_population(
         state: str,
         fred_api_key: Optional[str] = None,

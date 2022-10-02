@@ -9,8 +9,8 @@
   /traceability/employees/<license_number>
   /traceability/items
   /traceability/items/<item_id>
-  /traceability/lab-tests
-  /traceability/lab-tests/<test_id>
+  /traceability/results
+  /traceability/results/<test_id>
   /traceability/locations
   /traceability/locations/<area_id>
   /traceability/packages

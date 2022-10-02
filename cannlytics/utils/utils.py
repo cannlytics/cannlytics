@@ -752,15 +752,29 @@ def get_blocks(files, size=65536):
         yield block
 
 
-def get_number_of_lines(file_name, encoding='utf-16', errors='ignore'):
+def get_number_of_lines(
+        file_name: str,
+        encoding: Optional[str] = 'utf-16',
+        errors: Optional[str] = 'ignore',
+        verbose: Optional[bool] = False,
+    ) -> int:
     """
-    Read the number of lines in a large file.
+    Read the number of lines in a large file, such as a .csv or .tsv file.
+    Args:
+        file_name (str): The file to count the lines, expecting a .csv file.
+        encoding (str): The encoding of the file, "utf-16" by default (optional).
+        errors (str): How to handle the errors, "ignore" by default (optional).
+        verbose (bool): Whether or not to print the count, `False` by
+            default (optional).
+    Returns:
+        (int): The number of lines of the file.
     Credit: glglgl, SU3 <https://stackoverflow.com/a/9631635/5021266>
     License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
     """
     with open(file_name, 'r', encoding=encoding, errors=errors) as f:
         count = sum(bl.count('\n') for bl in get_blocks(f))
-        print('Number of rows:', count)
+        if verbose:
+            print('Number of rows:', count)
         return count
 
 

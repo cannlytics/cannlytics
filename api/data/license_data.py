@@ -1,13 +1,13 @@
 """
-Regulation Data Endpoints | Cannlytics API
+License Data Endpoints | Cannlytics API
 Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
-Created: 4/21/2021
-Updated: 1/9/2022
+Created: 9/26/2022
+Updated: 9/26/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-Description: API endpoints to interface with cannabis regulation data.
+Description: API endpoints to interface with cannabis license data.
 """
 # External imports
 from rest_framework.decorators import api_view
@@ -21,10 +21,10 @@ from cannlytics.firebase import (
 
 
 @api_view(['GET'])
-def regulation_data(request, state=None):
-    """Get data about cannabis regulations (public API endpoint)."""
+def license_data(request, state=None):
+    """Get data about cannabis licenses (public API endpoint)."""
     data = []
-    collection = 'public/data/regulations'
+    collection = 'public/data/licenses'
     if request.method == 'GET':
 
         # Get a specific observation.

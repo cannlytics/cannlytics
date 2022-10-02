@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 9/14/2022
+Updated: 9/23/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -78,6 +78,7 @@ import openpyxl
 import pandas as pd
 import requests
 import pdfplumber
+from PIL import Image
 from PyPDF2 import PdfMerger
 try:
     from pyzbar.pyzbar import decode
@@ -1475,6 +1476,19 @@ class CoADoc:
         # Raise an error if an incorrect type is passed.
         else:
             raise ValueError
+    
+    def scan(self, filename: Any) -> str:
+        """Scan an image for a QR code or barcode and return any data.
+        Args:
+            filename (str): A path to an image with a barcode or qr code.
+        Returns:
+            (str): Returns the data from the decoded QR code.
+        """
+        if isinstance(filename, str):
+            code = decode(Image.open(filename))
+        else:
+            code = decode(filename)
+        return code[0].data.decode('utf-8')
 
     def quit(self):
         """Close any driver, end any session, and reset the parameters."""
@@ -1604,6 +1618,12 @@ if __name__ == '__main__':
     # doc = '../../../tests/assets/coas/210000068-Cloud-Cake-1g.pdf'
     # temp_path = '../../../tests/assets/coas/tmp'
     # data = parser.parse_pdf(doc, temp_path=temp_path)
+
+    # [ ] TEST: Scan a QR code in an image with the `scan` method.
+    parser = CoADoc()
+    file_path = '../../../tests/assets/qr-code/steep-hill-qr-code.jpg'
+    data = parser.scan(file_path)
+    assert data.startswith('https')
 
     # [✓] TEST: Close the parser.
     parser.quit()

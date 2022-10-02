@@ -5,7 +5,7 @@ Copyright (c) 2022 Cannlytics
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/19/2022
 Updated: 4/20/2022
-License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with CCRS data and statistics.
 """

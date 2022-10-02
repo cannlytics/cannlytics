@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/5/2021
-Updated: 12/20/2021
+Updated: 9/24/2022
 License: License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 
 Description: Django settings secured by Google Cloud Secret Manager.
@@ -100,6 +100,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_feather',
+    'django_robohash',
+    'django.contrib.humanize',
 ]
 
 #-------------------------------------------------------------#
@@ -176,7 +178,7 @@ USE_TZ = True
 #-------------------------------------------------------------#
 
 # Specify allowed domains depending on production or development status.
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 if PRODUCTION != 'True':
     ALLOWED_HOSTS.extend(['*'])
 try:
@@ -237,7 +239,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, f'{PROJECT_NAME}/static'),)
 
 # The directory from where files are served. (web accessible folder)
 STATIC_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', 'public/static')
+    os.path.join(os.path.dirname(__file__), '..', 'public/console/static')
 )
 
 # The relative path to serve files.
@@ -258,8 +260,8 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 # Whether to expire the session when the user closes their browser.
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# The age of session cookies, in seconds. (Currently: 20 minutes)
-SESSION_COOKIE_AGE = 60 * 20
+# The age of session cookies, in seconds. (Currently: 30 days)
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 
 #-------------------------------------------------------------#
 # Customization
@@ -271,3 +273,8 @@ APPEND_SLASH = False
 # Allow Django template tags to span multiple lines.
 # https://stackoverflow.com/questions/49110044/django-template-tag-on-multiple-line
 base.tag_re = re.compile(base.tag_re.pattern, re.DOTALL)
+
+# Make certain Firebase variables easy to reference.
+FIREBASE_API_KEY = env('FIREBASE_API_KEY')
+FIREBASE_PROJECT_ID = env('FIREBASE_PROJECT_ID')
+STORAGE_BUCKET = env('FIREBASE_STORAGE_BUCKET')

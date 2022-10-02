@@ -8,6 +8,7 @@
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 */
 const appName = 'website';
+// const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -31,6 +32,9 @@ module.exports = env => {
       './assets/js/index.js',
       // You can add additional JS here.
     ],
+    // entry: {
+    //   cannlytics: `./assets/js/index.js`,
+    // },
     output: {
       path: path.resolve(__dirname, `./static/${appName}`),
       filename: './js/bundles/cannlytics.min.js',
@@ -41,6 +45,8 @@ module.exports = env => {
     },
     module: {
       rules: [
+
+        // Compiles SCSS to CSS.
         {
           test: /\.s[ac]ss$/i,
           use: [
@@ -59,6 +65,7 @@ module.exports = env => {
                 postcssOptions: {
                   plugins: function () {
                     return [
+                      // require('precss'),
                       require('autoprefixer')
                     ];
                   }
@@ -71,8 +78,9 @@ module.exports = env => {
             },
           ],
         },
+
+        // Convert ES2015 to JavaScript.
         {
-          // Convert ES2015 to JavaScript.
           test: /\.js$/,
           exclude: '/node_modules/',
           loader: 'babel-loader',
@@ -80,19 +88,33 @@ module.exports = env => {
             compact: true,
           },
         },
+
       ],
     },
+
+    // Minimize JavaScript in production.
     optimization: {
-      minimize: env.production, // Minimize JavaScript in production.
-      minimizer: [new TerserPlugin({ parallel: true })],
+      minimize: env.production,
+      minimizer: [
+        new TerserPlugin({ parallel: true }),
+        // new CssMinimizerPlugin({}),
+      ],
     },
+
     // Define maximum optimal bundle-size.
     performance: {
       maxEntrypointSize: 512000 * 4,
       maxAssetSize: 512000 * 4,
     },
+
+    // Useful plugins.
     plugins: [
-      new Dotenv({ path: '../.env' }), // Make .env variables available in entry file.
+
+      // Make .env variables available in the entry file.
+      // WARNING: Any variables used in JavaScript will be compiled.
+      new Dotenv({ path: '../.env' }),
+
     ],
+
   }
 };

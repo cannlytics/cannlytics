@@ -5,7 +5,7 @@ Copyright (c) 2021-2022 Cannlytics
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/30/2021
 Updated: 6/26/2022
-License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with datasets.
 """
@@ -48,7 +48,7 @@ def data_nfts(request, state=None):
 
 
 @api_view(['GET', 'POST'])
-def datasets(request, state=None):
+def data_base(request, state=None):
     """Get or update information about datasets."""
 
     # Authenticate the user.

@@ -789,8 +789,8 @@ material = {
             },
             {
                 "name": "Lab Tests",
-                "section": "lab-tests",
-                "url": "/traceability/lab-tests",
+                "section": "results",
+                "url": "/traceability/results",
                 "description": "Manage details for each individual lab test performed on submitted packages.",
                 "org_types": ["lab", "producer", "retailer"],
                 "selected": True,

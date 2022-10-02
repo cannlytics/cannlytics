@@ -4,8 +4,10 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/12/2022
-Updated: 4/20/2022
+Updated: 9/22/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+Description: Helpful CCRS constants.
 
 Data Sources:
 
