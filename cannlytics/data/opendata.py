@@ -21,6 +21,7 @@ FIXME: SQL queries do not appear to work.
 
 """
 # Standard imports.
+import json
 import os
 from typing import Any, Optional
 
@@ -154,7 +155,11 @@ class OpenData(object):
             response = self.session.get(url, headers=self.headers, params=params)
         if response.status_code != 200:
             raise APIError(response)
-        data = pd.DataFrame(response.json())
+        try:
+            body = response.json()
+        except:
+            body = json.loads(response.text.replace('\r', '').replace('\ufeff', ''))
+        data = pd.DataFrame(body)
         data.columns = map(str.lower, data.columns)
         data.columns = [x.replace('$', 'dollars').replace('%', 'percent') for x in data.columns]
         data.rename(columns=OPENDATA_CODINGS, inplace=True)
