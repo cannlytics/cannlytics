@@ -158,6 +158,8 @@ def search_for_address(
         fields (list): Optional, `formatted_address` is included by default.
     Returns:
         (list): A list of potential results.
+    Raises:
+        (IndexError): Raises an `IndexError` if no candidate is found.
     """
     if api_key is None:
         api_key = get_google_maps_api_key()
@@ -171,23 +173,21 @@ def search_for_address(
     search = places.find_place(gmaps, query, 'textquery')
     place_id = search['candidates'][0]['place_id']
     place = places.place(gmaps, place_id, fields=fields)
-    location = place['result']['geometry']['location']
-    formatted_address = place['result']['formatted_address']
-    parts = formatted_address.split(',')
-    street = parts[0]
-    city = parts[1].strip()
-    state, zipcode = tuple(parts[2].strip().split(' '))
-    try:
-        county = zipcodes.matching(zipcode)[0]['county']
-    except:
-        county = ''
-    return {
-        'formatted_address': formatted_address,
-        'street': street,
-        'city': city,
-        'county': county,
-        'state': state,
-        'zipcode': zipcode,
-        'latitude': location['lat'],
-        'longitude': location['lat'],
-    }
+    result = place['result']
+    candidate = {}
+    if result.get('geometry'):
+        location = result['geometry']['location']
+        candidate['latitude'] = location['lat']
+        candidate['longitude'] = location['lng']
+        del result['geometry']
+    if result.get('formatted_address'):
+        formatted_address = result['formatted_address']
+        parts = formatted_address.split(',')
+        candidate['street'] = parts[0]
+        candidate['city'] = parts[1].strip()
+        candidate['state'], candidate['zipcode'] = tuple(parts[2].strip().split(' '))
+        try:
+            candidate['county'] = zipcodes.matching(candidate['zipcode'])[0]['county']
+        except:
+            candidate['county'] = ''
+    return {**result, **candidate}
