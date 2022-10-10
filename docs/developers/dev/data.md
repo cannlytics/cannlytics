@@ -77,12 +77,12 @@ git fetch origin refs/pr/2:pr/2
 git checkout pr/2
 ```
 
-Next, do your modifications and track all of your changes, including any large data files, e.g. `.xlsx` files:
+Next, do your modifications and track all of your changes, including any large data files, e.g. `.csv` files:
 
 ```bash
-git lfs track *.xlsx
-git add *.xlsx
-git commit -m "Added `xlsx` files"
+git lfs track *.csv
+git add *.csv
+git commit -m "Added `csv` files"
 git add --all
 git status
 git commit -m "Updated `cannabis_licenses` dataset."
@@ -94,6 +94,8 @@ Finally, make the pull request:
 ```bash
 git push origin pr/2:refs/pr/2
 ```
+
+🎉 Congratulations, your pull request is now ready to be reviewed and merged by the repository admin!
 
 ## Testing a Dataset <a name="testing"></a>
 
@@ -112,5 +114,5 @@ from datasets import load_dataset
 dataset = load_dataset('cannabis_licenses.py', 'ca')
 data = dataset['data']
 assert len(data) > 0
-print('Read %i licenses.' % len(data))
+print('Read %i data points.' % len(data))
 ```

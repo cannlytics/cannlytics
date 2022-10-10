@@ -13,10 +13,12 @@ Description:
 
 """
 # Standard imports.
+from datetime import datetime
 from time import sleep
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 # External imports.
+from dotenv import dotenv_values
 from fredapi import Fred
 from googlemaps import Client, places
 import zipcodes
@@ -191,3 +193,72 @@ def search_for_address(
         except:
             candidate['county'] = ''
     return {**result, **candidate}
+
+
+def get_transfer_distance(
+        api_key,
+        start,
+        end,
+        mode='driving',
+) -> Tuple[int, int]:
+    """Get the distance and duration of a transfer.
+    Args:
+        client (Client): A googlemaps API client.
+        start (string): The starting point, either lat,long as a string or an address.
+        end (string): The ending point, either lat,long as a string or an address.
+        mode (string): The transportation method, driving by default.
+    Returns:
+        (int, int): Returns a tuple of the distance in kilometers and the
+            duration in seconds.
+    """
+    client = Client(key=api_key)
+    driving_distances = client.distance_matrix(start, end, mode=mode)
+    elements = driving_distances['rows'][0]['elements'][0]
+    km = elements['distance']['value']
+    duration = elements['duration']['value']
+    return km, duration
+
+
+def get_transfer_route(
+        api_key,
+        start,
+        end,
+        departure_time=None,
+        mode='driving',
+) -> str:
+    """Get the route of a transfer.
+    Args:
+        client (Client): A googlemaps API client.
+        start (string): The starting point, either lat,long as a string or an address.
+        end (string): The ending point, either lat,long as a string or an address.
+        departure_time (datetime): The time of departure, defaults to now (optional).
+        mode (string): The transportation method, driving by default (optional).
+    Returns:
+        (str): Returns the route as a polyline string.
+    """
+    client = Client(key=api_key)
+    if departure_time is None:
+        departure_time = datetime.now()
+    driving_directions = client.directions(
+        start,
+        end,
+        mode=mode,
+        departure_time=departure_time
+    )
+    m = driving_directions[0]['legs'][0]['distance']['value']
+    min = driving_directions[0]['legs'][0]['duration']['value']
+    polyline = driving_directions[0]['overview_polyline']['points']
+    return m, min, polyline
+
+
+def initialize_googlemaps(env_file: Optional[str] = './.env') -> Any:
+    """Initialize the Google Maps client.
+    Args:
+        env_file (str): A file path to a .env file with a `GOOGLE_MAPS_API_KEY`
+            environment variable.
+    Returns:
+        (Client): A googlemaps API client.
+    """
+    config = dotenv_values(env_file)
+    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
+    return Client(key=google_maps_api_key)

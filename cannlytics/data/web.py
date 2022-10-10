@@ -1,10 +1,10 @@
 """
-Web Data Functionality | Cannlytics
+Web Data Tools | Cannlytics
 Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/10/2021
-Updated: 8/13/2021
+Updated: 10/8/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Resources:
@@ -23,6 +23,8 @@ from typing import Any, Optional, Tuple
 import requests
 from bs4 import BeautifulSoup
 
+
+# === General Web Scraping Tools ===
 
 def format_params(parameters, **kwargs):
     """Format given keyword arguments HTTP request parameters.
@@ -221,3 +223,56 @@ def find_company_url():
     TODO: Find a company's website URL. (Google search for name?)
     """
     raise NotImplementedError
+
+
+# === Google Drive Tools ===
+
+def download_google_drive_file(drive_file, destination):
+    """Download a public Google Drive file given its ID and a destination.
+    Args:
+        drive_file (str): A Google Drive ID or URL for a file.
+        destination (str): The local file path and name.
+    Credit: turdus-merula <https://stackoverflow.com/a/39225272/5021266>
+    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
+    """
+    drive_id = drive_file
+    if drive_id.startswith('https://drive.google'):
+        drive_id = drive_id.split('/d/')[-1].split('/')[0]
+    drive_base = 'https://docs.google.com/uc?export=download'
+    drive_session = requests.Session()
+    drive_response = drive_session.get(
+        drive_base,
+        params={'id': drive_id},
+        stream=True,
+    )
+    drive_token = download_google_drive_file_confirm_token(drive_response)
+    if drive_token:
+        drive_response = drive_session.get(
+            drive_base,
+            params={'id': drive_id, 'confirm': drive_token},
+            stream = True
+        )
+    download_google_drive_file_save_response(drive_response, destination)    
+
+
+def download_google_drive_file_confirm_token(drive_response):
+    """
+    Credit: turdus-merula <https://stackoverflow.com/a/39225272/5021266>
+    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
+    """
+    for k, v in drive_response.cookies.items():
+        if k.startswith('download_warning'):
+            return v
+    return None
+
+
+def download_google_drive_file_save_response(drive_response, destination):
+    """
+    Credit: turdus-merula <https://stackoverflow.com/a/39225272/5021266>
+    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
+    """
+    CHUNK_SIZE = 32768
+    with open(destination, 'wb') as f:
+        for chunk in drive_response.iter_content(CHUNK_SIZE):
+            if chunk:
+                f.write(chunk)

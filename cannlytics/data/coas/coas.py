@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 9/23/2022
+Updated: 10/10/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -20,9 +20,9 @@ Description:
 
     In order to parse CoAs well, CoADoc takes into consideration:
 
-        - The lab or LIMS that generated the CoA;
-        - PDF properties, such as the fonts used and the page dimensions;
-        - All detected words, lines, columns, white-space, etc.
+        * The lab or LIMS that generated the CoA;
+        * PDF properties, such as the fonts used and the page dimensions;
+        * All detected words, lines, columns, white-space, etc.
     
     The roadmap for CoADoc is to continue adding lab and LIMS CoA
     parsing algorithms until a general CoA parsing algorithm may be able
@@ -39,6 +39,7 @@ Supported Labs and LIMS:
     ✓ MCR Labs
     ✓ SC Labs
     ✓ Sonoma Lab Works
+    ✓ Steep Hill Massachusetts
     ✓ TagLeaf LIMS
     ✓ Veda Scientific
 
@@ -96,6 +97,7 @@ except ImportError:
 
 # Internal imports.
 from cannlytics.data.data import create_hash, write_to_worksheet
+from cannlytics.data.web import download_google_drive_file
 from cannlytics.utils import (
     convert_to_numeric,
     dump_column,
@@ -122,6 +124,7 @@ from cannlytics.data.coas.mcrlabs import MCR_LABS
 from cannlytics.data.coas.sclabs import SC_LABS
 from cannlytics.data.coas.sonoma import SONOMA
 from cannlytics.data.coas.tagleaf import TAGLEAF
+from cannlytics.data.coas.steephill import STEEPHILL
 from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
 
 # Labs and LIMS that CoADoc can parse.
@@ -134,6 +137,7 @@ LIMS = {
     'SC Labs': SC_LABS,
     'Sonoma Lab Works': SONOMA,
     'TagLeaf LIMS': TAGLEAF,
+    'Steep Hill': STEEPHILL,
     'Veda Scientific': VEDA_SCIENTIFIC,
 }
 
@@ -151,7 +155,7 @@ DEFAULT_NUISANCE_COLUMNS = ['received_by', 'sampled_by', 'Unnamed: 1',
 DEFAULT_NUMERIC_COLUMNS = ['value', 'mg_g', 'lod', 'loq', 'limit', 'margin_of_error']
 
 # Encountered Metrc prefixes used to identify Metrc IDs.
-METRC_PREFIXES = ['1A40603']
+METRC_PREFIXES = ['1A40603', '1A40A01']
 
 # A custom `ValueError` message to raise when no known LIMS is identified.
 UNIDENTIFIED_LIMS = 'CoA not recognized as a CoA from a supported LIMS: '
@@ -527,6 +531,7 @@ class CoADoc:
             self,
             doc: Any,
             lims: Optional[Any] = None,
+            temp_path: Optional[str] = '/tmp',
         ) -> str:
         """Identify if a CoA was created by a common LIMS.
         Search all of the text of the LIMS name or URL.
@@ -536,25 +541,48 @@ class CoADoc:
             doc (str, PDF or Page): A URL or a pdfplumber PDF or Page.
             lims (str or dict): The name of a specific LIMS or a
                 dictionary of known LIMS.
+            temp_path (str): A temporary directory to store any online PDFs
+                if needed for identification, `/tmp` by default (optional).
         Returns:
             (str): Returns LIMS name if found, otherwise returns `None`.
         """
         # Search all of the text of the LIMS name or URL.
         known = None
         if isinstance(doc, str):
+
+            # Handle shortened URLs.
+            text = doc
+            if doc.startswith('https://tinyurl'):
+                response = requests.get(doc, headers=DEFAULT_HEADERS)
+                text = response.url
+        
+            # Handle Google Drive PDFs.
+            if text.startswith('https://drive.google'):
+                temp_pdf = os.path.join(temp_path, 'coa.pdf')
+                if not os.path.exists(temp_path): os.makedirs(temp_path)
+                download_google_drive_file(text, temp_pdf)
+                text = temp_pdf
+
+            # Handle PDFs.
             try:
-                pdf_file = pdfplumber.open(doc)
+                pdf_file = pdfplumber.open(text)
                 text = pdf_file.pages[0].extract_text()
             except (FileNotFoundError, OSError):
-                text = doc
+                pass
+        
+        # Handle PDFs passed directly.
         else:
             if isinstance(doc, pdfplumber.pdf.PDF):
                 page = doc.pages[0]
             else:
                 page = doc
             text = page.extract_text()
+
+        # Handle custom LIMS.
         if lims is None:
             lims = LIMS
+        
+        # Iterate over all known LIMS looking for URLs and LIMS names.
         if isinstance(lims, str):
             try:
                 if self.lims[lims]['url'] in text:
@@ -573,15 +601,23 @@ class CoADoc:
                     known = key
                     break
 
-        # Try to get a QR code to identify the LIMS.
+        # If the LIMS is still unknown, then try to identify the LIMS
+        # with any a QR code, if the COA is a PDF.
         if not known:
-            qr_code_url = self.find_pdf_qr_code_url(doc)
+            try:
+                qr_code_url = self.find_pdf_qr_code_url(doc)
+            except:
+                qr_code_url = None
             if qr_code_url:
                 for key, values in lims.items():
                     url = values.get('url')
                     if url and url in qr_code_url:
                         known = key
                         break
+        
+        # Optional: Can we detect LIMS from a photo for a COA or a label?
+
+        # Return any known LIMS.
         return known
 
     def parse(
