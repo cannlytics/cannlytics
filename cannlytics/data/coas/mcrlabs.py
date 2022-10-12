@@ -954,9 +954,9 @@ if __name__ == '__main__':
     # assert data is not None
     # print('Parsed:', doc)
 
-    # [ ] TEST: Parse a MCR Labs COA PDF from 2021.
-    parser = CoADoc()
-    doc = '../../../tests/assets/coas/mcr-labs/Watermelon 30mg Gummy.pdf'
-    data = parse_mcrlabs_pdf(parser, doc)
-    assert data is not None
-    print('Parsed:', doc)
+    # [✓] TEST: Parse a MCR Labs COA PDF from 2021.
+    # parser = CoADoc()
+    # doc = '../../../tests/assets/coas/mcr-labs/Watermelon 30mg Gummy.pdf'
+    # data = parse_mcrlabs_pdf(parser, doc)
+    # assert data is not None
+    # print('Parsed:', doc)
