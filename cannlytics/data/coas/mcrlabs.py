@@ -101,8 +101,7 @@ MCR_LABS = {
     'lab_latitude': 42.310820,
     'lab_longitude': -71.386920,
     'lab_phone': '508-872-6666',
-    'lab_email': 'support@steephill.com',
-    'lab_website': 'www.steephill.com',
+    'lab_email': 'hello@mcrlabs.com',
 }
 
 # It is assumed that there are the following analyses on each COA.
