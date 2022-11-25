@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/13/2021
-Updated: 7/19/2021
+Updated: 9/26/2022
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Description: API to interface with the Metrc API.
@@ -62,8 +62,9 @@ def initialize_traceability(project_id, license_number, version_id):
         version_id=version_id
     )
 
-    track = initialize_metrc(vendor_api_key, user_api_key)
-    return track
+    # Return a Metrc client.
+    return initialize_metrc(vendor_api_key, user_api_key)
+
 
 #-----------------------------------------------------------------------
 # Endpoints

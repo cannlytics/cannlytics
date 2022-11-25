@@ -4,10 +4,10 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/10/2022
-Updated: 4/10/2022
+Updated: 9/23/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-This module contains common CCRS models.
+Description: CCRS models.
 """
 
 # Internal imports.
@@ -16,16 +16,6 @@ from cannlytics.utils.utils import (
     clean_nested_dictionary,
     snake_case
 )
-# from cannlytics.utils.utils import (
-#     camel_to_snake,
-#     clean_dictionary,
-#     clean_nested_dictionary,
-#     get_timestamp,
-#     remove_dict_fields,
-#     remove_dict_nulls,
-#     snake_to_camel,
-#     update_dict,
-# )
 
 
 class Model(object):
@@ -99,33 +89,93 @@ class Model(object):
             update_document(ref, data)
 
 
+class Area(Model):
+    """A model for controlled cannabis production areas.
+    ```json
+        {
+            "area_id": "",
+            "created_by": "",
+            "created_date": "",
+            "external_identifier": "",
+            "is_deleted": "",
+            "is_quarantine": "",
+            "licensee_id": "",
+            "name": "",
+            "updated_by": "",
+            "updated_date": ""
+        }
+    ```
+    """
+    pass
 
-# TODO: Areas
 
 # TODO: Contacts
 
+
 # TODO: Integrators
 
-# TODO: Inventory
+
+class Inventory(Model):
+    """A model for cannabis inventory.
+    ```json
+        {
+            "area_id": "",
+            "created_by": "",
+            "created_date": "",
+            "external_identifier": "",
+            "initial_quantity": "",
+            "inventory_id": "",
+            "inventory_identifier": "",
+            "is_deleted": "",
+            "is_medical": "",
+            "licensee_id": "",
+            "product_id": "",
+            "quantity_on_hand": "",
+            "strain_id": "",
+            "total_cost": "",
+            "updated_by": "",
+            "updated_date": ""
+        }
+    ```
+    """
+    pass
+
 
 # TODO: Inventory Adjustments
 
+
 # TODO: Inventory Plant Transfers
+
 
 # TODO: Lab Results
 
+
 # TODO: Licensees
+
 
 # TODO: Plants
 
+
 # TODO: Plant destructions
+
 
 # TODO: Products
 
+
 # TODO: Sale Headers
+
 
 # TODO: Sale Details
 
+
 # TODO: Strains
 
+
 # TODO: Transfers (hard)
+
+
+
+# === Tests ===
+# if __name__ == '__main__':
+
+# {camel_to_snake(y): "" for y in sorted(x)}

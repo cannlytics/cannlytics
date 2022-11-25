@@ -6,12 +6,12 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/2/2022
-Updated: 9/13/2022
+Updated: 9/22/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Parse an Cannalysis CoA PDF.
+    Parse Cannalysis CoA PDFs.
 
 Data Points:
 
@@ -30,7 +30,8 @@ Data Points:
     ✓ product_name
     ✓ product_type
     ✓ results
-    ✓ sample_id
+    ✓ results_hash
+    ✓ sample_hash
     ✓ sample_size
     ✓ total_cannabinoids
     ✓ total_cbd
@@ -39,13 +40,13 @@ Data Points:
 
 FIXME:
 
-    - [ ] Occasional: Unknown string format "-02/18/202 11919" from OCR.
-    - [ ] Occasional: list index out of range
+    - [ ] Occasional unknown error: `list index out of range`
 
 """
 # Standard imports.
 from datetime import datetime
 import json
+import os
 import re
 from typing import Any, Optional
 import warnings
@@ -56,11 +57,24 @@ import pdfplumber
 from PIL import Image
 
 # Internal imports.
+from cannlytics import __version__
 from cannlytics.data.data import (
+    create_hash,
     create_sample_id,
     find_first_value,
 )
-from cannlytics.utils.constants import ANALYSES, ANALYTES, STANDARD_FIELDS
+from cannlytics.firebase import (
+    create_id,
+    create_short_url,
+    get_file_url,
+    initialize_firebase,
+    upload_file,
+)
+from cannlytics.utils.constants import (
+    ANALYSES,
+    ANALYTES,
+    STANDARD_FIELDS,
+)
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
@@ -104,6 +118,7 @@ CANNALYSIS_COA = {
         [0, 0.15, 0.35, 0.9],
         [0.35, 0.15, 1.0, 0.9],
     ],
+    'coa_image_area': [0.049, 0.179, 0.32, 0.3876],
     'coa_result_fields': [
         'name',
         'value',
@@ -122,6 +137,11 @@ CANNALYSIS_COA = {
         'Batch:',
         'ACCORDANCE',
         'criteria',
+        'identicalorsimilarproducts',
+        'bstractedinanymanner',
+        'Any violation of these conditions',
+        'All LQC samples required',
+        'acceptance criteria',
     ],
 }
 
@@ -130,7 +150,7 @@ def parse_cannalysis_coa(
         parser,
         doc: Any,
         cleanup: Optional[bool] = True,
-        resolution: Optional[int] = 180,
+        resolution: Optional[int] = 300,
         temp_path: Optional[str] = '/tmp',
         coa_pdf: Optional[str] = None,
         **kwargs,
@@ -143,7 +163,7 @@ def parse_cannalysis_coa(
             during OCR, `True` by default (optional).
         temp_path (str): A temporary directory to use for OCR.
         resolution (int): The resolution of rendered PDF images,
-            180 by default (optional).
+            300 by default (optional).
         coa_pdf (str): A filename to use for the `coa_pdf` field (optional).
     Returns:
         (dict): The sample data.
@@ -159,15 +179,14 @@ def parse_cannalysis_coa(
         obs['coa_pdf'] = coa_pdf or report.stream.name.replace('\\', '/').split('/')[-1]
 
     # Get the QR code from the last page.
-    # Note: After OCR, QR code decoding raises warning:
-    # DecompressionBombWarning: Image size (154554704 pixels) exceeds
-    # limit of 89478485 pixels, could be decompression bomb DOS attack.
-    # try:
-    #     obs['lab_results_url'] = parser.find_pdf_qr_code_url(report)
-    # except Image.DecompressionBombWarning:
-    #     obs['lab_results_url'] = ''
-
-    # TODO: Get the image data, `images` and `image_url`.
+    # Note: After OCR, QR code decoding raises DecompressionBombWarning.
+    try:
+        obs['lab_results_url'] = parser.find_pdf_qr_code_url(
+            report,
+            resolution=resolution,
+        )
+    except Image.DecompressionBombWarning:
+        obs['lab_results_url'] = ''
 
     # Get the lab specifics.
     coa_parameters = CANNALYSIS_COA
@@ -216,6 +235,37 @@ def parse_cannalysis_coa(
 
     # Optional: Is there any way to identify the `producer` and
     # `distributor` with their license numbers? Query Cannlytics API?
+
+    # Get the image data, if the PDF has gone through OCR, then cut out
+    # the image first. Then save the image to the cloud, get the file
+    # URL, create a short URL to use as the `image_url`.
+    # TODO: Resize the image if it is too large?
+    # TODO: Turn this into a function?
+    # try:
+    #     image_data = parser.get_pdf_image_data(
+    #         front_page,
+    #         image_index=1,
+    #         resolution=resolution,
+    #     )
+    # except IndexError:
+    #     area = tuple(coa_parameters['coa_image_area'])
+    #     image_data = parser.get_pdf_image_data(
+    #         front_page,
+    #         bbox=area,
+    #         resolution=resolution,
+    #     )
+    # image_id = obs.get('metrc_lab_id', create_id())
+    # image_ref = f'public/data/lab_results/{image_id}/image.jpg'
+    # api_key = os.environ['FIREBASE_API_KEY']
+    # bucket = os.environ['FIREBASE_STORAGE_BUCKET']
+    # project_name = os.environ['FIREBASE_PROJECT_ID']
+    # # FIXME:
+    # initialize_firebase()
+    # upload_file(image_ref, data_url=image_data, bucket_name=bucket)
+    # file_url = get_file_url(image_ref, bucket_name=bucket)
+    # # short_url = create_short_url(api_key, file_url, project_name)
+    # short_url = file_url
+    # obs['image_url'] = short_url
 
     # Check if OCR is required then re-run the routine.
     line = lines[0]
@@ -292,7 +342,7 @@ def parse_cannalysis_coa(
         obs['product_name'] = text[0].replace('G=>', '').strip()
 
     # Get all page text, from the 2nd page on.
-    results, date_tested = [], []
+    results, dates_tested = [], []
     for page_number, page in enumerate(report.pages[1:]):
         for area in coa_page_area:
 
@@ -358,12 +408,12 @@ def parse_cannalysis_coa(
                             date_time = pd.to_datetime(date)
                         else:
                             date_time = pd.to_datetime(' '.join([date, at]))
-                        date_tested.append(date_time)
+                        dates_tested.append(date_time)
                     except:
-                        pass
+                        continue
 
                 # Skip informational rows.
-                elif any(s in line for s in skip_fields):
+                elif any(s in line or s in line_text for s in skip_fields):
                     continue
 
                 # End at the end of the report.
@@ -410,6 +460,11 @@ def parse_cannalysis_coa(
                             result[key] = value
                     except IndexError:
                         continue
+                
+                    # Hot-fix: Skip (non-)analytes that begin with a digit.
+                    # Note: It would be best to improve this logic.
+                    if result['key'][0].isdigit():
+                        continue
 
                     # Record the result.
                     results.append(result)
@@ -418,7 +473,7 @@ def parse_cannalysis_coa(
     report.close()
 
     # Get the latest tested at date.
-    obs['date_tested'] = max(date_tested)
+    obs['date_tested'] = max(dates_tested)
 
     # Turn dates to ISO format.
     date_columns = [x for x in obs.keys() if x.startswith('date')]
@@ -429,15 +484,20 @@ def parse_cannalysis_coa(
             pass
 
     # Finish data collection with a freshly minted sample ID.
-    obs['analyses'] = list(set(analyses))
-    obs['results'] = results
+    # TODO: Fix or make `sample_id` obsolete.
+    obs = {**CANNALYSIS, **obs}
+    obs['analyses'] = json.dumps(list(set(analyses)))
+    obs['coa_algorithm_version'] = __version__
+    obs['coa_parsed_at'] = datetime.now().isoformat()
+    obs['results'] = json.dumps(results)
+    obs['results_hash'] = create_hash(results)
     obs['sample_id'] = create_sample_id(
         private_key=json.dumps(results),
         public_key=obs['product_name'],
-        salt=obs['date_tested'], # Note: The standard is `producer`.
+        salt=obs.get('producer', obs.get('date_tested', 'cannlytics.eth')),
     )
-    obs['coa_parsed_at'] = datetime.now().isoformat()
-    return {**CANNALYSIS, **obs}
+    obs['sample_hash'] = create_hash(obs)
+    return obs
 
 
 # === Test ===
@@ -445,25 +505,37 @@ if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
 
-    # [✓] TEST: Parse a Cannalysis CoA PDF.
-    # parser = CoADoc()
-    # doc = '../../../tests/assets/coas/MothersMilk.pdf'
-    # lab = parser.identify_lims(doc, lims={'Cannalysis': CANNALYSIS})
-    # assert lab == 'Cannalysis'
-    # data = parse_cannalysis_coa(parser, doc)
-    # assert data is not None
+    # [✓] TEST: Parse a Cannalysis CoA PDF (for a flower product).
+    parser = CoADoc()
+    doc = '../../../tests/assets/coas/cannalysis/Mothers-Milk-Flower.pdf'
+    lab = parser.identify_lims(doc, lims={'Cannalysis': CANNALYSIS})
+    assert lab == 'Cannalysis'
+    data = parse_cannalysis_coa(parser, doc)
+    assert data is not None
+    print('Parsed:', doc)
+
+    # [✓] TEST: Parse a Cannalysis CoA PDF (for a concentrate product).
+    parser = CoADoc()
+    doc = '../../../tests/assets/coas/cannalysis/Citrus-Slurm-Diamonds.pdf'
+    lab = parser.identify_lims(doc, lims={'Cannalysis': CANNALYSIS})
+    assert lab == 'Cannalysis'
+    data = parse_cannalysis_coa(parser, doc)
+    assert data is not None
+    print('Parsed:', doc)
 
     # [✓] TEST: Parse a Cannalysis CoA PDF after OCR is applied.
-    # parser = CoADoc()
-    # doc = '../../../.datasets/tests/test.pdf'
-    # lab = parser.identify_lims(doc, lims={'Cannalysis': CANNALYSIS})
-    # assert lab == 'Cannalysis'
-    # data = parse_cannalysis_coa(parser, doc)
-    # assert data is not None
+    parser = CoADoc()
+    doc = '../../../.datasets/tests/test.pdf'
+    lab = parser.identify_lims(doc, lims={'Cannalysis': CANNALYSIS})
+    assert lab == 'Cannalysis'
+    data = parse_cannalysis_coa(parser, doc)
+    assert data is not None
+    print('Parsed:', doc)
 
     # [✓] TEST: Parse a Cannalysis CoA PDF, applying OCR.
-    # parser = CoADoc()
-    # doc = '../../../.datasets/tests/mist.pdf'
-    # temp_path = '../../../.datasets/tests/tmp'
-    # data = parser.parse_pdf(doc, temp_path=temp_path)
-    # assert data is not None
+    parser = CoADoc()
+    doc = '../../../.datasets/tests/mist.pdf'
+    temp_path = '../../../.datasets/tests/tmp'
+    data = parser.parse_pdf(doc, temp_path=temp_path)
+    assert data is not None
+    print('Parsed:', doc)

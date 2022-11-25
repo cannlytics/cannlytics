@@ -129,6 +129,9 @@ ANALYSES = {
     'cannabinoids_status': 'cannabinoids',
     'heavy_metals_status': 'heavy_metals',
     'water_activity_status': 'water_activity',
+    'Cannabinoid Profile': 'cannabinoids',
+    'Microbiological Screen': 'microbes',
+    'Mycotoxin Screen': 'mycotoxins',
 }
 
 # A map of encountered analytes to their standardized analyte,
@@ -327,6 +330,34 @@ ANALYTES = {
     'methomy': 'methomyl',
     # FIXME: Standardize `fm`, `sscd`, `cep` without messing everything up.
     # 'ocimene': 'alpha_ocimene',
+    'Tetrahydrocannabinolic acid': 'thca',
+    'D9-Tetrahydrocannabinol': 'delta_9_thc',
+    'Cannabidiolic acid': 'cbda',
+    'Cannabidiol': 'cbd',
+    'Cannabinol': 'cbn',
+    'Cannabichromene': 'cbc',
+    'Cannabigerolic acid': 'cbga',
+    'Cannabigerol': 'cbg',
+    'Cannabidivarin': 'cbdv',
+    'Tetrahydrocannabivarin': 'thcv',
+    'D8-Tetrahydrocannabinol': 'delta_8_thc',
+    'Total Yeast and Mold': 'mold',
+    'Bile-Tolerant Gram-Neg. Bacteria': 'enterobacteriaceae',
+    'btgn': 'enterobacteriaceae',
+    'Total Arsenic': 'arsenic',
+    'Total Mercury': 'mercury',
+    'stec_e_coli': 'e_coli',
+    'stec': 'e_coli',
+    'iso_butane': 'isobutane',
+    'YM': 'mold',
+    'CC': 'total_coliforms',
+    'TAC': 'total_viable_aerobic_bacteria',
+    'total_yeast_and_mold': 'mold',
+    'total_bile_tolerant_gram_negative_bacteria': 'enterobacteriaceae',
+    'mycotoxin': 'total_aflatoxins',
+    # TODO: Identify:
+    # 'Total Coliforms': '',
+    # 'Total Viable Aerobic Bacteria': ''
 }
 # TODO: Find out how to map:
 # cis_nerolidol vs. nerolidol vs. nerolidol_1 vs. nerolidol_2 vs. trans_nerolidol?
@@ -602,6 +633,7 @@ CODINGS = {
     '< LOQ': 0.0000001,
     '<LLoQ': 0.0000001,
     '<LLOQ': 0.0000001,
+    'BLQ': 0.0000001,
     '<LLoa': 0.0000001,
     '≥ LOD': 10_001,
     'NR': None,

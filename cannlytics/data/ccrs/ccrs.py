@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/10/2022
-Updated: 4/21/2022
+Updated: 9/22/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports.
@@ -17,14 +17,20 @@ import pandas as pd
 import requests
 
 # Internal imports.
-from cannlytics.firebase import initialize_firebase, update_documents
+from cannlytics.data.ccrs.constants import (
+    analytes,
+    analyses,
+    datasets,
+)
+from cannlytics.firebase import (
+    initialize_firebase,
+    update_documents,
+)
 from cannlytics.utils.utils import snake_case
-from .constants import analytes, analyses, datasets
 
 
 class CCRS(object):
     """An instance of this class handles CCRS data."""
-
 
     def __init__(self, data_dir='C:\\data', test=True):
         """Initialize a CCRS client."""

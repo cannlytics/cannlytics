@@ -44,6 +44,40 @@ def list_datasets() -> list:
     return CANNLYTICS_DATASETS
 
 
+def load_google_sheet(
+        sheet_key,
+        sheet_name='',
+        header_row=1
+    ):
+    """Load a public Google Sheet by key or URL into a DataFrame. E.g.
+
+        https://docs.google.com/spreadsheets/d/{key}/edit/
+
+    Args:
+        sheet_key (str): A Google Sheets URL or the Sheet key found in in the URL.
+        sheet_name (str): A name of a particular sheet, the first sheet
+            is loaded by default (optional).
+        header_row (int): The row of the headers, 1 by default (optional).
+    Returns:
+        (DataFrame): The Google Sheet data in a DataFrame.    
+    Credit: Gianmario Spacagna <https://stackoverflow.com/a/48986530/5021266>
+    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
+    """
+    if sheet_key.startswith('https'):
+        key = sheet_key.split('/d/')[-1].split('/edit?')[0]
+    else:
+        key = sheet_key
+    url = 'https://docs.google.com/spreadsheets/d/{key}/gviz/tq?tqx=out:csv&sheet={sheet_name}&headers={header_row}'
+    url = url.format(
+        key=key,
+        sheet_name=sheet_name.replace(' ', '%20'),
+        header_row=header_row,
+    )
+    df = pd.read_csv(url)
+    return df.drop([col for col in df.columns if col.startswith('Unnamed')], axis=1)
+
+
+
 # === Data aggregation tools. ===
 
 def aggregate_datasets(

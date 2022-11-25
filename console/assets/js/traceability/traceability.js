@@ -161,7 +161,7 @@ const labTests = {
      * @param {String} versionId The secret version, the organization's state.
      */
     const query = `license=${licenseNumber}&org_id=${orgId}&version_id=${versionId}`;
-    const url = `/api/traceability/lab-tests?${query}`;
+    const url = `/api/traceability/results?${query}`;
     authRequest(url).then((response) => {
       const { data } = response;
       if (data) {

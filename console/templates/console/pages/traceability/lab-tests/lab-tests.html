@@ -27,7 +27,7 @@
           image='console/images/illustrations/science/lab_books.svg'
           message='No lab tests were found for your active license.'
           title='No Lab Tests Found'
-          url='/traceability/lab-tests/lab-test?new=true'
+          url='/traceability/results/lab-test?new=true'
           only
         %}
       </div>
@@ -35,7 +35,7 @@
       <!-- AG Grid Table -->
       <div id="data-table" class="d-none">
         <div
-          id="lab-tests-table"
+          id="results-table"
           class="ag-theme-alpine-dark"
           style="height: 350px; width:100%;"
         ></div>
@@ -53,7 +53,7 @@
 
   <script>
     cannlytics.traceability.getLabTests(
-      'lab-tests-table',
+      'results-table',
       '{{ organizations.0.uid }}',
       '{{ organizations.0.licenses.0.license_number }}',
       '{{ organizations.0.licenses.0.user_api_key_secret.version_id }}',

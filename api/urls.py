@@ -4,10 +4,10 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2021
-Updated: 9/11/2022
-License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+Updated: 9/26/2022
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-Description: API URLs to interface with cannabis analytics.
+Description: API URLs to interface with cannabis data and analytics.
 """
 # External imports.
 from django.urls import include, path
@@ -33,7 +33,7 @@ app_name = 'api' # pylint: disable=invalid-name
 
 urlpatterns = [
 
-    # Base API endpoint.
+    # Base API endpoint for users to discover an index of endpoints.
     path('', base.index, name='index'),
 
     # Authentication API endpoints.
@@ -52,33 +52,35 @@ urlpatterns = [
     # Data API endpoints.
     path('data', include([
 
-        # Base data endpoint.
-        path('', api.data.data.datasets),
+        # Base data API endpoint for users to find available datasets.
+        path('', api.data.data_base),
 
-        # Analyses data API endpoints.
-        path('/analyses', api.data.lab_analyses_data.analyses_data),
-        path('/analyses/<analysis_id', api.data.lab_analyses_data.analyses_data),
-        path('/analytes', api.data.lab_analyses_data.analytes_data),
-        path('/analytes/<analyte_id', api.data.lab_analyses_data.analytes_data),
+        # Analyses and analytes data API endpoints.
+        path('/analyses', api.data.analyses_data),
+        path('/analyses/<analysis_id', api.data.analyses_data),
+        path('/analytes', api.data.analytes_data),
+        path('/analytes/<analyte_id', api.data.analytes_data),
 
         # COA data and parser API endpoints.
-        path('/coas', api.data.coa_data.coa_data),
-        path('/coas/download', api.data.coa_data.download_coa_data),
+        path('/coas', api.data.coa_data),
+        path('/coas/download', api.data.download_coa_data),
 
         # Labs data API endpoints.
         path('labs', include([
-            path('', api.data.lab_data.lab_data),
-            path('/<license_number>', api.data.lab_data.lab_data),
-            path('/<license_number>/analyses', api.data.lab_data.lab_analyses),
-            path('/<license_number>/logs', api.data.lab_data.lab_logs),
+            path('', api.data.lab_data),
+            path('/<license_number>', api.data.lab_data),
+            path('/<license_number>/analyses', api.data.lab_analyses),
+            path('/<license_number>/logs', api.data.lab_logs),
         ])),
 
-        # TODO: Licensee data - Get data about specific licenses.
-
-        # Optional: Datasets data - Allow users to find available datasets.
+        # License data.
+        path('/licenses', include([
+            path('', api.data.license_data),
+            path('/<license_number>', api.data.license_data),
+        ])),
 
         # CCRS data endpoints.
-        # TODO: Re-design CCRS endpoints around timeseries statistics.
+        # FIXME: Re-design CCRS endpoints around timeseries statistics.
         # path('/ccrs/areas', ccrs_data.areas),
         # path('/ccrs/contacts', ccrs_data.contacts),
         # path('/ccrs/integrators', ccrs_data.integrators),
@@ -94,153 +96,153 @@ urlpatterns = [
         # path('/ccrs/strains', ccrs_data.strains),
         # path('/ccrs/transfers', ccrs_data.transfers),
 
-        # Regulation data API endpoints.
-        path('/regulations', api.data.regulation_data),
-        path('/regulations/<state>', api.data.regulation_data.regulation_data),
-
-        # State data API endpoints.
-        # TODO: Dynamically route states.
-        # path('/state/<state>', state_data),
-        path('/states', api.data.state_data.state_data),
-        path('/states/ct', api.data.state_data.state_data_ct),
-        path('/states/ma', api.data.state_data.state_data_ma),
-        path('/states/ok', api.data.state_data.state_data_ok),
-        path('/states/or', api.data.state_data.state_data_or),
-        path('/states/wa', api.data.state_data.state_data_wa),
-
-        # TODO: Lab result data API endpoints.
+        # Lab result data API endpoints.
         path('/results', include([
-            path('', api.data.strain_data.strain_data),
-            path('/<lab_result_id>', api.data.strain_data.strain_data),
+            path('', api.data.strain_data),
+            path('/<lab_result_id>', api.data.strain_data),
         ])),
 
         # Strain data API endpoints.
         path('/strains', include([
-            path('', api.data.strain_data.strain_data),
-            path('/<strain_name>', api.data.strain_data.strain_data),
+            path('', api.data.strain_data),
+            path('/<strain_name>', api.data.strain_data),
         ])),
 
-        # TODO: Implement patents data endpoints.
-        # path('/patents', include([
-        #     path('', patent_data.patent_data),
-        #     path('/<patent_number>', patent_data.patent_data),
-        # ])),
+        # Regulation data API endpoints.
+        path('/regulations', api.data.regulation_data),
+        path('/regulations/<state>', api.data.regulation_data),
+
+        # State data API endpoints.
+        path('/states', api.data.state_data),
+        path('/states/<state>', api.data.state_data),
 
     ])),
 
     # Stats endpoints.
     path('stats', include([
-        path('', api.stats.effects_stats.effects_stats),
-        path('/effects', api.stats.effects_stats.effects_stats),
-        path('/effects/actual', api.stats.effects_stats.record_effects),
+        path('', api.stats.effects_stats),
+        path('/effects', api.stats.effects_stats),
+        path('/effects/actual', api.stats.record_effects),
         path('/effects/<strain>', api.stats.effects_stats),
-        path('/personality', api.stats.personality_stats.personality_stats),
-        path('/recommendations', api.stats.recommendation_stats.recommendation_stats),
-        path('/patents', api.stats.patent_stats.patent_stats),
+        path('/personality', api.stats.personality_stats),
+        path('/recommendations', api.stats.recommendation_stats),
+        path('/patents', api.stats.patent_stats),
+        # TODO: Flower Art API endpoint.
     ])),
 
     # LIMS API endpoints.
     path('lims', include([
         path('analyses', include([
-            path('', api.lims.analyses.analyses),
-            path('/<analysis_id>', api.lims.analyses.analyses),
+            path('', api.lims.analyses),
+            path('/<analysis_id>', api.lims.analyses),
         ])),
         path('analytes', include([
-            path('', api.lims.analytes.analytes),
-            path('/<analyte_id>', api.lims.analytes.analytes),
+            path('', api.lims.analytes),
+            path('/<analyte_id>', api.lims.analytes),
         ])),
         path('areas', include([
-            path('', api.lims.areas.areas),
-            path('/<area_id>', api.lims.areas.areas),
+            path('', api.lims.areas),
+            path('/<area_id>', api.lims.areas),
         ])),
         path('certificates', include([
-            path('/generate', api.lims.certificates.generate_coas),
-            path('/review', api.lims.certificates.review_coas),
-            path('/approve', api.lims.certificates.approve_coas),
-            path('/post', api.lims.certificates.post_coas),
-            path('/release', api.lims.certificates.release_coas),
+            path('/generate', api.lims.generate_coas),
+            path('/review', api.lims.review_coas),
+            path('/approve', api.lims.approve_coas),
+            path('/post', api.lims.post_coas),
+            path('/release', api.lims.release_coas),
         ])),
         path('contacts', include([
-            path('', api.lims.contacts.contacts),
-            path('/<contact_id>', api.lims.contacts.contacts),
+            path('', api.lims.contacts),
+            path('/<contact_id>', api.lims.contacts),
         ])),
         path('people', include([
-            path('', api.lims.contacts.people),
-            path('/<person_id>', api.lims.contacts.people),
+            path('', api.lims.people),
+            path('/<person_id>', api.lims.people),
         ])),
         path('inventory', include([
-            path('', api.lims.inventory.inventory),
-            path('/<inventory_id>', api.lims.inventory.inventory),
+            path('', api.lims.inventory),
+            path('/<inventory_id>', api.lims.inventory),
         ])),
         path('instruments', include([
-            path('', api.lims.instruments.instruments),
-            path('/<instrument_id>', api.lims.instruments.instruments),
+            path('', api.lims.instruments),
+            path('/<instrument_id>', api.lims.instruments),
         ])),
         path('invoices', include([
-            path('', api.lims.invoices.invoices),
-            path('/<invoice_id>', api.lims.invoices.invoices),
+            path('', api.lims.invoices),
+            path('/<invoice_id>', api.lims.invoices),
         ])),
         path('measurements', include([
-            path('', api.lims.measurements.measurements),
-            path('/<measurement_id>', api.lims.measurements.measurements),
+            path('', api.lims.measurements),
+            path('/<measurement_id>', api.lims.measurements),
         ])),
         path('projects', include([
-            path('', api.lims.projects.projects),
-            path('/<project_id>', api.lims.projects.projects),
+            path('', api.lims.projects),
+            path('/<project_id>', api.lims.projects),
         ])),
         path('results', include([
-            path('', api.lims.results.results),
-            path('/<result_id>', api.lims.results.results),
-            path('/calculate', api.lims.results.calculate_results),
-            path('/post', api.lims.results.post_results),
-            path('/release', api.lims.results.release_results),
-            path('/send', api.lims.results.send_results),
+            path('', api.lims.results),
+            path('/<result_id>', api.lims.results),
+            path('/calculate', api.lims.calculate_results),
+            path('/post', api.lims.post_results),
+            path('/release', api.lims.release_results),
+            path('/send', api.lims.send_results),
         ])),
         path('samples', include([
-            path('', api.lims.samples.samples),
-            path('/<sample_id>', api.lims.samples.samples),
+            path('', api.lims.samples),
+            path('/<sample_id>', api.lims.samples),
         ])),
         path('templates', include([
-            path('', api.lims.results.templates),
-            path('/<template_id>', api.lims.results.templates),
+            path('', api.lims.templates),
+            path('/<template_id>', api.lims.templates),
         ])),
         path('transfers', include([
-            path('', api.lims.transfers.transfers),
-            path('/<transfer_id>', api.lims.transfers.transfers),
-            path('/receive', api.lims.transfers.receive_transfers),
+            path('', api.lims.transfers),
+            path('/<transfer_id>', api.lims.transfers),
+            path('/receive', api.lims.receive_transfers),
         ])),
         path('transporters', include([
-            path('', api.lims.transfers.transporters),
-            path('/<transporter_id>', api.lims.transfers.transporters),
+            path('', api.lims.transporters),
+            path('/<transporter_id>', api.lims.transporters),
         ])),
         path('vehicles', include([
-            path('', api.lims.transfers.vehicles),
-            path('/<vehicle_id>', api.lims.transfers.vehicles),
+            path('', api.lims.vehicles),
+            path('/<vehicle_id>', api.lims.vehicles),
         ])),
         path('waste', include([
-            path('', api.lims.waste.waste),
-            path('/<waste_item_id>', api.lims.waste.waste),
+            path('', api.lims.waste),
+            path('/<waste_item_id>', api.lims.waste),
         ])),
     ])),
 
     # Traceability API endpoints.
-    # TODO: Implement remaining Metrc endpoints.
     path('traceability', include([
-        path('/delete-license', api.traceability.traceability.delete_license),
-        path('/employees', api.traceability.traceability.employees),
-        path('/employees/<license_number>', api.traceability.traceability.employees),
-        path('/items', api.traceability.traceability.items),
-        path('/items/<item_id>', api.traceability.traceability.items),
-        path('/lab-tests', api.traceability.traceability.lab_tests),
-        path('/lab-tests/<test_id>', api.traceability.traceability.lab_tests),
-        path('/locations', api.traceability.traceability.locations),
-        path('/locations/<area_id>', api.traceability.traceability.locations),
-        path('/packages', api.traceability.traceability.packages),
-        path('/packages/<package_id>', api.traceability.traceability.packages),
-        path('/strains', api.traceability.traceability.strains),
-        path('/strains/<strain_id>', api.traceability.traceability.strains),
-        path('/transfers', api.traceability.traceability.transfers),
-        path('/transfers/<transfer_id>', api.traceability.traceability.transfers),
+        path('/delete-license', api.traceability.delete_license),
+        path('/employees', api.traceability.employees),
+        path('/employees/<license_number>', api.traceability.employees),
+        path('/items', api.traceability.items),
+        path('/items/<item_id>', api.traceability.items),
+        path('/locations', api.traceability.locations),
+        path('/locations/<area_id>', api.traceability.locations),
+        path('/packages', api.traceability.packages),
+        path('/packages/<package_id>', api.traceability.packages),
+        path('/results', api.traceability.lab_tests),
+        path('/results/<test_id>', api.traceability.lab_tests),
+        path('/strains', api.traceability.strains),
+        path('/strains/<strain_id>', api.traceability.strains),
+        path('/transfers', api.traceability.transfers),
+        path('/transfers/<transfer_id>', api.traceability.transfers),
+        # TODO: Implement remaining Metrc endpoints:
+        # - deliveries
+        # - categories
+        # - facilities
+        # - harvests
+        # - patients
+        # - plants
+        # - plantbatches
+        # - receipts
+        # - transfers/templates
+        # - transaction
+        # - waste
     ])),
 
     # Organization API endpoints.
@@ -256,11 +258,13 @@ urlpatterns = [
     path('users', include([
         path('', users.users),
         path('/<user_id>', users.users),
+        path('/<user_id>/about', users.users),
+        path('/<user_id>/consumption', users.users),
+        path('/<user_id>/spending', users.users),
         path('/<user_id>/logs', include([
             path('', settings.logs),
             path('/<log_id>', settings.logs),
         ])),
         path('/<user_id>/settings', users.users),
     ])),
-
 ]

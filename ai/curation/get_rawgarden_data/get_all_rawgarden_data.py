@@ -141,6 +141,7 @@ def get_rawgarden_products(
 def download_rawgarden_coas(
         items: pd.DataFrame,
         pause: Optional[float] = 0.24,
+        replace: Optional[bool] = False,
         verbose: Optional[bool] = True,
     ) -> None:
     """Download Raw Garden product COAs to `product_subtype` folders.
@@ -149,6 +150,8 @@ def download_rawgarden_coas(
             and `lab_results_url` to download.
         pause (float): A pause to respect the server serving the PDFs,
             `0.24` seconds by default (optional).
+        replace (bool): Whether or not to replace any existing PDFs,
+            `False` by default (optional).
         verbose (bool): Whether or not to print status, `True` by
             default (optional).
     """
@@ -172,6 +175,8 @@ def download_rawgarden_coas(
         filename = url.split('/')[-1]
         folder = kebab_case(subtype)
         outfile = os.path.join(COA_PDF_DIR, folder, filename)
+        if os.path.isfile(outfile):
+            continue
         response = requests.get(url, headers=DEFAULT_HEADERS)
         with open(outfile, 'wb') as pdf:
             pdf.write(response.content)
@@ -317,65 +322,65 @@ def upload_lab_results(
 #-----------------------------------------------------------------------
 if __name__ == '__main__':
 
-    # # === Setup ===
+    # === Setup ===
     from cannlytics.data.coas import CoADoc
 
-    # # Support command line usage.
-    # # Future work: Allow data dirs to be specified from the command line.
-    # import argparse
-    # try:
-    #     parser = argparse.ArgumentParser()
-    #     parser.add_argument('--days_ago', dest='days_ago', type=int)
-    #     parser.add_argument('--get_all', dest='get_all', type=bool)
-    #     args = parser.parse_args()
-    # except SystemExit:
-    #     args = {}
+    # Support command line usage.
+    # Future work: Allow data dirs to be specified from the command line.
+    import argparse
+    try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--days_ago', dest='days_ago', type=int)
+        parser.add_argument('--get_all', dest='get_all', type=bool)
+        args = parser.parse_args()
+    except SystemExit:
+        args = {}
 
-    # # Specify collection period.
-    # DAYS_AGO = args.get('days_ago', 1)
-    # GET_ALL =  args.get('get_all', True)
+    # Specify collection period.
+    DAYS_AGO = args.get('days_ago', 1)
+    GET_ALL =  args.get('get_all', True)
 
-    # # === Data Collection ===
+    # === Data Collection ===
 
-    # # Get the most recent Raw Garden products.
-    # start = datetime.now() - timedelta(days=DAYS_AGO)
-    # if GET_ALL:
-    #     start = datetime(year=2018, month=1, day=1)
-    # products = get_rawgarden_products(start=start)
-    # filenames = products['coa_pdf'].to_list()
+    # Get the most recent Raw Garden products.
+    start = datetime.now() - timedelta(days=DAYS_AGO)
+    if GET_ALL:
+        start = datetime(year=2018, month=1, day=1)
+    products = get_rawgarden_products(start=start)
+    filenames = products['coa_pdf'].to_list()
 
-    # # Download Raw Garden product COAs to `product_subtype` folders.
-    # download_rawgarden_coas(products, pause=0.24, verbose=True)
+    # Download Raw Garden product COAs to `product_subtype` folders.
+    download_rawgarden_coas(products, pause=0.24, verbose=True)
 
-    # # === Data Curation ===
+    # === Data Curation ===
 
-    # # Parse COA PDFs with CoADoc.
-    # coa_data, unidentified_coas = parse_rawgarden_coas(
-    #     COA_PDF_DIR,
-    #     filenames=filenames,
-    #     temp_path=TEMP_PATH,
-    #     verbose=True,
-    # )
+    # Parse COA PDFs with CoADoc.
+    coa_data, unidentified_coas = parse_rawgarden_coas(
+        COA_PDF_DIR,
+        filenames=filenames,
+        temp_path=TEMP_PATH,
+        verbose=True,
+    )
 
-    # # Merge the `products`'s `product_subtype` with the COA data.
-    # coa_df = rmerge(
-    #     pd.DataFrame(coa_data),
-    #     products,
-    #     on='coa_pdf',
-    #     how='left',
-    #     replace='right',
-    # )
+    # Merge the `products`'s `product_subtype` with the COA data.
+    coa_df = rmerge(
+        pd.DataFrame(coa_data),
+        products,
+        on='coa_pdf',
+        how='left',
+        replace='right',
+    )
 
-    # # Create hashes.
-    # coa_df = coa_df.where(pd.notnull(coa_df), None)
-    # coa_df['results_hash'] = coa_df['results'].apply(
-    #     lambda x: create_hash(x),
-    # )
-    # coa_df['sample_hash'] = coa_df.loc[:, coa_df.columns != 'sample_hash'].apply(
-    #     lambda x: create_hash(x.to_dict()),
-    #     axis=1,
-    # )
-    # datafile_hash = create_hash(coa_df)
+    # Create hashes.
+    coa_df = coa_df.where(pd.notnull(coa_df), None)
+    coa_df['results_hash'] = coa_df['results'].apply(
+        lambda x: create_hash(x),
+    )
+    coa_df['sample_hash'] = coa_df.loc[:, coa_df.columns != 'sample_hash'].apply(
+        lambda x: create_hash(x.to_dict()),
+        axis=1,
+    )
+    datafile_hash = create_hash(coa_df)
 
     # # === Data Archiving ===
 
@@ -414,7 +419,7 @@ if __name__ == '__main__':
     # upload_file(storage_datafile, datafile, bucket_name=BUCKET_NAME)
     # upload_file(storage_error_file, error_file, bucket_name=BUCKET_NAME)
 
-    # # == Data Aggregation ===
+    # == Data Aggregation ===
 
     # # Initialize the COA parser.
     # parser = CoADoc()

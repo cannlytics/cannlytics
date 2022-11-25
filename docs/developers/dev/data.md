@@ -68,10 +68,51 @@ A dataset is composed of:
     git push
     ```
 
+## Making a Dataset Pull Request
+
+When you want to make a pull request to a specific dataset, first, create a pull request branch on [Hugging Face](huggingface.co), then checkout the branch:
+
+```bash
+git fetch origin refs/pr/2:pr/2
+git checkout pr/2
+```
+
+Next, do your modifications and track all of your changes, including any large data files, e.g. `.csv` files:
+
+```bash
+git lfs track *.csv
+git add *.csv
+git commit -m "Added `csv` files"
+git add --all
+git status
+git commit -m "Updated `cannabis_licenses` dataset."
+git push
+```
+
+Finally, make the pull request:
+
+```bash
+git push origin pr/2:refs/pr/2
+```
+
+🎉 Congratulations, your pull request is now ready to be reviewed and merged by the repository admin!
+
 ## Testing a Dataset <a name="testing"></a>
 
-You can create dummy data for supported datafiles with:
+You can create dummy data for te dataset with:
 
 ```
 datasets-cli dummy_data datasets/<your-dataset-folder> --auto_generate
+```
+
+You can also load the dataset locally in Python, for example:
+
+```py
+from datasets import load_dataset
+
+# Load the dataset.
+dataset = load_dataset('cannabis_licenses.py', 'ca')
+data = dataset['data']
+assert len(data) > 0
+print('Read %i data points.' % len(data))
 ```

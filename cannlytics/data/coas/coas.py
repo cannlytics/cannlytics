@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 9/14/2022
+Updated: 10/10/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -20,9 +20,9 @@ Description:
 
     In order to parse CoAs well, CoADoc takes into consideration:
 
-        - The lab or LIMS that generated the CoA;
-        - PDF properties, such as the fonts used and the page dimensions;
-        - All detected words, lines, columns, white-space, etc.
+        * The lab or LIMS that generated the CoA;
+        * PDF properties, such as the fonts used and the page dimensions;
+        * All detected words, lines, columns, white-space, etc.
     
     The roadmap for CoADoc is to continue adding lab and LIMS CoA
     parsing algorithms until a general CoA parsing algorithm may be able
@@ -39,6 +39,7 @@ Supported Labs and LIMS:
     ✓ MCR Labs
     ✓ SC Labs
     ✓ Sonoma Lab Works
+    ✓ Steep Hill Massachusetts
     ✓ TagLeaf LIMS
     ✓ Veda Scientific
 
@@ -78,6 +79,7 @@ import openpyxl
 import pandas as pd
 import requests
 import pdfplumber
+from PIL import Image
 from PyPDF2 import PdfMerger
 try:
     from pyzbar.pyzbar import decode
@@ -95,6 +97,7 @@ except ImportError:
 
 # Internal imports.
 from cannlytics.data.data import create_hash, write_to_worksheet
+from cannlytics.data.web import download_google_drive_file
 from cannlytics.utils import (
     convert_to_numeric,
     dump_column,
@@ -121,6 +124,7 @@ from cannlytics.data.coas.mcrlabs import MCR_LABS
 from cannlytics.data.coas.sclabs import SC_LABS
 from cannlytics.data.coas.sonoma import SONOMA
 from cannlytics.data.coas.tagleaf import TAGLEAF
+from cannlytics.data.coas.steephill import STEEPHILL
 from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
 
 # Labs and LIMS that CoADoc can parse.
@@ -133,11 +137,13 @@ LIMS = {
     'SC Labs': SC_LABS,
     'Sonoma Lab Works': SONOMA,
     'TagLeaf LIMS': TAGLEAF,
+    'Steep Hill': STEEPHILL,
     'Veda Scientific': VEDA_SCIENTIFIC,
 }
 
 # Default preferred order for DataFrame columns.
-DEFAULT_COLUMN_ORDER = ['sample_id', 'product_name', 'producer',
+# TODO: Add `sample_hash` and `results_hash` to the beginning.
+DEFAULT_COLUMN_ORDER = ['product_name', 'producer',
     'product_type', 'date_tested']
 
 # Default nuisance columns to remove during standardization.
@@ -149,7 +155,7 @@ DEFAULT_NUISANCE_COLUMNS = ['received_by', 'sampled_by', 'Unnamed: 1',
 DEFAULT_NUMERIC_COLUMNS = ['value', 'mg_g', 'lod', 'loq', 'limit', 'margin_of_error']
 
 # Encountered Metrc prefixes used to identify Metrc IDs.
-METRC_PREFIXES = ['1A40603']
+METRC_PREFIXES = ['1A40603', '1A40A01']
 
 # A custom `ValueError` message to raise when no known LIMS is identified.
 UNIDENTIFIED_LIMS = 'CoA not recognized as a CoA from a supported LIMS: '
@@ -377,6 +383,7 @@ class CoADoc:
             pdf: Any,
             image_index: Optional[int] = None,
             page_index: Optional[int] = 0,
+            resolution: Optional[int] = 300,
         ) -> str:
         """Find the QR code given a CoA PDF or page.
         If no `image_index` is provided, then all images are tried to be
@@ -386,6 +393,8 @@ class CoADoc:
             pdf (PDF or Page): A pdfplumber PDF or Page.
             image_index (int): A known image index for the QR code.
             page_index (int): The page to search, 0 by default (optional).
+            resolution (int): The resolution to render the QR code,
+                `300` by default (optional).
         Returns:
             (str): The QR code URL.
         """
@@ -399,13 +408,13 @@ class CoADoc:
             page = pdf
         if image_index:
             img = page.images[image_index]
-            decoded_image = self.decode_pdf_qr_code(page, img)
+            decoded_image = self.decode_pdf_qr_code(page, img, resolution)
             image_data = decoded_image[0].data.decode('utf-8')
         else:
             image_range = sandwich_list(page.images)
             for img in image_range:
                 try:
-                    decoded_image = self.decode_pdf_qr_code(page, img)
+                    decoded_image = self.decode_pdf_qr_code(page, img, resolution)
                     image_data = decoded_image[0].data.decode('utf-8')
                     if image_data:
                         break
@@ -495,6 +504,7 @@ class CoADoc:
     def get_pdf_image_data(
             self,
             page: Any,
+            bbox: Optional[tuple] = None,
             image_index: Optional[int] = 0, 
             resolution: Optional[int] = 300,
         ) -> str:
@@ -506,9 +516,10 @@ class CoADoc:
         Returns:
             (str): The image data.
         """
-        y = page.height
-        img = page.images[image_index]
-        bbox = (img['x0'], y - img['y1'], img['x1'], y - img['y0'])
+        if bbox is None:
+            y = page.height
+            img = page.images[image_index]
+            bbox = (img['x0'], y - img['y1'], img['x1'], y - img['y0'])
         crop = page.crop(bbox)
         obj = crop.to_image(resolution=resolution)
         buffered = BytesIO()
@@ -520,6 +531,7 @@ class CoADoc:
             self,
             doc: Any,
             lims: Optional[Any] = None,
+            temp_path: Optional[str] = '/tmp',
         ) -> str:
         """Identify if a CoA was created by a common LIMS.
         Search all of the text of the LIMS name or URL.
@@ -529,25 +541,48 @@ class CoADoc:
             doc (str, PDF or Page): A URL or a pdfplumber PDF or Page.
             lims (str or dict): The name of a specific LIMS or a
                 dictionary of known LIMS.
+            temp_path (str): A temporary directory to store any online PDFs
+                if needed for identification, `/tmp` by default (optional).
         Returns:
             (str): Returns LIMS name if found, otherwise returns `None`.
         """
         # Search all of the text of the LIMS name or URL.
         known = None
         if isinstance(doc, str):
+
+            # Handle shortened URLs.
+            text = doc
+            if doc.startswith('https://tinyurl'):
+                response = requests.get(doc, headers=DEFAULT_HEADERS)
+                text = response.url
+        
+            # Handle Google Drive PDFs.
+            if text.startswith('https://drive.google'):
+                temp_pdf = os.path.join(temp_path, 'coa.pdf')
+                if not os.path.exists(temp_path): os.makedirs(temp_path)
+                download_google_drive_file(text, temp_pdf)
+                text = temp_pdf
+
+            # Handle PDFs.
             try:
-                pdf_file = pdfplumber.open(doc)
+                pdf_file = pdfplumber.open(text)
                 text = pdf_file.pages[0].extract_text()
             except (FileNotFoundError, OSError):
-                text = doc
+                pass
+        
+        # Handle PDFs passed directly.
         else:
             if isinstance(doc, pdfplumber.pdf.PDF):
                 page = doc.pages[0]
             else:
                 page = doc
             text = page.extract_text()
+
+        # Handle custom LIMS.
         if lims is None:
             lims = LIMS
+        
+        # Iterate over all known LIMS looking for URLs and LIMS names.
         if isinstance(lims, str):
             try:
                 if self.lims[lims]['url'] in text:
@@ -566,15 +601,23 @@ class CoADoc:
                     known = key
                     break
 
-        # Try to get a QR code to identify the LIMS.
+        # If the LIMS is still unknown, then try to identify the LIMS
+        # with any a QR code, if the COA is a PDF.
         if not known:
-            qr_code_url = self.find_pdf_qr_code_url(doc)
+            try:
+                qr_code_url = self.find_pdf_qr_code_url(doc)
+            except:
+                qr_code_url = None
             if qr_code_url:
                 for key, values in lims.items():
                     url = values.get('url')
                     if url and url in qr_code_url:
                         known = key
                         break
+        
+        # Optional: Can we detect LIMS from a photo for a COA or a label?
+
+        # Return any known LIMS.
         return known
 
     def parse(
@@ -1151,7 +1194,8 @@ class CoADoc:
             # Identify standard fields, adding analytes for `wide` data.
             fields = standard_fields
             if how == 'wide':
-                fields = {**standard_fields, **standard_analytes}
+                current_fields = {x:x for x in data.keys()}
+                fields = {**current_fields, **standard_analytes}
 
             # Standardize fields.
             std = {}
@@ -1261,8 +1305,8 @@ class CoADoc:
                     criterion = details_data.columns.str.endswith(c)
                     details_data = details_data.loc[:, ~criterion]
 
-                # FIXME: Apply codings to results.
-                # Note: This is super slow (2-3 mins for 2.5k observations)!
+                # Apply codings to results.
+                # FIXME: This is super slow (2-3 mins for 2.5k observations)!
                 details_data['results'].replace(codings, inplace=True)
 
                 # Convert totals to numeric.
@@ -1389,17 +1433,20 @@ class CoADoc:
                         # Hot-fix to place unidentified analyses at the end.
                         pairs.append((a, None, 122))
 
-                # Sort the pairs of analytes/analyses.
+                # Sort the pairs of analyses / analytes.
                 pairs.sort(key=operator.itemgetter(2))
 
                 # Create a wide table of values data.
                 values = []
                 for _, item in details_data.iterrows():
 
-                    # Specify the default columns.
-                    std = {}
-                    for c in column_order:
-                        std[c] = item[c]
+                    # Use all of the details in the values.
+                    std = item.to_dict()
+
+                    # Old: Only use the default columns. Make optional?
+                    # std = {}
+                    # for c in column_order:
+                    #     std[c] = item[c]
 
                     # Get the sample results.
                     sample_results = item['results']
@@ -1438,13 +1485,12 @@ class CoADoc:
                     criterion = values_data.columns.str.endswith(c)
                     values_data = values_data.loc[:, ~criterion]
 
-                # Drop totals.
-                # TODO: Add totals back from the Details worksheet?
-                criterion = values_data.columns.str.startswith('total_')
-                values_data = values_data.loc[:, ~criterion]
+                # Old: Drop totals. Make optional?
+                # criterion = values_data.columns.str.startswith('total_')
+                # values_data = values_data.loc[:, ~criterion]
 
                 # Move certain columns to the beginning.
-                cols = column_order + [x[0] for x in pairs]
+                cols = list(details_data.columns) + [x[0] for x in pairs]
                 values_data = reorder_columns(values_data, cols)
                 return values_data
 
@@ -1466,6 +1512,19 @@ class CoADoc:
         # Raise an error if an incorrect type is passed.
         else:
             raise ValueError
+    
+    def scan(self, filename: Any) -> str:
+        """Scan an image for a QR code or barcode and return any data.
+        Args:
+            filename (str): A path to an image with a barcode or qr code.
+        Returns:
+            (str): Returns the data from the decoded QR code.
+        """
+        if isinstance(filename, str):
+            code = decode(Image.open(filename))
+        else:
+            code = decode(filename)
+        return code[0].data.decode('utf-8')
 
     def quit(self):
         """Close any driver, end any session, and reset the parameters."""
@@ -1595,6 +1654,12 @@ if __name__ == '__main__':
     # doc = '../../../tests/assets/coas/210000068-Cloud-Cake-1g.pdf'
     # temp_path = '../../../tests/assets/coas/tmp'
     # data = parser.parse_pdf(doc, temp_path=temp_path)
+
+    # [ ] TEST: Scan a QR code in an image with the `scan` method.
+    parser = CoADoc()
+    file_path = '../../../tests/assets/qr-code/steep-hill-qr-code.jpg'
+    data = parser.scan(file_path)
+    assert data.startswith('https')
 
     # [✓] TEST: Close the parser.
     parser.quit()

@@ -31,10 +31,6 @@ module.exports = env => {
     output: {
       path: path.resolve(__dirname, `./static/${appName}`), // Should be in STATICFILES_DIRS.
       filename: './bundles/[name].min.js',
-      // library: { // Turns JavaScript into a module.
-      //   name: 'cannlytics',
-      //   type: 'umd',
-      // },
       library: 'cannlytics',
       libraryTarget: 'var',
       hotUpdateChunkFilename: './bundles/hot/hot-update.js',
@@ -46,25 +42,34 @@ module.exports = env => {
         // Compiles SCSS to CSS.
         {
           test: /\.(scss)$/,
-          use: [{
-            loader: 'style-loader', // Inject CSS to page by creating `style` nodes from JS strings.
-          }, {
-            loader: 'css-loader', // Translate CSS into CommonJS modules.
-          }, {
-            loader: 'postcss-loader', // Run post compile actions.
-            options: {
-              postcssOptions: {
-                plugins: function () { // Use post css plugins, can be exported to postcss.config.js
-                  return [
-                    require('precss'),
-                    require('autoprefixer')
-                  ];
-                }
+          use: [
+            {
+              // Inject CSS to page by creating `style` nodes from JS strings.
+              loader: 'style-loader',
+            },
+            {
+              // Translate CSS into CommonJS modules.
+              loader: 'css-loader',
+            },
+            {
+              // Run post compile actions.
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  plugins: function () {
+                    return [
+                      require('precss'),
+                      require('autoprefixer')
+                    ];
+                  }
+                },
               },
             },
-          }, {
-            loader: 'sass-loader' // Compile Sass to CSS.
-          }]
+            {
+              // Compile Sass to CSS.
+              loader: 'sass-loader',
+            }
+          ]
         },
 
         // Convert ES2015 to JavaScript.

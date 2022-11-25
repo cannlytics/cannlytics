@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/11/2022
-Updated: 4/11/2022
+Updated: 9/22/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 import os
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     # Create a place for your data to live.
     data_dir = 'D:\\data\\washington'
 
-    # FIXME: Download the latest zipped datasets programattically.
+    # FIXME: Download the latest zipped datasets programmatically.
     # download_latest_ccrs_zip('../../.datasets/cannlytics/ccrs.zip')
     # dropbox_file_download(
     #     None,

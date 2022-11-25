@@ -105,7 +105,9 @@ import pdfplumber
 import requests
 
 # Internal imports.
+from cannlytics import __version__
 from cannlytics.data.data import (
+    create_hash,
     create_sample_id,
     find_first_value,
     parse_data_block,
@@ -594,7 +596,8 @@ def get_sc_labs_sample_details(
         result['limit'] = convert_to_numeric(result.get('limit'))
 
         # Assign a `key` for the analyte.
-        result['key'] = snake_case(result['name'])
+        analyte = snake_case(result['name'])
+        result['key'] = parser.analytes(analyte, analyte)
 
         # Update the result.
         results[i] = result
@@ -807,9 +810,6 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
             name = line[:first_value].replace('\n', ' ').strip()
             analyte_analysis_map[name] = analysis
 
-    # FIXME: There are odd result fields showing up.
-    # E.g. `13_1_percent_tested_06_to_05_to_2021_method_qsp_1224_loss_on_drying_moisture`
-
     # Get the results.
     results = []
     for page in report.pages[1:]:
@@ -828,6 +828,11 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
 
                 # Skip per unit values.
                 if 'per_unit' in key:
+                    continue
+
+                # Hot-fix: Skip (non-)analytes that begin with a digit.
+                # Note: It would be best to improve this logic.
+                if key[0].isdigit():
                     continue
 
                 # Determine the values, handling screens differently.
@@ -868,17 +873,22 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
             pass
 
     # Finish data collection with a freshly minted sample ID.
-    obs['analyses'] = analyses
+    # TODO: Fix or make `sample_id` obsolete.
+    obs = {**SC_LABS, **obs}
+    obs['analyses'] = json.dumps(analyses)
+    obs['coa_algorithm_version'] = __version__
+    obs['coa_parsed_at'] = datetime.now().isoformat()
     obs['date_tested'] = date_tested
     obs['product_name'] = product_name
-    obs['results'] = results
+    obs['results'] = json.dumps(results)
+    obs['results_hash'] = create_hash(results)
     obs['sample_id'] = create_sample_id(
         private_key=json.dumps(results),
         public_key=obs['product_name'],
-        salt=obs['producer'],
+        salt=obs.get('producer', obs.get('date_tested', 'cannlytics.eth')),
     )
-    obs['coa_parsed_at'] = datetime.now().isoformat()
-    return {**SC_LABS, **obs}
+    obs['sample_hash'] = create_hash(obs)
+    return obs
 
 
 def parse_sc_labs_coa(
@@ -924,26 +934,30 @@ if __name__ == '__main__':
     # parser = CoADoc()
     # lab = parser.identify_lims(sc_labs_coa_url)
     # assert lab == 'SC Labs'
-    # data = get_sc_labs_sample_details(sc_labs_coa_url)
+    # data = get_sc_labs_sample_deta
+    # ils(sc_labs_coa_url)
     # assert data is not None
+    # print('Parsed:', doc)
 
     # [✓] TEST: Parse a SC Labs CoA PDF (with cannabinoids and terpenes).
-    # directory = '../../../tests/assets/coas'
+    # directory = '../../../tests/assets/coas/sc-labs'
     # doc = f'{directory}/Mattole Valley Jack H.pdf'
     # parser = CoADoc()
     # lab = parser.identify_lims(doc)
     # assert lab == 'SC Labs'
     # data = parse_sc_labs_pdf(parser, doc)
     # assert data is not None
+    # print('Parsed:', doc)
 
     # [✓] TEST: Parse a SC Labs CoA PDF (with safety screening).
-    # directory = '../../../tests/assets/coas'
-    # doc = f'{directory}/Cherry Punch.pdf'
-    # parser = CoADoc()
-    # lab = parser.identify_lims(doc)
-    # assert lab == 'SC Labs'
-    # data = parse_sc_labs_pdf(parser, doc)
-    # assert data is not None
+    directory = '../../../tests/assets/coas/sc-labs'
+    doc = f'{directory}/Cherry Punch.pdf'
+    parser = CoADoc()
+    lab = parser.identify_lims(doc)
+    assert lab == 'SC Labs'
+    data = parse_sc_labs_pdf(parser, doc)
+    assert data is not None
+    print('Parsed:', doc)
 
     # FIXME:
     # 220000981-Lime-Mojito-Joints.pdf

@@ -1,12 +1,12 @@
 """
-Get MCR Labs Test Result Data
+CoADoc | Get MCR Labs Test Result Data
 Copyright (c) 2022 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 8/30/2022
+Updated: 10/10/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -44,7 +44,6 @@ Data Sources:
 
 Future development:
 
-    - [ ] Create a parse CoA routine that could handle a MCR labs PDF.
     - [ ] Implement a function to get all of a given client's lab results.
     - Optional: Create necessary data dirs automatically.
     - Optional: Function to download any pre-existing results.
@@ -60,28 +59,74 @@ from typing import Any, Optional
 
 # External imports.
 from bs4 import BeautifulSoup
+import pandas as pd
+import pdfplumber
 import requests
 
 # Internal imports.
-from cannlytics.data.data import create_sample_id
-from cannlytics.utils.constants import ANALYSES, ANALYTES, DEFAULT_HEADERS
+from cannlytics import __version__
+from cannlytics.data.data import create_hash, create_sample_id
+from cannlytics.utils.constants import (
+    ANALYSES,
+    ANALYTES,
+    DECARB,
+    DEFAULT_HEADERS,
+    STANDARD_UNITS,
+)
 from cannlytics.utils.utils import (
     convert_to_numeric,
     format_iso_date,
     snake_case,
     strip_whitespace,
 )
+from datasets import load_dataset
 
 
 # It is assumed that the lab has the following details.
 MCR_LABS = {
     'coa_algorithm': 'mcrlabs.py',
-    'coa_algorithm_entry_point': 'get_mcr_labs_sample_details',
+    'coa_algorithm_entry_point': 'parse_mcrlabs_coa',
     'lims': 'MCR Labs',
     'url': 'https://reports.mcrlabs.com',
     'lab': 'MCR Labs',
     'lab_website': 'https://mcrlabs.com',
-    'public': True,
+    'lab_license_number': 'IL281277',
+    'lab_image_url': '',
+    'lab_address': '85 Speen St. Lower Level, Framingham, MA 01701',
+    'lab_street': '85 Speen St. Lower Level',
+    'lab_city': 'Framingham',
+    'lab_county': 'Middlesex',
+    'lab_state': 'MA',
+    'lab_zipcode': '01701',
+    'lab_latitude': 42.310820,
+    'lab_longitude': -71.386920,
+    'lab_phone': '508-872-6666',
+    'lab_email': 'hello@mcrlabs.com',
+}
+
+# It is assumed that there are the following analyses on each COA.
+MCR_LABS_COA = {
+    'fields': {
+        'Sample ID #': 'lab_id',
+        'Sample Name': 'product_name',
+        'Batch': 'batch_number',
+        'Matrix': 'product_type',
+        'Date Received' : 'date_received',
+        'Date Tested': 'date_tested',
+        'Serving size weight': 'serving_size',
+        'Analyte': 'name',
+        'Cannabinoid': 'skip',
+        'Conc.': 'value',
+        'Test ID': 'skip',
+        'Test Analysis': 'name',
+        'Result': 'value',
+        'LOD': 'lod',
+        'LOQ': 'loq',
+        'Limits': 'limit',
+        'Disposition': 'status',
+        'Results': 'value',
+        'Unit': 'skip',
+    }
 }
 
 
@@ -552,12 +597,312 @@ def get_mcr_labs_client_details():
     raise NotImplementedError
 
 
+def parse_mcrlabs_pdf(
+        parser,
+        doc: Any,
+        coa_pdf: Optional[str] = '',
+        **kwargs,
+    ) -> dict:
+    """Parse a MCR Labs COA PDF.
+    Args:
+        parser (CoADoc): A CoADoc parsing client.
+        doc (str or PDF): A PDF file path or pdfplumber PDF.
+        coa_pdf (str): A filename to use for the `coa_pdf` field (optional).
+    Returns:
+        (dict): The sample data, including:
+            ✓ analyses
+            ✓ batch_number
+            ✓ methods
+            - {analysis}_status TODO: Record the pass / fail status for each analysis.
+            ✓ date_received
+            ✓ date_tested
+            ✓ lab_id
+            ✓ metrc_lab_id
+            ✓ metrc_source_id
+            ✓ producer
+            ✓ producer_street
+            ✓ producer_city
+            ✓ producer_state
+            ✓ producer_zipcode
+            ✓ producer_license_number
+            ✓ product_name
+            ✓ product_type
+            ✓ results
+            ✓ results_hash
+            ✓ sample_hash
+            ✓ serving_size
+            ✓ sum_of_cannabinoids (Calculate simple sum of all cannabinoids)
+            ✓ total_cannabinoids (Applying decarb rate to all acidic cannabinoids)
+            ✓ total_cbd
+            ✓ total_thc
+            - total_terpenes
+    """
+    # Read the PDF.
+    obs = {}
+    if isinstance(doc, str):
+        report = pdfplumber.open(doc)
+        obs['coa_pdf'] = coa_pdf or doc.replace('\\', '/').split('/')[-1]
+    else:
+        report = doc
+        obs['coa_pdf'] = coa_pdf or report.stream.name.replace('\\', '/').split('/')[-1]
+
+    # Get the sample details.
+    front_page = report.pages[0]
+    tables = front_page.extract_tables()
+
+    # Get the producer data.
+    # FIXME: There is probably a more elegant way to parse this block.
+    producer_details = tables[0][0][0].split('\n')
+    if len(producer_details) == 5:
+        producer = producer_details[1] + producer_details[2]
+        address = ', '.join([producer_details[-2], producer_details[-1]])
+    elif len(producer_details) == 6:
+        producer = producer_details[1] + producer_details[2]
+        address = ', '.join([
+            producer_details[-3] + producer_details[-2],
+            producer_details[-1]
+        ])
+    else:
+        producer = producer_details[1]
+        address = ', '.join([producer_details[-2], producer_details[-1]])
+
+    # Optional: Get the producer address query for Google Places search.
+    # query = tables[0][0][0].replace('\n', ' ').split('Client:')[-1] \
+    #     .replace('  ', ' ').strip()
+
+    # Get producer and producer's address.
+    # FIXME: We may be able to look up the license with the MA Open Data API.
+    address_parts = address.split(', ')
+    state_parts = address_parts[-1].split(' ')
+    obs['producer'] = producer
+    obs['producer_street'] = address_parts[0]
+    obs['producer_city'] = address_parts[1]
+    obs['producer_zipcode'] = state_parts[-1]
+    obs['producer_zipcode'] = state_parts[0].strip()
+
+    # Lookup retailer for `cannabis_licenses` dataset.
+    # FIXME: This may return multiple matches.
+    # TODO: It may be better to lookup the license data with the Cannlytics API.
+    ma_licenses = load_dataset('cannlytics/cannabis_licenses', 'ma')
+    licenses = ma_licenses['data'].to_pandas()
+    criterion = licenses['business_legal_name'].str.contains(obs['producer'])
+    match = licenses.loc[criterion]
+    if len(match) == 0:
+        criterion = licenses['premise_street_address'].str.contains(obs['producer_street'])
+        match = licenses.loc[criterion]
+    if len(match) != 0:
+        licensee = match.iloc[0]
+        obs['producer_county'] = licensee['premise_county']
+        obs['producer_latitude'] = licensee['premise_latitude']
+        obs['producer_longitude'] = licensee['premise_longitude']
+        obs['producer_license_number'] = licensee['license_number']
+
+    # Get the sample data.
+    standard_fields = MCR_LABS_COA['fields']
+    fields = tables[1][0]
+    values = tables[1][-1]
+    for i, field in enumerate(fields):
+        key = field.replace('\n', '').strip()
+        key = standard_fields[key]
+        value = values[i].replace('\n', '').strip()
+        obs[key] = value
+
+    # Get the Metrc source ID.
+    # FIXME: Get both Metrc IDs if present.
+    try:
+        prefix = '1A40A01'
+        front_page_text = front_page.extract_text()
+        metrc_id = prefix + front_page_text.split(prefix)[-1].split('\n')[0].split('Date')[0]
+        obs['metrc_source_id'] = metrc_id
+        obs['metrc_lab_id'] = metrc_id
+    except:
+        obs['metrc_lab_id'] = None
+
+    # Get the date reported to override `date_tested`.
+    try:
+        date = front_page_text.split('Report Date:')[-1].strip().split(' ')[:3]
+        obs['date_tested'] = pd.to_datetime(', '.join(date))
+    except:
+        pass
+
+    # Get and standardize the analyses.
+    analyses_table = tables[-1][1:]
+    analyses = [x[0] for x in analyses_table]
+    analyses = [parser.analyses.get(x, x) for x in analyses]
+
+    # Get the methods and results.
+    # - analysis, units, key, name, value, mg_g, limit, status
+    methods, results = [], []
+    for page in report.pages[1:]:
+
+        # Get the text and the tables.
+        page_text = page.extract_text()
+        tables = page.extract_tables()
+
+        # Skip quality control (QC) pages.
+        if 'Quality control checks' in page_text:
+            continue
+
+        # Get the analysis.
+        analysis = page_text.split('Analyst:')[0].split('\n')[-1]
+        analysis = analysis.split(' [')[0]
+        analysis = parser.analyses.get(analysis, analysis)
+
+        # Get the method.
+        method = 'The sample' + page_text.split('Table ')[0] \
+            .split('The sample')[-1].split('.')[0] + '.'
+        methods.append(method)
+
+        # Get the columns and units.
+        columns = [x.replace('\n', '') for x in tables[0][0]]
+        column_text = ','.join(columns)
+        columns = [re.sub('\(.*?\)|\[.*?\]', '', x).strip() for x in columns]
+        columns = [standard_fields.get(x, x) for x in columns]
+        if '(' in column_text:
+            units = column_text.split('(')[-1].split(')')[0]
+        else:
+            units = STANDARD_UNITS.get(analysis)
+
+        # Get the values from the tables.
+        for index, table in enumerate(tables):
+            if index == 0:
+                table = table[1:]
+            for row in table:
+
+                # Get the result data.
+                result = {'analysis': analysis, 'units': units}
+                total = False
+                for i, cell in enumerate(row):
+                    column = columns[i]
+
+                    # Get the result name and key.
+                    if column == 'name':
+                        name = cell.replace('\n', '').replace('  ', ' ')
+                        key = snake_case(name)
+                        result['key'] = parser.analytes.get(key, key)
+
+                        # Record total THC and total CBD.
+                        if cell.startswith('Total THC'):
+                            obs['total_thc'] = convert_to_numeric(row[2])
+                            total = True
+                            continue
+                        elif cell.startswith('Total CBD'):
+                            obs['total_cbd'] = convert_to_numeric(row[2])
+                            total = True
+                            continue
+                        elif key == 'test_analysis':
+                            total = True
+                            continue
+
+                    # Handle multiple occurrences of value.
+                    elif column == 'value':
+                        
+                        serving_size = result.get('value', None)
+                        if serving_size:
+                            result['serving_size'] = serving_size
+                    
+                    # Skip nuisance values.
+                    elif column == 'skip':
+                        continue
+                    
+                    # Record the value.
+                    value = convert_to_numeric(cell)
+                    if isinstance(value, str):
+                        value = value.replace('\n', '') \
+                            .replace('Not Detected', 'ND') \
+                            .replace('  ', ' ')
+                        # value = value.replace('Δ', 'Delta-')
+                    result[column] = value
+                
+                # Record the result, skipping total rows.
+                if not total:
+                    results.append(result)
+
+    # Close the report.
+    report.close()
+
+    # Calculate total (active) cannabinoids and sum of cannabinoids.
+    total_cannabinoids = 0
+    sum_of_cannabinoids = 0
+    for result in results:
+        if result['analysis'] == 'cannabinoids':
+            value = result['value']
+            if isinstance(value, float):
+                if result['key'].endswith('a'):
+                    total_cannabinoids += DECARB * value
+                else:
+                    total_cannabinoids += value
+                sum_of_cannabinoids += value
+    obs['total_cannabinoids'] = total_cannabinoids
+    obs['sum_of_cannabinoids'] = sum_of_cannabinoids
+
+    # Hot-fix: MCR Labs reports total mycotoxins.
+    # for i, result in enumerate(results):
+    #     if result['analysis'] == 'mycotoxins':
+    #         result['key'] = 'total_aflatoxins'
+    #         results.append(result)
+    #         del results[i]
+    #         break
+
+    # Turn dates to ISO format.
+    date_columns = [x for x in obs.keys() if x.startswith('date')]
+    for date_column in date_columns:
+        try:
+            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+        except:
+            pass
+
+    # Finish data collection with a freshly minted sample ID.
+    obs = {**MCR_LABS, **obs}
+    obs['analyses'] = json.dumps(analyses)
+    obs['coa_algorithm_version'] = __version__
+    obs['coa_parsed_at'] = datetime.now().isoformat()
+    obs['methods'] = json.dumps(methods)
+    obs['results'] = results
+    obs['results_hash'] = create_hash(results)
+    obs['sample_id'] = create_sample_id(
+        private_key=json.dumps(results),
+        public_key=obs['product_name'],
+        salt=obs.get('producer', obs.get('date_tested', 'cannlytics.eth')),
+    )
+    # Note: Fix for `TypeError: Object of type float32 is not JSON serializable`.
+    obs['sample_hash'] = create_hash(str(obs))
+    return obs
+
+
+def parse_mcrlabs_coa(
+        parser,
+        doc: Any,
+        **kwargs,
+    ) -> dict:
+    """Parse a MCR Labs COA PDF or URL.
+    Args:
+        doc (str or PDF): A PDF file path or pdfplumber PDF.
+        kwargs (arguments): Arguments to pass to the parsing algorithms.
+    Returns:
+        (dict): The sample data.
+    """
+    if isinstance(doc, str):
+        if doc.endswith('.pdf'):
+            data = parse_mcrlabs_pdf(parser, doc, **kwargs)
+        else:
+            data = get_mcr_labs_sample_details(parser, doc, **kwargs)
+    else:
+        data = parse_mcrlabs_pdf(parser, doc, **kwargs)
+    if isinstance(doc, str):
+        data['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
+    elif isinstance(doc, pdfplumber.pdf.PDF):
+        data['coa_pdf'] = doc.stream.name.replace('\\', '/').split('/')[-1]
+    return data
+
+
+# === Tests ===
 if __name__ == '__main__':
 
-    # === Tests ===
-    from cannlytics.utils.utils import to_excel_with_style
-    from datetime import datetime
-    import pandas as pd
+    from cannlytics.data.coas import CoADoc
+    # from cannlytics.utils.utils import to_excel_with_style
+    # from datetime import datetime
+    # import pandas as pd
 
     # Specify where your test data lives.
     DATA_DIR = '../../../.datasets/lab_results'
@@ -597,3 +942,20 @@ if __name__ == '__main__':
     # datafile = f'{DATA_DIR}/mcr-lab-results-{timestamp}.xlsx'
     # to_excel_with_style(pd.DataFrame(recent_results), datafile)
     # print('Tested getting the most recent samples.')
+
+    # [✓] TEST: Parse a MCR Labs COA PDF from 2022.
+    # parser = CoADoc()
+    # doc = '../../../tests/assets/coas/mcr-labs/Bulk 100mg Milk Chocolate Drops.pdf'
+    # lab = parser.identify_lims(doc, lims={'MCR Labs': MCR_LABS})
+    # assert lab == 'MCR Labs'
+    # data = parse_mcrlabs_pdf(parser, doc)
+    # data = parse_mcrlabs_coa(parser, doc)
+    # assert data is not None
+    # print('Parsed:', doc)
+
+    # [✓] TEST: Parse a MCR Labs COA PDF from 2021.
+    # parser = CoADoc()
+    # doc = '../../../tests/assets/coas/mcr-labs/Watermelon 30mg Gummy.pdf'
+    # data = parse_mcrlabs_pdf(parser, doc)
+    # assert data is not None
+    # print('Parsed:', doc)

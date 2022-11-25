@@ -11,7 +11,12 @@ License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Parse a Confident Cannabis CoA PDF or URL.
+    Parse a Confident Cannabis CoA PDF or URL. Labs include:
+
+        - CaliGreen Laboratory
+        - California Ag Labs
+        - CB Labs Novato
+        - Harrens Lab Inc
 
 Data Points:
 

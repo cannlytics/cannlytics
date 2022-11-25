@@ -103,7 +103,7 @@ The `traceability` API endpoints are primarily used to add track and trace funct
 | -------- | ------- | ----------- |
 | `\traceability\employees` | `GET`, `POST`, `DELETE` | Manage tracked employees. |
 | `\traceability\items` | `GET`, `POST`, `DELETE` | Manage tracked items. |
-| `\traceability\lab-tests` | `GET`, `POST`, `DELETE` | Manage tracked lab tests. |
+| `\traceability\results` | `GET`, `POST`, `DELETE` | Manage tracked lab tests. |
 | `\traceability\locations` | `GET`, `POST`, `DELETE` | Manage tracked locations. |
 | `\traceability\packages` | `GET`, `POST`, `DELETE` | Manage tracked packages. |
 | `\traceability\strains` | `GET`, `POST`, `DELETE` | Manage tracked strains. |
