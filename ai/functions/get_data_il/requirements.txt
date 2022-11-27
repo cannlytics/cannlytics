@@ -1,7 +1,0 @@
-# Function Dependencies
-# See preinstalled packages: https://cloud.google.com/functions/docs/writing/specifying-dependencies-python#pre-installed_packages
-cannlytics==0.0.11
-fredapi==0.5.0
-numpy==1.22.3
-pandas==1.4.2
-pdfplumber==0.6.1

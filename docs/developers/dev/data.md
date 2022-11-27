@@ -9,13 +9,13 @@ The following documentation is intended for Cannlytics Data Scientists who wish 
 
 ## Cloning a Dataset <a name="cloning"></a>
 
-Install [Git Large File Storage (LFS)](https://git-lfs.github.com/) and clone your repository, for example `cannabis_tests`:
+Install [Git Large File Storage (LFS)](https://git-lfs.github.com/) and clone your repository, for example `cannabis_licenses`:
 
 ```
 # Make sure that you have git-lfs installed.
 git lfs install
 
-git clone https://huggingface.co/datasets/cannlytics/cannabis_tests
+git clone https://huggingface.co/datasets/cannlytics/cannabis_licenses
 ```
 
 ## Dataset Components <a name="components"></a>
@@ -30,7 +30,7 @@ A dataset is composed of:
 
     Note that it is helpful to split your dataset into training and test datafiles.
 
-3. An optional loading script, `your_new_dataset.py`.
+3. An optional loading script, for example `cannabis_licenses.py`.
 
 ## Publishing Datasets on Hugging Face <a name="publishing"></a>
 
@@ -99,7 +99,7 @@ git push origin pr/2:refs/pr/2
 
 ## Testing a Dataset <a name="testing"></a>
 
-You can create dummy data for te dataset with:
+You can create dummy data for the dataset with:
 
 ```
 datasets-cli dummy_data datasets/<your-dataset-folder> --auto_generate

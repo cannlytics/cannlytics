@@ -1,42 +1,14 @@
-<table>
-  <tr>
-    <td colspan="4">Cannlytics Standard Operating Procedure</td>
-  </tr>
-  <tr>
-    <td>Title</td>
-    <td colspan="3">Control of Documents</td>
-  </tr>
-  <tr>
-    <td>ID</td>
-    <td>SOP-0001</td>
-    <td>Version</td>
-    <td>0.0.1</td>
-  </tr>
-  <tr>
-    <td>Created At</td>
-    <td>2021-12-03</td>
-    <td>Updated At</td>
-    <td>2021-12-04</td>
-  </tr>
-  <tr>
-    <td>Review Period</td>
-    <td>Annual</td>
-    <td>Last Review</td>
-    <td>2021-12-04</td>
-  </tr>
-  <tr>
-    <td>Author</td>
-    <td colspan="3">Keegan Leon Skeate, Founder</td>
-  </tr>
-  <tr>
-    <td>Approved By</td>
-    <td colspan="3">Keegan Leon Skeate, Founder</td>
-  </tr>
-  <tr>
-    <td>Status</td>
-    <td colspan="3">Active</td>
-  </tr>
-</table>
+| Cannlytics SOP-0001 |  |
+|---------------------|--|
+| Title | Control of Documents |
+| Version | 0.0.2 |
+| Created At | 2021-12-03 |
+| Updated At | 2022-11-25 |
+| Review Period | Annual |
+| Last Review | 2022-11-25 |
+| Author | Keegan Skeate, Founder |
+| Approved by | Keegan Skeate, Founder |
+| Status | Active |
 
 ## Introduction
 
@@ -74,6 +46,7 @@ It is essential for anyone performing a procedure to periodically read, and idea
 ## History
 
 - 0.0.1 - Initial draft.
+- 0.0.2 - Simplified SOP header table.
 
 ## References
 

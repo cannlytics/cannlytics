@@ -1,82 +1,133 @@
-<table>
-  <tr>
-    <td colspan="4">Cannlytics Standard Operating Procedure</td>
-  </tr>
-  <tr>
-    <td>Title</td>
-    <td colspan="3">Certificate of Analysis (COA) Parsing</td>
-  </tr>
-  <tr>
-    <td>ID</td>
-    <td>SOP-0002</td>
-    <td>Version</td>
-    <td>0.0.1</td>
-  </tr>
-  <tr>
-    <td>Created At</td>
-    <td>2022-09-22</td>
-    <td>Updated At</td>
-    <td>2022-09-22</td>
-  </tr>
-  <tr>
-    <td>Review Period</td>
-    <td>Annual</td>
-    <td>Last Review</td>
-    <td>2022-09-22</td>
-  </tr>
-  <tr>
-    <td>Author</td>
-    <td colspan="3">Keegan Skeate, Founder</td>
-  </tr>
-  <tr>
-    <td>Approved By</td>
-    <td colspan="3">Keegan Skeate, Founder</td>
-  </tr>
-  <tr>
-    <td>Status</td>
-    <td colspan="3">Active</td>
-  </tr>
-</table>
+| Cannlytics SOP-0002 |  |
+|---------------------|--|
+| Title | Certificate of Analysis (COA) Parsing |
+| Version | 0.0.2 |
+| Created At | 2022-09-22 |
+| Updated At | 2022-11-27 |
+| Review Period | Annual |
+| Last Review | 2022-11-27 |
+| Author | Keegan Skeate, Founder |
+| Approved by | Keegan Skeate, Founder |
+| Status | Active |
 
 ## Introduction
 
-**Certificate of Analysis (COA) Parsing**, SOP-0002, defines how Cannlytics standard operating procedure (SOP) documents are best created, stored, accessed, and used. This document is reviewed and approved by the Cannlytics admin and should be read by anyone writing standard operating procedures (SOPs).
+**Certificate of Analysis (COA) Parsing**, SOP-0002, defines how Cannlytics creates COA parsing algorithms.
 
 ## Purpose
 
-Cannlytics believes that open-source software provides major value to people generating cannabis data, such as laboratories, because:
-
-1. Methods, measurements, and data are verifiable and reproducible.
-2. Data generation and collection processes are traceable and transparent.
-3. Data generation mechanisms, data quality, quality control, statistical analysis, interpretation, and validation of data can be improved by anyone in the world.
-
-This **COA Parsing** is the first standard operating procedure (SOP), SOP-0001, to provide clear guidance and instructions to aid in the verifiability, reproducibility, and standardization of cannabis data generation and collection.
+Creating COA parsing algorithms requires much custom coding, however, having a structured approach is helpful in the development process. Creating custom COA parsing algorithms is time-consuming, but arguably provides much value. Therefore, writing custom COA parsing algorithms is usually a high value-added procedure and having a standard operating procedure for approaching the task is important. This SOP outlines steps that you can take to make writing COA parsing algorithms easier.
 
 ## Procedure
 
-After copying this document, SOP-0001, as a template and editing appropriate fields, the following steps outline how to create a new standard operating procedure (SOP).
+First, check if you can identify the LIMS that produced the COA with:
 
-1. Define the users and present the process description with appropriate detail.
-2. Describe the task in detail.
-      - Break the process into sections.
-      - Break the sections into specific steps.
-      - Number the steps or add bullet points for clarity.
-3. Specify any tools that are required or helpful for the task, such as examples, data, tools, and references.
-4. Specify reviewers and approvers and plan appropriate maintenance of the document.
-5. Publish the SOP, preferably with the Cannlytics documentation.
+```py
+from cannlytics.data.coas import CoADoc
 
-Generally, SOPs should be written in markdown so that they can be rendered in HTML or LaTeX. It is best for general SOPs to be reviewed at least annually. When changes are made, versions should be [semantically](https://semver.org/) incremented.
+doc = 'coa.pdf'
+parser = CoADoc()
+lims = parser.identify_lims(doc)
+if lims is None:
+    print('New COA parsing routine needed.')
+```
+
+If the LIMS cannot be identified, then a new COA parsing algorithm is likely needed. You can define a constant for the lab or LIMS, e.g. `LAB_X`, and add parameters such as `lab`, `lims`, and `url` that are used in `CoADoc`'s `identify_lims` method. You can test identification with:
+
+```py
+LAB_X = {
+    'coa_algorithm': 'labx.py',
+    'coa_algorithm_entry_point': 'parse_labx_coa',
+    'lims': 'Lab X',
+    'url': 'https://console.cannlytics.com',
+    'lab': 'Lab X',
+    'lab_website': 'https://cannlytics.com',
+    'lab_license_number': '',
+    'lab_image_url': '',
+    'lab_address': '',
+    'lab_street': '',
+    'lab_city': '',
+    'lab_county': '',
+    'lab_state': '',
+    'lab_zipcode': '',
+    'lab_latitude': 0.0,
+    'lab_longitude': 0.0,
+    'lab_phone': '',
+    'lab_email': '',
+}
+
+lims = parser.identify_lims(doc, lims={'Lab X': LAB_X})
+assert lims == 'Lab X'
+```
+
+Once you have identified the lab or LIMS, then you are ready to extract the data. A good starting point for extracting data is to read the PDF with `pdfplumber`.
+
+```py
+report = pdfplumber.open(doc)
+```
+
+If you can extract table data, then that is a good place to start extracting data:
+
+```py
+for page in report.pages:
+    print(page.extract_tables())
+```
+
+If you can't find any table data or not all of the data are in tables, then you can extract all of the text and parse to the best of your abilities:
+
+```py
+print('Parse data with custom logic:')
+for page in report.pages:
+    text = page.extract_text()
+    lines = text.split('\n')
+    for line in lines:
+        print(line)
+```
+
+You can also:
+
+- Set lab-specific and COA-specific constants to help parse data as needed.
+- Outline the core pieces of data that you'll collect:
+  * Producer details;
+  * Sample details;
+  * Analyses;
+  * Methods;
+  * Results.
+
+It will likely take a fair amount of custom logic to parse the above data points. Afterwards, you can standardize the results and create a hash to serve as a unique ID for data that was collected.
+
+```py
+# Turn dates to ISO format.
+date_columns = [x for x in obs.keys() if x.startswith('date')]
+for date_column in date_columns:
+    try:
+        obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+    except:
+        pass
+
+# Finish data collection with a freshly minted sample ID.
+obs = {**LAB_X, **obs}
+obs['analyses'] = json.dumps(analyses)
+obs['coa_algorithm_version'] = __version__
+obs['coa_parsed_at'] = datetime.now().isoformat()
+obs['methods'] = json.dumps(methods)
+obs['results'] = results
+obs['results_hash'] = create_hash(results)
+obs['sample_id'] = create_sample_id(
+    private_key=json.dumps(results),
+    public_key=obs['product_name'],
+    salt=obs.get('producer', obs.get('date_tested', 'cannlytics.eth')),
+)
+obs['sample_hash'] = create_hash(obs)
+```
+
+Finally, you can import your algorithm and include it in the `LIMS` constant in `cannlytics.data.coas.coas.py`. Once included, then you have successfully added a new COA parsing algorithm that can help unlock rich laboratory data from hopefully many certificates.
 
 ## Training
 
-It is essential for anyone performing a procedure to periodically read, and ideally train and test, the corresponding standard operating procedure. Adequate training should be demonstrated before performing a procedure if possible and reasonable.
+You should ensure that your COA parsing algorithm passes tests and that other Cannabis Data Scientists can use the algorithm to parse test COAs.
 
 ## History
 
 - 0.0.1 - Initial draft.
-
-## References
-
-1. Hollmann S, Frohme M, Endrullat C, Kremer A, D'Elia D, Regierer B, et al. (2020) Ten simple rules on how to write a standard operating procedure. PLoS Comput Biol 16(9): e1008095. <https://doi.org/10.1371/journal.pcbi.1008095>.
-
-2. Preston-Werner, Tom (2013). Semantic Versioning 2.0.0. Creative Commons. Retrieved from <https://semver.org/spec/v2.0.0.html>.
+- 0.0.2 - Instructions written in full.
