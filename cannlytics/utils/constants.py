@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and the Cannabis Data Science Team
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/8/2021
-Updated: 9/14/2022
+Updated: 11/28/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains useful constants. In particular, there
@@ -19,16 +19,16 @@ The remaining useful constants are: `DECARB`, `DEFAULT_HEADERS`,
 # Optional: Load known analyses and analytes from
 # the Cannlytics Database via the Cannlytics API.
 STANDARD_ANALYSES = {
-    'cannabinoids': {'names': ['potency', 'POT']},
-    'terpenes': {'names': ['terpene', 'TERP', 'terpenoids']},
-    'residual_solvents': {'names': ['solvent', 'RST']},
-    'pesticides': {'names': ['pesticide', 'PEST']},
-    'microbes': {'names': ['microbial', 'MICRO']},
-    'mycotoxins': {'names': ['mycotoxins', 'MYCO']},
-    'heavy_metals': {'names': ['metal', 'MET']},
-    'foreign_matter': {'names': ['foreign_materials']},
-    'moisture_content': {'names': ['moisture']},
-    'water_activity': {'names': ['WA']},
+    'cannabinoids': {'name': 'Cannabinoids'},
+    'terpenes': {'name': 'Terpenes'},
+    'residual_solvents': {'name': 'Residual Solvents'},
+    'pesticides': {'name': 'Pesticides'},
+    'microbes': {'name': 'Microbes'},
+    'mycotoxins': {'name': 'Mycotoxins'},
+    'heavy_metals': {'name': 'Heavy Metals'},
+    'foreign_matter': {'name': 'Foreign Matter'},
+    'moisture_content': {'name': 'Moisture Content'},
+    'water_activity': {'name': 'Water Activity'},
 }
 
 # A map of encountered analyses to their standardized analysis.
@@ -184,6 +184,12 @@ ANALYTES = {
     'D9THC': 'delta_9_thc',
     'd_9_othc': 'delta_9_thc',
     'delta_9_thc_d_9_thc': 'delta_9_thc',
+    'd_9_thca': 'thca',
+    'd_9_thcva': 'thcva',
+    'd_9_thcv': 'thcv',
+    'cbca_3': 'cbca',
+    'cbna_3': 'cbna',
+    'cbl_3': 'cbl',
     'ddvp_dichlorvous': 'dichlorvos',
     'Dichlorvos (DDVP)': 'dichlorvos',
     'dichlorvos_ddvp': 'dichlorvos',
@@ -358,6 +364,7 @@ ANALYTES = {
     # TODO: Identify:
     # 'Total Coliforms': '',
     # 'Total Viable Aerobic Bacteria': ''
+
 }
 # TODO: Find out how to map:
 # cis_nerolidol vs. nerolidol vs. nerolidol_1 vs. nerolidol_2 vs. trans_nerolidol?

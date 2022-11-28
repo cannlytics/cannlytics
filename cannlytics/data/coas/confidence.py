@@ -6,7 +6,7 @@ Authors:
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/26/2022
-Updated: 11/27/2022
+Updated: 11/28/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -15,16 +15,14 @@ Description:
 
 Data Points (✓):
 
-    - analyses
-    - methods
+    ✓ analyses
+    ✓ methods
     - {analysis}_status
     ✓ date_received
     ✓ date_tested
     ✓ external_id
     ✓ lab_id
-    - lab_results_url
-    - metrc_lab_id
-    - metrc_source_id
+    ✓ lab_results_url
     ✓ producer
     ✓ producer_street
     - producer_city
@@ -34,13 +32,13 @@ Data Points (✓):
     ✓ product_id
     ✓ product_name
     ✓ product_type
-    - results
-    - results_hash
-    - sample_hash
-    - total_cannabinoids
+    ✓ results
+    ✓ results_hash
+    ✓ sample_hash
+    ✓ total_cannabinoids (calculated)
     - total_cbd (Calculated as total_cbd = cbd + 0.877 * cbda)
     - total_thc (Calculated as total_thc = delta_9_thc + 0.877 * thca)
-    - total_terpenes
+    - total_terpenes (calculated)
 
 """
 
@@ -48,22 +46,20 @@ Data Points (✓):
 from datetime import datetime
 import json
 import os
-import re
-from typing import Any, Optional
+from typing import Any, Optional, List
 
 # External imports.
+from datasets import load_dataset
 import pandas as pd
 import pdfplumber
-import requests
 
 # Internal imports.
 from cannlytics import __version__
 from cannlytics.data.data import (
     create_hash,
     create_sample_id,
-    find_first_value,
 )
-from cannlytics.data.web import download_google_drive_file
+from cannlytics.data.gis import search_for_address
 from cannlytics.utils import convert_to_numeric, snake_case
 from cannlytics.utils.constants import DECARB
 
@@ -89,6 +85,50 @@ CONFIDENCE = {
     'lab_phone': '(206) 743-8843',
     'lab_email': 'info@conflabs.com',
 }
+
+CONFIDENCE_COA = {
+    'analyses': {
+        'Cannabinoids': 'cannabinoids',
+        'Foreign Matter': 'foreign_matter',
+        'GC Pesticides': 'pesticides',
+        'LC Pesticides': 'pesticides',
+        'Microbes': 'microbes',
+        'Mycotoxins': 'mycotoxins',
+        'Terpenes': 'terpenes',
+        'Water Activity': 'water_activity',
+    },
+    'fields': [
+        'name',
+        'analysis',
+        'value',
+        'limit',
+        'units',
+        'lod',
+        'loq',
+        'status',
+        'date_tested',
+    ],
+}
+
+
+def calculate_total_cannabinoids(
+        results: List[dict],
+        decarb: Optional[float] = DECARB,
+        analysis: Optional[str] = 'cannabinoids',
+    ) -> float:
+    """Calculates total cannabinoids, applying a decarb rate to acidic
+    cannabinoids, given a list of results.
+    """
+    total_cannabinoids = 0.0
+    for result in results:
+        if result['analysis'] == analysis:
+            value = result['value']
+            if isinstance(value, float):
+                if result['key'].endswith('a'):
+                    total_cannabinoids += decarb * value
+                else:
+                    total_cannabinoids += value
+    return total_cannabinoids
 
 
 def parse_confidence_pdf(
@@ -125,15 +165,15 @@ def parse_confidence_pdf(
             obs['lab_id'] = line.split('Sample # ')[-1]
 
         # Get the product name, product ID, and date received.
-        if 'Sample Name:' in line:
+        elif 'Sample Name:' in line:
             next_line = front_page_lines[i + 1]
             parts = next_line.split(' ')
             obs['date_received'] = parts[-1]
             obs['product_id'] = parts[-2]
             obs['product_name'] = ' '.join(parts[0:-2])
-        
+
         # Get the product type, external ID, and date tested.
-        if 'Type:' in line:
+        elif 'Type:' in line:
             next_line = front_page_lines[i + 1]
             parts = next_line.split(' ')
             obs['date_tested'] = parts[-1]
@@ -141,64 +181,152 @@ def parse_confidence_pdf(
             obs['product_type'] = ' '.join(parts[0:-2])
 
         # Get the producer.
-        if 'Origination:' in line:
+        elif 'Origination:' in line:
             next_line = front_page_lines[i + 1]
             parts = next_line.split(',')[0].split(' ')
             obs['producer_license_number'] = parts[-3]
             obs['producer'] = ' '.join(parts[0:-3])
         
         # Get the producer address.
-        if 'Address:' in line:
+        elif 'Address:' in line:
             next_line = front_page_lines[i + 1]
             parts = next_line.split(' Date of Harvest:')[0].split(' ')
             obs['producer_street'] = ' '.join(parts[0:-1])
 
-            # TODO: Get the city, zip code, and date harvested from the next line.
+            # FIXME: Get the city, zip code, and date harvested from the next line.
             # obs['producer_city'] = 
             # obs['producer_state'] = 
             # obs['producer_zipcode'] = 
+        
+        # Get the total cannabinoids.
+        elif 'Total Canna. (raw sum):' in line:
+            value = float(line.split('%')[0].split(':')[-1])
+            obs['sum_cannabinoids'] = round(value, 3)
 
-        # TODO: Get the analyses and analysis statuses.
+        # TODO: Get the analysis statuses.
         # 'Foreign Matter + Seeds:PASS Microbes:PASS Pesticides:PASS',
         # 'Water Activity:PASS Mycotoxins:PASS Heavy Metals:NE',
         # 'Residual Solvents:NE   '
 
-    # TODO: Geocode the producer's address to get latitude and longitude.
+    # Get all of the lines of the document.
+    all_lines = []
+    for page in report.pages[1:]:
+        all_lines.extend(page.extract_text().split('\n'))
 
+    # Aggregate all of the analyte tables.
+    analyte_lines = []
+    header = False
+    for line in all_lines:
+        if 'Analyte Name' in line:
+            header = True
+        elif 'Document Created' in line:
+            header = False
+        elif '[ END OF ANALYTE TABLE ]' in line:
+            break
+        elif header:
+            analyte_lines.append(line)
 
+    # Remove blank lines from the analyte tables.
+    analyte_lines = [x for x in analyte_lines if x.strip()]
 
-    # # Get the sample IDs.
-    # obs['project_id'] = 
-    # obs['batch_number'] = 
-    # obs['metrc_lab_id'] = 
-    # obs['metrc_source_id'] = 
-
-    # # Get the sample data.
-    # obs['sample_weight'] = 
-    # obs['serving_size'] = 
-
-    # Get the product data, appending long rows to the row before.
-
-    # Get and standardize the analyses.
+    # Format the results.
     analyses = []
+    results = []
+    standard_analyses = CONFIDENCE_COA['analyses']
+    standard_fields = CONFIDENCE_COA['fields']
+    analysis_names = list(standard_analyses.keys())
+    analysis_keys = list(standard_analyses.values())
+    for line in analyte_lines:
 
-    # Get the methods and results.
-    methods, results = [], []
+        # Identify the analysis.
+        values = line.replace('< MRL', '<LOQ')
+        for n, analysis in enumerate(analysis_names):
+            if analysis in values:
+                analysis_key = analysis_keys[n]
+                values = values.replace(analysis, analysis_key)
+                analyses.append(analysis_key)
+                break
 
-        # Format the result.
-        # result = {
-        #     'analysis': analysis,
-        #     'units': units,
-        #     'key': key,
-        #     'name': name,
-        # }
+        # Remove extra spaces.
+        values = values.split(' ')
+        values = [x for x in values if x.strip()]
+
+        # Parse the result for the analyte.
+        result = {}
+        for k, field in enumerate(reversed(standard_fields)):
+            if field == 'name':
+                name = ' '.join(values[0:-8])
+                key = snake_case(name)
+                analyte = parser.analytes.get(key, key)
+                result['name'] = name
+                result['key'] = analyte
+            else:
+                result[field] = values[-k - 1]
+        
+        # Record the analyte result.
+        results.append(result)
+    
+    # Calculate total cannabinoids.
+    obs['total_cannabinoids'] = calculate_total_cannabinoids(results)
+
+    # TODO: Calculate total terpenes.
+
+
+    # FIXME: Calculate total CBD and total THC.
+    results_data = pd.DataFrame(results)
+    cbd = results_data.loc[results_data['key'] == 'cbd'].iloc[0]['value']
+    cbda = results_data.loc[results_data['key'] == 'cbda'].iloc[0]['value']
+    thc = results_data.loc[results_data['key'] == 'delta_9_thc'].iloc[0]['value']
+    thca = results_data.loc[results_data['key'] == 'thca'].iloc[0]['value']
+
+    # FIXME: Apply codings to results.
+    
+
+    # Get the producer's latitude and longitude from the
+    # `cannabis_licenses` dataset or by geocoding their address.
+    wa_licenses = load_dataset('cannlytics/cannabis_licenses', 'wa')
+    licenses = wa_licenses['data'].to_pandas()
+    criterion = licenses['license_number'].str.contains(obs['producer_license_number'])
+    match = licenses.loc[criterion]
+    if len(match):
+        licensee = match.iloc[0]
+        obs['producer_county'] = licensee['premise_county']
+        obs['producer_latitude'] = licensee['premise_latitude']
+        obs['producer_longitude'] = licensee['premise_longitude']
+    else:
+        try:
+            google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
+            location = search_for_address(
+                obs['producer_address'],
+                api_key=google_maps_api_key
+            )
+            for key, value in location.items():
+                obs[f'producer_{key}'] = value
+        except:
+            print("""Set `GOOGLE_MAPS_API_KEY` environment variable to
+            get the producer's latitude and longitude.""")
+            pass
+
+    # Get the methods.
+    methods = []
+    lines = report.pages[-1].extract_text().split('\n')
+    header = False
+    for line in lines:
+        if 'Analytical Methods Used' in line:
+            header = True
+        elif header:
+            method = line.strip()
+            if method:
+                methods.append(method)
+            else:
+                break
+
+    # Get the lab results URL from the QR code.
+    obs['lab_results_url'] = parser.find_pdf_qr_code_url(front_page)
     
     # Close the report.
     report.close()
 
-    # FIXME: Calculate total cannabinoids! Sum of cannabinoids!
-    # Calculate total CBD and total THC if needed.
-    
     # Turn dates to ISO format.
     date_columns = [x for x in obs.keys() if x.startswith('date')]
     for date_column in date_columns:
@@ -209,7 +337,7 @@ def parse_confidence_pdf(
 
     # Finish data collection with a freshly minted sample ID.
     obs = {**CONFIDENCE, **obs}
-    obs['analyses'] = json.dumps(analyses)
+    obs['analyses'] = json.dumps(list(set(analyses)))
     obs['coa_algorithm_version'] = __version__
     obs['coa_parsed_at'] = datetime.now().isoformat()
     obs['methods'] = json.dumps(methods)
@@ -290,6 +418,12 @@ def parse_confidence_coa(
 if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
+    from dotenv import dotenv_values
+
+    # Set a Google Maps API key.
+    config = dotenv_values('../../../.env')
+    api_key = config['GOOGLE_MAPS_API_KEY']
+    os.environ['GOOGLE_MAPS_API_KEY'] = api_key
 
     # Specify testing constants.
     coa_url = 'https://certs.conflabs.com/full/WA-kXIRbGqnLVBI-WA-221015-052.pdf'
@@ -304,15 +438,17 @@ if __name__ == '__main__':
     # [ ] TEST: Parse COA PDF.
     parser = CoADoc()
     data = parse_confidence_pdf(parser, doc)
-    print(data)
+    assert data is not None
 
     # [ ] TEST: Parse COA URL.
+    parser = CoADoc()
+    data = parse_confidence_url(parser, coa_url)
+    assert data is not None
 
-
-    # [ ] TEST: Parse each URL and PDF ambiguously.
-    # parser = CoADoc()
-    # coas = [short_url, long_url, doc]
-    # for coa in coas:
-    #     data = parser.parse(coa, temp_path=temp_path)
-    #     assert data is not None
-    # print('✓ Completed Confidence Analytics COA parsing tests.')
+    # [ ] TEST: Parse COA URL and PDF ambiguously.
+    parser = CoADoc()
+    coas = [coa_url, doc]
+    for coa in coas:
+        data = parser.parse(coa, temp_path=temp_path)
+        assert data is not None
+    print('✓ Completed Confidence Analytics COA parsing tests.')
