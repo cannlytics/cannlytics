@@ -6,7 +6,7 @@ Authors:
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/26/2022
-Updated: 11/28/2022
+Updated: 12/2/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -18,6 +18,7 @@ Data Points (✓):
     ✓ analyses
     ✓ methods
     - {analysis}_status
+    ✓ date_harvested
     ✓ date_received
     ✓ date_tested
     ✓ external_id
@@ -25,10 +26,12 @@ Data Points (✓):
     ✓ lab_results_url
     ✓ producer
     ✓ producer_street
-    - producer_city
-    - producer_state
-    - producer_zipcode
+    ✓ producer_city
+    ✓ producer_state
+    ✓ producer_zipcode
     ✓ producer_license_number
+    ✓ producer_latitude
+    ✓ producer_longitude
     ✓ product_id
     ✓ product_name
     ✓ product_type
@@ -36,31 +39,31 @@ Data Points (✓):
     ✓ results_hash
     ✓ sample_hash
     ✓ total_cannabinoids (calculated)
-    - total_cbd (Calculated as total_cbd = cbd + 0.877 * cbda)
-    - total_thc (Calculated as total_thc = delta_9_thc + 0.877 * thca)
-    - total_terpenes (calculated)
+    ✓ total_cbd (Calculated as cbd + 0.877 * cbda)
+    ✓ total_thc (Calculated as delta_9_thc + 0.877 * thca)
+    ✓ total_terpenes (calculated)
 
 """
-
-# Standard imports.
+# Standard imports:
 from datetime import datetime
 import json
 import os
 from typing import Any, Optional, List
 
-# External imports.
+# External imports:
 from datasets import load_dataset
 import pandas as pd
 import pdfplumber
 
-# Internal imports.
+# Internal imports:
 from cannlytics import __version__
-from cannlytics.data.data import (
-    create_hash,
-    create_sample_id,
-)
+from cannlytics.data.data import create_hash, create_sample_id
 from cannlytics.data.gis import search_for_address
-from cannlytics.utils import convert_to_numeric, snake_case
+from cannlytics.utils import (
+    convert_to_numeric,
+    download_file_from_url,
+    snake_case,
+)
 from cannlytics.utils.constants import DECARB
 
 
@@ -113,8 +116,9 @@ CONFIDENCE_COA = {
 
 def calculate_total_cannabinoids(
         results: List[dict],
-        decarb: Optional[float] = DECARB,
         analysis: Optional[str] = 'cannabinoids',
+        decarb: Optional[float] = DECARB,
+        decimal_places: Optional[int] = 4,
     ) -> float:
     """Calculates total cannabinoids, applying a decarb rate to acidic
     cannabinoids, given a list of results.
@@ -128,7 +132,75 @@ def calculate_total_cannabinoids(
                     total_cannabinoids += decarb * value
                 else:
                     total_cannabinoids += value
-    return total_cannabinoids
+    return round(total_cannabinoids, decimal_places)
+
+
+def calculate_total_terpenes(
+        results: List[dict],
+        analysis: Optional[str] = 'terpenes',
+        decarb: Optional[float] = 1,
+        decimal_places: Optional[int] = 4,
+    ) -> float:
+    """Calculates total terpenes given a list of results.
+    """
+    return calculate_total_cannabinoids(
+        results,
+        decarb=decarb,
+        analysis=analysis,
+        decimal_places=decimal_places,
+    )
+
+
+def calculate_total_cbd(
+        results: List[dict],
+        cbd_key: Optional[str] = 'cbd',
+        cbda_key: Optional[str] = 'cbda',
+        decarb: Optional[float] = DECARB,
+    ) -> float:
+    """Calculates total CBD given a list of results.
+    """
+    results_data = pd.DataFrame(results)
+    try:
+        cbd = results_data.loc[results_data['key'] == cbd_key].iloc[0]['value']
+    except IndexError:
+        cbd = 0
+    try:
+        cbda = results_data.loc[results_data['key'] == cbda_key].iloc[0]['value']
+    except IndexError:
+        cbda = 0
+    cbd = convert_to_numeric(cbd)
+    if not isinstance(cbd, float):
+        cbd = 0
+    cbda = convert_to_numeric(cbda)
+    if isinstance(cbda, float):
+        cbd += cbda * decarb
+    return cbd
+
+
+def calculate_total_thc(
+        results: List[dict],
+        thc_key: Optional[str] = 'delta_9_thc',
+        thca_key: Optional[str] = 'thca',
+        decarb: Optional[float] = DECARB,
+    ) -> float:
+    """Calculates total THC given a list of results.
+    """
+    results_data = pd.DataFrame(results)
+    try:
+        thc = results_data.loc[results_data['key'] == thc_key].iloc[0]['value']
+    except IndexError:
+        thc = 0
+    try:
+        thca = results_data.loc[results_data['key'] == thca_key].iloc[0]['value']
+    except IndexError:
+        thca = 0
+    thc = convert_to_numeric(thc)
+    if not isinstance(thc, float):
+        thc = 0
+    thca = convert_to_numeric(thca)
+    if isinstance(thca, float):
+        thc += thca * decarb
+    return thc
 
 
 def parse_confidence_pdf(
@@ -137,7 +209,7 @@ def parse_confidence_pdf(
         coa_pdf: Optional[str] = '',
         **kwargs,
     ) -> dict:
-    """Parse a Steep Hill CoA PDF.
+    """Parse a Confidence Analytics COA PDF.
     Args:
         parser (CoADoc): A CoADoc parsing client.
         doc (str or PDF): A PDF file path or pdfplumber PDF.
@@ -193,12 +265,24 @@ def parse_confidence_pdf(
             parts = next_line.split(' Date of Harvest:')[0].split(' ')
             obs['producer_street'] = ' '.join(parts[0:-1])
 
-            # FIXME: Get the city, zip code, and date harvested from the next line.
-            # obs['producer_city'] = 
-            # obs['producer_state'] = 
-            # obs['producer_zipcode'] = 
+            # Get the city, zip code, and date harvested from the next line.
+            address_line = front_page_lines[i + 2]
+            address_parts = address_line.split(',')
+            zip_parts = address_parts[-1].strip().split(' ')
+            obs['producer_city'] = address_parts[0].title()
+            obs['producer_state'] = zip_parts[0]
+            obs['producer_zipcode'] = zip_parts[1]
+            obs['producer_address'] = ', '.join([
+                obs['producer_street'],
+                obs['producer_city'],
+                obs['producer_state'] + ' ' + obs['producer_zipcode'],
+            ])
+            if '(not provided)' in address_line:
+                obs['date_harvested'] = None
+            else:
+                obs['date_harvested'] = zip_parts[-1]
         
-        # Get the total cannabinoids.
+        # Get the sum of cannabinoids.
         elif 'Total Canna. (raw sum):' in line:
             value = float(line.split('%')[0].split(':')[-1])
             obs['sum_cannabinoids'] = round(value, 3)
@@ -230,8 +314,7 @@ def parse_confidence_pdf(
     analyte_lines = [x for x in analyte_lines if x.strip()]
 
     # Format the results.
-    analyses = []
-    results = []
+    analyses, results = [], []
     standard_analyses = CONFIDENCE_COA['analyses']
     standard_fields = CONFIDENCE_COA['fields']
     analysis_names = list(standard_analyses.keys())
@@ -256,31 +339,36 @@ def parse_confidence_pdf(
         for k, field in enumerate(reversed(standard_fields)):
             if field == 'name':
                 name = ' '.join(values[0:-8])
+                name = name.rstrip('3')
                 key = snake_case(name)
                 analyte = parser.analytes.get(key, key)
                 result['name'] = name
                 result['key'] = analyte
             else:
-                result[field] = values[-k - 1]
+                result[field] = convert_to_numeric(values[-k - 1])
+
+        # Skip totals.
+        if analyte == 'raw' or analyte == 'total' or not analyte:
+            continue
         
         # Record the analyte result.
         results.append(result)
-    
-    # Calculate total cannabinoids.
+
+    # Convert terpenes to percentages.
+    for i, result in enumerate(results):
+        if result['analysis'] == 'terpenes':
+            result['units'] = 'percent'
+            try:
+                result['value'] = result['value'] / 10_000
+            except TypeError:
+                pass
+            results[i] = result
+
+    # Calculate total cannabinoids, terpenes, CBD, and THC.
     obs['total_cannabinoids'] = calculate_total_cannabinoids(results)
-
-    # TODO: Calculate total terpenes.
-
-
-    # FIXME: Calculate total CBD and total THC.
-    results_data = pd.DataFrame(results)
-    cbd = results_data.loc[results_data['key'] == 'cbd'].iloc[0]['value']
-    cbda = results_data.loc[results_data['key'] == 'cbda'].iloc[0]['value']
-    thc = results_data.loc[results_data['key'] == 'delta_9_thc'].iloc[0]['value']
-    thca = results_data.loc[results_data['key'] == 'thca'].iloc[0]['value']
-
-    # FIXME: Apply codings to results.
-    
+    obs['total_terpenes'] = calculate_total_terpenes(results)
+    obs['total_cbd'] = calculate_total_cbd(results)
+    obs['total_thc'] = calculate_total_thc(results)
 
     # Get the producer's latitude and longitude from the
     # `cannabis_licenses` dataset or by geocoding their address.
@@ -355,7 +443,6 @@ def parse_confidence_pdf(
 def parse_confidence_url(
         parser,
         url: str,
-        headers: Optional[Any] = None,
         temp_path: Optional[str] = '/tmp',
         **kwargs
     ) -> dict:
@@ -372,16 +459,13 @@ def parse_confidence_url(
     Returns:
         (dict): The sample data.
     """
-    # TODO: Download the PDF.
-    temp_pdf = 'coa.pdf'
+    # Download the PDF.
+    coa_pdf = download_file_from_url(url, temp_path, ext='.pdf')
 
-    # Extract the data with the PDF parsing algorithm and record the URL.
-    data = parse_confidence_pdf(
-        parser,
-        temp_pdf,
-        coa_pdf=url,
-        **kwargs,
-    )
+    # Extract the data with the PDF parsing algorithm.
+    data = parse_confidence_pdf(parser, coa_pdf)
+
+    # Record the URL.
     data['lab_results_url'] = url
     return data
 
@@ -399,19 +483,9 @@ def parse_confidence_coa(
         (dict): The sample data.
     """
     if isinstance(doc, str):
-        if doc.startswith('http'):
+        if doc.startswith('https'):
             return parse_confidence_url(parser, doc, **kwargs)
-        elif doc.endswith('.pdf'):
-            data = parse_confidence_pdf(parser, doc, **kwargs)
-        else:
-            data = parse_confidence_pdf(parser, doc, **kwargs)
-    else:
-        data = parse_confidence_pdf(parser, doc, **kwargs)
-    if isinstance(doc, str):
-        data['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
-    elif isinstance(doc, pdfplumber.pdf.PDF):
-        data['coa_pdf'] = doc.stream.name.replace('\\', '/').split('/')[-1]
-    return data
+    return parse_confidence_pdf(parser, doc, **kwargs)
 
 
 # === Tests ===
@@ -431,21 +505,21 @@ if __name__ == '__main__':
     temp_path = '../../../tests/assets/coas/tmp'
 
     # [✓] TEST: Identify LIMS.
-    # parser = CoADoc()
-    # lims = parser.identify_lims(doc, lims={'Confidence Analytics': CONFIDENCE})
-    # assert lims == 'Confidence Analytics'
+    parser = CoADoc()
+    lims = parser.identify_lims(doc, lims={'Confidence Analytics': CONFIDENCE})
+    assert lims == 'Confidence Analytics'
 
-    # [ ] TEST: Parse COA PDF.
+    # [✓] TEST: Parse COA PDF.
     parser = CoADoc()
     data = parse_confidence_pdf(parser, doc)
     assert data is not None
 
-    # [ ] TEST: Parse COA URL.
+    # [✓] TEST: Parse COA URL.
     parser = CoADoc()
-    data = parse_confidence_url(parser, coa_url)
+    data = parse_confidence_url(parser, coa_url, temp_path=temp_path)
     assert data is not None
 
-    # [ ] TEST: Parse COA URL and PDF ambiguously.
+    # [✓] TEST: Parse COA URL and PDF ambiguously.
     parser = CoADoc()
     coas = [coa_url, doc]
     for coa in coas:

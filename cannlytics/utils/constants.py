@@ -361,10 +361,16 @@ ANALYTES = {
     'total_yeast_and_mold': 'mold',
     'total_bile_tolerant_gram_negative_bacteria': 'enterobacteriaceae',
     'mycotoxin': 'total_aflatoxins',
-    # TODO: Identify:
-    # 'Total Coliforms': '',
-    # 'Total Viable Aerobic Bacteria': ''
-
+    'a_bisabolene': 'alpha_bisabolene',
+    'a_bulnesene': 'alpha_bulnesene',
+    'a_farnesene': 'alpha_farnesene',
+    'a_maaliene': 'alpha_maaliene',
+    'a_ocimene': 'alpha_ocimene',
+    'a_thujone': 'alpha_thujone',
+    'b_farnesene': 'trans_beta_farnesene',
+    'b_maaliene': 'beta_maaliene',
+    'bisabolol': 'alpha_bisabolol',
+    'foreign_matter_i_h_e': 'foreign_matter',
 }
 # TODO: Find out how to map:
 # cis_nerolidol vs. nerolidol vs. nerolidol_1 vs. nerolidol_2 vs. trans_nerolidol?
