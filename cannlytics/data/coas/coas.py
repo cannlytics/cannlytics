@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 10/10/2022
+Updated: 12/1/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -118,6 +118,7 @@ from cannlytics.utils.constants import (
 # Lab and LIMS CoA parsing algorithms.
 from cannlytics.data.coas.anresco import ANRESCO
 from cannlytics.data.coas.cannalysis import CANNALYSIS
+from cannlytics.data.coas.confidence import CONFIDENCE
 from cannlytics.data.coas.confidentcannabis import CONFIDENT_CANNABIS
 from cannlytics.data.coas.greenleaflab import GREEN_LEAF_LAB
 from cannlytics.data.coas.mcrlabs import MCR_LABS
@@ -131,6 +132,7 @@ from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
 LIMS = {
     'Anresco Laboratories': ANRESCO,
     'Cannalysis': CANNALYSIS,
+    'Confidence Analytics': CONFIDENCE,
     'Confident Cannabis': CONFIDENT_CANNABIS,
     'Green Leaf Lab': GREEN_LEAF_LAB,
     'MCR Labs': MCR_LABS,

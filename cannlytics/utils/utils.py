@@ -783,7 +783,7 @@ def download_file_from_url(url, destination='', ext=''):
     Author: H S Umer farooq <https://stackoverflow.com/a/53153505>
     License: CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/
     """
-    get_response = requests.get(url,stream=True)
+    get_response = requests.get(url, stream=True)
     file_name = snake_case(url.split('/')[-1])
     file_path = os.path.join(destination, file_name + ext)
     with open(file_path, 'wb') as f:
