@@ -52,7 +52,7 @@ Cannlytics is made available with ❤️ and your good will. Please consider mak
 | 👐 OpenCollective | <https://opencollective.com/cannlytics-company/donate> |
 | 💸 PayPal Donation | <https://paypal.me/cannlytics> |
 | 💵 Venmo Donation | <https://www.venmo.com/u/cannlytics> |
-| 🪙 Bitcoin donation address| 34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6 |
+| 🪙 Bitcoin donation address| `34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6` |
 | ⚡ Ethereum donation address | `cannlytics.eth` |
 
 ## 🏛️ License <a name="license"></a>

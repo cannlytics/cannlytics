@@ -1,5 +1,5 @@
 """
-Reported Effects and Aromas Prediction Model
+Product Descriptions with NLP and GLP.
 Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>

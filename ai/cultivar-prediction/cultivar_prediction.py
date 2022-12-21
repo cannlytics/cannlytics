@@ -1,5 +1,5 @@
 """
-Genetics Prediction | Cannlytics AI
+Cultivar Prediction | Cannlytics AI
 Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>

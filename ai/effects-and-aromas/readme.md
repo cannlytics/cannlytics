@@ -1,4 +1,4 @@
-# Predicting Effects and Aromas
+# Effects and Aromas Prediction Model
 
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
   <img width="240px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30">

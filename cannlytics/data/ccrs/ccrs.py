@@ -2,29 +2,24 @@
 CCRS Client | Cannlytics
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/10/2022
-Updated: 9/22/2022
+Updated: 12/21/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
-# Standard imports.
+# Standard imports:
 import csv
-from datetime import datetime
 import os
 
-# External imports.
+# External imports:
 import pandas as pd
-import requests
 
-# Internal imports.
+# Internal imports:
 from cannlytics.data.ccrs.constants import (
-    analytes,
-    analyses,
-    datasets,
-)
-from cannlytics.firebase import (
-    initialize_firebase,
-    update_documents,
+    CCRS_ANALYTES,
+    CCRS_ANALYSES,
+    CCRS_DATASETS,
 )
 from cannlytics.utils.utils import snake_case
 
@@ -35,17 +30,8 @@ class CCRS(object):
     def __init__(self, data_dir='C:\\data', test=True):
         """Initialize a CCRS client."""
         self.data_dir = data_dir
-        self.state = 'wa'
+        self.state = 'WA'
         self.test = test
-        try:
-            self.db = initialize_firebase()
-        except ValueError:
-            self.db = None
-
-
-    def initialize_firebase(self):
-        """Initialize a Firebase client."""
-        self.db = initialize_firebase()
 
 
     def read_areas(self, data_dir=None, limit=None):
@@ -89,9 +75,9 @@ class CCRS(object):
         Future work: Allow users to specify which fields to read.
         """
         data = self.read_data('LabResult_0', 'lab_results', data_dir, limit)
-        parsed_analyses = data['test_name'].map(analytes).values.tolist()
+        parsed_analyses = data['test_name'].map(CCRS_ANALYTES).values.tolist()
         data = data.join(pd.DataFrame(parsed_analyses))
-        data['type'] = data['type'].map(analyses)
+        data['type'] = data['type'].map(CCRS_ANALYSES)
         # TODO: Exclude any test lab results.
         return data
 
@@ -130,7 +116,7 @@ class CCRS(object):
         data = pd.DataFrame(csv_list)
         data.columns = headers + [''] * (len(data.columns) - len(headers))
         data.drop('', axis=1, inplace=True)
-        for key in datasets['licensees']['date_fields']:
+        for key in CCRS_DATASETS['licensees']['date_fields']:
             data[key] = pd.to_datetime(data[key], errors='coerce')
         data.columns = [snake_case(x) for x in data.columns]
         # TODO: Clean names more elegantly?
@@ -194,8 +180,8 @@ class CCRS(object):
         datafile = f'{data_dir}/{dataset}/{dataset}.xlsx'
         data = pd.read_excel(
             datafile,
-            usecols=datasets['transfers']['fields'],
-            parse_dates=datasets['transfers']['date_fields'],
+            usecols=CCRS_DATASETS['transfers']['fields'],
+            parse_dates=CCRS_DATASETS['transfers']['date_fields'],
             nrows=limit,
             skiprows=2,
         )
@@ -203,75 +189,20 @@ class CCRS(object):
         return data
 
 
-    def read_data(self, dataset, dataset_name,  data_dir=None, limit=None):
+    def read_data(self, datafile, dataset, data_dir=None, limit=None):
         """Read a dataset from local storage."""
         if data_dir is None:
             data_dir = self.data_dir
-        datafile = f'{data_dir}/{dataset}/{dataset}.csv'
+        if not datafile.endswith('.csv'):
+            datafile += '.csv'
+        # datafile = f'{data_dir}/{dataset}/{dataset}.csv'
+        filename = os.path.join(data_dir, datafile)
         data = pd.read_csv(
-            datafile,
+            filename,
             low_memory=False,
             nrows=limit,
-            parse_dates=datasets[dataset_name]['date_fields'],
-            usecols=datasets[dataset_name]['fields'],
+            parse_dates=CCRS_DATASETS[dataset]['date_fields'],
+            usecols=CCRS_DATASETS[dataset]['fields'],
         )
         data.columns = [snake_case(x) for x in data.columns]
         return data
-
-
-    def save_data(self, data, destination, index_col=True):
-        """Save data to local storage."""
-        if destination.endswith('.csv'):
-            data.to_csv(destination, index_col=index_col)
-        else:
-            data.to_excel(destination, index_col=index_col)
-
-
-    def upload_data(self, data, dataset, id_field='id', refs=None):
-        """Upload a dataset to a Firebase Firestore NoSQL database."""
-        for field in datasets[dataset]['date_fields']:
-            key = snake_case(field)
-            data[key] = data[key].apply(datetime.isoformat)
-        data = data.where(pd.notnull(data), None)
-        items = data.to_dict(orient='records')
-        print(f'Uploading {len(items)} items...')
-        # list(map(lambda x:Reading(h=x[0],p=x[1]),df.values.tolist()))
-        if refs is None:
-            refs = [f"data/ccrs/{dataset}/{x[id_field]}" for x in items]
-        update_documents(refs, items) # database=self.db
-        return items
-
-
-    def get_data(
-            self,
-            dataset,
-            base='https://cannlytics.com/api',
-            limit=None,
-            order_by=None,
-    ):
-        """Get a dataset from the Cannlytics API.
-        Reads Cannlytics API key from `CANNLYTICS_API_KEY` environmet variable."""
-        api_key = os.environ['CANNLYTICS_API_KEY']
-        headers = {
-            'Authorization': 'Bearer %s' % api_key,
-            'Content-type': 'application/json',
-        }
-        # TODO: Allow user to get stats for licensee or time period or
-        # a panel (licensees, all or some, for specified or max time period)
-        params = {
-            'limit': limit,
-            'order_by': order_by,
-        }
-        url = f'{base}/data/ccrs/{dataset}'
-        response = requests.get(url, headers=headers, params=params)
-        return response.json()['data']
-
-
-    def get_lab_results(self):
-        """Get lab results from the Cannlytics API."""
-        return self.get_data('lab_results')
-
-
-    # TODO: Create helper functions for the rest of the datasets.
-
-    # TODO: Create helper functions to get statistics.
