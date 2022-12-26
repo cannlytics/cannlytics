@@ -24,7 +24,7 @@ Data Sources:
 # Datasets that comprise the CCRS.
 CCRS_DATASETS = {
     'areas': {
-        'dataset': 'Areas_0',
+        'dataset': 'Areas',
         'singular': 'area',
         'fields': {
             'LicenseeId': 'string',
@@ -43,7 +43,7 @@ CCRS_DATASETS = {
         ],
     },
     'contacts': {
-        'dataset': 'Contacts_0',
+        'dataset': 'Contacts',
         'singular': 'contact',
         'fields': {
             'LicenseeId': 'string',
@@ -65,7 +65,7 @@ CCRS_DATASETS = {
         ],
     },
     'integrators': {
-        'dataset': 'Integrator_0',
+        'dataset': 'Integrator',
         'singular': 'integrator',
         'fields': {
             'Name': 'string',
@@ -82,7 +82,7 @@ CCRS_DATASETS = {
         ],
     },
     'inventory': {
-        'dataset': 'Inventory_0',
+        'dataset': 'Inventory',
         'singular': 'inventory_item',
         'fields': {
             'LicenseeId': 'string',
@@ -107,7 +107,7 @@ CCRS_DATASETS = {
         ],
     },
     'inventory_adjustments': {
-        'dataset': 'Areas_0',
+        'dataset': 'Areas',
         'singular': 'inventory_adjustment',
         'fields': {
             'InventoryId': 'string',
@@ -129,7 +129,7 @@ CCRS_DATASETS = {
         ],
     },
     'lab_results': {
-        'dataset': 'LabResult_0',
+        'dataset': 'LabResult',
         'singular': 'lab_result',
         'fields': {
             'LabResultId': 'string',
@@ -154,7 +154,7 @@ CCRS_DATASETS = {
         ],
     },
     'licensees': {
-        'dataset': 'Licensee_0',
+        'dataset': 'Licensee',
         'singular': 'licensee',
         'fields': {
             'LicenseStatus': 'string',
@@ -187,7 +187,7 @@ CCRS_DATASETS = {
         ],
     },
     'plants': {
-        'dataset': 'Plant_0',
+        'dataset': 'Plant',
         'singular': 'plant',
         'fields': {
             'LicenseeId': 'string',
@@ -215,7 +215,7 @@ CCRS_DATASETS = {
         ],
     },
     'plant_destructions': {
-        'dataset': 'PlantDestructions_0',
+        'dataset': 'PlantDestructions',
         'singular': 'plant_destruction',
         'fields': {
             'PlantId',
@@ -236,7 +236,7 @@ CCRS_DATASETS = {
         ],
     },
     'products': {
-        'dataset': 'Product_0',
+        'dataset': 'Product',
         'singular': 'product',
         'fields': {
             'LicenseeId': 'string',
@@ -257,7 +257,7 @@ CCRS_DATASETS = {
         ],
     },
     'sale_headers': {
-        'dataset': 'SaleHeader_0',
+        'dataset': 'SaleHeader',
         'singular': 'sale',
         'fields': {
             'SaleHeaderId': 'string',
@@ -279,7 +279,7 @@ CCRS_DATASETS = {
         ],
     },
     'sale_details': {
-        'dataset': 'SalesDetail_0',
+        'dataset': 'SalesDetail',
         'singular': 'sale_item',
         'fields': {
             'SaleDetailId': 'string',
@@ -304,7 +304,7 @@ CCRS_DATASETS = {
         ],
     },
     'strains': {
-        'dataset': 'Strains_0',
+        'dataset': 'Strains',
         'singular': 'strain',
         'fields': {
             'StrainType': 'string',
@@ -321,7 +321,7 @@ CCRS_DATASETS = {
         ],
     },
     'transfers': {
-        'dataset': 'Transfers_0',
+        'dataset': 'Transfers',
         'singular': 'transfer',
         'fields': {
             'Serial': 'string',
