@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/12/2022
-Updated: 12/21/2022
+Updated: 12/27/2022
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: Helpful CCRS constants.
@@ -218,16 +218,16 @@ CCRS_DATASETS = {
         'dataset': 'PlantDestructions',
         'singular': 'plant_destruction',
         'fields': {
-            'PlantId',
-            'DestructionReason',
-            'DestructionMethod',
-            'DestructionDate',
-            'ExternalIdentifier',
-            'IsDeleted',
-            'CreatedBy',
-            'CreatedDate',
-            'UpdatedBy',
-            'UpdatedDate'
+            'PlantId': 'string',
+            'DestructionReason': 'string',
+            'DestructionMethod': 'string',
+            'DestructionDate': 'datetime',
+            'ExternalIdentifier': 'string',
+            'IsDeleted': 'bool',
+            'CreatedBy': 'string',
+            'CreatedDate': 'datetime',
+            'UpdatedBy': 'string',
+            'UpdatedDate': 'datetime',
         },
         'date_fields': [
             'CreatedDate',
