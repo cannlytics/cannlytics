@@ -18,6 +18,7 @@ from zipfile import ZipFile
 import pandas as pd
 
 # Internal imports:
+from cannlytics.data import create_hash
 from cannlytics.data.ccrs.constants import (
     CCRS_ANALYTES,
     CCRS_ANALYSES,
@@ -144,6 +145,7 @@ def find_detections(
     df = tests.loc[tests[analysis_key] == analysis]
     if df.empty:
         return []
+    # FIXME: Raises warning.
     df.loc[:, value_key] = df[value_key].apply(convert_to_numeric)
     detected = df.loc[df[value_key] > 0]
     if detected.empty:
@@ -206,6 +208,16 @@ def format_lab_results(
     
     # Return the lab results.
     return pd.DataFrame(formatted)
+
+
+def anonymize(
+        df: pd.DataFrame,
+        columns: Optional[List[str]] = ['CreatedBy', 'UpdatedBy'],
+    ) -> pd.DataFrame:
+    """Anonymize the CCRS data."""
+    for column in columns:
+        df.loc[:, column] = df[column].astype(str).apply(create_hash)
+    return df
 
 
 class CCRS(object):
