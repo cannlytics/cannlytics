@@ -1,10 +1,12 @@
 """
 CCRS Constants | Cannlytics
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+    Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/12/2022
-Updated: 12/28/2022
+Updated: 1/3/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: Helpful CCRS constants.
@@ -405,20 +407,19 @@ CCRS_DATASETS = {
 # CCRS analyses.
 CCRS_ANALYSES = {
     'Foreign Matter': 'foreign_matter',
-    'Heavy Metal': 'heavy_metal',
-    'Microbiological': 'microbe',
+    'Heavy Metal': 'heavy_metals',
+    'Microbiological': 'microbes',
     'Moisture Analysis': 'moisture',
     'Moistures Analysis': 'moisture',
-    'Mycotoxin': 'mycotoxin',
-    'Pesticide': 'pesticide',
-    'Potency': 'cannabinoid',
-    'Residual Solvent': 'residual_solvent',
-    'Terpene': 'terpene',
+    'Mycotoxin': 'mycotoxins',
+    'Pesticide': 'pesticides',
+    'Potency': 'cannabinoids',
+    'Residual Solvent': 'residual_solvents',
+    'Terpene': 'terpenes',
     'Water Activity': 'water_activity',
 }
 
 # CCRS analyte constants.
-# TODO: Add WSLCB `limit`s.
 CCRS_ANALYTES = {
     'd9-THC': {'key': 'delta_9_thc', 'type': 'Potency', 'units': 'percent'},
     'CBD': {'key': 'cbd', 'type': 'Potency', 'units': 'percent'},
