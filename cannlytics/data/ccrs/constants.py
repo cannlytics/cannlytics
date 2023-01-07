@@ -14,13 +14,19 @@ Description: Helpful CCRS constants.
 Data Sources:
 
     - WAC 314-55-102 Quality assurance and quality control
-    https://app.leg.wa.gov/wac/default.aspx?cite=314-55-102&pdf=true
+    URL: <https://app.leg.wa.gov/wac/default.aspx?cite=314-55-102&pdf=true>
 
     - WAC 314-55-108 Pesticide action levels
-    https://apps.leg.wa.gov/WAC/default.aspx?cite=314-55-108
+    URL: <https://apps.leg.wa.gov/WAC/default.aspx?cite=314-55-108>
 
     - WAC 246-70-050 Quality assurance testing
-    https://app.leg.wa.gov/WAC/default.aspx?cite=246-70-050&pdf=true
+    URL: <https://app.leg.wa.gov/WAC/default.aspx?cite=246-70-050&pdf=true>
+
+    - WSLCB `TestName` List
+    URL: <https://lcb.wa.gov/sites/default/files/publications/Cannabis/CCRS/Lab%20Test%20CSV%20TestName.pdf>
+
+    - WSLCB Testing Requirements
+    URL: <https://lcb.wa.gov/sites/default/files/publications/Cannabis/Education/Cannabis_Prod_Testing_Req_Past_vs_Current_infograph.pdf>
 """
 
 # Datasets that comprise the CCRS.

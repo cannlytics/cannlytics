@@ -3,6 +3,7 @@
 # Updated: 6/3/2022
 
 # Console and website requirements:
+datasets==2.8.0
 datetime==4.3
 django==4.0
 # TODO: Implement CSP.

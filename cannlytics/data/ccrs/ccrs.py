@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/10/2022
-Updated: 1/3/2023
+Updated: 1/7/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -74,6 +74,7 @@ def merge_datasets(
         how: Optional[str] = 'left',
         sep: Optional[str] = '\t',
         validate: Optional[str] = 'm:1',
+        drop: Optional[dict] = None,
         rename: Optional[dict] = None,
         on_bad_lines: Optional[str] = 'skip',
     ) -> pd.DataFrame:
@@ -107,6 +108,8 @@ def merge_datasets(
         )
         if rename is not None:
             supplement.rename(rename, axis=1, inplace=True)
+        if drop is not None:
+            supplement.drop(drop, axis=1, inplace=True)
         # FIXME: Handle lab results that may be split between datafiles.
         if dataset == 'lab_results':
             supplement = format_lab_results(df, supplement)
@@ -118,7 +121,7 @@ def merge_datasets(
             validate=validate,
         )
         matched = match.loc[~match[target].isna()]
-        augmented = pd.concat([augmented, matched]) 
+        augmented = pd.concat([augmented, matched], ignore_index=True) 
         if len(augmented) == n:
             break
     return augmented

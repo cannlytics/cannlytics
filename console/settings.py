@@ -16,12 +16,14 @@ import os
 import re
 
 # External imports.
-import environ
+from cannlytics.firebase import (
+    access_secret_version,
+    initialize_firebase,
+)
+from dotenv import dotenv_values
 import google.auth
 from django.template import base
 
-# Internal imports.
-from cannlytics.firebase import access_secret_version
 
 #-------------------------------------------------------------#
 # Project variables
@@ -47,33 +49,45 @@ with open(os.path.join(BASE_DIR, 'package.json')) as v_file:
 #-------------------------------------------------------------#
 
 # Load secrets stored as environment variables.
-env = environ.Env(DEBUG=(bool, False))
 env_file = os.path.join(BASE_DIR, '.env')
 
-# Attempt to load the Project ID into the environment, safely failing on error.
-try:
-    _, os.environ['GOOGLE_CLOUD_PROJECT'] = google.auth.default()
-except google.auth.exceptions.DefaultCredentialsError:
-    pass
-
-# Use a local secret file, if provided.
-# Otherwise retrieve the secrets from Secret Manager.
+# Use a local environment variable file if provided.
 if os.path.isfile(env_file):
-    env.read_env(env_file)
+
+    # Load Firebase credentials from local credentials.
+    config = dotenv_values(env_file)
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config['GOOGLE_APPLICATION_CREDENTIALS']
+
+    # Initialize Firebase.
+    try:
+        initialize_firebase()
+    except ValueError:
+        pass
+
+# Otherwise retrieve the environment variables from Secret Manager.
 else:
     try:
+        # Load the project credentials from the cloud environment.
+        _, os.environ['GOOGLE_CLOUD_PROJECT'] = google.auth.default()
         project_id = os.environ.get('GOOGLE_CLOUD_PROJECT')
         payload = access_secret_version(project_id, SECRET_SETTINGS_NAME, 'latest')
-        env.read_env(io.StringIO(payload))
-    except KeyError:
+        config = dotenv_values(stream=io.StringIO(payload))
+
+        # Initialize Firebase.
+        try:
+            initialize_firebase()
+        except ValueError:
+            pass
+
+    except (KeyError, google.auth.exceptions.DefaultCredentialsError):
         raise Exception('No local .env or GOOGLE_CLOUD_PROJECT detected. No secrets found.')
 
 # Access the secret key.
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = config['SECRET_KEY']
 
 # Get production status. When publishing, ensure that PRODUCTION is 'True'.
 try:
-    PRODUCTION = env('PRODUCTION')
+    PRODUCTION = config['PRODUCTION']
 except:
     PRODUCTION = 'True'
 
@@ -182,15 +196,15 @@ ALLOWED_HOSTS = []
 if PRODUCTION != 'True':
     ALLOWED_HOSTS.extend(['*'])
 try:
-    ALLOWED_HOSTS.append(env('CUSTOM_DOMAIN'))
+    ALLOWED_HOSTS.append(config['CUSTOM_DOMAIN'])
 except KeyError:
     pass
 try:
-    ALLOWED_HOSTS.append(env('FIREBASE_HOSTING_URL'))
+    ALLOWED_HOSTS.append(config['FIREBASE_HOSTING_URL'])
 except KeyError:
     pass
 try:
-    ALLOWED_HOSTS.append(env('CLOUD_RUN_URL'))
+    ALLOWED_HOSTS.append(config['CLOUD_RUN_URL'])
 except KeyError:
     pass
 
@@ -215,11 +229,11 @@ DATABASES = {
 # Define variables to be able to send emails.
 EMAIL_USE_TLS = True
 try:
-    EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-    EMAIL_HOST = env('EMAIL_HOST')
-    EMAIL_PORT = env('EMAIL_PORT')
-    DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+    EMAIL_HOST_USER = config['EMAIL_HOST_USER']
+    EMAIL_HOST_PASSWORD = config['EMAIL_HOST_PASSWORD']
+    EMAIL_HOST = config['EMAIL_HOST']
+    EMAIL_PORT = config['EMAIL_PORT']
+    DEFAULT_FROM_EMAIL = config['DEFAULT_FROM_EMAIL']
     LIST_OF_EMAIL_RECIPIENTS = [EMAIL_HOST_USER]
 except KeyError:
     EMAIL_HOST = 'smtp.gmail.com'
@@ -275,6 +289,6 @@ APPEND_SLASH = False
 base.tag_re = re.compile(base.tag_re.pattern, re.DOTALL)
 
 # Make certain Firebase variables easy to reference.
-FIREBASE_API_KEY = env('FIREBASE_API_KEY')
-FIREBASE_PROJECT_ID = env('FIREBASE_PROJECT_ID')
-STORAGE_BUCKET = env('FIREBASE_STORAGE_BUCKET')
+FIREBASE_API_KEY = config['FIREBASE_API_KEY']
+FIREBASE_PROJECT_ID = config['FIREBASE_PROJECT_ID']
+STORAGE_BUCKET = config['FIREBASE_STORAGE_BUCKET']
