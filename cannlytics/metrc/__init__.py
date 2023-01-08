@@ -13,6 +13,8 @@ from .client import Metrc
 def initialize_metrc(
         vendor_api_key: str,
         user_api_key: str,
+        logs: Optional[bool] = False,
+        test: Optional[bool] = False,
         primary_license: Optional[str] = '',
         state: Optional[str] = 'ca',
         client_class: Any = Metrc,
@@ -31,6 +33,8 @@ def initialize_metrc(
     return client_class(
         vendor_api_key,
         user_api_key,
+        logs=logs,
+        test=test,
         primary_license=primary_license,
-        state=state
+        state=state,
     )

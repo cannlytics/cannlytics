@@ -1,25 +1,27 @@
 """
 Metrc Integration Test | Cannlytics
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2023 Cannlytics
 
-Authors: Keegan Skeate keegan@cannlytics.com
-Created: 3/292021
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+Created: 3/29/2021
+Updated: 1/8/2023
 License: MIT License
 
 Description:
 
-    Perform required tests for Metrc integration, recording verification items:
+    Perform required tests for Metrc integration, recording:
 
         - Result code: The status code of the response.
-        - ID Number: The UID for a created object, typically a 5 digit number. 
-        - Names: Names for created objects, such as strain or location name.
-        - Tag Number: Plant and package tags
-        - Last Modified Date: The time the test or actions were ran.
+        - ID Number: The UIDs for created objects. 
+        - Names: The names for created objects, such as location names.
+        - Tag Number: Plant and package tags that are used.
+        - Last Modified Date: The time of the successful requests.
         - Request Sent: The requested URL.
         - JSON Body: Minified JSON response.
 
-    All successful requests will return a 200 status code. Get support if you
-    cannot obtain a 200 status code for any request.
+    All successful requests will return a 200 status code. Get support
+    if you cannot obtain a 200 status code for any request.
 
 Resources:
 
@@ -27,27 +29,26 @@ Resources:
     - [Metrc Oregon Docs](https://api-or.metrc.com/Documentation)
 
 """
-# Standard imports.
+# Standard imports:
 import os
 from datetime import datetime
 from time import sleep
 
-# External imports.
+# External imports:
 from dotenv import dotenv_values
 
-# Import cannlytics locally for testing.
+# Internal imports:
 import sys
 sys.path.insert(0, os.path.abspath('../../../'))
 from cannlytics import firebase as fb
-from cannlytics import metrc # pylint: disable=no-name-in-module, import-error
-from cannlytics.metrc.exceptions import MetrcAPIError # pylint: disable=no-name-in-module, import-error
-from cannlytics.metrc.utils import ( # pylint: disable=no-name-in-module, import-error
+from cannlytics import metrc
+from cannlytics.metrc.exceptions import MetrcAPIError
+from cannlytics.utils import (
     clean_nested_dictionary,
     encode_pdf,
     get_timestamp,
 )
-     
-from cannlytics.metrc.models import ( # pylint: disable=no-name-in-module, import-error
+from cannlytics.metrc.models import (
     Facility,
     Item,
     PlantBatch,
@@ -55,6 +56,45 @@ from cannlytics.metrc.models import ( # pylint: disable=no-name-in-module, impor
 )
 
 # TODO: Refactor into smaller-scope tests.
+if __name__ == '__main__':
+
+    # Initialize the current time.
+    now = datetime.now()
+    current_time = now.isoformat()
+    current_date = now.strftime('%m/%d/%Y')
+    today = current_time[:10]
+
+    # Initialize Firebase.
+    config = dotenv_values('../../../.env')
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config['GOOGLE_APPLICATION_CREDENTIALS']
+    db = fb.initialize_firebase()
+    print('Firebase project:', db.project)
+
+    # Get Vendor API key using secret manager.
+    vendor_api_key = fb.access_secret_version(
+        project_id=db.project,
+        secret_id='metrc_test_vendor_api_key',
+    )
+
+    # Get user API key using secret manager.
+    user_api_key = fb.access_secret_version(
+        project_id=db.project,
+        secret_id='metrc_test_user_api_key',
+    )
+
+    # Initialize a Metrc client.
+    track = metrc.Metrc(
+        vendor_api_key,
+        user_api_key,
+        state='ok',
+        logs=True,
+    )
+
+    print('--------------------------------------------')
+    print('Testing Metrc API')
+    print('State:', track.state)
+    print('Base:', track.base)
+    print('--------------------------------------------')
 
 
 if __name__ == '__main__' and False:

@@ -1,10 +1,10 @@
 """
 Metrc Client | Cannlytics
-Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
+Copyright (c) 2021-2023 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 12/21/2021
+Updated: 1/8/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains the Client class responsible for
@@ -24,8 +24,11 @@ Future Work:
 
 """
 # Standard imports.
+from datetime import datetime
 from json import dumps
 import logging
+import os
+import tempfile
 
 # External imports.
 from pandas import read_excel
@@ -90,7 +93,7 @@ class Metrc(object):
             primary_license='',
             state='ma',
             test=True,
-    ):
+        ):
         """Initialize a Metrc API client.
         Args:
             vendor_api_key (str): Required Metrc API key, obtained from Metrc
@@ -141,7 +144,7 @@ class Metrc(object):
             endpoint,
             data=None,
             params=None,
-    ):
+        ):
         """Make a request to the Metrc API."""
         url = self.base + endpoint
         try:
@@ -181,18 +184,22 @@ class Metrc(object):
 
     def initialize_logs(self):
         """Initialize Metrc logs."""
+        timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+        temp_dir = tempfile.gettempdir()
+        temp_file = os.path.join(temp_dir, f'cannlytics-{timestamp}.log')
         logging.getLogger('metrc').handlers.clear()
         logging.basicConfig(
-            filename='./tmp/cannlytics.log',
+            filename=temp_file,
             filemode='w+',
             level=logging.DEBUG,
             format='%(asctime)s %(message)s',
             datefmt='%Y-%m-%dT%H:%M:%S',
         )
-        console = logging.StreamHandler()
-        console.setLevel(logging.DEBUG)
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.DEBUG)
         self.logger = logging.getLogger('metrc')
-        self.logger.addHandler(console)
+        self.logger.addHandler(handler)
+        self.logger.debug('Metrc initialized.')
 
 
     #------------------------------------------------------------------

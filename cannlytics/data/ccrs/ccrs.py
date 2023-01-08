@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/10/2022
-Updated: 1/7/2023
+Updated: 1/8/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -31,6 +31,16 @@ from cannlytics.utils.utils import (
 )
 
 
+def anonymize(
+        df: pd.DataFrame,
+        columns: Optional[List[str]] = ['CreatedBy', 'UpdatedBy'],
+    ) -> pd.DataFrame:
+    """Anonymize a CCRS dataset."""
+    for column in columns:
+        df.loc[:, column] = df[column].astype(str).apply(create_hash)
+    return df
+
+
 def get_datafiles(
         data_dir: str,
         dataset: Optional[str] = '',
@@ -46,87 +56,6 @@ def get_datafiles(
     return datafiles
 
 
-def unzip_datafiles(
-        data_dir: str,
-        verbose: Optional[bool] = True,
-    ) -> None:
-    """Unzip all CCRS datafiles in a given directory."""
-    zip_files = [f for f in os.listdir(data_dir) if f.endswith('.zip')]
-    for zip_file in zip_files:
-        filename = os.path.join(data_dir, zip_file)
-        zip_dest = filename.rstrip('.zip')
-        if not os.path.exists(zip_dest):
-            os.makedirs(zip_dest)
-        zip_ref = ZipFile(filename)
-        zip_ref.extractall(zip_dest)
-        zip_ref.close()
-        os.remove(filename)
-        if verbose:
-            print('Unzipped:', zip_file)
-
-
-def merge_datasets(
-        df: pd.DataFrame,
-        datafiles: List[str],
-        dataset: str,
-        on: Optional[str] = 'id',
-        target: Optional[str] = '',
-        how: Optional[str] = 'left',
-        sep: Optional[str] = '\t',
-        validate: Optional[str] = 'm:1',
-        drop: Optional[dict] = None,
-        rename: Optional[dict] = None,
-        on_bad_lines: Optional[str] = 'skip',
-    ) -> pd.DataFrame:
-    """Merge a supplemental CCRS dataset to an existing dataset.
-    Note: `IsDeleted` and `UnitWeightGrams` are treated as strings.
-    Lab results cannot be split between datafiles.
-    """
-    n = len(df)
-    augmented = pd.DataFrame()
-    fields = CCRS_DATASETS[dataset]['fields']
-    parse_dates = CCRS_DATASETS[dataset]['date_fields']
-    usecols = list(fields.keys()) + parse_dates
-    dtype = {k: v for k, v in fields.items() if v != 'datetime64'}
-    # FIXME: These fields throw `ValueError` if not strings.
-    if dtype.get('IsDeleted'):
-        dtype['IsDeleted'] = 'string'
-    if dtype.get('UnitWeightGrams'):
-        dtype['UnitWeightGrams'] = 'string'
-    if dtype.get('TestValue'):
-        dtype['TestValue'] = 'string'
-    for datafile in datafiles:
-        supplement = pd.read_csv(
-            datafile,
-            sep=sep,
-            encoding='utf-16',
-            engine='python',
-            parse_dates=parse_dates,
-            dtype=dtype,
-            usecols=usecols,
-            on_bad_lines=on_bad_lines,
-        )
-        if rename is not None:
-            supplement.rename(rename, axis=1, inplace=True)
-        if drop is not None:
-            supplement.drop(drop, axis=1, inplace=True)
-        # FIXME: Handle lab results that may be split between datafiles.
-        if dataset == 'lab_results':
-            supplement = format_lab_results(df, supplement)
-        match = rmerge(
-            df,
-            supplement,
-            on=on,
-            how=how,
-            validate=validate,
-        )
-        matched = match.loc[~match[target].isna()]
-        augmented = pd.concat([augmented, matched], ignore_index=True) 
-        if len(augmented) == n:
-            break
-    return augmented
-
-
 def format_test_value(tests, compound, value_key='TestValue'):
     """Format a lab result test value from a DataFrame of tests."""
     value = tests.loc[(tests.key == compound)]
@@ -139,15 +68,29 @@ def format_test_value(tests, compound, value_key='TestValue'):
 def find_detections(
         tests,
         analysis,
-        analysis_key='type',
+        analysis_key='analysis',
         analyte_key='key',
-        value_key='TestValue',
+        value_key='value',
     ) -> List[str]:
     """Find compounds detected for a given analysis from given tests."""
+
+    # Find detections in a list of results.
+    if isinstance(tests, list):
+        detected = []
+        for test in tests:
+            if test[analysis_key] == analysis:
+                value = pd.to_numeric(test[value_key], errors='coerce')
+                if value > 0:
+                    detected.append(test[analyte_key])
+        return detected
+
+    # Find detections in a DataFrame.
     analysis_tests = tests.loc[tests[analysis_key] == analysis]
     if analysis_tests.empty:
         return []
-    values = analysis_tests[value_key].apply(lambda x: pd.to_numeric(x, errors='coerce'))
+    values = analysis_tests[value_key].apply(
+        lambda x: pd.to_numeric(x, errors='coerce')
+    )
     analysis_tests = analysis_tests.assign(**{value_key: values})
     detected = analysis_tests.loc[analysis_tests[value_key] > 0]
     if detected.empty:
@@ -212,14 +155,64 @@ def format_lab_results(
     return pd.DataFrame(formatted)
 
 
-def anonymize(
+def merge_datasets(
         df: pd.DataFrame,
-        columns: Optional[List[str]] = ['CreatedBy', 'UpdatedBy'],
+        datafiles: List[str],
+        dataset: str,
+        on: Optional[str] = 'id',
+        target: Optional[str] = '',
+        how: Optional[str] = 'left',
+        sep: Optional[str] = '\t',
+        validate: Optional[str] = 'm:1',
+        drop: Optional[dict] = None,
+        rename: Optional[dict] = None,
+        on_bad_lines: Optional[str] = 'skip',
+        string_columns: Optional[list] = [
+            'IsDeleted', 'UnitWeightGrams',
+            'TestValue', 'IsQuarantine'],
     ) -> pd.DataFrame:
-    """Anonymize a CCRS dataset."""
-    for column in columns:
-        df.loc[:, column] = df[column].astype(str).apply(create_hash)
-    return df
+    """Merge a supplemental CCRS dataset to an existing dataset.
+    Note: Certain columns are treated as strings due to `ValueError`s.
+    Lab results cannot be split between datafiles.
+    """
+    n = len(df)
+    augmented = pd.DataFrame()
+    fields = CCRS_DATASETS[dataset]['fields']
+    parse_dates = CCRS_DATASETS[dataset]['date_fields']
+    usecols = list(fields.keys()) + parse_dates
+    dtype = {k: v for k, v in fields.items() if v != 'datetime64'}
+    for column in string_columns:
+        if dtype.get(column):
+            dtype[column] = 'string'
+    for datafile in datafiles:
+        supplement = pd.read_csv(
+            datafile,
+            sep=sep,
+            encoding='utf-16',
+            engine='python',
+            parse_dates=parse_dates,
+            dtype=dtype,
+            usecols=usecols,
+            on_bad_lines=on_bad_lines,
+        )
+        if rename is not None:
+            supplement.rename(rename, axis=1, inplace=True)
+        if drop is not None:
+            supplement.drop(drop, axis=1, inplace=True)
+        if dataset == 'lab_results':
+            supplement = format_lab_results(df, supplement)
+        match = rmerge(
+            df,
+            supplement,
+            on=on,
+            how=how,
+            validate=validate,
+        )
+        matched = match.loc[~match[target].isna()]
+        augmented = pd.concat([augmented, matched], ignore_index=True) 
+        if len(augmented) == n:
+            break
+    return augmented
 
 
 def save_dataset(
@@ -239,3 +232,22 @@ def save_dataset(
         shard = data.iloc[start: stop, :]
         outfile = os.path.join(data_dir, f'{name}_{i}.{ext}')
         shard.to_excel(outfile, index=False)
+
+
+def unzip_datafiles(
+        data_dir: str,
+        verbose: Optional[bool] = True,
+    ) -> None:
+    """Unzip all CCRS datafiles in a given directory."""
+    zip_files = [f for f in os.listdir(data_dir) if f.endswith('.zip')]
+    for zip_file in zip_files:
+        filename = os.path.join(data_dir, zip_file)
+        zip_dest = filename.rstrip('.zip')
+        if not os.path.exists(zip_dest):
+            os.makedirs(zip_dest)
+        zip_ref = ZipFile(filename)
+        zip_ref.extractall(zip_dest)
+        zip_ref.close()
+        os.remove(filename)
+        if verbose:
+            print('Unzipped:', zip_file)

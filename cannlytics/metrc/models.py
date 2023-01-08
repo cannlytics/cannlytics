@@ -1,10 +1,10 @@
 """
 Metrc Models | Cannlytics
-Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
+Copyright (c) 2021-2023 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 11/12/2021
+Updated: 1/8/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains common Metrc models.
