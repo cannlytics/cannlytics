@@ -26,7 +26,7 @@ Description:
 Resources:
 
     - [Metrc Oklahoma Docs](https://api-ok.metrc.com/Documentation)
-    - [Metrc Oregon Docs](https://api-or.metrc.com/Documentation)
+    - [Google Cloud Secret Manager](https://console.cloud.google.com/security/secret-manager)
 
 """
 # Standard imports:
@@ -55,30 +55,28 @@ from cannlytics.metrc.models import (
     TransferTemplate,
 )
 
-# TODO: Refactor into smaller-scope tests.
-if __name__ == '__main__':
 
-    # Initialize the current time.
-    now = datetime.now()
-    current_time = now.isoformat()
-    current_date = now.strftime('%m/%d/%Y')
-    today = current_time[:10]
+def test_initialize_metrc():
+    """Test initializing a Metrc client."""
 
-    # Initialize Firebase.
+    # Initialize Firebase to get API keys from Secret Manager.
+    # URL: <https://console.cloud.google.com/security/secret-manager>
     config = dotenv_values('../../../.env')
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config['GOOGLE_APPLICATION_CREDENTIALS']
+    key = 'GOOGLE_APPLICATION_CREDENTIALS'
+    os.environ[key] = config[key]
     db = fb.initialize_firebase()
-    print('Firebase project:', db.project)
+    project_id = db.project
+    print('Firebase project:', project_id)
 
-    # Get Vendor API key using secret manager.
+    # Get Vendor API key from Secret Manager.
     vendor_api_key = fb.access_secret_version(
-        project_id=db.project,
+        project_id=project_id,
         secret_id='metrc_test_vendor_api_key',
     )
 
-    # Get user API key using secret manager.
+    # Get user API key from Secret Manager.
     user_api_key = fb.access_secret_version(
-        project_id=db.project,
+        project_id=project_id,
         secret_id='metrc_test_user_api_key',
     )
 
@@ -89,12 +87,48 @@ if __name__ == '__main__':
         state='ok',
         logs=True,
     )
+    return track
+
+
+# TODO: Refactor into smaller-scope tests.
+if __name__ == '__main__':
 
     print('--------------------------------------------')
-    print('Testing Metrc API')
+    print('Metrc API Test')
+    print('--------------------------------------------')
+
+    #-------------------------------------------------------------------
+    # [✓] Initialization
+    #-------------------------------------------------------------------
+    print('Initializing Metrc...')
+    track = test_initialize_metrc()
     print('State:', track.state)
     print('Base:', track.base)
-    print('--------------------------------------------')
+
+
+    #-------------------------------------------------------------------
+    # [✓] Facilities
+    #-------------------------------------------------------------------
+    print('Testing facilities...')
+
+    # Get facilities. Permissions are set by the state for each facility.
+    facilities = track.get_facilities()
+    print('Found', len(facilities), 'facilities.')
+
+    # Define primary cultivator, lab, and retailer for tests.
+    cultivator, lab, retailer = None, None, None
+    for facility in facilities:
+        license_type = facility.license['license_type']
+        if cultivator is None and license_type == 'Grower':
+            cultivator = facility
+        elif lab is None and license_type == 'Testing Laboratory':
+            lab = facility
+        elif retailer is None and license_type == 'Dispensary':
+            retailer = facility
+    
+    # Ensure that each facility type exists.
+    assert None not in [cultivator, lab, retailer]
+    print('Identified all license types.')
 
 
 if __name__ == '__main__' and False:
