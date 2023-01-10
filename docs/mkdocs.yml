@@ -211,6 +211,7 @@ nav:
     - Users: api/users/readme.md
     - Settings: api/settings/readme.md
     - Traceability: api/traceability/readme.md
+    # TODO: Flesh out traceability documentation.
   
   # Users
   #------------
@@ -258,6 +259,10 @@ nav:
     - Metrc: cannlytics/metrc/readme.md
     - Stats: cannlytics/stats/readme.md
     - Utils: cannlytics/utils/readme.md
+    - SDK API References:
+      - Firebase: docs/sdk/firebase.md
+      - Metrc: docs/sdk/metrc.md
+      - Utils: docs/sdk/utils.md
   
   # Developers
   #------------

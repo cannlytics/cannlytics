@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/7/2021
-Updated: 1/8/2023
+Updated: 1/10/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: A wrapper of `firebase_admin` to make interacting with a Firestore
@@ -63,7 +63,7 @@ def initialize_firebase(
         key_path: Optional[str] = None,
         bucket_name: Optional[str] = None,
         project_id: Optional[str] = None,
-):
+    ):
     """Initialize Firebase, unless already initialized. Searches for environment
     credentials if `key_path` is not specified.
     Args:

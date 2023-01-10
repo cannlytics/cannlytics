@@ -427,6 +427,7 @@ CCRS_ANALYSES = {
     'Terpene': 'terpenes',
     'terpene': 'terpenes',
     'Water Activity': 'water_activity',
+    'water_activity': 'water_activity',
 }
 
 # CCRS analyte constants.
