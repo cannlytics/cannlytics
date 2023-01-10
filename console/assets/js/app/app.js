@@ -1,10 +1,10 @@
 /**
  * App JavaScript | Cannlytics Console
- * Copyright (c) 2021-2022 Cannlytics
+ * Copyright (c) 2021-2023 Cannlytics
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 12/7/2020
- * Updated: 1/13/2022
+ * Updated: 1/8/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
 import { checkForCredentials } from '../auth/auth.js';
@@ -29,26 +29,8 @@ export const app = {
     // Enable any and all tooltips.
     initHelpers.initializeTooltips();
 
-    // Create a session when a user is detected, checking
-    // if any Google credentials may have been passed.
-    onAuthChange(async (user) => {
-      if (user) {
-        if (user.metadata.createdAt == user.metadata.lastLoginAt) {
-          const { email } = user;
-          const defaultPhoto = `https://cannlytics.com/robohash/${user.email}?width=60&height=60`;
-          const data = { email, photo_url: defaultPhoto };
-          await authRequest('/api/users', data);
-        }
-        const currentSession = this.getSessionCookie();
-        // if (currentSession === 'None')
-        await authRequest('/src/auth/login');
-        if (redirect) window.location.href = window.location.origin;
-      } else {
-        checkForCredentials();
-        // FIXME: If the user has not persisted their session, may need
-        // to log out the user of their Django session with /src/logout
-      }
-    });
+    // Create a user session if a user is detected.
+    onAuthChange(async (user) => signInUser(user, redirect));
 
     // Hide the sidebar on small screens.
     try {
@@ -57,9 +39,60 @@ export const app = {
 
   },
 
-  getSessionCookie(nullValue='None') {
-    /** Gets the session cookie, returning 'None' by default if the cookie is null. */
-    return (document.cookie.match(/^(?:.*;)?\s*__session\s*=\s*([^;]+)(?:.*)?$/)||[,nullValue])[1];
-  },
+  // getSessionCookie(nullValue='None') {
+  //   /** Gets the session cookie, returning 'None' by default if the cookie is null. */
+  //   return (document.cookie.match(/^(?:.*;)?\s*__session\s*=\s*([^;]+)(?:.*)?$/)||[,nullValue])[1];
+  // },
 
+}
+
+function getSessionCookie(nullValue='None') {
+  /** Gets the session cookie, returning 'None' by default if the cookie is null. */
+  return (document.cookie.match(/^(?:.*;)?\s*__session\s*=\s*([^;]+)(?:.*)?$/)||[,nullValue])[1];
+}
+
+async function signInUser(user, redirect=false) {
+  /**
+   * Create a session when a user is detected, checking
+   * if any Google credentials may have been passed.
+   */
+  if (user) {
+
+    console.log(`USER DETECTED: ${user.uid}`);
+
+    // Set user data on first login.
+    if (user.metadata.createdAt == user.metadata.lastLoginAt) {
+      const { email } = user;
+      const defaultPhoto = `https://cannlytics.com/robohash/${user.uid}?width=60&height=60`;
+      const data = { email, photo_url: defaultPhoto };
+      await authRequest('/api/users', data);
+    }
+    
+    // Only authenticate with the server as needed.
+    const currentSession = getSessionCookie();
+    if (currentSession === 'None') await authRequest('/src/auth/login');
+    if (redirect) window.location.href = window.location.origin;
+    try {
+      document.getElementById('splash').classList.add('d-none');
+      document.getElementById('page').classList.remove('d-none');
+    } catch(error) {
+      // No splash page.
+    }
+
+  } else {
+
+    console.log('NO USER');
+    
+    // If the user has not persisted their session, then log out of their
+    // Django session, and redirect to the sign in page.
+    await checkForCredentials();
+    const currentSession = getSessionCookie();
+    if (currentSession === 'None') await authRequest('/src/auth/logout');
+    if (!window.location.href.includes('account')) {
+      window.location.href = `${window.location.origin}\\account\\sign-in`;
+      await page.waitForNavigation();
+    }
+    document.getElementById('page').classList.remove('d-none');
+  
+  }
 }

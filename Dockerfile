@@ -3,13 +3,16 @@
 #
 # Auhtors: Keegan Skeate <keegan@cannlytics.com>
 # Created: 1/5/2021
-# Updated: 6/2/2022
+# Updated: 1/9/2023
 # License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 # Use the official lightweight Python image.
 # https://hub.docker.com/_/python
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.9-slim-buster
+FROM python:3.10-slim
+
+# The main Django application.
+ENV APP console
 
 # Service must listen to $PORT environment variable.
 # This default value facilitates local development.
@@ -45,4 +48,4 @@ USER appuser
 # See:
 # https://docs.gunicorn.org/en/stable/design.html#how-many-workers
 # https://docs.gunicorn.org/en/stable/design.html#how-many-threads
-CMD exec gunicorn --bind :$PORT --workers 4 --threads 16 --timeout 120 website.core.wsgi:application
+CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 4 --threads 16 --timeout 120 $APP.core.wsgi:application

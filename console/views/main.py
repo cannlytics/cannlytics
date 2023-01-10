@@ -1,10 +1,10 @@
 """
 Main Views | Cannlytics
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/18/2020
-Updated: 12/16/2021
+Updated: 1/9/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 """
 # External imports.
@@ -69,10 +69,12 @@ class ConsoleView(TemplateView):
     def get(self, request, screen=None, section=None, unit=None, part=None, piece=None): #pylint: disable=too-many-arguments,arguments-differ,unused-argument
         """Ensure that there is a user session, otherwise
         navigate to the sign-in page."""
-        if screen != 'account':
-            claims = authenticate_request(request)
-            if not claims:
-                return HttpResponseRedirect('/account/sign-in')
+        print('GET to screen:', screen)
+        # FIXME:
+        # if screen != 'account':
+        #     claims = authenticate_request(request)
+        #     if not claims:
+        #         return HttpResponseRedirect('/account/sign-in')
         return super(ConsoleView, self).get(request)
 
 

@@ -48,39 +48,29 @@ with open(os.path.join(BASE_DIR, 'package.json')) as v_file:
 # Example: https://codelabs.developers.google.com/codelabs/cloud-run-django
 #-------------------------------------------------------------#
 
-# Load secrets stored as environment variables.
+# Load credentials from a local environment variables file if provided.
 env_file = os.path.join(BASE_DIR, '.env')
-
-# Use a local environment variable file if provided.
 if os.path.isfile(env_file):
-
-    # Load Firebase credentials from local credentials.
     config = dotenv_values(env_file)
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config['GOOGLE_APPLICATION_CREDENTIALS']
+    key = 'GOOGLE_APPLICATION_CREDENTIALS'
+    os.environ[key] = config[key]
 
-    # Initialize Firebase.
-    try:
-        initialize_firebase()
-    except ValueError:
-        pass
-
-# Otherwise retrieve the environment variables from Secret Manager.
+# Otherwise retrieve the environment variables from Secret Manager,
+# loading the project credentials from the cloud environment.
 else:
     try:
-        # Load the project credentials from the cloud environment.
-        _, os.environ['GOOGLE_CLOUD_PROJECT'] = google.auth.default()
-        project_id = os.environ.get('GOOGLE_CLOUD_PROJECT')
+        _, project_id = google.auth.default()
+        os.environ['GOOGLE_CLOUD_PROJECT'] = project_id
         payload = access_secret_version(project_id, SECRET_SETTINGS_NAME, 'latest')
         config = dotenv_values(stream=io.StringIO(payload))
-
-        # Initialize Firebase.
-        try:
-            initialize_firebase()
-        except ValueError:
-            pass
-
     except (KeyError, google.auth.exceptions.DefaultCredentialsError):
-        raise Exception('No local .env or GOOGLE_CLOUD_PROJECT detected. No secrets found.')
+        raise Exception('No local .env or GOOGLE_CLOUD_PROJECT detected.')
+
+# Initialize Firebase.
+try:
+    initialize_firebase()
+except ValueError:
+    pass
 
 # Access the secret key.
 SECRET_KEY = config['SECRET_KEY']
@@ -236,11 +226,12 @@ try:
     DEFAULT_FROM_EMAIL = config['DEFAULT_FROM_EMAIL']
     LIST_OF_EMAIL_RECIPIENTS = [EMAIL_HOST_USER]
 except KeyError:
+    EMAIL_HOST_USER = config.get('EMAIL_HOST_USER')
     EMAIL_HOST = 'smtp.gmail.com'
     EMAIL_PORT = 587
     DEFAULT_FROM_EMAIL = EMAIL_HOST
     LIST_OF_EMAIL_RECIPIENTS = [EMAIL_HOST_USER]
-    print('WARNING: Email not configured. User or password not specified')
+    print('WARNING: Email not configured. User or password not specified.')
 
 #-------------------------------------------------------------#
 # Static files (CSS, JavaScript, Images)

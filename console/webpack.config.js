@@ -8,7 +8,7 @@
  * License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
  */
 const appName = 'console';
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+// const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -90,7 +90,7 @@ module.exports = env => {
       minimize: env.production,
       minimizer: [
         new TerserPlugin({ parallel: true }),
-        new CssMinimizerPlugin({}),
+        // new CssMinimizerPlugin({}),
       ],
     },
     

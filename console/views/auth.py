@@ -1,5 +1,5 @@
 """
-Authentication Views | Cannlytics console
+Authentication Views | Cannlytics Console
 Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
@@ -16,7 +16,6 @@ from cannlytics.auth.auth import authenticate_request
 from cannlytics.firebase import (
     create_log,
     create_session_cookie,
-    initialize_firebase,
     revoke_refresh_tokens,
     update_document,
     verify_token,
@@ -26,6 +25,7 @@ from console.settings import (
     DEFAULT_FROM_EMAIL,
     SESSION_COOKIE_AGE,
 )
+from console.state import app_context
 
 
 class LoginView(TemplateView):
@@ -37,6 +37,7 @@ class LoginView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['app'] = app_context
         return context
 
 
@@ -52,7 +53,6 @@ def login(request, *args, **argv): #pylint: disable=unused-argument
             return JsonResponse({'success': False, 'message': message}, status=401)
 
         # Initialize Firebase and verify the Firebase ID token.
-        initialize_firebase()
         claims = verify_token(token)
         uid = claims['uid']
 

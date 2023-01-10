@@ -414,7 +414,10 @@ CCRS_DATASETS = {
 CCRS_ANALYSES = {
     'Foreign Matter': 'foreign_matter',
     'Heavy Metal': 'heavy_metals',
+    'microbe': 'microbes',
     'Microbiological': 'microbes',
+    'moisture': 'moisture',
+    'Moisture': 'moisture',
     'Moisture Analysis': 'moisture',
     'Moistures Analysis': 'moisture',
     'Mycotoxin': 'mycotoxins',
@@ -422,6 +425,7 @@ CCRS_ANALYSES = {
     'Potency': 'cannabinoids',
     'Residual Solvent': 'residual_solvents',
     'Terpene': 'terpenes',
+    'terpene': 'terpenes',
     'Water Activity': 'water_activity',
 }
 

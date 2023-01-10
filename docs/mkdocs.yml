@@ -262,15 +262,15 @@ nav:
   # Developers
   #------------
   - Developers:
-    - Dev:
-      - Getting Started: docs/developers/dev/development.md
-      - Installation: docs/developers/dev/installation.md
-      - Contributing: docs/developers/dev/contributing.md
-      - Packaging: docs/developers/dev/packaging.md
-      - Publishing: docs/developers/dev/publishing.md
-      - Roadmap: docs/developers/dev/roadmap.md
-      - Security: docs/developers/dev/security.md
-      - Testing: docs/developers/dev/testing.md
-      - Version control: docs/developers/dev/version_control.md
+    - Getting Started: docs/developers/development.md
+    - Installation: docs/developers/installation.md
+    - Contributing: docs/developers/contributing.md
+    - Packaging: docs/developers/packaging.md
+    - Publishing: docs/developers/publishing.md
+    - Roadmap: docs/developers/roadmap.md
+    - Security: docs/developers/security.md
+    - Testing: docs/developers/testing.md
+    - Version control: docs/developers/version_control.md
     - SOPs:
       - Control of Documents: docs/developers/sops/control-of-documents.md
+      - COA Parsing: docs/developers/sops/coa-parsing.md

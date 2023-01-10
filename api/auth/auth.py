@@ -1,10 +1,10 @@
 """
-Authentication Views | Cannlytics API
-Copyright (c) 2021-2022 Cannlytics
+Authentication | Cannlytics API
+Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/22/2021
-Updated: 7/24/2021
+Updated: 1/9/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Description: Authentication mechanisms for the Cannlytics API, including API key

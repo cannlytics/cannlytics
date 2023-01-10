@@ -1479,7 +1479,7 @@ class Strain(Model):
     def update(self, **kwargs):
         """Update the strain given parameters as keyword arguments."""
         context = self.to_dict()
-        data = update_dict(context, **kwargs)
+        data = update_dict(context, camelcase, **kwargs)
         self.client.update_strains([data], license_number=self._license)
 
     def delete(self):

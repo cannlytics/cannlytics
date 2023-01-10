@@ -56,12 +56,12 @@ from cannlytics.metrc.models import (
 )
 
 
-def test_initialize_metrc():
+def test_initialize_metrc(env_file='.env'):
     """Test initializing a Metrc client."""
 
     # Initialize Firebase to get API keys from Secret Manager.
     # URL: <https://console.cloud.google.com/security/secret-manager>
-    config = dotenv_values('../../../.env')
+    config = dotenv_values(env_file)
     key = 'GOOGLE_APPLICATION_CREDENTIALS'
     os.environ[key] = config[key]
     db = fb.initialize_firebase()
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     # [✓] Initialization
     #-------------------------------------------------------------------
     print('Initializing Metrc...')
-    track = test_initialize_metrc()
+    track = test_initialize_metrc(env_file='.env')
     print('State:', track.state)
     print('Base:', track.base)
 
@@ -129,6 +129,121 @@ if __name__ == '__main__':
     # Ensure that each facility type exists.
     assert None not in [cultivator, lab, retailer]
     print('Identified all license types.')
+
+
+    #------------------------------------------------------------------
+    # [✓] Locations
+    #------------------------------------------------------------------
+
+    # Create a new location.
+    cultivation_name = 'CAN Flower Garden 001'
+    cultivation_original_name = 'CAN Flower Garden 002'
+    cultivator.create_locations([
+        cultivation_original_name,
+        'CAN Drying Room 001',
+        'CAN Veg Room 001',
+        'CAN Warehouse',
+    ])
+    
+    # Get created location.
+    cultivation= None
+    locations = track.get_locations(
+        action='active',
+        license_number=cultivator.license_number,
+    )
+    for location in locations:
+        if location.name == cultivation_original_name:
+            cultivation = location
+
+    # Update the name of the location.
+    cultivator.update_locations([cultivation.uid], [cultivation_name])
+
+    # View the location.
+    traced_location = cultivator.get_locations(cultivation.uid)
+
+
+    #------------------------------------------------------------------
+    # [ ] Strains
+    #------------------------------------------------------------------
+
+    # Create a new strain.
+    strain_name = 'New Old-Time Moonshine'
+    strain = {
+        'Name': strain_name,
+        'TestingStatus': 'None',
+        'ThcLevel': 0.2420,
+        'CbdLevel': 0.0333,
+        'IndicaPercentage': 0.0,
+        'SativaPercentage': 1.0
+    }
+    try:
+        track.create_strains([strain], license_number=cultivator.license_number)
+    except MetrcAPIError:
+        pass
+
+    # Get the created strain's ID.
+    new_strain = None
+    strains = track.get_strains(license_number=cultivator.license_number)
+    for strain in strains:
+        if strain.name == strain_name:
+            new_strain = strain
+
+    # Change the THC and CBD levels.
+    # FIXME:
+    new_strain.update(thc_level=0.1333, cbd_level=0.0777)
+
+    # View the Strain.
+    traced_strain = track.get_strains(new_strain.uid, license_number=cultivator.license_number)
+    print(traced_strain.name, '| THC:', traced_strain.thc_level, 'CBD:', traced_strain.cbd_level)
+
+
+    #------------------------------------------------------------------
+    # [ ] Items
+    #------------------------------------------------------------------
+
+
+    #------------------------------------------------------------------
+    # [ ] Batches
+    #------------------------------------------------------------------
+
+
+
+    #------------------------------------------------------------------
+    # [ ] Plants
+    #------------------------------------------------------------------
+
+
+    #------------------------------------------------------------------
+    # [ ] Harvests
+    #------------------------------------------------------------------
+
+
+    #------------------------------------------------------------------
+    # [ ] Packages
+    #------------------------------------------------------------------
+
+
+    #------------------------------------------------------------------
+    # [ ] Transfers
+    #------------------------------------------------------------------
+
+
+
+    #------------------------------------------------------------------
+    # [ ] Transfer templates
+    #------------------------------------------------------------------
+
+
+    #------------------------------------------------------------------
+    # [ ] Lab results
+    #------------------------------------------------------------------
+
+
+    #------------------------------------------------------------------
+    # [ ] Sales
+    #------------------------------------------------------------------
+
+
 
 
 if __name__ == '__main__' and False:
