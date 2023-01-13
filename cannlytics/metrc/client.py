@@ -909,11 +909,23 @@ class Metrc(object):
                 return response
 
 
-    # TODO: Implement create_package
-    def create_package(self):
+    def create_package(
+            self,
+            data,
+            license_number='',
+            qa=False,
+            plantings=False,
+            return_obs=False,
+        ):
         """Create a single package."""
-        raise NotImplementedError
-
+        return self.create_packages(
+            [data],
+            license_number=license_number,
+            qa=qa,
+            plantings=plantings,
+            return_obs=return_obs,
+        )
+        
 
     def create_packages(
             self,
@@ -946,10 +958,9 @@ class Metrc(object):
     # TODO: create_package_from_plant (POST /plantbatches/v1/create/packages/frommotherplant)
 
 
-    # TODO: Implement update_package
-    def update_package(self):
+    def update_package(self, data, license_number='', return_obs=False):
         """Update a given package."""
-        raise NotImplementedError
+        return self.update_packages([data], license_number=license_number, return_obs=return_obs)
 
 
     def update_packages(self, data, license_number='', return_obs=False):

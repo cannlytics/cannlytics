@@ -634,7 +634,7 @@ class Package(Model):
     Immature plants and seeds can be packaged by a nursery and transported by a
     distributor to a cultivator, distributor or retailer for sale.
 
-    2. When a manufacturer is creating a concentrate that will then be used i
+    2. When a manufacturer is creating a concentrate that will then be used in
     multiple infused production batches, the concentrate must be created as a
     new package. The infused production batches will then be created from the
     concentrate package.

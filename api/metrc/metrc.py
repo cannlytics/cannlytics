@@ -16,6 +16,7 @@ from typing import Optional
 # External imports:
 import google.auth
 from django.http.response import JsonResponse
+from django.http.request import HttpRequest
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.request import Request
@@ -40,6 +41,7 @@ AUTH_ERROR = 'Authentication failed. Please login to the console or \
     provide a valid API key in an `Authentication: Bearer <token>` \
     header.'
 DEFAULT_STATE = 'ok'
+LOG_TYPE = 'metrc'
 
 
 #-----------------------------------------------------------------------
@@ -209,16 +211,23 @@ def packages(request: Request, package_id: Optional[str] = None):
     # Get package(s) data.
     # TODO: Implement queries.
     if request.method == 'GET':
-        objs = track.get_packages(start='2021-06-04', end='2021-06-05')
+        objs = track.get_packages(
+            # start='2021-06-04',
+            # end='2021-06-05'
+        )
         try:
             data = [obj.to_dict() for obj in objs]
         except TypeError:
             data = [objs.to_dict()]
         return Response({'data': data}, content_type='application/json')
 
-    # Create / update packages.
+    # Manage packages.
     if request.method == 'POST':
-        raise NotImplementedError
+
+        # TODO: Determine the action to perform.
+        body = request.data['data']
+        action = request.data.get('action')
+
         
         # TODO: Create packages.
 
@@ -750,7 +759,68 @@ def waste(request: Request, waste_id: Optional[str] = None):
 # - units of measure
 
 
-def delete_license(request, *args, **argv): #pylint: disable=unused-argument
+#-----------------------------------------------------------------------
+# License and Metrc user API key management.
+#-----------------------------------------------------------------------
+
+def add_license(request: HttpRequest, *args, **argv): #pylint: disable=unused-argument
+    """Add a license to an organization's licenses."""
+
+    # Authenticate the user.
+    claims = authenticate_request(request)
+    if claims is None:
+        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
+    
+    # Get the associated organization.
+    org_id = request.query_params.get('org_id')
+    if org_id is None:
+        message = 'Parameter `org_id` is required.'
+        return Response({'error': True, 'message': message}, status=403)
+
+    # Get the license, state, and Metrc user API key.
+    try:
+        data = loads(request.body.decode('utf-8'))
+        metrc_user_api_key = data['metrc_user_api_key']
+        license_number = data['license_number']
+        state = data['state']
+    except KeyError:
+        message = 'Body data `license_number`, `state`, and `metrc_user_api_key` are required.'
+        return Response({'error': True, 'message': message}, status=403)
+
+    # FIXME: Save the key data as a secret.
+    _, project_id = google.auth.default()
+    # doc = get_document(f'organizations/{org_id}')
+    # existing_licenses = doc['licenses']
+    # licenses = []
+    # for license_data in existing_licenses:
+    #     license_number = license_data['license_number']
+    #     if license_data['license_number'] != license_number:
+    #         licenses.append(license_data)
+    #     else:
+    #         add_secret_version(
+    #             project_id,
+    #             license_data['user_api_key_secret']['secret_id'],
+    #             'redacted'
+    #         )
+
+    # FIXME: Update the organization's licenses.
+    # doc['licenses'] = licenses
+    # update_document(f'organizations/{org_id}', doc)
+
+    # Create an activity log and return a response.
+    message = f'License {license_number} added in {state}.'
+    create_log(
+        ref=f'organizations/{org_id}/logs',
+        claims=claims,
+        action=message,
+        log_type=LOG_TYPE,
+        key='add_license',
+        changes=[license_number]
+    )
+    return JsonResponse({'success': True, 'message': message})
+
+
+def delete_license(request: HttpRequest, *args, **argv): #pylint: disable=unused-argument
     """Delete a license from an organization's licenses."""
 
     # Authenticate the user.
@@ -761,7 +831,7 @@ def delete_license(request, *args, **argv): #pylint: disable=unused-argument
     data = loads(request.body.decode('utf-8'))
     deletion_reason = data.get('deletion_reason', 'No deletion reason.')
     license_number = request.query_params.get('license')
-    org_id = request.query_params.get('license')
+    org_id = request.query_params.get('org_id')
     if not license_number or not org_id:
         message = 'Parameters `license` and `org_id` are required.'
         return Response({'error': True, 'message': message}, status=403)
@@ -786,12 +856,13 @@ def delete_license(request, *args, **argv): #pylint: disable=unused-argument
     update_document(f'organizations/{org_id}', doc)
 
     # Create a log.
+    message = 'License deleted.'
     create_log(
         ref=f'organizations/{org_id}/logs',
         claims=user_claims,
-        action='License deleted.',
-        log_type='traceability',
+        action=message,
+        log_type=LOG_TYPE,
         key='delete_license',
         changes=[license_number, deletion_reason]
     )
-    return JsonResponse({'status': 'success', 'message': 'License deleted.'})
+    return JsonResponse({'success': True, 'message': message})

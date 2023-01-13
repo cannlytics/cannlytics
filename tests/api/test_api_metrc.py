@@ -39,25 +39,46 @@ if __name__ == '__main__':
 # TODO: [ ] Facilities
 #------------------------------------------------------------------
 
-# Get facilities.
+def test_get_facilities(client):
+    """Test getting facilities from the Metrc API,
+    through the Cannlytics API.
+    """
+    response = client.get('/facilities/')
+    assert response.status_code == 200
+    # assert response.data['data'] == [{'id': 1, 'name': 'Facility 1'}, {'id': 2, 'name': 'Facility 2'}]
+
 
 
 #------------------------------------------------------------------
 # TODO: [ ] Locations
 #------------------------------------------------------------------
-# Create a new location.
 
+def test_get_locations(client):
+    """Test getting a location."""
+    response = client.get('/locations/')
+    assert response.status_code == 200
+    assert response.data['data'] == [{'id': 1, 'name': 'Location 1'}, {'id': 2, 'name': 'Location 2'}]
 
-# Get created location.
+def test_create_locations(client):
+    """Test creating a location."""
+    data = [{'name': 'Location 1', 'location_type': 'Room'}, {'name': 'Location 2', 'location_type': 'Room'}]
+    response = client.post('/locations/', data={'data': data})
+    assert response.status_code == 201
+    assert response.data['data'] == data
 
+def test_update_locations(client):
+    """Test update the name of the location."""
+    data = [{'id': 1, 'name': 'Location 1 Updated', 'location_type': 'Room'}, {'id': 2, 'name': 'Location 2 Updated', 'location_type': 'Room'}]
+    response = client.post('/locations/', data={'data': data})
+    assert response.status_code == 200
+    assert response.data['data'] == data
 
-# Update the name of the location.
-
-
-# View the location.
-
-
-# Delete locations?
+def test_delete_locations(client):
+    """Test deleting a location."""
+    data = [{'id': 1}, {'id': 2}]
+    response = client.delete('/locations/', data={'data': data})
+    assert response.status_code == 200
+    assert response.data == {'success': True, 'data': []}
 
 
 #------------------------------------------------------------------
@@ -261,3 +282,55 @@ if __name__ == '__main__':
 
 # Void a sales receipt.
 
+
+
+# === Tests ===
+if __name__ == '__main__':
+
+    # TODO: Initialize a client.
+    client = None
+
+    # [ ] Test adding a Metrc user API key.
+
+    # [ ] Test facilities.
+
+    # [ ] Test employees.
+
+    # [ ] Test locations.
+    # test_get_locations(client)
+    # test_create_locations(client)
+    # test_update_locations(client)
+    # test_delete_locations(client)
+
+    # [ ] Test packages.
+
+    # [ ] Test items.
+
+    # [ ] Test lab results.
+
+    # [ ] Test strains.
+
+    # [ ] Test batches.
+
+    # [ ] Test plants.
+
+    # [ ] Test harvests.
+
+    # [ ] Test transfers and transfer templates.
+
+    # [ ] Test patients.
+
+    # [ ] Test sales and transactions.
+
+    # [ ] Test deliveries.
+
+    # [ ] Test miscellaneous endpoints
+    # - additives
+    # - categories
+    # - customer types
+    # - Test statuses
+    # - Test types
+    # - units of measure
+    # - waste
+
+    # [ ] Test removing a Metrc user API key.
