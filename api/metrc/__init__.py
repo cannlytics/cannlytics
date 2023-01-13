@@ -1,5 +1,5 @@
 """
-Traceability API Endpoints Initialization | Cannlytics API
+Metrc API Endpoints Initialization | Cannlytics API
 Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
@@ -7,7 +7,7 @@ Created: 9/8/2022
 Updated: 9/26/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
-from api.traceability.traceability import (
+from api.metrc.metrc import (
     employees,
     items,
     lab_tests,

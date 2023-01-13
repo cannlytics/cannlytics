@@ -21,7 +21,7 @@ from api.base import base
 import api.data
 import api.lims
 import api.stats
-import api.traceability
+import api.metrc
 
 # Administrative API imports.
 from api.organizations import organizations
@@ -214,23 +214,23 @@ urlpatterns = [
         ])),
     ])),
 
-    # Traceability API endpoints.
-    path('traceability', include([
-        path('/delete-license', api.traceability.delete_license),
-        path('/employees', api.traceability.employees),
-        path('/employees/<license_number>', api.traceability.employees),
-        path('/items', api.traceability.items),
-        path('/items/<item_id>', api.traceability.items),
-        path('/locations', api.traceability.locations),
-        path('/locations/<area_id>', api.traceability.locations),
-        path('/packages', api.traceability.packages),
-        path('/packages/<package_id>', api.traceability.packages),
-        path('/results', api.traceability.lab_tests),
-        path('/results/<test_id>', api.traceability.lab_tests),
-        path('/strains', api.traceability.strains),
-        path('/strains/<strain_id>', api.traceability.strains),
-        path('/transfers', api.traceability.transfers),
-        path('/transfers/<transfer_id>', api.traceability.transfers),
+    # Metrc API endpoints.
+    path('metrc', include([
+        path('/delete-license', api.metrc.delete_license),
+        path('/employees', api.metrc.employees),
+        path('/employees/<employee_license>', api.metrc.employees),
+        path('/items', api.metrc.items),
+        path('/items/<item_id>', api.metrc.items),
+        path('/locations', api.metrc.locations),
+        path('/locations/<area_id>', api.metrc.locations),
+        path('/packages', api.metrc.packages),
+        path('/packages/<package_id>', api.metrc.packages),
+        path('/results', api.metrc.lab_tests),
+        path('/results/<test_id>', api.metrc.lab_tests),
+        path('/strains', api.metrc.strains),
+        path('/strains/<strain_id>', api.metrc.strains),
+        path('/transfers', api.metrc.transfers),
+        path('/transfers/<transfer_id>', api.metrc.transfers),
         # TODO: Implement remaining Metrc endpoints:
         # - deliveries
         # - categories

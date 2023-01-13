@@ -421,6 +421,7 @@ CCRS_ANALYSES = {
     'Moisture Analysis': 'moisture',
     'Moistures Analysis': 'moisture',
     'Mycotoxin': 'mycotoxins',
+    'mycotoxin': 'mycotoxins',
     'Pesticide': 'pesticides',
     'Potency': 'cannabinoids',
     'Residual Solvent': 'residual_solvents',

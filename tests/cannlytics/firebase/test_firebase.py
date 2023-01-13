@@ -12,6 +12,7 @@ import os
 import sys
 
 # External imports.
+# FIXME: Migrate to `dotenv_values`
 import environ
 from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference

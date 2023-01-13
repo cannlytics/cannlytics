@@ -1,6 +1,6 @@
 # Python Requirements | Cannlytics
 # Created 1/5/2021
-# Updated: 6/3/2022
+# Updated: 1/12/2023
 
 # Console and website requirements:
 datasets==2.8.0
@@ -18,7 +18,8 @@ firebase_admin==5.2.0
 fredapi==0.5.0
 google-auth==2.3.3
 google-cloud-secret-manager==2.8.0
-google-cloud-firestore
+# google-cloud-firestore==2.9.0
+google-cloud-logging==3.4.0
 googlemaps
 gunicorn==20.1.0
 Markdown==3.3.4

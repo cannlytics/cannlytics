@@ -17,7 +17,7 @@ from cannlytics.data.opendata import CCC
 
 
 #--------------------------------------------------------------------------
-# Wrangle Massachussetts Open Data.
+# Wrangle Massachusetts Open Data.
 #--------------------------------------------------------------------------
 
 # Initialize a CCC Data Catalog client.

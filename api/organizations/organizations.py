@@ -35,7 +35,7 @@ from cannlytics.firebase import (
     update_documents,
 )
 from cannlytics.auth.auth import authenticate_request
-from api.traceability.traceability import initialize_traceability
+from api.metrc.metrc import initialize_traceability
 from console.settings import DEFAULT_FROM_EMAIL, LIST_OF_EMAIL_RECIPIENTS
 
 
@@ -362,9 +362,9 @@ def employees(request):
     license_number = request.query_params.get('name')
     
     # Create a Metrc client.
-    # FIXME: Also pass state and primary license? | Pass state as version ID?
+    # FIXME: Also pass state and primary license?
     # Optional: Figure out how to pre-initialize a Metrc client.
-    track = initialize_traceability(project_id, license_number, '1')
+    track = initialize_traceability(project_id, license_number, 'latest')
 
     # Make a request to the Metrc API.
     data = track.get_employees(license_number=license_number)

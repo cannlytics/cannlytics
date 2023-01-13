@@ -114,6 +114,8 @@ def test_buy_data(data_token, asset):
         asset.did
     )
 
+
+# === Test ===
 if __name__ == '__main__':
 
     test_dataset = {

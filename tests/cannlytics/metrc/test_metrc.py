@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 3/29/2021
-Updated: 1/8/2023
+Updated: 1/12/2023
 License: MIT License
 
 Description:
@@ -665,7 +665,7 @@ if __name__ == '__main__' and False:
     print(new_package.last_modified)
 
     # Step 4 Using the new package created in Packages Step 1
-    #  Finish a package using: POST/packages/v1/finish
+    # Finish a package using: POST/packages/v1/finish
     new_package.finish()
     new_package = track.get_packages(uid=new_package.id, license_number=cultivator.license_number)
     print(new_package.last_modified)
@@ -710,7 +710,7 @@ if __name__ == '__main__' and False:
     # Get the tested package.
     test_package = track.get_packages(label=test_package_tag, license_number=cultivator.license_number)
 
-    # Step 1a Set up an external Incoming transfer
+    # Step 1a Set up an external incoming transfer
     # using: POST/transfers/v1/external/incoming
     transfer_data = {
         'ShipperLicenseNumber': cultivator.license_number,

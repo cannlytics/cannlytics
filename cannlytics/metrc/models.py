@@ -4,11 +4,13 @@ Copyright (c) 2021-2023 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 1/8/2023
+Updated: 1/13/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains common Metrc models.
 """
+# Standard imports:
+from typing import Any, Callable, Optional
 
 # Internal imports.
 from ..firebase import get_document, update_document
@@ -22,6 +24,7 @@ from ..utils.utils import (
     remove_dict_nulls,
     update_dict,
 )
+from client import Metrc
 
 
 class Model(object):
@@ -29,11 +32,11 @@ class Model(object):
 
     def __init__(
             self,
-            client,
-            context,
-            license_number='',
-            function=camel_to_snake
-    ):
+            client: Metrc,
+            context: dict,
+            license_number: Optional[str] = '',
+            function: Optional[Callable] = camel_to_snake
+        ):
         """Initialize the model, setting keys as properties."""
         self.client = client
         self._license = license_number
@@ -53,9 +56,9 @@ class Model(object):
         return self.__dict__.get('id')
 
     @classmethod
-    def from_dict(cls, client, json):
+    def from_dict(cls, client: Metrc, context: dict):
         """Initiate a class instance from a dictionary."""
-        obj = cls(client, json)
+        obj = cls(client, context)
         try:
             obj.create()
         except KeyError:
@@ -63,7 +66,7 @@ class Model(object):
         return obj
 
     @classmethod
-    def from_fb(cls, client, ref):
+    def from_fb(cls, client: Metrc, ref: str) -> Any:
         """Initialize a class from Firebase data.
         Args:
             client (Client): A Metrc client instance.
@@ -75,13 +78,13 @@ class Model(object):
         obj = cls(client, data)
         return obj
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """Returns the model's properties as a dictionary."""
         data = vars(self).copy()
         [data.pop(x, None) for x in ['_license', 'client', '__class__']]
         return data
 
-    def to_fb(self, ref='', col=''):
+    def to_fb(self, ref: Optional[str] = '', col: Optional[str] = ''):
         """Upload the model's properties as a dictionary to Firestore.
         Args:
             ref (str): The Firestore document reference.
@@ -434,6 +437,15 @@ class Location(Model):
             'harvests': 'ForHarvests',
             'packages': 'ForPackages'
         }
+    
+    def create(self, license_number='', return_obs=False):
+        """Create a location in Metrc."""
+        self.client.create_location(
+            self.name,
+            self.location_type,
+            license_number,
+            return_obs=return_obs,
+        )
 
     def update(self, **kwargs):
         """Update the location."""
@@ -669,7 +681,7 @@ class Package(Model):
             remediation=False,
             same_item=False,
 
-    ):
+        ):
         """Create a package from a harvest.
         Args:
             name (str): The name of the packaged item.
@@ -743,7 +755,7 @@ class Package(Model):
     # TODO: Implement (with return_obs)
     def create_packages(
             self,
-    ):
+        ):
         """Create multiple packages from a harvest."""
         raise NotImplementedError
 
@@ -781,7 +793,7 @@ class Package(Model):
             note='',
             reason='Mandatory State Destruction',
             uom='Grams'
-    ):
+        ):
         """Adjust the package.
         Args:
             weight (float): Required adjustment weight.
