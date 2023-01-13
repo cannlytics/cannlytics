@@ -501,7 +501,7 @@ class Harvest(Model):
             location=None,
             note='',
             uom=None
-    ):
+        ):
         """Create a package from a harvest.
         Args:
             name (str): The name of the packaged item.
@@ -542,7 +542,7 @@ class Harvest(Model):
             location=None,
             note='',
             uom=None
-    ):
+        ):
         """Create packages from a harvest.
         Args:
             name (str): The name of the packaged item.

@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/12/2023
-Updated: 1/12/2023
+Updated: 1/13/2023
 License: MIT License <https://opensource.org/licenses/MIT>
 """
 import os
@@ -118,7 +118,6 @@ if __name__ == '__main__':
 
 
 # Destroy a batch.
-
 
 
 #------------------------------------------------------------------
@@ -241,7 +240,6 @@ if __name__ == '__main__':
 
 
 # Get lab results for multiple packages.
-
 
 
 

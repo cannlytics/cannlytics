@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2021
-Updated: 1/9/2023
+Updated: 1/13/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API URLs to interface with cannabis data and analytics.
@@ -81,20 +81,22 @@ urlpatterns = [
 
         # CCRS data endpoints.
         # FIXME: Re-design CCRS endpoints around timeseries statistics.
-        # path('/ccrs/areas', ccrs_data.areas),
-        # path('/ccrs/contacts', ccrs_data.contacts),
-        # path('/ccrs/integrators', ccrs_data.integrators),
-        # path('/ccrs/inventory', ccrs_data.inventory),
-        # path('/ccrs/inventory_adjustments', ccrs_data.inventory_adjustments),
-        # path('/ccrs/plants', ccrs_data.plants),
-        # path('/ccrs/plant_destructions', ccrs_data.plant_destructions),
-        # path('/ccrs/products', ccrs_data.products),
-        # path('/ccrs/lab_results', ccrs_data.lab_results),
-        # path('/ccrs/licensees', ccrs_data.licensees),
-        # path('/ccrs/sale_headers', ccrs_data.sale_headers),
-        # path('/ccrs/sale_details', ccrs_data.sale_details),
-        # path('/ccrs/strains', ccrs_data.strains),
-        # path('/ccrs/transfers', ccrs_data.transfers),
+        # path('ccrs', include([
+        #     path('/areas', ccrs_data.areas),
+        #     path('/contacts', ccrs_data.contacts),
+        #     path('/integrators', ccrs_data.integrators),
+        #     path('/inventory', ccrs_data.inventory),
+        #     path('/inventory_adjustments', ccrs_data.inventory_adjustments),
+        #     path('/plants', ccrs_data.plants),
+        #     path('/plant_destructions', ccrs_data.plant_destructions),
+        #     path('/products', ccrs_data.products),
+        #     path('/lab_results', ccrs_data.lab_results),
+        #     path('/licensees', ccrs_data.licensees),
+        #     path('/sale_headers', ccrs_data.sale_headers),
+        #     path('/sale_details', ccrs_data.sale_details),
+        #     path('/strains', ccrs_data.strains),
+        #     path('/transfers', ccrs_data.transfers),
+        # ])),
 
         # Lab result data API endpoints.
         path('/results', include([
@@ -216,32 +218,37 @@ urlpatterns = [
 
     # Metrc API endpoints.
     path('metrc', include([
-        path('/delete-license', api.metrc.delete_license),
+        path('/admin/delete-license', api.metrc.delete_license),
+        path('/batches/<batch_id>', api.metrc.batches),
+        path('/deliveries/<delivery_id>', api.metrc.deliveries),
         path('/employees', api.metrc.employees),
-        path('/employees/<employee_license>', api.metrc.employees),
+        path('/employees/<license_number>', api.metrc.employees),
+        path('/facilities/<license_number>', api.metrc.facilities),
+        path('/harvests/<harvest_id>', api.metrc.harvests),
         path('/items', api.metrc.items),
         path('/items/<item_id>', api.metrc.items),
         path('/locations', api.metrc.locations),
         path('/locations/<area_id>', api.metrc.locations),
         path('/packages', api.metrc.packages),
         path('/packages/<package_id>', api.metrc.packages),
+        path('/patients/<patient_id>', api.metrc.patients),
+        path('/plants/<plant_id>', api.metrc.plants),
         path('/results', api.metrc.lab_tests),
         path('/results/<test_id>', api.metrc.lab_tests),
+        path('/sales/<sale_id>', api.metrc.sales),
         path('/strains', api.metrc.strains),
         path('/strains/<strain_id>', api.metrc.strains),
         path('/transfers', api.metrc.transfers),
         path('/transfers/<transfer_id>', api.metrc.transfers),
         # TODO: Implement remaining Metrc endpoints:
-        # - deliveries
+        # - additives
         # - categories
-        # - facilities
-        # - harvests
-        # - patients
-        # - plants
-        # - plantbatches
-        # - receipts
+        # - customer types
+        # - Test statuses
+        # - Test types
         # - transfers/templates
-        # - transaction
+        # - transaction?
+        # - units of measure
         # - waste
     ])),
 
@@ -254,7 +261,7 @@ urlpatterns = [
         path('/<organization_id>/join', organizations.join_organization),
     ])),
 
-    # User API Endpoints
+    # User API Endpoints.
     path('users', include([
         path('', users.users),
         path('/<user_id>', users.users),

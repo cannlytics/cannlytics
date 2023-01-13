@@ -21,6 +21,8 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 
 # Internal imports:
+from cannlytics.auth.auth import authenticate_request
+from cannlytics.data import create_hash
 from cannlytics.firebase import (
     access_secret_version,
     add_secret_version,
@@ -32,9 +34,8 @@ from cannlytics.metrc import initialize_metrc, Metrc
 from cannlytics.metrc.models import (
     Location,
 )
-from cannlytics.auth.auth import authenticate_request #pylint: disable=import-error
 
-
+# Metrc API defaults.
 AUTH_ERROR = 'Authentication failed. Please login to the console or \
     provide a valid API key in an `Authentication: Bearer <token>` \
     header.'
@@ -46,37 +47,52 @@ DEFAULT_STATE = 'ok'
 #-----------------------------------------------------------------------
 
 def initialize_traceability(
-        project_id: str,
-        license_number: str,
-        state: Optional[str] = DEFAULT_STATE,
-        test: Optional[bool] = False,
+        request: Request,
+        license_number: Optional[str] = '',
         version_id: Optional[str] = 'latest',
     ) -> Metrc:
-    """Initialize a Metrc client."""
+    """Initialize a Metrc client by getting the vendor API key
+    from Google Secret Manager and returning an authorized Metrc client.
+    """
+    # Get the Metrc user API key.
+    authorization = request.META['HTTP_AUTHORIZATION']
+    user_api_key = authorization.split(' ').pop()
+    if not user_api_key:
+        return AUTH_ERROR
 
-    # Get vendor version number.
-    admin_data = get_document('admin/metrc')
-    vendor_version_id = admin_data['vendor_api_key_secret']['version_id']
+    # Check that the user is the owner of the license / Metrc API key.
+    code = create_hash(user_api_key)
+    key_data = get_document(f'admin/metrc/user_api_key_hmacs/{code}')
+    if key_data is None:
+        return AUTH_ERROR
+    
+    # If the user is using a Cannlytics API key, then get their Metrc
+    # user API key.
+    if key_data.get('cannlytics'):
+        user_api_key = key_data.get('metrc_user_api_key')
+        if user_api_key is None:
+            return AUTH_ERROR
+
+    # Get the parameters for the client.
+    body = request.data['data']
+    if not license_number:
+        license_number = body.get('license', key_data.get('license_number'))
+    test = body.get('test', False)
+    state = body.get('state', DEFAULT_STATE)
+
+    # Get the Vendor API key from Secret Manager.
     if test:
         vendor_secret_id = 'metrc_test_vendor_api_key'
     else:
         vendor_secret_id = 'metrc_vendor_api_key'
-
-    # Get Vendor API key using secret manager.
+    _, project_id = google.auth.default()
     vendor_api_key = access_secret_version(
         project_id=project_id,
         secret_id=vendor_secret_id,
-        version_id=vendor_version_id
-    )
-
-    # Get user API key using secret manager.
-    user_api_key = access_secret_version(
-        project_id=project_id,
-        secret_id=f'{license_number}_secret',
         version_id=version_id
     )
 
-    # Return a Metrc client.
+    # Initialize and return a Metrc client.
     return initialize_metrc(
         vendor_api_key,
         user_api_key,
@@ -87,80 +103,18 @@ def initialize_traceability(
     )
 
 
-def delete_license(request, *args, **argv): #pylint: disable=unused-argument
-    """Delete a license from an organization's licenses."""
-
-    # Authenticate the user.
-    _, project_id = google.auth.default()
-    user_claims = authenticate_request(request)
-
-    # Get the parameters
-    data = loads(request.body.decode('utf-8'))
-    deletion_reason = data.get('deletion_reason', 'No deletion reason.')
-    license_number = request.query_params.get('license')
-    org_id = request.query_params.get('license')
-    if not license_number or not org_id:
-        message = 'Parameters `license` and `org_id` are required.'
-        return Response({'error': True, 'message': message}, status=403)
-
-    # Delete the license data and redact the secret.
-    doc = get_document(f'organizations/{org_id}')
-    existing_licenses = doc['licenses']
-    licenses = []
-    for license_data in existing_licenses:
-        license_number = license_data['license_number']
-        if license_data['license_number'] != license_number:
-            licenses.append(license_data)
-        else:
-            add_secret_version(
-                project_id,
-                license_data['user_api_key_secret']['secret_id'],
-                'redacted'
-            )
-    
-    # Update the user's remaining licenses.
-    doc['licenses'] = licenses
-    update_document(f'organizations/{org_id}', doc)
-
-    # Create a log.
-    create_log(
-        ref=f'organizations/{org_id}/logs',
-        claims=user_claims,
-        action='License deleted.',
-        log_type='traceability',
-        key='delete_license',
-        changes=[license_number, deletion_reason]
-    )
-    return JsonResponse({'status': 'success', 'message': 'License deleted.'})
-
-
 #-----------------------------------------------------------------------
 # Facilities
 #-----------------------------------------------------------------------
 
 @api_view(['GET'])
-def facilities(request: Request):
-    """Get employees for a given license number."""
-
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if not claims:
-        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-    _, project_id = google.auth.default()
-    
-
-    # Get the parameters.
-    license_number = request.data.get('license')
-    test = request.data.get('test', False)
-    state = request.data.get('state', DEFAULT_STATE)
+def facilities(request: Request, license_number: Optional[str] = ''):
+    """Get facilities for a given license number."""
 
     # Initialize Metrc.
-    track = initialize_traceability(
-        project_id,
-        license_number,
-        test=test,
-        state=state,
-    )
+    track = initialize_traceability(request, license_number=license_number)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
 
     # Get facilities from the Metrc API.
     objs = track.get_facilities()
@@ -175,27 +129,13 @@ def facilities(request: Request):
 #-----------------------------------------------------------------------
 
 @api_view(['GET'])
-def employees(request: Request, employee_license: Optional[str] = None):
+def employees(request: Request, license_number: Optional[str] = ''):
     """Get employees for a given license number."""
 
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if not claims:
-        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-    _, project_id = google.auth.default()
-    
-    # Get the parameters.
-    license_number = request.data.get('license')
-    test = request.data.get('test', False)
-    state = request.data.get('state', DEFAULT_STATE)
-
     # Initialize Metrc.
-    track = initialize_traceability(
-        project_id,
-        license_number,
-        test=test,
-        state=state,
-    )
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
 
     # Get employees from the Metrc API.
     objs = track.get_employees(license_number=license_number)
@@ -213,31 +153,14 @@ def employees(request: Request, employee_license: Optional[str] = None):
 def locations(request: Request, area_id: Optional[str] = None):
     """Get, update, and delete locations for a given license number."""
 
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if not claims:
-        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-    _, project_id = google.auth.default()
-
-    # Get the parameters.
-    license_number = request.data.get('license')
-    test = request.data.get('test', False)
-    state = request.data.get('state', DEFAULT_STATE)
-    if not license_number or not state:
-        message = 'Body data `license` and `state` are required.'
-        return Response({'error': True, 'message': message}, status=403)
-
     # Initialize Metrc.
-    track = initialize_traceability(
-        project_id,
-        license_number,
-        test=test,
-        state=state,
-    )
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
 
     # Get location(s) data.
     if request.method == 'GET':
-        objs = track.get_locations(license_number=license_number)
+        objs = track.get_locations()
         data = [obj.to_dict() for obj in objs]
         return Response({'data': data}, content_type='application/json')
 
@@ -251,18 +174,11 @@ def locations(request: Request, area_id: Optional[str] = None):
             else:
                 create_items.append(Location.from_dict(item))
         if create_items:
-            track.create_locations(
-                [x['name'] for x in create_items],
-                [x['location_type'] for x in create_items],
-                license_number=license_number,
-                return_obs=True
-            )
+            names = [x['name'] for x in create_items]
+            types = [x['location_type'] for x in create_items]
+            track.create_locations(names, types, return_obs=True)
         if update_items:
-            track.update_locations(
-                update_items,
-                license_number=license_number,
-                return_obs=True
-            )
+            track.update_locations(update_items, return_obs=True)
         items = create_items + update_items
         return Response({'data': items}, content_type='application/json')
 
@@ -285,32 +201,15 @@ def locations(request: Request, area_id: Optional[str] = None):
 def packages(request: Request, package_id: Optional[str] = None):
     """Get, update, and delete packages for a given license number."""
 
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if not claims:
-        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-
-    # Get the parameters.
-    _, project_id = google.auth.default()
-    license_number = request.data.get('license')
-    test = request.data.get('test', False)
-    state = request.data.get('state', DEFAULT_STATE)
-    if not license_number or not state:
-        message = 'Body data `license` and `state` are required.'
-        return Response({'error': True, 'message': message}, status=403)
-
     # Initialize Metrc.
-    track = initialize_traceability(
-        project_id,
-        license_number,
-        test=test,
-        state=state,
-    )
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
 
     # Get package(s) data.
     # TODO: Implement queries.
     if request.method == 'GET':
-        objs = track.get_packages(license_number=license_number, start='2021-06-04', end='2021-06-05')
+        objs = track.get_packages(start='2021-06-04', end='2021-06-05')
         try:
             data = [obj.to_dict() for obj in objs]
         except TypeError:
@@ -370,31 +269,14 @@ def packages(request: Request, package_id: Optional[str] = None):
 def items(request: Request, item_id: Optional[str] = None):
     """Get, update, and delete items for a given license number."""
 
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if not claims:
-        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-
-    # Get the parameters.
-    _, project_id = google.auth.default()
-    license_number = request.data.get('license')
-    test = request.data.get('test', False)
-    state = request.data.get('state', DEFAULT_STATE)
-    if not license_number or not state:
-        message = 'Body data `license` and `state` are required.'
-        return Response({'error': True, 'message': message}, status=403)
-
     # Initialize Metrc.
-    track = initialize_traceability(
-        project_id,
-        license_number,
-        test=test,
-        state=state,
-    )
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
 
     # Get item data.
     if request.method == 'GET':
-        objs = track.get_items(license_number=license_number, uid='243821')
+        objs = track.get_items(uid='243821')
         data = [obj.to_dict() for obj in objs]
         return Response({'data': data}, content_type='application/json')
 
@@ -408,17 +290,9 @@ def items(request: Request, item_id: Optional[str] = None):
             else:
                 create_items.append(item)
         if create_items:
-            track.create_items(
-                create_items,
-                license_number=license_number,
-                return_obs=True
-            )
+            track.create_items(create_items, return_obs=True)
         if update_items:
-            track.update_items(
-                update_items,
-                license_number=license_number,
-                return_obs=True
-            )
+            track.update_items(update_items, return_obs=True)
         items = create_items + update_items
         return Response({'data': items}, content_type='application/json')
 
@@ -441,37 +315,29 @@ def items(request: Request, item_id: Optional[str] = None):
 def lab_tests(request: Request, test_id: Optional[str] = None):
     """Get lab tests for a given license number."""
 
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if not claims:
-        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-    _, project_id = google.auth.default()
-
-    # Get the parameters.
-    license_number = request.query_params.get('license')
-    license_number = request.data.get('license')
-    test = request.data.get('test', False)
-    state = request.data.get('state', DEFAULT_STATE)
-    if not license_number or not state:
-        message = 'Body data `license` and `state` are required.'
-        return Response({'error': True, 'message': message}, status=403)
-
     # Initialize Metrc.
-    track = initialize_traceability(
-        project_id,
-        license_number,
-        test=test,
-        state=state,
-    )
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
 
     # Get lab results.
     # TODO: Implement queries.
     if request.method == 'GET':
-        objs = track.get_lab_results(uid='185436', license_number=license_number)
+        objs = track.get_lab_results(uid='185436')
         data = [obj.to_dict() for obj in objs]
         return Response({'data': data}, content_type='application/json')
 
-    # TODO: Post results
+    # FIXME: Post results
+    if request.method == 'POST':
+        raise NotImplementedError
+
+        # TODO: Post lab results.
+
+
+        # TODO: Upload lab result CoA(s).
+
+
+        # TODO: Release lab result(s).
 
 
 #-----------------------------------------------------------------------
@@ -482,31 +348,14 @@ def lab_tests(request: Request, test_id: Optional[str] = None):
 def strains(request: Request, strain_id: Optional[str] = None):
     """Get, update, and delete strains for a given license number."""
 
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if not claims:
-        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-
-    # Get the parameters.
-    _, project_id = google.auth.default()
-    license_number = request.data.get('license')
-    test = request.data.get('test', False)
-    state = request.data.get('state', DEFAULT_STATE)
-    if not license_number or not state:
-        message = 'Body data `license` and `state` are required.'
-        return Response({'error': True, 'message': message}, status=403)
-
     # Initialize Metrc.
-    track = initialize_traceability(
-        project_id,
-        license_number,
-        test=test,
-        state=state,
-    )
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
 
     # Get strain data.
     if request.method == 'GET':
-        objs = track.get_strains(license_number=license_number)
+        objs = track.get_strains()
         data = [obj.to_dict() for obj in objs]
         return Response({'data': data}, content_type='application/json')
 
@@ -520,17 +369,9 @@ def strains(request: Request, strain_id: Optional[str] = None):
             else:
                 create_items.append(item)
         if create_items:
-            track.create_strains(
-                create_items,
-                license_number=license_number,
-                return_obs=True
-            )
+            track.create_strains(create_items, return_obs=True)
         if update_items:
-            track.update_strains(
-                update_items,
-                license_number=license_number,
-                return_obs=True
-            )
+            track.update_strains(update_items, return_obs=True)
         items = create_items + update_items
         return Response({'data': items}, content_type='application/json')
 
@@ -549,21 +390,131 @@ def strains(request: Request, strain_id: Optional[str] = None):
 # Batches
 #-----------------------------------------------------------------------
 
-# FIXME: Implement!
+@api_view(['GET', 'POST', 'DELETE'])
+def batches(request: Request, batch_id: Optional[str] = None):
+    """Manage plant batches for a given license number."""
+
+    # Initialize Metrc.
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
+
+    # Get batch(es) data.
+    if request.method == 'GET':
+        if batch_id:
+            obj = track.get_batches(batch_id)
+            data = obj.to_dict()
+        else:
+            objs = track.get_batches()
+            data = [obj.to_dict() for obj in objs]
+        return Response({'data': data}, content_type='application/json')
+
+    # Manage batch(es).
+    if request.method == 'POST':
+        raise NotImplementedError
+
+        # TODO: Create plant batches.
+
+        # TODO: Manage batches:
+        # - Split batch(es).
+        # - Create plant package(s)
+        # - Move batch(es).
+        # - Add additives.
+        # - Create plantings.
 
 
 #-----------------------------------------------------------------------
 # Plants
 #-----------------------------------------------------------------------
 
-# FIXME: Implement!
+@api_view(['GET', 'POST', 'DELETE'])
+def plants(request: Request, plant_id: Optional[str] = None):
+    """Get, update, and delete plants for a given license number."""
+
+    # Initialize Metrc.
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
+
+    # Get plant(s) data.
+    if request.method == 'GET':
+        if plant_id:
+            obj = track.get_plants(plant_id)
+            data = obj.to_dict()
+        else:
+            objs = track.get_plants()
+            data = [obj.to_dict() for obj in objs]
+        return Response({'data': data}, content_type='application/json')
+
+    # Manage plant(s).
+    if request.method == 'POST':
+        raise NotImplementedError
+
+        # TODO: Create plant(s).
+
+
+        # TODO: Create plant package(s).
+
+
+        # TODO: Manicure plant(s).
+
+
+        # TODO: Harvest plant(s).
+
+
+        # TODO: Move plant(s).
+
+
+        # TODO: Flower plant(s).
+
+
+    # Delete plant(s).
+    if request.method == 'DELETE':
+        data = request.data['data']
+        if isinstance(data, list):
+            for item in data:
+                track.destroy_plants([item['id']])
+        else:
+            track.destroy_plants([data['id']])
 
 
 #-----------------------------------------------------------------------
 # Harvests
 #-----------------------------------------------------------------------
 
-# FIXME: Implement!
+@api_view(['GET', 'POST', 'DELETE'])
+def harvests(request: Request, harvest_id: Optional[str] = None):
+    """Manage harvests for a given license number."""
+
+    # Initialize Metrc.
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
+
+    # Get harvests.
+    if request.method == 'GET':
+        if harvest_id:
+            obj = track.get_harvests(harvest_id)
+            data = obj.to_dict()
+        else:
+            objs = track.get_harvests()
+            data = [obj.to_dict() for obj in objs]
+        return Response({'data': data}, content_type='application/json')
+
+    # Manage harvest(s).
+    if request.method == 'POST':
+        raise NotImplementedError
+
+        # TODO: Finish harvest(s).
+
+
+        # TODO: Unfinish harvest(s).
+
+
+        # TODO: Remove waste from  harvest(s).
+
+
+        # TODO: Move harvest(s).
 
 
 #-----------------------------------------------------------------------
@@ -574,27 +525,10 @@ def strains(request: Request, strain_id: Optional[str] = None):
 def transfers(request: Request, transfer_id: Optional[str] = None):
     """Get, update, and delete transfers for a given license number."""
 
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if not claims:
-        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-
-    # Get the parameters.
-    _, project_id = google.auth.default()
-    license_number = request.data.get('license')
-    test = request.data.get('test', False)
-    state = request.data.get('state', DEFAULT_STATE)
-    if not license_number or not state:
-        message = 'Body data `license` and `state` are required.'
-        return Response({'error': True, 'message': message}, status=403)
-
     # Initialize Metrc.
-    track = initialize_traceability(
-        project_id,
-        license_number,
-        test=test,
-        state=state,
-    )
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
 
     # Get transfer data.
     # TODO: Implement queries.
@@ -605,12 +539,11 @@ def transfers(request: Request, transfer_id: Optional[str] = None):
         # license_number=''
         # start=''
         # end=''
-        objs = track.get_transfers(license_number=license_number, start='2021-06-04', end='2021-06-05')
+        objs = track.get_transfers(start='2021-06-04', end='2021-06-05')
         data = [obj.to_dict() for obj in objs]
-        print('Retrieved the data:', data)
         return Response({'data': data}, content_type='application/json')
 
-    # TODO: Create / update transfers.
+    # FIXME: Create / update transfers.
 
 
     # TODO: Create / update transfer templates.
@@ -635,35 +568,18 @@ def transfers(request: Request, transfer_id: Optional[str] = None):
 def patients(request: Request, patient_id: Optional[str] = None):
     """Get, update, and delete patients for a given license number."""
 
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if not claims:
-        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-    _, project_id = google.auth.default()
-
-    # Get the parameters.
-    license_number = request.data.get('license')
-    test = request.data.get('test', False)
-    state = request.data.get('state', DEFAULT_STATE)
-    if not license_number or not state:
-        message = 'Body data `license` and `state` are required.'
-        return Response({'error': True, 'message': message}, status=403)
-
     # Initialize Metrc.
-    track = initialize_traceability(
-        project_id,
-        license_number,
-        test=test,
-        state=state,
-    )
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
 
     # Get patient(s) data.
     if request.method == 'GET':
         if patient_id:
-            obj = track.get_patients(patient_id, license_number=license_number)
+            obj = track.get_patients(patient_id)
             data = obj.to_dict()
         else:
-            objs = track.get_patients(license_number=license_number)
+            objs = track.get_patients()
             data = [obj.to_dict() for obj in objs]
         return Response({'data': data}, content_type='application/json')
 
@@ -677,17 +593,9 @@ def patients(request: Request, patient_id: Optional[str] = None):
             else:
                 create_items.append(item)
         if create_items:
-            track.create_patients(
-                create_items,
-                license_number=license_number,
-                return_obs=True
-            )
+            track.create_patients(create_items, return_obs=True)
         if update_items:
-            track.update_patients(
-                update_items,
-                license_number=license_number,
-                return_obs=True
-            )
+            track.update_patients(update_items, return_obs=True)
         items = create_items + update_items
         return Response({'data': items}, content_type='application/json')
 
@@ -709,31 +617,14 @@ def patients(request: Request, patient_id: Optional[str] = None):
 def sales(request: Request, strain_id: Optional[str] = None):
     """Get, update, and delete sales for a given license number."""
 
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if not claims:
-        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-
-    # Get the parameters.
-    _, project_id = google.auth.default()
-    license_number = request.data.get('license')
-    test = request.data.get('test', False)
-    state = request.data.get('state', DEFAULT_STATE)
-    if not license_number or not state:
-        message = 'Body data `license` and `state` are required.'
-        return Response({'error': True, 'message': message}, status=403)
-
     # Initialize Metrc.
-    track = initialize_traceability(
-        project_id,
-        license_number,
-        test=test,
-        state=state,
-    )
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
 
     # Get sales data.
     if request.method == 'GET':
-        objs = track.get_receipts(license_number=license_number)
+        objs = track.get_receipts()
         data = [obj.to_dict() for obj in objs]
         return Response({'data': data}, content_type='application/json')
 
@@ -747,17 +638,9 @@ def sales(request: Request, strain_id: Optional[str] = None):
             else:
                 create_items.append(item)
         if create_items:
-            track.create_receipts(
-                create_items,
-                license_number=license_number,
-                return_obs=True
-            )
+            track.create_receipts(create_items, return_obs=True)
         if update_items:
-            track.update_receipts(
-                update_items,
-                license_number=license_number,
-                return_obs=True
-            )
+            track.update_receipts(update_items, return_obs=True)
         items = create_items + update_items
         return Response({'data': items}, content_type='application/json')
 
@@ -773,6 +656,56 @@ def sales(request: Request, strain_id: Optional[str] = None):
 
 
 #-----------------------------------------------------------------------
+# Deliveries
+#-----------------------------------------------------------------------
+
+@api_view(['GET', 'POST', 'DELETE'])
+def deliveries(request: Request, delivery_id: Optional[str] = None):
+    """Get, update, and delete deliveries for a given license number."""
+
+    # Initialize Metrc.
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
+
+    # Get deliveries data.
+    if request.method == 'GET':
+        objs = track.get_deliveries()
+        data = [obj.to_dict() for obj in objs]
+        return Response({'data': data}, content_type='application/json')
+
+    # Create / update deliveries.
+    if request.method == 'POST':
+        create_items, update_items = [], []
+        data = request.data['data']
+        for item in data:
+            if item.get('id'):
+                update_items.append(item)
+            else:
+                create_items.append(item)
+        if create_items:
+            track.create_deliveries(create_items, return_obs=True)
+        if update_items:
+            track.update_deliveries(update_items, return_obs=True)
+        items = create_items + update_items
+        return Response({'data': items}, content_type='application/json')
+
+    # TODO: Complete deliveries.
+
+    # TODO: get_return_reasons
+
+    # Delete deliveries.
+    if request.method == 'DELETE':
+        data = request.data['data']
+        if isinstance(data, list):
+            for item in data:
+                track.delete_delivery(item['id'])
+        else:
+            track.delete_delivery(data['id'])
+        return Response({'success': True, 'data': []}, content_type='application/json')
+
+
+#-----------------------------------------------------------------------
 # Waste
 #-----------------------------------------------------------------------
 
@@ -780,36 +713,22 @@ def sales(request: Request, strain_id: Optional[str] = None):
 def waste(request: Request, waste_id: Optional[str] = None):
     """Get specific waste data for a given license number."""
 
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if not claims:
-        return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-    _, project_id = google.auth.default()
-    
-    # Get the parameters.
-    license_number = request.data.get('license')
-    test = request.data.get('test', False)
-    state = request.data.get('state', DEFAULT_STATE)
-
     # Initialize Metrc.
-    track = initialize_traceability(
-        project_id,
-        license_number,
-        test=test,
-        state=state,
-    )
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
 
     # Get all waste methods for a given license.
     if waste_id == 'methods':
-        data = track.get_waste_methods(license_number=license_number)
+        data = track.get_waste_methods()
 
     # Get all waste reasons for plants for a given license.
     elif waste_id == 'reasons':
-        data = track.get_waste_reasons(license_number=license_number)
+        data = track.get_waste_reasons()
 
     # Get all waste types for harvests for a given license.
     elif waste_id == 'types':
-        data = track.get_waste_types(license_number=license_number)
+        data = track.get_waste_types()
     
     # Handle incorrect queries.
     else:
@@ -823,6 +742,56 @@ def waste(request: Request, waste_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 # TODO: Implement API endpoints for:
+# - additives
 # - categories
 # - customer types
+# - Test statuses
+# - Test types
 # - units of measure
+
+
+def delete_license(request, *args, **argv): #pylint: disable=unused-argument
+    """Delete a license from an organization's licenses."""
+
+    # Authenticate the user.
+    _, project_id = google.auth.default()
+    user_claims = authenticate_request(request)
+
+    # Get the parameters
+    data = loads(request.body.decode('utf-8'))
+    deletion_reason = data.get('deletion_reason', 'No deletion reason.')
+    license_number = request.query_params.get('license')
+    org_id = request.query_params.get('license')
+    if not license_number or not org_id:
+        message = 'Parameters `license` and `org_id` are required.'
+        return Response({'error': True, 'message': message}, status=403)
+
+    # Delete the license data and redact the secret.
+    doc = get_document(f'organizations/{org_id}')
+    existing_licenses = doc['licenses']
+    licenses = []
+    for license_data in existing_licenses:
+        license_number = license_data['license_number']
+        if license_data['license_number'] != license_number:
+            licenses.append(license_data)
+        else:
+            add_secret_version(
+                project_id,
+                license_data['user_api_key_secret']['secret_id'],
+                'redacted'
+            )
+    
+    # Update the user's remaining licenses.
+    doc['licenses'] = licenses
+    update_document(f'organizations/{org_id}', doc)
+
+    # Create a log.
+    create_log(
+        ref=f'organizations/{org_id}/logs',
+        claims=user_claims,
+        action='License deleted.',
+        log_type='traceability',
+        key='delete_license',
+        changes=[license_number, deletion_reason]
+    )
+    return JsonResponse({'status': 'success', 'message': 'License deleted.'})
