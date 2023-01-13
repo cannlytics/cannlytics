@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 1/8/2023
+Updated: 1/13/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains the Client class responsible for
@@ -203,19 +203,8 @@ class Metrc(object):
 
 
     #------------------------------------------------------------------
-    # Employees and facilities
+    # Facilities and employees
     #------------------------------------------------------------------
-
-    def get_employees(self, license_number=''):
-        """Get all employees.
-        Args:
-            license_number (str): A licensee's license number.
-        """
-        url = METRC_EMPLOYEES_URL
-        params = self.format_params(license_number=license_number or self.primary_license)
-        response = self.request('get', url, params=params)
-        return [Employee(self, x) for x in response]
-
 
     def get_facilities(self):
         """Get all facilities."""
@@ -235,6 +224,18 @@ class Metrc(object):
                 facility = obs
                 break
         return facility
+    
+
+    def get_employees(self, license_number=''):
+        """Get all employees.
+        Args:
+            license_number (str): A licensee's license number.
+        """
+        url = METRC_EMPLOYEES_URL
+        params = self.format_params(license_number=license_number or self.primary_license)
+        response = self.request('get', url, params=params)
+        return [Employee(self, x) for x in response]
+
 
     #------------------------------------------------------------------
     # Deliveries
@@ -250,12 +251,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('post', url, data=data, params=params)
         # TODO: Return created deliveries.
-
-
-    # TODO: Get delivery.
-    def get_delivery(self):
-        """Get a home delivery."""
-        raise NotImplementedError
 
 
     def get_deliveries(
@@ -352,8 +347,6 @@ class Metrc(object):
     # Harvests
     #------------------------------------------------------------------
 
-    # TODO: get_harvest
-
     def get_harvests(
             self,
             uid='',
@@ -361,7 +354,7 @@ class Metrc(object):
             license_number='',
             start='',
             end='',
-    ):
+        ):
         """Get harvests.
         Args:
             uid (str): The UID of a harvest, takes precedent over action.
@@ -829,6 +822,7 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('delete', url, params=params)
 
+
     #------------------------------------------------------------------
     # Packages
     #------------------------------------------------------------------
@@ -1158,12 +1152,6 @@ class Metrc(object):
         return self.get_batches(action='types', license_number=license_number)
 
 
-    # TODO: Implement get_batch()
-    def get_batch(self):
-        """Get a given plant batch."""
-        raise NotImplementedError
-
-
     def get_batches(
             self,
             uid='',
@@ -1398,7 +1386,7 @@ class Metrc(object):
         # TODO: Optionally return updated plants.
 
 
-    # TODO: Finish remaining plant functions.
+    # FIXME: Finish remaining plant functions.
 
     def destroy_plants(self, data):
         """Move multiple plants."""
