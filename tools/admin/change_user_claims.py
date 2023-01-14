@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/13/2021
-Updated: 1/10/2023
+Updated: 1/13/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: Change a user's custom claims.
@@ -26,7 +26,7 @@ from dotenv import dotenv_values
 
 # Internal imports.
 sys.path.append('../..')
-from cannlytics import firebase # pylint: disable=import-error
+from cannlytics import firebase
 
 
 if __name__ == '__main__':
@@ -37,7 +37,11 @@ if __name__ == '__main__':
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
     firebase.initialize_firebase()
 
-    # TODO: Specify a user's ID and their desired claims.
+    # Specify a user's ID and their desired claims.
     UID = sys.argv[1]
     CLAIMS = json.loads(sys.argv[2])
     firebase.update_custom_claims(UID, claims=CLAIMS)
+
+    # Check the user's claims.
+    claims = firebase.get_custom_claims(UID)
+    print(claims)
