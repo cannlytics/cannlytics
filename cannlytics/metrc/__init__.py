@@ -4,10 +4,31 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 11/6/2021
+Updated: 1/14/2023
 """
 from typing import Any, Optional
 from .client import Metrc
+from .exceptions import MetrcAPIError
+from .models import (
+    Delivery,
+    Category,
+    Employee,
+    Facility,
+    Item,
+    Location,
+    Harvest,
+    Package,
+    Patient,
+    Plant,
+    PlantBatch,
+    LabResult,
+    Receipt,
+    Strain,
+    Transfer,
+    TransferTemplate,
+    Transaction,
+    Waste,
+)
 
 
 def initialize_metrc(
@@ -18,7 +39,7 @@ def initialize_metrc(
         primary_license: Optional[str] = '',
         state: Optional[str] = 'ca',
         client_class: Any = Metrc,
-) -> Metrc:
+    ) -> Metrc:
     """This is a shortcut function which instantiates a Metrc
     client using a user API key and the vendor API key.
     Args:
@@ -38,3 +59,27 @@ def initialize_metrc(
         primary_license=primary_license,
         state=state,
     )
+
+__all__ = [
+    initialize_metrc,
+    Metrc,
+    MetrcAPIError,
+    Delivery,
+    Category,
+    Employee,
+    Facility,
+    Item,
+    Location,
+    Harvest,
+    Package,
+    Patient,
+    Plant,
+    PlantBatch,
+    LabResult,
+    Receipt,
+    Strain,
+    Transfer,
+    TransferTemplate,
+    Transaction,
+    Waste,
+]
