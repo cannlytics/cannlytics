@@ -171,7 +171,7 @@ The tables below contain all of the methods of the `Metrc` class. In general, yo
 | `update_packages(data, license_number='', return_obs=False)` | Update packages. | `/packages/v1/update` |
 | `delete_package(uid, license_number='')` | Delete a package. | `/packages/v1/` |
 | `change_package_items(data, license_number='', return_obs=False)` | Update package items. | `/packages/v1/change/item` |
-| `update_package_item_locations(data, license_number='', return_obs=False)` | Update package item location(s). | `/packages/v1/change/locations` |
+| `change_package_locations(data, license_number='', return_obs=False)` | Update package item location(s). | `/packages/v1/change/locations` |
 | `manage_packages(data, action='adjust', license_number='', return_obs=False)` | Adjust package(s). Actions: `adjust`, `finish`, `unfinish`, `remediate`. | `/packages/v1/` |
 | `update_package_notes(data, license_number='', return_obs=False)` | Update package note(s). | `/packages/v1/change/note` |
 

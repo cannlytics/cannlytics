@@ -856,7 +856,7 @@ class Package(Model):
             'Location': location,
             'MoveDate': get_timestamp(zone=self.client.state)
         }]
-        self.client.update_package_item_locations(data)
+        self.client.change_package_locations(data)
 
 
     def update_items(self, name='', names=[]):

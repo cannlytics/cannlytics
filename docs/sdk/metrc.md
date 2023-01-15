@@ -637,7 +637,7 @@ SDK reference for the `cannlytics.metrc.client.Metrc` class.
       <td></td>
     </tr>
     <tr>
-      <td>`update_package_item_locations`</td>
+      <td>`change_package_locations`</td>
       <td>Update package item location(s).</td>
       <td>data (list): A list of package items (dict) to move.    license_number (str): A specific license number.</td>
       <td></td>

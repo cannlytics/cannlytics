@@ -4,10 +4,29 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/13/2021
-Updated: 1/14/2023
+Updated: 1/15/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API to interface with the Metrc API.
+
+TODO: Implement the remaining functionality:
+
+    [ ] Packages
+    [ ] Lab Tests
+    [ ] Plants
+    [ ] Harvests
+    [ ] Transfers
+    [ ] Deliveries
+
+    [ ] Logs
+    
+    [ ] Rate limits
+    <https://www.metrc.com/wp-content/uploads/2021/10/4-Metrc-Rate-Limiting-1.pdf>
+    - 50 GET calls per second per facility.
+    - 150 GET calls per second per vendor API key.
+    - 10 concurrent GET calls per facility.
+    - 30 concurrent GET calls per integrator.
+
 """
 # Standard imports:
 from json import loads
@@ -295,6 +314,36 @@ def log_metrc_error(request, action, key):
 
 
 #-----------------------------------------------------------------------
+# API Methods
+#-----------------------------------------------------------------------
+
+def create_or_update_objects(track, data, create_method, update_method):
+    """Create or update given API items."""
+    create_items, update_items = [], []
+    for item in data:
+        if item.get('id'):
+            update_items.append(item)
+        else:
+            create_items.append(item)
+    if create_items:
+        getattr(track, create_method)(create_items, return_obs=True)
+    if update_items:
+        getattr(track, update_method)(update_items, return_obs=True)
+    items = create_items + update_items
+    return Response({'data': items}, content_type='application/json')
+
+
+def delete_objects(track, data, delete_method):
+    """Delete given objects from the Metrc API."""
+    if isinstance(data, list):
+        for item in data:
+            getattr(track, delete_method)(item['id'])
+    else:
+        getattr(track, delete_method)(data['id'])
+    return Response({'success': True, 'data': []}, content_type='application/json')
+
+
+#-----------------------------------------------------------------------
 # Facilities
 #-----------------------------------------------------------------------
 
@@ -372,6 +421,7 @@ def locations(request: Request, area_id: Optional[str] = None):
                 update_items.append(item)
             else:
                 create_items.append(Location.from_dict(item))
+        # FIXME: Standardize location creation.
         if create_items:
             names = [x['name'] for x in create_items]
             types = [x['location_type'] for x in create_items]
@@ -397,7 +447,10 @@ def locations(request: Request, area_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def packages(request: Request, package_id: Optional[str] = None):
+def packages(
+        request: Request,
+        package_id: Optional[str] = None,
+    ):
     """Get, update, and delete packages for a given license number."""
 
     # Initialize Metrc.
@@ -421,18 +474,13 @@ def packages(request: Request, package_id: Optional[str] = None):
     # Manage packages.
     if request.method == 'POST':
 
-        # TODO: Determine the action to perform.
-        body = request.data['data']
-        action = request.data.get('action')
-
+        # Determine the action to perform.
+        data = request.data['data']
+        # action = request.data.get('action')
         
-        # TODO: Create packages.
-
-
-        # TODO: Update packages.
-
-
-        # TODO: Change items.
+        # TODO: Change package locations.
+        if package_id == 'change_package_locations':
+            raise NotImplementedError
 
 
         # TODO: Update items.
@@ -455,17 +503,17 @@ def packages(request: Request, package_id: Optional[str] = None):
 
         # TODO: Change location
 
+        # Create or update packages.
+        else:
+            return create_or_update_objects(track, data,
+                create_method='create_packages',
+                update_method='update_packages',
+            )
 
     # Delete package(s).
     if request.method == 'DELETE':
         data = request.data['data']
-        if isinstance(data, list):
-            for item in data:
-                track.delete_package(item['id'])
-        else:
-            track.delete_package(data['id'])
-        return Response({'success': True, 'data': []}, content_type='application/json')
-
+        return delete_objects(track, data, 'delete_package')
 
 #-----------------------------------------------------------------------
 # Items
@@ -482,35 +530,21 @@ def items(request: Request, item_id: Optional[str] = None):
 
     # Get item data.
     if request.method == 'GET':
-        objs = track.get_items(uid='243821')
+        objs = track.get_items(uid=item_id)
         data = [obj.to_dict() for obj in objs]
         return Response({'data': data}, content_type='application/json')
 
     # Create / update item(s).
     if request.method == 'POST':
-        create_items, update_items = [], []
-        data = request.data['data']
-        for item in data:
-            if item.get('id'):
-                update_items.append(item)
-            else:
-                create_items.append(item)
-        if create_items:
-            track.create_items(create_items, return_obs=True)
-        if update_items:
-            track.update_items(update_items, return_obs=True)
-        items = create_items + update_items
-        return Response({'data': items}, content_type='application/json')
+        return create_or_update_objects(track, data,
+            create_method='create_items',
+            update_method='update_items',
+        )
 
     # Delete item(s).
     if request.method == 'DELETE':
         data = request.data['data']
-        if isinstance(data, list):
-            for item in data:
-                track.delete_item(item['id'])
-        else:
-            track.delete_item(data['id'])
-        return Response({'success': True, 'data': []}, content_type='application/json')
+        return delete_objects(track, data, 'delete_item')
 
 
 #-----------------------------------------------------------------------
@@ -567,29 +601,15 @@ def strains(request: Request, strain_id: Optional[str] = None):
 
     # Create / update strains.
     if request.method == 'POST':
-        create_items, update_items = [], []
-        data = request.data['data']
-        for item in data:
-            if item.get('id'):
-                update_items.append(item)
-            else:
-                create_items.append(item)
-        if create_items:
-            track.create_strains(create_items, return_obs=True)
-        if update_items:
-            track.update_strains(update_items, return_obs=True)
-        items = create_items + update_items
-        return Response({'data': items}, content_type='application/json')
+        return create_or_update_objects(track, data,
+            create_method='create_strains',
+            update_method='update_strains',
+        )
 
     # Delete strains.
     if request.method == 'DELETE':
         data = request.data['data']
-        if isinstance(data, list):
-            for item in data:
-                track.delete_strain(item['id'])
-        else:
-            track.delete_strain(data['id'])
-        return Response({'success': True, 'data': []}, content_type='application/json')
+        return delete_objects(track, data, 'delete_strain')
 
 
 #-----------------------------------------------------------------------
@@ -627,6 +647,8 @@ def batches(request: Request, batch_id: Optional[str] = None):
         # - Move batch(es).
         # - Add additives.
         # - Create plantings.
+
+        # TODO: Implement additives.
 
 
 #-----------------------------------------------------------------------
@@ -677,11 +699,7 @@ def plants(request: Request, plant_id: Optional[str] = None):
     # Delete plant(s).
     if request.method == 'DELETE':
         data = request.data['data']
-        if isinstance(data, list):
-            for item in data:
-                track.destroy_plants([item['id']])
-        else:
-            track.destroy_plants([data['id']])
+        return delete_objects(track, data, 'destroy_plants')
 
 
 #-----------------------------------------------------------------------
@@ -724,7 +742,7 @@ def harvests(request: Request, harvest_id: Optional[str] = None):
 
 
 #-----------------------------------------------------------------------
-# Transfers and transfer templates
+# Transfers, transporters, and transfer templates
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
@@ -758,12 +776,44 @@ def transfers(request: Request, transfer_id: Optional[str] = None):
     # Delete transfers.
     if request.method == 'DELETE':
         data = request.data['data']
-        if isinstance(data, list):
-            for item in data:
-                track.delete_transfer(item['id'])
-        else:
-            track.delete_transfer(data['id'])
-        return Response({'success': True, 'data': []}, content_type='application/json')
+        return delete_objects(track, data, 'delete_transfer')
+
+
+@api_view(['GET'])
+def drivers(request: Request, driver_id: Optional[str] = None):
+    """Get transporters and transporter details for a given license number."""
+
+    # Initialize Metrc.
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
+
+    # Get the data for a transporter.
+    obj = track.get_transporters(driver_id)
+    data = obj.to_dict()
+    return Response({'data': data}, content_type='application/json')
+
+
+@api_view(['GET'])
+def vehicles(request: Request, driver_id: Optional[str] = None):
+    """Get transporters and transporter details for a given license number."""
+
+    # Initialize Metrc.
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
+
+    # Get the details of the transporter driver and vehicle.
+    obj = track.get_transporter_details(driver_id)
+    data = obj.to_dict()
+    return Response({'data': data}, content_type='application/json')
+
+
+# TODO: Implement transfer template endpoint for methods:
+# `get_transfer_templates`
+# `create_transfer_templates`
+# `update_transfer_templates`
+# `delete_transfer_template`
 
 
 #-----------------------------------------------------------------------
@@ -791,28 +841,15 @@ def patients(request: Request, patient_id: Optional[str] = None):
 
     # Create / update patient(s).
     if request.method == 'POST':
-        create_items, update_items = [], []
-        data = request.data['data']
-        for item in data:
-            if item.get('id'):
-                update_items.append(item)
-            else:
-                create_items.append(item)
-        if create_items:
-            track.create_patients(create_items, return_obs=True)
-        if update_items:
-            track.update_patients(update_items, return_obs=True)
-        items = create_items + update_items
-        return Response({'data': items}, content_type='application/json')
+        return create_or_update_objects(track, data,
+            create_method='create_patients',
+            update_method='update_patients',
+        )
 
     # Delete patient(s).
     if request.method == 'DELETE':
         data = request.data['data']
-        if isinstance(data, list):
-            for item in data:
-                track.delete_patient(item['id'])
-        else:
-            track.delete_patient(data['id'])
+        return delete_objects(track, data, 'delete_patient')
 
 
 #-----------------------------------------------------------------------
@@ -853,12 +890,7 @@ def sales(request: Request, strain_id: Optional[str] = None):
     # Delete (void) sale(s).
     if request.method == 'DELETE':
         data = request.data['data']
-        if isinstance(data, list):
-            for item in data:
-                track.delete_receipt(item['id'])
-        else:
-            track.delete_receipt(data['id'])
-        return Response({'success': True, 'data': []}, content_type='application/json')
+        return delete_objects(track, data, 'delete_receipt')
 
 
 #-----------------------------------------------------------------------
@@ -903,54 +935,123 @@ def deliveries(request: Request, delivery_id: Optional[str] = None):
     # Delete deliveries.
     if request.method == 'DELETE':
         data = request.data['data']
-        if isinstance(data, list):
-            for item in data:
-                track.delete_delivery(item['id'])
-        else:
-            track.delete_delivery(data['id'])
-        return Response({'success': True, 'data': []}, content_type='application/json')
-
-
-#-----------------------------------------------------------------------
-# Waste
-#-----------------------------------------------------------------------
-
-@api_view(['GET'])
-def waste(request: Request, waste_id: Optional[str] = None):
-    """Get specific waste data for a given license number."""
-
-    # Initialize Metrc.
-    track = initialize_traceability(request)
-    if isinstance(track, str):
-        return Response({'error': True, 'message': track}, status=403)
-
-    # Get all waste methods for a given license.
-    if waste_id == 'methods':
-        data = track.get_waste_methods()
-
-    # Get all waste reasons for plants for a given license.
-    elif waste_id == 'reasons':
-        data = track.get_waste_reasons()
-
-    # Get all waste types for harvests for a given license.
-    elif waste_id == 'types':
-        data = track.get_waste_types()
-    
-    # Handle incorrect queries.
-    else:
-        data = []
-
-    return Response({'data': data}, content_type='application/json')
+        return delete_objects(track, data, 'delete_delivery')
 
 
 #-----------------------------------------------------------------------
 # Miscellaneous
 #-----------------------------------------------------------------------
 
-# TODO: Implement API endpoints for:
-# - additives
-# - categories
-# - customer types
-# - Test statuses
-# - Test types
-# - units of measure
+def get_metrc_types(
+        request: Request,
+        method: str,
+        license_number: Optional[str] = '',
+    ):
+    # Initialize Metrc.
+    track = initialize_traceability(request, license_number)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
+
+    # Get data from the Metrc API.
+    try:
+        objs = getattr(track, method)()
+    except MetrcAPIError:
+        log_metrc_error(request, track, method)
+        return Response({'error': True, 'message': METRC_ERROR}, status=403)
+
+    # Return the requested data.
+    try:
+        data = [obj.to_dict() for obj in objs]
+    except AttributeError:
+        data = objs
+    return Response({'data': data}, content_type='application/json')
+
+
+@api_view(['GET'])
+def adjustment_reasons(request: Request, license_number: Optional[str] = ''):
+    """Get package adjustment reasons for a given license number."""
+    return get_metrc_types(request, 'get_adjustment_reasons', license_number)
+
+
+@api_view(['GET'])
+def batch_types(request: Request, license_number: Optional[str] = ''):
+    """Get batch types for a given license number."""
+    return get_metrc_types(request, 'get_batch_types', license_number)
+
+
+@api_view(['GET'])
+def categories(request: Request, license_number: Optional[str] = ''):
+    """Get categories for a given license number."""
+    return get_metrc_types(request, 'get_item_categories', license_number)
+
+
+@api_view(['GET'])
+def customer_types(request: Request, license_number: Optional[str] = ''):
+    """Get customer types for a given license number."""
+    return get_metrc_types(request, 'get_customer_types', license_number)
+
+
+@api_view(['GET'])
+def location_types(request: Request, license_number: Optional[str] = ''):
+    """Get location types for a given license number."""
+    return get_metrc_types(request, 'get_location_types', license_number)
+
+
+@api_view(['GET'])
+def package_statuses(request: Request, license_number: Optional[str] = ''):
+    """Get package statuses for a given license number."""
+    return get_metrc_types(request, 'get_package_statuses', license_number)
+
+
+@api_view(['GET'])
+def package_types(request: Request, license_number: Optional[str] = ''):
+    """Get package types for a given license number."""
+    return get_metrc_types(request, 'get_package_types', license_number)
+
+
+@api_view(['GET'])
+def return_reasons(request: Request, license_number: Optional[str] = ''):
+    """Get return reasons for a given license number."""
+    return get_metrc_types(request, 'get_return_reasons', license_number)
+
+
+@api_view(['GET'])
+def test_statuses(request: Request, license_number: Optional[str] = ''):
+    """Get test statuses for a given license number."""
+    return get_metrc_types(request, 'get_test_statuses', license_number)
+
+
+@api_view(['GET'])
+def test_types(request: Request, license_number: Optional[str] = ''):
+    """Get test types for a given license number."""
+    return get_metrc_types(request, 'get_test_types', license_number)
+
+
+@api_view(['GET'])
+def transfer_types(request: Request, license_number: Optional[str] = ''):
+    """Get transfer types for a given license number."""
+    return get_metrc_types(request, 'get_transfer_types', license_number)
+
+
+@api_view(['GET'])
+def units(request: Request, license_number: Optional[str] = ''):
+    """Get units of measure for a given license number."""
+    return get_metrc_types(request, 'get_units_of_measure', license_number)
+
+
+@api_view(['GET'])
+def waste_methods(request: Request, license_number: Optional[str] = ''):
+    """Get waste methods for a given license number."""
+    return get_metrc_types(request, 'get_waste_methods', license_number)
+
+
+@api_view(['GET'])
+def waste_reasons(request: Request, license_number: Optional[str] = ''):
+    """Get waste reasons for a given license number."""
+    return get_metrc_types(request, 'get_waste_reasons', license_number)
+
+
+@api_view(['GET'])
+def waste_types(request: Request, license_number: Optional[str] = ''):
+    """Get waste types for a given license number."""
+    return get_metrc_types(request, 'get_waste_types', license_number)

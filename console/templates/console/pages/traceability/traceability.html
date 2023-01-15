@@ -3,7 +3,34 @@
 <!--
   Traceability Page | Cannlytics Console
   Created: 12/18/2020
-  Updated: 12/16/2021
+  Updated: 1/15/2023
+
+Functionality to import data form worksheets to
+upload to Metrc:
+
+1. Create Plantings / Plantings from Plants / Plantings from Packages
+2. Immature Plants Growth Phase
+3. Record Immature Plants Waste
+4. Immature Plants Packages
+5. Destroy Immature Plants
+6. Plants Location
+7. Plants Growth Phase
+8. Record Plants Waste
+9. Manicure Plants
+10.Harvest Plants
+11.Destroy Plants
+12.Packages from Harvest
+13.Lab Results
+14.Package Adjustment
+15.Sales (new)
+16.Sales (update)
+
+Note: If uploading multiple types of CSV files, it is recommended that they be
+uploaded in the order listed above to avoid data collisions. For instance,
+if uploading a CSV to Manicure Plants and another to Destroy Plants and
+the same plant is included on both files, the manicure must be recorded
+prior to the destruction of the plant.
+
 -->
 {% extends "console/console.html" %}
 {% load icon %}

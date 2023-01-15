@@ -1,26 +1,36 @@
 """
 Metrc Client | Cannlytics
-Copyright (c) 2021-2023 Cannlytics and Cannlytics Contributors
+Copyright (c) 2021-2023 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 1/13/2023
+Updated: 1/15/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-This module contains the Client class responsible for
-communicating with the Metrc API.
+This module contains the `Metrc` class responsible for communicating
+with the Metrc API.
+
+TODO: Implement the remaining Metrc functionality:
+
+    [ ] Implement return created/updated objects for all endpoints.
+    [ ] `create_plant_batch_from_package`
+    [ ] `create_package_from_plant`
+    [ ] parameter isFromMotherPlant on POST /plantbatches/v1/createpackages
+    [ ] `create_plantings`
+    [ ] `change_plant_batch_growth_phase`
+    [ ] `add_plant_batch_additives`
+    [ ] `create_plant_package`
+    [ ] `destroy_plants`
+    [ ] `manicure_plants`
+    [ ] `harvest_plants`
+    [ ] GET /transfers/v1/templates/{id}/transporters
+    [ ] GET /transfers/v1/templates/{id}/transporters/details
 
 Future Work:
 
-    - Allow for start, end to specify a range and iterate over that range,
-    day-by-day.
-
-    - Document rate limits?
-        <https://www.metrc.com/wp-content/uploads/2021/10/4-Metrc-Rate-Limiting-1.pdf>
-        - 50 GET calls per second per facility.
-        - 150 GET calls per second per vendor API key.
-        - 10 concurrent GET calls per facility.
-        - 30 concurrent GET calls per integrator.
+    - Implement time period queries by allowing for the `start` and `end`
+    to be specified by the user, then iterate over that range, day-by-day.
 
 """
 # Standard imports.
@@ -162,6 +172,19 @@ class Metrc(object):
                 return response.text
         else:
             raise MetrcAPIError(response)
+    
+
+    def format_params(self, **kwargs):
+        """Format Metrc request parameters.
+        Returns:
+            (dict): Returns the parameters as a dictionary.
+        """
+        params = {}
+        for param in kwargs:
+            if kwargs[param]:
+                key = self.parameters[param]
+                params[key] = kwargs[param]
+        return params
 
 
     def create_log(self, response):
@@ -202,9 +225,9 @@ class Metrc(object):
         self.logger.debug('Metrc initialized.')
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Facilities and employees
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def get_facilities(self):
         """Get all facilities."""
@@ -237,9 +260,9 @@ class Metrc(object):
         return [Employee(self, x) for x in response]
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Deliveries
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def create_deliveries(self, data, license_number='', return_obs=False):
         """Create home deliver(ies).
@@ -343,9 +366,9 @@ class Metrc(object):
         return self.request('put', url, data=data, params=params)
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Harvests
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def get_harvests(
             self,
@@ -449,9 +472,9 @@ class Metrc(object):
         # TODO: Optionally return packages created.
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Items
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def get_item_categories(self, license_number=''):
         """Get all item categories.
@@ -474,7 +497,7 @@ class Metrc(object):
             uid='',
             action='active',
             license_number='',
-    ):
+        ):
         """Get an item.
         Args:
             uid (str): The UID of an item.
@@ -595,9 +618,9 @@ class Metrc(object):
         return self.request('delete', url, params=params)
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Lab Results
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def get_lab_result(
             self,
@@ -695,9 +718,9 @@ class Metrc(object):
         return self.request('put', url, data=data, params=params)
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Locations
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def get_location_types(self, license_number=''):
         """Get all location types for a given license.
@@ -823,17 +846,20 @@ class Metrc(object):
         return self.request('delete', url, params=params)
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Packages
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def get_adjustment_reasons(self, license_number=''):
         """Get reasons for adjusting packages."""
-        # FIXME: Don't return as a Package type.
-        return self.get_packages(
+        objs = self.get_packages(
             action='adjust/reasons',
             license_number=license_number,
         )
+        try:
+            return [obj.to_dict() for obj in objs]
+        except AttributeError:
+            return objs
 
 
     def get_package_types(self, license_number=''):
@@ -952,10 +978,10 @@ class Metrc(object):
         # TODO: Optionally return created packages.
 
 
-    # TODO: create_plant_batch_from_package (POST /packages/v1/create/plantings)
+    # FIXME: create_plant_batch_from_package (POST /packages/v1/create/plantings)
 
 
-    # TODO: create_package_from_plant (POST /plantbatches/v1/create/packages/frommotherplant)
+    # FIXME: create_package_from_plant (POST /plantbatches/v1/create/packages/frommotherplant)
 
 
     def update_package(self, data, license_number='', return_obs=False):
@@ -998,7 +1024,7 @@ class Metrc(object):
         # TODO: Optionally return updated packages.
 
 
-    def update_package_item_locations(self, data, license_number='', return_obs=False):
+    def change_package_locations(self, data, license_number='', return_obs=False):
         """Update package item location(s).
         Args:
             data (list): A list of package items (dict) to move.
@@ -1036,11 +1062,13 @@ class Metrc(object):
         # TODO: Optionally return updated packages.
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Patients
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
-    # TODO: Get patient.
+    def get_patient(self, uid, license_number=''):
+        return self.get_patients(uid, license_number=license_number)
+
 
     def get_patients(self, uid='', action='active', license_number=''):
         """Get licensee member patients.
@@ -1064,10 +1092,9 @@ class Metrc(object):
                 return response
 
 
-    # TODO: Implement create_patient.
-    def create_patient(self, return_obs=False):
+    def create_patient(self, data, license_number='', return_obs=False):
         """Create a given patient."""
-        raise NotImplementedError
+        return self.create_patients([data], license_number, return_obs)
 
 
     def create_patients(self, data, license_number='', return_obs=False):
@@ -1102,9 +1129,9 @@ class Metrc(object):
         return self.request('delete', url, params=params)
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Plant Batches
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def create_plant_batch(self, data, license_number='', return_obs=False):
         """Create a plant batch.
@@ -1139,7 +1166,7 @@ class Metrc(object):
             (list): Returns a list of plant batch (PlantBatch) classes.
         """
         if self.state == 'ca':
-            raise MetrcAPIError({'message': 'The request POST /plantbatches/v1/createplantings will not work in California due to "CanCreateOpeningBalancePlantBatches": false, this request is used in other states that allow Plant Batche creation.'})
+            raise MetrcAPIError({'message': 'The request POST /plantbatches/v1/createplantings will not work in California due to "CanCreateOpeningBalancePlantBatches": false, this request is used in other states that allow Plant Batch creation.'})
         response = self.manage_batches(data, 'createplantings', license_number=license_number)
         if not return_obs:
             return response
@@ -1214,13 +1241,13 @@ class Metrc(object):
         # TODO: Optionally return updated or created objects.
 
 
-    # TODO: Implement parameter isFromMotherPlant on POST /plantbatches/v1/createpackages
+    # FIXME: Implement parameter isFromMotherPlant on POST /plantbatches/v1/createpackages
 
-    # TODO: Implement create_plantings
+    # FIXME: Implement create_plantings
 
-    # TODO: Implement change_plant_batch_growth_phase
+    # FIXME: Implement change_plant_batch_growth_phase
 
-    # TODO: Implement add_plant_batch_additives
+    # FIXME: Implement add_plant_batch_additives
 
 
     def create_plant_package_from_batch(self, data, license_number='', return_obs=False):
@@ -1264,9 +1291,9 @@ class Metrc(object):
         # TODO: Optionally return new batches.
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Plants
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def create_plant(self, data, license_number='', return_obs=False):
         """Create a plant.
@@ -1316,7 +1343,7 @@ class Metrc(object):
             return return_obs
 
 
-    # TODO: Implement create_plant_package (POST /plants/v1/create/plantbatch/packages)
+    # FIXME: Implement create_plant_package (POST /plants/v1/create/plantbatch/packages)
 
 
     def create_plant_packages(self, data, license_number=''):
@@ -1414,9 +1441,9 @@ class Metrc(object):
         raise NotImplementedError
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Sales
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def get_receipts(
             self,
@@ -1510,8 +1537,7 @@ class Metrc(object):
             data (dict): A receipts (dict) to create.
             license_number (str): A specific license number.
         """
-        return self.create_receipts(data, license_number)
-        # TODO: Optionally return the created receipt.
+        return self.create_receipts(data, license_number, return_obs)
 
 
     def create_receipts(self, data, license_number='', return_obs=False):
@@ -1579,9 +1605,9 @@ class Metrc(object):
         # TODO: Optionally return the updated transactions.
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Strains
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def get_strains(self, uid='', action='active', license_number=''):
         """Get strains.
@@ -1701,9 +1727,9 @@ class Metrc(object):
         return self.request('delete', url, params=params)
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Transfers
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def get_transfers(
             self,
@@ -1885,11 +1911,11 @@ class Metrc(object):
         return self.request('delete', url, params=params)
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Transfer Templates
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
-    # TODO: Implement the following 2 endpoints:
+    # FIXME: Implement the following 2 endpoints:
     # GET /transfers/v1/templates/{id}/transporters
     # GET /transfers/v1/templates/{id}/transporters/details
 
@@ -1957,9 +1983,9 @@ class Metrc(object):
         return self.request('delete', url, params=params)
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Waste
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def get_waste_methods(self, license_number=''):
         """Get all waste methods for a given license.
@@ -1991,9 +2017,9 @@ class Metrc(object):
         return self.request('get', url, params=params)
 
 
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
     # Miscellaneous
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
 
     def get_units_of_measure(self, license_number=''):
         """Get all units of measurement.
@@ -2027,40 +2053,3 @@ class Metrc(object):
             names=['tag', 'type', 'status', 'commissioned', 'used', 'detached']
         )
         return df.to_dict('records')
-
-
-    def format_params(self, **kwargs):
-        """Format Metrc request parameters.
-        Returns:
-            (dict): Returns the parameters as a dictionary.
-        """
-        params = {}
-        for param in kwargs:
-            if kwargs[param]:
-                key = self.parameters[param]
-                params[key] = kwargs[param]
-        return params
-
-    # TODO: Functions to import data form worksheets to upload to Metrc.
-
-    # 1. Create Plantings / Plantings from Plants / Plantings from Packages
-    # 2. Immature Plants Growth Phase
-    # 3. Record Immature Plants Waste
-    # 4. Immature Plants Packages
-    # 5. Destroy Immature Plants
-    # 6. Plants Location
-    # 7. Plants Growth Phase
-    # 8. Record Plants Waste
-    # 9. Manicure Plants
-    # 10.Harvest Plants
-    # 11.Destroy Plants
-    # 12.Packages from Harvest
-    # 13.Lab Results
-    # 14.Package Adjustment
-    # 15.Sales (new)
-    # 16.Sales (update)
-
-    # If uploading multiple types of CSV files, it is recommended that they be uploaded in the
-    # order listed above to avoid data collisions. For instance, if uploading a CSV to
-    # Manicure Plants and another to Destroy Plants and the same plant is included on both
-    # files, the manicure must be recorded prior to the destruction of the plant.
