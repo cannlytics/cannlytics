@@ -17,8 +17,6 @@ TODO: Implement the remaining functionality:
     [ ] Harvests
     [ ] Transfers
     [ ] Deliveries
-
-    [ ] Logs
     
     [ ] Rate limits
     <https://www.metrc.com/wp-content/uploads/2021/10/4-Metrc-Rate-Limiting-1.pdf>
@@ -30,7 +28,7 @@ TODO: Implement the remaining functionality:
 """
 # Standard imports:
 from json import loads
-from typing import Optional
+from typing import Any, Optional
 
 # External imports:
 import google.auth
@@ -49,13 +47,15 @@ from cannlytics.firebase import (
     create_log,
     create_secret,
     get_document,
-    update_document
+    update_document,
+    update_documents,
 )
 from cannlytics.metrc import (
     Metrc,
     MetrcAPIError,
     Location,
 )
+from cannlytics.utils import snake_case
 
 # Metrc API defaults.
 AUTH_ERROR = 'Authentication failed. Please login to the console or \
@@ -64,6 +64,115 @@ AUTH_ERROR = 'Authentication failed. Please login to the console or \
 METRC_ERROR = 'Metrc API error. POST request will be retried.'
 DEFAULT_STATE = 'ok'
 LOG_TYPE = 'metrc'
+
+
+#-----------------------------------------------------------------------
+# API Methods
+# FIXME: Redundantly create, update, delete data in Firestore.
+#-----------------------------------------------------------------------
+
+def get_objects(
+        request: Request,
+        track: Metrc,
+        get_method: str,
+        uid: str,
+        **kwargs,
+    ) -> Response:
+    """Perform a simple `GET` request to the Metrc API."""
+    if uid:
+        obj = getattr(track, get_method)(uid)
+        data = obj.to_dict()
+    else:
+        objs = getattr(track, get_method)(**kwargs)
+        data = [obj.to_dict() for obj in objs]
+    log_metrc_request(request, data, 'get_objects', get_method)
+    return Response({'data': data}, content_type='application/json')
+
+
+def create_or_update_objects(
+        request: Request,
+        track: Metrc,
+        create_method,
+        update_method,
+    ) -> Response:
+    """Create or update given API items."""
+    create_items, update_items = [], []
+    data = request.data.get('data', request.data)
+    for item in data:
+        if item.get('id'):
+            update_items.append(item)
+        else:
+            create_items.append(item)
+    if create_items:
+        getattr(track, create_method)(create_items, return_obs=True)
+    if update_items:
+        getattr(track, update_method)(update_items, return_obs=True)
+    items = create_items + update_items
+    log_metrc_request(request, items, 'create_or_update_objects', update_method)
+    model = create_method.replace('create_', '')
+    refs = [f'metrc/{track.license_number}/{model}/{x["id"]}' for x in items]
+    update_documents(refs, items)
+    return Response({'data': items}, content_type='application/json')
+
+
+def delete_objects(
+        request: Request,
+        track: Metrc,
+        delete_method: str,
+    ) -> Response:
+    """Delete given objects from the Metrc API."""
+    data = request.data.get('data', request.data)
+    if isinstance(data, list):
+        for item in data:
+            getattr(track, delete_method)(item['id'])
+    else:
+        getattr(track, delete_method)(data['id'])
+    log_metrc_request(request, data, 'delete_object', delete_method)
+    return Response({'success': True, 'data': []}, content_type='application/json')
+
+
+def log_metrc_request(
+        request: Request,
+        data: Any,
+        key: str,
+        action: str,
+    ) -> None:
+    """Create a log for a request to the Metrc API, including any data
+    returned."""
+    claims = authenticate_request(request)
+    create_log(
+        ref='logs/metrc/metrc_requests',
+        claims=claims,
+        action=action,
+        log_type=LOG_TYPE,
+        key=key,
+        changes=[{
+            'body': request.data,
+            'data': data,
+            'method': request.method,
+            'query_params': request.query_params,
+            'url': request.get_full_path(),
+        }]
+    )
+
+
+def log_metrc_error(request: Request, key: str, action: str) -> None:
+    """Create a log for a Metrc API request error so that the request
+    can be retried."""
+    claims = authenticate_request(request)
+    create_log(
+        ref='logs/metrc/metrc_errors',
+        claims=claims,
+        action=action,
+        log_type=LOG_TYPE,
+        key=key,
+        changes=[{
+            'body': request.data,
+            'method': request.method,
+            'query_params': request.query_params,
+            'url': request.get_full_path(),
+        }]
+    )
 
 
 #-----------------------------------------------------------------------
@@ -275,9 +384,9 @@ def initialize_traceability(
 
     # Get the Vendor API key from Secret Manager.
     if test:
-        vendor_secret_id = 'metrc_test_vendor_api_key'
+        vendor_secret_id = f'metrc_test_vendor_api_key_{state}'
     else:
-        vendor_secret_id = 'metrc_vendor_api_key'
+        vendor_secret_id = f'metrc_vendor_api_key_{state}'
     vendor_api_key = access_secret_version(
         project_id=project_id,
         secret_id=vendor_secret_id,
@@ -293,54 +402,6 @@ def initialize_traceability(
         state=state,
         test=test,
     )
-
-
-def log_metrc_error(request, action, key):
-    """Create a log for a Metrc API request error so that the request
-    can be retried."""
-    claims = authenticate_request(request)
-    create_log(
-        ref='logs/metrc/metrc_errors',
-        claims=claims,
-        action=action,
-        log_type=LOG_TYPE,
-        key=key,
-        changes=[{
-            'body': request.data,
-            'query_params': request.query_params,
-            'url': request.get_full_path(),
-        }]
-    )
-
-
-#-----------------------------------------------------------------------
-# API Methods
-#-----------------------------------------------------------------------
-
-def create_or_update_objects(track, data, create_method, update_method):
-    """Create or update given API items."""
-    create_items, update_items = [], []
-    for item in data:
-        if item.get('id'):
-            update_items.append(item)
-        else:
-            create_items.append(item)
-    if create_items:
-        getattr(track, create_method)(create_items, return_obs=True)
-    if update_items:
-        getattr(track, update_method)(update_items, return_obs=True)
-    items = create_items + update_items
-    return Response({'data': items}, content_type='application/json')
-
-
-def delete_objects(track, data, delete_method):
-    """Delete given objects from the Metrc API."""
-    if isinstance(data, list):
-        for item in data:
-            getattr(track, delete_method)(item['id'])
-    else:
-        getattr(track, delete_method)(data['id'])
-    return Response({'success': True, 'data': []}, content_type='application/json')
 
 
 #-----------------------------------------------------------------------
@@ -359,8 +420,8 @@ def facilities(request: Request, license_number: Optional[str] = ''):
     # Get facilities from the Metrc API.
     try:
         objs = track.get_facilities()
-    except MetrcAPIError:
-        log_metrc_error(request, track, 'facilities')
+    except MetrcAPIError as error:
+        log_metrc_error(request, 'facilities', str(error))
         return Response({'error': True, 'message': METRC_ERROR}, status=403)
 
     # Return the requested data.
@@ -384,8 +445,8 @@ def employees(request: Request, license_number: Optional[str] = ''):
     # Get employees from the Metrc API.
     try:
         objs = track.get_employees(license_number=license_number)
-    except MetrcAPIError:
-        log_metrc_error(request, track, 'employees')
+    except MetrcAPIError as error:
+        log_metrc_error(request, 'employees', str(error))
         return Response({'error': True, 'message': METRC_ERROR}, status=403)
 
     # Return the requested data.
@@ -408,11 +469,13 @@ def locations(request: Request, area_id: Optional[str] = None):
 
     # Get location(s) data.
     if request.method == 'GET':
-        objs = track.get_locations()
-        data = [obj.to_dict() for obj in objs]
-        return Response({'data': data}, content_type='application/json')
+        return get_objects(request, track, 'get_locations',
+            uid=area_id,
+            action=request.query_params.get('type'),
+        )
 
     # Create / update locations.
+    # Optional: Standardize location creation.
     if request.method == 'POST':
         create_items, update_items = [], []
         data = request.data['data']
@@ -421,7 +484,6 @@ def locations(request: Request, area_id: Optional[str] = None):
                 update_items.append(item)
             else:
                 create_items.append(Location.from_dict(item))
-        # FIXME: Standardize location creation.
         if create_items:
             names = [x['name'] for x in create_items]
             types = [x['location_type'] for x in create_items]
@@ -429,17 +491,13 @@ def locations(request: Request, area_id: Optional[str] = None):
         if update_items:
             track.update_locations(update_items, return_obs=True)
         items = create_items + update_items
+        refs = [f'metrc/{track.license_number}/locations/{x["id"]}' for x in items]
+        update_documents(refs, items)
         return Response({'data': items}, content_type='application/json')
 
     # Delete location(s).
     if request.method == 'DELETE':
-        data = request.data['data']
-        if isinstance(data, list):
-            for item in data:
-                track.delete_location(item['id'])
-        else:
-            track.delete_location(data['id'])
-        return Response({'success': True, 'data': []}, content_type='application/json')
+        return delete_objects(request, track, 'delete_location')
 
 
 #-----------------------------------------------------------------------
@@ -447,10 +505,7 @@ def locations(request: Request, area_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def packages(
-        request: Request,
-        package_id: Optional[str] = None,
-    ):
+def packages(request: Request, package_id: Optional[str] = None):
     """Get, update, and delete packages for a given license number."""
 
     # Initialize Metrc.
@@ -459,61 +514,69 @@ def packages(
         return Response({'error': True, 'message': track}, status=403)
 
     # Get package(s) data.
-    # TODO: Implement queries.
     if request.method == 'GET':
-        objs = track.get_packages(
-            # start='2021-06-04',
-            # end='2021-06-05'
+        return get_objects(request, track, 'get_packages',
+            uid=package_id,
+            action=request.query_params.get('type'),
+            label=request.query_params.get('label'),
+            start=request.query_params.get('start'),
+            end=request.query_params.get('end'),
         )
-        try:
-            data = [obj.to_dict() for obj in objs]
-        except TypeError:
-            data = [objs.to_dict()]
-        return Response({'data': data}, content_type='application/json')
 
     # Manage packages.
     if request.method == 'POST':
 
-        # Determine the action to perform.
-        data = request.data['data']
-        # action = request.data.get('action')
+        # Get the data posted and determine the action to perform.
+        data = request.data.get('data', request.data)
+        action = request.data.get('action', snake_case(package_id))
         
-        # TODO: Change package locations.
-        if package_id == 'change_package_locations':
-            raise NotImplementedError
+        # FIXME: Also update Firestore as these update.
 
+        # Change package locations.
+        if action == 'change_package_locations':
+            objs = track.change_package_locations(data, return_obs=True)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-        # TODO: Update items.
+        # Update items.
+        elif action == 'change_package_items':
+            objs = track.change_package_items(data, return_obs=True)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
+        # Finish packages.
+        elif action == 'finish':
+            objs = track.manage_packages(data, 'finish', return_obs=True)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-        # TODO: Finish
+        # Unfinish packages.
+        elif action == 'unfinish':
+            objs = track.manage_packages(data, 'unfinish', return_obs=True)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
+        # Adjust packages.
+        elif action == 'adjust':
+            objs = track.manage_packages(data, 'adjust', return_obs=True)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-        # TODO: Unfinish
+        # Remediate packages.
+        elif action == 'remediate':
+            objs = track.manage_packages(data, 'remediate', return_obs=True)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-
-        # TODO: Adjust
-
-
-        # TODO: Remediate
-
-
-        # TODO: Update note
-
-
-        # TODO: Change location
+        # Update note(s) for packages.
+        elif action == 'update_package_notes':
+            objs = track.update_package_notes(data, return_obs=True)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
         # Create or update packages.
         else:
-            return create_or_update_objects(track, data,
+            return create_or_update_objects(request, track,
                 create_method='create_packages',
                 update_method='update_packages',
             )
 
     # Delete package(s).
     if request.method == 'DELETE':
-        data = request.data['data']
-        return delete_objects(track, data, 'delete_package')
+        return delete_objects(request, track, 'delete_package')
 
 #-----------------------------------------------------------------------
 # Items
@@ -530,21 +593,21 @@ def items(request: Request, item_id: Optional[str] = None):
 
     # Get item data.
     if request.method == 'GET':
-        objs = track.get_items(uid=item_id)
-        data = [obj.to_dict() for obj in objs]
-        return Response({'data': data}, content_type='application/json')
+        return get_objects(request, track, 'get_items',
+            uid=item_id,
+            action=request.query_params.get('type'),
+        )
 
     # Create / update item(s).
     if request.method == 'POST':
-        return create_or_update_objects(track, data,
+        return create_or_update_objects(request, track,
             create_method='create_items',
             update_method='update_items',
         )
 
     # Delete item(s).
     if request.method == 'DELETE':
-        data = request.data['data']
-        return delete_objects(track, data, 'delete_item')
+        return delete_objects(request, track, 'delete_item')
 
 
 #-----------------------------------------------------------------------
@@ -561,23 +624,30 @@ def lab_tests(request: Request, test_id: Optional[str] = None):
         return Response({'error': True, 'message': track}, status=403)
 
     # Get lab results.
-    # TODO: Implement queries.
     if request.method == 'GET':
-        objs = track.get_lab_results(uid='185436')
-        data = [obj.to_dict() for obj in objs]
-        return Response({'data': data}, content_type='application/json')
+        return get_objects(request, track, 'get_lab_result', test_id)
 
-    # FIXME: Post results
+    # Post results.
     if request.method == 'POST':
-        raise NotImplementedError
+        data = request.data.get('data', request.data)
+        action = request.data.get('action', snake_case(test_id))
 
-        # TODO: Post lab results.
+        # FIXME: Also update Firestore as these update.
 
+        # Release lab result(s).
+        if action == 'release':
+            objs = track.release_lab_results(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-        # TODO: Upload lab result CoA(s).
+        # Upload lab result CoA(s).
+        if action == 'coas':
+            objs = track.upload_coas(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-
-        # TODO: Release lab result(s).
+        # Post lab results.
+        else:
+            objs = track.post_lab_results(data, return_obs=True)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
 
 #-----------------------------------------------------------------------
@@ -595,21 +665,21 @@ def strains(request: Request, strain_id: Optional[str] = None):
 
     # Get strain data.
     if request.method == 'GET':
-        objs = track.get_strains()
-        data = [obj.to_dict() for obj in objs]
-        return Response({'data': data}, content_type='application/json')
+        return get_objects(request, track, 'get_strains',
+            uid=strain_id,
+            action=request.query_params.get('type'),
+        )
 
     # Create / update strains.
     if request.method == 'POST':
-        return create_or_update_objects(track, data,
+        return create_or_update_objects(request, track,
             create_method='create_strains',
             update_method='update_strains',
         )
 
     # Delete strains.
     if request.method == 'DELETE':
-        data = request.data['data']
-        return delete_objects(track, data, 'delete_strain')
+        return delete_objects(request, track, 'delete_strain')
 
 
 #-----------------------------------------------------------------------
@@ -627,28 +697,37 @@ def batches(request: Request, batch_id: Optional[str] = None):
 
     # Get batch(es) data.
     if request.method == 'GET':
-        if batch_id:
-            obj = track.get_batches(batch_id)
-            data = obj.to_dict()
-        else:
-            objs = track.get_batches()
-            data = [obj.to_dict() for obj in objs]
-        return Response({'data': data}, content_type='application/json')
+        return get_objects(request, track, 'get_batches',
+            uid=batch_id,
+            action=request.query_params.get('type'),
+            start=request.query_params.get('start'),
+            end=request.query_params.get('end'),
+        )
 
     # Manage batch(es).
     if request.method == 'POST':
-        raise NotImplementedError
+        data = request.data.get('data', request.data)
+        action = request.data.get('action', snake_case(batch_id))
 
-        # TODO: Create plant batches.
+        # FIXME: Also update Firestore as these update.
 
-        # TODO: Manage batches:
+        # FIXME: Manage batches:
+        if False:
+            pass
         # - Split batch(es).
         # - Create plant package(s)
         # - Move batch(es).
         # - Add additives.
         # - Create plantings.
 
-        # TODO: Implement additives.
+        # FIXME: Implement additives.
+
+        # Create plant batches.
+        else:
+            return create_or_update_objects(request, track,
+                create_method='create_plant_batches',
+                update_method=None,
+            )
 
 
 #-----------------------------------------------------------------------
@@ -666,40 +745,47 @@ def plants(request: Request, plant_id: Optional[str] = None):
 
     # Get plant(s) data.
     if request.method == 'GET':
-        if plant_id:
-            obj = track.get_plants(plant_id)
-            data = obj.to_dict()
-        else:
-            objs = track.get_plants()
-            data = [obj.to_dict() for obj in objs]
-        return Response({'data': data}, content_type='application/json')
+        return get_objects(request, track, 'get_plants',
+            uid=plant_id,
+            label=request.query_params.get('label'),
+            action=request.query_params.get('type'),
+            start=request.query_params.get('start'),
+            end=request.query_params.get('end'),
+        )
 
     # Manage plant(s).
     if request.method == 'POST':
-        raise NotImplementedError
+        data = request.data.get('data', request.data)
+        action = request.data.get('action', snake_case(plant_id))
 
-        # TODO: Create plant(s).
+        # FIXME: Also update Firestore as these update.
 
+        # FIXME: Create plant package(s).
+        if False:
+            pass
 
-        # TODO: Create plant package(s).
-
-
-        # TODO: Manicure plant(s).
-
-
-        # TODO: Harvest plant(s).
+        # FIXME: Manicure plant(s).
 
 
-        # TODO: Move plant(s).
+        # FIXME: Harvest plant(s).
 
 
-        # TODO: Flower plant(s).
+        # FIXME: Move plant(s).
 
+
+        # FIXME: Flower plant(s).
+
+
+        # Create plant(s).
+        else:
+            return create_or_update_objects(request, track,
+                create_method='create_plants',
+                update_method=None,
+            )
 
     # Delete plant(s).
     if request.method == 'DELETE':
-        data = request.data['data']
-        return delete_objects(track, data, 'destroy_plants')
+        return delete_objects(request, track, 'destroy_plants')
 
 
 #-----------------------------------------------------------------------
@@ -717,28 +803,30 @@ def harvests(request: Request, harvest_id: Optional[str] = None):
 
     # Get harvests.
     if request.method == 'GET':
-        if harvest_id:
-            obj = track.get_harvests(harvest_id)
-            data = obj.to_dict()
-        else:
-            objs = track.get_harvests()
-            data = [obj.to_dict() for obj in objs]
-        return Response({'data': data}, content_type='application/json')
+        return get_objects(request, track, 'get_harvests',
+            uid=harvest_id,
+            action=request.query_params.get('type'),
+            start=request.query_params.get('start'),
+            end=request.query_params.get('end'),
+        )
 
     # Manage harvest(s).
     if request.method == 'POST':
-        raise NotImplementedError
+        data = request.data.get('data', request.data)
+        action = request.data.get('action', snake_case(harvest_id))
 
-        # TODO: Finish harvest(s).
+        # FIXME: Also update Firestore as these update.
 
-
-        # TODO: Unfinish harvest(s).
-
-
-        # TODO: Remove waste from  harvest(s).
+        # FIXME: Finish harvest(s).
 
 
-        # TODO: Move harvest(s).
+        # FIXME: Unfinish harvest(s).
+
+
+        # FIXME: Remove waste from harvest(s).
+
+
+        # FIXME: Move harvest(s).
 
 
 #-----------------------------------------------------------------------
@@ -755,28 +843,54 @@ def transfers(request: Request, transfer_id: Optional[str] = None):
         return Response({'error': True, 'message': track}, status=403)
 
     # Get transfer data.
-    # TODO: Implement queries.
     if request.method == 'GET':
-        # TODO: Add filters
-        # uid=''
-        # transfer_type='incoming'
-        # license_number=''
-        # start=''
-        # end=''
-        objs = track.get_transfers(start='2021-06-04', end='2021-06-05')
-        data = [obj.to_dict() for obj in objs]
-        return Response({'data': data}, content_type='application/json')
+        return get_objects(request, track, 'get_transfers',
+            uid=transfer_id,
+            transfer_type=request.query_params.get('type'),
+            start=request.query_params.get('start'),
+            end=request.query_params.get('end'),
+        )
 
-    # FIXME: Create / update transfers.
-
-
-    # TODO: Create / update transfer templates.
-
+    # Create / update transfers.
+    if request.method == 'POST':
+        return create_or_update_objects(request, track,
+                create_method='create_transfers',
+                update_method='update_transfers',
+            )
 
     # Delete transfers.
     if request.method == 'DELETE':
-        data = request.data['data']
-        return delete_objects(track, data, 'delete_transfer')
+        return delete_objects(request, track, 'delete_transfer')
+
+
+@api_view(['GET', 'POST', 'DELETE'])
+def transfer_templates(request: Request, template_id: Optional[str] = None):
+    """Get, update, and delete transfer templates for a given license number."""
+
+    # Initialize Metrc.
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
+
+    # Get data.
+    if request.method == 'GET':
+        return get_objects(request, track, 'get_transfer_templates',
+            uid=template_id,
+            action=request.query_params.get('type'),
+            start=request.query_params.get('start'),
+            end=request.query_params.get('end'),
+        )
+
+    # Create / update data.
+    if request.method == 'POST':
+        return create_or_update_objects(request, track,
+            create_method='create_transfer_templates',
+            update_method='update_transfer_templates',
+        )
+
+    # Delete data.
+    if request.method == 'DELETE':
+        return delete_objects(request, track, 'delete_transfer_template')
 
 
 @api_view(['GET'])
@@ -809,13 +923,6 @@ def vehicles(request: Request, driver_id: Optional[str] = None):
     return Response({'data': data}, content_type='application/json')
 
 
-# TODO: Implement transfer template endpoint for methods:
-# `get_transfer_templates`
-# `create_transfer_templates`
-# `update_transfer_templates`
-# `delete_transfer_template`
-
-
 #-----------------------------------------------------------------------
 # Patients
 #-----------------------------------------------------------------------
@@ -831,25 +938,18 @@ def patients(request: Request, patient_id: Optional[str] = None):
 
     # Get patient(s) data.
     if request.method == 'GET':
-        if patient_id:
-            obj = track.get_patients(patient_id)
-            data = obj.to_dict()
-        else:
-            objs = track.get_patients()
-            data = [obj.to_dict() for obj in objs]
-        return Response({'data': data}, content_type='application/json')
+        return get_objects(request, track, 'get_patients', patient_id)
 
     # Create / update patient(s).
     if request.method == 'POST':
-        return create_or_update_objects(track, data,
+        return create_or_update_objects(request, track,
             create_method='create_patients',
             update_method='update_patients',
         )
 
     # Delete patient(s).
     if request.method == 'DELETE':
-        data = request.data['data']
-        return delete_objects(track, data, 'delete_patient')
+        return delete_objects(request, track, 'delete_patient')
 
 
 #-----------------------------------------------------------------------
@@ -873,24 +973,14 @@ def sales(request: Request, strain_id: Optional[str] = None):
 
     # Create / update sale(s).
     if request.method == 'POST':
-        create_items, update_items = [], []
-        data = request.data['data']
-        for item in data:
-            if item.get('id'):
-                update_items.append(item)
-            else:
-                create_items.append(item)
-        if create_items:
-            track.create_receipts(create_items, return_obs=True)
-        if update_items:
-            track.update_receipts(update_items, return_obs=True)
-        items = create_items + update_items
-        return Response({'data': items}, content_type='application/json')
+        return create_or_update_objects(request, track,
+            create_method='create_receipts',
+            update_method='update_receipts',
+        )
 
     # Delete (void) sale(s).
     if request.method == 'DELETE':
-        data = request.data['data']
-        return delete_objects(track, data, 'delete_receipt')
+        return delete_objects(request, track, 'delete_receipt')
 
 
 #-----------------------------------------------------------------------
@@ -908,34 +998,36 @@ def deliveries(request: Request, delivery_id: Optional[str] = None):
 
     # Get deliveries data.
     if request.method == 'GET':
-        objs = track.get_deliveries()
-        data = [obj.to_dict() for obj in objs]
-        return Response({'data': data}, content_type='application/json')
+        return get_objects(request, track, 'get_deliveries',
+            uid=delivery_id,
+            action=request.query_params.get('type'),
+            start=request.query_params.get('start'),
+            end=request.query_params.get('end'),
+            sales_start=request.query_params.get('sales_start'),
+            sales_end=request.query_params.get('sales_end'),
+        )
 
-    # Create / update deliveries.
+    # Manage deliveries.
     if request.method == 'POST':
-        create_items, update_items = [], []
-        data = request.data['data']
-        for item in data:
-            if item.get('id'):
-                update_items.append(item)
-            else:
-                create_items.append(item)
-        if create_items:
-            track.create_deliveries(create_items, return_obs=True)
-        if update_items:
-            track.update_deliveries(update_items, return_obs=True)
-        items = create_items + update_items
-        return Response({'data': items}, content_type='application/json')
+        data = request.data.get('data', request.data)
+        action = request.data.get('action', snake_case(delivery_id))
 
-    # TODO: Complete deliveries.
+        # Complete deliveries.
+        # FIXME: Also update Firestore as these update.
+        if action == 'complete':
+            objs = track.complete_deliveries(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-    # TODO: get_return_reasons
+        # Create / update deliveries.
+        else:
+            return create_or_update_objects(request, track,
+                create_method='create_deliveries',
+                update_method='update_deliveries',
+            )
 
     # Delete deliveries.
     if request.method == 'DELETE':
-        data = request.data['data']
-        return delete_objects(track, data, 'delete_delivery')
+        return delete_objects(request, track, 'delete_delivery')
 
 
 #-----------------------------------------------------------------------
@@ -955,8 +1047,8 @@ def get_metrc_types(
     # Get data from the Metrc API.
     try:
         objs = getattr(track, method)()
-    except MetrcAPIError:
-        log_metrc_error(request, track, method)
+    except MetrcAPIError as error:
+        log_metrc_error(request, method, str(error))
         return Response({'error': True, 'message': METRC_ERROR}, status=403)
 
     # Return the requested data.
