@@ -1431,8 +1431,13 @@ class Metrc(object):
         raise NotImplementedError
 
 
+    def flower_plants(self, data, return_obs=False):
+        """Manicure plants."""
+        raise NotImplementedError
+
+
     def manicure_plants(self, data, return_obs=False):
-        """Move multiple plants."""
+        """Manicure plants."""
         raise NotImplementedError
 
 

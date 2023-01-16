@@ -760,21 +760,27 @@ def plants(request: Request, plant_id: Optional[str] = None):
 
         # FIXME: Also update Firestore as these update.
 
-        # FIXME: Create plant package(s).
-        if False:
+        # Create plant package(s).
+        if action == 'create_plant_packages':
+            objs = track.create_plant_packages(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
+    
+        # FIXME: Flower plant(s).
+        if action == 'flower':
+            pass
+
+        # FIXME: Harvest plant(s).
+        if action == 'harvest':
             pass
 
         # FIXME: Manicure plant(s).
+        if action == 'manicure':
+            pass
 
-
-        # FIXME: Harvest plant(s).
-
-
-        # FIXME: Move plant(s).
-
-
-        # FIXME: Flower plant(s).
-
+        # Move plant(s).
+        if action == 'move':
+            objs = track.move_plants(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
         # Create plant(s).
         else:
