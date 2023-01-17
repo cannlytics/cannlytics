@@ -188,7 +188,8 @@ def add_license(request: HttpRequest):
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
     
     # Get the associated organization.
-    org_id = request.query_params.get('org_id')
+    data = loads(request.body.decode('utf-8'))
+    org_id = request.query_params.get('org_id', data.get('org_id'))
     if org_id is None:
         message = 'Parameter `org_id` is required.'
         return Response({'error': True, 'message': message}, status=403)
@@ -203,7 +204,6 @@ def add_license(request: HttpRequest):
 
     # Get the license, state, and Metrc user API key.
     try:
-        data = loads(request.body.decode('utf-8'))
         metrc_user_api_key = data['metrc_user_api_key']
         license_number = data['license_number']
         license_type = data.get('license_type')
@@ -284,8 +284,8 @@ def delete_license(request: HttpRequest):
     # Get the parameters
     data = loads(request.body.decode('utf-8'))
     deletion_reason = data.get('deletion_reason', 'No deletion reason.')
-    license_number = request.query_params.get('license')
-    org_id = request.query_params.get('org_id')
+    license_number = request.query_params.get('license', data.get('license_number'))
+    org_id = request.query_params.get('org_id', data.get('org_id'))
     if not license_number or not org_id:
         message = 'Parameters `license` and `org_id` are required.'
         return Response({'error': True, 'message': message}, status=403)
