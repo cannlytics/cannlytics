@@ -4,26 +4,31 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/13/2021
-Updated: 1/15/2023
+Updated: 1/17/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API to interface with the Metrc API.
 
+FIXME:
+
+    [ ] Also update Firestore as actions update the following models:
+        - deliveries
+        - lab results
+        - plants
+        - batches
+        - harvests
+
 TODO: Implement the remaining functionality:
 
-    [ ] Packages
-    [ ] Lab Tests
-    [ ] Plants
-    [ ] Harvests
-    [ ] Transfers
-    [ ] Deliveries
-    
     [ ] Rate limits
     <https://www.metrc.com/wp-content/uploads/2021/10/4-Metrc-Rate-Limiting-1.pdf>
     - 50 GET calls per second per facility.
     - 150 GET calls per second per vendor API key.
     - 10 concurrent GET calls per facility.
     - 30 concurrent GET calls per integrator.
+
+    [ ] Implement time period queries by allowing for the `start` and `end`
+    to be specified by the user, then iterate over that range, day-by-day.
 
 """
 # Standard imports:
@@ -49,6 +54,7 @@ from cannlytics.firebase import (
     get_document,
     update_document,
     update_documents,
+    delete_document,
 )
 from cannlytics.metrc import (
     Metrc,
@@ -68,7 +74,6 @@ LOG_TYPE = 'metrc'
 
 #-----------------------------------------------------------------------
 # API Methods
-# FIXME: Redundantly create, update, delete data in Firestore.
 #-----------------------------------------------------------------------
 
 def get_objects(
@@ -122,11 +127,17 @@ def delete_objects(
     ) -> Response:
     """Delete given objects from the Metrc API."""
     data = request.data.get('data', request.data)
+    model = delete_method.replace('delete_', '')
+    collection = f'metrc/{track.license_number}/{model}/'
     if isinstance(data, list):
         for item in data:
-            getattr(track, delete_method)(item['id'])
+            uid = item['id']
+            getattr(track, delete_method)(uid)
+            delete_document(f'{collection}/{uid}')
     else:
-        getattr(track, delete_method)(data['id'])
+        uid = item['id']
+        getattr(track, delete_method)(uid)
+        delete_document(f'{collection}/{uid}')
     log_metrc_request(request, data, 'delete_object', delete_method)
     return Response({'success': True, 'data': []}, content_type='application/json')
 
@@ -173,6 +184,18 @@ def log_metrc_error(request: Request, key: str, action: str) -> None:
             'url': request.get_full_path(),
         }]
     )
+
+
+def update_firestore():
+    """Update Firestore when given object(s) are changed."""
+
+    # TODO: Manipulate the data if simple change.
+
+    # TODO: Get the data from Metrc if necessary.
+
+    # TODO: Save the updated data to Firestore.
+
+    raise NotImplementedError
 
 
 #-----------------------------------------------------------------------
@@ -542,6 +565,14 @@ def packages(request: Request, package_id: Optional[str] = None):
             objs = track.change_package_items(data, return_obs=True)
             return Response({'success': True, 'data': objs}, content_type='application/json')
 
+        # Create plant batch(es) from given package(s).
+        elif action == 'create_plant_batches':
+            if isinstance(data, dict):
+                objs = track.create_plant_batches_from_packages([data])
+            else:
+                objs = track.create_plant_batches_from_packages(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
+
         # Finish packages.
         elif action == 'finish':
             objs = track.manage_packages(data, 'finish', return_obs=True)
@@ -711,16 +742,43 @@ def batches(request: Request, batch_id: Optional[str] = None):
 
         # FIXME: Also update Firestore as these update.
 
-        # FIXME: Manage batches:
-        if False:
-            pass
-        # - Split batch(es).
-        # - Create plant package(s)
-        # - Move batch(es).
-        # - Add additives.
-        # - Create plantings.
+        # Add additives.
+        if action == 'add_additives':
+            objs = track.add_batch_additives(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-        # FIXME: Implement additives.
+        # Create plant package from a batch.
+        elif action == 'create_plant_package':
+            objs = track.create_plant_package_from_batch(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
+
+        # Create plantings.
+        elif action == 'create_plant_batches':
+            objs = track.create_plantings(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
+
+        # Destroy plants.
+        elif action == 'destroy_plants':
+            objs = track.destroy_batch_plants(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
+
+        # Flower batch.
+        elif action == 'flower':
+            objs = track.change_batch_growth_phase(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
+        
+        # Move batch.
+        elif action == 'move':
+            objs = track.move_batch(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
+
+        # Split batch(es).
+        elif action == 'split':
+            if isinstance(data, dict):
+                objs = track.split_batch(data)
+            else:
+                objs = track.split_batches(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
         # Create plant batches.
         else:
@@ -762,23 +820,38 @@ def plants(request: Request, plant_id: Optional[str] = None):
 
         # Create plant package(s).
         if action == 'create_plant_packages':
-            objs = track.create_plant_packages(data)
+            if isinstance(data, dict):
+                objs = track.create_plant_packages([data])
+            else:
+                objs = track.create_plant_packages(data)
             return Response({'success': True, 'data': objs}, content_type='application/json')
     
-        # FIXME: Flower plant(s).
-        if action == 'flower':
-            pass
+        # Flower plant(s).
+        elif action == 'flower':
+            if isinstance(data, dict):
+                objs = track.flower_plants([data])
+            else:
+                objs = track.flower_plants(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-        # FIXME: Harvest plant(s).
-        if action == 'harvest':
-            pass
+        # Harvest plant(s).
+        elif action == 'harvest':
+            if isinstance(data, dict):
+                objs = track.harvest_plants([data])
+            else:
+                objs = track.harvest_plants(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-        # FIXME: Manicure plant(s).
-        if action == 'manicure':
-            pass
+        # Manicure plant(s).
+        elif action == 'manicure':
+            if isinstance(data, dict):
+                objs = track.manicure_plants([data])
+            else:
+                objs = track.manicure_plants(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
         # Move plant(s).
-        if action == 'move':
+        elif action == 'move':
             objs = track.move_plants(data)
             return Response({'success': True, 'data': objs}, content_type='application/json')
 
@@ -823,16 +896,57 @@ def harvests(request: Request, harvest_id: Optional[str] = None):
 
         # FIXME: Also update Firestore as these update.
 
-        # FIXME: Finish harvest(s).
+        # Finish harvest(s).
+        if action == 'finish':
+            if isinstance(data, dict):
+                objs = track.finish_harvests([data])
+            else:
+                objs = track.finish_harvests(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
+    
+        # Unfinish harvest(s).
+        elif action == 'unfinish':
+            if isinstance(data, dict):
+                objs = track.unfinish_harvests([data])
+            else:
+                objs = track.unfinish_harvests(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
+        # Remove waste from harvest(s).
+        elif action == 'remove_waste':
+            if isinstance(data, dict):
+                objs = track.remove_waste([data])
+            else:
+                objs = track.remove_waste(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-        # FIXME: Unfinish harvest(s).
+        # Move harvest(s).
+        elif action == 'move':
+            if isinstance(data, dict):
+                objs = track.move_harvests([data])
+            else:
+                objs = track.move_harvests(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
+        # Create harvest packages.
+        elif action == 'create_packages':
+            if isinstance(data, dict):
+                objs = track.create_harvest_packages([data])
+            else:
+                objs = track.create_harvest_packages(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-        # FIXME: Remove waste from harvest(s).
+        # Create harvest testing packages
+        elif action == 'create_testing_packages':
+            if isinstance(data, dict):
+                objs = track.create_harvest_testing_packages([data])
+            else:
+                objs = track.create_harvest_testing_packages(data)
+            return Response({'success': True, 'data': objs}, content_type='application/json')
 
-
-        # FIXME: Move harvest(s).
+        # Otherwise return an error.
+        message = 'Updating harvests requires you to pass a `action` parameter.'
+        return Response({'error': True, 'message': message}, content_type='application/json')
 
 
 #-----------------------------------------------------------------------

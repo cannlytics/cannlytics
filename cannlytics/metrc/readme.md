@@ -225,6 +225,20 @@ The `Metrc` class has the following methods for managing deliveries.
 
 The `Harvest` class represents a cannabis harvest.
 
+```py
+from cannlytics.metrc.models import Harvest
+
+# When you create a harvest, you pass the following object.
+new_harvest = Harvest.from_dict({
+
+})
+
+# When you request a harvest, you receive the following object.
+harvest = Harvest.from_dict({
+
+})
+```
+
 | Method | Description |
 |--------|-------------|
 | `create_package(name, tag, weight, location=None, note='', uom=None)` | Create a package from a harvest. |
@@ -313,6 +327,10 @@ The `Metrc` class has the following methods for managing items.
 
 The `LabResult` class that represents a cannabis lab result.
 
+```py
+
+```
+
 | Method | Description |
 |--------|-------------|
 | `create(data)` | Post lab result data. |
@@ -368,6 +386,10 @@ The `Metrc` class has the following methods for managing locations.
 ## Packages
 
 The `Package` class represents a cannabis package.
+
+```py
+
+```
 
 | Method | Description |
 |--------|-------------|
@@ -500,6 +522,10 @@ The `Metrc` class has the following methods for managing plant batches.
 ## Plants
 
 The `Plant` class represents a cannabis plant.
+
+```py
+
+```
 
 | Method | Description |
 |--------|-------------|
@@ -681,6 +707,10 @@ The `Metrc` class has the following methods for managing strains.
 
 The `Transfer` class represents a cannabis transfer.
 
+```py
+
+```
+
 | Method | Description |
 |--------|-------------|
 | `create()` | Create a transfer record in Metrc. |
@@ -707,6 +737,10 @@ The `Metrc` class has the following methods for managing transfers.
 
 The `TransferTemplate` class represents a cannabis transfer template. The template can be copied to create other templates. Transfer templates can be used for transfers to the same destination licensee utilizing the same: planned route, transporter(s), driver(s), vehicle(s), and packages.
 
+```py
+
+```
+
 | Method | Description |
 |--------|-------------|
 | `create()` | Create a transfer template record in Metrc. |
@@ -725,8 +759,6 @@ The `Metrc` class has the following methods for managing transfer templates.
 ## Types
 
 The `Metrc` class has the following methods for retrieving types.
-
-<!-- FIXME: Ensure all types are included! -->
 
 | Method | Description | Endpoint |
 |--------|-------------|----------|
@@ -747,23 +779,6 @@ The `Metrc` class has the following methods for retrieving types.
 | `get_waste_reasons(license_number='')` | Get all waste reasons for plants for a given license, e.g. `{'Name': 'Disease/Infestation', ...}`. | `/plants/v1/waste/reasons` |
 | `get_waste_types(license_number='')` | Get all waste types for harvests for a given license. | `/harvests/v1/waste/types` |
 | `get_units_of_measure(license_number='')` | Get all units of measurement, e.g. `{'Name': 'WeightBased, ...}`. | `/unitsofmeasure/v1/active` |
-
-<!-- ## Miscellaneous methods
-
-The `Metrc` class has the following utility methods.
-
-| Method | Description | Endpoint |
-|--------|-------------|----------|
-| `import_tags(file_path, row_start=0, row_end=None, number=10)` | Import plant and package tags. | N/A | -->
-
-<!-- ## Constants
-
-The following constants are found in `cannlytics.metrc.constants`. Available Metrc endpoints are found in `cannlytics.metrc.urls`.
-
-| Constant | Description |
-|----------|-------------|
-| `DEFAULT_HISTORY` | The number of minutes (5 by default) in the past to check the Metrc API when creating and updating objects and returning observations. |
-| `parameters` | A map of keys to Metrc API parameters. | -->
 
 ## Examples
 
@@ -848,6 +863,7 @@ sale.update()
 | [Missouri](https://www.metrc.com/partner/missouri/) | <https://api-mo.metrc.com/Documentation> |
 | [Montana](https://www.metrc.com/partner/montana/) | <https://api-mt.metrc.com/Documentation> |
 | [Nevada](https://www.metrc.com/partner/nevada/) | <https://api-nv.metrc.com/Documentation> |
+| [New Jersey](https://www.metrc.com/partner/new-jersey/) | <https://api-nj.metrc.com/Documentation> |
 | [Ohio](https://www.metrc.com/partner/ohio/) | <https://api-oh.metrc.com/Documentation> |
 | [Oklahoma](https://www.metrc.com/partner/oklahoma/) | <https://api-ok.metrc.com/Documentation> |
 | [Oregon](https://www.metrc.com/partner/oregon/) | <https://api-or.metrc.com/Documentation> |

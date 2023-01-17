@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 1/13/2023
+Updated: 1/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains common Metrc models.
@@ -751,13 +751,46 @@ class Package(Model):
             license_number=self._license,
         )
         # TODO: Implement return_obs
+    
 
-    # TODO: Implement (with return_obs)
-    def create_packages(
+    def create_plant_batch(
             self,
+            name,
+            count,
+            weight,
+            location=None,
+            batch_type='Clone',
+            units='Ounces',
+            date=None,
         ):
-        """Create multiple packages from a harvest."""
-        raise NotImplementedError
+        """Create an immature plant batch from the package.
+        Args:
+            name (str): The name of the new plant batch.
+            count (int): The number of clones being planted.
+            location (str): An optional new location for the plant batch.
+            batch_type (str): The type of planting, Seed of Clone, with Clone
+                as the default.
+        """
+        if date is None:
+            date = get_timestamp(zone=self.client.state)
+        data = {
+            'PackageLabel': self.label,
+            'PackageAdjustmentAmount': weight,
+            'PackageAdjustmentUnitOfMeasureName': units,
+            'PlantBatchName': name,
+            'PlantBatchType': batch_type,
+            'PlantCount': count,
+            'LocationName': location or self.location_name,
+            'StrainName': self.strain_name,
+            'PatientLicenseNumber': None,
+            'PlantedDate': get_timestamp(zone=self.client.state),
+            'UnpackagedDate': date,
+        },
+        self.client.manage_packages(
+            [data],
+            action='create/plantings',
+            license_number=self._license
+        )
 
     def change_item(self, item_name):
         """Change the item of the package."""
@@ -1226,7 +1259,39 @@ class PlantBatch(Model):
             except KeyError:
                 pass
 
-    # TODO: Implement add_additive, add_additives
+    def add_additive(self,
+            name,
+            amount,
+            units='Gallons',
+            additive_type='Fertilizer',
+            device=None,
+            supplier=None,
+            date=None,
+            ingredients=[],
+        ):
+        """Add an additive to the plant batch..
+        Args:
+            count (int): The number of plants to destroy.
+            ingredients (list): A list of ingredients as dictionaries,
+                e.g. {'name': 'Nitrogen', 'percentage': 4.20}
+        """
+        if date is None:
+            date = get_timestamp(zone=self.client.state)
+        data = {
+            'AdditiveType': additive_type,
+            'ProductTradeName': name,
+            'EpaRegistrationNumber': None,
+            'ProductSupplier': supplier,
+            'ApplicationDevice': device,
+            'TotalAmountApplied': amount,
+            'TotalAmountUnitOfMeasure': units,
+            'PlantBatchName': self.name,
+            'ActualDate': date,
+            'ActiveIngredients': [
+                clean_dictionary(x, camelcase)(x) for x in ingredients
+            ]
+        }
+        self.client.manage_batches([data], 'additives', self._license)
 
     def create(self, license_number=''):
         """Create a plant batch record in Metrc."""
@@ -1260,7 +1325,7 @@ class PlantBatch(Model):
         self.client.manage_batches([data], 'createpackages', self._license)
         # TODO: Implement return_obs
 
-    # TODO: Implement create_packages
+    # TODO: Implement a `create_packages` to create multiple packages.
 
     def create_package_from_mother(
             self,

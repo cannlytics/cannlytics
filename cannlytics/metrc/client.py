@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 1/15/2023
+Updated: 1/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains the `Metrc` class responsible for communicating
@@ -13,24 +13,9 @@ with the Metrc API.
 
 TODO: Implement the remaining Metrc functionality:
 
-    [ ] Implement return created/updated objects for all endpoints.
-    [ ] `create_plant_batch_from_package`
-    [ ] `create_package_from_plant`
-    [ ] parameter isFromMotherPlant on POST /plantbatches/v1/createpackages
-    [ ] `create_plantings`
-    [ ] `change_plant_batch_growth_phase`
-    [ ] `add_plant_batch_additives`
-    [ ] `create_plant_package`
-    [ ] `destroy_plants`
-    [ ] `manicure_plants`
-    [ ] `harvest_plants`
     [ ] GET /transfers/v1/templates/{id}/transporters
     [ ] GET /transfers/v1/templates/{id}/transporters/details
-
-Future Work:
-
-    - Implement time period queries by allowing for the `start` and `end`
-    to be specified by the user, then iterate over that range, day-by-day.
+    [ ] Implement return created/updated objects for all endpoints.
 
 """
 # Standard imports.
@@ -978,12 +963,6 @@ class Metrc(object):
         # TODO: Optionally return created packages.
 
 
-    # FIXME: create_plant_batch_from_package (POST /packages/v1/create/plantings)
-
-
-    # FIXME: create_package_from_plant (POST /plantbatches/v1/create/packages/frommotherplant)
-
-
     def update_package(self, data, license_number='', return_obs=False):
         """Update a given package."""
         return self.update_packages([data], license_number=license_number, return_obs=return_obs)
@@ -1059,6 +1038,18 @@ class Metrc(object):
         url = METRC_PACKAGES_URL % 'change/note'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('put', url, data=data, params=params)
+        # TODO: Optionally return updated packages.
+
+
+    def create_plant_batches_from_packages(self, data, license_number='', return_obs=False):
+        """Create plant batch(es) from given package(s).
+        Args:
+            data (list): A list of plant batches (dict) to create.
+            license_number (str): A specific license number.
+        """
+        url = METRC_PACKAGES_URL % 'create/plantings'
+        params = self.format_params(license_number=license_number or self.primary_license)
+        return self.request('post', url, data=data, params=params)
         # TODO: Optionally return updated packages.
 
 
@@ -1241,13 +1232,31 @@ class Metrc(object):
         # TODO: Optionally return updated or created objects.
 
 
-    # FIXME: Implement parameter isFromMotherPlant on POST /plantbatches/v1/createpackages
+    def add_batch_additives(self, data, license_number=''):
+        """Add additives to a given batch."""
+        if isinstance(data, dict):
+            objs = [data]
+        else:
+            objs = data
+        return self.manage_batches(objs, 'additives', license_number or self.primary_license)
 
-    # FIXME: Implement create_plantings
 
-    # FIXME: Implement change_plant_batch_growth_phase
+    def change_batch_growth_phase(self, data, license_number=''):
+        """Change the growth phase of given batch(es)."""
+        if isinstance(data, dict):
+            objs = [data]
+        else:
+            objs = data
+        return self.manage_batches(objs, 'changegrowthphase', license_number or self.primary_license)
 
-    # FIXME: Implement add_plant_batch_additives
+
+    def create_plantings(self, data, license_number=''):
+        """Create plantings from given batch."""
+        if isinstance(data, dict):
+            objs = [data]
+        else:
+            objs = data
+        return self.manage_batches(objs, 'createplantings', license_number or self.primary_license)
 
 
     def create_plant_package_from_batch(self, data, license_number='', return_obs=False):
@@ -1258,6 +1267,15 @@ class Metrc(object):
         """
         self.manage_batches([data], action='/create/packages/frommotherplant', license_number=license_number)
         # TODO: Optionally return created package.
+   
+
+    def destroy_batch_plants(self, data, license_number=''):
+        """Destroy plants in a given batch."""
+        if isinstance(data, dict):
+            objs = [data]
+        else:
+            objs = data
+        return self.manage_batches(objs, 'destroy', license_number or self.primary_license)
 
 
     def move_batch(self, data, license_number='', return_obs=False):
@@ -1343,7 +1361,13 @@ class Metrc(object):
             return return_obs
 
 
-    # FIXME: Implement create_plant_package (POST /plants/v1/create/plantbatch/packages)
+    def create_plant_package(self, data, license_number=''):
+        """Create plant package.
+        Args:
+            data (list): A list of plant packages (dict) to create.
+            license_number (str): A specific license number.
+        """
+        return self.create_plant_packages([data], license_number)
 
 
     def create_plant_packages(self, data, license_number=''):
@@ -1424,26 +1448,24 @@ class Metrc(object):
         # TODO: Optionally return updated plants.
 
 
-    # FIXME: Finish remaining plant functions.
-
-    def destroy_plants(self, data):
-        """Move multiple plants."""
-        raise NotImplementedError
+    def destroy_plants(self, data, license_number=''):
+        """Destroy plants."""
+        return self.manage_plants(data, action='destroyplants', license_number=license_number)
 
 
-    def flower_plants(self, data, return_obs=False):
+    def flower_plants(self, data, license_number='', return_obs=False):
+        """Flower plants."""
+        return self.manage_plants(data, action='changegrowthphases', license_number=license_number)
+
+
+    def harvest_plants(self, data, license_number='', return_obs=False):
+        """Harvest plants."""
+        return self.manage_plants(data, action='harvestplants', license_number=license_number)
+
+
+    def manicure_plants(self, data, license_number='', return_obs=False):
         """Manicure plants."""
-        raise NotImplementedError
-
-
-    def manicure_plants(self, data, return_obs=False):
-        """Manicure plants."""
-        raise NotImplementedError
-
-
-    def harvest_plants(self, data, return_obs=False):
-        """Move multiple plants."""
-        raise NotImplementedError
+        return self.manage_plants(data, action='manicureplants', license_number=license_number)
 
 
     #-------------------------------------------------------------------
@@ -1535,7 +1557,6 @@ class Metrc(object):
         return self.request('get', url, params=params)
 
 
-    # TODO: Make create_receipt(s) more function-like?
     def create_receipt(self, data, license_number='', return_obs=False):
         """Create a receipt.
         Args:

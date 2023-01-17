@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/12/2023
-Updated: 1/13/2023
+Updated: 1/17/2023
 License: MIT License <https://opensource.org/licenses/MIT>
 """
 import os
