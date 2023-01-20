@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/13/2021
-Updated: 1/17/2023
+Updated: 1/19/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API to interface with the Metrc API.
@@ -65,11 +65,15 @@ from cannlytics.utils import snake_case
 
 # Metrc API defaults.
 AUTH_ERROR = 'Authentication failed. Please login to the console or \
-    provide a valid API key in an `Authentication: Bearer <token>` \
-    header.'
+provide a valid API key in an `Authentication: Bearer <token>` \
+header.'
 METRC_ERROR = 'Metrc API error. POST request will be retried.'
 DEFAULT_STATE = 'ok'
 LOG_TYPE = 'metrc'
+SECRET_SETTINGS = {
+    'replication': {'automatic': {}},
+    'expire_time': None, # TODO: Add 1 year expiration timestamp.
+}
 
 
 #-----------------------------------------------------------------------
@@ -202,6 +206,7 @@ def update_firestore():
 # License and Metrc user API key management
 #-----------------------------------------------------------------------
 
+@api_view(['POST'])
 def add_license(request: HttpRequest):
     """Add a license to an organization's licenses on request."""
 
@@ -211,7 +216,7 @@ def add_license(request: HttpRequest):
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
     
     # Get the associated organization.
-    data = loads(request.body.decode('utf-8'))
+    data = request.data.get('data', request.data)
     org_id = request.query_params.get('org_id', data.get('org_id'))
     if org_id is None:
         message = 'Parameter `org_id` is required.'
@@ -236,16 +241,17 @@ def add_license(request: HttpRequest):
         return Response({'error': True, 'message': message}, status=403)
 
     # Save the key data as a secret.
-    _, project_id = google.auth.default()   
-    secret_id = create_secret(
-        project_id, 
-        f'metrc_user_api_key_{org_id}_{state}_{license_number}',
-        metrc_user_api_key,
-    )
+    _, project_id = google.auth.default()
+    secret_id = f'metrc_user_api_key_{org_id}_{state}_{license_number}'
+    try:
+        create_secret(project_id, secret_id, SECRET_SETTINGS)
+    except:
+        pass # Secret may already be created.
+    add_secret_version(project_id, secret_id, metrc_user_api_key)
 
     # Save the key data to Firestore for admin.
-    code = create_hash(metrc_user_api_key)
-    ref = f'admin/metrc/user_api_key_hmacs/{code}'
+    code = create_hash(metrc_user_api_key, org_id)
+    ref = f'admin/metrc/metrc_user_api_key_hmacs/{code}'
     entry = {
         'license_number': license_number,
         'license_type': license_type,
@@ -257,7 +263,7 @@ def add_license(request: HttpRequest):
 
     # Save the license data to Firestore, for the user to manage.
     doc = get_document(f'organizations/{org_id}')
-    existing_licenses = doc['licenses']
+    existing_licenses = doc.get('licenses', [])
     licenses = [{
         'license_number': license_number,
         'license_type': license_type,
@@ -280,8 +286,8 @@ def add_license(request: HttpRequest):
     # Cannlytics API key plus a license number.
     authorization = request.META['HTTP_AUTHORIZATION']
     cannlytics_api_key = authorization.split(' ').pop()
-    code = create_hash(cannlytics_api_key)
-    ref = f'admin/metrc/user_api_key_hmacs/{code}'
+    code = create_hash(cannlytics_api_key, org_id)
+    ref = f'admin/metrc/metrc_user_api_key_hmacs/{code}'
     update_document(ref, {project_id: True, 'licenses': licenses})
 
     # Create an activity log and return a response.
@@ -297,6 +303,7 @@ def add_license(request: HttpRequest):
     return JsonResponse({'success': True, 'message': message})
 
 
+@api_view(['POST'])
 def delete_license(request: HttpRequest):
     """Delete a license from an organization's licenses on request."""
 
@@ -305,12 +312,12 @@ def delete_license(request: HttpRequest):
     user_claims = authenticate_request(request)
 
     # Get the parameters
-    data = loads(request.body.decode('utf-8'))
+    data = request.data.get('data', request.data)
     deletion_reason = data.get('deletion_reason', 'No deletion reason.')
     license_number = request.query_params.get('license', data.get('license_number'))
     org_id = request.query_params.get('org_id', data.get('org_id'))
-    if not license_number or not org_id:
-        message = 'Parameters `license` and `org_id` are required.'
+    if not org_id:
+        message = 'Organization, `org_id`, is required.'
         return Response({'error': True, 'message': message}, status=403)
 
     # Delete the license data and redact the secret.
@@ -334,8 +341,8 @@ def delete_license(request: HttpRequest):
     # Update admin documents.
     authorization = request.META['HTTP_AUTHORIZATION']
     cannlytics_api_key = authorization.split(' ').pop()
-    code = create_hash(cannlytics_api_key)
-    ref = f'admin/metrc/user_api_key_hmacs/{code}'
+    code = create_hash(cannlytics_api_key, org_id)
+    ref = f'admin/metrc/metrc_user_api_key_hmacs/{code}'
     update_document(ref, {project_id: True, 'licenses': licenses})
 
     # Create a log.
@@ -365,19 +372,38 @@ def initialize_traceability(
     """
     # Get the user's Cannlytics or Metrc user API key.
     authorization = request.META['HTTP_AUTHORIZATION']
-    user_api_key = authorization.split(' ').pop()
-    if not user_api_key:
+    token = authorization.split(' ').pop()
+    if not token:
         return AUTH_ERROR
 
-    # Check if the user or Metrc user API key are known.
-    code = create_hash(user_api_key)
-    key_data = get_document(f'admin/metrc/user_api_key_hmacs/{code}')
+    # Get the organization the user may have passed, or
+    # use the primary license if the user is known,
+    # otherwise use `cannlytics.eth` to allow Metrc user API keys.
+    data = request.data.get('data', request.data)
+    org_id = request.query_params.get('org_id', data.get('org_id'))
+    if org_id is None:
+        claims = authenticate_request(request)
+        if claims is None:
+            org_id = 'cannlytics.eth'
+        else:
+            owner = claims.get('owner', claims.get('team', []))
+            if not isinstance(owner, list):
+                owner = [owner]
+            org_id = owner[0]
+
+    # Get the key data, retrievable if either the Cannlytics or Metrc
+    # user API key are known.
+    code = create_hash(token, org_id)
+    key_data = get_document(f'admin/metrc/metrc_user_api_key_hmacs/{code}')
     if key_data is None:
         return AUTH_ERROR
+
+    print('KEY DATA:', key_data)
     
     # Get the user's Metrc user API key if they are using a Cannlytics
     # API key, using the 1st license or by license number if provided.
     _, project_id = google.auth.default()
+    body = request.data.get('data', {})
     license_data = None
     if key_data.get(project_id):
         license_number = body.get('license')
@@ -389,37 +415,43 @@ def initialize_traceability(
                     break
         if license_data is None:
             return AUTH_ERROR
-        secret_id = license_data['secret_id']
-        user_api_key = access_secret_version(project_id, secret_id)
-        if user_api_key is None:
+        secret_id = license_data['user_api_key_secret']['secret_id']
+        metrc_user_api_key = access_secret_version(project_id, secret_id)
+        if metrc_user_api_key is None:
             return AUTH_ERROR
+    
+    print('READ USER API KEY.')
 
     # Get the parameters for the client.
-    body = request.data['data']
     if license_number is None:
         license_number = body.get('license', key_data.get('license_number'))
     if license_data:
-        test = license_data['test']
-        state = license_data['state']
+        test = license_data.get('test', True)
+        state = license_data.get('state', DEFAULT_STATE)
     else:
-        test = body.get('test', False)
-        state = body.get('state', DEFAULT_STATE)
+        test = body.get('test', key_data.get('test', True))
+        state = body.get('state', key_data.get('state', DEFAULT_STATE))
 
     # Get the Vendor API key from Secret Manager.
     if test:
         vendor_secret_id = f'metrc_test_vendor_api_key_{state}'
     else:
         vendor_secret_id = f'metrc_vendor_api_key_{state}'
-    vendor_api_key = access_secret_version(
-        project_id=project_id,
-        secret_id=vendor_secret_id,
-        version_id=version_id
-    )
+    try:
+        metrc_vendor_api_key = access_secret_version(
+            project_id=project_id,
+            secret_id=vendor_secret_id,
+            version_id=version_id
+        )
+    except:
+        return AUTH_ERROR
+    
+    print('READ VENDOR API KEY.')
 
     # Initialize and return a Metrc client.
     return Metrc(
-        vendor_api_key,
-        user_api_key,
+        metrc_vendor_api_key,
+        metrc_user_api_key,
         logs=True,
         primary_license=license_number,
         state=state,

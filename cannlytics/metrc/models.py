@@ -24,7 +24,6 @@ from ..utils.utils import (
     remove_dict_nulls,
     update_dict,
 )
-from client import Metrc
 
 
 class Model(object):
@@ -32,7 +31,7 @@ class Model(object):
 
     def __init__(
             self,
-            client: Metrc,
+            client: Any,
             context: dict,
             license_number: Optional[str] = '',
             function: Optional[Callable] = camel_to_snake
@@ -56,17 +55,13 @@ class Model(object):
         return self.__dict__.get('id')
 
     @classmethod
-    def from_dict(cls, client: Metrc, context: dict):
+    def from_dict(cls, client: Any, context: dict):
         """Initiate a class instance from a dictionary."""
         obj = cls(client, context)
-        try:
-            obj.create()
-        except KeyError:
-            pass
         return obj
 
     @classmethod
-    def from_fb(cls, client: Metrc, ref: str) -> Any:
+    def from_fb(cls, client: Any, ref: str) -> Any:
         """Initialize a class from Firebase data.
         Args:
             client (Client): A Metrc client instance.

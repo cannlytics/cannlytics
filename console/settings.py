@@ -139,6 +139,7 @@ if PRODUCTION == 'False':
     MIDDLEWARE.insert(0, 'livereload.middleware.LiveReloadScript')
     MIDDLEWARE_CLASSES = 'livereload.middleware.LiveReloadScript'
 
+
 #-------------------------------------------------------------#
 # Templates
 # https://docs.djangoproject.com/en/3.1/ref/templates/language/

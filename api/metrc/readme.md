@@ -91,16 +91,31 @@ The following example shows how to interface with locations in the Metrc API.
 
 ```py
 # Create a location.
+data = {
+  'name': 'Flower Room',
+  'location_type_name': 'Default'
+}
+url = f'{base}/metrc/locations'
+response = requests.post(url, data=data headers=headers)
+assert response.status_code == 200
 
 # Get a location.
-url = f'{base}/metrc/locations/redacted'
+url = f'{base}/metrc/locations/420'
 response = requests.get(url, headers=headers)
 assert response.status_code == 200
 
 # Update the name of a location.
+data = {
+  'id': 420,
+  'name': 'Flower Room A',
+  'location_type_name': 'Default'
+}
+url = f'{base}/metrc/locations'
+response = requests.post(url, data=data headers=headers)
+assert response.status_code == 200
 
 # Delete a location.
-url = f'{base}/metrc/locations/redacted'
+url = f'{base}/metrc/locations/420'
 response = requests.delete(url, headers=headers)
 assert response.status_code == 200
 ```

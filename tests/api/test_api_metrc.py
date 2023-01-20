@@ -4,12 +4,12 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/12/2023
-Updated: 1/17/2023
+Updated: 1/19/2023
 License: MIT License <https://opensource.org/licenses/MIT>
 """
 import os
 import requests
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 
 # Define the endpoint.
 ENDPOINT = 'metrc'
@@ -20,65 +20,77 @@ BASE = 'http://127.0.0.1:8000/api'
 # Production: Uncomment to test with the production server once published.
 # BASE = 'https://console.cannlytics.com/api'
 
-# Load your API key.
-load_dotenv('../../.env')
-API_KEY = os.getenv('CANNLYTICS_API_KEY')
-
-# Pass your API key through the authorization header as a bearer token.
-HEADERS = {
-    'Authorization': 'Bearer %s' % API_KEY,
-    'Content-type': 'application/json',
-}
+# Load your API key to pass in the authorization header as a bearer token.
+config = dotenv_values('../../.env')
+API_KEY = config['CANNLYTICS_API_KEY']
 
 
-# === Test ===
+# === Tests ===
 if __name__ == '__main__':
-    pass
 
-#------------------------------------------------------------------
-# TODO: [ ] Facilities
-#------------------------------------------------------------------
+    # Authentication a session.
+    session = requests.Session()
+    session.headers.update({'Authorization': f'Bearer {API_KEY}'})  
 
-def test_get_facilities(client):
-    """Test getting facilities from the Metrc API,
-    through the Cannlytics API.
-    """
-    response = client.get('/facilities/')
+
+    #------------------------------------------------------------------
+    # [ ] License management.
+    #------------------------------------------------------------------
+
+    # [✓] Test adding a Metrc user API key.
+    # print('Adding a license...')
+    # url = f'{BASE}/metrc/admin/create-license'
+    # data = {
+    #   'metrc_user_api_key': os.getenv('METRC_TEST_USER_API_KEY'),
+    #   'license_number': '',
+    #   'license_type': 'Processor',
+    #   'org_id': 'test-processor',
+    #   'state': 'ok',
+    # }
+    # response = requests.post(url, json=data, headers=HEADERS)
+    # assert response.json()['success']
+    # print('Added Metrc user API key.')
+
+    # TODO: Delete a license.
+    # print('Deleting a license...')
+    # url = f'{BASE}/metrc/admin/delete-license'
+    # data = {
+    #   'license_number': '',
+    #   'org_id': 'test-processor',
+    #   'deletion_reason': 'Test deletion.',
+    # }
+    # response = requests.post(url, json=data, headers=HEADERS)
+    # assert response.data['success']
+    # print('Delete Metrc user API key.')
+
+
+    #------------------------------------------------------------------
+    # [✓] Facilities
+    #------------------------------------------------------------------
+
+    # [✓] Test facilities.
+    response = session.get(f'{BASE}/metrc/facilities')
     assert response.status_code == 200
-    # assert response.data['data'] == [{'id': 1, 'name': 'Facility 1'}, {'id': 2, 'name': 'Facility 2'}]
+    facilities = response.json()['data']
+    print('Found %i facilities' % len(facilities))
 
 
+    #------------------------------------------------------------------
+    # [ ] Locations
+    #------------------------------------------------------------------
 
-#------------------------------------------------------------------
-# TODO: [ ] Locations
-#------------------------------------------------------------------
-
-def test_get_locations(client):
-    """Test getting a location."""
-    response = client.get('/locations/')
+    # [ ] Test getting a location.
+    params = {'license': facilities[0]['license']['number']}
+    response = session.get(f'{BASE}/metrc/locations', params=params)
     assert response.status_code == 200
-    assert response.data['data'] == [{'id': 1, 'name': 'Location 1'}, {'id': 2, 'name': 'Location 2'}]
 
-def test_create_locations(client):
-    """Test creating a location."""
-    data = [{'name': 'Location 1', 'location_type': 'Room'}, {'name': 'Location 2', 'location_type': 'Room'}]
-    response = client.post('/locations/', data={'data': data})
-    assert response.status_code == 201
-    assert response.data['data'] == data
+    # [ ] Test creating a location.
 
-def test_update_locations(client):
-    """Test update the name of the location."""
-    data = [{'id': 1, 'name': 'Location 1 Updated', 'location_type': 'Room'}, {'id': 2, 'name': 'Location 2 Updated', 'location_type': 'Room'}]
-    response = client.post('/locations/', data={'data': data})
-    assert response.status_code == 200
-    assert response.data['data'] == data
 
-def test_delete_locations(client):
-    """Test deleting a location."""
-    data = [{'id': 1}, {'id': 2}]
-    response = client.delete('/locations/', data={'data': data})
-    assert response.status_code == 200
-    assert response.data == {'success': True, 'data': []}
+    # [ ] Test update the name of the location.
+
+
+    # [ ] Test deleting a location.
 
 
 #------------------------------------------------------------------
@@ -284,15 +296,18 @@ def test_delete_locations(client):
 
 
 
-# === Tests ===
-if __name__ == '__main__':
+# # === Tests ===
+# if __name__ == '__main__':
 
-    # TODO: Initialize a client.
-    client = None
+#     # Initialize a client.
+#     session = requests.Session()
+#     session.headers.update({'Authorization': f'Bearer {API_KEY}'})  
 
-    # [ ] Test adding a Metrc user API key.
-
-    # [ ] Test facilities.
+#     # [✓] Test facilities.
+#     response = session.get(f'{BASE}/metrc/facilities/')
+#     assert response.status_code == 200
+#     facilities = len(response.json()['data'])
+#     print('Retrieved facilities.')
 
     # [ ] Test employees.
 

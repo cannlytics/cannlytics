@@ -689,8 +689,11 @@ def create_secret(project_id: str, secret_id: str, secret: Any) -> str:
         (str): The name of the created secret.
     """
     client = secretmanager.SecretManagerServiceClient()
-    parent = f'projects/{project_id}'
-    response = client.create_secret(parent, secret_id, secret)
+    response = client.create_secret(
+        parent=f'projects/{project_id}',
+        secret_id=secret_id,
+        secret=secret,
+    )
     return response.name
 
 
@@ -719,7 +722,10 @@ def add_secret_version(
     client = secretmanager.SecretManagerServiceClient()
     parent = f'projects/{project_id}/secrets/{secret_id}'
     payload = payload.encode('UTF-8')
-    response = client.add_secret_version(parent, {'data': payload})
+    response = client.add_secret_version(
+        parent=parent,
+        payload={'data': payload},
+    )
     return response.name
 
 
