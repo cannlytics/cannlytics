@@ -406,6 +406,15 @@ class Item(Model):
         self.client.delete_item(self.id, self._license)
 
 
+LOCATION_FIELDS = {
+    'name': 'Name',
+    'location_type': 'LocationTypeName',
+    'batches': 'ForPlantBatches',
+    'plants': 'ForPlants',
+    'harvests': 'ForHarvests',
+    'packages': 'ForPackages'
+}
+
 class Location(Model):
     """A class that represents a cannabis-production location.
     ```js
@@ -422,16 +431,16 @@ class Location(Model):
     ```
     """
 
-    def __init__(self, client, properties, license_number=''):
-        super().__init__(client, properties, license_number)
-        self._parameters = {
-            'name': 'Name',
-            'location_type': 'LocationTypeName',
-            'batches': 'ForPlantBatches',
-            'plants': 'ForPlants',
-            'harvests': 'ForHarvests',
-            'packages': 'ForPackages'
-        }
+    # def __init__(self, client, properties, license_number=''):
+    #     super().__init__(client, properties, license_number)
+    #     self._parameters = {
+    #         'name': 'Name',
+    #         'location_type': 'LocationTypeName',
+    #         'batches': 'ForPlantBatches',
+    #         'plants': 'ForPlants',
+    #         'harvests': 'ForHarvests',
+    #         'packages': 'ForPackages'
+    #     }
     
     def create(self, license_number='', return_obs=False):
         """Create a location in Metrc."""
@@ -447,7 +456,8 @@ class Location(Model):
         data = self.to_dict()
         update = clean_dictionary(data, camelcase)
         for param in kwargs:
-            key = self._parameters.get(param, param)
+            # key = self._parameters.get(param, param)
+            key = LOCATION_FIELDS.get(param, param)
             update[key] = kwargs[param]
         self.client.update_locations([update])
 

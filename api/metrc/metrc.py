@@ -56,12 +56,13 @@ from cannlytics.firebase import (
     update_documents,
     delete_document,
 )
-from cannlytics.metrc import (
-    Metrc,
-    MetrcAPIError,
-    Location,
+from cannlytics.metrc import Metrc, MetrcAPIError
+from cannlytics.utils import (
+    camelcase,
+    camel_to_snake,
+    clean_dictionary,
+    snake_case,
 )
-from cannlytics.utils import snake_case
 
 # Metrc API defaults.
 AUTH_ERROR = 'Authentication failed. Please login to the console or \
@@ -107,20 +108,37 @@ def create_or_update_objects(
     """Create or update given API items."""
     create_items, update_items = [], []
     data = request.data.get('data', request.data)
+    if data is None:
+        message = 'No data. You can pass a list of objects in the request body.'
+        return Response({'error': True, 'message': message}, content_type='application/json')
+    elif isinstance(data, dict):
+        data = [data]
     for item in data:
         if item.get('id'):
             update_items.append(item)
         else:
             create_items.append(item)
     if create_items:
-        getattr(track, create_method)(create_items, return_obs=True)
+        create_items = [clean_dictionary(x, camelcase) for x in create_items]
+        create_items = getattr(track, create_method)(create_items, return_obs=True)
     if update_items:
-        getattr(track, update_method)(update_items, return_obs=True)
+        update_items = [clean_dictionary(x, camelcase) for x in update_items]
+        update_items = getattr(track, update_method)(update_items, return_obs=True)
     items = create_items + update_items
-    log_metrc_request(request, items, 'create_or_update_objects', update_method)
-    model = create_method.replace('create_', '')
-    refs = [f'metrc/{track.license_number}/{model}/{x["id"]}' for x in items]
-    update_documents(refs, items)
+    try:
+        items = [x.to_dict() for x in items]
+    except:
+        pass
+    try:
+        log_metrc_request(request, items, 'create_or_update_objects', update_method)
+    except:
+        print('Failed to create logs.')
+    try:
+        model = create_method.replace('create_', '')
+        refs = [f'metrc/{track.primary_license}/{model}/{x["id"]}' for x in items]
+        update_documents(refs, items)
+    except:
+        print('Failed to update data in Firestore.')
     return Response({'data': items}, content_type='application/json')
 
 
@@ -128,20 +146,31 @@ def delete_objects(
         request: Request,
         track: Metrc,
         delete_method: str,
+        uid: Optional[str] = None,
     ) -> Response:
     """Delete given objects from the Metrc API."""
     data = request.data.get('data', request.data)
     model = delete_method.replace('delete_', '')
-    collection = f'metrc/{track.license_number}/{model}/'
+    collection = f'metrc/{track.primary_license}/{model}/'
     if isinstance(data, list):
         for item in data:
             uid = item['id']
             getattr(track, delete_method)(uid)
-            delete_document(f'{collection}/{uid}')
+            try:
+                delete_document(f'{collection}/{uid}')
+            except:
+                print('Failed to delete data from Firestore.')
     else:
-        uid = item['id']
+        if uid is None:
+            uid = data.get('id', data.get('Id'))
+            if uid is None:
+                message = 'UID not specified. You can append a UID to the path or pass a list of objects with `id`s in the request body.'
+                return Response({'error': True, 'message': message}, content_type='application/json')
         getattr(track, delete_method)(uid)
-        delete_document(f'{collection}/{uid}')
+        try:
+            delete_document(f'{collection}/{uid}')
+        except:
+            print('Failed to delete data from Firestore.')
     log_metrc_request(request, data, 'delete_object', delete_method)
     return Response({'success': True, 'data': []}, content_type='application/json')
 
@@ -268,7 +297,7 @@ def add_license(request: HttpRequest):
         'license_number': license_number,
         'license_type': license_type,
         'state': state,
-        'user_api_key_secret': {
+        'metrc_user_api_key_secret': {
             'project_id': project_id,
             'secret_id': secret_id,
             'version_id': '1'
@@ -330,7 +359,7 @@ def delete_license(request: HttpRequest):
         else:
             add_secret_version(
                 project_id,
-                license_data['secret_id'],
+                license_data['metrc_user_api_key_secret']['secret_id'],
                 'redacted'
             )
 
@@ -415,7 +444,7 @@ def initialize_traceability(
                     break
         if license_data is None:
             return AUTH_ERROR
-        secret_id = license_data['user_api_key_secret']['secret_id']
+        secret_id = license_data['metrc_user_api_key_secret']['secret_id']
         metrc_user_api_key = access_secret_version(project_id, secret_id)
         if metrc_user_api_key is None:
             return AUTH_ERROR
@@ -424,7 +453,10 @@ def initialize_traceability(
 
     # Get the parameters for the client.
     if license_number is None:
-        license_number = body.get('license', key_data.get('license_number'))
+        license_number = body.get(
+            'license',
+            request.query_params.get('license', key_data.get('license_number'))
+        )
     if license_data:
         test = license_data.get('test', True)
         state = license_data.get('state', DEFAULT_STATE)
@@ -477,7 +509,7 @@ def facilities(request: Request, license_number: Optional[str] = ''):
         objs = track.get_facilities()
     except MetrcAPIError as error:
         log_metrc_error(request, 'facilities', str(error))
-        return Response({'error': True, 'message': METRC_ERROR}, status=403)
+        return Response({'error': True, 'message': str(error)}, status=403)
 
     # Return the requested data.
     data = [obj.to_dict() for obj in objs]
@@ -489,20 +521,24 @@ def facilities(request: Request, license_number: Optional[str] = ''):
 #-----------------------------------------------------------------------
 
 @api_view(['GET'])
-def employees(request: Request, license_number: Optional[str] = ''):
+def employees(request: Request, license_number: Optional[str] = None):
     """Get employees for a given license number."""
 
     # Initialize Metrc.
     track = initialize_traceability(request)
     if isinstance(track, str):
         return Response({'error': True, 'message': track}, status=403)
+    
+    # Get the license number.
+    if license_number is None:
+        license_number = request.query_params.get('license', request.data.get('license'))
 
     # Get employees from the Metrc API.
     try:
         objs = track.get_employees(license_number=license_number)
     except MetrcAPIError as error:
         log_metrc_error(request, 'employees', str(error))
-        return Response({'error': True, 'message': METRC_ERROR}, status=403)
+        return Response({'error': True, 'message': str(error)}, status=403)
 
     # Return the requested data.
     data = [obj.to_dict() for obj in objs]
@@ -526,33 +562,48 @@ def locations(request: Request, area_id: Optional[str] = None):
     if request.method == 'GET':
         return get_objects(request, track, 'get_locations',
             uid=area_id,
-            action=request.query_params.get('type'),
+            action=request.query_params.get('type', 'active'),
+            license_number=track.primary_license,
         )
 
     # Create / update locations.
     # Optional: Standardize location creation.
     if request.method == 'POST':
         create_items, update_items = [], []
-        data = request.data['data']
+        data = request.data.get('data', request.data)
+        if isinstance(data, dict):
+            data = [data]
         for item in data:
             if item.get('id'):
                 update_items.append(item)
             else:
-                create_items.append(Location.from_dict(item))
+                create_items.append(item)
         if create_items:
             names = [x['name'] for x in create_items]
             types = [x['location_type'] for x in create_items]
-            track.create_locations(names, types, return_obs=True)
+            try:
+                track.create_locations(names, types, return_obs=True)
+            except MetrcAPIError as error:
+                log_metrc_error(request, 'create_locations', str(error))
+                return Response({'error': True, 'message': str(error)}, status=403)
         if update_items:
-            track.update_locations(update_items, return_obs=True)
+            try:
+                update_items = [clean_dictionary(x, camelcase) for x in update_items]
+                track.update_locations(update_items, return_obs=True)
+            except MetrcAPIError as error:
+                log_metrc_error(request, 'update_locations', str(error))
+                return Response({'error': True, 'message': str(error)}, status=403)
         items = create_items + update_items
-        refs = [f'metrc/{track.license_number}/locations/{x["id"]}' for x in items]
-        update_documents(refs, items)
+        try:
+            refs = [f'metrc/{track.primary_license}/locations/{x.get("id", x.get("ID"))}' for x in items]
+            update_documents(refs, items)
+        except:
+            pass
         return Response({'data': items}, content_type='application/json')
 
     # Delete location(s).
     if request.method == 'DELETE':
-        return delete_objects(request, track, 'delete_location')
+        return delete_objects(request, track, 'delete_location', area_id)
 
 
 #-----------------------------------------------------------------------
@@ -576,6 +627,7 @@ def packages(request: Request, package_id: Optional[str] = None):
             label=request.query_params.get('label'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
+            license_number=track.primary_license,
         )
 
     # Manage packages.
@@ -639,7 +691,7 @@ def packages(request: Request, package_id: Optional[str] = None):
 
     # Delete package(s).
     if request.method == 'DELETE':
-        return delete_objects(request, track, 'delete_package')
+        return delete_objects(request, track, 'delete_package', package_id)
 
 #-----------------------------------------------------------------------
 # Items
@@ -659,18 +711,23 @@ def items(request: Request, item_id: Optional[str] = None):
         return get_objects(request, track, 'get_items',
             uid=item_id,
             action=request.query_params.get('type'),
+            license_number=track.primary_license,
         )
 
     # Create / update item(s).
     if request.method == 'POST':
-        return create_or_update_objects(request, track,
-            create_method='create_items',
-            update_method='update_items',
-        )
+        try:
+            return create_or_update_objects(request, track,
+                create_method='create_items',
+                update_method='update_items',
+            )
+        except MetrcAPIError as error:
+            log_metrc_error(request, 'update_items', str(error))
+            return Response({'error': True, 'message': str(error)}, status=403)
 
     # Delete item(s).
     if request.method == 'DELETE':
-        return delete_objects(request, track, 'delete_item')
+        return delete_objects(request, track, 'delete_item', item_id)
 
 
 #-----------------------------------------------------------------------
@@ -688,7 +745,10 @@ def lab_tests(request: Request, test_id: Optional[str] = None):
 
     # Get lab results.
     if request.method == 'GET':
-        return get_objects(request, track, 'get_lab_result', test_id)
+        return get_objects(request, track, 'get_lab_result',
+            uid=test_id,
+            license_number=track.primary_license
+        )
 
     # Post results.
     if request.method == 'POST':
@@ -730,7 +790,8 @@ def strains(request: Request, strain_id: Optional[str] = None):
     if request.method == 'GET':
         return get_objects(request, track, 'get_strains',
             uid=strain_id,
-            action=request.query_params.get('type'),
+            action=request.query_params.get('type', 'active'),
+            license_number=track.primary_license,
         )
 
     # Create / update strains.
@@ -742,7 +803,7 @@ def strains(request: Request, strain_id: Optional[str] = None):
 
     # Delete strains.
     if request.method == 'DELETE':
-        return delete_objects(request, track, 'delete_strain')
+        return delete_objects(request, track, 'delete_strain', strain_id)
 
 
 #-----------------------------------------------------------------------
@@ -765,6 +826,7 @@ def batches(request: Request, batch_id: Optional[str] = None):
             action=request.query_params.get('type'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
+            license_number=track.primary_license,
         )
 
     # Manage batch(es).
@@ -841,6 +903,7 @@ def plants(request: Request, plant_id: Optional[str] = None):
             action=request.query_params.get('type'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
+            license_number=track.primary_license,
         )
 
     # Manage plant(s).
@@ -896,7 +959,7 @@ def plants(request: Request, plant_id: Optional[str] = None):
 
     # Delete plant(s).
     if request.method == 'DELETE':
-        return delete_objects(request, track, 'destroy_plants')
+        return delete_objects(request, track, 'destroy_plants', plant_id)
 
 
 #-----------------------------------------------------------------------
@@ -919,6 +982,7 @@ def harvests(request: Request, harvest_id: Optional[str] = None):
             action=request.query_params.get('type'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
+            license_number=track.primary_license,
         )
 
     # Manage harvest(s).
@@ -1001,6 +1065,7 @@ def transfers(request: Request, transfer_id: Optional[str] = None):
             transfer_type=request.query_params.get('type'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
+            license_number=track.primary_license,
         )
 
     # Create / update transfers.
@@ -1012,7 +1077,7 @@ def transfers(request: Request, transfer_id: Optional[str] = None):
 
     # Delete transfers.
     if request.method == 'DELETE':
-        return delete_objects(request, track, 'delete_transfer')
+        return delete_objects(request, track, 'delete_transfer', transfer_id)
 
 
 @api_view(['GET', 'POST', 'DELETE'])
@@ -1031,6 +1096,7 @@ def transfer_templates(request: Request, template_id: Optional[str] = None):
             action=request.query_params.get('type'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
+            license_number=track.primary_license,
         )
 
     # Create / update data.
@@ -1042,7 +1108,12 @@ def transfer_templates(request: Request, template_id: Optional[str] = None):
 
     # Delete data.
     if request.method == 'DELETE':
-        return delete_objects(request, track, 'delete_transfer_template')
+        return delete_objects(
+            request,
+            track,
+            'delete_transfer_template',
+            template_id
+        )
 
 
 @api_view(['GET'])
@@ -1090,7 +1161,10 @@ def patients(request: Request, patient_id: Optional[str] = None):
 
     # Get patient(s) data.
     if request.method == 'GET':
-        return get_objects(request, track, 'get_patients', patient_id)
+        return get_objects(request, track, 'get_patients', 
+            uid=patient_id,
+            license_number=track.primary_license,
+        )
 
     # Create / update patient(s).
     if request.method == 'POST':
@@ -1101,7 +1175,7 @@ def patients(request: Request, patient_id: Optional[str] = None):
 
     # Delete patient(s).
     if request.method == 'DELETE':
-        return delete_objects(request, track, 'delete_patient')
+        return delete_objects(request, track, 'delete_patient', patient_id)
 
 
 #-----------------------------------------------------------------------
@@ -1109,7 +1183,7 @@ def patients(request: Request, patient_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def sales(request: Request, strain_id: Optional[str] = None):
+def sales(request: Request, sale_id: Optional[str] = None):
     """Get, update, and delete sales for a given license number."""
 
     # Initialize Metrc.
@@ -1132,7 +1206,10 @@ def sales(request: Request, strain_id: Optional[str] = None):
 
     # Delete (void) sale(s).
     if request.method == 'DELETE':
-        return delete_objects(request, track, 'delete_receipt')
+        return delete_objects(request, track, 'delete_receipt', sale_id)
+
+
+# TODO: Also implement transaction endpoints?
 
 
 #-----------------------------------------------------------------------
@@ -1157,6 +1234,7 @@ def deliveries(request: Request, delivery_id: Optional[str] = None):
             end=request.query_params.get('end'),
             sales_start=request.query_params.get('sales_start'),
             sales_end=request.query_params.get('sales_end'),
+            license_number=track.primary_license,
         )
 
     # Manage deliveries.
@@ -1179,7 +1257,7 @@ def deliveries(request: Request, delivery_id: Optional[str] = None):
 
     # Delete deliveries.
     if request.method == 'DELETE':
-        return delete_objects(request, track, 'delete_delivery')
+        return delete_objects(request, track, 'delete_delivery', delivery_id)
 
 
 #-----------------------------------------------------------------------
@@ -1201,13 +1279,14 @@ def get_metrc_types(
         objs = getattr(track, method)()
     except MetrcAPIError as error:
         log_metrc_error(request, method, str(error))
-        return Response({'error': True, 'message': METRC_ERROR}, status=403)
+        return Response({'error': True, 'message': str(error)}, status=403)
 
     # Return the requested data.
     try:
         data = [obj.to_dict() for obj in objs]
     except AttributeError:
         data = objs
+    data = [clean_dictionary(x, camel_to_snake) for x in data]
     return Response({'data': data}, content_type='application/json')
 
 
