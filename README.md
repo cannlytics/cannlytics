@@ -1,7 +1,7 @@
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
   <img style="height:180px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics-space-logo.png?alt=media&token=87727d92-bfb1-43df-bb9e-e2308dfa9b08">
   <div>
-    <h3>Cannabis + Analytics</h3>
+    <h3>Cannabis data science and analytics.</h3>
   </div>
 
 <https://cannlytics.com>
@@ -52,8 +52,8 @@ Cannlytics is made available with ❤️ and your good will. Please consider mak
 | 👐 OpenCollective | <https://opencollective.com/cannlytics-company/donate> |
 | 💸 PayPal Donation | <https://paypal.me/cannlytics> |
 | 💵 Venmo Donation | <https://www.venmo.com/u/cannlytics> |
-| 🪙 Bitcoin donation address| `34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6` |
 | ⚡ Ethereum donation address | `cannlytics.eth` |
+<!-- | 🪙 Bitcoin donation address| `34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6` | -->
 
 ## 🏛️ License <a name="license"></a>
 
@@ -82,7 +82,7 @@ SOFTWARE.
 Please cite the following if you use the code examples in your research:
 
 ```bibtex
-@misc{cannlytics2022,
+@misc{cannlytics2023,
   title={Cannabis Data Science},
   author={Skeate, Keegan and Rice, Charles and O'Sullivan-Sutherland, Candace},
   journal={https://github.com/cannlytics/cannabis-data-science},

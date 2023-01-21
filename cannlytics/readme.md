@@ -1,7 +1,7 @@
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
-  <img style="height:180px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics-engine-logo.png?alt=media&token=85e11a96-ac74-479d-a69b-e61a3a47b4d2">
+  <img style="height:120px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics-space-logo.png?alt=media&token=87727d92-bfb1-43df-bb9e-e2308dfa9b08">
   <div style="margin-top:0.5rem;">
-    <h3>Simple, easy, cannabis analytics.</h3>
+    <h3>Cannabis data science and analytics.</h3>
   </div>
 
 <https://cannlytics.com>
@@ -12,7 +12,7 @@
 
 </div>
 
-🔥Cannlytics is a set of useful tools to get (wrangle), curate, augment, analyze, archive, and market cannabis data. The mission of Cannlytics is to help cannabis data be accessible, simply, easily, and for everyone. From seed to sale and beyond, Cannlytics can help you organize, analyze, and profit from your cannabis data. The `cannlytics` package is extensive and you are welcome to use any and all of the components that you find useful.
+🔥Cannlytics is a set of useful tools to wrangle, curate, augment, analyze, archive, and market cannabis data. The mission of Cannlytics is to help cannabis data and analytics be accessible. From seed to sale and beyond, Cannlytics can help you organize, analyze, and profit from your cannabis data. The `cannlytics` package is extensive and you are welcome to use any and all of the components that you find useful.
 
 - [🚀 Installation](#installation)
 - [🗝️ Authentication](#auth)
@@ -53,9 +53,9 @@ Cannlytics leverages [🔥Firebase](https://console.firebase.google.com/) by def
 
 The `cannlytics.data` module is a large toolbox for accessing, collecting, cleaning, augmenting, standardizing, saving, and analyzing cannabis data. See [the `cannlytics.data` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data) for more information on how to manage your cannabis data.
 
-### CoAs <a name="coas"></a>
+### COAs <a name="coas"></a>
 
-Certificates of analysis (CoAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! `CoADoc` puts these vital data points in your hands by parsing PDFs and URLs, finding **all the data**, standardizing the data, and cleanly returning the data to you. You can read more about using CoADoc in [the `cannlytics.data.coas` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas).
+Certificates of analysis (COAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! `CoADoc` puts these vital data points in your hands by parsing PDFs and URLs, finding **all the data**, standardizing the data, and cleanly returning the data to you. You can read more about using CoADoc in [the `cannlytics.data.coas` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas).
 
 ### Market <a name="market"></a>
 
@@ -81,7 +81,7 @@ track = metrc.authorize(
     'your-vendor-api-key',
     'your-user-api-key',
     primary_license='your-user-license-number',
-    state='ca',
+    state='ok',
 )
 ```
 
@@ -135,6 +135,8 @@ sale.total_price = 25
 sale.update()
 ```
 
+See [the `cannlytics.metrc` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/metrc) for more information and examples on how you can interface with the Metrc API.
+
 ## 📈 Statistics <a name="stats"></a>
 
 The `cannlytics.stats` submodule contains a number of functions for estimating, saving, and using statistical models. You can read more about the statistical tools in [the `cannlytics.stats` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas).
@@ -142,7 +144,7 @@ The `cannlytics.stats` submodule contains a number of functions for estimating, 
 ## 🏛️ License <a name="license"></a>
 
 ```
-Copyright (c) 2021-2022 Cannlytics and The Cannabis Data Science Team
+Copyright (c) 2021-2023 Cannlytics and The Cannabis Data Science Team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -170,6 +172,6 @@ Please cite the following if you use the code examples in your research:
   title={Cannabis Data Science},
   author={Skeate, Keegan and Rice, Charles and O'Sullivan-Sutherland, Candace},
   journal={https://github.com/cannlytics/cannabis-data-science},
-  year={2022}
+  year={2023}
 }
 ```
