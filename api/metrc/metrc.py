@@ -85,7 +85,7 @@ def get_objects(
         request: Request,
         track: Metrc,
         get_method: str,
-        uid: str,
+        uid: Optional[str] = '',
         **kwargs,
     ) -> Response:
     """Perform a simple `GET` request to the Metrc API."""
@@ -107,7 +107,10 @@ def create_or_update_objects(
     ) -> Response:
     """Create or update given API items."""
     create_items, update_items = [], []
-    data = request.data.get('data', request.data)
+    if isinstance(request.data, list):
+        data = request.data
+    else:
+        data = request.data.get('data', request.data)
     if data is None:
         message = 'No data. You can pass a list of objects in the request body.'
         return Response({'error': True, 'message': message}, content_type='application/json')
@@ -121,9 +124,13 @@ def create_or_update_objects(
     if create_items:
         create_items = [clean_dictionary(x, camelcase) for x in create_items]
         create_items = getattr(track, create_method)(create_items, return_obs=True)
+        if not isinstance(create_items, list):
+            create_items = [create_items]
     if update_items:
         update_items = [clean_dictionary(x, camelcase) for x in update_items]
         update_items = getattr(track, update_method)(update_items, return_obs=True)
+        if not isinstance(update_items, list):
+            update_items = [update_items]
     items = create_items + update_items
     try:
         items = [x.to_dict() for x in items]
@@ -146,10 +153,13 @@ def delete_objects(
         request: Request,
         track: Metrc,
         delete_method: str,
-        uid: Optional[str] = None,
+        uid: Optional[str] = '',
     ) -> Response:
     """Delete given objects from the Metrc API."""
-    data = request.data.get('data', request.data)
+    if isinstance(request.data, list):
+        data = request.data
+    else:
+        data = request.data.get('data', request.data)
     model = delete_method.replace('delete_', '')
     collection = f'metrc/{track.primary_license}/{model}/'
     if isinstance(data, list):
@@ -161,7 +171,7 @@ def delete_objects(
             except:
                 print('Failed to delete data from Firestore.')
     else:
-        if uid is None:
+        if not uid:
             uid = data.get('id', data.get('Id'))
             if uid is None:
                 message = 'UID not specified. You can append a UID to the path or pass a list of objects with `id`s in the request body.'
@@ -408,8 +418,11 @@ def initialize_traceability(
     # Get the organization the user may have passed, or
     # use the primary license if the user is known,
     # otherwise use `cannlytics.eth` to allow Metrc user API keys.
-    data = request.data.get('data', request.data)
-    org_id = request.query_params.get('org_id', data.get('org_id'))
+    if isinstance(request.data, list):
+        body = {}
+    else:
+        body = request.data.get('data', request.data)
+    org_id = request.query_params.get('org_id', body.get('org_id'))
     if org_id is None:
         claims = authenticate_request(request)
         if claims is None:
@@ -432,7 +445,6 @@ def initialize_traceability(
     # Get the user's Metrc user API key if they are using a Cannlytics
     # API key, using the 1st license or by license number if provided.
     _, project_id = google.auth.default()
-    body = request.data.get('data', {})
     license_data = None
     if key_data.get(project_id):
         license_number = body.get('license')
@@ -550,7 +562,7 @@ def employees(request: Request, license_number: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def locations(request: Request, area_id: Optional[str] = None):
+def locations(request: Request, area_id: Optional[str] = ''):
     """Get, update, and delete locations for a given license number."""
 
     # Initialize Metrc.
@@ -570,7 +582,10 @@ def locations(request: Request, area_id: Optional[str] = None):
     # Optional: Standardize location creation.
     if request.method == 'POST':
         create_items, update_items = [], []
-        data = request.data.get('data', request.data)
+        if isinstance(request.data, list):
+            data = request.data
+        else:
+            data = request.data.get('data', request.data)
         if isinstance(data, dict):
             data = [data]
         for item in data:
@@ -611,7 +626,7 @@ def locations(request: Request, area_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def packages(request: Request, package_id: Optional[str] = None):
+def packages(request: Request, package_id: Optional[str] = ''):
     """Get, update, and delete packages for a given license number."""
 
     # Initialize Metrc.
@@ -623,7 +638,7 @@ def packages(request: Request, package_id: Optional[str] = None):
     if request.method == 'GET':
         return get_objects(request, track, 'get_packages',
             uid=package_id,
-            action=request.query_params.get('type'),
+            action=request.query_params.get('type', 'active'),
             label=request.query_params.get('label'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
@@ -634,7 +649,10 @@ def packages(request: Request, package_id: Optional[str] = None):
     if request.method == 'POST':
 
         # Get the data posted and determine the action to perform.
-        data = request.data.get('data', request.data)
+        if isinstance(request.data, list):
+            data = request.data
+        else:
+            data = request.data.get('data', request.data)
         action = request.data.get('action', snake_case(package_id))
         
         # FIXME: Also update Firestore as these update.
@@ -698,7 +716,7 @@ def packages(request: Request, package_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def items(request: Request, item_id: Optional[str] = None):
+def items(request: Request, item_id: Optional[str] = ''):
     """Get, update, and delete items for a given license number."""
 
     # Initialize Metrc.
@@ -710,7 +728,7 @@ def items(request: Request, item_id: Optional[str] = None):
     if request.method == 'GET':
         return get_objects(request, track, 'get_items',
             uid=item_id,
-            action=request.query_params.get('type'),
+            action=request.query_params.get('type', 'active'),
             license_number=track.primary_license,
         )
 
@@ -735,7 +753,7 @@ def items(request: Request, item_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST'])
-def lab_tests(request: Request, test_id: Optional[str] = None):
+def lab_tests(request: Request, test_id: Optional[str] = ''):
     """Get lab tests for a given license number."""
 
     # Initialize Metrc.
@@ -752,7 +770,10 @@ def lab_tests(request: Request, test_id: Optional[str] = None):
 
     # Post results.
     if request.method == 'POST':
-        data = request.data.get('data', request.data)
+        if isinstance(request.data, list):
+            data = request.data
+        else:
+            data = request.data.get('data', request.data)
         action = request.data.get('action', snake_case(test_id))
 
         # FIXME: Also update Firestore as these update.
@@ -778,7 +799,7 @@ def lab_tests(request: Request, test_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def strains(request: Request, strain_id: Optional[str] = None):
+def strains(request: Request, strain_id: Optional[str] = ''):
     """Get, update, and delete strains for a given license number."""
 
     # Initialize Metrc.
@@ -811,7 +832,7 @@ def strains(request: Request, strain_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def batches(request: Request, batch_id: Optional[str] = None):
+def batches(request: Request, batch_id: Optional[str] = ''):
     """Manage plant batches for a given license number."""
 
     # Initialize Metrc.
@@ -823,7 +844,7 @@ def batches(request: Request, batch_id: Optional[str] = None):
     if request.method == 'GET':
         return get_objects(request, track, 'get_batches',
             uid=batch_id,
-            action=request.query_params.get('type'),
+            action=request.query_params.get('type', 'active'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
             license_number=track.primary_license,
@@ -831,8 +852,11 @@ def batches(request: Request, batch_id: Optional[str] = None):
 
     # Manage batch(es).
     if request.method == 'POST':
-        data = request.data.get('data', request.data)
-        action = request.data.get('action', snake_case(batch_id))
+        if isinstance(request.data, list):
+            data = request.data
+        else:
+            data = request.data.get('data', request.data)
+        action = request.query_params.get('action', snake_case(batch_id))
 
         # FIXME: Also update Firestore as these update.
 
@@ -844,11 +868,6 @@ def batches(request: Request, batch_id: Optional[str] = None):
         # Create plant package from a batch.
         elif action == 'create_plant_package':
             objs = track.create_plant_package_from_batch(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
-
-        # Create plantings.
-        elif action == 'create_plant_batches':
-            objs = track.create_plantings(data)
             return Response({'success': True, 'data': objs}, content_type='application/json')
 
         # Destroy plants.
@@ -874,6 +893,11 @@ def batches(request: Request, batch_id: Optional[str] = None):
                 objs = track.split_batches(data)
             return Response({'success': True, 'data': objs}, content_type='application/json')
 
+        # # Create plantings.
+        # elif action == 'create_plant_batches':
+        #     objs = track.create_plantings(data)
+        #     return Response({'success': True, 'data': objs}, content_type='application/json')
+
         # Create plant batches.
         else:
             return create_or_update_objects(request, track,
@@ -887,7 +911,7 @@ def batches(request: Request, batch_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def plants(request: Request, plant_id: Optional[str] = None):
+def plants(request: Request, plant_id: Optional[str] = ''):
     """Get, update, and delete plants for a given license number."""
 
     # Initialize Metrc.
@@ -900,7 +924,7 @@ def plants(request: Request, plant_id: Optional[str] = None):
         return get_objects(request, track, 'get_plants',
             uid=plant_id,
             label=request.query_params.get('label'),
-            action=request.query_params.get('type'),
+            action=request.query_params.get('type', 'vegetative'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
             license_number=track.primary_license,
@@ -908,7 +932,10 @@ def plants(request: Request, plant_id: Optional[str] = None):
 
     # Manage plant(s).
     if request.method == 'POST':
-        data = request.data.get('data', request.data)
+        if isinstance(request.data, list):
+            data = request.data
+        else:
+            data = request.data.get('data', request.data)
         action = request.data.get('action', snake_case(plant_id))
 
         # FIXME: Also update Firestore as these update.
@@ -967,7 +994,7 @@ def plants(request: Request, plant_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def harvests(request: Request, harvest_id: Optional[str] = None):
+def harvests(request: Request, harvest_id: Optional[str] = ''):
     """Manage harvests for a given license number."""
 
     # Initialize Metrc.
@@ -979,7 +1006,7 @@ def harvests(request: Request, harvest_id: Optional[str] = None):
     if request.method == 'GET':
         return get_objects(request, track, 'get_harvests',
             uid=harvest_id,
-            action=request.query_params.get('type'),
+            action=request.query_params.get('type', 'active'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
             license_number=track.primary_license,
@@ -987,7 +1014,10 @@ def harvests(request: Request, harvest_id: Optional[str] = None):
 
     # Manage harvest(s).
     if request.method == 'POST':
-        data = request.data.get('data', request.data)
+        if isinstance(request.data, list):
+            data = request.data
+        else:
+            data = request.data.get('data', request.data)
         action = request.data.get('action', snake_case(harvest_id))
 
         # FIXME: Also update Firestore as these update.
@@ -1050,7 +1080,7 @@ def harvests(request: Request, harvest_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def transfers(request: Request, transfer_id: Optional[str] = None):
+def transfers(request: Request, transfer_id: Optional[str] = ''):
     """Get, update, and delete transfers for a given license number."""
 
     # Initialize Metrc.
@@ -1062,7 +1092,7 @@ def transfers(request: Request, transfer_id: Optional[str] = None):
     if request.method == 'GET':
         return get_objects(request, track, 'get_transfers',
             uid=transfer_id,
-            transfer_type=request.query_params.get('type'),
+            transfer_type=request.query_params.get('type', 'incoming'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
             license_number=track.primary_license,
@@ -1081,7 +1111,7 @@ def transfers(request: Request, transfer_id: Optional[str] = None):
 
 
 @api_view(['GET', 'POST', 'DELETE'])
-def transfer_templates(request: Request, template_id: Optional[str] = None):
+def transfer_templates(request: Request, template_id: Optional[str] = ''):
     """Get, update, and delete transfer templates for a given license number."""
 
     # Initialize Metrc.
@@ -1117,7 +1147,7 @@ def transfer_templates(request: Request, template_id: Optional[str] = None):
 
 
 @api_view(['GET'])
-def drivers(request: Request, driver_id: Optional[str] = None):
+def drivers(request: Request, driver_id: Optional[str] = ''):
     """Get transporters and transporter details for a given license number."""
 
     # Initialize Metrc.
@@ -1132,7 +1162,7 @@ def drivers(request: Request, driver_id: Optional[str] = None):
 
 
 @api_view(['GET'])
-def vehicles(request: Request, driver_id: Optional[str] = None):
+def vehicles(request: Request, driver_id: Optional[str] = ''):
     """Get transporters and transporter details for a given license number."""
 
     # Initialize Metrc.
@@ -1151,7 +1181,7 @@ def vehicles(request: Request, driver_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def patients(request: Request, patient_id: Optional[str] = None):
+def patients(request: Request, patient_id: Optional[str] = ''):
     """Get, update, and delete patients for a given license number."""
 
     # Initialize Metrc.
@@ -1163,6 +1193,7 @@ def patients(request: Request, patient_id: Optional[str] = None):
     if request.method == 'GET':
         return get_objects(request, track, 'get_patients', 
             uid=patient_id,
+            action=request.query_params.get('type', 'active'),
             license_number=track.primary_license,
         )
 
@@ -1183,7 +1214,7 @@ def patients(request: Request, patient_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def sales(request: Request, sale_id: Optional[str] = None):
+def sales(request: Request, sale_id: Optional[str] = ''):
     """Get, update, and delete sales for a given license number."""
 
     # Initialize Metrc.
@@ -1217,7 +1248,7 @@ def sales(request: Request, sale_id: Optional[str] = None):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST', 'DELETE'])
-def deliveries(request: Request, delivery_id: Optional[str] = None):
+def deliveries(request: Request, delivery_id: Optional[str] = ''):
     """Get, update, and delete deliveries for a given license number."""
 
     # Initialize Metrc.
@@ -1229,7 +1260,7 @@ def deliveries(request: Request, delivery_id: Optional[str] = None):
     if request.method == 'GET':
         return get_objects(request, track, 'get_deliveries',
             uid=delivery_id,
-            action=request.query_params.get('type'),
+            action=request.query_params.get('type', 'active'),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
             sales_start=request.query_params.get('sales_start'),
@@ -1239,7 +1270,10 @@ def deliveries(request: Request, delivery_id: Optional[str] = None):
 
     # Manage deliveries.
     if request.method == 'POST':
-        data = request.data.get('data', request.data)
+        if isinstance(request.data, list):
+            data = request.data
+        else:
+            data = request.data.get('data', request.data)
         action = request.data.get('action', snake_case(delivery_id))
 
         # Complete deliveries.
@@ -1286,7 +1320,10 @@ def get_metrc_types(
         data = [obj.to_dict() for obj in objs]
     except AttributeError:
         data = objs
-    data = [clean_dictionary(x, camel_to_snake) for x in data]
+    try:
+        data = [clean_dictionary(x, camel_to_snake) for x in data]
+    except AttributeError:
+        pass
     return Response({'data': data}, content_type='application/json')
 
 

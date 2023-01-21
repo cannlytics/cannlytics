@@ -838,7 +838,7 @@ if __name__ == '__main__':
     # [ ] Lab results
     #-------------------------------------------------------------------
 
-        # Record a lab test result using: POST /labtests/v1/record
+    # Record a lab test result using: POST /labtests/v1/record
     test_package_data = {
         'Tag': test_package_tag,
         'Location': None,
