@@ -2,34 +2,27 @@
 Traceability API Views | Cannlytics API
 Copyright (c) 2021-2023 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/13/2021
-Updated: 1/19/2023
+Updated: 1/22/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API to interface with the Metrc API.
 
-FIXME:
+TODO:
 
-    [ ] Also update Firestore as actions update the following models:
-        - deliveries
-        - lab results
-        - plants
-        - batches
-        - harvests
-
-TODO: Implement the remaining functionality:
-
-    [ ] Rate limits
-    <https://www.metrc.com/wp-content/uploads/2021/10/4-Metrc-Rate-Limiting-1.pdf>
-    - 50 GET calls per second per facility.
-    - 150 GET calls per second per vendor API key.
-    - 10 concurrent GET calls per facility.
-    - 30 concurrent GET calls per integrator.
+    [ ] Also update Firestore as methods are performed.
 
     [ ] Implement time period queries by allowing for the `start` and `end`
     to be specified by the user, then iterate over that range, day-by-day.
 
+    [ ] Handle rate limits.
+    See: <https://www.metrc.com/wp-content/uploads/2021/10/4-Metrc-Rate-Limiting-1.pdf>
+    - 50 GET calls per second per facility.
+    - 150 GET calls per second per vendor API key.
+    - 10 concurrent GET calls per facility.
+    - 30 concurrent GET calls per integrator.
 """
 # Standard imports:
 from json import loads
@@ -183,6 +176,21 @@ def delete_objects(
             print('Failed to delete data from Firestore.')
     log_metrc_request(request, data, 'delete_object', delete_method)
     return Response({'success': True, 'data': []}, content_type='application/json')
+
+
+def perform_method(request, track, data, method, **kwargs):
+    """Perform a given method in the Metrc API given data."""
+    # FIXME: Also update Firestore as these update.
+    if isinstance(data, list):
+        data = [clean_dictionary(x, camelcase) for x in data]
+    elif isinstance(data, dict):
+        data = clean_dictionary(data, camelcase)
+    try:
+        objs = getattr(track, method)(data, return_obs=True, **kwargs)
+    except MetrcAPIError as error:
+        log_metrc_error(request, method, str(error))
+        return Response({'error': True, 'message': str(error)}, status=error.response.status_code)
+    return Response({'success': True, 'data': objs}, content_type='application/json')
 
 
 def log_metrc_request(
@@ -406,7 +414,7 @@ def initialize_traceability(
         license_number: Optional[str] = None,
         version_id: Optional[str] = 'latest',
     ) -> Metrc:
-    """Initialize a Metrc client by getting the vendor API key
+    """Initialize a Metrc client by getting the Metrc user and vendor API key
     from Google Secret Manager and returning an authorized Metrc client.
     """
     # Get the user's Cannlytics or Metrc user API key.
@@ -440,8 +448,6 @@ def initialize_traceability(
     if key_data is None:
         return AUTH_ERROR
 
-    print('KEY DATA:', key_data)
-    
     # Get the user's Metrc user API key if they are using a Cannlytics
     # API key, using the 1st license or by license number if provided.
     _, project_id = google.auth.default()
@@ -461,8 +467,6 @@ def initialize_traceability(
         if metrc_user_api_key is None:
             return AUTH_ERROR
     
-    print('READ USER API KEY.')
-
     # Get the parameters for the client.
     if license_number is None:
         license_number = body.get(
@@ -490,8 +494,6 @@ def initialize_traceability(
     except:
         return AUTH_ERROR
     
-    print('READ VENDOR API KEY.')
-
     # Initialize and return a Metrc client.
     return Metrc(
         metrc_vendor_api_key,
@@ -521,7 +523,7 @@ def facilities(request: Request, license_number: Optional[str] = ''):
         objs = track.get_facilities()
     except MetrcAPIError as error:
         log_metrc_error(request, 'facilities', str(error))
-        return Response({'error': True, 'message': str(error)}, status=403)
+        return Response({'error': True, 'message': str(error)}, status=error.response.status_code)
 
     # Return the requested data.
     data = [obj.to_dict() for obj in objs]
@@ -550,7 +552,7 @@ def employees(request: Request, license_number: Optional[str] = None):
         objs = track.get_employees(license_number=license_number)
     except MetrcAPIError as error:
         log_metrc_error(request, 'employees', str(error))
-        return Response({'error': True, 'message': str(error)}, status=403)
+        return Response({'error': True, 'message': str(error)}, status=error.response.status_code)
 
     # Return the requested data.
     data = [obj.to_dict() for obj in objs]
@@ -600,14 +602,14 @@ def locations(request: Request, area_id: Optional[str] = ''):
                 track.create_locations(names, types, return_obs=True)
             except MetrcAPIError as error:
                 log_metrc_error(request, 'create_locations', str(error))
-                return Response({'error': True, 'message': str(error)}, status=403)
+                return Response({'error': True, 'message': str(error)}, status=error.response.status_code)
         if update_items:
             try:
                 update_items = [clean_dictionary(x, camelcase) for x in update_items]
                 track.update_locations(update_items, return_obs=True)
             except MetrcAPIError as error:
                 log_metrc_error(request, 'update_locations', str(error))
-                return Response({'error': True, 'message': str(error)}, status=403)
+                return Response({'error': True, 'message': str(error)}, status=error.response.status_code)
         items = create_items + update_items
         try:
             refs = [f'metrc/{track.primary_license}/locations/{x.get("id", x.get("ID"))}' for x in items]
@@ -653,52 +655,41 @@ def packages(request: Request, package_id: Optional[str] = ''):
             data = request.data
         else:
             data = request.data.get('data', request.data)
-        action = request.data.get('action', snake_case(package_id))
-        
-        # FIXME: Also update Firestore as these update.
-
+        action = snake_case(request.query_params.get('action', package_id))
+    
         # Change package locations.
         if action == 'change_package_locations':
-            objs = track.change_package_locations(data, return_obs=True)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'change_package_locations')
 
         # Update items.
         elif action == 'change_package_items':
-            objs = track.change_package_items(data, return_obs=True)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'change_package_items')
 
         # Create plant batch(es) from given package(s).
         elif action == 'create_plant_batches':
-            if isinstance(data, dict):
-                objs = track.create_plant_batches_from_packages([data])
-            else:
-                objs = track.create_plant_batches_from_packages(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'create_plant_batches_from_packages')
 
         # Finish packages.
         elif action == 'finish':
-            objs = track.manage_packages(data, 'finish', return_obs=True)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'manage_packages', action='finish')
 
         # Unfinish packages.
         elif action == 'unfinish':
-            objs = track.manage_packages(data, 'unfinish', return_obs=True)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'manage_packages', action='unfinish')
 
         # Adjust packages.
         elif action == 'adjust':
-            objs = track.manage_packages(data, 'adjust', return_obs=True)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'manage_packages', action='adjust')
 
         # Remediate packages.
         elif action == 'remediate':
-            objs = track.manage_packages(data, 'remediate', return_obs=True)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'manage_packages', action='remediate')
 
         # Update note(s) for packages.
         elif action == 'update_package_notes':
-            objs = track.update_package_notes(data, return_obs=True)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'update_package_notes')
 
         # Create or update packages.
         else:
@@ -741,7 +732,7 @@ def items(request: Request, item_id: Optional[str] = ''):
             )
         except MetrcAPIError as error:
             log_metrc_error(request, 'update_items', str(error))
-            return Response({'error': True, 'message': str(error)}, status=403)
+            return Response({'error': True, 'message': str(error)}, status=error.response.status_code)
 
     # Delete item(s).
     if request.method == 'DELETE':
@@ -774,24 +765,19 @@ def lab_tests(request: Request, test_id: Optional[str] = ''):
             data = request.data
         else:
             data = request.data.get('data', request.data)
-        action = request.data.get('action', snake_case(test_id))
-
-        # FIXME: Also update Firestore as these update.
+        action = snake_case(request.query_params.get('action', test_id))
 
         # Release lab result(s).
         if action == 'release':
-            objs = track.release_lab_results(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'release_lab_results')
 
-        # Upload lab result CoA(s).
+        # Upload lab result COA(s).
         if action == 'coas':
-            objs = track.upload_coas(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'upload_coas')
 
         # Post lab results.
         else:
-            objs = track.post_lab_results(data, return_obs=True)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'post_lab_results')
 
 
 #-----------------------------------------------------------------------
@@ -856,53 +842,39 @@ def batches(request: Request, batch_id: Optional[str] = ''):
             data = request.data
         else:
             data = request.data.get('data', request.data)
-        action = request.query_params.get('action', snake_case(batch_id))
-
-        # FIXME: Also update Firestore as these update.
+        action = snake_case(request.query_params.get('action', batch_id))
 
         # Add additives.
         if action == 'add_additives':
-            objs = track.add_batch_additives(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'add_batch_additives')
 
         # Create plant package from a batch.
         elif action == 'create_plant_package':
-            objs = track.create_plant_package_from_batch(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'create_plant_package_from_batch')
 
         # Destroy plants.
         elif action == 'destroy_plants':
-            objs = track.destroy_batch_plants(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'destroy_batch_plants')
 
         # Flower batch.
         elif action == 'flower':
-            objs = track.change_batch_growth_phase(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'change_batch_growth_phase')
         
         # Move batch.
         elif action == 'move':
-            objs = track.move_batch(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'move_batches')
 
         # Split batch(es).
         elif action == 'split':
-            if isinstance(data, dict):
-                objs = track.split_batch(data)
-            else:
-                objs = track.split_batches(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'split_batches')
 
-        # # Create plantings.
-        # elif action == 'create_plant_batches':
-        #     objs = track.create_plantings(data)
-        #     return Response({'success': True, 'data': objs}, content_type='application/json')
-
-        # Create plant batches.
+        # Create plant batches (create plantings).
         else:
             return create_or_update_objects(request, track,
                 create_method='create_plant_batches',
-                update_method=None,
+                update_method='create_plant_batches',
             )
 
 
@@ -936,46 +908,31 @@ def plants(request: Request, plant_id: Optional[str] = ''):
             data = request.data
         else:
             data = request.data.get('data', request.data)
-        action = request.data.get('action', snake_case(plant_id))
-
-        # FIXME: Also update Firestore as these update.
+        action = snake_case(request.query_params.get('action', plant_id))
 
         # Create plant package(s).
         if action == 'create_plant_packages':
-            if isinstance(data, dict):
-                objs = track.create_plant_packages([data])
-            else:
-                objs = track.create_plant_packages(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'create_plant_packages')
     
         # Flower plant(s).
         elif action == 'flower':
-            if isinstance(data, dict):
-                objs = track.flower_plants([data])
-            else:
-                objs = track.flower_plants(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'flower_plants')
 
         # Harvest plant(s).
         elif action == 'harvest':
-            if isinstance(data, dict):
-                objs = track.harvest_plants([data])
-            else:
-                objs = track.harvest_plants(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'harvest_plants')
 
         # Manicure plant(s).
         elif action == 'manicure':
-            if isinstance(data, dict):
-                objs = track.manicure_plants([data])
-            else:
-                objs = track.manicure_plants(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'manicure_plants')
 
         # Move plant(s).
         elif action == 'move':
-            objs = track.move_plants(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'move_plants')
 
         # Create plant(s).
         else:
@@ -1018,57 +975,37 @@ def harvests(request: Request, harvest_id: Optional[str] = ''):
             data = request.data
         else:
             data = request.data.get('data', request.data)
-        action = request.data.get('action', snake_case(harvest_id))
-
-        # FIXME: Also update Firestore as these update.
+        action = snake_case(request.query_params.get('action', harvest_id))
 
         # Finish harvest(s).
         if action == 'finish':
-            if isinstance(data, dict):
-                objs = track.finish_harvests([data])
-            else:
-                objs = track.finish_harvests(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'finish_harvests')
     
         # Unfinish harvest(s).
         elif action == 'unfinish':
-            if isinstance(data, dict):
-                objs = track.unfinish_harvests([data])
-            else:
-                objs = track.unfinish_harvests(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'unfinish_harvests')
 
         # Remove waste from harvest(s).
         elif action == 'remove_waste':
-            if isinstance(data, dict):
-                objs = track.remove_waste([data])
-            else:
-                objs = track.remove_waste(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'remove_waste')
 
         # Move harvest(s).
         elif action == 'move':
-            if isinstance(data, dict):
-                objs = track.move_harvests([data])
-            else:
-                objs = track.move_harvests(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'move_harvests')
 
         # Create harvest packages.
         elif action == 'create_packages':
-            if isinstance(data, dict):
-                objs = track.create_harvest_packages([data])
-            else:
-                objs = track.create_harvest_packages(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'create_harvest_packages')
 
         # Create harvest testing packages
         elif action == 'create_testing_packages':
-            if isinstance(data, dict):
-                objs = track.create_harvest_testing_packages([data])
-            else:
-                objs = track.create_harvest_testing_packages(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'create_harvest_testing_packages')
 
         # Otherwise return an error.
         message = 'Updating harvests requires you to pass a `action` parameter.'
@@ -1274,13 +1211,11 @@ def deliveries(request: Request, delivery_id: Optional[str] = ''):
             data = request.data
         else:
             data = request.data.get('data', request.data)
-        action = request.data.get('action', snake_case(delivery_id))
+        action = snake_case(request.query_params.get('action', delivery_id))
 
         # Complete deliveries.
-        # FIXME: Also update Firestore as these update.
         if action == 'complete':
-            objs = track.complete_deliveries(data)
-            return Response({'success': True, 'data': objs}, content_type='application/json')
+            return perform_method(request, track, data, 'complete_deliveries')
 
         # Create / update deliveries.
         else:
@@ -1295,7 +1230,7 @@ def deliveries(request: Request, delivery_id: Optional[str] = ''):
 
 
 #-----------------------------------------------------------------------
-# Miscellaneous
+# Types
 #-----------------------------------------------------------------------
 
 def get_metrc_types(
@@ -1303,6 +1238,7 @@ def get_metrc_types(
         method: str,
         license_number: Optional[str] = '',
     ):
+    """Get metadata for the possible types of the given `method`."""
     # Initialize Metrc.
     track = initialize_traceability(request, license_number)
     if isinstance(track, str):
@@ -1313,7 +1249,7 @@ def get_metrc_types(
         objs = getattr(track, method)()
     except MetrcAPIError as error:
         log_metrc_error(request, method, str(error))
-        return Response({'error': True, 'message': str(error)}, status=403)
+        return Response({'error': True, 'message': str(error)}, status=error.response.status_code)
 
     # Return the requested data.
     try:
@@ -1325,6 +1261,12 @@ def get_metrc_types(
     except AttributeError:
         pass
     return Response({'data': data}, content_type='application/json')
+
+
+@api_view(['GET'])
+def additive_types(request: Request, license_number: Optional[str] = ''):
+    """Get additive types for a given license number."""
+    return get_metrc_types(request, 'get_additive_types', license_number)
 
 
 @api_view(['GET'])

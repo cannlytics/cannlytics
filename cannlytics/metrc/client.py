@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 1/17/2023
+Updated: 1/22/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains the `Metrc` class responsible for communicating
@@ -318,7 +318,7 @@ class Metrc(object):
         return self.request('get', url, params=params)
 
 
-    def complete_deliveries(self, data, license_number=''):
+    def complete_deliveries(self, data, license_number='', return_obs=False):
         """Complete home delivery(ies).
         Args:
             data (list): A list of deliveries (dict) to complete.
@@ -389,7 +389,7 @@ class Metrc(object):
                 return response
 
 
-    def finish_harvests(self, data, license_number=''):
+    def finish_harvests(self, data, license_number='', return_obs=False):
         """Finish harvests.
         Args:
             data (list): A list of harvests (dict) to finish.
@@ -400,7 +400,7 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
 
 
-    def unfinish_harvests(self, data, license_number=''):
+    def unfinish_harvests(self, data, license_number='', return_obs=False):
         """Unfinish harvests.
         Args:
             data (list): A list of harvests (dict) to unfinish.
@@ -411,7 +411,7 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
 
 
-    def remove_waste(self, data, license_number=''):
+    def remove_waste(self, data, license_number='', return_obs=False):
         """Remove's waste from a harvest.
         Args:
             data (list): A list of waste (dict) to unfinish.
@@ -422,7 +422,7 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
 
 
-    def move_harvests(self, data, license_number=''):
+    def move_harvests(self, data, license_number='', return_obs=False):
         """Move a harvests.
         Args:
             data (list): A list of harvests (dict) to move.
@@ -681,7 +681,7 @@ class Metrc(object):
         # )
 
 
-    def upload_coas(self, data, license_number=''):
+    def upload_coas(self, data, license_number='', return_obs=False):
         """Upload lab result CoA(s).
         Args:
             data (list): A list of CoAs (dict) to upload.
@@ -692,7 +692,7 @@ class Metrc(object):
         return self.request('put', url, data=data, params=params)
 
 
-    def release_lab_results(self, data, license_number=''):
+    def release_lab_results(self, data, license_number='', return_obs=False):
         """Release lab result(s).
         Args:
             data (list): A list of package labels (dict) to release lab results.
@@ -1221,7 +1221,7 @@ class Metrc(object):
             data (list): A list of plants (dict) to manage.
             action (str): The action to apply to the plants, with options:
                 `createplantings`, `createpackages`, `split`,
-                `/create/packages/frommotherplant`, `changegrowthphase`,
+                `create/packages/frommotherplant`, `changegrowthphase`,
                 `additives`, `destroy`.
             from_mother (bool): An optional parameter for the
                 `createpackages` action.
@@ -1232,7 +1232,7 @@ class Metrc(object):
         # TODO: Optionally return updated or created objects.
 
 
-    def add_batch_additives(self, data, license_number=''):
+    def add_batch_additives(self, data, license_number='', return_obs=False):
         """Add additives to a given batch."""
         if isinstance(data, dict):
             objs = [data]
@@ -1241,7 +1241,7 @@ class Metrc(object):
         return self.manage_batches(objs, 'additives', license_number or self.primary_license)
 
 
-    def change_batch_growth_phase(self, data, license_number=''):
+    def change_batch_growth_phase(self, data, license_number='', return_obs=False):
         """Change the growth phase of given batch(es)."""
         if isinstance(data, dict):
             objs = [data]
@@ -1250,7 +1250,7 @@ class Metrc(object):
         return self.manage_batches(objs, 'changegrowthphase', license_number or self.primary_license)
 
 
-    def create_plantings(self, data, license_number=''):
+    def create_plantings(self, data, license_number='', return_obs=False):
         """Create plantings from given batch."""
         if isinstance(data, dict):
             objs = [data]
@@ -1265,11 +1265,11 @@ class Metrc(object):
             data (dict): The plant package data.
             license_number (str): A specific license number.
         """
-        self.manage_batches([data], action='/create/packages/frommotherplant', license_number=license_number)
+        self.manage_batches([data], 'create/packages/frommotherplant', license_number=license_number)
         # TODO: Optionally return created package.
    
 
-    def destroy_batch_plants(self, data, license_number=''):
+    def destroy_batch_plants(self, data, license_number='', return_obs=False):
         """Destroy plants in a given batch."""
         if isinstance(data, dict):
             objs = [data]
@@ -1278,7 +1278,7 @@ class Metrc(object):
         return self.manage_batches(objs, 'destroy', license_number or self.primary_license)
 
 
-    def move_batch(self, data, license_number='', return_obs=False):
+    def move_batches(self, data, license_number='', return_obs=False):
         """Move plant batch(es).
         Args:
             data (list): A list of plant batches (dict) to move.
@@ -1361,7 +1361,7 @@ class Metrc(object):
             return return_obs
 
 
-    def create_plant_package(self, data, license_number=''):
+    def create_plant_package(self, data, license_number='', return_obs=False):
         """Create plant package.
         Args:
             data (list): A list of plant packages (dict) to create.
@@ -1370,7 +1370,7 @@ class Metrc(object):
         return self.create_plant_packages([data], license_number)
 
 
-    def create_plant_packages(self, data, license_number=''):
+    def create_plant_packages(self, data, license_number='', return_obs=False):
         """Create plant packages.
         Args:
             data (list): A list of plant packages (dict) to create.
@@ -1466,6 +1466,11 @@ class Metrc(object):
     def manicure_plants(self, data, license_number='', return_obs=False):
         """Manicure plants."""
         return self.manage_plants(data, action='manicureplants', license_number=license_number)
+
+
+    def get_additive_types(self, license_number='', return_obs=False):
+        """Manicure plants."""
+        return self.get_plants(action='additives/types', license_number=license_number)
 
 
     #-------------------------------------------------------------------

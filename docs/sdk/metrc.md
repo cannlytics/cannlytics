@@ -547,7 +547,7 @@ SDK reference for the `cannlytics.metrc.client.Metrc` class.
       <td></td>
     </tr>
     <tr>
-      <td>`move_batch`</td>
+      <td>`move_batches`</td>
       <td>Move plant batch(es).</td>
       <td>data (list): A list of plant batches (dict) to move.</td>
       <td></td>

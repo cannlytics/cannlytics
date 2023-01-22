@@ -2,9 +2,10 @@
 Metrc API Endpoint Tests | Cannlytics API
 Copyright (c) 2023 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/12/2023
-Updated: 1/20/2023
+Updated: 1/22/2023
 License: MIT License <https://opensource.org/licenses/MIT>
 """
 import os
@@ -102,7 +103,7 @@ if __name__ == '__main__':
 
     # [✓] Test creating a location.
     data = {
-        'name': 'CAN API Test Location',
+        'name': 'CAN API Test Flower Bed',
         'location_type': location_types[0]['name']
     }
     params = {'license': facilities[5]['license']['number']}
@@ -111,8 +112,9 @@ if __name__ == '__main__':
     print('Created location.')
 
     # [✓] Test update the name of the location.
+    uid = response.json()['data'][0]['uid']
     data = {
-        'id': '61001',
+        'id': uid,
         'name': 'CAN Test Location',
         'location_type_name': location_types[0]['name']
     }
@@ -121,7 +123,7 @@ if __name__ == '__main__':
     print('Updated location.')
 
     # [✓] Test getting a specific location.
-    uid = '61001'
+    uid = response.json()['data'][0]['uid']
     params = {'license': facilities[0]['license']['number']}
     response = session.get(f'{BASE}/metrc/locations/{uid}', params=params)
     assert response.status_code == 200
@@ -129,7 +131,7 @@ if __name__ == '__main__':
     print('Found location.')
 
     # [✓] Test deleting a location.
-    uid = '61001'
+    uid = response.json()['data'][0]['uid']
     params = {'license': facilities[0]['license']['number']}
     response = session.delete(f'{BASE}/metrc/locations/{uid}', params=params)
     assert response.status_code == 200
@@ -209,7 +211,7 @@ if __name__ == '__main__':
         'unit_of_measure': 'Ounces',
         'strain': strain_name,
     }
-    params = {'license': facilities[0]['license']['number']}
+    params = {'license': facilities[5]['license']['number']}
     response = session.post(f'{BASE}/metrc/items', json=data, params=params)
     assert response.status_code == 200
     print('Created item.')
@@ -295,7 +297,7 @@ if __name__ == '__main__':
     print('Found %i waste types' % len(waste_types))
 
     # [✓] Create a new plant batch.
-    today = '2023-01-20'
+    today = '2023-01-21'
     batch_name = 'Moonshine Haze Hydroponics'
     data = {
         'name': batch_name,
@@ -318,42 +320,132 @@ if __name__ == '__main__':
     response = session.get(f'{BASE}/metrc/batches/{uid}', params=params)
     assert response.status_code == 200
 
-    # [ ] Create a package from a batch.
-    batch_tag = 'ENTER_YOUR_BATCH_TAG'
-    package = {
-        'id': traced_batch.uid,
+    # [ ] FIXME: Create a package from a batch.
+    batch_tag = 'YOUR_BATCH_TAG'
+    data = {
+        # 'id': uid,
+        'id': None,
+        'plant_batch': batch_name,
         'count': 3,
-        'location': 'MediGrow',
-        'item': 'New Old-Time Moonshine Clone',
+        # 'location': 'CAN API Test Location',
+        'location': None,
+        'item': 'Moonshine Haze Eighth',
         'tag': batch_tag,
-        'note': 'A package containing 3 clones from the Old-time Moonshine Plant Batch',
+        'patient_license_number': None,
+        'note': 'A package containing 3 clones plucked from the batch.',
         'is_trade_sample': False,
         'is_donation': False,
         'actual_date': today
     }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'create-plant-package',
+    }
+    response = session.post(f'{BASE}/metrc/batches', json=data, params=params)
+    assert response.status_code == 200
+    print('Created a package of clones from a plant batch.')
 
-    # [ ] Flower a batch.
+    # [ ] FIXME: Flower a batch.
+    plant_tag = 'YOUR_PLANT_TAG'
     data = {
-        'name': traced_batch.name,
+        'name': batch_name,
         'count': 2,
         'starting_tag': plant_tag,
         'growth_phase': 'Vegetative',
-        'new_location': 'MediGrow',
+        'new_location': 'CAN API Test Location',
         'growth_date': today,
     }
-
-
-    # [ ] Destroy a batch.
-    data = {
-        'count': 1,
-        'reason': 'Male plant!'
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'flower',
     }
+    response = session.post(f'{BASE}/metrc/batches', json=data, params=params)
+    assert response.status_code == 200
+    print('Flowered plant batch.')
 
+    # [✓] Destroy plants in a batch.
+    data = {
+        'plant_batch': batch_name,
+        'count': 1,
+        'reason_note': 'Male plant!',
+        'actual_date': today,
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'destroy-plants',
+    }
+    response = session.post(f'{BASE}/metrc/batches', json=data, params=params)
+    assert response.status_code == 200
+    print('Destroyed a plant in a batch.')
 
-    # [ ] Get additives.
+    # [✓] Get units of measure.
+    response = session.get(f'{BASE}/metrc/types/units', params=params)
+    assert response.status_code == 200
+    units = response.json()['data']
+    print('Found %i units' % len(units))
 
+    # [✓] Get types of additives.
+    response = session.get(f'{BASE}/metrc/types/additives', params=params)
+    assert response.status_code == 200
+    additives = response.json()['data']
+    print('Found %i additives' % len(additives))
 
-    # [ ] Manage waste.
+    # [✓] Add additives.
+    data = {
+        'additive_type': additives[0],
+        'product_trade_name': 'Great White Bat Guano',
+        'epa_registration_number': None,
+        'product_supplier': 'Ace',
+        'application_device': 'Scoop',
+        'total_amount_applied': 4.20,
+        'total_amount_unit_of_measure': units[2]['name'],
+        'plant_batch_name': batch_name,
+        'actual_date': today,
+        'active_ingredients': [
+            {'Name': 'Phosphorous', 'Percentage': 7.0},
+            {'Name': 'Nitrogen', 'Percentage': 7.0},
+            {'Name': 'Potassium', 'Percentage': 7.0},
+        ],
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'add-additives',
+    }
+    response = session.post(f'{BASE}/metrc/batches', json=data, params=params)
+    assert response.status_code == 200
+    print('Added additives to a batch.')
+
+    # [✓] Move batch.
+    data = {
+        'name': batch_name,
+        'location': 'CAN API Test Flower Bed',
+        'move_date': today,
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'move',
+    }
+    response = session.post(f'{BASE}/metrc/batches', json=data, params=params)
+    assert response.status_code == 200
+    print('Moved batch.')
+
+    # [✓] Split batch.
+    data = {
+        'plant_batch': batch_name,
+        'group_name': batch_name + ' #2',
+        'count': 1,
+        'location': 'CAN API Test Flower Bed',
+        'strain': strain_name,
+        'patient_license_number': None,
+        'actual_date': today,
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'split',
+    }
+    response = session.post(f'{BASE}/metrc/batches', json=data, params=params)
+    assert response.status_code == 200
+    print('Split batch.')
 
 
     #-------------------------------------------------------------------
@@ -361,6 +453,7 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------
 
     # [ ] Get a plant created in a plant batch.
+    
 
 
     # [ ] Change the growth phase of a plant from `Vegetative` to `Flowering`.

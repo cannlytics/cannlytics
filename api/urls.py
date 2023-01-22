@@ -2,9 +2,10 @@
 URLs | Cannlytics API
 Copyright (c) 2021-2023 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2021
-Updated: 1/15/2023
+Updated: 1/22/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API URLs to interface with cannabis data and analytics.
@@ -149,6 +150,7 @@ urlpatterns = [
         path('/drivers/<driver_id>', api.metrc.drivers),
         path('/vehicles/<vehicle_id>', api.metrc.vehicles),
         path('/types', include([
+            path('/additives', api.metrc.additive_types),
             path('/adjustments', api.metrc.adjustment_reasons),
             path('/batches', api.metrc.batch_types),
             path('/categories', api.metrc.categories),

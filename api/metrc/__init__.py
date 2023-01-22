@@ -2,13 +2,15 @@
 Metrc API Endpoints Initialization | Cannlytics API
 Copyright (c) 2022 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/8/2022
-Updated: 1/15/2023
+Updated: 1/22/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 from api.metrc.metrc import (
     add_license,
+    additive_types,
     adjustment_reasons,
     batches,
     batch_types,
@@ -46,6 +48,7 @@ from api.metrc.metrc import (
 
 __all__ = [
     add_license,
+    additive_types,
     adjustment_reasons,
     batches,
     batch_types,
