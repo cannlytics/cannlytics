@@ -320,7 +320,7 @@ if __name__ == '__main__':
     response = session.get(f'{BASE}/metrc/batches/{uid}', params=params)
     assert response.status_code == 200
 
-    # [ ] FIXME: Create a package from a batch.
+    # [ ] TODO: Create a package from a batch.
     batch_tag = 'YOUR_BATCH_TAG'
     data = {
         # 'id': uid,
@@ -345,7 +345,7 @@ if __name__ == '__main__':
     assert response.status_code == 200
     print('Created a package of clones from a plant batch.')
 
-    # [ ] FIXME: Flower a batch.
+    # [ ] TODO: Flower a batch.
     plant_tag = 'YOUR_PLANT_TAG'
     data = {
         'name': batch_name,
@@ -452,75 +452,224 @@ if __name__ == '__main__':
     # Plants
     #-------------------------------------------------------------------
 
-    # [ ] Get a plant created in a plant batch.
-    
+    # [✓] Get plants created on a specific day.
+    params = {
+        'license': facilities[5]['license']['number'],
+        'start': '2023-01-19',
+        'end': '2023-01-20',
+    }
+    response = session.get(f'{BASE}/metrc/plants', params=params)
+    assert response.status_code == 200
+    plants = response.json()['data']
+    print('Found %i plants.' % len(plants))
 
+    # [✓] Get growth phases.
+    response = session.get(f'{BASE}/metrc/types/growth-phases', params=params)
+    assert response.status_code == 200
+    growth_phases = response.json()['data']
+    print('Found %i growth phases' % len(growth_phases))
 
-    # [ ] Change the growth phase of a plant from `Vegetative` to `Flowering`.
+    # [ ] TODO: Change the growth phase of a plant from `Vegetative` to `Flowering`.
+    new_tag = 'PLANT_TAG'
+    data = {
+        'id': None,
+        'label': plants[0]['label'],
+        'new_tag': new_tag,
+        'growth_phase': 'Flowering',
+        'new_location': 'CAN API Test Flower Bed',
+        'growth_date': today,
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'flower',
+    }
+    response = session.post(f'{BASE}/metrc/plants', json=data, params=params)
+    assert response.status_code == 200
+    print('Flowered plant.')
 
+    # [✓] Move a plant to a different room.
+    data = {
+        'id': None,
+        'label': plants[-1]['label'],
+        'location': 'CAN API Test Flower Bed',
+        'actual_date': today
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'move',
+    }
+    response = session.post(f'{BASE}/metrc/plants', json=data, params=params)
+    assert response.status_code == 200
+    print('Moved plant.')
 
-    # [ ] Move a plant to a different room.
+    # [✓] Add additives to a plant.
+    data = {
+        'additive_type': additives[0],
+        'product_trade_name': 'Great White Bat Guano',
+        'epa_registration_number': None,
+        'product_supplier': 'Ace',
+        'application_device': 'Scoop',
+        'total_amount_applied': 4.20,
+        'total_amount_unit_of_measure': units[2]['name'],
+        'plant_labels': [plants[-1]['label']],
+        'actual_date': today,
+        'active_ingredients': [
+            {'Name': 'Phosphorous', 'Percentage': 7.0},
+            {'Name': 'Nitrogen', 'Percentage': 7.0},
+            {'Name': 'Potassium', 'Percentage': 7.0}
+        ],
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'add-additives',
+    }
+    response = session.post(f'{BASE}/metrc/plants', json=data, params=params)
+    assert response.status_code == 200
+    print('Added additives to a plant.')
 
+    # [✓] Manicure a plant.
+    data = {
+        'plant': plants[-1]['label'],
+        'weight': 1.23,
+        'unit_of_weight': 'Grams',
+        'drying_location': 'CAN API Test Flower Bed',
+        'harvest_name': None,
+        'patient_license_number': None,
+        'actual_date': today,
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'manicure',
+    }
+    response = session.post(f'{BASE}/metrc/plants', json=data, params=params)
+    assert response.status_code == 200
+    print('Manicured plant.')
 
-    # [ ] Destroy a plant.
+    # [ ] TODO: Harvest a plant.
+    data = {
+        'plant': plants[-1]['label'],
+        'weight': 1.23,
+        'unit_of_weight': 'Grams',
+        'drying_location': 'CAN API Test Flower Bed',
+        'harvest_name': plants[-1]['strain_name'] + f' Harvest {today}',
+        'patient_license_number': None,
+        'actual_date': today
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'harvest',
+    }
+    response = session.post(f'{BASE}/metrc/plants', json=data, params=params)
+    assert response.status_code == 200
+    print('Harvested plant.')
 
-
-    # [ ] Manicure a plant.
-
-
-    # [ ] Harvest a plant.
-
-
-    # [ ] Delete a harvest?
+    # [✓] Destroy a plant.
+    uid = plants[-2]['id']
+    response = session.delete(f'{BASE}/metrc/plants', json=data, params=params)
+    assert response.status_code == 200
+    print('Destroyed plant.')
 
 
     #-------------------------------------------------------------------
     # Harvests
     #-------------------------------------------------------------------
 
-    # [ ] Get a harvest.
+    # [✓] Get harvests created on a specific day.
+    params = {
+        'license': facilities[5]['license']['number'],
+        'start': '2023-01-22',
+        'end': '2023-01-23',
+    }
+    response = session.get(f'{BASE}/metrc/harvests', params=params)
+    assert response.status_code == 200
+    harvests = response.json()['data']
+    print('Found %i harvests.' % len(harvests))
 
-
-    # [ ] Create a package.
-    package_tag = 'YOUR_PACKAGE_TAG'
-    package = {
-        'Tag': package_tag,
-        'Location': 'Harvest Location',
-        'Item': 'New Old-Time Moonshine Teenth',
-        'UnitOfWeight': 'Grams',
-        # 'PatientLicenseNumber': 'X00001',
-        'Note': 'Golden ticket in this package.',
-        # 'IsProductionBatch': False,
-        # 'ProductionBatchNumber': None,
-        # 'IsTradeSample': False,
-        # 'IsDonation': False,
-        # 'ProductRequiresRemediation': False,
-        # 'RemediateProduct': False,
-        # 'RemediationMethodId': None,
-        # 'RemediationDate': None,
-        # 'RemediationSteps': None,
-        'ActualDate': today,
-        'Ingredients': [
+    # [ ] TODO: Create a package.
+    harvest_id = harvests[0]['id']
+    data = {
+        'tag': 'YOUR_PACKAGE_TAG',
+        'location': 'CAN API Test Flower Bed',
+        'item': 'Moonshine Haze 1g Jar',
+        'unit_of_weight': 'Grams',
+        'patient_license_number': None,
+        'note': 'Golden nug in this package.',
+        'is_production_batch': False,
+        'production_batch_number': None,
+        'is_trade_sample': False,
+        'is_donation': False,
+        'product_requires_remediation': False,
+        'remediate_product': False,
+        'remediation_method_id': None,
+        'remediation_date': None,
+        'remediation_steps': None,
+        'actual_date': today,
+        'ingredients': [
             {
-                'HarvestId': harvest_id,
-                # 'HarvestName': None,
-                'Weight': 28,
-                'UnitOfWeight': 'Grams'
-            },
+                'harvest_id': harvest_id,
+                'harvest_name': None,
+                'weight': 1,
+                'unit_of_weight': 'Grams'
+            }
         ]
     }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'create-packages',
+    }
+    response = session.post(f'{BASE}/metrc/harvests', json=data, params=params)
+    assert response.status_code == 200
+    print('Created package from harvest.')
 
+    # [ ] TODO: Create testing package.
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'create-testing-packages',
+    }
+    response = session.post(f'{BASE}/metrc/harvests', json=data, params=params)
+    assert response.status_code == 200
+    print('Created testing package from harvest.')
 
-    # [ ] Remove waste weight from a harvest.
+    # [✓] Remove waste weight from a harvest.
+    data = {
+        'id': harvest_id,
+        'waste_type': waste_types[0]['name'],
+        'unit_of_weight': 'Grams',
+        'waste_weight': 0.05,
+        'actual_date': today,
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'remove-waste',
+    }
+    response = session.post(f'{BASE}/metrc/harvests', json=data, params=params)
+    assert response.status_code == 200
+    print('Removed waste from a harvest.')
 
+    # [✓] Finish a harvest.
+    data = {
+        'id': harvest_id,
+        'actual_date': today,
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'finish',
+    }
+    response = session.post(f'{BASE}/metrc/harvests', json=data, params=params)
+    assert response.status_code == 200
+    print('Finished a harvest.')
 
-    # [ ] Finish a harvest.
-
-
-    # [ ] Unfinish the harvest.
-
-
-    # [ ] Delete a harvest?
+    # [✓] Unfinish a harvest.
+    data = {
+        'id': harvest_id
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'unfinish',
+    }
+    response = session.post(f'{BASE}/metrc/harvests', json=data, params=params)
+    assert response.status_code == 200
+    print('Unfinished a harvest.')
 
 
     #-------------------------------------------------------------------
@@ -545,56 +694,139 @@ if __name__ == '__main__':
     adjustment_reasons = response.json()['data']
     print('Found %i adjustment reasons' % len(adjustment_reasons))
 
-    # [ ] Get a package.
+    # [✓] Get packages by date.
+    params = {
+        'license': facilities[5]['license']['number'],
+        'start': '2023-01-19',
+        'end': '2023-01-20',
+    }
+    response = session.get(f'{BASE}/metrc/packages', params=params)
+    assert response.status_code == 200
+    packages = response.json()['data']
+    print('Found %i packages.' % len(packages))
 
-
-    # [ ] Create a package from another package.
+    # [ ] TODO: Create a package from another package.
     new_package_tag = 'YOUR_SECOND_PACKAGE_TAG'
     new_package_data = {
-        'Tag': new_package_tag,
-        'Location': 'Warehouse',
-        'Item': 'New Old-Time Moonshine Teenth',
-        'Quantity': 1.75,
-        'UnitOfMeasure': 'Grams',
-        # 'PatientLicenseNumber': 'redacted',
-        'Note': '1st teenth for sale.',
-        # 'IsProductionBatch': False,
-        # 'ProductionBatchNumber': None,
-        # 'IsDonation': False,
-        # 'ProductRequiresRemediation': False,
-        # 'UseSameItem': True,
-        'ActualDate': today,
-        'Ingredients': [
+        'tag': 'YOUR_SECOND_PACKAGE_TAG',
+        'location': 'CAN API Test Flower Bed',
+        'item': 'Moonshine Haze Bowl',
+        'quantity': 0.25,
+        'unit_of_measure': 'Grams',
+        'patient_license_number': None,
+        'note': 'This is a tiny sample.',
+        'is_production_batch': False,
+        'production_batch_number': None,
+        'is_donation': False,
+        'product_requires_remediation': False,
+        'use_same_item': True,
+        'actual_date': today,
+        'ingredients': [
             {
-                'Package': traced_package.label,
-                'Quantity': 1.75,
-                'UnitOfMeasure': 'Grams'
+                'package': 'traced_package.label',
+                'quantity': 0.25,
+                'unit_of_measure': 'Grams'
             }
         ]
     }
 
-
     # [ ] Change the item of a package.
-
-
-    # [ ] Adjust the weight of a package.
-    adjustment = {
-        'Label': new_package_tag,
-        'Quantity': -1.75,
-        'UnitOfMeasure': 'Grams',
-        'AdjustmentReason': 'Drying',
-        'AdjustmentDate': today,
-        'ReasonNote': None
+    data = {
+        'label': packages[0]['label'],
+        'item': 'Moonshine Haze Shake'
     }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'change-package-items',
+    }
+    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
+    assert response.status_code == 200
+    print('Changed an item in a package.')
+
+    # [✓] Change the location of a package.
+    data = {
+        'label': packages[0]['label'],
+        'location': 'CAN API Test Flower Bed',
+        'move_date': today,
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'move',
+    }
+    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
+    assert response.status_code == 200
+    print('Changed the location of a package.')
+
+    # [✓] Adjust the weight of a package.
+    data = {
+        'label': packages[0]['label'],
+        'quantity': -0.05,
+        'unit_of_measure': 'Each',
+        'adjustment_reason': adjustment_reasons[-1]['name'],
+        'adjustment_date': today,
+        'reason_note': 'The scales needed calibration.',
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'adjust',
+    }
+    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
+    assert response.status_code == 200
+    print('Adjusted the weight of a package.')
+
+    # [ ] Create a plant batch from a package.
 
 
     # [ ] Finish a package.
-
+    data = {
+        'label': packages[0]['label'],
+        'actual_date': today,
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'finish',
+    }
+    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
+    assert response.status_code == 200
+    print('Finished a package.')
 
     # [ ] Unfinish a package.
+    data = {'label': packages[0]['label']}
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'unfinish',
+    }
+    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
+    assert response.status_code == 200
+    print('Unfinished a package.')
 
+    # [ ] Remediate a package.
+    data = {
+        'package_label': packages[0]['label'],
+        'remediation_method_name': 'Further Drying',
+        'remediation_date': today,
+        'remediation_steps': 'Used hair dryer'
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'remediate',
+    }
+    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
+    assert response.status_code == 200
+    print('Remediated a package.')
 
-    # [ ] Delete a package?
+    # [✓] Update the note for a package.
+    data = {
+        'package_label': packages[0]['label'],
+        'note': 'Scale calibration is correct.'
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'update-package-notes',
+    }
+    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
+    assert response.status_code == 200
+    print('Updated notes for a package.')
 
 
     #-------------------------------------------------------------------
@@ -602,93 +834,96 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------
 
     # [✓] Get transfer types.
-    # FIXME: The keys are not in snake_case.
+    params = {'license': facilities[5]['license']['number']}
     response = session.get(f'{BASE}/metrc/types/transfers', params=params)
     assert response.status_code == 200
     transfer_types = response.json()['data']
     print('Found %i transfer types' % len(transfer_types))
 
-    # [ ] Get a licensed courier.
-
+    # [✓] Get a licensed courier.
+    params = {'license': facilities[5]['license']['number']}
+    response = session.get(f'{BASE}/metrc/employees', params=params)
+    assert response.status_code == 200
+    employees = response.json()['data']
+    print('Found %i employees.' % len(employees))
+    courier = employees[0]
 
     # [ ] Create a testing package.
-    test_package_tag = 'YOUR_TEST_PACKAGE_TAG'
-    test_package_data = {
-        'Tag': test_package_tag,
-        'Location': 'Warehouse',
-        'Item': 'New Old-Time Moonshine Teenth',
-        'Quantity': 4.0,
-        'UnitOfMeasure': 'Grams',
-        'Note': 'Quality assurance test sample.',
-        'ActualDate': today,
-        'Ingredients': [
+    data = {
+        'tag': 'YOUR_TEST_PACKAGE_TAG',
+        'location': 'CAN API Test Flower Bed',
+        'item': 'Moonshine Haze Shake',
+        'quantity': 0.05,
+        'unit_of_measure': 'Grams',
+        'note': 'Quality assurance test sample.',
+        'actual_date': '2023-01-21',
+        'ingredients': [
             {
-                'Package': 'redacted',
-                'Quantity': 4.0,
-                'UnitOfMeasure': 'Grams'
+                'package': 'redacted',
+                'quantity': 0.05,
+                'unit_of_measure': 'Grams',
             }
         ]
     }
-
 
     # [ ] Get the tested package.
 
 
     # [ ] Set up an external transfer.
     transfer_data = {
-        'ShipperLicenseNumber': cultivator.license_number,
-        'ShipperName': cultivator.name,
-        'ShipperMainPhoneNumber': '18005555555',
-        'ShipperAddress1': 'Mulberry Street',
-        'ShipperAddress2': None,
-        'ShipperAddressCity': 'Oklahoma City',
-        'ShipperAddressState': 'OK',
-        'ShipperAddressPostalCode': '123',
-        'TransporterFacilityLicenseNumber': lab.license['number'],
-        # 'DriverOccupationalLicenseNumber': grower.license['number'],
-        # 'DriverName': grower.full_name,
-        # 'DriverLicenseNumber': 'xyz',
-        # 'PhoneNumberForQuestions': '18005555555',
-        # 'VehicleMake': 'xyz',
-        # 'VehicleModel': 'xyz',
-        # 'VehicleLicensePlateNumber': 'xyz',
-        'Destinations': [
+        'shipper_license_number': 'cultivator.license_number',
+        'shipper_name': 'cultivator.name',
+        'shipper_main_phone_number': '18005555555',
+        'shipper_address1': 'Mulberry Street',
+        'shipper_address2': None,
+        'shipper_address_city': 'Oklahoma City',
+        'shipper_address_state': 'OK',
+        'shipper_address_postal_code': '123',
+        'transporter_facility_license_number': "lab.license['number']",
+        'driver_occupational_license_number': "grower.license['number']",
+        'driver_name': 'grower.full_name',
+        'driver_license_number': 'xyz',
+        'phone_number_for_questions': '18005555555',
+        'vehicle_make': 'xyz',
+        'vehicle_model': 'xyz',
+        'vehicle_license_plate_number': 'xyz',
+        'destinations': [
             {
-                'RecipientLicenseNumber': lab.license_number,
-                'TransferTypeName': 'Lab Sample Transfer',
-                'PlannedRoute': 'Hypertube.',
-                'EstimatedDepartureDateTime': get_timestamp(),
-                'EstimatedArrivalDateTime': get_timestamp(future=60 * 24),
-                'GrossWeight': 4,
-                # 'GrossUnitOfWeightId': None,
-                'Transporters': [
+                'recipient_license_number': 'lab.license_number',
+                'transfer_type_name': 'Lab Sample Transfer',
+                'planned_route': 'Hyper-tube.',
+                'estimated_departure_date_time': 'get_timestamp()',
+                'estimated_arrival_date_time': 'get_timestamp(future=60 * 24)',
+                'gross_weight': 4,
+                'gross_unit_of_weight_id': None,
+                'transporters': [
                     {
-                        'TransporterFacilityLicenseNumber': lab.license_number,
-                        'DriverOccupationalLicenseNumber': courier.license['number'],
-                        'DriverName': courier.full_name,
-                        'DriverLicenseNumber': 'xyz',
-                        'PhoneNumberForQuestions': '18005555555',
-                        'VehicleMake': 'xyz',
-                        'VehicleModel': 'xyz',
-                        'VehicleLicensePlateNumber': 'xyz',
-                        # 'IsLayover': False,
-                        'EstimatedDepartureDateTime': get_timestamp(),
-                        'EstimatedArrivalDateTime': get_timestamp(future=60 * 24),
-                        # 'TransporterDetails': None
+                        'transporter_facility_license_number': 'lab.license_number',
+                        'driver_occupational_license_number': "courier.license['number']",
+                        'driver_name': 'courier.full_name',
+                        'driver_license_number': 'xyz',
+                        'phone_number_for_questions': '18005555555',
+                        'vehicle_make': 'xyz',
+                        'vehicle_model': 'xyz',
+                        'vehicle_license_plate_number': 'xyz',
+                        'is_layover': False,
+                        'estimated_departure_date_time': 'get_timestamp()',
+                        'estimated_arrival_date_time': 'get_timestamp(future=60 * 24)',
+                        'transporter_details': None,
                     }
                 ],
-                'Packages': [
+                'packages': [
                     {
-                        # 'PackageLabel': traced_package.label,
-                        # 'HarvestName': '2nd New Old-Time Moonshine Harvest',
-                        'ItemName': 'New Old-Time Moonshine Teenth',
-                        'Quantity': 1,
-                        'UnitOfMeasureName': 'Each',
-                        'PackagedDate': get_timestamp(),
-                        'GrossWeight': 4.0,
-                        'GrossUnitOfWeightName': 'Grams',
-                        'WholesalePrice': None,
-                        # 'Source': '2nd New Old-Time Moonshine Harvest',
+                        'package_label': 'traced_package.label',
+                        'harvest_name': '2nd New Old-Time Moonshine Harvest',
+                        'item_name': 'New Old-Time Moonshine Teenth',
+                        'quantity': 1,
+                        'unit_of_measure_name': 'Each',
+                        'packaged_date': 'get_timestamp()',
+                        'gross_weight': 4.0,
+                        'gross_unit_of_weight_name': 'Grams',
+                        'wholesale_price': None,
+                        'source': '2nd New Old-Time Moonshine Harvest'
                     },
                 ]
             }
@@ -703,55 +938,113 @@ if __name__ == '__main__':
 
 
     # [ ] Create a transfer template.
+    cultivator_license_number = facilities[5]['license']['number']
     template_data = {
-        'Name': 'HyperLoop Template',
-        'TransporterFacilityLicenseNumber': cultivator.license_number,
-        'DriverOccupationalLicenseNumber': courier.license['number'],
-        'DriverName': courier.full_name,
-        # 'DriverLicenseNumber': None,
-        # 'PhoneNumberForQuestions': None,
-        # 'VehicleMake': None,
-        # 'VehicleModel': None,
-        # 'VehicleLicensePlateNumber': None,
-        'Destinations': [
+        'name': 'HyperLoop Template',
+        'transporter_facility_license_number': cultivator_license_number,
+        'driver_occupational_license_number': courier['license']['number'],
+        'driver_name': courier['full_name'],
+        'driver_license_number': None,
+        'phone_number_for_questions': None,
+        'vehicle_make': None,
+        'vehicle_model': None,
+        'vehicle_license_plate_number': None,
+        'destinations': [
             {
-                'RecipientLicenseNumber': lab.license_number,
-                'TransferTypeName': 'Affiliated Transfer',
-                'PlannedRoute': 'Take hyperlink A to hyperlink Z.',
-                'EstimatedDepartureDateTime': get_timestamp(),
-                'EstimatedArrivalDateTime': get_timestamp(future=360),
-                'Transporters': [
+                'recipient_license_number': 'lab.license_number',
+                'transfer_type_name': 'Affiliated Transfer',
+                'planned_route': 'Take hyperlink A to hyperlink Z.',
+                'estimated_departure_date_time': '2023-01-23T12:00',
+                'estimated_arrival_date_time': '2023-01-23T13:00',
+                'transporters': [
                     {
-                        'TransporterFacilityLicenseNumber': transporter.license_number,
-                        'DriverOccupationalLicenseNumber': courier.license['number'],
-                        'DriverName': courier.full_name,
-                        'DriverLicenseNumber': 'dash',
-                        'PhoneNumberForQuestions': '18005555555',
-                        'VehicleMake': 'X',
-                        'VehicleModel': 'X',
-                        'VehicleLicensePlateNumber': 'X',
-                        'IsLayover': False,
-                        'EstimatedDepartureDateTime':get_timestamp(),
-                        'EstimatedArrivalDateTime': get_timestamp(future=360),
-                        'TransporterDetails': None
+                        'transporter_facility_license_number': 'transporter.license_number',
+                        'driver_occupational_license_number': "courier.license['number']",
+                        'driver_name': 'courier.full_name',
+                        'driver_license_number': 'dash',
+                        'phone_number_for_questions': '18005555555',
+                        'vehicle_make': 'X',
+                        'vehicle_model': 'X',
+                        'vehicle_license_plate_number': 'X',
+                        'is_layover': False,
+                        'estimated_departure_date_time': 'get_timestamp()',
+                        'estimated_arrival_date_time': 'get_timestamp(future=360)',
+                        'transporter_details': None,
                     }
                 ],
-                # 'Packages': [
+                # 'packages': [
                 #     {
-                #         'PackageLabel': new_package_tag,
-                #         'WholesalePrice': 13.33
+                #         'package_label': 'YOUR_PACKAGE_TAG',
+                #         'wholesale_price': 13.33,
                 #     },
                 # ]
             }
         ]
     }
+    params = {'license': facilities[5]['license']['number']}
+    response = session.post(f'{BASE}/metrc/transfers/templates', params=params)
+    assert response.status_code == 200
+    print('Created transfer template.')
 
-
-    # [ ] Get transfer templates.
-
+    # [✓] Get transfer templates.
+    params = {
+        'license': facilities[5]['license']['number'],
+        'start': '2021-04-09',
+        'end': '2021-04-10',
+    }
+    response = session.get(f'{BASE}/metrc/transfers/templates', params=params)
+    assert response.status_code == 200
+    templates = response.json()['data']
+    print('Found %i transfer templates.' % len(templates))
 
     # [ ] Update a transfer template.
-
+    data = {
+        'transfer_template_id': templates[0]['id'],
+        'name': 'Driverless Truck Template',
+        'transporter_facility_license_number': None,
+        'driver_occupational_license_number': None,
+        'driver_name': None,
+        'driver_license_number': None,
+        'phone_number_for_questions': None,
+        'vehicle_make': None,
+        'vehicle_model': None,
+        'vehicle_license_plate_number': None,
+        'destinations': [
+            {
+                'transfer_destination_id': 0,
+                'recipient_license_number': '123-XYZ',
+                'transfer_type_name': 'Transfer',
+                'planned_route': 'I will drive down the road to the place.',
+                'estimated_departure_date_time': '2018-03-06T09:15:00.000',
+                'estimated_arrival_date_time': '2018-03-06T12:24:00.000',
+                'transporters': [
+                    {
+                        'transporter_facility_license_number': '123-ABC',
+                        'driver_occupational_license_number': '50',
+                        'driver_name': 'X',
+                        'driver_license_number': '5',
+                        'phone_number_for_questions': '18005555555',
+                        'vehicle_make': 'X',
+                        'vehicle_model': 'X',
+                        'vehicle_license_plate_number': 'X',
+                        'is_layover': False,
+                        'estimated_departure_date_time': '2018-03-06T12:00:00.000',
+                        'estimated_arrival_date_time': '2018-03-06T21:00:00.000',
+                        'transporter_details': None
+                    }
+                ],
+                # 'packages': [
+                #     {
+                #         'package_label': 'ABCDEF012345670000010026',
+                #         'wholesale_price': None
+                #     },
+                # ],
+            }
+        ],
+    }
+    response = session.post(f'{BASE}/metrc/transfers/templates', json=data, params=params)
+    assert response.status_code == 200
+    print('Updated a transfer template.')
 
     # [ ] Delete a transfer template.
 
@@ -783,12 +1076,12 @@ if __name__ == '__main__':
 
     # [ ] Create the lab result record.
     lab_result_data = {
-        'Label': test_package_label,
-        'ResultDate': get_timestamp(),
-        # 'LabTestDocument': {
-            # 'DocumentFileName': 'new-old-time-moonshine.pdf',
-            # 'DocumentFileBase64': 'encoded_pdf',
-        # },
+        'Label': 'test_package_label',
+        'ResultDate': 'get_timestamp()',
+        'LabTestDocument': {
+            'DocumentFileName': 'new-old-time-moonshine.pdf',
+            'DocumentFileBase64': 'encoded_pdf',
+        },
         'Results': [
             {
                 'LabTestTypeName': 'THC',
@@ -802,24 +1095,6 @@ if __name__ == '__main__':
                 'Passed': True,
                 'Notes': ''
             },
-            # {
-            #     'LabTestTypeName': 'Microbiologicals',
-            #     'Quantity': 0,
-            #     'Passed': True,
-            #     'Notes': ''
-            # },
-            # {
-            #     'LabTestTypeName': 'Pesticides',
-            #     'Quantity': 0,
-            #     'Passed': True,
-            #     'Notes': ''
-            # },
-            # {
-            #     'LabTestTypeName': 'Heavy Metals',
-            #     'Quantity': 0,
-            #     'Passed': True,
-            #     'Notes': ''
-            # },
         ]
     }
 
@@ -841,25 +1116,57 @@ if __name__ == '__main__':
     print('Found %i customer types' % len(customer_types))
 
     # [ ] Create a sales receipt for a package.
-    receipt_data = {
-        'SalesDateTime': get_timestamp(),
-        'SalesCustomerType': 'Patient',
-        'PatientLicenseNumber': '1',
-        'Transactions': [
+    data = {
+        'sales_date_time': 'get_timestamp()',
+        'sales_customer_type': 'Patient',
+        'patient_license_number': '1',
+        'transactions': [
             {
-                'PackageLabel': retailer_package.label,
-                'Quantity': 1.75,
-                'UnitOfMeasure': 'Grams',
-                'TotalAmount': 25.00
+                'package_label': 'retailer_package.label',
+                'quantity': 1.75,
+                'unit_of_measure': 'Grams',
+                'total_amount': 25.0
             }
         ]
     }
 
+    # [ ] Get sales by date.
+    date_ranges = [
+        ('2023-01-13', '2023-01-14'),
+        ('2023-01-14', '2023-01-15'),
+        ('2023-01-15', '2023-01-16'),
+        ('2023-01-16', '2023-01-17'),
+        ('2023-01-17', '2023-01-18'),
+        ('2023-01-18', '2023-01-19'),
+        ('2023-01-19', '2023-01-20'),
+        ('2023-01-20', '2023-01-21'),
+        ('2023-01-21', '2023-01-22'),
+        ('2023-01-22', '2023-01-23'),
+        ('2023-01-23', '2023-01-24')
+    ]
+    for date_range in date_ranges:
+        start, end = date_range
+        params = {
+            'license': facilities[0]['license']['number'],
+            'start': start,
+            'end': end,
+        }
+        response = session.get(f'{BASE}/metrc/sales', params=params)
+        assert response.status_code == 200
+        sales = response.json()['data']
+        print('Found %i sales on %s.' % (len(sales), start))
+        if len(sales) > 0:
+            break
 
     # [ ] Get a sale.
-
-
-    # [ ] Get sales.
+    for i in range(400, 420):
+        uid = str(i)
+        params = {'license': facilities[0]['license']['number']}
+        response = session.get(f'{BASE}/metrc/sales/{uid}', params=params)
+        assert response.status_code == 200
+        print(response.json())
+        if response.json()['data']:
+            break
 
 
     # [ ] Update a sales receipt.
@@ -873,10 +1180,12 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------
 
     # [ ] Get return reasons.
+    # FIXME: This may only be valid in certain states.
+    params = {'license': facilities[0]['license']['number'],}
     response = session.get(f'{BASE}/metrc/types/return-reasons', params=params)
     assert response.status_code == 200
     return_reasons = response.json()['data']
-    print('Found %i return reasons' % len(return_reasons))
+    print('Found %i return reasons.' % len(return_reasons))
 
     # [ ] Create a delivery.
 

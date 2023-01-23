@@ -83,7 +83,7 @@ def get_objects(
     ) -> Response:
     """Perform a simple `GET` request to the Metrc API."""
     if uid:
-        obj = getattr(track, get_method)(uid)
+        obj = getattr(track, get_method)(uid, **kwargs)
         data = obj.to_dict()
     else:
         objs = getattr(track, get_method)(**kwargs)
@@ -658,11 +658,13 @@ def packages(request: Request, package_id: Optional[str] = ''):
         action = snake_case(request.query_params.get('action', package_id))
     
         # Change package locations.
-        if action == 'change_package_locations':
+        if action == 'move':
+            if isinstance(data, dict): data = [data]
             return perform_method(request, track, data, 'change_package_locations')
 
         # Update items.
         elif action == 'change_package_items':
+            if isinstance(data, dict): data = [data]
             return perform_method(request, track, data, 'change_package_items')
 
         # Create plant batch(es) from given package(s).
@@ -672,18 +674,22 @@ def packages(request: Request, package_id: Optional[str] = ''):
 
         # Finish packages.
         elif action == 'finish':
+            if isinstance(data, dict): data = [data]
             return perform_method(request, track, data, 'manage_packages', action='finish')
 
         # Unfinish packages.
         elif action == 'unfinish':
+            if isinstance(data, dict): data = [data]
             return perform_method(request, track, data, 'manage_packages', action='unfinish')
 
         # Adjust packages.
         elif action == 'adjust':
+            if isinstance(data, dict): data = [data]
             return perform_method(request, track, data, 'manage_packages', action='adjust')
 
         # Remediate packages.
         elif action == 'remediate':
+            if isinstance(data, dict): data = [data]
             return perform_method(request, track, data, 'manage_packages', action='remediate')
 
         # Update note(s) for packages.
@@ -932,7 +938,13 @@ def plants(request: Request, plant_id: Optional[str] = ''):
 
         # Move plant(s).
         elif action == 'move':
+            if isinstance(data, dict): data = [data]
             return perform_method(request, track, data, 'move_plants')
+
+        # Add additive(s).
+        elif action == 'add_additives':
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'add_plant_additives')
 
         # Create plant(s).
         else:
@@ -1060,7 +1072,7 @@ def transfer_templates(request: Request, template_id: Optional[str] = ''):
     if request.method == 'GET':
         return get_objects(request, track, 'get_transfer_templates',
             uid=template_id,
-            action=request.query_params.get('type'),
+            action=request.query_params.get('type', ''),
             start=request.query_params.get('start'),
             end=request.query_params.get('end'),
             license_number=track.primary_license,
@@ -1357,3 +1369,9 @@ def waste_reasons(request: Request, license_number: Optional[str] = ''):
 def waste_types(request: Request, license_number: Optional[str] = ''):
     """Get waste types for a given license number."""
     return get_metrc_types(request, 'get_waste_types', license_number)
+
+
+@api_view(['GET'])
+def growth_phases(request: Request, license_number: Optional[str] = ''):
+    """Get growth phases for a given license number."""
+    return get_metrc_types(request, 'get_growth_phases', license_number)

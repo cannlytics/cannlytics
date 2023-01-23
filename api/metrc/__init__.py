@@ -44,6 +44,7 @@ from api.metrc.metrc import (
     waste_methods,
     waste_reasons,
     waste_types,
+    growth_phases,
 )
 
 __all__ = [
@@ -82,4 +83,5 @@ __all__ = [
     waste_methods,
     waste_reasons,
     waste_types,
+    growth_phases,
 ]

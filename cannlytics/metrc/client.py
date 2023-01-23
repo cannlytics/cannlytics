@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 1/22/2023
+Updated: 1/23/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains the `Metrc` class responsible for communicating
@@ -74,7 +74,11 @@ from .urls import (
     METRC_TRANSFER_TEMPLATE_URL,
     METRC_UOM_URL,
 )
-from ..utils.utils import clean_dictionary, get_timestamp
+from ..utils.utils import (
+    camel_to_snake,
+    clean_dictionary,
+    get_timestamp,
+)
 
 
 class Metrc(object):
@@ -980,6 +984,7 @@ class Metrc(object):
         # TODO: Optionally return updated packages.
 
 
+    # FIXME: Does this Metrc API endpoint exist? Test and find out.
     def delete_package(self, uid, license_number=''):
         """Delete a package.
         Args:
@@ -1468,9 +1473,23 @@ class Metrc(object):
         return self.manage_plants(data, action='manicureplants', license_number=license_number)
 
 
+    def add_plant_additives(self, data, license_number='', return_obs=False):
+        """Add additive(s) to given plant(s)."""
+        return self.manage_plants(data, action='additives', license_number=license_number)
+
+
     def get_additive_types(self, license_number='', return_obs=False):
-        """Manicure plants."""
+        """Get additive types."""
         return self.get_plants(action='additives/types', license_number=license_number)
+    
+
+    def get_growth_phases(self, license_number='', return_obs=False):
+        """Get growth phases."""
+        return self.get_plants(action='growthphases', license_number=license_number)
+    
+
+
+    # TODO: "additives/bylocation")
 
 
     #-------------------------------------------------------------------
@@ -1818,7 +1837,7 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         response = self.request('get', url, params=params)
         try:
-            return [clean_dictionary(x) for x in response]
+            return [clean_dictionary(x, camel_to_snake) for x in response]
         except:
             return response
 
