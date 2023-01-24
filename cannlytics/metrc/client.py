@@ -928,7 +928,7 @@ class Metrc(object):
             self,
             data,
             license_number='',
-            qa=False,
+            testing=False,
             plantings=False,
             return_obs=False,
         ):
@@ -936,7 +936,7 @@ class Metrc(object):
         return self.create_packages(
             [data],
             license_number=license_number,
-            qa=qa,
+            testing=testing,
             plantings=plantings,
             return_obs=return_obs,
         )
@@ -946,7 +946,7 @@ class Metrc(object):
             self,
             data,
             license_number='',
-            qa=False,
+            testing=False,
             plantings=False,
             return_obs=False,
         ):
@@ -954,11 +954,11 @@ class Metrc(object):
         Args:
             data (list): A list of packages (dict) to create.
             license_number (str): A specific license number.
-            qa (bool): If the packages are for QA testing.
+            testing (bool): If the packages are for QA testing.
             plantings (bool): If the packages are for planting.
         """
         url = METRC_PACKAGES_URL % 'create'
-        if qa:
+        if testing:
             url += '/testing'
         elif plantings:
             url += '/plantings'

@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/13/2021
-Updated: 1/22/2023
+Updated: 1/24/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API to interface with the Metrc API.
@@ -83,12 +83,17 @@ def get_objects(
         **kwargs,
     ) -> Response:
     """Perform a simple `GET` request to the Metrc API."""
+    # Get singular items.
     if uid:
         obj = getattr(track, get_method)(uid, **kwargs)
         data = obj.to_dict()
+
+    # Get multiple items.
     else:
         objs = getattr(track, get_method)(**kwargs)
         data = [obj.to_dict() for obj in objs]
+    
+    # Create a log and return the data.
     log_metrc_request(request, data, 'get_objects', get_method)
     return Response({'data': data}, content_type='application/json')
 
@@ -98,9 +103,12 @@ def create_or_update_objects(
         track: Metrc,
         create_method: str,
         update_method: str,
+        return_obs: Optional[bool] = True,
     ) -> Response:
     """Create or update given API items."""
     create_items, update_items = [], []
+
+    # Get the data posted.
     if isinstance(request.data, list):
         data = request.data
     else:
@@ -110,31 +118,39 @@ def create_or_update_objects(
         return Response({'error': True, 'message': message}, content_type='application/json')
     elif isinstance(data, dict):
         data = [data]
+
+    # Determine if the data is being updated or deleted.
     for item in data:
         if item.get('id'):
             update_items.append(item)
         else:
             create_items.append(item)
+    
+    # Create items.
     if create_items:
         create_items = [clean_nested_dictionary(x, camelcase) for x in create_items]
         try:
-            create_items = getattr(track, create_method)(create_items, return_obs=True)
+            create_items = getattr(track, create_method)(create_items, return_obs=return_obs)
         except MetrcAPIError as error:
             log_metrc_error(request, create_method, str(error))
             response = {'error': True, 'message': str(error)}
             return Response(response, status=error.response.status_code)
         if not isinstance(create_items, list):
             create_items = [create_items]
+    
+    # Update items.
     if update_items:
         update_items = [clean_nested_dictionary(x, camelcase) for x in update_items]
         try:
-            update_items = getattr(track, update_method)(update_items, return_obs=True)
+            update_items = getattr(track, update_method)(update_items, return_obs=return_obs)
         except MetrcAPIError as error:
             log_metrc_error(request, update_method, str(error))
             response = {'error': True, 'message': str(error)}
             return Response(response, status=error.response.status_code)
         if not isinstance(update_items, list):
             update_items = [update_items]
+    
+    # Return all items after creating entries in Firestore.
     items = create_items + update_items
     try:
         items = [x.to_dict() for x in items]
@@ -160,10 +176,13 @@ def delete_objects(
         uid: Optional[str] = '',
     ) -> Response:
     """Delete given objects from the Metrc API."""
+    # Get the data posted.
     if isinstance(request.data, list):
         data = request.data
     else:
         data = request.data.get('data', request.data)
+    
+    # Delete multiple items.
     model = delete_method.replace('delete_', '')
     collection = f'metrc/{track.primary_license}/{model}/'
     if isinstance(data, list):
@@ -174,6 +193,8 @@ def delete_objects(
                 delete_document(f'{collection}/{uid}')
             except:
                 print('Failed to delete data from Firestore.')
+    
+    # Delete singular items.
     else:
         if not uid:
             uid = data.get('id', data.get('Id'))
@@ -185,6 +206,8 @@ def delete_objects(
             delete_document(f'{collection}/{uid}')
         except:
             print('Failed to delete data from Firestore.')
+    
+    # Create a log and return an empty success response.
     log_metrc_request(request, data, 'delete_object', delete_method)
     return Response({'success': True, 'data': []}, content_type='application/json')
 
@@ -192,16 +215,21 @@ def delete_objects(
 def perform_method(request, track, data, method, **kwargs):
     """Perform a given method in the Metrc API given data."""
     # FIXME: Also update Firestore as these update.
-    # FIXME: Clean nested dictionary handling lists!
+
+    # Format the data.
     if isinstance(data, list):
         data = [clean_nested_dictionary(x, camelcase) for x in data]
     elif isinstance(data, dict):
         data = clean_nested_dictionary(data, camelcase)
+    
+    # Perform the action.
     try:
         objs = getattr(track, method)(data, return_obs=True, **kwargs)
     except MetrcAPIError as error:
         log_metrc_error(request, method, str(error))
         return Response({'error': True, 'message': str(error)}, status=error.response.status_code)
+    
+    # Return any data.
     return Response({'success': True, 'data': objs}, content_type='application/json')
 
 
@@ -709,6 +737,12 @@ def packages(request: Request, package_id: Optional[str] = ''):
             if isinstance(data, dict): data = [data]
             return perform_method(request, track, data, 'update_package_notes')
 
+        # Create a testing package.
+        elif action == 'create_testing_package':
+            if isinstance(data, dict): data = [data]
+            return perform_method(request, track, data, 'create_packages',
+                testing=True)
+
         # Create or update packages.
         else:
             return create_or_update_objects(request, track,
@@ -1056,10 +1090,12 @@ def transfers(request: Request, transfer_id: Optional[str] = ''):
         )
 
     # Create / update transfers.
+    # FIXME: Updating transfers causes an error if returning data.
     if request.method == 'POST':
         return create_or_update_objects(request, track,
                 create_method='create_transfers',
                 update_method='update_transfers',
+                return_obs=False, 
             )
 
     # Delete transfers.

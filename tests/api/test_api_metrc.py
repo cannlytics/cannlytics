@@ -11,6 +11,7 @@ License: MIT License <https://opensource.org/licenses/MIT>
 import os
 import requests
 from dotenv import dotenv_values
+from cannlytics.utils import get_timestamp
 
 # Define the endpoint.
 ENDPOINT = 'metrc'
@@ -839,23 +840,6 @@ if __name__ == '__main__':
     assert response.status_code == 200
     print('Changed the location of a package.')
 
-    # [✓] Adjust the weight of a package.
-    data = {
-        'label': packages[0]['label'],
-        'quantity': -0.05,
-        'unit_of_measure': 'Each',
-        'adjustment_reason': adjustment_reasons[-1]['name'],
-        'adjustment_date': today,
-        'reason_note': 'The scales needed calibration.',
-    }
-    params = {
-        'license': facilities[5]['license']['number'],
-        'action': 'adjust',
-    }
-    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
-    assert response.status_code == 200
-    print('Adjusted the weight of a package.')
-
     # [✓] Create a plant batch from a package.
     data = {
         'package_label': packages[-1]['label'],
@@ -878,11 +862,33 @@ if __name__ == '__main__':
     assert response.status_code == 200
     print('Created a plant batch from a package.')
 
-    # TODO: Adjust the weight of a package to 0.
+    # [✓] Get a package using it's label.
+    label = packages[0]['label']
+    response = session.get(f'{BASE}/metrc/packages/{label}', params=params)
+    assert response.status_code == 200
+    package = response.json()['data']
+    print('Found package:', package['label'])
 
-    # [ ] Finish a package.
+    # [✓] Adjust the weight of a package.
     data = {
-        'label': packages[0]['label'],
+        'label': package['label'],
+        'quantity': -0.9,
+        'unit_of_measure': 'Grams',
+        'adjustment_reason': adjustment_reasons[-1]['name'],
+        'adjustment_date': today,
+        'reason_note': 'The scales needed calibration.',
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'adjust',
+    }
+    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
+    assert response.status_code == 200
+    print('Adjusted the weight of a package.')
+
+    # [✓] Finish a package.
+    data = {
+        'label': package['label'],
         'actual_date': today,
     }
     params = {
@@ -893,8 +899,8 @@ if __name__ == '__main__':
     assert response.status_code == 200
     print('Finished a package.')
 
-    # [ ] Unfinish a package.
-    data = {'label': packages[0]['label']}
+    # [✓] Unfinish a package.
+    data = {'label': package['label']}
     params = {
         'license': facilities[5]['license']['number'],
         'action': 'unfinish',
@@ -952,40 +958,54 @@ if __name__ == '__main__':
     print('Found %i employees.' % len(employees))
     courier = employees[0]
 
-    # [ ] Create a testing package.
+    # [✓] Create a testing package.
     data = {
-        'tag': 'YOUR_TEST_PACKAGE_TAG',
-        'location': 'CAN API Test Flower Bed',
+        'tag': '1A4FF0100000002000000113',
+        'location': test_location,
         'item': 'Moonshine Haze Shake',
-        'quantity': 0.05,
+        'quantity': 0.025,
         'unit_of_measure': 'Grams',
         'note': 'Quality assurance test sample.',
-        'actual_date': '2023-01-21',
+        'actual_date': today,
         'ingredients': [
             {
-                'package': 'redacted',
+                'package': packages[1]['label'],
                 'quantity': 0.05,
                 'unit_of_measure': 'Grams',
             }
         ]
     }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'create-testing-package',
+    }
+    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
+    assert response.status_code == 200
+    print('Created a testing package.')
 
-    # [ ] Get the tested package.
+    # [✓] Get the tested package.
+    label = '1A4FF0100000002000000113'
+    response = session.get(f'{BASE}/metrc/packages/{label}', params=params)
+    assert response.status_code == 200
+    testing_package = response.json()['data']
+    print('Found testing package:', testing_package['label'])
 
-
-    # [ ] Set up an external transfer.
+    # [✓] Set up an external transfer.
+    lab = facilities[15]
+    cultivator = facilities[5]
+    courier = employees[0]
     transfer_data = {
-        'shipper_license_number': 'cultivator.license_number',
-        'shipper_name': 'cultivator.name',
+        'shipper_license_number': cultivator['license']['number'],
+        'shipper_name': cultivator['name'],
         'shipper_main_phone_number': '18005555555',
         'shipper_address1': 'Mulberry Street',
         'shipper_address2': None,
         'shipper_address_city': 'Oklahoma City',
         'shipper_address_state': 'OK',
         'shipper_address_postal_code': '123',
-        'transporter_facility_license_number': "lab.license['number']",
-        'driver_occupational_license_number': "grower.license['number']",
-        'driver_name': 'grower.full_name',
+        'transporter_facility_license_number': lab['license']['number'],
+        'driver_occupational_license_number': courier['license']['number'],
+        'driver_name': courier['full_name'],
         'driver_license_number': 'xyz',
         'phone_number_for_questions': '18005555555',
         'vehicle_make': 'xyz',
@@ -993,59 +1013,76 @@ if __name__ == '__main__':
         'vehicle_license_plate_number': 'xyz',
         'destinations': [
             {
-                'recipient_license_number': 'lab.license_number',
-                'transfer_type_name': 'Lab Sample Transfer',
+                'recipient_license_number': lab['license']['number'],
+                'transfer_type_name': 'Beginning Inventory Transfer',
                 'planned_route': 'Hyper-tube.',
-                'estimated_departure_date_time': 'get_timestamp()',
-                'estimated_arrival_date_time': 'get_timestamp(future=60 * 24)',
-                'gross_weight': 4,
+                'estimated_departure_date_time': get_timestamp(),
+                'estimated_arrival_date_time': get_timestamp(future=60 * 24),
+                'gross_weight': 0.025,
                 'gross_unit_of_weight_id': None,
                 'transporters': [
                     {
-                        'transporter_facility_license_number': 'lab.license_number',
-                        'driver_occupational_license_number': "courier.license['number']",
-                        'driver_name': 'courier.full_name',
+                        'transporter_facility_license_number': lab['license']['number'],
+                        'driver_occupational_license_number': courier['license']['number'],
+                        'driver_name': courier['full_name'],
                         'driver_license_number': 'xyz',
                         'phone_number_for_questions': '18005555555',
                         'vehicle_make': 'xyz',
                         'vehicle_model': 'xyz',
                         'vehicle_license_plate_number': 'xyz',
                         'is_layover': False,
-                        'estimated_departure_date_time': 'get_timestamp()',
-                        'estimated_arrival_date_time': 'get_timestamp(future=60 * 24)',
+                        'estimated_departure_date_time': get_timestamp(),
+                        'estimated_arrival_date_time': get_timestamp(future=60 * 24),
                         'transporter_details': None,
                     }
                 ],
                 'packages': [
                     {
-                        'package_label': 'traced_package.label',
-                        'harvest_name': '2nd New Old-Time Moonshine Harvest',
-                        'item_name': 'New Old-Time Moonshine Teenth',
-                        'quantity': 1,
-                        'unit_of_measure_name': 'Each',
-                        'packaged_date': 'get_timestamp()',
-                        'gross_weight': 4.0,
+                        'package_label': testing_package['label'],
+                        'harvest_name': testing_package['source_harvest_names'],
+                        'item_name': packages[1]['item']['name'],
+                        'quantity': 0.025,
+                        'unit_of_measure_name': 'Grams',
+                        'packaged_date': get_timestamp(),
+                        'gross_weight': 0.025,
                         'gross_unit_of_weight_name': 'Grams',
                         'wholesale_price': None,
-                        'source': '2nd New Old-Time Moonshine Harvest'
+                        'source': packages[1]['source_harvest_names']
                     },
                 ]
             }
         ]
     }
+    data = transfer_data
+    params = {'license': facilities[5]['license']['number']}
+    response = session.post(f'{BASE}/metrc/transfers', json=data, params=params)
+    assert response.status_code == 200
+    print('Created an external transfer.')
 
+    # [✓] Get external transfers.
+    params = {
+        'license': facilities[5]['license']['number'],
+        'start': get_timestamp(past=30),
+    }
+    response = session.get(f'{BASE}/metrc/transfers', params=params)
+    assert response.status_code == 200
+    transfers = response.json()['data']
+    print('Found %i external transfers.' % len(transfers))
 
-    # [ ] Get external transfers.
+    # [✓] Update an external transfer.
+    data = transfer_data
+    data['transfer_id'] = transfers[0]['id']
+    data['shipper_address1'] = 'North Mulberry Street'
+    response = session.post(f'{BASE}/metrc/transfers', json=data, params=params)
+    assert response.status_code == 200
+    transfers = response.json()['data']
+    print('Updated external transfer.')
 
-
-    # [ ] Update an external transfer.
-
-
-    # [ ] Create a transfer template.
+    # [✓] Create a transfer template.
     cultivator_license_number = facilities[5]['license']['number']
-    template_data = {
+    data = {
         'name': 'HyperLoop Template',
-        'transporter_facility_license_number': cultivator_license_number,
+        'transporter_facility_license_number': cultivator['license']['number'],
         'driver_occupational_license_number': courier['license']['number'],
         'driver_name': courier['full_name'],
         'driver_license_number': None,
@@ -1055,27 +1092,28 @@ if __name__ == '__main__':
         'vehicle_license_plate_number': None,
         'destinations': [
             {
-                'recipient_license_number': 'lab.license_number',
+                'recipient_license_number': lab['license']['number'],
                 'transfer_type_name': 'Affiliated Transfer',
                 'planned_route': 'Take hyperlink A to hyperlink Z.',
-                'estimated_departure_date_time': '2023-01-23T12:00',
-                'estimated_arrival_date_time': '2023-01-23T13:00',
+                'estimated_departure_date_time': get_timestamp(),
+                'estimated_arrival_date_time': get_timestamp(future=60),
                 'transporters': [
                     {
-                        'transporter_facility_license_number': 'transporter.license_number',
-                        'driver_occupational_license_number': "courier.license['number']",
-                        'driver_name': 'courier.full_name',
+                        'transporter_facility_license_number': cultivator['license']['number'],
+                        'driver_occupational_license_number': courier['license']['number'],
+                        'driver_name': courier['full_name'],
                         'driver_license_number': 'dash',
                         'phone_number_for_questions': '18005555555',
                         'vehicle_make': 'X',
                         'vehicle_model': 'X',
                         'vehicle_license_plate_number': 'X',
                         'is_layover': False,
-                        'estimated_departure_date_time': 'get_timestamp()',
-                        'estimated_arrival_date_time': 'get_timestamp(future=360)',
+                        'estimated_departure_date_time': get_timestamp(),
+                        'estimated_arrival_date_time': get_timestamp(future=60),
                         'transporter_details': None,
                     }
                 ],
+                # Optional: Add packages to the transfer template.
                 # 'packages': [
                 #     {
                 #         'package_label': 'YOUR_PACKAGE_TAG',
@@ -1086,71 +1124,34 @@ if __name__ == '__main__':
         ]
     }
     params = {'license': facilities[5]['license']['number']}
-    response = session.post(f'{BASE}/metrc/transfers/templates', params=params)
+    response = session.post(f'{BASE}/metrc/transfers/templates', json=data, params=params)
     assert response.status_code == 200
     print('Created transfer template.')
 
     # [✓] Get transfer templates.
     params = {
         'license': facilities[5]['license']['number'],
-        'start': '2021-04-09',
-        'end': '2021-04-10',
+        'start': get_timestamp(past=30),
     }
     response = session.get(f'{BASE}/metrc/transfers/templates', params=params)
     assert response.status_code == 200
     templates = response.json()['data']
     print('Found %i transfer templates.' % len(templates))
 
-    # [ ] Update a transfer template.
-    data = {
-        'transfer_template_id': templates[0]['id'],
-        'name': 'Driverless Truck Template',
-        'transporter_facility_license_number': None,
-        'driver_occupational_license_number': None,
-        'driver_name': None,
-        'driver_license_number': None,
-        'phone_number_for_questions': None,
-        'vehicle_make': None,
-        'vehicle_model': None,
-        'vehicle_license_plate_number': None,
-        'destinations': [
-            {
-                'transfer_destination_id': 0,
-                'recipient_license_number': '123-XYZ',
-                'transfer_type_name': 'Transfer',
-                'planned_route': 'I will drive down the road to the place.',
-                'estimated_departure_date_time': '2018-03-06T09:15:00.000',
-                'estimated_arrival_date_time': '2018-03-06T12:24:00.000',
-                'transporters': [
-                    {
-                        'transporter_facility_license_number': '123-ABC',
-                        'driver_occupational_license_number': '50',
-                        'driver_name': 'X',
-                        'driver_license_number': '5',
-                        'phone_number_for_questions': '18005555555',
-                        'vehicle_make': 'X',
-                        'vehicle_model': 'X',
-                        'vehicle_license_plate_number': 'X',
-                        'is_layover': False,
-                        'estimated_departure_date_time': '2018-03-06T12:00:00.000',
-                        'estimated_arrival_date_time': '2018-03-06T21:00:00.000',
-                        'transporter_details': None
-                    }
-                ],
-                # 'packages': [
-                #     {
-                #         'package_label': 'ABCDEF012345670000010026',
-                #         'wholesale_price': None
-                #     },
-                # ],
-            }
-        ],
-    }
+    # [✓] Update a transfer template.
+    params = {'license': facilities[5]['license']['number']}
+    data['transfer_template_id'] = templates[0]['id']
+    data['name'] = 'Premier Hyper Loop Template'
     response = session.post(f'{BASE}/metrc/transfers/templates', json=data, params=params)
     assert response.status_code == 200
     print('Updated a transfer template.')
 
-    # [ ] Delete a transfer template.
+    # [✓] Delete a transfer template.
+    uid = templates[0]['id']
+    params = {'license': facilities[5]['license']['number']}
+    response = session.delete(f'{BASE}/metrc/transfers/templates/{uid}', params=params)
+    assert response.status_code == 200
+    print('Deleted a transfer template.')
 
 
     #-------------------------------------------------------------------
@@ -1175,7 +1176,7 @@ if __name__ == '__main__':
     units = response.json()['data']
     print('Found %i units of measure' % len(units))
 
-    # [ ] Record a lab test result.
+    # [ ] Get a testing package at the lab.
 
 
     # [ ] Create the lab result record.
@@ -1203,6 +1204,12 @@ if __name__ == '__main__':
     }
 
 
+    # [ ] Release lab results.
+
+
+    # [ ] Upload a COA.
+
+
     # [ ] Get a package's lab results.
 
 
@@ -1216,26 +1223,46 @@ if __name__ == '__main__':
     # Sales
     #-------------------------------------------------------------------
 
+    # Define the retailer.
+    retailer = facilities[0]
+
     # [✓] Get customer types.
     response = session.get(f'{BASE}/metrc/types/customers', params=params)
     assert response.status_code == 200
     customer_types = response.json()['data']
     print('Found %i customer types' % len(customer_types))
 
+    # [ ] Get a retail package.
+    for r in date_range("2023-01-01", "2023-01-30"):
+        params = {
+            'license': facilities[0]['license']['number'],
+            'start': r[0],
+            'end': r[1],
+        }
+        response = session.get(f'{BASE}/metrc/packages', params=params)
+        assert response.status_code == 200
+        retail_packages = response.json()['data']
+        print('Found %i retail packages' % len(retail_packages))
+        if len(retail_packages) > 0: break
+
     # [ ] Create a sales receipt for a package.
     data = {
-        'sales_date_time': 'get_timestamp()',
+        'sales_date_time': get_timestamp(),
         'sales_customer_type': 'Patient',
         'patient_license_number': '1',
         'transactions': [
             {
-                'package_label': 'retailer_package.label',
+                'package_label': retail_packages[0]['label'],
                 'quantity': 1.75,
                 'unit_of_measure': 'Grams',
                 'total_amount': 25.0
             }
         ]
     }
+    params = {'license': facilities[0]['license']['number']}
+    response = session.post(f'{BASE}/metrc/transfers', json=data, params=params)
+    assert response.status_code == 200
+    print('Created an external transfer.')
 
     # [ ] Get sales by date.
     date_ranges = [
@@ -1280,6 +1307,11 @@ if __name__ == '__main__':
 
 
     # [ ] Void a sales receipt.
+    uid = sales[0]['id']
+    params = {'license': retailer['license']['number']}
+    response = session.delete(f'{BASE}/metrc/sales/{uid}', params=params)
+    assert response.status_code == 200
+    print('Voided a sale.')
 
 
     #-------------------------------------------------------------------

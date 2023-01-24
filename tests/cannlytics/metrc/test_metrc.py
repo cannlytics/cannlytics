@@ -527,7 +527,7 @@ if __name__ == '__main__':
     track.create_packages(
         [test_package_data],
         license_number=cultivator.license_number,
-        qa=True
+        testing=True
     )
 
     # Get the tested package.
