@@ -31,8 +31,14 @@ if __name__ == '__main__':
 
     # Authentication a session.
     session = requests.Session()
-    session.headers.update({'Authorization': f'Bearer {API_KEY}'})  
+    session.headers.update({'Authorization': f'Bearer {API_KEY}'})
 
+    # Define test namespaces.
+    today = '2023-01-24'
+    strain_name = 'Moonshine Haze'
+    batch_name = 'Moonshine Haze Clone Batch'
+    test_location = 'CAN API Test Location'
+    test_item = 'Moonshine Haze Eighth'
 
     #-------------------------------------------------------------------
     # License management.
@@ -202,6 +208,7 @@ if __name__ == '__main__':
     response = session.get(f'{BASE}/metrc/types/categories', params=params)
     assert response.status_code == 200
     categories = response.json()['data']
+    print('Found %i categories.' % len(categories))
 
     # [✓] Create an item.
     item_name = 'Moonshine Haze Eighth'
@@ -226,12 +233,24 @@ if __name__ == '__main__':
         },
         {
             'item_category': categories[7]['name'],
-            'name': 'Moonshine Haze Teener',
+            'name': 'Moonshine Haze Gram Jar',
             'unit_of_measure': 'Grams',
+            'strain': strain_name,
+        },
+        {
+            'item_category': categories[7]['name'],
+            'name': 'Moonshine Haze Sniffer Jar',
+            'unit_of_measure': 'Grams',
+            'strain': strain_name,
+        },
+        {
+            'item_category': 'Immature Plants',
+            'name': 'Moonshine Haze Clone',
+            'unit_of_measure': 'Each',
             'strain': strain_name,
         }
     ]
-    params = {'license': facilities[0]['license']['number']}
+    params = {'license': facilities[5]['license']['number']}
     response = session.post(f'{BASE}/metrc/items', json=data, params=params)
     assert response.status_code == 200
     print('Created items.')
@@ -297,14 +316,13 @@ if __name__ == '__main__':
     print('Found %i waste types' % len(waste_types))
 
     # [✓] Create a new plant batch.
-    today = '2023-01-21'
-    batch_name = 'Moonshine Haze Hydroponics'
+    batch_name = 'Moonshine Haze Clone Batch'
     data = {
         'name': batch_name,
-        'type': 'Seed',
-        'count': 6,
+        'type': 'Clone',
+        'count': 77,
         'strain': strain_name,
-        'location': 'CAN API Test Location',
+        'location': test_location,
         'actual_date': today,
         'patient_license_number': '',
         'source_plant_batches': None,
@@ -314,28 +332,37 @@ if __name__ == '__main__':
     assert response.status_code == 200
     print('Created batch.')
 
+    # [✓] Get plant batches by date.
+    params = {
+        'license': facilities[5]['license']['number'],
+        'start': '2023-01-24',
+        'end': '2023-01-25',
+    }
+    response = session.get(f'{BASE}/metrc/batches', params=params)
+    assert response.status_code == 200
+    batches = response.json()['data']
+    print('Found %i batches.' % len(batches))
+
     # [✓] Get a plant batch.
     uid = response.json()['data'][0]['id']
     params = {'license': facilities[5]['license']['number']}
     response = session.get(f'{BASE}/metrc/batches/{uid}', params=params)
     assert response.status_code == 200
 
-    # [ ] TODO: Create a package from a batch.
-    batch_tag = 'YOUR_BATCH_TAG'
+    # [✓] Create a package from a batch.
+    uid = response.json()['data'][0]['id']
     data = {
-        # 'id': uid,
-        'id': None,
-        'plant_batch': batch_name,
+        'id': uid,
+        'plant_batch': None, # Specify `plant_batch` if `id` is None.
         'count': 3,
-        # 'location': 'CAN API Test Location',
-        'location': None,
-        'item': 'Moonshine Haze Eighth',
-        'tag': batch_tag,
+        'location': test_location,
+        'item': 'Moonshine Haze Clone',
+        'tag': 'redacted',
         'patient_license_number': None,
-        'note': 'A package containing 3 clones plucked from the batch.',
+        'note': 'A package containing 3 plucky clones.',
         'is_trade_sample': False,
         'is_donation': False,
-        'actual_date': today
+        'actual_date': '2023-01-24'
     }
     params = {
         'license': facilities[5]['license']['number'],
@@ -345,14 +372,13 @@ if __name__ == '__main__':
     assert response.status_code == 200
     print('Created a package of clones from a plant batch.')
 
-    # [ ] TODO: Flower a batch.
-    plant_tag = 'YOUR_PLANT_TAG'
+    # [✓] Flower 2 plants in a batch.
     data = {
         'name': batch_name,
         'count': 2,
-        'starting_tag': plant_tag,
-        'growth_phase': 'Vegetative',
-        'new_location': 'CAN API Test Location',
+        'starting_tag': '1A4FF0000000002000000123',
+        'growth_phase': 'Flowering',
+        'new_location': test_location,
         'growth_date': today,
     }
     params = {
@@ -452,11 +478,27 @@ if __name__ == '__main__':
     # Plants
     #-------------------------------------------------------------------
 
+    # [✓] Create a plant.
+    data = {
+        'plant_label': '1A4FF0000000002000000150',
+        'plant_batch_name': batch_name + ' #2',
+        'plant_batch_type': 'Clone',
+        'plant_count': 1,
+        'location_name': test_location,
+        'strain_name': strain_name,
+        'patient_license_number': None,
+        'actual_date': today,
+    }
+    params = {'license': facilities[5]['license']['number']}
+    response = session.post(f'{BASE}/metrc/plants', json=data, params=params)
+    assert response.status_code == 200
+    print('Created plant.')
+
     # [✓] Get plants created on a specific day.
     params = {
         'license': facilities[5]['license']['number'],
-        'start': '2023-01-19',
-        'end': '2023-01-20',
+        'start': '2023-01-23',
+        'end': '2023-01-24',
     }
     response = session.get(f'{BASE}/metrc/plants', params=params)
     assert response.status_code == 200
@@ -469,14 +511,13 @@ if __name__ == '__main__':
     growth_phases = response.json()['data']
     print('Found %i growth phases' % len(growth_phases))
 
-    # [ ] TODO: Change the growth phase of a plant from `Vegetative` to `Flowering`.
-    new_tag = 'PLANT_TAG'
+    # [✓] Change the growth phase of a plant from `Vegetative` to `Flowering`.
     data = {
         'id': None,
         'label': plants[0]['label'],
-        'new_tag': new_tag,
+        'new_tag': '1A4FF0000000002000000150',
         'growth_phase': 'Flowering',
-        'new_location': 'CAN API Test Flower Bed',
+        'new_location': test_location,
         'growth_date': today,
     }
     params = {
@@ -486,6 +527,18 @@ if __name__ == '__main__':
     response = session.post(f'{BASE}/metrc/plants', json=data, params=params)
     assert response.status_code == 200
     print('Flowered plant.')
+
+    # [✓] Get flowering plants.
+    params = {
+        'license': facilities[5]['license']['number'],
+        'type': 'flowering',
+        'start': '2023-01-24',
+        'end': '2023-01-25',
+    }
+    response = session.get(f'{BASE}/metrc/plants', params=params)
+    assert response.status_code == 200
+    plants = response.json()['data']
+    print('Found %i plants.' % len(plants))
 
     # [✓] Move a plant to a different room.
     data = {
@@ -545,12 +598,12 @@ if __name__ == '__main__':
     assert response.status_code == 200
     print('Manicured plant.')
 
-    # [ ] TODO: Harvest a plant.
+    # [✓] Harvest from a plant.
     data = {
         'plant': plants[-1]['label'],
         'weight': 1.23,
         'unit_of_weight': 'Grams',
-        'drying_location': 'CAN API Test Flower Bed',
+        'drying_location': test_location,
         'harvest_name': plants[-1]['strain_name'] + f' Harvest {today}',
         'patient_license_number': None,
         'actual_date': today
@@ -561,7 +614,7 @@ if __name__ == '__main__':
     }
     response = session.post(f'{BASE}/metrc/plants', json=data, params=params)
     assert response.status_code == 200
-    print('Harvested plant.')
+    print('Harvested from a plant.')
 
     # [✓] Destroy a plant.
     uid = plants[-2]['id']
@@ -577,20 +630,20 @@ if __name__ == '__main__':
     # [✓] Get harvests created on a specific day.
     params = {
         'license': facilities[5]['license']['number'],
-        'start': '2023-01-22',
-        'end': '2023-01-23',
+        'start': '2023-01-24',
+        'end': '2023-01-25',
     }
     response = session.get(f'{BASE}/metrc/harvests', params=params)
     assert response.status_code == 200
     harvests = response.json()['data']
     print('Found %i harvests.' % len(harvests))
 
-    # [ ] TODO: Create a package.
+    # [✓] Create a package.
     harvest_id = harvests[0]['id']
     data = {
-        'tag': 'YOUR_PACKAGE_TAG',
-        'location': 'CAN API Test Flower Bed',
-        'item': 'Moonshine Haze 1g Jar',
+        'tag': '1A4FF0100000002000000088',
+        'location': test_location,
+        'item': 'Moonshine Haze Shake',
         'unit_of_weight': 'Grams',
         'patient_license_number': None,
         'note': 'Golden nug in this package.',
@@ -608,7 +661,7 @@ if __name__ == '__main__':
             {
                 'harvest_id': harvest_id,
                 'harvest_name': None,
-                'weight': 1,
+                'weight': 1.0,
                 'unit_of_weight': 'Grams'
             }
         ]
@@ -621,7 +674,33 @@ if __name__ == '__main__':
     assert response.status_code == 200
     print('Created package from harvest.')
 
-    # [ ] TODO: Create testing package.
+    # [✓] Create a testing package.
+    data = {
+        'tag': '1A4FF0100000002000000090',
+        'location': test_location,
+        'item': 'Moonshine Haze Shake',
+        'unit_of_weight': 'Grams',
+        'patient_license_number': None,
+        'note': 'Golden nug in this package.',
+        'is_production_batch': False,
+        'production_batch_number': None,
+        'is_trade_sample': False,
+        'is_donation': False,
+        'product_requires_remediation': False,
+        'remediate_product': False,
+        'remediation_method_id': None,
+        'remediation_date': None,
+        'remediation_steps': None,
+        'actual_date': today,
+        'ingredients': [
+            {
+                'harvest_id': harvest_id,
+                'harvest_name': None,
+                'weight': 0.1,
+                'unit_of_weight': 'Grams'
+            }
+        ]
+    }
     params = {
         'license': facilities[5]['license']['number'],
         'action': 'create-testing-packages',
@@ -697,21 +776,20 @@ if __name__ == '__main__':
     # [✓] Get packages by date.
     params = {
         'license': facilities[5]['license']['number'],
-        'start': '2023-01-19',
-        'end': '2023-01-20',
+        'start': '2023-01-24',
+        'end': '2023-01-25',
     }
     response = session.get(f'{BASE}/metrc/packages', params=params)
     assert response.status_code == 200
     packages = response.json()['data']
     print('Found %i packages.' % len(packages))
 
-    # [ ] TODO: Create a package from another package.
-    new_package_tag = 'YOUR_SECOND_PACKAGE_TAG'
-    new_package_data = {
-        'tag': 'YOUR_SECOND_PACKAGE_TAG',
-        'location': 'CAN API Test Flower Bed',
-        'item': 'Moonshine Haze Bowl',
-        'quantity': 0.25,
+    # [✓] Create a package from another package.
+    data = {
+        'tag': '1A4FF0100000002000000112',
+        'location': test_location,
+        'item': 'Moonshine Haze Shake',
+        'quantity': 0.1,
         'unit_of_measure': 'Grams',
         'patient_license_number': None,
         'note': 'This is a tiny sample.',
@@ -723,17 +801,21 @@ if __name__ == '__main__':
         'actual_date': today,
         'ingredients': [
             {
-                'package': 'traced_package.label',
-                'quantity': 0.25,
+                'package': packages[0]['label'],
+                'quantity': 0.1,
                 'unit_of_measure': 'Grams'
             }
         ]
     }
+    params = {'license': facilities[5]['license']['number']}
+    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
+    assert response.status_code == 200
+    print('Created a package from another package.')
 
-    # [ ] Change the item of a package.
+    # [✓] Change the item of a package.
     data = {
-        'label': packages[0]['label'],
-        'item': 'Moonshine Haze Shake'
+        'label': packages[1]['label'],
+        'item': 'Moonshine Haze Sniffer Jar'
     }
     params = {
         'license': facilities[5]['license']['number'],
@@ -774,8 +856,29 @@ if __name__ == '__main__':
     assert response.status_code == 200
     print('Adjusted the weight of a package.')
 
-    # [ ] Create a plant batch from a package.
+    # [✓] Create a plant batch from a package.
+    data = {
+        'package_label': packages[-1]['label'],
+        'package_adjustment_amount': 1.0,
+        'package_adjustment_unit_of_measure_name': 'Ounces',
+        'plant_batch_name': batch_name + ' #4',
+        'plant_batch_type': 'Clone',
+        'plant_count': 1,
+        'location_name': test_location,
+        'strain_name': strain_name,
+        'patient_license_number': None,
+        'planted_date': today,
+        'unpackaged_date': today
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'create-plant-batches',
+    }
+    response = session.post(f'{BASE}/metrc/packages', json=data, params=params)
+    assert response.status_code == 200
+    print('Created a plant batch from a package.')
 
+    # TODO: Adjust the weight of a package to 0.
 
     # [ ] Finish a package.
     data = {
@@ -801,6 +904,7 @@ if __name__ == '__main__':
     print('Unfinished a package.')
 
     # [ ] Remediate a package.
+    # TODO: This requires that the package has failed lab testing.
     data = {
         'package_label': packages[0]['label'],
         'remediation_method_name': 'Further Drying',
@@ -1103,6 +1207,9 @@ if __name__ == '__main__':
 
 
     # [ ] Get lab results for multiple packages.
+
+
+    # TODO: Fail a sample.
 
 
     #-------------------------------------------------------------------

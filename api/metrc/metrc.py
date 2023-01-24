@@ -54,6 +54,7 @@ from cannlytics.utils import (
     camelcase,
     camel_to_snake,
     clean_dictionary,
+    clean_nested_dictionary,
     snake_case,
 )
 
@@ -95,8 +96,8 @@ def get_objects(
 def create_or_update_objects(
         request: Request,
         track: Metrc,
-        create_method,
-        update_method,
+        create_method: str,
+        update_method: str,
     ) -> Response:
     """Create or update given API items."""
     create_items, update_items = [], []
@@ -115,13 +116,23 @@ def create_or_update_objects(
         else:
             create_items.append(item)
     if create_items:
-        create_items = [clean_dictionary(x, camelcase) for x in create_items]
-        create_items = getattr(track, create_method)(create_items, return_obs=True)
+        create_items = [clean_nested_dictionary(x, camelcase) for x in create_items]
+        try:
+            create_items = getattr(track, create_method)(create_items, return_obs=True)
+        except MetrcAPIError as error:
+            log_metrc_error(request, create_method, str(error))
+            response = {'error': True, 'message': str(error)}
+            return Response(response, status=error.response.status_code)
         if not isinstance(create_items, list):
             create_items = [create_items]
     if update_items:
-        update_items = [clean_dictionary(x, camelcase) for x in update_items]
-        update_items = getattr(track, update_method)(update_items, return_obs=True)
+        update_items = [clean_nested_dictionary(x, camelcase) for x in update_items]
+        try:
+            update_items = getattr(track, update_method)(update_items, return_obs=True)
+        except MetrcAPIError as error:
+            log_metrc_error(request, update_method, str(error))
+            response = {'error': True, 'message': str(error)}
+            return Response(response, status=error.response.status_code)
         if not isinstance(update_items, list):
             update_items = [update_items]
     items = create_items + update_items
@@ -181,10 +192,11 @@ def delete_objects(
 def perform_method(request, track, data, method, **kwargs):
     """Perform a given method in the Metrc API given data."""
     # FIXME: Also update Firestore as these update.
+    # FIXME: Clean nested dictionary handling lists!
     if isinstance(data, list):
-        data = [clean_dictionary(x, camelcase) for x in data]
+        data = [clean_nested_dictionary(x, camelcase) for x in data]
     elif isinstance(data, dict):
-        data = clean_dictionary(data, camelcase)
+        data = clean_nested_dictionary(data, camelcase)
     try:
         objs = getattr(track, method)(data, return_obs=True, **kwargs)
     except MetrcAPIError as error:
@@ -605,7 +617,7 @@ def locations(request: Request, area_id: Optional[str] = ''):
                 return Response({'error': True, 'message': str(error)}, status=error.response.status_code)
         if update_items:
             try:
-                update_items = [clean_dictionary(x, camelcase) for x in update_items]
+                update_items = [clean_nested_dictionary(x, camelcase) for x in update_items]
                 track.update_locations(update_items, return_obs=True)
             except MetrcAPIError as error:
                 log_metrc_error(request, 'update_locations', str(error))
@@ -731,14 +743,10 @@ def items(request: Request, item_id: Optional[str] = ''):
 
     # Create / update item(s).
     if request.method == 'POST':
-        try:
-            return create_or_update_objects(request, track,
-                create_method='create_items',
-                update_method='update_items',
-            )
-        except MetrcAPIError as error:
-            log_metrc_error(request, 'update_items', str(error))
-            return Response({'error': True, 'message': str(error)}, status=error.response.status_code)
+        return create_or_update_objects(request, track,
+            create_method='create_items',
+            update_method='update_items',
+        )
 
     # Delete item(s).
     if request.method == 'DELETE':

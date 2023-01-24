@@ -1264,13 +1264,16 @@ class Metrc(object):
         return self.manage_batches(objs, 'createplantings', license_number or self.primary_license)
 
 
-    def create_plant_package_from_batch(self, data, license_number='', return_obs=False):
+    def create_plant_package_from_batch(self, data, license_number='', from_mother_plant=False, return_obs=False):
         """Create a plant package from a batch.
         Args:
             data (dict): The plant package data.
             license_number (str): A specific license number.
         """
-        self.manage_batches([data], 'create/packages/frommotherplant', license_number=license_number)
+        if from_mother_plant:
+            return self.manage_batches([data], 'create/packages/frommotherplant', license_number=license_number)
+        else:
+            return self.manage_batches([data], 'createpackages', license_number=license_number)        
         # TODO: Optionally return created package.
    
 

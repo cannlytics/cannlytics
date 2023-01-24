@@ -280,7 +280,7 @@ def clean_dictionary(data: dict, function: Callable = snake_case) -> dict:
 
 def clean_nested_dictionary(data: dict, function: Callable = snake_case) -> dict:
     """Format nested (at most 2 levels) dictionary keys with a given function,
-    snake case by default.
+    snake case by default. Handles list of dictionaries.
     Args:
         d (dict): A dictionary to clean, allowing dictionaries as values.
         function (function): A function to apply to each key.
@@ -289,10 +289,19 @@ def clean_nested_dictionary(data: dict, function: Callable = snake_case) -> dict
     """
     clean = clean_dictionary(data, function)
     for k, value in clean.items():
-        try:
-            clean[k] = clean_dictionary(value, function)
-        except AttributeError:
-            pass
+        if isinstance(value, list):
+            x = []
+            for v in value:
+                try:
+                    x.append(clean_nested_dictionary(v, function))
+                except:
+                    x.append(v)
+            clean[k] = x
+        elif isinstance(value, dict):
+            try:
+                clean[k] = clean_nested_dictionary(value, function)
+            except AttributeError:
+                pass
     return clean
 
 

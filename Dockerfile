@@ -3,7 +3,7 @@
 #
 # Auhtors: Keegan Skeate <keegan@cannlytics.com>
 # Created: 1/5/2021
-# Updated: 1/19/2023
+# Updated: 1/23/2023
 # License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 #------------------------------------------------------------------
@@ -45,21 +45,21 @@ ENV PYTHONUNBUFFERED True
 
 # TEST:
 
-# Install Chrome (to use Selenium for web automation).
-RUN apt-get install wget -y
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
+# # Install Chrome (to use Selenium for web automation).
+# RUN apt-get install wget -y
+# RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+# RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
 
-# Install C libraries.
-RUN apt-get update && apt-get install -y gconf-service libasound2 libatk1.0-0 libcairo2 libcups2 libfontconfig1 libgdk-pixbuf2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libxss1 fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils imagemagick libzbar0
+# # Install C libraries.
+# RUN apt-get update && apt-get install -y gconf-service libasound2 libatk1.0-0 libcairo2 libcups2 libfontconfig1 libgdk-pixbuf2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libxss1 fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils imagemagick libzbar0
 
-# Install `zbar`.
-RUN apt-get update && apt-get install -y zbar-tools libzbar-dev python-zbar
-RUN dpkg -L libzbar-dev; ls -l /usr/include/zbar.h
+# # Install `zbar`.
+# RUN apt-get update && apt-get install -y zbar-tools libzbar-dev python-zbar
+# RUN dpkg -L libzbar-dev; ls -l /usr/include/zbar.h
 
-# Setup `zbar` environment variables.
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
+# # Setup `zbar` environment variables.
+# ENV LC_ALL C.UTF-8
+# ENV LANG C.UTF-8
 
 # DEV:
 
