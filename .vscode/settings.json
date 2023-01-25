@@ -353,6 +353,7 @@
     "iterrows",
     "itertuples",
     "jinga",
+    "jobtypes",
     "jwts",
     "keegan",
     "keychain",

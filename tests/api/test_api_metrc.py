@@ -8,10 +8,19 @@ Created: 1/12/2023
 Updated: 1/22/2023
 License: MIT License <https://opensource.org/licenses/MIT>
 """
+# Standard imports:
 import os
-import requests
+
+# External imports:
 from dotenv import dotenv_values
-from cannlytics.utils import get_timestamp
+import requests
+
+# Internal imports:
+from cannlytics.utils import (
+    get_date_range,
+    encode_pdf,
+    get_timestamp,
+)
 
 # Define the endpoint.
 ENDPOINT = 'metrc'
@@ -994,6 +1003,7 @@ if __name__ == '__main__':
     lab = facilities[15]
     cultivator = facilities[5]
     courier = employees[0]
+    retailer = facilities[0]
     transfer_data = {
         'shipper_license_number': cultivator['license']['number'],
         'shipper_name': cultivator['name'],
@@ -1003,7 +1013,7 @@ if __name__ == '__main__':
         'shipper_address_city': 'Oklahoma City',
         'shipper_address_state': 'OK',
         'shipper_address_postal_code': '123',
-        'transporter_facility_license_number': lab['license']['number'],
+        'transporter_facility_license_number': retailer['license']['number'],
         'driver_occupational_license_number': courier['license']['number'],
         'driver_name': courier['full_name'],
         'driver_license_number': 'xyz',
@@ -1013,7 +1023,7 @@ if __name__ == '__main__':
         'vehicle_license_plate_number': 'xyz',
         'destinations': [
             {
-                'recipient_license_number': lab['license']['number'],
+                'recipient_license_number': retailer['license']['number'],
                 'transfer_type_name': 'Beginning Inventory Transfer',
                 'planned_route': 'Hyper-tube.',
                 'estimated_departure_date_time': get_timestamp(),
@@ -1022,7 +1032,7 @@ if __name__ == '__main__':
                 'gross_unit_of_weight_id': None,
                 'transporters': [
                     {
-                        'transporter_facility_license_number': lab['license']['number'],
+                        'transporter_facility_license_number': retailer['license']['number'],
                         'driver_occupational_license_number': courier['license']['number'],
                         'driver_name': courier['full_name'],
                         'driver_license_number': 'xyz',
@@ -1038,8 +1048,8 @@ if __name__ == '__main__':
                 ],
                 'packages': [
                     {
-                        'package_label': testing_package['label'],
-                        'harvest_name': testing_package['source_harvest_names'],
+                        'package_label': packages[1]['label'],
+                        'harvest_name': packages[1]['source_harvest_names'],
                         'item_name': packages[1]['item']['name'],
                         'quantity': 0.025,
                         'unit_of_measure_name': 'Grams',
@@ -1061,8 +1071,9 @@ if __name__ == '__main__':
 
     # [✓] Get external transfers.
     params = {
-        'license': facilities[5]['license']['number'],
+        'license': facilities[0]['license']['number'],
         'start': get_timestamp(past=30),
+        'type': 'rejected',
     }
     response = session.get(f'{BASE}/metrc/transfers', params=params)
     assert response.status_code == 200
@@ -1158,6 +1169,9 @@ if __name__ == '__main__':
     # Lab results
     #-------------------------------------------------------------------
 
+    # Define the lab.
+    lab = facilities[15]
+
     # [✓] Get test statuses.
     response = session.get(f'{BASE}/metrc/types/test-statuses', params=params)
     assert response.status_code == 200
@@ -1177,46 +1191,79 @@ if __name__ == '__main__':
     print('Found %i units of measure' % len(units))
 
     # [ ] Get a testing package at the lab.
-
+    params = {
+        'license': lab['license']['number'],
+        # 'start': '2023-01-22',
+        # 'end': '2023-01-23'
+    }
+    response = session.get(f'{BASE}/metrc/packages', params=params)
+    assert response.status_code == 200
+    testing_packages = response.json()['data']
+    print('Found %i testing packages.' % len(testing_packages))
 
     # [ ] Create the lab result record.
+    encoded_coa = encode_pdf('../assets/pdfs/example_coa.pdf')
     lab_result_data = {
-        'Label': 'test_package_label',
-        'ResultDate': 'get_timestamp()',
-        'LabTestDocument': {
-            'DocumentFileName': 'new-old-time-moonshine.pdf',
-            'DocumentFileBase64': 'encoded_pdf',
-        },
-        'Results': [
+        'label': 'test_package_label',
+        'result_date': get_timestamp(),
+        # Optional: Upload encoded COA PDF.
+        # 'lab_test_document': {
+        #     'document_file_name': 'coa.pdf',
+        #     'document_file_base64': encoded_coa,
+        # },
+        'results': [
             {
-                'LabTestTypeName': 'THC',
-                'Quantity': 0.07,
-                'Passed': True,
-                'Notes': ''
+                'lab_test_type_name': 'CBD',
+                'quantity': 23.33,
+                'passed': True,
+                'notes': ''
             },
             {
-                'LabTestTypeName': 'CBD',
-                'Quantity': 23.33,
-                'Passed': True,
-                'Notes': ''
+                'lab_test_type_name': 'THC',
+                'quantity': 0.07,
+                'passed': True,
+                'notes': ''
             },
         ]
     }
 
+    # TODO: Fail a sample.
+
 
     # [ ] Release lab results.
+    data = {
+        'package_label': 'PACKAGE_LABEL',
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'release',
+    }
+    response = session.post(f'{BASE}/metrc/tests', json=data, params=params)
+    assert response.status_code == 200
+    print('Released lab results.')
 
 
     # [ ] Upload a COA.
+    data = {
+        'lab_test_result_id': 1,
+        'document_file_name': 'coa.pdf',
+        'document_file_base64': encoded_coa,
+    }
+    params = {
+        'license': facilities[5]['license']['number'],
+        'action': 'coas',
+    }
+    response = session.post(f'{BASE}/metrc/tests', json=data, params=params)
+    assert response.status_code == 200
+    print('Uploaded COA.')
 
 
     # [ ] Get a package's lab results.
-
-
-    # [ ] Get lab results for multiple packages.
-
-
-    # TODO: Fail a sample.
+    test_id = 'TEST_ID'
+    response = session.get(f'{BASE}/metrc/tests/{test_id}', params=params)
+    assert response.status_code == 200
+    result = response.json()['data']
+    print('Found lab result.')
 
 
     #-------------------------------------------------------------------
@@ -1232,53 +1279,59 @@ if __name__ == '__main__':
     customer_types = response.json()['data']
     print('Found %i customer types' % len(customer_types))
 
-    # [ ] Get a retail package.
-    for r in date_range("2023-01-01", "2023-01-30"):
+    # [✓] Get a retail package.
+    for dates in get_date_range('2021-01-01', '2021-04-20'):
         params = {
             'license': facilities[0]['license']['number'],
-            'start': r[0],
-            'end': r[1],
+            'start': dates[0],
+            'end': dates[1],
         }
         response = session.get(f'{BASE}/metrc/packages', params=params)
         assert response.status_code == 200
         retail_packages = response.json()['data']
-        print('Found %i retail packages' % len(retail_packages))
-        if len(retail_packages) > 0: break
+        print(dates[0], 'Found %i retail packages' % len(retail_packages))
+        if len(retail_packages) > 0:
+            break
 
-    # [ ] Create a sales receipt for a package.
+    # [✓] Create a sales receipt for a package.
     data = {
         'sales_date_time': get_timestamp(),
         'sales_customer_type': 'Patient',
         'patient_license_number': '1',
+        # "PatientLicenseNumber": null,
+        # "CaregiverLicenseNumber": null,
+        # "IdentificationMethod": null,
+        # "PatientRegistrationLocationId": null,
         'transactions': [
             {
                 'package_label': retail_packages[0]['label'],
                 'quantity': 1.75,
                 'unit_of_measure': 'Grams',
-                'total_amount': 25.0
+                'total_amount': 25.0,
+                # "UnitThcPercent": null,
+                # "UnitThcContent": null,
+                # "UnitThcContentUnitOfMeasure": null,
+                # "UnitWeight": null,
+                # "UnitWeightUnitOfMeasure": null,
+                # "InvoiceNumber": null,
+                # "Price": null,
+                # "ExciseTax": null,
+                # "CityTax": null,
+                # "CountyTax": null,
+                # "MunicipalTax": null,
+                # "DiscountAmount": null,
+                # "SubTotal": null,
+                # "SalesTax": null,
             }
         ]
     }
     params = {'license': facilities[0]['license']['number']}
-    response = session.post(f'{BASE}/metrc/transfers', json=data, params=params)
+    response = session.post(f'{BASE}/metrc/sales', json=data, params=params)
     assert response.status_code == 200
-    print('Created an external transfer.')
+    print('Created a sales receipt.')
 
-    # [ ] Get sales by date.
-    date_ranges = [
-        ('2023-01-13', '2023-01-14'),
-        ('2023-01-14', '2023-01-15'),
-        ('2023-01-15', '2023-01-16'),
-        ('2023-01-16', '2023-01-17'),
-        ('2023-01-17', '2023-01-18'),
-        ('2023-01-18', '2023-01-19'),
-        ('2023-01-19', '2023-01-20'),
-        ('2023-01-20', '2023-01-21'),
-        ('2023-01-21', '2023-01-22'),
-        ('2023-01-22', '2023-01-23'),
-        ('2023-01-23', '2023-01-24')
-    ]
-    for date_range in date_ranges:
+    # [✓] Get sales by date.
+    for date_range in get_date_range('2023-01-22', '2023-01-25'):
         start, end = date_range
         params = {
             'license': facilities[0]['license']['number'],
@@ -1288,30 +1341,50 @@ if __name__ == '__main__':
         response = session.get(f'{BASE}/metrc/sales', params=params)
         assert response.status_code == 200
         sales = response.json()['data']
-        print('Found %i sales on %s.' % (len(sales), start))
+        print(start, 'Found %i sales.' % len(sales))
         if len(sales) > 0:
             break
 
-    # [ ] Get a sale.
-    for i in range(400, 420):
-        uid = str(i)
-        params = {'license': facilities[0]['license']['number']}
-        response = session.get(f'{BASE}/metrc/sales/{uid}', params=params)
-        assert response.status_code == 200
-        print(response.json())
-        if response.json()['data']:
-            break
+    # [✓] Get a sale given its Id.
+    uid = sales[0]['id']
+    params = {'license': facilities[0]['license']['number']}
+    response = session.get(f'{BASE}/metrc/sales/{uid}', params=params)
+    assert response.status_code == 200
+    sales = response.json()['data']
+    print('Found sale', sales[0]['id'])
 
+    # [✓] Update a sales receipt.
+    data['id'] = sales[0]['id']
+    data['transactions'][0]['total_amount'] = 4.20
+    params = {'license': facilities[0]['license']['number']}
+    response = session.post(f'{BASE}/metrc/sales', json=data, params=params)
+    assert response.status_code == 200
+    print('Updated a sales receipt.')
 
-    # [ ] Update a sales receipt.
-
-
-    # [ ] Void a sales receipt.
+    # [✓] Void a sales receipt.
     uid = sales[0]['id']
     params = {'license': retailer['license']['number']}
     response = session.delete(f'{BASE}/metrc/sales/{uid}', params=params)
     assert response.status_code == 200
     print('Voided a sale.')
+
+
+    # TODO: GET /sales/v1/transactions (daily statistics)
+
+
+    # TODO: GET /sales/v1/patientregistration/locations`
+
+
+    # TODO: GET /sales/v1/transactions
+
+
+
+    # TODO: Add transactions on a particular day.
+    # POST /sales/v1/transactions/{date}
+
+
+    # TODO: Update transactions on a particular day.
+    # PUT /sales/v1/transactions/{date}
 
 
     #-------------------------------------------------------------------

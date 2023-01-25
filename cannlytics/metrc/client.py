@@ -354,6 +354,13 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('put', url, data=data, params=params)
 
+    
+    # TODO: Implement state-specific endpoints:
+    # - POST /sales/v1/deliveries/retailer/depart
+    # - POST /sales/v1/deliveries/retailer/restock
+    # - POST /sales/v1/deliveries/retailer/sale
+    # - POST /sales/v1/deliveries/retailer/end
+
 
     #-------------------------------------------------------------------
     # Harvests
@@ -606,6 +613,11 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('delete', url, params=params)
 
+
+    # TODO: Implement new item endpoints:
+    # - GET /items/v1/brands
+    # - GET /items/v1/photo/{id}
+    # - POST /items/v1/photo
 
     #-------------------------------------------------------------------
     # Lab Results
@@ -984,18 +996,6 @@ class Metrc(object):
         # TODO: Optionally return updated packages.
 
 
-    # FIXME: Does this Metrc API endpoint exist? Test and find out.
-    def delete_package(self, uid, license_number=''):
-        """Delete a package.
-        Args:
-            uid (str): The UID of a package to delete.
-            license_number (str): A specific license number.
-        """
-        url = METRC_PACKAGES_URL % uid
-        params = self.format_params(license_number=license_number or self.primary_license)
-        return self.request('delete', url, params=params)
-
-
     def change_package_items(self, data, license_number='', return_obs=False):
         """Update package items.
         Args:
@@ -1070,7 +1070,8 @@ class Metrc(object):
         """Get licensee member patients.
         Args:
             uid (str): A UID for a patient.
-            action (str): An optional filter to apply: `active`.
+            action (str): An optional filter to apply: `active` or
+                `statuses/{patientLicenseNumber}` in certain states (e.g. mi).
             license_number (str): A licensee's license number to filter by.
         """
         if uid:
@@ -1492,7 +1493,7 @@ class Metrc(object):
     
 
 
-    # TODO: "additives/bylocation")
+    # TODO: Implement endpoint: "additives/bylocation"
 
 
     #-------------------------------------------------------------------
@@ -1968,9 +1969,9 @@ class Metrc(object):
     # Transfer Templates
     #-------------------------------------------------------------------
 
-    # FIXME: Implement the following 2 endpoints:
-    # GET /transfers/v1/templates/{id}/transporters
-    # GET /transfers/v1/templates/{id}/transporters/details
+    # TODO: Implement remaining transfer template endpoints:
+    # - GET /transfers/v1/templates/{id}/transporters
+    # - GET /transfers/v1/templates/{id}/transporters/details
 
     def get_transfer_templates(
             self,
@@ -2071,8 +2072,35 @@ class Metrc(object):
 
 
     #-------------------------------------------------------------------
+    # Processing (new endpoint for NJ!)
+    #-------------------------------------------------------------------
+
+    # TODO: Implement:
+    # - GET /processing/v1/{id}
+    # - GET /processing/v1/active
+    # - GET /processing/v1/inactive
+    # - POST /processing/v1/createpackages
+    # - POST /processing/v1/start
+    # - POST /processing/v1/adjust
+    # - PUT /processing/v1/finish
+    # - PUT /processing/v1/unfinish
+    # - DELETE /processing/v1/{id}
+    # - GET /processing/v1/jobtypes/active
+    # - GET /processing/v1/jobtypes/inactive
+    # - POST /processing/v1/jobtypes
+    # - PUT /processing/v1/jobtypes
+    # - DELETE /processing/v1/jobtypes/{id}
+    # - GET /processing/v1/jobtypes/attributes
+    # - GET /processing/v1/jobtypes/categories
+
+
+    #-------------------------------------------------------------------
     # Miscellaneous
     #-------------------------------------------------------------------
+
+
+    # TODO: GET /caregivers/v1/status/{caregiverLicenseNumber}
+
 
     def get_units_of_measure(self, license_number=''):
         """Get all units of measurement.

@@ -667,7 +667,7 @@ def locations(request: Request, area_id: Optional[str] = ''):
 # Packages
 #-----------------------------------------------------------------------
 
-@api_view(['GET', 'POST', 'DELETE'])
+@api_view(['GET', 'POST'])
 def packages(request: Request, package_id: Optional[str] = ''):
     """Get, update, and delete packages for a given license number."""
 
@@ -750,9 +750,6 @@ def packages(request: Request, package_id: Optional[str] = ''):
                 update_method='update_packages',
             )
 
-    # Delete package(s).
-    if request.method == 'DELETE':
-        return delete_objects(request, track, 'delete_package', package_id)
 
 #-----------------------------------------------------------------------
 # Items
@@ -1081,6 +1078,25 @@ def transfers(request: Request, transfer_id: Optional[str] = ''):
 
     # Get transfer data.
     if request.method == 'GET':
+
+        # FIXME: Implement:
+            # - /transfers/v1/delivery/package/{id}/requiredlabtestbatches
+            # - /transfers/v1/delivery/{id}/packages/wholesale
+            # - /transfers/v1/delivery/{id}/packages
+
+        # Get transfer packages.
+        # action = snake_case(request.query_params.get('action', transfer_id))
+        if transfer_id == 'packages':
+            action = request.query_params.get('type', 'packages')
+            if action == 'wholesale':
+                action = 'packages/wholesale'
+            elif action == 'testing':
+                action = 'requiredlabtestbatches'
+            return perform_method(request, track, transfer_id,
+                'get_transfer_packages', action=action)
+        
+
+        # Otherwise get transfers.
         return get_objects(request, track, 'get_transfers',
             uid=transfer_id,
             transfer_type=request.query_params.get('type', 'incoming'),
@@ -1092,6 +1108,9 @@ def transfers(request: Request, transfer_id: Optional[str] = ''):
     # Create / update transfers.
     # FIXME: Updating transfers causes an error if returning data.
     if request.method == 'POST':
+
+        
+
         return create_or_update_objects(request, track,
                 create_method='create_transfers',
                 update_method='update_transfers',

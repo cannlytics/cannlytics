@@ -670,6 +670,29 @@ def format_iso_date(date: str, sep: Optional[str] = '/') -> str:
     return '-'.join([yyyy, mm, dd])
 
 
+def get_date_range(start_date: str, end_date: str):
+    """Generates a list of tuples containing ISO-formatted date strings
+    for each consecutive day in a given range of dates.
+    Args:
+        start_date (str): The start date in the format '%Y-%m-%d'.
+        end_date (str): The end date in the format '%Y-%m-%d'.
+    Returns:
+        The output will be a list of tuples containing date strings in
+        format '%Y-%m-%d'
+    Credit: ChatGPT <https://chat.openai.com/chat>
+    """
+    start_date = datetime.strptime(start_date, '%Y-%m-%d')
+    end_date = datetime.strptime(end_date, '%Y-%m-%d')
+    delta = timedelta(days=1)
+    date_range = []
+    while start_date <= end_date:
+        start = start_date.strftime('%Y-%m-%d')
+        end = (start_date + delta).strftime('%Y-%m-%d')
+        date_range.append((start, end))
+        start_date += delta
+    return date_range
+
+
 def get_timestamp(
         date: Optional[str] = None,
         past: Optional[int] = 0,

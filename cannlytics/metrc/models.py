@@ -920,11 +920,6 @@ class Package(Model):
                 })
         self.client.change_package_items(data)
 
-    def delete(self):
-        """Delete the package."""
-        self.client.delete_package(self.id)
-
-
 
 class Patient(Model):
     """A class that represents a cannabis patient.
@@ -1757,6 +1752,9 @@ class Transaction(Model):
         data = remove_dict_fields(data, self.RETURNED_VALUES.keys())
         data = remove_dict_nulls(data)
         self.client.update_transactions([data], self._license)
+
+
+# TODO: Create a Job or ProcessingJob class.
 
 
 class Waste(Model):
