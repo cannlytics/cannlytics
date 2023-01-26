@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/12/2023
-Updated: 1/22/2023
+Updated: 1/26/2023
 License: MIT License <https://opensource.org/licenses/MIT>
 """
 # Standard imports:
@@ -22,9 +22,6 @@ from cannlytics.utils import (
     get_timestamp,
 )
 
-# Define the endpoint.
-ENDPOINT = 'metrc'
-
 # Dev: Test with the development server.
 BASE = 'http://127.0.0.1:8000/api'
 
@@ -34,6 +31,9 @@ BASE = 'http://127.0.0.1:8000/api'
 # Load your API key to pass in the authorization header as a bearer token.
 config = dotenv_values('../../.env')
 API_KEY = config['CANNLYTICS_API_KEY']
+
+# Define the URL endpoint.
+ENDPOINT = 'metrc'
 
 
 # === Tests ===
@@ -1190,27 +1190,23 @@ if __name__ == '__main__':
     units = response.json()['data']
     print('Found %i units of measure' % len(units))
 
-    # [ ] Get a testing package at the lab.
-    params = {
-        'license': lab['license']['number'],
-        # 'start': '2023-01-22',
-        # 'end': '2023-01-23'
-    }
+    # [✓] Get testing package at the lab.
+    params = {'license': lab['license']['number'],}
     response = session.get(f'{BASE}/metrc/packages', params=params)
     assert response.status_code == 200
     testing_packages = response.json()['data']
     print('Found %i testing packages.' % len(testing_packages))
 
-    # [ ] Create the lab result record.
+    # [✓] Create a lab result record.
     encoded_coa = encode_pdf('../assets/pdfs/example_coa.pdf')
-    lab_result_data = {
-        'label': 'test_package_label',
-        'result_date': get_timestamp(),
+    data = {
+        'label': testing_packages[0]['label'],
+        'result_date': get_timestamp(zone='ok'),
         # Optional: Upload encoded COA PDF.
-        # 'lab_test_document': {
-        #     'document_file_name': 'coa.pdf',
-        #     'document_file_base64': encoded_coa,
-        # },
+        'lab_test_document': {
+            'document_file_name': 'coa.pdf',
+            'document_file_base64': encoded_coa.decode('utf-8'),
+        },
         'results': [
             {
                 'lab_test_type_name': 'CBD',
@@ -1226,16 +1222,60 @@ if __name__ == '__main__':
             },
         ]
     }
+    params = {'license': lab['license']['number'],}
+    response = session.post(f'{BASE}/metrc/tests', json=data, params=params)
+    assert response.status_code == 200
+    print('Created a lab result record.')
 
-    # TODO: Fail a sample.
+    # [✓] Fail a sample.
+    analytes = []
+    sample_type = 'Raw Plant Material'
+    units = ['%', 'ppm', 'CFU/g', 'Aw']
+    for unit in units:
+        analytes += [x['name'] for x in test_types \
+            if f'({unit}) {sample_type}' in x['name']]
+    data = {
+        'label': testing_packages[0]['label'],
+        'result_date': get_timestamp(zone='ok'),
+        'results': [
+            {
+                'lab_test_type_name': 'Spiromesifen (ppm) Raw Plant Material',
+                'quantity': 0.2,
+                'passed': False,
+                'notes': 'This sample just passed the limit.'
+            }
+        ]
+    }
+    for analyte in analytes:
+        if not 'Spiromesifen' in analyte:
+            data['results'].append(
+                {
+                'lab_test_type_name': analyte,
+                'quantity': 0,
+                'passed': False,
+                'notes': 'Nothing to note here.'
+            }
+            )
+            
+    params = {'license': lab['license']['number'],}
+    response = session.post(f'{BASE}/metrc/tests', json=data, params=params)
+    assert response.status_code == 200
+    print('Posted a failing lab result record.')
 
+    # [✓] Get test records for a package.
+    uid = testing_packages[0]['id']
+    params = {'license': lab['license']['number'],}
+    response = session.get(f'{BASE}/metrc/tests/{uid}', params=params)
+    assert response.status_code == 200
+    tests = response.json()['data']
+    print('Found package tests.')
 
     # [ ] Release lab results.
     data = {
-        'package_label': 'PACKAGE_LABEL',
+        'package_label': testing_packages[0]['label'],
     }
     params = {
-        'license': facilities[5]['license']['number'],
+        'license': cultivator['license']['number'],
         'action': 'release',
     }
     response = session.post(f'{BASE}/metrc/tests', json=data, params=params)
@@ -1244,13 +1284,14 @@ if __name__ == '__main__':
 
 
     # [ ] Upload a COA.
+    encoded_coa = encode_pdf('../assets/pdfs/example_coa.pdf')
     data = {
-        'lab_test_result_id': 1,
+        'lab_test_result_id': tests['lab_test_result_id'],
         'document_file_name': 'coa.pdf',
-        'document_file_base64': encoded_coa,
+        'document_file_base64': encoded_coa.decode('utf-8'),
     }
     params = {
-        'license': facilities[5]['license']['number'],
+        'license': facilities[0]['license']['number'],
         'action': 'coas',
     }
     response = session.post(f'{BASE}/metrc/tests', json=data, params=params)
@@ -1258,12 +1299,23 @@ if __name__ == '__main__':
     print('Uploaded COA.')
 
 
-    # [ ] Get a package's lab results.
-    test_id = 'TEST_ID'
-    response = session.get(f'{BASE}/metrc/tests/{test_id}', params=params)
+    # [ ] Get a COA by appending `id` to the URL.
+    test_id = tests['lab_test_result_id']
+    params = {'license': facilities[0]['license']['number']}
+    response = session.get(f'{BASE}/metrc/tests/coas/{test_id}', params=params)
     assert response.status_code == 200
-    result = response.json()['data']
-    print('Found lab result.')
+    print('Retrieved COA.')
+
+
+    # [ ] Get a COA by passing `id` as a parameter.
+    test_id = tests['lab_test_result_id']
+    params = {
+        'license': facilities[0]['license']['number'],
+        'id': tests['lab_test_result_id'],
+    }
+    response = session.get(f'{BASE}/metrc/tests/coas', params=params)
+    assert response.status_code == 200
+    print('Retrieved COA.')
 
 
     #-------------------------------------------------------------------
@@ -1298,30 +1350,30 @@ if __name__ == '__main__':
         'sales_date_time': get_timestamp(),
         'sales_customer_type': 'Patient',
         'patient_license_number': '1',
-        # "PatientLicenseNumber": null,
-        # "CaregiverLicenseNumber": null,
-        # "IdentificationMethod": null,
-        # "PatientRegistrationLocationId": null,
+        'patient_license_number': None,
+        'caregiver_license_number': None,
+        'identification_method': None,
+        'patient_registration_location_id': None,
         'transactions': [
             {
                 'package_label': retail_packages[0]['label'],
                 'quantity': 1.75,
                 'unit_of_measure': 'Grams',
                 'total_amount': 25.0,
-                # "UnitThcPercent": null,
-                # "UnitThcContent": null,
-                # "UnitThcContentUnitOfMeasure": null,
-                # "UnitWeight": null,
-                # "UnitWeightUnitOfMeasure": null,
-                # "InvoiceNumber": null,
-                # "Price": null,
-                # "ExciseTax": null,
-                # "CityTax": null,
-                # "CountyTax": null,
-                # "MunicipalTax": null,
-                # "DiscountAmount": null,
-                # "SubTotal": null,
-                # "SalesTax": null,
+                'unit_thc_percent': None,
+                'unit_thc_content': None,
+                'unit_thc_content_unit_of_measure': None,
+                'unit_weight': None,
+                'unit_weight_unit_of_measure': None,
+                'invoice_number': None,
+                'price': None,
+                'excise_tax': None,
+                'city_tax': None,
+                'county_tax': None,
+                'municipal_tax': None,
+                'discount_amount': None,
+                'sub_total': None,
+                'sales_tax': None,
             }
         ]
     }
@@ -1369,22 +1421,125 @@ if __name__ == '__main__':
     print('Voided a sale.')
 
 
-    # TODO: GET /sales/v1/transactions (daily statistics)
+    #-------------------------------------------------------------------
+    # Transactions
+    #-------------------------------------------------------------------
+
+    # [ ] TODO: GET /sales/v1/transactions (daily statistics)
+    for facility in facilities:
+        try:
+            params = {
+                'license': facility['license']['number'],
+                'start': '2023-01-23',
+                'end': '2023-01-26',
+            }
+            response = session.get(f'{BASE}/metrc/transactions', params=params)
+            assert response.status_code == 200
+            transactions = response.json()['data']
+            print('Found %i transactions.' % len(transactions))
+            break
+        except:
+            print('Failed to find transactions for', facility['license']['number'])
+
+    # [ ] TODO: GET /sales/v1/patientregistration/locations`
 
 
-    # TODO: GET /sales/v1/patientregistration/locations`
+    # [ ] TODO: GET /sales/v1/transactions
 
 
-    # TODO: GET /sales/v1/transactions
-
-
-
-    # TODO: Add transactions on a particular day.
+    # [ ] TODO: Add transactions on a particular day.
     # POST /sales/v1/transactions/{date}
+    data = {
+        'package_label': 'ABCDEF012345670000010331',
+        'quantity': 1.0,
+        'unit_of_measure': 'Ounces',
+        'total_amount': 9.99,
+        'unit_thc_percent': None,
+        'unit_thc_content': None,
+        'unit_thc_content_unit_of_measure': None,
+        'unit_weight': None,
+        'unit_weight_unit_of_measure': None,
+        'invoice_number': None,
+        'price': None,
+        'excise_tax': None,
+        'city_tax': None,
+        'county_tax': None,
+        'municipal_tax': None,
+        'discount_amount': None,
+        'sub_total': None,
+        'sales_tax': None,
+    }
 
 
-    # TODO: Update transactions on a particular day.
+    # [ ] TODO: Update transactions on a particular day.
     # PUT /sales/v1/transactions/{date}
+    data = {
+        'package_label': 'ABCDEF012345670000010331',
+        'quantity': 1.0,
+        'unit_of_measure': 'Ounces',
+        'total_amount': 9.99,
+        'unit_thc_percent': None,
+        'unit_thc_content': None,
+        'unit_thc_content_unit_of_measure': None,
+        'unit_weight': None,
+        'unit_weight_unit_of_measure': None,
+        'invoice_number': None,
+        'price': None,
+        'excise_tax': None,
+        'city_tax': None,
+        'county_tax': None,
+        'municipal_tax': None,
+        'discount_amount': None,
+        'sub_total': None,
+        'sales_tax': None,
+    }
+
+
+    #-------------------------------------------------------------------
+    # Patients
+    #-------------------------------------------------------------------
+
+    # [ ] Get active patients.
+    for facility in facilities:
+        try:
+            params = {
+                'license': facility['license']['number']
+            }
+            response = session.get(f'{BASE}/metrc/patients', params=params)
+            assert response.status_code == 200
+            patients = response.json()['data']
+            print('Found %i patients.' % patients)
+        except:
+            print('Failed to find patients:', facility['license']['number'])
+
+    # [ ] Get a patient using the patient's ID.
+
+
+    # [ ] Add a patient.
+    data = {
+
+    }
+    params = {'license': facility['license']['number']}
+    response = session.post(f'{BASE}/metrc/patients', json=data, params=params)
+    assert response.status_code == 200
+    print('Added a patient.')
+
+
+    # [ ] Update a patient.
+    data = {
+
+    }
+    params = {'license': facility['license']['number']}
+    response = session.post(f'{BASE}/metrc/patients', json=data, params=params)
+    assert response.status_code == 200
+    print('Updated a patient.')
+
+    # [ ] Delete a patient.
+    uid = response.json()['data'][0]['uid']
+    params = {'license': facilities[0]['license']['number']}
+    response = session.delete(f'{BASE}/metrc/patients/{uid}', params=params)
+    assert response.status_code == 200
+    print('Deleted a patient.')
 
 
     #-------------------------------------------------------------------

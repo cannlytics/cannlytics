@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 1/23/2023
+Updated: 1/26/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains the `Metrc` class responsible for communicating
@@ -15,6 +15,7 @@ TODO: Implement the remaining Metrc functionality:
 
     [ ] GET /transfers/v1/templates/{id}/transporters
     [ ] GET /transfers/v1/templates/{id}/transporters/details
+    [ ] Implement any remaining endpoints.
     [ ] Implement return created/updated objects for all endpoints.
 
 """
@@ -717,6 +718,23 @@ class Metrc(object):
         url = METRC_LAB_RESULTS_URL % 'results/release'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('put', url, data=data, params=params)
+    
+
+    def get_coa(
+            self,
+            uid,
+            license_number='',
+        ):
+        """Get a certificate of analysis for a given test.
+        Args:
+            uid (str): The UID for a test.
+            license_number (str): A specific license number.
+        """
+        url = METRC_LAB_RESULTS_URL % f'labtestdocument/{uid}'
+        params = self.format_params(
+            license_number=license_number or self.primary_license,
+        )
+        return self.request('get', url, params=params)
 
 
     #-------------------------------------------------------------------
@@ -1124,6 +1142,24 @@ class Metrc(object):
         url = METRC_PATIENTS_URL % uid
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('delete', url, params=params)
+    
+
+    # FIXME:
+    # def get_patient_registration_locations(
+    #         self,
+    #         uid,
+    #         license_number='',
+    #     ):
+    #     """Get a certificate of analysis for a given test.
+    #     Args:
+    #         uid (str): The UID for a test.
+    #         license_number (str): A specific license number.
+    #     """
+    #     url = METRC_LAB_RESULTS_URL % f'labtestdocument/{uid}'
+    #     params = self.format_params(
+    #         license_number=license_number or self.primary_license,
+    #     )
+    #     return self.request('get', url, params=params)
 
 
     #-------------------------------------------------------------------
@@ -1629,7 +1665,7 @@ class Metrc(object):
         return self.request('delete', url, params=params)
 
 
-    def create_transactions(self, data, date, license_number='', return_obs=False):
+    def create_transactions(self, data, date=None, license_number='', return_obs=False):
         """Create transaction(s).
         Args:
             data (list): A list of transactions (dict) to create.
@@ -1638,13 +1674,15 @@ class Metrc(object):
         Return:
             (Transaction): Return the created transaction if `return_obs=True`.
         """
+        if date is None:
+            date = get_timestamp(zone=self.state)
         url = METRC_TRANSACTIONS_URL % date
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return the created transactions.
 
 
-    def update_transactions(self, data, date, license_number='', return_obs=False):
+    def update_transactions(self, data, date=None, license_number='', return_obs=False):
         """Update transaction(s).
         Args:
             data (list): A list of transactions (dict) to update.
@@ -1653,6 +1691,8 @@ class Metrc(object):
         Return:
             (list): Return a list of transactions (Transaction) if `return_obs=True`.
         """
+        if date is None:
+            date = get_timestamp(zone=self.state)
         url = METRC_TRANSACTIONS_URL % date
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('put', url, data=data, params=params)

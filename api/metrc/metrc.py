@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/13/2021
-Updated: 1/24/2023
+Updated: 1/26/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API to interface with the Metrc API.
@@ -83,16 +83,25 @@ def get_objects(
         **kwargs,
     ) -> Response:
     """Perform a simple `GET` request to the Metrc API."""
-    # Get singular items.
-    if uid:
-        obj = getattr(track, get_method)(uid, **kwargs)
-        data = obj.to_dict()
+    # Try to get the requested items.
+    try:
+            
+        # Get singular items.
+        if uid:
+            obj = getattr(track, get_method)(uid, **kwargs)
+            data = obj.to_dict()
 
-    # Get multiple items.
-    else:
-        objs = getattr(track, get_method)(**kwargs)
-        data = [obj.to_dict() for obj in objs]
+        # Get multiple items.
+        else:
+            objs = getattr(track, get_method)(**kwargs)
+            data = [obj.to_dict() for obj in objs]
     
+    # Return any Metric error.
+    except MetrcAPIError as error:
+        log_metrc_error(request, get_method, str(error))
+        response = {'error': True, 'message': str(error)}
+        return Response(response, status=error.response.status_code)
+
     # Create a log and return the data.
     log_metrc_request(request, data, 'get_objects', get_method)
     return Response({'data': data}, content_type='application/json')
@@ -789,7 +798,11 @@ def items(request: Request, item_id: Optional[str] = ''):
 #-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST'])
-def lab_tests(request: Request, test_id: Optional[str] = ''):
+def lab_tests(
+        request: Request,
+        test_id: Optional[str] = '',
+        coa_id: Optional[str] = '',
+    ):
     """Get lab tests for a given license number."""
 
     # Initialize Metrc.
@@ -799,24 +812,40 @@ def lab_tests(request: Request, test_id: Optional[str] = ''):
 
     # Get lab results.
     if request.method == 'GET':
-        return get_objects(request, track, 'get_lab_result',
+
+        # Get a COA for a test.
+        if coa_id or test_id == 'coas':
+            if not coa_id:
+                coa_id = request.query_params.get('id', '')
+            try:
+                track.get_coa(coa_id, license_number=track.primary_license)
+            except MetrcAPIError as error:
+                log_metrc_error(request, 'get_coa', str(error))
+                response = {'error': True, 'message': str(error)}
+                return Response(response, status=error.response.status_code)
+
+        # Get test data.
+        return get_objects(request, track, 'get_lab_results',
             uid=test_id,
             license_number=track.primary_license
         )
 
     # Post results.
     if request.method == 'POST':
-        if isinstance(request.data, list):
-            data = request.data
-        else:
-            data = request.data.get('data', request.data)
+        data = request.data
+        if data is None:
+            data = request.data.get('data')
+        if isinstance(data, dict):
+            data = [data]
         action = snake_case(request.query_params.get('action', test_id))
 
         # Release lab result(s).
+        # FIXME: This may not be working. Ask Metrc.
         if action == 'release':
             return perform_method(request, track, data, 'release_lab_results')
 
         # Upload lab result COA(s).
+        # FIXME: This may not be working. Ask Metrc.
         if action == 'coas':
             return perform_method(request, track, data, 'upload_coas')
 
@@ -1108,9 +1137,6 @@ def transfers(request: Request, transfer_id: Optional[str] = ''):
     # Create / update transfers.
     # FIXME: Updating transfers causes an error if returning data.
     if request.method == 'POST':
-
-        
-
         return create_or_update_objects(request, track,
                 create_method='create_transfers',
                 update_method='update_transfers',
@@ -1236,9 +1262,16 @@ def sales(request: Request, sale_id: Optional[str] = ''):
 
     # Get sales data.
     if request.method == 'GET':
-        objs = track.get_receipts()
-        data = [obj.to_dict() for obj in objs]
-        return Response({'data': data}, content_type='application/json')
+        params = request.query_params
+        return get_objects(request, track, 'get_receipts', 
+            uid=sale_id,
+            action=params.get('type', 'active'),
+            start=params.get('start'),
+            end=params.get('end'),
+            sales_start=params.get('sales_start', params.get('salesStart')),
+            sales_end=params.get('sales_end', params.get('salesEnd')),
+            license_number=track.primary_license,
+        )
 
     # Create / update sale(s).
     if request.method == 'POST':
@@ -1252,7 +1285,35 @@ def sales(request: Request, sale_id: Optional[str] = ''):
         return delete_objects(request, track, 'delete_receipt', sale_id)
 
 
-# TODO: Also implement transaction endpoints?
+@api_view(['GET', 'POST', 'DELETE'])
+def transactions(
+        request: Request,
+        start: Optional[str] = '',
+        end: Optional[str] = '',
+    ):
+    """Get, create, and update transactions for a given license number."""
+
+    # Initialize Metrc.
+    track = initialize_traceability(request)
+    if isinstance(track, str):
+        return Response({'error': True, 'message': track}, status=403)
+
+    # Get transactions data.
+    if request.method == 'GET':
+        params = request.query_params
+        return get_objects(request, track, 'get_transactions', 
+            start=params.get('start', start),
+            end=params.get('end', end),
+            license_number=track.primary_license,
+        )
+
+    # Create / update transaction(s).
+    if request.method == 'POST':
+        return create_or_update_objects(request, track,
+            create_method='create_transactions',
+            update_method='update_transactions',
+            date = request.query_params.get('date', start),
+        )
 
 
 #-----------------------------------------------------------------------
@@ -1270,13 +1331,14 @@ def deliveries(request: Request, delivery_id: Optional[str] = ''):
 
     # Get deliveries data.
     if request.method == 'GET':
+        params = request.query_params
         return get_objects(request, track, 'get_deliveries',
             uid=delivery_id,
-            action=request.query_params.get('type', 'active'),
-            start=request.query_params.get('start'),
-            end=request.query_params.get('end'),
-            sales_start=request.query_params.get('sales_start'),
-            sales_end=request.query_params.get('sales_end'),
+            action=params.get('type', 'active'),
+            start=params.get('start'),
+            end=params.get('end'),
+            sales_start=params.get('sales_start'),
+            sales_end=params.get('sales_end'),
             license_number=track.primary_license,
         )
 
