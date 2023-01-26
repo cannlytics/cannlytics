@@ -1237,6 +1237,7 @@ def patients(request: Request, patient_id: Optional[str] = ''):
 
     # Create / update patient(s).
     if request.method == 'POST':
+        # FIXME: Handle `update_patients`.
         return create_or_update_objects(request, track,
             create_method='create_patients',
             update_method='update_patients',
@@ -1309,10 +1310,11 @@ def transactions(
 
     # Create / update transaction(s).
     if request.method == 'POST':
+        # FIXME:
         return create_or_update_objects(request, track,
             create_method='create_transactions',
             update_method='update_transactions',
-            date = request.query_params.get('date', start),
+            # date=request.query_params.get('date', start),
         )
 
 

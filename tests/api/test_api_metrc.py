@@ -1450,10 +1450,10 @@ if __name__ == '__main__':
     # [ ] TODO: Add transactions on a particular day.
     # POST /sales/v1/transactions/{date}
     data = {
-        'package_label': 'ABCDEF012345670000010331',
+        'package_label': retail_packages[0]['label'],
         'quantity': 1.0,
         'unit_of_measure': 'Ounces',
-        'total_amount': 9.99,
+        'total_amount': 299.99,
         'unit_thc_percent': None,
         'unit_thc_content': None,
         'unit_thc_content_unit_of_measure': None,
@@ -1469,15 +1469,21 @@ if __name__ == '__main__':
         'sub_total': None,
         'sales_tax': None,
     }
-
+    params = {
+        'license': facilities[0]['license']['number'],
+        'date': '2023-01-26'
+    }
+    response = session.post(f'{BASE}/metrc/transactions', json=data, params=params)
+    assert response.status_code == 200
+    print('Created a transaction.')
 
     # [ ] TODO: Update transactions on a particular day.
     # PUT /sales/v1/transactions/{date}
     data = {
-        'package_label': 'ABCDEF012345670000010331',
+        'package_label': retail_packages[0]['label'],
         'quantity': 1.0,
         'unit_of_measure': 'Ounces',
-        'total_amount': 9.99,
+        'total_amount': 249.99,
         'unit_thc_percent': None,
         'unit_thc_content': None,
         'unit_thc_content_unit_of_measure': None,
@@ -1493,6 +1499,13 @@ if __name__ == '__main__':
         'sub_total': None,
         'sales_tax': None,
     }
+    params = {
+        'license': facilities[0]['license']['number'],
+        'date': '2023-01-26'
+    }
+    response = session.post(f'{BASE}/metrc/transactions', json=data, params=params)
+    assert response.status_code == 200
+    print('Updated a transaction.')
 
 
     #-------------------------------------------------------------------
@@ -1517,17 +1530,41 @@ if __name__ == '__main__':
 
     # [ ] Add a patient.
     data = {
-
+        'license_number': '000001',
+        'license_effective_start_date': '2023-01-26',
+        'license_effective_end_date': '2024-01-27',
+        'recommended_plants': 6,
+        'recommended_smokable_quantity': 1.0,
+        'flower_ounces_allowed': None,
+        'thc_ounces_allowed': None,
+        'concentrate_ounces_allowed': None,
+        'infused_ounces_allowed': None,
+        'max_flower_thc_percent_allowed': None,
+        'max_concentrate_thc_percent_allowed': None,
+        'has_sales_limit_exemption': False,
+        'actual_date': '2023-01-26'
     }
     params = {'license': facility['license']['number']}
     response = session.post(f'{BASE}/metrc/patients', json=data, params=params)
     assert response.status_code == 200
     print('Added a patient.')
 
-
     # [ ] Update a patient.
     data = {
-
+        'license_number': '000001',
+        'new_license_number': None,
+        'license_effective_start_date': '2015-06-21',
+        'license_effective_end_date': '2016-06-15',
+        'recommended_plants': 7,
+        'recommended_smokable_quantity': 2.0,
+        'flower_ounces_allowed': None,
+        'thc_ounces_allowed': None,
+        'concentrate_ounces_allowed': None,
+        'infused_ounces_allowed': None,
+        'max_flower_thc_percent_allowed': None,
+        'max_concentrate_thc_percent_allowed': None,
+        'has_sales_limit_exemption': False,
+        'actual_date': '2015-12-15'
     }
     params = {'license': facility['license']['number']}
     response = session.post(f'{BASE}/metrc/patients', json=data, params=params)
@@ -1547,7 +1584,6 @@ if __name__ == '__main__':
     #-------------------------------------------------------------------
 
     # [ ] Get return reasons.
-    # FIXME: This may only be valid in certain states.
     params = {'license': facilities[0]['license']['number'],}
     response = session.get(f'{BASE}/metrc/types/return-reasons', params=params)
     assert response.status_code == 200
@@ -1555,18 +1591,164 @@ if __name__ == '__main__':
     print('Found %i return reasons.' % len(return_reasons))
 
     # [ ] Create a delivery.
+    data = {
+        'sales_date_time': '2017-04-04T10:10:19.000',
+        'sales_customer_type': 'Consumer',
+        'patient_license_number': None,
+        'consumer_id': None,
+        'driver_employee_id': '1',
+        'driver_name': 'John Doe',
+        'drivers_license_number': '1',
+        'phone_number_for_questions': '+1-123-456-7890',
+        'vehicle_make': 'Car',
+        'vehicle_model': 'Small',
+        'vehicle_license_plate_number': '000000',
+        'recipient_name': None,
+        'recipient_address_street1': '1 Someplace Road',
+        'recipient_address_street2': 'Ste 9',
+        'recipient_address_city': 'Denver',
+        'recipient_address_county': None,
+        'recipient_address_state': 'CO',
+        'recipient_address_postal_code': '11111',
+        'planned_route': 'Drive to destination.',
+        'estimated_departure_date_time': '2017-04-04T11:00:00.000',
+        'estimated_arrival_date_time': '2017-04-04T13:00:00.000',
+        'transactions': [
+            {
+                'package_label': 'ABCDEF012345670000000001',
+                'quantity': 1.0,
+                'unit_of_measure': 'Ounces',
+                'total_amount': 9.99,
+                'unit_thc_percent': None,
+                'unit_thc_content': None,
+                'unit_thc_content_unit_of_measure': None,
+                'unit_weight': None,
+                'unit_weight_unit_of_measure': None,
+                'invoice_number': None,
+                'price': None,
+                'excise_tax': None,
+                'city_tax': None,
+                'county_tax': None,
+                'municipal_tax': None,
+                'discount_amount': None,
+                'sub_total': None,
+                'sales_tax': None
+            }
+        ]
+    }
 
 
     # [ ] Get deliveries.
 
 
     # [ ] Query deliveries.
+    # - delivery_id
+    # - active/inactive
+    # - start and end
 
 
     # [ ] Update a delivery.
+    data['id'] = 'delivery_id'
 
 
     # [ ] Delete a delivery.
 
 
     # [ ] Complete a delivery.
+    data = {
+        'id': 6,
+        'actual_arrival_date_time': '2017-04-04T13:00:00.000',
+        'accepted_packages': ['ABCDEF012345670000000001'],
+        'returned_packages': [
+            {
+                'label': 'ABCDEF012345670000000002',
+                'return_quantity_verified': 1.0,
+                'return_unit_of_measure': 'Ounces',
+                'return_reason': 'Spoilage',
+                'return_reason_note': ''
+            }
+        ]
+   }
+
+    # [ ] Depart a delivery.
+    data = {
+        "RetailerDeliveryId": 6
+    }
+
+    # [ ] Restock a delivery.
+    data = {
+        'retailer_delivery_id': 1,
+        'date_time': '2017-04-04T10:10:19.000',
+        'estimated_departure_date_time': '2017-04-04T11:00:00.000',
+        'destinations': None,
+        'packages': [
+            {
+                'package_label': 'ABCDEF012345670000000001',
+                'quantity': 1.0,
+                'unit_of_measure': 'Ounces',
+                'total_price': 9.99,
+                'remove_current_package': False
+            }
+        ]
+    }
+
+    # [ ] Deliver a delivery.
+    data = {
+        'retailer_delivery_id': 1,
+        'sales_date_time': '2017-04-04T10:10:19.000',
+        'sales_customer_type': 'Consumer',
+        'patient_license_number': None,
+        'consumer_id': None,
+        'driver_employee_id': '1',
+        'driver_name': 'John Doe',
+        'drivers_license_number': '1',
+        'phone_number_for_questions': '+1-123-456-7890',
+        'vehicle_make': 'Car',
+        'vehicle_model': 'Small',
+        'vehicle_license_plate_number': '000000',
+        'recipient_name': None,
+        'recipient_address_street1': '1 Someplace Road',
+        'recipient_address_street2': 'Ste 9',
+        'recipient_address_city': 'Denver',
+        'recipient_address_county': None,
+        'recipient_address_state': 'CO',
+        'recipient_address_postal_code': '11111',
+        'planned_route': 'Drive to destination.',
+        'estimated_departure_date_time': '2017-04-04T11:00:00.000',
+        'estimated_arrival_date_time': '2017-04-04T13:00:00.000',
+        'transactions': [
+            {
+                'package_label': 'ABCDEF012345670000000001',
+                'quantity': 1.0,
+                'unit_of_measure': 'Ounces',
+                'total_amount': 9.99,
+                'unit_thc_percent': None,
+                'unit_thc_content': None,
+                'unit_thc_content_unit_of_measure': None,
+                'unit_weight': None,
+                'unit_weight_unit_of_measure': None,
+                'invoice_number': None,
+                'price': None,
+                'excise_tax': None,
+                'city_tax': None,
+                'county_tax': None,
+                'municipal_tax': None,
+                'discount_amount': None,
+                'sub_total': None,
+                'sales_tax': None
+            }
+        ]
+    }
+
+    # [ ] End a delivery.
+    data = {
+        'retailer_delivery_id': 6,
+        'actual_arrival_date_time': '2017-04-04T13:00:00.000',
+        'packages': [
+            {
+                'label': 'ABCDEF012345670000000002',
+                'end_quantity': 1.0,
+                'end_unit_of_measure': 'Ounces'
+            }
+        ]
+    }
