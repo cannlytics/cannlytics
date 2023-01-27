@@ -32,7 +32,6 @@ from django.template import base
 # Define project namespaces.
 PROJECT_NAME = 'console'
 ROOT_URLCONF = f'{PROJECT_NAME}.urls'
-SECRET_SETTINGS_NAME = 'cannlytics_platform_settings' # Define your secret's name.
 WSGI_APPLICATION = f'{PROJECT_NAME}.core.wsgi.application'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -61,6 +60,7 @@ else:
     try:
         _, project_id = google.auth.default()
         os.environ['GOOGLE_CLOUD_PROJECT'] = project_id
+        SECRET_SETTINGS_NAME = os.environ['SETTINGS_NAME']
         payload = access_secret_version(project_id, SECRET_SETTINGS_NAME, 'latest')
         config = dotenv_values(stream=io.StringIO(payload))
     except (KeyError, google.auth.exceptions.DefaultCredentialsError):
@@ -183,7 +183,8 @@ USE_TZ = True
 #-------------------------------------------------------------#
 
 # Specify allowed domains depending on production or development status.
-ALLOWED_HOSTS = []
+# FIXME:
+ALLOWED_HOSTS = ['*']
 if PRODUCTION != 'True':
     ALLOWED_HOSTS.extend(['*'])
 try:

@@ -26,7 +26,7 @@ from cannlytics.utils import (
 BASE = 'http://127.0.0.1:8000/api'
 
 # Production: Uncomment to test with the production server once published.
-# BASE = 'https://console.cannlytics.com/api'
+BASE = 'https://console.cannlytics.com/api'
 
 # Load your API key to pass in the authorization header as a bearer token.
 config = dotenv_values('../../.env')
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     session.headers.update({'Authorization': f'Bearer {API_KEY}'})
 
     # Define test namespaces.
-    today = '2023-01-24'
+    today = '2023-01-26'
     strain_name = 'Moonshine Haze'
     batch_name = 'Moonshine Haze Clone Batch'
     test_location = 'CAN API Test Location'
@@ -1425,13 +1425,13 @@ if __name__ == '__main__':
     # Transactions
     #-------------------------------------------------------------------
 
-    # [ ] TODO: GET /sales/v1/transactions (daily statistics)
+    # [ ] Get transactions (daily statistics).
     for facility in facilities:
         try:
             params = {
                 'license': facility['license']['number'],
-                'start': '2023-01-23',
-                'end': '2023-01-26',
+                'start': '2021-01-01',
+                'end': '2021-01-30',
             }
             response = session.get(f'{BASE}/metrc/transactions', params=params)
             assert response.status_code == 200
@@ -1441,14 +1441,13 @@ if __name__ == '__main__':
         except:
             print('Failed to find transactions for', facility['license']['number'])
 
-    # [ ] TODO: GET /sales/v1/patientregistration/locations`
+    # [✓] Get patient registration locations.
+    response = session.get(f'{BASE}/metrc/patients/locations')
+    assert response.status_code == 200
+    registration_locations = response.json()['data']
+    print('Found %i patient registration locations.' % len(registration_locations))
 
-
-    # [ ] TODO: GET /sales/v1/transactions
-
-
-    # [ ] TODO: Add transactions on a particular day.
-    # POST /sales/v1/transactions/{date}
+    # [ ] Add transactions on a particular day.
     data = {
         'package_label': retail_packages[0]['label'],
         'quantity': 1.0,
@@ -1477,8 +1476,7 @@ if __name__ == '__main__':
     assert response.status_code == 200
     print('Created a transaction.')
 
-    # [ ] TODO: Update transactions on a particular day.
-    # PUT /sales/v1/transactions/{date}
+    # [ ] Update transactions on a particular day.
     data = {
         'package_label': retail_packages[0]['label'],
         'quantity': 1.0,
@@ -1501,7 +1499,8 @@ if __name__ == '__main__':
     }
     params = {
         'license': facilities[0]['license']['number'],
-        'date': '2023-01-26'
+        'date': '2023-01-26',
+        'action': 'update',
     }
     response = session.post(f'{BASE}/metrc/transactions', json=data, params=params)
     assert response.status_code == 200
@@ -1526,7 +1525,11 @@ if __name__ == '__main__':
             print('Failed to find patients:', facility['license']['number'])
 
     # [ ] Get a patient using the patient's ID.
-
+    uid = '000001'
+    params = {'license': facilities[0]['license']['number']}
+    response = session.get(f'{BASE}/metrc/patients/{uid}', params=params)
+    assert response.status_code == 200
+    print('Found patient.')
 
     # [ ] Add a patient.
     data = {
@@ -1636,23 +1639,44 @@ if __name__ == '__main__':
             }
         ]
     }
-
+    params = {'license': facility['license']['number']}
+    response = session.post(f'{BASE}/metrc/deliveries', json=data, params=params)
+    assert response.status_code == 200
+    print('Created a delivery.')
 
     # [ ] Get deliveries.
+    params = {
+        'license': facilities[0]['license']['number'],
+        'start': '2023-01-26',
+        'end': '2023-01-27',
+        'salesStart': '2023-01-26',
+        'salesEnd': '2023-01-27',
+        'type': 'active',
+    }
+    response = session.get(f'{BASE}/metrc/deliveries', params=params)
+    assert response.status_code == 200
+    print('Found deliveries.')
 
-
-    # [ ] Query deliveries.
-    # - delivery_id
-    # - active/inactive
-    # - start and end
-
+    # [ ] Get a delivery using its ID.
+    uid = '1'
+    params = {'license': facilities[0]['license']['number']}
+    response = session.get(f'{BASE}/metrc/deliveries/{uid}', params=params)
+    assert response.status_code == 200
+    print('Found delivery.')
 
     # [ ] Update a delivery.
-    data['id'] = 'delivery_id'
-
+    data['id'] = '1'
+    params = {'license': facility['license']['number']}
+    response = session.post(f'{BASE}/metrc/deliveries', json=data, params=params)
+    assert response.status_code == 200
+    print('Updated a delivery.')
 
     # [ ] Delete a delivery.
-
+    uid = '1'
+    params = {'license': facilities[0]['license']['number']}
+    response = session.delete(f'{BASE}/metrc/deliveries/{uid}', params=params)
+    assert response.status_code == 200
+    print('Deleted a delivery.')
 
     # [ ] Complete a delivery.
     data = {
@@ -1668,16 +1692,30 @@ if __name__ == '__main__':
                 'return_reason_note': ''
             }
         ]
-   }
+    }
+    params = {
+        'license': facility['license']['number'],
+        'action': 'complete',
+    }
+    response = session.post(f'{BASE}/metrc/deliveries', json=data, params=params)
+    assert response.status_code == 200
+    print('Completed a delivery.')
 
     # [ ] Depart a delivery.
     data = {
-        "RetailerDeliveryId": 6
+        'retailer_delivery_id': 6
     }
+    params = {
+        'license': facility['license']['number'],
+        'action': 'depart',
+    }
+    response = session.post(f'{BASE}/metrc/deliveries', json=data, params=params)
+    assert response.status_code == 200
+    print('Departed a delivery.')
 
     # [ ] Restock a delivery.
     data = {
-        'retailer_delivery_id': 1,
+        'retailer_delivery_id': 6,
         'date_time': '2017-04-04T10:10:19.000',
         'estimated_departure_date_time': '2017-04-04T11:00:00.000',
         'destinations': None,
@@ -1691,6 +1729,13 @@ if __name__ == '__main__':
             }
         ]
     }
+    params = {
+        'license': facility['license']['number'],
+        'action': 'restock',
+    }
+    response = session.post(f'{BASE}/metrc/deliveries', json=data, params=params)
+    assert response.status_code == 200
+    print('Restocked a delivery.')
 
     # [ ] Deliver a delivery.
     data = {
@@ -1739,6 +1784,13 @@ if __name__ == '__main__':
             }
         ]
     }
+    params = {
+        'license': facility['license']['number'],
+        'action': 'deliver',
+    }
+    response = session.post(f'{BASE}/metrc/deliveries', json=data, params=params)
+    assert response.status_code == 200
+    print('Delivered a delivery.')
 
     # [ ] End a delivery.
     data = {
@@ -1752,3 +1804,10 @@ if __name__ == '__main__':
             }
         ]
     }
+    params = {
+        'license': facility['license']['number'],
+        'action': 'end',
+    }
+    response = session.post(f'{BASE}/metrc/deliveries', json=data, params=params)
+    assert response.status_code == 200
+    print('Ended a delivery.')

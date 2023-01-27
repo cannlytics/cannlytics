@@ -12,6 +12,7 @@
       "target": "production",
       "public": "public/console",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "**/development/**"],
+      "appAssociation": "AUTO",
       "rewrites": [
         {
           "source": "!/sitemap",
@@ -20,6 +21,10 @@
         {
           "source": "!/static",
           "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
+        },
+        {
+          "source": "!/robots.txt",
+          "run": {"serviceId": "cannlytics-website", "region": "us-central1"}
         },
         {
           "source": "**",

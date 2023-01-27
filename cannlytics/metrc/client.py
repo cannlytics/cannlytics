@@ -1144,22 +1144,10 @@ class Metrc(object):
         return self.request('delete', url, params=params)
     
 
-    # FIXME:
-    # def get_patient_registration_locations(
-    #         self,
-    #         uid,
-    #         license_number='',
-    #     ):
-    #     """Get a certificate of analysis for a given test.
-    #     Args:
-    #         uid (str): The UID for a test.
-    #         license_number (str): A specific license number.
-    #     """
-    #     url = METRC_LAB_RESULTS_URL % f'labtestdocument/{uid}'
-    #     params = self.format_params(
-    #         license_number=license_number or self.primary_license,
-    #     )
-    #     return self.request('get', url, params=params)
+    def get_patient_registration_locations(self):
+        """Get patient registration locations."""
+        url = METRC_SALES_URL % f'patientregistration/locations'
+        return self.request('get', url)
 
 
     #-------------------------------------------------------------------

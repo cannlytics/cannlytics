@@ -27,6 +27,7 @@ openpyxl==3.0.10
 opencv-python==4.6.0.66
 pandas==1.5.1
 pdfplumber==0.7.6
+pypdf==3.3.0
 python-dateutil==2.8.2
 python-dotenv==0.21.0
 pymdown-extensions==9.8

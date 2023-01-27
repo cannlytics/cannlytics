@@ -90,7 +90,7 @@ def test_initialize_metrc(env_file='.env'):
     return track
 
 
-# TODO: Refactor into smaller-scope tests.
+# === Tests ===
 if __name__ == '__main__':
 
     print('--------------------------------------------')

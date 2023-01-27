@@ -80,7 +80,7 @@ import pandas as pd
 import requests
 import pdfplumber
 from PIL import Image
-from PyPDF2 import PdfMerger
+from pypdf import PdfMerger
 try:
     from pyzbar.pyzbar import decode
 except ImportError:
