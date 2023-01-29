@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+  <!--
+    Shopify Products | Cannlytics Website
+    Created: 1/28/2023
+    Updated: 1/28/2023
+  -->
+  {% load static %}
+  <section class="col container pb-2 pt-5">
+
+    <!-- Title -->
+    <div class="d-flex flex-column w-100">
+      <h2 id="shop" class="serif text-dark mb-3">
+        <svg class="pe-1" style="float:left;width:125px;height:125px;">
+          <use href="{% static "website/images/emojies/technologist.svg" %}#technologist-emoji"></use>
+        </svg>
+        Support open-source cannabis analytics
+      </h2>
+      <p class="fs-6 double-line mb-3 pb-3" style="max-width:720px;">
+        When you get 🔥Cannlytics loot, you support awesome 👨‍🚀
+        Cannabis Data Scientists around the 🌎 who are helping
+        to advance cannabis science, 🧬 molecule by molecule.
+      </p>
+    </div>
+
+  <!-- Shopify Code -->
+<div id="collection-component-1674932695707" class="d-flex"></div>
+<script type="text/javascript">
+/*<![CDATA[*/
+(function () {
+  var scriptURL = 'https://sdks.shopifycdn.com/buy-button/latest/buy-button-storefront.min.js';
+  if (window.ShopifyBuy) {
+    if (window.ShopifyBuy.UI) {
+      ShopifyBuyInit();
+    } else {
+      loadScript();
+    }
+  } else {
+    loadScript();
+  }
+  function loadScript() {
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = scriptURL;
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(script);
+    script.onload = ShopifyBuyInit;
+  }
+  function ShopifyBuyInit() {
+    var client = ShopifyBuy.buildClient({
+      domain: 'cannlytics.myshopify.com',
+      storefrontAccessToken: '0762e417686b1d06225500e7f521d1ad',
+    });
+    ShopifyBuy.UI.onReady(client).then(function (ui) {
+      ui.createComponent('collection', {
+        id: '435771343169',
+        node: document.getElementById('collection-component-1674932695707'),
+        moneyFormat: '%24%7B%7Bamount%7D%7D',
+        options: {
+  "product": {
+    "styles": {
+      "product": {
+        "@media (min-width: 601px)": {
+          "max-width": "calc(25% - 20px)",
+          "margin-left": "20px",
+          "margin-bottom": "50px",
+          "width": "calc(25% - 20px)"
+        },
+        "img": {
+          "height": "calc(100% - 15px)",
+          "position": "absolute",
+          "left": "0",
+          "right": "0",
+          "top": "0"
+        },
+        "imgWrapper": {
+          "padding-top": "calc(75% + 15px)",
+          "position": "relative",
+          "height": "0"
+        }
+      },
+      "button": {
+        "font-family": "Open Sans, sans-serif",
+        "font-size": "14px",
+        "padding-top": "15px",
+        "padding-bottom": "15px",
+        ":hover": {
+          "background-color": "#e68600"
+        },
+        "background-color": "#ff9500",
+        ":focus": {
+          "background-color": "#e68600"
+        },
+        "border-radius": "2px",
+        "padding-left": "16px",
+        "padding-right": "16px"
+      },
+      "quantityInput": {
+        "font-size": "14px",
+        "padding-top": "15px",
+        "padding-bottom": "15px"
+      }
+    },
+    "buttonDestination": "checkout",
+    "text": {
+      "button": "Buy now"
+    },
+    "googleFonts": [
+      "Open Sans"
+    ]
+  },
+  "productSet": {
+    "styles": {
+      "products": {
+        "@media (min-width: 601px)": {
+          "margin-left": "-20px"
+        }
+      }
+    }
+  },
+  "modalProduct": {
+    "contents": {
+      "img": false,
+      "imgWithCarousel": true,
+      "button": false,
+      "buttonWithQuantity": true
+    },
+    "styles": {
+      "product": {
+        "@media (min-width: 601px)": {
+          "max-width": "100%",
+          "margin-left": "0px",
+          "margin-bottom": "0px"
+        }
+      },
+      "button": {
+        "font-family": "Open Sans, sans-serif",
+        "font-size": "14px",
+        "padding-top": "15px",
+        "padding-bottom": "15px",
+        ":hover": {
+          "background-color": "#e68600"
+        },
+        "background-color": "#ff9500",
+        ":focus": {
+          "background-color": "#e68600"
+        },
+        "border-radius": "2px",
+        "padding-left": "16px",
+        "padding-right": "16px"
+      },
+      "quantityInput": {
+        "font-size": "14px",
+        "padding-top": "15px",
+        "padding-bottom": "15px"
+      }
+    },
+    "googleFonts": [
+      "Open Sans"
+    ],
+    "text": {
+      "button": "Add to cart"
+    }
+  },
+  "option": {},
+  "cart": {
+    "styles": {
+      "button": {
+        "font-family": "Open Sans, sans-serif",
+        "font-size": "14px",
+        "padding-top": "15px",
+        "padding-bottom": "15px",
+        ":hover": {
+          "background-color": "#e68600"
+        },
+        "background-color": "#ff9500",
+        ":focus": {
+          "background-color": "#e68600"
+        },
+        "border-radius": "2px"
+      }
+    },
+    "text": {
+      "total": "Subtotal",
+      "button": "Checkout"
+    },
+    "googleFonts": [
+      "Open Sans"
+    ]
+  },
+  "toggle": {
+    "styles": {
+      "toggle": {
+        "font-family": "Open Sans, sans-serif",
+        "background-color": "#ff9500",
+        ":hover": {
+          "background-color": "#e68600"
+        },
+        ":focus": {
+          "background-color": "#e68600"
+        }
+      },
+      "count": {
+        "font-size": "14px"
+      }
+    },
+    "googleFonts": [
+      "Open Sans"
+    ]
+  }
+},
+      });
+    });
+  }
+})();
+/*]]>*/
+</script>
+
+</section>
+</html>

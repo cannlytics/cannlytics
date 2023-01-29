@@ -12,21 +12,42 @@
 {% extends "website/index.html" %}
 {% load static %}
 {% block title %}Welcome | Cannlytics{% endblock %}
+{% block page_css %}
+<!-- Shopify CSS -->
+<style>
+  body.dark h1.shopify-buy__product__title {
+    color: #fff !important;
+  }
+  body.dark .shopify-buy__option-select label {
+    color: #ccc !important;
+  }
+  body.dark .shopify-buy__product__actual-price {
+    color: #ccc !important;
+  }
+</style>
+{% endblock page_css %}
 {% block material %}
   <div class="homepage pb-5 overflow-hidden">
 
     <!-- Hero -->
     {% include "website/pages/homepage/components/hero.html" with hero=homepage.hero only %}
 
+    <!-- Shopify products -->
+    <div class="ground">
+      {% include "./components/shopify_products.html" %}
+    </div>
+
     <!-- Video Banner -->
     <div class="ground">
     {% include "website/components/banners/video_banner.html" %}
     </div>
 
+    {% comment %}
+    <!-- Alternative sections: -->
     <!-- Premium Video Banner | Or mix premium videos with others? -->
-
     <!-- Features -->
     {% include "website/pages/homepage/components/features.html" with features=homepage.features only %}
+    {% endcomment %}
 
     <!-- Wave -->
     <div class="wave small upside-down" >

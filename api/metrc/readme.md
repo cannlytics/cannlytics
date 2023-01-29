@@ -290,9 +290,9 @@ data = {
   'plant_labels': [plants[-1]['label']],
   'actual_date': today,
   'active_ingredients': [
-  {'Name': 'Phosphorous', 'Percentage': 7.0},
-  {'Name': 'Nitrogen', 'Percentage': 7.0},
-  {'Name': 'Potassium', 'Percentage': 7.0}
+    {'Name': 'Phosphorous', 'Percentage': 7.0},
+    {'Name': 'Nitrogen', 'Percentage': 7.0},
+    {'Name': 'Potassium', 'Percentage': 7.0}
   ],
 }
 params = {
