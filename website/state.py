@@ -14,7 +14,7 @@ app_context = {
     "app_name": "Cannlytics",
     "contact_email": DEFAULT_FROM_EMAIL,
     "contact_phone": "(828) 395-3954",
-    "contact_phonenumber": "18283953954",
+    "contact_phone_number": "18283953954",
     "description": "Cannlytics is a suite of free software for cannabis-testing laboratories, empowering you with a state-of-the-art system.",
     "footer": {
         "index": [

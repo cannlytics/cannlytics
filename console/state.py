@@ -20,7 +20,7 @@ app_context = {
     'app_name': 'Cannlytics',
     'contact_email': DEFAULT_FROM_EMAIL,
     'contact_phone': '',
-    'contact_phonenumber': '',
+    'contact_phone_number': '',
     'homepage': 'https://cannlytics.com',
     'logos': {
         'light': 'console/images/logos/cannlytics_logo_with_phrase.svg',
