@@ -1,8 +1,9 @@
 # Python Requirements | Cannlytics
 # Created 1/5/2021
-# Updated: 1/19/2023
+# Updated: 1/31/2023
 
 # Console and website requirements:
+chromedriver-binary==106.0.5249.21.0
 datasets==2.8.0
 datetime==4.7
 django==4.1.5
@@ -27,6 +28,7 @@ openpyxl==3.0.10
 opencv-python==4.6.0.66
 pandas==1.5.1
 pdfplumber==0.7.6
+Pillow==9.4.0 # FIXME: Does `pyzbar` need 6.2.2?
 pypdf==3.3.0
 python-dateutil==2.8.2
 python-dotenv==0.21.0
@@ -38,5 +40,6 @@ selenium==4.6.0
 statsmodels==0.13.5
 ulid-py==1.1.0
 waitress==2.1.2
+Wand==0.6.11
 whitenoise==6.2.0
 zipcodes==1.2.0

@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/7/2021
-  Updated: 9/3/2022
+  Updated: 1/31/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% load static %}
@@ -26,7 +26,7 @@
   <link rel="shortcut icon" href="{% static 'website/images/logos/favicon.ico' %}" type="image/x-icon">
   
   <!-- Manifest -->
-  <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+  {% comment %} <link rel="manifest" href="{% static 'manifest.webmanifest' %}"> {% endcomment %}
 
   <!-- Title -->
   <title>{% block title %}Cannlytics{% endblock title %}</title>

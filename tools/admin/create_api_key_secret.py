@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/13/2021
-Updated: 1/10/2023
+Updated: 1/31/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: Save sensitive API keys as secrets.
@@ -15,10 +15,8 @@ import os
 import sys
 
 # External imports.
+from cannlytics import firebase
 from dotenv import dotenv_values
-
-sys.path.append('../..')
-from cannlytics import firebase # pylint: disable=import-error
 
 
 def create_project_secret(project_id, secret_id, secret, ref, field):
@@ -67,9 +65,16 @@ if __name__ == '__main__':
     # TODO: Allow secret_id, ref, and field to be dynamic.
     PROJECT_ID = config['FIREBASE_PROJECT_ID']
     SECRET = config['METRC_VENDOR_API_KEY']
+    STATE = config.get('METRC_STATE', 'ok')
+    TEST = config.get('METRC_TEST', False)
+    if TEST:
+        secret_id = f'metrc_test_vendor_api_key_{STATE}'
+        SECRET = config['METRC_TEST_VENDOR_API_KEY']
+    else:
+        secret_id = f'metrc_vendor_api_key_{STATE}'
     secret_data = create_project_secret(
         PROJECT_ID,
-        secret_id='metrc_vendor_api_key',
+        secret_id=secret_id,
         secret=SECRET,
         ref='admin/metrc',
         field='vendor_api_key_secret'

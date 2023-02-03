@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 1/5/2021
-Updated: 9/3/2022
+Updated: 1/31/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Django settings powered by environment variables and
@@ -17,12 +17,14 @@ import os
 import re
 
 # External imports.
-import environ
+from cannlytics.firebase import (
+    access_secret_version,
+    initialize_firebase,
+)
+from dotenv import dotenv_values
 import google.auth
 from django.template import base
 
-# Internal imports.
-from cannlytics.firebase import access_secret_version
 
 #----------------------------------------------------------------------#
 # Project variables.
@@ -46,34 +48,37 @@ with open(os.path.join(BASE_DIR, 'package.json')) as v_file:
 # Example: https://codelabs.developers.google.com/codelabs/cloud-run-django
 #----------------------------------------------------------------------#
 
-# Load secrets stored as environment variables.
-env = environ.Env(DEBUG=(bool, False))
+# Load credentials from a local environment variables file if provided.
 env_file = os.path.join(BASE_DIR, '.env')
-
-# Attempt to load the Project ID into the environment, safely failing on error.
-try:
-    _, os.environ['GOOGLE_CLOUD_PROJECT'] = google.auth.default()
-except google.auth.exceptions.DefaultCredentialsError:
-    pass
-
-# Use a local secret file, if provided.
-# Otherwise retrieve the secrets from Secret Manager.
 if os.path.isfile(env_file):
-    env.read_env(env_file)
+    config = dotenv_values(env_file)
+    key = 'GOOGLE_APPLICATION_CREDENTIALS'
+    os.environ[key] = config[key]
+
+# Otherwise retrieve the environment variables from Secret Manager,
+# loading the project credentials from the cloud environment.
 else:
     try:
-        project_id = os.environ['GOOGLE_CLOUD_PROJECT']
-        payload = access_secret_version(project_id, 'cannlytics_website_settings', 'latest')
-        env.read_env(io.StringIO(payload))
-    except KeyError:
-        raise Exception('No local .env or GOOGLE_CLOUD_PROJECT detected. No secrets found.')
+        _, project_id = google.auth.default()
+        os.environ['GOOGLE_CLOUD_PROJECT'] = project_id
+        SECRET_SETTINGS_NAME = os.environ['SETTINGS_NAME']
+        payload = access_secret_version(project_id, SECRET_SETTINGS_NAME, 'latest')
+        config = dotenv_values(stream=io.StringIO(payload))
+    except (KeyError, google.auth.exceptions.DefaultCredentialsError):
+        raise Exception('No local .env or GOOGLE_CLOUD_PROJECT detected.')
+
+# Initialize Firebase.
+try:
+    initialize_firebase()
+except ValueError:
+    pass
 
 # Access the secret key.
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = config['SECRET_KEY']
 
-# Get production status. When publishing, ensure PRODUCTION in .env is `True`.
+# Get production status. When publishing, ensure that PRODUCTION is 'True'.
 try:
-    PRODUCTION = env('PRODUCTION')
+    PRODUCTION = config['PRODUCTION']
 except:
     PRODUCTION = 'True'
 
@@ -179,19 +184,20 @@ USE_TZ = True
 #----------------------------------------------------------------------#
 
 # Specify allowed domains depending on production or development status.
-ALLOWED_HOSTS = []
+# FIXME:
+ALLOWED_HOSTS = ['*']
 if PRODUCTION != 'True':
     ALLOWED_HOSTS.extend(['*'])
 try:
-    ALLOWED_HOSTS.append(env('CUSTOM_DOMAIN'))
+    ALLOWED_HOSTS.append(config['CUSTOM_DOMAIN'])
 except KeyError:
     pass
 try:
-    ALLOWED_HOSTS.append(env('FIREBASE_HOSTING_URL'))
+    ALLOWED_HOSTS.append(config['FIREBASE_HOSTING_URL'])
 except KeyError:
     pass
 try:
-    ALLOWED_HOSTS.append(env('CLOUD_RUN_URL'))
+    ALLOWED_HOSTS.append(config['CLOUD_RUN_URL'])
 except KeyError:
     pass
 
@@ -296,13 +302,21 @@ DATABASES = {
 #----------------------------------------------------------------------#
 
 # Define variables to be able to send emails.
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = '587'
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
-LIST_OF_EMAIL_RECIPIENTS = [env('EMAIL_HOST_USER')]
+try:
+    EMAIL_HOST_USER = config['EMAIL_HOST_USER']
+    EMAIL_HOST_PASSWORD = config['EMAIL_HOST_PASSWORD']
+    EMAIL_HOST = config['EMAIL_HOST']
+    EMAIL_PORT = config['EMAIL_PORT']
+    DEFAULT_FROM_EMAIL = config['DEFAULT_FROM_EMAIL']
+    LIST_OF_EMAIL_RECIPIENTS = [EMAIL_HOST_USER]
+except KeyError:
+    EMAIL_HOST_USER = config.get('EMAIL_HOST_USER')
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    DEFAULT_FROM_EMAIL = EMAIL_HOST
+    LIST_OF_EMAIL_RECIPIENTS = [EMAIL_HOST_USER]
+    print('WARNING: Email not configured. User or password not specified.')
 
 #----------------------------------------------------------------------#
 # Static files (CSS, JavaScript, Images)
@@ -316,7 +330,7 @@ STATICFILES_DIRS = (
 
 # The directory from where files are served. (web accessible folder)
 STATIC_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', 'public/website/static')
+    os.path.join(os.path.dirname(__file__), '..', f'public/{PROJECT_NAME}/static')
 )
 
 # The relative path to serve files.
@@ -352,6 +366,6 @@ APPEND_SLASH = False
 base.tag_re = re.compile(base.tag_re.pattern, re.DOTALL)
 
 # Make certain Firebase variables easy to reference.
-FIREBASE_API_KEY = env('FIREBASE_API_KEY')
-FIREBASE_PROJECT_ID = env('FIREBASE_PROJECT_ID')
-STORAGE_BUCKET = env('FIREBASE_STORAGE_BUCKET')
+FIREBASE_API_KEY = config['FIREBASE_API_KEY']
+FIREBASE_PROJECT_ID = config['FIREBASE_PROJECT_ID']
+STORAGE_BUCKET = config['FIREBASE_STORAGE_BUCKET']

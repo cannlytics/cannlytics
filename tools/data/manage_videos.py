@@ -18,7 +18,7 @@ Command-line examples:
     Upload data.
 
     ```
-    python tools/website/data/manage_videos.py upload_video_data
+    python tools/data/manage_videos.py upload_video_data
     ```
 """
 # Standard imports

@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/5/2021
-Updated: 9/24/2022
+Updated: 1/31/2023
 License: License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 
 Description: Django settings secured by Google Cloud Secret Manager.
@@ -246,7 +246,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, f'{PROJECT_NAME}/static'),)
 
 # The directory from where files are served. (web accessible folder)
 STATIC_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', 'public/console/static')
+    os.path.join(os.path.dirname(__file__), '..', f'public/{PROJECT_NAME}/static')
 )
 
 # The relative path to serve files.
@@ -265,7 +265,7 @@ STATIC_URL = '/static/'
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 
 # Whether to expire the session when the user closes their browser.
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 # The age of session cookies, in seconds. (Currently: 30 days)
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30

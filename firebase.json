@@ -9,7 +9,7 @@
   "hosting": [
     {"target": "docs", "public": "docs/build"},
     {
-      "target": "production",
+      "target": "console",
       "public": "public/console",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "**/development/**"],
       "appAssociation": "AUTO",
@@ -24,7 +24,7 @@
         },
         {
           "source": "!/robots.txt",
-          "run": {"serviceId": "cannlytics-website", "region": "us-central1"}
+          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
         },
         {
           "source": "**",
@@ -60,25 +60,6 @@
         {
           "source": "**",
           "run": {"serviceId": "cannlytics-website", "region": "us-central1"}
-        }
-      ]
-    },
-    {
-      "target": "leopard",
-      "public": "public/console",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "**/development/**"],
-      "rewrites": [
-        {
-          "source": "!/sitemap",
-          "run": {"serviceId": "cannlytics-leopard", "region": "us-central1"}
-        },
-        {
-          "source": "!/static",
-          "run": {"serviceId": "cannlytics-leopard", "region": "us-central1"}
-        },
-        {
-          "source": "**",
-          "run": {"serviceId": "cannlytics-leopard", "region": "us-central1"}
         }
       ]
     },

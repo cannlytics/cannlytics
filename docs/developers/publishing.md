@@ -152,6 +152,8 @@ gcloud run services describe your-lims \
   --format "value(status.url)"
 ```
 
+Note, you will probably want to [Configure cleanup policies for repositories](https://cloud.google.com/artifact-registry/docs/repositories/cleanup-policy) to [remove old images](https://stackoverflow.com/questions/67636234/do-i-need-to-clean-remove-the-images-created-on-deployments-of-my-cloud-run-inst) to save on cloud storage costs.
+
 ### 3. Hosting requests are directed to the containerized app.
 
 This step provides access to this containerized app from a [Firebase Hosting](https://firebase.google.com/docs/hosting) URL, so that the app can generate dynamic content for the Firebase-hosted site. You will need to have Firebase's command line tool installed:

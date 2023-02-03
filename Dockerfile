@@ -3,7 +3,7 @@
 #
 # Auhtors: Keegan Skeate <keegan@cannlytics.com>
 # Created: 1/5/2021
-# Updated: 1/23/2023
+# Updated: 1/31/2023
 # License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 #------------------------------------------------------------------
@@ -15,8 +15,8 @@
 # See: https://aka.ms/vscode-docker-python
 FROM python:3.10-slim
 
-# Define The main Django application.
-ENV APP console
+# TODO: Define The main Django application.
+ENV APP website
 
 # Listen to $PORT environment variable.
 # Note: This default value facilitates local development.
@@ -30,46 +30,22 @@ ENV PYTHONUNBUFFERED True
 
 #------------------------------------------------------------------
 # Dependencies installation.
+# Uncomment to supercharge with web automation, OCR, and QR codes.
 #------------------------------------------------------------------
 
-# DEV:
+# Install Chrome (to use Selenium for web automation).
+RUN apt-get update && apt-get install wget -y
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
 
-# Install Image libs?
-# RUN apt-get install -y zlib1g-dev libjpeg-dev libwebp-dev libpng-dev libtiff5-dev libjasper-dev libopenexr-dev libgdal-dev
+# Install C libraries (for image proecssing).
+RUN apt-get update && apt-get install -y gconf-service libasound2 libatk1.0-0 libcairo2 libcups2 libfontconfig1 libgdk-pixbuf2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libxss1 fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils imagemagick libzbar0
 
-# Install `imagemagick` (for parsing COAs). `libzbar0`?
-# RUN apt-get update && apt-get install -y imagemagick
-
-# Get's shared library for zbar
-# RUN apt-get update && apt-get install -y libzbar0 zbar-tools libzbar-dev python-zbar
-
-# TEST:
-
-# # Install Chrome (to use Selenium for web automation).
-# RUN apt-get install wget -y
-# RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-# RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
-
-# # Install C libraries.
-# RUN apt-get update && apt-get install -y gconf-service libasound2 libatk1.0-0 libcairo2 libcups2 libfontconfig1 libgdk-pixbuf2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libxss1 fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils imagemagick libzbar0
-
-# # Install `zbar`.
-# RUN apt-get update && apt-get install -y zbar-tools libzbar-dev python-zbar
-# RUN dpkg -L libzbar-dev; ls -l /usr/include/zbar.h
-
-# # Setup `zbar` environment variables.
-# ENV LC_ALL C.UTF-8
-# ENV LANG C.UTF-8
-
-# DEV:
-
-# Install Python dependencies, with `pyzbar` through pip.
-# RUN pip install --upgrade pip setuptools wheel pyzbar
-# COPY wheeldir /app/wheeldir
-# COPY requirements.txt .
-# RUN pip install --use-wheel --no-index --find-links=/app/wheeldir \
-# -r requirements.txt
-# RUN pip install -y pyzbar
+# Install `zbar` and set its required environment variables (for QR codes).
+RUN apt-get update && apt-get install -y zbar-tools libzbar-dev
+RUN dpkg -L libzbar-dev; ls -l /usr/include/zbar.h
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
 
 #------------------------------------------------------------------
 # General installation.

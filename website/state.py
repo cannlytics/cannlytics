@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/15/2020
-Updated: 6/21/2022
+Updated: 1/31/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # pylint:disable=line-too-long
@@ -192,12 +192,12 @@ material = {
             "price": "$4.20 / mo.",
             "color": "green",
             "action": "Sign Up ✍️",
-            "url": "https://console.cannlytics.com",
+            "url": "/subscriptions/checkout?name=premium",
             "attributes": [
                 "All datasets",
                 "All videos",
                 "All whitepapers",
-                "API access",
+                "Limited API access",
             ],
         },
     },
@@ -206,29 +206,44 @@ material = {
             {
                 "name": "Enterprise",
                 "plan_name": "enterprise",
-                "price": "$1,200 / mo.",
+                "price": "$1,420 / mo.",
                 "color": "purple",
                 "action": "Launch Now 🚀",
                 "url": "/subscriptions/checkout?name=enterprise",
                 "attributes": [
-                    "Custom installation",
-                    "Access to admin tools",
-                    "Feature requests",
-                    "Talk with devs",
+                    {"title": "Metrc integration*", "active": True},
+                    {"title": "Unlimited API access", "active": True},
+                    {"title": "Custom installation", "active": True},
+                    {"title": "24/7 phone support", "active": True},
+                    # "Prioritized issues",
                 ],
             },
             {
-                "name": "Pro",
+                "name": "Developer",
                 "plan_name": "pro",
                 "price": "$420 / mo.",
                 "color": "orange",
                 "action": "Get Started 🏃‍♀️",
+                "url": "/subscriptions/checkout?name=pro",
+                "attributes": [
+                    {"title": "Metrc integration*", "active": True},
+                    {"title": "Unlimited API access", "active": True},
+                    {"title": "Custom installation", "active": False},
+                    {"title": "24/7 phone support", "active": False},
+                ],
+            },
+            {
+                "name": "API Only",
+                "plan_name": "premium",
+                "price": "$4.20 / mo.",
+                "color": "green",
+                "action": "Sign Up ✍️",
                 "url": "/subscriptions/checkout?name=premium",
                 "attributes": [
-                    "Metrc integration*",
-                    "Access to dev tools",
-                    "Unlimited data storage",
-                    "Email support",
+                    {"title": "Unlimited API access", "active": True},
+                    {"title": "Metrc integration*", "active": False},
+                    {"title": "Custom installation", "active": False},
+                    {"title": "24/7 phone support", "active": False},
                 ],
             },
         ],
