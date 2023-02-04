@@ -66,28 +66,20 @@
       <ul class="navbar-nav me-2">
         <li class="nav-item mb-0">
           <a
+            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'ai' in request.path %}active{% endif %}"
+            href="{% url 'page' page='ai' %}"
+          >
+            AI
+          </a>
+        </li>
+        <li class="nav-item mb-0">
+          <a
             class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'data' in request.path %}active{% endif %}"
             href="{% url 'page' page='data' %}"
           >
             Data
           </a>
         </li>
-        <li class="nav-item mb-0">
-          <a
-            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'stats' in request.path %}active{% endif %}"
-            href="{% url 'page' page='stats' %}"
-          >
-            Stats
-          </a>
-        </li>
-        {% comment %} <li class="nav-item mb-0">
-          <a
-            class="nav-link btn-sm background-hover fw-bold serif text-dark"
-            href="https://docs.cannlytics.com"
-          >
-            Docs
-          </a>
-        </li> {% endcomment %}
         <li class="nav-item mb-0">
           <a
             class="nav-link btn-sm background-hover fw-bold serif text-dark"

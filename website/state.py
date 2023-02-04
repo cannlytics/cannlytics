@@ -290,7 +290,7 @@ lab_state = {
 #-----------------------------------------------------------------------
 
 page_docs = {
-    "ai": ["ai"],
+    "ai": ["ai", "ai_conclusion"],
     "api": ["api"],
     "data-science": ["data-science"],
     "data": ["data", "regulations"],

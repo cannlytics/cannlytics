@@ -1,0 +1,295 @@
+<!doctype html>
+<html>
+<!--
+  BudderBaker Cannabis Recipe Creator Page | Cannlytics Website
+  Copyright (c) 2023 Cannlytics
+
+  Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+  Created: 2/4/2023
+  Updated: 2/4/2023
+  License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static icon %}
+{% block title %}BudderBaker | Cannlytics{% endblock %}
+{% block page_css %}
+<style>
+* { box-sizing: border-box; }
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #d4d4d4;
+}
+.autocomplete-items div:hover {
+  background-color: #e9e9e9;
+}
+.autocomplete-active {
+  background-color: #50fa7b33 !important;
+  color: #ffffff;
+}
+body.dark .autocomplete-items div {
+  background-color: #2e303e;
+  border-color: #8b949e;
+}
+body.dark .autocomplete-items div:hover {
+  background-color: #616161;
+}
+body.dark .autocomplete-active {
+  background-color: #ffa60033 !important;
+  color: #ffffff;
+}
+.tooltip-inner {
+  text-align: left;
+}
+</style>
+{% endblock page_css %}
+{% block material %}
+<section class="container mb-2 mt-5">
+
+  <!-- Title -->
+  <div class="d-flex mt-4">
+    <nav
+      style="--bs-breadcrumb-divider: '>';"
+      aria-label="breadcrumb"
+    >
+      <ol class="breadcrumb bg-transparent p-0 mb-0">
+        <li class="breadcrumb-item fs-6 lh-sm">
+          <a
+            class="text-dark serif action"
+            href="{% url 'page' page='ai' %}"
+          >
+            AI
+          </a>
+        </li>
+        <li class="breadcrumb-item active fs-6 lh-sm text-dark serif" aria-current="page">
+          🍯BudderBaker
+        </li>
+      </ol>
+      <div>
+    </div>
+    </nav>
+  </div>
+
+  <!--
+    🍯BudderBaker is your go-to cannabis kitchen companion!
+    Create custom recipes or choose from food and beverage
+    options, specifying ingredients and adjusting the quantity
+    of your cannabis. Lab results or product information can
+    be entered for precision. Our system will even match your
+    terpenes with complementary ingredients. Safety is our
+    top priority, so we'll give you the green light before
+    you start cooking. Get a personalized image and fun
+    title for your creation, and keep your recipes organized
+    for future use. Get ready to elevate your culinary
+    experience!    
+  -->
+
+  <!-- Start with question: What are you trying to make? -->
+  <div class="d-flex flex-wrap align-items-center mb-3">
+    <div class="autocomplete mt-3" style="width:90%;">
+      <label
+        class="col col-form-label col-form-label-sm serif"
+        style="max-width:130px;"
+      >
+        Desired product
+      </label>
+      <div
+        class="d-flex flex-grow-1 nav-search-form"
+        role="search"
+      >
+        <input
+          type="text"
+          id="product-name"
+          class="form-control form-control-sm serif w-100"
+          placeholder="What are you trying to make? Enter a product, description, or your own product name..."
+          aria-label="Product name"
+          aria-describedby="product-name-button"
+          spellcheck="false"
+        >
+        <button
+          class="nav-search-button btn btn-default p-0"
+          style="transform:translateX(-32px);width:0;"
+          type="submit"
+          onclick="cannlytics.ai.recipes.searchRecipes();"
+        >
+          <span
+            data-bs-toggle="tooltip"
+            data-bs-placement="right"
+            title="Bake your recipe!"
+          >🧁</span>
+          {% comment %} {% icon "search" height="16" width="16" class="text-secondary" %} {% endcomment %}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODO: Pick or specify ingredients
+    - Start with an autocomplete and gradually make it more sophisticated.
+  -->
+
+  <!-- TODO: Specify the type of food/beverage they may want to make
+    - Start with a simple text field
+  -->
+
+  <!-- TODO: Enter cannabis product with lab results or attach image / COA
+    - Start with simple text field for product name
+    - Start with quantity number field and THC / CBD numeric fields.
+    - Option to "Add Compounds"
+    - Start with a simple file attachement
+  -->
+
+  <!-- TODO: Specify desired mg/serving or total_mg
+    - Start with simple number fields
+  -->
+
+  <!-- TODO: Use math + GPT to calculate:
+    - mg/serving
+    - mg/piece
+    - total_servings
+    - total_mg
+  -->
+
+  <!-- Predict! -->
+  <div class="d-flex justify-content-center mt-4">
+    <button
+      id="predict-button"
+      class="btn bg-gradient-orange text-white serif"
+      onclick="cannlytics.ai.recipes.createRecipe();"
+    >
+      {% icon 'zap' width="16px" class="me-1" %}
+      Bake Recipe
+    </button>
+    <button
+      id="predict-button-loading"
+      class="btn bg-gradient-orange text-white serif d-none"
+      type="button"
+      title="Baking..."
+      disabled
+    >
+      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+      Baking recipe... this may take a hot minute!
+    </button>
+  </div>
+
+
+  <!-- TODO: Show a grid of created recipes for management -->
+
+
+  <!-- Optional: Show community-created recipes as demonstrations. -->
+
+
+  <!-- TODO: Open recipes in dialogs (or new page?) for management -->
+
+  {% comment %} <!-- TODO: Submit feedback for recipe -->
+  <!-- Submit feedback button -->
+  <div id="feedback-submit" class="d-flex justify-content-center mt-4 mb-3">
+    <button
+      id="submit-actual-button"
+      class="btn bg-gradient-orange text-white serif"
+      type="button"
+      {% if not user %}
+      data-bs-target="#sign-in-dialog"
+      data-bs-toggle="modal"
+      {% else %}
+      onclick="cannlytics.stats.submitActual();"
+      {% endif %}
+    >
+    {% icon 'upload' width="16px" height="16px" class="me-1" %}
+      Submit Actual Effects and Aromas
+    </button>
+    <button
+      id="submit-actual-button-loading"
+      class="btn bg-gradient-orange text-white serif d-none"
+      type="button"
+      title="Submitting..."
+      disabled
+    >
+      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+      Submitting...
+    </button>
+  </div> {% endcomment %}
+
+  <!-- TODO: API instructions and examples -->
+
+  <!-- About the API -->
+  <div class="markdown">
+
+    {% comment %} <!-- TODO: Data Source Notice -->
+    <h2 class="mt-5">Data Sources</h2>
+    <ul>
+      <li>
+        <p class="fs-small">
+          <b class="serif">Dataset</b>:	<a class="fw-normal" href="https://cannlytics.page.link/reported-effects">Curated Cannabis Strains, their Average Chemical Compositions, and Reported Effects and Aromas</a><br>
+          <b class="serif">Author</b>:	Cannlytics<br>
+          <b class="serif">Created</b>:	5/18/2022<br>
+          <b class="serif">Updated</b>:	6/4/2022<br>
+          <b class="serif">Original Authors</b>: <a class="fw-normal" href="https://data.mendeley.com/datasets/6zwcgrttkp/1" target="_blank">
+            de la Fuente, et al. (2019)
+          </a>.<br>
+          <b class="serif">License</b>: <a class="fw-normal" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">
+            CC BY 4.0.
+          </a>
+        </p>
+        <p class="mt-2">
+          <small>The files associated with this dataset are licensed under a Creative Commons Attribution 4.0 International license.</small>
+        </p>
+        <p class="mt-2">
+          <small>You can share, copy and modify this dataset so long as you give appropriate credit, provide a link to the CC BY license, and indicate if changes were made, but you may not do so in a way that suggests the rights holder has endorsed you or your use of the dataset. Note that further permission may be required for any content within the dataset that is identified as belonging to a third party.</small>
+        </p>
+      </li>
+    </ul> {% endcomment %}
+
+    <!-- Disclaimer -->
+    <h2 class="mt-5">Disclaimer</h2>
+    <div class="col-md-8 callout">
+      <p class="fs-6 lh-md mt-0">
+        <small class="serif" style="font-size:0.7rem;">
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        </small>
+      </p>
+    </div>
+    <div class="col-md-8 callout callout-warning">
+      <p class="fs-6 lh-md mt-0">
+        ⚠️
+        <small class="serif" style="font-size:0.7rem;">
+          This product is not intended to diagnose, treat, cure, or prevent any disease.
+        </small>
+      </p>
+    </div>
+
+  </div><!-- End of about the API -->
+
+</section>
+{% include "website/components/art/vines.html" %}
+{% endblock material %}
+{% block page_js %}
+  <script>
+
+    // Enable tooltips.
+    cannlytics.ui.enableTooltips();
+  
+  </script>
+{% endblock %}
+</html>

@@ -1787,3 +1787,31 @@ body.dark .popover .link-primary {
 body.dark .popover .link-primary:hover {
   color: #47ADFB;
 }
+
+/*--------------------------------------------------------------------------
+ * Notifications
+ *-------------------------------------------------------------------------*/
+
+.callout {
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  background-color: var(--bs-gray-100);
+  border-left: 0.25rem solid var(--bs-gray-300);
+}
+body.dark .callout {
+  background-color: var(--bs-gray-800);
+  border-left: 0.25rem solid var(--bs-gray-600);
+}
+.callout-info {
+  background-color: rgba(var(--bs-info-rgb), .075) !important;
+  border-left: 0.25rem solid rgba(var(--bs-info-rgb), .5) !important;
+}
+.callout-danger {
+  background-color: rgba(var(--bs-danger-rgb), .075) !important;
+  border-left: 0.25rem solid rgba(var(--bs-danger-rgb), .5) !important;
+}
+.callout-warning {
+  background-color: rgba(var(--bs-warning-rgb), .075) !important;
+  border-left: 0.25rem solid rgba(var(--bs-warning-rgb), .5) !important;
+}
