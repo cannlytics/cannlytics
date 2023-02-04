@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<!--
+  AI Page | Cannlytics Website
+  Copyright (c) 2021-2022 Cannlytics
+
+  Authors: Keegan Skeate <https://github.com/keeganskeate>
+  Created: 11/22/2021
+  Updated: 1/2/2022
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% block title %}AI | Cannlytics{% endblock %}
+{% block material %}
+
+  <!-- Hero Banner -->
+  {% include "website/components/heros/hero_banner.html" with
+    primary_action='Integrate now'
+    primary_action_url='https://console.cannlytics.com/account/sign-in'
+    secondary_action='Read the docs'
+    secondary_action_url='https://github.com/cannlytics/cannlytics-ai'
+    image_url='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_ai_with_text.png?alt=media&token=78d19117-eff5-4f45-a8fa-3bbdabd6917d'
+    image_size='50px'
+    alt_title='Cannlytics API'
+    only
+  %}
+
+  <!-- Markdown -->
+  <div class="container my-3">
+    <div class="col markdown">
+      {{ ai|safe }}
+    </div>
+  </div>
+
+  <!-- AI tools
+    TODO:    
+    - [ ] Make the lsit of data tools dynamic (retrived from the database).
+  -->
+  <section class="container mb-2 markdown">
+    <div class="w-100">
+      <h2 class="my-3 text-dark serif">AI Tools</h2>
+      <table
+        class="table table-hover table-sm w-100"
+        style="background-color: transparent !important;"
+      >
+        <caption class="markdown lh-sm" style="max-width:560px;">
+          <small class="serif">
+            Note: All AI tools are
+            <a class="serif" href="https://github.com/cannlytics/cannlytics">open-source</a>
+            and are <a href="https://platform.openai.com/docs/guides/safety-best-practices/understand-and-communicate-limitations"
+                class="serif"  
+                target="_blank"
+              >far from perfect</a>.
+            If you notice any shortcomings, then please
+            <a class="serif" href="https://github.com/cannlytics/cannlytics/issues">
+              get our devs to tackle any issues
+            </a>
+            or tinker on a solution yourself!
+          </small>
+        </caption>
+        <thead>
+          <tr>
+            <th class="col-3">Tool</th>
+            <th class="col-6">Description</th>
+            <th class="col-3 text-center">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr role='button' onclick="window.location='{% url 'section' page='data' section='coas' %}';">
+            <th class="align-middle fs-5 lh-sm">
+              <h5 class="fw-bold serif">🍯BudderBaker</h5>
+              <h6 class="serif text-secondary">Cannabis Recipe Creator</h6>
+            </th>
+            <td class="text-dark">
+              Users can pick or specify their ingredients (or not)
+              Alternatively, users can specify the type of food/beverage they want to make.
+              Users can enter lab results for their cannabis or use 🥸CoADoc to parse
+              lab results from product labels.
+              Ultimately, the quantity and cannabinoid concentrations of the cannabis
+              plus the quantity of ingredients are used to calculate:
+              - mg/serving
+              - mg/piece
+              - total servings
+              - total mg
+              Pairings can be made between known product terpenes and ingredients, where possible.
+                Once complete, we assess if the product is safe.
+                You get an image for the recipe.
+                You get a fun title for the recipe.
+                You get a recipe description.
+                You can keep and manage created recipes.
+              </td>
+            <td class="align-middle text-center text-nowrap">
+              <h4><span class="fw-bold serif text-gradient">Premium</span></h4>
+              <span class="serif text-secondary">($4.20 / mo.)</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Learn More -->
+  {% comment %} {% include "website/components/content/introduction.html" with
+    title="Read the API Documentation"
+    description='Cannlytics AI is artificial intelligence, powered by Cannlytics, that strives to be the go-to source of public cannabis data. Cannlytics AI leverages the comparative advantage of Cannlytics in aggregating cannabis data from disparate resources to provide you with clean, standardized data. Cannlytics AI provides you with a rich buffet of cannabis data, automatically, without mistakes, flaws, or complaint.'
+    action="Utilize Cannlytics AI today"
+    image_id="mechanical-arm-emoji"
+    image_ref="website/images/emojies/mechanical-arm.svg"
+    link="https://github.com/cannlytics/cannlytics-ai"
+  %} {% endcomment %}
+
+  <!-- Vines -->
+  {% include "website/components/art/vines.html" %}
+
+{% endblock %}
+</html>
