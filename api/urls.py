@@ -19,6 +19,7 @@ from api.auth import auth
 from api.base import base
 
 # Functional API imports.
+import api.ai
 import api.data
 import api.lims
 import api.stats
@@ -48,6 +49,18 @@ urlpatterns = [
         path('/get-keys', auth.get_api_key_hmacs),
         path('/get-signature', auth.get_signature),
         path('/verify-pin', auth.verify_user_pin),
+    ])),
+
+    # AI API endpoints.
+    # Data API endpoints.
+    path('ai', include([
+
+        # TODO: Base AI API endpoint for users to find information.
+        # path('', api.data.data_base),
+
+        # Analyses and analytes data API endpoints.
+        path('/recipes', api.ai.recipes_api),
+
     ])),
 
     # Data API endpoints.
