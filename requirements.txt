@@ -24,6 +24,7 @@ googlemaps==4.7.3
 gunicorn==20.1.0
 Markdown==3.4.1
 # ocean-lib==0.8.5
+openai==0.26.4
 openpyxl==3.0.10
 opencv-python==4.6.0.66
 pandas==1.5.1
