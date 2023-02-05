@@ -341,6 +341,7 @@ def create_recipe(uid, data, params=None):
         prompt=image_prompt,
         n=1,
         size=IMAGE_SIZE,
+        user=uid,
     )
     print(response)
     usage += TOKENS_PER_IMAGE
@@ -497,6 +498,7 @@ def update_recipe(uid, recipe_id, data, params=None):
     change_image = data.get('change_image', False)
 
     # TODO: Get a new title for the recipe.
+    
 
     # Ask GPT to update the existing recipe.
     # Handles changes where the user doesn't want the recipe to change.
@@ -510,6 +512,7 @@ def update_recipe(uid, recipe_id, data, params=None):
             instruction=instructions,
             temperature=temperature,
             n=1,
+            user=uid,
         )
         print(response)
         usage, prompt_ids = increment_usage(usage, prompt_ids, response)
@@ -528,6 +531,7 @@ def update_recipe(uid, recipe_id, data, params=None):
             image=open(image_file, 'rb'),
             n=1,
             size=IMAGE_SIZE,
+            user=uid,
         )
         print(response)
         usage += TOKENS_PER_IMAGE

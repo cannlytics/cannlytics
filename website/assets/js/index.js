@@ -8,6 +8,7 @@
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { auth } from './auth/auth.js';
+import { ai } from './ai/ai.js';
 import { data } from './data/data.js';
 import * as firebase from './firebase.js';
 import { payments } from './payments/payments.js';
@@ -24,6 +25,7 @@ import '../css/cannlytics.scss';
 
 export {
   auth,
+  ai,
   data,
   firebase,
   payments,

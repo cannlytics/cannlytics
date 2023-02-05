@@ -49,6 +49,7 @@ if __name__ == '__main__':
       'doses': None,
       'special_instructions': None,
       'creativity': 0.420,
+      # TODO: Test more fields!
     }
     response = session.post(f'{BASE}/ai/recipes', json=data)
     assert response.status_code == 200
