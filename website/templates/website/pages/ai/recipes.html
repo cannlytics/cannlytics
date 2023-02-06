@@ -7,7 +7,7 @@
   Authors:
     Keegan Skeate <https://github.com/keeganskeate>
   Created: 2/4/2023
-  Updated: 2/4/2023
+  Updated: 2/6/2023
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -86,6 +86,7 @@ body.dark .autocomplete-active {
     </nav>
   </div>
 
+  <!-- TODO: Add description: -->
   <!--
     🍯BudderBaker is your go-to cannabis kitchen companion!
     Create custom recipes or choose from food and beverage
@@ -100,7 +101,7 @@ body.dark .autocomplete-active {
     experience!    
   -->
 
-  <!-- Start with question: What are you trying to make? -->
+  <!-- Product: What are you trying to make? -->
   <div class="d-flex flex-wrap align-items-center mb-3">
     <div class="autocomplete mt-3" style="width:90%;">
       <label
@@ -133,15 +134,60 @@ body.dark .autocomplete-active {
             data-bs-placement="right"
             title="Bake your recipe!"
           >🧁</span>
-          {% comment %} {% icon "search" height="16" width="16" class="text-secondary" %} {% endcomment %}
         </button>
       </div>
     </div>
   </div>
 
-  <!-- TODO: Pick or specify ingredients
-    - Start with an autocomplete and gradually make it more sophisticated.
+  <!-- Ingredients: Pick or specify ingredients
+    Future work: Implement an autocomplete and
+    gradually make it more sophisticated.
   -->
+    <div class="mt-2 row">
+      <div class="col-md-5">
+        <div class="row">
+          <label
+            class="col col-form-label col-form-label-sm serif"
+            style="max-width:130px;"
+          >
+            Ingredients
+          </label>
+          <div class="autocomplete" style="width:300px;">
+            <input
+              type="text"
+              id="new-ingredient"
+              class="form-control form-control-sm serif w-100"
+              placeholder="Enter an ingredient..."
+              aria-label="Ingredients"
+              aria-describedby="add-ingredient-button"
+              spellcheck="false"
+            >
+          </div>
+          <div class="d-flex align-items-center mt-3">
+            <button
+              id="add-ingredient-button"
+              class="btn btn-sm btn-sm-light text-nowrap fs-6"
+              onclick="cannlytics.ai.recipes.addIngredient('new-ingredient', 'ingredients', 'ingredient-template');"
+              title="Add ingredient."
+            >
+              {% icon 'plus' width="14px" %}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="ingredients" class="col-md-7"></div>
+    </div>
+  
+    <!-- Ingredients badge template -->
+    <span id="ingredient-template" class="badge rounded-pill bg-opacity-25 text-dark d-inline-flex align-items-center d-none mt-3 me-2">
+      <span class="badge-text"></span>
+      <button type="button" class="btn nav-link ms-2" onclick="">
+        {% icon 'x' width="16px" %}
+      </button>
+    </span>
+
+  <!-- TODO: Allow the user to toggle between public or not -->
+  
 
   <!-- TODO: Specify the type of food/beverage they may want to make
     - Start with a simple text field
@@ -241,6 +287,22 @@ body.dark .autocomplete-active {
     </button>
   </div> {% endcomment %}
 
+  <!-- TODO: Leave review -->
+
+    {% comment %} <!-- Textarea for user to leave free-form review. -->
+    <div class="form-floating mb-3 mt-5">
+      <textarea
+        class="form-control form-control-sm serif"
+        placeholder="Leave a comment here"
+        id="feedback-review"
+        style="height: 150px; max-width: 560px;"
+      ></textarea>
+      <label for="feedback-review" class="serif fs-6">
+        <small class="serif">Product review</small>
+      </label>
+    </div> {% endcomment %}
+
+
   <!-- TODO: API instructions and examples -->
 
   <!-- About the API -->
@@ -302,6 +364,17 @@ body.dark .autocomplete-active {
 {% endblock material %}
 {% block page_js %}
   <script>
+
+    // Initialize recipes.
+    cannlytics.ai.recipes.initializeRecipes();
+
+    // Add ingredient on enter.
+    var node = document.getElementById('new-ingredient');
+    node.addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        cannlytics.ai.recipes.addIngredient('new-ingredient', 'ingredients', 'ingredient-template');
+      }
+    });
 
     // Enable tooltips.
     cannlytics.ui.enableTooltips();

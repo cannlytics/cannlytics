@@ -7,10 +7,12 @@
  * Updated: 2/5/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
+import { Modal } from 'bootstrap';
 import { reportError } from '../payments/payments.js';
-import { authRequest } from '../utils.js';
+import { authRequest, capitalize, createUUID } from '../utils.js';
+import { autocomplete } from '../ui/autocomplete.js';
 import { showLoadingButton, hideLoadingButton } from '../ui/ui.js';
-
+import { getCurrentUser, listenToCollection } from '../firebase.js';
 
 export const RecipesAI = {
 
@@ -18,13 +20,52 @@ export const RecipesAI = {
     /**
      * Initialize the recipes page.
      */
+
+    // Stream any user's recipes.
+    const user = getCurrentUser();
+    if (user != null) {
+      this.streamUserRecipes();
+    }
+
+    // Stream public recipes.
+    this.streamPublicRecipes();
   },
 
-  getRecipes() {
+  /** Data Functionality */
+
+  streamUserRecipes() {
     /**
-     * Get recipes from the API.
+     * Stream user recipes from Firestore.
      */
+    console.log('Streaming user recipes...');
+    // listenToCollection(
+    //   path,
+    //   params,
+    //   queryCallback = null,
+    //   addedCallback = null,
+    //   modifiedCallback = null,
+    //   removedCallback = null,
+    //   errorCallback = null,
+    // )
   },
+
+  streamPublicRecipes() {
+    /**
+     * Stream public recipes from Firestore.
+     */
+    console.log('Streaming public recipes...');
+    // listenToCollection(
+    //   path,
+    //   params,
+    //   queryCallback = null,
+    //   addedCallback = null,
+    //   modifiedCallback = null,
+    //   removedCallback = null,
+    //   errorCallback = null,
+    // )
+  },
+
+  /** API Functionality */
 
   async createRecipe() {
     /**
@@ -73,8 +114,47 @@ export const RecipesAI = {
      */
   },
 
+  /** UI Functionality */
+
+  addIngredient(inputId, containerId, templateId) {
+    /**
+     * Add an ingredient.
+     */
+    // Get the value.
+    const input = document.getElementById(inputId);
+    const value = input.value;
+    if (value === null || value === '') return;
+
+    // Create a new badge.
+    const id = createUUID();
+    const docFrag = document.createDocumentFragment();
+    const tempNode = document.getElementById(templateId).cloneNode(true);
+    const name = value.replaceAll('_', ' ');
+    tempNode.classList.remove('d-none');
+    
+    // TODO: Get color from Firestore/OpenAI.
+    // If color is not in Firestore, ask OpenAI and save to Firestore.
+    // tempNode.style.backgroundColor = this.variables[`${type}s`][value].color;
+    
+    // TODO: Get emoji from Firestore/OpenAI.
+    // If emoji is not in Firestore, ask OpenAI and save to Firestore.
+    
+    // Add the badge to the UI with a remove button.
+    tempNode.querySelector('.badge-text').classList.add('text-black');
+    tempNode.id = id;
+    tempNode.querySelector('.badge-text').textContent = capitalize(name);
+    tempNode.querySelector('.btn').onclick = function() {
+      document.getElementById(id).remove();
+    };
+    docFrag.appendChild(tempNode);
+    document.getElementById(containerId).appendChild(docFrag);
+    input.value = '';
+  },
+
   // TODO: Open recipe in a dialog.
 
   // TODO: Search recipes.
 
 }
+
+

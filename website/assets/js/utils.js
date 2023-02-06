@@ -325,6 +325,18 @@ export const validateEmail = (email) => {
  * Data Helpers
  *----------------------------------------------------------------------------*/
 
+export const createUUID = () => {
+  /** Generate UUID.
+   * Credit: Joe <https://stackoverflow.com/a/6860916>
+   * License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
+   * @returns {String} A UUID.
+   */
+  var S4 = function() {
+    return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+  };
+  return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+}
+
 export const downloadBlob = (blob, filename) => {
   /**
    * Download a blob by creating an element in the user interface.
