@@ -187,7 +187,19 @@ body.dark .autocomplete-active {
     </span>
 
   <!-- TODO: Allow the user to toggle between public or not -->
-  
+  <div class="form-check form-check-inline">
+    <input
+      class="form-check-input"
+      type="radio"
+      name="public"
+      id="public-choice"
+      value="true"
+    >
+    <label class="form-check-label" for="public-choice">
+      Public {% icon "globe" width="16px" height="16px" %}<br>
+      <small class="text-secondary">Appears in search results.</small>
+    </label>
+  </div>
 
   <!-- TODO: Specify the type of food/beverage they may want to make
     - Start with a simple text field

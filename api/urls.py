@@ -59,6 +59,7 @@ urlpatterns = [
 
         # Recipes AI.
         path('/recipes', api.ai.recipes_api),
+        path('/recipes/<recipe_id>', api.ai.recipes_api),
 
         # AI utilities.
         path('/color', api.ai.text_to_color_api),

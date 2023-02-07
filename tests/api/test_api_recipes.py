@@ -15,12 +15,6 @@ import os
 from dotenv import dotenv_values
 import requests
 
-# Internal imports:
-from cannlytics.utils import (
-    get_date_range,
-    encode_pdf,
-    get_timestamp,
-)
 
 # Dev: Test with the development server.
 BASE = 'http://127.0.0.1:8000/api'
@@ -29,7 +23,7 @@ BASE = 'http://127.0.0.1:8000/api'
 # BASE = 'https://cannlytics.com/api'
 
 # Load your API key to pass in the authorization header as a bearer token.
-config = dotenv_values('../../.env')
+config = dotenv_values('.env')
 API_KEY = config['CANNLYTICS_API_KEY']
 
 
@@ -40,38 +34,56 @@ if __name__ == '__main__':
     session = requests.Session()
     session.headers.update({'Authorization': f'Bearer {API_KEY}'})
 
-    # [ ] Get information about Cannlytics AI.
-
+    # [✓] Get information about Cannlytics AI.
+    response = session.get(f'{BASE}/ai')
+    assert response.status_code == 200
+    print('AP live.')
 
     # [✓] Create a recipe.
     print('Creating a recipe...')
-    url = f'{BASE}/recipes'
     data = {
+        'image_type': '',
       'ingredients': ['coffee', 'milk', 'butter'],
       'product_name': 'Infused cannabis coffee',
       'doses': None,
       'special_instructions': None,
       'creativity': 0.420,
-      # TODO: Test more fields!
+      'total_thc': 800,
+      'total_cbd': 0,
+      'public': True,
     }
     response = session.post(f'{BASE}/ai/recipes', json=data)
     assert response.status_code == 200
     print('Created a recipe.')
 
-    # [ ] Get a color from text.
+    # [✓] Generate a color from text.
+    data = {'text': 'Moonshine Haze'}
+    response = session.post(f'{BASE}/ai/color', json=data)
+    assert response.status_code == 200
+    print('Generated color from text.')
 
+    # [✓] Generate an emoji from text.
+    data = {'text': 'Moonshine Haze'}
+    response = session.post(f'{BASE}/ai/emoji', json=data)
+    assert response.status_code == 200
+    print('Generated emoji from text.')
 
-    # [ ] Get an emoji from text.
+    # [✓] Get a user's recipes.
+    response = session.get(f'{BASE}/ai/recipes')
+    assert response.status_code == 200
+    print('Found user recipes.')
 
-
-    # [ ] Get a user's recipes.
-
-
-    # [ ] Get a recipe using its ID.
-
+    # [✓] Get a recipe using its ID.
+    uid = response.json()['data'][0]['id']
+    response = session.get(f'{BASE}/ai/recipes/{uid}')
+    assert response.status_code == 200
+    print('Found user recipe by ID.')
 
     # [ ] Get public recipes.
-
+    params = {'public': True}
+    response = session.get(f'{BASE}/ai/recipes', params=params)
+    assert response.status_code == 200
+    print('Found public recipes.')
 
     # [ ] Search public / user recipes:
     # - limit
@@ -92,9 +104,19 @@ if __name__ == '__main__':
     #     {'key': 'updated_at_max', 'type': 'datetime'},
     # ]
 
-
     # [ ] Update a recipe.
-
+    data = {
+      'ingredients': [],
+      'title': '',
+      'doses': None,
+      'instructions': '',
+      'special_instructions': None,
+      'creativity': 0.420,
+      'change_recipe': True,
+      'change_image': True,
+      'change_title': True,
+      'public': True,
+    }
 
     # [ ] Update a recipe's image.
 

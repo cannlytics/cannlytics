@@ -58,15 +58,11 @@ def increment_usage(usage, prompt_ids, response):
 @api_view(['GET'])
 def ai_base(request: Request):
     """Base AI endpoint to help users discover other endpoints."""
-
-    message = """Welcome to Cannlytics AI. You can currently use:
-   
-        - `/api/ai/recipes`: A cannabis recipes generator.
-        - `/api/ai/color`: A text-to-color generator.
-        - `/api/ai/emoji`: A text-to-emoji generator.
-    
-    Please stay tuned for new AI APIs.
-    """
+    message = "Welcome to Cannlytics AI. You can currently use:\n"
+    message += "\n - `/api/ai/recipes`: A cannabis recipes generator."
+    message += "\n - `/api/ai/color`: A text-to-color generator."
+    message += "\n - `/api/ai/emoji`: A text-to-emoji generator."
+    message += "\n\nPlease stay tuned for new AI APIs."
     response = {'success': True, 'message': message, 'data': None}
     return Response(response, status=200)
 
