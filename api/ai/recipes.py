@@ -21,13 +21,13 @@ Future work:
     [ ] Save / archive multiple images?
 
 """
-# Standard imports.
+# Standard imports:
 from datetime import datetime
 import os
 import secrets
 import tempfile
 
-# External imports.
+# External imports:
 import google.auth
 from google.cloud.firestore import Increment
 import openai
@@ -35,7 +35,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.request import Request
 
-# Internal imports.
+# Internal imports:
 from cannlytics.auth.auth import authenticate_request
 from cannlytics.firebase import (
     access_secret_version,
@@ -249,6 +249,7 @@ def create_recipe(uid, data, params=None):
         temperature = params.get('creativity', TEMPERATURE)
 
     # Ask GPT to create a recipe.
+    print(recipe_prompt)
     response = openai.Completion.create(
         model=CREATE_TEXT_MODEL,
         prompt=recipe_prompt,
@@ -269,6 +270,7 @@ def create_recipe(uid, data, params=None):
         title_prompt = 'Write a title for the following recipe'
     title_prompt += ' (use the product name if possible):'
     title_prompt += recipe
+    print(title_prompt)
     response = openai.Completion.create(
         model=CREATE_TEXT_MODEL,
         prompt=title_prompt,
@@ -287,6 +289,7 @@ def create_recipe(uid, data, params=None):
     type_prompt = 'Is this recipe for a food or drink?'
     type_prompt += product_title
     type_prompt += 'Type:'
+    print(type_prompt)
     response = openai.Completion.create(
         model=CREATE_TEXT_MODEL,
         prompt=type_prompt,
@@ -318,6 +321,7 @@ def create_recipe(uid, data, params=None):
     else:
         description_prompt = 'Short summary of:'
     description_prompt += recipe
+    print(description_prompt)
     response = openai.Completion.create(
         model=CREATE_TEXT_MODEL,
         prompt=description_prompt,
@@ -337,6 +341,7 @@ def create_recipe(uid, data, params=None):
     image_type = data.get('image_type', IMAGE_TYPE)
     image_prompt = f'A {image_type} of '
     image_prompt += product_title
+    print(image_prompt)
     response = openai.Image.create(
         prompt=image_prompt,
         n=1,
@@ -364,6 +369,7 @@ def create_recipe(uid, data, params=None):
     total_prompt = f'What is the total weight in {units_name} of the following recipe?'
     total_prompt += recipe
     total_prompt += f'\nTotal {units_name}:'
+    print(total_prompt)
     response = openai.Completion.create(
         model=CREATE_TEXT_MODEL,
         prompt=total_prompt,
@@ -385,6 +391,7 @@ def create_recipe(uid, data, params=None):
     serving_prompt = f'What is the {units_name} per serving (or each) of the following recipe?'
     serving_prompt += recipe
     serving_prompt += f'\n{units_name} per serving (or each):'
+    print(serving_prompt)
     response = openai.Completion.create(
         model=CREATE_TEXT_MODEL,
         prompt=serving_prompt,
@@ -506,6 +513,7 @@ def update_recipe(uid, recipe_id, data, params=None):
         instructions = 'Given:'
         instructions += data.get('instructions', UPDATE_INSTRUCTIONS)
         instructions += '\nChange the recipe'
+        print(instructions)
         response = openai.Edit.create(
             model=EDIT_TEXT_MODEL,
             input=existing_recipe,

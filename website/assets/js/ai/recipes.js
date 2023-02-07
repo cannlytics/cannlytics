@@ -75,7 +75,17 @@ export const RecipesAI = {
     showLoadingButton('create-button');
 
     // TODO: Format the request data.
-    const postData = {};
+    const postData = {
+      'image_type': '',
+      'ingredients': [],
+      'product_name': 'Infused cannabis coffee',
+      'doses': null,
+      'special_instructions': null,
+      'creativity': 0.420,
+      'public': true,
+      'total_thc': 800,
+      'total_cbd': 0,
+    };
 
     // Make a request to create a recipe.
     const response = await authRequest('/api/ai/recipes', postData);
@@ -94,6 +104,20 @@ export const RecipesAI = {
     /**
      * Update a recipe through the API.
      */
+
+    // TODO: Format the request data.
+    const postData = {
+      'ingredients': [],
+      'title': '',
+      'doses': null,
+      'instructions': '',
+      'special_instructions': null,
+      'creativity': 0.420,
+      'change_recipe': true,
+      'change_image': true,
+      'change_title': true,
+      'public': true,
+    };
   },
 
   deleteRecipe() {
@@ -116,7 +140,7 @@ export const RecipesAI = {
 
   /** UI Functionality */
 
-  addIngredient(inputId, containerId, templateId) {
+  async addIngredient(inputId, containerId, templateId) {
     /**
      * Add an ingredient.
      */
@@ -132,13 +156,6 @@ export const RecipesAI = {
     const name = value.replaceAll('_', ' ');
     tempNode.classList.remove('d-none');
     
-    // TODO: Get color from Firestore/OpenAI.
-    // If color is not in Firestore, ask OpenAI and save to Firestore.
-    // tempNode.style.backgroundColor = this.variables[`${type}s`][value].color;
-    
-    // TODO: Get emoji from Firestore/OpenAI.
-    // If emoji is not in Firestore, ask OpenAI and save to Firestore.
-    
     // Add the badge to the UI with a remove button.
     tempNode.querySelector('.badge-text').classList.add('text-black');
     tempNode.id = id;
@@ -149,6 +166,28 @@ export const RecipesAI = {
     docFrag.appendChild(tempNode);
     document.getElementById(containerId).appendChild(docFrag);
     input.value = '';
+
+    // Get a color for the badge from Firestore/OpenAI.
+    // If color is not in Firestore, ask OpenAI and save to Firestore.
+    try {
+      const response = await authRequest('/api/ai/color', {text: value});
+      console.log('Color:')
+      console.log(response);
+      tempNode.style.backgroundColor = response['data'];
+    } catch(error) {
+      // Unable to query a color.
+    }
+    
+    // Get an emoji for the badge from Firestore/OpenAI.
+    // If emoji is not in Firestore, ask OpenAI and save to Firestore.
+    try {
+      const response = await authRequest('/api/ai/emoji', {text: value});
+      console.log('Emoji:')
+      console.log(response);
+      document.getElementById(id).innerHTML = response['data'] + value;
+    } catch(error) {
+      // Unable to query a color.
+    }
   },
 
   // TODO: Open recipe in a dialog.

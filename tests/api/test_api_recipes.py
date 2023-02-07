@@ -40,6 +40,9 @@ if __name__ == '__main__':
     session = requests.Session()
     session.headers.update({'Authorization': f'Bearer {API_KEY}'})
 
+    # [ ] Get information about Cannlytics AI.
+
+
     # [✓] Create a recipe.
     print('Creating a recipe...')
     url = f'{BASE}/recipes'
@@ -54,6 +57,12 @@ if __name__ == '__main__':
     response = session.post(f'{BASE}/ai/recipes', json=data)
     assert response.status_code == 200
     print('Created a recipe.')
+
+    # [ ] Get a color from text.
+
+
+    # [ ] Get an emoji from text.
+
 
     # [ ] Get a user's recipes.
 

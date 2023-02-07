@@ -52,14 +52,17 @@ urlpatterns = [
     ])),
 
     # AI API endpoints.
-    # Data API endpoints.
     path('ai', include([
 
-        # TODO: Base AI API endpoint for users to find information.
-        # path('', api.data.data_base),
+        # Base AI API endpoint for users to find available AI tools.
+        path('', api.ai.ai_base),
 
-        # Analyses and analytes data API endpoints.
+        # Recipes AI.
         path('/recipes', api.ai.recipes_api),
+
+        # AI utilities.
+        path('/color', api.ai.text_to_color_api),
+        path('/emoji', api.ai.text_to_emoji_api),
 
     ])),
 

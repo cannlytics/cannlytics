@@ -7,8 +7,16 @@ Created: 2/5/2023
 Updated: 2/5/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
+from api.ai.ai import (
+    ai_base,
+    text_to_color_api,
+    text_to_emoji_api,
+)
 from api.ai.recipes import recipes_api
 
 __all__ = [
+    ai_base,
     recipes_api,
+    text_to_color_api,
+    text_to_emoji_api,
 ]
