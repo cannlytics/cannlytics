@@ -42,7 +42,7 @@ if __name__ == '__main__':
     # [✓] Create a recipe.
     print('Creating a recipe...')
     data = {
-        'image_type': '',
+      'image_type': '',
       'ingredients': ['coffee', 'milk', 'butter'],
       'product_name': 'Infused cannabis coffee',
       'doses': None,
@@ -132,6 +132,5 @@ if __name__ == '__main__':
         'review': "A baker's dozen!",
         'rating': 0.420,
     }
-
 
     # [ ] Rate a public recipe.

@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/2/2023
-Updated: 2/5/2023
+Updated: 2/8/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API to interface with AI-generated cannabis recipes.
@@ -193,7 +193,7 @@ def get_recipes(params, recipe_id=None, uid=None) -> list:
 
 
 def create_recipe(uid, data, params=None):
-    """Create a recipe.
+    """Create a recipe with OpenAI.
     """
     # Initialize a blank recipe.
     usage, prompt_ids = 0, []
@@ -459,15 +459,18 @@ def create_recipe(uid, data, params=None):
         'baking': False,
         'description': description,
         'doses': doses,
+        'creativity': temperature,
         'file_url': file_url,
         'image_ref': image_ref,
         'image_url': image_url,
+        'image_type': image_type,
         'ingredients': ingredients,
         'product_name': product_name,
         'product_type': product_type,
         'product_subtype': product_subtype,
         'recipe': recipe,
         'title': product_title,
+        'special_instructions': special_instructions,
         'number_of_servings': number_of_servings,
         'total_weight': total_weight,
         'serving_weight': serving_weight,
@@ -499,7 +502,7 @@ def create_recipe(uid, data, params=None):
 
 
 def update_recipe(uid, recipe_id, data, params=None):
-    """Update an existing recipe.
+    """Update an existing recipe with OpenAI.
     """
     # Initialize an update for the recipe.
     usage, prompt_ids = 0, []
@@ -531,7 +534,7 @@ def update_recipe(uid, recipe_id, data, params=None):
     # Handles changes where the user doesn't want the recipe to change.
     if change_recipe:
         instructions = 'Given:'
-        instructions += data.get('instructions', UPDATE_INSTRUCTIONS)
+        instructions += data.get('special_instructions', UPDATE_INSTRUCTIONS)
         instructions += '\nChange the recipe'
         print(instructions)
         response = openai.Edit.create(
@@ -591,6 +594,8 @@ def update_recipe(uid, recipe_id, data, params=None):
     entry = {
         **doc,
         'baking': False,
+        'update_instructions': instructions,
+        'creativity': temperature,
         'file_url': file_url,
         'image_url': image_url,
         'recipe': updated_recipe,

@@ -6,10 +6,10 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 2/7/2023
-  Updated: 2/7/2023
+  Updated: 2/8/2023
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
-{% load icon %}
+{% load static icon %}
 <div
     id="recipe-dialog"
     class="modal fade"
@@ -22,6 +22,7 @@
         <div class="modal-header">
 
           <!-- Recipe name -->
+          <!-- TODO: Allow the user to edit the recipe name -->
           <h5
             class="modal-title serif"
             id="recipe-dialog-title"
@@ -46,7 +47,7 @@
         <div class="modal-body">
 
           <!-- Large recipe image -->
-          <!-- TODO: Prompt to edit image through GPT -->
+          
           <!-- TODO: Allow user to upload their own image -->
           <img
             id="recipe-large-image"
@@ -55,6 +56,25 @@
             height="128px;"
             width="128px;"
           >
+
+          <!-- TODO: Prompt to edit image through GPT -->
+          {% comment %} <div class="d-flex flex-column mb-2 mt-3">
+            <label
+              class="col col-form-label serif"
+              style="max-width:150px;"
+            >
+              Instructions to update image
+            </label>
+            <input
+              type="text"
+              id="image-update-input"
+              name="image_type"
+              class="form-control form-control-sm serif w-100"
+              style="max-width:300px;"
+              value=""
+              aria-label="Image style"
+            >
+          </div> {% endcomment %}
           
           <!-- Description -->
           <div class="form-floating mb-3 mt-2">
@@ -68,6 +88,10 @@
               <small class="serif">Description</small>
             </label>
           </div>
+
+          <!-- TODO: Allow the user to enter update_instructions and ask GPT
+            to update their recipe.
+          -->
 
           <!-- Display the full `recipe` -->
           <div class="form-floating mb-3 mt-2">
@@ -105,14 +129,25 @@
             -->
             <span></span>
 
-            <!-- TODO: Allow user to upload photos of their recipe -->
+            <!-- TODO: Allow user to upload multiple photos of their recipe
+              to an image gallery.
+            -->
 
-
-            <!-- TODO: Allow user to leave feedback on recipe -->
-
-
+            {% comment %}
             <!-- TODO: Allow user to leave review and rating of the recipe -->
-            
+             <!-- Textarea for user to leave free-form review. -->
+              <div class="form-floating mb-3 mt-5">
+                <textarea
+                  class="form-control form-control-sm serif"
+                  placeholder="Leave a comment here"
+                  id="feedback-review"
+                  style="height: 150px; max-width: 560px;"
+                ></textarea>
+                <label for="feedback-review" class="serif fs-6">
+                  <small class="serif">Product review</small>
+                </label>
+              </div>
+            {% endcomment %}
 
             <!-- Dosage -->
             <label
@@ -130,6 +165,66 @@
             <div id="total_thc" class="serif fs-6"></div>
             <div id="total_cbd" class="serif fs-6"></div>
             <div id="number_of_servings" class="serif fs-6"></div>
+
+            <!-- Allow user to leave feedback on recipe -->
+
+            <!-- Textarea for user to leave free-form review. -->
+            <div id="feedback-form" class="form-floating mb-3 mt-5">
+              <textarea
+                id="feedback-review"
+                class="form-control form-control-sm serif"
+                placeholder="Leave a comment here"
+                style="height: 150px; max-width: 560px;"
+              ></textarea>
+              <label for="feedback-review" class="serif fs-6">
+                <small class="serif">Feedback</small>
+              </label>
+            </div>
+
+            <!-- Thank you for feedback -->
+            <div
+              id="feedback-thank-you"
+              class="card rounded mt-3 text-center d-none"
+              style="max-width:420px;"
+            >
+              <div class="d-flex justify-content-center">
+                <svg style="width:80px;height:80px;">
+                  <use href="{% static "website/images/emojies/green-check.svg" %}#green-check-emoji"></use>
+                </svg>
+              </div>
+              <h4 class="serif text-dark mt-0 mb-2">
+                Thank you for your feedback!</h4>
+              <p class="fs-6 serif text-secondary mt-0 mb-2">
+                Your feedback has been recorded.<br>
+                Thank you for helping the world<br>to
+                better understand cannabis recipes.
+              </p>
+            </div>
+
+            <!-- Submit feedback button -->
+            <div
+              id="feedback-submit"
+              class="d-flex justify-content-start"
+            >
+              <button
+                id="recipe-feedback"
+                class="btn btn-sm bg-gradient-green text-white serif"
+                type="button"
+                onclick="cannlytics.ai.recipes.addRecipeFeedback();"
+              >
+                Send Feedback
+              </button>
+              <button
+                id="recipe-feedback-loading"
+                class="btn btn-sm bg-gradient-green text-white serif d-none"
+                type="button"
+                title="Submitting..."
+                disabled
+              >
+                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                Submitting...
+              </button>
+            </div>
 
             <!-- Delete button -->
             <button
@@ -164,6 +259,7 @@
             id="save-recipe-button"
             class="btn btn-sm bg-gradient-green text-white serif"
             type="button"
+            onclick="cannlytics.ai.recipes.saveRecipe();"
           >
             Save
           </button>

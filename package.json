@@ -1,6 +1,6 @@
 {
   "name": "cannlytics",
-  "version": "0.0.13",
+  "version": "0.0.13+3",
   "license": "MIT",
   "homepage": "https://cannlytics.com",
   "description": "Cannlytics includes a LIMS, a console, documentation, a website, and vast amount of tools for cannabis analytics.",
@@ -56,7 +56,7 @@
     "website:run": "gcloud run deploy cannlytics-website --image=gcr.io/cannlytics/cannlytics-website --set-env-vars=SETTINGS_NAME=cannlytics_platform_settings --region=us-central1 --allow-unauthenticated --platform=managed --memory=2Gi --cpu=2 --min-instances=1 --max-instances=99 --no-use-http2",
     "website:deploy": "firebase deploy --project cannlytics --only hosting:cannlytics",
     "website:docker": "docker build . --tag gcr.io/cannlytics/cannlytics-website:latest & docker push gcr.io/cannlytics/cannlytics-website:latest",
-    "website:publish": "npm run website:build & npm run website:docker & npm run website:run && npm run website:deploy"
+    "website:publish": "npm run website:build & website:collectstatic & npm run website:docker & npm run website:run && npm run website:deploy"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.6",

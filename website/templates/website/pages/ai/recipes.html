@@ -7,7 +7,7 @@
   Authors:
     Keegan Skeate <https://github.com/keeganskeate>
   Created: 2/4/2023
-  Updated: 2/7/2023
+  Updated: 2/8/2023
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -681,7 +681,7 @@ body.dark .autocomplete-active {
       {% endif %}
 
       <!-- Dynamic recipes container -->
-      <div id="user-recipes"></div>
+      <div id="user-recipes" class="d-flex flex-wrap"></div>
 
     </div>
   </div>
@@ -706,7 +706,7 @@ body.dark .autocomplete-active {
       </p>
 
       <!-- Dynamic recipes container -->
-      <div id="public-recipes"></div>
+      <div id="public-recipes" class="d-flex flex-wrap"></div>
 
     </div>
   </div>
@@ -716,50 +716,6 @@ body.dark .autocomplete-active {
 
   <!-- Recipe dialog -->
   {% include "./recipe_dialog.html" %}
-
-  {% comment %} <!-- TODO: Submit feedback for recipe -->
-  <!-- Submit feedback button -->
-  <div id="feedback-submit" class="d-flex justify-content-center mt-4 mb-3">
-    <button
-      id="submit-actual-button"
-      class="btn bg-gradient-orange text-white serif"
-      type="button"
-      {% if not user %}
-      data-bs-target="#sign-in-dialog"
-      data-bs-toggle="modal"
-      {% else %}
-      onclick="cannlytics.stats.submitActual();"
-      {% endif %}
-    >
-    {% icon 'upload' width="16px" height="16px" class="me-1" %}
-      Submit Actual Effects and Aromas
-    </button>
-    <button
-      id="submit-actual-button-loading"
-      class="btn bg-gradient-orange text-white serif d-none"
-      type="button"
-      title="Submitting..."
-      disabled
-    >
-      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-      Submitting...
-    </button>
-  </div> {% endcomment %}
-
-  <!-- TODO: Leave review -->
-
-    {% comment %} <!-- Textarea for user to leave free-form review. -->
-    <div class="form-floating mb-3 mt-5">
-      <textarea
-        class="form-control form-control-sm serif"
-        placeholder="Leave a comment here"
-        id="feedback-review"
-        style="height: 150px; max-width: 560px;"
-      ></textarea>
-      <label for="feedback-review" class="serif fs-6">
-        <small class="serif">Product review</small>
-      </label>
-    </div> {% endcomment %}
 
   <!-- About the API -->
   <div class="markdown">

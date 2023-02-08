@@ -116,8 +116,8 @@ service cloud.firestore {
 
     // === Recipes ===
 
-    // Allow anyone to read public recipes.
-    match /public/ai/recipes/{document=**} {
+    // Allow anyone to read public AI data.
+    match /public/ai/{collection}/{document=**} {
     	allow read: if true;
       allow write: if false;
     }

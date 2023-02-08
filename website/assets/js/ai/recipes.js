@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 2/5/2023
- * Updated: 2/7/2023
+ * Updated: 2/8/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
 import { Modal } from 'bootstrap';
@@ -13,6 +13,7 @@ import { authRequest, capitalize, createUUID, showNotification } from '../utils.
 import { autocomplete } from '../ui/autocomplete.js';
 import { showLoadingButton, hideLoadingButton } from '../ui/ui.js';
 import { onAuthChange, getCurrentUser, listenToCollection } from '../firebase.js';
+import { updateDoc } from 'firebase/firestore';
 
 export const RecipesAI = {
 
@@ -29,7 +30,7 @@ export const RecipesAI = {
     });
 
     // Stream public recipes.
-    this.streamPublicRecipes();
+    // this.streamPublicRecipes();
 
     // Wire-up the recipe modal.
     const modal = document.getElementById('recipe-dialog')
@@ -50,12 +51,14 @@ export const RecipesAI = {
           document.getElementById('user-recipes-placeholder').classList.remove('d-none');
           return;
         } else {
-          document.getElementById('user-recipes-placeholder').classList.add('d-none');
-          document.getElementById('user-recipes').textContent = '';
+          try {
+            document.getElementById('user-recipes-placeholder').classList.add('d-none');
+            document.getElementById('user-recipes').textContent = '';
+          } catch(error) {
+            // User may not be signed in on server.
+          }
         }
         querySnapshot.forEach((doc) => {
-          console.log('RENDER TEMPLATE:');
-          console.log(doc.data());
 
           // Render or update recipe thumbnails.
           this.addRecipeThumbnail(doc.id, doc.data());
@@ -72,9 +75,8 @@ export const RecipesAI = {
     /**
      * Stream public recipes from Firestore.
      */
-    console.log('Streaming public recipes...');
 
-    // TODO: Stream public recipes.
+    // FIXME: Stream public recipes.
     // listenToCollection(
     //   path,
     //   params,
@@ -104,7 +106,7 @@ export const RecipesAI = {
     // Get all of the ingredients.
     const ingredients = []
     const ingredientInputs = document.getElementsByClassName('ingredient');
-    Array.from(ingredientInputs).forEach((el) => {
+    Array.prototype.forEach.call(ingredientInputs, function(el) {
       const ingredient = el.textContent;
       if (ingredient != '') ingredients.push(ingredient);
     });
@@ -141,7 +143,7 @@ export const RecipesAI = {
     const doses = [];
     const compoundNames = document.getElementsByClassName('compound-name');
     const compoundAmounts = document.getElementsByClassName('compound-amount');
-    Array.from(compoundNames).forEach((el, n) => {
+    Array.prototype.forEach.call(compoundNames, function(el, n) {
       const name = el.value;
       const amount = compoundAmounts[n].value;
       if (name != '') {
@@ -168,22 +170,24 @@ export const RecipesAI = {
       'total_cbd': cbd,
       'units': 'mg',
     };
-    console.log('POSTING:');
-    console.log(postData);
+
+    // Show baking notification.
+    const message = 'Baking recipe... this may take a hot minute!';
+    showNotification('Baking recipe', message, /* type = */ 'success');
 
     // Make a request to create a recipe.
-    const response = await authRequest('/api/ai/recipes', postData);
-    if (response.success) {
-      console.log(response.data)
-    } else {
+    try {
+      response = await authRequest('/api/ai/recipes', postData);
+      console.log(response);
+      const message = 'Created your new recipe. Enjoy!';
+      showNotification('Recipe created', message, /* type = */ 'success');
+    } catch(error) {
       const message = 'Error encountered when creating recipe. Please try again later or email support.';
       showNotification('Error creating recipe', message, /* type = */ 'error');
     }
 
     // Hide loading button.
     hideLoadingButton('create-button');
-    const message = 'Baking recipe... this may take a hot minute!';
-    showNotification('Baking recipe', message, /* type = */ 'success');
   },
 
   updateRecipe() {
@@ -206,12 +210,6 @@ export const RecipesAI = {
     };
   },
 
-  saveRecipe() {
-    /**
-     * Save a user's edits to their recipe.
-     */
-  },
-
   async deleteRecipe() {
     /**
      * Delete a recipe through the API.
@@ -221,9 +219,7 @@ export const RecipesAI = {
 
     // Make a request to delete the recipe.
     const response = await authRequest('/api/ai/recipes', null, {delete: true});
-    if (response.success) {
-      console.log(response.data)
-    } else {
+    if (!response.success) {
       const message = 'Error encountered when deleting recipe. Please try again later or email support.';
       showNotification('Error deleting recipe', message, /* type = */ 'error');
     }
@@ -238,15 +234,64 @@ export const RecipesAI = {
      * Add a recipe review through the API.
      */
     // TODO: Implement!
-    console.log('Adding recipe review....');
+    const options = {params: {action: 'review'}};
   },
 
-  addRecipeFeedback() {
+  async addRecipeFeedback() {
     /**
      * Add recipe feedback through the API.
      */
-    // TODO: Implement!
-    console.log('Adding recipe feedback....');
+    // Show loading indicator.
+    showLoadingButton('recipe-feedback');
+  
+    // Get the user's feedback.
+    const data = {
+      feedback: document.getElementById('feedback-review').value,
+      like: null,
+      recipe_id: document.getElementById('recipe-id').textContent,
+    };
+
+    // Post the user's feedback through the API.
+    const options = {params: {action: 'feedback'}};
+    const response = await authRequest('/api/ai/recipes?action=feedback', data);
+    if (!response.success) {
+      showNotification('Error posting feedback', response.message, { type: 'error' });
+      hideLoadingButton('recipe-feedback');
+      return;
+    }
+
+    // Handle the user interface.
+    try {
+      hideLoadingButton('recipe-feedback');
+      document.getElementById('feedback-form').classList.add('d-none');
+      document.getElementById('feedback-submit').classList.add('d-none');
+      document.getElementById('feedback-thank-you').classList.remove('d-none');  
+    } catch(error) {
+      // User interface not behaving!
+    }
+  },
+
+  saveRecipe() {
+    /**
+     * Save a user's edits to their recipe.
+     */
+    // Get the recipe ID.
+    const id = document.getElementById('recipe-id').textContent;
+    const user = getCurrentUser();
+    const uid = user.uid;
+
+    // Save the data to Firestore!
+    const ref = `users/${uid}/recipes/${id}`;
+    updateDoc(ref, {
+      description: document.getElementById('recipe-description').value,
+      recipe: document.getElementById('recipe-text').value,
+      // TODO: Allow the user to edit and save more fields:
+      // - title
+    })
+
+    // Close the modal.
+    const modal = new Modal(document.getElementById('recipe-dialog'), {});
+    modal.hide();
   },
 
   /** UI Functionality */
@@ -323,28 +368,24 @@ export const RecipesAI = {
     /**
      * Change the units (mg, ml, %)
      */
-    console.log('Changing units...');
   },
 
   changeWeight() {
     /**
      * Change the units (mg, ml, %)
      */
-    console.log('Changing weight...');
   },
 
   changeWeightUnits() {
     /**
      * Change the units (mg, ml, %)
      */
-    console.log('Changing weight units...');
   },
 
   calcTotalTHC() {
     /**
      * Calculate total THC.
      */
-    console.log('Calculating total THC...');
   },
 
   changeCreativity(field, id) {
@@ -416,6 +457,7 @@ export const RecipesAI = {
      * Open recipe in a dialog.
      * @param {Event} event The button that triggered the function.
      */
+    // Get the recipe ID.
     const button = event.relatedTarget;
     const id = button.getAttribute('data-bs-sample');
     
@@ -456,10 +498,14 @@ export const RecipesAI = {
     const img = document.getElementById('recipe-large-image');
     img.src = obs['file_url'];
     img.classList.remove('d-none');
+
+    // Reset the feedback form.
+    document.getElementById('feedback-form').classList.remove('d-none');
+    document.getElementById('feedback-submit').classList.remove('d-none');
+    document.getElementById('feedback-thank-you').classList.add('d-none'); 
+    document.getElementById('feedback-review').value = '';
   },
 
   // Future work: Search recipes.
 
 }
-
-
