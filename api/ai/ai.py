@@ -19,9 +19,13 @@ from rest_framework.request import Request
 
 # Internal imports:
 from cannlytics.auth.auth import authenticate_request
+from cannlytics.data import create_hash
 from cannlytics.firebase import (
     access_secret_version,
+    get_document,
+    update_document,
 )
+
 
 # API defaults.
 AUTH_ERROR = 'Authentication failed. Please login to Cannlytics\
@@ -78,18 +82,26 @@ def text_to_color_api(request: Request):
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
     
     # Get the parameters.
-    uid = claims['uid']
+    uid = claims.get('uid', 'cannlytics.eth')
     data = request.data.get('data', request.data)
     if isinstance(data, str):
         text = data
     else:
         text = data.get('text')
 
+    # Try to get the color from Firestore first.
+    text_hash = create_hash(text.strip().lower())
+    text_ref = f'public/ai/colors/{text_hash}'
+    doc = get_document(text_ref)
+    if doc:
+        response = {'success': True, 'data': doc['color']}
+        return Response(response, status=200)
+
     # Initialize OpenAI.
     initialize_openai()
 
     # Format the prompt.
-    prompt = 'Color hex:'
+    prompt = 'Best color hex for:'
     prompt += text
 
     # Ask GPT for a hexadecimal color of given text.
@@ -110,6 +122,11 @@ def text_to_color_api(request: Request):
     answer = response['choices'][0]['text'].replace('\n\n', '')
     if '#' in answer:
         code = '#' + answer.split('#')[-1][:6]
+
+        # Save the color to Firestore for quick future retrieval.
+        update_document(text_ref, {'color': code, 'text': text})
+
+    # Otherwise no color can be determined.
     else:
         code = '#ffffff'
 
@@ -129,18 +146,26 @@ def text_to_emoji_api(request: Request):
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
     
     # Get the parameters.
-    uid = claims['uid']
+    uid = claims.get('uid', 'cannlytics.eth')
     data = request.data.get('data', request.data)
     if isinstance(data, str):
         text = data
     else:
         text = data.get('text')
 
+    # Try to get the emoji from Firestore first.
+    text_hash = create_hash(text.strip().lower())
+    text_ref = f'public/ai/emojies/{text_hash}'
+    doc = get_document(text_ref)
+    if doc:
+        response = {'success': True, 'data': doc['emoji']}
+        return Response(response, status=200)
+
     # Initialize OpenAI.
     initialize_openai()
 
     # Format the prompt.
-    prompt = 'Emoji HTML hex for:'
+    prompt = 'Best emoji HTML hex for:'
     prompt += text
 
     # Ask GPT for an emoji representation of given text.
@@ -162,16 +187,13 @@ def text_to_emoji_api(request: Request):
     if '&#' in answer:
         emoji = answer.split('&#')[-1].split(';')[0]
         emoji = f'&#{emoji};'
+
+        # Save the emoji to Firestore for quick future retrieval.
+        update_document(text_ref, {'emoji': emoji, 'text': text})
+
+    # Otherwise no emoji can be determined.
     else:
         emoji = '&#127807;' # A herb emoji.
-
-    # Optional: Handle other emoji formats.
-    # answer = response['choices'][0]['text'].replace('\n\n', '')
-    # try:
-    #     emoji = answer.encode('unicode-escape').split(b'\\')[-1].decode('unicode-escape')
-    # except:
-    #     emoji = answer.encode('unicode-escape')
-    # print(emoji)
 
     # Return the color.
     response = {'success': True, 'data': emoji}

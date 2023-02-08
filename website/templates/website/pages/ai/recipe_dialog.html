@@ -1,0 +1,174 @@
+<!doctype html>
+<html>
+<!--
+  Recipe Dialog | BudderBaker | Cannlytics Website
+  Copyright (c) 2023 Cannlytics
+
+  Authors: Keegan Skeate <https://github.com/keeganskeate>
+  Created: 2/7/2023
+  Updated: 2/7/2023
+  License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+-->
+{% load icon %}
+<div
+    id="recipe-dialog"
+    class="modal fade"
+    tabindex="-1"
+    aria-labelledby="recipe-dialog-label"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content">
+        <div class="modal-header">
+
+          <!-- Recipe name -->
+          <h5
+            class="modal-title serif"
+            id="recipe-dialog-title"
+          >
+            Recipe
+          </h5>
+
+          <!-- Hidden recipe ID -->
+          <div id="recipe-id" class="visually-hidden"></div>
+
+          <!-- Close dialog button -->
+          <button
+            class="btn btn-sm-light position-absolute text-dark text-center"
+            style="z-index:99;right:0;top:0;"
+            data-bs-dismiss="modal"
+            title="Close recipe"
+            type="button"
+          >
+            {% icon "x" width="16px" height="16px" %}
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <!-- Large recipe image -->
+          <!-- TODO: Prompt to edit image through GPT -->
+          <!-- TODO: Allow user to upload their own image -->
+          <img
+            id="recipe-large-image"
+            class="d-none"
+            src=""
+            height="128px;"
+            width="128px;"
+          >
+          
+          <!-- Description -->
+          <div class="form-floating mb-3 mt-2">
+            <textarea
+              id="recipe-description"
+              class="form-control form-control-sm serif"
+              placeholder="Start your recipe..."
+              style="height:75px; max-width:560px;"
+            ></textarea>
+            <label for="recipe-description" class="serif fs-6">
+              <small class="serif">Description</small>
+            </label>
+          </div>
+
+          <!-- Display the full `recipe` -->
+          <div class="form-floating mb-3 mt-2">
+            <textarea
+              id="recipe-text"
+              class="form-control form-control-sm serif"
+              placeholder="Start your recipe..."
+              style="height: 420px; max-width: 560px;"
+            ></textarea>
+            <label for="recipe-text" class="serif fs-6">
+              <small class="serif">Recipe</small>
+            </label>
+          </div>
+
+            <!-- FIXME: Display all details (for user to edit and update recipe):
+              - version
+              - updated_at
+              - created_at
+              - created_by
+              - description
+              - serving_cbd
+              - serving_thc
+              - total_cbd
+              - total_weight
+              - units
+              - number_of_servings
+              - product_name
+              - product_subtype
+              - product_type
+              - public
+              - ingredients
+              - total_thc (also keep track of THC / THCA?)
+              - total_cbd (also keep track of CBD / CBDA?)
+              - doses
+            -->
+            <span></span>
+
+            <!-- TODO: Allow user to upload photos of their recipe -->
+
+
+            <!-- TODO: Allow user to leave feedback on recipe -->
+
+
+            <!-- TODO: Allow user to leave review and rating of the recipe -->
+            
+
+            <!-- Dosage -->
+            <label
+              class="col col-form-label serif"
+              style="max-width:150px;"
+            >
+              Dosage (mg)
+            </label>
+
+            <div class="fst-italic">Per Serving</div>
+            <div id="serving_thc" class="serif fs-6"></div>
+            <div id="serving_cbd" class="serif fs-6"></div>
+
+            <div class="fst-italic mt-2">Total</div>
+            <div id="total_thc" class="serif fs-6"></div>
+            <div id="total_cbd" class="serif fs-6"></div>
+            <div id="number_of_servings" class="serif fs-6"></div>
+
+            <!-- Delete button -->
+            <button
+              id="delete-recipe-button"
+              class="btn btn-sm bg-danger text-white serif mt-5"
+              type="button"
+              onclick="cannlytics.ai.recipes.deleteRecipe();"
+            >
+              Delete
+            </button>
+
+            <!-- TODO: Download / print option -->
+            {% comment %} <button
+              id="download-recipe-button"
+              class="btn btn-sm bg-gradient-purple text-white serif"
+              type="button"
+              data-bs-sample=""
+            >
+              Print
+            </button> {% endcomment %}
+
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-sm-light btn-md-light serif"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button
+            id="save-recipe-button"
+            class="btn btn-sm bg-gradient-green text-white serif"
+            type="button"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</html>

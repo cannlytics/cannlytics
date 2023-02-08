@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<!--
+  Recipe Thumbnail | BudderBaker | Cannlytics Website
+  Copyright (c) 2023 Cannlytics
+
+  Authors: Keegan Skeate <https://github.com/keeganskeate>
+  Created: 2/7/2023
+  Updated: 2/7/2023
+  License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+-->
+{% load icon %}
+<div
+  id="recipe-thumbnail"
+  class="recipe-card col-12 col-md-4 px-3 pb-3 text-start d-none"
+>
+  <div class="card rounded">
+
+    {% comment %} <!-- TODO: Delete button here? -->
+    <button
+      class="btn btn-sm-light position-absolute text-dark text-center"
+      style="z-index:99;right:0;"
+      title="Remove recipe"
+      type="button"
+    >
+      {% icon "x" width="16px" height="16px" %}
+    </button> {% endcomment %}
+
+    {% comment %} <!-- TODO: If baking, show baking indicator -->
+    Baking... {% endcomment %}
+
+    <!-- Recipe details -->
+    <div class="card-body bg-transparent recipe-details text-dark">
+      <img class="recipe-image d-none text-center" src="" height="75px;">
+      <div class="title fw-bold fs-5 serif"></div>
+      <div class="serif">
+        <small class="description serif text-secondary"></small>
+      </div>
+      {% comment %} <div class="product-type serif"></div>
+      <div class="producer serif"></div>
+      <div class="date-tested serif"></div> {% endcomment %}
+      <div class="recipe-data visually-hidden"></div>
+    </div>
+    <!-- FIXME: Display recipe dosage
+      - mg/serving
+      - mg/piece
+      - total_servings
+      - total_mg
+    -->
+
+    <!-- Recipe dialog link -->
+    <a
+      href=""
+      class="stretched-link"
+      data-bs-toggle="modal"
+      data-bs-target="#recipe-dialog"
+      data-bs-sample=""
+    ></a>
+
+  </div>
+</div>
+</html>

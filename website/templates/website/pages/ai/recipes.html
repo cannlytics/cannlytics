@@ -1,13 +1,13 @@
 <!doctype html>
 <html>
 <!--
-  BudderBaker Cannabis Recipe Creator Page | Cannlytics Website
+  BudderBaker | Cannabis Recipe Creator Page | Cannlytics Website
   Copyright (c) 2023 Cannlytics
 
   Authors:
     Keegan Skeate <https://github.com/keeganskeate>
   Created: 2/4/2023
-  Updated: 2/6/2023
+  Updated: 2/7/2023
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -60,83 +60,96 @@ body.dark .autocomplete-active {
 </style>
 {% endblock page_css %}
 {% block material %}
-<section class="container mb-2 mt-5">
+
+<!-- Logo -->
+<section class="jumbotron text-center">
+
+  <h1 class="display-6 text-dark fw-bold mt-3 mb-2">
+    🍯BudderBaker🧁
+  </h1>
+
+</section> 
+
+<!-- Warning -->
+<section class="container mx-auto text-start" style="max-width:720px;">
+<div class="callout callout-warning" style="max-width:720px;">
+  <p class="fs-6 lh-md mt-0">
+    <span class="float-start pe-2" style="font-size:28px;">⚠️</span>
+      This product is a prototype and is in testing.<br>
+      Use extreme caution and proceed at your own risk.
+  </p>
+</div>
+</section>
+
+<!-- Model -->
+<section class="container card rounded text-dark mb-2" style="max-width:720px;">
 
   <!-- Title -->
-  <div class="d-flex mt-4">
-    <nav
-      style="--bs-breadcrumb-divider: '>';"
-      aria-label="breadcrumb"
-    >
-      <ol class="breadcrumb bg-transparent p-0 mb-0">
-        <li class="breadcrumb-item fs-6 lh-sm">
-          <a
-            class="text-dark serif action"
-            href="{% url 'page' page='ai' %}"
-          >
-            AI
-          </a>
-        </li>
-        <li class="breadcrumb-item active fs-6 lh-sm text-dark serif" aria-current="page">
-          🍯BudderBaker
-        </li>
-      </ol>
-      <div>
+  <div class="d-flex justify-content-between">
+    <h2 class="fs-3 text-dark fw-bold mb-2 mt-2">
+      Recipe Creation
+    </h2>
+
+    <!-- Reset the form button -->
+    <div class="d-flex align-items-center">
+      <button
+        id="reset-recipe-button"
+        class="btn btn-sm-light"
+        onclick="cannlytics.ai.recipes.resetRecipe();"
+        title="Reset recipe."
+      >
+        {% icon 'rotate-cw' width="14px" %}
+      </button>
     </div>
-    </nav>
   </div>
 
-  <!-- TODO: Add description: -->
-  <!--
-    🍯BudderBaker is your go-to cannabis kitchen companion!
-    Create custom recipes or choose from food and beverage
-    options, specifying ingredients and adjusting the quantity
-    of your cannabis. Lab results or product information can
-    be entered for precision. Our system will even match your
-    terpenes with complementary ingredients. Safety is our
-    top priority, so we'll give you the green light before
-    you start cooking. Get a personalized image and fun
-    title for your creation, and keep your recipes organized
-    for future use. Get ready to elevate your culinary
-    experience!    
-  -->
-
   <!-- Product: What are you trying to make? -->
-  <div class="d-flex flex-wrap align-items-center mb-3">
-    <div class="autocomplete mt-3" style="width:90%;">
+  <div class="d-flex col-md-12 flex-wrap align-items-center mb-3">
+
+    <div class="autocomplete" style="width:100%;">
       <label
-        class="col col-form-label col-form-label-sm serif"
-        style="max-width:130px;"
+        class="col col-form-label serif"
+        style="max-width:150px;"
       >
         Desired product
       </label>
-      <div
-        class="d-flex flex-grow-1 nav-search-form"
-        role="search"
-      >
+        {% comment %} {% icon 'info' width="16px" height="16px" class="ms-1 mb-2 text-secondary"
+          data-bs-toggle="tooltip"
+          data-bs-placement="right"
+          data-bs-html="true"
+          title="Enter a product, description, or your own product name. Be as detailed as you please."
+        %} {% endcomment %}
+      <div class="d-flex flex-grow">
         <input
           type="text"
-          id="product-name"
+          id="special-instructions-input"
+          name="special_instructions"
           class="form-control form-control-sm serif w-100"
-          placeholder="What are you trying to make? Enter a product, description, or your own product name..."
-          aria-label="Product name"
-          aria-describedby="product-name-button"
+          placeholder="What are you trying to make? Enter your desire...."
+          aria-label="Special instructions"
+          aria-describedby="desired-product-button"
           spellcheck="false"
         >
         <button
-          class="nav-search-button btn btn-default p-0"
-          style="transform:translateX(-32px);width:0;"
-          type="submit"
-          onclick="cannlytics.ai.recipes.searchRecipes();"
+          id="create-button"
+          class="btn btn-sm-light btn-md-light text-dark text-nowrap serif ms-2"
+          onclick="cannlytics.ai.recipes.createRecipe();"
         >
-          <span
-            data-bs-toggle="tooltip"
-            data-bs-placement="right"
-            title="Bake your recipe!"
-          >🧁</span>
+        🧁 Bake
+        </button>
+        <button
+          id="create-button-loading"
+          class="btn btn-sm-light btn-md-light text-dark text-nowrap serif d-none ms-2"
+          type="button"
+          title="Baking..."
+          disabled
+        >
+          <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+          Baking...
         </button>
       </div>
     </div>
+
   </div>
 
   <!-- Ingredients: Pick or specify ingredients
@@ -146,12 +159,20 @@ body.dark .autocomplete-active {
     <div class="mt-2 row">
       <div class="col-md-5">
         <div class="row">
-          <label
-            class="col col-form-label col-form-label-sm serif"
-            style="max-width:130px;"
-          >
-            Ingredients
-          </label>
+          <div class="d-flex align-items-center">
+            <label
+              class="col col-form-label serif"
+            >
+              Ingredients
+            </label>
+            {% comment %} {% icon 'info' width="16px" height="16px" class="ms-1 mb-2 text-secondary"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
+              data-bs-html="true"
+              title="Add any ingredients you want to include in your recipe."
+            %} {% endcomment %}
+          </div>
+          <div class="d-flex align-items-center mb-3">
           <div class="autocomplete" style="width:300px;">
             <input
               type="text"
@@ -160,10 +181,9 @@ body.dark .autocomplete-active {
               placeholder="Enter an ingredient..."
               aria-label="Ingredients"
               aria-describedby="add-ingredient-button"
-              spellcheck="false"
             >
           </div>
-          <div class="d-flex align-items-center mt-3">
+          <div class="d-flex align-items-center ms-2">
             <button
               id="add-ingredient-button"
               class="btn btn-sm btn-sm-light text-nowrap fs-6"
@@ -174,41 +194,442 @@ body.dark .autocomplete-active {
             </button>
           </div>
         </div>
+        </div>
       </div>
       <div id="ingredients" class="col-md-7"></div>
     </div>
   
     <!-- Ingredients badge template -->
-    <span id="ingredient-template" class="badge rounded-pill bg-opacity-25 text-dark d-inline-flex align-items-center d-none mt-3 me-2">
-      <span class="badge-text"></span>
-      <button type="button" class="btn nav-link ms-2" onclick="">
+    <span
+      id="ingredient-template"
+      class="badge rounded-pill bg-opacity-25 text-dark d-inline-flex align-items-center d-none mt-3 me-2"
+      style="background-color:#fff;"
+    >
+      <span class="ingredient badge-text"></span>
+      <button type="button" class="btn nav-link ms-2 text-secondary" onclick="">
         {% icon 'x' width="16px" %}
       </button>
     </span>
 
-  <!-- TODO: Allow the user to toggle between public or not -->
-  <div class="form-check form-check-inline">
-    <input
-      class="form-check-input"
-      type="radio"
-      name="public"
-      id="public-choice"
-      value="true"
-    >
-    <label class="form-check-label" for="public-choice">
-      Public {% icon "globe" width="16px" height="16px" %}<br>
-      <small class="text-secondary">Appears in search results.</small>
-    </label>
-  </div>
+    <!-- TODO: Allow users to add THC + THCA / CBD + CBDA
+      - Show calculated Total THC and Total THC.
+      - * More compounds coming soon!
+    -->
 
-  <!-- TODO: Specify the type of food/beverage they may want to make
-    - Start with a simple text field
-  -->
+        <!-- Label -->
+        <div class="row mt-2">
+          <div class="d-flex align-items-center">
+            <label
+              class="col col-form-label serif"
+            >
+              Cannabis
+            </label>
+            {% comment %} {% icon 'info' width="16px" height="16px" class="ms-1 mb-2 text-secondary"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
+              data-bs-html="true"
+              title="Enter known concentrations of your cannabis."
+            %} {% endcomment %}
+          </div>
+        </div>
 
-  <!-- TODO: Enter cannabis product with lab results or attach image / COA
-    - Start with simple text field for product name
-    - Start with quantity number field and THC / CBD numeric fields.
-    - Option to "Add Compounds"
+        <!-- Product -->
+        <div class="d-flex align-items-center mb-2">
+          <label
+            for="product-name-input"
+            class="col-sm-2 col-form-label col-form-label-sm"
+            style="max-width:100px;"
+          >
+            Product
+          </label>
+
+          <!-- Product name -->
+          <input
+            type="text"
+            id="product-name-input"
+            name="product_name"
+            class="form-control form-control-sm serif w-100 ms-2"
+            style="max-width:300px;"
+            placeholder="Product name"
+            aria-label="Product name"
+            spellcheck="false"
+          >
+
+          <!-- Product type -->
+          <div class="ms-2">
+            <select
+              id="product-type-input"
+              name="product_type"
+              class="form-select form-select-sm"
+              style="max-width:150px;"
+              aria-label="Product type"
+            >
+              <option value="flower" selected>🌿 Flower</option>
+              <option value="oil">🧪 Oil</option>
+              <option value="other">📦 Other</option>
+            </select>
+          </div>
+
+        </div>
+
+      <!-- Weight -->
+      <div class="d-flex align-items-center mb-2 mt-2">
+        <label
+          for="weight-input"
+          class="col-sm-2 col-form-label col-form-label-sm"
+          style="max-width:100px;"
+        >
+          Weight
+        </label>
+        <div class="ms-2">
+          <input
+            id="weight-input"
+            class="form-control form-control-sm"
+            style="min-width:150px;max-width:150px;"
+            name="weight"
+            spellcheck="false"
+            type="number"
+            autocomplete="off"
+            onchange="cannlytics.ai.recipes.changeWeight();"
+            min="0"
+            max="9999"
+            value="1.0"
+          >
+        </div>
+
+        <!-- Weight units -->
+        <div class="ms-2">
+          <select
+            id="weight-units-input"
+            name="units"
+            class="form-select form-select-sm"
+            style="max-width:120px;"
+            aria-label="Units"
+            onchange="cannlytics.ai.recipes.changeWeightUnits()"
+          >
+            <option value="g" selected>grams</option>
+            <option value="mg">mg</option>
+            <option value="ml">ml</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Label -->
+      <div class="row mt-3">
+        <div class="d-flex align-items-center">
+          <label
+            class="col col-form-label serif"
+          >
+            Compounds
+          </label>
+          {% comment %} {% icon 'info' width="16px" height="16px" class="ms-1 mb-2 text-secondary"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
+              data-bs-html="true"
+              title="Enter any known concentrations of your cannabis."
+            %} {% endcomment %}
+        </div>
+      </div>
+
+      <!-- Units selection -->
+      <div class="row my-3">
+        <div class="d-flex align-items-center">
+          <label
+            class="col-sm-2 col-form-label col-form-label-sm"
+            style="max-width:60px;"
+          >
+            Units
+          </label>
+          <div class="ms-2">
+            <select
+              id="units-input"
+              name="units"
+              class="form-select form-select-sm"
+              style="max-width:175px;"
+              aria-label="Units"
+              onchange="cannlytics.ai.recipes.changeUnits()"
+            >
+              <option value="percent" selected>Percent (%)</option>
+              <option value="mg/g">mg per gram (mg/g)</option>
+              <option value="ml/l">mL per Liter (mL/L)</option>
+            </select>
+          </div>
+          {% icon 'info' width="16px" height="16px" class="ms-2 mb-2 text-secondary"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
+              data-bs-html="true"
+              title="Note that there are 1000mg in one gram. One gram with a THC concentration of 20% has 200mg of THC. You can establish a general formula as THC mg equals 10 x Q x THC percent where Q is the number of grams."
+            %}
+        </div>
+      </div>
+
+      <!-- THC -->
+      <div class="d-flex align-items-center mb-2">
+        <label
+          for="thc-input"
+          class="col-form-label col-form-label-sm"
+          style="width:65px;"
+        >
+        Δ<sup>9</sup>-THC
+        </label>
+        <div class="ms-2">
+          <input
+            id="thc-input"
+            class="form-control form-control-sm"
+            style="max-width:120px;"
+            name="thc"
+            spellcheck="false"
+            type="number"
+            autocomplete="off"
+            min="0"
+            max="9999"
+            value=""
+          >
+        </div>
+
+        <!-- THCA -->
+        <label
+          for="thca-input"
+          class="col-form-label col-form-label-sm ms-3"
+          style="width:65px;"
+        >
+          THCA
+        </label>
+        <div class="ms-2">
+          <input
+            id="thca-input"
+            class="form-control form-control-sm"
+            style="max-width:120px;"
+            name="thca"
+            spellcheck="false"
+            type="number"
+            autocomplete="off"
+            min="0"
+            max="9999"
+            value=""
+          >
+        </div>
+
+      </div>
+
+      <!-- CBD -->
+      <div class="d-flex align-items-center mb-2">
+        <label
+          for="thc-input"
+          class="col-form-label col-form-label-sm"
+          style="width:65px;"
+        >
+          CBD
+        </label>
+        <div class="ms-2">
+          <input
+            id="cbd-input"
+            class="form-control form-control-sm"
+            style="max-width:120px;"
+            name="cbd"
+            spellcheck="false"
+            type="number"
+            autocomplete="off"
+            min="0"
+            max="9999"
+            value=""
+          >
+        </div>
+
+        <!-- CBDA -->
+        <label
+          for="thca-input"
+          class="col-form-label col-form-label-sm ms-3"
+          style="width:65px;"
+        >
+          CBDA
+        </label>
+        <div class="ms-2">
+          <input
+            id="cbda-input"
+            class="form-control form-control-sm"
+            style="max-width:120px;"
+            name="cbda"
+            spellcheck="false"
+            type="number"
+            autocomplete="off"
+            min="0"
+            max="9999"
+            value=""
+          >
+        </div>
+
+      </div>
+
+      <!-- Additional compounds -->
+      <div id="additional-compounds"></div>
+
+      <!-- Compound template -->
+      <div
+        id="compound-template"
+        class="d-flex align-items-center mb-2 d-none"
+      >
+
+        <!-- Compound name -->
+        <label
+          for="compound-input"
+          class="col-form-label col-form-label-sm"
+        >
+          Compound
+        </label>
+        <input
+          type="text"
+          id="compound-name"
+          class="compound-name form-control form-control-sm serif w-100 ms-2"
+          style="max-width:150px;"
+          placeholder="Compound name"
+          aria-label="Compound name"
+          spellcheck="false"
+        >
+
+        <!-- Compound amount -->
+        <label
+          for="compound-input"
+          class="col-form-label col-form-label-sm ms-2"
+        >
+          Amount
+        </label>
+        <input
+          id="compound-amount"
+          class="compound-amount form-control form-control-sm ms-2"
+          style="max-width:120px;"
+          spellcheck="false"
+          type="number"
+          autocomplete="off"
+          min="0"
+          max="9999"
+          value=""
+        >
+        <button
+          type="button"
+          class="btn nav-link ms-2 text-secondary"
+          onclick=""
+        >
+          {% icon 'x' width="16px" %}
+        </button>
+      </div>
+
+      <!-- Add compounds -->
+      <div class="d-flex">
+        <button
+          class="btn btn-sm-light btn-md-light mt-2 text-nowrap"
+          type="button"
+          title="Add a compound such as additional cannabinoids or terpenes."
+          onclick="cannlytics.ai.recipes.addCompound();"
+        >
+          {% icon "plus" width="16px" height="16px" %}
+          Add a compound
+        </button>
+      </div>
+
+    <!-- Creativity scale -->
+    <div class="col-sm-5 mt-4">
+      <div class="d-flex align-items-center">
+        <label
+          class="col col-form-label serif"
+          style="max-width:90px;"
+        >
+          Creativity
+      </label>
+        {% icon 'info' width="16px" height="16px" class="ms-2 mb-2 text-secondary"
+          data-bs-toggle="tooltip"
+          data-bs-placement="right"
+          data-bs-html="true"
+          title="Higher creativity lets the model make more novel suggestions while lower values result in more well-defined recipes."
+        %}
+      </div>
+
+      <div class="d-flex align-items-center">
+        <span>👩‍🔬</span>
+        <input
+          id="creativity-input"
+          class="form-range custom-range"
+          name="creativity"
+          type="range"
+          min="0"
+          max="100"
+          value="42"
+          onchange="cannlytics.ai.recipes.changeCreativity(this, 'creativity-percent-input');"
+        >
+        <span>🎨</span>
+        <input
+          id="creativity-percent-input"
+          class="form-control form-control-sm ms-2"
+          style="max-width:90px;"
+          name="creativity_percent"
+          spellcheck="false"
+          type="number"
+          autocomplete="off"
+          min="0"
+          max="100"
+          value="42"
+          onchange="cannlytics.ai.recipes.changeCreativity(this, 'creativity-input');"
+        >
+      </div>
+    </div>
+
+    <!-- Allow the user to toggle between public or not -->
+    <div class="d-flex flex-column mb-2 mt-3">
+      <label
+        class="col col-form-label serif"
+        style="max-width:150px;"
+      >
+        Public
+      </label>
+      <div class="form-check form-check-inline">
+        <input
+          id="public-input"
+          name="public"
+          class="app-action form-check-input"
+          type="checkbox"
+          value=""
+        >
+        <label class="form-check-label" for="public-choice">
+          <small class="text-secondary">Publish your recipe for others to enjoy.</small>
+        </label>
+      </div>
+    </div>
+
+    <!-- Image prompt -->
+    <div class="d-flex flex-column mb-2 mt-3">
+      <label
+        class="col col-form-label serif"
+        style="max-width:150px;"
+      >
+        Image style
+      </label>
+      <input
+        type="text"
+        id="image-type-input"
+        name="image_type"
+        class="form-control form-control-sm serif w-100"
+        style="max-width:300px;"
+        value="Drawing"
+        aria-label="Image style"
+      >
+    </div>
+
+    <!-- Model information -->
+    <div class="markdown">
+    <p class="mt-0 lh-md mt-3 mb-3" style="max-width:560px;">
+      <small><b class="serif text-dark">Notes:</b>
+      For technical details of the recipe generation model, please refer to the
+      <a href="https://github.com/cannlytics/cannlytics/tree/latest/api/ai/recipes.py"><small>source code</small></a>
+      and
+      <a href="https://github.com/cannlytics/cannlytics/tree/latest/api/ai"><small>documentation</small></a>
+      Please remember that the recipes are simply statistical constructs are
+      should not be relied upon without human interpretation.
+      </small>
+    </p>
+    <div>
+
+  <!-- TODO: Attach COA or product labels
     - Start with a simple file attachement
   -->
 
@@ -216,59 +637,85 @@ body.dark .autocomplete-active {
     - Start with simple number fields
   -->
 
-  <!-- TODO: Use math + GPT to calculate:
-    - mg/serving
-    - mg/piece
-    - total_servings
-    - total_mg
-  -->
+</section>
 
-  <!-- Example:
-    High-ly Delicious Cannabis Chocolate Chip Cookies
-    \n\nCannabis Chocolate Chip Cookies\n\nIngredients:\n\n-1 cup of cannabutter\n-1 cup of white sugar\n-1 cup of brown sugar\n-2 eggs\n-1 teaspoon of vanilla extract\n-2 ½ cups of all-purpose flour\n-1 teaspoon of baking soda\n-1 teaspoon of salt\n-2 cups of semi-sweet chocolate chips\n-1 cup of chopped walnuts (optional)\n\nInstructions:\n\n1. Preheat oven to 350°F (175°C).\n\n2. In a large bowl, cream together the cannabutter, white sugar, and brown sugar until smooth. Beat in the eggs one at a time, then stir in the vanilla.\n\n3. In a separate bowl, combine the flour, baking soda, and salt. Gradually stir the dry ingredients into the wet ingredients until everything is well blended.\n\n4. Fold in the chocolate chips and walnuts.\n\n5. Drop the dough by rounded spoonfuls onto ungreased baking sheets.\n\n6. Bake for 8 to 10 minutes in the preheated oven, or until the edges are golden brown.\n\n7. Allow cookies to cool on baking sheet for 5 minutes before transferring to a wire rack to cool completely.
-    Enjoy!This recipe makes cannabis-infused chocolate chip cookies that are sure to satisfy your sweet tooth! Cream together cannabutter, white sugar, and brown sugar, then stir in eggs and vanilla. Add in flour, baking soda, and salt, then fold in chocolate chips and walnuts. Bake until golden brown and enjoy!
+<!-- User and Public Recipes -->
+<section class="container mb-2">
 
-    Cannabis-Infused Coffee: The Perfect Blend\
-    nTo make cannabis coffee, grind 2 tablespoons of cannabis flowers into a powder, lightly toast in a saucepan, add to 1 cup of hot coffee, and simmer for 10 minutes. Strain, add butter and milk, and enjoy!
-    1. Begin by grinding 2 tablespoons of cannabis flowers into a fine powder.\n\n2. Measure out 2 tablespoons of the ground cannabis and place it in a small saucepan.\n\n3. Heat the saucepan over low heat, stirring constantly, until the cannabis is lightly toasted and fragrant.\n\n4. Add 1 cup of freshly brewed hot coffee to the saucepan and stir to combine.\n\n5. Simmer the mixture over low heat for 10 minutes, stirring occasionally.\n\n6. Strain the mixture through a fine mesh sieve or cheesecloth into a mug.\n\n7. Add 1 tablespoon of butter and 1 tablespoon of milk to the mug and stir to combine.\n\n8. Enjoy your infused cannabis coffee!"
+  <!-- User recipes -->
+  <div class="card rounded text-start mt-5">
+    <div class="card-header no-border bg-transparent d-flex justify-content-between align-items-center pb-0 pt-3">
+      <h2 class="fs-3 text-dark fw-bold mb-2 mt-0">
+        Your Recipes
+      </h2>
+    </div>
+    <div class="card-body bg-transparent pt-0">
 
-    "Cannabis-Infused Coffee: A Deliciously Relaxing Treat!
-    Heat coffee, add butter and cannabis-infused oil, stir in milk, simmer for 5 minutes, strain, and enjoy!
-    1. Begin by heating 1 cup of coffee in a saucepan over medium heat.\n\n2. Once the coffee is hot, add 1 tablespoon of butter and 1 tablespoon of cannabis-infused oil. Stir until the butter and oil are completely melted.\n\n3. Add 1 cup of milk and stir until all ingredients are combined.\n\n4. Simmer the mixture for 5 minutes, stirring occasionally.\n\n5. Strain the mixture through a fine-mesh sieve to remove any solids.\n\n6. Pour the infused coffee into two mugs and enjoy!
-    https://oaidalleapiprodscus.blob.core.windows.net/private/org-CV0VvEfbHXBfu5p68TQdSo0j/user-kzXzc1edFxVm1ZOv85YQC2K5/img-4z94LSioUOHTbSOKs2QaJCx1.png?st=2023-02-05T17%3A29%3A42Z&se=2023-02-05T19%3A29%3A42Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-02-05T14%3A34%3A40Z&ske=2023-02-06T14%3A34%3A40Z&sks=b&skv=2021-08-06&sig=0jrU3dIaECSSRjv%2BqWj8KMOXIWdCgwE2HDtpJQaMAi8%3D
+      <!-- Sign-in indicator -->
+      {% if not user %}
+      <p
+        id="coa-sample-results-placeholder"
+        class="text-dark text-center fs-5 mb-5 lh-md mt-4"
+      >
+        🍯 Sign in to save your tasty recipes!<br>
+        <span class="fs-6"><small class="serif text-secondary">Create a Cannlytics account to save and manage your created recipes.</small></span><br>
+        <button
+          class="btn btn-sm bg-gradient-green text-white serif mt-2"
+          data-bs-target="#sign-in-dialog"
+          data-bs-toggle="modal"
+          type="button"
+        >
+          Sign In
+        </button>
+      </p>
 
-  -->
+      <!-- User recipes Placeholder -->
+      {% else %}
+      <p
+        id="user-recipes-placeholder"
+        class="text-dark text-center fs-5 mb-5 lh-md mt-4"
+      >
+        🧁 Waiting on your first recipe<br>
+        <span class="fs-6"><small class="serif">Your created recipes will appear here for you to manage.</small></span>
+      </p>
+      {% endif %}
 
-  <!-- Create button -->
-  <div class="d-flex justify-content-center mt-4">
-    <button
-      id="create-button"
-      class="btn bg-gradient-orange text-white serif"
-      onclick="cannlytics.ai.recipes.createRecipe();"
-    >
-      {% icon 'zap' width="16px" class="me-1" %}
-      Bake Recipe
-    </button>
-    <button
-      id="create-button-loading"
-      class="btn bg-gradient-orange text-white serif d-none"
-      type="button"
-      title="Baking..."
-      disabled
-    >
-      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-      Baking recipe... this may take a hot minute!
-    </button>
+      <!-- Dynamic recipes container -->
+      <div id="user-recipes"></div>
+
+    </div>
   </div>
 
+  <!-- Public recipes -->
+  <div class="card rounded text-start mt-5">
+    <div class="card-header no-border bg-transparent d-flex justify-content-between align-items-center pb-0 pt-3">
+      <h2 class="fs-3 text-dark fw-bold mb-0 mt-0">
+        Public Recipes
+      </h2>
+    </div>
+    <!-- Find a public recipe to suit your fancy -->
+    <div class="card-body bg-transparent pt-0">
 
-  <!-- TODO: Show a grid of created recipes for management -->
+      <!-- Public recipes placeholder -->
+      <p
+        id="public-recipes-placeholder"
+        class="text-dark text-center fs-5 mb-5 lh-md mt-4"
+      >
+        🧁 Public recipes coming soon!<br>
+        <span class="fs-6"></span>
+      </p>
 
+      <!-- Dynamic recipes container -->
+      <div id="public-recipes"></div>
 
-  <!-- Optional: Show community-created recipes as demonstrations. -->
+    </div>
+  </div>
 
+  <!-- Recipe thumbnail template -->
+  {% include "./recipe_thumbnail.html" %}
 
-  <!-- TODO: Open recipes in dialogs (or new page?) for management -->
+  <!-- Recipe dialog -->
+  {% include "./recipe_dialog.html" %}
 
   {% comment %} <!-- TODO: Submit feedback for recipe -->
   <!-- Submit feedback button -->
@@ -314,36 +761,22 @@ body.dark .autocomplete-active {
       </label>
     </div> {% endcomment %}
 
-
-  <!-- TODO: API instructions and examples -->
-
   <!-- About the API -->
   <div class="markdown">
 
-    {% comment %} <!-- TODO: Data Source Notice -->
-    <h2 class="mt-5">Data Sources</h2>
-    <ul>
-      <li>
-        <p class="fs-small">
-          <b class="serif">Dataset</b>:	<a class="fw-normal" href="https://cannlytics.page.link/reported-effects">Curated Cannabis Strains, their Average Chemical Compositions, and Reported Effects and Aromas</a><br>
-          <b class="serif">Author</b>:	Cannlytics<br>
-          <b class="serif">Created</b>:	5/18/2022<br>
-          <b class="serif">Updated</b>:	6/4/2022<br>
-          <b class="serif">Original Authors</b>: <a class="fw-normal" href="https://data.mendeley.com/datasets/6zwcgrttkp/1" target="_blank">
-            de la Fuente, et al. (2019)
-          </a>.<br>
-          <b class="serif">License</b>: <a class="fw-normal" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">
-            CC BY 4.0.
-          </a>
-        </p>
-        <p class="mt-2">
-          <small>The files associated with this dataset are licensed under a Creative Commons Attribution 4.0 International license.</small>
-        </p>
-        <p class="mt-2">
-          <small>You can share, copy and modify this dataset so long as you give appropriate credit, provide a link to the CC BY license, and indicate if changes were made, but you may not do so in a way that suggests the rights holder has endorsed you or your use of the dataset. Note that further permission may be required for any content within the dataset that is identified as belonging to a third party.</small>
-        </p>
-      </li>
-    </ul> {% endcomment %}
+    <!-- Model dscription -->
+    <h2 class="mt-5">About the API</h2>
+    <p class="fs-6 lh-lg mt-0 text-secondary" style="max-width:620px;">
+      <b class="serif">🍯BudderBaker</b>
+      is your go-to cannabis kitchen companion!
+      Create custom recipes or choose from food and beverage
+      options, specifying ingredients and adjusting the quantity
+      of your cannabis. Lab results or product information can
+      be entered for precision. Get a personalized image and fun
+      title for your creation, and keep your recipes organized
+      for future use. Get ready to elevate your culinary
+      experience!
+    </p>
 
     <!-- Disclaimer -->
     <h2 class="mt-5">Disclaimer</h2>

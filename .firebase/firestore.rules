@@ -113,7 +113,19 @@ service cloud.firestore {
     match /users/{userId}/user_settings/signature {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    
+
+    // === Recipes ===
+
+    // Allow anyone to read public recipes.
+    match /public/ai/recipes/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow user's to read and write their own recipes.
+    match /users/{userId}/recipes/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
     
     // TODO: Allow users to read the details of their team members.
 

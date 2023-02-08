@@ -210,21 +210,35 @@ def create_recipe(uid, data, params=None):
     recipe_prompt = 'Write a recipe'
     product_name = data.get('product_name', DEFAULT_PRODUCT)
     if product_name:
-        recipe_prompt += f' for {product_name}'
+        recipe_prompt += f' with {product_name}'
+
+    # Assign product type.
+    product_type = data.get('product_type')
+    if product_type is None:
+        product_type = '???'
+    else:
+        recipe_prompt += f' ({product_type} cannabis)'
 
     # Future work: Get lab results with CoADoc if possible.
+    # The user could pass a `results_image`.
 
-    # Future work: Pair terpenes / strains with ingredients where possible.
+    # TODO: Paid product names with ingredients where possible.
 
     # Get any specified dose of compounds.
     doses = data.get('doses')
     if doses:
-        recipe_prompt += 'With:'
+
+        # Incorporate compounds.
+        recipe_prompt += '\nWith:'
         for dose in doses:
             units = dose['units']
             value = dose['value']
             name = dose['name']
-            recipe_prompt += f'\n{value} {units} of {name} per serving'
+            recipe_prompt += f'\n{value} {units} of {name}'
+            if '/' in units:
+                recipe_prompt += ' per serving'
+
+        # TODO: Pair any known terpenes with ingredients.
 
     # Get any special instructions.
     special_instructions = data.get('special_instructions')
@@ -338,7 +352,7 @@ def create_recipe(uid, data, params=None):
     # Get an image for the recipe.
     # Lets the user specify the type of image.
     # E.g. `drawing` or `high-quality photo`.
-    image_type = data.get('image_type', IMAGE_TYPE)
+    image_type = data.get('image_type', IMAGE_TYPE).lower()
     image_prompt = f'A {image_type} of '
     image_prompt += product_title
     print(image_prompt)
@@ -413,7 +427,10 @@ def create_recipe(uid, data, params=None):
     try:
         number_of_servings = round(total_weight / serving_weight)
     except:
-        number_of_servings = 'Unknown'
+        number_of_servings = '???'
+
+    # Future work: Handle other unit types.
+    # Currently the calculations below assume mg.
 
     # Calculate total THC per serving.
     # Default: 1 gram of oil (1000mg) at 80% THC is 800mg THC.
@@ -421,14 +438,14 @@ def create_recipe(uid, data, params=None):
     try:
         serving_thc = total_thc / number_of_servings
     except:
-        serving_thc = 'Unknown'
+        serving_thc = '???'
     
     # Calculate total CBD per serving.
     total_cbd = data.get('total_cbd', DEFAULT_TOTAL_CBD)
     try:
         serving_cbd = total_cbd / number_of_servings
     except:
-        serving_cbd = 'Unknown'
+        serving_cbd = '???'
 
     # Future work: Use SkunkFx to predict effects and aromas.
 
@@ -441,10 +458,13 @@ def create_recipe(uid, data, params=None):
     entry = {
         'baking': False,
         'description': description,
+        'doses': doses,
         'file_url': file_url,
         'image_ref': image_ref,
         'image_url': image_url,
+        'ingredients': ingredients,
         'product_name': product_name,
+        'product_type': product_type,
         'product_subtype': product_subtype,
         'recipe': recipe,
         'title': product_title,
@@ -596,7 +616,11 @@ def update_recipe(uid, recipe_id, data, params=None):
     # Record usage and prompt IDs for administrators to review.
     doc_id = secrets.token_hex(ID_LENGTH)
     refs.append(f'admin/ai/recipe_usage/{doc_id}')
-    entries.append({'usage': usage, 'prompt_ids': prompt_ids})
+    entries.append({
+        'usage': usage,
+        'prompt_ids': prompt_ids,
+        'uid': uid,
+    })
 
     # Return the data.
     return entry, refs, entries

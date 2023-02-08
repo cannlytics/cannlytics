@@ -23,7 +23,7 @@ BASE = 'http://127.0.0.1:8000/api'
 # BASE = 'https://cannlytics.com/api'
 
 # Load your API key to pass in the authorization header as a bearer token.
-config = dotenv_values('.env')
+config = dotenv_values('../../.env')
 API_KEY = config['CANNLYTICS_API_KEY']
 
 
