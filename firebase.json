@@ -42,6 +42,11 @@
           "source": "/wp-login.php",
           "destination": "https://google.com",
           "type": 301
+        },
+        {
+          "source": "/docs",
+          "destination": "https://docs.cannlytics.com",
+          "type": 301
         }
       ],
       "rewrites": [

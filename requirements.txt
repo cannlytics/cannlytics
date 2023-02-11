@@ -2,7 +2,6 @@
 # Created 1/5/2021
 # Updated: 1/31/2023
 
-# Console and website requirements:
 chromedriver-binary==106.0.5249.21.0
 datasets==2.8.0
 datetime==4.7

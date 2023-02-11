@@ -777,6 +777,14 @@ body.dark .autocomplete-active {
       }
     });
 
+    // Create recipe on enter.
+    var node = document.getElementById('special-instructions-input');
+    node.addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        cannlytics.ai.recipes.createRecipe();
+      }
+    });
+
     // Enable tooltips.
     cannlytics.ui.enableTooltips();
   

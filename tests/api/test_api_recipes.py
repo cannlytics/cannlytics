@@ -125,12 +125,20 @@ if __name__ == '__main__':
 
 
     # [ ] Give feedback on a recipe.
-
+    data = {
+        'feedback': 'Simply delightful.',
+        'like': True,
+        'uid': '<recipe_id>',
+    }
+    params = {'action': 'feedback'}
+    url = f'{BASE}/ai/recipes'
+    response = session.post(url, json=data, params=params)
+    assert response.status_code == 200
+    print('Created a recipe.')
 
     # [ ] Review a public recipe.
     data = {
         'review': "A baker's dozen!",
         'rating': 0.420,
     }
-
-    # [ ] Rate a public recipe.
+    params = {'action': 'review'}

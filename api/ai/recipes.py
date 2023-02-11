@@ -192,28 +192,52 @@ def get_recipes(params, recipe_id=None, uid=None) -> list:
     return recipes
 
 
-def create_recipe(uid, data, params=None):
-    """Create a recipe with OpenAI.
-    """
+def create_recipe(uid, data):
+    """Create a recipe with OpenAI."""
+
     # Initialize a blank recipe.
     usage, prompt_ids = 0, []
     recipe_id = secrets.token_hex(ID_LENGTH)
     ref = f'users/{uid}/recipes/{recipe_id}'
 
+    # Get the posted data.
+    ingredients = data.get('ingredients', [])
+    product_type = data.get('product_type')
+    product_name = data.get('product_name', DEFAULT_PRODUCT)
+    special_instructions = data.get('special_instructions')
+    doses = data.get('doses')
+    image_type = data.get('image_type', IMAGE_TYPE).lower()
+    total_thc = data.get('total_thc', DEFAULT_TOTAL_THC)
+    total_cbd = data.get('total_cbd', DEFAULT_TOTAL_CBD)
+    public = data.get('public', False)
+    temperature = data.get('creativity', TEMPERATURE)
+
     # Update Firestore to indicate that the recipe is being created.
-    update_document(ref, {'baking': True})
+    update_document(ref, {
+        'baking': True,
+        'creativity': temperature,
+        'doses': doses,
+        'ingredients': ingredients,
+        'product_type': product_type,
+        'product_name': product_name,
+        'special_instructions': special_instructions,
+        'doses': doses,
+        'image_type': image_type,
+        'total_thc': total_thc,
+        'total_cbd': total_cbd,
+        'public': public,
+        'version': 1,
+        'created_by': uid,
+    })
 
     # Create a recipe for cannabis edibles, optionally given
     # ingredients, a desired product, and/or the desired dose
     # of various compounds. e.g. {"name": "THC", "units": "mg", "value": 800}.
-    ingredients = data.get('ingredients', [])
     recipe_prompt = 'Write a recipe'
-    product_name = data.get('product_name', DEFAULT_PRODUCT)
     if product_name:
         recipe_prompt += f' with {product_name}'
 
     # Assign product type.
-    product_type = data.get('product_type')
     if product_type is None:
         product_type = '???'
     else:
@@ -225,10 +249,7 @@ def create_recipe(uid, data, params=None):
     # TODO: Paid product names with ingredients where possible.
 
     # Get any specified dose of compounds.
-    doses = data.get('doses')
     if doses:
-
-        # Incorporate compounds.
         recipe_prompt += '\nWith:'
         for dose in doses:
             units = dose['units']
@@ -241,9 +262,8 @@ def create_recipe(uid, data, params=None):
         # TODO: Pair any known terpenes with ingredients.
 
     # Get any special instructions.
-    special_instructions = data.get('special_instructions')
     if special_instructions:
-        recipe_prompt += 'With special instructions: '
+        recipe_prompt += '\nWith special instructions: '
         recipe_prompt += special_instructions
 
     # Get any specified ingredients.
@@ -257,69 +277,75 @@ def create_recipe(uid, data, params=None):
 
     # Initialize OpenAI.
     initialize_openai()
-    if params is None:
-        temperature = TEMPERATURE
-    else:
-        temperature = params.get('creativity', TEMPERATURE)
 
     # Ask GPT to create a recipe.
-    print(recipe_prompt)
-    response = openai.Completion.create(
-        model=CREATE_TEXT_MODEL,
-        prompt=recipe_prompt,
-        max_tokens=MAX_TOKENS,
-        temperature=temperature,
-        n=1,
-        user=uid,
-    )
-    print(response)
-    usage, prompt_ids = increment_usage(usage, prompt_ids, response)
-    recipe = response['choices'][0]['text']
+    try:
+        print(recipe_prompt)
+        response = openai.Completion.create(
+            model=CREATE_TEXT_MODEL,
+            prompt=recipe_prompt,
+            max_tokens=MAX_TOKENS,
+            temperature=temperature,
+            n=1,
+            user=uid,
+        )
+        print(response)
+        usage, prompt_ids = increment_usage(usage, prompt_ids, response)
+        recipe = response['choices'][0]['text']
+    except:
+        message = 'Failed to generate a recipe.'
+        return message, None, None
 
     # Ask GPT for a fun title.
-    if temperature > 0.5:
-        title_prompt = 'Write a fun title for the following recipe'
-        title_prompt += ' (pun if possible)'
-    else:
-        title_prompt = 'Write a title for the following recipe'
-    title_prompt += ' (use the product name if possible):'
-    title_prompt += recipe
-    print(title_prompt)
-    response = openai.Completion.create(
-        model=CREATE_TEXT_MODEL,
-        prompt=title_prompt,
-        max_tokens=MAX_TOKENS,
-        temperature=temperature,
-        n=1,
-        user=uid,
-    )
-    print(response)
-    usage, prompt_ids = increment_usage(usage, prompt_ids, response)
-    product_title = response['choices'][0]['text'] \
-        .replace('\n', ' ').replace('"', '').strip()
+    try:
+        if temperature > 0.5:
+            title_prompt = 'Write a fun title for the following recipe'
+            title_prompt += ' (pun if possible)'
+        else:
+            title_prompt = 'Write a title for the following recipe'
+        title_prompt += ' (use the product name if possible):'
+        title_prompt += recipe
+        print(title_prompt)
+        response = openai.Completion.create(
+            model=CREATE_TEXT_MODEL,
+            prompt=title_prompt,
+            max_tokens=MAX_TOKENS,
+            temperature=temperature,
+            n=1,
+            user=uid,
+        )
+        print(response)
+        usage, prompt_ids = increment_usage(usage, prompt_ids, response)
+        product_title = response['choices'][0]['text'] \
+            .replace('\n', ' ').replace('"', '').strip()
+    except:
+        product_title = product_name.title()
 
     # Ask GPT if it is a food or a drink to differentiate
     # between solid and liquid edibles.
-    type_prompt = 'Is this recipe for a food or drink?'
-    type_prompt += product_title
-    type_prompt += 'Type:'
-    print(type_prompt)
-    response = openai.Completion.create(
-        model=CREATE_TEXT_MODEL,
-        prompt=type_prompt,
-        max_tokens=MAX_TOKENS,
-        temperature=0,
-        n=1,
-        user=uid,
-    )
-    print(response)
-    usage, prompt_ids = increment_usage(usage, prompt_ids, response)
-    edible_type = response['choices'][0]['text'] \
-        .replace('\n', ' ').replace('"', '').strip()
-    if edible_type.lower() == 'drink':
-        product_subtype = 'liquid_edible'
-    else:
-        product_subtype = 'solid_edible'
+    try:
+        type_prompt = 'Is this recipe for a food or drink? '
+        type_prompt += product_title
+        type_prompt += '\nType:'
+        print(type_prompt)
+        response = openai.Completion.create(
+            model=CREATE_TEXT_MODEL,
+            prompt=type_prompt,
+            max_tokens=MAX_TOKENS,
+            temperature=0,
+            n=1,
+            user=uid,
+        )
+        print(response)
+        usage, prompt_ids = increment_usage(usage, prompt_ids, response)
+        edible_type = response['choices'][0]['text'] \
+            .replace('\n', ' ').replace('"', '').strip()
+        if edible_type.lower() == 'drink':
+            product_subtype = 'liquid_edible'
+        else:
+            product_subtype = 'solid_edible'
+    except:
+        product_subtype = None
 
     # Determine the units.
     if product_subtype == 'liquid_edible':
@@ -330,100 +356,121 @@ def create_recipe(uid, data, params=None):
         units_name = 'milligrams'
 
     # Ask GPT for a description of the recipe.
-    if temperature >= 0.5:
-        description_prompt = 'Fun, short summary of:'
-    else:
-        description_prompt = 'Short summary of:'
-    description_prompt += recipe
-    print(description_prompt)
-    response = openai.Completion.create(
-        model=CREATE_TEXT_MODEL,
-        prompt=description_prompt,
-        max_tokens=MAX_TOKENS,
-        temperature=temperature,
-        n=1,
-        user=uid,
-    )
-    print(response)
-    usage, prompt_ids = increment_usage(usage, prompt_ids, response)
-    description = response['choices'][0]['text'] \
-        .replace('\n', ' ').replace('"', '').strip()
+    try:
+        if temperature >= 0.5:
+            description_prompt = 'Fun, short summary of:'
+        else:
+            description_prompt = 'Short summary of:'
+        description_prompt += recipe
+        print(description_prompt)
+        response = openai.Completion.create(
+            model=CREATE_TEXT_MODEL,
+            prompt=description_prompt,
+            max_tokens=MAX_TOKENS,
+            temperature=temperature,
+            n=1,
+            user=uid,
+        )
+        print(response)
+        usage, prompt_ids = increment_usage(usage, prompt_ids, response)
+        description = response['choices'][0]['text'] \
+            .replace('\n', ' ').replace('"', '').strip()
+    except:
+        description = None
 
     # Get an image for the recipe.
     # Lets the user specify the type of image.
     # E.g. `drawing` or `high-quality photo`.
-    image_type = data.get('image_type', IMAGE_TYPE).lower()
-    image_prompt = f'A {image_type} of '
-    image_prompt += product_title
-    print(image_prompt)
-    response = openai.Image.create(
-        prompt=image_prompt,
-        n=1,
-        size=IMAGE_SIZE,
-        user=uid,
-    )
-    print(response)
-    usage += TOKENS_PER_IMAGE
-    image_url = response['data'][0]['url']
+    image_url, image_ref, file_url = None, None, None
+    try:
+        image_prompt = f'A {image_type} of '
+        image_prompt += product_title
+        print(image_prompt)
+        response = openai.Image.create(
+            prompt=image_prompt,
+            n=1,
+            size=IMAGE_SIZE,
+            user=uid,
+        )
+        print(response)
+        usage += TOKENS_PER_IMAGE
+        image_url = response['data'][0]['url']
 
-    # Download the image and save the image to Firebase Storage.
-    tempfile.gettempdir()
-    image_file = download_file_from_url(
-        image_url,
-        tempfile.gettempdir(),
-        file_name='recipe.png',
-    )
-    image_ref = f'users/{uid}/recipes/{recipe_id}.png'
-    _, project_id = google.auth.default()
-    bucket_name = f'{project_id}.appspot.com'
-    upload_file(image_ref, image_file, bucket_name=bucket_name)
-    file_url = get_file_url(image_ref, bucket_name=bucket_name)
+        # Download the image and save the image to Firebase Storage.
+        print('Downloading image...')
+        tempfile.gettempdir()
+        image_file = download_file_from_url(
+            image_url,
+            tempfile.gettempdir(),
+            file_name='recipe.png',
+        )
+
+        # Upload the image to storage.
+        print('Uploading image to storage...')
+        image_ref = f'users/{uid}/recipes/{recipe_id}.png'
+        _, project_id = google.auth.default()
+        bucket_name = f'{project_id}.appspot.com'
+        upload_file(image_ref, image_file, bucket_name=bucket_name)
+        file_url = get_file_url(image_ref, bucket_name=bucket_name)
+        print('Uploaded image to storage')
+    except:
+        pass
 
     # Ask GPT for the total weight in milligrams of the whole dish.
-    total_prompt = f'What is the total weight in {units_name} of the following recipe?'
-    total_prompt += recipe
-    total_prompt += f'\nTotal {units_name}:'
-    print(total_prompt)
-    response = openai.Completion.create(
-        model=CREATE_TEXT_MODEL,
-        prompt=total_prompt,
-        max_tokens=MAX_TOKENS,
-        temperature=0,
-        n=1,
-        user=uid,
-    )
-    print(response)
-    usage, prompt_ids = increment_usage(usage, prompt_ids, response)
-    total_weight = response['choices'][0]['text'] \
-        .replace('\n', ' ').replace('"', '').strip()
+    total_weight = '???'
     try:
-        total_weight = convert_to_numeric(total_weight, strip=True)
+        total_prompt = f'What is the total weight in {units_name} of the following recipe?'
+        total_prompt += recipe
+        total_prompt += f'\nTotal {units_name}:'
+        print(total_prompt)
+        response = openai.Completion.create(
+            model=CREATE_TEXT_MODEL,
+            prompt=total_prompt,
+            max_tokens=MAX_TOKENS,
+            temperature=0,
+            n=1,
+            user=uid,
+        )
+        print(response)
+        usage, prompt_ids = increment_usage(usage, prompt_ids, response)
+        total_weight = response['choices'][0]['text'] \
+            .replace('\n', ' ').replace('"', '').strip()
+        try:
+            total_weight = convert_to_numeric(total_weight, strip=True)
+        except:
+            pass
     except:
         pass
 
     # Ask GPT for the weight per serving in milligrams.
-    serving_prompt = f'What is the {units_name} per serving (or each) of the following recipe?'
-    serving_prompt += recipe
-    serving_prompt += f'\n{units_name} per serving (or each):'
-    print(serving_prompt)
-    response = openai.Completion.create(
-        model=CREATE_TEXT_MODEL,
-        prompt=serving_prompt,
-        max_tokens=MAX_TOKENS,
-        temperature=0,
-        n=1,
-        user=uid,
-    )
-    print(response)
-    usage, prompt_ids = increment_usage(usage, prompt_ids, response)
-    serving_weight = response['choices'][0]['text'] \
-        .replace('\n', ' ').replace('"', '').strip()
+    print('Calculating serving weight...')
+    serving_weight = '???'
     try:
-        serving_weight = convert_to_numeric(serving_weight, strip=True)
+        serving_prompt = f'What is the {units_name} per serving (or each) of the following recipe?'
+        serving_prompt += recipe
+        serving_prompt += f'\n{units_name} per serving (or each):'
+        print(serving_prompt)
+        response = openai.Completion.create(
+            model=CREATE_TEXT_MODEL,
+            prompt=serving_prompt,
+            max_tokens=MAX_TOKENS,
+            temperature=0,
+            n=1,
+            user=uid,
+        )
+        print(response)
+        usage, prompt_ids = increment_usage(usage, prompt_ids, response)
+        serving_weight = response['choices'][0]['text'] \
+            .replace('\n', ' ').replace('"', '').strip()
+        try:
+            serving_weight = convert_to_numeric(serving_weight, strip=True)
+        except:
+            pass
     except:
         pass
 
     # Estimate the number of servings.
+    print('Calculating the number of servings...')
     try:
         number_of_servings = round(total_weight / serving_weight)
     except:
@@ -434,76 +481,69 @@ def create_recipe(uid, data, params=None):
 
     # Calculate total THC per serving.
     # Default: 1 gram of oil (1000mg) at 80% THC is 800mg THC.
-    total_thc = data.get('total_thc', DEFAULT_TOTAL_THC)
+    print('Calculating total THC per serving...')
     try:
         serving_thc = total_thc / number_of_servings
     except:
         serving_thc = '???'
     
     # Calculate total CBD per serving.
-    total_cbd = data.get('total_cbd', DEFAULT_TOTAL_CBD)
+    print('Calculating total CBD per serving...')
     try:
         serving_cbd = total_cbd / number_of_servings
     except:
         serving_cbd = '???'
 
     # Future work: Use SkunkFx to predict effects and aromas.
-
-    # Allow the user to make their recipes public.
-    public = data.get('public', False)
             
     # Compile the data.
     # Future work: Also keep track of terpenes?
+    print('Compiling data...')
     timestamp = datetime.now().isoformat()
     entry = {
         'baking': False,
         'description': description,
-        'doses': doses,
-        'creativity': temperature,
         'file_url': file_url,
         'image_ref': image_ref,
         'image_url': image_url,
         'image_type': image_type,
-        'ingredients': ingredients,
-        'product_name': product_name,
-        'product_type': product_type,
         'product_subtype': product_subtype,
         'recipe': recipe,
         'title': product_title,
-        'special_instructions': special_instructions,
         'number_of_servings': number_of_servings,
         'total_weight': total_weight,
         'serving_weight': serving_weight,
-        'total_thc': total_thc,
         'serving_thc': serving_thc,
-        'total_cbd': total_cbd,
         'serving_cbd': serving_cbd,
         'units': units,
-        'version': 1,
-        'public': public,
-        'created_by': uid,
         'created_at': timestamp,
         'updated_at': timestamp,
     }
-
-    # Prepare the data for Firestore.
     refs, entries = [ref], [entry]
-    if public:
-        refs.append(f'public/ai/recipes/{recipe_id}')
-        entries.append(entry)
+
+    # Allow the user to make their recipe public.
+    try:
+        if public:
+            refs.append(f'public/ai/recipes/{recipe_id}')
+            entries.append(entry)
+    except:
+        print("Couldn't make recipe public.")
 
     # Record usage and prompt IDs for administrators to review.
-    doc_id = secrets.token_hex(ID_LENGTH)
-    refs.append(f'admin/ai/recipe_usage/{doc_id}')
-    entries.append({'usage': usage, 'prompt_ids': prompt_ids})
+    try:
+        doc_id = secrets.token_hex(ID_LENGTH)
+        refs.append(f'admin/ai/recipe_usage/{doc_id}')
+        entries.append({'usage': usage, 'prompt_ids': prompt_ids})
+    except:
+        print("Couldn't save admin document.")
 
     # Return the Firestore data.
     return entry, refs, entries
 
 
 def update_recipe(uid, recipe_id, data, params=None):
-    """Update an existing recipe with OpenAI.
-    """
+    """Update an existing recipe with OpenAI."""
+
     # Initialize an update for the recipe.
     usage, prompt_ids = 0, []
     initialize_openai()
@@ -718,6 +758,7 @@ def recipes_api(request: Request, recipe_id=None):
 
     # Get the parameters.
     uid = claims['uid']
+    print('Request by:', uid)
     params = request.query_params
     data = request.data.get('data', request.data)
     recipe_id = data.get('id', recipe_id)
@@ -751,11 +792,17 @@ def recipes_api(request: Request, recipe_id=None):
         # Create a recipe.
         elif recipe_id is None:
             action = 'create_recipe'
-            entry, refs, entries = create_recipe(uid, data, params)
+            print('Creating recipe...')
+            entry, refs, entries = create_recipe(uid, data)
+            # if isinstance(entry, str):
+            #     message = 'Failed to create recipe. ' + entry
+            #     response = {'success': False, 'message': message}
+            #     return Response(response, status=404)
 
         # Update an existing recipe.
         else:
             action = 'update_recipe'
+            print('Updating recipe...')
             entry, refs, entries = update_recipe(uid, recipe_id, data, params)
             if entry is None:
                 message = 'Recipe not found among your recipes.'
@@ -763,20 +810,29 @@ def recipes_api(request: Request, recipe_id=None):
                 return Response(response, status=404)
 
         # Save all user, public, and usage data to Firestore.
-        update_documents(refs, entries)
+        try:            
+            print('Saving all data to Firestore...')
+            update_documents(refs, entries)
+        except:
+            print('Failed to save data to Firestore.')
 
         # Create an activity log.
-        create_log(
-            ref='logs/ai/recipe_logs',
-            claims=claims,
-            action=action,
-            log_type='recipes',
-            key=recipe_id,
-            changes=[entry]
-        )
+        try:
+            print('Creating activity log...')
+            create_log(
+                ref='logs/ai/recipe_logs',
+                claims=claims,
+                action=action,
+                log_type='recipes',
+                key=recipe_id,
+                changes=entries
+            )
+        except:
+            print('Failed to log activity.')
 
         # Return the entered data.
-        response = {'success': True, 'data': [entry]}
+        print('Returning the data...')
+        response = {'success': True, 'data': entries}
         return Response(response, status=200)
 
     # Delete recipe(s).

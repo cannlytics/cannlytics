@@ -173,7 +173,7 @@ export const RecipesAI = {
 
     // Show baking notification.
     const message = 'Baking recipe... this may take a hot minute!';
-    showNotification('Baking recipe', message, /* type = */ 'success');
+    showNotification('Baking recipe', message, /* type = */ 'wait');
 
     // Make a request to create a recipe.
     try {
