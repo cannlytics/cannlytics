@@ -1544,9 +1544,8 @@ class CoADoc:
         self.service = None
 
 
-if __name__ == '__main__':
-
-    # === Tests ===
+# === Tests ===
+if __name__ == '__main__' and False:
 
     # Initialize the CoA parser.
     # Future work: Test the parser with different configurations.
@@ -1554,108 +1553,108 @@ if __name__ == '__main__':
 
     # Specify where your data lives for testing.
     DATA_DIR = '../../../.datasets/coas'
-    # cc_coa_pdf = f'{DATA_DIR}/Classic Jack.pdf'
-    # cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
-    # tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
-    # tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
-    # tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
+    cc_coa_pdf = f'{DATA_DIR}/Classic Jack.pdf'
+    cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
+    tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
+    tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
+    tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
 
     # [✓] TEST: `decode_pdf_qr_code` via `find_pdf_qr_code_url`.
-    # qr_code_url = parser.find_pdf_qr_code_url(cc_coa_pdf)
-    # assert qr_code_url.startswith('https')
-    # qr_code_url = parser.find_pdf_qr_code_url(tagleaf_coa_pdf)
-    # assert qr_code_url.startswith('https')
+    qr_code_url = parser.find_pdf_qr_code_url(cc_coa_pdf)
+    assert qr_code_url.startswith('https')
+    qr_code_url = parser.find_pdf_qr_code_url(tagleaf_coa_pdf)
+    assert qr_code_url.startswith('https')
 
     # [✓] TEST: `get_pdf_creation_date`.
-    # from datetime import datetime
-    # creation_date = parser.get_pdf_creation_date(cc_coa_pdf)
-    # assert isinstance(pd.to_datetime(creation_date), datetime)
-    # creation_date = parser.get_pdf_creation_date(tagleaf_coa_pdf)
-    # assert isinstance(pd.to_datetime(creation_date), datetime)
+    from datetime import datetime
+    creation_date = parser.get_pdf_creation_date(cc_coa_pdf)
+    assert isinstance(pd.to_datetime(creation_date), datetime)
+    creation_date = parser.get_pdf_creation_date(tagleaf_coa_pdf)
+    assert isinstance(pd.to_datetime(creation_date), datetime)
 
     # [✓] TEST: `identify_lims`.
-    # identified_lims = parser.identify_lims(cc_coa_pdf)
-    # assert identified_lims == 'Confident Cannabis'
-    # identified_lims = parser.identify_lims(tagleaf_coa_pdf)
-    # assert identified_lims == 'TagLeaf LIMS'
+    identified_lims = parser.identify_lims(cc_coa_pdf)
+    assert identified_lims == 'Confident Cannabis'
+    identified_lims = parser.identify_lims(tagleaf_coa_pdf)
+    assert identified_lims == 'TagLeaf LIMS'
 
     # [✓] TEST: Parse a PDF.
-    # data = parser.parse_pdf(cc_coa_pdf)
+    data = parser.parse_pdf(cc_coa_pdf)
 
     # [✓] TEST: Parse a URL.
-    # data = parser.parse_url(cc_coa_url)
+    data = parser.parse_url(cc_coa_url)
 
     # [✓] TEST: Parse a list of CoA URLs.
-    # urls = [cc_coa_url, tagleaf_coa_url]
-    # data = parser.parse(urls)
+    urls = [cc_coa_url, tagleaf_coa_url]
+    data = parser.parse(urls)
 
     # [✓] TEST: Parse a list of CoA PDFs.
-    # files = [cc_coa_pdf, tagleaf_coa_pdf]
-    # data = parser.parse(files)
+    files = [cc_coa_pdf, tagleaf_coa_pdf]
+    data = parser.parse(files)
 
     # [✓] TEST: Parse all CoAs in a given directory.
-    # data = parser.parse(DATA_DIR)
+    data = parser.parse(DATA_DIR)
 
     # [ ] TEST: Parse all CoAs in a zipped folder!
-    # zip_folder = '../../../tests/assets/coas/coas.zip'
-    # data = parser.parse(zip_folder)
-    # assert data is not None
+    zip_folder = '../../../tests/assets/coas/coas.zip'
+    data = parser.parse(zip_folder)
+    assert data is not None
 
     # [✓] TEST: Parse a custom CoA (accept an error for now).
-    # try:
-    #     parser.parse('https://cannlytics.page.link/partial-equilibrium-notes')
-    # except NotImplementedError:
-    #     pass
+    try:
+        parser.parse('https://cannlytics.page.link/partial-equilibrium-notes')
+    except NotImplementedError:
+        pass
 
     # [✓] TEST: Standardize CoA data.
-    # coa = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
-    # # coa = '../../../.datasets/coas/Flore COA/Flore Brand/220121OgreInfused.pdf'
-    # data = parser.parse(coa)
+    coa = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
+    # coa = '../../../.datasets/coas/Flore COA/Flore Brand/220121OgreInfused.pdf'
+    data = parser.parse(coa)
 
     # [✓] TEST: Standardize CoA data dictionary.
-    # clean_data = parser.standardize(data[0])
+    clean_data = parser.standardize(data[0])
 
     # [✓] TEST: Standardize CoA data list of dictionaries.
-    # clean_data_list = parser.standardize(data)
+    clean_data_list = parser.standardize(data)
 
     # [✓] TEST: Standardize CoA data DataFrame.
-    # dataframe = pd.DataFrame(data)
-    # details_dataframe = parser.standardize(dataframe)
-    # results_dataframe = parser.standardize(
-    #     dataframe,
-    #     how='long'
-    # )
-    # values_dataframe = parser.standardize(
-    #     dataframe,
-    #     how='wide',
-    #     details_data=details_dataframe,
-    #     results_data=results_dataframe,
-    # )
+    dataframe = pd.DataFrame(data)
+    details_dataframe = parser.standardize(dataframe)
+    results_dataframe = parser.standardize(
+        dataframe,
+        how='long'
+    )
+    values_dataframe = parser.standardize(
+        dataframe,
+        how='wide',
+        details_data=details_dataframe,
+        results_data=results_dataframe,
+    )
 
     # [✓] TEST: Save CoA data from DataFrame.
-    # parser.save(dataframe, '../../../tests/assets/coas/test-coas.xlsx')
+    parser.save(dataframe, '../../../tests/assets/coas/test-coas.xlsx')
 
     # [✓] TEST: Save CoA data from list of dictionaries.
-    # parser.save(data, '../../../tests/assets/coas/test-coas.xlsx')
+    parser.save(data, '../../../tests/assets/coas/test-coas.xlsx')
 
     # [✓] TEST: Save CoA data from dictionary.
-    # parser.save(data[0], '../../../tests/assets/coas/test-coas.xlsx')
+    parser.save(data[0], '../../../tests/assets/coas/test-coas.xlsx')
 
     # [✓] TEST: Pass a PDF through OCR.
-    # doc = '../../../tests/assets/coas/210000068-Cloud-Cake-1g.pdf'
-    # temp_path = '../../../tests/assets/coas/tmp'
-    # temp_file = '../../../tests/assets/coas/tmp/ocr-coa.pdf'
-    # parser.pdf_ocr(doc, temp_file, temp_path=temp_path)
+    doc = '../../../tests/assets/coas/210000068-Cloud-Cake-1g.pdf'
+    temp_path = '../../../tests/assets/coas/tmp'
+    temp_file = '../../../tests/assets/coas/tmp/ocr-coa.pdf'
+    parser.pdf_ocr(doc, temp_file, temp_path=temp_path)
 
     # [✓] TEST: Parse a COA using OCR using `parse_pdf`.
-    # doc = '../../../tests/assets/coas/210000068-Cloud-Cake-1g.pdf'
-    # temp_path = '../../../tests/assets/tmp'
-    # data = parser.parse_pdf(doc, temp_path=temp_path)
+    doc = '../../../tests/assets/coas/210000068-Cloud-Cake-1g.pdf'
+    temp_path = '../../../tests/assets/tmp'
+    data = parser.parse_pdf(doc, temp_path=temp_path)
 
     # [✓] TEST: Parse a COA using OCR using `parse`.
-    # doc = '../../../tests/assets/coas/210000068-Cloud-Cake-1g.pdf'
-    # temp_path = '../../../tests/assets/coas/tmp'
-    # data = parser.parse_pdf(doc, temp_path=temp_path)
+    doc = '../../../tests/assets/coas/210000068-Cloud-Cake-1g.pdf'
+    temp_path = '../../../tests/assets/coas/tmp'
+    data = parser.parse_pdf(doc, temp_path=temp_path)
 
     # [ ] TEST: Scan a QR code in an image with the `scan` method.
     parser = CoADoc()
