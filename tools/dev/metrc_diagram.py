@@ -5,8 +5,10 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/12/2023
-Updated: 2/12/2023
+Updated: 2/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+Note: This diagram is a work in progress!
 """
 # Standard imports:
 from urllib.request import urlretrieve
@@ -180,7 +182,7 @@ def create_dataset_node(title, fields, cluster_attr={}, node_attr={}):
 
 
 # Parameters.
-filename = 'ccrs_diagram'
+filename = 'metrc_diagram'
 direction ='LR'
 cluster_attr = {
     'fontname': 'times bold',

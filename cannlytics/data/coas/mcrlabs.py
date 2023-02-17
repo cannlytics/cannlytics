@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 2/13/2023
+Updated: 2/17/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -89,6 +89,12 @@ from cannlytics.utils.utils import (
     strip_whitespace,
 )
 from datasets import load_dataset
+
+# Suppress `datasets` warning:
+# Deprecated argument(s) used in 'dataset_info': token.
+# Will not be supported from version '0.12'.
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 # It is assumed that the lab has the following details.
@@ -720,7 +726,7 @@ def parse_mcrlabs_pdf(
     values = tables[1][-1]
     for i, field in enumerate(fields):
         key = field.replace('\n', '').strip()
-        key = standard_fields[key]
+        key = standard_fields.get(key, snake_case(key))
         value = values[i].replace('\n', '').strip()
         obs[key] = value
 
@@ -957,12 +963,15 @@ def parse_mcrlabs_coa(
 
 
 # === Tests ===
+# Notes: Uncomment tests to perform them.
+# Checked tests have been successfully performed by Cannlytics.
+# Contact: <admin@cannlytics.com>.
 if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
-    # from cannlytics.utils.utils import to_excel_with_style
-    # from datetime import datetime
-    # import pandas as pd
+    from cannlytics.utils.utils import to_excel_with_style
+    from datetime import datetime
+    import pandas as pd
 
     # Specify where your test data lives.
     DATA_DIR = '../../../.datasets/lab_results'
@@ -1020,19 +1029,17 @@ if __name__ == '__main__':
     # assert data is not None
     # print('Parsed:', doc)
 
-    # [ ] Test: Parse MCR Labs COAs observed in the wild.
-    parser = CoADoc()
-    docs = [
-        '../../../tests/assets/coas/curaleafMA2022/MCRLabsMA6pg.PDF',
-        '../../../tests/assets/coas/curaleafMA2022/mcrlabsma6pgs.pdf',
-        '../../../tests/assets/coas/mcr-labs/mcrlabsma4pgs.pdf',
-        '../../../tests/assets/coas/mcr-labs/mcrlabsma5pgs.pdf',
-        '../../../tests/assets/coas/mcr-labs/mcrlabsma6pgs.pdf',
-        '../../../tests/assets/coas/mcr-labs/mcrlabsma8pgs.pdf',
-    ]
-    for doc in docs:
-        data = parse_mcrlabs_coa(parser, doc)
-        assert data is not None
-        print('Parsed:', doc)
-        outfile = doc.replace('.pdf', '.xlsx')
-        parser.save(data, outfile)
+    # [✓] Test: Parse and save MCR Labs COAs observed in the wild.
+    # parser = CoADoc()
+    # docs = [
+    #     '../../../tests/assets/coas/mcr-labs/mcr-labs-ma-4pgs.pdf',
+    #     '../../../tests/assets/coas/mcr-labs/mcr-labs-ma-5pgs.pdf',
+    #     '../../../tests/assets/coas/mcr-labs/mcr-labs-ma-6pgs.pdf',
+    #     '../../../tests/assets/coas/mcr-labs/mcr-labs-ma-8pgs.pdf',
+    # ]
+    # for doc in docs:
+    #     data = parse_mcrlabs_coa(parser, doc)
+    #     assert data is not None
+    #     print('Parsed:', doc)
+    #     outfile = doc.replace('.pdf', '.xlsx')
+    #     parser.save(data, outfile)
