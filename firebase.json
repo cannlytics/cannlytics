@@ -7,28 +7,27 @@
     "rules": ".firebase/storage.rules"
   },
   "hosting": [
-    {"target": "docs", "public": "docs/build"},
     {
-      "target": "console",
+      "target": "app",
+      "public": "app/build/web",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    },
+    {
+      "target": "docs",
+      "public": "docs/build"
+    },
+    {
+      "target": "dev",
       "public": "public/console",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "**/development/**"],
-      "appAssociation": "AUTO",
       "rewrites": [
         {
-          "source": "!/sitemap",
-          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
-        },
-        {
-          "source": "!/static",
-          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
-        },
-        {
-          "source": "!/robots.txt",
-          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
-        },
-        {
           "source": "**",
-          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
+          "run": {"serviceId": "cannlytics-dev", "region": "us-central1"}
         }
       ]
     },
@@ -69,13 +68,26 @@
       ]
     },
     {
-      "target": "dev",
+      "target": "console",
       "public": "public/console",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "**/development/**"],
+      "appAssociation": "AUTO",
       "rewrites": [
         {
+          "source": "!/sitemap",
+          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
+        },
+        {
+          "source": "!/static",
+          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
+        },
+        {
+          "source": "!/robots.txt",
+          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
+        },
+        {
           "source": "**",
-          "run": {"serviceId": "cannlytics-dev", "region": "us-central1"}
+          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
         }
       ]
     }

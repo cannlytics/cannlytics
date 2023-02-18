@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    Cannlytics App
+    Copyright (c) 2023 Cannlytics
+
+    Authors:
+      Keegan Skeate <https://github.com/keeganskeate>
+    Created: 2/17/2023
+    Updated: 2/17/2023
+    License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Manage your cannabis data and analytics like a pro with Cannlytics.">
+  <meta name="author" content="Keegan Skeate admin@cannlytics.com"/>
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="cannlytics_app">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="mask-icon" color="#e48632" href="images/logos/safari-pinned-tab.svg"/>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logos/favicon.ico"/>
+  <link rel="shortcut icon" type="image/x-icon" href="images/logos/favicon.ico"/>
+  <link rel="icon" sizes="32x32" type="image/png" href="images/logos/favicon-32x32.png"/>
+  <link rel="icon" sizes="16x16" type="image/png" href="images/logos/favicon-16x16.png"/>
+
+  <!-- Title -->
+  <title>Cannlytics</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Flutter Code Begins -->
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    var serviceWorkerVersion = null;
+  </script>
+  <script src="flutter.js" defer></script>
+</head>
+<body>
+  <script>
+    window.addEventListener('load', function(ev) {
+      // Download main.dart.js
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: serviceWorkerVersion,
+        }
+      }).then(function(engineInitializer) {
+        return engineInitializer.initializeEngine();
+      }).then(function(appRunner) {
+        return appRunner.runApp();
+      });
+    });
+  </script>
+</body>
+</html>

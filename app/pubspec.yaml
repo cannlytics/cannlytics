@@ -1,0 +1,41 @@
+name: cannlytics_app
+description: The Cannlytics app.
+
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  cloud_firestore: ^4.0.5
+  cupertino_icons: ^1.0.5
+  equatable: ^2.0.5
+  firebase_auth: ^4.1.2
+  firebase_core: ^2.2.0
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.1.1
+  flutter_svg: ^1.1.6
+  go_router: 5.1.1
+  intl: ^0.17.0
+  rxdart: ^0.27.6
+  shared_preferences: ^2.0.15
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^0.3.0
+  random_string:
+  flutter_lints: ^2.0.0
+
+# https://stackoverflow.com/a/74234079/436422
+#dependency_overrides:
+#  firebase_core_platform_interface: 4.5.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/logos/cannlytics_logo_with_text_dark.svg
+    - assets/images/logos/cannlytics_logo_with_text_light.svg
+    - assets/images/logos/cannlytics_logo_with_text_light.png

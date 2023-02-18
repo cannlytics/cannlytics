@@ -68,9 +68,6 @@ env.yaml
 # Ignore any SQL database
 *.sqlite3
 
-# Ignore Webpack hashes
-*webpack-stats.json
-
 # Ignore documentation build
 docs/build
 
@@ -128,3 +125,6 @@ website/static/website/js/bundles/*
 /public/static/*
 public/console/
 public/website/
+
+# Exception for Flutter library.
+!app/lib/
