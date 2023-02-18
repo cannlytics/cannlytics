@@ -19,7 +19,7 @@ Cannlytics utilizes Firebase services which encrypt data in transit using HTTPS 
 <!-- "Confidential Information  of any  kind  shall be  stored, processed,  or  transferred  only  in  or  to facilities  located  within  the  State of  Nevada,  and  shall  not  be  distributed  or  sold  to  any  third  party, retained  in  any  files  or  otherwise, or  used  by  Provider  or  its  agents  in  any  way, except  as authorized  by  this  Agreement,  by  law,  unless  approved  in  writing by  the  State.  Provider  shall provide  and  maintain  a  secure  environment  that  ensures  confidentiality  of  all  Confidential Information wherever located. Neither  Provider  nor  any  of  its  agents,  employees,  Subcontractors, or  permitted  assigns  shall  have  any  rights  to  use  or  access  any  data or  information  of EITS,  the Nevada  Cannabis  Compliance  Board,  or  any  other  Nevada  state agency,  except  with  the prior approval of the  State" -->
 
 
-## Our security requirments
+## Our security requirements
 
 We hold ourselves to the following minimal security requirements.
 
@@ -30,3 +30,6 @@ We hold ourselves to the following minimal security requirements.
 
   <!-- - [Add Google Cloud Armor](https://cloud.google.com/blog/products/identity-security/google-cloud-armor-features-to-protect-your-websites-and-applications?utm_source=release-notes&utm_medium=email&utm_campaign=2020-aug-release-notes-1-en) -->
 
+## References
+
+- Lodderstedt, T., Ed., McGloin, M., and P. Hunt, "OAuth 2.0 Threat Model and Security Considerations", RFC 6819, DOI 10.17487/RFC6819, January 2013, <https://www.rfc-editor.org/info/rfc6819>.

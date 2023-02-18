@@ -1,14 +1,16 @@
 """
 Metrc Models | Cannlytics
-Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
+Copyright (c) 2021-2023 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 11/12/2021
+Updated: 1/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 This module contains common Metrc models.
 """
+# Standard imports:
+from typing import Any, Callable, Optional
 
 # Internal imports.
 from ..firebase import get_document, update_document
@@ -29,11 +31,11 @@ class Model(object):
 
     def __init__(
             self,
-            client,
-            context,
-            license_number='',
-            function=camel_to_snake
-    ):
+            client: Any,
+            context: dict,
+            license_number: Optional[str] = '',
+            function: Optional[Callable] = camel_to_snake
+        ):
         """Initialize the model, setting keys as properties."""
         self.client = client
         self._license = license_number
@@ -53,17 +55,13 @@ class Model(object):
         return self.__dict__.get('id')
 
     @classmethod
-    def from_dict(cls, client, json):
+    def from_dict(cls, client: Any, context: dict):
         """Initiate a class instance from a dictionary."""
-        obj = cls(client, json)
-        try:
-            obj.create()
-        except KeyError:
-            pass
+        obj = cls(client, context)
         return obj
 
     @classmethod
-    def from_fb(cls, client, ref):
+    def from_fb(cls, client: Any, ref: str) -> Any:
         """Initialize a class from Firebase data.
         Args:
             client (Client): A Metrc client instance.
@@ -75,13 +73,13 @@ class Model(object):
         obj = cls(client, data)
         return obj
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """Returns the model's properties as a dictionary."""
         data = vars(self).copy()
         [data.pop(x, None) for x in ['_license', 'client', '__class__']]
         return data
 
-    def to_fb(self, ref='', col=''):
+    def to_fb(self, ref: Optional[str] = '', col: Optional[str] = ''):
         """Upload the model's properties as a dictionary to Firestore.
         Args:
             ref (str): The Firestore document reference.
@@ -408,6 +406,15 @@ class Item(Model):
         self.client.delete_item(self.id, self._license)
 
 
+LOCATION_FIELDS = {
+    'name': 'Name',
+    'location_type': 'LocationTypeName',
+    'batches': 'ForPlantBatches',
+    'plants': 'ForPlants',
+    'harvests': 'ForHarvests',
+    'packages': 'ForPackages'
+}
+
 class Location(Model):
     """A class that represents a cannabis-production location.
     ```js
@@ -424,23 +431,33 @@ class Location(Model):
     ```
     """
 
-    def __init__(self, client, properties, license_number=''):
-        super().__init__(client, properties, license_number)
-        self._parameters = {
-            'name': 'Name',
-            'location_type': 'LocationTypeName',
-            'batches': 'ForPlantBatches',
-            'plants': 'ForPlants',
-            'harvests': 'ForHarvests',
-            'packages': 'ForPackages'
-        }
+    # def __init__(self, client, properties, license_number=''):
+    #     super().__init__(client, properties, license_number)
+    #     self._parameters = {
+    #         'name': 'Name',
+    #         'location_type': 'LocationTypeName',
+    #         'batches': 'ForPlantBatches',
+    #         'plants': 'ForPlants',
+    #         'harvests': 'ForHarvests',
+    #         'packages': 'ForPackages'
+    #     }
+    
+    def create(self, license_number='', return_obs=False):
+        """Create a location in Metrc."""
+        self.client.create_location(
+            self.name,
+            self.location_type,
+            license_number,
+            return_obs=return_obs,
+        )
 
     def update(self, **kwargs):
         """Update the location."""
         data = self.to_dict()
         update = clean_dictionary(data, camelcase)
         for param in kwargs:
-            key = self._parameters.get(param, param)
+            # key = self._parameters.get(param, param)
+            key = LOCATION_FIELDS.get(param, param)
             update[key] = kwargs[param]
         self.client.update_locations([update])
 
@@ -489,7 +506,7 @@ class Harvest(Model):
             location=None,
             note='',
             uom=None
-    ):
+        ):
         """Create a package from a harvest.
         Args:
             name (str): The name of the packaged item.
@@ -530,7 +547,7 @@ class Harvest(Model):
             location=None,
             note='',
             uom=None
-    ):
+        ):
         """Create packages from a harvest.
         Args:
             name (str): The name of the packaged item.
@@ -622,7 +639,7 @@ class Package(Model):
     Immature plants and seeds can be packaged by a nursery and transported by a
     distributor to a cultivator, distributor or retailer for sale.
 
-    2. When a manufacturer is creating a concentrate that will then be used i
+    2. When a manufacturer is creating a concentrate that will then be used in
     multiple infused production batches, the concentrate must be created as a
     new package. The infused production batches will then be created from the
     concentrate package.
@@ -669,7 +686,7 @@ class Package(Model):
             remediation=False,
             same_item=False,
 
-    ):
+        ):
         """Create a package from a harvest.
         Args:
             name (str): The name of the packaged item.
@@ -739,13 +756,46 @@ class Package(Model):
             license_number=self._license,
         )
         # TODO: Implement return_obs
+    
 
-    # TODO: Implement (with return_obs)
-    def create_packages(
+    def create_plant_batch(
             self,
-    ):
-        """Create multiple packages from a harvest."""
-        raise NotImplementedError
+            name,
+            count,
+            weight,
+            location=None,
+            batch_type='Clone',
+            units='Ounces',
+            date=None,
+        ):
+        """Create an immature plant batch from the package.
+        Args:
+            name (str): The name of the new plant batch.
+            count (int): The number of clones being planted.
+            location (str): An optional new location for the plant batch.
+            batch_type (str): The type of planting, Seed of Clone, with Clone
+                as the default.
+        """
+        if date is None:
+            date = get_timestamp(zone=self.client.state)
+        data = {
+            'PackageLabel': self.label,
+            'PackageAdjustmentAmount': weight,
+            'PackageAdjustmentUnitOfMeasureName': units,
+            'PlantBatchName': name,
+            'PlantBatchType': batch_type,
+            'PlantCount': count,
+            'LocationName': location or self.location_name,
+            'StrainName': self.strain_name,
+            'PatientLicenseNumber': None,
+            'PlantedDate': get_timestamp(zone=self.client.state),
+            'UnpackagedDate': date,
+        },
+        self.client.manage_packages(
+            [data],
+            action='create/plantings',
+            license_number=self._license
+        )
 
     def change_item(self, item_name):
         """Change the item of the package."""
@@ -781,7 +831,7 @@ class Package(Model):
             note='',
             reason='Mandatory State Destruction',
             uom='Grams'
-    ):
+        ):
         """Adjust the package.
         Args:
             weight (float): Required adjustment weight.
@@ -844,7 +894,7 @@ class Package(Model):
             'Location': location,
             'MoveDate': get_timestamp(zone=self.client.state)
         }]
-        self.client.update_package_item_locations(data)
+        self.client.change_package_locations(data)
 
 
     def update_items(self, name='', names=[]):
@@ -869,11 +919,6 @@ class Package(Model):
                     'Item': item_name,
                 })
         self.client.change_package_items(data)
-
-    def delete(self):
-        """Delete the package."""
-        self.client.delete_package(self.id)
-
 
 
 class Patient(Model):
@@ -1214,7 +1259,39 @@ class PlantBatch(Model):
             except KeyError:
                 pass
 
-    # TODO: Implement add_additive, add_additives
+    def add_additive(self,
+            name,
+            amount,
+            units='Gallons',
+            additive_type='Fertilizer',
+            device=None,
+            supplier=None,
+            date=None,
+            ingredients=[],
+        ):
+        """Add an additive to the plant batch..
+        Args:
+            count (int): The number of plants to destroy.
+            ingredients (list): A list of ingredients as dictionaries,
+                e.g. {'name': 'Nitrogen', 'percentage': 4.20}
+        """
+        if date is None:
+            date = get_timestamp(zone=self.client.state)
+        data = {
+            'AdditiveType': additive_type,
+            'ProductTradeName': name,
+            'EpaRegistrationNumber': None,
+            'ProductSupplier': supplier,
+            'ApplicationDevice': device,
+            'TotalAmountApplied': amount,
+            'TotalAmountUnitOfMeasure': units,
+            'PlantBatchName': self.name,
+            'ActualDate': date,
+            'ActiveIngredients': [
+                clean_dictionary(x, camelcase)(x) for x in ingredients
+            ]
+        }
+        self.client.manage_batches([data], 'additives', self._license)
 
     def create(self, license_number=''):
         """Create a plant batch record in Metrc."""
@@ -1248,7 +1325,7 @@ class PlantBatch(Model):
         self.client.manage_batches([data], 'createpackages', self._license)
         # TODO: Implement return_obs
 
-    # TODO: Implement create_packages
+    # TODO: Implement a `create_packages` to create multiple packages.
 
     def create_package_from_mother(
             self,
@@ -1479,7 +1556,7 @@ class Strain(Model):
     def update(self, **kwargs):
         """Update the strain given parameters as keyword arguments."""
         context = self.to_dict()
-        data = update_dict(context, **kwargs)
+        data = update_dict(context, camelcase, **kwargs)
         self.client.update_strains([data], license_number=self._license)
 
     def delete(self):
@@ -1675,6 +1752,9 @@ class Transaction(Model):
         data = remove_dict_fields(data, self.RETURNED_VALUES.keys())
         data = remove_dict_nulls(data)
         self.client.update_transactions([data], self._license)
+
+
+# TODO: Create a Job or ProcessingJob class.
 
 
 class Waste(Model):

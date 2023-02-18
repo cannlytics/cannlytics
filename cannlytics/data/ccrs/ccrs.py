@@ -1,277 +1,253 @@
 """
-CCRS Client | Cannlytics
-Copyright (c) 2022 Cannlytics
+CCRS Module | Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+    Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/10/2022
-Updated: 9/22/2022
+Updated: 1/8/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
-# Standard imports.
-import csv
-from datetime import datetime
+# Standard imports:
 import os
+from typing import List, Optional
+from zipfile import ZipFile
 
-# External imports.
+# External imports:
 import pandas as pd
-import requests
 
-# Internal imports.
+# Internal imports:
+from cannlytics.data import create_hash
 from cannlytics.data.ccrs.constants import (
-    analytes,
-    analyses,
-    datasets,
+    CCRS_ANALYTES,
+    CCRS_ANALYSES,
+    CCRS_DATASETS,
 )
-from cannlytics.firebase import (
-    initialize_firebase,
-    update_documents,
+from cannlytics.utils.utils import (
+    convert_to_numeric,
+    rmerge,
+    sorted_nicely,
 )
-from cannlytics.utils.utils import snake_case
 
 
-class CCRS(object):
-    """An instance of this class handles CCRS data."""
-
-    def __init__(self, data_dir='C:\\data', test=True):
-        """Initialize a CCRS client."""
-        self.data_dir = data_dir
-        self.state = 'wa'
-        self.test = test
-        try:
-            self.db = initialize_firebase()
-        except ValueError:
-            self.db = None
+def anonymize(
+        df: pd.DataFrame,
+        columns: Optional[List[str]] = ['CreatedBy', 'UpdatedBy'],
+    ) -> pd.DataFrame:
+    """Anonymize a CCRS dataset."""
+    for column in columns:
+        df.loc[:, column] = df[column].astype(str).apply(create_hash)
+    return df
 
 
-    def initialize_firebase(self):
-        """Initialize a Firebase client."""
-        self.db = initialize_firebase()
+def get_datafiles(
+        data_dir: str,
+        dataset: Optional[str] = '',
+        desc: Optional[bool] = True,
+    ) -> list:
+    """Get all CCRS datafiles of a given type in a directory."""
+    datafiles = sorted_nicely([
+        os.path.join(data_dir, f, f, f + '.csv')
+        for f in os.listdir(data_dir) if f.startswith(dataset)
+    ])
+    if desc:
+        datafiles.reverse()
+    return datafiles
 
 
-    def read_areas(self, data_dir=None, limit=None):
-        """Read areas into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        return self.read_data('Areas_0', 'areas', data_dir, limit)
+def format_test_value(tests, compound, value_key='TestValue'):
+    """Format a lab result test value from a DataFrame of tests."""
+    value = tests.loc[(tests.key == compound)]
+    try:
+        return convert_to_numeric(value.iloc[0][value_key])
+    except:
+        return None
 
 
-    def read_contacts(self, data_dir=None, limit=None):
-        """Read contacts into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        return self.read_data('Contacts_0', 'contacts', data_dir, limit)
+def find_detections(
+        tests,
+        analysis,
+        analysis_key='analysis',
+        analyte_key='key',
+        value_key='value',
+    ) -> List[str]:
+    """Find compounds detected for a given analysis from given tests."""
+
+    # Find detections in a list of results.
+    if isinstance(tests, list):
+        detected = []
+        for test in tests:
+            if test[analysis_key] == analysis:
+                value = pd.to_numeric(test[value_key], errors='coerce')
+                if value > 0:
+                    detected.append(test[analyte_key])
+        return detected
+
+    # Find detections in a DataFrame.
+    analysis_tests = tests.loc[tests[analysis_key] == analysis]
+    if analysis_tests.empty:
+        return []
+    values = analysis_tests[value_key].apply(
+        lambda x: pd.to_numeric(x, errors='coerce')
+    )
+    analysis_tests = analysis_tests.assign(**{value_key: values})
+    detected = analysis_tests.loc[analysis_tests[value_key] > 0]
+    if detected.empty:
+        return []
+    return detected[analyte_key].to_list()
 
 
-    def read_integrators(self, data_dir=None, limit=None):
-        """Read integrators into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        return self.read_data('Integrator_0', 'integrators', data_dir, limit)
+def format_lab_results(
+        df: pd.DataFrame,
+        results: pd.DataFrame,
+        item_key: Optional[str] = 'InventoryId',
+        analysis_name: Optional[str] = 'TestName',
+        analysis_key: Optional[str] = 'TestValue',
+    ) -> pd.DataFrame:
+    """Format CCRS lab results to merge into another dataset."""
 
+    # Curate lab results.
+    analyte_data = results[analysis_name].map(CCRS_ANALYTES).values.tolist()
+    results = results.join(pd.DataFrame(analyte_data))
+    results['type'] = results['type'].map(CCRS_ANALYSES)
 
-    def read_inventory(self, data_dir=None, limit=None):
-        """Read inventory into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        return self.read_data('Inventory_0', 'inventory', data_dir, limit)
+    # Find lab results for each item.
+    formatted = []
+    item_ids = list(df[item_key].unique())
+    for item_id in item_ids:
+        item_results = results.loc[results[item_key].astype(str) == item_id]
+        if item_results.empty:
+            continue
 
+        # Map certain test values.
+        values = item_results.iloc[0].to_dict()
+        [values.pop(key) for key in [analysis_name, analysis_key]]
+        entry = {
+            **values,
+            'analyses': list(item_results['type'].unique()),
+            'delta_9_thc': format_test_value(item_results, 'delta_9_thc'),
+            'thca': format_test_value(item_results, 'thca'),
+            'total_thc': format_test_value(item_results, 'total_thc'),
+            'cbd': format_test_value(item_results, 'cbd'),
+            'cbda': format_test_value(item_results, 'cbda'),
+            'total_cbd': format_test_value(item_results, 'total_cbd'),
+            'moisture_content': format_test_value(item_results, 'moisture_content'),
+            'water_activity': format_test_value(item_results, 'water_activity'),
+        }
 
-    def read_inventory_adjustments(self, data_dir=None, limit=None):
-        """Read inventory adjustments into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        return self.read_data('InventoryAdjustment_0', 'inventory_adjustments', data_dir, limit)
-
-
-    def read_lab_results(self, data_dir=None, limit=None):
-        """Read lab results into a well-formatted DataFrame,
-        mapping analyses from `test_name` into `key`, `type`, `units`.
-        Future work: Allow users to specify which fields to read.
-        """
-        data = self.read_data('LabResult_0', 'lab_results', data_dir, limit)
-        parsed_analyses = data['test_name'].map(analytes).values.tolist()
-        data = data.join(pd.DataFrame(parsed_analyses))
-        data['type'] = data['type'].map(analyses)
-        # TODO: Exclude any test lab results.
-        return data
-
-
-    def read_licensees(self, data_dir=None):
-        """Read licensee data into a well-formatted DataFrame.
-            1. If a row has a value in cell 22, shift 2 to the left,
-            condensing column 4 to 3 and column 6 to 5.
-            2. If a row has a value in cell 21, shift 1 to the left,
-            condensing column 4 to 3.
-
-        Future work: Allow users to specify which fields to read.
-        """
-        dataset = 'Licensee_0'
-        if data_dir is None:
-            data_dir = self.data_dir
-        datafile = f'{data_dir}/{dataset}/{dataset}.csv'
-        csv_list = []
-        with open(datafile, 'r', encoding='latin1') as f:
-            for line in csv.reader(f):
-                csv_list.append(line)
-        headers = csv_list[:1][0]
-        raw_data = pd.DataFrame(csv_list[1:])
-        csv_list = []
-        # FIXME: Some rows are even longer due to addresses.
-        for _, values in raw_data.iterrows():
-            if values[22]:
-                values[5] = values[5] + values[6]
-                values[3] = values[3] + values[4]
-                values.pop(6)
-                values.pop(4)
-            elif values[21]:
-                values[3] = values[3] + values[4]
-                values.pop(4)
-            csv_list.append(values)
-        data = pd.DataFrame(csv_list)
-        data.columns = headers + [''] * (len(data.columns) - len(headers))
-        data.drop('', axis=1, inplace=True)
-        for key in datasets['licensees']['date_fields']:
-            data[key] = pd.to_datetime(data[key], errors='coerce')
-        data.columns = [snake_case(x) for x in data.columns]
-        # TODO: Clean names more elegantly?
-        data['name'] = data['name'].str.title()
-        data['dba'] = data['dba'].str.title()
-        data['city'] = data['city'].str.title()
-        data['county'] = data['county'].str.title()
-        data['license_number'] = data['license_number'].str.strip()
-        return data
-
-
-    def read_plants(self, data_dir=None, limit=None):
-        """Read plants into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        return self.read_data('Plant_0', 'plants', data_dir, limit)
-
-
-    def read_plant_destructions(self, data_dir=None, limit=None):
-        """Read plant destructions into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        return self.read_data('PlantDestructions_0', 'plant_destructions', data_dir, limit)
-
-
-    def read_products(self, data_dir=None, limit=None):
-        """Read products into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        return self.read_data('Product_0', 'products', data_dir, limit)
-
-
-    def read_sale_headers(self, data_dir=None, limit=None):
-        """Read sale headers into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        return self.read_data('SaleHeader_0', 'sale_headers', data_dir, limit)
-
-
-    def read_sale_details(self, data_dir=None, limit=None):
-        """Read sale headers into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        return self.read_data('SalesDetail_0', 'sale_details', data_dir, limit)
-
-
-    def read_strains(self, data_dir=None, limit=None):
-        """Read strains into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        return self.read_data('Strains_0', 'strains', data_dir, limit)
-
-
-    def read_transfers(self, data_dir=None, limit=None):
-        """Read transfers into a well-formatted DataFrame.
-        Future work: Allow users to specify which fields to read.
-        """
-        dataset = 'Transfers_0'
-        if data_dir is None:
-            data_dir = self.data_dir
-        datafile = f'{data_dir}/{dataset}/{dataset}.xlsx'
-        data = pd.read_excel(
-            datafile,
-            usecols=datasets['transfers']['fields'],
-            parse_dates=datasets['transfers']['date_fields'],
-            nrows=limit,
-            skiprows=2,
-        )
-        data.columns = [snake_case(x) for x in data.columns]
-        return data
-
-
-    def read_data(self, dataset, dataset_name,  data_dir=None, limit=None):
-        """Read a dataset from local storage."""
-        if data_dir is None:
-            data_dir = self.data_dir
-        datafile = f'{data_dir}/{dataset}/{dataset}.csv'
-        data = pd.read_csv(
-            datafile,
-            low_memory=False,
-            nrows=limit,
-            parse_dates=datasets[dataset_name]['date_fields'],
-            usecols=datasets[dataset_name]['fields'],
-        )
-        data.columns = [snake_case(x) for x in data.columns]
-        return data
-
-
-    def save_data(self, data, destination, index_col=True):
-        """Save data to local storage."""
-        if destination.endswith('.csv'):
-            data.to_csv(destination, index_col=index_col)
+        # Determine `status`.
+        statuses = list(item_results['LabTestStatus'].unique())
+        if 'Fail' in statuses:
+            entry['status'] = 'Fail'
         else:
-            data.to_excel(destination, index_col=index_col)
+            entry['status'] = 'Pass'
+
+        # Determine detected contaminants.
+        entry['pesticides'] = find_detections(item_results, 'pesticides')
+        entry['residual_solvents'] = find_detections(item_results, 'residual_solvent')
+        entry['heavy_metals'] = find_detections(item_results, 'heavy_metals')
+
+        # Record the lab results for the item.
+        formatted.append(entry)
+
+    # Return the lab results.
+    return pd.DataFrame(formatted)
 
 
-    def upload_data(self, data, dataset, id_field='id', refs=None):
-        """Upload a dataset to a Firebase Firestore NoSQL database."""
-        for field in datasets[dataset]['date_fields']:
-            key = snake_case(field)
-            data[key] = data[key].apply(datetime.isoformat)
-        data = data.where(pd.notnull(data), None)
-        items = data.to_dict(orient='records')
-        print(f'Uploading {len(items)} items...')
-        # list(map(lambda x:Reading(h=x[0],p=x[1]),df.values.tolist()))
-        if refs is None:
-            refs = [f"data/ccrs/{dataset}/{x[id_field]}" for x in items]
-        update_documents(refs, items) # database=self.db
-        return items
+def merge_datasets(
+        df: pd.DataFrame,
+        datafiles: List[str],
+        dataset: str,
+        on: Optional[str] = 'id',
+        target: Optional[str] = '',
+        how: Optional[str] = 'left',
+        sep: Optional[str] = '\t',
+        validate: Optional[str] = 'm:1',
+        drop: Optional[dict] = None,
+        rename: Optional[dict] = None,
+        on_bad_lines: Optional[str] = 'skip',
+        string_columns: Optional[list] = [
+            'IsDeleted', 'UnitWeightGrams',
+            'TestValue', 'IsQuarantine'],
+    ) -> pd.DataFrame:
+    """Merge a supplemental CCRS dataset to an existing dataset.
+    Note: Certain columns are treated as strings due to `ValueError`s.
+    Lab results cannot be split between datafiles.
+    """
+    n = len(df)
+    augmented = pd.DataFrame()
+    fields = CCRS_DATASETS[dataset]['fields']
+    parse_dates = CCRS_DATASETS[dataset]['date_fields']
+    usecols = list(fields.keys()) + parse_dates
+    dtype = {k: v for k, v in fields.items() if v != 'datetime64'}
+    for column in string_columns:
+        if dtype.get(column):
+            dtype[column] = 'string'
+    for datafile in datafiles:
+        supplement = pd.read_csv(
+            datafile,
+            sep=sep,
+            encoding='utf-16',
+            engine='python',
+            parse_dates=parse_dates,
+            dtype=dtype,
+            usecols=usecols,
+            on_bad_lines=on_bad_lines,
+        )
+        if rename is not None:
+            supplement.rename(rename, axis=1, inplace=True)
+        if drop is not None:
+            supplement.drop(drop, axis=1, inplace=True)
+        if dataset == 'lab_results':
+            supplement = format_lab_results(df, supplement)
+        match = rmerge(
+            df,
+            supplement,
+            on=on,
+            how=how,
+            validate=validate,
+        )
+        matched = match.loc[~match[target].isna()]
+        augmented = pd.concat([augmented, matched], ignore_index=True) 
+        if len(augmented) == n:
+            break
+    return augmented
 
 
-    def get_data(
-            self,
-            dataset,
-            base='https://cannlytics.com/api',
-            limit=None,
-            order_by=None,
-    ):
-        """Get a dataset from the Cannlytics API.
-        Reads Cannlytics API key from `CANNLYTICS_API_KEY` environmet variable."""
-        api_key = os.environ['CANNLYTICS_API_KEY']
-        headers = {
-            'Authorization': 'Bearer %s' % api_key,
-            'Content-type': 'application/json',
-        }
-        # TODO: Allow user to get stats for licensee or time period or
-        # a panel (licensees, all or some, for specified or max time period)
-        params = {
-            'limit': limit,
-            'order_by': order_by,
-        }
-        url = f'{base}/data/ccrs/{dataset}'
-        response = requests.get(url, headers=headers, params=params)
-        return response.json()['data']
+def save_dataset(
+        data: pd.DataFrame,
+        data_dir: str,
+        name: str,
+        ext: Optional[str] = 'xlsx',
+        rows: Optional[float] = 1e6,
+    ) -> None:
+    """Save a curated dataset, determining the number of datafiles
+    (1 million per file) and saving each shard of the dataset."""
+    if not os.path.exists(data_dir): os.makedirs(data_dir)
+    file_count = round((len(data) + rows) / rows)
+    for i in range(0, file_count):
+        start = int(0 + rows * i)
+        stop = int(rows + rows * i)
+        shard = data.iloc[start: stop, :]
+        outfile = os.path.join(data_dir, f'{name}_{i}.{ext}')
+        shard.to_excel(outfile, index=False)
 
 
-    def get_lab_results(self):
-        """Get lab results from the Cannlytics API."""
-        return self.get_data('lab_results')
-
-
-    # TODO: Create helper functions for the rest of the datasets.
-
-    # TODO: Create helper functions to get statistics.
+def unzip_datafiles(
+        data_dir: str,
+        verbose: Optional[bool] = True,
+    ) -> None:
+    """Unzip all CCRS datafiles in a given directory."""
+    zip_files = [f for f in os.listdir(data_dir) if f.endswith('.zip')]
+    for zip_file in zip_files:
+        filename = os.path.join(data_dir, zip_file)
+        zip_dest = filename.rstrip('.zip')
+        if not os.path.exists(zip_dest):
+            os.makedirs(zip_dest)
+        zip_ref = ZipFile(filename)
+        zip_ref.extractall(zip_dest)
+        zip_ref.close()
+        os.remove(filename)
+        if verbose:
+            print('Unzipped:', zip_file)

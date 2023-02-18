@@ -1,0 +1,4 @@
+# Tool requirements | Cannlytics
+# Created 1/19/2023
+# Updated: 1/19/2023
+moviepy

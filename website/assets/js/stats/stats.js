@@ -9,8 +9,8 @@
  */
 import { authRequest, capitalize, getUrlParameter, showNotification } from '../utils.js';
 import { getDocument } from '../firebase.js';
-import { hideLoadingButton, showLoadingButton } from '../ui/ui.js';
 import { autocomplete } from '../ui/autocomplete.js';
+import { hideLoadingButton, showLoadingButton } from '../ui/ui.js';
 
 export const personalityStats = {
 

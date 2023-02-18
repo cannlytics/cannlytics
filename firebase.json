@@ -7,107 +7,75 @@
     "rules": ".firebase/storage.rules"
   },
   "hosting": [
+    {"target": "docs", "public": "docs/build"},
     {
-      "target": "docs",
-      "public": "docs/build"
-    },
-    {
-      "target": "production",
+      "target": "console",
       "public": "public/console",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**",
-        "**/development/**"
-      ],
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "**/development/**"],
+      "appAssociation": "AUTO",
       "rewrites": [
         {
           "source": "!/sitemap",
-          "run": {
-            "serviceId": "cannlytics-console",
-            "region": "us-central1"
-          }
+          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
         },
         {
           "source": "!/static",
-          "run": {
-            "serviceId": "cannlytics-console",
-            "region": "us-central1"
-          }
+          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
+        },
+        {
+          "source": "!/robots.txt",
+          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
         },
         {
           "source": "**",
-          "run": {
-            "serviceId": "cannlytics-console",
-            "region": "us-central1"
-          }
-        }
-      ]
-    },
-    {
-      "target": "dev",
-      "public": "public/console",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**",
-        "**/development/**"
-      ],
-      "rewrites": [
-        {
-          "source": "**",
-          "run": {
-            "serviceId": "cannlytics-dev",
-            "region": "us-central1"
-          }
+          "run": {"serviceId": "cannlytics-console", "region": "us-central1"}
         }
       ]
     },
     {
       "site": "cannlytics",
       "public": "public/website",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**",
-        "**/development/**"
-      ],
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "**/development/**"],
       "appAssociation": "AUTO",
       "redirects": [
         {
           "source": "/wp-login.php",
           "destination": "https://google.com",
           "type": 301
+        },
+        {
+          "source": "/docs",
+          "destination": "https://docs.cannlytics.com",
+          "type": 301
         }
       ],
       "rewrites": [
         {
           "source": "!/sitemap",
-          "run": {
-            "serviceId": "cannlytics-website",
-            "region": "us-central1"
-          }
+          "run": {"serviceId": "cannlytics-website", "region": "us-central1"}
         },
         {
           "source": "!/static",
-          "run": {
-            "serviceId": "cannlytics-website",
-            "region": "us-central1"
-          }
+          "run": {"serviceId": "cannlytics-website", "region": "us-central1"}
         },
         {
           "source": "!/robots.txt",
-          "run": {
-            "serviceId": "cannlytics-website",
-            "region": "us-central1"
-          }
+          "run": {"serviceId": "cannlytics-website", "region": "us-central1"}
         },
         {
           "source": "**",
-          "run": {
-            "serviceId": "cannlytics-website",
-            "region": "us-central1"
-          }
+          "run": {"serviceId": "cannlytics-website", "region": "us-central1"}
+        }
+      ]
+    },
+    {
+      "target": "dev",
+      "public": "public/console",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "**/development/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "run": {"serviceId": "cannlytics-dev", "region": "us-central1"}
         }
       ]
     }

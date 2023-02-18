@@ -1,13 +1,14 @@
 """
 Utility Functions | Cannlytics
-Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
+Copyright (c) 2021-2023 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 8/13/2022
+Updated: 2/5/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-Description: This module contains general utility functions.
+Description: This module contains general Cannlytics utility functions.
 """
 # Standard imports.
 from base64 import b64encode, decodebytes
@@ -207,7 +208,7 @@ def strip_whitespace(string: str) -> str:
 # Number utilities.
 #-----------------------------------------------------------------------
 
-def convert_to_numeric(string: str, strip: Optional[str] = False) -> str:
+def convert_to_numeric(string: str, strip: Optional[str] = False) -> Any:
     """Convert a string to numeric, optionally replacing non-numeric
     characters.
     Args:
@@ -242,7 +243,7 @@ def sandwich_list(a) -> list:
 
 
 def sorted_nicely(unsorted_list: List[str]) -> List[str]:
-    """Sort the given iterable in the way that humans expect.
+    """Sort the given iterable in a way that humans would expect.
     Credit: Mark Byers <https://stackoverflow.com/a/2669120/5021266>
     License: CC BY-SA 2.5 <https://creativecommons.org/licenses/by-sa/2.5/>
     """
@@ -280,7 +281,7 @@ def clean_dictionary(data: dict, function: Callable = snake_case) -> dict:
 
 def clean_nested_dictionary(data: dict, function: Callable = snake_case) -> dict:
     """Format nested (at most 2 levels) dictionary keys with a given function,
-    snake case by default.
+    snake case by default. Handles list of dictionaries.
     Args:
         d (dict): A dictionary to clean, allowing dictionaries as values.
         function (function): A function to apply to each key.
@@ -289,10 +290,19 @@ def clean_nested_dictionary(data: dict, function: Callable = snake_case) -> dict
     """
     clean = clean_dictionary(data, function)
     for k, value in clean.items():
-        try:
-            clean[k] = clean_dictionary(value, function)
-        except AttributeError:
-            pass
+        if isinstance(value, list):
+            x = []
+            for v in value:
+                try:
+                    x.append(clean_nested_dictionary(v, function))
+                except:
+                    x.append(v)
+            clean[k] = x
+        elif isinstance(value, dict):
+            try:
+                clean[k] = clean_nested_dictionary(value, function)
+            except AttributeError:
+                pass
     return clean
 
 
@@ -661,6 +671,29 @@ def format_iso_date(date: str, sep: Optional[str] = '/') -> str:
     return '-'.join([yyyy, mm, dd])
 
 
+def get_date_range(start_date: str, end_date: str):
+    """Generates a list of tuples containing ISO-formatted date strings
+    for each consecutive day in a given range of dates.
+    Args:
+        start_date (str): The start date in the format '%Y-%m-%d'.
+        end_date (str): The end date in the format '%Y-%m-%d'.
+    Returns:
+        The output will be a list of tuples containing date strings in
+        format '%Y-%m-%d'
+    Credit: ChatGPT <https://chat.openai.com/chat>
+    """
+    start_date = datetime.strptime(start_date, '%Y-%m-%d')
+    end_date = datetime.strptime(end_date, '%Y-%m-%d')
+    delta = timedelta(days=1)
+    date_range = []
+    while start_date <= end_date:
+        start = start_date.strftime('%Y-%m-%d')
+        end = (start_date + delta).strftime('%Y-%m-%d')
+        date_range.append((start, end))
+        start_date += delta
+    return date_range
+
+
 def get_timestamp(
         date: Optional[str] = None,
         past: Optional[int] = 0,
@@ -778,14 +811,17 @@ def get_number_of_lines(
         return count
 
 
-def download_file_from_url(url, destination='', ext=''):
+def download_file_from_url(url, destination='', ext='', file_name = None):
     """Download a file from a URL to a given directory.
     Author: H S Umer farooq <https://stackoverflow.com/a/53153505>
     License: CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/
     """
     get_response = requests.get(url, stream=True)
-    file_name = snake_case(url.split('/')[-1])
-    file_path = os.path.join(destination, file_name + ext)
+    if file_name is None:
+        file_name = snake_case(url.split('/')[-1])
+    if not file_name.endswith(ext):
+        file_name = file_name + ext
+    file_path = os.path.join(destination, file_name)
     with open(file_path, 'wb') as f:
         for chunk in get_response.iter_content(chunk_size=1024):
             if chunk:

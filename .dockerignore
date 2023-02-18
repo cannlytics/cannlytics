@@ -33,6 +33,7 @@ README.md
 /ai
 /build
 /cannlytics.egg-info
+/dist
 /docs
 /tests
 /tools

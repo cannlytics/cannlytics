@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/15/2021
-  Updated: 1/10/2022
+  Updated: 1/31/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -50,7 +50,7 @@
           <div class="col-8 col-md-6 col-lg-4">
             <div class="card mb-4 shadow-sm">
               <div class="card-header bg-gradient-{{ item.color }}">
-                <h4 class="font-weight-normal text-white my-0">
+                <h4 class="fw-bold text-white my-0">
                   {{ item.name }}
                 </h4>
               </div>
@@ -60,24 +60,25 @@
                 </h1>
                 <ul class="text-dark list-unstyled mt-3 mb-4 text-start w-75">
                   {% for attribute in item.attributes %}
+                    {% if attribute.active %}
+                      <li class="fs-6 mb-1">
+                        <svg class="" style="width:24px;height:24px;">
+                          <use href="{% static "website/images/emojies/check.svg" %}#check-emoji"></use>
+                        </svg>
+                        <small class="serif text-dark">
+                          {{ attribute.title }}
+                        </small>
+                      </li>
+                    {% else %}
                     <li class="fs-6 mb-1">
-                      <svg class="" style="width:24px;height:24px;">
-                        <use href="{% static "website/images/emojies/check.svg" %}#check-emoji"></use>
-                      </svg>
-                      <small class="serif text-dark">
-                        {{ attribute }}
+                      <small class="serif text-secondary">
+                        &nbsp;
                       </small>
                     </li>
+                    {% endif %}
                   {% endfor %}
                 </ul>
                 <div id="paypal-{{ item.plan_name }}"></div>
-                {% comment %} <a
-                  type="button"
-                  class="btn btn-sm btn-block bg-gradient-{{ item.color }} serif text-white"
-                  href="{{ item.url }}"
-                >
-                  {{ item.action }}
-                </a> {% endcomment %}
               </div>
             </div>
           </div>
@@ -87,7 +88,7 @@
       <!-- Note -->
       <p class="markdown fs-6 serif text-dark w-50">
         <small>
-          * If Cannlytics is verified with Metrc in your state and your company is licensed.
+          * If Cannlytics is verified with Metrc in your state and your company is licensed or a verified Metrc integrator.
           Please <a class="serif" href="{% url 'index' %}#metrc">check our current validation list</a>
           and request your state if you
           do not see your state in the list.

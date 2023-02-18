@@ -1,10 +1,11 @@
 """
 URLs | Cannlytics API
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2023 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2021
-Updated: 9/26/2022
+Updated: 1/22/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API URLs to interface with cannabis data and analytics.
@@ -18,10 +19,11 @@ from api.auth import auth
 from api.base import base
 
 # Functional API imports.
+import api.ai
 import api.data
 import api.lims
 import api.stats
-import api.traceability
+import api.metrc
 
 # Administrative API imports.
 from api.organizations import organizations
@@ -47,6 +49,22 @@ urlpatterns = [
         path('/get-keys', auth.get_api_key_hmacs),
         path('/get-signature', auth.get_signature),
         path('/verify-pin', auth.verify_user_pin),
+    ])),
+
+    # AI API endpoints.
+    path('ai', include([
+
+        # Base AI API endpoint for users to find available AI tools.
+        path('', api.ai.ai_base),
+
+        # Recipes AI.
+        path('/recipes', api.ai.recipes_api),
+        path('/recipes/<recipe_id>', api.ai.recipes_api),
+
+        # AI utilities.
+        path('/color', api.ai.text_to_color_api),
+        path('/emoji', api.ai.text_to_emoji_api),
+
     ])),
 
     # Data API endpoints.
@@ -78,23 +96,6 @@ urlpatterns = [
             path('', api.data.license_data),
             path('/<license_number>', api.data.license_data),
         ])),
-
-        # CCRS data endpoints.
-        # FIXME: Re-design CCRS endpoints around timeseries statistics.
-        # path('/ccrs/areas', ccrs_data.areas),
-        # path('/ccrs/contacts', ccrs_data.contacts),
-        # path('/ccrs/integrators', ccrs_data.integrators),
-        # path('/ccrs/inventory', ccrs_data.inventory),
-        # path('/ccrs/inventory_adjustments', ccrs_data.inventory_adjustments),
-        # path('/ccrs/plants', ccrs_data.plants),
-        # path('/ccrs/plant_destructions', ccrs_data.plant_destructions),
-        # path('/ccrs/products', ccrs_data.products),
-        # path('/ccrs/lab_results', ccrs_data.lab_results),
-        # path('/ccrs/licensees', ccrs_data.licensees),
-        # path('/ccrs/sale_headers', ccrs_data.sale_headers),
-        # path('/ccrs/sale_details', ccrs_data.sale_details),
-        # path('/ccrs/strains', ccrs_data.strains),
-        # path('/ccrs/transfers', ccrs_data.transfers),
 
         # Lab result data API endpoints.
         path('/results', include([
@@ -128,6 +129,90 @@ urlpatterns = [
         path('/recommendations', api.stats.recommendation_stats),
         path('/patents', api.stats.patent_stats),
         # TODO: Flower Art API endpoint.
+    ])),
+
+    # Metrc API endpoints.
+    path('metrc', include([
+        path('/admin/create-license', api.metrc.add_license),
+        path('/admin/delete-license', api.metrc.delete_license),
+        path('/batches', api.metrc.batches),
+        path('/batches/<batch_id>', api.metrc.batches),
+        path('/deliveries', api.metrc.deliveries),
+        path('/deliveries/<delivery_id>', api.metrc.deliveries),
+        path('/employees', api.metrc.employees),
+        path('/employees/<license_number>', api.metrc.employees),
+        path('/facilities', api.metrc.facilities),
+        path('/facilities/<license_number>', api.metrc.facilities),
+        path('/harvests', api.metrc.harvests),
+        path('/harvests/<harvest_id>', api.metrc.harvests),
+        path('/items', api.metrc.items),
+        path('/items/<item_id>', api.metrc.items),
+        path('/locations', api.metrc.locations),
+        path('/locations/<area_id>', api.metrc.locations),
+        path('/packages', api.metrc.packages),
+        path('/packages/<package_id>', api.metrc.packages),
+        path('/patients', api.metrc.patients),
+        path('/patients/<patient_id>', api.metrc.patients),
+        path('/plants', api.metrc.plants),
+        path('/plants/<plant_id>', api.metrc.plants),
+        path('/tests', api.metrc.lab_tests),
+        path('/tests/<test_id>', api.metrc.lab_tests),
+        path('/tests/<test_id>/<coa_id>', api.metrc.lab_tests),
+        path('/sales', api.metrc.sales),
+        path('/sales/<sale_id>', api.metrc.sales),
+        path('/transactions', api.metrc.transactions),
+        path('/transactions/<start>', api.metrc.transactions),
+        path('/transactions/<start>/<end>', api.metrc.transactions),
+        path('/strains', api.metrc.strains),
+        path('/strains/<strain_id>', api.metrc.strains),
+        path('/transfers/templates', api.metrc.transfer_templates),
+        path('/transfers/templates/<template_id>', api.metrc.transfer_templates),
+        path('/transfers', api.metrc.transfers),
+        path('/transfers/<transfer_id>', api.metrc.transfers),
+        path('/drivers/<driver_id>', api.metrc.drivers),
+        path('/vehicles/<vehicle_id>', api.metrc.vehicles),
+        path('/types', include([
+            path('/additives', api.metrc.additive_types),
+            path('/adjustments', api.metrc.adjustment_reasons),
+            path('/batches', api.metrc.batch_types),
+            path('/categories', api.metrc.categories),
+            path('/customers', api.metrc.customer_types),
+            path('/locations', api.metrc.location_types),
+            path('/growth-phases', api.metrc.growth_phases),
+            path('/packages', api.metrc.package_types),
+            path('/package-statuses', api.metrc.package_statuses),
+            path('/return-reasons', api.metrc.return_reasons),
+            path('/test-statuses', api.metrc.test_statuses),
+            path('/tests', api.metrc.test_types),
+            path('/transfers', api.metrc.transfer_types),
+            path('/units', api.metrc.units),
+            path('/waste', api.metrc.waste_types),
+            path('/waste-methods', api.metrc.waste_methods),
+            path('/waste-reasons', api.metrc.waste_reasons),
+        ])),
+    ])),
+
+    # Organization API endpoints.
+    path('organizations', include([
+        path('/<organization_id>', organizations.organizations),
+        path('/<organization_id>/settings', organizations.organizations),
+        path('/<organization_id>/team', organizations.organization_team),
+        path('/<organization_id>/team/<user_id>', organizations.organization_team),
+        path('/<organization_id>/join', organizations.join_organization),
+    ])),
+
+    # User API Endpoints.
+    path('users', include([
+        path('', users.users),
+        path('/<user_id>', users.users),
+        path('/<user_id>/about', users.users),
+        path('/<user_id>/consumption', users.users),
+        path('/<user_id>/spending', users.users),
+        path('/<user_id>/logs', include([
+            path('', settings.logs),
+            path('/<log_id>', settings.logs),
+        ])),
+        path('/<user_id>/settings', users.users),
     ])),
 
     # LIMS API endpoints.
@@ -212,59 +297,5 @@ urlpatterns = [
             path('', api.lims.waste),
             path('/<waste_item_id>', api.lims.waste),
         ])),
-    ])),
-
-    # Traceability API endpoints.
-    path('traceability', include([
-        path('/delete-license', api.traceability.delete_license),
-        path('/employees', api.traceability.employees),
-        path('/employees/<license_number>', api.traceability.employees),
-        path('/items', api.traceability.items),
-        path('/items/<item_id>', api.traceability.items),
-        path('/locations', api.traceability.locations),
-        path('/locations/<area_id>', api.traceability.locations),
-        path('/packages', api.traceability.packages),
-        path('/packages/<package_id>', api.traceability.packages),
-        path('/results', api.traceability.lab_tests),
-        path('/results/<test_id>', api.traceability.lab_tests),
-        path('/strains', api.traceability.strains),
-        path('/strains/<strain_id>', api.traceability.strains),
-        path('/transfers', api.traceability.transfers),
-        path('/transfers/<transfer_id>', api.traceability.transfers),
-        # TODO: Implement remaining Metrc endpoints:
-        # - deliveries
-        # - categories
-        # - facilities
-        # - harvests
-        # - patients
-        # - plants
-        # - plantbatches
-        # - receipts
-        # - transfers/templates
-        # - transaction
-        # - waste
-    ])),
-
-    # Organization API endpoints.
-    path('organizations', include([
-        path('/<organization_id>', organizations.organizations),
-        path('/<organization_id>/settings', organizations.organizations),
-        path('/<organization_id>/team', organizations.organization_team),
-        path('/<organization_id>/team/<user_id>', organizations.organization_team),
-        path('/<organization_id>/join', organizations.join_organization),
-    ])),
-
-    # User API Endpoints
-    path('users', include([
-        path('', users.users),
-        path('/<user_id>', users.users),
-        path('/<user_id>/about', users.users),
-        path('/<user_id>/consumption', users.users),
-        path('/<user_id>/spending', users.users),
-        path('/<user_id>/logs', include([
-            path('', settings.logs),
-            path('/<log_id>', settings.logs),
-        ])),
-        path('/<user_id>/settings', users.users),
     ])),
 ]

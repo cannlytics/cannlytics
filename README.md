@@ -1,7 +1,7 @@
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
   <img style="height:180px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics-space-logo.png?alt=media&token=87727d92-bfb1-43df-bb9e-e2308dfa9b08">
   <div>
-    <h3>Cannabis + Analytics</h3>
+    <h3>Cannabis data science and analytics.</h3>
   </div>
 
 <https://cannlytics.com>
@@ -26,7 +26,7 @@
 
 ## 🧑‍🚀 Cannabis Data Science
 
-Do you want to join a team of data scientists from around the world who are advancing cannabis science one 🧬 molecule at a time? Come to the [Cannabis Data Science Meetup Group](https://www.meetup.com/cannabis-data-science)! At the meetup, you will be introduced to many useful notes, notebooks, and video tutorials to help you get, wrangle, and analyze cannabis data with the best of them. Join the fun every Wednesday at 1:20pm PST / 2:20pm MT / 3:20pm CT / 4:20pm EST. You are always welcome to use the [code](https://github.com/cannlytics/cannabis-data-science), watch the [videos](https://cannlytics.com/videos), and make contributions of your own! Please tune in 🚀
+Do you want to join a team of data scientists from around the world who are advancing cannabis science, molecule by molecule? 🧬 Come to the [Cannabis Data Science Meetup Group](https://www.meetup.com/cannabis-data-science)! At the meetup, you will be introduced to many useful notes, notebooks, and video tutorials to help you get, wrangle, and analyze cannabis data with the best of them. Please join the fun on Wednesdays at 8:30am PST / 9:30am MT / 10:30am CT / 11:30am EST. You are always welcome to use the [code](https://github.com/cannlytics/cannabis-data-science), watch the [videos](https://www.youtube.com/@cannlytics), and make contributions of your own! Please tune in 🚀
 
 <!-- **Cannlytics Data Catalogue**
 
@@ -37,28 +37,28 @@ Do you want to join a team of data scientists from around the world who are adva
 Contributions are always welcome! You are encouraged to submit [issues](https://github.com/cannlytics/cannlytics/issues), functionality, and features that you want to be addressed. See [the contributing guide](https://docs.cannlytics.com/developers/contributing/) to get started. Anyone is welcome to contribute anything. Currently, the project could greatly benefit from:
 
 - 🎨 [Art](https://github.com/cannlytics/cannlytics/tree/main/website/static/website/images);
-- 👨‍💻 Code refactoring;
-- 💡 General ideas for improvement;
+- 👨‍💻 [Code refactoring](.docs/developers/contributing.md);
+- 💡 [General ideas for improvement](mailto:contact@cannlytics.com);
 - 👷 [Tests](https://github.com/cannlytics/cannlytics/tree/main/tests);
 - 🖊️ [User documentation](https://github.com/cannlytics/cannlytics/tree/main/docs);
-- 🏹 Example use cases.
+- 🏹 [Example use cases](https://github.com/cannabisdata/cannabisdata).
 
 ## 💖 Support <a name="support"></a>
 
 Cannlytics is made available with ❤️ and your good will. Please consider making a contribution to help us continue crafting useful tools and data pipelines for you. Thank you 🙏
 
 | Provider | Link |
-|-|-|
+|----------|------|
 | 👐 OpenCollective | <https://opencollective.com/cannlytics-company/donate> |
 | 💸 PayPal Donation | <https://paypal.me/cannlytics> |
 | 💵 Venmo Donation | <https://www.venmo.com/u/cannlytics> |
-| 🪙 Bitcoin donation address| 34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6 |
 | ⚡ Ethereum donation address | `cannlytics.eth` |
+<!-- | 🪙 Bitcoin donation address| `34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6` | -->
 
 ## 🏛️ License <a name="license"></a>
 
 ```
-Copyright (c) 2020-2022 Cannlytics and The Cannabis Data Science Team
+Copyright (c) 2020-2023 Cannlytics and The Cannabis Data Science Team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -82,10 +82,10 @@ SOFTWARE.
 Please cite the following if you use the code examples in your research:
 
 ```bibtex
-@misc{cannlytics2022,
+@misc{cannlytics2023,
   title={Cannabis Data Science},
   author={Skeate, Keegan and Rice, Charles and O'Sullivan-Sutherland, Candace},
   journal={https://github.com/cannlytics/cannabis-data-science},
-  year={2022}
+  year={2023}
 }
 ```

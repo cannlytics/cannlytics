@@ -1,160 +1,172 @@
 """
 Metrc Integration Test | Cannlytics
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2023 Cannlytics
 
-Authors: Keegan Skeate keegan@cannlytics.com
-Created: 3/292021
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+Created: 3/29/2021
+Updated: 1/26/2023
 License: MIT License
 
 Description:
 
-    Perform required tests for Metrc integration, recording verification items:
+    Perform required tests for Metrc integration, recording:
 
         - Result code: The status code of the response.
-        - ID Number: The UID for a created object, typically a 5 digit number. 
-        - Names: Names for created objects, such as strain or location name.
-        - Tag Number: Plant and package tags
-        - Last Modified Date: The time the test or actions were ran.
+        - ID Number: The UIDs for created objects. 
+        - Names: The names for created objects, such as location names.
+        - Tag Number: Plant and package tags that are used.
+        - Last Modified Date: The time of the successful requests.
         - Request Sent: The requested URL.
         - JSON Body: Minified JSON response.
 
-    All successful requests will return a 200 status code. Get support if you
-    cannot obtain a 200 status code for any request.
+    All successful requests will return a 200 status code. Get support
+    if you cannot obtain a 200 status code for any request.
 
 Resources:
 
     - [Metrc Oklahoma Docs](https://api-ok.metrc.com/Documentation)
-    - [Metrc Oregon Docs](https://api-or.metrc.com/Documentation)
+    - [Google Cloud Secret Manager](https://console.cloud.google.com/security/secret-manager)
 
 """
-# Standard imports.
+# Standard imports:
 import os
 from datetime import datetime
 from time import sleep
 
-# External imports.
+# External imports:
 from dotenv import dotenv_values
 
-# Import cannlytics locally for testing.
+# Internal imports:
 import sys
 sys.path.insert(0, os.path.abspath('../../../'))
 from cannlytics import firebase as fb
-from cannlytics import metrc # pylint: disable=no-name-in-module, import-error
-from cannlytics.metrc.exceptions import MetrcAPIError # pylint: disable=no-name-in-module, import-error
-from cannlytics.metrc.utils import ( # pylint: disable=no-name-in-module, import-error
+from cannlytics import metrc
+from cannlytics.metrc.exceptions import MetrcAPIError
+from cannlytics.utils import (
     clean_nested_dictionary,
     encode_pdf,
     get_timestamp,
 )
-     
-from cannlytics.metrc.models import ( # pylint: disable=no-name-in-module, import-error
+from cannlytics.metrc.models import (
     Facility,
     Item,
     PlantBatch,
     TransferTemplate,
 )
 
-# TODO: Refactor into smaller-scope tests.
 
+def test_initialize_metrc(env_file='.env'):
+    """Test initializing a Metrc client."""
 
-if __name__ == '__main__' and False:
-
-    #------------------------------------------------------------------
-    # Initialization
-    #------------------------------------------------------------------
-
-    # Initialize the current time.
-    now = datetime.now()
-    current_time = now.isoformat()
-    current_date = now.strftime('%m/%d/%Y')
-    today = current_time[:10]
-
-    # Initialize Firebase.
-    config = dotenv_values('../../../.env')
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config['GOOGLE_APPLICATION_CREDENTIALS']
+    # Initialize Firebase to get API keys from Secret Manager.
+    # URL: <https://console.cloud.google.com/security/secret-manager>
+    config = dotenv_values(env_file)
+    key = 'GOOGLE_APPLICATION_CREDENTIALS'
+    os.environ[key] = config[key]
     db = fb.initialize_firebase()
+    project_id = db.project
+    print('Firebase project:', project_id)
+
+    # Get Vendor API key from Secret Manager.
+    vendor_api_key = fb.access_secret_version(
+        project_id=project_id,
+        secret_id='metrc_test_vendor_api_key',
+    )
+
+    # Get user API key from Secret Manager.
+    user_api_key = fb.access_secret_version(
+        project_id=project_id,
+        secret_id='metrc_test_user_api_key',
+    )
 
     # Initialize a Metrc client.
-    vendor_api_key = config['METRC_TEST_VENDOR_API_KEY']
-    user_api_key = config['METRC_TEST_USER_API_KEY']
-    track = metrc.authorize(vendor_api_key, user_api_key)
+    track = metrc.Metrc(
+        vendor_api_key,
+        user_api_key,
+        state='ok',
+        logs=True,
+    )
+    return track
+
+
+# === Tests ===
+if __name__ == '__main__':
 
     print('--------------------------------------------')
-    print('Performing Metrc Validation Test')
-    print(current_time)
+    print('Metrc API Test')
     print('--------------------------------------------')
 
-    #------------------------------------------------------------------
-    # Facilities
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
+    # [✓] Initialization
+    #-------------------------------------------------------------------
+    print('Initializing Metrc...')
+    track = test_initialize_metrc(env_file='.env')
+    print('State:', track.state)
+    print('Base:', track.base)
 
-    # Unless facilities are not set, then get the facilities from Metrc.
-    # Get facilities, with permissions set by the state for each facility type.
+
+    #-------------------------------------------------------------------
+    # [✓] Facilities
+    #-------------------------------------------------------------------
+    print('Testing facilities...')
+
+    # Get facilities. Permissions are set by the state for each facility.
     facilities = track.get_facilities()
+    print('Found', len(facilities), 'facilities.')
 
     # Define primary cultivator, lab, and retailer for tests.
     cultivator, lab, retailer = None, None, None
     for facility in facilities:
-        license_type = facility.license_type
+        license_type = facility.license['license_type']
         if cultivator is None and license_type == 'Grower':
             cultivator = facility
         elif lab is None and license_type == 'Testing Laboratory':
             lab = facility
         elif retailer is None and license_type == 'Dispensary':
             retailer = facility
-
-        # Save facility to Firestore.
-        license_number = facility.license_number
-        ref = f'tests/metrc/organizations/1/facilities/{license_number}'
-        data = clean_nested_dictionary(facility.to_dict())
-        data['license_number'] = license_number
-        fb.update_document(ref, data)
     
-    # Get facilities from Firestore.
-    ref = 'tests/metrc/organizations/1/facilities'
-    cultivator = Facility.from_fb(track, f'{ref}/redacted')
-    retailer = Facility.from_fb(track, f'{ref}/redacted')
-    processor = Facility.from_fb(track, f'{ref}/redacted')
-    lab = Facility.from_fb(track, f'{ref}/redacted')
-    transporter = Facility.from_fb(track, f'{ref}/redacted')
+    # Ensure that each facility type exists.
+    assert None not in [cultivator, lab, retailer]
+    print('Identified all license types.')
 
-    #------------------------------------------------------------------
-    # Locations ✓
-    #------------------------------------------------------------------
 
-    # # Create a new location.
-    test_metrc_create_locations()
-    # cultivation_name = 'MediGrow'
-    # cultivation_original_name = 'medi grow'
-    # cultivator.create_locations([
-    #     cultivation_original_name,
-    #     'Harvest Location',
-    #     'Plant Location',
-    #     'Warehouse',
-    # ])
+    #-------------------------------------------------------------------
+    # [✓] Locations
+    #-------------------------------------------------------------------
+
+    # Create a new location.
+    cultivation_name = 'CAN Flower Garden 001'
+    cultivation_original_name = 'CAN Flower Garden 002'
+    cultivator.create_locations([
+        cultivation_original_name,
+        'CAN Drying Room 001',
+        'CAN Veg Room 001',
+        'CAN Warehouse',
+    ])
     
-    # # Get created location
-    # cultivation= None
-    # locations = track.get_locations(action='active', license_number=cultivator.license_number)
-    # for location in locations:
-    #     if location.name == cultivation_original_name:
-    #         cultivation = location
+    # Get created location.
+    cultivation= None
+    locations = track.get_locations(
+        action='active',
+        license_number=cultivator.license_number,
+    )
+    for location in locations:
+        if location.name == cultivation_original_name:
+            cultivation = location
 
-    # # Update the name of the location using: POST /locations/v1/update
-    test_metrc_update_locations()
-    # cultivator.update_locations([cultivation.uid], [cultivation_name])
+    # Update the name of the location.
+    cultivator.update_locations([cultivation.uid], [cultivation_name])
 
-    # # View the location using GET /locations/v1/{id}
-    test_metrc_get_location(location_id)
-    # cultivation_uid = 'redacted'
-    # traced_location = cultivator.get_locations(uid=cultivation_uid)
+    # View the location.
+    traced_location = cultivator.get_locations(cultivation.uid)
 
 
-    #------------------------------------------------------------------
-    # Strains ✓
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
+    # [ ] Strains
+    #-------------------------------------------------------------------
 
-    # Create a new strain using: POST /strains/v1/create
+    # Create a new strain.
     strain_name = 'New Old-Time Moonshine'
     strain = {
         'Name': strain_name,
@@ -162,7 +174,7 @@ if __name__ == '__main__' and False:
         'ThcLevel': 0.2420,
         'CbdLevel': 0.0333,
         'IndicaPercentage': 0.0,
-        'SativaPercentage': 100.0
+        'SativaPercentage': 1.0
     }
     try:
         track.create_strains([strain], license_number=cultivator.license_number)
@@ -171,26 +183,24 @@ if __name__ == '__main__' and False:
 
     # Get the created strain's ID.
     new_strain = None
-    strain_id = None
     strains = track.get_strains(license_number=cultivator.license_number)
-    for s in strains:
-        if s.name == strain_name:
-            strain_id = s.uid
-            new_strain = s
+    for strain in strains:
+        if strain.name == strain_name:
+            new_strain = strain
 
-    # Change the THC and CBD levels using: POST /strains/v1/update
+    # Change the THC and CBD levels.
+    # FIXME:
     new_strain.update(thc_level=0.1333, cbd_level=0.0777)
 
-    # View the Strain using GET /strains/v1/{id}
-    strain_uid = 'redacted'
-    traced_strain = track.get_strains(uid=strain_uid, license_number=cultivator.license_number)
+    # View the Strain.
+    traced_strain = track.get_strains(new_strain.uid, license_number=cultivator.license_number)
     print(traced_strain.name, '| THC:', traced_strain.thc_level, 'CBD:', traced_strain.cbd_level)
 
 
-    #------------------------------------------------------------------
-    # Items ✓
-    #------------------------------------------------------------------
-    
+    #-------------------------------------------------------------------
+    # [ ] Items
+    #-------------------------------------------------------------------
+
     # Create an item using: POST /items/v1/create
     item_name = 'New Old-Time Moonshine Teenth'
     item = Item.create_from_json(track, cultivator.license_number, {
@@ -207,7 +217,6 @@ if __name__ == '__main__' and False:
         'UnitOfMeasure': 'Grams',
         'Strain': strain_name,
     })
-
 
     # Get the item's UID.
     new_item = None
@@ -237,9 +246,10 @@ if __name__ == '__main__' and False:
     clone_uid = 'redacted'
     clone_item = track.get_items(uid=clone_uid, license_number=cultivator.license_number)
 
-    #------------------------------------------------------------------
-    # Batches ✓
-    #------------------------------------------------------------------
+
+    #-------------------------------------------------------------------
+    # [ ] Batches
+    #-------------------------------------------------------------------
 
     # Create a new plant batch containing
     # 6 plants using: POST /plantbatches/v1/createplantings
@@ -298,9 +308,9 @@ if __name__ == '__main__' and False:
     traced_batch.destroy_plants(count=1, reason='Male plant!')
 
 
-    #------------------------------------------------------------------
-    # Plants ✓
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
+    # [ ] Plants
+    #-------------------------------------------------------------------
 
     # Get a plant created in the plant batches section for use.
     plants = track.get_plants(
@@ -345,9 +355,10 @@ if __name__ == '__main__' and False:
         weight=828,
     )
 
-    #------------------------------------------------------------------
-    # Harvest ✓
-    #------------------------------------------------------------------
+
+    #-------------------------------------------------------------------
+    # [ ] Harvests
+    #-------------------------------------------------------------------
 
     # Get the harvest
     harvests = track.get_harvests(
@@ -412,9 +423,9 @@ if __name__ == '__main__' and False:
     print(traced_harvest.last_modified)
 
 
-    #------------------------------------------------------------------
-    # Packages ✓
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
+    # [ ] Packages
+    #-------------------------------------------------------------------
 
     # Step 1 Using the Package created in Harvest Step 1 OR create a
     # package from an existing package that you have found.
@@ -476,7 +487,7 @@ if __name__ == '__main__' and False:
     print(new_package.last_modified)
 
     # Step 4 Using the new package created in Packages Step 1
-    #  Finish a package using: POST/packages/v1/finish
+    # Finish a package using: POST/packages/v1/finish
     new_package.finish()
     new_package = track.get_packages(uid=new_package.id, license_number=cultivator.license_number)
     print(new_package.last_modified)
@@ -487,9 +498,10 @@ if __name__ == '__main__' and False:
     new_package = track.get_packages(uid=new_package.id, license_number=cultivator.license_number)
     print(new_package.last_modified)
 
-    #------------------------------------------------------------------
-    # Outgoing transfers (See Oregon test) ✓
-    #------------------------------------------------------------------
+
+    #-------------------------------------------------------------------
+    # [ ] Outgoing Transfers
+    #-------------------------------------------------------------------
 
     # Get licensed courier.
     courier = track.get_employees(license_number=lab.license_number)[0]
@@ -515,13 +527,13 @@ if __name__ == '__main__' and False:
     track.create_packages(
         [test_package_data],
         license_number=cultivator.license_number,
-        qa=True
+        testing=True
     )
 
     # Get the tested package.
     test_package = track.get_packages(label=test_package_tag, license_number=cultivator.license_number)
 
-    # Step 1a Set up an external Incoming transfer
+    # Step 1a Set up an external incoming transfer
     # using: POST/transfers/v1/external/incoming
     transfer_data = {
         'ShipperLicenseNumber': cultivator.license_number,
@@ -678,9 +690,55 @@ if __name__ == '__main__' and False:
         end=get_timestamp()
     )
 
-    #------------------------------------------------------------------
-    # Transfer templates ✓
-    #------------------------------------------------------------------
+
+    #-------------------------------------------------------------------
+    # [ ] Incoming Transfers
+    #-------------------------------------------------------------------
+
+    # Step 1 Find an Incoming Transfer: GET/transfers/v1/incoming
+    incoming_transfers = track.get_transfers(license_number=retailer.license_number)
+
+    # Step 2 Find an Outgoing Transfer: GET/transfers/v1/outgoing
+    outgoing_transfers = track.get_transfers(
+        transfer_type='outgoing',
+        license_number=cultivator.license_number
+    )
+    facilities = track.get_facilities()
+    for facility in facilities:
+        print('Getting transfers for', facility.license['number'])
+        outgoing_transfers = track.get_transfers(
+            transfer_type='outgoing',
+            license_number=facility.license['number']
+        )
+        if outgoing_transfers:
+            break
+        sleep(5)
+
+    # Step 3 Find a Rejected Transfer: GET/transfers/v1/rejected
+    rejected_transfers = track.get_transfers(
+        transfer_type='rejected',
+        license_number=cultivator.license_number
+    )                            
+
+    # Step 4 Find a Transfer by the Manifest ID number: GET/transfers/v1/{id}/deliveries
+    transfer_id = 'YOUR_TRANSFER_ID'
+    traced_transfer = track.get_transfers(uid=transfer_id, license_number=cultivator.license_number)
+
+    # Step 5 Find The Packages Using the Delivery ID number: GET/transfers/v1/delivery/{id}/packages
+    traced_transfer_package = track.get_transfer_packages(uid=transfer_id, license_number=cultivator.license_number)
+
+    # Transfers Wholesale Step 6 Find Packages Wholesale Pricing
+    # Using the Delivery ID GET/transfers/v1/delivery/{id}/packages/wholesale
+    traced_wholesale_package = track.get_transfer_packages(
+        uid=transfer_id,
+        action='packages/wholesale',
+        license_number=cultivator.license_number
+    )
+
+
+    #-------------------------------------------------------------------
+    # [ ] Transfer templates
+    #-------------------------------------------------------------------
 
     # Step 1a Set up a Template using: POST/transfers/v1/templates
     template_data = {
@@ -776,54 +834,9 @@ if __name__ == '__main__' and False:
     print(template.last_modified)
 
 
-    #------------------------------------------------------------------
-    # Outgoing transfers ✓
-    #------------------------------------------------------------------
-
-    # Step 1 Find an Incoming Transfer: GET/transfers/v1/incoming
-    incoming_transfers = track.get_transfers(license_number=retailer.license_number)
-
-    # Step 2 Find an Outgoing Transfer: GET/transfers/v1/outgoing
-    outgoing_transfers = track.get_transfers(
-        transfer_type='outgoing',
-        license_number=cultivator.license_number
-    )
-    facilities = track.get_facilities()
-    for facility in facilities:
-        print('Getting transfers for', facility.license['number'])
-        outgoing_transfers = track.get_transfers(
-            transfer_type='outgoing',
-            license_number=facility.license['number']
-        )
-        if outgoing_transfers:
-            break
-        sleep(5)
-
-    # Step 3 Find a Rejected Transfer: GET/transfers/v1/rejected
-    rejected_transfers = track.get_transfers(
-        transfer_type='rejected',
-        license_number=cultivator.license_number
-    )                            
-
-    # Step 4 Find a Transfer by the Manifest ID number: GET/transfers/v1/{id}/deliveries
-    transfer_id = 'YOUR_TRANSFER_ID'
-    traced_transfer = track.get_transfers(uid=transfer_id, license_number=cultivator.license_number)
-
-    # Step 5 Find The Packages Using the Delivery ID number: GET/transfers/v1/delivery/{id}/packages
-    traced_transfer_package = track.get_transfer_packages(uid=transfer_id, license_number=cultivator.license_number)
-
-    # Transfers Wholesale Step 6 Find Packages Wholesale Pricing
-    # Using the Delivery ID GET/transfers/v1/delivery/{id}/packages/wholesale
-    traced_wholesale_package = track.get_transfer_packages(
-        uid=transfer_id,
-        action='packages/wholesale',
-        license_number=cultivator.license_number
-    )
-
-
-    #------------------------------------------------------------------
-    # Lab results ✓
-    #------------------------------------------------------------------
+    #-------------------------------------------------------------------
+    # [ ] Lab results
+    #-------------------------------------------------------------------
 
     # Record a lab test result using: POST /labtests/v1/record
     test_package_data = {
@@ -907,9 +920,10 @@ if __name__ == '__main__' and False:
     # Get the tested package's lab result.
     lab_results = track.get_lab_results(uid=test_package.id, license_number=lab.license_number)
 
-    #------------------------------------------------------------------
-    # Sales ✓
-    #------------------------------------------------------------------
+
+    #-------------------------------------------------------------------
+    # [ ] Sales
+    #-------------------------------------------------------------------
 
     # Get a retail package.
     retailer_packages = track.get_packages(license_number=retailer.license_number)

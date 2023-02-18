@@ -12,15 +12,19 @@
 
 </div>
 
-<!-- ## Predicting consumption
+| Model | Description |
+|-------|-------------|
+| [Cultivar Prediction Model](./cultivar-prediction) | Given the lab results for two strains, the average of the results can be used as a predictor of the results of the child. |
+| [Effects and Aromas Prediction Model](./effects-and-aromas) | A [multivariate probit model](https://en.wikipedia.org/wiki/Multivariate_probit_model) is used to predict the probability of all potential effects and aromas simultaneously given lab results for a sample or samples. |
+| [Product Descriptions](./product-descriptions) | Create product descriptions given product details using NLP. |
+| [Product Recommendations](./product-recommendations) | **Collaborative Filtering**: Recommend products similar to a given product and an inventory of products. Given a consumer's characteristics, recommend products that other consumers with similar characteristics enjoyed. **Content-Based**: Given a body of a consumer's reviews and lab results for those products, rank an inventory of products by the estimated consumer's preferences. |
+| [Strain NFTs](./strain-nfts) | Programmatically create flower art given effects and aromas. |
+| [Strain Statistics](./strain-statistics) | Cannabis strains, or cultivars, varieties, etc., are a focal point of the cannabis industry. The general understanding is that strain name usage is loose and the meaningfulness of strain names is hotly debated. Here, we simply attempt to identify and quantify common strain names that people use for the varieties that they cultivate and sell. We provide statistics about specific strain names and use the data and statistics to aid in prediction models. |
 
-## Predicting effects and flavors
-
+<!-- Possible models:
+## Predicting consumption
 ## Predicting sales
-
 ## Predicting yield
-
 ## Predicting the likelihood of a sample failing QA
-
-Using a Bayesian model trained on Washington state data, we can provide the probability of failing various quality control tests given the parameters at hand and the limit in the state of interest. -->
-
+  Using a Bayesian model trained on Washington state data, we can provide the probability of failing various quality control tests given the parameters at hand and the limit in the state of interest.
+-->

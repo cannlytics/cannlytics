@@ -2,11 +2,11 @@
 <html lang="en-US">
 <!--
   Base Template | Cannlytics Console
-  Copyright (c) 2021-2022 Cannlytics
+  Copyright (c) 2021-2023 Cannlytics
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/7/2021
-  Updated: 12/12/2021
+  Updated: 1/9/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 -->
  {% load static %}
@@ -14,27 +14,28 @@
   <meta charset="utf-8"/>
   <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
   <meta name="theme-color" content="#281e52"/>
-  <meta name="description" content="Superpower your lab with open-source cannabis analytics made with love."/>
+  <meta name="description" content="Manage your cannabis data and analytics like a pro with Cannlytics."/>
   <meta name="author" content="Keegan Skeate <keegan@cannlytics.com>"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   
   <!-- Logos -->
+  <!-- FIXME: -->
   <link rel="icon" href="{% static 'images/logos/favicon.ico' %}">
+  <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/logos/favicon.ico' %}"/>
   <link rel="icon" sizes="32x32" type="image/png" href="{% static 'images/logos/favicon-32x32.png' %}"/>
   <link rel="icon" sizes="16x16" type="image/png" href="{% static 'images/logos/favicon-16x16.png' %}"/>
   <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/logos/apple-touch-icon.png' %}"/>
   <link rel="mask-icon" color="#e48632" href="{% static 'images/logos/safari-pinned-tab.svg' %}"/>
-  <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/logos/favicon.ico' %}"/>
 
   <!-- Title -->
   <title>{% block title %}Cannlytics{% endblock title %}</title>
   
   <!-- jQuery -->
-  <!-- Optional: Ween off of jQuery | Current jQuery dependencies: bootstrap-datepicker -->
   <script crossorigin="anonymous" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 
   <!-- Cannlytics module -->
-  <script id="cannlytics" src="{% static 'console/bundles/cannlytics.min.js'%}?{% if DEBUG %}{% now 'U' %}{% else %}{{ APP_VERSION_NUMBER }}{% endif %}"></script>
+  <script id="cannlytics" src="{% static 'console/bundles/cannlytics.min.js'%}?{{ APP_VERSION_NUMBER }}"></script>
+  {% comment %} {% if DEBUG %}{% now 'U' %}{% else %}{{ APP_VERSION_NUMBER }}{% endif %} {% endcomment %}
 
   <!-- Page-specific stylesheets -->
   {% block page_css %}{% endblock page_css %}

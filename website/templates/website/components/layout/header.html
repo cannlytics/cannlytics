@@ -14,7 +14,7 @@
 {% include "website/components/banners/banner_support.html" with
   email="contact@cannlytics.com"
   phone=app.contact_phone
-  phone_number=app.contact_phonenumber
+  phone_number=app.contact_phone_number
   only
 %}
 
@@ -66,28 +66,20 @@
       <ul class="navbar-nav me-2">
         <li class="nav-item mb-0">
           <a
+            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'ai' in request.path %}active{% endif %}"
+            href="{% url 'page' page='ai' %}"
+          >
+            AI
+          </a>
+        </li>
+        <li class="nav-item mb-0">
+          <a
             class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'data' in request.path %}active{% endif %}"
             href="{% url 'page' page='data' %}"
           >
             Data
           </a>
         </li>
-        <li class="nav-item mb-0">
-          <a
-            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'stats' in request.path %}active{% endif %}"
-            href="{% url 'page' page='stats' %}"
-          >
-            Stats
-          </a>
-        </li>
-        {% comment %} <li class="nav-item mb-0">
-          <a
-            class="nav-link btn-sm background-hover fw-bold serif text-dark"
-            href="https://docs.cannlytics.com"
-          >
-            Docs
-          </a>
-        </li> {% endcomment %}
         <li class="nav-item mb-0">
           <a
             class="nav-link btn-sm background-hover fw-bold serif text-dark"
@@ -114,7 +106,7 @@
                     <h5 class="fw-bold px-3 serif text-dark">Core</h5>
                     <div class="list-group border-none">
                       <!-- TODO: Replace AI with analytics? -->
-                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='ai' %}">🦾 AI</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='ai' %}">🦾 AI <span class="badge rounded-pill bg-success">New</span></a>
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='api' %}">📡 API</a>
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://console.cannlytics.com">📱 App</a>
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://pypi.org/project/cannlytics/">🐍 Python SDK</a>
@@ -131,15 +123,13 @@
                       <div class="card-body bg-transparent px-0">
                         <p class="card-text fs-6 text-dark markdown">
                           <small>
-                            Join like-minded individuals
-                            who apply data science to cannabis data every Wednesday
-                            at 8:30am PST / 11:30am EST at the
+                            Find, wrangle, and crunch cannabis data like a pro every Wednesday at 8:30am PST / 11:30am EST at the
                             <a
                               href="https://www.meetup.com/cannabis-data-science/"
                               class="serif background-hover"
                             >
-                              Cannabis Data Science Meetup
-                            </a>.
+                              Cannabis Data Science Meetup🚀
+                            </a>
                           </small>
                         </p>
                       </div>
@@ -160,7 +150,7 @@
                   <div class="col-12 col-sm-12 col-md-3 py-4">
                     <h5 class="fw-bold px-3 serif text-dark">Data</h5>
                     <div class="list-group">
-                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'section' page='data' section='market' %}">🪙 Data Market <span class="badge rounded-pill bg-success">New</span></a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'section' page='data' section='market' %}">🪙 Data Market</a>
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='testing' %}">🥼 Labs, analyses, and <strong class="serif">prices</strong>!</a>
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='economics' %}">📈 Economics and forecasts</a>
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='data' %}#state-data">🏛️ Public state data</a>

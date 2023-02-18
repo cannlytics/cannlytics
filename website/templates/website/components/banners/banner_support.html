@@ -3,7 +3,7 @@
 <!--
   Banner - DataScience | Cannlytics Website
   Created: 6/27/2021
-  Updated: 4/10/2022
+  Updated: 1/31/2023
   Params:
     email
     phone
@@ -20,9 +20,38 @@
       href="{% url 'section' page='data' section='coas' %}"
       title="Get the data locked in your certificates of analysis (CoAs)!"
     >
-      <span class="badge rounded-pill bg-success me-1">New</span>
       <small>
-        <b class="serif">🥸CoADoc</b>, a free certificate of analysis parser!
+        <b class="serif">🥸CoADoc</b>
+      </small>
+    </a>
+    <span class="px-2">|</span>
+    <a
+      class="text-dark background-hover d-flex align-items-center"
+      href="{% url 'section' page='stats' section='effects' %}"
+      title="Predict potential effects and aromas given lab results."
+    >
+      <small>
+        <b class="serif">🦨SkunkFx</b>
+      </small>
+    </a>
+    <span class="px-2">|</span>
+    <a
+      class="text-dark background-hover d-flex align-items-center"
+      href="{% url 'section' page='ai' section='recipes' %}"
+      title="Create custom cannabis recipes."
+    >
+      <small>
+        <b class="serif">🍯BudderBaker</b>
+      </small>
+    </a>
+    <span class="px-2">|</span>
+    <a
+      class="text-dark background-hover d-flex align-items-center"
+      href="https://github.com/cannlytics/cannlytics/tree/main/cannlytics/metrc"
+      title="Securely interface with the Metrc API."
+    >
+      <small>
+        <b class="serif">🔰Metrc SDK</b>
       </small>
     </a>
 
@@ -43,7 +72,7 @@
       </a>
     {% endif %}
 
-    <!-- Github star button -->
+    {% comment %} <!-- Github star button -->
     <span class="px-2">|</span>
     <div class="d-flex">
       <iframe
@@ -54,7 +83,7 @@
         height="20"
         title="Check out Cannlytics code and data on GitHub!"
       ></iframe>
-    </div>
+    </div> {% endcomment %}
 
   </div>
   <div class="d-flex d-lg-none"></div>

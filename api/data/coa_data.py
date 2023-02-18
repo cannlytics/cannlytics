@@ -24,7 +24,7 @@ from rest_framework.response import Response
 
 # Internal imports
 from cannlytics.auth.auth import authenticate_request
-from cannlytics.data.coas import CoADoc
+from cannlytics.data.coas.coas import CoADoc
 from cannlytics.firebase.firebase import create_log, update_documents
 
 # Maximum number of files that can be parsed in 1 request.

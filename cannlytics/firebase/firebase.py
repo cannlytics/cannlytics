@@ -1,10 +1,10 @@
 """
 Firebase Module | Cannlytics
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/7/2021
-Updated: 5/17/2022
+Updated: 1/10/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: A wrapper of `firebase_admin` to make interacting with a Firestore
@@ -21,7 +21,6 @@ database = initialize_firebase('./env')
 """
 # Standard imports
 from datetime import datetime, timedelta
-import json
 from os import listdir
 from os.path import isfile, join
 from typing import Any, List, Optional, Tuple
@@ -43,7 +42,10 @@ from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.transforms import DELETE_FIELD
 # FIXME: Raises the error below in Cloud Run.
 # AttributeError: partially initialized module 'pandas' has no attribute 'core' (most likely due to a circular import)
-from pandas import notnull, read_csv, read_excel, DataFrame, Series
+try:
+    from pandas import notnull, read_csv, read_excel, DataFrame, Series
+except AttributeError:
+    print('Pandas may not be installed.')
 
 # Internal imports.
 from cannlytics.utils import get_random_string, snake_case
@@ -61,7 +63,7 @@ def initialize_firebase(
         key_path: Optional[str] = None,
         bucket_name: Optional[str] = None,
         project_id: Optional[str] = None,
-):
+    ):
     """Initialize Firebase, unless already initialized. Searches for environment
     credentials if `key_path` is not specified.
     Args:
@@ -476,7 +478,11 @@ def create_custom_claims(
     auth.set_custom_user_claims(uid, claims)
 
 
-def update_custom_claims(uid: str, email: str = None, claims: dict = None):
+def update_custom_claims(
+        uid: str,
+        email: str = None,
+        claims: dict = None
+    ) -> dict:
     """Update custom claims for a user.
     The new custom claims will propagate to the user's ID token the
     next time a new one is issued.
@@ -499,7 +505,9 @@ def update_custom_claims(uid: str, email: str = None, claims: dict = None):
     # current_owner = claims.get('owner', [])
     # FIXME: For now, only 1 organization per user.
     # claims['owner'] = list(set(existing_owner + current_owner))
-    auth.set_custom_user_claims(uid, {**existing_claims, **claims})
+    new_claims = {**existing_claims, **claims}
+    auth.set_custom_user_claims(uid, new_claims)
+    return new_claims
 
 
 def get_custom_claims(name: str) -> dict:
@@ -681,12 +689,19 @@ def create_secret(project_id: str, secret_id: str, secret: Any) -> str:
         (str): The name of the created secret.
     """
     client = secretmanager.SecretManagerServiceClient()
-    parent = f'projects/{project_id}'
-    response = client.create_secret(parent, secret_id, secret)
+    response = client.create_secret(
+        parent=f'projects/{project_id}',
+        secret_id=secret_id,
+        secret=secret,
+    )
     return response.name
 
 
-def add_secret_version(project_id: str, secret_id: str, payload: Any) -> str:
+def add_secret_version(
+        project_id: str,
+        secret_id: str,
+        payload: Any,
+    ) -> str:
     """
     Add a new secret version to the given secret with the provided payload.
     A secret version contains the actual contents of a secret.
@@ -707,11 +722,18 @@ def add_secret_version(project_id: str, secret_id: str, payload: Any) -> str:
     client = secretmanager.SecretManagerServiceClient()
     parent = f'projects/{project_id}/secrets/{secret_id}'
     payload = payload.encode('UTF-8')
-    response = client.add_secret_version(parent, {'data': payload})
+    response = client.add_secret_version(
+        parent=parent,
+        payload={'data': payload},
+    )
     return response.name
 
 
-def access_secret_version(project_id: str, secret_id: str, version_id: str) -> str:
+def access_secret_version(
+        project_id: str,
+        secret_id: str,
+        version_id: Optional[str] = 'latest',
+    ) -> str:
     """
     Access the payload for a given secret version if one exists. The version
     can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
@@ -734,7 +756,11 @@ def access_secret_version(project_id: str, secret_id: str, version_id: str) -> s
 
 # === Storage ===
 
-def create_short_url(api_key: str, long_url: str, project_name: str) -> str:
+def create_short_url(
+        api_key: str,
+        long_url: str,
+        project_name: str,
+    ) -> str:
     """Create a short URL to a specified file.
     Args:
         api_key (str): An API key for Firebase dynamic links.
@@ -762,7 +788,7 @@ def create_short_url(api_key: str, long_url: str, project_name: str) -> str:
 def download_file(
         source_blob_name: str,
         destination_file_name: str,
-        bucket_name: Optional[str] = None
+        bucket_name: Optional[str] = None,
     ):
     """Downloads a file from Firebase Storage.
     Args:

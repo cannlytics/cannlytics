@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 1/17/2021
- * Updated: 1/11/2022
+ * Updated: 1/31/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { getDocument } from '../firebase.js';
@@ -27,35 +27,34 @@ const submitSubscription = async function(details, subscriptionID, planName) {
   }
 }
 
+
+const addPayPalButton = function(planId, planName) {
+  /**
+   * Create a PayPal button for a given subscription plan ID and name.
+   */
+  paypal.Buttons({
+    createSubscription: function(data, actions) {
+      return actions.subscription.create({'plan_id': planId});
+    },
+    onApprove: function(data, actions) {
+      try {
+        const { subscriptionID } = data;
+        return actions.order.capture().then(async function(details) {
+          submitSubscription(details, subscriptionID, planName);
+        });
+      } catch(error) {
+        reportError();
+      }
+    }
+  }).render(`#paypal-${planName}`);
+}
+
+
 export const payments = {
 
   /**---------------------------------------------------------------------------
    * Setup Subscriptions
    *--------------------------------------------------------------------------*/
-
-  async initializePremiumSubscription() {
-    /**
-     * Initialize premium PayPal subscription checkout.
-      */
-    const subscription = await this.getSubscription('premium');
-    paypal.Buttons({
-      createSubscription: function(data, actions) {
-        return actions.subscription.create({
-          'plan_id': subscription.plan_id,
-        });
-      },
-      onApprove: function(data, actions) {
-        try {
-          const { subscriptionID } = data;
-          return actions.order.capture().then(async function(details) {
-            submitSubscription(details, subscriptionID, 'premium');
-          });
-        } catch(error) {
-          reportError();
-        }
-      }
-    }).render('#paypal-premium');
-  },
 
   async initializeSupport() {
     /**
@@ -63,40 +62,18 @@ export const payments = {
      */
     const enterpriseSubscription = await this.getSubscription('enterprise');
     const proSubscription = await this.getSubscription('pro');
-    paypal.Buttons({
-      createSubscription: function(data, actions) {
-        return actions.subscription.create({
-          'plan_id': enterpriseSubscription.plan_id,
-        });
-      },
-      onApprove: function(data, actions) {
-        try {
-          const { subscriptionID } = data;
-          return actions.order.capture().then(async function(details) {
-            submitSubscription(details, subscriptionID, 'enterprise');
-          });
-        } catch(error) {
-          reportError();
-        }
-      }
-    }).render('#paypal-enterprise');
-    paypal.Buttons({
-      createSubscription: function(data, actions) {
-        return actions.subscription.create({
-          'plan_id': proSubscription.plan_id,
-        });
-      },
-      onApprove: function(data, actions) {
-        try {
-          const { subscriptionID } = data;
-          return actions.order.capture().then(async function(details) {
-            submitSubscription(details, subscriptionID, 'pro');
-          });
-        } catch(error) {
-          reportError();
-        }
-      }
-    }).render('#paypal-pro');
+    const premiumSubscription = await this.getSubscription('premium');
+    addPayPalButton(enterpriseSubscription.plan_id, 'enterprise');
+    addPayPalButton(proSubscription.plan_id, 'pro');
+    addPayPalButton(premiumSubscription.plan_id, 'premium');
+  },
+
+  async initializePremiumSubscription() {
+    /**
+     * Initialize premium PayPal subscription checkout.
+      */
+    const premiumSubscription = await this.getSubscription('premium');
+    addPayPalButton(premiumSubscription.plan_id, 'premium');
   },
 
   /**---------------------------------------------------------------------------
@@ -133,7 +110,7 @@ export const payments = {
     document.getElementById('cancel-support-button').addEventListener('click', this.cancelChangeSupportSubscription);
     
     // Initialize subscriptions.
-    this.initializePremiumSubscription();
+    // this.initializePremiumSubscription();
     this.initializeSupport();
   },
 
@@ -458,7 +435,7 @@ export const payments = {
     document.getElementById('subscription-price-now').textContent = `${subscriptionData.price_now} now`;
 
     // Initialize PayPal buttons.
-    // FIXME: Display is not working properly.
+    // FIXME: Popup is not working properly (double popup).
     paypal.Buttons({
       style: {
           shape: 'rect',

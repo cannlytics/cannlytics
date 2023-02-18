@@ -1,0 +1,10 @@
+# AI requirements | Cannlytics
+# Created 1/19/2023
+# Updated: 1/19/2023
+spacy
+pymc3
+lifelines
+opencv-python
+PySimpleGUI
+# pyzmq
+# traitlets

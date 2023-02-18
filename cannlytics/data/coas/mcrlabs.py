@@ -6,12 +6,21 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 10/10/2022
+Updated: 2/17/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
     Tools to collect MCR Labs' publicly published lab results.
+    MCR Labs' COA PDFs are generally laid out as follows:
+
+        Page 1 Lab/Product/Test information
+        Page 2 Cannabinoid Test result
+        Page 3 Microbe Test results
+        Page 4 Mycotoxin and Heavy Metal Test results
+        Page 5 Pesticide Test results
+        Page 6 Terpenes Test results
+        Pages 7 and 8 are for QC/QA and are not used.
 
 Data Points:
 
@@ -81,6 +90,12 @@ from cannlytics.utils.utils import (
 )
 from datasets import load_dataset
 
+# Suppress `datasets` warning:
+# Deprecated argument(s) used in 'dataset_info': token.
+# Will not be supported from version '0.12'.
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 # It is assumed that the lab has the following details.
 MCR_LABS = {
@@ -113,6 +128,7 @@ MCR_LABS_COA = {
         'Matrix': 'product_type',
         'Date Received' : 'date_received',
         'Date Tested': 'date_tested',
+        'Sample Weight': 'sample_weight',
         'Serving size weight': 'serving_size',
         'Analyte': 'name',
         'Cannabinoid': 'skip',
@@ -251,8 +267,7 @@ def get_mcr_labs_sample_details(
                 obs[f'{analysis}_method'] = method
     
     # Get the sample test results.
-    analyses = []
-    results = []
+    analyses, results = [], []
 
     # Get the cannabinoids.
     scripts = soup.find_all('script')
@@ -696,6 +711,14 @@ def parse_mcrlabs_pdf(
         obs['producer_latitude'] = licensee['premise_latitude']
         obs['producer_longitude'] = licensee['premise_longitude']
         obs['producer_license_number'] = licensee['license_number']
+    
+    # Note: Sample data differs on page 4:
+    # "Serving size weight" 5,6,8 pages is "Sample Weight"
+    while len(report.pages) < 5:
+        try: 
+          MCR_LABS_COA['fields']['Serving size weight'] = MCR_LABS_COA['fields'].pop('Sample Weight')
+        except:
+          break
 
     # Get the sample data.
     standard_fields = MCR_LABS_COA['fields']
@@ -703,7 +726,7 @@ def parse_mcrlabs_pdf(
     values = tables[1][-1]
     for i, field in enumerate(fields):
         key = field.replace('\n', '').strip()
-        key = standard_fields[key]
+        key = standard_fields.get(key, snake_case(key))
         value = values[i].replace('\n', '').strip()
         obs[key] = value
 
@@ -735,6 +758,10 @@ def parse_mcrlabs_pdf(
     methods, results = [], []
     for page in report.pages[1:]:
 
+        # Stop reading pages at the first quality control (QC) page.
+        if (len(report.pages)) > 6 and (page.page_number > 5):
+            break
+
         # Get the text and the tables.
         page_text = page.extract_text()
         tables = page.extract_tables()
@@ -753,29 +780,65 @@ def parse_mcrlabs_pdf(
             .split('The sample')[-1].split('.')[0] + '.'
         methods.append(method)
 
-        # Get the columns and units.
-        columns = [x.replace('\n', '') for x in tables[0][0]]
+        # Get the columns and units (for pesticide screening).
+        if page.page_number == 5:
+            analysis = 'pesticides'
+            columns = [
+                x.replace('Test Analysis', 'name') \
+                 .replace('Result, ppb', 'value') \
+                 .replace(' ppb', '') \
+                 .replace('Limits', 'Limit') \
+                 .replace('\n', '') for x in tables[0][0]
+            ]
+        
+        # Get the columns and units (for terpene analysis).
+        elif page.page_number == 6:
+            analysis = "terpenes"
+            columns = [
+                x.replace('Terpene', 'name') \
+                 .replace('Conc. (weight %)*', 'value') \
+                 .replace('\n', '') for x in tables[0][0]
+            ] 
+        
+        # Get the columns and units (for all other analyses).
+        else:
+            columns = [x.replace('\n', '') for x in tables[0][0]]
         column_text = ','.join(columns)
         columns = [re.sub('\(.*?\)|\[.*?\]', '', x).strip() for x in columns]
         columns = [standard_fields.get(x, x) for x in columns]
-        if '(' in column_text:
-            units = column_text.split('(')[-1].split(')')[0]
+        if 'ppb' in column_text:
+            units = 'ppb'
         else:
             units = STANDARD_UNITS.get(analysis)
 
         # Get the values from the tables.
         for index, table in enumerate(tables):
-            if index == 0:
-                table = table[1:]
+
+            # Skip the first table.
+            table = table[1:]
+
+            # Change analysis on heavy metal tables.
+            if page.page_number == 4 and index == 1:
+                tmp_analysis = page_text.split('Analyst:')[1].split('\n')[-1]
+                tmp_analysis = tmp_analysis.split(' [')[0]
+                tmp_analysis = parser.analyses.get(tmp_analysis, tmp_analysis)
+                if tmp_analysis == 'heavy_metals':
+                    analysis = tmp_analysis
+
+            # Iterate over each row.
             for row in table:
 
                 # Get the result data.
                 result = {'analysis': analysis, 'units': units}
                 total = False
                 for i, cell in enumerate(row):
-                    column = columns[i]
+
+                    # Skip extra rows.
+                    if i >= 7:
+                        continue
 
                     # Get the result name and key.
+                    column = columns[i]
                     if column == 'name':
                         name = cell.replace('\n', '').replace('  ', ' ')
                         key = snake_case(name)
@@ -796,7 +859,6 @@ def parse_mcrlabs_pdf(
 
                     # Handle multiple occurrences of value.
                     elif column == 'value':
-                        
                         serving_size = result.get('value', None)
                         if serving_size:
                             result['serving_size'] = serving_size
@@ -805,13 +867,18 @@ def parse_mcrlabs_pdf(
                     elif column == 'skip':
                         continue
                     
-                    # Record the value.
+                    # Clean and record the value.
+                    cell = cell.strip(' CFU/g')
+                    cell = cell.strip(' in 1')
                     value = convert_to_numeric(cell)
                     if isinstance(value, str):
                         value = value.replace('\n', '') \
+                            .replace('*', '') \
+                            .replace('=', '') \
+                            .replace('<100', '99') \
+                            .replace('%', '') \
                             .replace('Not Detected', 'ND') \
                             .replace('  ', ' ')
-                        # value = value.replace('Δ', 'Delta-')
                     result[column] = value
                 
                 # Record the result, skipping total rows.
@@ -822,8 +889,7 @@ def parse_mcrlabs_pdf(
     report.close()
 
     # Calculate total (active) cannabinoids and sum of cannabinoids.
-    total_cannabinoids = 0
-    sum_of_cannabinoids = 0
+    sum_of_cannabinoids, total_cannabinoids = 0, 0
     for result in results:
         if result['analysis'] == 'cannabinoids':
             value = result['value']
@@ -897,12 +963,15 @@ def parse_mcrlabs_coa(
 
 
 # === Tests ===
+# Notes: Uncomment tests to perform them.
+# Checked tests have been successfully performed by Cannlytics.
+# Contact: <admin@cannlytics.com>.
 if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
-    # from cannlytics.utils.utils import to_excel_with_style
-    # from datetime import datetime
-    # import pandas as pd
+    from cannlytics.utils.utils import to_excel_with_style
+    from datetime import datetime
+    import pandas as pd
 
     # Specify where your test data lives.
     DATA_DIR = '../../../.datasets/lab_results'
@@ -959,3 +1028,18 @@ if __name__ == '__main__':
     # data = parse_mcrlabs_pdf(parser, doc)
     # assert data is not None
     # print('Parsed:', doc)
+
+    # [✓] Test: Parse and save MCR Labs COAs observed in the wild.
+    # parser = CoADoc()
+    # docs = [
+    #     '../../../tests/assets/coas/mcr-labs/mcr-labs-ma-4pgs.pdf',
+    #     '../../../tests/assets/coas/mcr-labs/mcr-labs-ma-5pgs.pdf',
+    #     '../../../tests/assets/coas/mcr-labs/mcr-labs-ma-6pgs.pdf',
+    #     '../../../tests/assets/coas/mcr-labs/mcr-labs-ma-8pgs.pdf',
+    # ]
+    # for doc in docs:
+    #     data = parse_mcrlabs_coa(parser, doc)
+    #     assert data is not None
+    #     print('Parsed:', doc)
+    #     outfile = doc.replace('.pdf', '.xlsx')
+    #     parser.save(data, outfile)
