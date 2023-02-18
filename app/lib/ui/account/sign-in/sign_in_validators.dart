@@ -1,6 +1,14 @@
-import 'package:cannlytics_app/ui/email_password/email_password_sign_in_form_type.dart';
-import 'package:cannlytics_app/ui/email_password/string_validators.dart';
-import 'package:cannlytics_app/localization/string_hardcoded.dart';
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/18/2023
+// Updated: 2/18/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
+import 'package:cannlytics_app/utils/strings/string_validators.dart';
+import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 
 /// Mixin class to be used for client-side email & password validation
 mixin EmailAndPasswordValidators {

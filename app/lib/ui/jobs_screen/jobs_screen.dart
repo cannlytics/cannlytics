@@ -1,13 +1,20 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/18/2023
+// Updated: 2/18/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cannlytics_app/constants/strings.dart';
 import 'package:cannlytics_app/services/firestore_repository.dart';
 import 'package:cannlytics_app/models/job.dart';
 import 'package:cannlytics_app/widgets/list_items_builder.dart';
 import 'package:cannlytics_app/ui/jobs_screen/jobs_screen_controller.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
-import 'package:cannlytics_app/utils/async_value_ui.dart';
+import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 
 class JobsScreen extends StatelessWidget {
   const JobsScreen({super.key});
@@ -16,7 +23,7 @@ class JobsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(Strings.jobs),
+        title: const Text('Jobs'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.add, color: Colors.white),

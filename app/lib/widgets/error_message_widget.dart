@@ -1,3 +1,11 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/18/2023
+// Updated: 2/18/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 
 class ErrorMessageWidget extends StatelessWidget {

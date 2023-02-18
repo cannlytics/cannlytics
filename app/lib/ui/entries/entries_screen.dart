@@ -1,6 +1,13 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/18/2023
+// Updated: 2/18/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cannlytics_app/constants/strings.dart';
 import 'package:cannlytics_app/models/entries_list_tile_model.dart';
 import 'package:cannlytics_app/services/entries_service.dart';
 import 'package:cannlytics_app/widgets/list_items_builder.dart';
@@ -12,7 +19,7 @@ class EntriesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(Strings.entries),
+        title: const Text('Entries'),
       ),
       body: Consumer(
         builder: (context, ref, child) {

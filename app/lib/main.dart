@@ -4,9 +4,8 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/17/2023
+// Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,12 +14,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cannlytics_app/firebase_options.dart';
 import 'package:cannlytics_app/app.dart';
 import 'package:cannlytics_app/services/firebase_auth_repository.dart';
-import 'package:cannlytics_app/localization/string_hardcoded.dart';
-import 'package:cannlytics_app/services/onboarding_repository.dart';
+import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
+import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 // ignore:depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
 
-/// [main] initializes the Cannlytics app.
+/// [main] initializes the [CannlyticsApp].
 Future<void> main() async {
   // Initialize Flutter.
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,23 +29,24 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // turn off the # in the URLs on the web
+  // Remove the hashtag (#) from URLs on the web.
   usePathUrlStrategy();
-  final sharedPreferences = await SharedPreferences.getInstance();
-  // * Register error handlers. For more info, see:
-  // * https://docs.flutter.dev/testing/errors
-  registerErrorHandlers();
-  // * Entry point of the app
 
+  // Register error handlers.
+  final sharedPreferences = await SharedPreferences.getInstance();
+  registerErrorHandlers();
+
+  // App entry point.
   final container = ProviderContainer(
     overrides: [
-      onboardingRepositoryProvider.overrideWithValue(
-        OnboardingRepository(sharedPreferences),
+      onboardingStoreProvider.overrideWithValue(
+        OnboardingStore(sharedPreferences),
       ),
     ],
   );
-  // await until auth state is determined
-  // this will prevent unnecessary redirects inside GoRouter when the app starts
+
+  // Wait for authentication to be determined.
+  // Note: This will prevent unnecessary redirects when the app starts.
   await container.read(authStateChangesProvider.future);
   runApp(UncontrolledProviderScope(
     container: container,
@@ -54,18 +54,21 @@ Future<void> main() async {
   ));
 }
 
+/// [registerErrorHandlers] displays notifications if certain errors are thrown.
 void registerErrorHandlers() {
-  // * Show some error UI if any uncaught exception happens
+  // Show an error notification if any uncaught exception happens.
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     debugPrint(details.toString());
   };
-  // * Handle errors from the underlying platform/OS
+
+  // Handle underlying platform/OS errors.
   PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
     debugPrint(error.toString());
     return true;
   };
-  // * Show some error UI when any widget in the app fails to build
+
+  // Show an error notification when any widget in the app fails to build.
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Scaffold(
       appBar: AppBar(

@@ -1,10 +1,17 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/18/2023
+// Updated: 2/18/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cannlytics_app/widgets/primary_button.dart';
-import 'package:cannlytics_app/ui/onboarding/onboarding_controller.dart';
-import 'package:cannlytics_app/localization/string_hardcoded.dart';
+import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
+import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 
 class OnboardingScreen extends ConsumerWidget {
@@ -12,7 +19,7 @@ class OnboardingScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(onboardingControllerProvider);
+    final state = ref.watch(onboardingController);
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -28,15 +35,15 @@ class OnboardingScreen extends ConsumerWidget {
               ),
             ),
 
-            // Get started button.
+            // Consumer start button.
             PrimaryButton(
-              text: 'Get Started'.hardcoded,
+              text: 'Consumer'.hardcoded,
               isLoading: state.isLoading,
               onPressed: state.isLoading
                   ? null
                   : () async {
                       await ref
-                          .read(onboardingControllerProvider.notifier)
+                          .read(onboardingController.notifier)
                           .completeOnboarding();
                       // TODO: Check if mounted
                       // go to sign in page after completing onboarding

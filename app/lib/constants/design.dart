@@ -1,6 +1,14 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/18/2023
+// Updated: 2/18/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 
-/// Constant sizes to be used in the app (paddings, gaps, rounded corners etc.)
+// Constant paddings.
 class Sizes {
   static const p4 = 4.0;
   static const p8 = 8.0;
@@ -13,7 +21,9 @@ class Sizes {
   static const p64 = 64.0;
 }
 
-/// Constant gap widths
+// TODO: Constant corners.
+
+// Constant gap widths.
 const gapW4 = SizedBox(width: Sizes.p4);
 const gapW8 = SizedBox(width: Sizes.p8);
 const gapW12 = SizedBox(width: Sizes.p12);
@@ -24,7 +34,7 @@ const gapW32 = SizedBox(width: Sizes.p32);
 const gapW48 = SizedBox(width: Sizes.p48);
 const gapW64 = SizedBox(width: Sizes.p64);
 
-/// Constant gap heights
+// Constant gap heights.
 const gapH4 = SizedBox(height: Sizes.p4);
 const gapH8 = SizedBox(height: Sizes.p8);
 const gapH12 = SizedBox(height: Sizes.p12);
@@ -34,3 +44,9 @@ const gapH24 = SizedBox(height: Sizes.p24);
 const gapH32 = SizedBox(height: Sizes.p32);
 const gapH48 = SizedBox(height: Sizes.p48);
 const gapH64 = SizedBox(height: Sizes.p64);
+
+/// Layout breakpoints used in the app.
+class Breakpoint {
+  static const double desktop = 900;
+  static const double tablet = 600;
+}

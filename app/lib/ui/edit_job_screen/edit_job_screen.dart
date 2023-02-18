@@ -1,3 +1,11 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/17/2023
+// Updated: 2/18/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -5,7 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cannlytics_app/models/job.dart';
 import 'package:cannlytics_app/ui/edit_job_screen/edit_job_screen_controller.dart';
-import 'package:cannlytics_app/utils/async_value_ui.dart';
+import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 
 class EditJobScreen extends ConsumerStatefulWidget {
   const EditJobScreen({super.key, this.jobId, this.job});

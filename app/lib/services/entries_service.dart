@@ -1,3 +1,11 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/18/2023
+// Updated: 2/18/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:cannlytics_app/services/firebase_auth_repository.dart';
@@ -6,7 +14,7 @@ import 'package:cannlytics_app/models/daily_jobs_details.dart';
 import 'package:cannlytics_app/models/entries_list_tile_model.dart';
 import 'package:cannlytics_app/models/entry_job.dart';
 import 'package:cannlytics_app/services/firestore_repository.dart';
-import 'package:cannlytics_app/utils/format.dart';
+import 'package:cannlytics_app/utils/strings/string_format.dart';
 import 'package:cannlytics_app/models/entry.dart';
 import 'package:cannlytics_app/models/job.dart';
 

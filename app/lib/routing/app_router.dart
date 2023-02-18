@@ -1,22 +1,29 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/18/2023
+// Updated: 2/18/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cannlytics_app/services/firebase_auth_repository.dart';
 import 'package:cannlytics_app/ui/account/account_screen.dart';
-import 'package:cannlytics_app/ui/email_password/email_password_sign_in_form_type.dart';
-import 'package:cannlytics_app/ui/email_password/email_password_sign_in_screen.dart';
-import 'package:cannlytics_app/ui/sign_in/sign_in_screen.dart';
+import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
+import 'package:cannlytics_app/ui/account/sign-in/sign_in_screen.dart';
 import 'package:cannlytics_app/ui/entries/entries_screen.dart';
 import 'package:cannlytics_app/models/entry.dart';
 import 'package:cannlytics_app/models/job.dart';
 import 'package:cannlytics_app/ui/entry_screen/entry_screen.dart';
 import 'package:cannlytics_app/ui/job_entries_screen/job_entries_screen.dart';
-import 'package:go_router/go_router.dart';
 import 'package:cannlytics_app/ui/edit_job_screen/edit_job_screen.dart';
 import 'package:cannlytics_app/ui/jobs_screen/jobs_screen.dart';
-import 'package:cannlytics_app/services/onboarding_repository.dart';
-import 'package:cannlytics_app/ui/onboarding/onboarding_screen.dart';
+import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
+import 'package:cannlytics_app/ui/account/onboarding/onboarding_screen.dart';
 import 'package:cannlytics_app/routing/go_router_refresh_stream.dart';
-import 'package:cannlytics_app/routing/scaffold_with_bottom_nav_bar.dart';
+import 'package:cannlytics_app/routing/bottom_navigation.dart';
 
 // private navigators
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -25,7 +32,7 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 enum AppRoute {
   onboarding,
   signIn,
-  emailPassword,
+  // resetPassword,
   jobs,
   job,
   addJob,
@@ -39,9 +46,9 @@ enum AppRoute {
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
-  final onboardingRepository = ref.watch(onboardingRepositoryProvider);
+  final onboardingRepository = ref.watch(onboardingStoreProvider);
   return GoRouter(
-    initialLocation: '/signIn',
+    initialLocation: '/sign-in',
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
     redirect: (context, state) {
@@ -55,14 +62,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       }
       final isLoggedIn = authRepository.currentUser != null;
       if (isLoggedIn) {
-        if (state.subloc.startsWith('/signIn')) {
+        if (state.subloc.startsWith('/sign-in')) {
           return '/jobs';
         }
       } else {
         if (state.subloc.startsWith('/jobs') ||
             state.subloc.startsWith('/entries') ||
             state.subloc.startsWith('/account')) {
-          return '/signIn';
+          return '/sign-in';
         }
       }
       return null;
@@ -77,26 +84,37 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           child: const OnboardingScreen(),
         ),
       ),
+      // GoRoute(
+      //   path: '/sign-in',
+      //   name: AppRoute.signIn.name,
+      //   pageBuilder: (context, state) => NoTransitionPage(
+      //     key: state.pageKey,
+      //     child: const SignInScreen(),
+      //   ),
+      //   routes: [
+      //     GoRoute(
+      //       path: 'reset-password',
+      //       name: AppRoute.resetPassword.name,
+      //       pageBuilder: (context, state) => MaterialPage(
+      //         key: state.pageKey,
+      //         fullscreenDialog: true,
+      //         child: const EmailPasswordSignInScreen(
+      //           formType: EmailPasswordSignInFormType.signIn,
+      //         ),
+      //       ),
+      //     ),
+      //   ],
+      // ),
       GoRoute(
-        path: '/signIn',
+        path: '/sign-in',
         name: AppRoute.signIn.name,
-        pageBuilder: (context, state) => NoTransitionPage(
+        pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
-          child: const SignInScreen(),
-        ),
-        routes: [
-          GoRoute(
-            path: 'emailPassword',
-            name: AppRoute.emailPassword.name,
-            pageBuilder: (context, state) => MaterialPage(
-              key: state.pageKey,
-              fullscreenDialog: true,
-              child: const EmailPasswordSignInScreen(
-                formType: EmailPasswordSignInFormType.signIn,
-              ),
-            ),
+          fullscreenDialog: true,
+          child: const EmailPasswordSignInScreen(
+            formType: EmailPasswordSignInFormType.signIn,
           ),
-        ],
+        ),
       ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,

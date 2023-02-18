@@ -1,16 +1,24 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/18/2023
+// Updated: 2/18/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/widgets/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/primary_button.dart';
 import 'package:cannlytics_app/widgets/responsive_scrollable_card.dart';
-import 'package:cannlytics_app/constants/app_sizes.dart';
-import 'package:cannlytics_app/ui/email_password/email_password_sign_in_controller.dart';
-import 'package:cannlytics_app/ui/email_password/email_password_sign_in_form_type.dart';
-import 'package:cannlytics_app/ui/email_password/email_password_sign_in_validators.dart';
-import 'package:cannlytics_app/ui/email_password/string_validators.dart';
-import 'package:cannlytics_app/localization/string_hardcoded.dart';
-import 'package:cannlytics_app/utils/async_value_ui.dart';
+import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/ui/account/sign-in/sign_in_controller.dart';
+import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
+import 'package:cannlytics_app/ui/account/sign-in/sign_in_validators.dart';
+import 'package:cannlytics_app/utils/strings/string_validators.dart';
+import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
+import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 
 /// Email & password sign in screen.
 /// Wraps the [EmailPasswordSignInContents] widget below with a [Scaffold] and
@@ -26,6 +34,7 @@ class EmailPasswordSignInScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // FIXME: This should alternate between "Register" and "Sign In".
       appBar: AppBar(title: Text('Sign In'.hardcoded)),
       body: EmailPasswordSignInContents(
         formType: formType,
@@ -82,8 +91,7 @@ class _EmailPasswordSignInContentsState
     setState(() => _submitted = true);
     // only submit the form if validation passes
     if (_formKey.currentState!.validate()) {
-      final controller =
-          ref.read(emailPasswordSignInControllerProvider.notifier);
+      final controller = ref.read(authProvider.notifier);
       await controller.submit(
         email: email,
         password: password,
@@ -116,10 +124,10 @@ class _EmailPasswordSignInContentsState
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue>(
-      emailPasswordSignInControllerProvider,
+      authProvider,
       (_, state) => state.showAlertDialogOnError(context),
     );
-    final state = ref.watch(emailPasswordSignInControllerProvider);
+    final state = ref.watch(authProvider);
     return ResponsiveScrollableCard(
       child: FocusScope(
         node: _node,
@@ -181,6 +189,16 @@ class _EmailPasswordSignInContentsState
                 text: _formType.secondaryButtonText,
                 onPressed: state.isLoading ? null : _updateFormType,
               ),
+              gapH8,
+              if (_formType == EmailPasswordSignInFormType.signIn)
+                CustomTextButton(
+                  key: const Key('anonymous'),
+                  text: 'Try anonymously',
+                  onPressed: state.isLoading
+                      ? null
+                      : () =>
+                          ref.read(authProvider.notifier).signInAnonymously(),
+                ),
             ],
           ),
         ),
