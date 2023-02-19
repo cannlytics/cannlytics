@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/18/2023
+// Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:intl/intl.dart';
 
@@ -35,5 +35,19 @@ class Format {
       return formatter.format(pay);
     }
     return '';
+  }
+
+  /// Capitalize the first letter of a [String].
+  static String capitalize(String text) {
+    return text.substring(0, 1).toUpperCase() + text.substring(1).toLowerCase();
+  }
+
+  /// Capitalize the first letter of each word in a [String].
+  static String capitalizeAllWords(String text) {
+    List<String> words = text.split(' ');
+    for (int i = 0; i < words.length; i++) {
+      words[i] = capitalize(words[i]);
+    }
+    return words.join(' ');
   }
 }

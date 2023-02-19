@@ -29,13 +29,14 @@ dev_dependencies:
   random_string:
   flutter_lints: ^2.0.0
 
-# https://stackoverflow.com/a/74234079/436422
-#dependency_overrides:
-#  firebase_core_platform_interface: 4.5.1
-
 flutter:
   uses-material-design: true
   assets:
     - assets/images/logos/cannlytics_logo_with_text_dark.svg
     - assets/images/logos/cannlytics_logo_with_text_light.svg
     - assets/images/logos/cannlytics_logo_with_text_light.png
+    - assets/images/icons/figures.png
+    - assets/images/icons/organizations.png
+    - assets/images/icons/patients.png
+    - assets/images/icons/person.png
+    - assets/images/icons/shop.png

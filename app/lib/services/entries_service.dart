@@ -8,12 +8,12 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:cannlytics_app/services/firebase_auth_repository.dart';
+import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/models/app_user.dart';
 import 'package:cannlytics_app/models/daily_jobs_details.dart';
-import 'package:cannlytics_app/models/entries_list_tile_model.dart';
+import 'package:cannlytics_app/ui/consumer/spending/spending_models.dart';
 import 'package:cannlytics_app/models/entry_job.dart';
-import 'package:cannlytics_app/services/firestore_repository.dart';
+import 'package:cannlytics_app/ui/consumer/spending/spending_service.dart';
 import 'package:cannlytics_app/utils/strings/string_format.dart';
 import 'package:cannlytics_app/models/entry.dart';
 import 'package:cannlytics_app/models/job.dart';
@@ -21,7 +21,7 @@ import 'package:cannlytics_app/models/job.dart';
 // TODO: Clean up this code a bit more
 class EntriesService {
   EntriesService({required this.database});
-  final FirestoreRepository database;
+  final SpendingService database;
 
   /// combine List<Job>, List<Entry> into List<EntryJob>
   Stream<List<EntryJob>> _allEntriesStream(UserID uid) =>

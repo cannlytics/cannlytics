@@ -13,7 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cannlytics_app/firebase_options.dart';
 import 'package:cannlytics_app/app.dart';
-import 'package:cannlytics_app/services/firebase_auth_repository.dart';
+import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 // ignore:depend_on_referenced_packages

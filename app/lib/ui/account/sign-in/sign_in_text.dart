@@ -4,16 +4,16 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/18/2023
+// Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 
 /// Form type for email & password authentication
-enum EmailPasswordSignInFormType { signIn, register }
+enum SignInFormType { signIn, register }
 
-extension EmailPasswordSignInFormTypeX on EmailPasswordSignInFormType {
+extension SignInFormTypeX on SignInFormType {
   String get passwordLabelText {
-    if (this == EmailPasswordSignInFormType.register) {
+    if (this == SignInFormType.register) {
       return 'Password (8+ characters)'.hardcoded;
     } else {
       return 'Password'.hardcoded;
@@ -22,7 +22,7 @@ extension EmailPasswordSignInFormTypeX on EmailPasswordSignInFormType {
 
   // Getters
   String get primaryButtonText {
-    if (this == EmailPasswordSignInFormType.register) {
+    if (this == SignInFormType.register) {
       return 'Create an account'.hardcoded;
     } else {
       return 'Sign in'.hardcoded;
@@ -30,23 +30,23 @@ extension EmailPasswordSignInFormTypeX on EmailPasswordSignInFormType {
   }
 
   String get secondaryButtonText {
-    if (this == EmailPasswordSignInFormType.register) {
+    if (this == SignInFormType.register) {
       return 'Have an account? Sign in'.hardcoded;
     } else {
       return 'Need an account? Register'.hardcoded;
     }
   }
 
-  EmailPasswordSignInFormType get secondaryActionFormType {
-    if (this == EmailPasswordSignInFormType.register) {
-      return EmailPasswordSignInFormType.signIn;
+  SignInFormType get secondaryActionFormType {
+    if (this == SignInFormType.register) {
+      return SignInFormType.signIn;
     } else {
-      return EmailPasswordSignInFormType.register;
+      return SignInFormType.register;
     }
   }
 
   String get errorAlertTitle {
-    if (this == EmailPasswordSignInFormType.register) {
+    if (this == SignInFormType.register) {
       return 'Registration failed'.hardcoded;
     } else {
       return 'Sign in failed'.hardcoded;
@@ -54,7 +54,7 @@ extension EmailPasswordSignInFormTypeX on EmailPasswordSignInFormType {
   }
 
   String get title {
-    if (this == EmailPasswordSignInFormType.register) {
+    if (this == SignInFormType.register) {
       return 'Register'.hardcoded;
     } else {
       return 'Sign in'.hardcoded;

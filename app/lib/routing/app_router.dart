@@ -4,31 +4,32 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/18/2023
+// Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cannlytics_app/services/firebase_auth_repository.dart';
+import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/account_screen.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_screen.dart';
-import 'package:cannlytics_app/ui/entries/entries_screen.dart';
+import 'package:cannlytics_app/ui/consumer/spending/entries_screen.dart';
 import 'package:cannlytics_app/models/entry.dart';
 import 'package:cannlytics_app/models/job.dart';
-import 'package:cannlytics_app/ui/entry_screen/entry_screen.dart';
-import 'package:cannlytics_app/ui/job_entries_screen/job_entries_screen.dart';
-import 'package:cannlytics_app/ui/edit_job_screen/edit_job_screen.dart';
-import 'package:cannlytics_app/ui/jobs_screen/jobs_screen.dart';
+import 'package:cannlytics_app/ui/consumer/spending/entry_screen.dart';
+import 'package:cannlytics_app/ui/consumer/spending/job_entries_screen.dart';
+import 'package:cannlytics_app/ui/consumer/spending/edit_job_screen.dart';
+import 'package:cannlytics_app/ui/consumer/spending/jobs_screen.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_screen.dart';
 import 'package:cannlytics_app/routing/go_router_refresh_stream.dart';
 import 'package:cannlytics_app/routing/bottom_navigation.dart';
 
-// private navigators
+// Private navigators.
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
+// Routes.
 enum AppRoute {
   onboarding,
   signIn,
@@ -44,38 +45,50 @@ enum AppRoute {
   account,
 }
 
+// Navigation.
 final goRouterProvider = Provider<GoRouter>((ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
+  final authService = ref.watch(authServiceProvider);
   final onboardingRepository = ref.watch(onboardingStoreProvider);
   return GoRouter(
     initialLocation: '/sign-in',
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
+    refreshListenable: GoRouterRefreshStream(authService.authStateChanges()),
+    //errorBuilder: (context, state) => const NotFoundScreen(),
     redirect: (context, state) {
+      // Determine if the user completed onboarding.
       final didCompleteOnboarding = onboardingRepository.isOnboardingComplete();
+
+      // Navigate to onboarding screen if necessary.
       if (!didCompleteOnboarding) {
-        // Always check state.subloc before returning a non-null route
-        // https://github.com/flutter/packages/blob/main/packages/go_router/example/lib/redirection.dart#L78
         if (state.subloc != '/onboarding') {
           return '/onboarding';
         }
       }
-      final isLoggedIn = authRepository.currentUser != null;
+
+      // Determine if the user is logged in.
+      final isLoggedIn = authService.currentUser != null;
+
+      // Navigate to either the home screen or the sign in page.
       if (isLoggedIn) {
         if (state.subloc.startsWith('/sign-in')) {
           return '/jobs';
         }
       } else {
-        if (state.subloc.startsWith('/jobs') ||
-            state.subloc.startsWith('/entries') ||
-            state.subloc.startsWith('/account')) {
+        // Test if removing this code still works:
+        // if (state.subloc.startsWith('/jobs') ||
+        //     state.subloc.startsWith('/entries') ||
+        //     state.subloc.startsWith('/account')) {
+        //   return '/sign-in';
+        // }
+        if (state.subloc != '/sign-in') {
           return '/sign-in';
         }
       }
       return null;
     },
-    refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges()),
     routes: [
+      // Onboarding screen, allowing user to choose "Consumer" or "Business".
       GoRoute(
         path: '/onboarding',
         name: AppRoute.onboarding.name,
@@ -84,27 +97,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           child: const OnboardingScreen(),
         ),
       ),
-      // GoRoute(
-      //   path: '/sign-in',
-      //   name: AppRoute.signIn.name,
-      //   pageBuilder: (context, state) => NoTransitionPage(
-      //     key: state.pageKey,
-      //     child: const SignInScreen(),
-      //   ),
-      //   routes: [
-      //     GoRoute(
-      //       path: 'reset-password',
-      //       name: AppRoute.resetPassword.name,
-      //       pageBuilder: (context, state) => MaterialPage(
-      //         key: state.pageKey,
-      //         fullscreenDialog: true,
-      //         child: const EmailPasswordSignInScreen(
-      //           formType: EmailPasswordSignInFormType.signIn,
-      //         ),
-      //       ),
-      //     ),
-      //   ],
-      // ),
+
+      // Sign in page.
       GoRoute(
         path: '/sign-in',
         name: AppRoute.signIn.name,
@@ -112,16 +106,21 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           key: state.pageKey,
           fullscreenDialog: true,
           child: const EmailPasswordSignInScreen(
-            formType: EmailPasswordSignInFormType.signIn,
+            formType: SignInFormType.signIn,
           ),
         ),
       ),
+
+      // TODO: Reset password page.
+
+      // Main screens.
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) {
           return ScaffoldWithBottomNavBar(child: child);
         },
         routes: [
+          // Jobs screens.
           GoRoute(
             path: '/jobs',
             name: AppRoute.jobs.name,
@@ -130,6 +129,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               child: const JobsScreen(),
             ),
             routes: [
+              // New job screen.
               GoRoute(
                 path: 'add',
                 name: AppRoute.addJob.name,
@@ -142,6 +142,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   );
                 },
               ),
+
+              // Job Screen
               GoRoute(
                 path: ':id',
                 name: AppRoute.job.name,
@@ -152,7 +154,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     child: JobEntriesScreen(jobId: id),
                   );
                 },
+
+                // Entries screens.
                 routes: [
+                  // Add entry screen.
                   GoRoute(
                     path: 'entries/add',
                     name: AppRoute.addEntry.name,
@@ -168,6 +173,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       );
                     },
                   ),
+
+                  // Entry screen.
                   GoRoute(
                     path: 'entries/:eid',
                     name: AppRoute.entry.name,
@@ -185,6 +192,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       );
                     },
                   ),
+
+                  // Edit entry screen.
                   GoRoute(
                     path: 'edit',
                     name: AppRoute.editJob.name,
@@ -202,6 +211,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+
+          // Entries screen.
           GoRoute(
             path: '/entries',
             name: AppRoute.entries.name,
@@ -210,6 +221,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               child: const EntriesScreen(),
             ),
           ),
+
+          // Account screen.
           GoRoute(
             path: '/account',
             name: AppRoute.account.name,
@@ -221,6 +234,5 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
     ],
-    //errorBuilder: (context, state) => const NotFoundScreen(),
   );
 });

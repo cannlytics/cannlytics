@@ -10,18 +10,18 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
-import 'package:cannlytics_app/services/firebase_auth_repository.dart';
+import 'package:cannlytics_app/services/auth_service.dart';
 
-/// [AuthController] manages the sign in, sign up, and reset password screens.
-class AuthController extends AutoDisposeAsyncNotifier<void> {
+/// [SignInController] manages the sign in, sign up, and reset password screens.
+class SignInController extends AutoDisposeAsyncNotifier<void> {
   @override
   FutureOr<void> build() {}
 
-  /// [submit] signs the user in with their email and password.
-  Future<void> submit({
+  /// [signIn] signs the user in with their email and password.
+  Future<void> signIn({
     required String email,
     required String password,
-    required EmailPasswordSignInFormType formType,
+    required SignInFormType formType,
   }) async {
     state = const AsyncValue.loading();
     state =
@@ -32,24 +32,25 @@ class AuthController extends AutoDisposeAsyncNotifier<void> {
   Future<void> _authenticate(
     String email,
     String password,
-    EmailPasswordSignInFormType formType,
+    SignInFormType formType,
   ) {
-    final authRepository = ref.read(authRepositoryProvider);
+    final authService = ref.read(authServiceProvider);
     switch (formType) {
-      case EmailPasswordSignInFormType.signIn:
-        return authRepository.signInWithEmailAndPassword(email, password);
-      case EmailPasswordSignInFormType.register:
-        return authRepository.createUserWithEmailAndPassword(email, password);
+      case SignInFormType.signIn:
+        return authService.signInWithEmailAndPassword(email, password);
+      case SignInFormType.register:
+        return authService.createUserWithEmailAndPassword(email, password);
     }
   }
 
   /// [signInAnonymously] allows the user to sign in anonymously.
   Future<void> signInAnonymously() async {
-    final authRepository = ref.read(authRepositoryProvider);
+    final authService = ref.read(authServiceProvider);
     state = const AsyncLoading();
-    state = await AsyncValue.guard(authRepository.signInAnonymously);
+    state = await AsyncValue.guard(authService.signInAnonymously);
   }
 }
 
-final authProvider =
-    AutoDisposeAsyncNotifierProvider<AuthController, void>(AuthController.new);
+// An instance of the sign-in controller.
+final signInProvider = AutoDisposeAsyncNotifierProvider<SignInController, void>(
+    SignInController.new);

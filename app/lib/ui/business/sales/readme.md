@@ -1,0 +1,5 @@
+# Sales
+
+## Receipts
+
+## Transactions

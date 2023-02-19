@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/widgets/action_text_button.dart';
 import 'package:cannlytics_app/widgets/avatar.dart';
-import 'package:cannlytics_app/services/firebase_auth_repository.dart';
+import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/account_screen_controller.dart';
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialogs.dart';
@@ -26,7 +26,7 @@ class AccountScreen extends ConsumerWidget {
       (_, state) => state.showAlertDialogOnError(context),
     );
     final state = ref.watch(accountScreenControllerProvider);
-    final user = ref.watch(authRepositoryProvider).currentUser;
+    final user = ref.watch(authServiceProvider).currentUser;
     return Scaffold(
       appBar: AppBar(
         title: state.isLoading

@@ -4,8 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/18/2023
+// Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
+import 'package:cannlytics_app/utils/strings/string_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,79 +22,70 @@ import 'package:cannlytics_app/utils/strings/string_validators.dart';
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 
-/// Email & password sign in screen.
-/// Wraps the [EmailPasswordSignInContents] widget below with a [Scaffold] and
-/// [AppBar] with a title.
-class EmailPasswordSignInScreen extends StatelessWidget {
-  const EmailPasswordSignInScreen({super.key, required this.formType});
-  final EmailPasswordSignInFormType formType;
+/// Sign in screen.
+class EmailPasswordSignInScreen extends ConsumerWidget {
+  const EmailPasswordSignInScreen({
+    super.key,
+    required this.formType,
+  });
+  final SignInFormType formType;
 
-  // * Keys for testing using find.byKey()
+  // Keys for testing using find.byKey()
   static const emailKey = Key('email');
   static const passwordKey = Key('password');
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final store = ref.watch(onboardingStoreProvider);
     return Scaffold(
-      // FIXME: This should alternate between "Register" and "Sign In".
-      appBar: AppBar(title: Text('Sign In'.hardcoded)),
-      body: EmailPasswordSignInContents(
-        formType: formType,
-      ),
+      appBar: AppBar(title: Text(Format.capitalize(store.userType()))),
+      body: SignInForm(formType: formType),
     );
   }
 }
 
-/// A widget for email & password authentication, supporting the following:
-/// - sign in
-/// - register (create an account)
-class EmailPasswordSignInContents extends ConsumerStatefulWidget {
-  const EmailPasswordSignInContents({
+/// Email & password authentication, supporting sign in and create an account.
+class SignInForm extends ConsumerStatefulWidget {
+  const SignInForm({
     super.key,
     required this.formType,
   });
 
   /// The default form type to use.
-  final EmailPasswordSignInFormType formType;
+  final SignInFormType formType;
   @override
-  ConsumerState<EmailPasswordSignInContents> createState() =>
-      _EmailPasswordSignInContentsState();
+  ConsumerState<SignInForm> createState() => _SignInFormState();
 }
 
-class _EmailPasswordSignInContentsState
-    extends ConsumerState<EmailPasswordSignInContents>
+class _SignInFormState extends ConsumerState<SignInForm>
     with EmailAndPasswordValidators {
+  // Widget controllers.
   final _formKey = GlobalKey<FormState>();
   final _node = FocusScopeNode();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  // Widget state.
   String get email => _emailController.text;
   String get password => _passwordController.text;
-
-  // local variable used to apply AutovalidateMode.onUserInteraction and show
-  // error hints only when the form has been submitted
-  // For more details on how this is implemented, see:
-  // https://codewithandrea.com/articles/flutter-text-field-form-validation/
   var _submitted = false;
-  // track the formType as a local state variable
   late var _formType = widget.formType;
 
+  // Dispose controllers.
   @override
   void dispose() {
-    // * TextEditingControllers should be always disposed
     _node.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  // Submit the sign-in form if validation passes.
   Future<void> _submit() async {
     setState(() => _submitted = true);
-    // only submit the form if validation passes
     if (_formKey.currentState!.validate()) {
-      final controller = ref.read(authProvider.notifier);
-      await controller.submit(
+      final controller = ref.read(signInProvider.notifier);
+      await controller.signIn(
         email: email,
         password: password,
         formType: _formType,
@@ -100,12 +93,14 @@ class _EmailPasswordSignInContentsState
     }
   }
 
+  // Indicator if email is entered.
   void _emailEditingComplete() {
     if (canSubmitEmail(email)) {
       _node.nextFocus();
     }
   }
 
+  // Indicator if password is entered.
   void _passwordEditingComplete() {
     if (!canSubmitEmail(email)) {
       _node.previousFocus();
@@ -114,20 +109,20 @@ class _EmailPasswordSignInContentsState
     _submit();
   }
 
+  // Toggle between register and sign in form, clearing the password field.
   void _updateFormType() {
-    // * Toggle between register and sign in form
     setState(() => _formType = _formType.secondaryActionFormType);
-    // * Clear the password field when doing so
     _passwordController.clear();
   }
 
+  // User interface.
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue>(
-      authProvider,
+      signInProvider,
       (_, state) => state.showAlertDialogOnError(context),
     );
-    final state = ref.watch(authProvider);
+    final state = ref.watch(signInProvider);
     return ResponsiveScrollableCard(
       child: FocusScope(
         node: _node,
@@ -136,8 +131,10 @@ class _EmailPasswordSignInContentsState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              // Spacer.
               gapH8,
-              // Email field
+
+              // Email field.
               TextFormField(
                 key: EmailPasswordSignInScreen.emailKey,
                 controller: _emailController,
@@ -159,8 +156,11 @@ class _EmailPasswordSignInContentsState
                       editingValidator: EmailEditingRegexValidator()),
                 ],
               ),
+
+              // Spacer.
               gapH8,
-              // Password field
+
+              // Password field.
               TextFormField(
                 key: EmailPasswordSignInScreen.passwordKey,
                 controller: _passwordController,
@@ -178,26 +178,38 @@ class _EmailPasswordSignInContentsState
                 keyboardAppearance: Brightness.light,
                 onEditingComplete: () => _passwordEditingComplete(),
               ),
+
+              // Spacer.
               gapH8,
+
+              // Submit button.
               PrimaryButton(
                 text: _formType.primaryButtonText,
                 isLoading: state.isLoading,
                 onPressed: state.isLoading ? null : () => _submit(),
               ),
+
+              // Spacer.
               gapH8,
+
+              // Change forms (sign-in to register) button.
               CustomTextButton(
                 text: _formType.secondaryButtonText,
                 onPressed: state.isLoading ? null : _updateFormType,
               ),
+
+              // Spacer.
               gapH8,
-              if (_formType == EmailPasswordSignInFormType.signIn)
+
+              // Anonymous sign-in.
+              if (_formType == SignInFormType.signIn)
                 CustomTextButton(
                   key: const Key('anonymous'),
                   text: 'Try anonymously',
                   onPressed: state.isLoading
                       ? null
                       : () =>
-                          ref.read(authProvider.notifier).signInAnonymously(),
+                          ref.read(signInProvider.notifier).signInAnonymously(),
                 ),
             ],
           ),

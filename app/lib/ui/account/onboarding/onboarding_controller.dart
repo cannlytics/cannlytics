@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/18/2023
+// Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'dart:async';
 
@@ -14,39 +14,48 @@ import 'package:cannlytics_app/ui/account/onboarding/onboarding_screen.dart';
 
 /// [OnboardingStore] manages onboarding data.
 class OnboardingStore {
-  // Preferred data.
-  OnboardingStore(this.sharedPreferences);
-  final SharedPreferences sharedPreferences;
-
-  // Key for onboarding completion.
-  static const onboardingCompleteKey = 'onboardingComplete';
+  // Local user data.
+  OnboardingStore(this.localData);
+  final SharedPreferences localData;
 
   // Change onboarding completion
   Future<void> setOnboardingComplete() async {
-    await sharedPreferences.setBool(onboardingCompleteKey, true);
+    await localData.setBool('onboardingComplete', true);
   }
 
-  // Whether or not onboarding is complete.
-  bool isOnboardingComplete() =>
-      sharedPreferences.getBool(onboardingCompleteKey) ?? false;
-}
+  // Set the type of business.
+  Future<void> setUserType(String value) async {
+    await localData.setString('userType', value);
+  }
 
-/// [OnboardingController] manages the [OnboardingScreen].
-class OnboardingController extends AutoDisposeAsyncNotifier<void> {
-  @override
-  FutureOr<void> build() {}
+  // Whether onboarding is complete or not.
+  bool isOnboardingComplete() {
+    return localData.getBool('onboardingComplete') ?? false;
+  }
 
-  /// [completeOnboarding] completes the onboarding process.
-  Future<void> completeOnboarding() async {
-    final onboardingStore = ref.watch(onboardingStoreProvider);
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(onboardingStore.setOnboardingComplete);
+  // Whether the user is a business or not.
+  String userType() {
+    return localData.getString('userType') ?? 'consumer';
   }
 }
 
 // An instance of the store.
 final onboardingStoreProvider =
     Provider<OnboardingStore>((ref) => throw UnimplementedError());
+
+/// [OnboardingController] manages the [OnboardingScreen].
+class OnboardingController extends AutoDisposeAsyncNotifier<void> {
+  @override
+  FutureOr<void> build() {}
+
+  /// [completeOnboarding] completes the onboarding process, setting user type.
+  Future<void> completeOnboarding(String choice) async {
+    final onboardingStore = ref.watch(onboardingStoreProvider);
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() => onboardingStore.setUserType(choice));
+    state = await AsyncValue.guard(onboardingStore.setOnboardingComplete);
+  }
+}
 
 // A controller instance.
 final onboardingController =

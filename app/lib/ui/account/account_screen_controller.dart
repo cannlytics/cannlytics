@@ -9,7 +9,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cannlytics_app/services/firebase_auth_repository.dart';
+import 'package:cannlytics_app/services/auth_service.dart';
 
 class AccountScreenController extends AutoDisposeAsyncNotifier<void> {
   @override
@@ -18,9 +18,9 @@ class AccountScreenController extends AutoDisposeAsyncNotifier<void> {
   }
 
   Future<void> signOut() async {
-    final authRepository = ref.read(authRepositoryProvider);
+    final authService = ref.read(authServiceProvider);
     state = const AsyncLoading();
-    state = await AsyncValue.guard(authRepository.signOut);
+    state = await AsyncValue.guard(authService.signOut);
   }
 }
 

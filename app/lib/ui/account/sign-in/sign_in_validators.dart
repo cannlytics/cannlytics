@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/18/2023
+// Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
 import 'package:cannlytics_app/utils/strings/string_validators.dart';
@@ -22,9 +22,8 @@ mixin EmailAndPasswordValidators {
     return emailSubmitValidator.isValid(email);
   }
 
-  bool canSubmitPassword(
-      String password, EmailPasswordSignInFormType formType) {
-    if (formType == EmailPasswordSignInFormType.register) {
+  bool canSubmitPassword(String password, SignInFormType formType) {
+    if (formType == SignInFormType.register) {
       return passwordRegisterSubmitValidator.isValid(password);
     }
     return passwordSignInSubmitValidator.isValid(password);
@@ -38,8 +37,7 @@ mixin EmailAndPasswordValidators {
     return showErrorText ? errorText : null;
   }
 
-  String? passwordErrorText(
-      String password, EmailPasswordSignInFormType formType) {
+  String? passwordErrorText(String password, SignInFormType formType) {
     final bool showErrorText = !canSubmitPassword(password, formType);
     final String errorText = password.isEmpty
         ? 'Password can\'t be empty'.hardcoded

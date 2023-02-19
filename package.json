@@ -31,7 +31,7 @@
   "private": true,
   "scripts": {
     "app": "cd app & flutter run --no-sound-null-safety & cd ../",
-    "app:web": "cd app & flutter run -d chrome --no-sound-null-safety & cd ../",
+    "app:web": "cd app & flutter run -d chrome & cd ../",
     "app:windows": "cd app & flutter run -d windows --no-sound-null-safety & cd ../",
     "app:build": "cd app & flutter build web --no-sound-null-safety & cd ../",
     "app:publish": "firebase deploy --project cannlytics --only hosting:app",
