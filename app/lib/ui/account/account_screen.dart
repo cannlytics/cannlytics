@@ -75,6 +75,23 @@ class AccountScreen extends ConsumerWidget {
           ),
         ),
       ),
+      // TODO: Implement a body for the user to manage their account!
+      // - Reset password.
+      // - Change user email.
+      // - Change user phone.
+      // - Change user name.
+      // - Change user photo.
+      // - View user data:
+      //  * Account created date.
+      //  * Last sign in date.
+      // - View logs.
+      // - View / manage organizations and teams.
+      // - Delete account.
+
+      // Business:
+      // - state (restrict to Cannlytics-verified states)
+      // - licenses (/admin/create-license and /admin/delete-license)
+      // - license type
     );
   }
 }

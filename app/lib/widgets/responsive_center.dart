@@ -17,7 +17,7 @@ import 'package:cannlytics_app/constants/design.dart';
 class ResponsiveCenter extends StatelessWidget {
   const ResponsiveCenter({
     super.key,
-    this.maxContentWidth = Breakpoint.desktop,
+    this.maxContentWidth = Breakpoints.desktop,
     this.padding = EdgeInsets.zero,
     required this.child,
   });
@@ -47,7 +47,7 @@ class ResponsiveCenter extends StatelessWidget {
 class ResponsiveSliverCenter extends StatelessWidget {
   const ResponsiveSliverCenter({
     super.key,
-    this.maxContentWidth = Breakpoint.desktop,
+    this.maxContentWidth = Breakpoints.desktop,
     this.padding = EdgeInsets.zero,
     required this.child,
   });

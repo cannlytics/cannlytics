@@ -8,12 +8,12 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cannlytics_app/ui/consumer/spending/spending_models.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/packages_models.dart';
 import 'package:cannlytics_app/services/entries_service.dart';
 import 'package:cannlytics_app/widgets/list_items_builder.dart';
 
-class EntriesScreen extends ConsumerWidget {
-  const EntriesScreen({super.key});
+class ItemsScreen extends ConsumerWidget {
+  const ItemsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

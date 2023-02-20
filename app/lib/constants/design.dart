@@ -46,7 +46,31 @@ const gapH48 = SizedBox(height: Sizes.p48);
 const gapH64 = SizedBox(height: Sizes.p64);
 
 /// Layout breakpoints used in the app.
-class Breakpoint {
-  static const double desktop = 900;
-  static const double tablet = 600;
+class Breakpoints {
+  static const desktop = 1060.0;
+  static const tablet = 834.0;
+  static const mobile = 375.0;
+  static const twoColLayoutMinWidth = 640.0;
+}
+
+/// Standard horizontal padding.
+double horizontalPadding(double screenWidth) {
+  if (screenWidth > Breakpoints.desktop) {
+    return 0;
+  } else if (screenWidth > Breakpoints.mobile) {
+    return 28;
+  } else {
+    return 20;
+  }
+}
+
+/// Standard horizontal padding for slivers.
+double sliverHorizontalPadding(double screenWidth) {
+  if (screenWidth > Breakpoints.desktop) {
+    return (screenWidth - Breakpoints.desktop) / 2;
+  } else if (screenWidth > Breakpoints.mobile) {
+    return 28;
+  } else {
+    return 20;
+  }
 }

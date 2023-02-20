@@ -10,16 +10,16 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/ui/consumer/spending/spending_service.dart';
-import 'package:cannlytics_app/models/job.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
+import 'package:cannlytics_app/models/entry.dart';
 
-class JobsScreenController extends AutoDisposeAsyncNotifier<void> {
+class EntryScreenController extends AutoDisposeAsyncNotifier<void> {
   @override
   FutureOr<void> build() {
     // ok to leave this empty if the return type is FutureOr<void>
   }
 
-  Future<void> deleteJob(Job job) async {
+  Future<bool> setEntry(Entry entry) async {
     final currentUser = ref.read(authServiceProvider).currentUser;
     if (currentUser == null) {
       throw AssertionError('User can\'t be null');
@@ -27,10 +27,11 @@ class JobsScreenController extends AutoDisposeAsyncNotifier<void> {
     final database = ref.read(databaseProvider);
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-        () => database.deleteJob(uid: currentUser.uid, job: job));
+        () => database.setEntry(uid: currentUser.uid, entry: entry));
+    return state.hasError == false;
   }
 }
 
-final jobsScreenControllerProvider =
-    AutoDisposeAsyncNotifierProvider<JobsScreenController, void>(
-        JobsScreenController.new);
+final entryScreenControllerProvider =
+    AutoDisposeAsyncNotifierProvider<EntryScreenController, void>(
+        EntryScreenController.new);

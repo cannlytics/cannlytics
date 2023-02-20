@@ -9,15 +9,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cannlytics_app/ui/consumer/spending/spending_service.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 import 'package:cannlytics_app/models/job.dart';
 import 'package:cannlytics_app/widgets/list_items_builder.dart';
-import 'package:cannlytics_app/ui/consumer/spending/jobs_screen_controller.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/packages_controller.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 
-class JobsScreen extends StatelessWidget {
-  const JobsScreen({super.key});
+class PackagesScreen extends StatelessWidget {
+  const PackagesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class JobsScreen extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.add, color: Colors.white),
-            onPressed: () => context.goNamed(AppRoute.addJob.name),
+            onPressed: () => context.goNamed(AppRoute.addPackage.name),
           ),
         ],
       ),
@@ -52,7 +52,7 @@ class JobsScreen extends StatelessWidget {
               child: JobListTile(
                 job: job,
                 onTap: () => context.goNamed(
-                  AppRoute.job.name,
+                  AppRoute.package.name,
                   params: {'id': job.id},
                 ),
               ),

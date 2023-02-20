@@ -10,9 +10,9 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/ui/consumer/spending/spending_service.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 import 'package:cannlytics_app/models/job.dart';
-import 'package:cannlytics_app/ui/consumer/spending/job_submit_exception.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/packages_error.dart';
 
 class EditJobScreenController extends AutoDisposeAsyncNotifier<void> {
   @override

@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 
 // App primary color.
+// TODO: Separate into a theme file?
 const MaterialColor primaryColor = MaterialColor(0xFF42A5F5, {
   50: Color(0xFFE3F2FD),
   100: Color(0xFFBBDEFB),
@@ -24,6 +25,7 @@ const MaterialColor primaryColor = MaterialColor(0xFF42A5F5, {
   900: Color(0xFF0D47A1),
 });
 
+/// The main application.
 class CannlyticsApp extends ConsumerWidget {
   const CannlyticsApp({super.key});
 

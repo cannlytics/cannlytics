@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cannlytics_app/models/job.dart';
-import 'package:cannlytics_app/ui/consumer/spending/edit_job_screen_controller.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/package_edit_controller.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 
 class EditJobScreen extends ConsumerStatefulWidget {

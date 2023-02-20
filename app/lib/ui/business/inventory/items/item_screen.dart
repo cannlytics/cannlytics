@@ -12,10 +12,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cannlytics_app/widgets/date_time_picker.dart';
-import 'package:cannlytics_app/ui/consumer/spending/spending_service.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 import 'package:cannlytics_app/models/entry.dart';
 import 'package:cannlytics_app/models/job.dart';
-import 'package:cannlytics_app/ui/consumer/spending/entry_screen_controller.dart';
+import 'package:cannlytics_app/ui/business/inventory/items/item_controller.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/utils/strings/string_format.dart';
 

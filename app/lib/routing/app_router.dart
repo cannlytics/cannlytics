@@ -4,8 +4,9 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/19/2023
+// Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+import 'package:cannlytics_app/ui/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,13 +14,13 @@ import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/account_screen.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_screen.dart';
-import 'package:cannlytics_app/ui/consumer/spending/entries_screen.dart';
+import 'package:cannlytics_app/ui/business/inventory/items/items_screen.dart';
 import 'package:cannlytics_app/models/entry.dart';
 import 'package:cannlytics_app/models/job.dart';
-import 'package:cannlytics_app/ui/consumer/spending/entry_screen.dart';
-import 'package:cannlytics_app/ui/consumer/spending/job_entries_screen.dart';
-import 'package:cannlytics_app/ui/consumer/spending/edit_job_screen.dart';
-import 'package:cannlytics_app/ui/consumer/spending/jobs_screen.dart';
+import 'package:cannlytics_app/ui/business/inventory/items/item_screen.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/package_items_screen.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/package_edit_screen.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/packages_screen.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_screen.dart';
 import 'package:cannlytics_app/routing/go_router_refresh_stream.dart';
@@ -31,18 +32,118 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 // Routes.
 enum AppRoute {
+  account,
+  dashboard,
   onboarding,
   signIn,
-  // resetPassword,
-  jobs,
-  job,
-  addJob,
-  editJob,
-  entry,
-  addEntry,
-  editEntry,
-  entries,
-  account,
+  // resetPassword, // TODO: Implement reset password!
+
+  /* Business screens */
+
+  // Deliveries
+  deliveries,
+  delivery,
+  addDelivery,
+  editDelivery,
+  vehicles,
+  vehicle,
+  drivers,
+  driver,
+
+  // Employees
+  employees,
+  employee,
+  addEmployee,
+  editEmployee,
+
+  // Facilities
+  facilities,
+  facility,
+  addFacility,
+
+  // Locations
+  locations,
+  location,
+  addLocation,
+  editLocation,
+
+  // Patients
+  patients,
+  patient,
+  addPatient,
+  editPatient,
+
+  // Plants
+  plants,
+  plant,
+  addPlant,
+  editPlant,
+
+  // Results
+  results,
+  result,
+  addResult,
+  editResult,
+
+  // Sales
+  receipts,
+  receipt,
+  addReceipt,
+  editReceipt,
+  transactions,
+  transaction,
+  addTransaction,
+  editTransaction,
+
+  // Strains
+  strains,
+  strain,
+  addStrain,
+  editStrain,
+
+  // Transfers
+  transfers,
+  transfer,
+  addTransfer,
+  editTransfer,
+
+  // Packages
+  packages,
+  package,
+  addPackage,
+  editPackage,
+
+  // Items
+  items,
+  item,
+  addItem,
+  editItem,
+
+  /* Consumer screens */
+
+  // Homegrow
+  garden,
+  gardenPlant,
+  addGardenPlant,
+  editGardenPlant,
+
+  // Products
+  products,
+  product,
+  addProduct,
+  editProduct,
+
+  // Retailers and brands (licensees).
+  retailers,
+  retailer,
+  brands,
+  brand,
+
+  // Spending
+  spending,
+  spend,
+  addSpend,
+  editSpend,
 }
 
 // Navigation.
@@ -72,16 +173,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // Navigate to either the home screen or the sign in page.
       if (isLoggedIn) {
         if (state.subloc.startsWith('/sign-in')) {
-          return '/jobs';
+          return '/dashboard';
         }
       } else {
-        // Test if removing this code still works:
-        // if (state.subloc.startsWith('/jobs') ||
-        //     state.subloc.startsWith('/entries') ||
-        //     state.subloc.startsWith('/account')) {
-        //   return '/sign-in';
-        // }
-        if (state.subloc != '/sign-in') {
+        if (state.subloc.startsWith('/dashboard') ||
+            state.subloc.startsWith('/jobs') ||
+            state.subloc.startsWith('/entries') ||
+            state.subloc.startsWith('/account')) {
           return '/sign-in';
         }
       }
@@ -120,19 +218,89 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return ScaffoldWithBottomNavBar(child: child);
         },
         routes: [
-          // Jobs screens.
+          // Account screen.
           GoRoute(
-            path: '/jobs',
-            name: AppRoute.jobs.name,
+            path: '/account',
+            name: AppRoute.account.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const JobsScreen(),
+              child: const AccountScreen(),
+            ),
+          ),
+
+          // Dashboard screen.
+          GoRoute(
+            path: '/dashboard',
+            name: AppRoute.dashboard.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const DashboardScreen(),
+            ),
+          ),
+
+          // TODO:
+          // - deliveries (delivery and items, vehicles, drivers,
+          //    return reasons)
+          GoRoute(
+            path: '/deliveries',
+            name: AppRoute.deliveries.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const ItemsScreen(),
+            ),
+          ),
+
+          // - employees
+          GoRoute(
+            path: '/employees',
+            name: AppRoute.deliveries.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const ItemsScreen(),
+            ),
+          ),
+
+          // - facilities
+          // - inventory (packages and items, categories, package statuses)
+          // - locations (location types)
+          // - patients
+          // - plants (plant batches, harvests, waste (methods and reasons),
+          //      additives, adjustments, growth phases)
+          // - results (test types)
+          // - sales (receipts and transactions)
+          // - strains
+          // - transfers (transfer types)
+
+          // TODO:
+          // - homegrow
+          // - products
+          // - results
+          // - retailers
+          // - spending
+
+          // Items screen.
+          GoRoute(
+            path: '/items',
+            name: AppRoute.items.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const ItemsScreen(),
+            ),
+          ),
+
+          // Packages screens.
+          GoRoute(
+            path: '/packages',
+            name: AppRoute.packages.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const PackagesScreen(),
             ),
             routes: [
-              // New job screen.
+              // New package screen.
               GoRoute(
                 path: 'add',
-                name: AppRoute.addJob.name,
+                name: AppRoute.addPackage.name,
                 parentNavigatorKey: _rootNavigatorKey,
                 pageBuilder: (context, state) {
                   return MaterialPage(
@@ -146,12 +314,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               // Job Screen
               GoRoute(
                 path: ':id',
-                name: AppRoute.job.name,
+                name: AppRoute.package.name,
                 pageBuilder: (context, state) {
                   final id = state.params['id']!;
                   return MaterialPage(
                     key: state.pageKey,
-                    child: JobEntriesScreen(jobId: id),
+                    child: JobItemsScreen(jobId: id),
                   );
                 },
 
@@ -159,8 +327,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 routes: [
                   // Add entry screen.
                   GoRoute(
-                    path: 'entries/add',
-                    name: AppRoute.addEntry.name,
+                    path: 'items/add',
+                    name: AppRoute.addItem.name,
                     parentNavigatorKey: _rootNavigatorKey,
                     pageBuilder: (context, state) {
                       final jobId = state.params['id']!;
@@ -176,11 +344,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
                   // Entry screen.
                   GoRoute(
-                    path: 'entries/:eid',
-                    name: AppRoute.entry.name,
+                    path: 'items/:uid',
+                    name: AppRoute.item.name,
                     pageBuilder: (context, state) {
                       final jobId = state.params['id']!;
-                      final entryId = state.params['eid']!;
+                      final entryId = state.params['uid']!;
                       final entry = state.extra as Entry?;
                       return MaterialPage(
                         key: state.pageKey,
@@ -196,7 +364,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   // Edit entry screen.
                   GoRoute(
                     path: 'edit',
-                    name: AppRoute.editJob.name,
+                    name: AppRoute.editItem.name,
                     pageBuilder: (context, state) {
                       final jobId = state.params['id'];
                       final job = state.extra as Job?;
@@ -210,26 +378,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 ],
               ),
             ],
-          ),
-
-          // Entries screen.
-          GoRoute(
-            path: '/entries',
-            name: AppRoute.entries.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const EntriesScreen(),
-            ),
-          ),
-
-          // Account screen.
-          GoRoute(
-            path: '/account',
-            name: AppRoute.account.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const AccountScreen(),
-            ),
           ),
         ],
       ),
