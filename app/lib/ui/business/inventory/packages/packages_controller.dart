@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/18/2023
+// Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'dart:async';
 
@@ -13,13 +13,13 @@ import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 import 'package:cannlytics_app/models/job.dart';
 
-class PackagesScreenController extends AutoDisposeAsyncNotifier<void> {
+/// Manages packages.
+class PackagesController extends AutoDisposeAsyncNotifier<void> {
   @override
-  FutureOr<void> build() {
-    // ok to leave this empty if the return type is FutureOr<void>
-  }
+  FutureOr<void> build() {}
 
-  Future<void> deleteJob(Job job) async {
+  /// Deletes a package.
+  Future<void> deletePackage(Job job) async {
     final currentUser = ref.read(authServiceProvider).currentUser;
     if (currentUser == null) {
       throw AssertionError('User can\'t be null');
@@ -27,10 +27,10 @@ class PackagesScreenController extends AutoDisposeAsyncNotifier<void> {
     final database = ref.read(databaseProvider);
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-        () => database.deleteJob(uid: currentUser.uid, job: job));
+        () => database.deletePackage(uid: currentUser.uid, job: job));
   }
 }
 
-final jobsScreenControllerProvider =
-    AutoDisposeAsyncNotifierProvider<PackagesScreenController, void>(
-        PackagesScreenController.new);
+final packagesProvider =
+    AutoDisposeAsyncNotifierProvider<PackagesController, void>(
+        PackagesController.new);

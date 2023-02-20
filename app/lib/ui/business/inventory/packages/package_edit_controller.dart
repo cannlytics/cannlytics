@@ -12,7 +12,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 import 'package:cannlytics_app/models/job.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/packages_error.dart';
+
+class JobSubmitException {
+  String get title => 'Name already used';
+  String get description => 'Please choose a different job name';
+
+  @override
+  String toString() {
+    return '$title. $description.';
+  }
+}
 
 class EditJobScreenController extends AutoDisposeAsyncNotifier<void> {
   @override

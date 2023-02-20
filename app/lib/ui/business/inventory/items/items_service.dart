@@ -11,12 +11,24 @@ import 'package:rxdart/rxdart.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/models/app_user.dart';
 import 'package:cannlytics_app/models/daily_jobs_details.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/packages_models.dart';
 import 'package:cannlytics_app/models/entry_job.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 import 'package:cannlytics_app/utils/strings/string_format.dart';
 import 'package:cannlytics_app/models/entry.dart';
 import 'package:cannlytics_app/models/job.dart';
+
+class EntriesListTileModel {
+  const EntriesListTileModel({
+    required this.leadingText,
+    required this.trailingText,
+    this.middleText,
+    this.isHeader = false,
+  });
+  final String leadingText;
+  final String trailingText;
+  final String? middleText;
+  final bool isHeader;
+}
 
 // TODO: Clean up this code a bit more
 class EntriesService {

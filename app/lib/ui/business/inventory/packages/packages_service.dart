@@ -38,8 +38,11 @@ class SpendingService {
         data: job.toMap(),
       );
 
-  Future<void> deleteJob({required UserID uid, required Job job}) async {
-    // delete where entry.jobId == job.jobId
+  /// Delete a package given it's ID.
+  Future<void> deletePackage({
+    required UserID uid,
+    required Job job,
+  }) async {
     final allEntries = await watchEntries(uid: uid, job: job).first;
     for (final entry in allEntries) {
       if (entry.jobId == job.id) {

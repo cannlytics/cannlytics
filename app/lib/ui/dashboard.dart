@@ -193,9 +193,15 @@ class ScreenData {
     ),
     ScreenData(
       imageName: 'assets/images/icons/figures.png',
-      title: 'Inventory',
-      description: 'Manage your packages and items.',
+      title: 'Packages',
+      description: 'Manage your packages and their items.',
       route: 'packages',
+    ),
+    ScreenData(
+      imageName: 'assets/images/icons/figures.png',
+      title: 'Items',
+      description: 'Manage your items.',
+      route: 'items',
     ),
     ScreenData(
       imageName: 'assets/images/icons/figures.png',

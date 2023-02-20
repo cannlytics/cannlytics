@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/18/2023
+// Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +16,7 @@ import 'package:cannlytics_app/ui/business/inventory/packages/packages_controlle
 import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 
+/// A screen for the user to manage their packages.
 class PackagesScreen extends StatelessWidget {
   const PackagesScreen({super.key});
 
@@ -23,7 +24,7 @@ class PackagesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Jobs'),
+        title: const Text('Packages'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.add, color: Colors.white),
@@ -31,41 +32,49 @@ class PackagesScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Consumer(
-        builder: (context, ref, child) {
-          ref.listen<AsyncValue>(
-            jobsScreenControllerProvider,
-            (_, state) => state.showAlertDialogOnError(context),
-          );
-          // * TODO: investigate why we get a dismissible error if we call
-          // * ref.watch(jobsScreenControllerProvider) here
-          final jobsAsyncValue = ref.watch(jobsStreamProvider);
-          return ListItemsBuilder<Job>(
-            data: jobsAsyncValue,
-            itemBuilder: (context, job) => Dismissible(
-              key: Key('job-${job.id}'),
-              background: Container(color: Colors.red),
-              direction: DismissDirection.endToStart,
-              onDismissed: (direction) => ref
-                  .read(jobsScreenControllerProvider.notifier)
-                  .deleteJob(job),
-              child: JobListTile(
-                job: job,
-                onTap: () => context.goNamed(
-                  AppRoute.package.name,
-                  params: {'id': job.id},
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+      body: const ProductList(),
     );
   }
 }
 
-class JobListTile extends StatelessWidget {
-  const JobListTile({Key? key, required this.job, this.onTap})
+/// A list of packages.
+class ProductList extends StatelessWidget {
+  const ProductList({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, child) {
+        ref.listen<AsyncValue>(
+          packagesProvider,
+          (_, state) => state.showAlertDialogOnError(context),
+        );
+        final jobsAsyncValue = ref.watch(jobsStreamProvider);
+        return ListItemsBuilder<Job>(
+          data: jobsAsyncValue,
+          itemBuilder: (context, job) => Dismissible(
+            key: Key('package-${job.id}'),
+            background: Container(color: Colors.red),
+            direction: DismissDirection.endToStart,
+            onDismissed: (direction) =>
+                ref.read(packagesProvider.notifier).deletePackage(job),
+            child: ProductListTile(
+              job: job,
+              onTap: () => context.goNamed(
+                AppRoute.package.name,
+                params: {'id': job.id},
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// A product list tile.
+class ProductListTile extends StatelessWidget {
+  const ProductListTile({Key? key, required this.job, this.onTap})
       : super(key: key);
   final Job job;
   final VoidCallback? onTap;

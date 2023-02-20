@@ -253,7 +253,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           // - employees
           GoRoute(
             path: '/employees',
-            name: AppRoute.deliveries.name,
+            name: AppRoute.employees.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const ItemsScreen(),
@@ -261,14 +261,21 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
 
           // - facilities
+
           // - inventory (packages and items, categories, package statuses)
+
           // - locations (location types)
+
           // - patients
           // - plants (plant batches, harvests, waste (methods and reasons),
           //      additives, adjustments, growth phases)
+
           // - results (test types)
+
           // - sales (receipts and transactions)
+
           // - strains
+
           // - transfers (transfer types)
 
           // TODO:
