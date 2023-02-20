@@ -43,3 +43,4 @@ waitress==2.1.2
 Wand==0.6.11
 whitenoise==6.2.0
 zipcodes==1.2.0
+numpy>=1.22.2 # not directly required, pinned by Snyk to avoid a vulnerability
