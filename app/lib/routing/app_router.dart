@@ -6,7 +6,12 @@
 // Created: 2/18/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+import 'dart:async';
+
+import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/ui/dashboard.dart';
+import 'package:cannlytics_app/ui/general/search_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,128 +28,11 @@ import 'package:cannlytics_app/ui/business/inventory/packages/package_edit_scree
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_screen.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_screen.dart';
-import 'package:cannlytics_app/routing/go_router_refresh_stream.dart';
-import 'package:cannlytics_app/routing/bottom_navigation.dart';
+import 'package:cannlytics_app/ui/screen.dart';
 
 // Private navigators.
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
-
-// Routes.
-enum AppRoute {
-  account,
-  dashboard,
-  onboarding,
-  signIn,
-  // resetPassword, // TODO: Implement reset password!
-
-  /* Business screens */
-
-  // Deliveries
-  deliveries,
-  delivery,
-  addDelivery,
-  editDelivery,
-  vehicles,
-  vehicle,
-  drivers,
-  driver,
-
-  // Employees
-  employees,
-  employee,
-  addEmployee,
-  editEmployee,
-
-  // Facilities
-  facilities,
-  facility,
-  addFacility,
-
-  // Locations
-  locations,
-  location,
-  addLocation,
-  editLocation,
-
-  // Patients
-  patients,
-  patient,
-  addPatient,
-  editPatient,
-
-  // Plants
-  plants,
-  plant,
-  addPlant,
-  editPlant,
-
-  // Results
-  results,
-  result,
-  addResult,
-  editResult,
-
-  // Sales
-  receipts,
-  receipt,
-  addReceipt,
-  editReceipt,
-  transactions,
-  transaction,
-  addTransaction,
-  editTransaction,
-
-  // Strains
-  strains,
-  strain,
-  addStrain,
-  editStrain,
-
-  // Transfers
-  transfers,
-  transfer,
-  addTransfer,
-  editTransfer,
-
-  // Packages
-  packages,
-  package,
-  addPackage,
-  editPackage,
-
-  // Items
-  items,
-  item,
-  addItem,
-  editItem,
-
-  /* Consumer screens */
-
-  // Homegrow
-  garden,
-  gardenPlant,
-  addGardenPlant,
-  editGardenPlant,
-
-  // Products
-  products,
-  product,
-  addProduct,
-  editProduct,
-
-  // Retailers and brands (licensees).
-  retailers,
-  retailer,
-  brands,
-  brand,
-
-  // Spending
-  spending,
-  spend,
-  addSpend,
-  editSpend,
-}
 
 // Navigation.
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -189,7 +77,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // Onboarding screen, allowing user to choose "Consumer" or "Business".
       GoRoute(
         path: '/onboarding',
-        name: AppRoute.onboarding.name,
+        name: AppRoutes.onboarding.name,
         pageBuilder: (context, state) => NoTransitionPage(
           key: state.pageKey,
           child: const OnboardingScreen(),
@@ -199,7 +87,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // Sign in page.
       GoRoute(
         path: '/sign-in',
-        name: AppRoute.signIn.name,
+        name: AppRoutes.signIn.name,
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           fullscreenDialog: true,
@@ -215,13 +103,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) {
-          return ScaffoldWithBottomNavBar(child: child);
+          return MainScreen(child: child);
         },
         routes: [
           // Account screen.
           GoRoute(
             path: '/account',
-            name: AppRoute.account.name,
+            name: AppRoutes.account.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const AccountScreen(),
@@ -231,33 +119,59 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           // Dashboard screen.
           GoRoute(
             path: '/dashboard',
-            name: AppRoute.dashboard.name,
+            name: AppRoutes.dashboard.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const DashboardScreen(),
             ),
           ),
 
-          // TODO:
-          // - deliveries (delivery and items, vehicles, drivers,
-          //    return reasons)
+          // Search screen.
+          GoRoute(
+            path: '/search',
+            name: AppRoutes.search.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const SearchScreen(),
+            ),
+          ),
+
+          // Deliveries screens.
+          // - delivery
+          // - delivery items
+          // - vehicles
+          // - drivers
           GoRoute(
             path: '/deliveries',
-            name: AppRoute.deliveries.name,
+            name: AppRoutes.deliveries.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const ItemsScreen(),
             ),
           ),
 
-          // - employees
+          // Employees screens.
           GoRoute(
             path: '/employees',
-            name: AppRoute.employees.name,
+            name: AppRoutes.employees.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const ItemsScreen(),
             ),
+            routes: [
+              // Employee screen.
+              GoRoute(
+                path: ':id',
+                name: AppRoutes.package.name,
+                pageBuilder: (context, state) {
+                  final id = state.params['id']!;
+                  return MaterialPage(
+                    key: state.pageKey,
+                    child: JobItemsScreen(jobId: id),
+                  );
+                },
+              ),
+            ],
           ),
 
           // - facilities
@@ -267,6 +181,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           // - locations (location types)
 
           // - patients
+
           // - plants (plant batches, harvests, waste (methods and reasons),
           //      additives, adjustments, growth phases)
 
@@ -288,7 +203,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           // Items screen.
           GoRoute(
             path: '/items',
-            name: AppRoute.items.name,
+            name: AppRoutes.items.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const ItemsScreen(),
@@ -298,7 +213,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           // Packages screens.
           GoRoute(
             path: '/packages',
-            name: AppRoute.packages.name,
+            name: AppRoutes.packages.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const PackagesScreen(),
@@ -307,7 +222,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               // New package screen.
               GoRoute(
                 path: 'add',
-                name: AppRoute.addPackage.name,
+                name: AppRoutes.addPackage.name,
                 parentNavigatorKey: _rootNavigatorKey,
                 pageBuilder: (context, state) {
                   return MaterialPage(
@@ -321,7 +236,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               // Job Screen
               GoRoute(
                 path: ':id',
-                name: AppRoute.package.name,
+                name: AppRoutes.package.name,
                 pageBuilder: (context, state) {
                   final id = state.params['id']!;
                   return MaterialPage(
@@ -335,7 +250,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   // Add entry screen.
                   GoRoute(
                     path: 'items/add',
-                    name: AppRoute.addItem.name,
+                    name: AppRoutes.addItem.name,
                     parentNavigatorKey: _rootNavigatorKey,
                     pageBuilder: (context, state) {
                       final jobId = state.params['id']!;
@@ -352,7 +267,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   // Entry screen.
                   GoRoute(
                     path: 'items/:uid',
-                    name: AppRoute.item.name,
+                    name: AppRoutes.item.name,
                     pageBuilder: (context, state) {
                       final jobId = state.params['id']!;
                       final entryId = state.params['uid']!;
@@ -371,7 +286,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   // Edit entry screen.
                   GoRoute(
                     path: 'edit',
-                    name: AppRoute.editItem.name,
+                    name: AppRoutes.editItem.name,
                     pageBuilder: (context, state) {
                       final jobId = state.params['id'];
                       final job = state.extra as Job?;
@@ -391,3 +306,53 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+/// FIXME: Whire this up for cool transitions.
+/// Custom GoRoute sub-class to make the router declaration easier to read
+// class AppRoute extends GoRoute {
+//   AppRoute(String path, Widget Function(GoRouterState s) builder,
+//       {List<GoRoute> routes = const [], this.useFade = false})
+//       : super(
+//           path: path,
+//           routes: routes,
+//           pageBuilder: (context, state) {
+//             final pageContent = Scaffold(
+//               body: builder(state),
+//               resizeToAvoidBottomInset: false,
+//             );
+//             if (useFade) {
+//               return CustomTransitionPage(
+//                 key: state.pageKey,
+//                 child: pageContent,
+//                 transitionsBuilder:
+//                     (context, animation, secondaryAnimation, child) {
+//                   return FadeTransition(
+//                     opacity: animation,
+//                     child: child,
+//                   );
+//                 },
+//               );
+//             }
+//             return CupertinoPage(child: pageContent);
+//           },
+//         );
+//   final bool useFade;
+// }
+
+/// This class was imported from the migration guide for GoRouter 5.0
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+          (dynamic _) => notifyListeners(),
+        );
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}

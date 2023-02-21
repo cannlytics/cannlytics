@@ -6,6 +6,7 @@
 // Created: 2/18/2023
 // Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+import 'package:cannlytics_app/routing/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -42,7 +43,7 @@ class JobEntriesPageContents extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit, color: Colors.white),
             onPressed: () => context.goNamed(
-              AppRoute.editPackage.name,
+              AppRoutes.editPackage.name,
               params: {'id': job.id},
               extra: job,
             ),
@@ -53,7 +54,7 @@ class JobEntriesPageContents extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add, color: Colors.white),
         onPressed: () => context.goNamed(
-          AppRoute.addPackage.name,
+          AppRoutes.addPackage.name,
           params: {'id': job.id},
           extra: job,
         ),

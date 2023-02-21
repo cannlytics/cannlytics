@@ -6,6 +6,7 @@
 // Created: 2/17/2023
 // Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/utils/strings/string_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,7 +41,7 @@ class JobEntriesList extends ConsumerWidget {
               .read(jobsEntriesListControllerProvider.notifier)
               .deleteEntry(entry),
           onTap: () => context.goNamed(
-            AppRoute.item.name,
+            AppRoutes.item.name,
             params: {'id': job.id, 'eid': entry.id},
             extra: entry,
           ),

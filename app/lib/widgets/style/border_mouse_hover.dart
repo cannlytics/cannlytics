@@ -1,4 +1,4 @@
-import 'package:cannlytics_app/widgets/style/app_colors.dart';
+import 'package:cannlytics_app/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 class BorderMouseHover extends StatefulWidget {

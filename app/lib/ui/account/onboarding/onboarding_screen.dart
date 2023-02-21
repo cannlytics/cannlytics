@@ -7,6 +7,7 @@
 // Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/routing/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -79,7 +80,7 @@ class StartChoices extends ConsumerWidget {
                         await ref
                             .read(onboardingController.notifier)
                             .completeOnboarding('consumer');
-                        context.goNamed(AppRoute.signIn.name);
+                        context.goNamed(AppRoutes.signIn.name);
                       },
                 child: Padding(
                   padding:
@@ -123,7 +124,7 @@ class StartChoices extends ConsumerWidget {
                         await ref
                             .read(onboardingController.notifier)
                             .completeOnboarding('business');
-                        context.goNamed(AppRoute.signIn.name);
+                        context.goNamed(AppRoutes.signIn.name);
                       },
                 child: Padding(
                   padding:

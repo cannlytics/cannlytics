@@ -6,6 +6,7 @@
 // Created: 2/18/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+import 'package:cannlytics_app/routing/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -28,7 +29,7 @@ class PackagesScreen extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.add, color: Colors.white),
-            onPressed: () => context.goNamed(AppRoute.addPackage.name),
+            onPressed: () => context.goNamed(AppRoutes.addPackage.name),
           ),
         ],
       ),
@@ -61,7 +62,7 @@ class ProductList extends StatelessWidget {
             child: ProductListTile(
               job: job,
               onTap: () => context.goNamed(
-                AppRoute.package.name,
+                AppRoutes.package.name,
                 params: {'id': job.id},
               ),
             ),
