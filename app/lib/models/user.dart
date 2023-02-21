@@ -1,3 +1,12 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/20/2023
+// Updated: 2/20/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
 /// Type defining a user ID from Firebase.
 typedef UserID = String;
 

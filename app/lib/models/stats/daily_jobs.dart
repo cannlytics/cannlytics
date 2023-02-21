@@ -1,3 +1,11 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/20/2023
+// Updated: 2/20/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_app/models/entry_job.dart';
 
 /// Temporary model class to store the time tracked and pay for a job

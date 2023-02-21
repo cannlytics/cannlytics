@@ -8,18 +8,15 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/routing/mobile_menu.dart';
 import 'package:cannlytics_app/routing/routes.dart';
+import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// The main navigation header.
 class AppHeader extends StatelessWidget {
-  const AppHeader({
-    Key? key,
-    // required this.child,
-  }) : super(key: key);
-  // final Widget child;
+  const AppHeader({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +59,6 @@ class DesktopNavigationLayout extends StatelessWidget {
             text: 'Account',
             path: AppRoutes.account.name,
           ),
-          // const NavigationIconButton(assetName: Constants.search),
           // const NavigationIconButton(assetName: Constants.toggleDay),
           SizedBox(width: isVeryWide ? 80 : 28),
         ],
@@ -72,14 +68,14 @@ class DesktopNavigationLayout extends StatelessWidget {
 }
 
 /// Navigation layout for mobile.
-class MobileNavigationLayout extends StatefulWidget {
+class MobileNavigationLayout extends ConsumerStatefulWidget {
   const MobileNavigationLayout({Key? key}) : super(key: key);
 
   @override
-  State<MobileNavigationLayout> createState() => _MobileNavigationLayoutState();
+  MobileNavigationLayoutState createState() => MobileNavigationLayoutState();
 }
 
-class _MobileNavigationLayoutState extends State<MobileNavigationLayout>
+class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
     with SingleTickerProviderStateMixin {
   late final _menuController = AnimationController(
     vsync: this,
@@ -97,11 +93,16 @@ class _MobileNavigationLayoutState extends State<MobileNavigationLayout>
 
   @override
   Widget build(BuildContext context) {
+    final store = ref.watch(onboardingStoreProvider);
     return AnimatedBuilder(
       animation: _menuController,
       builder: (context, _) {
-        final height =
-            64 + _menuController.value * MobileNavigationMenu.menuHeight;
+        final List<ScreenData> screens = (store.userType() == 'consumer')
+            ? ScreenData.consumerScreens
+            : ScreenData.businessScreens;
+        final int screenCount = screens.length;
+        final menuHeight = 56 * screenCount + 64;
+        final height = 64 + _menuController.value * menuHeight;
         return SizedBox(
           height: height,
           child: Column(
@@ -116,17 +117,6 @@ class _MobileNavigationLayoutState extends State<MobileNavigationLayout>
                     const AppLogo(),
                     const Spacer(),
 
-                    // Search button.
-                    // IconButton(
-                    //   icon: const Icon(
-                    //     Icons.search,
-                    //     color: Colors.white,
-                    //     size: 30,
-                    //   ),
-                    //   onPressed: () {},
-                    // ),
-                    // const NavigationIconButton(assetName: Constants.search),
-
                     // Open / close menu button.
                     GestureDetector(
                       onTap: _toggleMenu,
@@ -140,11 +130,76 @@ class _MobileNavigationLayoutState extends State<MobileNavigationLayout>
                   ],
                 ),
               ),
-              const Expanded(child: MobileNavigationMenu()),
+
+              // List of routes.
+              Expanded(child: MobileNavigationMenu(screens: screens)),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+/// The main navigation for user's on mobile.
+class MobileNavigationMenu extends ConsumerWidget {
+  const MobileNavigationMenu({
+    Key? key,
+    required this.screens,
+  }) : super(key: key);
+  final List<ScreenData> screens;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Material(
+      // color: AppColors.offWhite,
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          for (ScreenData screen in screens)
+            MobileMenuListTile(
+              title: screen.title,
+              route: screen.route,
+              description: screen.description,
+            ),
+          // TODO: Add light/dark theme toggle.
+          // Container(
+          //   height: 64.0,
+          //   alignment: Alignment.center,
+          //   child: MobileToggleButton(onPressed: () {}),
+          // )
+        ],
+      ),
+    );
+  }
+}
+
+/// Mobile menu list item.
+class MobileMenuListTile extends StatelessWidget {
+  const MobileMenuListTile({
+    Key? key,
+    required this.title,
+    required this.description,
+    required this.route,
+  }) : super(key: key);
+  final String title;
+  final String description;
+  final String route;
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      child: InkWell(
+        splashColor: AppColors.accent1,
+        onTap: () {
+          context.goNamed(route);
+        },
+        child: ListTile(
+          leading: FlutterLogo(size: 56.0),
+          title: Text(title),
+          subtitle: Text(description),
+        ),
+      ),
     );
   }
 }

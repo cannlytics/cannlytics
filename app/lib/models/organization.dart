@@ -8,16 +8,16 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:equatable/equatable.dart';
 
-typedef PackageId = String;
+typedef OrganizationId = String;
 
 /// Model representing an organization.
-class Package extends Equatable {
-  const Package({
+class Organization extends Equatable {
+  const Organization({
     required this.uid,
-    this.label = '',
+    this.name = '',
   });
-  final PackageId uid;
-  final String label;
+  final OrganizationId uid;
+  final String name;
 
   @override
   List<Object?> get props => [uid];
@@ -25,17 +25,17 @@ class Package extends Equatable {
   @override
   bool get stringify => true;
 
-  factory Package.fromMap(Map<String, dynamic>? data, String uid) {
-    return Package(
+  factory Organization.fromMap(Map<String, dynamic>? data, String uid) {
+    return Organization(
       uid: uid,
-      label: data!['label'] as String,
+      name: data!['name'] as String,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': uid,
-      'label': label,
+      'name': name,
     };
   }
 }

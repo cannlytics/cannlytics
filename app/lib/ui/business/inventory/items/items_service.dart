@@ -9,8 +9,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/models/app_user.dart';
-import 'package:cannlytics_app/models/daily_jobs_details.dart';
+import 'package:cannlytics_app/models/user.dart';
+import 'package:cannlytics_app/models/stats/daily_jobs.dart';
 import 'package:cannlytics_app/models/entry_job.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 import 'package:cannlytics_app/utils/strings/string_format.dart';

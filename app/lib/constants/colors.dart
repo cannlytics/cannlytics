@@ -43,6 +43,9 @@ class AppColors {
   static const neutral5 = Color(0xFF4A4B4F);
   static const neutral6 = Color(0xFF0F0F0F);
 
+  // Layout colors.
+  static const Color surface = Colors.white;
+
   // Common colors.
   static const yellow = Color(0xFFE3BE1B);
   static const blue = Color(0xFF204F96);

@@ -151,28 +151,28 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
 
           // Employees screens.
-          GoRoute(
-            path: '/employees',
-            name: AppRoutes.employees.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const ItemsScreen(),
-            ),
-            routes: [
-              // Employee screen.
-              GoRoute(
-                path: ':id',
-                name: AppRoutes.package.name,
-                pageBuilder: (context, state) {
-                  final id = state.params['id']!;
-                  return MaterialPage(
-                    key: state.pageKey,
-                    child: JobItemsScreen(jobId: id),
-                  );
-                },
-              ),
-            ],
-          ),
+          // GoRoute(
+          //   path: '/employees',
+          //   name: AppRoutes.employees.name,
+          //   pageBuilder: (context, state) => NoTransitionPage(
+          //     key: state.pageKey,
+          //     child: const ItemsScreen(),
+          //   ),
+          //   routes: [
+          //     // Employee screen.
+          //     GoRoute(
+          //       path: ':id',
+          //       name: AppRoutes.package.name,
+          //       pageBuilder: (context, state) {
+          //         final id = state.params['id']!;
+          //         return MaterialPage(
+          //           key: state.pageKey,
+          //           child: JobItemsScreen(jobId: id),
+          //         );
+          //       },
+          //     ),
+          //   ],
+          // ),
 
           // - facilities
 

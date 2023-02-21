@@ -1,3 +1,11 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/20/2023
+// Updated: 2/20/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
@@ -21,15 +29,11 @@ class Job extends Equatable {
   bool get stringify => true;
 
   factory Job.fromMap(Map<String, dynamic>? data, String documentId) {
-    if (data == null) {
-      throw StateError('missing data for jobId: $documentId');
-    }
-    final name = data['name'] as String?;
-    if (name == null) {
-      throw StateError('missing name for jobId: $documentId');
-    }
-    final ratePerHour = data['ratePerHour'] as int;
-    return Job(id: documentId, name: name, ratePerHour: ratePerHour);
+    return Job(
+      id: documentId,
+      name: data!['name'] as String,
+      ratePerHour: data['ratePerHour'] as int,
+    );
   }
 
   Map<String, dynamic> toMap() {

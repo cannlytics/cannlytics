@@ -15,8 +15,10 @@ enum AppRoutes {
   account,
   dashboard,
   onboarding,
+  resetPassword,
   signIn,
-  // resetPassword, // TODO: Implement reset password!
+
+  // Utility pages.
   search,
 
   /* Business screens */
