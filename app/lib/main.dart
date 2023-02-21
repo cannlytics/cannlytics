@@ -1,11 +1,13 @@
 // Cannlytics App
 // Copyright (c) 2023 Cannlytics
+// Copyright (c) 2021 Coding With Flutter Limited
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+// License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:firebase_core/firebase_core.dart';

@@ -8,7 +8,8 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/constants/colors.dart';
-import 'package:cannlytics_app/routing/menu.dart';
+import 'package:cannlytics_app/ui/general/footer.dart';
+import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/widgets/style/border_mouse_hover.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
@@ -41,7 +42,7 @@ class DashboardScreen extends ConsumerWidget {
 
     // Body.
     return Scaffold(
-      backgroundColor: AppColors.neutral1,
+      backgroundColor: AppColors.white,
       body: CustomScrollView(
         slivers: [
           // App header.
@@ -50,6 +51,9 @@ class DashboardScreen extends ConsumerWidget {
           // Navigation cards.
           for (var chunk in chunks)
             SliverToBoxAdapter(child: DashboardCards(items: chunk)),
+
+          // Footer
+          const SliverToBoxAdapter(child: Footer()),
         ],
       ),
     );

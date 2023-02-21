@@ -8,6 +8,44 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 
+// Constant breakpoints.
+class Breakpoints {
+  static const desktop = 1060.0;
+  static const tablet = 834.0;
+  static const mobile = 375.0;
+  static const twoColLayoutMinWidth = 640.0;
+}
+
+// Constant corners.
+class Corners {
+  static const double sm = 4;
+  static const double md = 8;
+  static const double lg = 32;
+}
+
+// Constant durations.
+class Durations {
+  static const Duration fast = Duration(milliseconds: 300);
+  static const Duration med = Duration(milliseconds: 600);
+  static const Duration slow = Duration(milliseconds: 900);
+  static const Duration pageTransition = Duration(milliseconds: 200);
+}
+
+// Constant insets.
+class Insets {
+  Insets(this._scale);
+  final double _scale;
+
+  late final double xxs = 4 * _scale;
+  late final double xs = 8 * _scale;
+  late final double sm = 16 * _scale;
+  late final double md = 24 * _scale;
+  late final double lg = 32 * _scale;
+  late final double xl = 48 * _scale;
+  late final double xxl = 56 * _scale;
+  late final double offset = 80 * _scale;
+}
+
 // Constant paddings.
 class Sizes {
   static const p4 = 4.0;
@@ -20,8 +58,6 @@ class Sizes {
   static const p48 = 48.0;
   static const p64 = 64.0;
 }
-
-// TODO: Constant corners.
 
 // Constant gap widths.
 const gapW4 = SizedBox(width: Sizes.p4);
@@ -44,14 +80,6 @@ const gapH24 = SizedBox(height: Sizes.p24);
 const gapH32 = SizedBox(height: Sizes.p32);
 const gapH48 = SizedBox(height: Sizes.p48);
 const gapH64 = SizedBox(height: Sizes.p64);
-
-/// Layout breakpoints used in the app.
-class Breakpoints {
-  static const desktop = 1060.0;
-  static const tablet = 834.0;
-  static const mobile = 375.0;
-  static const twoColLayoutMinWidth = 640.0;
-}
 
 /// Standard horizontal padding.
 double horizontalPadding(double screenWidth) {

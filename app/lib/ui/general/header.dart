@@ -44,8 +44,13 @@ class DesktopNavigationLayout extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Logo.
           SizedBox(width: isVeryWide ? 80 : 28),
           const AppLogo(),
+
+          // TODO: Select license if business!
+
+          // Links.
           const Spacer(),
           NavigationLink(
             text: 'Home',

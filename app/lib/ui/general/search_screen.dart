@@ -6,7 +6,7 @@
 // Created: 2/20/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-import 'package:cannlytics_app/routing/menu.dart';
+import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/ui/general/search_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
