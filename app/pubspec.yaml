@@ -37,8 +37,21 @@ flutter:
     - assets/images/logos/cannlytics_logo_with_text_dark.svg
     - assets/images/logos/cannlytics_logo_with_text_light.svg
     - assets/images/logos/cannlytics_logo_with_text_light.png
+    - assets/images/icons/driver.png
+    - assets/images/icons/employees.png
+    - assets/images/icons/facilities.png
     - assets/images/icons/figures.png
+    - assets/images/icons/item.png
+    - assets/images/icons/locations.png
     - assets/images/icons/organizations.png
+    - assets/images/icons/packages.png
     - assets/images/icons/patients.png
-    - assets/images/icons/person.png
+    - assets/images/icons/results.png
     - assets/images/icons/shop.png
+    - assets/images/icons/sales.png
+    - assets/images/icons/spade.png
+    - assets/images/icons/spending.png
+    - assets/images/icons/strains.png
+    - assets/images/icons/transfers.png
+    # - assets/images/icons/person.png
+    # - assets/images/icons/shop.png

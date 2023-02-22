@@ -145,43 +145,43 @@ class ScreenData {
   // Business screens.
   static const businessScreens = [
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/driver.png',
       title: 'Deliveries',
       description: 'Manage your deliveries to consumers.',
       route: 'deliveries',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/employees.png',
       title: 'Employees',
       description: 'Manage your employees and staff.',
       route: 'employees',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/facilities.png',
       title: 'Facilities',
       description: 'Manage your facilities and locations.',
       route: 'facilities',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/packages.png',
       title: 'Packages',
       description: 'Manage your packages and their items.',
       route: 'packages',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/item.png',
       title: 'Items',
       description: 'Manage your items.',
       route: 'items',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/locations.png',
       title: 'Locations',
       description: 'Manage your locations and addresses.',
       route: 'locations',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/patients.png',
       title: 'Patients',
       description: 'Manage your patients and customers.',
       route: 'patients',
@@ -193,25 +193,25 @@ class ScreenData {
       route: 'plants',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/results.png',
       title: 'Results',
       description: 'Manage your test results and analyses.',
       route: 'results',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/sales.png',
       title: 'Sales',
       description: 'Manage your sale receipts, transactions, and revenue.',
       route: 'receipts',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/strains.png',
       title: 'Strains',
-      description: 'Manage your strains and product catalog.',
+      description: 'Manage your strains and variety catalog.',
       route: 'strains',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/transfers.png',
       title: 'Transfers',
       description: 'Manage your transfers and shipments.',
       route: 'transfers',
@@ -221,25 +221,25 @@ class ScreenData {
   // Consumer screens.
   static const consumerScreens = [
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/spade.png',
       title: 'Homegrow',
       description: 'Manage your home cultivation.',
       route: 'garden',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/product.png',
       title: 'Products',
       description: 'Manage your cannabis products.',
       route: 'products',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/results.png',
       title: 'results',
       description: 'Explore lab results.',
       route: 'results',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/shop.png',
       title: 'Retailers',
       description: 'Find cannabis retailers.',
       route: 'retailers',
@@ -251,7 +251,13 @@ class ScreenData {
       route: 'brands',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/strains.png',
+      title: 'Strains',
+      description: 'Explore cannabis varieties.',
+      route: 'strains',
+    ),
+    ScreenData(
+      imageName: 'assets/images/icons/spending.png',
       title: 'Spending',
       description: 'Manage your cannabis spending.',
       route: 'spending',
