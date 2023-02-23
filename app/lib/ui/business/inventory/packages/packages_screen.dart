@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 import 'package:cannlytics_app/models/job.dart';
-import 'package:cannlytics_app/widgets/list_items_builder.dart';
+import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_controller.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';

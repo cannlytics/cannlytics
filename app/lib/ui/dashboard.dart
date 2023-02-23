@@ -11,7 +11,7 @@ import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/routing/routes.dart';
-import 'package:cannlytics_app/widgets/style/border_mouse_hover.dart';
+import 'package:cannlytics_app/widgets/cards/hover_border.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -74,8 +74,10 @@ class DashboardCards extends StatelessWidget {
     final crossAxisCount =
         (screenWidth >= Breakpoints.twoColLayoutMinWidth) ? 3 : 2;
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: sliverHorizontalPadding(screenWidth),
+      padding: EdgeInsets.only(
+        left: sliverHorizontalPadding(screenWidth),
+        right: sliverHorizontalPadding(screenWidth),
+        top: 24,
       ),
       child: ItemCardGrid(
         crossAxisCount: crossAxisCount,
@@ -133,12 +135,16 @@ class ItemCard extends StatelessWidget {
         },
         child: Column(
           children: [
+            // Spacer.
+            gapH12,
+
+            // Image.
             AspectRatio(
               aspectRatio: 24.0 / 8.0,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    fit: BoxFit.fitWidth,
+                    fit: BoxFit.fitHeight,
                     image: AssetImage(data.imageName),
                   ),
                   borderRadius: const BorderRadius.only(
@@ -156,12 +162,25 @@ class ItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Title.
                   Text(
                     data.title,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge!
+                        .copyWith(color: AppColors.neutral6),
                   ),
-                  gapH12,
+
+                  // Spacer.
+                  gapH8,
+
+                  // Description.
                   Text(
                     data.description,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(color: AppColors.neutral4),
                   ),
                 ],
               ),

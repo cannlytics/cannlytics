@@ -4,34 +4,34 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/18/2023
+// Updated: 2/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 
 /// Colors used in the app for theming.
 class AppColors {
   // Primary colors.
-  static const primary = Color(0xFF2E54FF);
-  static const primary7 = Color(0xFF040D36);
-  static const primary6 = Color(0xFF0A228C);
-  static const primary5 = Color(0xFF2E54FF);
-  static const primary4 = Color(0xFF5C7AFF);
-  static const primary3 = Color(0xFFADBCFF);
-  static const primary2 = Color(0xFFD6DEFF);
-  static const primary1 = Color(0xFFF7F9FF);
+  static const primary = Color(0xFFFF9500);
+  static const primary7 = Color(0xFFe53a23);
+  static const primary6 = Color(0xFFFF9339);
+  static const primary5 = Color(0xFFFF9500);
+  static const primary4 = Color(0xFFffa600);
+  static const primary3 = Color(0xFFFF8979);
+  static const primary2 = Color(0xFFFFCE88);
+  static const primary1 = Color(0xFFFFE4B3);
 
-  // Primary colors.
-  static const MaterialColor primaryColors = MaterialColor(0xFF42A5F5, {
-    50: Color(0xFFE3F2FD),
-    100: Color(0xFFBBDEFB),
-    200: Color(0xFF90CAF9),
-    300: Color(0xFF64B5F6),
-    400: Color(0xFF42A5F5),
-    500: Color(0xFF2196F3),
-    600: Color(0xFF1E88E5),
-    700: Color(0xFF1976D2),
-    800: Color(0xFF1565C0),
-    900: Color(0xFF0D47A1),
+  // Shades of the primary color.
+  static const MaterialColor primaryColors = MaterialColor(0xFFFF9500, {
+    50: Color(0xFFFFE4B3),
+    100: Color(0xFFFFD488),
+    200: Color(0xFFFFC864),
+    300: Color(0xFFFFCE88),
+    400: Color(0xFFFF8979),
+    500: Color(0xFFFFAD39),
+    600: Color(0xFFffa600),
+    700: Color(0xFFFF9500),
+    800: Color(0xFFFF9339),
+    900: Color(0xFFe53a23),
   });
 
   // Secondary colors.
@@ -55,9 +55,9 @@ class AppColors {
   static const red = Color(0xFFB3122F);
 
   // Text colors.
-  static final Color accent1 = Color(0xFFE4935D);
-  static final Color accent2 = Color(0xFFBEABA1);
-  static final Color offWhite = Color(0xFFF8ECE5);
+  static const Color accent1 = Color(0xFFFF9500);
+  static const Color accent2 = Color(0xFFBEABA1);
+  static const Color offWhite = Color(0xFFF8ECE5);
   static const Color caption = Color(0xFF7D7873);
   static const Color body = Color(0xFF514F4D);
   static const Color greyStrong = Color(0xFF272625);
@@ -95,9 +95,13 @@ class AppColors {
 
     /// Now that we have ColorScheme and TextTheme, we can create the ThemeData
     /// Also add on some extra properties that ColorScheme seems to miss
-    var t =
-        ThemeData.from(textTheme: txtTheme, colorScheme: colorScheme).copyWith(
-      textSelectionTheme: TextSelectionThemeData(cursorColor: accent1),
+    var t = ThemeData.from(
+      textTheme: txtTheme,
+      colorScheme: colorScheme,
+    ).copyWith(
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: accent1,
+      ),
       highlightColor: accent1,
     );
 

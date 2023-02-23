@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/18/2023
+// Updated: 2/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
 
+/// Widget to display an error message.
 class ErrorMessageWidget extends StatelessWidget {
   const ErrorMessageWidget(this.errorMessage, {super.key});
   final String errorMessage;
@@ -15,7 +16,9 @@ class ErrorMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       errorMessage,
-      style: Theme.of(context).textTheme.headline6!.copyWith(color: Colors.red),
+      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+            color: Colors.red,
+          ),
     );
   }
 }

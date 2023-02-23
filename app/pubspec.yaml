@@ -1,5 +1,5 @@
 name: cannlytics_app
-description: The Cannlytics app.
+description: An app to interface with Cannlytics, cannabis data and analytics.
 
 publish_to: 'none'
 version: 1.0.0
@@ -23,6 +23,7 @@ dependencies:
   intl: ^0.17.0
   rxdart: ^0.27.6
   shared_preferences: ^2.0.15
+  url_launcher: ^6.1.10
 
 dev_dependencies:
   flutter_test:
@@ -37,21 +38,74 @@ flutter:
     - assets/images/logos/cannlytics_logo_with_text_dark.svg
     - assets/images/logos/cannlytics_logo_with_text_light.svg
     - assets/images/logos/cannlytics_logo_with_text_light.png
+    - assets/images/icons/additives.png
+    - assets/images/icons/anchor.png
+    - assets/images/icons/award.png
+    - assets/images/icons/book.png
+    - assets/images/icons/bug.png
+    - assets/images/icons/certificate.png
+    - assets/images/icons/chemistry.png
+    - assets/images/icons/clock.png
+    - assets/images/icons/clones.png
+    - assets/images/icons/document.png
     - assets/images/icons/driver.png
+    - assets/images/icons/electricity.png
     - assets/images/icons/employees.png
     - assets/images/icons/facilities.png
+    - assets/images/icons/fan.png
     - assets/images/icons/figures.png
+    - assets/images/icons/figures.svg
+    - assets/images/icons/flower-plant.png
+    - assets/images/icons/heavy-metal.png
+    - assets/images/icons/images.png
+    - assets/images/icons/indoor.png
     - assets/images/icons/item.png
+    - assets/images/icons/leaf.png
+    - assets/images/icons/leaf_outline.png
+    - assets/images/icons/light.png
     - assets/images/icons/locations.png
+    - assets/images/icons/logs.png
+    - assets/images/icons/measurement.png
+    - assets/images/icons/measurements.png
+    - assets/images/icons/meter.png
+    - assets/images/icons/microbe.png
+    - assets/images/icons/notes.png
     - assets/images/icons/organizations.png
+    - assets/images/icons/organizations.svg
+    - assets/images/icons/outdoor.png
     - assets/images/icons/packages.png
     - assets/images/icons/patients.png
+    - assets/images/icons/person.png
+    - assets/images/icons/photos.png
+    - assets/images/icons/plant.png
+    - assets/images/icons/plant-batches.png
+    - assets/images/icons/plant-data.png
+    - assets/images/icons/plant-environment.png
+    - assets/images/icons/process.png
+    - assets/images/icons/product.png
+    - assets/images/icons/products.png
+    - assets/images/icons/reagents.png
+    - assets/images/icons/recipe.png
+    - assets/images/icons/result.png
     - assets/images/icons/results.png
-    - assets/images/icons/shop.png
     - assets/images/icons/sales.png
+    - assets/images/icons/sample-plant.png
+    - assets/images/icons/security.png
+    - assets/images/icons/seedlings.png
+    - assets/images/icons/settings.png
+    - assets/images/icons/shop.png
+    - assets/images/icons/shop.svg
+    - assets/images/icons/shovel.png
     - assets/images/icons/spade.png
+    - assets/images/icons/spend.png
     - assets/images/icons/spending.png
+    - assets/images/icons/stats.png
     - assets/images/icons/strains.png
+    - assets/images/icons/toolbox.png
     - assets/images/icons/transfers.png
-    # - assets/images/icons/person.png
-    # - assets/images/icons/shop.png
+    - assets/images/icons/tree.png
+    - assets/images/icons/unknown-docs.png
+    - assets/images/icons/waste.png
+    - assets/images/icons/water.png
+    - assets/images/icons/weights.png
+    - assets/images/icons/wrench.png

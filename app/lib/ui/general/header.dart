@@ -24,6 +24,14 @@ class AppHeader extends StatelessWidget {
     bool isWide = screenWidth > Breakpoints.tablet;
     return Container(
       color: AppColors.white,
+      // decoration: const BoxDecoration(
+      //   border: Border(
+      //     bottom: BorderSide(
+      //       color: AppColors.neutral2,
+      //       width: 1,
+      //     ),
+      //   ),
+      // ),
       child: isWide
           ? const DesktopNavigationLayout()
           : const MobileNavigationLayout(),
@@ -39,34 +47,44 @@ class DesktopNavigationLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     bool isVeryWide = screenWidth > Breakpoints.desktop;
-    return SizedBox(
-      height: 64,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Logo.
-          SizedBox(width: isVeryWide ? 80 : 28),
-          const AppLogo(),
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.neutral2,
+            width: 1,
+          ),
+        ),
+      ),
+      child: SizedBox(
+        height: 64,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Logo.
+            SizedBox(width: isVeryWide ? 80 : 28),
+            const AppLogo(),
 
-          // TODO: Select license if business!
+            // TODO: Select license if business!
 
-          // Links.
-          const Spacer(),
-          NavigationLink(
-            text: 'Home',
-            path: AppRoutes.dashboard.name,
-          ),
-          NavigationLink(
-            text: 'Search',
-            path: AppRoutes.search.name,
-          ),
-          NavigationLink(
-            text: 'Account',
-            path: AppRoutes.account.name,
-          ),
-          // const NavigationIconButton(assetName: Constants.toggleDay),
-          SizedBox(width: isVeryWide ? 80 : 28),
-        ],
+            // Links.
+            const Spacer(),
+            // NavigationLink(
+            //   text: 'Home',
+            //   path: AppRoutes.dashboard.name,
+            // ),
+            // NavigationLink(
+            //   text: 'Search',
+            //   path: AppRoutes.search.name,
+            // ),
+            NavigationLink(
+              text: 'Account',
+              path: AppRoutes.account.name,
+            ),
+            // const NavigationIconButton(assetName: Constants.toggleDay),
+            SizedBox(width: isVeryWide ? 80 : 28),
+          ],
+        ),
       ),
     );
   }
@@ -108,37 +126,47 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
         final int screenCount = screens.length;
         final menuHeight = 56 * screenCount + 64;
         final height = 64 + _menuController.value * menuHeight;
-        return SizedBox(
-          height: height,
-          child: Column(
-            children: [
-              SizedBox(
-                height: 64,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // App logo.
-                    const SizedBox(width: 28),
-                    const AppLogo(),
-                    const Spacer(),
-
-                    // Open / close menu button.
-                    GestureDetector(
-                      onTap: _toggleMenu,
-                      child: AnimatedIcon(
-                        icon: AnimatedIcons.menu_close,
-                        progress: _menuController,
-                        color: AppColors.neutral2,
-                      ),
-                    ),
-                    const SizedBox(width: 28),
-                  ],
-                ),
+        return Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: AppColors.neutral2,
+                width: 1,
               ),
+            ),
+          ),
+          child: SizedBox(
+            height: height,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 64,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // App logo.
+                      const SizedBox(width: 28),
+                      const AppLogo(),
+                      const Spacer(),
 
-              // List of routes.
-              Expanded(child: MobileNavigationMenu(screens: screens)),
-            ],
+                      // Open / close menu button.
+                      GestureDetector(
+                        onTap: _toggleMenu,
+                        child: AnimatedIcon(
+                          icon: AnimatedIcons.menu_close,
+                          progress: _menuController,
+                          color: AppColors.neutral2,
+                        ),
+                      ),
+                      const SizedBox(width: 28),
+                    ],
+                  ),
+                ),
+
+                // List of routes.
+                Expanded(child: MobileNavigationMenu(screens: screens)),
+              ],
+            ),
           ),
         );
       },
@@ -166,6 +194,7 @@ class MobileNavigationMenu extends ConsumerWidget {
               title: screen.title,
               route: screen.route,
               description: screen.description,
+              imageName: screen.imageName,
             ),
           // TODO: Add light/dark theme toggle.
           // Container(
@@ -186,10 +215,13 @@ class MobileMenuListTile extends StatelessWidget {
     required this.title,
     required this.description,
     required this.route,
+    required this.imageName,
   }) : super(key: key);
   final String title;
   final String description;
   final String route;
+  final String imageName;
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -200,7 +232,10 @@ class MobileMenuListTile extends StatelessWidget {
           context.goNamed(route);
         },
         child: ListTile(
-          leading: FlutterLogo(size: 56.0),
+          leading: Image.asset(
+            imageName,
+            height: 45,
+          ),
           title: Text(title),
           subtitle: Text(description),
         ),
@@ -215,9 +250,15 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/images/logos/cannlytics_logo_with_text_light.png',
-      width: 120,
+    return InkWell(
+      splashColor: AppColors.accent1,
+      onTap: () {
+        context.goNamed('dashboard');
+      },
+      child: Image.asset(
+        'assets/images/logos/cannlytics_logo_with_text_light.png',
+        width: 120,
+      ),
     );
   }
 }

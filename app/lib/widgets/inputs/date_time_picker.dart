@@ -9,7 +9,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:cannlytics_app/widgets/input_dropdown.dart';
+import 'package:cannlytics_app/widgets/inputs/input_dropdown.dart';
 import 'package:cannlytics_app/utils/strings/string_format.dart';
 
 class DateTimePicker extends StatelessWidget {

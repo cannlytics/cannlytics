@@ -9,7 +9,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/ui/business/inventory/items/items_service.dart';
-import 'package:cannlytics_app/widgets/list_items_builder.dart';
+import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
 
 class ItemsScreen extends ConsumerWidget {
   const ItemsScreen({super.key});

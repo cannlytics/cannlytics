@@ -7,7 +7,7 @@
 // Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:flutter/material.dart';
-import 'package:cannlytics_app/widgets/responsive_center.dart';
+import 'package:cannlytics_app/widgets/layout/responsive_center.dart';
 import 'package:cannlytics_app/constants/design.dart';
 
 /// Scrollable widget that shows a responsive card with a given child widget.

@@ -9,8 +9,8 @@
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cannlytics_app/widgets/action_text_button.dart';
-import 'package:cannlytics_app/widgets/avatar.dart';
+import 'package:cannlytics_app/widgets/buttons/action_text_button.dart';
+import 'package:cannlytics_app/widgets/images/avatar.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/account_controller.dart';
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';

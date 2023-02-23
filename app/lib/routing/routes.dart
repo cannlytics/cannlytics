@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/20/2023
+// Updated: 2/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Routes.
@@ -145,7 +145,7 @@ class ScreenData {
   // Business screens.
   static const businessScreens = [
     ScreenData(
-      imageName: 'assets/images/icons/driver.png',
+      imageName: 'assets/images/icons/spending.png',
       title: 'Deliveries',
       description: 'Manage your deliveries to consumers.',
       route: 'deliveries',
@@ -187,13 +187,13 @@ class ScreenData {
       route: 'patients',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/plant.png',
       title: 'Plants',
       description: 'Manage your plants and cultivation processes.',
       route: 'plants',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/results.png',
+      imageName: 'assets/images/icons/chemistry.png',
       title: 'Results',
       description: 'Manage your test results and analyses.',
       route: 'results',
@@ -221,7 +221,7 @@ class ScreenData {
   // Consumer screens.
   static const consumerScreens = [
     ScreenData(
-      imageName: 'assets/images/icons/spade.png',
+      imageName: 'assets/images/icons/indoor.png',
       title: 'Homegrow',
       description: 'Manage your home cultivation.',
       route: 'garden',
@@ -233,8 +233,8 @@ class ScreenData {
       route: 'products',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/results.png',
-      title: 'results',
+      imageName: 'assets/images/icons/chemistry.png',
+      title: 'Results',
       description: 'Explore lab results.',
       route: 'results',
     ),
@@ -245,9 +245,9 @@ class ScreenData {
       route: 'retailers',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/figures.png',
+      imageName: 'assets/images/icons/award.png',
       title: 'Brands',
-      description: 'Find cannabis brands.',
+      description: 'Explore cannabis brands and their products.',
       route: 'brands',
     ),
     ScreenData(
@@ -260,7 +260,7 @@ class ScreenData {
       imageName: 'assets/images/icons/spending.png',
       title: 'Spending',
       description: 'Manage your cannabis spending.',
-      route: 'spending',
+      route: 'spend',
     ),
   ];
 }

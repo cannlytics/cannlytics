@@ -4,16 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 2/20/2023
+// Updated: 2/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-// import 'package:cannlytics_app/src/constants/app_colors.dart';
-// import 'package:cannlytics_app/src/constants/breakpoints.dart';
-// import 'package:cannlytics_app/src/features/app_header/app_logo.dart';
 import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
+import 'package:cannlytics_app/utils/web/web.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 /// A footer with links at the bottom of the app.
 class Footer extends StatelessWidget {
@@ -21,19 +18,13 @@ class Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine the screen size.
     final screenWidth = MediaQuery.of(context).size.width;
     final isWide = screenWidth > Breakpoints.tablet;
+
+    // Build the footer.
     return Container(
-      // margin: EdgeInsets.only(top: 16),
       margin: EdgeInsets.only(top: Insets(1).md),
-      // decoration: const BoxDecoration(
-      //   border: Border(
-      //     top: BorderSide(
-      //       color: AppColors.neutral2,
-      //       width: 1,
-      //     ),
-      //   ),
-      // ),
       child: Center(
         child: SizedBox(
           width: Breakpoints.desktop.toDouble(),
@@ -46,20 +37,28 @@ class Footer extends StatelessWidget {
                   isWide ? CrossAxisAlignment.start : CrossAxisAlignment.center,
               children: [
                 // Logo.
-                const SizedBox(height: 32),
+                gapH6,
                 const AppLogo(),
-                const SizedBox(height: 6),
+                gapH6,
 
-                // Copyright.
-                Text(
-                  'Copyright © 2023 Cannlytics',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                        color: AppColors.neutral5,
-                        fontWeight: FontWeight.normal,
-                      ),
-                ),
-                const SizedBox(height: 12),
+                // Copyright and version.
+                if (isWide)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _copyright(context),
+                      _version(context),
+                    ],
+                  ),
+                if (!isWide)
+                  Column(
+                    children: [
+                      _copyright(context),
+                      gapH6,
+                      _version(context),
+                    ],
+                  ),
+                gapH6,
 
                 // Horizontal rule.
                 Container(
@@ -69,7 +68,7 @@ class Footer extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Links.
-                const FooterLinks(),
+                FooterLinks(isWide: isWide),
                 const SizedBox(height: 16),
               ],
             ),
@@ -78,27 +77,70 @@ class Footer extends StatelessWidget {
       ),
     );
   }
+
+  /// Copyright widget.
+  Widget _copyright(BuildContext context) {
+    return Text(
+      'Copyright © 2023 Cannlytics',
+      textAlign: TextAlign.center,
+      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+            color: AppColors.neutral5,
+            fontWeight: FontWeight.normal,
+          ),
+    );
+  }
+
+  /// Version widget.
+  Widget _version(BuildContext context) {
+    return Text(
+      'v1.0.0',
+      textAlign: TextAlign.center,
+      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+            color: AppColors.neutral5,
+            fontWeight: FontWeight.normal,
+          ),
+    );
+  }
 }
 
 /// Row of footer links.
 class FooterLinks extends StatelessWidget {
-  const FooterLinks({Key? key}) : super(key: key);
+  const FooterLinks({
+    Key? key,
+    required this.isWide,
+  }) : super(key: key);
+  final bool isWide;
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWide = screenWidth > Breakpoints.tablet;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const FooterLink(text: 'Contact', route: 'contact'),
+        // Contact link.
+        const FooterLink(
+          text: 'Contact',
+          route: 'https://cannlytics.com/contact',
+        ),
+
+        // Spacer.
         if (isWide) const Spacer(),
+
+        // Terms links.
         if (!isWide) const SizedBox(width: 32),
-        const FooterLink(text: 'Privacy', route: 'privacy'),
+        const FooterLink(
+          text: 'Privacy',
+          route: 'https://docs.cannlytics.com/about/privacy-policy',
+        ),
         const SizedBox(width: 32),
-        const FooterLink(text: 'Security', route: 'security'),
+        const FooterLink(
+          text: 'Security',
+          route: 'https://docs.cannlytics.com/about/security-policy',
+        ),
         const SizedBox(width: 32),
-        const FooterLink(text: 'Terms', route: 'terms'),
+        const FooterLink(
+          text: 'Terms',
+          route: 'https://docs.cannlytics.com/about/terms-of-service',
+        ),
       ],
     );
   }
@@ -113,28 +155,20 @@ class FooterLink extends StatelessWidget {
   }) : super(key: key);
   final String text;
   final String route;
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: TextButton(
-          child: Text(
-            text,
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall!
-                .copyWith(color: AppColors.neutral6),
-          ),
-          onPressed: () {
-            // TODO: Open terms in dialogs!
-            // context.goNamed(route);
-            print('RENDER:');
-            print(route);
-          },
-        ),
+    return TextButton(
+      child: Text(
+        text,
+        style: Theme.of(context)
+            .textTheme
+            .titleSmall!
+            .copyWith(color: AppColors.neutral6),
       ),
+      onPressed: () {
+        WebUtils.launchURL(route);
+      },
     );
   }
 }
