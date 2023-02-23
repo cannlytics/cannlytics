@@ -10,6 +10,7 @@
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -29,17 +30,26 @@ class CannlyticsApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final goRouter = ref.watch(goRouterProvider);
+    final themeMode = ref.watch(themeModeProvider);
     return MaterialApp.router(
       routerConfig: goRouter,
-      theme: ThemeData(
-        primarySwatch: AppColors.primaryColors,
-        unselectedWidgetColor: Colors.grey,
-        appBarTheme: const AppBarTheme(
-          elevation: 2.0,
-          centerTitle: true,
-        ),
-        scaffoldBackgroundColor: Colors.grey[200],
-      ),
+      // theme: ThemeData(
+      //   primarySwatch: AppColors.primaryColors,
+      //   unselectedWidgetColor: Colors.grey,
+      //   appBarTheme: const AppBarTheme(
+      //     elevation: 0.0,
+      //     centerTitle: true,
+      //   ),
+      //   scaffoldBackgroundColor: Colors.grey[200],
+      // ),
+      // darkTheme: ThemeData(
+      //   useMaterial3: true,
+      //   colorScheme: darkColorScheme,
+      //   textTheme: textTheme,
+      // ),
+      theme: AppColors.toThemeData(false),
+      darkTheme: AppColors.toThemeData(true),
+      themeMode: themeMode,
       debugShowCheckedModeBanner: false,
     );
   }

@@ -24,7 +24,7 @@ class CustomTextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: Sizes.p48,
+      height: Sizes.p24,
       child: TextButton(
         onPressed: onPressed,
         child: Text(

@@ -8,6 +8,8 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/routes.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/widgets/cards/hover_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +22,8 @@ class OnboardingScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -28,7 +32,7 @@ class OnboardingScreen extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            appLogo(),
+            appLogo(isDark),
             gapH24,
             const StartChoices(),
           ],
@@ -38,112 +42,102 @@ class OnboardingScreen extends ConsumerWidget {
   }
 
   /// A simple logo widget.
-  Widget appLogo() {
+  Widget appLogo(bool isDark) {
     return FractionallySizedBox(
       widthFactor: 0.5,
       child: Image.asset(
-        'assets/images/logos/cannlytics_logo_with_text_light.png',
-        height: 60,
+        isDark
+            ? 'assets/images/logos/cannlytics_logo_with_text_light.png'
+            : 'assets/images/logos/cannlytics_logo_with_text_dark.png',
+        height: 45,
       ),
     );
   }
 }
 
 /// A widget that allows the user to choose between "Consumer" and "Business".
-class StartChoices extends ConsumerWidget {
+class StartChoices extends StatelessWidget {
   const StartChoices({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(onboardingController);
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      children: const [
         // Consumer choice.
-        Flexible(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 300),
-            child: Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                side: const BorderSide(
-                  color: Colors.grey,
-                  width: 0.1,
-                ),
-              ),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: state.isLoading
-                    ? null
-                    : () async {
-                        await ref
-                            .read(onboardingController.notifier)
-                            .completeOnboarding('consumer');
-                        context.goNamed(AppRoutes.signIn.name);
-                      },
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 24, horizontal: 36),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        'assets/images/icons/figures.png',
-                        width: 75,
-                      ),
-                      const Text('Consumer'),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+        StartingCard(
+          title: 'Consumer',
+          route: 'consumer',
+          imageName: 'assets/images/icons/figures.png',
         ),
 
         // Spacer.
         gapW12,
 
         // Business choice.
-        Flexible(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 300),
+        StartingCard(
+          title: 'Business',
+          route: 'business',
+          imageName: 'assets/images/icons/organizations.png',
+        ),
+      ],
+    );
+  }
+}
+
+/// A card to display starting choices.
+class StartingCard extends ConsumerWidget {
+  const StartingCard({
+    super.key,
+    required this.title,
+    required this.route,
+    required this.imageName,
+  });
+  final String title;
+  final String route;
+  final String imageName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(onboardingController);
+    return Flexible(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 300),
+        child: BorderMouseHover(
+          builder: (context, value) => InkWell(
+            borderRadius: BorderRadius.circular(3),
+            onTap: state.isLoading
+                ? null
+                : () async {
+                    await ref
+                        .read(onboardingController.notifier)
+                        .completeOnboarding(route);
+                    context.goNamed(AppRoutes.signIn.name);
+                  },
             child: Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                side: const BorderSide(
-                  color: Colors.grey,
-                  width: 0.1,
-                ),
+                borderRadius: BorderRadius.circular(3),
               ),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: state.isLoading
-                    ? null
-                    : () async {
-                        await ref
-                            .read(onboardingController.notifier)
-                            .completeOnboarding('business');
-                        context.goNamed(AppRoutes.signIn.name);
-                      },
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 24, horizontal: 36),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        'assets/images/icons/organizations.png',
-                        width: 75,
-                      ),
-                      const Text('Business'),
-                    ],
-                  ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 36,
+                ),
+                child: Column(
+                  children: [
+                    Image.asset(
+                      imageName,
+                      width: 75,
+                    ),
+                    Text(title),
+                  ],
                 ),
               ),
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }

@@ -22,6 +22,13 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(authService.signOut);
   }
+
+  /// Change the user's photo.
+  Future<void> changePhoto() async {
+    final authService = ref.read(authServiceProvider);
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(authService.changePhoto);
+  }
 }
 
 // An instance of the account controller to use as a provider.

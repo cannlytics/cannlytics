@@ -66,17 +66,16 @@ class AppColors {
   static const Color black = Color(0xFF1E1B18);
 
   // Whether or not the app is in dark mode.
-  final bool isDark = false;
+  // final bool isDark = false;
 
   /// Shift a color.
-  Color shift(Color c, double d) =>
-      ColorUtils.shiftHsl(c, d * (isDark ? -1 : 1));
+  // Color shift(Color c, double d) =>
+  //     ColorUtils.shiftHsl(c, d * (isDark ? -1 : 1));
 
   /// Convert the colors to theme data.
-  ThemeData toThemeData() {
+  static ThemeData toThemeData(bool isDark) {
     TextTheme txtTheme =
         (isDark ? ThemeData.dark() : ThemeData.light()).textTheme;
-    Color txtColor = white;
     ColorScheme colorScheme = ColorScheme(
       brightness: isDark ? Brightness.dark : Brightness.light,
       primary: accent1,
@@ -84,28 +83,81 @@ class AppColors {
       secondary: accent1,
       secondaryContainer: accent1,
       background: offWhite,
-      surface: offWhite,
-      onBackground: txtColor,
-      onSurface: txtColor,
+      surface: isDark ? Colors.white : const Color(0xFF323443),
+      onBackground: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+      onSurface: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
       onError: Colors.white,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       error: Colors.red.shade400,
     );
 
-    /// Now that we have ColorScheme and TextTheme, we can create the ThemeData
-    /// Also add on some extra properties that ColorScheme seems to miss
+    // Create the ThemeData with the ColorScheme and TextTheme.
+    // Also add on extra properties that ColorScheme seems to miss.
     var t = ThemeData.from(
       textTheme: txtTheme,
       colorScheme: colorScheme,
     ).copyWith(
+      useMaterial3: true,
+      scaffoldBackgroundColor: isDark ? Colors.white : const Color(0xFF323443),
+      buttonTheme: const ButtonThemeData(
+        buttonColor: primary2,
+        textTheme: ButtonTextTheme.primary,
+      ),
+      textTheme: TextTheme(
+        displayLarge: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        displayMedium: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        displaySmall: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        headlineLarge: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        headlineMedium: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        headlineSmall: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        titleLarge: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        titleMedium: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        titleSmall: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        bodyLarge: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        bodyMedium: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        bodySmall: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        labelLarge: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        labelMedium: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+        labelSmall: TextStyle(
+          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+        ),
+      ),
       textSelectionTheme: const TextSelectionThemeData(
         cursorColor: accent1,
       ),
       highlightColor: accent1,
     );
 
-    /// Return the themeData which MaterialApp can use.
+    // Return the themeData which MaterialApp can use.
     return t;
   }
 }

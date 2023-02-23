@@ -6,6 +6,8 @@
 // Created: 2/18/2023
 // Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/utils/strings/string_format.dart';
 import 'package:flutter/material.dart';
@@ -37,10 +39,85 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final store = ref.watch(onboardingStoreProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
     return Scaffold(
-      appBar: AppBar(title: Text(Format.capitalize(store.userType()))),
-      body: SignInForm(formType: formType),
+      // appBar: AppBar(title: Text(Format.capitalize(store.userType()))),
+      // backgroundColor: AppColors.surface,
+      // body: SignInForm(formType: formType),
+      body: CustomScrollView(
+        slivers: [
+          // Light / dark theme toggle.
+          const SliverToBoxAdapter(child: ThemeToggle()),
+
+          // Logo.
+          SliverToBoxAdapter(child: appLogo(isDark)),
+
+          // User type.
+          SliverToBoxAdapter(child: userType(context, store.userType())),
+
+          // Sign in form.
+          SliverToBoxAdapter(child: SignInForm(formType: formType)),
+
+          // TODO: Terms.
+
+          // TODO: Copyright.
+        ],
+      ),
     );
+  }
+
+  /// A simple logo widget.
+  Widget appLogo(bool isDark) {
+    return FractionallySizedBox(
+      widthFactor: 0.5,
+      child: Image.asset(
+        isDark
+            ? 'assets/images/logos/cannlytics_logo_with_text_light.png'
+            : 'assets/images/logos/cannlytics_logo_with_text_dark.png',
+        height: 45,
+      ),
+    );
+  }
+
+  /// A simple user type.
+  Widget userType(BuildContext context, String type) {
+    return Center(
+      child: Text(Format.capitalize(type),
+          style: Theme.of(context).textTheme.titleSmall),
+    );
+  }
+}
+
+/// Light / dark theme toggle.
+class ThemeToggle extends StatelessWidget {
+  const ThemeToggle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(builder: (context, ref, child) {
+      final theme = ref.watch(themeModeProvider);
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(6),
+            child: IconButton(
+              splashRadius: 18,
+              onPressed: () {
+                // Toggle light / dark theme.
+                ref.read(themeModeProvider.notifier).state =
+                    theme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+              },
+              icon: Icon(
+                theme == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+                color: AppColors.neutral4,
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 }
 
@@ -196,6 +273,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
               CustomTextButton(
                 text: _formType.secondaryButtonText,
                 onPressed: state.isLoading ? null : _updateFormType,
+                style: Theme.of(context).textTheme.titleSmall,
               ),
 
               // Spacer.

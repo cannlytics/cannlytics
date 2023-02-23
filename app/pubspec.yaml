@@ -12,6 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.5
   equatable: ^2.0.5
   firebase_auth: ^4.1.2
+  firebase_storage: ^11.0.14
   firebase_core: ^2.2.0
   flutter:
     sdk: flutter
@@ -20,6 +21,7 @@ dependencies:
   flutter_svg: ^1.1.6
   go_router: 5.1.1
   http: ^0.13.5
+  image_picker: ^0.8.6+3
   intl: ^0.17.0
   rxdart: ^0.27.6
   shared_preferences: ^2.0.15
@@ -36,6 +38,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/logos/cannlytics_logo_with_text_dark.svg
+    - assets/images/logos/cannlytics_logo_with_text_dark.png
     - assets/images/logos/cannlytics_logo_with_text_light.svg
     - assets/images/logos/cannlytics_logo_with_text_light.png
     - assets/images/icons/additives.png
