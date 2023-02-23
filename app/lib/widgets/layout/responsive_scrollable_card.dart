@@ -23,6 +23,7 @@ class ResponsiveScrollableCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(Sizes.p16),
           child: Card(
+            color: Colors.transparent,
             child: Padding(
               padding: const EdgeInsets.all(Sizes.p16),
               child: child,

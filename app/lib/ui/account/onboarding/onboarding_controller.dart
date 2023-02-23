@@ -55,6 +55,13 @@ class OnboardingController extends AutoDisposeAsyncNotifier<void> {
     state = await AsyncValue.guard(() => onboardingStore.setUserType(choice));
     state = await AsyncValue.guard(onboardingStore.setOnboardingComplete);
   }
+
+  /// Change the user's type.
+  Future<void> changeUserType(String choice) async {
+    final onboardingStore = ref.watch(onboardingStoreProvider);
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() => onboardingStore.setUserType(choice));
+  }
 }
 
 // A controller instance.

@@ -54,7 +54,8 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
           SliverToBoxAdapter(child: appLogo(isDark)),
 
           // User type.
-          SliverToBoxAdapter(child: userType(context, store.userType())),
+          // FIXME: Allow the user to toggle their type here on sign-in.
+          SliverToBoxAdapter(child: userTypeButton(context, store)),
 
           // Sign in form.
           SliverToBoxAdapter(child: SignInForm(formType: formType)),
@@ -80,11 +81,25 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
     );
   }
 
-  /// A simple user type.
-  Widget userType(BuildContext context, String type) {
+  /// A simple user type choice widget.
+  Widget userTypeButton(BuildContext context, OnboardingStore store) {
     return Center(
-      child: Text(Format.capitalize(type),
-          style: Theme.of(context).textTheme.titleSmall),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: CustomTextButton(
+          text: Format.capitalize(store.userType()),
+          onPressed: () {
+            print(
+                'FIXME: Allow the user to toggle between business and consumer.');
+            if (store.userType() == 'business') {
+              store.setUserType('consumer');
+            } else {
+              store.setUserType('business');
+            }
+          },
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+      ),
     );
   }
 }
@@ -206,7 +221,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               // Spacer.
               gapH8,
@@ -257,7 +272,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
               ),
 
               // Spacer.
-              gapH8,
+              gapH12,
 
               // Submit button.
               PrimaryButton(
@@ -280,15 +295,15 @@ class _SignInFormState extends ConsumerState<SignInForm>
               gapH8,
 
               // Anonymous sign-in.
-              if (_formType == SignInFormType.signIn)
-                CustomTextButton(
-                  key: const Key('anonymous'),
-                  text: 'Try anonymously',
-                  onPressed: state.isLoading
-                      ? null
-                      : () =>
-                          ref.read(signInProvider.notifier).signInAnonymously(),
-                ),
+              // if (_formType == SignInFormType.signIn)
+              //   CustomTextButton(
+              //     key: const Key('anonymous'),
+              //     text: 'Try anonymously',
+              //     onPressed: state.isLoading
+              //         ? null
+              //         : () =>
+              //             ref.read(signInProvider.notifier).signInAnonymously(),
+              //   ),
             ],
           ),
         ),

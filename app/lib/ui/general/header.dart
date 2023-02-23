@@ -83,6 +83,8 @@ class DesktopNavigationLayout extends StatelessWidget {
             ),
             // const NavigationIconButton(assetName: Constants.toggleDay),
             SizedBox(width: isVeryWide ? 80 : 28),
+
+            // FIXME: A sidebar menu is needed for desktop!
           ],
         ),
       ),

@@ -100,9 +100,19 @@ class AppColors {
     ).copyWith(
       useMaterial3: true,
       scaffoldBackgroundColor: isDark ? Colors.white : const Color(0xFF323443),
-      buttonTheme: const ButtonThemeData(
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+      buttonTheme: ButtonThemeData(
         buttonColor: primary2,
         textTheme: ButtonTextTheme.primary,
+        colorScheme: colorScheme.copyWith(
+          secondary: isDark ? Colors.white : const Color(0xFF323443),
+        ),
       ),
       textTheme: TextTheme(
         displayLarge: TextStyle(
