@@ -8,14 +8,20 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 library alert_dialogs;
 
+// Dart imports:
 import 'dart:io';
 
-import 'package:cannlytics_app/constants/colors.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:firebase_core/firebase_core.dart';
+
+// Project imports:
+import 'package:cannlytics_app/constants/colors.dart';
 
 part 'alert_dialog_show.dart';
 part 'alert_dialog_error.dart';

@@ -6,6 +6,8 @@
 // Created: 2/17/2023
 // Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Project imports:
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 
 /// Form type for email & password authentication

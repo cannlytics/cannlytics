@@ -6,10 +6,15 @@
 // Created: 2/18/2023
 // Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Dart imports:
 import 'dart:async';
 
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_screen.dart';
 
 /// [OnboardingStore] manages onboarding data.

@@ -6,6 +6,8 @@
 // Created: 2/20/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Package imports:
 import 'package:equatable/equatable.dart';
 
 typedef PackageId = String;

@@ -6,16 +6,20 @@
 // Created: 2/18/2023
 // Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/models/user.dart';
-import 'package:cannlytics_app/models/stats/daily_jobs.dart';
+
+// Project imports:
+import 'package:cannlytics_app/models/entry.dart';
 import 'package:cannlytics_app/models/entry_job.dart';
+import 'package:cannlytics_app/models/job.dart';
+import 'package:cannlytics_app/models/stats/daily_jobs.dart';
+import 'package:cannlytics_app/models/user.dart';
+import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 import 'package:cannlytics_app/utils/strings/string_format.dart';
-import 'package:cannlytics_app/models/entry.dart';
-import 'package:cannlytics_app/models/job.dart';
 
 class EntriesListTileModel {
   const EntriesListTileModel({

@@ -6,12 +6,17 @@
 // Created: 2/18/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Dart imports:
 import 'dart:async';
 
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
+import 'package:cannlytics_app/models/job.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
-import 'package:cannlytics_app/models/job.dart';
 
 /// Manages packages.
 class PackagesController extends AutoDisposeAsyncNotifier<void> {

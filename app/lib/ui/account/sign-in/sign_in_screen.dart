@@ -6,23 +6,29 @@
 // Created: 2/18/2023
 // Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-import 'package:cannlytics_app/constants/colors.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
-import 'package:cannlytics_app/utils/strings/string_format.dart';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
-import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
-import 'package:cannlytics_app/widgets/layout/responsive_scrollable_card.dart';
+
+// Project imports:
+import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_controller.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_validators.dart';
-import 'package:cannlytics_app/utils/strings/string_validators.dart';
-import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/utils/strings/string_format.dart';
+import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
+import 'package:cannlytics_app/utils/strings/string_validators.dart';
+import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
+import 'package:cannlytics_app/widgets/layout/responsive_scrollable_card.dart';
 
 /// Sign in screen.
 class EmailPasswordSignInScreen extends ConsumerWidget {
@@ -58,7 +64,9 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
           SliverToBoxAdapter(child: userTypeButton(context, store)),
 
           // Sign in form.
-          SliverToBoxAdapter(child: SignInForm(formType: formType)),
+          SliverToBoxAdapter(
+            child: SignInForm(formType: formType),
+          ),
 
           // TODO: Terms.
 
@@ -232,7 +240,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Email'.hardcoded,
-                  hintText: 'test@test.com'.hardcoded,
+                  hintText: 'test@cannlytics.com'.hardcoded,
                   enabled: !state.isLoading,
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -272,7 +280,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
               ),
 
               // Spacer.
-              gapH12,
+              gapH18,
 
               // Submit button.
               PrimaryButton(
@@ -291,10 +299,8 @@ class _SignInFormState extends ConsumerState<SignInForm>
                 style: Theme.of(context).textTheme.titleSmall,
               ),
 
-              // Spacer.
-              gapH8,
-
               // Anonymous sign-in.
+              // gapH8,
               // if (_formType == SignInFormType.signIn)
               //   CustomTextButton(
               //     key: const Key('anonymous'),

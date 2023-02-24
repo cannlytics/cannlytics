@@ -6,6 +6,8 @@
 // Created: 2/18/2023
 // Updated: 2/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 /// Widget to display the user's photo.

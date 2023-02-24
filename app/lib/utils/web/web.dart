@@ -6,6 +6,8 @@
 // Created: 2/22/2023
 // Updated: 2/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Package imports:
 import 'package:url_launcher/url_launcher.dart';
 
 class WebUtils {

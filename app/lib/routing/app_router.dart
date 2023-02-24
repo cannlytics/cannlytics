@@ -6,28 +6,35 @@
 // Created: 2/18/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Dart imports:
 import 'dart:async';
 
-import 'package:cannlytics_app/routing/routes.dart';
-import 'package:cannlytics_app/ui/dashboard.dart';
-import 'package:cannlytics_app/ui/general/search_screen.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/ui/account/account_screen.dart';
-import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
-import 'package:cannlytics_app/ui/account/sign-in/sign_in_screen.dart';
-import 'package:cannlytics_app/ui/business/inventory/items/items_screen.dart';
+
+// Project imports:
 import 'package:cannlytics_app/models/entry.dart';
 import 'package:cannlytics_app/models/job.dart';
-import 'package:cannlytics_app/ui/business/inventory/items/item_screen.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/package_items_screen.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/package_edit_screen.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/packages_screen.dart';
+import 'package:cannlytics_app/routing/routes.dart';
+import 'package:cannlytics_app/services/auth_service.dart';
+import 'package:cannlytics_app/ui/account/account_screen.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_screen.dart';
+import 'package:cannlytics_app/ui/account/sign-in/sign_in_screen.dart';
+import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
+import 'package:cannlytics_app/ui/business/inventory/items/item_screen.dart';
+import 'package:cannlytics_app/ui/business/inventory/items/items_screen.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/package_edit_screen.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/package_items_screen.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/packages_screen.dart';
+import 'package:cannlytics_app/ui/dashboard.dart';
+import 'package:cannlytics_app/ui/general/search_screen.dart';
 import 'package:cannlytics_app/ui/screen.dart';
 
 // Private navigators.

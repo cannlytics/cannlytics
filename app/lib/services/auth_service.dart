@@ -6,13 +6,18 @@
 // Created: 2/18/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Dart imports:
 import 'dart:io';
 
-import 'package:cannlytics_app/services/firestore_service.dart';
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+
+// Project imports:
+import 'package:cannlytics_app/services/firestore_service.dart';
 
 /// [AuthService] manages authentication with Firebase.
 class AuthService {

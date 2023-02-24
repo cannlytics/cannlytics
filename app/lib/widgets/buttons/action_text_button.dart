@@ -6,8 +6,12 @@
 // Created: 2/18/2023
 // Updated: 2/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-import 'package:cannlytics_app/constants/colors.dart';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/constants/design.dart';
 
 /// Text button to be used as an [AppBar] action.

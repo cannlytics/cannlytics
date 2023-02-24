@@ -6,18 +6,24 @@
 // Created: 2/18/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/constants/colors.dart';
-import 'package:cannlytics_app/ui/general/footer.dart';
-import 'package:cannlytics_app/ui/general/header.dart';
-import 'package:cannlytics_app/routing/routes.dart';
-import 'package:cannlytics_app/widgets/cards/hover_border.dart';
-import 'package:flutter_layout_grid/flutter_layout_grid.dart';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
+
+// Project imports:
+import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
+import 'package:cannlytics_app/routing/routes.dart';
+import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
+import 'package:cannlytics_app/ui/general/footer.dart';
+import 'package:cannlytics_app/ui/general/header.dart';
+import 'package:cannlytics_app/widgets/cards/hover_border.dart';
 
 /// The initial screen the user sees after signing in.
 class DashboardScreen extends ConsumerWidget {

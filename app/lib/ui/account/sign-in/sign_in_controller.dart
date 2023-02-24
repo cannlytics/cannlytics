@@ -6,11 +6,16 @@
 // Created: 2/18/2023
 // Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Dart imports:
 import 'dart:async';
 
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
+
+// Project imports:
 import 'package:cannlytics_app/services/auth_service.dart';
+import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
 
 /// [SignInController] manages the sign in, sign up, and reset password screens.
 class SignInController extends AutoDisposeAsyncNotifier<void> {

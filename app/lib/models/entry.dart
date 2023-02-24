@@ -6,6 +6,8 @@
 // Created: 2/18/2023
 // Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Package imports:
 import 'package:equatable/equatable.dart';
 
 typedef EntryID = String;

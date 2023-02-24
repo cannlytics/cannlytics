@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
+<!DOCTYPE html><html><head>
   <!--
     Cannlytics App
     Copyright (c) 2023 Cannlytics
@@ -15,20 +13,20 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Manage your cannabis data and analytics like a pro with Cannlytics.">
-  <meta name="author" content="Keegan Skeate admin@cannlytics.com"/>
+  <meta name="author" content="Keegan Skeate admin@cannlytics.com">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="cannlytics_app">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <link rel="mask-icon" color="#e48632" href="images/logos/safari-pinned-tab.svg"/>
+  <link rel="mask-icon" color="#e48632" href="images/logos/safari-pinned-tab.svg">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="images/logos/favicon.ico"/>
-  <link rel="shortcut icon" type="image/x-icon" href="images/logos/favicon.ico"/>
-  <link rel="icon" sizes="32x32" type="image/png" href="images/logos/favicon-32x32.png"/>
-  <link rel="icon" sizes="16x16" type="image/png" href="images/logos/favicon-16x16.png"/>
+  <link rel="icon" type="image/png" href="images/logos/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="images/logos/favicon.ico">
+  <link rel="icon" sizes="32x32" type="image/png" href="images/logos/favicon-32x32.png">
+  <link rel="icon" sizes="16x16" type="image/png" href="images/logos/favicon-16x16.png">
 
   <!-- Title -->
   <title>Cannlytics</title>
@@ -39,9 +37,20 @@
     // The value below is injected by flutter build, do not touch.
     var serviceWorkerVersion = null;
   </script>
-  <script src="flutter.js" defer></script>
+  <script src="flutter.js" defer=""></script>
+  <link rel="stylesheet" type="text/css" href="splash/style.css">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <script src="splash/splash.js"></script>
 </head>
-<body>
+<body>  <picture id="splash-branding">
+    <source srcset="splash/img/branding-1x.png 1x, splash/img/branding-2x.png 2x, splash/img/branding-3x.png 3x, splash/img/branding-4x.png 4x" media="(prefers-color-scheme: light)">
+    <source srcset="splash/img/branding-dark-1x.png 1x, splash/img/branding-dark-2x.png 2x, splash/img/branding-dark-3x.png 3x, splash/img/branding-dark-4x.png 4x" media="(prefers-color-scheme: dark)">
+    <img class="bottom" aria-hidden="true" src="splash/img/branding-1x.png" alt="">
+  </picture>  <picture id="splash">
+      <source srcset="splash/img/light-1x.png 1x, splash/img/light-2x.png 2x, splash/img/light-3x.png 3x, splash/img/light-4x.png 4x" media="(prefers-color-scheme: light)">
+      <source srcset="splash/img/dark-1x.png 1x, splash/img/dark-2x.png 2x, splash/img/dark-3x.png 3x, splash/img/dark-4x.png 4x" media="(prefers-color-scheme: dark)">
+      <img class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
+  </picture>
   <script>
     window.addEventListener('load', function(ev) {
       // Download main.dart.js
@@ -56,5 +65,6 @@
       });
     });
   </script>
-</body>
-</html>
+
+
+</body></html>

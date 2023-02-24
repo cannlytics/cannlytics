@@ -6,10 +6,16 @@
 // Created: 2/20/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/ui/general/search_controller.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 
 class SearchScreen extends ConsumerWidget {

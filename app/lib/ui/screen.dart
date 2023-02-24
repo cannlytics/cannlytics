@@ -6,10 +6,16 @@
 // Created: 2/17/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:go_router/go_router.dart';
+
+// Project imports:
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/routes.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 
 /// Bottom navigation bar for mobile.

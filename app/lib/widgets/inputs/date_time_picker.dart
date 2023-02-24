@@ -6,11 +6,16 @@
 // Created: 2/18/2023
 // Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Dart imports:
 import 'dart:async';
 
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:cannlytics_app/widgets/inputs/input_dropdown.dart';
+
+// Project imports:
 import 'package:cannlytics_app/utils/strings/string_format.dart';
+import 'package:cannlytics_app/widgets/inputs/input_dropdown.dart';
 
 class DateTimePicker extends StatelessWidget {
   const DateTimePicker({

@@ -4,8 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/22/2023
+// Updated: 2/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 /// Colors used in the app for theming.
@@ -99,6 +101,10 @@ class AppColors {
       colorScheme: colorScheme,
     ).copyWith(
       useMaterial3: true,
+      appBarTheme: const AppBarTheme(
+        elevation: 0.0,
+        centerTitle: true,
+      ),
       scaffoldBackgroundColor: isDark ? Colors.white : const Color(0xFF323443),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
@@ -117,48 +123,63 @@ class AppColors {
       textTheme: TextTheme(
         displayLarge: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'LibreBaskerville',
         ),
         displayMedium: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'LibreBaskerville',
         ),
         displaySmall: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'LibreBaskerville',
         ),
         headlineLarge: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'SourceSerifPro',
         ),
         headlineMedium: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'SourceSerifPro',
         ),
         headlineSmall: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'SourceSerifPro',
         ),
         titleLarge: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'SourceSerifPro',
         ),
         titleMedium: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'SourceSerifPro',
         ),
         titleSmall: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'SourceSerifPro',
         ),
         bodyLarge: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'CormorantGaramond',
         ),
         bodyMedium: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'CormorantGaramond',
         ),
         bodySmall: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'CormorantGaramond',
         ),
         labelLarge: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'IBMPlexSans',
         ),
         labelMedium: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'IBMPlexSans',
         ),
         labelSmall: TextStyle(
           color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+          fontFamily: 'IBMPlexSans',
         ),
       ),
       textSelectionTheme: const TextSelectionThemeData(

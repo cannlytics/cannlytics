@@ -6,15 +6,21 @@
 // Created: 2/18/2023
 // Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-import 'package:cannlytics_app/routing/routes.dart';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cannlytics_app/widgets/layout/async_value_widget.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
+
+// Project imports:
 import 'package:cannlytics_app/models/job.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/package_items_list.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
+import 'package:cannlytics_app/routing/routes.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/package_items_list.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
+import 'package:cannlytics_app/widgets/layout/async_value_widget.dart';
 
 class JobItemsScreen extends ConsumerWidget {
   const JobItemsScreen({super.key, required this.jobId});

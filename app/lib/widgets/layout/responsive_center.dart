@@ -6,7 +6,11 @@
 // Created: 2/18/2023
 // Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:cannlytics_app/constants/design.dart';
 
 /// Reusable widget for showing a child with a maximum content width constraint.

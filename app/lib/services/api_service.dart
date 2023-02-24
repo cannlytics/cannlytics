@@ -6,7 +6,11 @@
 // Created: 2/20/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Dart imports:
 import 'dart:convert';
+
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 

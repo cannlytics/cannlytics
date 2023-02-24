@@ -6,13 +6,19 @@
 // Created: 2/20/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+// Project imports:
 import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 /// The main navigation header.
 class AppHeader extends StatelessWidget {

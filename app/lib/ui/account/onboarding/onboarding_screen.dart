@@ -6,15 +6,21 @@
 // Created: 2/18/2023
 // Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/routing/routes.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/widgets/cards/hover_border.dart';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
+
+// Project imports:
+import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
+import 'package:cannlytics_app/routing/routes.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
+import 'package:cannlytics_app/widgets/cards/hover_border.dart';
 
 /// The initial screen the user sees to choose "Consumer" or "Business".
 class OnboardingScreen extends ConsumerWidget {

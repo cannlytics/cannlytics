@@ -6,18 +6,24 @@
 // Created: 2/17/2023
 // Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-import 'package:cannlytics_app/routing/routes.dart';
-import 'package:cannlytics_app/utils/strings/string_format.dart';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
+
+// Project imports:
 import 'package:cannlytics_app/models/entry.dart';
 import 'package:cannlytics_app/models/job.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/package_items_controller.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
+import 'package:cannlytics_app/routing/routes.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/package_items_controller.dart';
+import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/utils/strings/string_format.dart';
+import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
 
 class JobEntriesList extends ConsumerWidget {
   const JobEntriesList({super.key, required this.job});

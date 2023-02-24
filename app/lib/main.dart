@@ -5,23 +5,31 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/20/2023
+// Updated: 2/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
-import 'package:cannlytics_app/constants/colors.dart';
-import 'package:cannlytics_app/routing/app_router.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:firebase_core/firebase_core.dart';
+
+// Flutter imports:
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cannlytics_app/firebase_options.dart';
-import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
-import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
-// ignore:depend_on_referenced_packages
+// ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
+import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/firebase_options.dart';
+import 'package:cannlytics_app/routing/app_router.dart';
+import 'package:cannlytics_app/services/auth_service.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
+import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
+
+// ignore:depend_on_referenced_packages
 
 /// The main application.
 class CannlyticsApp extends ConsumerWidget {
@@ -29,28 +37,22 @@ class CannlyticsApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Routing provider.
     final goRouter = ref.watch(goRouterProvider);
+
+    // Theme provider.
     final themeMode = ref.watch(themeModeProvider);
+
+    // Remove the native splash screen.
+    // FlutterNativeSplash.remove();
+
+    // Material app.
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       routerConfig: goRouter,
-      // theme: ThemeData(
-      //   primarySwatch: AppColors.primaryColors,
-      //   unselectedWidgetColor: Colors.grey,
-      //   appBarTheme: const AppBarTheme(
-      //     elevation: 0.0,
-      //     centerTitle: true,
-      //   ),
-      //   scaffoldBackgroundColor: Colors.grey[200],
-      // ),
-      // darkTheme: ThemeData(
-      //   useMaterial3: true,
-      //   colorScheme: darkColorScheme,
-      //   textTheme: textTheme,
-      // ),
       theme: AppColors.toThemeData(false),
       darkTheme: AppColors.toThemeData(true),
       themeMode: themeMode,
-      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -58,26 +60,32 @@ class CannlyticsApp extends ConsumerWidget {
 /// [main] initializes the [CannlyticsApp].
 Future<void> main() async {
   // Initialize Flutter.
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  // Keep the native splash screen open until the app initializes.
+  // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // Initialize Firebase.
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Remove the hashtag (#) from URLs on the web.
+  // Remove hashtags from URLs on the web.
   usePathUrlStrategy();
 
   // Register error handlers.
   final sharedPreferences = await SharedPreferences.getInstance();
   registerErrorHandlers();
 
-  // App entry point.
+  // TODO: Register licenses.
+  LicenseRegistry.addLicense(() async* {
+    // final license = await rootBundle.loadString('google_fonts/OFL.txt');
+    // yield LicenseEntryWithLineBreaks(['google_fonts'], license);
+  });
+
+  // Create a container to serve as the app entry point.
   final container = ProviderContainer(
     overrides: [
-      onboardingStoreProvider.overrideWithValue(
-        OnboardingStore(sharedPreferences),
-      ),
+      onboardingStoreProvider
+          .overrideWithValue(OnboardingStore(sharedPreferences)),
     ],
   );
 

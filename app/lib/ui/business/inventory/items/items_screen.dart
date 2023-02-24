@@ -6,8 +6,14 @@
 // Created: 2/18/2023
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_app/ui/business/inventory/items/items_service.dart';
 import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
 

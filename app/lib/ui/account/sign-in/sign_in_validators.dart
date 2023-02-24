@@ -6,9 +6,11 @@
 // Created: 2/18/2023
 // Updated: 2/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Project imports:
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
-import 'package:cannlytics_app/utils/strings/string_validators.dart';
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
+import 'package:cannlytics_app/utils/strings/string_validators.dart';
 
 /// Mixin class to be used for client-side email & password validation
 mixin EmailAndPasswordValidators {
