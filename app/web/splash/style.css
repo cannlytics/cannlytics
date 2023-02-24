@@ -6,6 +6,7 @@ body {
   margin: 0;
   min-height: 100%;
   background-color: #ffffff;
+  background-image: url("img/light-background.png");
   background-size: 100% 100%;
 }
 
@@ -58,5 +59,6 @@ body {
 @media (prefers-color-scheme: dark) {
   body {
     background-color: #24292e;
+    background-image: url("img/dark-background.png");
   }
 }

@@ -85,6 +85,8 @@ class AuthService {
       }
     }
   }
+
+  /// TODO: Let the user request a password reset email.
 }
 
 /// An instance of Firebase Authentication provider.

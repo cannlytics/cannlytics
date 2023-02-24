@@ -59,11 +59,13 @@ flutter_icons:
 flutter_native_splash:
   color: "#ffffff"
   image: assets/images/logos/cannlytics_calyx_192.png
-  branding: assets/images/logos/cannlytics_logo_with_text_light.png
+  branding: assets/images/logos/cannlytics_brand_small.png
   branding_mode: bottom
   color_dark: "#24292e"
   image_dark: assets/images/logos/cannlytics_calyx_192.png
-  branding_dark: assets/images/logos/cannlytics_logo_with_text_dark.png
+  branding_dark: assets/images/logos/cannlytics_brand_small_dark.png
+  background_image: assets/images/logos/cannlytics_background_light.png
+  background_image_dark: assets/images/logos/cannlytics_background_dark.png
   android: false
   ios: false
   web: true
@@ -78,9 +80,9 @@ flutter_native_splash:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/logos/cannlytics_logo_with_text_dark.svg
+    - assets/images/logos/logo_dark.svg
+    - assets/images/logos/logo_light.svg
     - assets/images/logos/cannlytics_logo_with_text_dark.png
-    - assets/images/logos/cannlytics_logo_with_text_light.svg
     - assets/images/logos/cannlytics_logo_with_text_light.png
     - assets/images/icons/additives.png
     - assets/images/icons/anchor.png

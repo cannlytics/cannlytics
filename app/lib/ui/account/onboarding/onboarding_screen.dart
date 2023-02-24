@@ -31,7 +31,7 @@ class OnboardingScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -53,8 +53,8 @@ class OnboardingScreen extends ConsumerWidget {
       widthFactor: 0.5,
       child: Image.asset(
         isDark
-            ? 'assets/images/logos/cannlytics_logo_with_text_light.png'
-            : 'assets/images/logos/cannlytics_logo_with_text_dark.png',
+            ? 'assets/images/logos/cannlytics_logo_with_text_dark.png'
+            : 'assets/images/logos/cannlytics_logo_with_text_light.png',
         height: 45,
       ),
     );
@@ -131,12 +131,19 @@ class StartingCard extends ConsumerWidget {
                   horizontal: 36,
                 ),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset(
                       imageName,
                       width: 75,
                     ),
-                    Text(title),
+                    Center(
+                      child: Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                    ),
                   ],
                 ),
               ),

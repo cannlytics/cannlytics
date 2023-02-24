@@ -85,9 +85,9 @@ class AppColors {
       secondary: accent1,
       secondaryContainer: accent1,
       background: offWhite,
-      surface: isDark ? Colors.white : const Color(0xFF323443),
-      onBackground: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-      onSurface: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
+      surface: isDark ? const Color(0xFF323443) : Colors.white,
+      onBackground: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+      onSurface: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
       onError: Colors.white,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
@@ -96,6 +96,7 @@ class AppColors {
 
     // Create the ThemeData with the ColorScheme and TextTheme.
     // Also add on extra properties that ColorScheme seems to miss.
+    // See: https://medium.com/@omlondhe/themedata-in-flutter-f6a67d9c636d
     var t = ThemeData.from(
       textTheme: txtTheme,
       colorScheme: colorScheme,
@@ -105,14 +106,14 @@ class AppColors {
         elevation: 0.0,
         centerTitle: true,
       ),
-      scaffoldBackgroundColor: isDark ? Colors.white : const Color(0xFF323443),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      ),
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      highlightColor: accent1,
+      scaffoldBackgroundColor: isDark ? const Color(0xFF323443) : Colors.white,
+      canvasColor: isDark ? const Color(0xFF323443) : AppColors.neutral1,
+      cardColor: isDark ? const Color(0xFF323443) : AppColors.neutral1,
+      dialogBackgroundColor:
+          isDark ? const Color(0xFF323443) : AppColors.neutral1,
       buttonTheme: ButtonThemeData(
         buttonColor: primary2,
         textTheme: ButtonTextTheme.primary,
@@ -120,72 +121,78 @@ class AppColors {
           secondary: isDark ? Colors.white : const Color(0xFF323443),
         ),
       ),
-      textTheme: TextTheme(
-        displayLarge: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'LibreBaskerville',
-        ),
-        displayMedium: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'LibreBaskerville',
-        ),
-        displaySmall: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'LibreBaskerville',
-        ),
-        headlineLarge: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'SourceSerifPro',
-        ),
-        headlineMedium: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'SourceSerifPro',
-        ),
-        headlineSmall: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'SourceSerifPro',
-        ),
-        titleLarge: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'SourceSerifPro',
-        ),
-        titleMedium: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'SourceSerifPro',
-        ),
-        titleSmall: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'SourceSerifPro',
-        ),
-        bodyLarge: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'CormorantGaramond',
-        ),
-        bodyMedium: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'CormorantGaramond',
-        ),
-        bodySmall: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'CormorantGaramond',
-        ),
-        labelLarge: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'IBMPlexSans',
-        ),
-        labelMedium: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'IBMPlexSans',
-        ),
-        labelSmall: TextStyle(
-          color: isDark ? const Color(0xFF24292e) : const Color(0xFFf5f5f5),
-          fontFamily: 'IBMPlexSans',
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
       ),
       textSelectionTheme: const TextSelectionThemeData(
         cursorColor: accent1,
       ),
-      highlightColor: accent1,
+      textTheme: TextTheme(
+        displayLarge: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'LibreBaskerville',
+        ),
+        displayMedium: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'LibreBaskerville',
+        ),
+        displaySmall: TextStyle(
+          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
+          fontFamily: 'LibreBaskerville',
+        ),
+        headlineLarge: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'SourceSerifPro',
+        ),
+        headlineMedium: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'SourceSerifPro',
+        ),
+        headlineSmall: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'SourceSerifPro',
+        ),
+        titleLarge: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'LibreBaskerville',
+        ),
+        titleMedium: TextStyle(
+          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
+          fontFamily: 'SourceSerifPro',
+        ),
+        titleSmall: TextStyle(
+          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
+          fontFamily: 'CormorantGaramond',
+        ),
+        bodyLarge: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'CormorantGaramond',
+        ),
+        bodyMedium: TextStyle(
+          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
+          fontFamily: 'IBMPlexSans',
+        ),
+        bodySmall: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'IBMPlexSans',
+        ),
+        labelLarge: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'IBMPlexSans',
+        ),
+        labelMedium: TextStyle(
+          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
+          fontFamily: 'IBMPlexSans',
+        ),
+        labelSmall: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'IBMPlexSans',
+        ),
+      ),
     );
 
     // Return the themeData which MaterialApp can use.

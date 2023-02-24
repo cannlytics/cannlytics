@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/19/2023
+// Updated: 2/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/routing/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -29,6 +30,7 @@ import 'package:cannlytics_app/utils/strings/string_validators.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/layout/responsive_scrollable_card.dart';
+import 'package:go_router/go_router.dart';
 
 /// Sign in screen.
 class EmailPasswordSignInScreen extends ConsumerWidget {
@@ -44,13 +46,15 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Get the onboarding provider.
     final store = ref.watch(onboardingStoreProvider);
+
+    // Get the theme.
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
+
+    // Build the layout.
     return Scaffold(
-      // appBar: AppBar(title: Text(Format.capitalize(store.userType()))),
-      // backgroundColor: AppColors.surface,
-      // body: SignInForm(formType: formType),
       body: CustomScrollView(
         slivers: [
           // Light / dark theme toggle.
@@ -65,7 +69,7 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
 
           // Sign in form.
           SliverToBoxAdapter(
-            child: SignInForm(formType: formType),
+            child: SignInForm(formType: formType, isDark: isDark),
           ),
 
           // TODO: Terms.
@@ -82,8 +86,8 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
       widthFactor: 0.5,
       child: Image.asset(
         isDark
-            ? 'assets/images/logos/cannlytics_logo_with_text_light.png'
-            : 'assets/images/logos/cannlytics_logo_with_text_dark.png',
+            ? 'assets/images/logos/cannlytics_logo_with_text_dark.png'
+            : 'assets/images/logos/cannlytics_logo_with_text_light.png',
         height: 45,
       ),
     );
@@ -97,13 +101,13 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
         child: CustomTextButton(
           text: Format.capitalize(store.userType()),
           onPressed: () {
-            print(
-                'FIXME: Allow the user to toggle between business and consumer.');
-            if (store.userType() == 'business') {
-              store.setUserType('consumer');
-            } else {
-              store.setUserType('business');
-            }
+            context.goNamed(AppRoutes.onboarding.name);
+            // TODO: Allow the user to toggle between business and consumer here.
+            // if (store.userType() == 'business') {
+            //   store.setUserType('consumer');
+            // } else {
+            //   store.setUserType('business');
+            // }
           },
           style: Theme.of(context).textTheme.titleSmall,
         ),
@@ -133,7 +137,7 @@ class ThemeToggle extends StatelessWidget {
                     theme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
               },
               icon: Icon(
-                theme == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+                theme == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
                 color: AppColors.neutral4,
               ),
             ),
@@ -144,19 +148,23 @@ class ThemeToggle extends StatelessWidget {
   }
 }
 
-/// Email & password authentication, supporting sign in and create an account.
+/// Sign in / create account form.
 class SignInForm extends ConsumerStatefulWidget {
   const SignInForm({
     super.key,
     required this.formType,
+    required this.isDark,
   });
 
   /// The default form type to use.
   final SignInFormType formType;
+  final bool isDark;
+
   @override
   ConsumerState<SignInForm> createState() => _SignInFormState();
 }
 
+/// Sign in / create account form state.
 class _SignInFormState extends ConsumerState<SignInForm>
     with EmailAndPasswordValidators {
   // Widget controllers.
@@ -224,6 +232,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
     );
     final state = ref.watch(signInProvider);
     return ResponsiveScrollableCard(
+      isDark: widget.isDark,
       child: FocusScope(
         node: _node,
         child: Form(
@@ -299,7 +308,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
                 style: Theme.of(context).textTheme.titleSmall,
               ),
 
-              // Anonymous sign-in.
+              // FIXME: Anonymous sign-in.
               // gapH8,
               // if (_formType == SignInFormType.signIn)
               //   CustomTextButton(

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/18/2023
+// Updated: 2/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -14,11 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:cannlytics_app/constants/design.dart';
 
 /// Primary button based on [ElevatedButton].
-/// Useful for CTAs in the app.
-/// @param text - text to display on the button.
-/// @param isLoading - if true, a loading indicator will be displayed instead of
-/// the text.
-/// @param onPressed - callback to be called when the button is pressed.
+/// [text] - Text displayed  on the button.
+/// [isLoading] - Whether or not to show a loading indicator.
+/// [onPressed] - Callback to be called when the button is pressed.
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     super.key,
@@ -41,7 +39,11 @@ class PrimaryButton extends StatelessWidget {
         ),
         onPressed: onPressed,
         child: isLoading
-            ? const CircularProgressIndicator()
+            ? const SizedBox(
+                width: 21,
+                height: 21,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
             : Text(
                 text,
                 textAlign: TextAlign.center,

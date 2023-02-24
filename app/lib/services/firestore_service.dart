@@ -15,21 +15,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class FirestoreService {
   const FirestoreService._();
 
+  /// Set data in Firestore given a path, optionally merging data.
   Future<void> setData({
     required String path,
     required Map<String, dynamic> data,
-    bool merge = false,
+    bool merge = true,
   }) async {
     final reference = FirebaseFirestore.instance.doc(path);
     await reference.set(data, SetOptions(merge: merge));
   }
 
+  /// Delete a document from Firestore.
   Future<void> deleteData({required String path}) async {
     final reference = FirebaseFirestore.instance.doc(path);
     await reference.delete();
   }
 
-  // watch collections and documents as streams
+  /// Watch a collection as streams.
   Stream<List<T>> watchCollection<T>({
     required String path,
     required T Function(Map<String, dynamic>? data, String documentID) builder,
@@ -55,6 +57,7 @@ class FirestoreService {
     });
   }
 
+  /// Watch a document as streams.
   Stream<T> watchDocument<T>({
     required String path,
     required T Function(Map<String, dynamic>? data, String documentID) builder,
@@ -65,7 +68,7 @@ class FirestoreService {
     return snapshots.map((snapshot) => builder(snapshot.data(), snapshot.id));
   }
 
-  // fetch collections and documents as futures
+  /// Get documents from a collection.
   Future<List<T>> fetchCollection<T>({
     required String path,
     required T Function(Map<String, dynamic>? data, String documentID) builder,
@@ -89,6 +92,7 @@ class FirestoreService {
     return result;
   }
 
+  /// Get a document.
   Future<T> fetchDocument<T>({
     required String path,
     required T Function(Map<String, dynamic>? data, String documentID) builder,
@@ -99,6 +103,7 @@ class FirestoreService {
   }
 }
 
+// An instance of the Firestore provider.
 final firestoreDataSourceProvider = Provider<FirestoreService>((ref) {
   return const FirestoreService._();
 });

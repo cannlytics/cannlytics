@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -29,15 +30,7 @@ class AppHeader extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     bool isWide = screenWidth > Breakpoints.tablet;
     return Container(
-      color: AppColors.white,
-      // decoration: const BoxDecoration(
-      //   border: Border(
-      //     bottom: BorderSide(
-      //       color: AppColors.neutral2,
-      //       width: 1,
-      //     ),
-      //   ),
-      // ),
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: isWide
           ? const DesktopNavigationLayout()
           : const MobileNavigationLayout(),
@@ -46,13 +39,20 @@ class AppHeader extends StatelessWidget {
 }
 
 /// Navigation layout for desktop.
-class DesktopNavigationLayout extends StatelessWidget {
+class DesktopNavigationLayout extends ConsumerWidget {
   const DesktopNavigationLayout({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get the screen width.
     final screenWidth = MediaQuery.of(context).size.width;
     bool isVeryWide = screenWidth > Breakpoints.desktop;
+
+    // Get the theme.
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
+
+    // Build the layout.
     return Container(
       decoration: const BoxDecoration(
         border: Border(
@@ -69,7 +69,7 @@ class DesktopNavigationLayout extends StatelessWidget {
           children: [
             // Logo.
             SizedBox(width: isVeryWide ? 80 : 28),
-            const AppLogo(),
+            AppLogo(isDark: isDark),
 
             // TODO: Select license if business!
 
@@ -87,14 +87,48 @@ class DesktopNavigationLayout extends StatelessWidget {
               text: 'Account',
               path: AppRoutes.account.name,
             ),
-            // const NavigationIconButton(assetName: Constants.toggleDay),
             SizedBox(width: isVeryWide ? 80 : 28),
 
             // FIXME: A sidebar menu is needed for desktop!
+
+            // Theme toggle.
+            const ThemeToggle(),
           ],
         ),
       ),
     );
+  }
+}
+
+/// Light / dark theme toggle.
+class ThemeToggle extends StatelessWidget {
+  const ThemeToggle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(builder: (context, ref, child) {
+      final theme = ref.watch(themeModeProvider);
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 6, right: 24, bottom: 6),
+            child: IconButton(
+              splashRadius: 18,
+              onPressed: () {
+                // Toggle light / dark theme.
+                ref.read(themeModeProvider.notifier).state =
+                    theme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+              },
+              icon: Icon(
+                theme == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
+                color: AppColors.neutral4,
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 }
 
@@ -124,13 +158,23 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
 
   @override
   Widget build(BuildContext context) {
+    // Get the provider.
     final store = ref.watch(onboardingStoreProvider);
+
+    // Get the theme.
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
+
+    // Build the layout.
     return AnimatedBuilder(
       animation: _menuController,
       builder: (context, _) {
+        // Get the user type.
         final List<ScreenData> screens = (store.userType() == 'consumer')
             ? ScreenData.consumerScreens
             : ScreenData.businessScreens;
+
+        // Format the height.
         final int screenCount = screens.length;
         final menuHeight = 56 * screenCount + 64;
         final height = 64 + _menuController.value * menuHeight;
@@ -154,7 +198,7 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
                     children: [
                       // App logo.
                       const SizedBox(width: 28),
-                      const AppLogo(),
+                      AppLogo(isDark: isDark),
                       const Spacer(),
 
                       // Open / close menu button.
@@ -233,7 +277,7 @@ class MobileMenuListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
+      // color: AppColors.surface,
       child: InkWell(
         splashColor: AppColors.accent1,
         onTap: () {
@@ -254,7 +298,11 @@ class MobileMenuListTile extends StatelessWidget {
 
 /// App logo for the menu.
 class AppLogo extends StatelessWidget {
-  const AppLogo({Key? key}) : super(key: key);
+  const AppLogo({
+    Key? key,
+    required this.isDark,
+  }) : super(key: key);
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +312,9 @@ class AppLogo extends StatelessWidget {
         context.goNamed('dashboard');
       },
       child: Image.asset(
-        'assets/images/logos/cannlytics_logo_with_text_light.png',
+        isDark
+            ? 'assets/images/logos/logo_dark.svg'
+            : 'assets/images/logos/logo_light.svg',
         width: 120,
       ),
     );
@@ -289,10 +339,7 @@ class NavigationLink extends StatelessWidget {
         child: TextButton(
           child: Text(
             text,
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall!
-                .copyWith(color: AppColors.neutral6),
+            style: Theme.of(context).textTheme.titleSmall,
           ),
           onPressed: () {
             context.goNamed(path);
@@ -303,21 +350,21 @@ class NavigationLink extends StatelessWidget {
   }
 }
 
-/// Icon in navigation.
-class NavigationIconButton extends StatelessWidget {
-  const NavigationIconButton({
-    Key? key,
-    required this.assetName,
-  }) : super(key: key);
-  final String assetName;
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: GestureDetector(
-        child: Image.asset(assetName),
-        onTap: () {},
-      ),
-    );
-  }
-}
+// /// Icon in navigation.
+// class NavigationIconButton extends StatelessWidget {
+//   const NavigationIconButton({
+//     Key? key,
+//     required this.assetName,
+//   }) : super(key: key);
+//   final String assetName;
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(horizontal: 16.0),
+//       child: GestureDetector(
+//         child: Image.asset(assetName),
+//         onTap: () {},
+//       ),
+//     );
+//   }
+// }

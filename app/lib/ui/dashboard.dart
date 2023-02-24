@@ -48,7 +48,7 @@ class DashboardScreen extends ConsumerWidget {
 
     // Body.
     return Scaffold(
-      backgroundColor: AppColors.white,
+      // backgroundColor: AppColors.white,
       body: CustomScrollView(
         slivers: [
           // App header.
@@ -169,12 +169,12 @@ class ItemCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Title.
-                  Text(
-                    data.title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge!
-                        .copyWith(color: AppColors.neutral6),
+                  Center(
+                    child: Text(
+                      data.title,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
 
                   // Spacer.
@@ -183,10 +183,7 @@ class ItemCard extends StatelessWidget {
                   // Description.
                   Text(
                     data.description,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(color: AppColors.neutral4),
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ],
               ),

@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -15,19 +16,25 @@ import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/utils/web/web.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A footer with links at the bottom of the app.
-class Footer extends StatelessWidget {
+class Footer extends ConsumerWidget {
   const Footer({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Determine the screen size.
     final screenWidth = MediaQuery.of(context).size.width;
     final isWide = screenWidth > Breakpoints.tablet;
 
+    // Get the theme.
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
+
     // Build the footer.
     return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
       margin: EdgeInsets.only(top: Insets(1).md),
       child: Center(
         child: SizedBox(
@@ -42,7 +49,7 @@ class Footer extends StatelessWidget {
               children: [
                 // Logo.
                 gapH6,
-                const AppLogo(),
+                AppLogo(isDark: isDark),
                 gapH6,
 
                 // Copyright and version.
@@ -88,7 +95,6 @@ class Footer extends StatelessWidget {
       'Copyright © 2023 Cannlytics',
       textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.titleSmall!.copyWith(
-            color: AppColors.neutral5,
             fontWeight: FontWeight.normal,
           ),
     );
@@ -100,7 +106,6 @@ class Footer extends StatelessWidget {
       'v1.0.0',
       textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.titleSmall!.copyWith(
-            color: AppColors.neutral5,
             fontWeight: FontWeight.normal,
           ),
     );
@@ -165,10 +170,7 @@ class FooterLink extends StatelessWidget {
     return TextButton(
       child: Text(
         text,
-        style: Theme.of(context)
-            .textTheme
-            .titleSmall!
-            .copyWith(color: AppColors.neutral6),
+        style: Theme.of(context).textTheme.titleSmall,
       ),
       onPressed: () {
         WebUtils.launchURL(route);

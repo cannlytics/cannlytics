@@ -47,7 +47,7 @@ class _BorderMouseHoverState extends State<BorderMouseHover>
             margin: const EdgeInsets.all(2),
             decoration: BoxDecoration(
               border: Border.all(
-                color: (_controller.value < 0.1)
+                color: (_controller.value < 0.01)
                     ? AppColors.neutral2
                     : AppColors.primary.withOpacity(_controller.value),
                 width: 1,

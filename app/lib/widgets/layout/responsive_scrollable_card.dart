@@ -18,8 +18,14 @@ import 'package:cannlytics_app/widgets/layout/responsive_center.dart';
 /// Scrollable widget that shows a responsive card with a given child widget.
 /// Useful for displaying forms and other widgets that need to be scrollable.
 class ResponsiveScrollableCard extends StatelessWidget {
-  const ResponsiveScrollableCard({super.key, required this.child});
+  ResponsiveScrollableCard({
+    super.key,
+    required this.child,
+    this.isDark = false,
+  });
   final Widget child;
+  bool isDark;
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -28,7 +34,9 @@ class ResponsiveScrollableCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(Sizes.p16),
           child: Card(
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: isDark
+                ? Theme.of(context).scaffoldBackgroundColor
+                : AppColors.surface,
             child: Padding(
               padding: const EdgeInsets.all(Sizes.p16),
               child: child,
