@@ -16,7 +16,6 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
@@ -118,6 +117,7 @@ class StartingCard extends ConsumerWidget {
                     await ref
                         .read(onboardingController.notifier)
                         .completeOnboarding(route);
+                    // ignore: use_build_context_synchronously
                     context.goNamed(AppRoutes.signIn.name);
                   },
             child: Card(

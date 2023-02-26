@@ -16,25 +16,17 @@ import 'package:http/http.dart' as http;
 
 class APIService {
   final String _baseUrl = 'https://cannlytics.com/api';
+  final String _testUrl = '/api';
 
-  Future<String> getUserToken({bool refresh = false}) async {
-    /**
-  * Get an auth token for a given user.
-  * @param {bool} refresh Whether or not the credentials of the ID token should be refreshed.
-  */
-    // if (auth.currentUser == null) {
-    //   final user = await FirebaseAuth.instance.authStateChanges().listen((firebaseUser) async {
-    //     if (user != null) return await user.getIdToken(refresh);
-    //   });
-    //   return user;
-    // } else {
-    //   return await auth.currentUser.getIdToken(refresh);
-    // }
+  /// Get a user's token.
+  /// Set [refresh] if the credentials should be refreshed.
+  static Future<String> getUserToken({bool refresh = false}) async {
     final tokenResult = FirebaseAuth.instance.currentUser!;
     return await tokenResult.getIdToken(refresh);
   }
 
-  Future<dynamic> authRequest(
+  /// Make an authenticated HTTP request to the Cannlytics API.
+  static Future<dynamic> authRequest(
     String endpoint,
     dynamic data, {
     Map<String, dynamic>? options,
@@ -54,7 +46,8 @@ class APIService {
     }
   }
 
-  Future<dynamic> apiRequest(
+  /// Make a HTTP request to the Cannlytics API.
+  static Future<dynamic> apiRequest(
     String endpoint,
     dynamic data,
     Map<String, dynamic>? options, {
