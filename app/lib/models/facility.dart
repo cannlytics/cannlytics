@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 2/25/2023
+// Updated: 2/26/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 typedef FacilityId = String;
@@ -13,7 +13,7 @@ typedef FacilityId = String;
 class Facility {
   // Initialization.
   const Facility({
-    required this.uid,
+    required this.id,
     this.alias = '',
     this.credentialedDate = '',
     this.displayName = '',
@@ -33,7 +33,7 @@ class Facility {
   });
 
   // Properties.
-  final FacilityId uid;
+  final FacilityId id;
   final String alias;
   final String credentialedDate;
   final String displayName;
@@ -54,7 +54,7 @@ class Facility {
   // Create model.
   factory Facility.fromMap(Map<String, dynamic>? data, String uid) {
     return Facility(
-      uid: uid,
+      id: uid,
       alias: data?['alias'] ?? '',
       credentialedDate: data?['credentialed_date'] ?? '',
       displayName: data?['display_name'] ?? '',
@@ -77,7 +77,7 @@ class Facility {
   // Create JSON.
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'uid': uid,
+      'id': id,
       'alias': alias,
       'credentialed_date': credentialedDate,
       'display_name': displayName,

@@ -285,6 +285,8 @@ class _SignInFormState extends ConsumerState<SignInForm>
                 autocorrect: false,
                 textInputAction: TextInputAction.done,
                 keyboardAppearance: Brightness.light,
+                // FIXME: Error color is white!
+                // style: TextStyle().copyWith(),
                 onEditingComplete: () => _passwordEditingComplete(),
               ),
 

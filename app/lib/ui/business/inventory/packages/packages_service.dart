@@ -26,8 +26,8 @@ String documentIdFromCurrentDate() {
 }
 
 class FirestorePath {
-  static String job(String uid, String jobId) => 'users/$uid/jobs/$jobId';
-  static String jobs(String uid) => 'users/$uid/jobs';
+  static String facility(String uid, String jobId) => 'users/$uid/jobs/$jobId';
+  static String facilities(String uid) => 'users/$uid/jobs';
   static String entry(String uid, String entryId) =>
       'users/$uid/entries/$entryId';
   static String entries(String uid) => 'users/$uid/entries';
@@ -39,7 +39,7 @@ class SpendingService {
 
   Future<void> setJob({required UserID uid, required Job job}) =>
       _dataSource.setData(
-        path: FirestorePath.job(uid, job.id),
+        path: FirestorePath.facility(uid, job.id),
         data: job.toMap(),
       );
 
@@ -55,24 +55,24 @@ class SpendingService {
       }
     }
     // delete job
-    await _dataSource.deleteData(path: FirestorePath.job(uid, job.id));
+    await _dataSource.deleteData(path: FirestorePath.facility(uid, job.id));
   }
 
   Stream<Job> watchJob({required UserID uid, required JobID jobId}) =>
       _dataSource.watchDocument(
-        path: FirestorePath.job(uid, jobId),
+        path: FirestorePath.facility(uid, jobId),
         builder: (data, documentId) => Job.fromMap(data, documentId),
       );
 
   Stream<List<Job>> watchJobs({required UserID uid}) =>
       _dataSource.watchCollection(
-        path: FirestorePath.jobs(uid),
+        path: FirestorePath.facilities(uid),
         builder: (data, documentId) => Job.fromMap(data, documentId),
       );
 
   Future<List<Job>> fetchJobs({required UserID uid}) =>
       _dataSource.fetchCollection(
-        path: FirestorePath.jobs(uid),
+        path: FirestorePath.facilities(uid),
         builder: (data, documentId) => Job.fromMap(data, documentId),
       );
 

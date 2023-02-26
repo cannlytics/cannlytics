@@ -11,20 +11,21 @@
 import 'dart:async';
 
 // Package imports:
+import 'package:cannlytics_app/models/facility.dart';
+import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/entry.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 
-class EntryScreenController extends AutoDisposeAsyncNotifier<void> {
+class FacilityScreenController extends AutoDisposeAsyncNotifier<void> {
   @override
   FutureOr<void> build() {
     // ok to leave this empty if the return type is FutureOr<void>
   }
 
-  Future<bool> setEntry(Entry entry) async {
+  /// Set data for a facility.
+  Future<bool> setFacility(Facility entry) async {
     final currentUser = ref.read(authServiceProvider).currentUser;
     if (currentUser == null) {
       throw AssertionError('User can\'t be null');
@@ -32,11 +33,12 @@ class EntryScreenController extends AutoDisposeAsyncNotifier<void> {
     final database = ref.read(databaseProvider);
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-        () => database.setEntry(uid: currentUser.uid, entry: entry));
+        () => database.setFacility(uid: currentUser.uid, facility: entry));
     return state.hasError == false;
   }
 }
 
-final entryScreenControllerProvider =
-    AutoDisposeAsyncNotifierProvider<EntryScreenController, void>(
-        EntryScreenController.new);
+// The facility screen provider.
+final facilityScreenControllerProvider =
+    AutoDisposeAsyncNotifierProvider<FacilityScreenController, void>(
+        FacilityScreenController.new);

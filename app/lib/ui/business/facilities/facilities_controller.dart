@@ -4,25 +4,31 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/18/2023
+// Updated: 2/26/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
+import 'package:cannlytics_app/models/facility.dart';
+import 'package:cannlytics_app/services/firestore_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rxdart/rxdart.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/entry.dart';
-import 'package:cannlytics_app/models/entry_job.dart';
-import 'package:cannlytics_app/models/job.dart';
-import 'package:cannlytics_app/models/stats/daily_jobs.dart';
 import 'package:cannlytics_app/models/user.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
-import 'package:cannlytics_app/utils/strings/string_format.dart';
 
-class EntriesListTileModel {
-  const EntriesListTileModel({
+class FirestorePath {
+  // FIXME: Make paths revolve around organizations.
+  static String facility(String uid, String facilityId) =>
+      'users/$uid/facilities/$facilityId';
+  static String facilities(String uid) => 'users/$uid/facilities';
+  static String entry(String uid, String entryId) =>
+      'users/$uid/entries/$entryId';
+  static String entries(String uid) => 'users/$uid/entries';
+}
+
+/// Class to display facilities.
+class FacilitiesListTileModel {
+  const FacilitiesListTileModel({
     required this.leadingText,
     required this.trailingText,
     this.middleText,
@@ -34,83 +40,53 @@ class EntriesListTileModel {
   final bool isHeader;
 }
 
-// TODO: Clean up this code a bit more
+/// Service to manage facilities.
 class FacilitiesService {
-  FacilitiesService({required this.database});
-  final SpendingService database;
+  const FacilitiesService(this._dataSource);
+  final FirestoreService _dataSource;
 
-  /// combine List<Job>, List<Entry> into List<EntryJob>
-  Stream<List<EntryJob>> _allEntriesStream(UserID uid) =>
-      CombineLatestStream.combine2(
-        database.watchEntries(uid: uid),
-        database.watchJobs(uid: uid),
-        _entriesJobsCombiner,
+  // Set facility data.
+  Future<void> setFacility({required UserID uid, required Facility facility}) =>
+      _dataSource.setData(
+        path: FirestorePath.facility(uid, facility.id),
+        data: facility.toMap(),
       );
 
-  static List<EntryJob> _entriesJobsCombiner(
-      List<Entry> entries, List<Job> jobs) {
-    return entries.map((entry) {
-      final job = jobs.firstWhere((job) => job.id == entry.jobId);
-      return EntryJob(entry, job);
-    }).toList();
-  }
+  // Stream a facility.
+  Stream<Facility> watchFacility(
+          {required UserID uid, required FacilityId facilityId}) =>
+      _dataSource.watchDocument(
+        path: FirestorePath.facility(uid, facilityId),
+        builder: (data, documentId) => Facility.fromMap(data, documentId),
+      );
 
-  /// Output stream
-  Stream<List<EntriesListTileModel>> entriesTileModelStream(UserID uid) =>
-      _allEntriesStream(uid).map(_createModels);
+  // Stream all facilities.
+  Stream<List<Facility>> watchFacilities({required UserID uid}) =>
+      _dataSource.watchCollection(
+        path: FirestorePath.facilities(uid),
+        builder: (data, documentId) => Facility.fromMap(data, documentId),
+      );
 
-  static List<EntriesListTileModel> _createModels(List<EntryJob> allEntries) {
-    if (allEntries.isEmpty) {
-      return [];
-    }
-    final allDailyJobsDetails = DailyJobsDetails.all(allEntries);
-
-    // total duration across all jobs
-    final totalDuration = allDailyJobsDetails
-        .map((dateJobsDuration) => dateJobsDuration.duration)
-        .reduce((value, element) => value + element);
-
-    // total pay across all jobs
-    final totalPay = allDailyJobsDetails
-        .map((dateJobsDuration) => dateJobsDuration.pay)
-        .reduce((value, element) => value + element);
-
-    return <EntriesListTileModel>[
-      EntriesListTileModel(
-        leadingText: 'All Entries',
-        middleText: Format.currency(totalPay),
-        trailingText: Format.hours(totalDuration),
-      ),
-      for (DailyJobsDetails dailyJobsDetails in allDailyJobsDetails) ...[
-        EntriesListTileModel(
-          isHeader: true,
-          leadingText: Format.date(dailyJobsDetails.date),
-          middleText: Format.currency(dailyJobsDetails.pay),
-          trailingText: Format.hours(dailyJobsDetails.duration),
-        ),
-        for (JobDetails jobDuration in dailyJobsDetails.jobsDetails)
-          EntriesListTileModel(
-            leadingText: jobDuration.name,
-            middleText: Format.currency(jobDuration.pay),
-            trailingText: Format.hours(jobDuration.durationInHours),
-          ),
-      ]
-    ];
-  }
+  // Get all facilities.
+  Future<List<Facility>> fetchFacilities({required UserID uid}) =>
+      _dataSource.fetchCollection(
+        path: FirestorePath.facilities(uid),
+        builder: (data, documentId) => Facility.fromMap(data, documentId),
+      );
 }
 
-final entriesServiceProvider = Provider<FacilitiesService>((ref) {
-  return FacilitiesService(database: ref.watch(databaseProvider));
+// The database provider.
+final databaseProvider = Provider<FacilitiesService>((ref) {
+  return FacilitiesService(ref.watch(firestoreDataSourceProvider));
 });
 
-final entriesTileModelStreamProvider =
-    StreamProvider.autoDispose<List<EntriesListTileModel>>(
-  (ref) {
-    final user = ref.watch(authStateChangesProvider).value;
-    if (user == null) {
-      throw AssertionError('User can\'t be null when fetching entries');
-    }
-    final entriesService = ref.watch(entriesServiceProvider);
-    return entriesService.entriesTileModelStream(user.uid);
-  },
-);
+// The facilities stream provider.
+final facilitiesStreamProvider =
+    StreamProvider.autoDispose<List<Facility>>((ref) {
+  final user = ref.watch(authStateChangesProvider).value;
+  if (user == null) {
+    throw AssertionError('User can\'t be null');
+  }
+  final database = ref.watch(databaseProvider);
+  return database.watchFacilities(uid: user.uid);
+});
