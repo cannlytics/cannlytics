@@ -8,7 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
-import 'package:cannlytics_app/models/facility.dart';
+import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/services/firestore_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,13 +17,10 @@ import 'package:cannlytics_app/models/user.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 
 class FirestorePath {
-  // FIXME: Make paths revolve around organizations.
+  // TODO: Make paths revolve around organizations.
   static String facility(String uid, String facilityId) =>
       'users/$uid/facilities/$facilityId';
   static String facilities(String uid) => 'users/$uid/facilities';
-  static String entry(String uid, String entryId) =>
-      'users/$uid/entries/$entryId';
-  static String entries(String uid) => 'users/$uid/entries';
 }
 
 /// Class to display facilities.

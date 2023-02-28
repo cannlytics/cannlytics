@@ -8,8 +8,8 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
-import 'package:cannlytics_app/models/entry.dart';
-import 'package:cannlytics_app/models/job.dart';
+import 'package:cannlytics_app/models/consumer/entry.dart';
+import 'package:cannlytics_app/models/consumer/job.dart';
 
 class EntryJob {
   EntryJob(this.entry, this.job);

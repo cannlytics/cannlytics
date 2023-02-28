@@ -27,8 +27,8 @@ class APIService {
 
   /// Make an authenticated HTTP request to the Cannlytics API.
   static Future<dynamic> authRequest(
-    String endpoint,
-    dynamic data, {
+    String endpoint, {
+    dynamic data,
     Map<String, dynamic>? options,
   }) async {
     /**
@@ -40,7 +40,12 @@ class APIService {
    */
     try {
       final idToken = await getUserToken();
-      return await apiRequest(endpoint, data, options, idToken: idToken);
+      return await apiRequest(
+        endpoint,
+        data: data,
+        options: options,
+        idToken: idToken,
+      );
     } catch (error) {
       return error;
     }
@@ -48,9 +53,9 @@ class APIService {
 
   /// Make a HTTP request to the Cannlytics API.
   static Future<dynamic> apiRequest(
-    String endpoint,
+    String endpoint, {
     dynamic data,
-    Map<String, dynamic>? options, {
+    Map<String, dynamic>? options,
     String? idToken,
   }) async {
     /**
@@ -88,7 +93,10 @@ class APIService {
           ..headers.addAll(headerAuth)
           ..body = body));
     try {
-      return jsonDecode(response.body);
+      var responseData = jsonDecode(response.body);
+      return responseData.containsKey('data')
+          ? responseData['data']
+          : responseData;
     } catch (error) {
       return response;
     }

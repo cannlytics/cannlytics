@@ -14,7 +14,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/entry.dart';
+import 'package:cannlytics_app/models/consumer/entry.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 

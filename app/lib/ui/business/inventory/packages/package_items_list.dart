@@ -15,8 +15,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/entry.dart';
-import 'package:cannlytics_app/models/job.dart';
+import 'package:cannlytics_app/models/consumer/entry.dart';
+import 'package:cannlytics_app/models/consumer/job.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/package_items_controller.dart';

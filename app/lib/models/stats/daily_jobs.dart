@@ -8,7 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
-import 'package:cannlytics_app/models/entry_job.dart';
+import 'package:cannlytics_app/models/consumer/entry_job.dart';
 
 /// Temporary model class to store the time tracked and pay for a job
 class JobDetails {

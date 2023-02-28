@@ -7,7 +7,7 @@
 // Updated: 2/26/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-import 'package:cannlytics_app/models/strain.dart';
+import 'package:cannlytics_app/models/metrc/strain.dart';
 
 typedef PlantId = String;
 

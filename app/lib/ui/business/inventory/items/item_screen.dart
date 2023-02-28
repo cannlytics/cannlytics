@@ -18,8 +18,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/entry.dart';
-import 'package:cannlytics_app/models/job.dart';
+import 'package:cannlytics_app/models/consumer/entry.dart';
+import 'package:cannlytics_app/models/consumer/job.dart';
 import 'package:cannlytics_app/ui/business/inventory/items/item_controller.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
