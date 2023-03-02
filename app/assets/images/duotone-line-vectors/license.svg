@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 64 64" id="Layer_1" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<style type="text/css">
+	.st0{fill:none;stroke:#126BB5;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st1{fill:none;stroke:#00B1E4;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st2{fill:none;stroke:#00B1E4;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st3{fill:#FFFFFF;stroke:#00B1E4;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st4{fill:#00B1E4;}
+	.st5{fill:none;stroke:#126BB5;stroke-width:2;stroke-miterlimit:10;}
+	.st6{fill:none;stroke:#00B1E4;stroke-width:2;stroke-miterlimit:10;}
+	.st7{fill:none;stroke:#2B3088;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st8{fill:none;stroke:#126BB5;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;}
+	.st9{fill:none;stroke:#00B1E4;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;}
+</style>
+<path class="st1" d="M25,38h-8v-1c0-2.2,1.8-4,4-4h0c2.2,0,4,1.8,4,4V38z"/>
+<circle class="st1" cx="21" cy="28" r="2"/>
+<line class="st1" x1="32" x2="46" y1="27" y2="27"/>
+<line class="st1" x1="32" x2="46" y1="32" y2="32"/>
+<line class="st1" x1="32" x2="46" y1="37" y2="37"/>
+<g>
+<g>
+<path class="st0" d="M52,38c0,2.8-2.3,5-5,5H17c-2.8,0-5-2.3-5-5V26c0-2.8,2.3-5,5-5h30c2.8,0,5,2.3,5,5V38z"/>
+</g>
+<path class="st0" d="M36,21h-8v-1c0-2.2,1.8-4,4-4h0c2.2,0,4,1.8,4,4V21z"/>
+</g>
+<polyline class="st1" points="18,12 12,12 12,18 "/>
+<polyline class="st1" points="46,12 52,12 52,18 "/>
+<polyline class="st1" points="52,46 52,52 46,52 "/>
+<polyline class="st1" points="12,46 12,52 18,52 "/>
+</svg>

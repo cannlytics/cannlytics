@@ -8,31 +8,37 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/ui/business/inventory/items/items_service.dart';
 import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
 
-class ItemsScreen extends ConsumerWidget {
-  const ItemsScreen({super.key});
+/// The facilities screen.
+class FacilitiesScreen extends ConsumerWidget {
+  const FacilitiesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
+      // App bar.
       appBar: AppBar(
-        title: const Text('Entries'),
+        title: const Text('Facilities'),
       ),
+
+      // Body.
       body: Consumer(
         builder: (context, ref, child) {
-          final entriesTileModelStream =
-              ref.watch(entriesTileModelStreamProvider);
+          // Facilities provider.
+          final data = ref.watch(facilitiesProvider);
+
+          // Render facilities.
           return ListItemsBuilder<dynamic>(
-            data: entriesTileModelStream,
-            itemBuilder: (context, model) => EntriesListTile(model: model),
+            data: data,
+            itemBuilder: (context, model) => FacilityRow(model: model),
           );
         },
       ),
@@ -40,9 +46,24 @@ class ItemsScreen extends ConsumerWidget {
   }
 }
 
-class EntriesListTile extends StatelessWidget {
-  const EntriesListTile({super.key, required this.model});
-  final EntriesListTileModel model;
+/// Class to display facilities.
+class FacilityRowModel {
+  const FacilityRowModel({
+    required this.leadingText,
+    required this.trailingText,
+    this.middleText,
+    this.isHeader = false,
+  });
+  final String leadingText;
+  final String trailingText;
+  final String? middleText;
+  final bool isHeader;
+}
+
+/// A facility tile.
+class FacilityRow extends StatelessWidget {
+  const FacilityRow({super.key, required this.model});
+  final FacilityRowModel model;
 
   @override
   Widget build(BuildContext context) {
@@ -52,14 +73,22 @@ class EntriesListTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Row(
         children: <Widget>[
-          Text(model.leadingText, style: const TextStyle(fontSize: fontSize)),
+          // Title.
+          Text(
+            model.leadingText,
+            style: const TextStyle(fontSize: fontSize),
+          ),
           Expanded(child: Container()),
+
+          // Description.
           if (model.middleText != null)
             Text(
               model.middleText!,
               style: TextStyle(color: Colors.green[700], fontSize: fontSize),
               textAlign: TextAlign.right,
             ),
+
+          // Actions.
           SizedBox(
             width: 60.0,
             child: Text(

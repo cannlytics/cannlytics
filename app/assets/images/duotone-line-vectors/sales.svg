@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="800px"
+   height="800px"
+   viewBox="0 0 64 64"
+   version="1.1"
+   id="svg33"
+   sodipodi:docname="sales.svg"
+   inkscape:export-filename="C:\Users\keega\Documents\cannlytics\cannlytics\app\assets\images\icons\sales.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
+  <metadata
+     id="metadata37">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1094"
+     id="namedview35"
+     showgrid="false"
+     inkscape:zoom="0.94125"
+     inkscape:cx="500.85238"
+     inkscape:cy="398.35226"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg33" />
+  <defs
+     id="defs4">
+    <style
+       id="style2">.cls-1{fill:#f57c00;}.cls-2{fill:#999;}.cls-3{fill:#666;}</style>
+  </defs>
+  <title
+     id="title6" />
+  <g
+     data-name="outline color"
+     id="outline_color">
+    <path
+       class="cls-1"
+       d="M41.5,60a1,1,0,0,1-.39-.08l-14-6A1,1,0,0,1,26.5,53V35a1,1,0,0,1,1.39-.92l14,6a1,1,0,0,1,.61.92V59a1,1,0,0,1-.45.83A1,1,0,0,1,41.5,60Zm-13-7.66,12,5.14V41.66l-12-5.14Z"
+       id="path8" />
+    <path
+       class="cls-1"
+       d="M41.5,60a1,1,0,0,1-.55-.17A1,1,0,0,1,40.5,59V41a1,1,0,0,1,.61-.92l14-6A1,1,0,0,1,56.5,35V53a1,1,0,0,1-.61.92l-14,6A1,1,0,0,1,41.5,60Zm1-18.34V57.48l12-5.14V36.52Z"
+       id="path10" />
+    <path
+       class="cls-1"
+       d="M41.5,42a1,1,0,0,1-.39-.08l-14-6a1,1,0,0,1,0-1.84l14-6a1,1,0,0,1,.78,0l14,6a1,1,0,0,1,0,1.84l-14,6A1,1,0,0,1,41.5,42ZM30,35,41.5,39.91,53,35,41.5,30.09Z"
+       id="path12" />
+    <path
+       class="cls-1"
+       d="M41.5,51c-5.71,0-11-1-14.44-2.7S23,44.77,23,43.5s.7-3.14,4.06-4.8a1,1,0,1,1,.88,1.8c-1.89.94-2.94,2-2.94,3s1.05,2.06,2.94,3C31.1,48.07,36.17,49,41.5,49s10.4-.93,13.56-2.5c1.89-.94,2.94-2,2.94-3s-1-2.06-2.94-3a1,1,0,1,1,.88-1.8C59.3,40.36,60,42.23,60,43.5s-.7,3.14-4.06,4.8S47.21,51,41.5,51Z"
+       id="path14" />
+    <path
+       class="cls-2"
+       d="M21.92,55.07a5,5,0,0,1-4.56-2.93L4.5,23.93A5,5,0,0,1,7,17.3L28.45,7.52a1,1,0,0,1,.83,1.82L7.81,19.12a3,3,0,0,0-1.49,4L19.18,51.31a3,3,0,0,0,4,1.48l.14,0A1,1,0,1,1,24,54.59l-.1,0A4.81,4.81,0,0,1,21.92,55.07Z"
+       id="path16" />
+    <path
+       class="cls-3"
+       d="M22.15,24.73a1,1,0,0,1-1-.85,7.63,7.63,0,0,1-.09-2.52v0a7.52,7.52,0,0,1,3.64-5.46,1,1,0,0,1,.5-.14,1,1,0,0,1,1,1,1,1,0,0,1-.57.9,5.56,5.56,0,0,0-2.6,3.93v.05a5.33,5.33,0,0,0,.07,1.91.75.75,0,0,1,0,.21A1,1,0,0,1,22.15,24.73Z"
+       id="path18" />
+    <path
+       class="cls-3"
+       d="M16.6,37a1,1,0,0,1-.91-.58l-4.57-10a1,1,0,0,1,.5-1.32l10-4.57a1,1,0,0,1,1.25.36,1.08,1.08,0,0,1,.19.58,1,1,0,0,1-.86,1l-8.85,4L17.22,35a1,1,0,0,1,0,1.83l-.25.12A1,1,0,0,1,16.6,37Z"
+       id="path20" />
+    <path
+       class="cls-2"
+       d="M21,43a1.15,1.15,0,0,1-.41-.08l-2.11-.95a5,5,0,0,1-2.62-6.35.71.71,0,0,1,.08-.21l5.33-11.93a.41.41,0,0,1,0-.08l3.12-7,.06-.12L28.61,7a5,5,0,0,1,6.6-2.52l21.91,9.79a5,5,0,0,1,2.52,6.61l-4.33,9.7a1,1,0,1,1-1.82-.82l4.33-9.7a3,3,0,0,0-1.52-4L34.39,6.31a3,3,0,0,0-2.29-.06,3,3,0,0,0-1.67,1.58l-4.18,9.36-.06.12-3,6.79a.41.41,0,0,1,0,.08l-5.34,12a.45.45,0,0,1,0-.06,1.21,1.21,0,0,1-.05.18A3,3,0,0,0,19.3,40.1l2.11.94A1,1,0,0,1,21,43Z"
+       id="path22" />
+    <path
+       class="cls-3"
+       d="M31.81,29.8a1,1,0,0,1-.81-.41,1,1,0,0,1,.22-1.4l3.92-2.84.09-.06,4.38-3.18a1,1,0,0,1,1-.08,1,1,0,0,1,.55.89L41.44,25a1,1,0,0,1-2,.21l-.07-.66-3.06,2.22-.1.06L32.4,29.61A1,1,0,0,1,31.81,29.8Z"
+       id="path24" />
+    <path
+       class="cls-3"
+       d="M35.6,27a7.44,7.44,0,0,1-3-.65,7.5,7.5,0,1,1,10.48-7.9,7.34,7.34,0,0,1-.57,4.12,7.2,7.2,0,0,1-1.43,2.12,1,1,0,1,1-1.44-1.38,5.49,5.49,0,0,0,1-1.56,5.38,5.38,0,0,0,.41-3,5.5,5.5,0,1,0-7.68,5.79,5.26,5.26,0,0,0,2.33.47,1,1,0,0,1,1,1,1,1,0,0,1-1,1Z"
+       id="path26" />
+    <path
+       class="cls-3"
+       d="M40.2,23.73a1,1,0,0,1-1-1h0a1,1,0,1,1,1,1Z"
+       id="path28" />
+    <path
+       class="cls-3"
+       d="M49.8,29.21a1,1,0,0,1-.41-.09,1,1,0,0,1-.5-1.32l1.92-4.3-9-4-.24-.09a1,1,0,0,1-.45-1.32l0,0a1,1,0,0,1,1.3-.46l10,4.49a1,1,0,0,1,.52.55,1,1,0,0,1,0,.77l-2.33,5.21A1,1,0,0,1,49.8,29.21Z"
+       id="path30" />
+  </g>
+</svg>

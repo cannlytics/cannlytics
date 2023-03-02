@@ -11,6 +11,8 @@
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_app/ui/business/facilities/facilities_screen.dart';
+import 'package:cannlytics_app/ui/business/facilities/facility_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -181,7 +183,29 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           //   ],
           // ),
 
-          // - facilities
+          // Facilities
+          GoRoute(
+            path: '/facilities',
+            name: AppRoutes.facilities.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const FacilitiesScreen(),
+            ),
+            routes: [
+              // Facility screen.
+              GoRoute(
+                path: ':id',
+                name: AppRoutes.facility.name,
+                pageBuilder: (context, state) {
+                  final id = state.params['id']!;
+                  return MaterialPage(
+                    key: state.pageKey,
+                    child: FacilityScreen(jobId: id),
+                  );
+                },
+              ),
+            ],
+          ),
 
           // - inventory (packages and items, categories, package statuses)
 

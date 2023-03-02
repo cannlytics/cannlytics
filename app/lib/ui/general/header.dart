@@ -313,8 +313,8 @@ class AppLogo extends StatelessWidget {
       },
       child: Image.asset(
         isDark
-            ? 'assets/images/logos/logo_dark.svg'
-            : 'assets/images/logos/logo_light.svg',
+            ? 'assets/images/logos/cannlytics_logo_with_text_dark.png'
+            : 'assets/images/logos/cannlytics_logo_with_text_light.png',
         width: 120,
       ),
     );
