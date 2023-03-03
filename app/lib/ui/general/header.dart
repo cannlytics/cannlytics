@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/ui/dashboard_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -52,6 +53,13 @@ class DesktopNavigationLayout extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
 
+    // Watch the user's licenses.
+    // final dashboardStore = ref.watch(dashboardStoreProvider);
+    // print('LICENSES:');
+    // print(dashboardStore.getLicenses());
+    // print('PRIMARY LICENSE:');
+    // print(dashboardStore.getPrimaryLicense());
+
     // Build the layout.
     return Container(
       decoration: const BoxDecoration(
@@ -71,7 +79,26 @@ class DesktopNavigationLayout extends ConsumerWidget {
             SizedBox(width: isVeryWide ? 80 : 28),
             AppLogo(isDark: isDark),
 
-            // TODO: Select license if business!
+            // License selection.
+            SizedBox(width: isVeryWide ? 80 : 28),
+            LicenseDropDown(),
+            // _licenseSelect(licenses, primaryLicense),
+            // DropdownButton<String>(
+            //   value: dashboardStore.getPrimaryLicense(),
+            //   items: dashboardStore.getLicenses().map((String value) {
+            //     return DropdownMenuItem<String>(
+            //       value: value,
+            //       child: Text(value),
+            //     );
+            //   }).toList(),
+            //   onChanged: (newValue) async {
+            //     print('SELECTED LICENSE:');
+            //     print(newValue);
+            //     await ref
+            //         .read(dashboardController.notifier)
+            //         .changePrimaryLicense(newValue ?? '+ Add a license');
+            //   },
+            // ),
 
             // Links.
             const Spacer(),
@@ -96,6 +123,32 @@ class DesktopNavigationLayout extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A dropdown selection for the user to choose their primary license.
+class LicenseDropDown extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final value = ref.watch(licenseProvider).primaryLicense;
+    final items = ref.watch(licenseProvider).licenses;
+    return DropdownButton(
+      value: value,
+      items: items
+          .map((e) => DropdownMenuItem<String>(
+                onTap: () => e,
+                value: e,
+                child: Text(e),
+              ))
+          .toList(),
+      onChanged: (value) {
+        if (value == '+ Add a license') {
+          GoRouter.of(context).go('/licenses/add');
+          return;
+        }
+        ref.read(licenseProvider.notifier).changeLicense(value as String);
+      },
     );
   }
 }

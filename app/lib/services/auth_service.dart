@@ -7,15 +7,11 @@
 // Updated: 2/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Dart imports:
-import 'dart:io';
-
 // Package imports:
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 
 // Project imports:
 import 'package:cannlytics_app/services/firestore_service.dart';
@@ -58,10 +54,6 @@ class AuthService {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       // Show the image picker to let the user select a new photo.
-      // final imagePicker = ImagePicker();
-      // final pickedFile = await imagePicker.pickImage(
-      //   source: ImageSource.gallery,
-      // );
       var pickedFile = await FilePicker.platform.pickFiles();
 
       // If the user picks a photo.
