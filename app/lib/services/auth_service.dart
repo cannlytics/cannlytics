@@ -11,6 +11,7 @@
 import 'dart:io';
 
 // Package imports:
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +28,7 @@ class AuthService {
 
   /// Handle user changes and get the current user.
   Stream<User?> authStateChanges() => _auth.authStateChanges();
+
   User? get currentUser => _auth.currentUser;
 
   /// Signs the user in anonymously.
@@ -56,17 +58,18 @@ class AuthService {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       // Show the image picker to let the user select a new photo.
-      final imagePicker = ImagePicker();
-      final pickedFile = await imagePicker.pickImage(
-        source: ImageSource.gallery,
-      );
+      // final imagePicker = ImagePicker();
+      // final pickedFile = await imagePicker.pickImage(
+      //   source: ImageSource.gallery,
+      // );
+      var pickedFile = await FilePicker.platform.pickFiles();
 
       // If the user picks a photo.
       if (pickedFile != null) {
         // Upload the selected photo to Firebase Storage and get its download URL.
         final String photoRef = 'users/${user.uid}/photo.jpg';
         final storageRef = FirebaseStorage.instance.ref().child(photoRef);
-        final uploadTask = storageRef.putFile(File(pickedFile.path));
+        final uploadTask = storageRef.putData(pickedFile.files.first.bytes!);
         final snapshot = await uploadTask.whenComplete(() {});
         final downloadURL = await snapshot.ref.getDownloadURL();
 
@@ -82,6 +85,8 @@ class AuthService {
 
         // Update the user's photo URL in Firebase Authentication.
         await user.updatePhotoURL(downloadURL);
+        print('UPDATED PHOTO!');
+        await user.reload();
       }
     }
   }

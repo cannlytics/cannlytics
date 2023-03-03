@@ -4,10 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/22/2023
+// Updated: 3/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
+import 'package:cannlytics_app/widgets/layout/shimmer.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -29,16 +31,11 @@ import 'package:cannlytics_app/widgets/buttons/action_text_button.dart';
 import 'package:cannlytics_app/widgets/images/avatar.dart';
 
 /// Screen for the user to manage their account.
-class AccountScreen extends ConsumerWidget {
+class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen<AsyncValue>(
-      accountProvider,
-      (_, state) => state.showAlertDialogOnError(context),
-    );
-    final user = ref.watch(authServiceProvider).currentUser;
+  Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -46,26 +43,9 @@ class AccountScreen extends ConsumerWidget {
           const SliverToBoxAdapter(child: AppHeader()),
 
           // Account management.
-          SliverToBoxAdapter(child: AccountManagement(user: user)),
+          SliverToBoxAdapter(child: AccountManagement()),
         ],
       ),
-      // TODO: Implement a body for the user to manage their account!
-      // - Reset password.
-      // - Change user email.
-      // - Change user phone.
-      // - Change user name.
-      // - Change user photo.
-      // - View user data:
-      //  * Account created date.
-      //  * Last sign in date.
-      // - View logs.
-      // - View / manage organizations and teams.
-      // - Delete account.
-
-      // Business:
-      // - state (restrict to Cannlytics-verified states)
-      // - licenses (/admin/create-license and /admin/delete-license)
-      // - license type
     );
   }
 }
@@ -74,16 +54,26 @@ class AccountScreen extends ConsumerWidget {
 class AccountManagement extends ConsumerWidget {
   const AccountManagement({
     Key? key,
-    required this.user,
+    // required this.user,
   }) : super(key: key);
-  final User? user;
+  // final User? user;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Listen to the account state,
     final state = ref.watch(accountProvider);
+
+    // Dynamic screen width.
     final screenWidth = MediaQuery.of(context).size.width;
-    // final crossAxisCount =
-    //     (screenWidth >= Breakpoints.twoColLayoutMinWidth) ? 3 : 2;
+
+    // Listen to the current user.
+    ref.listen<AsyncValue>(
+      accountProvider,
+      (_, state) => state.showAlertDialogOnError(context),
+    );
+    final user = ref.watch(authServiceProvider).currentUser;
+
+    // Render the widget.
     return Padding(
       padding: EdgeInsets.only(
         left: sliverHorizontalPadding(screenWidth),
@@ -103,43 +93,77 @@ class AccountManagement extends ConsumerWidget {
                 onTap: state.isLoading
                     ? null
                     : () async {
-                        ref.read(accountProvider.notifier).changePhoto();
+                        await ref.read(accountProvider.notifier).changePhoto();
                       },
-                child: Avatar(
-                  photoUrl: user!.photoURL,
-                  radius: 60,
-                  borderColor: Colors.black54,
-                  borderWidth: 1.0,
+                child: ShimmerLoading(
+                  isLoading: state.isLoading,
+                  child: Avatar(
+                    photoUrl: user.photoURL,
+                    radius: 60,
+                    borderColor: Theme.of(context).secondaryHeaderColor,
+                    borderWidth: 1.0,
+                  ),
                 ),
               ),
               gapH8,
 
               // User name.
               // TODO: Change user name.
-              if (user!.displayName != null)
+              if (user.displayName != null)
                 Text(
                   'Username: ${user!.displayName!}',
-                  style: const TextStyle(color: AppColors.neutral6),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               gapH8,
 
               // User email.
               // TODO: Change email.
-              if (user!.email != null)
+              if (user.email != null)
                 Text(
                   'Email: ${user!.email!}',
-                  style: const TextStyle(color: AppColors.neutral6),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               gapH8,
 
               // User phone.
               // TODO: Change user phone.
-              if (user!.phoneNumber != null)
+              if (user.phoneNumber != null)
                 Text(
                   'Phone: ${user!.phoneNumber!}',
-                  style: const TextStyle(color: AppColors.neutral6),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+
+              // TODO: Add phone number.
+              if (user.phoneNumber == null)
+                CustomTextButton(
+                  text: 'Add phone number',
+                  onPressed: () {
+                    // TODO: Add phone number.
+                  },
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
               gapH8,
+
+              // TODO: Toggle light / dark theme.
+              // ThemeInput(),
+
+              // TODO: Implement a body for the user to manage their account!
+              // - Reset password.
+              // - Change user email.
+              // - Change user phone.
+              // - Change user name.
+              // - Change user photo.
+              // - View user data:
+              //  * Account created date.
+              //  * Last sign in date.
+              // - View logs.
+              // - View / manage organizations and teams.
+              // - Delete account.
+
+              // Business:
+              // - state (restrict to Cannlytics-verified states)
+              // - licenses (/admin/create-license and /admin/delete-license)
+              // - license type
 
               // Sign out.
               ActionTextButton(
@@ -165,3 +189,35 @@ class AccountManagement extends ConsumerWidget {
     );
   }
 }
+
+/// TODO: Light / dark theme input.
+// class ThemeInput extends StatelessWidget {
+//   const ThemeInput({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Consumer(builder: (context, ref, child) {
+//       final theme = ref.watch(themeModeProvider);
+//       return Row(
+//         mainAxisAlignment: MainAxisAlignment.end,
+//         children: [
+//           Padding(
+//             padding: const EdgeInsets.only(top: 6, right: 24, bottom: 6),
+//             child: IconButton(
+//               splashRadius: 18,
+//               onPressed: () {
+//                 // Toggle light / dark theme.
+//                 ref.read(themeModeProvider.notifier).state =
+//                     theme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+//               },
+//               icon: Icon(
+//                 theme == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
+//                 color: AppColors.neutral4,
+//               ),
+//             ),
+//           ),
+//         ],
+//       );
+//     });
+//   }
+// }

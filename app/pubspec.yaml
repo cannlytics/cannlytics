@@ -11,6 +11,7 @@ dependencies:
   cloud_firestore: ^4.0.5
   cupertino_icons: ^1.0.5
   equatable: ^2.0.5
+  file_picker: ^5.2.5
   firebase_auth: ^4.1.2
   firebase_storage: ^11.0.14
   firebase_core: ^2.2.0

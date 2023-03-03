@@ -8,15 +8,17 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/utils/web/web.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A footer with links at the bottom of the app.
 class Footer extends ConsumerWidget {

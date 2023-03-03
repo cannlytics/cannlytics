@@ -8,13 +8,15 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
+import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
+import 'package:cannlytics_app/ui/general/footer.dart';
+import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
 
 /// The facilities screen.
@@ -25,23 +27,48 @@ class FacilitiesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       // App bar.
-      appBar: AppBar(
-        title: const Text('Facilities'),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Facilities'),
+      // ),
 
       // Body.
-      body: Consumer(
-        builder: (context, ref, child) {
-          // Facilities provider.
-          final data = ref.watch(facilitiesProvider);
+      body: CustomScrollView(
+        slivers: [
+          // App header.
+          const SliverToBoxAdapter(child: AppHeader()),
 
-          // Render facilities.
-          return ListItemsBuilder<dynamic>(
-            data: data,
-            itemBuilder: (context, model) => FacilityRow(model: model),
-          );
-        },
+          // Navigation cards.
+          SliverToBoxAdapter(
+            child: Consumer(
+              builder: (context, ref, child) {
+                // Facilities provider.
+                final data = ref.watch(facilitiesProvider);
+
+                // Render facilities.
+                return ListItemsBuilder<dynamic>(
+                  data: data,
+                  itemBuilder: (context, model) => FacilityRow(model: model),
+                );
+              },
+            ),
+          ),
+
+          // Footer
+          const SliverToBoxAdapter(child: Footer()),
+        ],
       ),
+      // body: Consumer(
+      //   builder: (context, ref, child) {
+      //     // Facilities provider.
+      //     final data = ref.watch(facilitiesProvider);
+
+      //     // Render facilities.
+      //     return ListItemsBuilder<dynamic>(
+      //       data: data,
+      //       itemBuilder: (context, model) => FacilityRow(model: model),
+      //     );
+      //   },
+      // ),
     );
   }
 }

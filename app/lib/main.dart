@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// ignore: depend_on_referenced_packages
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,6 +27,9 @@ import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
+
+// ignore: depend_on_referenced_packages
+
 
 // ignore:depend_on_referenced_packages
 

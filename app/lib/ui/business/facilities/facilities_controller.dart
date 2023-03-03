@@ -8,13 +8,13 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
-import 'package:cannlytics_app/models/metrc/facility.dart';
-import 'package:cannlytics_app/services/firestore_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
+import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/models/user.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
+import 'package:cannlytics_app/services/firestore_service.dart';
 
 /// Service to manage facilities.
 class FacilitiesService {

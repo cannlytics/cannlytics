@@ -31,11 +31,7 @@ class ActionTextButton extends StatelessWidget {
       ),
       child: TextButton(
         onPressed: onPressed,
-        child: Text(text,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium!
-                .copyWith(color: AppColors.neutral5)),
+        child: Text(text, style: Theme.of(context).textTheme.titleMedium!),
       ),
     );
   }

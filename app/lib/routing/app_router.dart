@@ -11,8 +11,6 @@
 import 'dart:async';
 
 // Flutter imports:
-import 'package:cannlytics_app/ui/business/facilities/facilities_screen.dart';
-import 'package:cannlytics_app/ui/business/facilities/facility_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -30,6 +28,8 @@ import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart'
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_screen.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_screen.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
+import 'package:cannlytics_app/ui/business/facilities/facilities_screen.dart';
+import 'package:cannlytics_app/ui/business/facilities/facility_screen.dart';
 import 'package:cannlytics_app/ui/business/inventory/items/item_screen.dart';
 import 'package:cannlytics_app/ui/business/inventory/items/items_screen.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/package_edit_screen.dart';

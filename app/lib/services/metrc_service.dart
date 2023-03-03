@@ -10,6 +10,8 @@
 // Package imports:
 // TODO: Create SaleReceipt, SaleTransaction, Delivery, LabTest models.
 // TODO: Use models instead of Maps where possible.
+
+// Project imports:
 import 'package:cannlytics_app/models/metrc/employee.dart';
 import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/models/metrc/harvest.dart';
@@ -17,8 +19,8 @@ import 'package:cannlytics_app/models/metrc/item.dart';
 import 'package:cannlytics_app/models/metrc/location.dart';
 import 'package:cannlytics_app/models/metrc/package.dart';
 import 'package:cannlytics_app/models/metrc/patient.dart';
-import 'package:cannlytics_app/models/metrc/plant_batch.dart';
 import 'package:cannlytics_app/models/metrc/plant.dart';
+import 'package:cannlytics_app/models/metrc/plant_batch.dart';
 import 'package:cannlytics_app/models/metrc/strain.dart';
 import 'package:cannlytics_app/models/metrc/transporter.dart';
 import 'package:cannlytics_app/services/api_service.dart';

@@ -8,13 +8,13 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
@@ -59,39 +59,39 @@ class _MainScreenState extends State<MainScreen> {
     // Render the screen with navigation items on mobile.
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: isWide
-          ? null
-          : Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                border: const Border(
-                  top: BorderSide(color: AppColors.neutral2, width: 1.0),
-                ),
-              ),
-              child: BottomNavigationBar(
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                currentIndex: _selectedIndex,
-                elevation: 0,
-                type: BottomNavigationBarType.fixed,
-                // showSelectedLabels: false,
-                // showUnselectedLabels: false,
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home_outlined),
-                    label: 'Home',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.search_outlined),
-                    label: 'Search',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.account_box_outlined),
-                    label: 'Account',
-                  ),
-                ],
-                onTap: (index) => _tap(context, index),
-              ),
-            ),
+      // bottomNavigationBar: isWide
+      //     ? null
+      //     : Container(
+      //         decoration: BoxDecoration(
+      //           color: Theme.of(context).scaffoldBackgroundColor,
+      //           border: const Border(
+      //             top: BorderSide(color: AppColors.neutral2, width: 1.0),
+      //           ),
+      //         ),
+      //         child: BottomNavigationBar(
+      //           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      //           currentIndex: _selectedIndex,
+      //           elevation: 0,
+      //           type: BottomNavigationBarType.fixed,
+      //           // showSelectedLabels: false,
+      //           // showUnselectedLabels: false,
+      //           items: const [
+      //             BottomNavigationBarItem(
+      //               icon: Icon(Icons.home_outlined),
+      //               label: 'Home',
+      //             ),
+      //             BottomNavigationBarItem(
+      //               icon: Icon(Icons.search_outlined),
+      //               label: 'Search',
+      //             ),
+      //             BottomNavigationBarItem(
+      //               icon: Icon(Icons.account_box_outlined),
+      //               label: 'Account',
+      //             ),
+      //           ],
+      //           onTap: (index) => _tap(context, index),
+      //         ),
+      //       ),
     );
   }
 }

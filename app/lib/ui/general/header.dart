@@ -8,7 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -19,6 +18,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/routes.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 
 /// The main navigation header.

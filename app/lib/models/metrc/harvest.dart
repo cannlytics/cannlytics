@@ -7,6 +7,7 @@
 // Updated: 2/27/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Project imports:
 import 'package:cannlytics_app/models/metrc/strain.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
 

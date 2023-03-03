@@ -8,16 +8,17 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/routing/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_controller.dart';
@@ -30,7 +31,6 @@ import 'package:cannlytics_app/utils/strings/string_validators.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/layout/responsive_scrollable_card.dart';
-import 'package:go_router/go_router.dart';
 
 /// Sign in screen.
 class EmailPasswordSignInScreen extends ConsumerWidget {
