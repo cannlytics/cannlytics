@@ -26,7 +26,7 @@ class FacilityScreenController extends AutoDisposeAsyncNotifier<void> {
 
   /// Set data for a facility.
   Future<bool> setFacility(Facility entry) async {
-    final currentUser = ref.read(authServiceProvider).currentUser;
+    final currentUser = ref.read(authProvider).currentUser;
     if (currentUser == null) {
       throw AssertionError('User can\'t be null');
     }

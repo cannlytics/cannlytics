@@ -58,13 +58,13 @@ class FacilitiesService {
 
 // The database provider.
 final databaseProvider = Provider<FacilitiesService>((ref) {
-  return FacilitiesService(ref.watch(firestoreDataSourceProvider));
+  return FacilitiesService(ref.watch(firestoreProvider));
 });
 
 // The facilities stream provider.
 final facilitiesProvider = StreamProvider.autoDispose<List<Facility>>((ref) {
   // Get the user.
-  final user = ref.watch(authStateChangesProvider).value;
+  final user = ref.watch(userProvider).value;
 
   // Handle errors.
   if (user == null) {

@@ -36,7 +36,7 @@ class EditJobScreenController extends AutoDisposeAsyncNotifier<void> {
 
   Future<bool> submit(
       {Job? job, required String name, required int ratePerHour}) async {
-    final currentUser = ref.read(authServiceProvider).currentUser;
+    final currentUser = ref.read(authProvider).currentUser;
     if (currentUser == null) {
       throw AssertionError('User can\'t be null');
     }

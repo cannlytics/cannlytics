@@ -1,5 +1,6 @@
 part of alert_dialogs;
 
+/// Show an alert dialog.
 Future<bool?> showAlertDialog({
   required BuildContext context,
   required String title,

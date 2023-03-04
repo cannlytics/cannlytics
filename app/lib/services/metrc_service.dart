@@ -7,23 +7,27 @@
 // Updated: 2/28/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Package imports:
-// TODO: Create SaleReceipt, SaleTransaction, Delivery, LabTest models.
-// TODO: Use models instead of Maps where possible.
-
 // Project imports:
+import 'package:cannlytics_app/models/metrc/category.dart';
+import 'package:cannlytics_app/models/metrc/delivery.dart';
 import 'package:cannlytics_app/models/metrc/employee.dart';
 import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/models/metrc/harvest.dart';
 import 'package:cannlytics_app/models/metrc/item.dart';
+import 'package:cannlytics_app/models/metrc/lab_result.dart';
+import 'package:cannlytics_app/models/metrc/lab_test.dart';
 import 'package:cannlytics_app/models/metrc/location.dart';
 import 'package:cannlytics_app/models/metrc/package.dart';
 import 'package:cannlytics_app/models/metrc/patient.dart';
 import 'package:cannlytics_app/models/metrc/plant.dart';
 import 'package:cannlytics_app/models/metrc/plant_batch.dart';
+import 'package:cannlytics_app/models/metrc/sales_receipt.dart';
+import 'package:cannlytics_app/models/metrc/sales_transaction.dart';
 import 'package:cannlytics_app/models/metrc/strain.dart';
 import 'package:cannlytics_app/models/metrc/transporter.dart';
 import 'package:cannlytics_app/services/api_service.dart';
+
+// TODO: Use models instead of Maps where possible.
 
 // Base URL.
 const String _host = 'https://cannlytics.com';
@@ -34,6 +38,7 @@ class Metrc {
   final MetrcFacilities facilities;
   final MetrcEmployees employees;
   final MetrcLocations locations;
+  final MetrcLicenses licenses;
   final MetrcStrains strains;
   final MetrcPlants plants;
   final MetrcPlantBatches plantBatches;
@@ -50,6 +55,7 @@ class Metrc {
   Metrc()
       : facilities = MetrcFacilities(),
         employees = MetrcEmployees(),
+        licenses = MetrcLicenses(),
         locations = MetrcLocations(),
         strains = MetrcStrains(),
         plants = MetrcPlants(),
@@ -63,6 +69,44 @@ class Metrc {
         sales = MetrcSales(),
         transactions = MetrcTransactions(),
         deliveries = MetrcDeliveries();
+}
+
+/// Manage Metrc licenses
+class MetrcLicenses {
+  /// Add Metrc license.
+  static Future<void> createLicense(
+    String licenseNumber,
+    String licenseType,
+    String metrcUserApiKey,
+    String orgId,
+    String state,
+  ) async {
+    String endpoint = '$_host$_path/admin/create-license';
+    Map data = {
+      'license_number': licenseNumber,
+      'license_type': licenseType,
+      'metrc_user_api_key': metrcUserApiKey,
+      'org_id': orgId,
+      'state': state,
+    };
+    return await APIService.authRequest(endpoint, data: data);
+  }
+
+  /// Delete Metrc License.
+  static Future<void> deleteLicense(
+    String licenseNumber,
+    String orgId,
+    String deletionReason,
+  ) async {
+    String endpoint = '$_host$_path/admin/delete-license';
+    Map data = {
+      'license_number': licenseNumber,
+      'org_id': orgId,
+      'deletion_reason': deletionReason,
+    };
+    Map<String, String> headers = {'Content-Type': 'application/json'};
+    return await APIService.authRequest(endpoint, data: data);
+  }
 }
 
 /// Facilities

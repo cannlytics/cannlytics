@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/20/2023
+// Updated: 3/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -16,15 +16,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_app/services/firestore_service.dart';
 
+// Firebase Authentication provider.
+final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
+  return FirebaseAuth.instance;
+});
+
+// Authentication service provider.
+final authProvider = Provider<AuthService>((ref) {
+  return AuthService(
+    ref.watch(firebaseAuthProvider),
+    ref.watch(firestoreProvider),
+  );
+});
+
+// User provider.
+final userProvider = StreamProvider<User?>((ref) {
+  return ref.watch(authProvider).authStateChanges();
+});
+
 /// [AuthService] manages authentication with Firebase.
 class AuthService {
   AuthService(this._auth, this._firestore);
   final FirebaseAuth _auth;
   final FirestoreService _firestore;
 
-  /// Handle user changes and get the current user.
+  /// Stream the current user.
   Stream<User?> authStateChanges() => _auth.authStateChanges();
 
+  /// Get the current user.
   User? get currentUser => _auth.currentUser;
 
   /// Signs the user in anonymously.
@@ -33,14 +52,19 @@ class AuthService {
   }
 
   /// Sign in with email and password.
-  Future<void> signInWithEmailAndPassword(String email, String password) {
+  Future<void> signIn(String email, String password) {
     return _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
   /// Create a user with email and password.
-  Future<void> createUserWithEmailAndPassword(String email, String password) {
+  Future<void> createAccount(
+    String email,
+    String password,
+  ) {
     return _auth.createUserWithEmailAndPassword(
-        email: email, password: password);
+      email: email,
+      password: password,
+    );
   }
 
   /// Sign the user out.
@@ -72,31 +96,14 @@ class AuthService {
             'photo_url': downloadURL,
             'photo_ref': photoRef,
           },
-          merge: true,
         );
 
         // Update the user's photo URL in Firebase Authentication.
         await user.updatePhotoURL(downloadURL);
-        print('UPDATED PHOTO!');
-        await user.reload();
+        // await user.reload();
       }
     }
   }
 
   /// TODO: Let the user request a password reset email.
 }
-
-/// An instance of Firebase Authentication provider.
-final firebaseAuthProvider =
-    Provider<FirebaseAuth>((ref) => FirebaseAuth.instance);
-
-final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService(
-    ref.watch(firebaseAuthProvider),
-    ref.watch(firestoreDataSourceProvider),
-  );
-});
-
-final authStateChangesProvider = StreamProvider<User?>((ref) {
-  return ref.watch(authServiceProvider).authStateChanges();
-});

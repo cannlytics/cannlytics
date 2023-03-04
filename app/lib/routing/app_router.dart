@@ -11,6 +11,8 @@
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_app/ui/account/licenses/add_license_screen.dart';
+import 'package:cannlytics_app/ui/account/licenses/licenses_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -23,7 +25,7 @@ import 'package:cannlytics_app/models/consumer/entry.dart';
 import 'package:cannlytics_app/models/consumer/job.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/ui/account/account_screen.dart';
+import 'package:cannlytics_app/ui/account/user/account_screen.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/ui/account/onboarding/onboarding_screen.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_screen.dart';
@@ -35,9 +37,9 @@ import 'package:cannlytics_app/ui/business/inventory/items/items_screen.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/package_edit_screen.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/package_items_screen.dart';
 import 'package:cannlytics_app/ui/business/inventory/packages/packages_screen.dart';
-import 'package:cannlytics_app/ui/dashboard.dart';
+import 'package:cannlytics_app/ui/general/dashboard.dart';
 import 'package:cannlytics_app/ui/general/search_screen.dart';
-import 'package:cannlytics_app/ui/screen.dart';
+import 'package:cannlytics_app/ui/general/screen.dart';
 
 // Private navigators.
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -45,7 +47,7 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 // Navigation.
 final goRouterProvider = Provider<GoRouter>((ref) {
-  final authService = ref.watch(authServiceProvider);
+  final authService = ref.watch(authProvider);
   final onboardingRepository = ref.watch(onboardingStoreProvider);
   return GoRouter(
     initialLocation: '/sign-in',
@@ -115,7 +117,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return MainScreen(child: child);
         },
         routes: [
-          // Account screen.
+          // User account.
           GoRoute(
             path: '/account',
             name: AppRoutes.account.name,
@@ -123,6 +125,52 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               key: state.pageKey,
               child: const AccountScreen(),
             ),
+          ),
+
+          // Organizations
+          GoRoute(
+            path: '/organizations',
+            name: AppRoutes.organizations.name,
+            pageBuilder: (context, state) => MaterialPage(
+              key: state.pageKey,
+              child: LicensesScreen(),
+            ),
+            routes: [
+              // Organization.
+              GoRoute(
+                path: ':id',
+                name: AppRoutes.organization.name,
+                pageBuilder: (context, state) {
+                  return MaterialPage(
+                    key: state.pageKey,
+                    child: AddLicenseScreen(),
+                  );
+                },
+              ),
+            ],
+          ),
+
+          // License management.
+          GoRoute(
+            path: '/licenses',
+            name: AppRoutes.licenses.name,
+            pageBuilder: (context, state) => MaterialPage(
+              key: state.pageKey,
+              child: LicensesScreen(),
+            ),
+            routes: [
+              // Add license screen.
+              GoRoute(
+                path: 'add',
+                name: AppRoutes.addLicense.name,
+                pageBuilder: (context, state) {
+                  return MaterialPage(
+                    key: state.pageKey,
+                    child: AddLicenseScreen(),
+                  );
+                },
+              ),
+            ],
           ),
 
           // Dashboard screen.
@@ -370,13 +418,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 //   final bool useFade;
 // }
 
-/// This class was imported from the migration guide for GoRouter 5.0
+/// GoRouter stream.
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
     notifyListeners();
-    _subscription = stream.asBroadcastStream().listen(
-          (dynamic _) => notifyListeners(),
-        );
+    _subscription = stream.asBroadcastStream().listen((dynamic _) {
+      return notifyListeners();
+    });
   }
 
   late final StreamSubscription<dynamic> _subscription;

@@ -23,14 +23,14 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
 
   /// Sign the user out.
   Future<void> signOut() async {
-    final authService = ref.read(authServiceProvider);
+    final authService = ref.read(authProvider);
     state = const AsyncLoading();
     state = await AsyncValue.guard(authService.signOut);
   }
 
   /// Change the user's photo.
   Future<void> changePhoto() async {
-    final authService = ref.read(authServiceProvider);
+    final authService = ref.read(authProvider);
     state = const AsyncLoading();
     state = await AsyncValue.guard(authService.changePhoto);
   }

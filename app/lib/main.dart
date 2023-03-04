@@ -30,7 +30,6 @@ import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 
 // ignore: depend_on_referenced_packages
 
-
 // ignore:depend_on_referenced_packages
 
 /// The main application.
@@ -93,7 +92,7 @@ Future<void> main() async {
 
   // Wait for authentication to be determined.
   // Note: This will prevent unnecessary redirects when the app starts.
-  await container.read(authStateChangesProvider.future);
+  await container.read(userProvider.future);
   runApp(UncontrolledProviderScope(
     container: container,
     child: const CannlyticsApp(),

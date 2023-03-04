@@ -8,7 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/ui/dashboard_controller.dart';
+import 'package:cannlytics_app/ui/general/dashboard_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -127,64 +127,6 @@ class DesktopNavigationLayout extends ConsumerWidget {
   }
 }
 
-/// A dropdown selection for the user to choose their primary license.
-class LicenseDropDown extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final value = ref.watch(licenseProvider).primaryLicense;
-    final items = ref.watch(licenseProvider).licenses;
-    return DropdownButton(
-      value: value,
-      items: items
-          .map((e) => DropdownMenuItem<String>(
-                onTap: () => e,
-                value: e,
-                child: Text(e),
-              ))
-          .toList(),
-      onChanged: (value) {
-        if (value == '+ Add a license') {
-          GoRouter.of(context).go('/licenses/add');
-          return;
-        }
-        ref.read(licenseProvider.notifier).changeLicense(value as String);
-      },
-    );
-  }
-}
-
-/// Light / dark theme toggle.
-class ThemeToggle extends StatelessWidget {
-  const ThemeToggle({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer(builder: (context, ref, child) {
-      final theme = ref.watch(themeModeProvider);
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 6, right: 24, bottom: 6),
-            child: IconButton(
-              splashRadius: 18,
-              onPressed: () {
-                // Toggle light / dark theme.
-                ref.read(themeModeProvider.notifier).state =
-                    theme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-              },
-              icon: Icon(
-                theme == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-                color: AppColors.neutral4,
-              ),
-            ),
-          ),
-        ],
-      );
-    });
-  }
-}
-
 /// Navigation layout for mobile.
 class MobileNavigationLayout extends ConsumerStatefulWidget {
   const MobileNavigationLayout({Key? key}) : super(key: key);
@@ -252,6 +194,12 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
                       // App logo.
                       const SizedBox(width: 28),
                       AppLogo(isDark: isDark),
+
+                      // License selection.
+                      SizedBox(width: 28),
+                      LicenseDropDown(),
+
+                      // Spacer.
                       const Spacer(),
 
                       // Open / close menu button.
@@ -400,6 +348,71 @@ class NavigationLink extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// A dropdown selection for the user to choose their primary license.
+class LicenseDropDown extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final value = ref.watch(licenseProvider).primaryLicense;
+    final items = ref.watch(licenseProvider).licenses;
+    // TODO: If no license, simply return a button.
+    if (items.length == 1) {
+      return NavigationLink(
+        text: '+ Add a license',
+        path: AppRoutes.addLicense.name,
+      );
+    }
+    return DropdownButton(
+      value: value,
+      items: items
+          .map((e) => DropdownMenuItem<String>(
+                onTap: () => e,
+                value: e,
+                child: Text(e),
+              ))
+          .toList(),
+      onChanged: (value) {
+        if (value == '+ Add a license') {
+          GoRouter.of(context).go('/licenses/add');
+          return;
+        }
+        ref.read(licenseProvider.notifier).changeLicense(value as String);
+      },
+    );
+  }
+}
+
+/// Light / dark theme toggle.
+class ThemeToggle extends StatelessWidget {
+  const ThemeToggle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(builder: (context, ref, child) {
+      final theme = ref.watch(themeModeProvider);
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 6, right: 24, bottom: 6),
+            child: IconButton(
+              splashRadius: 18,
+              onPressed: () {
+                // Toggle light / dark theme.
+                ref.read(themeModeProvider.notifier).state =
+                    theme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+              },
+              icon: Icon(
+                theme == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
+                color: AppColors.neutral4,
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 }
 

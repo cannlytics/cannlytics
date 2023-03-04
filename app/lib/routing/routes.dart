@@ -18,10 +18,18 @@ enum AppRoutes {
   resetPassword,
   signIn,
 
+  // Organization pages.
+  organizations,
+  organization,
+
   // Utility pages.
   search,
 
   /* Business screens */
+
+  // Licenses
+  addLicense,
+  licenses,
 
   // Deliveries
   deliveries,

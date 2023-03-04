@@ -28,7 +28,7 @@ class SearchScreen extends ConsumerWidget {
       (_, state) => state.showAlertDialogOnError(context),
     );
     // final state = ref.watch(searchProvider);
-    // final user = ref.watch(authServiceProvider).currentUser;
+    // final user = ref.watch(authProvider).currentUser;
     return const Scaffold(
       body: CustomScrollView(
         slivers: [

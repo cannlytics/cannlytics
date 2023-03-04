@@ -97,11 +97,11 @@ class SpendingService {
 }
 
 final databaseProvider = Provider<SpendingService>((ref) {
-  return SpendingService(ref.watch(firestoreDataSourceProvider));
+  return SpendingService(ref.watch(firestoreProvider));
 });
 
 final jobsStreamProvider = StreamProvider.autoDispose<List<Job>>((ref) {
-  final user = ref.watch(authStateChangesProvider).value;
+  final user = ref.watch(userProvider).value;
   if (user == null) {
     throw AssertionError('User can\'t be null');
   }
@@ -111,7 +111,7 @@ final jobsStreamProvider = StreamProvider.autoDispose<List<Job>>((ref) {
 
 final jobStreamProvider =
     StreamProvider.autoDispose.family<Job, JobID>((ref, jobId) {
-  final user = ref.watch(authStateChangesProvider).value;
+  final user = ref.watch(userProvider).value;
   if (user == null) {
     throw AssertionError('User can\'t be null');
   }
@@ -121,7 +121,7 @@ final jobStreamProvider =
 
 final jobEntriesStreamProvider =
     StreamProvider.autoDispose.family<List<Entry>, Job>((ref, job) {
-  final user = ref.watch(authStateChangesProvider).value;
+  final user = ref.watch(userProvider).value;
   if (user == null) {
     throw AssertionError('User can\'t be null when fetching jobs');
   }

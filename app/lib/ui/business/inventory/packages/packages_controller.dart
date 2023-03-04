@@ -25,7 +25,7 @@ class PackagesController extends AutoDisposeAsyncNotifier<void> {
 
   /// Deletes a package.
   Future<void> deletePackage(Job job) async {
-    final currentUser = ref.read(authServiceProvider).currentUser;
+    final currentUser = ref.read(authProvider).currentUser;
     if (currentUser == null) {
       throw AssertionError('User can\'t be null');
     }

@@ -4,22 +4,25 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/18/2023
+// Updated: 3/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 part of alert_dialogs;
 
+/// Render an error dialog.
 Future<void> showExceptionAlertDialog({
   required BuildContext context,
   required String title,
   required dynamic exception,
-}) =>
-    showAlertDialog(
-      context: context,
-      title: title,
-      content: _message(exception),
-      defaultActionText: 'OK',
-    );
+}) {
+  return showAlertDialog(
+    context: context,
+    title: title,
+    content: _message(exception),
+    defaultActionText: 'Okay',
+  );
+}
 
+/// The error message.
 String _message(dynamic exception) {
   if (exception is FirebaseException) {
     return exception.message ?? exception.toString();

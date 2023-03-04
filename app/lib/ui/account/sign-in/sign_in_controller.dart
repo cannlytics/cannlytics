@@ -29,8 +29,9 @@ class SignInController extends AutoDisposeAsyncNotifier<void> {
     required SignInFormType formType,
   }) async {
     state = const AsyncValue.loading();
-    state =
-        await AsyncValue.guard(() => _authenticate(email, password, formType));
+    state = await AsyncValue.guard(() {
+      return _authenticate(email, password, formType);
+    });
   }
 
   /// [_authenticate] either signs the user in or creates a new account.
@@ -39,18 +40,18 @@ class SignInController extends AutoDisposeAsyncNotifier<void> {
     String password,
     SignInFormType formType,
   ) {
-    final authService = ref.read(authServiceProvider);
+    final authService = ref.read(authProvider);
     switch (formType) {
       case SignInFormType.signIn:
-        return authService.signInWithEmailAndPassword(email, password);
+        return authService.signIn(email, password);
       case SignInFormType.register:
-        return authService.createUserWithEmailAndPassword(email, password);
+        return authService.createAccount(email, password);
     }
   }
 
   /// [signInAnonymously] allows the user to sign in anonymously.
   Future<void> signInAnonymously() async {
-    final authService = ref.read(authServiceProvider);
+    final authService = ref.read(authProvider);
     state = const AsyncLoading();
     state = await AsyncValue.guard(authService.signInAnonymously);
   }

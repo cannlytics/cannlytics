@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/18/2023
+// Updated: 3/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -15,8 +15,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_app/utils/dialogs/alert_dialogs.dart';
-import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 
+/// A dialog to display asynchronous errors.
 extension AsyncValueUI on AsyncValue {
   void showAlertDialogOnError(BuildContext context) {
     debugPrint('isLoading: $isLoading, hasError: $hasError');
@@ -24,7 +24,7 @@ extension AsyncValueUI on AsyncValue {
       final message = error.toString();
       showExceptionAlertDialog(
         context: context,
-        title: 'Error'.hardcoded,
+        title: 'Error',
         exception: message,
       );
     }

@@ -1,7 +1,7 @@
 # Account
 
-## Onboarding
+## Sign Up / Sign in / Sign Out
 
-## Sign in
+## User
 
-## Password reset
+## Organizations

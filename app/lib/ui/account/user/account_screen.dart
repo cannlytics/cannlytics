@@ -22,7 +22,7 @@ import 'package:cannlytics_app/constants/colors.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/models/user.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/ui/account/account_controller.dart';
+import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialogs.dart';
@@ -71,7 +71,7 @@ class AccountManagement extends ConsumerWidget {
       accountProvider,
       (_, state) => state.showAlertDialogOnError(context),
     );
-    final user = ref.watch(authServiceProvider).currentUser;
+    final user = ref.watch(authProvider).currentUser;
 
     // Render the widget.
     return Padding(
