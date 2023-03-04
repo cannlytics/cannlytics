@@ -31,7 +31,6 @@ class Organization {
     required this.projectId,
     required this.secretId,
     required this.versionId,
-    required this.linkedin,
     required this.name,
     required this.owner,
     required this.phone,
@@ -59,7 +58,6 @@ class Organization {
   final String projectId;
   final String secretId;
   final String versionId;
-  final String linkedin;
   final String name;
   final String owner;
   final String phone;
@@ -88,7 +86,6 @@ class Organization {
       projectId: data['project_id'] as String,
       secretId: data['secret_id'] as String,
       versionId: data['version_id'] as String,
-      linkedin: data['linkedin'] as String,
       name: data['name'] as String,
       owner: data['owner'] as String,
       phone: data['phone'] as String,
@@ -119,7 +116,6 @@ class Organization {
       'project_id': projectId,
       'secret_id': secretId,
       'version_id': versionId,
-      'linkedin': linkedin,
       'name': name,
       'owner': owner,
       'phone': phone,

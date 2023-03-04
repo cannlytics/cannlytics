@@ -13,6 +13,7 @@ import 'dart:async';
 // Flutter imports:
 import 'package:cannlytics_app/models/metrc/license.dart';
 import 'package:cannlytics_app/ui/account/licenses/licenses_controller.dart';
+import 'package:cannlytics_app/ui/account/organizations/organizations_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -60,7 +61,7 @@ class _OrganizationScreenState extends ConsumerState<OrganizationScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue>(
-      licensesProvider,
+      organizationProvider,
       (_, state) => state.showAlertDialogOnError(context),
     );
     return Scaffold(
@@ -86,12 +87,43 @@ class _OrganizationScreenState extends ConsumerState<OrganizationScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              // _buildStartDate(),
-              // _buildEndDate(),
-              // const SizedBox(height: 8.0),
-              // _buildDuration(),
-              // const SizedBox(height: 8.0),
-              // _buildComment(),
+              // TODO: Team widget
+
+              // TODO: Invite team member widget
+              // - email / role
+
+              // TODO: Licenses widget
+
+              // TODO: Add license button
+
+              // TODO: Danger zone: Delete license
+
+              // TODO: Organization details
+              // Setup your organization for maximum impact.
+              // - name
+              // - trade_name
+              // - website
+              // - email
+              // - phone
+              // (show more)
+              // - address
+              // - city
+              // - state
+              // - country
+              // - zip code
+              // - external ID
+
+              // TODO: Visibility
+              // Decide whether or not to list your organization for discovery by other users.
+              // Public
+              // Appears in search results. Private
+              // Only visible to you.
+
+              // TODO: Organization image
+              // Choose an image for your organization, up to 5MB.
+
+              // TODO: Organization Type
+              // Select the organization type for your appropriate functionality.
             ],
           ),
         ),

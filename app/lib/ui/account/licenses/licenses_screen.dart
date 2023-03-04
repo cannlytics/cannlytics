@@ -29,7 +29,7 @@ class LicensesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // TODO: Get the user's licenses.
-    final data = ref.watch(organizationProvider);
+    final data = ref.watch(licensesProvider);
     print('ORGANIZATION LICENSES:');
     print(data);
 

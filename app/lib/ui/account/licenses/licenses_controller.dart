@@ -46,24 +46,6 @@ class LicensesController extends AutoDisposeAsyncNotifier<void> {
   }
 }
 
-// Organization licenses provider.
-final organizationProvider = StreamProvider.autoDispose<Map>((ref) {
-  final user = ref.watch(userProvider).value;
-  final _database = ref.watch(firestoreProvider);
-  // FIXME: Get the current organization ID.
-  final orgId = 'test-company';
-  print('CURRENT USER:');
-  print(user!.uid);
-  print('CURRENT ORGANIZATION:');
-  print(orgId);
-  return _database.watchDocument(
-    path: FirestorePath.organization(orgId),
-    builder: (data, documentId) {
-      return data ?? {};
-    },
-  );
-});
-
 // // Licenses service provider.
 // final licensesFirestoreProvider = Provider<LicensesService>((ref) {
 //   return LicensesService(ref.watch(firestoreProvider));

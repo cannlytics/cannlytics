@@ -10,7 +10,7 @@
 // Flutter imports:
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/ui/account/licenses/licenses_controller.dart';
+import 'package:cannlytics_app/ui/account/organizations/organizations_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -28,7 +28,7 @@ class OrganizationsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // TODO: Get the user's organizations.
-    final data = ref.watch(organizationProvider);
+    final data = ref.watch(organizationsProvider);
     print('ORGANIZATION LICENSES:');
     print(data);
 
@@ -113,7 +113,7 @@ class OrganizationsTable extends StatelessWidget {
         DataColumn(
           label: Expanded(
             child: Text(
-              'Age',
+              'ID',
               style: TextStyle(fontStyle: FontStyle.italic),
             ),
           ),
@@ -121,7 +121,7 @@ class OrganizationsTable extends StatelessWidget {
         DataColumn(
           label: Expanded(
             child: Text(
-              'Role',
+              'Owner',
               style: TextStyle(fontStyle: FontStyle.italic),
             ),
           ),
@@ -130,9 +130,9 @@ class OrganizationsTable extends StatelessWidget {
       rows: const <DataRow>[
         DataRow(
           cells: <DataCell>[
-            DataCell(Text('Sarah')),
-            DataCell(Text('19')),
-            DataCell(Text('Student')),
+            DataCell(Text('Cannlytics')),
+            DataCell(Text('cannlytics')),
+            DataCell(Text('QIxUQ6kO3ZcDIZceJHCl0e1ZaOS2')),
           ],
         ),
       ],

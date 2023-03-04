@@ -88,7 +88,7 @@ class DesktopNavigationLayout extends ConsumerWidget {
 
             // License selection.
             gapW6,
-            LicenseDropDown(),
+            FacilitySelection(),
 
             // Links.
             const Spacer(),
@@ -188,7 +188,7 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
 
                       // License selection.
                       gapW6,
-                      LicenseDropDown(),
+                      FacilitySelection(),
 
                       // Spacer.
                       const Spacer(),
@@ -500,7 +500,7 @@ class OrganizationSelection extends ConsumerWidget {
 }
 
 /// A dropdown selection for the user to choose their primary license.
-class LicenseDropDown extends ConsumerWidget {
+class FacilitySelection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final value = ref.watch(licenseProvider).primaryLicense;
