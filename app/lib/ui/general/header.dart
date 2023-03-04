@@ -8,7 +8,12 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/services/auth_service.dart';
+import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/general/dashboard_controller.dart';
+import 'package:cannlytics_app/utils/dialogs/alert_dialogs.dart';
+import 'package:cannlytics_app/widgets/buttons/action_text_button.dart';
+import 'package:cannlytics_app/widgets/images/avatar.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -76,29 +81,14 @@ class DesktopNavigationLayout extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Logo.
+            // TODO: Turn into organization selection.
             SizedBox(width: isVeryWide ? 80 : 28),
-            AppLogo(isDark: isDark),
+            // AppLogo(isDark: isDark),
+            OrganizationSelection(),
 
             // License selection.
-            SizedBox(width: isVeryWide ? 80 : 28),
+            gapW6,
             LicenseDropDown(),
-            // _licenseSelect(licenses, primaryLicense),
-            // DropdownButton<String>(
-            //   value: dashboardStore.getPrimaryLicense(),
-            //   items: dashboardStore.getLicenses().map((String value) {
-            //     return DropdownMenuItem<String>(
-            //       value: value,
-            //       child: Text(value),
-            //     );
-            //   }).toList(),
-            //   onChanged: (newValue) async {
-            //     print('SELECTED LICENSE:');
-            //     print(newValue);
-            //     await ref
-            //         .read(dashboardController.notifier)
-            //         .changePrimaryLicense(newValue ?? '+ Add a license');
-            //   },
-            // ),
 
             // Links.
             const Spacer(),
@@ -114,7 +104,7 @@ class DesktopNavigationLayout extends ConsumerWidget {
               text: 'Account',
               path: AppRoutes.account.name,
             ),
-            SizedBox(width: isVeryWide ? 80 : 28),
+            SizedBox(width: isVeryWide ? 28 : 12),
 
             // FIXME: A sidebar menu is needed for desktop!
 
@@ -192,11 +182,12 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // App logo.
-                      const SizedBox(width: 28),
-                      AppLogo(isDark: isDark),
+                      gapW12,
+                      // AppLogo(isDark: isDark),
+                      OrganizationSelection(),
 
                       // License selection.
-                      SizedBox(width: 28),
+                      gapW6,
                       LicenseDropDown(),
 
                       // Spacer.
@@ -208,7 +199,7 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
                         child: AnimatedIcon(
                           icon: AnimatedIcons.menu_close,
                           progress: _menuController,
-                          color: AppColors.neutral2,
+                          // color: AppColors.neutral2,
                         ),
                       ),
                       const SizedBox(width: 28),
@@ -237,11 +228,127 @@ class MobileNavigationMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Listen to the current user.
+    final state = ref.watch(accountProvider);
+    final user = ref.watch(authProvider).currentUser;
+
     return Material(
-      // color: AppColors.offWhite,
+      elevation: 8,
       child: ListView(
         shrinkWrap: true,
         children: [
+          // Account.
+          Container(
+            // padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                // User photo, name, and email.
+                gapH6,
+                Row(
+                  children: [
+                    // User photo.
+                    gapW12,
+                    Avatar(
+                      photoUrl: user!.photoURL,
+                      radius: 24,
+                      borderColor: Theme.of(context).secondaryHeaderColor,
+                      borderWidth: 1.0,
+                    ),
+                    gapW12,
+
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // User name.
+                        Text(
+                          user.displayName!,
+                          textAlign: TextAlign.start,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium!
+                              .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .color),
+                        ),
+
+                        // User email.
+                        Text(
+                          user.email!,
+                          textAlign: TextAlign.start,
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                      ],
+                    ),
+
+                    // Theme toggle.
+                    const Spacer(),
+                    const ThemeToggle(),
+                  ],
+                ),
+
+                // Divider.
+                Divider(
+                  color: AppColors.neutral2,
+                  thickness: 0.25,
+                  // height: 20,
+                ),
+
+                // Manage account.
+                InkWell(
+                  splashColor: AppColors.accent1,
+                  onTap: () {
+                    context.goNamed(AppRoutes.account.name);
+                  },
+                  child: ListTile(
+                    dense: true,
+                    title: Text(
+                      'Manage account',
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: Theme.of(context).textTheme.titleLarge!.color),
+                    ),
+                  ),
+                ),
+
+                // Sign out.
+                InkWell(
+                  splashColor: AppColors.accent1,
+                  onTap: state.isLoading
+                      ? null
+                      : () async {
+                          final logout = await showAlertDialog(
+                            context: context,
+                            title: 'Are you sure?',
+                            cancelActionText: 'Cancel',
+                            defaultActionText: 'Sign out',
+                          );
+                          if (logout == true) {
+                            ref.read(accountProvider.notifier).signOut();
+                          }
+                        },
+                  child: ListTile(
+                    dense: true,
+                    title: Text(
+                      'Sign out',
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: Theme.of(context).textTheme.titleLarge!.color),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Divider.
+          Divider(
+            color: AppColors.neutral2,
+            thickness: 0.25,
+            // height: 20,
+          ),
+
+          // Links.
           for (ScreenData screen in screens)
             MobileMenuListTile(
               title: screen.title,
@@ -285,12 +392,21 @@ class MobileMenuListTile extends StatelessWidget {
           context.goNamed(route);
         },
         child: ListTile(
+          dense: true,
           leading: Image.asset(
             imageName,
             height: 45,
           ),
-          title: Text(title),
-          subtitle: Text(description),
+          title: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  color: Theme.of(context).textTheme.titleLarge!.color,
+                ),
+          ),
+          subtitle: Text(
+            description,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
         ),
       ),
     );
@@ -333,20 +449,52 @@ class NavigationLink extends StatelessWidget {
   final String path;
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: TextButton(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          onPressed: () {
-            context.goNamed(path);
-          },
-        ),
+    return TextButton(
+      onPressed: () {
+        context.goNamed(path);
+      },
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+              color: Theme.of(context).textTheme.titleLarge!.color,
+            ),
       ),
+    );
+  }
+}
+
+/// Organization selection.
+class OrganizationSelection extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final value = ref.watch(licenseProvider).primaryLicense;
+    final items = ref.watch(licenseProvider).licenses;
+    // If no organization, return a create/join organization button.
+    if (items.length == 1) {
+      return NavigationLink(
+        text: '+ Add a license',
+        path: AppRoutes.addLicense.name,
+      );
+    }
+
+    // Dropdown.
+    return DropdownButton(
+      isDense: true,
+      value: value,
+      items: items
+          .map((e) => DropdownMenuItem<String>(
+                onTap: () => e,
+                value: e,
+                child: Text(e),
+              ))
+          .toList(),
+      onChanged: (value) {
+        if (value == '+ Add a license') {
+          GoRouter.of(context).go('/licenses/add');
+          return;
+        }
+        ref.read(licenseProvider.notifier).changeLicense(value as String);
+      },
     );
   }
 }
@@ -357,14 +505,17 @@ class LicenseDropDown extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final value = ref.watch(licenseProvider).primaryLicense;
     final items = ref.watch(licenseProvider).licenses;
-    // TODO: If no license, simply return a button.
+    // If no license, return an add license button.
     if (items.length == 1) {
       return NavigationLink(
         text: '+ Add a license',
         path: AppRoutes.addLicense.name,
       );
     }
+
+    // Dropdown.
     return DropdownButton(
+      isDense: true,
       value: value,
       items: items
           .map((e) => DropdownMenuItem<String>(

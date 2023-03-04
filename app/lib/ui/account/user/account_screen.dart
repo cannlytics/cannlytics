@@ -167,7 +167,7 @@ class AccountManagement extends ConsumerWidget {
 
               // Sign out.
               ActionTextButton(
-                text: 'Logout'.hardcoded,
+                text: 'Sign out',
                 onPressed: state.isLoading
                     ? null
                     : () async {
@@ -175,7 +175,7 @@ class AccountManagement extends ConsumerWidget {
                           context: context,
                           title: 'Are you sure?'.hardcoded,
                           cancelActionText: 'Cancel'.hardcoded,
-                          defaultActionText: 'Logout'.hardcoded,
+                          defaultActionText: 'Sign out'.hardcoded,
                         );
                         if (logout == true) {
                           ref.read(accountProvider.notifier).signOut();

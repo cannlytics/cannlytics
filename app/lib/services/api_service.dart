@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 2/20/2023
+// Updated: 3/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -15,8 +15,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 class APIService {
-  final String _baseUrl = 'https://cannlytics.com/api';
-  final String _testUrl = '/api';
+  static final String baseUrl = 'https://cannlytics.com/api';
 
   /// Get a user's token.
   /// Set [refresh] if the credentials should be refreshed.
@@ -31,15 +30,11 @@ class APIService {
     dynamic data,
     Map<String, dynamic>? options,
   }) async {
-    /**
-   * Make an authorized GET or POST request by
-   * getting the user's ID token and exchanging it for a session cookie.
-   * @param {String} endpoint The API endpoint to which to make an authenticated request.
-   * @param {Object} data Any data posted to the API.
-   * @param {Object} options Any request options: `delete` (bool) or `params` (Object).
-   */
     try {
+      // Get the user's session token.
       final idToken = await getUserToken();
+
+      // Make an API request with the token.
       return await apiRequest(
         endpoint,
         data: data,
@@ -58,40 +53,49 @@ class APIService {
     Map<String, dynamic>? options,
     String? idToken,
   }) async {
-    /**
-   * Make a request to the Cannlytics API, with an ID token for authentication
-   * or without ID token when the user already has an authenticated session.
-   * @param {String} endpoint The API endpoint to which to make an authenticated request.
-   * @param {Object} data Any data posted to the API.
-   * @param {Object} options Any request options: `delete` (bool) or `params` (Object).
-   * @param {String} idToken = null
-   */
+    // Format headers.
     final headerAuth = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${idToken ?? ''}',
     };
-    var method = 'GET';
+
+    // Set defaults.
     var body;
+    var method = 'GET';
+
+    // Handle post.
     if (data != null) {
       method = 'POST';
       body = jsonEncode(data);
     }
+
+    // Handle options.
     if (options != null) {
-      if (options['delete'] != null) {
+      // Handle delete.
+      if (options['delete'] == true) {
         method = 'DELETE';
       }
+
+      // Handle query parameters.
       if (options['params'] != null) {
         final url = Uri.parse(endpoint);
         final newUrl = url.replace(queryParameters: options['params']);
         endpoint = newUrl.toString();
       }
     }
-    final url =
-        endpoint.startsWith('https') ? endpoint : '${Uri.base}$endpoint';
-    final response = await http.Response.fromStream(
-        await http.Client().send(http.Request(method, Uri.parse(url))
-          ..headers.addAll(headerAuth)
-          ..body = body));
+
+    // Format the URL
+    final url = endpoint.startsWith(baseUrl) ? endpoint : '$baseUrl$endpoint';
+
+    // Make the request.
+    final client = http.Client();
+    final request = http.Request(method, Uri.parse(url))
+      ..headers.addAll(headerAuth)
+      ..body = body;
+    // final response = await client.send(request).then(http.Response.fromStream);
+    final response = await http.Response.fromStream(await client.send(request));
+
+    // Return the data.
     try {
       var responseData = jsonDecode(response.body);
       return responseData.containsKey('data')

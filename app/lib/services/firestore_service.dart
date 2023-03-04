@@ -102,19 +102,11 @@ class FirestoreService {
   /// Get documents from a collection.
   Future<List<T>> fetchCollection<T>({
     required String path,
-    required T Function(
-      Map<String, dynamic>? data,
-      String documentID,
-    )
-        builder,
-    Query<Map<String, dynamic>>? Function(
-      Query<Map<String, dynamic>> query,
-    )?
-        queryBuilder,
+    required T Function(Map? data, String documentID) builder,
+    Query<Map>? Function(Query<Map> query)? queryBuilder,
     int Function(T lhs, T rhs)? sort,
   }) async {
-    Query<Map<String, dynamic>> query =
-        FirebaseFirestore.instance.collection(path);
+    Query<Map> query = FirebaseFirestore.instance.collection(path);
     if (queryBuilder != null) {
       query = queryBuilder(query)!;
     }

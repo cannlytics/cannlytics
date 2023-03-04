@@ -32,7 +32,7 @@ class Job extends Equatable {
   @override
   bool get stringify => true;
 
-  factory Job.fromMap(Map<String, dynamic>? data, String documentId) {
+  factory Job.fromMap(Map<dynamic, dynamic>? data, String documentId) {
     return Job(
       id: documentId,
       name: data!['name'] as String,

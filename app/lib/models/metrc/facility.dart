@@ -52,7 +52,7 @@ class Facility {
   final String supportLastPaidDate;
 
   // Create model.
-  factory Facility.fromMap(Map<String, dynamic>? data, String uid) {
+  factory Facility.fromMap(Map<dynamic, dynamic>? data, String uid) {
     return Facility(
       id: uid,
       alias: data?['alias'] ?? '',

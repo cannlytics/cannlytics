@@ -52,4 +52,12 @@ class Format {
     }
     return words.join(' ');
   }
+
+  /// Turn text to a slug.
+  static String slugify(String text) {
+    return text
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^\w ]+'), '')
+        .replaceAll(RegExp(r' +'), '-');
+  }
 }

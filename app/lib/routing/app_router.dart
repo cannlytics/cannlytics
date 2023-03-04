@@ -13,6 +13,8 @@ import 'dart:async';
 // Flutter imports:
 import 'package:cannlytics_app/ui/account/licenses/add_license_screen.dart';
 import 'package:cannlytics_app/ui/account/licenses/licenses_screen.dart';
+import 'package:cannlytics_app/ui/account/organizations/organization_screen.dart';
+import 'package:cannlytics_app/ui/account/organizations/organizations_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -133,7 +135,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             name: AppRoutes.organizations.name,
             pageBuilder: (context, state) => MaterialPage(
               key: state.pageKey,
-              child: LicensesScreen(),
+              child: OrganizationsScreen(),
             ),
             routes: [
               // Organization.
@@ -143,7 +145,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 pageBuilder: (context, state) {
                   return MaterialPage(
                     key: state.pageKey,
-                    child: AddLicenseScreen(),
+                    child: OrganizationScreen(),
                   );
                 },
               ),
