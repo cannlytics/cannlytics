@@ -4,19 +4,88 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 3/4/2023
+// Updated: 3/5/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
-import 'dart:async';
-
 import 'package:cannlytics_app/models/organization.dart';
 import 'package:cannlytics_app/services/api_service.dart';
+import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/firestore_service.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Project imports:
-import 'package:cannlytics_app/services/auth_service.dart';
+// Organization management provider.
+final organizationSelectionProvider =
+    ChangeNotifierProvider<OrganizationSelectionProvider>((ref) {
+  return OrganizationSelectionProvider();
+});
+
+/// License management functionality.
+class OrganizationSelectionProvider extends ChangeNotifier {
+  // Primary license.
+  String _primaryOrganization = 'Organizations';
+  String get primaryOrganization => _primaryOrganization;
+
+  // User's licenses.
+  // TODO: Somehow populate licenses from Firestore on initialization.
+  List<String> _organizations = ['Organizations'];
+  List<String> get organizations => _organizations;
+
+  /// Change the user's primary organization.
+  changeOrganization(String value) {
+    if (value.isEmpty) {
+      return _primaryOrganization;
+    }
+    _primaryOrganization = value;
+    return notifyListeners();
+  }
+
+  /// Change the user's licenses.
+  changeLicenses(List<String> values) {
+    if (values.isEmpty) {
+      return _organizations;
+    }
+    _organizations = values;
+    return notifyListeners();
+  }
+}
+
+// License management provider.
+final facilitySelectionProvider =
+    ChangeNotifierProvider<FacilitySelectionProvider>((ref) {
+  return FacilitySelectionProvider();
+});
+
+/// License management functionality.
+class FacilitySelectionProvider extends ChangeNotifier {
+  // Primary license.
+  String _primaryLicense = '+ Add a license';
+  String get primaryLicense => _primaryLicense;
+
+  // User's licenses.
+  // TODO: Somehow populate licenses from Firestore on initialization.
+  List<String> _licenses = ['+ Add a license'];
+  List<String> get licenses => _licenses;
+
+  /// Change the user's primary license.
+  changeLicense(String value) {
+    if (value.isEmpty) {
+      return _primaryLicense;
+    }
+    _primaryLicense = value;
+    return notifyListeners();
+  }
+
+  /// Change the user's licenses.
+  changeLicenses(List<String> values) {
+    if (values.isEmpty) {
+      return _licenses;
+    }
+    _licenses = values;
+    return notifyListeners();
+  }
+}
 
 // Organizations service provider.
 final organizationsServiceProvider = Provider<OrganizationsService>((ref) {
@@ -60,6 +129,8 @@ final organizationProvider = StreamProvider.autoDispose<Map>((ref) {
     },
   );
 });
+
+/* SCRAP */
 
 // Organization licenses provider.
 // final organizationsProvider = StreamProvider.autoDispose<Map>((ref) {

@@ -11,7 +11,7 @@
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/licenses/licenses_controller.dart';
-import 'package:cannlytics_app/ui/general/dashboard_controller.dart';
+import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:

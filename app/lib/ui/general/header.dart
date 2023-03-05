@@ -4,15 +4,15 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 2/20/2023
+// Updated: 3/5/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
-import 'package:cannlytics_app/ui/general/dashboard_controller.dart';
+import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialogs.dart';
-import 'package:cannlytics_app/widgets/buttons/action_text_button.dart';
+import 'package:cannlytics_app/widgets/buttons/theme_toggle.dart';
 import 'package:cannlytics_app/widgets/images/avatar.dart';
 import 'package:flutter/material.dart';
 
@@ -58,13 +58,6 @@ class DesktopNavigationLayout extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
 
-    // Watch the user's licenses.
-    // final dashboardStore = ref.watch(dashboardStoreProvider);
-    // print('LICENSES:');
-    // print(dashboardStore.getLicenses());
-    // print('PRIMARY LICENSE:');
-    // print(dashboardStore.getPrimaryLicense());
-
     // Build the layout.
     return Container(
       decoration: const BoxDecoration(
@@ -80,10 +73,8 @@ class DesktopNavigationLayout extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Logo.
-            // TODO: Turn into organization selection.
+            // Organization selection.
             SizedBox(width: isVeryWide ? 80 : 28),
-            // AppLogo(isDark: isDark),
             OrganizationSelection(),
 
             // License selection.
@@ -92,21 +83,13 @@ class DesktopNavigationLayout extends ConsumerWidget {
 
             // Links.
             const Spacer(),
-            // NavigationLink(
-            //   text: 'Home',
-            //   path: AppRoutes.dashboard.name,
-            // ),
-            // NavigationLink(
-            //   text: 'Search',
-            //   path: AppRoutes.search.name,
-            // ),
             NavigationLink(
               text: 'Account',
               path: AppRoutes.account.name,
             ),
             SizedBox(width: isVeryWide ? 28 : 12),
 
-            // FIXME: A sidebar menu is needed for desktop!
+            // TODO: A sidebar menu is needed for desktop!
 
             // Theme toggle.
             const ThemeToggle(),
@@ -181,9 +164,8 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // App logo.
+                      // Organization selection.
                       gapW12,
-                      // AppLogo(isDark: isDark),
                       OrganizationSelection(),
 
                       // License selection.
@@ -239,7 +221,6 @@ class MobileNavigationMenu extends ConsumerWidget {
         children: [
           // Account.
           Container(
-            // padding: EdgeInsets.all(16.0),
             child: Column(
               children: [
                 // User photo, name, and email.
@@ -256,6 +237,7 @@ class MobileNavigationMenu extends ConsumerWidget {
                     ),
                     gapW12,
 
+                    // User name and email.
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -293,7 +275,6 @@ class MobileNavigationMenu extends ConsumerWidget {
                 Divider(
                   color: AppColors.neutral2,
                   thickness: 0.25,
-                  // height: 20,
                 ),
 
                 // Manage account.
@@ -345,7 +326,6 @@ class MobileNavigationMenu extends ConsumerWidget {
           Divider(
             color: AppColors.neutral2,
             thickness: 0.25,
-            // height: 20,
           ),
 
           // Links.
@@ -356,12 +336,6 @@ class MobileNavigationMenu extends ConsumerWidget {
               description: screen.description,
               imageName: screen.imageName,
             ),
-          // TODO: Add light/dark theme toggle.
-          // Container(
-          //   height: 64.0,
-          //   alignment: Alignment.center,
-          //   child: MobileToggleButton(onPressed: () {}),
-          // )
         ],
       ),
     );
@@ -385,7 +359,6 @@ class MobileMenuListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      // color: AppColors.surface,
       child: InkWell(
         splashColor: AppColors.accent1,
         onTap: () {
@@ -408,31 +381,6 @@ class MobileMenuListTile extends StatelessWidget {
             style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// App logo for the menu.
-class AppLogo extends StatelessWidget {
-  const AppLogo({
-    Key? key,
-    required this.isDark,
-  }) : super(key: key);
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      splashColor: AppColors.accent1,
-      onTap: () {
-        context.goNamed('dashboard');
-      },
-      child: Image.asset(
-        isDark
-            ? 'assets/images/logos/cannlytics_logo_with_text_dark.png'
-            : 'assets/images/logos/cannlytics_logo_with_text_light.png',
-        width: 120,
       ),
     );
   }
@@ -463,21 +411,22 @@ class NavigationLink extends StatelessWidget {
   }
 }
 
-/// Organization selection.
+/// Primary organization selection.
+/// FIXME: Load organizations!
 class OrganizationSelection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final value = ref.watch(licenseProvider).primaryLicense;
-    final items = ref.watch(licenseProvider).licenses;
-    // If no organization, return a create/join organization button.
+    final value = ref.watch(organizationSelectionProvider).primaryOrganization;
+    final items = ref.watch(organizationSelectionProvider).organizations;
+    // final orgs = ref.watch(organizationsProvider);
+    print('ORGANIZATIONS IN WIDGET:');
+    print(items);
     if (items.length == 1) {
       return NavigationLink(
-        text: '+ Add a license',
-        path: AppRoutes.addLicense.name,
+        text: 'Organizations',
+        path: AppRoutes.organizations.name,
       );
     }
-
-    // Dropdown.
     return DropdownButton(
       isDense: true,
       value: value,
@@ -489,31 +438,31 @@ class OrganizationSelection extends ConsumerWidget {
               ))
           .toList(),
       onChanged: (value) {
-        if (value == '+ Add a license') {
-          GoRouter.of(context).go('/licenses/add');
+        if (value == 'Organizations') {
+          GoRouter.of(context).go('/organizations');
           return;
         }
-        ref.read(licenseProvider.notifier).changeLicense(value as String);
+        ref
+            .read(organizationSelectionProvider)
+            .changeOrganization(value as String);
       },
     );
   }
 }
 
-/// A dropdown selection for the user to choose their primary license.
+/// Primary license selection.
+/// FIXME: Load licenses and facilities!
 class FacilitySelection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final value = ref.watch(licenseProvider).primaryLicense;
-    final items = ref.watch(licenseProvider).licenses;
-    // If no license, return an add license button.
+    final value = ref.watch(facilitySelectionProvider).primaryLicense;
+    final items = ref.watch(facilitySelectionProvider).licenses;
     if (items.length == 1) {
       return NavigationLink(
         text: '+ Add a license',
         path: AppRoutes.addLicense.name,
       );
     }
-
-    // Dropdown.
     return DropdownButton(
       isDense: true,
       value: value,
@@ -529,59 +478,10 @@ class FacilitySelection extends ConsumerWidget {
           GoRouter.of(context).go('/licenses/add');
           return;
         }
-        ref.read(licenseProvider.notifier).changeLicense(value as String);
+        ref
+            .read(facilitySelectionProvider.notifier)
+            .changeLicense(value as String);
       },
     );
   }
 }
-
-/// Light / dark theme toggle.
-class ThemeToggle extends StatelessWidget {
-  const ThemeToggle({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer(builder: (context, ref, child) {
-      final theme = ref.watch(themeModeProvider);
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 6, right: 24, bottom: 6),
-            child: IconButton(
-              splashRadius: 18,
-              onPressed: () {
-                // Toggle light / dark theme.
-                ref.read(themeModeProvider.notifier).state =
-                    theme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-              },
-              icon: Icon(
-                theme == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-                color: AppColors.neutral4,
-              ),
-            ),
-          ),
-        ],
-      );
-    });
-  }
-}
-
-// /// Icon in navigation.
-// class NavigationIconButton extends StatelessWidget {
-//   const NavigationIconButton({
-//     Key? key,
-//     required this.assetName,
-//   }) : super(key: key);
-//   final String assetName;
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-//       child: GestureDetector(
-//         child: Image.asset(assetName),
-//         onTap: () {},
-//       ),
-//     );
-//   }
-// }
