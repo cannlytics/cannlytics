@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/3/2023
+// Updated: 3/5/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -14,54 +14,30 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
+/// Service to interface with the Cannlytics API.
 class APIService {
-  static final String baseUrl = 'https://cannlytics.com/api';
+  // Production / test base URL.
+  // static final String baseUrl = 'https://cannlytics.com/api';
+  static final String baseUrl = 'http://127.0.0.1:8000/api';
 
-  /// Get a user's token.
-  /// Set [refresh] if the credentials should be refreshed.
+  /// Get a user's token. Set [refresh] to renew credentials.
   static Future<String> getUserToken({bool refresh = false}) async {
-    final tokenResult = FirebaseAuth.instance.currentUser!;
+    final tokenResult = FirebaseAuth.instance.currentUser;
+    if (tokenResult == null) return '';
     return await tokenResult.getIdToken(refresh);
   }
 
   /// Make an authenticated HTTP request to the Cannlytics API.
-  static Future<dynamic> authRequest(
-    String endpoint, {
-    dynamic data,
-    Map<String, dynamic>? options,
-  }) async {
-    try {
-      // Get the user's session token.
-      final idToken = await getUserToken();
-
-      // Make an API request with the token.
-      return await apiRequest(
-        endpoint,
-        data: data,
-        options: options,
-        idToken: idToken,
-      );
-    } catch (error) {
-      return error;
-    }
-  }
-
-  /// Make a HTTP request to the Cannlytics API.
-  static Future<dynamic> apiRequest(
-    String endpoint, {
-    dynamic data,
-    Map<String, dynamic>? options,
-    String? idToken,
-  }) async {
-    // Format headers.
-    final headerAuth = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${idToken ?? ''}',
-    };
-
-    // Set defaults.
+  static Future<dynamic> apiRequest(String endpoint,
+      {dynamic data, Map<String, dynamic>? options}) async {
+    // Create default body, method, and headers.
     var body;
     var method = 'GET';
+    final idToken = await getUserToken();
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $idToken',
+    };
 
     // Handle post.
     if (data != null) {
@@ -89,11 +65,17 @@ class APIService {
 
     // Make the request.
     final client = http.Client();
-    final request = http.Request(method, Uri.parse(url))
-      ..headers.addAll(headerAuth)
-      ..body = body;
-    // final response = await client.send(request).then(http.Response.fromStream);
-    final response = await http.Response.fromStream(await client.send(request));
+    final request;
+    if (body == null) {
+      request = http.Request(method, Uri.parse(url))..headers.addAll(headers);
+    } else {
+      request = http.Request(method, Uri.parse(url))
+        ..headers.addAll(headers)
+        ..body = body;
+    }
+
+    // Get the response.
+    final response = await client.send(request).then(http.Response.fromStream);
 
     // Return the data.
     try {

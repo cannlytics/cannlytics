@@ -104,6 +104,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    # 'corsheaders',
     'django_feather',
     'django_robohash',
     'django.contrib.humanize',
@@ -127,6 +128,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     f'{PROJECT_NAME}.core.middleware.AppendOrRemoveSlashMiddleware',
+    # 'corsheaders.middleware.CorsMiddleware',
     # 'csp.middleware.CSPMiddleware',
     # 'csp.context_processors.nonce',
 ]
@@ -369,3 +371,7 @@ base.tag_re = re.compile(base.tag_re.pattern, re.DOTALL)
 FIREBASE_API_KEY = config['FIREBASE_API_KEY']
 FIREBASE_PROJECT_ID = config['FIREBASE_PROJECT_ID']
 STORAGE_BUCKET = config['FIREBASE_STORAGE_BUCKET']
+
+# Allow CORS.
+# See: https://stackoverflow.com/questions/35760943/how-can-i-enable-cors-on-django-rest-framework
+# CORS_ORIGIN_ALLOW_ALL = True

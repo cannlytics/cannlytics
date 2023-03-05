@@ -4,7 +4,7 @@ Copyright (c) Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/25/2021
-Updated: 1/13/2022
+Updated: 3/5/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 
 Description: API to interface with organizations.
@@ -22,7 +22,6 @@ from rest_framework.response import Response
 
 # Internal imports.
 from cannlytics.firebase import (
-    access_secret_version,
     add_secret_version,
     create_secret,
     create_log,
@@ -38,6 +37,11 @@ from cannlytics.auth.auth import authenticate_request
 from api.metrc.metrc import initialize_traceability
 from console.settings import DEFAULT_FROM_EMAIL, LIST_OF_EMAIL_RECIPIENTS
 
+# RESPONSE_HEADERS = {
+#     'Access-Control-Allow-Origin': '*',
+#     'Access-Control-Allow-Methods': '*',
+#     'Access-Control-Allow-Headers': 'X-Requested-With',
+# }
 
 @api_view(['GET'])
 def labs(request):
@@ -115,7 +119,7 @@ def invite_user_to_organization(uid, organization_id, organization_name):
     )
 
 
-@api_view(['GET', 'POST', 'DELETE'])
+@api_view(['OPTIONS', 'GET', 'POST', 'DELETE'])
 def organizations(request, organization_id=None, type='lab'):
     """Get, create, or update organizations.
     E.g.
@@ -138,7 +142,7 @@ def organizations(request, organization_id=None, type='lab'):
     except KeyError:
         unauthenticated = True
 
-    # Return publically available information if the authentication fails.
+    # Return publicly available information if the authentication fails.
     if unauthenticated or request.query_params.get('public'):
         filters = [{'key': 'public', 'operation': '==', 'value': True}]
         limit = request.query_params.get('limit')
@@ -157,7 +161,7 @@ def organizations(request, organization_id=None, type='lab'):
     _, project_id = google.auth.default()
 
     # Get organization(s).
-    if request.method == 'GET':
+    if request.method == 'GET' or request.method == 'OPTIONS':
 
         # Get organization_id parameter
         if organization_id:
@@ -194,6 +198,7 @@ def organizations(request, organization_id=None, type='lab'):
                 'value': uid
             }
             docs = get_collection(model_type, filters=[query])
+            print('Returning organizations!')
             return Response({'data': docs})
 
         # Optional: Try to get facility data from Metrc.

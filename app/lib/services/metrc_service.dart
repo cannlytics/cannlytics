@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/26/2023
-// Updated: 2/28/2023
+// Updated: 3/5/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -89,7 +89,7 @@ class MetrcLicenses {
       'org_id': orgId,
       'state': state,
     };
-    return await APIService.authRequest(endpoint, data: data);
+    return await APIService.apiRequest(endpoint, data: data);
   }
 
   /// Delete Metrc License.
@@ -105,7 +105,7 @@ class MetrcLicenses {
       'deletion_reason': deletionReason,
     };
     Map<String, String> headers = {'Content-Type': 'application/json'};
-    return await APIService.authRequest(endpoint, data: data);
+    return await APIService.apiRequest(endpoint, data: data);
   }
 }
 
@@ -115,7 +115,7 @@ class MetrcFacilities {
   static Future<List<Facility>> getFacilities() async {
     String endpoint = '$_host$_path/facilities';
     List<Facility> items = [];
-    List<dynamic> response = await APIService.authRequest(endpoint);
+    List<dynamic> response = await APIService.apiRequest(endpoint);
     for (var item in response) {
       items.add(Facility.fromMap(item, item['id']));
     }
@@ -130,7 +130,7 @@ class MetrcEmployees {
     String endpoint = '$_host$_path/employees';
     Map params = {'license': licenseNumber};
     List<Employee> items = [];
-    List<dynamic> response = await APIService.authRequest(
+    List<dynamic> response = await APIService.apiRequest(
       endpoint,
       options: {'params': params},
     );
@@ -146,7 +146,7 @@ class MetrcLocations {
   // Get location types.
   static Future<List> getLocationTypes(String licenseNumber) async {
     String endpoint = '$_host$_path/types/locations';
-    return await APIService.authRequest(
+    return await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber}
@@ -165,7 +165,7 @@ class MetrcLocations {
       'name': name,
       'location_type': locationType,
     };
-    return await APIService.authRequest(
+    return await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -177,7 +177,7 @@ class MetrcLocations {
   // Get a location.
   static Future<void> getLocation(String licenseNumber, String id) async {
     String endpoint = '$_host$_path/locations/$id';
-    return await APIService.authRequest(
+    return await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber}
@@ -198,7 +198,7 @@ class MetrcLocations {
       'name': name,
       'location_type_name': locationTypeName,
     };
-    return await APIService.authRequest(
+    return await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -210,7 +210,7 @@ class MetrcLocations {
   // Delete a location.
   static Future<void> deleteLocation(String licenseNumber, String id) async {
     String endpoint = '$_host$_path/locations/$id';
-    return await APIService.authRequest(
+    return await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber, 'delete': true}
@@ -240,7 +240,7 @@ class MetrcStrains {
       'sativa_percentage': sativaPercentage,
     };
     String endpoint = '$_host$_path/strains';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -255,7 +255,7 @@ class MetrcStrains {
   static Future<List<Strain>> getStrains(String licenseNumber) async {
     String endpoint = '$_host$_path/strains';
     List<Strain> items = [];
-    List<dynamic> response = await APIService.authRequest(
+    List<dynamic> response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber}
@@ -288,7 +288,7 @@ class MetrcStrains {
       'sativa_percentage': sativaPercentage,
     };
     String endpoint = '$_host$_path/strains';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -304,7 +304,7 @@ class MetrcStrains {
     required String id,
   }) async {
     String endpoint = '$_host$_path/strains/$id';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber},
@@ -322,7 +322,7 @@ class MetrcPlants {
     Map data,
   ) async {
     String endpoint = '$_host$_path/plants';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       // TODO: Make more function like.
       // data: {
@@ -350,7 +350,7 @@ class MetrcPlants {
     String? type,
   }) async {
     String endpoint = '$_host$_path/plants';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -368,7 +368,7 @@ class MetrcPlants {
     String? end,
   }) async {
     String endpoint = '$_host$_path/plants';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {
@@ -389,7 +389,7 @@ class MetrcPlants {
     String? location,
   }) async {
     String endpoint = '$_host$_path/plants';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: {
         'actual_date': DateTime.now().toIso8601String(),
@@ -410,7 +410,7 @@ class MetrcPlants {
     Map data,
   ) async {
     String endpoint = '$_host$_path/plants';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -428,7 +428,7 @@ class MetrcPlants {
     Map data,
   ) async {
     String endpoint = '$_host$_path/plants';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -446,7 +446,7 @@ class MetrcPlants {
     Map data,
   ) async {
     String endpoint = '$_host$_path/plants';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -464,7 +464,7 @@ class MetrcPlants {
     String id,
   ) async {
     String endpoint = '$_host$_path/plants/$id';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       options: {
         'params': {
@@ -484,7 +484,7 @@ class MetrcPlantBatches {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/batches';
-    await APIService.authRequest(endpoint, data: data, options: {
+    await APIService.apiRequest(endpoint, data: data, options: {
       'params': {'license': licenseNumber},
     });
   }
@@ -496,7 +496,7 @@ class MetrcPlantBatches {
     required String endDate,
   }) async {
     String endpoint = '$_host$_path/batches';
-    var response = await APIService.authRequest(endpoint, options: {
+    var response = await APIService.apiRequest(endpoint, options: {
       'params': {
         'license': licenseNumber,
         'start': startDate,
@@ -512,7 +512,7 @@ class MetrcPlantBatches {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/packages/v1/packages/createfromplantbatch';
-    await APIService.authRequest(endpoint, data: data, options: {
+    await APIService.apiRequest(endpoint, data: data, options: {
       'params': {'license': licenseNumber},
     });
   }
@@ -523,7 +523,7 @@ class MetrcPlantBatches {
     required String id,
   }) async {
     String endpoint = '$_host$_path/batches';
-    await APIService.authRequest(endpoint, options: {
+    await APIService.apiRequest(endpoint, options: {
       'params': {'license': licenseNumber},
       'action': 'flower',
     });
@@ -535,7 +535,7 @@ class MetrcPlantBatches {
     required String id,
   }) async {
     String endpoint = '$_host$_path/batches';
-    await APIService.authRequest(endpoint, options: {
+    await APIService.apiRequest(endpoint, options: {
       'params': {'license': licenseNumber},
       'action': 'destroy-plants',
     });
@@ -547,7 +547,7 @@ class MetrcPlantBatches {
     Map data,
   ) async {
     String endpoint = '$_host$_path/batches';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -564,7 +564,7 @@ class MetrcPlantBatches {
     required String location,
   }) async {
     String endpoint = '$_host$_path/batches';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: {
         'name': name,
@@ -589,7 +589,7 @@ class MetrcPlantBatches {
     String? patientLicenseNumber,
   }) async {
     String endpoint = '$_host$_path/batches';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: {
         'plant_batch': name,
@@ -617,7 +617,7 @@ class MetrcHarvests {
     String? end,
   }) async {
     String endpoint = '$_host$_path/harvests';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {
@@ -636,7 +636,7 @@ class MetrcHarvests {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/packages';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -652,7 +652,7 @@ class MetrcHarvests {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/packages';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -668,7 +668,7 @@ class MetrcHarvests {
     Map data,
   ) async {
     String endpoint = '$_host$_path/harvests';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -684,7 +684,7 @@ class MetrcHarvests {
     String harvestId,
   ) async {
     String endpoint = '$_host$_path/harvests';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: {
         'actual_date': DateTime.now().toIso8601String(),
@@ -703,7 +703,7 @@ class MetrcHarvests {
     String harvestId,
   ) async {
     String endpoint = '$_host$_path/harvests';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: {'id': harvestId},
       options: {
@@ -725,7 +725,7 @@ class MetrcPackages {
   }) async {
     String endpoint = '$_host$_path/packages';
     if (label != null) label += '/$label';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {
@@ -744,7 +744,7 @@ class MetrcPackages {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/packages';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -760,7 +760,7 @@ class MetrcPackages {
     required String itemName,
   }) async {
     String endpoint = '$_host$_path/packages';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: {
         'label': label,
@@ -780,7 +780,7 @@ class MetrcPackages {
     required String location,
   }) async {
     String endpoint = '$_host$_path/packages';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: {
         'label': packageLabel,
@@ -800,7 +800,7 @@ class MetrcPackages {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/packages';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -816,7 +816,7 @@ class MetrcPackages {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/packages';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -832,7 +832,7 @@ class MetrcPackages {
     required String label,
   }) async {
     String endpoint = '$_host$_path/packages';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: {
         'label': label,
@@ -851,7 +851,7 @@ class MetrcPackages {
     required String label,
   }) async {
     String endpoint = '$_host$_path/packages';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: {'label': label},
       options: {
@@ -867,7 +867,7 @@ class MetrcPackages {
     Map data,
   ) async {
     String endpoint = '$_host$_path/packages';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -884,7 +884,7 @@ class MetrcPackages {
     required String note,
   }) async {
     String endpoint = '$_host$_path/packages';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: {
         'package_label': label,
@@ -906,7 +906,7 @@ class MetrcItems {
     List<Map<String, dynamic>> data,
   ) async {
     String endpoint = '$_host$_path/items';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -924,7 +924,7 @@ class MetrcItems {
   }) async {
     String endpoint = '$_host$_path/items';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {
@@ -944,7 +944,7 @@ class MetrcItems {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/items/$id';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -959,7 +959,7 @@ class MetrcItems {
     String id,
   ) async {
     String endpoint = '$_host$_path/items/$id';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber},
@@ -977,7 +977,7 @@ class MetrcTransfers {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/transfers';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -994,7 +994,7 @@ class MetrcTransfers {
   }) async {
     String endpoint = '$_host$_path/transfers';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber},
@@ -1010,7 +1010,7 @@ class MetrcTransfers {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/transfers';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1026,7 +1026,7 @@ class MetrcTransfers {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/transfers/templates';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1042,7 +1042,7 @@ class MetrcTransfers {
   }) async {
     String endpoint = '$_host$_path/transactions';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber},
@@ -1058,7 +1058,7 @@ class MetrcTransfers {
     String data,
   ) async {
     String endpoint = '$_host$_path/transfers/templates/$id';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1074,7 +1074,7 @@ class MetrcTransfers {
     required String id,
   }) async {
     String endpoint = '$_host$_path/transfers/templates/$id';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber},
@@ -1098,7 +1098,7 @@ class MetrcLabTests {
     required String id,
   }) async {
     String endpoint = '$_host$_path/tests/coas/$id';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber},
@@ -1118,7 +1118,7 @@ class MetrcPatients {
   }) async {
     String endpoint = '$_host$_path/patients';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {
@@ -1143,7 +1143,7 @@ class MetrcPatients {
     String licenseNumber,
   ) async {
     String endpoint = '$_host$_path/patients/locations';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber},
@@ -1158,7 +1158,7 @@ class MetrcPatients {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/patients';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1173,7 +1173,7 @@ class MetrcPatients {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/patients';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1189,7 +1189,7 @@ class MetrcPatients {
     required String id,
   }) async {
     String endpoint = '$_host$_path/patients/$id';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber},
@@ -1207,7 +1207,7 @@ class MetrcSales {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/sales';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1225,7 +1225,7 @@ class MetrcSales {
   }) async {
     String endpoint = '$_host$_path/sales';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {
@@ -1244,7 +1244,7 @@ class MetrcSales {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/sales';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1260,7 +1260,7 @@ class MetrcSales {
     String id,
   ) async {
     String endpoint = '$_host$_path/sales/$id';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber},
@@ -1279,7 +1279,7 @@ class MetrcTransactions {
     String end,
   ) async {
     String endpoint = '$_host$_path/transactions';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber},
@@ -1297,7 +1297,7 @@ class MetrcTransactions {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/transactions/$date';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1313,7 +1313,7 @@ class MetrcTransactions {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/transactions/$date';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1338,7 +1338,7 @@ class MetrcDeliveries {
   }) async {
     String endpoint = '$_host$_path/deliveries';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.authRequest(
+    var response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {
@@ -1360,7 +1360,7 @@ class MetrcDeliveries {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/deliveries';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1375,7 +1375,7 @@ class MetrcDeliveries {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/deliveries';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1391,7 +1391,7 @@ class MetrcDeliveries {
     required String id,
   }) async {
     String endpoint = '$_host$_path/deliveries/$id';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       options: {
         'params': {'license': licenseNumber},
@@ -1406,7 +1406,7 @@ class MetrcDeliveries {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/deliveries';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1422,7 +1422,7 @@ class MetrcDeliveries {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/deliveries';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1438,7 +1438,7 @@ class MetrcDeliveries {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/deliveries';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1454,7 +1454,7 @@ class MetrcDeliveries {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/deliveries';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1470,7 +1470,7 @@ class MetrcDeliveries {
     Map<String, dynamic> data,
   ) async {
     String endpoint = '$_host$_path/deliveries';
-    await APIService.authRequest(
+    await APIService.apiRequest(
       endpoint,
       data: data,
       options: {
@@ -1488,96 +1488,96 @@ class MetrcTypes {
   /// Get adjustment reasons.
   Future<List<dynamic>> getAdjustments() async {
     String endpoint = '$_host$_path/types/adjustments';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get batch types.
   Future<List<dynamic>> getBatchTypes() async {
     String endpoint = '$_host$_path/types/batches';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get categories.
   Future<List<dynamic>> getCategories() async {
     String endpoint = '$_host$_path/types/categories';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get customer types.
   Future<List<dynamic>> getCustomerTypes() async {
     String endpoint = '$_host$_path/types/customers';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get growth phases.
   Future<List<dynamic>> getGrowthPhases() async {
     String endpoint = '$_host$_path/types/growth-phases';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get location types.
   Future<List<dynamic>> getLocationTypes() async {
     String endpoint = '$_host$_path/types/locations';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get package types.
   Future<List<dynamic>> getPackageTypes() async {
     String endpoint = '$_host$_path/types/packages';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get package statuses.
   Future<List<dynamic>> getPackageStatuses() async {
     String endpoint = '$_host$_path/types/package-statuses';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get return reasons.
   Future<List<dynamic>> getReturnReasons() async {
     String endpoint = '$_host$_path/types/return-reasons';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get test statuses.
   Future<List<dynamic>> getTestStatuses() async {
     String endpoint = '$_host$_path/types/test-statuses';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get test types.
   Future<List<dynamic>> getTestTypes() async {
     String endpoint = '$_host$_path/types/tests';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get transfer types.
   Future<List<dynamic>> getTransferTypes() async {
     String endpoint = '$_host$_path/types/transfers';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get units of measure.
   Future<List<dynamic>> getUnitsOfMeasure() async {
     String endpoint = '$_host$_path/types/units';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get waste types.
   Future<List<dynamic>> getWasteTypes() async {
     String endpoint = '$_host$_path/types/waste';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get waste methods.
   Future<List<dynamic>> getWasteMethods() async {
     String endpoint = '$_host$_path/types/waste-methods';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 
   /// Get waste reasons.
   Future<List<dynamic>> getWasteReasons() async {
     String endpoint = '$_host$_path/types/waste-reasons';
-    return await APIService.authRequest(endpoint);
+    return await APIService.apiRequest(endpoint);
   }
 }

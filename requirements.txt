@@ -7,6 +7,7 @@ chromedriver-binary==106.0.5249.21.0
 datasets==2.8.0
 django==4.1.5
 # django-csp==3.7
+# django-cors-headers==3.14.0
 django-environ==0.9.0
 django-feather==0.3.0
 django-livereload-server==0.4

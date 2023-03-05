@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/4/2023
+// Updated: 3/5/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 import 'package:cannlytics_app/services/api_service.dart';
@@ -18,29 +18,22 @@ class Organization {
   // Initialization.
   const Organization({
     required this.id,
-    required this.address,
-    required this.city,
-    required this.country,
-    required this.email,
-    required this.externalId,
-    required this.licenses,
-    required this.licenseNumber,
-    required this.licenseType,
-    required this.state,
-    required this.userApiKeySecret,
-    required this.projectId,
-    required this.secretId,
-    required this.versionId,
+    this.address = '',
+    this.city = '',
+    this.country = '',
+    this.email = '',
+    this.externalId = '',
+    this.licenses,
     required this.name,
     required this.owner,
-    required this.phone,
-    required this.public,
+    this.phone = '',
+    this.public = false,
+    this.state = '',
     required this.team,
-    required this.tradeName,
-    required this.type,
-    required this.uid,
-    required this.website,
-    required this.zipCode,
+    this.tradeName = '',
+    this.type = '',
+    this.website = '',
+    this.zipCode = '',
   });
 
   // Properties.
@@ -50,52 +43,38 @@ class Organization {
   final String country;
   final String email;
   final String externalId;
-  final int licenses;
-  final String licenseNumber;
-  final String licenseType;
-  final String state;
-  final String userApiKeySecret;
-  final String projectId;
-  final String secretId;
-  final String versionId;
+  final List<Map?>? licenses;
   final String name;
   final String owner;
   final String phone;
   final bool public;
-  final List<String> team;
+  final String state;
+  final List<dynamic> team;
   final String tradeName;
   final String type;
-  final String uid;
   final String website;
   final String zipCode;
 
   // Create model.
   factory Organization.fromMap(Map<dynamic, dynamic> data) {
     return Organization(
-      id: Format.slugify(data['name'] as String),
-      address: data['address'] as String,
-      city: data['city'] as String,
-      country: data['country'] as String,
-      email: data['email'] as String,
-      externalId: data['external_id'] as String,
-      licenses: data['licenses'] as int,
-      licenseNumber: data['license_number'] as String,
-      licenseType: data['license_type'] as String,
-      state: data['state'] as String,
-      userApiKeySecret: data['user_api_key_secret'] as String,
-      projectId: data['project_id'] as String,
-      secretId: data['secret_id'] as String,
-      versionId: data['version_id'] as String,
-      name: data['name'] as String,
-      owner: data['owner'] as String,
-      phone: data['phone'] as String,
-      public: data['public'] as bool,
-      team: data['team'] as List<String>,
-      tradeName: data['trade_name'] as String,
-      type: data['type'] as String,
-      uid: data['uid'] as String,
-      website: data['website'] as String,
-      zipCode: data['zip_code'] as String,
+      id: Format.slugify(data['name']),
+      address: data['address'],
+      city: data['city'],
+      country: data['country'],
+      email: data['email'],
+      externalId: data['external_id'],
+      licenses: data['licenses'],
+      name: data['name'],
+      owner: data['owner'],
+      phone: data['phone'],
+      public: data['public'],
+      state: data['state'],
+      team: data['team'],
+      tradeName: data['trade_name'],
+      type: data['type'],
+      website: data['website'],
+      zipCode: data['zip_code'],
     );
   }
 
@@ -109,21 +88,14 @@ class Organization {
       'email': email,
       'external_id': externalId,
       'licenses': licenses,
-      'license_number': licenseNumber,
-      'license_type': licenseType,
-      'state': state,
-      'user_api_key_secret': userApiKeySecret,
-      'project_id': projectId,
-      'secret_id': secretId,
-      'version_id': versionId,
       'name': name,
       'owner': owner,
       'phone': phone,
       'public': public,
+      'state': state,
       'team': team,
       'trade_name': tradeName,
       'type': type,
-      'uid': uid,
       'website': website,
       'zip_code': zipCode,
     };
@@ -133,20 +105,20 @@ class Organization {
   Future<void> create() async {
     Map data = this.toMap();
     String orgId = Format.slugify(this.name);
-    await APIService.authRequest('/organizations/$orgId', data: data);
+    await APIService.apiRequest('/organizations/$orgId', data: data);
   }
 
   // Update Organization.
   Future<void> update() async {
     Map data = this.toMap();
     String orgId = Format.slugify(this.name);
-    await APIService.authRequest('/organizations/$orgId', data: data);
+    await APIService.apiRequest('/organizations/$orgId', data: data);
   }
 
   // Delete Organization.
   Future<void> delete() async {
     String orgId = Format.slugify(this.name);
-    await APIService.authRequest(
+    await APIService.apiRequest(
       '/organizations/$orgId',
       options: {'delete': true},
     );

@@ -29,7 +29,7 @@ class OrganizationsService {
   final FirestoreService _dataSource;
 
   Future<List<Organization>> getOrganizations() async {
-    List<Map> response = await APIService.authRequest('/organizations');
+    List<Map> response = await APIService.apiRequest('/organizations');
     print('RESPONSE:');
     print(response);
     return response.map((org) => Organization.fromMap(org)).toList();
@@ -91,7 +91,7 @@ final organizationProvider = StreamProvider.autoDispose<Map>((ref) {
 
 //   /// Get organizations.
 //   Future<List<Organization>> getOrganizations() async {
-//     List<Map> response = await APIService.authRequest('/organizations');
+//     List<Map> response = await APIService.apiRequest('/organizations');
 //     print('RESPONSE:');
 //     print(response);
 //     return response.map((org) => Organization.fromMap(org)).toList();
@@ -114,7 +114,7 @@ final organizationProvider = StreamProvider.autoDispose<Map>((ref) {
 //   //     return data ?? {};
 //   //   },
 //   // );
-//   List<Map> response = await APIService.authRequest('/organizations');
+//   List<Map> response = await APIService.apiRequest('/organizations');
 //     print('RESPONSE:');
 //     print(response);
 //     return response.map((org) => Organization.fromMap(org)).toList();

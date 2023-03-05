@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/models/organization.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
@@ -79,7 +80,7 @@ class DesktopNavigationLayout extends ConsumerWidget {
 
             // License selection.
             gapW6,
-            FacilitySelection(),
+            // FacilitySelection(),
 
             // Links.
             const Spacer(),
@@ -170,7 +171,7 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
 
                       // License selection.
                       gapW6,
-                      FacilitySelection(),
+                      // FacilitySelection(),
 
                       // Spacer.
                       const Spacer(),
@@ -412,39 +413,56 @@ class NavigationLink extends StatelessWidget {
 }
 
 /// Primary organization selection.
-/// FIXME: Load organizations!
 class OrganizationSelection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final value = ref.watch(organizationSelectionProvider).primaryOrganization;
-    final items = ref.watch(organizationSelectionProvider).organizations;
-    // final orgs = ref.watch(organizationsProvider);
+    // Get the user's organizations.
+    final orgs = ref.watch(organizationsProvider).value ?? [];
     print('ORGANIZATIONS IN WIDGET:');
-    print(items);
-    if (items.length == 1) {
+    print(orgs);
+
+    // Return organizations link button.
+    if (orgs.length == 0) {
       return NavigationLink(
         text: 'Organizations',
         path: AppRoutes.organizations.name,
       );
     }
+
+    // TODO: Get the user's current organization.
+    final value = orgs[0].name;
+    print('CURRENT ORGANIZATION:');
+    print(value);
+
+    // Return the selection.
     return DropdownButton(
       isDense: true,
       value: value,
-      items: items
-          .map((e) => DropdownMenuItem<String>(
-                onTap: () => e,
-                value: e,
-                child: Text(e),
-              ))
-          .toList(),
+      items: orgs
+              .map((org) => org.name)
+              .toList()
+              .map((e) => DropdownMenuItem<String>(
+                    onTap: () => e,
+                    value: e,
+                    child: Text(e),
+                  ))
+              .toList() +
+          [
+            DropdownMenuItem<String>(
+              onTap: () => 'organizations',
+              value: 'organizations',
+              child: Text('Start or join an organizations'),
+            )
+          ],
       onChanged: (value) {
-        if (value == 'Organizations') {
+        if (value == 'organizations') {
           GoRouter.of(context).go('/organizations');
           return;
         }
-        ref
-            .read(organizationSelectionProvider)
-            .changeOrganization(value as String);
+        // FIXME: Change the primary organization.
+        // ref
+        //     .read(organizationSelectionProvider)
+        //     .changeOrganization(value as String);
       },
     );
   }
@@ -452,36 +470,36 @@ class OrganizationSelection extends ConsumerWidget {
 
 /// Primary license selection.
 /// FIXME: Load licenses and facilities!
-class FacilitySelection extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final value = ref.watch(facilitySelectionProvider).primaryLicense;
-    final items = ref.watch(facilitySelectionProvider).licenses;
-    if (items.length == 1) {
-      return NavigationLink(
-        text: '+ Add a license',
-        path: AppRoutes.addLicense.name,
-      );
-    }
-    return DropdownButton(
-      isDense: true,
-      value: value,
-      items: items
-          .map((e) => DropdownMenuItem<String>(
-                onTap: () => e,
-                value: e,
-                child: Text(e),
-              ))
-          .toList(),
-      onChanged: (value) {
-        if (value == '+ Add a license') {
-          GoRouter.of(context).go('/licenses/add');
-          return;
-        }
-        ref
-            .read(facilitySelectionProvider.notifier)
-            .changeLicense(value as String);
-      },
-    );
-  }
-}
+// class FacilitySelection extends ConsumerWidget {
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     final value = ref.watch(facilitySelectionProvider).primaryLicense;
+//     final items = ref.watch(facilitySelectionProvider).licenses;
+//     if (items.length == 1) {
+//       return NavigationLink(
+//         text: '+ Add a license',
+//         path: AppRoutes.addLicense.name,
+//       );
+//     }
+//     return DropdownButton(
+//       isDense: true,
+//       value: value,
+//       items: items
+//           .map((e) => DropdownMenuItem<String>(
+//                 onTap: () => e,
+//                 value: e,
+//                 child: Text(e),
+//               ))
+//           .toList(),
+//       onChanged: (value) {
+//         if (value == '+ Add a license') {
+//           GoRouter.of(context).go('/licenses/add');
+//           return;
+//         }
+//         ref
+//             .read(facilitySelectionProvider.notifier)
+//             .changeLicense(value as String);
+//       },
+//     );
+//   }
+// }

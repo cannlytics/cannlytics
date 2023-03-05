@@ -194,6 +194,7 @@ urlpatterns = [
 
     # Organization API endpoints.
     path('organizations', include([
+        path('', organizations.organizations),
         path('/<organization_id>', organizations.organizations),
         path('/<organization_id>/settings', organizations.organizations),
         path('/<organization_id>/team', organizations.organization_team),
