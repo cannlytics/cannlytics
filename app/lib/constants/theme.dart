@@ -102,11 +102,11 @@ class AppColors {
       colorScheme: colorScheme,
     ).copyWith(
       useMaterial3: true,
+      visualDensity: VisualDensity.comfortable,
       appBarTheme: const AppBarTheme(
         elevation: 0.0,
         centerTitle: true,
       ),
-      visualDensity: VisualDensity.compact,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       highlightColor: accent1,
       scaffoldBackgroundColor: isDark ? const Color(0xFF323443) : Colors.white,
@@ -124,7 +124,7 @@ class AppColors {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(3),
           ),
         ),
       ),
@@ -135,61 +135,81 @@ class AppColors {
         displayLarge: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'LibreBaskerville',
+          fontSize: 48,
+          letterSpacing: 1.5,
         ),
         displayMedium: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'LibreBaskerville',
+          fontSize: 36,
+          letterSpacing: 1.2,
         ),
         displaySmall: TextStyle(
           color: isDark ? AppColors.neutral2 : AppColors.neutral4,
           fontFamily: 'LibreBaskerville',
+          fontSize: 24,
         ),
         headlineLarge: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'SourceSerifPro',
+          fontSize: 28,
         ),
         headlineMedium: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'SourceSerifPro',
+          fontSize: 24,
         ),
         headlineSmall: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'SourceSerifPro',
+          fontSize: 20,
         ),
         titleLarge: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'LibreBaskerville',
+          fontSize: 24,
         ),
         titleMedium: TextStyle(
-          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'SourceSerifPro',
+          fontSize: 21,
         ),
         titleSmall: TextStyle(
           color: isDark ? AppColors.neutral2 : AppColors.neutral4,
           fontFamily: 'CormorantGaramond',
+          fontSize: 18,
         ),
         bodyLarge: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'CormorantGaramond',
+          fontSize: 21,
+          height: 1.5,
         ),
         bodyMedium: TextStyle(
           color: isDark ? AppColors.neutral2 : AppColors.neutral4,
-          fontFamily: 'IBMPlexSans',
+          fontFamily: 'CormorantGaramond',
+          fontSize: 18,
+          height: 1.5,
         ),
         bodySmall: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
-          fontFamily: 'IBMPlexSans',
+          fontFamily: 'CormorantGaramond',
+          fontSize: 16,
+          height: 1.5,
         ),
         labelLarge: TextStyle(
+          fontSize: 21,
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'IBMPlexSans',
         ),
         labelMedium: TextStyle(
-          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
+          fontSize: 18,
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'IBMPlexSans',
         ),
         labelSmall: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontSize: 14,
+          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
           fontFamily: 'IBMPlexSans',
         ),
       ),

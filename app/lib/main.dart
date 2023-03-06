@@ -20,7 +20,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/firebase_options.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/services/auth_service.dart';

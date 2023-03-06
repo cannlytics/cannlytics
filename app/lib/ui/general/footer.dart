@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/utils/web/web.dart';
@@ -55,22 +55,26 @@ class Footer extends ConsumerWidget {
                 gapH6,
 
                 // Copyright and version.
-                if (isWide)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _copyright(context),
-                      _version(context),
-                    ],
-                  ),
-                if (!isWide)
-                  Column(
-                    children: [
-                      _copyright(context),
-                      gapH6,
-                      _version(context),
-                    ],
-                  ),
+                // if (isWide)
+                Row(
+                  mainAxisAlignment: isWide
+                      ? MainAxisAlignment.spaceBetween
+                      : MainAxisAlignment.center,
+                  children: [
+                    _copyright(context),
+                    if (!isWide) Text('|'),
+                    _version(context),
+                  ],
+                ),
+                // if (!isWide)
+                //   Column(
+                //     mainAxisAlignment: MainAxisAlignment.center,
+                //     children: [
+                //       _copyright(context),
+                //       gapH6,
+                //       _version(context),
+                //     ],
+                //   ),
                 gapH6,
 
                 // Horizontal rule.
@@ -93,23 +97,23 @@ class Footer extends ConsumerWidget {
 
   /// Copyright widget.
   Widget _copyright(BuildContext context) {
-    return Text(
-      'Copyright © 2023 Cannlytics',
-      textAlign: TextAlign.center,
-      style: Theme.of(context).textTheme.titleSmall!.copyWith(
-            fontWeight: FontWeight.normal,
-          ),
+    return SizedBox(
+      height: 32,
+      child: FooterLink(
+        text: 'Copyright © 2023 Cannlytics',
+        route: 'https://github.com/cannlytics/cannlytics',
+      ),
     );
   }
 
   /// Version widget.
   Widget _version(BuildContext context) {
-    return Text(
-      'v1.0.0',
-      textAlign: TextAlign.center,
-      style: Theme.of(context).textTheme.titleSmall!.copyWith(
-            fontWeight: FontWeight.normal,
-          ),
+    return SizedBox(
+      height: 32,
+      child: FooterLink(
+        text: 'v1.0.0',
+        route: 'https://github.com/cannlytics/cannlytics',
+      ),
     );
   }
 }

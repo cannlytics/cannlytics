@@ -151,7 +151,6 @@ class OrganizationsTable extends ConsumerWidget {
     print(orgs);
 
     // Return a placeholder if no organizations.
-    // TODO: Adjust borders, height, font size, image, margins
     if (orgs.length == 0)
       return Placeholder(
         image: 'assets/images/icons/facilities.png',
@@ -211,6 +210,8 @@ class OrganizationsTable extends ConsumerWidget {
   }
 }
 
+/// A general placeholder.
+// TODO: Adjust borders, height, font size, image, margins
 class Placeholder extends StatelessWidget {
   const Placeholder({
     Key? key,
@@ -228,30 +229,37 @@ class Placeholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.symmetric(vertical: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(3),
+      ),
       child: InkWell(
         onTap: onTap,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Image.asset(
               image,
-              height: 200,
-              fit: BoxFit.cover,
+              height: 100,
+              fit: BoxFit.fitHeight,
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  SizedBox(height: 8),
+                  gapH6,
                   Text(
                     description,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
+                  gapH12,
                 ],
               ),
             ),

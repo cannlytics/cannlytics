@@ -11,7 +11,7 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/widgets/layout/responsive_center.dart';
 

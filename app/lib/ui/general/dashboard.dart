@@ -16,7 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/routing/routes.dart';
@@ -173,7 +173,7 @@ class ItemCard extends StatelessWidget {
                     child: Text(
                       data.title,
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
 
@@ -183,7 +183,7 @@ class ItemCard extends StatelessWidget {
                   // Description.
                   Text(
                     data.description,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ],
               ),

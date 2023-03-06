@@ -29,6 +29,7 @@ dependencies:
   riverpod_annotation: ^1.1.1
   rxdart: ^0.27.6
   shared_preferences: ^2.0.15
+  toggle_switch: ^2.0.1
   url_launcher: ^6.1.10
 
 dev_dependencies:

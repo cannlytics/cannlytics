@@ -8,7 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -36,31 +36,27 @@ class SecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: Sizes.p24,
-      child: TextButton(
-        onPressed: onPressed,
-        style: TextButton.styleFrom(
-          backgroundColor: isDark ? AppColors.neutral4 : Colors.grey[200],
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(3),
-          ),
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        backgroundColor: isDark ? AppColors.neutral4 : Colors.grey[200],
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(3),
         ),
-        child: isLoading
-            ? const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 1.42),
-              )
-            : Text(
-                text,
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      // color: Theme.of(context).textTheme.titleLarge!.color,
-                      color: isDark ? AppColors.neutral2 : AppColors.neutral5,
-                    ),
-              ),
       ),
+      child: isLoading
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 1.42),
+            )
+          : Text(
+              text,
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: isDark ? AppColors.neutral2 : AppColors.neutral5,
+                  ),
+            ),
     );
   }
 }

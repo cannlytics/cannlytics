@@ -11,7 +11,7 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 
 /// A widget to add a border to a card that changes color on hover (on the web).
 class BorderMouseHover extends StatefulWidget {

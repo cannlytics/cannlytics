@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/ui/general/simple_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -16,7 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
@@ -31,6 +32,7 @@ import 'package:cannlytics_app/utils/strings/string_validators.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/layout/responsive_scrollable_card.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 
 /// Sign in screen.
 class EmailPasswordSignInScreen extends ConsumerWidget {
@@ -72,6 +74,9 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
             child: SignInForm(formType: formType, isDark: isDark),
           ),
 
+          // Footer
+          const SliverToBoxAdapter(child: SimpleFooter()),
+
           // TODO: Terms.
 
           // TODO: Copyright.
@@ -95,26 +100,71 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
 
   /// A simple user type choice widget.
   Widget userTypeButton(BuildContext context, OnboardingStore store) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: CustomTextButton(
-          text: Format.capitalize(store.userType()),
-          onPressed: () {
-            context.goNamed(AppRoutes.onboarding.name);
-            // TODO: Allow the user to toggle between business and consumer here.
-            // if (store.userType() == 'business') {
-            //   store.setUserType('consumer');
-            // } else {
-            //   store.setUserType('business');
-            // }
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: ToggleSwitch(
+          minHeight: 32,
+          customWidths: [100.0, 100.0],
+          initialLabelIndex: 1,
+          cornerRadius: 20.0,
+          activeFgColor: Colors.white,
+          inactiveBgColor: Colors.grey,
+          inactiveFgColor: Colors.white,
+          totalSwitches: 2,
+          labels: ['Consumer', 'Business'],
+          // icons: [FontAwesomeIcons.mars, FontAwesomeIcons.venus],
+          activeBgColors: [
+            [Colors.green],
+            [Colors.orange]
+          ],
+          onToggle: (index) {
+            // TODO: Switch between user type.
           },
-          style: Theme.of(context).textTheme.titleSmall,
         ),
       ),
     );
   }
 }
+
+// Define a class to represent the options for the radio toggle
+// class RadioOption {
+//   final String title;
+//   final String subtitle;
+
+//   RadioOption({required this.title, required this.subtitle});
+// }
+
+// // Define the list of options for the radio toggle
+// final List<RadioOption> options = [
+//   RadioOption(title: 'Option 1', subtitle: 'Description of option 1'),
+//   RadioOption(title: 'Option 2', subtitle: 'Description of option 2'),
+//   RadioOption(title: 'Option 3', subtitle: 'Description of option 3'),
+// ];
+
+// // Define a variable to keep track of the currently selected option
+// RadioOption? _selectedOption;
+
+// // Define the radio toggle widget
+// Widget buildRadioToggle() {
+//   return Column(
+//     children: options
+//         .map(
+//           (option) => RadioListTile(
+//             title: Text(option.title),
+//             subtitle: Text(option.subtitle),
+//             value: option,
+//             groupValue: _selectedOption,
+//             onChanged: (value) {
+//               setState(() {
+//                 _selectedOption = value as RadioOption?;
+//               });
+//             },
+//           ),
+//         )
+//         .toList(),
+//   );
+// }
 
 /// Light / dark theme toggle.
 class ThemeToggle extends StatelessWidget {
@@ -248,8 +298,8 @@ class _SignInFormState extends ConsumerState<SignInForm>
                 key: EmailPasswordSignInScreen.emailKey,
                 controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: 'Email'.hardcoded,
-                  hintText: 'test@cannlytics.com'.hardcoded,
+                  labelText: 'Email',
+                  hintText: 'test@cannlytics.com',
                   enabled: !state.isLoading,
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -307,7 +357,6 @@ class _SignInFormState extends ConsumerState<SignInForm>
               CustomTextButton(
                 text: _formType.secondaryButtonText,
                 onPressed: state.isLoading ? null : _updateFormType,
-                style: Theme.of(context).textTheme.titleSmall,
               ),
 
               // FIXME: Anonymous sign-in.

@@ -21,7 +21,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 
 part 'alert_dialog_show.dart';
 part 'alert_dialog_error.dart';
