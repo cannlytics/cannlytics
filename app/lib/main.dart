@@ -5,7 +5,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/23/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 
@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/theme.dart';
@@ -25,10 +24,7 @@ import 'package:cannlytics_app/firebase_options.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
-
-// ignore: depend_on_referenced_packages
 
 // ignore:depend_on_referenced_packages
 
@@ -44,7 +40,7 @@ class CannlyticsApp extends ConsumerWidget {
     // Theme provider.
     final themeMode = ref.watch(themeModeProvider);
 
-    // Remove the native splash screen.
+    // Optional: Remove the native splash screen.
     // FlutterNativeSplash.remove();
 
     // Material app.
@@ -63,7 +59,7 @@ Future<void> main() async {
   // Initialize Flutter.
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
-  // Keep the native splash screen open until the app initializes.
+  // Optional: Keep the native splash screen open until the app initializes.
   // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // Initialize Firebase.
@@ -73,7 +69,6 @@ Future<void> main() async {
   usePathUrlStrategy();
 
   // Register error handlers.
-  final sharedPreferences = await SharedPreferences.getInstance();
   registerErrorHandlers();
 
   // TODO: Register licenses.
@@ -82,11 +77,15 @@ Future<void> main() async {
     // yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
 
+  // Optional: Add persisted local data.
+  // final sharedPreferences = await SharedPreferences.getInstance();
+
   // Create a container to serve as the app entry point.
   final container = ProviderContainer(
     overrides: [
-      onboardingStoreProvider
-          .overrideWithValue(OnboardingStore(sharedPreferences)),
+      // Optional: Initialize persisted local data.
+      // onboardingStoreProvider
+      //     .overrideWithValue(OnboardingStore(sharedPreferences)),
     ],
   );
 

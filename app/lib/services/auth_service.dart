@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/3/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -105,5 +105,8 @@ class AuthService {
     }
   }
 
-  /// TODO: Let the user request a password reset email.
+  /// Send the user a password reset email.
+  Future<void> resetPassword(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
 }

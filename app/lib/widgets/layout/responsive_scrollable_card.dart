@@ -24,7 +24,7 @@ class ResponsiveScrollableCard extends StatelessWidget {
     this.isDark = false,
   });
   final Widget child;
-  bool isDark;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +34,7 @@ class ResponsiveScrollableCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(Sizes.p16),
           child: Card(
-            color: isDark
-                ? Theme.of(context).scaffoldBackgroundColor
-                : AppColors.surface,
+            surfaceTintColor: isDark ? null : AppColors.surface,
             child: Padding(
               padding: const EdgeInsets.all(Sizes.p16),
               child: child,

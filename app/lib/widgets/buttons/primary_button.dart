@@ -4,14 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/24/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:flutter/material.dart';
-
-// Project imports:
-import 'package:cannlytics_app/constants/design.dart';
 
 /// Primary button based on [ElevatedButton].
 /// [text] - Text displayed  on the button.

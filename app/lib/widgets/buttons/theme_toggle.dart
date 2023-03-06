@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/22/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -15,7 +15,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Light / dark theme toggle.
 class ThemeToggle extends StatelessWidget {
-  const ThemeToggle({super.key});
+  const ThemeToggle({
+    super.key,
+    this.isDark = false,
+  });
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +39,7 @@ class ThemeToggle extends StatelessWidget {
               },
               icon: Icon(
                 theme == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-                color: AppColors.neutral4,
+                color: isDark ? AppColors.neutral2 : AppColors.neutral3,
               ),
             ),
           ),

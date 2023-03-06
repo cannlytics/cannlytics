@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/20/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -15,7 +15,7 @@ import 'package:cannlytics_app/ui/account/licenses/add_license_screen.dart';
 import 'package:cannlytics_app/ui/account/licenses/licenses_screen.dart';
 import 'package:cannlytics_app/ui/account/organizations/organization_screen.dart';
 import 'package:cannlytics_app/ui/account/organizations/organizations_screen.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cannlytics_app/ui/account/user/reset_password_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -28,8 +28,8 @@ import 'package:cannlytics_app/models/consumer/job.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/user/account_screen.dart';
-import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
-import 'package:cannlytics_app/ui/account/onboarding/onboarding_screen.dart';
+// import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
+// import 'package:cannlytics_app/ui/account/onboarding/onboarding_screen.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_screen.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
 import 'package:cannlytics_app/ui/business/facilities/facilities_screen.dart';
@@ -50,7 +50,7 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 // Navigation.
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authService = ref.watch(authProvider);
-  final onboardingRepository = ref.watch(onboardingStoreProvider);
+  // final onboardingRepository = ref.watch(onboardingStoreProvider);
   return GoRouter(
     initialLocation: '/sign-in',
     navigatorKey: _rootNavigatorKey,
@@ -58,15 +58,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: GoRouterRefreshStream(authService.authStateChanges()),
     //errorBuilder: (context, state) => const NotFoundScreen(),
     redirect: (context, state) {
-      // Determine if the user completed onboarding.
-      final didCompleteOnboarding = onboardingRepository.isOnboardingComplete();
+      // // Determine if the user completed onboarding.
+      // final didCompleteOnboarding = onboardingRepository.isOnboardingComplete();
 
-      // Navigate to onboarding screen if necessary.
-      if (!didCompleteOnboarding) {
-        if (state.subloc != '/onboarding') {
-          return '/onboarding';
-        }
-      }
+      // // Navigate to onboarding screen if necessary.
+      // if (!didCompleteOnboarding) {
+      //   if (state.subloc != '/onboarding') {
+      //     return '/onboarding';
+      //   }
+      // }
 
       // Determine if the user is logged in.
       final isLoggedIn = authService.currentUser != null;
@@ -77,25 +77,29 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return '/dashboard';
         }
       } else {
-        if (state.subloc.startsWith('/dashboard') ||
-            state.subloc.startsWith('/jobs') ||
-            state.subloc.startsWith('/entries') ||
-            state.subloc.startsWith('/account')) {
+        if (!state.subloc.startsWith('/sign-in') &&
+            !state.subloc.startsWith('/account/reset-password')) {
           return '/sign-in';
         }
+        // if (state.subloc.startsWith('/dashboard') ||
+        //     state.subloc.startsWith('/jobs') ||
+        //     state.subloc.startsWith('/entries') ||
+        //     state.subloc.startsWith('/account')) {
+        //   return '/sign-in';
+        // }
       }
       return null;
     },
     routes: [
-      // Onboarding screen, allowing user to choose "Consumer" or "Business".
-      GoRoute(
-        path: '/onboarding',
-        name: AppRoutes.onboarding.name,
-        pageBuilder: (context, state) => NoTransitionPage(
-          key: state.pageKey,
-          child: const OnboardingScreen(),
-        ),
-      ),
+      // // Onboarding screen, allowing user to choose "Consumer" or "Business".
+      // GoRoute(
+      //   path: '/onboarding',
+      //   name: AppRoutes.onboarding.name,
+      //   pageBuilder: (context, state) => NoTransitionPage(
+      //     key: state.pageKey,
+      //     child: const OnboardingScreen(),
+      //   ),
+      // ),
 
       // Sign in page.
       GoRoute(
@@ -127,6 +131,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               key: state.pageKey,
               child: const AccountScreen(),
             ),
+            routes: [
+              // Organization.
+              GoRoute(
+                path: 'reset-password',
+                name: AppRoutes.resetPassword.name,
+                pageBuilder: (context, state) {
+                  return MaterialPage(
+                    key: state.pageKey,
+                    child: ResetPasswordScreen(),
+                  );
+                },
+              ),
+            ],
           ),
 
           // Organizations

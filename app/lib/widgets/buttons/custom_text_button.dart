@@ -18,28 +18,21 @@ class CustomTextButton extends StatelessWidget {
   CustomTextButton({
     super.key,
     required this.text,
-    this.style,
     this.onPressed,
   });
   final String text;
-  TextStyle? style;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    // Set default style.
-    if (style == null) {
-      style = Theme.of(context).textTheme.labelMedium!.copyWith(
-            color: Theme.of(context).textTheme.labelLarge!.color,
-          );
-    }
-
     // Render the button.
     return TextButton(
       onPressed: onPressed,
       child: Text(
         text,
-        style: style,
+        style: Theme.of(context).textTheme.labelSmall!.copyWith(
+              color: Theme.of(context).textTheme.labelLarge!.color,
+            ),
         textAlign: TextAlign.center,
       ),
     );

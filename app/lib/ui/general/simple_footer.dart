@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/5/2023
-// Updated: 3/5/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -30,11 +30,10 @@ class SimpleFooter extends ConsumerWidget {
 
     // Build the footer.
     return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
       margin: EdgeInsets.only(top: Insets(1).md),
       child: Center(
         child: SizedBox(
-          width: 300,
+          width: 320,
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: horizontalPadding(screenWidth),

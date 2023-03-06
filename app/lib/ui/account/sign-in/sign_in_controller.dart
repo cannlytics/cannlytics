@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/18/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -16,6 +16,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
+
+// An instance of the sign-in controller.
+final signInProvider = AutoDisposeAsyncNotifierProvider<SignInController, void>(
+    SignInController.new);
 
 /// [SignInController] manages the sign in, sign up, and reset password screens.
 class SignInController extends AutoDisposeAsyncNotifier<void> {
@@ -56,7 +60,3 @@ class SignInController extends AutoDisposeAsyncNotifier<void> {
     state = await AsyncValue.guard(authService.signInAnonymously);
   }
 }
-
-// An instance of the sign-in controller.
-final signInProvider = AutoDisposeAsyncNotifierProvider<SignInController, void>(
-    SignInController.new);

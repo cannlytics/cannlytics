@@ -4,34 +4,34 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/24/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/theme.dart';
+import 'package:cannlytics_app/routing/routes.dart';
+import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:cannlytics_app/ui/general/simple_footer.dart';
+import 'package:cannlytics_app/widgets/buttons/theme_toggle.dart';
+import 'package:cannlytics_app/widgets/images/app_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_controller.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_validators.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/utils/strings/string_format.dart';
-import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 import 'package:cannlytics_app/utils/strings/string_validators.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/layout/responsive_scrollable_card.dart';
+import 'package:go_router/go_router.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 /// Sign in screen.
@@ -48,153 +48,87 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Get the onboarding provider.
-    final store = ref.watch(onboardingStoreProvider);
-
     // Get the theme.
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
 
     // Build the layout.
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Light / dark theme toggle.
-          const SliverToBoxAdapter(child: ThemeToggle()),
-
-          // Logo.
-          SliverToBoxAdapter(child: appLogo(isDark)),
-
-          // User type.
-          // FIXME: Allow the user to toggle their type here on sign-in.
-          SliverToBoxAdapter(child: userTypeButton(context, store)),
-
-          // Sign in form.
-          SliverToBoxAdapter(
-            child: SignInForm(formType: formType, isDark: isDark),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(1, -1),
+            radius: 4.0,
+            colors: [
+              isDark ? Colors.green : AppColors.neutral1,
+              isDark ? Colors.transparent : Colors.white,
+            ],
           ),
+        ),
+        child: CustomScrollView(
+          slivers: [
+            // Light / dark theme toggle.
+            SliverToBoxAdapter(child: ThemeToggle(isDark: isDark)),
 
-          // Footer
-          const SliverToBoxAdapter(child: SimpleFooter()),
+            // Logo.
+            SliverToBoxAdapter(child: ResponsiveAppLogo(isDark: isDark)),
 
-          // TODO: Terms.
+            // User type selection.
+            SliverToBoxAdapter(child: UserTypeButton()),
 
-          // TODO: Copyright.
-        ],
-      ),
-    );
-  }
+            // Sign in form.
+            SliverToBoxAdapter(
+              child: SignInForm(formType: formType, isDark: isDark),
+            ),
 
-  /// A simple logo widget.
-  Widget appLogo(bool isDark) {
-    return FractionallySizedBox(
-      widthFactor: 0.5,
-      child: Image.asset(
-        isDark
-            ? 'assets/images/logos/cannlytics_logo_with_text_dark.png'
-            : 'assets/images/logos/cannlytics_logo_with_text_light.png',
-        height: 45,
-      ),
-    );
-  }
-
-  /// A simple user type choice widget.
-  Widget userTypeButton(BuildContext context, OnboardingStore store) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 16),
-      child: Center(
-        child: ToggleSwitch(
-          minHeight: 32,
-          customWidths: [100.0, 100.0],
-          initialLabelIndex: 1,
-          cornerRadius: 20.0,
-          activeFgColor: Colors.white,
-          inactiveBgColor: Colors.grey,
-          inactiveFgColor: Colors.white,
-          totalSwitches: 2,
-          labels: ['Consumer', 'Business'],
-          // icons: [FontAwesomeIcons.mars, FontAwesomeIcons.venus],
-          activeBgColors: [
-            [Colors.green],
-            [Colors.orange]
+            // Footer
+            const SliverToBoxAdapter(child: SimpleFooter()),
           ],
-          onToggle: (index) {
-            // TODO: Switch between user type.
-          },
         ),
       ),
     );
   }
 }
 
-// Define a class to represent the options for the radio toggle
-// class RadioOption {
-//   final String title;
-//   final String subtitle;
-
-//   RadioOption({required this.title, required this.subtitle});
-// }
-
-// // Define the list of options for the radio toggle
-// final List<RadioOption> options = [
-//   RadioOption(title: 'Option 1', subtitle: 'Description of option 1'),
-//   RadioOption(title: 'Option 2', subtitle: 'Description of option 2'),
-//   RadioOption(title: 'Option 3', subtitle: 'Description of option 3'),
-// ];
-
-// // Define a variable to keep track of the currently selected option
-// RadioOption? _selectedOption;
-
-// // Define the radio toggle widget
-// Widget buildRadioToggle() {
-//   return Column(
-//     children: options
-//         .map(
-//           (option) => RadioListTile(
-//             title: Text(option.title),
-//             subtitle: Text(option.subtitle),
-//             value: option,
-//             groupValue: _selectedOption,
-//             onChanged: (value) {
-//               setState(() {
-//                 _selectedOption = value as RadioOption?;
-//               });
-//             },
-//           ),
-//         )
-//         .toList(),
-//   );
-// }
-
-/// Light / dark theme toggle.
-class ThemeToggle extends StatelessWidget {
-  const ThemeToggle({super.key});
+/// Widget to let the user choose their type: "Consumer" or "Business".
+class UserTypeButton extends ConsumerWidget {
+  const UserTypeButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer(builder: (context, ref, child) {
-      final theme = ref.watch(themeModeProvider);
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(6),
-            child: IconButton(
-              splashRadius: 18,
-              onPressed: () {
-                // Toggle light / dark theme.
-                ref.read(themeModeProvider.notifier).state =
-                    theme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-              },
-              icon: Icon(
-                theme == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-                color: AppColors.neutral4,
-              ),
-            ),
-          ),
-        ],
-      );
-    });
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get the user type.
+    final userType = ref.watch(userTypeProvider);
+
+    // Render a toggle switch.
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: ToggleSwitch(
+          initialLabelIndex: (userType == 'consumer') ? 0 : 1,
+          labels: ['Consumer', 'Business'],
+          minHeight: 32,
+          customWidths: [100.0, 100.0],
+          cornerRadius: 20.0,
+          activeFgColor: Colors.white,
+          inactiveBgColor: Colors.grey,
+          inactiveFgColor: Colors.white,
+          totalSwitches: 2,
+          // icons: [FontAwesomeIcons.mars, FontAwesomeIcons.venus],
+          activeBgColors: [
+            [Colors.green],
+            [Colors.orange]
+          ],
+          onToggle: (index) {
+            // Switch between user type.
+            if (index == 0) {
+              ref.read(userTypeProvider.notifier).update((state) => 'consumer');
+            } else {
+              ref.read(userTypeProvider.notifier).update((state) => 'business');
+            }
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -217,13 +151,13 @@ class SignInForm extends ConsumerStatefulWidget {
 /// Sign in / create account form state.
 class _SignInFormState extends ConsumerState<SignInForm>
     with EmailAndPasswordValidators {
-  // Widget controllers.
+  // Controllers.
   final _formKey = GlobalKey<FormState>();
   final _node = FocusScopeNode();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // Widget state.
+  // State.
   String get email => _emailController.text;
   String get password => _passwordController.text;
   var _submitted = false;
@@ -290,6 +224,14 @@ class _SignInFormState extends ConsumerState<SignInForm>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              // Title.
+              Text(
+                (_formType == SignInFormType.signIn) ? 'Sign In' : 'Sign Up',
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
+              ),
+
               // Spacer.
               gapH8,
 
@@ -343,15 +285,28 @@ class _SignInFormState extends ConsumerState<SignInForm>
               // Spacer.
               gapH18,
 
-              // Submit button.
-              PrimaryButton(
-                text: _formType.primaryButtonText,
-                isLoading: state.isLoading,
-                onPressed: state.isLoading ? null : () => _submit(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Reset password button.
+                  CustomTextButton(
+                    text: 'Lost Password?',
+                    onPressed: () {
+                      context.goNamed(AppRoutes.resetPassword.name);
+                    },
+                  ),
+
+                  // Submit button.
+                  PrimaryButton(
+                    text: _formType.primaryButtonText,
+                    isLoading: state.isLoading,
+                    onPressed: state.isLoading ? null : () => _submit(),
+                  ),
+                ],
               ),
 
               // Spacer.
-              gapH8,
+              gapH24,
 
               // Change forms (sign-in to register) button.
               CustomTextButton(
@@ -359,7 +314,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
                 onPressed: state.isLoading ? null : _updateFormType,
               ),
 
-              // FIXME: Anonymous sign-in.
+              // TODO: Anonymous sign-in.
               // gapH8,
               // if (_formType == SignInFormType.signIn)
               //   CustomTextButton(

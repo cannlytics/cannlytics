@@ -140,7 +140,6 @@ class AccountManagement extends ConsumerWidget {
                   onPressed: () {
                     // TODO: Add phone number.
                   },
-                  style: Theme.of(context).textTheme.titleSmall,
                 ),
               gapH8,
 

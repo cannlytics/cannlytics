@@ -68,11 +68,7 @@ class AppColors {
   static const Color black = Color(0xFF1E1B18);
 
   // Whether or not the app is in dark mode.
-  // final bool isDark = false;
-
-  /// Shift a color.
-  // Color shift(Color c, double d) =>
-  //     ColorUtils.shiftHsl(c, d * (isDark ? -1 : 1));
+  final bool isDark = false;
 
   /// Convert the colors to theme data.
   static ThemeData toThemeData(bool isDark) {
@@ -111,7 +107,7 @@ class AppColors {
       highlightColor: accent1,
       scaffoldBackgroundColor: isDark ? const Color(0xFF323443) : Colors.white,
       canvasColor: isDark ? const Color(0xFF323443) : AppColors.neutral1,
-      cardColor: isDark ? const Color(0xFF323443) : AppColors.neutral1,
+      cardColor: isDark ? const Color(0xFF323443) : Colors.white,
       dialogBackgroundColor:
           isDark ? const Color(0xFF323443) : AppColors.neutral1,
       buttonTheme: ButtonThemeData(
@@ -147,70 +143,72 @@ class AppColors {
         displaySmall: TextStyle(
           color: isDark ? AppColors.neutral2 : AppColors.neutral4,
           fontFamily: 'LibreBaskerville',
-          fontSize: 24,
+          fontSize: 28,
         ),
         headlineLarge: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'SourceSerifPro',
-          fontSize: 28,
+          fontSize: 24,
         ),
         headlineMedium: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'SourceSerifPro',
-          fontSize: 24,
+          fontSize: 21,
         ),
         headlineSmall: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'SourceSerifPro',
-          fontSize: 20,
+          fontSize: 18,
         ),
         titleLarge: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'LibreBaskerville',
-          fontSize: 24,
+          fontSize: 21,
         ),
         titleMedium: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'SourceSerifPro',
-          fontSize: 21,
+          fontSize: 17,
         ),
         titleSmall: TextStyle(
           color: isDark ? AppColors.neutral2 : AppColors.neutral4,
           fontFamily: 'CormorantGaramond',
-          fontSize: 18,
+          fontSize: 16,
         ),
         bodyLarge: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'CormorantGaramond',
-          fontSize: 21,
+          fontSize: 18,
           height: 1.5,
         ),
         bodyMedium: TextStyle(
           color: isDark ? AppColors.neutral2 : AppColors.neutral4,
-          fontFamily: 'CormorantGaramond',
-          fontSize: 18,
+          fontFamily: 'SourceSerifPro',
+          fontSize: 16,
           height: 1.5,
         ),
         bodySmall: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
-          fontFamily: 'CormorantGaramond',
-          fontSize: 16,
+          fontFamily: 'SourceSerifPro',
+          fontSize: 14,
           height: 1.5,
         ),
         labelLarge: TextStyle(
-          fontSize: 21,
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
-          fontFamily: 'IBMPlexSans',
-        ),
-        labelMedium: TextStyle(
           fontSize: 18,
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
-          fontFamily: 'IBMPlexSans',
+          fontFamily: 'CormorantGaramond',
+        ),
+        labelMedium: TextStyle(
+          fontSize: 16,
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'CormorantGaramond',
         ),
         labelSmall: TextStyle(
-          fontSize: 14,
+          fontSize: 15,
           color: isDark ? AppColors.neutral2 : AppColors.neutral4,
-          fontFamily: 'IBMPlexSans',
+          fontFamily: 'CormorantGaramond',
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.25,
         ),
       ),
     );
@@ -227,6 +225,10 @@ class ColorUtils {
     var hslc = HSLColor.fromColor(c);
     return hslc.withLightness((hslc.lightness + amt).clamp(0.0, 1.0)).toColor();
   }
+
+  /// Shift a color accounting for light / dark theme.
+  Color shift(bool isDark, Color c, double d) =>
+      ColorUtils.shiftHsl(c, d * (isDark ? -1 : 1));
 
   /// Parse a color hex.
   static Color parseHex(String value) =>

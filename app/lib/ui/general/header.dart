@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/5/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -14,6 +14,7 @@ import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialogs.dart';
 import 'package:cannlytics_app/widgets/buttons/theme_toggle.dart';
+import 'package:cannlytics_app/widgets/images/app_logo.dart';
 import 'package:cannlytics_app/widgets/images/avatar.dart';
 import 'package:flutter/material.dart';
 
@@ -26,7 +27,6 @@ import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 
 /// The main navigation header.
 class AppHeader extends StatelessWidget {
@@ -74,8 +74,11 @@ class DesktopNavigationLayout extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            gapW24,
+            AppIcon(),
+
             // Organization selection.
-            SizedBox(width: isVeryWide ? 80 : 28),
+            SizedBox(width: isVeryWide ? 24 : 12),
             OrganizationSelection(),
 
             // License selection.
@@ -88,7 +91,7 @@ class DesktopNavigationLayout extends ConsumerWidget {
               text: 'Account',
               path: AppRoutes.account.name,
             ),
-            SizedBox(width: isVeryWide ? 28 : 12),
+            SizedBox(width: isVeryWide ? 24 : 12),
 
             // TODO: A sidebar menu is needed for desktop!
 
@@ -127,19 +130,19 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
 
   @override
   Widget build(BuildContext context) {
-    // Get the provider.
-    final store = ref.watch(onboardingStoreProvider);
+    // Get the user type.
+    final userType = ref.watch(userTypeProvider);
 
     // Get the theme.
-    final themeMode = ref.watch(themeModeProvider);
-    final bool isDark = themeMode == ThemeMode.dark;
+    // final themeMode = ref.watch(themeModeProvider);
+    // final bool isDark = themeMode == ThemeMode.dark;
 
     // Build the layout.
     return AnimatedBuilder(
       animation: _menuController,
       builder: (context, _) {
         // Get the user type.
-        final List<ScreenData> screens = (store.userType() == 'consumer')
+        final List<ScreenData> screens = (userType == 'consumer')
             ? ScreenData.consumerScreens
             : ScreenData.businessScreens;
 
@@ -165,11 +168,16 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      // Icon.
+                      gapW6,
+                      AppIcon(),
+
                       // Organization selection.
                       gapW12,
                       OrganizationSelection(),
 
-                      // License selection.
+                      // FIXME: License selection.
+                      // TODO: Only show once a user has an organization.
                       gapW6,
                       // FacilitySelection(),
 
@@ -182,10 +190,9 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
                         child: AnimatedIcon(
                           icon: AnimatedIcons.menu_close,
                           progress: _menuController,
-                          // color: AppColors.neutral2,
                         ),
                       ),
-                      const SizedBox(width: 28),
+                      gapW24,
                     ],
                   ),
                 ),
@@ -214,6 +221,7 @@ class MobileNavigationMenu extends ConsumerWidget {
     // Listen to the current user.
     final state = ref.watch(accountProvider);
     final user = ref.watch(authProvider).currentUser;
+    if (user == null) return Container();
 
     return Material(
       elevation: 8,
@@ -418,7 +426,7 @@ class OrganizationSelection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the user's organizations.
     final orgs = ref.watch(organizationsProvider).value ?? [];
-    print('ORGANIZATIONS IN WIDGET:');
+    print('ORGANIZATIONS IN WIDGET HEADER:');
     print(orgs);
 
     // Return organizations link button.

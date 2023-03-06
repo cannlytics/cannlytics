@@ -4,17 +4,16 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 3/3/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/models/organization.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/ui/account/organizations/organizations_controller.dart';
-import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
+import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -23,7 +22,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
-import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
 import 'package:go_router/go_router.dart';
 
 /// Licenses screen.
@@ -147,12 +145,12 @@ class OrganizationsTable extends ConsumerWidget {
     // Get the user's organizations.
     // final orgs = ref.watch(organizationsProvider).value ?? [];
     final orgs = [];
-    print('ORGANIZATION LICENSES:');
+    print('ORGANIZATIONS in [OrganizationsTable] widget:');
     print(orgs);
 
     // Return a placeholder if no organizations.
     if (orgs.length == 0)
-      return Placeholder(
+      return CustomPlaceholder(
         image: 'assets/images/icons/facilities.png',
         title: 'Add an organization',
         description:
@@ -162,167 +160,56 @@ class OrganizationsTable extends ConsumerWidget {
         },
       );
 
+    // Table headers.
+    List<DataColumn> tableHeader = const <DataColumn>[
+      DataColumn(
+        label: Expanded(
+          child: Text(
+            'Name',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+      DataColumn(
+        label: Expanded(
+          child: Text(
+            'ID',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+      DataColumn(
+        label: Expanded(
+          child: Text(
+            'Owner',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+    ];
+
+    // Table rows.
+    List<DataRow> tableRows = <DataRow>[
+      for (Organization org in orgs)
+        DataRow(
+          onSelectChanged: (bool? selected) {
+            if (selected!) {
+              context.go('/organizations/${org.id}');
+            }
+          },
+          cells: <DataCell>[
+            DataCell(Text(org.name)),
+            DataCell(Text(org.id)),
+            DataCell(Text(org.owner)),
+          ],
+        ),
+    ];
+
     // Build the data table.
     return DataTable(
       showCheckboxColumn: false,
-      columns: const <DataColumn>[
-        DataColumn(
-          label: Expanded(
-            child: Text(
-              'Name',
-              style: TextStyle(fontStyle: FontStyle.italic),
-            ),
-          ),
-        ),
-        DataColumn(
-          label: Expanded(
-            child: Text(
-              'ID',
-              style: TextStyle(fontStyle: FontStyle.italic),
-            ),
-          ),
-        ),
-        DataColumn(
-          label: Expanded(
-            child: Text(
-              'Owner',
-              style: TextStyle(fontStyle: FontStyle.italic),
-            ),
-          ),
-        ),
-      ],
-      rows: <DataRow>[
-        for (Organization org in orgs)
-          DataRow(
-            onSelectChanged: (bool? selected) {
-              if (selected!) {
-                context.go('/organizations/${org.id}');
-              }
-            },
-            cells: <DataCell>[
-              DataCell(Text(org.name)),
-              DataCell(Text(org.id)),
-              DataCell(Text(org.owner)),
-            ],
-          ),
-      ],
+      columns: tableHeader,
+      rows: tableRows,
     );
   }
 }
-
-/// A general placeholder.
-// TODO: Adjust borders, height, font size, image, margins
-class Placeholder extends StatelessWidget {
-  const Placeholder({
-    Key? key,
-    required this.image,
-    required this.title,
-    required this.description,
-    required this.onTap,
-  }) : super(key: key);
-
-  final String image;
-  final String title;
-  final String description;
-  final Function()? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(3),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Image.asset(
-              image,
-              height: 100,
-              fit: BoxFit.fitHeight,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  gapH6,
-                  Text(
-                    description,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  gapH12,
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// /// Class to display facilities.
-// class LicenseRowModel {
-//   const LicenseRowModel({
-//     required this.leadingText,
-//     required this.trailingText,
-//     this.middleText,
-//     this.isHeader = false,
-//   });
-//   final String leadingText;
-//   final String trailingText;
-//   final String? middleText;
-//   final bool isHeader;
-// }
-
-// /// A license tile.
-// class LicenseRow extends StatelessWidget {
-//   const LicenseRow({super.key, required this.model});
-//   final LicenseRowModel model;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     const fontSize = 16.0;
-//     return Container(
-//       color: model.isHeader ? Colors.indigo[100] : null,
-//       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-//       child: Row(
-//         children: <Widget>[
-//           // Title.
-//           Text(
-//             model.leadingText,
-//             style: const TextStyle(fontSize: fontSize),
-//           ),
-//           Expanded(child: Container()),
-
-//           // Description.
-//           if (model.middleText != null)
-//             Text(
-//               model.middleText!,
-//               style: TextStyle(color: Colors.green[700], fontSize: fontSize),
-//               textAlign: TextAlign.right,
-//             ),
-
-//           // Actions.
-//           SizedBox(
-//             width: 60.0,
-//             child: Text(
-//               model.trailingText,
-//               style: const TextStyle(fontSize: fontSize),
-//               textAlign: TextAlign.right,
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }

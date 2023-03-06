@@ -4,11 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 2/22/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/widgets/images/app_logo.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -17,7 +16,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/utils/web/web.dart';
 
 /// A footer with links at the bottom of the app.
@@ -31,8 +29,8 @@ class Footer extends ConsumerWidget {
     final isWide = screenWidth > Breakpoints.tablet;
 
     // Get the theme.
-    final themeMode = ref.watch(themeModeProvider);
-    final bool isDark = themeMode == ThemeMode.dark;
+    // final themeMode = ref.watch(themeModeProvider);
+    // final bool isDark = themeMode == ThemeMode.dark;
 
     // Build the footer.
     return Container(
@@ -49,32 +47,21 @@ class Footer extends ConsumerWidget {
               crossAxisAlignment:
                   isWide ? CrossAxisAlignment.start : CrossAxisAlignment.center,
               children: [
-                // Logo.
-                gapH6,
-                AppLogo(isDark: isDark),
-                gapH6,
+                // // Logo.
+                // gapH6,
+                // AppLogo(isDark: isDark),
+                // gapH6,
 
                 // Copyright and version.
-                // if (isWide)
                 Row(
                   mainAxisAlignment: isWide
                       ? MainAxisAlignment.spaceBetween
                       : MainAxisAlignment.center,
                   children: [
                     _copyright(context),
-                    if (!isWide) Text('|'),
-                    _version(context),
+                    if (isWide) _version(context),
                   ],
                 ),
-                // if (!isWide)
-                //   Column(
-                //     mainAxisAlignment: MainAxisAlignment.center,
-                //     children: [
-                //       _copyright(context),
-                //       gapH6,
-                //       _version(context),
-                //     ],
-                //   ),
                 gapH6,
 
                 // Horizontal rule.
@@ -82,11 +69,11 @@ class Footer extends ConsumerWidget {
                   color: AppColors.neutral2,
                   height: 1,
                 ),
-                const SizedBox(height: 16),
+                gapH6,
 
                 // Links.
                 FooterLinks(isWide: isWide),
-                const SizedBox(height: 16),
+                gapH6,
               ],
             ),
           ),

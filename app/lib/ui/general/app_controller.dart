@@ -4,17 +4,16 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 3/5/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
 import 'package:cannlytics_app/models/organization.dart';
 import 'package:cannlytics_app/services/api_service.dart';
-import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/services/firestore_service.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+// User type provider.
+final userTypeProvider = StateProvider<String>((ref) => 'consumer');
 
 /// Organizations provider.
 final organizationsProvider =

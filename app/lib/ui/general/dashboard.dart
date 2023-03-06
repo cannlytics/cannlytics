@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/20/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -16,11 +17,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/routing/routes.dart';
-import 'package:cannlytics_app/ui/account/onboarding/onboarding_controller.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/widgets/cards/hover_border.dart';
@@ -32,12 +30,12 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Provider data and dynamic width.
-    final store = ref.watch(onboardingStoreProvider);
+    final userType = ref.watch(userTypeProvider);
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Break screen data into chunks.
     var chunks = [];
-    List cards = (store.userType() == 'consumer')
+    List cards = (userType == 'consumer')
         ? ScreenData.consumerScreens
         : ScreenData.businessScreens;
     int chunkSize = (screenWidth >= Breakpoints.twoColLayoutMinWidth) ? 3 : 2;

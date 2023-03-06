@@ -4,15 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/24/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_app/constants/theme.dart';
 import 'package:flutter/material.dart';
-
-// Project imports:
-import 'package:cannlytics_app/constants/design.dart';
 
 /// Secondary button based on [TextButton].
 /// [isDark] - Whether or not the theme is dark.
