@@ -60,10 +60,10 @@ class _OrganizationScreenState extends ConsumerState<OrganizationScreen> {
   // Main widget.
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue>(
-      organizationProvider,
-      (_, state) => state.showAlertDialogOnError(context),
-    );
+    // ref.listen<AsyncValue>(
+    //   organizationProvider,
+    //   (_, state) => state.showAlertDialogOnError(context),
+    // );
     return Scaffold(
       // // App bar.
       // appBar: AppBar(

@@ -8,38 +8,45 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
 
-/// Primary button based on [ElevatedButton].
+/// Secondary button based on [TextButton].
+/// [isDark] - Whether or not the theme is dark.
 /// [text] - Text displayed  on the button.
 /// [isLoading] - Whether or not to show a loading indicator.
 /// [onPressed] - Callback to be called when the button is pressed.
-class PrimaryButton extends StatelessWidget {
-  const PrimaryButton({
+class SecondaryButton extends StatelessWidget {
+  const SecondaryButton({
     super.key,
     required this.text,
+    this.isDark = false,
     this.isLoading = false,
     this.onPressed,
   });
+
+  // Properties.
+  final bool isDark;
   final String text;
   final bool isLoading;
   final VoidCallback? onPressed;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: Sizes.p24,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green,
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          backgroundColor: isDark ? AppColors.neutral4 : Colors.grey[200],
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(3),
           ),
         ),
-        onPressed: onPressed,
         child: isLoading
             ? const SizedBox(
                 width: 16,
@@ -48,9 +55,9 @@ class PrimaryButton extends StatelessWidget {
               )
             : Text(
                 text,
-                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: Colors.white,
+                      // color: Theme.of(context).textTheme.titleLarge!.color,
+                      color: isDark ? AppColors.neutral2 : AppColors.neutral5,
                     ),
               ),
       ),

@@ -9,8 +9,12 @@
 
 // Flutter imports:
 import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/models/organization.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/organizations/organizations_controller.dart';
+import 'package:cannlytics_app/ui/general/app_controller.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
+import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -20,6 +24,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
+import 'package:go_router/go_router.dart';
 
 /// Licenses screen.
 class OrganizationsScreen extends ConsumerWidget {
@@ -27,11 +32,6 @@ class OrganizationsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // TODO: Get the user's organizations.
-    final data = ref.watch(organizationsProvider);
-    print('ORGANIZATION LICENSES:');
-    print(data);
-
     // Determine the screen size.
     final screenWidth = MediaQuery.of(context).size.width;
     final isWide = screenWidth > Breakpoints.tablet;
@@ -70,12 +70,56 @@ class OrganizationsScreen extends ConsumerWidget {
                               ? CrossAxisAlignment.start
                               : CrossAxisAlignment.center,
                           children: [
-                            OrganizationsTable(),
-                            // TODO: Render organizations here.
-                            // return ListItemsBuilder<dynamic>(
-                            //   data: data,
-                            //   itemBuilder: (context, model) => LicenseRow(model: model),
-                            // );
+                            // Table header.
+                            Row(
+                              children: [
+                                // Title
+                                Text(
+                                  'Organizations',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(
+                                        color: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge!
+                                            .color,
+                                      ),
+                                ),
+                                const Spacer(),
+
+                                // Join an organization button.
+                                SecondaryButton(
+                                  isDark: isDark,
+                                  text:
+                                      isWide ? 'Join an organization' : 'Join',
+                                  onPressed: () {
+                                    context.go('/organizations/join');
+                                  },
+                                ),
+
+                                // Add organization button.
+                                gapW6,
+                                PrimaryButton(
+                                  text: isWide ? 'New organization' : 'New',
+                                  onPressed: () {
+                                    context.go('/organizations/new');
+                                  },
+                                ),
+                              ],
+                            ),
+
+                            // Organizations table.
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width,
+                                    child: OrganizationsTable(),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -95,12 +139,33 @@ class OrganizationsScreen extends ConsumerWidget {
 }
 
 /// Organizations table.
-class OrganizationsTable extends StatelessWidget {
+class OrganizationsTable extends ConsumerWidget {
   const OrganizationsTable({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get the user's organizations.
+    // final orgs = ref.watch(organizationsProvider).value ?? [];
+    final orgs = [];
+    print('ORGANIZATION LICENSES:');
+    print(orgs);
+
+    // Return a placeholder if no organizations.
+    // TODO: Adjust borders, height, font size, image, margins
+    if (orgs.length == 0)
+      return Placeholder(
+        image: 'assets/images/icons/facilities.png',
+        title: 'Add an organization',
+        description:
+            'Create an organization to manage your licenses and traceability data.',
+        onTap: () {
+          context.go('/organizations/new');
+        },
+      );
+
+    // Build the data table.
     return DataTable(
+      showCheckboxColumn: false,
       columns: const <DataColumn>[
         DataColumn(
           label: Expanded(
@@ -127,15 +192,72 @@ class OrganizationsTable extends StatelessWidget {
           ),
         ),
       ],
-      rows: const <DataRow>[
-        DataRow(
-          cells: <DataCell>[
-            DataCell(Text('Cannlytics')),
-            DataCell(Text('cannlytics')),
-            DataCell(Text('QIxUQ6kO3ZcDIZceJHCl0e1ZaOS2')),
+      rows: <DataRow>[
+        for (Organization org in orgs)
+          DataRow(
+            onSelectChanged: (bool? selected) {
+              if (selected!) {
+                context.go('/organizations/${org.id}');
+              }
+            },
+            cells: <DataCell>[
+              DataCell(Text(org.name)),
+              DataCell(Text(org.id)),
+              DataCell(Text(org.owner)),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class Placeholder extends StatelessWidget {
+  const Placeholder({
+    Key? key,
+    required this.image,
+    required this.title,
+    required this.description,
+    required this.onTap,
+  }) : super(key: key);
+
+  final String image;
+  final String title;
+  final String description;
+  final Function()? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Image.asset(
+              image,
+              height: 200,
+              fit: BoxFit.cover,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
-      ],
+      ),
     );
   }
 }

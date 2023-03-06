@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 3/4/2023
+// Updated: 3/5/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -18,48 +18,52 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_app/services/auth_service.dart';
 
-// Organizations service provider.
-final organizationsServiceProvider = Provider<OrganizationsService>((ref) {
-  return OrganizationsService(ref.watch(firestoreProvider));
-});
+/* WORKING */
 
-/// Organizations service.
-class OrganizationsService {
-  const OrganizationsService(this._dataSource);
-  final FirestoreService _dataSource;
+// // Organizations service provider.
+// final organizationsServiceProvider = Provider<OrganizationsService>((ref) {
+//   return OrganizationsService(ref.watch(firestoreProvider));
+// });
 
-  Future<List<Organization>> getOrganizations() async {
-    List<Map> response = await APIService.apiRequest('/organizations');
-    print('RESPONSE:');
-    print(response);
-    return response.map((org) => Organization.fromMap(org)).toList();
-  }
-}
+// /// Organizations service.
+// class OrganizationsService {
+//   const OrganizationsService(this._dataSource);
+//   final FirestoreService _dataSource;
 
-/// Organizations stream.
-final organizationsProvider =
-    FutureProvider.autoDispose<List<Organization>>((ref) async {
-  final service = ref.watch(organizationsServiceProvider);
-  return await service.getOrganizations();
-});
+//   Future<List<Organization>> getOrganizations() async {
+//     List<Map> response = await APIService.apiRequest('/organizations');
+//     print('RESPONSE:');
+//     print(response);
+//     return response.map((org) => Organization.fromMap(org)).toList();
+//   }
+// }
 
-// Organization provider.
-final organizationProvider = StreamProvider.autoDispose<Map>((ref) {
-  final user = ref.watch(userProvider).value;
-  final _database = ref.watch(firestoreProvider);
-  // FIXME: Get the current organization ID.
-  final orgId = 'test-company';
-  print('CURRENT USER:');
-  print(user!.uid);
-  print('CURRENT ORGANIZATION:');
-  print(orgId);
-  return _database.watchDocument(
-    path: FirestorePath.organization(orgId),
-    builder: (data, documentId) {
-      return data ?? {};
-    },
-  );
-});
+// /// Organizations stream.
+// final organizationsProvider =
+//     FutureProvider.autoDispose<List<Organization>>((ref) async {
+//   final service = ref.watch(organizationsServiceProvider);
+//   return await service.getOrganizations();
+// });
+
+// // Organization provider.
+// final organizationProvider = StreamProvider.autoDispose<Map>((ref) {
+//   final user = ref.watch(userProvider).value;
+//   final _database = ref.watch(firestoreProvider);
+//   // FIXME: Get the current organization ID.
+//   final orgId = 'test-company';
+//   print('CURRENT USER:');
+//   print(user!.uid);
+//   print('CURRENT ORGANIZATION:');
+//   print(orgId);
+//   return _database.watchDocument(
+//     path: FirestorePath.organization(orgId),
+//     builder: (data, documentId) {
+//       return data ?? {};
+//     },
+//   );
+// });
+
+/* SCRAP */
 
 // Organization licenses provider.
 // final organizationsProvider = StreamProvider.autoDispose<Map>((ref) {
