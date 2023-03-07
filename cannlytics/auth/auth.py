@@ -20,6 +20,7 @@ from ..firebase import (
     get_custom_claims,
     get_document,
     verify_session_cookie,
+    verify_token,
 )
 
 #-----------------------------------------------------------------------
@@ -46,7 +47,10 @@ def authenticate_request(request):
         try:
             authorization = request.META['HTTP_AUTHORIZATION']
             key = authorization.split(' ').pop()
-            claims = get_user_from_api_key(key)
+            try:
+                claims = get_user_from_api_key(key)
+            except:
+                claims = verify_token(key)
         except:
             claims = {}
     return claims

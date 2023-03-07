@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 3/6/2023
+// Updated: 3/7/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -13,7 +13,27 @@ import 'package:cannlytics_app/services/api_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // User type provider.
-final userTypeProvider = StateProvider<String>((ref) => 'business');
+final userTypeProvider = StateProvider<String>((ref) {
+  return 'business';
+});
+
+// Primary organization provider.
+// FIXME: Wire up.
+final primaryOrganizationProvider = StateProvider<String>((ref) {
+  return 'cannlytics-test';
+});
+
+// Primary license / facility provider.
+// FIXME: Wire up.
+final primaryLicenseProvider = StateProvider<String>((ref) {
+  return 'LAAA-MOXZ-FQ1G';
+});
+
+// Primary state.
+// FIXME: Wire up.
+final primaryStateProvider = StateProvider<String>((ref) {
+  return 'ok';
+});
 
 /// Organizations provider.
 final organizationsProvider =

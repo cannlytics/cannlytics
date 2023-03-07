@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 3/6/2023
+// Updated: 3/7/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -25,7 +25,7 @@ import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:go_router/go_router.dart';
 
-/// Licenses screen.
+/// Organizations screen.
 class OrganizationsScreen extends ConsumerWidget {
   const OrganizationsScreen({super.key});
 

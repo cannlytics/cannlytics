@@ -89,6 +89,9 @@ Future<void> main() async {
     ],
   );
 
+  // DEV: Enable more detailed error messages.
+  // FlutterError.demangleStackTrace = true;
+
   // Wait for authentication to be determined.
   // Note: This will prevent unnecessary redirects when the app starts.
   await container.read(userProvider.future);
@@ -102,8 +105,10 @@ Future<void> main() async {
 void registerErrorHandlers() {
   // Show an error notification if any uncaught exception happens.
   FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    debugPrint(details.toString());
+    // FlutterError.presentError(details);
+    // debugPrint(details.toString());
+    FlutterError.dumpErrorToConsole(details);
+    throw details.exception;
   };
 
   // Handle underlying platform/OS errors.

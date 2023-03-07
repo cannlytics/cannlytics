@@ -34,6 +34,7 @@ class APIService {
     var body;
     var method = 'GET';
     final idToken = await getUserToken();
+    print('ID TOKEN: $idToken');
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $idToken',

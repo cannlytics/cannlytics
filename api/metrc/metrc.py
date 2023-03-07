@@ -491,7 +491,9 @@ def initialize_traceability(
     """Initialize a Metrc client by getting the Metrc user and vendor API key
     from Google Secret Manager and returning an authorized Metrc client.
     """
-    # Get the user's Cannlytics or Metrc user API key.
+    # Get the user's Cannlytics API key (or Metrc user API key?).
+    claims = authenticate_request(request)
+    print('USER CLAIMS:', str(claims))
     authorization = request.META['HTTP_AUTHORIZATION']
     token = authorization.split(' ').pop()
     if not token:
@@ -506,66 +508,99 @@ def initialize_traceability(
         body = request.data.get('data', request.data)
     org_id = request.query_params.get('org_id', body.get('org_id'))
     if org_id is None:
-        claims = authenticate_request(request)
         if claims is None:
             org_id = 'cannlytics.eth'
         else:
             owner = claims.get('owner', claims.get('team', []))
             if not isinstance(owner, list):
                 owner = [owner]
-            org_id = owner[0]
-
-    # Get the key data, retrievable if either the Cannlytics or Metrc
-    # user API key are known.
-    code = create_hash(token, org_id)
-    key_data = get_document(f'admin/metrc/metrc_user_api_key_hmacs/{code}')
-    if key_data is None:
+            try:
+                org_id = owner[0]
+            except:
+                return AUTH_ERROR
+    
+    # Ensure that the user is authorized to work with the organization.
+    # FIXME: Allow the user to pass a Metrc user API key?
+    print('ORG ID:', org_id)
+    ownership = claims.get('owner', [])
+    team = claims.get('team', [])
+    if isinstance(ownership, str): ownership = [ownership]
+    if isinstance(team, str): team = [team]
+    if org_id not in ownership + team:
         return AUTH_ERROR
+
+    # FIXME: Get the key data, retrievable if either the Cannlytics or Metrc
+    # user API key are known.
+    # code = create_hash(token, org_id)
+    # key_data = get_document(f'admin/metrc/metrc_user_api_key_hmacs/{code}')
+    # if key_data is None:
+    #     return AUTH_ERROR
+    org_data = get_document(f'organizations/{org_id}')
 
     # Get the user's Metrc user API key if they are using a Cannlytics
     # API key, using the 1st license or by license number if provided.
     _, project_id = google.auth.default()
-    license_data = None
-    if key_data.get(project_id):
-        license_number = body.get('license')
-        if license_number is None:
-            license_data = key_data['licenses'][0]
-        else:
-            for license_data in key_data['licenses']:
-                if license_data['license_number'] == license_number:
-                    break
-        if license_data is None:
-            return AUTH_ERROR
-        secret_id = license_data['metrc_user_api_key_secret']['secret_id']
-        metrc_user_api_key = access_secret_version(project_id, secret_id)
-        if metrc_user_api_key is None:
-            return AUTH_ERROR
+    # license_data = None
+    # if key_data.get(project_id):
+    test = True
+    state = 'ok'
+    secret_id = None
+    license_number = body.get('license', request.query_params.get('license'))
+    if license_number is None:
+        license_data = org_data['licenses'][0]
+        license_number = license_data['license_number']
+        secret_id = license_data['user_api_key_secret']['secret_id']
+        state = license_data.get('state', state)
+        test = license_data.get('test', test)
+    else:
+        for license_data in org_data['licenses']:
+            if license_data['license_number'] == license_number:
+                license_number = license_data['license_number']
+                secret_id = license_data['user_api_key_secret']['secret_id']
+                state = license_data.get('state', state)
+                test = license_data.get('test', test)
+                break
+
+    # Return an error if the secret can't be found.
+    # secret_id = license_data['metrc_user_api_key_secret']['secret_id']
+    print('SECRET ID:', secret_id)
+    if secret_id is None:
+        return AUTH_ERROR
+    
+    # Get the Metrc user API key.
+    metrc_user_api_key = access_secret_version(project_id, secret_id)
+    print('METRC USER API KEY PREFIX:', str(metrc_user_api_key)[:4])
+    if metrc_user_api_key is None:
+        return AUTH_ERROR
     
     # Get the parameters for the client.
-    if license_number is None:
-        license_number = body.get(
-            'license',
-            request.query_params.get('license', key_data.get('license_number'))
-        )
-    if license_data:
-        test = license_data.get('test', True)
-        state = license_data.get('state', DEFAULT_STATE)
-    else:
-        test = body.get('test', key_data.get('test', True))
-        state = body.get('state', key_data.get('state', DEFAULT_STATE))
+    # if license_number is None:
+    #     license_number = body.get(
+    #         'license',
+    #         request.query_params.get('license', key_data.get('license_number'))
+    #     )
+    # if license_data:
+    #     test = license_data.get('test', True)
+    #     state = license_data.get('state', DEFAULT_STATE)
+    # else:
+    #     test = body.get('test', key_data.get('test', True))
+    #     state = body.get('state', key_data.get('state', DEFAULT_STATE))
 
     # Get the Vendor API key from Secret Manager.
     if test:
-        vendor_secret_id = f'metrc_test_vendor_api_key_{state}'
+        vendor_secret_id = f'metrc_test_vendor_api_key_{state.lower()}'
     else:
-        vendor_secret_id = f'metrc_vendor_api_key_{state}'
+        vendor_secret_id = f'metrc_vendor_api_key_{state.lower()}'
     try:
+        print('Trying to get:', vendor_secret_id)
         metrc_vendor_api_key = access_secret_version(
             project_id=project_id,
             secret_id=vendor_secret_id,
             version_id=version_id
         )
+        print('METRC VENDOR API KEY PREFIX:', metrc_vendor_api_key[:4])
     except:
+        print('FAILED TO GET METRC VENDOR API KEY!')
         return AUTH_ERROR
     
     # Initialize and return a Metrc client.

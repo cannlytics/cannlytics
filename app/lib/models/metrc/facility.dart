@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 2/26/2023
+// Updated: 3/7/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 typedef FacilityId = String;
@@ -17,7 +17,7 @@ class Facility {
     this.alias = '',
     this.credentialedDate = '',
     this.displayName = '',
-    this.facilityType = '',
+    this.facilityType = const {},
     this.hireDate = '',
     this.isManager = false,
     this.isOwner = false,
@@ -38,7 +38,7 @@ class Facility {
   final String credentialedDate;
   final String displayName;
   final String hireDate;
-  final String facilityType;
+  final Map facilityType;
   final bool isManager;
   final bool isOwner;
   final String licenseEndDate;
@@ -52,25 +52,25 @@ class Facility {
   final String supportLastPaidDate;
 
   // Create model.
-  factory Facility.fromMap(Map<dynamic, dynamic>? data, String uid) {
+  factory Facility.fromMap(Map<dynamic, dynamic> data) {
     return Facility(
-      id: uid,
-      alias: data?['alias'] ?? '',
-      credentialedDate: data?['credentialed_date'] ?? '',
-      displayName: data?['display_name'] ?? '',
-      facilityType: data?['facility_type'] ?? '',
-      hireDate: data?['hire_date'] ?? '',
-      isManager: data?['is_manager'] ?? false,
-      isOwner: data?['is_owner'] ?? false,
-      licenseEndDate: data?['license']['end_date'] ?? '',
-      licenseNumber: data?['license']['number'] ?? '',
-      licenseStartDate: data?['license']['start_date'] ?? '',
-      licenseType: data?['license']['type'] ?? '',
-      name: data?['name'] ?? '',
-      occupations: List<dynamic>.from(data?['occupations'] ?? const []),
-      supportActivationDate: data?['support_activation_date'] ?? '',
-      supportExpirationDate: data?['support_expiration_date'] ?? '',
-      supportLastPaidDate: data?['support_last_paid_date'] ?? '',
+      id: data['id'] ?? '',
+      alias: data['alias'] ?? '',
+      credentialedDate: data['credentialed_date'] ?? '',
+      displayName: data['display_name'] ?? '',
+      facilityType: data['facility_type'] ?? {},
+      hireDate: data['hire_date'] ?? '',
+      isManager: data['is_manager'] ?? false,
+      isOwner: data['is_owner'] ?? false,
+      licenseEndDate: data['license']['end_date'] ?? '',
+      licenseNumber: data['license']['number'] ?? '',
+      licenseStartDate: data['license']['start_date'] ?? '',
+      licenseType: data['license']['type'] ?? '',
+      name: data['name'] ?? '',
+      occupations: List<dynamic>.from(data['occupations'] ?? const []),
+      supportActivationDate: data['support_activation_date'] ?? '',
+      supportExpirationDate: data['support_expiration_date'] ?? '',
+      supportLastPaidDate: data['support_last_paid_date'] ?? '',
     );
   }
 

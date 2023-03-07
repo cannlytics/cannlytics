@@ -4,7 +4,7 @@ Copyright (c) Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/25/2021
-Updated: 3/5/2023
+Updated: 3/7/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 
 Description: API to interface with organizations.
@@ -37,11 +37,6 @@ from cannlytics.auth.auth import authenticate_request
 from api.metrc.metrc import initialize_traceability
 from console.settings import DEFAULT_FROM_EMAIL, LIST_OF_EMAIL_RECIPIENTS
 
-# RESPONSE_HEADERS = {
-#     'Access-Control-Allow-Origin': '*',
-#     'Access-Control-Allow-Methods': '*',
-#     'Access-Control-Allow-Headers': 'X-Requested-With',
-# }
 
 @api_view(['GET'])
 def labs(request):
@@ -198,7 +193,6 @@ def organizations(request, organization_id=None, type='lab'):
                 'value': uid
             }
             docs = get_collection(model_type, filters=[query])
-            print('Returning organizations!')
             return Response({'data': docs})
 
         # Optional: Try to get facility data from Metrc.

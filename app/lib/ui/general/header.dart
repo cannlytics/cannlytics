@@ -84,7 +84,7 @@ class DesktopNavigationLayout extends ConsumerWidget {
 
             // License / facility selection.
             gapW6,
-            FacilitySelection(),
+            // FacilitySelection(),
 
             // Links.
             const Spacer(),
@@ -179,7 +179,7 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
 
                       // License / facility selection.
                       gapW6,
-                      FacilitySelection(),
+                      // FacilitySelection(),
 
                       // Spacer.
                       const Spacer(),
@@ -425,9 +425,10 @@ class OrganizationSelection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the user's organizations.
-    final orgs = ref.watch(organizationsProvider).value ?? [];
-    print('ORGANIZATIONS IN WIDGET HEADER:');
-    print(orgs);
+    // final orgs = ref.watch(organizationsProvider).value ?? [];
+    // print('ORGANIZATIONS IN WIDGET HEADER:');
+    // print(orgs);
+    final orgs = ['test'];
 
     // Return organizations link button.
     if (orgs.length == 0) {
@@ -438,9 +439,9 @@ class OrganizationSelection extends ConsumerWidget {
     }
 
     // TODO: Get the user's current organization.
-    final value = orgs[0].name;
-    print('CURRENT ORGANIZATION:');
-    print(value);
+    // final value = orgs[0].name;
+    // print('CURRENT ORGANIZATION:');
+    // print(value);
 
     // Build the selection.
     var dropdown = DropdownButton(
@@ -449,10 +450,11 @@ class OrganizationSelection extends ConsumerWidget {
       isExpanded: true,
       // icon: Icon(Icons.business_center_outlined),
       // iconSize: 18,
-      value: value,
-      items: orgs
-              .map((org) => org.name)
-              .toList()
+      value: 'test',
+      // items: orgs
+      //         .map((org) => org.name)
+      //         .toList()
+      items: ['test']
               .map(
                 (name) => DropdownMenuItem<String>(
                   onTap: () => name,
@@ -496,8 +498,6 @@ class OrganizationSelection extends ConsumerWidget {
 }
 
 /// Primary license selection.
-/// FIXME: Load licenses and facilities!
-/// TODO: Only show once a user has an organization.
 class FacilitySelection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -505,10 +505,11 @@ class FacilitySelection extends ConsumerWidget {
     final orgs = ref.watch(organizationsProvider).value ?? [];
     if (orgs.length == 0) return Container();
 
+    /// FIXME: Load licenses and facilities!
     // Get the user's facilities.
-    final facilities = ref.watch(facilitiesProvider);
-    print('FACILITIES:');
-    print(facilities);
+    // final facilities = ref.watch(facilitiesProvider);
+    // print('FACILITIES:');
+    // print(facilities);
 
     // Get available licenses / facilities.
     List items = [];
@@ -534,14 +535,15 @@ class FacilitySelection extends ConsumerWidget {
 
     // TODO: Get the user's current license / facility.
     final value = items[0];
+    print('CURRENT LICENSE / FACILITY: $value');
 
     // Build the dropdown.
     var dropdown = DropdownButton(
       underline: Container(),
       isDense: true,
       isExpanded: true,
-      value: value,
-      items: items
+      value: 'test',
+      items: ['test']
               .map(
                 (name) => DropdownMenuItem<String>(
                   onTap: () => name,

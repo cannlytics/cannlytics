@@ -276,7 +276,29 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
           // - inventory (packages and items, categories, package statuses)
 
-          // - locations (location types)
+          // TODO: Locations.
+          GoRoute(
+            path: '/locations',
+            name: AppRoutes.locations.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const FacilitiesScreen(),
+            ),
+            routes: [
+              // Facility screen.
+              GoRoute(
+                path: ':id',
+                name: AppRoutes.facility.name,
+                pageBuilder: (context, state) {
+                  final id = state.params['id']!;
+                  return MaterialPage(
+                    key: state.pageKey,
+                    child: FacilityScreen(jobId: id),
+                  );
+                },
+              ),
+            ],
+          ),
 
           // - patients
 

@@ -38,8 +38,13 @@ if __name__ == '__main__':
     firebase.initialize_firebase()
 
     # Specify a user's ID and their desired claims.
-    UID = sys.argv[1]
-    CLAIMS = json.loads(sys.argv[2])
+    # UID = sys.argv[1]
+    # CLAIMS = json.loads(sys.argv[2])
+    UID = 'QIxUQ6kO3ZcDIZceJHCl0e1ZaOS2'
+    CLAIMS = {
+        'owner': ['test-company'],
+        'team': ['test-company', 'cannlytics-test']
+    }
     firebase.update_custom_claims(UID, claims=CLAIMS)
 
     # Check the user's claims.
