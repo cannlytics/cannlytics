@@ -61,7 +61,9 @@ class APIService {
     }
 
     // Format the URL
-    final url = endpoint.startsWith(baseUrl) ? endpoint : '$baseUrl$endpoint';
+    final url = endpoint.startsWith(baseUrl)
+        ? endpoint
+        : '$baseUrl${endpoint.replaceFirst('/api', '')}';
 
     // Make the request.
     final client = http.Client();

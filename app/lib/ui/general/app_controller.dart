@@ -13,7 +13,7 @@ import 'package:cannlytics_app/services/api_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // User type provider.
-final userTypeProvider = StateProvider<String>((ref) => 'consumer');
+final userTypeProvider = StateProvider<String>((ref) => 'business');
 
 /// Organizations provider.
 final organizationsProvider =
@@ -25,6 +25,20 @@ final organizationsProvider =
   }
   return data;
 });
+
+/// TODO: License provider.
+
+/// TODO: Get licenses / facilities.
+// final facilitiesProvider =
+//     FutureProvider.autoDispose<List<Organization>>((ref) async {
+//   final response = await APIService.apiRequest('/organizations');
+//   List<Organization> data = [];
+//   for (Map item in response) {
+//     data.add(Organization.fromMap(item));
+//   }
+//   return data;
+// });
+
 
 /* WORKING EXAMPLE */
 

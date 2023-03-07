@@ -29,47 +29,84 @@ import 'package:cannlytics_app/services/api_service.dart';
 
 // TODO: Use models instead of Maps where possible.
 
-// Base URL.
-const String _host = 'https://cannlytics.com';
-const String _path = '/api/metrc';
+class base {}
 
 /// Metrc API service.
-class Metrc {
-  final MetrcFacilities facilities;
-  final MetrcEmployees employees;
-  final MetrcLocations locations;
-  final MetrcLicenses licenses;
-  final MetrcStrains strains;
-  final MetrcPlants plants;
-  final MetrcPlantBatches plantBatches;
-  final MetrcHarvests harvests;
-  final MetrcPackages packages;
-  final MetrcItems items;
-  final MetrcTransfers transfers;
-  final MetrcLabTests labTests;
-  final MetrcPatients patients;
-  final MetrcSales sales;
-  final MetrcTransactions transactions;
-  final MetrcDeliveries deliveries;
+/// FIXME: These can't be called.
+class Metrc extends base
+    with
+        MetrcLicenses,
+        MetrcEmployees,
+        MetrcLocations,
+        MetrcStrains,
+        MetrcFacilities,
+        MetrcPlants,
+        MetrcPlantBatches,
+        MetrcHarvests,
+        MetrcPackages,
+        MetrcItems,
+        MetrcTransfers,
+        MetrcLabTests,
+        MetrcPatients,
+        MetrcSales,
+        MetrcTransactions,
+        MetrcDeliveries {
+  // Create instances of the classes
+  MetrcFacilities facilities = MetrcFacilities();
+  MetrcEmployees employees = MetrcEmployees();
+  MetrcLicenses licenses = MetrcLicenses();
+  MetrcLocations locations = MetrcLocations();
+  MetrcStrains strains = MetrcStrains();
+  MetrcPlants plants = MetrcPlants();
+  MetrcPlantBatches plantBatches = MetrcPlantBatches();
+  MetrcHarvests harvests = MetrcHarvests();
+  MetrcPackages packages = MetrcPackages();
+  MetrcItems items = MetrcItems();
+  MetrcTransfers transfers = MetrcTransfers();
+  MetrcLabTests labTests = MetrcLabTests();
+  MetrcPatients patients = MetrcPatients();
+  MetrcSales sales = MetrcSales();
+  MetrcTransactions transactions = MetrcTransactions();
+  MetrcDeliveries deliveries = MetrcDeliveries();
 
-  Metrc()
-      : facilities = MetrcFacilities(),
-        employees = MetrcEmployees(),
-        licenses = MetrcLicenses(),
-        locations = MetrcLocations(),
-        strains = MetrcStrains(),
-        plants = MetrcPlants(),
-        plantBatches = MetrcPlantBatches(),
-        harvests = MetrcHarvests(),
-        packages = MetrcPackages(),
-        items = MetrcItems(),
-        transfers = MetrcTransfers(),
-        labTests = MetrcLabTests(),
-        patients = MetrcPatients(),
-        sales = MetrcSales(),
-        transactions = MetrcTransactions(),
-        deliveries = MetrcDeliveries();
+  // Additional properties and methods
 }
+// class Metrc {
+//   final MetrcFacilities facilities;
+//   final MetrcEmployees employees;
+//   final MetrcLocations locations;
+//   final MetrcLicenses licenses;
+//   final MetrcStrains strains;
+//   final MetrcPlants plants;
+//   final MetrcPlantBatches plantBatches;
+//   final MetrcHarvests harvests;
+//   final MetrcPackages packages;
+//   final MetrcItems items;
+//   final MetrcTransfers transfers;
+//   final MetrcLabTests labTests;
+//   final MetrcPatients patients;
+//   final MetrcSales sales;
+//   final MetrcTransactions transactions;
+//   final MetrcDeliveries deliveries;
+
+//   Metrc()
+//       : facilities = MetrcFacilities(),
+//         employees = MetrcEmployees(),
+//         licenses = MetrcLicenses(),
+//         locations = MetrcLocations(),
+//         strains = MetrcStrains(),
+//         plants = MetrcPlants(),
+//         plantBatches = MetrcPlantBatches(),
+//         harvests = MetrcHarvests(),
+//         packages = MetrcPackages(),
+//         items = MetrcItems(),
+//         transfers = MetrcTransfers(),
+//         labTests = MetrcLabTests(),
+//         patients = MetrcPatients(),
+//         sales = MetrcSales(),
+//         transactions = MetrcTransactions(),
+//         deliveries = MetrcDeliveries();
+// }
 
 /// Manage Metrc licenses
 class MetrcLicenses {
@@ -81,7 +118,7 @@ class MetrcLicenses {
     String orgId,
     String state,
   ) async {
-    String endpoint = '$_host$_path/admin/create-license';
+    String endpoint = '/api/metrc/admin/create-license';
     Map data = {
       'license_number': licenseNumber,
       'license_type': licenseType,
@@ -98,7 +135,7 @@ class MetrcLicenses {
     String orgId,
     String deletionReason,
   ) async {
-    String endpoint = '$_host$_path/admin/delete-license';
+    String endpoint = '/api/metrc/admin/delete-license';
     Map data = {
       'license_number': licenseNumber,
       'org_id': orgId,
@@ -113,7 +150,7 @@ class MetrcLicenses {
 class MetrcFacilities {
   /// Get facilities.
   static Future<List<Facility>> getFacilities() async {
-    String endpoint = '$_host$_path/facilities';
+    String endpoint = '/api/metrc/facilities';
     List<Facility> items = [];
     List<dynamic> response = await APIService.apiRequest(endpoint);
     for (var item in response) {
@@ -127,7 +164,7 @@ class MetrcFacilities {
 class MetrcEmployees {
   /// Get employees.
   static Future<List<Employee>> getEmployees(String licenseNumber) async {
-    String endpoint = '$_host$_path/employees';
+    String endpoint = '/api/metrc/employees';
     Map params = {'license': licenseNumber};
     List<Employee> items = [];
     List<dynamic> response = await APIService.apiRequest(
@@ -145,7 +182,7 @@ class MetrcEmployees {
 class MetrcLocations {
   // Get location types.
   static Future<List> getLocationTypes(String licenseNumber) async {
-    String endpoint = '$_host$_path/types/locations';
+    String endpoint = '/api/metrc/types/locations';
     return await APIService.apiRequest(
       endpoint,
       options: {
@@ -160,7 +197,7 @@ class MetrcLocations {
     String name,
     String locationType,
   ) async {
-    String endpoint = '$_host$_path/locations';
+    String endpoint = '/api/metrc/locations';
     Map data = {
       'name': name,
       'location_type': locationType,
@@ -176,7 +213,7 @@ class MetrcLocations {
 
   // Get a location.
   static Future<void> getLocation(String licenseNumber, String id) async {
-    String endpoint = '$_host$_path/locations/$id';
+    String endpoint = '/api/metrc/locations/$id';
     return await APIService.apiRequest(
       endpoint,
       options: {
@@ -192,7 +229,7 @@ class MetrcLocations {
     String name,
     String locationTypeName,
   ) async {
-    String endpoint = '$_host$_path/locations/$id';
+    String endpoint = '/api/metrc/locations/$id';
     Map data = {
       'id': id,
       'name': name,
@@ -209,7 +246,7 @@ class MetrcLocations {
 
   // Delete a location.
   static Future<void> deleteLocation(String licenseNumber, String id) async {
-    String endpoint = '$_host$_path/locations/$id';
+    String endpoint = '/api/metrc/locations/$id';
     return await APIService.apiRequest(
       endpoint,
       options: {
@@ -239,7 +276,7 @@ class MetrcStrains {
       'indica_percentage': indicaPercentage,
       'sativa_percentage': sativaPercentage,
     };
-    String endpoint = '$_host$_path/strains';
+    String endpoint = '/api/metrc/strains';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -253,7 +290,7 @@ class MetrcStrains {
 
   /// Get strains.
   static Future<List<Strain>> getStrains(String licenseNumber) async {
-    String endpoint = '$_host$_path/strains';
+    String endpoint = '/api/metrc/strains';
     List<Strain> items = [];
     List<dynamic> response = await APIService.apiRequest(
       endpoint,
@@ -287,7 +324,7 @@ class MetrcStrains {
       'indica_percentage': indicaPercentage,
       'sativa_percentage': sativaPercentage,
     };
-    String endpoint = '$_host$_path/strains';
+    String endpoint = '/api/metrc/strains';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -303,7 +340,7 @@ class MetrcStrains {
     String licenseNumber, {
     required String id,
   }) async {
-    String endpoint = '$_host$_path/strains/$id';
+    String endpoint = '/api/metrc/strains/$id';
     await APIService.apiRequest(
       endpoint,
       options: {
@@ -321,7 +358,7 @@ class MetrcPlants {
     String licenseNumber,
     Map data,
   ) async {
-    String endpoint = '$_host$_path/plants';
+    String endpoint = '/api/metrc/plants';
     await APIService.apiRequest(
       endpoint,
       // TODO: Make more function like.
@@ -349,7 +386,7 @@ class MetrcPlants {
     Map data, {
     String? type,
   }) async {
-    String endpoint = '$_host$_path/plants';
+    String endpoint = '/api/metrc/plants';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -367,7 +404,7 @@ class MetrcPlants {
     String? start,
     String? end,
   }) async {
-    String endpoint = '$_host$_path/plants';
+    String endpoint = '/api/metrc/plants';
     var response = await APIService.apiRequest(
       endpoint,
       options: {
@@ -388,7 +425,7 @@ class MetrcPlants {
     String? label,
     String? location,
   }) async {
-    String endpoint = '$_host$_path/plants';
+    String endpoint = '/api/metrc/plants';
     await APIService.apiRequest(
       endpoint,
       data: {
@@ -409,7 +446,7 @@ class MetrcPlants {
     String licenseNumber,
     Map data,
   ) async {
-    String endpoint = '$_host$_path/plants';
+    String endpoint = '/api/metrc/plants';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -427,7 +464,7 @@ class MetrcPlants {
     String licenseNumber,
     Map data,
   ) async {
-    String endpoint = '$_host$_path/plants';
+    String endpoint = '/api/metrc/plants';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -445,7 +482,7 @@ class MetrcPlants {
     String licenseNumber,
     Map data,
   ) async {
-    String endpoint = '$_host$_path/plants';
+    String endpoint = '/api/metrc/plants';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -463,7 +500,7 @@ class MetrcPlants {
     String licenseNumber,
     String id,
   ) async {
-    String endpoint = '$_host$_path/plants/$id';
+    String endpoint = '/api/metrc/plants/$id';
     await APIService.apiRequest(
       endpoint,
       options: {
@@ -483,7 +520,7 @@ class MetrcPlantBatches {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/batches';
+    String endpoint = '/api/metrc/batches';
     await APIService.apiRequest(endpoint, data: data, options: {
       'params': {'license': licenseNumber},
     });
@@ -495,7 +532,7 @@ class MetrcPlantBatches {
     required String startDate,
     required String endDate,
   }) async {
-    String endpoint = '$_host$_path/batches';
+    String endpoint = '/api/metrc/batches';
     var response = await APIService.apiRequest(endpoint, options: {
       'params': {
         'license': licenseNumber,
@@ -511,7 +548,7 @@ class MetrcPlantBatches {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/packages/v1/packages/createfromplantbatch';
+    String endpoint = '/api/metrc/packages/v1/packages/createfromplantbatch';
     await APIService.apiRequest(endpoint, data: data, options: {
       'params': {'license': licenseNumber},
     });
@@ -522,7 +559,7 @@ class MetrcPlantBatches {
     String licenseNumber, {
     required String id,
   }) async {
-    String endpoint = '$_host$_path/batches';
+    String endpoint = '/api/metrc/batches';
     await APIService.apiRequest(endpoint, options: {
       'params': {'license': licenseNumber},
       'action': 'flower',
@@ -534,7 +571,7 @@ class MetrcPlantBatches {
     String licenseNumber, {
     required String id,
   }) async {
-    String endpoint = '$_host$_path/batches';
+    String endpoint = '/api/metrc/batches';
     await APIService.apiRequest(endpoint, options: {
       'params': {'license': licenseNumber},
       'action': 'destroy-plants',
@@ -546,7 +583,7 @@ class MetrcPlantBatches {
     String licenseNumber,
     Map data,
   ) async {
-    String endpoint = '$_host$_path/batches';
+    String endpoint = '/api/metrc/batches';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -563,7 +600,7 @@ class MetrcPlantBatches {
     required String name,
     required String location,
   }) async {
-    String endpoint = '$_host$_path/batches';
+    String endpoint = '/api/metrc/batches';
     await APIService.apiRequest(
       endpoint,
       data: {
@@ -588,7 +625,7 @@ class MetrcPlantBatches {
     required String strain,
     String? patientLicenseNumber,
   }) async {
-    String endpoint = '$_host$_path/batches';
+    String endpoint = '/api/metrc/batches';
     await APIService.apiRequest(
       endpoint,
       data: {
@@ -616,7 +653,7 @@ class MetrcHarvests {
     String? start,
     String? end,
   }) async {
-    String endpoint = '$_host$_path/harvests';
+    String endpoint = '/api/metrc/harvests';
     var response = await APIService.apiRequest(
       endpoint,
       options: {
@@ -635,7 +672,7 @@ class MetrcHarvests {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -651,7 +688,7 @@ class MetrcHarvests {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -667,7 +704,7 @@ class MetrcHarvests {
     String licenseNumber,
     Map data,
   ) async {
-    String endpoint = '$_host$_path/harvests';
+    String endpoint = '/api/metrc/harvests';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -683,7 +720,7 @@ class MetrcHarvests {
     String licenseNumber,
     String harvestId,
   ) async {
-    String endpoint = '$_host$_path/harvests';
+    String endpoint = '/api/metrc/harvests';
     await APIService.apiRequest(
       endpoint,
       data: {
@@ -702,7 +739,7 @@ class MetrcHarvests {
     String licenseNumber,
     String harvestId,
   ) async {
-    String endpoint = '$_host$_path/harvests';
+    String endpoint = '/api/metrc/harvests';
     await APIService.apiRequest(
       endpoint,
       data: {'id': harvestId},
@@ -723,7 +760,7 @@ class MetrcPackages {
     String? start,
     String? end,
   }) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     if (label != null) label += '/$label';
     var response = await APIService.apiRequest(
       endpoint,
@@ -743,7 +780,7 @@ class MetrcPackages {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -759,7 +796,7 @@ class MetrcPackages {
     required String label,
     required String itemName,
   }) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     await APIService.apiRequest(
       endpoint,
       data: {
@@ -779,7 +816,7 @@ class MetrcPackages {
     required String packageLabel,
     required String location,
   }) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     await APIService.apiRequest(
       endpoint,
       data: {
@@ -799,7 +836,7 @@ class MetrcPackages {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -815,7 +852,7 @@ class MetrcPackages {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -831,7 +868,7 @@ class MetrcPackages {
     String licenseNumber, {
     required String label,
   }) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     await APIService.apiRequest(
       endpoint,
       data: {
@@ -850,7 +887,7 @@ class MetrcPackages {
     String licenseNumber, {
     required String label,
   }) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     await APIService.apiRequest(
       endpoint,
       data: {'label': label},
@@ -866,7 +903,7 @@ class MetrcPackages {
     String licenseNumber,
     Map data,
   ) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -883,7 +920,7 @@ class MetrcPackages {
     required String label,
     required String note,
   }) async {
-    String endpoint = '$_host$_path/packages';
+    String endpoint = '/api/metrc/packages';
     await APIService.apiRequest(
       endpoint,
       data: {
@@ -905,7 +942,7 @@ class MetrcItems {
     String licenseNumber,
     List<Map<String, dynamic>> data,
   ) async {
-    String endpoint = '$_host$_path/items';
+    String endpoint = '/api/metrc/items';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -922,7 +959,7 @@ class MetrcItems {
     String? start,
     String? end,
   }) async {
-    String endpoint = '$_host$_path/items';
+    String endpoint = '/api/metrc/items';
     if (id != null) endpoint += '/$id';
     var response = await APIService.apiRequest(
       endpoint,
@@ -943,7 +980,7 @@ class MetrcItems {
     String id,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/items/$id';
+    String endpoint = '/api/metrc/items/$id';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -958,7 +995,7 @@ class MetrcItems {
     String licenseNumber,
     String id,
   ) async {
-    String endpoint = '$_host$_path/items/$id';
+    String endpoint = '/api/metrc/items/$id';
     await APIService.apiRequest(
       endpoint,
       options: {
@@ -976,7 +1013,7 @@ class MetrcTransfers {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/transfers';
+    String endpoint = '/api/metrc/transfers';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -992,7 +1029,7 @@ class MetrcTransfers {
     String? id,
     String? type,
   }) async {
-    String endpoint = '$_host$_path/transfers';
+    String endpoint = '/api/metrc/transfers';
     if (id != null) endpoint += '/$id';
     var response = await APIService.apiRequest(
       endpoint,
@@ -1009,7 +1046,7 @@ class MetrcTransfers {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/transfers';
+    String endpoint = '/api/metrc/transfers';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1025,7 +1062,7 @@ class MetrcTransfers {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/transfers/templates';
+    String endpoint = '/api/metrc/transfers/templates';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1040,7 +1077,7 @@ class MetrcTransfers {
     String licenseNumber, {
     String? id,
   }) async {
-    String endpoint = '$_host$_path/transactions';
+    String endpoint = '/api/metrc/transactions';
     if (id != null) endpoint += '/$id';
     var response = await APIService.apiRequest(
       endpoint,
@@ -1057,7 +1094,7 @@ class MetrcTransfers {
     String id,
     String data,
   ) async {
-    String endpoint = '$_host$_path/transfers/templates/$id';
+    String endpoint = '/api/metrc/transfers/templates/$id';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1073,7 +1110,7 @@ class MetrcTransfers {
     String licenseNumber, {
     required String id,
   }) async {
-    String endpoint = '$_host$_path/transfers/templates/$id';
+    String endpoint = '/api/metrc/transfers/templates/$id';
     await APIService.apiRequest(
       endpoint,
       options: {
@@ -1097,7 +1134,7 @@ class MetrcLabTests {
     String licenseNumber, {
     required String id,
   }) async {
-    String endpoint = '$_host$_path/tests/coas/$id';
+    String endpoint = '/api/metrc/tests/coas/$id';
     var response = await APIService.apiRequest(
       endpoint,
       options: {
@@ -1116,7 +1153,7 @@ class MetrcPatients {
     String licenseNumber, {
     String? id,
   }) async {
-    String endpoint = '$_host$_path/patients';
+    String endpoint = '/api/metrc/patients';
     if (id != null) endpoint += '/$id';
     var response = await APIService.apiRequest(
       endpoint,
@@ -1142,7 +1179,7 @@ class MetrcPatients {
   static Future<List<dynamic>> getPatientLocations(
     String licenseNumber,
   ) async {
-    String endpoint = '$_host$_path/patients/locations';
+    String endpoint = '/api/metrc/patients/locations';
     var response = await APIService.apiRequest(
       endpoint,
       options: {
@@ -1157,7 +1194,7 @@ class MetrcPatients {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/patients';
+    String endpoint = '/api/metrc/patients';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1172,7 +1209,7 @@ class MetrcPatients {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/patients';
+    String endpoint = '/api/metrc/patients';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1188,7 +1225,7 @@ class MetrcPatients {
     String licenseNumber, {
     required String id,
   }) async {
-    String endpoint = '$_host$_path/patients/$id';
+    String endpoint = '/api/metrc/patients/$id';
     await APIService.apiRequest(
       endpoint,
       options: {
@@ -1206,7 +1243,7 @@ class MetrcSales {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/sales';
+    String endpoint = '/api/metrc/sales';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1223,7 +1260,7 @@ class MetrcSales {
     String? start,
     String? end,
   }) async {
-    String endpoint = '$_host$_path/sales';
+    String endpoint = '/api/metrc/sales';
     if (id != null) endpoint += '/$id';
     var response = await APIService.apiRequest(
       endpoint,
@@ -1243,7 +1280,7 @@ class MetrcSales {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/sales';
+    String endpoint = '/api/metrc/sales';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1259,7 +1296,7 @@ class MetrcSales {
     String licenseNumber,
     String id,
   ) async {
-    String endpoint = '$_host$_path/sales/$id';
+    String endpoint = '/api/metrc/sales/$id';
     await APIService.apiRequest(
       endpoint,
       options: {
@@ -1278,7 +1315,7 @@ class MetrcTransactions {
     String start,
     String end,
   ) async {
-    String endpoint = '$_host$_path/transactions';
+    String endpoint = '/api/metrc/transactions';
     var response = await APIService.apiRequest(
       endpoint,
       options: {
@@ -1296,7 +1333,7 @@ class MetrcTransactions {
     String date,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/transactions/$date';
+    String endpoint = '/api/metrc/transactions/$date';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1312,7 +1349,7 @@ class MetrcTransactions {
     String date,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/transactions/$date';
+    String endpoint = '/api/metrc/transactions/$date';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1336,7 +1373,7 @@ class MetrcDeliveries {
     String? salesEnd,
     String? type,
   }) async {
-    String endpoint = '$_host$_path/deliveries';
+    String endpoint = '/api/metrc/deliveries';
     if (id != null) endpoint += '/$id';
     var response = await APIService.apiRequest(
       endpoint,
@@ -1359,7 +1396,7 @@ class MetrcDeliveries {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/deliveries';
+    String endpoint = '/api/metrc/deliveries';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1374,7 +1411,7 @@ class MetrcDeliveries {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/deliveries';
+    String endpoint = '/api/metrc/deliveries';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1390,7 +1427,7 @@ class MetrcDeliveries {
     String licenseNumber, {
     required String id,
   }) async {
-    String endpoint = '$_host$_path/deliveries/$id';
+    String endpoint = '/api/metrc/deliveries/$id';
     await APIService.apiRequest(
       endpoint,
       options: {
@@ -1405,7 +1442,7 @@ class MetrcDeliveries {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/deliveries';
+    String endpoint = '/api/metrc/deliveries';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1421,7 +1458,7 @@ class MetrcDeliveries {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/deliveries';
+    String endpoint = '/api/metrc/deliveries';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1437,7 +1474,7 @@ class MetrcDeliveries {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/deliveries';
+    String endpoint = '/api/metrc/deliveries';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1453,7 +1490,7 @@ class MetrcDeliveries {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/deliveries';
+    String endpoint = '/api/metrc/deliveries';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1469,7 +1506,7 @@ class MetrcDeliveries {
     String licenseNumber,
     Map<String, dynamic> data,
   ) async {
-    String endpoint = '$_host$_path/deliveries';
+    String endpoint = '/api/metrc/deliveries';
     await APIService.apiRequest(
       endpoint,
       data: data,
@@ -1487,97 +1524,97 @@ class MetrcDeliveries {
 class MetrcTypes {
   /// Get adjustment reasons.
   Future<List<dynamic>> getAdjustments() async {
-    String endpoint = '$_host$_path/types/adjustments';
+    String endpoint = '/api/metrc/types/adjustments';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get batch types.
   Future<List<dynamic>> getBatchTypes() async {
-    String endpoint = '$_host$_path/types/batches';
+    String endpoint = '/api/metrc/types/batches';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get categories.
   Future<List<dynamic>> getCategories() async {
-    String endpoint = '$_host$_path/types/categories';
+    String endpoint = '/api/metrc/types/categories';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get customer types.
   Future<List<dynamic>> getCustomerTypes() async {
-    String endpoint = '$_host$_path/types/customers';
+    String endpoint = '/api/metrc/types/customers';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get growth phases.
   Future<List<dynamic>> getGrowthPhases() async {
-    String endpoint = '$_host$_path/types/growth-phases';
+    String endpoint = '/api/metrc/types/growth-phases';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get location types.
   Future<List<dynamic>> getLocationTypes() async {
-    String endpoint = '$_host$_path/types/locations';
+    String endpoint = '/api/metrc/types/locations';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get package types.
   Future<List<dynamic>> getPackageTypes() async {
-    String endpoint = '$_host$_path/types/packages';
+    String endpoint = '/api/metrc/types/packages';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get package statuses.
   Future<List<dynamic>> getPackageStatuses() async {
-    String endpoint = '$_host$_path/types/package-statuses';
+    String endpoint = '/api/metrc/types/package-statuses';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get return reasons.
   Future<List<dynamic>> getReturnReasons() async {
-    String endpoint = '$_host$_path/types/return-reasons';
+    String endpoint = '/api/metrc/types/return-reasons';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get test statuses.
   Future<List<dynamic>> getTestStatuses() async {
-    String endpoint = '$_host$_path/types/test-statuses';
+    String endpoint = '/api/metrc/types/test-statuses';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get test types.
   Future<List<dynamic>> getTestTypes() async {
-    String endpoint = '$_host$_path/types/tests';
+    String endpoint = '/api/metrc/types/tests';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get transfer types.
   Future<List<dynamic>> getTransferTypes() async {
-    String endpoint = '$_host$_path/types/transfers';
+    String endpoint = '/api/metrc/types/transfers';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get units of measure.
   Future<List<dynamic>> getUnitsOfMeasure() async {
-    String endpoint = '$_host$_path/types/units';
+    String endpoint = '/api/metrc/types/units';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get waste types.
   Future<List<dynamic>> getWasteTypes() async {
-    String endpoint = '$_host$_path/types/waste';
+    String endpoint = '/api/metrc/types/waste';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get waste methods.
   Future<List<dynamic>> getWasteMethods() async {
-    String endpoint = '$_host$_path/types/waste-methods';
+    String endpoint = '/api/metrc/types/waste-methods';
     return await APIService.apiRequest(endpoint);
   }
 
   /// Get waste reasons.
   Future<List<dynamic>> getWasteReasons() async {
-    String endpoint = '$_host$_path/types/waste-reasons';
+    String endpoint = '/api/metrc/types/waste-reasons';
     return await APIService.apiRequest(endpoint);
   }
 }

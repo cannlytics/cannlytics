@@ -11,6 +11,7 @@
 import 'package:cannlytics_app/models/organization.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
+import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialogs.dart';
 import 'package:cannlytics_app/widgets/buttons/theme_toggle.dart';
@@ -81,9 +82,9 @@ class DesktopNavigationLayout extends ConsumerWidget {
             SizedBox(width: isVeryWide ? 24 : 12),
             OrganizationSelection(),
 
-            // License selection.
+            // License / facility selection.
             gapW6,
-            // FacilitySelection(),
+            FacilitySelection(),
 
             // Links.
             const Spacer(),
@@ -176,10 +177,9 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
                       gapW12,
                       OrganizationSelection(),
 
-                      // FIXME: License selection.
-                      // TODO: Only show once a user has an organization.
+                      // License / facility selection.
                       gapW6,
-                      // FacilitySelection(),
+                      FacilitySelection(),
 
                       // Spacer.
                       const Spacer(),
@@ -442,25 +442,37 @@ class OrganizationSelection extends ConsumerWidget {
     print('CURRENT ORGANIZATION:');
     print(value);
 
-    // Return the selection.
-    return DropdownButton(
+    // Build the selection.
+    var dropdown = DropdownButton(
+      underline: Container(),
       isDense: true,
+      isExpanded: true,
+      // icon: Icon(Icons.business_center_outlined),
+      // iconSize: 18,
       value: value,
       items: orgs
               .map((org) => org.name)
               .toList()
-              .map((e) => DropdownMenuItem<String>(
-                    onTap: () => e,
-                    value: e,
-                    child: Text(e),
-                  ))
+              .map(
+                (name) => DropdownMenuItem<String>(
+                  onTap: () => name,
+                  value: name,
+                  child: ListTile(
+                    dense: true,
+                    title: Text(name),
+                  ),
+                ),
+              )
               .toList() +
           [
             DropdownMenuItem<String>(
               onTap: () => 'organizations',
               value: 'organizations',
-              child: Text('Start or join an organizations'),
-            )
+              child: ListTile(
+                dense: true,
+                title: Text('Manage organizations'),
+              ),
+            ),
           ],
       onChanged: (value) {
         if (value == 'organizations') {
@@ -473,41 +485,101 @@ class OrganizationSelection extends ConsumerWidget {
         //     .changeOrganization(value as String);
       },
     );
+
+    // Render the dropdown.
+    return Container(
+      height: 45.0,
+      width: 175.0,
+      child: dropdown,
+    );
   }
 }
 
 /// Primary license selection.
 /// FIXME: Load licenses and facilities!
-// class FacilitySelection extends ConsumerWidget {
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     final value = ref.watch(facilitySelectionProvider).primaryLicense;
-//     final items = ref.watch(facilitySelectionProvider).licenses;
-//     if (items.length == 1) {
-//       return NavigationLink(
-//         text: '+ Add a license',
-//         path: AppRoutes.addLicense.name,
-//       );
-//     }
-//     return DropdownButton(
-//       isDense: true,
-//       value: value,
-//       items: items
-//           .map((e) => DropdownMenuItem<String>(
-//                 onTap: () => e,
-//                 value: e,
-//                 child: Text(e),
-//               ))
-//           .toList(),
-//       onChanged: (value) {
-//         if (value == '+ Add a license') {
-//           GoRouter.of(context).go('/licenses/add');
-//           return;
-//         }
-//         ref
-//             .read(facilitySelectionProvider.notifier)
-//             .changeLicense(value as String);
-//       },
-//     );
-//   }
-// }
+/// TODO: Only show once a user has an organization.
+class FacilitySelection extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get the user's organizations.
+    final orgs = ref.watch(organizationsProvider).value ?? [];
+    if (orgs.length == 0) return Container();
+
+    // Get the user's facilities.
+    final facilities = ref.watch(facilitiesProvider);
+    print('FACILITIES:');
+    print(facilities);
+
+    // Get available licenses / facilities.
+    List items = [];
+    for (var org in orgs) {
+      var licenses = org.licenses ?? [];
+      print('ORG LICENSES:');
+      print(licenses);
+      if (licenses.isEmpty) continue;
+      for (var license in licenses) {
+        try {
+          items.add(license!['license_number']);
+        } catch (error) {
+          // Pass
+        }
+      }
+    }
+    if (items.isEmpty) {
+      return NavigationLink(
+        text: '+ Add a license',
+        path: AppRoutes.addLicense.name,
+      );
+    }
+
+    // TODO: Get the user's current license / facility.
+    final value = items[0];
+
+    // Build the dropdown.
+    var dropdown = DropdownButton(
+      underline: Container(),
+      isDense: true,
+      isExpanded: true,
+      value: value,
+      items: items
+              .map(
+                (name) => DropdownMenuItem<String>(
+                  onTap: () => name,
+                  value: name,
+                  child: ListTile(
+                    dense: true,
+                    title: Text(name),
+                  ),
+                ),
+              )
+              .toList() +
+          [
+            DropdownMenuItem<String>(
+              onTap: () => 'add',
+              value: 'add',
+              child: ListTile(
+                dense: true,
+                title: Text('+ Add a license'),
+              ),
+            ),
+          ],
+      onChanged: (value) {
+        if (value == 'add') {
+          GoRouter.of(context).go('/licenses/add');
+          return;
+        }
+        // FIXME: Change current license / facility.
+        // ref
+        //     .read(facilitySelectionProvider.notifier)
+        //     .changeLicense(value as String);
+      },
+    );
+
+    // Render the dropdown.
+    return Container(
+      height: 45.0,
+      width: 100.0,
+      child: dropdown,
+    );
+  }
+}

@@ -24,18 +24,18 @@ class FacilityScreenController extends AutoDisposeAsyncNotifier<void> {
     // ok to leave this empty if the return type is FutureOr<void>
   }
 
-  /// Set data for a facility.
-  Future<bool> setFacility(Facility entry) async {
-    final currentUser = ref.read(authProvider).currentUser;
-    if (currentUser == null) {
-      throw AssertionError('User can\'t be null');
-    }
-    final database = ref.read(databaseProvider);
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(
-        () => database.setFacility(uid: currentUser.uid, facility: entry));
-    return state.hasError == false;
-  }
+  // /// Set data for a facility.
+  // Future<bool> setFacility(Facility entry) async {
+  //   final currentUser = ref.read(authProvider).currentUser;
+  //   if (currentUser == null) {
+  //     throw AssertionError('User can\'t be null');
+  //   }
+  //   final database = ref.read(databaseProvider);
+  //   state = const AsyncLoading();
+  //   state = await AsyncValue.guard(
+  //       () => database.setFacility(uid: currentUser.uid, facility: entry));
+  //   return state.hasError == false;
+  // }
 }
 
 // The facility screen provider.

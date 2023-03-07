@@ -11,6 +11,7 @@
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/models/organization.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
@@ -143,8 +144,7 @@ class OrganizationsTable extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the user's organizations.
-    // final orgs = ref.watch(organizationsProvider).value ?? [];
-    final orgs = [];
+    final orgs = ref.watch(organizationsProvider).value ?? [];
     print('ORGANIZATIONS in [OrganizationsTable] widget:');
     print(orgs);
 
