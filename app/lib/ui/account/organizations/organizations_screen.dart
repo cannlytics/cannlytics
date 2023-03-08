@@ -15,6 +15,7 @@ import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
+import 'package:cannlytics_app/widgets/layout/table_form.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -39,6 +40,27 @@ class OrganizationsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
 
+    // Define table actions.
+    var actions = Row(children: [
+      // Join an organization button.
+      SecondaryButton(
+        isDark: isDark,
+        text: isWide ? 'Join an organization' : 'Join',
+        onPressed: () {
+          context.go('/organizations/join');
+        },
+      ),
+
+      // Add organization button.
+      gapW6,
+      PrimaryButton(
+        text: isWide ? 'New organization' : 'New',
+        onPressed: () {
+          context.go('/organizations/new');
+        },
+      ),
+    ]);
+
     // Render the widget.
     return Scaffold(
       body: CustomScrollView(
@@ -46,88 +68,95 @@ class OrganizationsScreen extends ConsumerWidget {
           // App header.
           const SliverToBoxAdapter(child: AppHeader()),
 
-          // Navigation cards.
+          // Form.
           SliverToBoxAdapter(
-            child: Consumer(
-              builder: (context, ref, child) {
-                return Container(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  margin: EdgeInsets.only(top: Insets(1).md),
-                  constraints: BoxConstraints(
-                    minHeight: 320,
-                  ),
-                  child: Center(
-                    child: SizedBox(
-                      width: Breakpoints.desktop.toDouble(),
-                      height: MediaQuery.of(context).size.height - 64 - 200,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: horizontalPadding(screenWidth),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: isWide
-                              ? CrossAxisAlignment.start
-                              : CrossAxisAlignment.center,
-                          children: [
-                            // Table header.
-                            Row(
-                              children: [
-                                // Title
-                                Text(
-                                  'Organizations',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge!
-                                      .copyWith(
-                                        color: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge!
-                                            .color,
-                                      ),
-                                ),
-                                const Spacer(),
-
-                                // Join an organization button.
-                                SecondaryButton(
-                                  isDark: isDark,
-                                  text:
-                                      isWide ? 'Join an organization' : 'Join',
-                                  onPressed: () {
-                                    context.go('/organizations/join');
-                                  },
-                                ),
-
-                                // Add organization button.
-                                gapW6,
-                                PrimaryButton(
-                                  text: isWide ? 'New organization' : 'New',
-                                  onPressed: () {
-                                    context.go('/organizations/new');
-                                  },
-                                ),
-                              ],
-                            ),
-
-                            // Organizations table.
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: SizedBox(
-                                    width: MediaQuery.of(context).size.width,
-                                    child: OrganizationsTable(),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
+            child: TableForm(
+              title: 'Organizations',
+              table: OrganizationsTable(),
+              actions: actions,
             ),
           ),
+          // SliverToBoxAdapter(
+          //   child: Consumer(
+          //     builder: (context, ref, child) {
+          //       return Container(
+          //         color: Theme.of(context).scaffoldBackgroundColor,
+          //         margin: EdgeInsets.only(top: Insets(1).md),
+          //         constraints: BoxConstraints(
+          //           minHeight: 320,
+          //         ),
+          //         child: Center(
+          //           child: SizedBox(
+          //             width: Breakpoints.desktop.toDouble(),
+          //             height: MediaQuery.of(context).size.height - 64 - 200,
+          //             child: Padding(
+          //               padding: EdgeInsets.symmetric(
+          //                 horizontal: horizontalPadding(screenWidth),
+          //               ),
+          //               child: Column(
+          //                 crossAxisAlignment: isWide
+          //                     ? CrossAxisAlignment.start
+          //                     : CrossAxisAlignment.center,
+          //                 children: [
+          //                   // Table header.
+          //                   Row(
+          //                     children: [
+          //                       // Title
+          //                       Text(
+          //                         'Organizations',
+          //                         style: Theme.of(context)
+          //                             .textTheme
+          //                             .titleLarge!
+          //                             .copyWith(
+          //                               color: Theme.of(context)
+          //                                   .textTheme
+          //                                   .titleLarge!
+          //                                   .color,
+          //                             ),
+          //                       ),
+          //                       const Spacer(),
+
+          //                       // Join an organization button.
+          //                       SecondaryButton(
+          //                         isDark: isDark,
+          //                         text:
+          //                             isWide ? 'Join an organization' : 'Join',
+          //                         onPressed: () {
+          //                           context.go('/organizations/join');
+          //                         },
+          //                       ),
+
+          //                       // Add organization button.
+          //                       gapW6,
+          //                       PrimaryButton(
+          //                         text: isWide ? 'New organization' : 'New',
+          //                         onPressed: () {
+          //                           context.go('/organizations/new');
+          //                         },
+          //                       ),
+          //                     ],
+          //                   ),
+
+          //                   // Organizations table.
+          //                   Row(
+          //                     children: [
+          //                       Expanded(
+          //                         child: SizedBox(
+          //                           width: MediaQuery.of(context).size.width,
+          //                           child: OrganizationsTable(),
+          //                         ),
+          //                       ),
+          //                     ],
+          //                   ),
+          //                 ],
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ),
 
           // Footer
           const SliverToBoxAdapter(child: Footer()),
@@ -198,9 +227,9 @@ class OrganizationsTable extends ConsumerWidget {
             }
           },
           cells: <DataCell>[
-            DataCell(Text(org.name)),
-            DataCell(Text(org.id)),
-            DataCell(Text(org.owner)),
+            DataCell(Text(org.name ?? '')),
+            DataCell(Text(org.id ?? '')),
+            DataCell(Text(org.owner ?? '')),
           ],
         ),
     ];

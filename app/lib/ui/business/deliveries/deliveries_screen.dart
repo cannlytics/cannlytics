@@ -3,13 +3,13 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 2/18/2023
-// Updated: 3/7/2023
+// Created: 3/7/2023
+// Updated: 3/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/models/metrc/facility.dart';
-import 'package:cannlytics_app/utils/strings/string_format.dart';
+import 'package:cannlytics_app/models/metrc/delivery.dart';
+import 'package:cannlytics_app/ui/business/deliveries/deliveries_controller.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/table_form.dart';
 import 'package:flutter/material.dart';
@@ -18,14 +18,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:go_router/go_router.dart';
 
-/// The facilities screen.
-class FacilitiesScreen extends StatelessWidget {
-  const FacilitiesScreen({super.key});
+/// The deliveries screen.
+class DeliveriesScreen extends StatelessWidget {
+  const DeliveriesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +35,11 @@ class FacilitiesScreen extends StatelessWidget {
           // App header.
           const SliverToBoxAdapter(child: AppHeader()),
 
-          // Form.
+          // Facilities form.
           SliverToBoxAdapter(
             child: TableForm(
-              title: 'Facilities',
-              table: FacilitiesTable(),
+              title: 'Deliveries',
+              table: DeliveriesTable(),
             ),
           ),
 
@@ -52,31 +51,34 @@ class FacilitiesScreen extends StatelessWidget {
   }
 }
 
-/// Facilities table.
-class FacilitiesTable extends ConsumerWidget {
-  const FacilitiesTable({super.key});
+/// Deliveries table.
+class DeliveriesTable extends ConsumerWidget {
+  const DeliveriesTable({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Get the facilities for the primary license.
-    final data = ref.watch(facilitiesProvider).value ?? [];
+    // Get the data for the primary license / facility.
+    final data = ref.watch(deliveriesProvider).value ?? [];
 
-    // Return a placeholder if no organizations.
+    // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
-        image: 'assets/images/icons/facilities.png',
-        title: 'No facilities',
-        description: 'There are no facilities associated with your license.',
+        image: 'assets/images/icons/products.png',
+        title: 'Add a delivery',
+        description: 'You do not have any active deliveries for this facility.',
         onTap: () {
-          context.go('/facilities/new');
+          context.go('/deliveries/new');
         },
       );
 
+    print('OBSERVATION:');
+    print(data[0]);
+
     // Get the rows per page.
-    final rowsPerPage = ref.watch(facilitiesRowsPerPageProvider);
+    final rowsPerPage = ref.watch(deliveriesRowsPerPageProvider);
 
     // Format the table headers.
-    List<String> headers = ['Name', 'DBA', 'License Type'];
+    List<String> headers = ['ID', 'Name', 'Type'];
     List<DataColumn> tableHeader = <DataColumn>[
       for (String header in headers)
         DataColumn(
@@ -97,17 +99,17 @@ class FacilitiesTable extends ConsumerWidget {
       columnSpacing: 48,
       headingRowHeight: 48,
       horizontalMargin: 12,
-      availableRowsPerPage: [5, 25, 50],
+      availableRowsPerPage: [5, 10, 25, 50],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
-        ref.read(facilitiesRowsPerPageProvider.notifier).state = index!;
+        ref.read(deliveriesRowsPerPageProvider.notifier).state = index!;
       },
       showCheckboxColumn: false,
-      source: FacilitiesTableSource(
+      source: DeliveriesTableSource(
         data: data,
-        onTap: (Facility item) {
-          String slug = Format.slugify(item.displayName);
-          context.go('/facilities/$slug');
+        onTap: (Delivery item) {
+          // String slug = Format.slugify(item.name);
+          context.go('/deliveries/${item.consumerId}');
         },
       ),
     );
@@ -115,15 +117,15 @@ class FacilitiesTable extends ConsumerWidget {
 }
 
 /// Facilities table data.
-class FacilitiesTableSource extends DataTableSource {
-  FacilitiesTableSource({
+class DeliveriesTableSource extends DataTableSource {
+  DeliveriesTableSource({
     required this.data,
     this.onTap,
   });
 
   // Properties.
-  final List<Facility> data;
-  final void Function(Facility item)? onTap;
+  final List<Delivery> data;
+  final void Function(Delivery item)? onTap;
 
   @override
   DataRow getRow(int index) {
@@ -136,9 +138,9 @@ class FacilitiesTableSource extends DataTableSource {
         }
       },
       cells: <DataCell>[
-        DataCell(Text(item.name)),
-        DataCell(Text(item.displayName)),
-        DataCell(Text(item.licenseType)),
+        DataCell(Text(item.consumerId)),
+        DataCell(Text(item.consumerId ?? '')),
+        DataCell(Text(item.consumerId ?? '')),
       ],
     );
   }

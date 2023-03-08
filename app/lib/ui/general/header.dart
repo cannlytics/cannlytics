@@ -4,11 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/6/2023
+// Updated: 3/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/models/organization.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
@@ -84,7 +83,7 @@ class DesktopNavigationLayout extends ConsumerWidget {
 
             // License / facility selection.
             gapW6,
-            // FacilitySelection(),
+            FacilitySelection(),
 
             // Links.
             const Spacer(),
@@ -179,7 +178,7 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
 
                       // License / facility selection.
                       gapW6,
-                      // FacilitySelection(),
+                      FacilitySelection(),
 
                       // Spacer.
                       const Spacer(),
@@ -425,10 +424,7 @@ class OrganizationSelection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the user's organizations.
-    // final orgs = ref.watch(organizationsProvider).value ?? [];
-    // print('ORGANIZATIONS IN WIDGET HEADER:');
-    // print(orgs);
-    final orgs = ['test'];
+    final orgs = ref.watch(organizationsProvider).value ?? [];
 
     // Return organizations link button.
     if (orgs.length == 0) {
@@ -438,10 +434,8 @@ class OrganizationSelection extends ConsumerWidget {
       );
     }
 
-    // TODO: Get the user's current organization.
-    // final value = orgs[0].name;
-    // print('CURRENT ORGANIZATION:');
-    // print(value);
+    // Get the user's current organization.
+    var value = ref.watch(primaryOrganizationProvider) ?? orgs[0].id;
 
     // Build the selection.
     var dropdown = DropdownButton(
@@ -450,18 +444,15 @@ class OrganizationSelection extends ConsumerWidget {
       isExpanded: true,
       // icon: Icon(Icons.business_center_outlined),
       // iconSize: 18,
-      value: 'test',
-      // items: orgs
-      //         .map((org) => org.name)
-      //         .toList()
-      items: ['test']
+      value: value,
+      items: orgs
               .map(
-                (name) => DropdownMenuItem<String>(
-                  onTap: () => name,
-                  value: name,
+                (item) => DropdownMenuItem<String>(
+                  onTap: () => item.id,
+                  value: item.id,
                   child: ListTile(
                     dense: true,
-                    title: Text(name),
+                    title: Text(item.id),
                   ),
                 ),
               )
@@ -476,22 +467,19 @@ class OrganizationSelection extends ConsumerWidget {
               ),
             ),
           ],
-      onChanged: (value) {
+      onChanged: (String? value) {
         if (value == 'organizations') {
           GoRouter.of(context).go('/organizations');
           return;
         }
-        // FIXME: Change the primary organization.
-        // ref
-        //     .read(organizationSelectionProvider)
-        //     .changeOrganization(value as String);
+        ref.read(primaryOrganizationProvider.notifier).state = value!;
       },
     );
 
     // Render the dropdown.
     return Container(
       height: 45.0,
-      width: 175.0,
+      width: 150.0,
       child: dropdown,
     );
   }
@@ -505,52 +493,60 @@ class FacilitySelection extends ConsumerWidget {
     final orgs = ref.watch(organizationsProvider).value ?? [];
     if (orgs.length == 0) return Container();
 
-    /// FIXME: Load licenses and facilities!
-    // Get the user's facilities.
-    // final facilities = ref.watch(facilitiesProvider);
-    // print('FACILITIES:');
-    // print(facilities);
+    // Get the active organization.
+    final primaryOrg = ref.watch(primaryOrganizationProvider);
 
-    // Get available licenses / facilities.
-    List items = [];
+    // Get all organization's licenses.
+    List<String> licenseIds = [];
     for (var org in orgs) {
-      var licenses = org.licenses ?? [];
-      print('ORG LICENSES:');
-      print(licenses);
-      if (licenses.isEmpty) continue;
-      for (var license in licenses) {
-        try {
-          items.add(license!['license_number']);
-        } catch (error) {
-          // Pass
+      if (org.id == primaryOrg) {
+        var licenses = org.licenses ?? [];
+        if (licenses.isEmpty) continue;
+        for (var license in licenses) {
+          licenseIds.add(license!['license_number']);
         }
       }
     }
-    if (items.isEmpty) {
+
+    // Return prompt to add a license if no licenses.
+    if (licenseIds.isEmpty) {
       return NavigationLink(
         text: '+ Add a license',
         path: AppRoutes.addLicense.name,
       );
     }
 
-    // TODO: Get the user's current license / facility.
-    final value = items[0];
-    print('CURRENT LICENSE / FACILITY: $value');
+    /// Get the user's facilities.
+    final facilities = ref.watch(facilitiesProvider).value ?? [];
+
+    // Return prompt to add a license if no facilities.
+    if (facilities.isEmpty) {
+      return NavigationLink(
+        text: '+ Add a license',
+        path: AppRoutes.addLicense.name,
+      );
+    }
+
+    // Get the current facility.
+    var primaryFacility =
+        ref.watch(primaryFacilityProvider) ?? facilities[0].id;
+
+    // TODO: Add licenses and facilities to dropdown.
 
     // Build the dropdown.
     var dropdown = DropdownButton(
       underline: Container(),
       isDense: true,
       isExpanded: true,
-      value: 'test',
-      items: ['test']
+      value: primaryFacility,
+      items: facilities
               .map(
-                (name) => DropdownMenuItem<String>(
-                  onTap: () => name,
-                  value: name,
+                (item) => DropdownMenuItem<String>(
+                  onTap: () => item.id,
+                  value: item.id,
                   child: ListTile(
                     dense: true,
-                    title: Text(name),
+                    title: Text(item.id),
                   ),
                 ),
               )
@@ -565,22 +561,19 @@ class FacilitySelection extends ConsumerWidget {
               ),
             ),
           ],
-      onChanged: (value) {
+      onChanged: (String? value) {
         if (value == 'add') {
           GoRouter.of(context).go('/licenses/add');
           return;
         }
-        // FIXME: Change current license / facility.
-        // ref
-        //     .read(facilitySelectionProvider.notifier)
-        //     .changeLicense(value as String);
+        ref.read(primaryFacilityProvider.notifier).state = value!;
       },
     );
 
     // Render the dropdown.
     return Container(
       height: 45.0,
-      width: 100.0,
+      width: 150.0,
       child: dropdown,
     );
   }

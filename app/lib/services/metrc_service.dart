@@ -154,7 +154,6 @@ class MetrcFacilities {
     String? state,
   }) async {
     String endpoint = '/api/metrc/facilities';
-    List<Facility> items = [];
     Map<String, dynamic> options = {
       'params': {'org_id': orgId, 'state': state}
     };
@@ -162,6 +161,7 @@ class MetrcFacilities {
       endpoint,
       options: options,
     );
+    List<Facility> items = [];
     for (var item in response) {
       items.add(Facility.fromMap(item));
     }
@@ -220,8 +220,34 @@ class MetrcLocations {
     );
   }
 
+  // Get locations.
+  static Future<List<Location>> getLocations({
+    String? licenseNumber,
+    String? orgId,
+    String? state,
+  }) async {
+    String endpoint = '/api/metrc/locations';
+    final response = await APIService.apiRequest(
+      endpoint,
+      options: {
+        'params': {
+          'license': licenseNumber,
+          'org_id': orgId,
+          'state': state,
+        }
+      },
+    );
+    List<Location> items = [];
+    for (var item in response) {
+      print('ITEM:');
+      print(item);
+      items.add(Location.fromMap(item));
+    }
+    return items;
+  }
+
   // Get a location.
-  static Future<void> getLocation(String licenseNumber, String id) async {
+  static Future<Location> getLocation(String licenseNumber, String id) async {
     String endpoint = '/api/metrc/locations/$id';
     return await APIService.apiRequest(
       endpoint,

@@ -7,6 +7,8 @@
 // Updated: 3/7/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+import 'package:cannlytics_app/utils/strings/string_format.dart';
+
 typedef FacilityId = String;
 
 /// Model representing an organization.
@@ -54,7 +56,7 @@ class Facility {
   // Create model.
   factory Facility.fromMap(Map<dynamic, dynamic> data) {
     return Facility(
-      id: data['id'] ?? '',
+      id: Format.slugify(data['display_name']),
       alias: data['alias'] ?? '',
       credentialedDate: data['credentialed_date'] ?? '',
       displayName: data['display_name'] ?? '',

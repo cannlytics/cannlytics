@@ -4,8 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/5/2023
+// Updated: 3/7/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+import 'dart:convert';
 
 import 'package:cannlytics_app/services/api_service.dart';
 import 'package:cannlytics_app/services/firestore_service.dart';
@@ -24,12 +26,12 @@ class Organization {
     this.email = '',
     this.externalId = '',
     this.licenses,
-    required this.name,
-    required this.owner,
+    this.name,
+    this.owner,
     this.phone = '',
-    this.public = false,
+    this.public,
     this.state = '',
-    required this.team,
+    this.team,
     this.tradeName = '',
     this.type = '',
     this.website = '',
@@ -38,39 +40,53 @@ class Organization {
 
   // Properties.
   final OrganizationId id;
-  final String address;
-  final String city;
-  final String country;
-  final String email;
-  final String externalId;
-  final List<Map?>? licenses;
-  final String name;
-  final String owner;
-  final String phone;
-  final bool public;
-  final String state;
-  final List<dynamic> team;
-  final String tradeName;
-  final String type;
-  final String website;
-  final String zipCode;
+  final String? address;
+  final String? city;
+  final String? country;
+  final String? email;
+  final String? externalId;
+  final List<dynamic>? licenses;
+  final String? name;
+  final String? owner;
+  final String? phone;
+  final bool? public;
+  final String? state;
+  final List<dynamic>? team;
+  final String? tradeName;
+  final String? type;
+  final String? website;
+  final String? zipCode;
 
   // Create model.
   factory Organization.fromMap(Map<dynamic, dynamic> data) {
+    var _licenses = data['licenses'];
+    if (_licenses is String) {
+      _licenses = List<dynamic>.from(jsonDecode(_licenses));
+    }
+    var _team = data['team'];
+    if (_team is String) {
+      _team = List<String>.from(jsonDecode(_team));
+    }
+    var _public = data['public'];
+    if (_public == 'true') {
+      _public = true;
+    } else if (_public == 'false') {
+      _public = false;
+    }
     return Organization(
-      id: Format.slugify(data['name']),
+      id: data['id'] ?? Format.slugify(data['name']),
       address: data['address'],
       city: data['city'],
       country: data['country'],
       email: data['email'],
       externalId: data['external_id'],
-      licenses: data['licenses'],
+      licenses: _licenses,
       name: data['name'],
       owner: data['owner'],
       phone: data['phone'],
-      public: data['public'],
+      public: _public,
       state: data['state'],
-      team: data['team'],
+      team: _team,
       tradeName: data['trade_name'],
       type: data['type'],
       website: data['website'],
@@ -104,20 +120,20 @@ class Organization {
   // Create Organization.
   Future<void> create() async {
     Map data = this.toMap();
-    String orgId = Format.slugify(this.name);
+    String orgId = Format.slugify(this.name!);
     await APIService.apiRequest('/organizations/$orgId', data: data);
   }
 
   // Update Organization.
   Future<void> update() async {
     Map data = this.toMap();
-    String orgId = Format.slugify(this.name);
+    String orgId = Format.slugify(this.name!);
     await APIService.apiRequest('/organizations/$orgId', data: data);
   }
 
   // Delete Organization.
   Future<void> delete() async {
-    String orgId = Format.slugify(this.name);
+    String orgId = Format.slugify(this.name!);
     await APIService.apiRequest(
       '/organizations/$orgId',
       options: {'delete': true},
@@ -133,7 +149,7 @@ class Organization {
     required FirestoreService db,
     String? uid,
   }) {
-    String orgId = Format.slugify(this.name);
+    String orgId = Format.slugify(this.name!);
     return db.fetchCollection(
       path: 'organizations/$orgId/logs',
       builder: (data, documentId) => data!,
