@@ -1,8 +1,0 @@
-# Inventory
-
-## Categories
-
-## Items
-
-## Packages
-

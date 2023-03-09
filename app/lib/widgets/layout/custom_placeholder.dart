@@ -7,8 +7,11 @@
 // Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-import 'package:cannlytics_app/constants/design.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:cannlytics_app/constants/design.dart';
 
 /// A custom placeholder.
 class CustomPlaceholder extends StatelessWidget {

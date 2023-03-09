@@ -7,8 +7,11 @@
 // Updated: 3/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-import 'package:cannlytics_app/services/firestore_service.dart';
+// Package imports:
 import 'package:intl/intl.dart';
+
+// Project imports:
+import 'package:cannlytics_app/services/firestore_service.dart';
 
 typedef LogId = String;
 

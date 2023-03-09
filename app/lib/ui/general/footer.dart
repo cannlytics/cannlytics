@@ -14,8 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/utils/web/web.dart';
 
 /// A footer with links at the bottom of the app.

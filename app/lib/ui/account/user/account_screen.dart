@@ -8,8 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
-import 'package:cannlytics_app/widgets/layout/shimmer.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -18,8 +16,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/models/user.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
@@ -28,7 +26,9 @@ import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialogs.dart';
 import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 import 'package:cannlytics_app/widgets/buttons/action_text_button.dart';
+import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/images/avatar.dart';
+import 'package:cannlytics_app/widgets/layout/shimmer.dart';
 
 /// Screen for the user to manage their account.
 class AccountScreen extends StatelessWidget {

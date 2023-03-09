@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/26/2023
-// Updated: 3/8/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -12,7 +12,6 @@ import 'package:cannlytics_app/models/metrc/category.dart';
 import 'package:cannlytics_app/models/metrc/delivery.dart';
 import 'package:cannlytics_app/models/metrc/employee.dart';
 import 'package:cannlytics_app/models/metrc/facility.dart';
-import 'package:cannlytics_app/models/metrc/harvest.dart';
 import 'package:cannlytics_app/models/metrc/item.dart';
 import 'package:cannlytics_app/models/metrc/lab_result.dart';
 import 'package:cannlytics_app/models/metrc/lab_test.dart';
@@ -21,6 +20,7 @@ import 'package:cannlytics_app/models/metrc/package.dart';
 import 'package:cannlytics_app/models/metrc/patient.dart';
 import 'package:cannlytics_app/models/metrc/plant.dart';
 import 'package:cannlytics_app/models/metrc/plant_batch.dart';
+import 'package:cannlytics_app/models/metrc/plant_harvest.dart';
 import 'package:cannlytics_app/models/metrc/sales_receipt.dart';
 import 'package:cannlytics_app/models/metrc/sales_transaction.dart';
 import 'package:cannlytics_app/models/metrc/strain.dart';

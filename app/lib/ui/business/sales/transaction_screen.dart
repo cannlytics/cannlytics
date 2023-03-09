@@ -3,8 +3,8 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 2/17/2023
-// Updated: 2/18/2023
+// Created: 3/9/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -20,23 +20,29 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_app/models/consumer/entry.dart';
 import 'package:cannlytics_app/models/consumer/job.dart';
-import 'package:cannlytics_app/ui/business/inventory/items/item_controller.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
+import 'package:cannlytics_app/ui/business/items/item_controller.dart';
+import 'package:cannlytics_app/ui/business/packages/packages_service.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/utils/strings/string_format.dart';
 import 'package:cannlytics_app/widgets/inputs/date_time_picker.dart';
 
-class EntryScreen extends ConsumerStatefulWidget {
-  const EntryScreen({super.key, required this.jobId, this.entryId, this.entry});
+/// The sales transaction screen.
+class TransactionScreen extends ConsumerStatefulWidget {
+  const TransactionScreen({
+    super.key,
+    required this.jobId,
+    this.entryId,
+    this.entry,
+  });
   final JobID jobId;
   final EntryID? entryId;
   final Entry? entry;
 
   @override
-  ConsumerState<EntryScreen> createState() => _EntryPageState();
+  ConsumerState<TransactionScreen> createState() => _TransactionScreenState();
 }
 
-class _EntryPageState extends ConsumerState<EntryScreen> {
+class _TransactionScreenState extends ConsumerState<TransactionScreen> {
   late DateTime _startDate;
   late TimeOfDay _startTime;
   late DateTime _endDate;
@@ -58,10 +64,20 @@ class _EntryPageState extends ConsumerState<EntryScreen> {
   }
 
   Entry _entryFromState() {
-    final start = DateTime(_startDate.year, _startDate.month, _startDate.day,
-        _startTime.hour, _startTime.minute);
-    final end = DateTime(_endDate.year, _endDate.month, _endDate.day,
-        _endTime.hour, _endTime.minute);
+    final start = DateTime(
+      _startDate.year,
+      _startDate.month,
+      _startDate.day,
+      _startTime.hour,
+      _startTime.minute,
+    );
+    final end = DateTime(
+      _endDate.year,
+      _endDate.month,
+      _endDate.day,
+      _endTime.hour,
+      _endTime.minute,
+    );
     final id = widget.entry?.id ?? documentIdFromCurrentDate();
     return Entry(
       id: id,
@@ -88,18 +104,24 @@ class _EntryPageState extends ConsumerState<EntryScreen> {
       (_, state) => state.showAlertDialogOnError(context),
     );
     return Scaffold(
+      // App bar.
       appBar: AppBar(
         title: Text(widget.entry != null ? 'Edit Entry' : 'New Entry'),
         actions: <Widget>[
           TextButton(
             child: Text(
               widget.entry != null ? 'Update' : 'Create',
-              style: const TextStyle(fontSize: 18.0, color: Colors.white),
+              style: const TextStyle(
+                fontSize: 18.0,
+                color: Colors.white,
+              ),
             ),
             onPressed: () => _setEntryAndDismiss(),
           ),
         ],
       ),
+
+      // Body.
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(16.0),
@@ -120,6 +142,7 @@ class _EntryPageState extends ConsumerState<EntryScreen> {
     );
   }
 
+  // Start date.
   Widget _buildStartDate() {
     return DateTimePicker(
       labelText: 'Start',
@@ -130,6 +153,7 @@ class _EntryPageState extends ConsumerState<EntryScreen> {
     );
   }
 
+  // End date.
   Widget _buildEndDate() {
     return DateTimePicker(
       labelText: 'End',
@@ -140,6 +164,7 @@ class _EntryPageState extends ConsumerState<EntryScreen> {
     );
   }
 
+  // Duration.
   Widget _buildDuration() {
     final currentEntry = _entryFromState();
     final durationFormatted = Format.hours(currentEntry.durationInHours);
@@ -148,7 +173,10 @@ class _EntryPageState extends ConsumerState<EntryScreen> {
       children: <Widget>[
         Text(
           'Duration: $durationFormatted',
-          style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            fontSize: 18.0,
+            fontWeight: FontWeight.w500,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -156,6 +184,7 @@ class _EntryPageState extends ConsumerState<EntryScreen> {
     );
   }
 
+  // Comment.
   Widget _buildComment() {
     return TextField(
       keyboardType: TextInputType.text,
@@ -163,10 +192,16 @@ class _EntryPageState extends ConsumerState<EntryScreen> {
       controller: TextEditingController(text: _comment),
       decoration: const InputDecoration(
         labelText: 'Comment',
-        labelStyle: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
+        labelStyle: TextStyle(
+          fontSize: 18.0,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       keyboardAppearance: Brightness.light,
-      style: const TextStyle(fontSize: 20.0, color: Colors.black),
+      style: const TextStyle(
+        fontSize: 20.0,
+        color: Colors.black,
+      ),
       maxLines: null,
       onChanged: (comment) => _comment = comment,
     );

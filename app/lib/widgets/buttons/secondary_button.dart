@@ -8,8 +8,10 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:cannlytics_app/constants/theme.dart';
 
 /// Secondary button based on [TextButton].
 /// [isDark] - Whether or not the theme is dark.

@@ -8,19 +8,19 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/models/metrc/transfer.dart';
-import 'package:cannlytics_app/ui/business/transfers/transfers_controller.dart';
-import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
-import 'package:cannlytics_app/widgets/layout/table_form.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:cannlytics_app/models/metrc/transfer.dart';
+import 'package:cannlytics_app/ui/business/transfers/transfers_controller.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
-import 'package:go_router/go_router.dart';
+import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
+import 'package:cannlytics_app/widgets/layout/table_form.dart';
 
 /// The transfers screen.
 class TransfersScreen extends StatelessWidget {
@@ -78,7 +78,7 @@ class TransfersTable extends ConsumerWidget {
     final rowsPerPage = ref.watch(transfersRowsPerPageProvider);
 
     // Format the table headers.
-    List<String> headers = ['ID', 'Name', 'Testing Status'];
+    List<String> headers = ['ID', 'Manifest Number', 'Name'];
     List<DataColumn> tableHeader = <DataColumn>[
       for (String header in headers)
         DataColumn(
@@ -139,8 +139,8 @@ class TransfersTableSource extends DataTableSource {
       },
       cells: <DataCell>[
         DataCell(Text(item.id)),
-        DataCell(Text(item.fullName)),
-        DataCell(Text(item.license)),
+        DataCell(Text(item.manifestNumber)),
+        DataCell(Text(item.name)),
       ],
     );
   }

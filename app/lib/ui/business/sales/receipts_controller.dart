@@ -3,44 +3,44 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 3/8/2023
-// Updated: 3/8/2023
+// Created: 3/9/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/metrc/employee.dart';
+import 'package:cannlytics_app/models/metrc/sales_receipt.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
 
-// Employees rows per page provider.
-final employeesRowsPerPageProvider = StateProvider<int>((ref) => 5);
+// Receipts rows per page provider.
+final receiptsRowsPerPageProvider = StateProvider<int>((ref) => 5);
 
-// Employees provider.
-final employeesProvider =
-    AsyncNotifierProvider<EmployeesController, List<Employee>>(() {
-  return EmployeesController();
+// Receipts provider.
+final receiptsProvider =
+    AsyncNotifierProvider<ReceiptsController, List<SalesReceipt>>(() {
+  return ReceiptsController();
 });
 
-/// Employees controller.
-class EmployeesController extends AsyncNotifier<List<Employee>> {
+/// Receipts controller.
+class ReceiptsController extends AsyncNotifier<List<SalesReceipt>> {
   @override
-  Future<List<Employee>> build() async {
+  Future<List<SalesReceipt>> build() async {
     // Load initial data from Metrc.
-    return _getEmployees();
+    return _getReceipts();
   }
 
-  /// Get employees.
-  Future<List<Employee>> _getEmployees() async {
+  /// Get receipts.
+  Future<List<SalesReceipt>> _getReceipts() async {
     // final licenseNumber = ref.watch(primaryLicenseProvider);
     final licenseNumber = '010-X0001';
     final orgId = ref.watch(primaryOrganizationProvider);
     final state = ref.watch(primaryStateProvider);
     try {
       // FIXME:
-      // return await MetrcEmployees.getEmployees(
+      // return await MetrcReceipts.getReceipts(
       //   licenseNumber: licenseNumber,
       //   orgId: orgId,
       //   state: state,
@@ -52,11 +52,11 @@ class EmployeesController extends AsyncNotifier<List<Employee>> {
     }
   }
 
-  // TODO: Get delivery.
+  // TODO: Get receipt.
 
-  // TODO: Create delivery.
+  // TODO: Create receipt.
 
-  // TODO: Update delivery.
+  // TODO: Update receipt.
 
-  // TODO: Delete delivery.
+  // TODO: Delete receipt.
 }

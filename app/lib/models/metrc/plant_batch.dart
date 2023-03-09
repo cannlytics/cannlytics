@@ -4,13 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/27/2023
-// Updated: 2/27/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
 import 'package:cannlytics_app/models/metrc/strain.dart';
 
-typedef PlantBatchId = int;
+typedef PlantBatchId = String;
 
 /// Model representing a plant batch.
 class PlantBatch {
@@ -65,9 +65,9 @@ class PlantBatch {
   final DateTime lastModified;
 
   // Create model.
-  factory PlantBatch.fromMap(Map<String, dynamic> data, int uid) {
+  factory PlantBatch.fromMap(Map<String, dynamic> data) {
     return PlantBatch(
-      id: uid,
+      id: data['id'] ?? '',
       name: data['name'] as String,
       type: data['type'] as String,
       locationId: data['location_id'] as int,

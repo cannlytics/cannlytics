@@ -8,10 +8,12 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_app/models/metrc/transfer.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Transfers rows per page provider.
 final transfersRowsPerPageProvider = StateProvider<int>((ref) => 5);

@@ -18,7 +18,7 @@ import 'package:cannlytics_app/models/consumer/job.dart';
 import 'package:cannlytics_app/models/stats/daily_jobs.dart';
 import 'package:cannlytics_app/models/user.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
+import 'package:cannlytics_app/ui/business/packages/packages_service.dart';
 import 'package:cannlytics_app/utils/strings/string_format.dart';
 
 class EntriesListTileModel {

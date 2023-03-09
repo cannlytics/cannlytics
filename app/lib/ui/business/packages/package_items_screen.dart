@@ -18,12 +18,12 @@ import 'package:go_router/go_router.dart';
 import 'package:cannlytics_app/models/consumer/job.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/routing/routes.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/package_items_list.dart';
-import 'package:cannlytics_app/ui/business/inventory/packages/packages_service.dart';
+import 'package:cannlytics_app/ui/business/packages/package_items_list.dart';
+import 'package:cannlytics_app/ui/business/packages/packages_service.dart';
 import 'package:cannlytics_app/widgets/layout/async_value_widget.dart';
 
-class JobItemsScreen extends ConsumerWidget {
-  const JobItemsScreen({super.key, required this.jobId});
+class PackageScreen extends ConsumerWidget {
+  const PackageScreen({super.key, required this.jobId});
   final JobID jobId;
 
   @override

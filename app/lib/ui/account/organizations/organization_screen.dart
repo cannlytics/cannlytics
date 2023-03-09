@@ -11,13 +11,6 @@
 import 'dart:async';
 
 // Flutter imports:
-import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/models/metrc/license.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/ui/account/licenses/licenses_controller.dart';
-import 'package:cannlytics_app/ui/account/organizations/organizations_controller.dart';
-import 'package:cannlytics_app/ui/general/footer.dart';
-import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -25,6 +18,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/models/metrc/license.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/ui/account/licenses/licenses_controller.dart';
+import 'package:cannlytics_app/ui/account/organizations/organizations_controller.dart';
+import 'package:cannlytics_app/ui/general/footer.dart';
+import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 
 class OrganizationScreen extends ConsumerWidget {

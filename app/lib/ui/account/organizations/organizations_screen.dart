@@ -8,23 +8,23 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/models/organization.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/ui/general/app_controller.dart';
-import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
-import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
-import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
-import 'package:cannlytics_app/widgets/layout/table_form.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/models/organization.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
-import 'package:go_router/go_router.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
+import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
+import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
+import 'package:cannlytics_app/widgets/layout/table_form.dart';
 
 /// Organizations screen.
 class OrganizationsScreen extends ConsumerWidget {

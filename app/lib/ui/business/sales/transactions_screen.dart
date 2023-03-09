@@ -3,8 +3,8 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 3/8/2023
-// Updated: 3/8/2023
+// Created: 3/9/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -15,16 +15,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/metrc/patient.dart';
-import 'package:cannlytics_app/ui/business/patients/patients_controller.dart';
+import 'package:cannlytics_app/models/metrc/sales_transaction.dart';
+import 'package:cannlytics_app/ui/business/sales/transactions_controller.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/table_form.dart';
 
-/// The patients screen.
-class PatientsScreen extends StatelessWidget {
-  const PatientsScreen({super.key});
+/// The transactions screen.
+class TransactionsScreen extends StatelessWidget {
+  const TransactionsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +35,11 @@ class PatientsScreen extends StatelessWidget {
           // App header.
           const SliverToBoxAdapter(child: AppHeader()),
 
-          // Patients form.
+          // Transactions form.
           SliverToBoxAdapter(
             child: TableForm(
-              title: 'Patients',
-              table: PatientsTable(),
+              title: 'Transactions',
+              table: TransactionsTable(),
             ),
           ),
 
@@ -51,23 +51,24 @@ class PatientsScreen extends StatelessWidget {
   }
 }
 
-/// Patients table.
-class PatientsTable extends ConsumerWidget {
-  const PatientsTable({super.key});
+/// Transactions table.
+class TransactionsTable extends ConsumerWidget {
+  const TransactionsTable({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the data for the primary license / facility.
-    final data = ref.watch(patientsProvider).value ?? [];
+    final data = ref.watch(transactionsProvider).value ?? [];
 
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
         image: 'assets/images/icons/products.png',
-        title: 'No patients',
-        description: 'You do not have any active patients for this facility.',
+        title: 'No transactions',
+        description:
+            'You do not have any active transactions for this facility.',
         onTap: () {
-          context.go('/patients/new');
+          context.go('/transactions/new');
         },
       );
 
@@ -75,10 +76,10 @@ class PatientsTable extends ConsumerWidget {
     print(data[0]);
 
     // Get the rows per page.
-    final rowsPerPage = ref.watch(patientsRowsPerPageProvider);
+    final rowsPerPage = ref.watch(transactionsRowsPerPageProvider);
 
     // Format the table headers.
-    List<String> headers = ['ID', 'License', 'License'];
+    List<String> headers = ['ID', 'Manifest Number', 'Name'];
     List<DataColumn> tableHeader = <DataColumn>[
       for (String header in headers)
         DataColumn(
@@ -102,30 +103,29 @@ class PatientsTable extends ConsumerWidget {
       availableRowsPerPage: [5, 10, 25, 50],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
-        ref.read(patientsRowsPerPageProvider.notifier).state = index!;
+        ref.read(transactionsRowsPerPageProvider.notifier).state = index!;
       },
       showCheckboxColumn: false,
-      source: PatientsTableSource(
+      source: TransactionsTableSource(
         data: data,
-        onTap: (Patient item) {
-          // String slug = Format.slugify(item.name);
-          context.go('/patients/${item.id}');
+        onTap: (SalesTransaction item) {
+          context.go('/transactions/${item.invoiceNumber}');
         },
       ),
     );
   }
 }
 
-/// Patients table data.
-class PatientsTableSource extends DataTableSource {
-  PatientsTableSource({
+/// Transactions table data.
+class TransactionsTableSource extends DataTableSource {
+  TransactionsTableSource({
     required this.data,
     this.onTap,
   });
 
   // Properties.
-  final List<Patient> data;
-  final void Function(Patient item)? onTap;
+  final List<SalesTransaction> data;
+  final void Function(SalesTransaction item)? onTap;
 
   @override
   DataRow getRow(int index) {
@@ -138,9 +138,9 @@ class PatientsTableSource extends DataTableSource {
         }
       },
       cells: <DataCell>[
-        DataCell(Text(item.id)),
-        DataCell(Text(item.licenseNumber)),
-        DataCell(Text(item.licenseNumber)),
+        DataCell(Text(item.packageLabel)),
+        DataCell(Text(item.invoiceNumber)),
+        DataCell(Text(item.unitThcContentUnitOfMeasure)),
       ],
     );
   }

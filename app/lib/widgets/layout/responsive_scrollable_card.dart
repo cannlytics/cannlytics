@@ -11,8 +11,8 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/widgets/layout/responsive_center.dart';
 
 /// Scrollable widget that shows a responsive card with a given child widget.

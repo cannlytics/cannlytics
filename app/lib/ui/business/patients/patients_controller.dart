@@ -8,10 +8,12 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_app/models/metrc/patient.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Patients rows per page provider.
 final patientsRowsPerPageProvider = StateProvider<int>((ref) => 5);

@@ -8,9 +8,13 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
+
+// Project imports:
+import 'package:cannlytics_app/constants/theme.dart';
 
 /// App logo.
 class AppLogo extends StatelessWidget {

@@ -3,8 +3,8 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 3/8/2023
-// Updated: 3/8/2023
+// Created: 3/9/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -15,16 +15,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/metrc/patient.dart';
-import 'package:cannlytics_app/ui/business/patients/patients_controller.dart';
+import 'package:cannlytics_app/models/metrc/plant_batch.dart';
+import 'package:cannlytics_app/ui/business/plants/plant_batches_controller.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/table_form.dart';
 
-/// The patients screen.
-class PatientsScreen extends StatelessWidget {
-  const PatientsScreen({super.key});
+/// The plant batches screen.
+class PlantBatchesScreen extends StatelessWidget {
+  const PlantBatchesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +35,11 @@ class PatientsScreen extends StatelessWidget {
           // App header.
           const SliverToBoxAdapter(child: AppHeader()),
 
-          // Patients form.
+          // Form.
           SliverToBoxAdapter(
             child: TableForm(
-              title: 'Patients',
-              table: PatientsTable(),
+              title: 'Plants Batches',
+              table: PlantBatchesTable(),
             ),
           ),
 
@@ -51,23 +51,23 @@ class PatientsScreen extends StatelessWidget {
   }
 }
 
-/// Patients table.
-class PatientsTable extends ConsumerWidget {
-  const PatientsTable({super.key});
+/// PlantBatches table.
+class PlantBatchesTable extends ConsumerWidget {
+  const PlantBatchesTable({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the data for the primary license / facility.
-    final data = ref.watch(patientsProvider).value ?? [];
+    final data = ref.watch(plantBatchesProvider).value ?? [];
 
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
         image: 'assets/images/icons/products.png',
-        title: 'No patients',
-        description: 'You do not have any active patients for this facility.',
+        title: 'No plants',
+        description: 'You do not have any active plants for this facility.',
         onTap: () {
-          context.go('/patients/new');
+          context.go('/plants/new');
         },
       );
 
@@ -75,10 +75,10 @@ class PatientsTable extends ConsumerWidget {
     print(data[0]);
 
     // Get the rows per page.
-    final rowsPerPage = ref.watch(patientsRowsPerPageProvider);
+    final rowsPerPage = ref.watch(plantBatchesRowsPerPageProvider);
 
     // Format the table headers.
-    List<String> headers = ['ID', 'License', 'License'];
+    List<String> headers = ['ID', 'Strain Name', 'Batch Name'];
     List<DataColumn> tableHeader = <DataColumn>[
       for (String header in headers)
         DataColumn(
@@ -102,30 +102,30 @@ class PatientsTable extends ConsumerWidget {
       availableRowsPerPage: [5, 10, 25, 50],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
-        ref.read(patientsRowsPerPageProvider.notifier).state = index!;
+        ref.read(plantBatchesRowsPerPageProvider.notifier).state = index!;
       },
       showCheckboxColumn: false,
-      source: PatientsTableSource(
+      source: PlantBatchesTableSource(
         data: data,
-        onTap: (Patient item) {
+        onTap: (PlantBatch item) {
           // String slug = Format.slugify(item.name);
-          context.go('/patients/${item.id}');
+          context.go('/batches/${item.id}');
         },
       ),
     );
   }
 }
 
-/// Patients table data.
-class PatientsTableSource extends DataTableSource {
-  PatientsTableSource({
+/// PlantBatches table data.
+class PlantBatchesTableSource extends DataTableSource {
+  PlantBatchesTableSource({
     required this.data,
     this.onTap,
   });
 
   // Properties.
-  final List<Patient> data;
-  final void Function(Patient item)? onTap;
+  final List<PlantBatch> data;
+  final void Function(PlantBatch item)? onTap;
 
   @override
   DataRow getRow(int index) {
@@ -139,8 +139,8 @@ class PatientsTableSource extends DataTableSource {
       },
       cells: <DataCell>[
         DataCell(Text(item.id)),
-        DataCell(Text(item.licenseNumber)),
-        DataCell(Text(item.licenseNumber)),
+        DataCell(Text(item.name)),
+        DataCell(Text(item.strainName)),
       ],
     );
   }

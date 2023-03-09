@@ -8,9 +8,11 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_app/models/organization.dart';
 import 'package:cannlytics_app/services/api_service.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // User type provider.
 final userTypeProvider = StateProvider<String>((ref) => 'business');

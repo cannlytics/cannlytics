@@ -4,12 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/27/2023
-// Updated: 2/27/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
 import 'package:cannlytics_app/models/metrc/strain.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
+
+typedef HarvestId = String;
 
 /// Model representing a harvest of cannabis.
 class Harvest {
@@ -44,7 +46,7 @@ class Harvest {
   });
 
   // Properties.
-  final int id;
+  final HarvestId id;
   final DateTime archivedDate;
   final double currentWeight;
   final int dryingLocationId;
@@ -74,7 +76,7 @@ class Harvest {
   // Create model.
   factory Harvest.fromMap(Map<String, dynamic> data) {
     return Harvest(
-      id: data['id'] as int,
+      id: data['id'] ?? '',
       archivedDate: data['archived_date'] as DateTime,
       currentWeight: data['current_weight'] as double,
       dryingLocationId: data['drying_location_id'] as int,

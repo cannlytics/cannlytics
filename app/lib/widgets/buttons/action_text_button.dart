@@ -11,8 +11,8 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/constants/theme.dart';
 
 /// Text button to be used as an [AppBar] action.
 class ActionTextButton extends StatelessWidget {

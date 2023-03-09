@@ -7,6 +7,8 @@
 // Updated: 3/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // Reference: https://docs.flutter.dev/cookbook/effects/shimmer-loading
+
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 /// The shimmer color gradient.

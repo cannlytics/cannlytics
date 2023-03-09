@@ -8,19 +8,19 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/models/metrc/employee.dart';
-import 'package:cannlytics_app/ui/business/employees/employees_controller.dart';
-import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
-import 'package:cannlytics_app/widgets/layout/table_form.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:cannlytics_app/models/metrc/employee.dart';
+import 'package:cannlytics_app/ui/business/employees/employees_controller.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
-import 'package:go_router/go_router.dart';
+import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
+import 'package:cannlytics_app/widgets/layout/table_form.dart';
 
 /// The employees screen.
 class EmployeesScreen extends StatelessWidget {

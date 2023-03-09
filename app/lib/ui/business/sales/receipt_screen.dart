@@ -3,8 +3,8 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 3/8/2023
-// Updated: 3/8/2023
+// Created: 3/9/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -26,9 +26,9 @@ import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/utils/strings/string_format.dart';
 import 'package:cannlytics_app/widgets/inputs/date_time_picker.dart';
 
-/// The employee screen.
-class StrainScreen extends ConsumerStatefulWidget {
-  const StrainScreen({
+/// The sales receipt screen.
+class ReceiptScreen extends ConsumerStatefulWidget {
+  const ReceiptScreen({
     super.key,
     required this.jobId,
     this.entryId,
@@ -39,10 +39,10 @@ class StrainScreen extends ConsumerStatefulWidget {
   final Entry? entry;
 
   @override
-  ConsumerState<StrainScreen> createState() => _StrainScreenState();
+  ConsumerState<ReceiptScreen> createState() => _ReceiptScreenState();
 }
 
-class _StrainScreenState extends ConsumerState<StrainScreen> {
+class _ReceiptScreenState extends ConsumerState<ReceiptScreen> {
   late DateTime _startDate;
   late TimeOfDay _startTime;
   late DateTime _endDate;

@@ -11,13 +11,13 @@
 import 'dart:async';
 
 // Package imports:
-import 'package:cannlytics_app/models/metrc/license.dart';
-import 'package:cannlytics_app/models/user.dart';
-import 'package:cannlytics_app/services/firestore_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
+import 'package:cannlytics_app/models/metrc/license.dart';
+import 'package:cannlytics_app/models/user.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
+import 'package:cannlytics_app/services/firestore_service.dart';
 
 // Licenses provider.
 final licensesProvider =

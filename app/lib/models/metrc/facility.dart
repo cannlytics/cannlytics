@@ -7,6 +7,7 @@
 // Updated: 3/7/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Project imports:
 import 'package:cannlytics_app/utils/strings/string_format.dart';
 
 typedef FacilityId = String;
