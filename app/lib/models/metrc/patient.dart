@@ -4,13 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/27/2023
-// Updated: 2/27/2023
+// Updated: 3/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
 import 'package:cannlytics_app/services/metrc_service.dart';
 
-typedef PatientId = int;
+typedef PatientId = String;
 
 /// Model representing a patient.
 class Patient {
@@ -39,9 +39,9 @@ class Patient {
   final int otherFacilitiesCount;
 
   // Create model.
-  factory Patient.fromMap(Map<String, dynamic> data, int uid) {
+  factory Patient.fromMap(Map<String, dynamic> data) {
     return Patient(
-      id: uid,
+      id: data['id'] ?? '',
       licenseNumber: data['license_number'] as String,
       registrationDate: DateTime.parse(data['registration_date'] as String),
       licenseEffectiveStartDate:

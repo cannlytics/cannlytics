@@ -238,7 +238,7 @@ class MobileNavigationMenu extends ConsumerWidget {
                     // User photo.
                     gapW12,
                     Avatar(
-                      photoUrl: user!.photoURL,
+                      photoUrl: user.photoURL,
                       radius: 24,
                       borderColor: Theme.of(context).secondaryHeaderColor,
                       borderWidth: 1.0,

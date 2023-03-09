@@ -3,32 +3,32 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 2/27/2023
+// Created: 3/8/2023
 // Updated: 3/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
 import 'package:cannlytics_app/services/metrc_service.dart';
 
-typedef EmployeeId = String;
+typedef TransferId = String;
 
 /// Model representing an employee.
-class Employee {
+class Transfer {
   // Initialization.
-  const Employee({
+  const Transfer({
     required this.id,
     required this.fullName,
     required this.license,
   });
 
   // Properties.
-  final EmployeeId id;
+  final TransferId id;
   final String fullName;
   final String license;
 
   // Create model.
-  factory Employee.fromMap(Map<String, dynamic> data) {
-    return Employee(
+  factory Transfer.fromMap(Map<String, dynamic> data) {
+    return Transfer(
       id: data['id'] ?? '',
       fullName: data['full_name'] ?? '',
       license: data['license'] ?? '',
@@ -44,21 +44,21 @@ class Employee {
     };
   }
 
-  // Create Employee.
+  // Create Transfer.
   Future<void> create() async {
     // Call an API or database to create a new employee.
-    // await MetrcService.createEmployee(this.toMap());
+    // await MetrcService.createTransfer(this.toMap());
   }
 
-  // Update Employee.
+  // Update Transfer.
   Future<void> update() async {
     // Call an API or database to update the existing employee.
-    // await MetrcService.updateEmployee(this.id, this.toMap());
+    // await MetrcService.updateTransfer(this.id, this.toMap());
   }
 
-  // Delete Employee.
+  // Delete Transfer.
   Future<void> delete() async {
     // Call an API or database to delete the existing employee.
-    // await MetrcService.deleteEmployee(this.id);
+    // await MetrcService.deleteTransfer(this.id);
   }
 }

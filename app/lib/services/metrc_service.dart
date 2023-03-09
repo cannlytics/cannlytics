@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/26/2023
-// Updated: 3/5/2023
+// Updated: 3/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -181,7 +181,7 @@ class MetrcEmployees {
       options: {'params': params},
     );
     for (var item in response) {
-      items.add(Employee.fromMap(item, item['id']));
+      items.add(Employee.fromMap(item));
     }
     return items;
   }

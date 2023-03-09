@@ -16,8 +16,18 @@ import 'package:cannlytics_app/ui/account/licenses/licenses_screen.dart';
 import 'package:cannlytics_app/ui/account/organizations/organization_screen.dart';
 import 'package:cannlytics_app/ui/account/organizations/organizations_screen.dart';
 import 'package:cannlytics_app/ui/account/user/reset_password_screen.dart';
+import 'package:cannlytics_app/ui/business/deliveries/deliveries_screen.dart';
+import 'package:cannlytics_app/ui/business/deliveries/delivery_screen.dart';
+import 'package:cannlytics_app/ui/business/employees/employee_screen.dart';
+import 'package:cannlytics_app/ui/business/employees/employees_screen.dart';
 import 'package:cannlytics_app/ui/business/locations/location_screen.dart';
 import 'package:cannlytics_app/ui/business/locations/locations_screen.dart';
+import 'package:cannlytics_app/ui/business/patients/patient_screen.dart';
+import 'package:cannlytics_app/ui/business/patients/patients_screen.dart';
+import 'package:cannlytics_app/ui/business/strains/strain_screen.dart';
+import 'package:cannlytics_app/ui/business/strains/strains_screen.dart';
+import 'package:cannlytics_app/ui/business/transfers/transfer_screen.dart';
+import 'package:cannlytics_app/ui/business/transfers/transfers_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -68,12 +78,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return '/dashboard';
         }
       } else {
-        // if (state.subloc.startsWith('/dashboard') ||
-        //     state.subloc.startsWith('/organizations') ||
-        //     state.subloc.startsWith('/facilities') ||
-        //     state.subloc.startsWith('/locations')) {
-        //   return '/sign-in';
-        // }
         if (!state.subloc.startsWith('/sign-in') &&
             !state.subloc.startsWith('/account/reset-password')) {
           return '/sign-in';
@@ -92,198 +96,203 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // User account screens.
-      GoRoute(
+      AppRoute(
         path: '/account',
         name: AppRoutes.account.name,
-        pageBuilder: (context, state) => NoTransitionPage(
-          key: state.pageKey,
-          child: const AccountScreen(),
-        ),
+        builder: (context, state) => AccountScreen(),
         routes: [
           // Reset password screen.
-          GoRoute(
+          AppRoute(
             path: 'reset-password',
             name: AppRoutes.resetPassword.name,
-            pageBuilder: (context, state) {
-              return MaterialPage(
-                key: state.pageKey,
-                child: ResetPasswordScreen(),
-              );
-            },
+            builder: (context, state) => ResetPasswordScreen(),
           ),
         ],
       ),
 
       // Organizations screen.
-      GoRoute(
+      AppRoute(
         path: '/organizations',
         name: AppRoutes.organizations.name,
-        pageBuilder: (context, state) => MaterialPage(
-          key: state.pageKey,
-          child: OrganizationsScreen(),
-        ),
+        builder: (context, state) => OrganizationsScreen(),
         routes: [
           // Organization screen.
-          GoRoute(
-            path: ':id',
+          AppRoute(
+            path: 'add',
             name: AppRoutes.organization.name,
-            pageBuilder: (context, state) {
-              return MaterialPage(
-                key: state.pageKey,
-                child: OrganizationScreen(),
-              );
-            },
+            builder: (context, state) => OrganizationScreen(),
           ),
         ],
       ),
 
       // License management screen.
-      GoRoute(
+      AppRoute(
         path: '/licenses',
         name: AppRoutes.licenses.name,
-        pageBuilder: (context, state) => MaterialPage(
-          key: state.pageKey,
-          child: LicensesScreen(),
-        ),
+        builder: (context, state) => LicensesScreen(),
         routes: [
-          // Add license screen.
-          GoRoute(
+          // Delivery screen.
+          AppRoute(
             path: 'add',
             name: AppRoutes.addLicense.name,
-            pageBuilder: (context, state) {
-              return MaterialPage(
-                key: state.pageKey,
-                child: AddLicenseScreen(),
-              );
-            },
+            builder: (context, state) => AddLicenseScreen(),
           ),
         ],
       ),
 
       // Dashboard screen.
-      GoRoute(
+      AppRoute(
         path: '/dashboard',
         name: AppRoutes.dashboard.name,
-        pageBuilder: (context, state) => NoTransitionPage(
-          key: state.pageKey,
-          child: const DashboardScreen(),
-        ),
+        builder: (context, state) => DashboardScreen(),
       ),
 
       // Search screen.
-      GoRoute(
+      AppRoute(
         path: '/search',
         name: AppRoutes.search.name,
-        pageBuilder: (context, state) => NoTransitionPage(
-          key: state.pageKey,
-          child: const SearchScreen(),
-        ),
+        builder: (context, state) => SearchScreen(),
       ),
+
+      /* Business screens */
 
       // Deliveries screens.
-      GoRoute(
+      AppRoute(
         path: '/deliveries',
         name: AppRoutes.deliveries.name,
-        pageBuilder: (context, state) => NoTransitionPage(
-          key: state.pageKey,
-          child: const ItemsScreen(),
-        ),
+        builder: (context, state) => DeliveriesScreen(),
+        routes: [
+          // Delivery screen.
+          AppRoute(
+            path: ':id',
+            name: AppRoutes.delivery.name,
+            builder: (context, state) {
+              final id = state.params['id']!;
+              return DeliveryScreen(jobId: id);
+            },
+          ),
+        ],
       ),
 
-      // TODO: Employees screens.
-      // GoRoute(
-      //   path: '/employees',
-      //   name: AppRoutes.employees.name,
-      //   pageBuilder: (context, state) => NoTransitionPage(
-      //     key: state.pageKey,
-      //     child: const ItemsScreen(),
-      //   ),
-      //   routes: [
-      //     // Employee screen.
-      //     GoRoute(
-      //       path: ':id',
-      //       name: AppRoutes.package.name,
-      //       pageBuilder: (context, state) {
-      //         final id = state.params['id']!;
-      //         return MaterialPage(
-      //           key: state.pageKey,
-      //           child: JobItemsScreen(jobId: id),
-      //         );
-      //       },
-      //     ),
-      //   ],
-      // ),
+      // Employees screens.
+      AppRoute(
+        path: '/employees',
+        name: AppRoutes.employees.name,
+        builder: (context, state) => EmployeesScreen(),
+        routes: [
+          // Employee screen.
+          AppRoute(
+            path: ':id',
+            name: AppRoutes.employee.name,
+            builder: (context, state) {
+              final id = state.params['id']!;
+              return EmployeeScreen(jobId: id);
+            },
+          ),
+        ],
+      ),
 
       // Facilities
-      GoRoute(
+      AppRoute(
         path: '/facilities',
         name: AppRoutes.facilities.name,
-        pageBuilder: (context, state) => NoTransitionPage(
-          key: state.pageKey,
-          child: const FacilitiesScreen(),
-        ),
+        builder: (context, state) => FacilitiesScreen(),
         routes: [
           // Facility screen.
-          GoRoute(
+          AppRoute(
             path: ':id',
             name: AppRoutes.facility.name,
-            pageBuilder: (context, state) {
+            builder: (context, state) {
               final id = state.params['id']!;
-              return MaterialPage(
-                key: state.pageKey,
-                child: FacilityScreen(jobId: id),
-              );
+              return FacilityScreen(jobId: id);
             },
           ),
         ],
       ),
 
       // Locations.
-      GoRoute(
+      AppRoute(
         path: '/locations',
         name: AppRoutes.locations.name,
-        pageBuilder: (context, state) => NoTransitionPage(
-          key: state.pageKey,
-          child: const LocationsScreen(),
-        ),
+        builder: (context, state) => LocationsScreen(),
         routes: [
-          // Facility screen.
-          GoRoute(
+          // Location screen.
+          AppRoute(
             path: ':id',
             name: AppRoutes.location.name,
-            pageBuilder: (context, state) {
+            builder: (context, state) {
               final id = state.params['id']!;
-              return MaterialPage(
-                key: state.pageKey,
-                child: LocationScreen(jobId: id),
-              );
+              return LocationScreen(jobId: id);
             },
           ),
         ],
       ),
 
-      // TODO: patients
+      // Patients
+      AppRoute(
+        path: '/patients',
+        name: AppRoutes.patients.name,
+        builder: (context, state) => PatientsScreen(),
+        routes: [
+          // Patient screen.
+          AppRoute(
+            path: ':id',
+            name: AppRoutes.patient.name,
+            builder: (context, state) {
+              final id = state.params['id']!;
+              return PatientScreen(jobId: id);
+            },
+          ),
+        ],
+      ),
 
-      // TODO: plants (plant batches, harvests, waste (methods and reasons),
-      //      additives, adjustments, growth phases)
-
-      // TODO: results (test types)
-
-      // TODO: sales (receipts and transactions)
-
-      // TODO: strains
-
-      // TODO: transfers (transfer types)
-
-      // TODO: homegrow
-
-      // TODO: products
+      // TODO: plants
+      // - plant batches
+      // - harvests
 
       // TODO: results
 
-      // TODO: retailers
+      // TODO: sales receipts
 
-      // TODO: spending
+      // TODO: sales transactions
+
+      // Strains screen.
+      AppRoute(
+        path: '/strains',
+        name: AppRoutes.strains.name,
+        builder: (context, state) => StrainsScreen(),
+        routes: [
+          // Strain screen.
+          AppRoute(
+            path: ':id',
+            name: AppRoutes.strain.name,
+            builder: (context, state) {
+              final id = state.params['id']!;
+              return StrainScreen(jobId: id);
+            },
+          ),
+        ],
+      ),
+
+      // Transfers screen.
+      AppRoute(
+        path: '/transfers',
+        name: AppRoutes.transfers.name,
+        builder: (context, state) => TransfersScreen(),
+        routes: [
+          // Transfer screen.
+          AppRoute(
+            path: ':id',
+            name: AppRoutes.transfer.name,
+            builder: (context, state) {
+              final id = state.params['id']!;
+              return TransferScreen(jobId: id);
+            },
+          ),
+        ],
+      ),
+
+      // TODO: Transfer templates screen.
 
       // Items screen.
       GoRoute(
@@ -386,17 +395,36 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      //   ],
-      // ),
+
+      /* Consumer screens */
+
+      // TODO: homegrow
+
+      // TODO: products
+
+      // TODO: retailers
+
+      // TODO: brands
+
+      // TODO: spending
     ],
   );
 });
 
 /// Custom GoRoute class to make route declaration easier.
 class AppRoute extends GoRoute {
+  // Route properties.
+  final String? name;
+  final String path;
+  final Widget Function(BuildContext, GoRouterState) builder;
+  final bool noTransition;
+  final bool useFade;
+
+  // Route initialization.
   AppRoute({
     required this.path,
     required this.builder,
+    this.noTransition = false,
     this.useFade = false,
     this.name,
     List<GoRoute> routes = const [],
@@ -405,10 +433,13 @@ class AppRoute extends GoRoute {
           name: name,
           routes: routes,
           pageBuilder: (context, state) {
+            // Screen scaffold.
             final pageContent = Scaffold(
               body: builder(context, state),
               resizeToAvoidBottomInset: false,
             );
+
+            // Fade transition screen.
             if (useFade) {
               return CustomTransitionPage(
                 key: state.pageKey,
@@ -426,18 +457,22 @@ class AppRoute extends GoRoute {
                 },
               );
             }
+
+            // No transition screen.
+            if (noTransition) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: pageContent,
+              );
+            }
+
+            // Normal screen.
             return MaterialPage(
               key: state.pageKey,
               child: pageContent,
             );
           },
         );
-
-  // Route properties.
-  final bool useFade;
-  final String? name;
-  final String path;
-  final Widget Function(BuildContext, GoRouterState) builder;
 }
 
 /// GoRouter stream.

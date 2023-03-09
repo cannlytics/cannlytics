@@ -111,7 +111,7 @@ class AccountManagement extends ConsumerWidget {
               // TODO: Change user name.
               if (user.displayName != null)
                 Text(
-                  'Username: ${user!.displayName!}',
+                  'Username: ${user.displayName!}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               gapH8,
@@ -120,7 +120,7 @@ class AccountManagement extends ConsumerWidget {
               // TODO: Change email.
               if (user.email != null)
                 Text(
-                  'Email: ${user!.email!}',
+                  'Email: ${user.email!}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               gapH8,
@@ -129,7 +129,7 @@ class AccountManagement extends ConsumerWidget {
               // TODO: Change user phone.
               if (user.phoneNumber != null)
                 Text(
-                  'Phone: ${user!.phoneNumber!}',
+                  'Phone: ${user.phoneNumber!}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
 

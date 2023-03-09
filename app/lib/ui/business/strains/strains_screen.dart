@@ -3,13 +3,13 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 3/7/2023
+// Created: 3/8/2023
 // Updated: 3/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/models/metrc/delivery.dart';
-import 'package:cannlytics_app/ui/business/deliveries/deliveries_controller.dart';
+import 'package:cannlytics_app/models/metrc/strain.dart';
+import 'package:cannlytics_app/ui/business/strains/strains_controller.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/table_form.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +22,9 @@ import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:go_router/go_router.dart';
 
-/// The deliveries screen.
-class DeliveriesScreen extends StatelessWidget {
-  const DeliveriesScreen({super.key});
+/// The strains screen.
+class StrainsScreen extends StatelessWidget {
+  const StrainsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +35,11 @@ class DeliveriesScreen extends StatelessWidget {
           // App header.
           const SliverToBoxAdapter(child: AppHeader()),
 
-          // Facilities form.
+          // Strains form.
           SliverToBoxAdapter(
             child: TableForm(
-              title: 'Deliveries',
-              table: DeliveriesTable(),
+              title: 'Strains',
+              table: StrainsTable(),
             ),
           ),
 
@@ -51,23 +51,23 @@ class DeliveriesScreen extends StatelessWidget {
   }
 }
 
-/// Deliveries table.
-class DeliveriesTable extends ConsumerWidget {
-  const DeliveriesTable({super.key});
+/// Strains table.
+class StrainsTable extends ConsumerWidget {
+  const StrainsTable({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the data for the primary license / facility.
-    final data = ref.watch(deliveriesProvider).value ?? [];
+    final data = ref.watch(strainsProvider).value ?? [];
 
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
         image: 'assets/images/icons/products.png',
-        title: 'Add a delivery',
-        description: 'You do not have any active deliveries for this facility.',
+        title: 'No strains',
+        description: 'You do not have any active strains for this facility.',
         onTap: () {
-          context.go('/deliveries/new');
+          context.go('/strains/new');
         },
       );
 
@@ -75,10 +75,10 @@ class DeliveriesTable extends ConsumerWidget {
     print(data[0]);
 
     // Get the rows per page.
-    final rowsPerPage = ref.watch(deliveriesRowsPerPageProvider);
+    final rowsPerPage = ref.watch(strainsRowsPerPageProvider);
 
     // Format the table headers.
-    List<String> headers = ['ID', 'Name', 'Type'];
+    List<String> headers = ['ID', 'Name', 'Testing Status'];
     List<DataColumn> tableHeader = <DataColumn>[
       for (String header in headers)
         DataColumn(
@@ -102,30 +102,30 @@ class DeliveriesTable extends ConsumerWidget {
       availableRowsPerPage: [5, 10, 25, 50],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
-        ref.read(deliveriesRowsPerPageProvider.notifier).state = index!;
+        ref.read(strainsRowsPerPageProvider.notifier).state = index!;
       },
       showCheckboxColumn: false,
-      source: DeliveriesTableSource(
+      source: StrainsTableSource(
         data: data,
-        onTap: (Delivery item) {
+        onTap: (Strain item) {
           // String slug = Format.slugify(item.name);
-          context.go('/deliveries/${item.consumerId}');
+          context.go('/strains/${item.id}');
         },
       ),
     );
   }
 }
 
-/// Facilities table data.
-class DeliveriesTableSource extends DataTableSource {
-  DeliveriesTableSource({
+/// Strains table data.
+class StrainsTableSource extends DataTableSource {
+  StrainsTableSource({
     required this.data,
     this.onTap,
   });
 
   // Properties.
-  final List<Delivery> data;
-  final void Function(Delivery item)? onTap;
+  final List<Strain> data;
+  final void Function(Strain item)? onTap;
 
   @override
   DataRow getRow(int index) {
@@ -138,9 +138,9 @@ class DeliveriesTableSource extends DataTableSource {
         }
       },
       cells: <DataCell>[
-        DataCell(Text(item.consumerId)),
-        DataCell(Text(item.consumerId)),
-        DataCell(Text(item.consumerId)),
+        DataCell(Text(item.id)),
+        DataCell(Text(item.name)),
+        DataCell(Text(item.testingStatus)),
       ],
     );
   }

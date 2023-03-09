@@ -103,7 +103,7 @@ class Item {
       administrationMethod: data['administration_method'] as String,
       description: data['description'] as String,
       numberOfDoses: data['number_of_doses'] as int,
-      publicIngredients: (data['public_ingredients'] as List)?.cast<String>(),
+      publicIngredients: (data['public_ingredients'] as List).cast<String>(),
       servingSize: data['serving_size'] as int,
       supplyDurationDays: data['supply_duration_days'] as int,
       unitCbdContent: data['unit_cbd_content'] as double,

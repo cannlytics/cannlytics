@@ -228,7 +228,7 @@ class OrganizationsTable extends ConsumerWidget {
           },
           cells: <DataCell>[
             DataCell(Text(org.name ?? '')),
-            DataCell(Text(org.id ?? '')),
+            DataCell(Text(org.id)),
             DataCell(Text(org.owner ?? '')),
           ],
         ),

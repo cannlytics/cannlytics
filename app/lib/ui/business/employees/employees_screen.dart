@@ -3,13 +3,13 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 3/7/2023
+// Created: 3/8/2023
 // Updated: 3/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/models/metrc/delivery.dart';
-import 'package:cannlytics_app/ui/business/deliveries/deliveries_controller.dart';
+import 'package:cannlytics_app/models/metrc/employee.dart';
+import 'package:cannlytics_app/ui/business/employees/employees_controller.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/table_form.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +22,9 @@ import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:go_router/go_router.dart';
 
-/// The deliveries screen.
-class DeliveriesScreen extends StatelessWidget {
-  const DeliveriesScreen({super.key});
+/// The employees screen.
+class EmployeesScreen extends StatelessWidget {
+  const EmployeesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +35,11 @@ class DeliveriesScreen extends StatelessWidget {
           // App header.
           const SliverToBoxAdapter(child: AppHeader()),
 
-          // Facilities form.
+          // Employees form.
           SliverToBoxAdapter(
             child: TableForm(
-              title: 'Deliveries',
-              table: DeliveriesTable(),
+              title: 'Employees',
+              table: EmployeesTable(),
             ),
           ),
 
@@ -51,23 +51,23 @@ class DeliveriesScreen extends StatelessWidget {
   }
 }
 
-/// Deliveries table.
-class DeliveriesTable extends ConsumerWidget {
-  const DeliveriesTable({super.key});
+/// Employees table.
+class EmployeesTable extends ConsumerWidget {
+  const EmployeesTable({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the data for the primary license / facility.
-    final data = ref.watch(deliveriesProvider).value ?? [];
+    final data = ref.watch(employeesProvider).value ?? [];
 
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
         image: 'assets/images/icons/products.png',
-        title: 'Add a delivery',
-        description: 'You do not have any active deliveries for this facility.',
+        title: 'No employees',
+        description: 'You do not have any active employees for this facility.',
         onTap: () {
-          context.go('/deliveries/new');
+          context.go('/employees/new');
         },
       );
 
@@ -75,10 +75,10 @@ class DeliveriesTable extends ConsumerWidget {
     print(data[0]);
 
     // Get the rows per page.
-    final rowsPerPage = ref.watch(deliveriesRowsPerPageProvider);
+    final rowsPerPage = ref.watch(employeesRowsPerPageProvider);
 
     // Format the table headers.
-    List<String> headers = ['ID', 'Name', 'Type'];
+    List<String> headers = ['ID', 'Name', 'License'];
     List<DataColumn> tableHeader = <DataColumn>[
       for (String header in headers)
         DataColumn(
@@ -102,30 +102,30 @@ class DeliveriesTable extends ConsumerWidget {
       availableRowsPerPage: [5, 10, 25, 50],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
-        ref.read(deliveriesRowsPerPageProvider.notifier).state = index!;
+        ref.read(employeesRowsPerPageProvider.notifier).state = index!;
       },
       showCheckboxColumn: false,
-      source: DeliveriesTableSource(
+      source: EmployeesTableSource(
         data: data,
-        onTap: (Delivery item) {
+        onTap: (Employee item) {
           // String slug = Format.slugify(item.name);
-          context.go('/deliveries/${item.consumerId}');
+          context.go('/employees/${item.id}');
         },
       ),
     );
   }
 }
 
-/// Facilities table data.
-class DeliveriesTableSource extends DataTableSource {
-  DeliveriesTableSource({
+/// Employees table data.
+class EmployeesTableSource extends DataTableSource {
+  EmployeesTableSource({
     required this.data,
     this.onTap,
   });
 
   // Properties.
-  final List<Delivery> data;
-  final void Function(Delivery item)? onTap;
+  final List<Employee> data;
+  final void Function(Employee item)? onTap;
 
   @override
   DataRow getRow(int index) {
@@ -138,9 +138,9 @@ class DeliveriesTableSource extends DataTableSource {
         }
       },
       cells: <DataCell>[
-        DataCell(Text(item.consumerId)),
-        DataCell(Text(item.consumerId)),
-        DataCell(Text(item.consumerId)),
+        DataCell(Text(item.id)),
+        DataCell(Text(item.fullName)),
+        DataCell(Text(item.license)),
       ],
     );
   }

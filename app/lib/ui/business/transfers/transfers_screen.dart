@@ -3,13 +3,13 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 3/7/2023
+// Created: 3/8/2023
 // Updated: 3/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/models/metrc/delivery.dart';
-import 'package:cannlytics_app/ui/business/deliveries/deliveries_controller.dart';
+import 'package:cannlytics_app/models/metrc/transfer.dart';
+import 'package:cannlytics_app/ui/business/transfers/transfers_controller.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/table_form.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +22,9 @@ import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
 import 'package:go_router/go_router.dart';
 
-/// The deliveries screen.
-class DeliveriesScreen extends StatelessWidget {
-  const DeliveriesScreen({super.key});
+/// The transfers screen.
+class TransfersScreen extends StatelessWidget {
+  const TransfersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +35,11 @@ class DeliveriesScreen extends StatelessWidget {
           // App header.
           const SliverToBoxAdapter(child: AppHeader()),
 
-          // Facilities form.
+          // Transfers form.
           SliverToBoxAdapter(
             child: TableForm(
-              title: 'Deliveries',
-              table: DeliveriesTable(),
+              title: 'Transfers',
+              table: TransfersTable(),
             ),
           ),
 
@@ -51,23 +51,23 @@ class DeliveriesScreen extends StatelessWidget {
   }
 }
 
-/// Deliveries table.
-class DeliveriesTable extends ConsumerWidget {
-  const DeliveriesTable({super.key});
+/// Transfers table.
+class TransfersTable extends ConsumerWidget {
+  const TransfersTable({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the data for the primary license / facility.
-    final data = ref.watch(deliveriesProvider).value ?? [];
+    final data = ref.watch(transfersProvider).value ?? [];
 
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
         image: 'assets/images/icons/products.png',
-        title: 'Add a delivery',
-        description: 'You do not have any active deliveries for this facility.',
+        title: 'No transfers',
+        description: 'You do not have any active transfers for this facility.',
         onTap: () {
-          context.go('/deliveries/new');
+          context.go('/transfers/new');
         },
       );
 
@@ -75,10 +75,10 @@ class DeliveriesTable extends ConsumerWidget {
     print(data[0]);
 
     // Get the rows per page.
-    final rowsPerPage = ref.watch(deliveriesRowsPerPageProvider);
+    final rowsPerPage = ref.watch(transfersRowsPerPageProvider);
 
     // Format the table headers.
-    List<String> headers = ['ID', 'Name', 'Type'];
+    List<String> headers = ['ID', 'Name', 'Testing Status'];
     List<DataColumn> tableHeader = <DataColumn>[
       for (String header in headers)
         DataColumn(
@@ -102,30 +102,30 @@ class DeliveriesTable extends ConsumerWidget {
       availableRowsPerPage: [5, 10, 25, 50],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
-        ref.read(deliveriesRowsPerPageProvider.notifier).state = index!;
+        ref.read(transfersRowsPerPageProvider.notifier).state = index!;
       },
       showCheckboxColumn: false,
-      source: DeliveriesTableSource(
+      source: TransfersTableSource(
         data: data,
-        onTap: (Delivery item) {
+        onTap: (Transfer item) {
           // String slug = Format.slugify(item.name);
-          context.go('/deliveries/${item.consumerId}');
+          context.go('/transfers/${item.id}');
         },
       ),
     );
   }
 }
 
-/// Facilities table data.
-class DeliveriesTableSource extends DataTableSource {
-  DeliveriesTableSource({
+/// Transfers table data.
+class TransfersTableSource extends DataTableSource {
+  TransfersTableSource({
     required this.data,
     this.onTap,
   });
 
   // Properties.
-  final List<Delivery> data;
-  final void Function(Delivery item)? onTap;
+  final List<Transfer> data;
+  final void Function(Transfer item)? onTap;
 
   @override
   DataRow getRow(int index) {
@@ -138,9 +138,9 @@ class DeliveriesTableSource extends DataTableSource {
         }
       },
       cells: <DataCell>[
-        DataCell(Text(item.consumerId)),
-        DataCell(Text(item.consumerId)),
-        DataCell(Text(item.consumerId)),
+        DataCell(Text(item.id)),
+        DataCell(Text(item.fullName)),
+        DataCell(Text(item.license)),
       ],
     );
   }
