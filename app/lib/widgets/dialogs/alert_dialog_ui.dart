@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/utils/dialogs/alert_dialogs.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
 
 /// A dialog to display asynchronous errors.
 extension AsyncValueUI on AsyncValue {

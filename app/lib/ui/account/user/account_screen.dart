@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/2/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -18,14 +18,12 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/constants/theme.dart';
-import 'package:cannlytics_app/models/user.dart';
+import 'package:cannlytics_app/models/common/user.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
-import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/utils/dialogs/alert_dialogs.dart';
-import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
-import 'package:cannlytics_app/widgets/buttons/action_text_button.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/images/avatar.dart';
 import 'package:cannlytics_app/widgets/layout/shimmer.dart';
@@ -165,16 +163,16 @@ class AccountManagement extends ConsumerWidget {
               // - license type
 
               // Sign out.
-              ActionTextButton(
+              CustomTextButton(
                 text: 'Sign out',
                 onPressed: state.isLoading
                     ? null
                     : () async {
                         final logout = await showAlertDialog(
                           context: context,
-                          title: 'Are you sure?'.hardcoded,
-                          cancelActionText: 'Cancel'.hardcoded,
-                          defaultActionText: 'Sign out'.hardcoded,
+                          title: 'Are you sure?',
+                          cancelActionText: 'Cancel',
+                          defaultActionText: 'Sign out',
                         );
                         if (logout == true) {
                           ref.read(accountProvider.notifier).signOut();

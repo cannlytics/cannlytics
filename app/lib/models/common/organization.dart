@@ -13,7 +13,7 @@ import 'dart:convert';
 // Project imports:
 import 'package:cannlytics_app/services/api_service.dart';
 import 'package:cannlytics_app/services/firestore_service.dart';
-import 'package:cannlytics_app/utils/strings/string_format.dart';
+import 'package:cannlytics_app/utils/string_utils.dart';
 
 typedef OrganizationId = String;
 

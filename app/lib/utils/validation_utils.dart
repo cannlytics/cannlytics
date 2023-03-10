@@ -1,8 +1,16 @@
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
+
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 2/17/2023
+// Updated: 3/9/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
 // Flutter imports:
 import 'package:flutter/services.dart';
 
-/// This file contains some helper functions used for string validation.
-
+// Utility functions for managing validation.
 abstract class StringValidator {
   bool isValid(String value);
 }

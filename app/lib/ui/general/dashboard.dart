@@ -21,7 +21,7 @@ import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
-import 'package:cannlytics_app/widgets/cards/hover_border.dart';
+import 'package:cannlytics_app/widgets/cards/border_card.dart';
 
 /// The initial screen the user sees after signing in.
 class DashboardScreen extends ConsumerWidget {
@@ -131,7 +131,7 @@ class ItemCard extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = screenWidth >= Breakpoints.tablet ? 48.0 : 24.0;
     final verticalPadding = screenWidth >= Breakpoints.tablet ? 24.0 : 12.0;
-    return BorderMouseHover(
+    return BorderCard(
       builder: (context, value) => InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () {

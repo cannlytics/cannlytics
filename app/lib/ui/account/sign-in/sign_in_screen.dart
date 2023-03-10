@@ -25,14 +25,14 @@ import 'package:cannlytics_app/ui/account/sign-in/sign_in_controller.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_validators.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
-import 'package:cannlytics_app/ui/general/simple_footer.dart';
-import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/utils/strings/string_validators.dart';
+import 'package:cannlytics_app/ui/general/footer_simple.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/utils/validation_utils.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
-import 'package:cannlytics_app/widgets/buttons/theme_toggle.dart';
+import 'package:cannlytics_app/widgets/buttons/theme_button.dart';
 import 'package:cannlytics_app/widgets/images/app_logo.dart';
-import 'package:cannlytics_app/widgets/layout/responsive_scrollable_card.dart';
+import 'package:cannlytics_app/widgets/cards/responsive_card.dart';
 
 /// Sign in screen.
 class EmailPasswordSignInScreen extends ConsumerWidget {
@@ -100,6 +100,8 @@ class UserTypeButton extends ConsumerWidget {
     final userType = ref.watch(userTypeProvider);
 
     // Render a toggle switch.
+    // FIXME: Use `CupertinoSegmentedControl` instead
+    // because it will be 1 less dependency.
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 16),
       child: Center(
@@ -216,7 +218,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
       (_, state) => state.showAlertDialogOnError(context),
     );
     final state = ref.watch(signInProvider);
-    return ResponsiveScrollableCard(
+    return ResponsiveCard(
       isDark: widget.isDark,
       child: FocusScope(
         node: _node,

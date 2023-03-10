@@ -16,7 +16,7 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/models/organization.dart';
+import 'package:cannlytics_app/models/common/organization.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';

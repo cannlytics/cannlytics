@@ -14,15 +14,15 @@ import 'package:flutter/material.dart';
 import 'package:cannlytics_app/constants/theme.dart';
 
 /// A widget to add a border to a card that changes color on hover (on the web).
-class BorderMouseHover extends StatefulWidget {
-  const BorderMouseHover({Key? key, required this.builder}) : super(key: key);
+class BorderCard extends StatefulWidget {
+  const BorderCard({Key? key, required this.builder}) : super(key: key);
   final Widget Function(BuildContext, double) builder;
 
   @override
-  _BorderMouseHoverState createState() => _BorderMouseHoverState();
+  _BorderCardState createState() => _BorderCardState();
 }
 
-class _BorderMouseHoverState extends State<BorderMouseHover>
+class _BorderCardState extends State<BorderCard>
     with SingleTickerProviderStateMixin {
   late final _controller = AnimationController(
     vsync: this,

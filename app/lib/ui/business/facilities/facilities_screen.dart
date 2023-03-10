@@ -19,7 +19,7 @@ import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
-import 'package:cannlytics_app/utils/strings/string_format.dart';
+import 'package:cannlytics_app/utils/string_utils.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/table_form.dart';
 

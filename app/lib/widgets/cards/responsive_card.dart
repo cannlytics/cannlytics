@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/18/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -17,8 +17,8 @@ import 'package:cannlytics_app/widgets/layout/responsive_center.dart';
 
 /// Scrollable widget that shows a responsive card with a given child widget.
 /// Useful for displaying forms and other widgets that need to be scrollable.
-class ResponsiveScrollableCard extends StatelessWidget {
-  ResponsiveScrollableCard({
+class ResponsiveCard extends StatelessWidget {
+  ResponsiveCard({
     super.key,
     required this.child,
     this.isDark = false,

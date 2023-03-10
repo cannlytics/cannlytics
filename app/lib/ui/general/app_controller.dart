@@ -11,7 +11,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/organization.dart';
+import 'package:cannlytics_app/models/common/organization.dart';
 import 'package:cannlytics_app/services/api_service.dart';
 
 // User type provider.

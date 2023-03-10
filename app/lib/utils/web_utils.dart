@@ -10,6 +10,7 @@
 // Package imports:
 import 'package:url_launcher/url_launcher.dart';
 
+/// Utility functions for the web.
 class WebUtils {
   /// Launch a website.
   static Future<void> launchURL(String url) async {

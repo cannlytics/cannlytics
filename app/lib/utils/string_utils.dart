@@ -4,13 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/19/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
 import 'package:intl/intl.dart';
 
-/// [Format] supplies string-formatting utility functions.
+/// Utility functions for managing strings.
 class Format {
   /// Format a [double] as number of hours.
   static String hours(double hours) {
@@ -60,4 +60,10 @@ class Format {
         .replaceAll(RegExp(r'[^\w ]+'), '')
         .replaceAll(RegExp(r' +'), '-');
   }
+}
+
+/// A simple placeholder that can be used to search all the hardcoded strings
+/// in the code (useful to identify strings that need to be localized).
+extension StringHardcoded on String {
+  String get hardcoded => this;
 }

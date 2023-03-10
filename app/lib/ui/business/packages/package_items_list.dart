@@ -21,8 +21,8 @@ import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/ui/business/packages/package_items_controller.dart';
 import 'package:cannlytics_app/ui/business/packages/packages_service.dart';
-import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/utils/strings/string_format.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/utils/string_utils.dart';
 import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
 
 class JobEntriesList extends ConsumerWidget {

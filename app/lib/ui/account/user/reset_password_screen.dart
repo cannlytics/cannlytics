@@ -22,14 +22,14 @@ import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_validators.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
-import 'package:cannlytics_app/ui/general/simple_footer.dart';
-import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/utils/dialogs/alert_dialogs.dart';
+import 'package:cannlytics_app/ui/general/footer_simple.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
-import 'package:cannlytics_app/widgets/buttons/theme_toggle.dart';
+import 'package:cannlytics_app/widgets/buttons/theme_button.dart';
 import 'package:cannlytics_app/widgets/images/app_logo.dart';
-import 'package:cannlytics_app/widgets/layout/responsive_scrollable_card.dart';
+import 'package:cannlytics_app/widgets/cards/responsive_card.dart';
 
 /// Screen for the user to reset their password.
 class ResetPasswordScreen extends ConsumerWidget {
@@ -148,7 +148,7 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            ResponsiveScrollableCard(
+            ResponsiveCard(
               isDark: widget.isDark,
               child: FocusScope(
                 node: _node,

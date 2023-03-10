@@ -25,7 +25,7 @@ import 'package:cannlytics_app/ui/account/licenses/licenses_controller.dart';
 import 'package:cannlytics_app/ui/account/organizations/organizations_controller.dart';
 import 'package:cannlytics_app/ui/general/footer.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
-import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 
 class OrganizationScreen extends ConsumerWidget {
   const OrganizationScreen({super.key});

@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/widgets/notifications/error_message_widget.dart';
+import 'package:cannlytics_app/widgets/notifications/error_notification.dart';
 
 class AsyncValueWidget<T> extends StatelessWidget {
   const AsyncValueWidget({super.key, required this.value, required this.data});
@@ -25,7 +25,7 @@ class AsyncValueWidget<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return value.when(
       data: data,
-      error: (e, st) => Center(child: ErrorMessageWidget(e.toString())),
+      error: (e, st) => Center(child: ErrorNotification(e.toString())),
       loading: () => const Center(child: CircularProgressIndicator()),
     );
   }
@@ -43,7 +43,7 @@ class ScaffoldAsyncValueWidget<T> extends StatelessWidget {
       data: data,
       error: (e, st) => Scaffold(
         appBar: AppBar(),
-        body: Center(child: ErrorMessageWidget(e.toString())),
+        body: Center(child: ErrorNotification(e.toString())),
       ),
       loading: () => Scaffold(
         appBar: AppBar(),

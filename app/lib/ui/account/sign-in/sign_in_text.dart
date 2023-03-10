@@ -4,11 +4,8 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/19/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// Project imports:
-import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 
 /// Form type for email & password authentication
 enum SignInFormType { signIn, register }
@@ -16,26 +13,26 @@ enum SignInFormType { signIn, register }
 extension SignInFormTypeX on SignInFormType {
   String get passwordLabelText {
     if (this == SignInFormType.register) {
-      return 'Password (8+ characters)'.hardcoded;
+      return 'Password (8+ characters)';
     } else {
-      return 'Password'.hardcoded;
+      return 'Password';
     }
   }
 
   // Getters
   String get primaryButtonText {
     if (this == SignInFormType.register) {
-      return 'Create an account'.hardcoded;
+      return 'Create an account';
     } else {
-      return 'Sign in'.hardcoded;
+      return 'Sign in';
     }
   }
 
   String get secondaryButtonText {
     if (this == SignInFormType.register) {
-      return 'Have an account? Sign in'.hardcoded;
+      return 'Have an account? Sign in';
     } else {
-      return 'Need an account? Register'.hardcoded;
+      return 'Need an account? Register';
     }
   }
 
@@ -49,17 +46,17 @@ extension SignInFormTypeX on SignInFormType {
 
   String get errorAlertTitle {
     if (this == SignInFormType.register) {
-      return 'Registration failed'.hardcoded;
+      return 'Registration failed';
     } else {
-      return 'Sign in failed'.hardcoded;
+      return 'Sign in failed';
     }
   }
 
   String get title {
     if (this == SignInFormType.register) {
-      return 'Register'.hardcoded;
+      return 'Register';
     } else {
-      return 'Sign in'.hardcoded;
+      return 'Sign in';
     }
   }
 }

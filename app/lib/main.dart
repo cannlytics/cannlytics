@@ -24,7 +24,6 @@ import 'package:cannlytics_app/firebase_options.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
 
 // ignore:depend_on_referenced_packages
 
@@ -119,7 +118,7 @@ void registerErrorHandlers() {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.red,
-        title: Text('An error occurred'.hardcoded),
+        title: Text('An error occurred'),
       ),
       body: Center(child: Text(details.toString())),
     );

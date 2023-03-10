@@ -4,13 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 2/19/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
-import 'package:cannlytics_app/utils/strings/string_hardcoded.dart';
-import 'package:cannlytics_app/utils/strings/string_validators.dart';
+import 'package:cannlytics_app/utils/validation_utils.dart';
 
 /// Mixin class to be used for client-side email & password validation
 mixin EmailAndPasswordValidators {
@@ -33,17 +32,15 @@ mixin EmailAndPasswordValidators {
 
   String? emailErrorText(String email) {
     final bool showErrorText = !canSubmitEmail(email);
-    final String errorText = email.isEmpty
-        ? 'Email can\'t be empty'.hardcoded
-        : 'Invalid email'.hardcoded;
+    final String errorText =
+        email.isEmpty ? 'Email can\'t be empty' : 'Invalid email';
     return showErrorText ? errorText : null;
   }
 
   String? passwordErrorText(String password, SignInFormType formType) {
     final bool showErrorText = !canSubmitPassword(password, formType);
-    final String errorText = password.isEmpty
-        ? 'Password can\'t be empty'.hardcoded
-        : 'Password is too short'.hardcoded;
+    final String errorText =
+        password.isEmpty ? 'Password can\'t be empty' : 'Password is too short';
     return showErrorText ? errorText : null;
   }
 }

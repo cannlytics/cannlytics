@@ -20,7 +20,7 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_app/models/metrc/license.dart';
 import 'package:cannlytics_app/ui/account/licenses/licenses_controller.dart';
-import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 
 /// Add license screen.
 class AddLicenseScreen extends ConsumerStatefulWidget {

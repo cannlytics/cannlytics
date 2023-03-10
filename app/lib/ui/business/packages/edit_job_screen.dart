@@ -20,7 +20,7 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_app/models/consumer/job.dart';
 import 'package:cannlytics_app/ui/business/packages/package_edit_controller.dart';
-import 'package:cannlytics_app/utils/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 
 class EditJobScreen extends ConsumerStatefulWidget {
   const EditJobScreen({super.key, this.jobId, this.job});
