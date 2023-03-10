@@ -23,13 +23,13 @@ import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_validators.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/general/footer_simple.dart';
-import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/buttons/theme_button.dart';
-import 'package:cannlytics_app/widgets/images/app_logo.dart';
 import 'package:cannlytics_app/widgets/cards/responsive_card.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
+import 'package:cannlytics_app/widgets/images/app_logo.dart';
 
 /// Screen for the user to reset their password.
 class ResetPasswordScreen extends ConsumerWidget {

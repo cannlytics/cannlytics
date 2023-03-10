@@ -8,7 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -18,14 +17,15 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/constants/theme.dart';
+import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
-import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
 import 'package:cannlytics_app/widgets/buttons/theme_button.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
 import 'package:cannlytics_app/widgets/images/app_logo.dart';
 import 'package:cannlytics_app/widgets/images/avatar.dart';
 

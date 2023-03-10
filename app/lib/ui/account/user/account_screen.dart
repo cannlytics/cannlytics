@@ -22,9 +22,9 @@ import 'package:cannlytics_app/models/common/user.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/general/header.dart';
+import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
-import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/images/avatar.dart';
 import 'package:cannlytics_app/widgets/layout/shimmer.dart';
 
