@@ -20,6 +20,10 @@ import 'package:cannlytics_app/ui/general/app_controller.dart';
 // Locations rows per page provider.
 final locationsRowsPerPageProvider = StateProvider<int>((ref) => 5);
 
+// Locations sorting.
+final locationsSortColumnIndex = StateProvider<int>((ref) => 0);
+final locationsSortAscending = StateProvider<bool>((ref) => true);
+
 // Locations provider.
 final locationsProvider =
     AsyncNotifierProvider<LocationsController, List<Location>>(() {
@@ -39,6 +43,7 @@ class LocationsController extends AsyncNotifier<List<Location>> {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final orgId = ref.watch(primaryOrganizationProvider);
     final state = ref.watch(primaryStateProvider);
+    if (licenseNumber == null) return [];
     try {
       return await MetrcLocations.getLocations(
         licenseNumber: licenseNumber,
@@ -46,9 +51,16 @@ class LocationsController extends AsyncNotifier<List<Location>> {
         state: state,
       );
     } catch (error, stack) {
-      print(stack);
-      throw Exception("Error decoding JSON: [error=${error.toString()}]");
+      // print(stack);
+      print("Error decoding JSON: [error=${error.toString()}]");
+      return [];
     }
+  }
+
+  /// Set the location.
+  Future<void> setLocations(List<Location> items) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async => items);
   }
 
   // TODO: Get location.

@@ -29,11 +29,6 @@ final authProvider = Provider<AuthService>((ref) {
   );
 });
 
-// User provider.
-final userProvider = StreamProvider<User?>((ref) {
-  return ref.watch(authProvider).authStateChanges();
-});
-
 /// [AuthService] manages authentication with Firebase.
 class AuthService {
   AuthService(this._auth, this._firestore);

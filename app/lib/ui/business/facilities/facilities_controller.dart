@@ -36,11 +36,16 @@ class FacilitiesController extends AsyncNotifier<List<Facility>> {
   Future<List<Facility>> _getFacilities() async {
     final orgId = ref.watch(primaryOrganizationProvider);
     final state = ref.watch(primaryStateProvider);
+    final primaryFacility = ref.watch(primaryFacilityProvider);
     try {
-      return await MetrcFacilities.getFacilities(
+      var data = await MetrcFacilities.getFacilities(
         orgId: orgId,
         state: state,
       );
+      if (data.isNotEmpty && primaryFacility == null) {
+        ref.read(primaryFacilityProvider.notifier).state = data[0].id;
+      }
+      return data;
     } catch (error, stack) {
       print(stack);
       throw Exception("Error decoding JSON: [error=${error.toString()}]");

@@ -239,7 +239,7 @@ class MobileNavigationMenu extends ConsumerWidget {
                     // User photo.
                     gapW12,
                     Avatar(
-                      photoUrl: user.photoURL,
+                      photoUrl: user!.photoURL,
                       radius: 24,
                       borderColor: Theme.of(context).secondaryHeaderColor,
                       borderWidth: 1.0,
@@ -428,7 +428,7 @@ class OrganizationSelection extends ConsumerWidget {
     final orgs = ref.watch(organizationsProvider).value ?? [];
 
     // Return organizations link button.
-    if (orgs.length == 0) {
+    if (orgs.isEmpty) {
       return NavigationLink(
         text: 'Organizations',
         path: AppRoutes.organizations.name,
@@ -492,7 +492,7 @@ class FacilitySelection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the user's organizations.
     final orgs = ref.watch(organizationsProvider).value ?? [];
-    if (orgs.length == 0) return Container();
+    if (orgs.isEmpty) return Container();
 
     // Get the active organization.
     final primaryOrg = ref.watch(primaryOrganizationProvider);
@@ -568,9 +568,9 @@ class FacilitySelection extends ConsumerWidget {
           return;
         }
         ref.read(primaryFacilityProvider.notifier).state = value!;
-        for (Facility f in facilities) {
-          if (f.id == value) {
-            ref.read(primaryLicenseProvider.notifier).state = f.licenseNumber;
+        for (Facility x in facilities) {
+          if (x.id == value) {
+            ref.read(primaryLicenseProvider.notifier).state = x.licenseNumber;
           }
         }
       },

@@ -175,7 +175,8 @@ class AccountManagement extends ConsumerWidget {
                           defaultActionText: 'Sign out',
                         );
                         if (logout == true) {
-                          ref.read(accountProvider.notifier).signOut();
+                          await ref.read(accountProvider.notifier).signOut();
+                          context.go('/sign-in');
                         }
                       },
               ),

@@ -8,7 +8,10 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
+import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:dartx/dartx.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,7 +67,7 @@ class LocationsTable extends ConsumerWidget {
     final data = ref.watch(locationsProvider).value ?? [];
 
     // Return a placeholder if no data.
-    if (data.length == 0)
+    if (data.isEmpty)
       return CustomPlaceholder(
         image: 'assets/images/icons/facilities.png',
         title: 'Add a location',
@@ -74,17 +77,25 @@ class LocationsTable extends ConsumerWidget {
         },
       );
 
-    print('OBSERVATION:');
-    print(data[0]);
-
-    // Get the rows per page.
-    final rowsPerPage = ref.watch(locationsRowsPerPageProvider);
-
-    // Get the selected rows.
-    List<Location> selectedRows = ref.watch(selectedLocationsProvider);
-
     // Format the table headers.
-    List<String> headers = ['ID', 'Name', 'Type'];
+    List<String> headers = [
+      'ID',
+      'Name',
+      'Type',
+      'Packages',
+      'Batches',
+      'Plants',
+      'Harvests',
+    ];
+    List<String> fields = [
+      'id',
+      'name',
+      'location_type_name',
+      'for_plant_batches',
+      'for_plants',
+      'for_harvests',
+      'for_packages',
+    ];
     List<DataColumn> tableHeader = <DataColumn>[
       for (String header in headers)
         DataColumn(
@@ -94,23 +105,54 @@ class LocationsTable extends ConsumerWidget {
               style: TextStyle(fontStyle: FontStyle.italic),
             ),
           ),
+          onSort: (columnIndex, sortAscending) {
+            // FIXME: Actually sort the data!
+            var field = fields[columnIndex];
+            var sorted = data;
+            if (sortAscending) {
+              sorted = data.sortedBy((x) => x.toMap()[field]);
+            } else {
+              sorted = data.sortedByDescending((x) => x.toMap()[field]);
+            }
+            ref.read(locationsSortColumnIndex.notifier).state = columnIndex;
+            ref.read(locationsSortAscending.notifier).state = sortAscending;
+            ref.read(locationsProvider.notifier).setLocations(sorted);
+          },
         ),
     ];
+
+    // Get the rows per page.
+    final rowsPerPage = ref.watch(locationsRowsPerPageProvider);
+
+    // Get the selected rows.
+    List<Location> selectedRows = ref.watch(selectedLocationsProvider);
+
+    // Get the sorting state.
+    final sortColumnIndex = ref.read(locationsSortColumnIndex);
+    final sortAscending = ref.read(locationsSortAscending);
 
     // Build the data table.
     // TODO: Make sortable.
     return PaginatedDataTable(
+      // Options.
       showCheckboxColumn: true,
+      showFirstLastButtons: true,
+      sortColumnIndex: sortColumnIndex,
+      sortAscending: sortAscending,
+      // Columns
       columns: tableHeader,
+      // Style.
       dataRowHeight: 48,
       columnSpacing: 48,
       headingRowHeight: 48,
       horizontalMargin: 12,
+      // Pagination.
       availableRowsPerPage: [5, 10, 25, 50],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
         ref.read(locationsRowsPerPageProvider.notifier).state = index!;
       },
+      // Table data.
       source: LocationsTableSource(
         data: data,
 
@@ -167,6 +209,10 @@ class LocationsTableSource extends DataTableSource {
         DataCell(Text(item.id)),
         DataCell(Text(item.name ?? '')),
         DataCell(Text(item.locationTypeName ?? '')),
+        DataCell(Text(item.forPackages! ? '✓' : 'x')),
+        DataCell(Text(item.forPlantBatches! ? '✓' : 'x')),
+        DataCell(Text(item.forPlants! ? '✓' : 'x')),
+        DataCell(Text(item.forHarvests! ? '✓' : 'x')),
       ],
     );
   }

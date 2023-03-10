@@ -33,8 +33,8 @@ class SignInController extends AutoDisposeAsyncNotifier<void> {
     required SignInFormType formType,
   }) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() {
-      return _authenticate(email, password, formType);
+    state = await AsyncValue.guard(() async {
+      return await _authenticate(email, password, formType);
     });
   }
 

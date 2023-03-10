@@ -11,13 +11,13 @@
 import 'dart:async';
 
 // Package imports:
+import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_app/models/common/user.dart';
 import 'package:cannlytics_app/models/consumer/entry.dart';
 import 'package:cannlytics_app/models/consumer/job.dart';
-import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/firestore_service.dart';
 
 String documentIdFromCurrentDate() {

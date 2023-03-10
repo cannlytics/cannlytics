@@ -8,13 +8,14 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/services/auth_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:toggle_switch/toggle_switch.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
@@ -100,35 +101,64 @@ class UserTypeButton extends ConsumerWidget {
     final userType = ref.watch(userTypeProvider);
 
     // Render a toggle switch.
-    // FIXME: Use `CupertinoSegmentedControl` instead
-    // because it will be 1 less dependency.
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 16),
       child: Center(
-        child: ToggleSwitch(
-          initialLabelIndex: (userType == 'consumer') ? 0 : 1,
-          labels: ['Consumer', 'Business'],
-          minHeight: 32,
-          customWidths: [100.0, 100.0],
-          cornerRadius: 20.0,
-          activeFgColor: Colors.white,
-          inactiveBgColor: Colors.grey,
-          inactiveFgColor: Colors.white,
-          totalSwitches: 2,
-          // icons: [FontAwesomeIcons.mars, FontAwesomeIcons.venus],
-          activeBgColors: [
-            [Colors.green],
-            [Colors.orange]
-          ],
-          onToggle: (index) {
-            // Switch between user type.
-            if (index == 0) {
-              ref.read(userTypeProvider.notifier).update((state) => 'consumer');
-            } else {
-              ref.read(userTypeProvider.notifier).update((state) => 'business');
-            }
+        child: CupertinoSegmentedControl<String>(
+          borderColor: (userType == 'consumer') ? Colors.green : Colors.orange,
+          selectedColor:
+              (userType == 'consumer') ? Colors.green : Colors.orange,
+          unselectedColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          groupValue: userType,
+          onValueChanged: (String value) {
+            ref.read(userTypeProvider.notifier).update((state) => value);
+          },
+          children: <String, Widget>{
+            'consumer': Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Consumer',
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
+              ),
+            ),
+            'business': Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Business',
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
+              ),
+            ),
           },
         ),
+        // child: ToggleSwitch(
+        //   initialLabelIndex: (userType == 'consumer') ? 0 : 1,
+        //   labels: ['Consumer', 'Business'],
+        //   minHeight: 32,
+        //   customWidths: [100.0, 100.0],
+        //   cornerRadius: 20.0,
+        //   activeFgColor: Colors.white,
+        //   inactiveBgColor: Colors.grey,
+        //   inactiveFgColor: Colors.white,
+        //   totalSwitches: 2,
+        //   // icons: [FontAwesomeIcons.mars, FontAwesomeIcons.venus],
+        //   activeBgColors: [
+        //     [Colors.green],
+        //     [Colors.orange]
+        //   ],
+        //   onToggle: (index) {
+        //     // Switch between user type.
+        //     if (index == 0) {
+        //       ref.read(userTypeProvider.notifier).update((state) => 'consumer');
+        //     } else {
+        //       ref.read(userTypeProvider.notifier).update((state) => 'business');
+        //     }
+        //   },
+        // ),
       ),
     );
   }
@@ -184,7 +214,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
         password: password,
         formType: _formType,
       );
-      context.go('/dashboard');
+      // context.go('/dashboard');
     }
   }
 
@@ -218,6 +248,10 @@ class _SignInFormState extends ConsumerState<SignInForm>
       (_, state) => state.showAlertDialogOnError(context),
     );
     final state = ref.watch(signInProvider);
+    // final user = ref.watch(userProvider).value;
+    // if (user != null) {
+    //   context.go('/dashboard');
+    // }
     return ResponsiveCard(
       isDark: widget.isDark,
       child: FocusScope(

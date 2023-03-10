@@ -10,6 +10,7 @@
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 
 // Flutter imports:
+import 'package:cannlytics_app/ui/general/app_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +23,6 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/firebase_options.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
-import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 
 // ignore:depend_on_referenced_packages
@@ -91,8 +91,8 @@ Future<void> main() async {
   // Wait for authentication to be determined.
   // Note: This will prevent unnecessary redirects when the app starts.
   await container.read(userProvider.future);
-  runApp(ProviderScope(
-    // container: container,
+  runApp(UncontrolledProviderScope(
+    container: container,
     child: const CannlyticsApp(),
   ));
 }
