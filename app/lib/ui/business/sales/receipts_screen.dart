@@ -64,7 +64,7 @@ class ReceiptsTable extends ConsumerWidget {
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
-        image: 'assets/images/icons/products.png',
+        image: 'assets/images/icons/spend.png',
         title: 'No receipts',
         description: 'You do not have any active receipts for this facility.',
         onTap: () {

@@ -11,12 +11,11 @@
 import 'package:flutter/foundation.dart';
 
 // Package imports:
-import 'package:equatable/equatable.dart';
 
 typedef JobID = String;
 
 @immutable
-class Job extends Equatable {
+class Job {
   const Job({
     required this.id,
     required this.name,
@@ -25,12 +24,6 @@ class Job extends Equatable {
   final JobID id;
   final String name;
   final int ratePerHour;
-
-  @override
-  List<Object> get props => [id, name, ratePerHour];
-
-  @override
-  bool get stringify => true;
 
   factory Job.fromMap(Map<dynamic, dynamic>? data, String documentId) {
     return Job(

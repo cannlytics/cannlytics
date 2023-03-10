@@ -247,12 +247,21 @@ class MetrcLocations {
   }
 
   // Get a location.
-  static Future<Location> getLocation(String licenseNumber, String id) async {
+  static Future<Location> getLocation({
+    String? licenseNumber,
+    String? orgId,
+    String? state,
+    String? id,
+  }) async {
     String endpoint = '/api/metrc/locations/$id';
     return await APIService.apiRequest(
       endpoint,
       options: {
-        'params': {'license': licenseNumber}
+        'params': {
+          'license': licenseNumber,
+          'org_id': orgId,
+          'state': state,
+        }
       },
     );
   }

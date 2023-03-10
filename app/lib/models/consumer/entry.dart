@@ -8,11 +8,10 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
-import 'package:equatable/equatable.dart';
 
 typedef EntryID = String;
 
-class Entry extends Equatable {
+class Entry {
   const Entry({
     required this.id,
     required this.jobId,

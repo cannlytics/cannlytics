@@ -63,7 +63,7 @@ class ResultsTable extends ConsumerWidget {
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
-        image: 'assets/images/icons/products.png',
+        image: 'assets/images/icons/certificate.png',
         title: 'No results',
         description: 'You do not have any active results for this facility.',
         onTap: () {

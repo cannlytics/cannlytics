@@ -63,7 +63,7 @@ class EmployeesTable extends ConsumerWidget {
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
-        image: 'assets/images/icons/products.png',
+        image: 'assets/images/icons/driver.png',
         title: 'No employees',
         description: 'You do not have any active employees for this facility.',
         onTap: () {

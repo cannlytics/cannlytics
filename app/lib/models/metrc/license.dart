@@ -4,15 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 3/3/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
-import 'package:equatable/equatable.dart';
 
 typedef LicenseId = String;
 
-class License extends Equatable {
+class License {
   // Initialization.
   const License({
     required this.id,
@@ -30,14 +29,6 @@ class License extends Equatable {
   final String state;
   final String? userAPIKey;
   final String? prefix;
-
-  // Used to compared models.
-  @override
-  List<Object> get props => [license, prefix ?? ''];
-
-  // Used to turn model into a string.
-  @override
-  bool get stringify => true;
 
   // Create model.
   factory License.fromMap(Map<dynamic, dynamic> values) {

@@ -63,7 +63,7 @@ class StrainsTable extends ConsumerWidget {
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
-        image: 'assets/images/icons/products.png',
+        image: 'assets/images/icons/plant-data.png',
         title: 'No strains',
         description: 'You do not have any active strains for this facility.',
         onTap: () {

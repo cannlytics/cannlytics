@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/7/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -26,6 +26,8 @@ import 'package:cannlytics_app/widgets/layout/table_form.dart';
 class LocationsScreen extends StatelessWidget {
   const LocationsScreen({super.key});
 
+  // TODO: Add Create / delete (if selected) actions.
+
   @override
   Widget build(BuildContext context) {
     // Render the widget.
@@ -40,6 +42,7 @@ class LocationsScreen extends StatelessWidget {
             child: TableForm(
               title: 'Locations',
               table: LocationsTable(),
+              // actions: actions,
             ),
           ),
 
@@ -77,6 +80,9 @@ class LocationsTable extends ConsumerWidget {
     // Get the rows per page.
     final rowsPerPage = ref.watch(locationsRowsPerPageProvider);
 
+    // Get the selected rows.
+    List<Location> selectedRows = ref.watch(selectedLocationsProvider);
+
     // Format the table headers.
     List<String> headers = ['ID', 'Name', 'Type'];
     List<DataColumn> tableHeader = <DataColumn>[
@@ -94,6 +100,7 @@ class LocationsTable extends ConsumerWidget {
     // Build the data table.
     // TODO: Make sortable.
     return PaginatedDataTable(
+      showCheckboxColumn: true,
       columns: tableHeader,
       dataRowHeight: 48,
       columnSpacing: 48,
@@ -104,13 +111,26 @@ class LocationsTable extends ConsumerWidget {
       onRowsPerPageChanged: (index) {
         ref.read(locationsRowsPerPageProvider.notifier).state = index!;
       },
-      showCheckboxColumn: false,
       source: LocationsTableSource(
         data: data,
-        onTap: (Location item) {
-          // String slug = Format.slugify(item.name);
+
+        // Tap on a location.
+        onTap: (Location item) async {
+          await ref.read(locationProvider.notifier).setLocation(item);
           context.go('/locations/${item.id}');
         },
+
+        // Select a location.
+        onSelect: (bool selected, Location item) {
+          if (selected) {
+            ref.read(selectedLocationsProvider.notifier).selectLocation(item);
+          } else {
+            ref.read(selectedLocationsProvider.notifier).unselectLocation(item);
+          }
+        },
+
+        // Specify selected locations.
+        selected: selectedRows.map((x) => x.id).toList(),
       ),
     );
   }
@@ -121,21 +141,27 @@ class LocationsTableSource extends DataTableSource {
   LocationsTableSource({
     required this.data,
     this.onTap,
+    this.onSelect,
+    this.selected,
   });
 
   // Properties.
   final List<Location> data;
   final void Function(Location item)? onTap;
+  final void Function(bool selected, Location item)? onSelect;
+  final List? selected;
 
   @override
   DataRow getRow(int index) {
     final item = data[index];
     return DataRow.byIndex(
       index: index,
+      selected: selected!.contains(item.id),
       onSelectChanged: (bool? selected) {
-        if (selected!) {
-          onTap!(item);
-        }
+        onSelect!(selected ?? false, item);
+      },
+      onLongPress: () {
+        onTap!(item);
       },
       cells: <DataCell>[
         DataCell(Text(item.id)),

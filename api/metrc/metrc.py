@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/13/2021
-Updated: 1/26/2023
+Updated: 3/9/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API to interface with the Metrc API.
@@ -85,7 +85,7 @@ def get_objects(
     """Perform a simple `GET` request to the Metrc API."""
     # Try to get the requested items.
     try:
-            
+ 
         # Get singular items.
         if uid:
             obj = getattr(track, get_method)(uid, **kwargs)
@@ -95,7 +95,7 @@ def get_objects(
         else:
             objs = getattr(track, get_method)(**kwargs)
             data = [obj.to_dict() for obj in objs]
-    
+
     # Return any Metric error.
     except MetrcAPIError as error:
         log_metrc_error(request, get_method, str(error))
@@ -137,7 +137,7 @@ def create_or_update_objects(
             update_items.append(item)
         else:
             create_items.append(item)
-    
+
     # Create items.
     if create_items:
         create_items = [
@@ -155,7 +155,7 @@ def create_or_update_objects(
             return Response(response, status=error.response.status_code)
         if not isinstance(create_items, list):
             create_items = [create_items]
-    
+
     # Update items.
     if update_items:
         update_items = [
@@ -173,7 +173,7 @@ def create_or_update_objects(
             return Response(response, status=error.response.status_code)
         if not isinstance(update_items, list):
             update_items = [update_items]
-    
+
     # Return all items after creating entries in Firestore.
     items = create_items + update_items
     try:
@@ -211,7 +211,7 @@ def delete_objects(
         data = request.data
     else:
         data = request.data.get('data', request.data)
-    
+
     # Delete multiple items.
     model = delete_method.replace('delete_', '')
     collection = f'metrc/{track.primary_license}/{model}/'
@@ -223,7 +223,7 @@ def delete_objects(
                 delete_document(f'{collection}/{uid}')
             except:
                 print('Failed to delete data from Firestore.')
-    
+
     # Delete singular items.
     else:
         if not uid:
@@ -237,7 +237,7 @@ def delete_objects(
             delete_document(f'{collection}/{uid}')
         except:
             print('Failed to delete data from Firestore.')
-    
+
     # Create a log and return an empty success response.
     log_metrc_request(request, data, 'delete_object', delete_method)
     response = {'success': True, 'data': []}
@@ -253,7 +253,7 @@ def perform_method(request, track, data, method, **kwargs):
         data = [clean_nested_dictionary(x, camelcase) for x in data]
     elif isinstance(data, dict):
         data = clean_nested_dictionary(data, camelcase)
-    
+
     # Perform the action.
     try:
         objs = getattr(track, method)(data, return_obs=True, **kwargs)
@@ -261,7 +261,7 @@ def perform_method(request, track, data, method, **kwargs):
         log_metrc_error(request, method, str(error))
         response = {'error': True, 'message': str(error)}
         return Response(response, status=error.response.status_code)
-    
+
     # Return any data.
     response = {'success': True, 'data': objs}
     return Response(response, content_type='application/json')
@@ -335,7 +335,7 @@ def add_license(request: HttpRequest):
     claims = authenticate_request(request)
     if claims is None:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
-    
+
     # Get the associated organization.
     data = request.data.get('data', request.data)
     org_id = request.query_params.get('org_id', data.get('org_id'))
@@ -389,11 +389,9 @@ def add_license(request: HttpRequest):
         'license_number': license_number,
         'license_type': license_type,
         'state': state,
-        'metrc_user_api_key_secret': {
-            'project_id': project_id,
-            'secret_id': secret_id,
-            'version_id': '1'
-        },
+        'project_id': project_id,
+        'secret_id': secret_id,
+        'version_id': '1',
     }]
     for license_data in existing_licenses:
         if license_data['license_number'] != license_number:
@@ -451,7 +449,7 @@ def delete_license(request: HttpRequest):
         else:
             add_secret_version(
                 project_id,
-                license_data['metrc_user_api_key_secret']['secret_id'],
+                license_data['secret_id'],
                 'redacted'
             )
 
@@ -518,7 +516,7 @@ def initialize_traceability(
                 org_id = owner[0]
             except:
                 return AUTH_ERROR
-    
+
     # Ensure that the user is authorized to work with the organization.
     # FIXME: Allow the user to pass a Metrc user API key?
     print('ORG ID:', org_id)
@@ -549,30 +547,29 @@ def initialize_traceability(
     if license_number is None:
         license_data = org_data['licenses'][0]
         license_number = license_data['license_number']
-        secret_id = license_data['user_api_key_secret']['secret_id']
+        secret_id = license_data['secret_id']
         state = license_data.get('state', state)
         test = license_data.get('test', test)
     else:
         for license_data in org_data['licenses']:
             if license_data['license_number'] == license_number:
                 license_number = license_data['license_number']
-                secret_id = license_data['user_api_key_secret']['secret_id']
+                secret_id = license_data['secret_id']
                 state = license_data.get('state', state)
                 test = license_data.get('test', test)
                 break
 
     # Return an error if the secret can't be found.
-    # secret_id = license_data['metrc_user_api_key_secret']['secret_id']
     print('SECRET ID:', secret_id)
     if secret_id is None:
         return AUTH_ERROR
-    
+
     # Get the Metrc user API key.
     metrc_user_api_key = access_secret_version(project_id, secret_id)
     print('METRC USER API KEY PREFIX:', str(metrc_user_api_key)[:4])
     if metrc_user_api_key is None:
         return AUTH_ERROR
-    
+
     # Get the parameters for the client.
     # if license_number is None:
     #     license_number = body.get(
@@ -602,7 +599,7 @@ def initialize_traceability(
     except:
         print('FAILED TO GET METRC VENDOR API KEY!')
         return AUTH_ERROR
-    
+
     # Initialize and return a Metrc client.
     return Metrc(
         metrc_vendor_api_key,
@@ -652,7 +649,7 @@ def employees(request: Request, license_number: Optional[str] = None):
     track = initialize_traceability(request)
     if isinstance(track, str):
         return Response({'error': True, 'message': track}, status=403)
-    
+
     # Get the license number from parameters or the body.
     if license_number is None:
         license_number = request.query_params.get('license',
@@ -771,7 +768,7 @@ def packages(request: Request, package_id: Optional[str] = ''):
         else:
             data = request.data.get('data', request.data)
         action = snake_case(request.query_params.get('action', package_id))
-    
+
         # Change package locations.
         if action == 'move':
             if isinstance(data, dict): data = [data]

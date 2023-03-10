@@ -182,6 +182,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
         password: password,
         formType: _formType,
       );
+      context.go('/dashboard');
     }
   }
 

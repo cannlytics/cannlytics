@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -567,6 +568,11 @@ class FacilitySelection extends ConsumerWidget {
           return;
         }
         ref.read(primaryFacilityProvider.notifier).state = value!;
+        for (Facility f in facilities) {
+          if (f.id == value) {
+            ref.read(primaryLicenseProvider.notifier).state = f.licenseNumber;
+          }
+        }
       },
     );
 

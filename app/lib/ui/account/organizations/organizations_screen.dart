@@ -40,7 +40,7 @@ class OrganizationsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
 
-    // Define table actions.
+    // Table actions.
     var actions = Row(children: [
       // Join an organization button.
       SecondaryButton(

@@ -63,7 +63,7 @@ class DeliveriesTable extends ConsumerWidget {
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
-        image: 'assets/images/icons/products.png',
+        image: 'assets/images/icons/driver.png',
         title: 'Add a delivery',
         description: 'You do not have any active deliveries for this facility.',
         onTap: () {

@@ -45,7 +45,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 // Redirect function.
 // First, determine if the user is logged in,
 // then navigate to either the dashboard or to sign in.
-String routeRedirect(GoRouterState state, bool isLoggedIn) {
+String? routeRedirect(GoRouterState state, bool isLoggedIn) {
   if (isLoggedIn) {
     if (state.subloc.startsWith('/sign-in')) return '/dashboard';
   } else {
@@ -54,7 +54,7 @@ String routeRedirect(GoRouterState state, bool isLoggedIn) {
       return '/sign-in';
     }
   }
-  return '/sign-in';
+  return null;
 }
 
 /// Custom GoRoute class to make route declaration easier.

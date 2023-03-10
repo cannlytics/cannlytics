@@ -8,6 +8,9 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -23,11 +26,36 @@ import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/table_form.dart';
 
 /// The plants screen.
-class PlantsScreen extends StatelessWidget {
+class PlantsScreen extends ConsumerWidget {
   const PlantsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Determine the screen size.
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWide = screenWidth > Breakpoints.tablet;
+
+    // Table actions.
+    var actions = Row(children: [
+      // TODO: Allow the user to select rows and perform the following actions.
+
+      // TODO: Move plants.
+
+      // TODO: Destroy plants.
+
+      // TODO: Manicure plants.
+
+      // TODO: Harvest plants.
+
+      // Add plant button.
+      PrimaryButton(
+        text: isWide ? 'Add a plant' : 'Add',
+        onPressed: () {
+          context.go('/plants/new');
+        },
+      ),
+    ]);
+
     // Render the widget.
     return Scaffold(
       body: CustomScrollView(
@@ -40,6 +68,7 @@ class PlantsScreen extends StatelessWidget {
             child: TableForm(
               title: 'Plants',
               table: PlantsTable(),
+              actions: actions,
             ),
           ),
 
@@ -60,11 +89,16 @@ class PlantsTable extends ConsumerWidget {
     // Get the data for the primary license / facility.
     final data = ref.watch(plantsProvider).value ?? [];
 
+    // Get the theme.
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
+
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
-        image: 'assets/images/icons/products.png',
-        title: 'No plants',
+        isDark: isDark,
+        image: 'assets/images/icons/clones.png',
+        title: 'Create plants',
         description: 'You do not have any active plants for this facility.',
         onTap: () {
           context.go('/plants/new');

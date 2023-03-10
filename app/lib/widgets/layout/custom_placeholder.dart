@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/theme.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -21,16 +22,19 @@ class CustomPlaceholder extends StatelessWidget {
     required this.title,
     required this.description,
     required this.onTap,
+    this.isDark = false,
   }) : super(key: key);
 
   final String image;
   final String title;
   final String description;
   final Function()? onTap;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      surfaceTintColor: isDark ? null : AppColors.surface,
       margin: EdgeInsets.symmetric(vertical: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(3),
@@ -41,6 +45,7 @@ class CustomPlaceholder extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            gapH16,
             Image.asset(
               image,
               height: 100,

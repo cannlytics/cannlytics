@@ -63,7 +63,7 @@ class TransfersTable extends ConsumerWidget {
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
-        image: 'assets/images/icons/products.png',
+        image: 'assets/images/icons/sales.png',
         title: 'No transfers',
         description: 'You do not have any active transfers for this facility.',
         onTap: () {

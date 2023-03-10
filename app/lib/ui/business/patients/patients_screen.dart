@@ -63,7 +63,7 @@ class PatientsTable extends ConsumerWidget {
     // Return a placeholder if no data.
     if (data.length == 0)
       return CustomPlaceholder(
-        image: 'assets/images/icons/products.png',
+        image: 'assets/images/icons/document.png',
         title: 'No patients',
         description: 'You do not have any active patients for this facility.',
         onTap: () {

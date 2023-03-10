@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/7/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -14,6 +14,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/models/metrc/location.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
+
+/* Locations */
 
 // Locations rows per page provider.
 final locationsRowsPerPageProvider = StateProvider<int>((ref) => 5);
@@ -34,8 +36,7 @@ class LocationsController extends AsyncNotifier<List<Location>> {
 
   /// Get locations.
   Future<List<Location>> _getLocations() async {
-    // final licenseNumber = ref.watch(primaryLicenseProvider);
-    final licenseNumber = '010-X0001';
+    final licenseNumber = ref.watch(primaryLicenseProvider);
     final orgId = ref.watch(primaryOrganizationProvider);
     final state = ref.watch(primaryStateProvider);
     try {
@@ -51,6 +52,84 @@ class LocationsController extends AsyncNotifier<List<Location>> {
   }
 
   // TODO: Get location.
+
+  // TODO: Create locations.
+
+  // TODO: Update locations.
+
+  // TODO: Delete locations.
+}
+
+/* Locations Management  */
+
+// Location selection provider.
+final selectedLocationsProvider =
+    NotifierProvider<SelectedLocationsNotifier, List<Location>>(() {
+  return SelectedLocationsNotifier();
+});
+
+// Location selection.
+class SelectedLocationsNotifier extends Notifier<List<Location>> {
+  // Initialize with an empty list.
+  @override
+  List<Location> build() {
+    return [];
+  }
+
+  // Select a location.
+  void selectLocation(Location item) {
+    state = [...state, item];
+  }
+
+  // Unselect a location
+  void unselectLocation(Location item) {
+    state = [
+      for (final obj in state)
+        if (obj.id != item.id) item,
+    ];
+  }
+}
+
+/* Location Management */
+
+// Location provider.
+final locationProvider =
+    AsyncNotifierProvider<LocationController, Location?>(() {
+  return LocationController();
+});
+
+/// Locations controller.
+class LocationController extends AsyncNotifier<Location?> {
+  @override
+  Future<Location?> build() async {
+    // // Load initial data from Metrc.
+    // return _getLocations();
+  }
+
+  /// Get location.
+  /// TODO: Implement if navigating directly to the detail screen.
+  Future<Location> _getLocation(String id) async {
+    final licenseNumber = ref.watch(primaryLicenseProvider);
+    final orgId = ref.watch(primaryOrganizationProvider);
+    final state = ref.watch(primaryStateProvider);
+    try {
+      return await MetrcLocations.getLocation(
+        licenseNumber: licenseNumber,
+        orgId: orgId,
+        state: state,
+        id: id,
+      );
+    } catch (error, stack) {
+      print(stack);
+      throw Exception("Error decoding JSON: [error=${error.toString()}]");
+    }
+  }
+
+  /// Set the location.
+  Future<void> setLocation(Location item) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async => item);
+  }
 
   // TODO: Create location.
 

@@ -1,6 +1,6 @@
 {
   "name": "cannlytics",
-  "version": "0.0.13+4",
+  "version": "0.0.13+5",
   "license": "MIT",
   "homepage": "https://cannlytics.com",
   "description": "Cannlytics includes a LIMS, a console, documentation, a website, and vast amount of tools for cannabis analytics.",
@@ -37,6 +37,7 @@
     "app:start": "npm-run-all --parallel app:watch app:web",
     "app:windows": "cd app & flutter run -d windows --no-sound-null-safety & cd ../",
     "app:build": "cd app & flutter build web --no-sound-null-safety & cd ../",
+    "app:stage": "cd app/build/web & python -m http.server 8000 & cd ../../../",
     "app:publish": "firebase deploy --project cannlytics --only hosting:app",
     "ai:deploy-cannabis-data-daily": "cd ./tools/data/state_data/get_cannabis_data_daily & gcloud functions deploy get_cannabis_data_daily --entry-point get_cannabis_data_daily --runtime python39 --trigger-topic get_cannabis_data_daily --memory 1024MB --timeout 300 --env-vars-file env.yaml & cd ../../../../",
     "console:start": "npm-run-all --parallel console:serve console:livereload console:dev" ,
