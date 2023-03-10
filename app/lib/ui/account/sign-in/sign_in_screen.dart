@@ -4,11 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/6/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -135,30 +134,6 @@ class UserTypeButton extends ConsumerWidget {
             ),
           },
         ),
-        // child: ToggleSwitch(
-        //   initialLabelIndex: (userType == 'consumer') ? 0 : 1,
-        //   labels: ['Consumer', 'Business'],
-        //   minHeight: 32,
-        //   customWidths: [100.0, 100.0],
-        //   cornerRadius: 20.0,
-        //   activeFgColor: Colors.white,
-        //   inactiveBgColor: Colors.grey,
-        //   inactiveFgColor: Colors.white,
-        //   totalSwitches: 2,
-        //   // icons: [FontAwesomeIcons.mars, FontAwesomeIcons.venus],
-        //   activeBgColors: [
-        //     [Colors.green],
-        //     [Colors.orange]
-        //   ],
-        //   onToggle: (index) {
-        //     // Switch between user type.
-        //     if (index == 0) {
-        //       ref.read(userTypeProvider.notifier).update((state) => 'consumer');
-        //     } else {
-        //       ref.read(userTypeProvider.notifier).update((state) => 'business');
-        //     }
-        //   },
-        // ),
       ),
     );
   }
@@ -214,7 +189,6 @@ class _SignInFormState extends ConsumerState<SignInForm>
         password: password,
         formType: _formType,
       );
-      // context.go('/dashboard');
     }
   }
 
@@ -243,15 +217,14 @@ class _SignInFormState extends ConsumerState<SignInForm>
   // User interface.
   @override
   Widget build(BuildContext context) {
+    // Listen to the user's state.
     ref.listen<AsyncValue>(
       signInProvider,
       (_, state) => state.showAlertDialogOnError(context),
     );
     final state = ref.watch(signInProvider);
-    // final user = ref.watch(userProvider).value;
-    // if (user != null) {
-    //   context.go('/dashboard');
-    // }
+
+    // Build the form.
     return ResponsiveCard(
       isDark: widget.isDark,
       child: FocusScope(

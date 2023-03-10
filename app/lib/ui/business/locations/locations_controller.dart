@@ -72,6 +72,8 @@ class LocationsController extends AsyncNotifier<List<Location>> {
   // TODO: Delete locations.
 }
 
+// TODO: Implement locations search.
+
 /* Locations Management  */
 
 // Location selection provider.

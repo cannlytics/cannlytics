@@ -31,8 +31,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   final authService = ref.watch(authProvider);
   final user = ref.watch(userProvider).value;
   final isLoggedIn = user != null;
-  print('isLoggedIn: $isLoggedIn');
-  // final isLoggedIn = authService.currentUser != null;
 
   // Build the routes.
   return GoRouter(
@@ -50,7 +48,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 // First, determine if the user is logged in,
 // then navigate to either the dashboard or to sign in.
 String? routeRedirect(GoRouterState state, bool isLoggedIn) {
-  print('Logged in: $isLoggedIn');
   if (isLoggedIn) {
     if (state.subloc.startsWith('/sign-in')) return '/dashboard';
   } else {

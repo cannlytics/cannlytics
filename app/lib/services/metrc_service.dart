@@ -239,8 +239,6 @@ class MetrcLocations {
     );
     List<Location> items = [];
     for (var item in response) {
-      print('ITEM:');
-      print(item);
       items.add(Location.fromMap(item));
     }
     return items;

@@ -29,10 +29,18 @@ import 'package:cannlytics_app/widgets/layout/table_form.dart';
 class LocationsScreen extends StatelessWidget {
   const LocationsScreen({super.key});
 
-  // TODO: Add Create / delete (if selected) actions.
-
   @override
   Widget build(BuildContext context) {
+    // TODO: Add Create / delete (if selected) actions.
+    var actions = Padding(
+        padding: EdgeInsets.all(8.0),
+        child: SearchBox(
+            key: Key('LocationsSearch'),
+            onSearch: (searchTerm) {
+              // context.read(searchTermProvider).state = searchTerm),
+              return null;
+            }));
+
     // Render the widget.
     return Scaffold(
       body: CustomScrollView(
@@ -45,7 +53,7 @@ class LocationsScreen extends StatelessWidget {
             child: TableForm(
               title: 'Locations',
               table: LocationsTable(),
-              // actions: actions,
+              actions: actions,
             ),
           ),
 
@@ -78,36 +86,28 @@ class LocationsTable extends ConsumerWidget {
       );
 
     // Format the table headers.
-    List<String> headers = [
-      'ID',
-      'Name',
-      'Type',
-      'Packages',
-      'Batches',
-      'Plants',
-      'Harvests',
-    ];
-    List<String> fields = [
-      'id',
-      'name',
-      'location_type_name',
-      'for_plant_batches',
-      'for_plants',
-      'for_harvests',
-      'for_packages',
+    List<Map> headers = [
+      {'name': 'ID', 'key': 'id', 'sort': true},
+      {'name': 'Name', 'key': 'name', 'sort': true},
+      {'name': 'Type', 'key': 'location_type_name', 'sort': true},
+      {'name': 'Packages', 'key': 'for_plant_batches', 'sort': false},
+      {'name': 'Batches', 'key': 'for_plants', 'sort': false},
+      {'name': 'Plants', 'key': 'for_harvests', 'sort': false},
+      {'name': 'Harvests', 'key': 'for_packages', 'sort': false},
     ];
     List<DataColumn> tableHeader = <DataColumn>[
-      for (String header in headers)
+      for (Map header in headers)
         DataColumn(
           label: Expanded(
             child: Text(
-              header,
+              header['name'],
               style: TextStyle(fontStyle: FontStyle.italic),
             ),
           ),
           onSort: (columnIndex, sortAscending) {
-            // FIXME: Actually sort the data!
-            var field = fields[columnIndex];
+            var field = headers[columnIndex]['key'];
+            var sort = headers[columnIndex]['sort'];
+            if (!sort) return;
             var sorted = data;
             if (sortAscending) {
               sorted = data.sortedBy((x) => x.toMap()[field]);
@@ -132,7 +132,6 @@ class LocationsTable extends ConsumerWidget {
     final sortAscending = ref.read(locationsSortAscending);
 
     // Build the data table.
-    // TODO: Make sortable.
     return PaginatedDataTable(
       // Options.
       showCheckboxColumn: true,
@@ -147,7 +146,7 @@ class LocationsTable extends ConsumerWidget {
       headingRowHeight: 48,
       horizontalMargin: 12,
       // Pagination.
-      availableRowsPerPage: [5, 10, 25, 50],
+      availableRowsPerPage: [5, 10, 25, 50, 100],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
         ref.read(locationsRowsPerPageProvider.notifier).state = index!;
@@ -225,4 +224,47 @@ class LocationsTableSource extends DataTableSource {
 
   @override
   int get selectedRowCount => 0;
+}
+
+/// Table search.
+/// TODO: Add clear.
+class SearchBox extends StatelessWidget {
+  final ValueChanged<String> onSearch;
+
+  const SearchBox({
+    required Key key,
+    required this.onSearch,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 150,
+      child: TextFormField(
+        initialValue: '',
+        style: TextStyle(color: Colors.white),
+        cursorColor: Colors.white,
+        decoration: InputDecoration(
+          hintText: 'Search',
+          hintStyle: TextStyle(fontSize: 16, color: Colors.white),
+          isDense: true,
+          suffixIcon: Icon(Icons.search, color: Colors.white),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: Colors.white,
+              width: 2.0,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(style: BorderStyle.none),
+          ),
+          filled: true,
+          fillColor: Colors.lightBlue.shade200,
+        ),
+        onChanged: onSearch,
+      ),
+    );
+  }
 }
