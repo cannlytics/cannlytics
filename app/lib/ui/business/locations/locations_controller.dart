@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/9/2023
+// Updated: 3/11/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
@@ -15,14 +16,7 @@ import 'package:cannlytics_app/models/metrc/location.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
 import 'package:cannlytics_app/ui/general/app_controller.dart';
 
-/* Locations */
-
-// Locations rows per page provider.
-final locationsRowsPerPageProvider = StateProvider<int>((ref) => 5);
-
-// Locations sorting.
-final locationsSortColumnIndex = StateProvider<int>((ref) => 0);
-final locationsSortAscending = StateProvider<bool>((ref) => true);
+/* Locations data */
 
 // Locations provider.
 final locationsProvider =
@@ -32,9 +26,9 @@ final locationsProvider =
 
 /// Locations controller.
 class LocationsController extends AsyncNotifier<List<Location>> {
+  // Load initial data from Metrc.
   @override
   Future<List<Location>> build() async {
-    // Load initial data from Metrc.
     return _getLocations();
   }
 
@@ -51,7 +45,6 @@ class LocationsController extends AsyncNotifier<List<Location>> {
         state: state,
       );
     } catch (error, stack) {
-      // print(stack);
       print("Error decoding JSON: [error=${error.toString()}]");
       return [];
     }
@@ -72,9 +65,78 @@ class LocationsController extends AsyncNotifier<List<Location>> {
   // TODO: Delete locations.
 }
 
-// TODO: Implement locations search.
+/* Table */
 
-/* Locations Management  */
+// Rows per page provider.
+final locationsRowsPerPageProvider = StateProvider<int>((ref) => 5);
+
+// Sorting providers.
+final locationsSortColumnIndex = StateProvider<int>((ref) => 0);
+final locationsSortAscending = StateProvider<bool>((ref) => true);
+
+/* Search */
+
+// Search term provider.
+final searchTermProvider = StateProvider<String>((ref) => '');
+
+/// Filtered locations provider.
+final filteredLocationsProvider =
+    StateNotifierProvider<FilteredLocationsNotifier, List<Location>>(
+  (ref) {
+    // Listen to both data and search term.
+    final data = ref.watch(locationsProvider).value;
+    final searchTerm = ref.watch(searchTermProvider);
+    return FilteredLocationsNotifier(ref, data ?? [], searchTerm);
+  },
+);
+
+/// Filtered locations.
+class FilteredLocationsNotifier extends StateNotifier<List<Location>> {
+  // Properties.
+  final StateNotifierProviderRef<dynamic, dynamic> ref;
+  final List<Location> items;
+  final String searchTerm;
+
+  // Initialization.
+  FilteredLocationsNotifier(
+    this.ref,
+    this.items,
+    this.searchTerm,
+  ) : super([]) {
+    // Search function.
+    if (searchTerm.isEmpty) {
+      state = items;
+      return;
+    }
+    String keyword = searchTerm.toLowerCase();
+    List<Location> matched = [];
+    items.forEach((x) {
+      // Matching logic.
+      if (x.name.toLowerCase().contains(keyword) || x.id.contains(keyword)) {
+        matched.add(x);
+      }
+    });
+    state = matched;
+  }
+}
+
+// Search TextEditingController provider.
+final searchControllerProvider =
+    StateNotifierProvider<SearchController, TextEditingController>((ref) {
+  return SearchController();
+});
+
+// Search TextEditingController.
+class SearchController extends StateNotifier<TextEditingController> {
+  SearchController() : super(TextEditingController());
+  @override
+  void dispose() {
+    state.dispose();
+    super.dispose();
+  }
+}
+
+/* Selection  */
 
 // Location selection provider.
 final selectedLocationsProvider =
@@ -95,7 +157,7 @@ class SelectedLocationsNotifier extends Notifier<List<Location>> {
     state = [...state, item];
   }
 
-  // Unselect a location
+  // Unselect a location.
   void unselectLocation(Location item) {
     state = [
       for (final obj in state)
@@ -104,7 +166,7 @@ class SelectedLocationsNotifier extends Notifier<List<Location>> {
   }
 }
 
-/* Location Management */
+/* Location Details */
 
 // Location provider.
 final locationProvider =
@@ -116,12 +178,12 @@ final locationProvider =
 class LocationController extends AsyncNotifier<Location?> {
   @override
   Future<Location?> build() async {
-    // // Load initial data from Metrc.
-    // return _getLocations();
+    // FIXME: Load initial data from Metrc if data not already loaded.
+    // TODO: Persist location data when a user clicks on a location.
+    // return _getLocation();
   }
 
   /// Get location.
-  /// TODO: Implement if navigating directly to the detail screen.
   Future<Location> _getLocation(String id) async {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final orgId = ref.watch(primaryOrganizationProvider);

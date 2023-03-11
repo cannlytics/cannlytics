@@ -67,13 +67,10 @@ class AppColors {
   static const Color white = Colors.white;
   static const Color black = Color(0xFF1E1B18);
 
-  // Whether or not the app is in dark mode.
-  final bool isDark = false;
-
   /// Convert the colors to theme data.
   static ThemeData toThemeData(bool isDark) {
-    TextTheme txtTheme =
-        (isDark ? ThemeData.dark() : ThemeData.light()).textTheme;
+    ThemeData themeMode = isDark ? ThemeData.dark() : ThemeData.light();
+    TextTheme textTheme = themeMode.textTheme;
     ColorScheme colorScheme = ColorScheme(
       brightness: isDark ? Brightness.dark : Brightness.light,
       primary: accent1,
@@ -94,29 +91,45 @@ class AppColors {
     // Also add on extra properties that ColorScheme seems to miss.
     // See: https://medium.com/@omlondhe/themedata-in-flutter-f6a67d9c636d
     var t = ThemeData.from(
-      textTheme: txtTheme,
+      textTheme: textTheme,
       colorScheme: colorScheme,
     ).copyWith(
-      // TODO:
-      // dataTableTheme: ,
       useMaterial3: true,
-      visualDensity: VisualDensity.comfortable,
-      appBarTheme: const AppBarTheme(
-        elevation: 0.0,
-        centerTitle: true,
-      ),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       highlightColor: accent1,
+      visualDensity: VisualDensity.comfortable,
       scaffoldBackgroundColor: isDark ? const Color(0xFF323443) : Colors.white,
       canvasColor: isDark ? const Color(0xFF323443) : AppColors.neutral1,
       cardColor: isDark ? const Color(0xFF323443) : Colors.white,
       dialogBackgroundColor:
           isDark ? const Color(0xFF323443) : AppColors.neutral1,
+      appBarTheme: const AppBarTheme(
+        elevation: 0.0,
+        centerTitle: true,
+      ),
       buttonTheme: ButtonThemeData(
         buttonColor: primary2,
         textTheme: ButtonTextTheme.primary,
         colorScheme: colorScheme.copyWith(
           secondary: isDark ? Colors.white : const Color(0xFF323443),
+        ),
+      ),
+      cardTheme: CardTheme(
+        elevation: 0,
+        surfaceTintColor: isDark ? null : AppColors.surface,
+      ),
+      dataTableTheme: DataTableThemeData(
+        // headingTextStyle: TextStyle(
+        //   fontWeight: FontWeight.bold,
+        //   fontSize: 16.0,
+        // ),
+        // dataTextStyle: TextStyle(
+        //   fontSize: 14.0,
+        // ),
+        // headingRowColor: MaterialStateProperty.all(Colors.transparent),
+        // dataRowColor: MaterialStateProperty.all(Colors.transparent),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
         ),
       ),
       textButtonTheme: TextButtonThemeData(

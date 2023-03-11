@@ -141,7 +141,6 @@ class MetrcLicenses {
       'org_id': orgId,
       'deletion_reason': deletionReason,
     };
-    Map<String, String> headers = {'Content-Type': 'application/json'};
     return await APIService.apiRequest(endpoint, data: data);
   }
 }

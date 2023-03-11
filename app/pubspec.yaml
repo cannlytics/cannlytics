@@ -21,6 +21,8 @@ dependencies:
   flutter_native_splash: ^2.2.18
   flutter_riverpod: ^2.3.1
   flutter_svg: ^2.0.3
+  # fuzzy: 0.3.0
+  flutter_typeahead: ^4.3.7
   go_router: ^6.2.0
   http: ^0.13.5
   intl: ^0.17.0

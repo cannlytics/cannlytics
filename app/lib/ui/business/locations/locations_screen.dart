@@ -4,17 +4,19 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/9/2023
+// Updated: 3/11/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
-import 'package:cannlytics_app/ui/general/app_controller.dart';
+import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
+import 'package:cannlytics_app/widgets/tables/table_data.dart';
 import 'package:flutter/material.dart';
 import 'package:dartx/dartx.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
@@ -26,22 +28,11 @@ import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/table_form.dart';
 
 /// The locations screen.
-class LocationsScreen extends StatelessWidget {
+class LocationsScreen extends ConsumerWidget {
   const LocationsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // TODO: Add Create / delete (if selected) actions.
-    var actions = Padding(
-        padding: EdgeInsets.all(8.0),
-        child: SearchBox(
-            key: Key('LocationsSearch'),
-            onSearch: (searchTerm) {
-              // context.read(searchTermProvider).state = searchTerm),
-              return null;
-            }));
-
-    // Render the widget.
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -53,7 +44,6 @@ class LocationsScreen extends StatelessWidget {
             child: TableForm(
               title: 'Locations',
               table: LocationsTable(),
-              actions: actions,
             ),
           ),
 
@@ -71,21 +61,27 @@ class LocationsTable extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Get the data for the primary license / facility.
-    final data = ref.watch(locationsProvider).value ?? [];
+    // Determine the screen size.
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWide = screenWidth > Breakpoints.tablet;
 
-    // Return a placeholder if no data.
-    if (data.isEmpty)
-      return CustomPlaceholder(
-        image: 'assets/images/icons/facilities.png',
-        title: 'Add a location',
-        description: 'You do not have any active locations for this facility.',
-        onTap: () {
-          context.go('/locations/new');
-        },
-      );
+    // Get the filtered data.
+    final data = ref.watch(filteredLocationsProvider);
 
-    // Format the table headers.
+    // Define the cell builder function.
+    _buildCells(item) {
+      return <DataCell>[
+        DataCell(Text(item.id)),
+        DataCell(Text(item.name)),
+        DataCell(Text(item.locationTypeName ?? '')),
+        DataCell(Text(item.forPackages! ? '✓' : 'x')),
+        DataCell(Text(item.forPlantBatches! ? '✓' : 'x')),
+        DataCell(Text(item.forPlants! ? '✓' : 'x')),
+        DataCell(Text(item.forHarvests! ? '✓' : 'x')),
+      ];
+    }
+
+    // Define the table headers.
     List<Map> headers = [
       {'name': 'ID', 'key': 'id', 'sort': true},
       {'name': 'Name', 'key': 'name', 'sort': true},
@@ -95,6 +91,8 @@ class LocationsTable extends ConsumerWidget {
       {'name': 'Plants', 'key': 'for_harvests', 'sort': false},
       {'name': 'Harvests', 'key': 'for_packages', 'sort': false},
     ];
+
+    // Format the table headers.
     List<DataColumn> tableHeader = <DataColumn>[
       for (Map header in headers)
         DataColumn(
@@ -126,13 +124,14 @@ class LocationsTable extends ConsumerWidget {
 
     // Get the selected rows.
     List<Location> selectedRows = ref.watch(selectedLocationsProvider);
+    List<String> selectedIds = selectedRows.map((x) => x.id).toList();
 
     // Get the sorting state.
     final sortColumnIndex = ref.read(locationsSortColumnIndex);
     final sortAscending = ref.read(locationsSortAscending);
 
     // Build the data table.
-    return PaginatedDataTable(
+    Widget table = PaginatedDataTable(
       // Options.
       showCheckboxColumn: true,
       showFirstLastButtons: true,
@@ -151,9 +150,13 @@ class LocationsTable extends ConsumerWidget {
       onRowsPerPageChanged: (index) {
         ref.read(locationsRowsPerPageProvider.notifier).state = index!;
       },
-      // Table data.
-      source: LocationsTableSource(
+      // Table.
+      source: TableData<Location>(
+        // Table data.
         data: data,
+
+        // Table cells.
+        cellsBuilder: _buildCells,
 
         // Tap on a location.
         onTap: (Location item) async {
@@ -171,100 +174,103 @@ class LocationsTable extends ConsumerWidget {
         },
 
         // Specify selected locations.
-        selected: selectedRows.map((x) => x.id).toList(),
+        isSelected: (item) => selectedIds.contains(item.id),
       ),
     );
-  }
-}
 
-/// Facilities table data.
-class LocationsTableSource extends DataTableSource {
-  LocationsTableSource({
-    required this.data,
-    this.onTap,
-    this.onSelect,
-    this.selected,
-  });
+    // Read the controller.
+    final _controller = ref.watch(searchControllerProvider);
 
-  // Properties.
-  final List<Location> data;
-  final void Function(Location item)? onTap;
-  final void Function(bool selected, Location item)? onSelect;
-  final List? selected;
+    // Define the table actions.
+    var actions = Row(
+      children: [
+        // Search box.
+        SizedBox(
+          width: 175,
+          height: 34,
+          child: TypeAheadField(
+            textFieldConfiguration: TextFieldConfiguration(
+              // Controller.
+              controller: _controller,
 
-  @override
-  DataRow getRow(int index) {
-    final item = data[index];
-    return DataRow.byIndex(
-      index: index,
-      selected: selected!.contains(item.id),
-      onSelectChanged: (bool? selected) {
-        onSelect!(selected ?? false, item);
-      },
-      onLongPress: () {
-        onTap!(item);
-      },
-      cells: <DataCell>[
-        DataCell(Text(item.id)),
-        DataCell(Text(item.name ?? '')),
-        DataCell(Text(item.locationTypeName ?? '')),
-        DataCell(Text(item.forPackages! ? '✓' : 'x')),
-        DataCell(Text(item.forPlantBatches! ? '✓' : 'x')),
-        DataCell(Text(item.forPlants! ? '✓' : 'x')),
-        DataCell(Text(item.forHarvests! ? '✓' : 'x')),
+              // Decoration.
+              decoration: InputDecoration(
+                hintText: 'Search...',
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(3)),
+                ),
+                suffixIcon: (_controller.text.isEmpty)
+                    ? null
+                    : GestureDetector(
+                        onTap: () {
+                          _controller.clear();
+                        },
+                        child: Icon(Icons.clear),
+                      ),
+              ),
+              style: DefaultTextStyle.of(context).style.copyWith(
+                    fontStyle: FontStyle.italic,
+                    fontSize: 16.0,
+                    height: 1.25,
+                  ),
+            ),
+            // Search engine function.
+            suggestionsCallback: (pattern) async {
+              ref.read(searchTermProvider.notifier).state = pattern;
+              final suggestions = ref.read(filteredLocationsProvider);
+              return suggestions;
+            },
+
+            // Autocomplete menu.
+            itemBuilder: (context, Location suggestion) {
+              return ListTile(
+                title: Text(suggestion.name),
+              );
+            },
+
+            // Menu selection function.
+            onSuggestionSelected: (Location suggestion) {
+              context.go('/locations/${suggestion.id}');
+            },
+          ),
+        ),
+
+        // Spacer
+        const Spacer(),
+
+        // Delete button if any rows selected.
+        if (selectedIds.length > 0)
+          PrimaryButton(
+            backgroundColor: Colors.red,
+            text: isWide ? 'Delete locations' : 'Delete',
+            onPressed: () {
+              print('DELETE LOCATIONS!');
+            },
+          ),
+
+        // Add button.
+        if (selectedIds.length > 0) gapW6,
+        PrimaryButton(
+          text: isWide ? 'New location' : 'New',
+          onPressed: () {
+            context.go('/locations/new');
+          },
+        ),
       ],
     );
-  }
 
-  @override
-  int get rowCount => data.length;
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get selectedRowCount => 0;
-}
-
-/// Table search.
-/// TODO: Add clear.
-class SearchBox extends StatelessWidget {
-  final ValueChanged<String> onSearch;
-
-  const SearchBox({
-    required Key key,
-    required this.onSearch,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 150,
-      child: TextFormField(
-        initialValue: '',
-        style: TextStyle(color: Colors.white),
-        cursorColor: Colors.white,
-        decoration: InputDecoration(
-          hintText: 'Search',
-          hintStyle: TextStyle(fontSize: 16, color: Colors.white),
-          isDense: true,
-          suffixIcon: Icon(Icons.search, color: Colors.white),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(
-              color: Colors.white,
-              width: 2.0,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(style: BorderStyle.none),
-          ),
-          filled: true,
-          fillColor: Colors.lightBlue.shade200,
-        ),
-        onChanged: onSearch,
-      ),
-    );
+    // Return the table and actions.
+    if (data.isEmpty)
+      table = CustomPlaceholder(
+        image: 'assets/images/icons/facilities.png',
+        title: 'Add a location',
+        description: 'Locations are used to track packages, items, and plants.',
+        onTap: () {
+          context.go('/locations/new');
+        },
+      );
+    return Column(children: [actions, table]);
   }
 }

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/27/2023
-// Updated: 3/7/2023
+// Updated: 3/11/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -17,7 +17,7 @@ class Location {
   // Initialization.
   const Location({
     required this.id,
-    this.name,
+    required this.name,
     this.locationTypeId,
     this.locationTypeName,
     this.forPlantBatches,
@@ -28,7 +28,7 @@ class Location {
 
   // Properties.
   final LocationId id;
-  final String? name;
+  final String name;
   final String? locationTypeId;
   final String? locationTypeName;
   final bool? forPlantBatches;
@@ -38,9 +38,6 @@ class Location {
 
   // Create model.
   factory Location.fromMap(Map<dynamic, dynamic> data) {
-    print('id: ${data['id']}');
-    print('name: ${data['name']}');
-    print('location_type_name: ${data['location_type_name']}');
     return Location(
       id: data['id'].toString(),
       name: data['name'] ?? '',
@@ -69,19 +66,19 @@ class Location {
 
   // Create Location.
   Future<void> create() async {
-    // Call an API or database to create a new location.
+    // TODO: Create the location in Metrc.
     // await MetrcService.createLocation(this.toMap());
   }
 
   // Update Location.
   Future<void> update() async {
-    // Call an API or database to update the existing location.
+    // TODO: Update the location in Metrc.
     // await MetrcService.updateLocation(this.id, this.toMap());
   }
 
   // Delete Location.
   Future<void> delete() async {
-    // Call an API or database to delete the existing location.
+    // TODO: Delete the location from Metrc.
     // await MetrcService.deleteLocation(this.id);
   }
 }
