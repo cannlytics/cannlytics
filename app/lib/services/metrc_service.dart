@@ -251,7 +251,7 @@ class MetrcLocations {
     String? id,
   }) async {
     String endpoint = '/api/metrc/locations/$id';
-    return await APIService.apiRequest(
+    final response = await APIService.apiRequest(
       endpoint,
       options: {
         'params': {
@@ -261,6 +261,9 @@ class MetrcLocations {
         }
       },
     );
+    print('RESPONSE:');
+    print(response);
+    return Location.fromMap(response);
   }
 
   // Update the name of a location.

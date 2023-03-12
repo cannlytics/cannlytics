@@ -160,7 +160,8 @@ class LocationsTable extends ConsumerWidget {
 
         // Tap on a location.
         onTap: (Location item) async {
-          await ref.read(locationProvider.notifier).set(item);
+          // await ref.read(locationProvider.notifier).set(item);
+          // FIXME: Pass location data to avoid extra API request.
           context.go('/locations/${item.id}');
         },
 
@@ -179,7 +180,7 @@ class LocationsTable extends ConsumerWidget {
     );
 
     // Read the controller.
-    final _controller = ref.watch(searchControllerProvider);
+    final _controller = ref.watch(searchController);
 
     // Define the table actions.
     var actions = Row(

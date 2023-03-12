@@ -8,6 +8,9 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
+import 'dart:async';
+
+import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -120,13 +123,11 @@ class FilteredLocationsNotifier extends StateNotifier<List<Location>> {
   }
 }
 
-// Search TextEditingController provider.
-final searchControllerProvider =
-    StateNotifierProvider<SearchController, TextEditingController>((ref) {
-  return SearchController();
-});
+// Search input.
+final searchController =
+    StateNotifierProvider<SearchController, TextEditingController>(
+        (ref) => SearchController());
 
-// Search TextEditingController.
 class SearchController extends StateNotifier<TextEditingController> {
   SearchController() : super(TextEditingController());
   @override
@@ -168,31 +169,74 @@ class SelectedLocationsNotifier extends Notifier<List<Location>> {
 
 /* Location Details */
 
+// Location ID.
+final locationId = StateProvider<String?>((ref) => null);
+
 // Location provider.
+// final locationProvider =
+//     FutureProvider.family<Location, String>((ref, id) async {
+//   final licenseNumber = ref.watch(primaryLicenseProvider);
+//   final orgId = ref.watch(primaryOrganizationProvider);
+//   final licenseState = ref.watch(primaryStateProvider);
+//   try {
+//     return await MetrcLocations.getLocation(
+//       licenseNumber: licenseNumber,
+//       orgId: orgId,
+//       state: licenseState,
+//       id: id,
+//     );
+//   } catch (error, stack) {
+//     print(stack);
+//     throw Exception("Error decoding JSON: [error=${error.toString()}]");
+//   }
+// });
 final locationProvider =
-    AsyncNotifierProvider<LocationController, Location?>(() {
-  return LocationController();
-});
+    AsyncNotifierProvider.family<LocationController, Location?, String?>(
+  ({id}) {
+    return LocationController(id: id);
+  },
+);
 
 /// Locations controller.
-class LocationController extends AsyncNotifier<Location?> {
+class LocationController extends FamilyAsyncNotifier<Location?, String?> {
+  LocationController({required this.id}) : super();
+
+  // Properties.
+  final String? id;
+
+  // Initialization.
   @override
-  Future<Location?> build() async {
-    // FIXME: Load initial data from Metrc if data not already loaded.
-    // TODO: Persist location data when a user clicks on a location.
+  FutureOr<Location?> build(String? id) async {
+    if (id == null) return null;
+    final data = await this.get(id);
+    print(data);
+    return data;
+    // return Location(
+    //   required this.id,
+    //   required this.name,
+    //   this.locationTypeId,
+    //   this.locationTypeName,
+    //   this.forPlantBatches,
+    //   this.forPlants,
+    //   this.forHarvests,
+    //   this.forPackages,
+    // );
+    // ref.read(goRouterProvider).
     // return _getLocation();
   }
 
   /// Get location.
-  Future<Location> _getLocation(String id) async {
+  Future<Location?> get(String id) async {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final orgId = ref.watch(primaryOrganizationProvider);
-    final state = ref.watch(primaryStateProvider);
+    final licenseState = ref.watch(primaryStateProvider);
+    print('LICENSE FOR LOCATIONS: $licenseNumber');
+    if (licenseNumber == null) return null;
     try {
       return await MetrcLocations.getLocation(
         licenseNumber: licenseNumber,
         orgId: orgId,
-        state: state,
+        state: licenseState,
         id: id,
       );
     } catch (error, stack) {
@@ -205,6 +249,7 @@ class LocationController extends AsyncNotifier<Location?> {
   Future<bool> set(Location item) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => item);
+    ref.read(nameController).value = TextEditingValue(text: item.name);
     return state.hasError == false;
   }
 
@@ -240,5 +285,30 @@ class LocationTypesNotifier extends AsyncNotifier<List<dynamic>> {
   Future<List<dynamic>> _getLocationTypes() async {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     return MetrcLocations.getLocationTypes(licenseNumber: licenseNumber);
+  }
+}
+
+/* Location Form */
+
+// Name input.
+final nameController =
+    StateNotifierProvider<NameController, TextEditingController>(
+  (ref) {
+    // final item = ref.watch(locationProvider).value;
+    return NameController();
+  },
+);
+
+class NameController extends StateNotifier<TextEditingController> {
+  NameController() : super(TextEditingController());
+
+  @override
+  void dispose() {
+    state.dispose();
+    super.dispose();
+  }
+
+  void change(String value) {
+    state.value = TextEditingValue(text: value);
   }
 }
