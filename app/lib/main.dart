@@ -10,7 +10,7 @@
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 
 // Flutter imports:
-import 'package:cannlytics_app/ui/general/app_controller.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

@@ -17,8 +17,8 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_app/models/metrc/plant_harvest.dart';
 import 'package:cannlytics_app/ui/business/plants/plant_harvests_controller.dart';
-import 'package:cannlytics_app/ui/general/footer.dart';
-import 'package:cannlytics_app/ui/general/header.dart';
+import 'package:cannlytics_app/ui/layout/footer.dart';
+import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/table_form.dart';
 

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/11/2023
+// Updated: 3/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -14,7 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_app/models/metrc/location.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
-import 'package:cannlytics_app/ui/general/app_controller.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 
 /* Locations data */
 
@@ -202,14 +202,43 @@ class LocationController extends AsyncNotifier<Location?> {
   }
 
   /// Set the location.
-  Future<void> setLocation(Location item) async {
+  Future<bool> set(Location item) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => item);
+    return state.hasError == false;
   }
 
   // TODO: Create location.
+  Future<bool> create(Location item) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async => item);
+    return state.hasError == false;
+  }
 
   // TODO: Update location.
 
   // TODO: Delete location.
+}
+
+/* Location Types */
+
+// Location types provider.
+final locationTypesProvider =
+    AsyncNotifierProvider<LocationTypesNotifier, List<dynamic>>(() {
+  return LocationTypesNotifier();
+});
+
+// Location types controller.
+class LocationTypesNotifier extends AsyncNotifier<List<dynamic>> {
+  // Initialization.
+  @override
+  Future<List<dynamic>> build() async {
+    return _getLocationTypes();
+  }
+
+  // Get location types from Metrc.
+  Future<List<dynamic>> _getLocationTypes() async {
+    final licenseNumber = ref.watch(primaryLicenseProvider);
+    return MetrcLocations.getLocationTypes(licenseNumber: licenseNumber);
+  }
 }

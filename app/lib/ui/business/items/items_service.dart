@@ -8,7 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
-import 'package:cannlytics_app/ui/general/app_controller.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 

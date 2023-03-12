@@ -48,8 +48,8 @@ import 'package:cannlytics_app/ui/business/strains/strain_screen.dart';
 import 'package:cannlytics_app/ui/business/strains/strains_screen.dart';
 import 'package:cannlytics_app/ui/business/transfers/transfer_screen.dart';
 import 'package:cannlytics_app/ui/business/transfers/transfers_screen.dart';
-import 'package:cannlytics_app/ui/general/dashboard.dart';
-import 'package:cannlytics_app/ui/general/search_screen.dart';
+import 'package:cannlytics_app/ui/main/dashboard.dart';
+import 'package:cannlytics_app/ui/layout/search_screen.dart';
 
 // The main app routes.
 class Routes {
@@ -186,7 +186,7 @@ class Routes {
           name: AppRoutes.location.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return LocationScreen(jobId: id);
+            return LocationScreen(id: id);
           },
         ),
       ],

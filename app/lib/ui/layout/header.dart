@@ -23,7 +23,7 @@ import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
-import 'package:cannlytics_app/ui/general/app_controller.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:cannlytics_app/widgets/buttons/theme_button.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
 import 'package:cannlytics_app/widgets/images/app_logo.dart';

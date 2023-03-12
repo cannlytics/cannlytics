@@ -13,7 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
-import 'package:cannlytics_app/ui/general/app_controller.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 
 // Facilities rows per page provider.
 final facilitiesRowsPerPageProvider = StateProvider<int>((ref) => 5);

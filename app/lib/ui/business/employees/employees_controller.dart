@@ -13,7 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_app/models/metrc/employee.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
-import 'package:cannlytics_app/ui/general/app_controller.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 
 // Employees rows per page provider.
 final employeesRowsPerPageProvider = StateProvider<int>((ref) => 5);

@@ -13,7 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_app/models/metrc/strain.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
-import 'package:cannlytics_app/ui/general/app_controller.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 
 // Strains rows per page provider.
 final strainsRowsPerPageProvider = StateProvider<int>((ref) => 5);

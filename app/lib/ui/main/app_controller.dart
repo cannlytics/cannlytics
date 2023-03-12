@@ -4,13 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 3/9/2023
+// Updated: 3/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
-import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -42,7 +40,13 @@ final userProvider = StreamProvider<User?>((ref) {
 final organizationsProvider =
     FutureProvider.autoDispose<List<Organization>>((ref) async {
   // Get organizations from the API.
-  final response = await APIService.apiRequest('/organizations');
+  var response;
+  try {
+    response = await APIService.apiRequest('/organizations');
+  } catch (error) {
+    print('NO API CONNECTION!');
+    return [];
+  }
 
   // Convert organizations data into models.
   List<Organization> data = [];

@@ -28,6 +28,7 @@ dependencies:
   intl: ^0.17.0
   rxdart: ^0.27.7
   url_launcher: ^6.1.10
+  uuid: ^3.0.7
 
 dev_dependencies:
   import_sorter: ^4.6.0

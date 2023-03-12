@@ -4,105 +4,106 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/7/2023
+// Updated: 3/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/ui/business/locations/locations_controller.dart';
+import 'package:cannlytics_app/ui/layout/footer.dart';
+import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/consumer/entry.dart';
-import 'package:cannlytics_app/models/consumer/job.dart';
-import 'package:cannlytics_app/ui/business/items/item_controller.dart';
-import 'package:cannlytics_app/ui/business/packages/packages_service.dart';
-import 'package:cannlytics_app/utils/string_utils.dart';
+import 'package:cannlytics_app/models/metrc/location.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/widgets/inputs/date_time_picker.dart';
 
-/// The location screen.
+/// Location screen.
 class LocationScreen extends ConsumerStatefulWidget {
   const LocationScreen({
     super.key,
-    required this.jobId,
-    this.entryId,
+    required this.id,
     this.entry,
   });
-  final JobID jobId;
-  final EntryID? entryId;
-  final Entry? entry;
+  final LocationId id;
+  final Location? entry;
 
   @override
   ConsumerState<LocationScreen> createState() => _LocationScreenState();
 }
 
+// Location screen state.
 class _LocationScreenState extends ConsumerState<LocationScreen> {
-  late DateTime _startDate;
-  late TimeOfDay _startTime;
-  late DateTime _endDate;
-  late TimeOfDay _endTime;
-  late String _comment;
+  // Fields.
+  late String _name;
+  late String _locationTypeId;
+  late String _locationTypeName;
+  late bool _forPlantBatches;
+  late bool _forPlants;
+  late bool _forHarvests;
+  late bool _forPackages;
 
+  // Initialization.
   @override
   void initState() {
     super.initState();
-    final start = widget.entry?.start ?? DateTime.now();
-    _startDate = DateTime(start.year, start.month, start.day);
-    _startTime = TimeOfDay.fromDateTime(start);
-
-    final end = widget.entry?.end ?? DateTime.now();
-    _endDate = DateTime(end.year, end.month, end.day);
-    _endTime = TimeOfDay.fromDateTime(end);
-
-    _comment = widget.entry?.comment ?? '';
+    _name = widget.entry?.name ?? '';
+    _locationTypeId = widget.entry?.locationTypeId ?? '';
+    _locationTypeName = widget.entry?.locationTypeName ?? '';
+    _forPlantBatches = widget.entry?.forPlantBatches ?? false;
+    _forPlants = widget.entry?.forPlants ?? false;
+    _forHarvests = widget.entry?.forHarvests ?? false;
+    _forPackages = widget.entry?.forPackages ?? false;
   }
 
-  Entry _entryFromState() {
-    final start = DateTime(
-      _startDate.year,
-      _startDate.month,
-      _startDate.day,
-      _startTime.hour,
-      _startTime.minute,
-    );
-    final end = DateTime(
-      _endDate.year,
-      _endDate.month,
-      _endDate.day,
-      _endTime.hour,
-      _endTime.minute,
-    );
-    final id = widget.entry?.id ?? documentIdFromCurrentDate();
-    return Entry(
+  // State to model.
+  Location _entryFromState() {
+    final id = widget.entry?.id ?? _createID();
+    return Location(
       id: id,
-      jobId: widget.jobId,
-      start: start,
-      end: end,
-      comment: _comment,
+      name: _name,
+      locationTypeId: _locationTypeId,
+      locationTypeName: _locationTypeName,
+      forPlantBatches: _forPlantBatches,
+      forPlants: _forPlants,
+      forHarvests: _forHarvests,
+      forPackages: _forPackages,
     );
   }
 
+  // Create a time-based UUID.
+  String _createID() {
+    var uuid = Uuid();
+    return uuid.v1();
+  }
+
+  // Save the entry and dismiss modal.
   Future<void> _setEntryAndDismiss() async {
     final entry = _entryFromState();
-    final success =
-        await ref.read(entryScreenControllerProvider.notifier).setEntry(entry);
+    final success = await ref.read(locationProvider.notifier).create(entry);
     if (success && mounted) {
       context.pop();
     }
   }
 
+  // Build.
   @override
   Widget build(BuildContext context) {
+    // Listen for errors.
     ref.listen<AsyncValue>(
-      entryScreenControllerProvider,
+      locationProvider,
       (_, state) => state.showAlertDialogOnError(context),
     );
+
+    // Form.
     return Scaffold(
       // App bar.
       appBar: AppBar(
@@ -122,88 +123,61 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
       ),
 
       // Body.
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _buildStartDate(),
-              _buildEndDate(),
-              const SizedBox(height: 8.0),
-              _buildDuration(),
-              const SizedBox(height: 8.0),
-              _buildComment(),
-            ],
+      body: CustomScrollView(
+        slivers: [
+          // App header.
+          const SliverToBoxAdapter(child: AppHeader()),
+
+          // Form.
+          SliverToBoxAdapter(
+            child: _form(),
           ),
-        ),
+
+          // Footer
+          const SliverToBoxAdapter(child: Footer()),
+        ],
       ),
     );
   }
 
-  // Start date.
-  Widget _buildStartDate() {
-    return DateTimePicker(
-      labelText: 'Start',
-      selectedDate: _startDate,
-      selectedTime: _startTime,
-      onSelectedDate: (date) => setState(() => _startDate = date),
-      onSelectedTime: (time) => setState(() => _startTime = time),
-    );
-  }
+  Widget _form() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          // Name field.
+          gapH6,
+          _nameField(),
+          gapH6,
 
-  // End date.
-  Widget _buildEndDate() {
-    return DateTimePicker(
-      labelText: 'End',
-      selectedDate: _endDate,
-      selectedTime: _endTime,
-      onSelectedDate: (date) => setState(() => _endDate = date),
-      onSelectedTime: (time) => setState(() => _endTime = time),
-    );
-  }
-
-  // Duration.
-  Widget _buildDuration() {
-    final currentEntry = _entryFromState();
-    final durationFormatted = Format.hours(currentEntry.durationInHours);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: <Widget>[
-        Text(
-          'Duration: $durationFormatted',
-          style: const TextStyle(
-            fontSize: 18.0,
-            fontWeight: FontWeight.w500,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+          // TODO: Add additional fields.
+        ],
+      ),
     );
   }
 
   // Comment.
-  Widget _buildComment() {
+  Widget _nameField() {
     return TextField(
-      keyboardType: TextInputType.text,
-      maxLength: 50,
-      controller: TextEditingController(text: _comment),
+      controller: TextEditingController(text: _name),
       decoration: const InputDecoration(
-        labelText: 'Comment',
+        labelText: 'Name',
         labelStyle: TextStyle(
           fontSize: 18.0,
           fontWeight: FontWeight.w500,
         ),
       ),
-      keyboardAppearance: Brightness.light,
-      style: const TextStyle(
-        fontSize: 20.0,
-        color: Colors.black,
-      ),
+      // style: const TextStyle(
+      //   fontSize: 20.0,
+      //   color: Colors.black,
+      // ),
+      // keyboardAppearance: Brightness.light,
+      keyboardType: TextInputType.text,
+      maxLength: 150,
       maxLines: null,
-      onChanged: (comment) => _comment = comment,
+      onChanged: (comment) => _name = comment,
     );
   }
 }

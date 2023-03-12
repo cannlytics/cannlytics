@@ -189,7 +189,7 @@ class MetrcEmployees {
 /// Locations
 class MetrcLocations {
   // Get location types.
-  static Future<List> getLocationTypes(String licenseNumber) async {
+  static Future<List> getLocationTypes({String? licenseNumber}) async {
     String endpoint = '/api/metrc/types/locations';
     return await APIService.apiRequest(
       endpoint,
@@ -200,15 +200,15 @@ class MetrcLocations {
   }
 
   // Create a location.
-  static Future<void> createLocation(
-    String licenseNumber,
-    String name,
-    String locationType,
-  ) async {
+  static Future<void> createLocation({
+    required String name,
+    String? licenseNumber,
+    String? locationType,
+  }) async {
     String endpoint = '/api/metrc/locations';
     Map data = {
       'name': name,
-      'location_type': locationType,
+      'location_type': locationType ?? 'Default Location',
     };
     return await APIService.apiRequest(
       endpoint,
@@ -264,12 +264,12 @@ class MetrcLocations {
   }
 
   // Update the name of a location.
-  static Future<void> updateLocationName(
-    String licenseNumber,
-    String id,
-    String name,
-    String locationTypeName,
-  ) async {
+  static Future<void> updateLocationName({
+    required String id,
+    required String name,
+    required String locationTypeName,
+    String? licenseNumber,
+  }) async {
     String endpoint = '/api/metrc/locations/$id';
     Map data = {
       'id': id,
@@ -286,7 +286,10 @@ class MetrcLocations {
   }
 
   // Delete a location.
-  static Future<void> deleteLocation(String licenseNumber, String id) async {
+  static Future<void> deleteLocation({
+    required String id,
+    String? licenseNumber,
+  }) async {
     String endpoint = '/api/metrc/locations/$id';
     return await APIService.apiRequest(
       endpoint,

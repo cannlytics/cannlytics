@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/11/2023
+// Updated: 3/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -22,8 +22,8 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_app/models/metrc/location.dart';
 import 'package:cannlytics_app/ui/business/locations/locations_controller.dart';
-import 'package:cannlytics_app/ui/general/footer.dart';
-import 'package:cannlytics_app/ui/general/header.dart';
+import 'package:cannlytics_app/ui/layout/footer.dart';
+import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/table_form.dart';
 
@@ -160,7 +160,7 @@ class LocationsTable extends ConsumerWidget {
 
         // Tap on a location.
         onTap: (Location item) async {
-          await ref.read(locationProvider.notifier).setLocation(item);
+          await ref.read(locationProvider.notifier).set(item);
           context.go('/locations/${item.id}');
         },
 
