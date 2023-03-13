@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/12/2023
+// Updated: 3/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -58,11 +58,11 @@ class LocationsController extends AsyncNotifier<List<Location>> {
     state = await AsyncValue.guard(() async => items);
   }
 
-  // FIXME: Create locations.
+  // TODO: Create locations.
 
-  // FIXME: Update locations.
+  // TODO: Update locations.
 
-  // FIXME: Delete locations.
+  // TODO: Delete locations.
 }
 
 /* Table */
@@ -218,39 +218,16 @@ class LocationController extends FamilyAsyncNotifier<Location?, String?> {
     return state.hasError == false;
   }
 
-  // FIXME: Create location.
+  // TODO: Create location.
   Future<bool> create(Location item) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => item);
     return state.hasError == false;
   }
 
-  // FIXME: Update location.
+  // TODO: Update location.
 
-  // FIXME: Delete location.
-}
-
-/* Location Types */
-
-// Location types provider.
-final locationTypesProvider =
-    AsyncNotifierProvider<LocationTypesNotifier, List<dynamic>>(() {
-  return LocationTypesNotifier();
-});
-
-// Location types controller.
-class LocationTypesNotifier extends AsyncNotifier<List<dynamic>> {
-  // Initialization.
-  @override
-  Future<List<dynamic>> build() async {
-    return _getLocationTypes();
-  }
-
-  // Get location types from Metrc.
-  Future<List<dynamic>> _getLocationTypes() async {
-    final licenseNumber = ref.watch(primaryLicenseProvider);
-    return MetrcLocations.getLocationTypes(licenseNumber: licenseNumber);
-  }
+  // TODO: Delete location.
 }
 
 /* Location Form */
@@ -273,41 +250,52 @@ class NameController extends StateNotifier<TextEditingController> {
   void change(String value) => state.value = TextEditingValue(text: value);
 }
 
+/* Location Types */
+
+// Location types provider.
+final locationTypesProvider =
+    AsyncNotifierProvider<LocationTypesNotifier, List<dynamic>>(() {
+  return LocationTypesNotifier();
+});
+
+// Location types controller.
+class LocationTypesNotifier extends AsyncNotifier<List<dynamic>> {
+  // Initialization.
+  @override
+  Future<List<dynamic>> build() async {
+    return _getLocationTypes();
+  }
+
+  // Get location types from Metrc.
+  Future<List<dynamic>> _getLocationTypes() async {
+    final licenseNumber = ref.watch(primaryLicenseProvider);
+    final orgId = ref.watch(primaryOrganizationProvider);
+    final licenseState = ref.watch(primaryStateProvider);
+    List<dynamic> data = await MetrcLocations.getLocationTypes(
+      licenseNumber: licenseNumber,
+      orgId: orgId,
+      state: licenseState,
+    );
+    final value = ref.read(locationName);
+    // Set initial location type and permissions.
+    if (value == null && data.isNotEmpty) {
+      Map initialValue = data[0];
+      ref.read(locationName.notifier).state = initialValue['name'];
+      ref.read(forPlants.notifier).state = initialValue['for_plants'];
+      ref.read(forPlantBatches.notifier).state =
+          initialValue['for_plant_batches'];
+      ref.read(forHarvests.notifier).state = initialValue['for_harvests'];
+      ref.read(forPackages.notifier).state = initialValue['for_packages'];
+    }
+    return data;
+  }
+}
+
+// Location name field.
+final locationName = StateProvider<String?>((ref) => null);
+
 // Boolean fields.
-final forPlants = StateNotifierProvider.family<ForPlants, bool?, bool?>(
-  (ref, initialValue) => ForPlants(initialValue),
-);
-final forPlantBatches =
-    StateNotifierProvider.family<ForPlantBatches, bool?, bool?>(
-  (ref, initialValue) => ForPlantBatches(initialValue),
-);
-final forHarvests = StateNotifierProvider.family<ForHarvests, bool?, bool?>(
-  (ref, initialValue) => ForHarvests(initialValue),
-);
-final forPackages = StateNotifierProvider.family<ForPackages, bool?, bool?>(
-  (ref, initialValue) => ForPackages(initialValue),
-);
-
-class ForPlants extends StateNotifier<bool?> {
-  ForPlants(this.initialValue) : super(initialValue);
-  final bool? initialValue;
-  void change(bool value) => state = value;
-}
-
-class ForPlantBatches extends StateNotifier<bool?> {
-  ForPlantBatches(this.initialValue) : super(initialValue);
-  final bool? initialValue;
-  void change(bool value) => state = value;
-}
-
-class ForHarvests extends StateNotifier<bool?> {
-  ForHarvests(this.initialValue) : super(initialValue);
-  final bool? initialValue;
-  void change(bool value) => state = value;
-}
-
-class ForPackages extends StateNotifier<bool?> {
-  ForPackages(this.initialValue) : super(initialValue);
-  final bool? initialValue;
-  void change(bool value) => state = value;
-}
+final forPlants = StateProvider<bool?>((ref) => null);
+final forPlantBatches = StateProvider<bool?>((ref) => null);
+final forHarvests = StateProvider<bool?>((ref) => null);
+final forPackages = StateProvider<bool?>((ref) => null);

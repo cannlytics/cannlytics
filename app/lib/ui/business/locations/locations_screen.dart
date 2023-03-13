@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/12/2023
+// Updated: 3/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -25,7 +25,7 @@ import 'package:cannlytics_app/ui/business/locations/locations_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
-import 'package:cannlytics_app/widgets/layout/table_form.dart';
+import 'package:cannlytics_app/widgets/tables/table_form.dart';
 
 /// The locations screen.
 class LocationsScreen extends ConsumerWidget {

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/12/2023
+// Updated: 3/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -12,7 +12,9 @@ import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/ui/business/locations/locations_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/widgets/inputs/checkbox_input.dart';
+import 'package:cannlytics_app/widgets/layout/form_container.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -33,23 +35,18 @@ class LocationScreen extends ConsumerStatefulWidget {
   ConsumerState<LocationScreen> createState() => _LocationScreenState();
 }
 
-// Location screen state.
-// TODO: Handle creating a location.
-// TODO: Handle updating a location.
-// TODO: Handle deleting an existing location.
+/// Location screen state.
 class _LocationScreenState extends ConsumerState<LocationScreen> {
-  // Build.
   @override
   Widget build(BuildContext context) {
-    // TODO: Listen for errors.
-    // ref.listen<AsyncValue>(
-    //   locationProvider(widget.id),
-    //   (_, state) => state.showAlertDialogOnError(context),
-    // );
+    // Listen for errors.
+    ref.listen<AsyncValue>(
+      locationProvider(widget.id),
+      (_, state) => state.showAlertDialogOnError(context),
+    );
 
     // Listen for the location data.
     final item = ref.watch(locationProvider(widget.id)).value;
-    ;
 
     // Body.
     return CustomScrollView(
@@ -62,7 +59,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
         if (item == null)
           SliverToBoxAdapter(child: Container())
         else
-          SliverToBoxAdapter(child: _form(item)),
+          SliverToBoxAdapter(child: FormContainer(children: _fields(item))),
 
         // Footer
         const SliverToBoxAdapter(child: Footer()),
@@ -70,77 +67,52 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
     );
   }
 
-  Widget _form(Location item) {
-    // Get form values.
-    // final _forPlants = ref.watch(forPlants(item.forPlants ?? false));
-
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
+  /// Form fields.
+  List<Widget> _fields(Location item) {
+    return <Widget>[
+      Row(
+        children: [
           // ID.
           _idField(item),
 
-          // Name field.
-          gapH6,
-          _nameField(item),
-          gapH6,
+          // Spacer.
+          const Spacer(),
 
-          // FIXME: Location type.
-          // - locationTypeId (not editable)
-          // - locationTypeName (selection)
-          // * Get location types
+          // Actions.
+          // TODO: Handle creating a location.
 
-          // Checkboxes.
-          CheckboxField(
-            title: 'For Packages',
-            value: ref.watch(forPackages(item.forPackages ?? false)),
-            onChanged: (bool? newValue) {
-              ref
-                  .read(forPackages(item.forPackages ?? false).notifier)
-                  .change(newValue ?? false);
-            },
-          ),
-          CheckboxField(
-            title: 'For Plants',
-            value: ref.watch(forPlants(item.forPlants ?? false)),
-            onChanged: (bool? newValue) {
-              ref
-                  .read(forPlants(item.forPlants ?? false).notifier)
-                  .change(newValue ?? false);
-            },
-          ),
-          CheckboxField(
-            title: 'For Plant Batches',
-            value: ref.watch(forPlantBatches(item.forPlantBatches ?? false)),
-            onChanged: (bool? newValue) {
-              ref
-                  .read(forPlantBatches(item.forPlantBatches ?? false).notifier)
-                  .change(newValue ?? false);
-            },
-          ),
-          CheckboxField(
-            title: 'For Harvests',
-            value: ref.watch(forHarvests(item.forHarvests ?? false)),
-            onChanged: (bool? newValue) {
-              ref
-                  .read(forHarvests(item.forHarvests ?? false).notifier)
-                  .change(newValue ?? false);
-            },
-          ),
+          // TODO: Handle updating a location.
+
+          // TODO: Handle deleting an existing location.
         ],
       ),
-    );
+
+      // Name field.
+      gapH6,
+      _nameField(item),
+      gapH6,
+
+      // Location type name and ID.
+      _locationNameField(item),
+
+      // Checkbox fields.
+      ..._checkboxes(item),
+
+      // TODO: Allow user's to save additional data in Firestore:
+      // - location_image
+      // - created_at
+      // - created_by
+      // - updated_at
+      // - updated_by
+
+      // Optional: Look at packages / plants at the location.
+    ];
   }
 
   // ID field.
-  Widget _idField(Location? item) {
+  Widget _idField(Location item) {
     return Text(
-      (item == null || item.id.isEmpty)
-          ? 'New Location'
-          : 'Location ${item.id}',
+      (item.id.isEmpty) ? 'New Location' : 'Location ${item.id}',
       style: Theme.of(context).textTheme.titleLarge!.copyWith(
             color: Theme.of(context).textTheme.titleLarge!.color,
           ),
@@ -150,16 +122,107 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
   // Name field.
   Widget _nameField(Location item) {
     final _nameController = ref.watch(nameController);
-    // if (item == null) return Container();
     if (_nameController.text.isEmpty && item.name.isNotEmpty) {
       ref.read(nameController.notifier).change(item.name);
     }
-    return TextField(
+    final textField = TextField(
       controller: _nameController,
       decoration: const InputDecoration(labelText: 'Name'),
       keyboardType: TextInputType.text,
-      maxLength: 150,
+      maxLength: null,
       maxLines: null,
     );
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: 300,
+      ),
+      child: textField,
+    );
+  }
+
+  // Location name field.
+  // TODO: Display location ID (not editable).
+  Widget _locationNameField(Location item) {
+    final items = ref.watch(locationTypesProvider).value ?? [];
+    final value = ref.watch(locationName);
+    if (items.length == 0 || value == null) return Container();
+    var dropdown = DropdownButton(
+      underline: Container(),
+      isDense: true,
+      isExpanded: true,
+      value: value,
+      items: items
+          .map(
+            (item) => DropdownMenuItem<String>(
+              onTap: () => item['name'],
+              value: item['name'],
+              child: ListTile(
+                dense: true,
+                title: Text(item['name']),
+              ),
+            ),
+          )
+          .toList(),
+      onChanged: (String? value) {
+        ref.read(locationName.notifier).state = value;
+        // FIXME: Change location permissions.
+      },
+    );
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        gapH18,
+        Text(
+          'Location Type Name',
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                color: Theme.of(context).textTheme.titleLarge!.color,
+              ),
+        ),
+        gapH6,
+        SizedBox(
+          height: 36,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 300,
+            ),
+            child: dropdown,
+          ),
+        ),
+        gapH6,
+      ],
+    );
+  }
+
+  // Checkbox fields.
+  List<Widget> _checkboxes(Location item) {
+    final items = ref.watch(locationTypesProvider).value ?? [];
+    if (items.length == 0) return [Container()];
+    return [
+      gapH12,
+      Text(
+        'Permissions',
+        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+              color: Theme.of(context).textTheme.titleLarge!.color,
+            ),
+      ),
+      gapH6,
+      CheckboxField(
+        title: 'For Packages',
+        value: ref.watch(forPackages) ?? false,
+      ),
+      CheckboxField(
+        title: 'For Plants',
+        value: ref.watch(forPlants) ?? false,
+      ),
+      CheckboxField(
+        title: 'For Plant Batches',
+        value: ref.watch(forPlantBatches) ?? false,
+      ),
+      CheckboxField(
+        title: 'For Harvests',
+        value: ref.watch(forHarvests) ?? false,
+      ),
+    ];
   }
 }

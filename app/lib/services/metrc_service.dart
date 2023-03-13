@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/26/2023
-// Updated: 3/9/2023
+// Updated: 3/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -189,12 +189,20 @@ class MetrcEmployees {
 /// Locations
 class MetrcLocations {
   // Get location types.
-  static Future<List> getLocationTypes({String? licenseNumber}) async {
+  static Future<List<dynamic>> getLocationTypes({
+    String? licenseNumber,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/locations';
     return await APIService.apiRequest(
       endpoint,
       options: {
-        'params': {'license': licenseNumber}
+        'params': {
+          'license': licenseNumber,
+          'org_id': orgId,
+          'state': state,
+        }
       },
     );
   }
@@ -208,7 +216,7 @@ class MetrcLocations {
     String endpoint = '/api/metrc/locations';
     Map data = {
       'name': name,
-      'location_type': locationType ?? 'Default Location',
+      'location_type': locationType ?? 'Default Location Type',
     };
     return await APIService.apiRequest(
       endpoint,

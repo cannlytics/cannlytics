@@ -24,7 +24,7 @@ import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
-import 'package:cannlytics_app/widgets/layout/table_form.dart';
+import 'package:cannlytics_app/widgets/tables/table_form.dart';
 
 /// Organizations screen.
 class OrganizationsScreen extends ConsumerWidget {

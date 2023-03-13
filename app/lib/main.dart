@@ -101,10 +101,10 @@ Future<void> main() async {
 void registerErrorHandlers() {
   // Show an error notification if any uncaught exception happens.
   FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    debugPrint(details.toString());
+    // FlutterError.presentError(details);
+    // debugPrint(details.toString());
     // FlutterError.dumpErrorToConsole(details);
-    // throw details.exception;
+    throw details.exception;
   };
 
   // Handle underlying platform/OS errors.

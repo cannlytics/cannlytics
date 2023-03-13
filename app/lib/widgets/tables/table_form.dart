@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/7/2023
+// Updated: 3/12/2023
 
 // Flutter imports:
 import 'package:flutter/material.dart';
@@ -14,8 +14,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
-import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
 
 /// Table form.
 class TableForm extends ConsumerWidget {
@@ -70,27 +68,9 @@ class TableForm extends ConsumerWidget {
                                 ),
                           ),
 
+                          // Optional actions.
                           const Spacer(),
                           if (actions != null) actions!,
-
-                          // TODO: Allow actions to be passed.
-                          // // Join an organization button.
-                          // SecondaryButton(
-                          //   isDark: isDark,
-                          //   text: isWide ? 'Join an organization' : 'Join',
-                          //   onPressed: () {
-                          //     context.go('/organizations/join');
-                          //   },
-                          // ),
-
-                          // // Add organization button.
-                          // gapW6,
-                          // PrimaryButton(
-                          //   text: isWide ? 'New organization' : 'New',
-                          //   onPressed: () {
-                          //     context.go('/organizations/new');
-                          //   },
-                          // ),
                         ],
                       ),
 

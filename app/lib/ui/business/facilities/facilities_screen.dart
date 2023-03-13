@@ -21,7 +21,7 @@ import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/utils/string_utils.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
-import 'package:cannlytics_app/widgets/layout/table_form.dart';
+import 'package:cannlytics_app/widgets/tables/table_form.dart';
 
 /// The facilities screen.
 class FacilitiesScreen extends StatelessWidget {

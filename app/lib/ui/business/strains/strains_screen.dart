@@ -20,7 +20,7 @@ import 'package:cannlytics_app/ui/business/strains/strains_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
-import 'package:cannlytics_app/widgets/layout/table_form.dart';
+import 'package:cannlytics_app/widgets/tables/table_form.dart';
 
 /// The strains screen.
 class StrainsScreen extends StatelessWidget {

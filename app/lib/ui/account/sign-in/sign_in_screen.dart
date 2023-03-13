@@ -74,7 +74,8 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
             SliverToBoxAdapter(child: ResponsiveAppLogo(isDark: isDark)),
 
             // User type selection.
-            SliverToBoxAdapter(child: UserTypeButton()),
+            SliverToBoxAdapter(child: gapH12),
+            // SliverToBoxAdapter(child: UserTypeButton()),
 
             // Sign in form.
             SliverToBoxAdapter(
