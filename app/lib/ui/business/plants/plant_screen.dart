@@ -24,7 +24,7 @@ import 'package:cannlytics_app/ui/business/items/item_controller.dart';
 import 'package:cannlytics_app/ui/business/packages/packages_service.dart';
 import 'package:cannlytics_app/utils/string_utils.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/widgets/inputs/date_time_picker.dart';
+import 'package:cannlytics_app/widgets/inputs/date_time_input.dart';
 
 /// The employee screen.
 class PlantScreen extends ConsumerStatefulWidget {

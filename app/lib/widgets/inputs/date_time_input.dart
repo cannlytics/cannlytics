@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:cannlytics_app/utils/string_utils.dart';
-import 'package:cannlytics_app/widgets/inputs/input_dropdown.dart';
+import 'package:cannlytics_app/widgets/inputs/dropdown_input.dart';
 
 class DateTimePicker extends StatelessWidget {
   const DateTimePicker({

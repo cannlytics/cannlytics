@@ -10,7 +10,6 @@
 // Package imports:
 import 'dart:async';
 
-import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -47,7 +46,7 @@ class LocationsController extends AsyncNotifier<List<Location>> {
         orgId: orgId,
         state: state,
       );
-    } catch (error, stack) {
+    } catch (error) {
       print("Error decoding JSON: [error=${error.toString()}]");
       return [];
     }
@@ -59,13 +58,11 @@ class LocationsController extends AsyncNotifier<List<Location>> {
     state = await AsyncValue.guard(() async => items);
   }
 
-  // TODO: Get location.
+  // FIXME: Create locations.
 
-  // TODO: Create locations.
+  // FIXME: Update locations.
 
-  // TODO: Update locations.
-
-  // TODO: Delete locations.
+  // FIXME: Delete locations.
 }
 
 /* Table */
@@ -173,23 +170,6 @@ class SelectedLocationsNotifier extends Notifier<List<Location>> {
 final locationId = StateProvider<String?>((ref) => null);
 
 // Location provider.
-// final locationProvider =
-//     FutureProvider.family<Location, String>((ref, id) async {
-//   final licenseNumber = ref.watch(primaryLicenseProvider);
-//   final orgId = ref.watch(primaryOrganizationProvider);
-//   final licenseState = ref.watch(primaryStateProvider);
-//   try {
-//     return await MetrcLocations.getLocation(
-//       licenseNumber: licenseNumber,
-//       orgId: orgId,
-//       state: licenseState,
-//       id: id,
-//     );
-//   } catch (error, stack) {
-//     print(stack);
-//     throw Exception("Error decoding JSON: [error=${error.toString()}]");
-//   }
-// });
 final locationProvider =
     AsyncNotifierProvider.family<LocationController, Location?, String?>(
   ({id}) {
@@ -208,21 +188,7 @@ class LocationController extends FamilyAsyncNotifier<Location?, String?> {
   @override
   FutureOr<Location?> build(String? id) async {
     if (id == null) return null;
-    final data = await this.get(id);
-    print(data);
-    return data;
-    // return Location(
-    //   required this.id,
-    //   required this.name,
-    //   this.locationTypeId,
-    //   this.locationTypeName,
-    //   this.forPlantBatches,
-    //   this.forPlants,
-    //   this.forHarvests,
-    //   this.forPackages,
-    // );
-    // ref.read(goRouterProvider).
-    // return _getLocation();
+    return await this.get(id);
   }
 
   /// Get location.
@@ -230,8 +196,8 @@ class LocationController extends FamilyAsyncNotifier<Location?, String?> {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final orgId = ref.watch(primaryOrganizationProvider);
     final licenseState = ref.watch(primaryStateProvider);
-    print('LICENSE FOR LOCATIONS: $licenseNumber');
     if (licenseNumber == null) return null;
+    if (id == 'new') return Location(id: '', name: '');
     try {
       return await MetrcLocations.getLocation(
         licenseNumber: licenseNumber,
@@ -239,8 +205,7 @@ class LocationController extends FamilyAsyncNotifier<Location?, String?> {
         state: licenseState,
         id: id,
       );
-    } catch (error, stack) {
-      print(stack);
+    } catch (error) {
       throw Exception("Error decoding JSON: [error=${error.toString()}]");
     }
   }
@@ -253,16 +218,16 @@ class LocationController extends FamilyAsyncNotifier<Location?, String?> {
     return state.hasError == false;
   }
 
-  // TODO: Create location.
+  // FIXME: Create location.
   Future<bool> create(Location item) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => item);
     return state.hasError == false;
   }
 
-  // TODO: Update location.
+  // FIXME: Update location.
 
-  // TODO: Delete location.
+  // FIXME: Delete location.
 }
 
 /* Location Types */
@@ -290,13 +255,10 @@ class LocationTypesNotifier extends AsyncNotifier<List<dynamic>> {
 
 /* Location Form */
 
-// Name input.
+// Name field.
 final nameController =
     StateNotifierProvider<NameController, TextEditingController>(
-  (ref) {
-    // final item = ref.watch(locationProvider).value;
-    return NameController();
-  },
+  (ref) => NameController(),
 );
 
 class NameController extends StateNotifier<TextEditingController> {
@@ -308,7 +270,44 @@ class NameController extends StateNotifier<TextEditingController> {
     super.dispose();
   }
 
-  void change(String value) {
-    state.value = TextEditingValue(text: value);
-  }
+  void change(String value) => state.value = TextEditingValue(text: value);
+}
+
+// Boolean fields.
+final forPlants = StateNotifierProvider.family<ForPlants, bool?, bool?>(
+  (ref, initialValue) => ForPlants(initialValue),
+);
+final forPlantBatches =
+    StateNotifierProvider.family<ForPlantBatches, bool?, bool?>(
+  (ref, initialValue) => ForPlantBatches(initialValue),
+);
+final forHarvests = StateNotifierProvider.family<ForHarvests, bool?, bool?>(
+  (ref, initialValue) => ForHarvests(initialValue),
+);
+final forPackages = StateNotifierProvider.family<ForPackages, bool?, bool?>(
+  (ref, initialValue) => ForPackages(initialValue),
+);
+
+class ForPlants extends StateNotifier<bool?> {
+  ForPlants(this.initialValue) : super(initialValue);
+  final bool? initialValue;
+  void change(bool value) => state = value;
+}
+
+class ForPlantBatches extends StateNotifier<bool?> {
+  ForPlantBatches(this.initialValue) : super(initialValue);
+  final bool? initialValue;
+  void change(bool value) => state = value;
+}
+
+class ForHarvests extends StateNotifier<bool?> {
+  ForHarvests(this.initialValue) : super(initialValue);
+  final bool? initialValue;
+  void change(bool value) => state = value;
+}
+
+class ForPackages extends StateNotifier<bool?> {
+  ForPackages(this.initialValue) : super(initialValue);
+  final bool? initialValue;
+  void change(bool value) => state = value;
 }
