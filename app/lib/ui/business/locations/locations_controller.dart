@@ -22,27 +22,24 @@ import 'package:cannlytics_app/ui/main/app_controller.dart';
 
 // Locations provider.
 final locationsProvider =
-    AsyncNotifierProvider<LocationsController, List<Location>>(() {
-  return LocationsController();
-});
+    AsyncNotifierProvider<LocationsController, List<Location>>(
+        () => LocationsController());
 
 /// Locations controller.
 class LocationsController extends AsyncNotifier<List<Location>> {
   // Load initial data from Metrc.
   @override
-  Future<List<Location>> build() async {
-    return _getLocations();
-  }
+  Future<List<Location>> build() async => getLocations();
 
   /// Get locations.
-  Future<List<Location>> _getLocations() async {
+  Future<List<Location>> getLocations() async {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final orgId = ref.watch(primaryOrganizationProvider);
     final state = ref.watch(primaryStateProvider);
     if (licenseNumber == null) return [];
     try {
       return await MetrcLocations.getLocations(
-        licenseNumber: licenseNumber,
+        license: licenseNumber,
         orgId: orgId,
         state: state,
       );
@@ -138,17 +135,14 @@ class SearchController extends StateNotifier<TextEditingController> {
 
 // Location selection provider.
 final selectedLocationsProvider =
-    NotifierProvider<SelectedLocationsNotifier, List<Location>>(() {
-  return SelectedLocationsNotifier();
-});
+    NotifierProvider<SelectedLocationsNotifier, List<Location>>(
+        () => SelectedLocationsNotifier());
 
 // Location selection.
 class SelectedLocationsNotifier extends Notifier<List<Location>> {
   // Initialize with an empty list.
   @override
-  List<Location> build() {
-    return [];
-  }
+  List<Location> build() => [];
 
   // Select a location.
   void selectLocation(Location item) {
@@ -200,10 +194,10 @@ class LocationController extends FamilyAsyncNotifier<Location?, String?> {
     if (id == 'new') return Location(id: '', name: '');
     try {
       return await MetrcLocations.getLocation(
-        licenseNumber: licenseNumber,
+        id: id,
+        license: licenseNumber,
         orgId: orgId,
         state: licenseState,
-        id: id,
       );
     } catch (error) {
       throw Exception("Error decoding JSON: [error=${error.toString()}]");
@@ -262,17 +256,15 @@ final locationTypesProvider =
 class LocationTypesNotifier extends AsyncNotifier<List<dynamic>> {
   // Initialization.
   @override
-  Future<List<dynamic>> build() async {
-    return _getLocationTypes();
-  }
+  Future<List<dynamic>> build() async => getLocationTypes();
 
   // Get location types from Metrc.
-  Future<List<dynamic>> _getLocationTypes() async {
+  Future<List<dynamic>> getLocationTypes() async {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final orgId = ref.watch(primaryOrganizationProvider);
     final licenseState = ref.watch(primaryStateProvider);
     List<dynamic> data = await MetrcLocations.getLocationTypes(
-      licenseNumber: licenseNumber,
+      license: licenseNumber,
       orgId: orgId,
       state: licenseState,
     );

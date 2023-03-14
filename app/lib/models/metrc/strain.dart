@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/25/2023
-// Updated: 2/25/2023
+// Updated: 3/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -18,32 +18,32 @@ class Strain {
   const Strain({
     required this.id,
     required this.name,
-    required this.testingStatus,
-    required this.thcLevel,
-    required this.cbdLevel,
-    required this.indicaPercentage,
-    required this.sativaPercentage,
+    this.testingStatus,
+    this.thcLevel,
+    this.cbdLevel,
+    this.indicaPercentage,
+    this.sativaPercentage,
   });
 
   // Properties.
   final StrainId id;
   final String name;
-  final String testingStatus;
-  final double thcLevel;
-  final double cbdLevel;
-  final double indicaPercentage;
-  final double sativaPercentage;
+  final String? testingStatus;
+  final double? thcLevel;
+  final double? cbdLevel;
+  final double? indicaPercentage;
+  final double? sativaPercentage;
 
   // Create model.
-  factory Strain.fromMap(Map<String, dynamic> data, String uid) {
+  factory Strain.fromMap(Map<String, dynamic> data) {
     return Strain(
-      id: uid,
-      name: data['name'] as String,
-      testingStatus: data['testing_status'] as String,
-      thcLevel: data['thc_level'] as double,
-      cbdLevel: data['cbd_level'] as double,
-      indicaPercentage: data['indica_percentage'] as double,
-      sativaPercentage: data['sativa_percentage'] as double,
+      id: data['id'] ?? 'new',
+      name: data['name'] ?? '',
+      testingStatus: data['testing_status'],
+      thcLevel: data['thc_level'],
+      cbdLevel: data['cbd_level'],
+      indicaPercentage: data['indica_percentage'],
+      sativaPercentage: data['sativa_percentage'],
     );
   }
 

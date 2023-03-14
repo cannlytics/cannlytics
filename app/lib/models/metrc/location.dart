@@ -68,7 +68,7 @@ class Location {
   Future<void> create(String? licenseNumber) async {
     await MetrcLocations.createLocation(
       name: this.name,
-      licenseNumber: licenseNumber,
+      license: licenseNumber,
       locationType: this.locationTypeName,
     );
   }
@@ -79,7 +79,7 @@ class Location {
       id: this.id,
       name: this.name,
       locationTypeName: this.locationTypeName ?? 'Default Location',
-      licenseNumber: licenseNumber,
+      license: licenseNumber,
     );
   }
 
@@ -87,7 +87,7 @@ class Location {
   Future<void> delete(String? licenseNumber) async {
     await MetrcLocations.deleteLocation(
       id: this.id,
-      licenseNumber: licenseNumber,
+      license: licenseNumber,
     );
   }
 }

@@ -7,6 +7,14 @@
 // Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// TODO: Allow the user to keep logs for their plants.
+// Additional data:
+// - soil type
+// yield, potency, and quality of the buds
+// - Pests and Diseases
+// - weather conditions, air quality, and water source
+// - lighting
+
 // Dart imports:
 import 'dart:async';
 

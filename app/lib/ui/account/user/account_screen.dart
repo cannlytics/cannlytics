@@ -8,6 +8,9 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
+import 'package:cannlytics_app/widgets/cards/responsive_card.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -64,12 +67,37 @@ class AccountManagement extends ConsumerWidget {
     // Dynamic screen width.
     final screenWidth = MediaQuery.of(context).size.width;
 
+    // Get the theme.
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
+
     // Listen to the current user.
     ref.listen<AsyncValue>(
       accountProvider,
       (_, state) => state.showAlertDialogOnError(context),
     );
     final user = ref.watch(authProvider).currentUser;
+
+    // User photo choice.
+    Widget _userPhoto = InkWell(
+      customBorder: const CircleBorder(),
+      splashColor: AppColors.accent1,
+      onTap: state.isLoading
+          ? null
+          : () async {
+              await ref.read(accountProvider.notifier).changePhoto();
+            },
+      child: ShimmerLoading(
+        isLoading: state.isLoading,
+        child: Avatar(
+          photoUrl:
+              user!.photoURL ?? 'https://cannlytics.com/robohash/${user.uid}',
+          radius: 60,
+          borderColor: Theme.of(context).secondaryHeaderColor,
+          borderWidth: 1.0,
+        ),
+      ),
+    );
 
     // Render the widget.
     return Padding(
@@ -81,104 +109,123 @@ class AccountManagement extends ConsumerWidget {
       child: PreferredSize(
         preferredSize: const Size.fromHeight(130.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (user != null) ...[
+            ...[
               // User photo.
-              InkWell(
-                customBorder: const CircleBorder(),
-                splashColor: AppColors.accent1,
-                onTap: state.isLoading
-                    ? null
-                    : () async {
-                        await ref.read(accountProvider.notifier).changePhoto();
-                      },
-                child: ShimmerLoading(
-                  isLoading: state.isLoading,
-                  child: Avatar(
-                    photoUrl: user.photoURL,
-                    radius: 60,
-                    borderColor: Theme.of(context).secondaryHeaderColor,
-                    borderWidth: 1.0,
+              _userPhoto,
+              gapH8,
+
+              // Account information
+              Card(
+                color: isDark ? AppColors.neutral5 : AppColors.neutral2,
+                margin: EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 21, horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title
+                      Text(
+                        'Account Information',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(
+                              color:
+                                  Theme.of(context).textTheme.titleLarge!.color,
+                            ),
+                      ),
+                      gapH12,
+
+                      // User name.
+                      // TODO: Change user name.
+                      if (user.displayName != null)
+                        Text(
+                          'Username: ${user.displayName!}',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      gapH8,
+
+                      // User email.
+                      // TODO: Change email.
+                      if (user.email != null)
+                        Text(
+                          'Email: ${user.email!}',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      gapH8,
+
+                      // User phone.
+                      // TODO: Change user phone.
+                      if (user.phoneNumber != null)
+                        Text(
+                          'Phone: ${user.phoneNumber!}',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+
+                      // TODO: Add phone number.
+                      if (user.phoneNumber == null)
+                        Row(
+                          children: [
+                            Text(
+                              'Phone: ',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            CustomTextButton(
+                              text: 'Add phone number',
+                              onPressed: () {
+                                // TODO: Add phone number.
+                              },
+                            ),
+                          ],
+                        ),
+
+                      gapH8,
+                    ],
                   ),
                 ),
-              ),
-              gapH8,
 
-              // User name.
-              // TODO: Change user name.
-              if (user.displayName != null)
-                Text(
-                  'Username: ${user.displayName!}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              gapH8,
+                // TODO: Toggle light / dark theme.
+                // ThemeInput(),
 
-              // User email.
-              // TODO: Change email.
-              if (user.email != null)
-                Text(
-                  'Email: ${user.email!}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              gapH8,
+                // TODO: Implement a body for the user to manage their account!
+                // - Reset password.
 
-              // User phone.
-              // TODO: Change user phone.
-              if (user.phoneNumber != null)
-                Text(
-                  'Phone: ${user.phoneNumber!}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                // - View user data:
+                //  * Account created date.
+                //  * Last sign in date.
+                // - View logs.
+                // - View / manage organizations and teams.
+                // - Delete account.
 
-              // TODO: Add phone number.
-              if (user.phoneNumber == null)
-                CustomTextButton(
-                  text: 'Add phone number',
-                  onPressed: () {
-                    // TODO: Add phone number.
-                  },
-                ),
-              gapH8,
+                // Business:
+                // - state (restrict to Cannlytics-verified states)
+                // - licenses (/admin/create-license and /admin/delete-license)
+                // - license type
 
-              // TODO: Toggle light / dark theme.
-              // ThemeInput(),
-
-              // TODO: Implement a body for the user to manage their account!
-              // - Reset password.
-              // - Change user email.
-              // - Change user phone.
-              // - Change user name.
-              // - Change user photo.
-              // - View user data:
-              //  * Account created date.
-              //  * Last sign in date.
-              // - View logs.
-              // - View / manage organizations and teams.
-              // - Delete account.
-
-              // Business:
-              // - state (restrict to Cannlytics-verified states)
-              // - licenses (/admin/create-license and /admin/delete-license)
-              // - license type
-
-              // Sign out.
-              CustomTextButton(
-                text: 'Sign out',
-                onPressed: state.isLoading
-                    ? null
-                    : () async {
-                        final logout = await showAlertDialog(
-                          context: context,
-                          title: 'Are you sure?',
-                          cancelActionText: 'Cancel',
-                          defaultActionText: 'Sign out',
-                        );
-                        if (logout == true) {
-                          await ref.read(accountProvider.notifier).signOut();
-                          context.go('/sign-in');
-                        }
-                      },
+                // Sign out.
+                // SecondaryButton(
+                //   isDark: isDark,
+                //   text: 'Sign out',
+                //   onPressed: state.isLoading
+                //       ? null
+                //       : () async {
+                //           final logout = await showAlertDialog(
+                //             context: context,
+                //             title: 'Are you sure?',
+                //             cancelActionText: 'Cancel',
+                //             defaultActionText: 'Sign out',
+                //           );
+                //           if (logout == true) {
+                //             await ref.read(accountProvider.notifier).signOut();
+                //             context.go('/sign-in');
+                //           }
+                //         },
+                // ),
               ),
             ],
           ],
@@ -186,6 +233,27 @@ class AccountManagement extends ConsumerWidget {
       ),
     );
   }
+
+  // Widget _userPhoto(BuildContext context, state, user) {
+  //   return InkWell(
+  //     customBorder: const CircleBorder(),
+  //     splashColor: AppColors.accent1,
+  //     onTap: state.isLoading
+  //         ? null
+  //         : () async {
+  //             await ref.read(accountProvider.notifier).changePhoto();
+  //           },
+  //     child: ShimmerLoading(
+  //       isLoading: state.isLoading,
+  //       child: Avatar(
+  //         photoUrl: user.photoURL,
+  //         radius: 60,
+  //         borderColor: Theme.of(context).secondaryHeaderColor,
+  //         borderWidth: 1.0,
+  //       ),
+  //     ),
+  //   );
+  // }
 }
 
 /// TODO: Light / dark theme input.

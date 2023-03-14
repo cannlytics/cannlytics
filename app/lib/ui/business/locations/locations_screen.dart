@@ -27,7 +27,7 @@ import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/tables/table_form.dart';
 
-/// The locations screen.
+/// Locations screen.
 class LocationsScreen extends ConsumerWidget {
   const LocationsScreen({super.key});
 
@@ -69,7 +69,7 @@ class LocationsTable extends ConsumerWidget {
     final data = ref.watch(filteredLocationsProvider);
 
     // Define the cell builder function.
-    _buildCells(item) {
+    _buildCells(Location item) {
       return <DataCell>[
         DataCell(Text(item.id)),
         DataCell(Text(item.name)),
@@ -205,9 +205,7 @@ class LocationsTable extends ConsumerWidget {
                 suffixIcon: (_controller.text.isEmpty)
                     ? null
                     : GestureDetector(
-                        onTap: () {
-                          _controller.clear();
-                        },
+                        onTap: () => _controller.clear(),
                         child: Icon(Icons.clear),
                       ),
               ),
@@ -225,7 +223,7 @@ class LocationsTable extends ConsumerWidget {
             },
 
             // Autocomplete menu.
-            itemBuilder: (context, Location suggestion) {
+            itemBuilder: (BuildContext context, Location suggestion) {
               return ListTile(
                 title: Text(suggestion.name),
               );

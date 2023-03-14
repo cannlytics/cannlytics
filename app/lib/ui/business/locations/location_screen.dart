@@ -105,6 +105,28 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
       // - updated_at
       // - updated_by
 
+      // Lighting Data
+      // This information can help optimize the lighting conditions for
+      // the specific strain and maximize the yield and potency of the plants.
+      // - light intensity and duration.
+      // Energy Consumption Data: Cannabis cultivators may want to track
+      // energy consumption data, such as electricity usage and costs, to
+      // help identify ways to reduce energy consumption and costs.
+
+      // Climate data
+      // ensure that the growing environment is optimal for the plants.
+      // - temperature, humidity, precipitation, and wind speed
+
+      // Soil and Water Data
+      // This information can help optimize the soil conditions and
+      // ensure that the plants receive the right nutrients for healthy growth.
+      // - pH levels, nutrient content, and salinity levels
+
+      // Pest and Disease Data: Cannabis cultivators may want to track pest
+      // and disease data, such as the presence of pests, mold, or fungus.
+      // This information can help identify potential problems early on
+      // and take corrective action to prevent damage to the plants.
+
       // Optional: Look at packages / plants at the location.
     ];
   }

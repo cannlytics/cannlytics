@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/8/2023
-// Updated: 3/8/2023
+// Updated: 3/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -26,7 +26,7 @@ import 'package:cannlytics_app/utils/string_utils.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/widgets/inputs/date_time_input.dart';
 
-/// The employee screen.
+/// Strain screen.
 class StrainScreen extends ConsumerStatefulWidget {
   const StrainScreen({
     super.key,
