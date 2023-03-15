@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/9/2023
+// Updated: 3/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -53,88 +53,37 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
     final bool isDark = themeMode == ThemeMode.dark;
 
     // Build the layout.
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(1, -1),
-            radius: 4.0,
-            colors: [
-              isDark ? Colors.green : AppColors.neutral1,
-              isDark ? Colors.transparent : Colors.white,
-            ],
-          ),
-        ),
-        child: CustomScrollView(
-          slivers: [
-            // Light / dark theme toggle.
-            SliverToBoxAdapter(child: ThemeToggle(isDark: isDark)),
-
-            // Logo.
-            SliverToBoxAdapter(child: ResponsiveAppLogo(isDark: isDark)),
-
-            // User type selection.
-            SliverToBoxAdapter(child: gapH12),
-            // SliverToBoxAdapter(child: UserTypeButton()),
-
-            // Sign in form.
-            SliverToBoxAdapter(
-              child: SignInForm(formType: formType, isDark: isDark),
-            ),
-
-            // Footer
-            const SliverToBoxAdapter(child: SimpleFooter()),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment(1, -1),
+          radius: 4.0,
+          colors: [
+            isDark ? Colors.green : AppColors.neutral1,
+            isDark ? Colors.transparent : Colors.white,
           ],
         ),
       ),
-    );
-  }
-}
+      child: CustomScrollView(
+        slivers: [
+          // Light / dark theme toggle.
+          SliverToBoxAdapter(child: ThemeToggle(isDark: isDark)),
 
-/// Widget to let the user choose their type: "Consumer" or "Business".
-class UserTypeButton extends ConsumerWidget {
-  const UserTypeButton({super.key});
+          // Logo.
+          SliverToBoxAdapter(child: ResponsiveAppLogo(isDark: isDark)),
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Get the user type.
-    final userType = ref.watch(userTypeProvider);
+          // User type selection.
+          SliverToBoxAdapter(child: gapH12),
+          // SliverToBoxAdapter(child: UserTypeButton()),
 
-    // Render a toggle switch.
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 16),
-      child: Center(
-        child: CupertinoSegmentedControl<String>(
-          borderColor: (userType == 'consumer') ? Colors.green : Colors.orange,
-          selectedColor:
-              (userType == 'consumer') ? Colors.green : Colors.orange,
-          unselectedColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          groupValue: userType,
-          onValueChanged: (String value) {
-            ref.read(userTypeProvider.notifier).update((state) => value);
-          },
-          children: <String, Widget>{
-            'consumer': Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Consumer',
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: Theme.of(context).textTheme.titleLarge!.color,
-                    ),
-              ),
-            ),
-            'business': Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Business',
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: Theme.of(context).textTheme.titleLarge!.color,
-                    ),
-              ),
-            ),
-          },
-        ),
+          // Sign in form.
+          SliverToBoxAdapter(
+            child: SignInForm(formType: formType, isDark: isDark),
+          ),
+
+          // Footer
+          const SliverToBoxAdapter(child: SimpleFooter()),
+        ],
       ),
     );
   }
@@ -227,7 +176,6 @@ class _SignInFormState extends ConsumerState<SignInForm>
 
     // Build the form.
     return ResponsiveCard(
-      isDark: widget.isDark,
       child: FocusScope(
         node: _node,
         child: Form(
@@ -244,7 +192,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
               ),
 
               // Spacer.
-              gapH8,
+              gapH18,
 
               // Email field.
               TextFormField(
@@ -270,7 +218,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
               ),
 
               // Spacer.
-              gapH8,
+              gapH18,
 
               // Password field.
               TextFormField(
@@ -288,8 +236,6 @@ class _SignInFormState extends ConsumerState<SignInForm>
                 autocorrect: false,
                 textInputAction: TextInputAction.done,
                 keyboardAppearance: Brightness.light,
-                // FIXME: Error color is white!
-                // style: TextStyle().copyWith(),
                 onEditingComplete: () => _passwordEditingComplete(),
               ),
 
@@ -338,6 +284,55 @@ class _SignInFormState extends ConsumerState<SignInForm>
               //   ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Widget to let the user choose their type: "Consumer" or "Business".
+class UserTypeButton extends ConsumerWidget {
+  const UserTypeButton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get the user type.
+    final userType = ref.watch(userTypeProvider);
+
+    // Render a toggle switch.
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: CupertinoSegmentedControl<String>(
+          borderColor: (userType == 'consumer') ? Colors.green : Colors.orange,
+          selectedColor:
+              (userType == 'consumer') ? Colors.green : Colors.orange,
+          unselectedColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          groupValue: userType,
+          onValueChanged: (String value) {
+            ref.read(userTypeProvider.notifier).update((state) => value);
+          },
+          children: <String, Widget>{
+            'consumer': Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Consumer',
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
+              ),
+            ),
+            'business': Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Business',
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
+              ),
+            ),
+          },
         ),
       ),
     );

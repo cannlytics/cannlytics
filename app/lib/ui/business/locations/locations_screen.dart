@@ -188,7 +188,7 @@ class LocationsTable extends ConsumerWidget {
         // Search box.
         SizedBox(
           width: 175,
-          height: 34,
+          // height: 34,
           child: TypeAheadField(
             textFieldConfiguration: TextFieldConfiguration(
               // Controller.
@@ -198,7 +198,7 @@ class LocationsTable extends ConsumerWidget {
               decoration: InputDecoration(
                 hintText: 'Search...',
                 contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(3)),
                 ),
@@ -211,8 +211,8 @@ class LocationsTable extends ConsumerWidget {
               ),
               style: DefaultTextStyle.of(context).style.copyWith(
                     fontStyle: FontStyle.italic,
-                    fontSize: 16.0,
-                    height: 1.25,
+                    // fontSize: 16.0,
+                    // height: 1.25,
                   ),
             ),
             // Search engine function.
@@ -270,6 +270,6 @@ class LocationsTable extends ConsumerWidget {
           context.go('/locations/new');
         },
       );
-    return Column(children: [actions, table]);
+    return Column(children: [actions, gapH12, table]);
   }
 }

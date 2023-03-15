@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 2/23/2023
+// Updated: 3/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -103,10 +103,14 @@ class AppColors {
       cardColor: isDark ? const Color(0xFF323443) : Colors.white,
       dialogBackgroundColor:
           isDark ? const Color(0xFF323443) : AppColors.neutral1,
+
+      // App bar theme.
       appBarTheme: const AppBarTheme(
         elevation: 0.0,
         centerTitle: true,
       ),
+
+      // Button theme.
       buttonTheme: ButtonThemeData(
         buttonColor: primary2,
         textTheme: ButtonTextTheme.primary,
@@ -114,10 +118,14 @@ class AppColors {
           secondary: isDark ? Colors.white : const Color(0xFF323443),
         ),
       ),
+
+      // Card style.
       cardTheme: CardTheme(
-        elevation: 0,
+        elevation: 1,
         surfaceTintColor: isDark ? null : AppColors.surface,
       ),
+
+      // Data table style.
       dataTableTheme: DataTableThemeData(
         // headingTextStyle: TextStyle(
         //   fontWeight: FontWeight.bold,
@@ -132,6 +140,26 @@ class AppColors {
           border: Border.all(color: Colors.grey),
         ),
       ),
+
+      // Input style.
+      inputDecorationTheme: InputDecorationTheme(
+        labelStyle: null,
+        floatingLabelStyle: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+        ),
+        helperStyle: null,
+        errorStyle: TextStyle(
+          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+        ),
+        isDense: true,
+        contentPadding: null,
+        outlineBorder: null,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(3),
+        ),
+      ),
+
+      // Text button style.
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
@@ -139,9 +167,13 @@ class AppColors {
           ),
         ),
       ),
-      textSelectionTheme: const TextSelectionThemeData(
-        cursorColor: accent1,
+
+      // Text selection style.
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
       ),
+
+      // Text style.
       textTheme: TextTheme(
         displayLarge: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
@@ -228,7 +260,7 @@ class AppColors {
       ),
     );
 
-    // Return the themeData which MaterialApp can use.
+    // Return theme data that MaterialApp can use.
     return t;
   }
 }

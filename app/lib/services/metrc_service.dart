@@ -102,7 +102,13 @@ class MetrcFacilities {
     String endpoint = '/api/metrc/facilities';
     List<dynamic> response = await APIService.apiRequest(
       endpoint,
-      options: getParams(null, orgId, state),
+      // options: getParams(null, orgId, state),
+      options: {
+        'params': {
+          'org_id': orgId,
+          'state': state,
+        },
+      },
     );
     List<Facility> items = [];
     for (var item in response) {

@@ -12,8 +12,10 @@ import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/ui/business/locations/locations_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/widgets/inputs/checkbox_input.dart';
+import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/form_container.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +24,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_app/models/metrc/location.dart';
+import 'package:go_router/go_router.dart';
 
 /// Location screen.
 class LocationScreen extends ConsumerStatefulWidget {
@@ -46,7 +49,10 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
     );
 
     // Listen for the location data.
-    final item = ref.watch(locationProvider(widget.id)).value;
+    var item = ref.watch(locationProvider(widget.id)).value;
+    if (item == null) {
+      item = Location(id: 'new', name: '');
+    }
 
     // Body.
     return CustomScrollView(
@@ -56,10 +62,20 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
 
         // Form.
         // TODO: Add a loading placeholding.
-        if (item == null)
-          SliverToBoxAdapter(child: Container())
-        else
-          SliverToBoxAdapter(child: FormContainer(children: _fields(item))),
+        // if (item == null)
+        //   SliverToBoxAdapter(
+        //     child: CustomPlaceholder(
+        //       image: 'assets/images/icons/facilities.png',
+        //       title: 'Add a location',
+        //       description:
+        //           'Locations are used to track packages, items, and plants.',
+        //       onTap: () {
+        //         context.go('/locations/new');
+        //       },
+        //     ),
+        //   )
+        // else
+        SliverToBoxAdapter(child: FormContainer(children: _fields(item))),
 
         // Footer
         const SliverToBoxAdapter(child: Footer()),
@@ -71,6 +87,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
   List<Widget> _fields(Location item) {
     return <Widget>[
       Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           // ID.
           _idField(item),
@@ -79,11 +96,26 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
           const Spacer(),
 
           // Actions.
-          // TODO: Handle creating a location.
-
-          // TODO: Handle updating a location.
-
-          // TODO: Handle deleting an existing location.
+          // TODO: Handle creating / updating a location.
+          PrimaryButton(
+            text: (widget.id == 'new') ? 'Create' : 'Save',
+            onPressed: () async {
+              if (widget.id == 'new') {
+                // TODO: Get fields.
+                print('FIELDS:');
+                var name = ref.read(nameController).value.text;
+                var update = Location(
+                  id: widget.id,
+                  name: name,
+                  locationTypeName: ref.read(locationType),
+                );
+                print('UPDATE:');
+                print(update);
+                // ref.read(locationsProvider.notifier).createLocations([entry]);
+              } else {}
+              // context.go('/locations');
+            },
+          ),
         ],
       ),
 
@@ -93,7 +125,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
       gapH6,
 
       // Location type name and ID.
-      _locationNameField(item),
+      _locationTypeField(item),
 
       // Checkbox fields.
       ..._checkboxes(item),
@@ -128,7 +160,43 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
       // and take corrective action to prevent damage to the plants.
 
       // Optional: Look at packages / plants at the location.
+
+      // Danger zone : Handle deleting an existing location.
+      // TODO: Add border to card / adjust background color.
+      // TODO: Change card width
+      if (widget.id == 'new') _deletebutton(),
     ];
+  }
+
+  Widget _deletebutton() {
+    return Container(
+      constraints: BoxConstraints(minWidth: 200), // set minimum width of 200
+      child: Card(
+        borderOnForeground: true,
+        surfaceTintColor: null,
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Text(
+                'Danger Zone',
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
+              ),
+              gapH12,
+              PrimaryButton(
+                backgroundColor: Colors.red,
+                text: 'Delete',
+                onPressed: () {
+                  context.go('/locations');
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // ID field.
@@ -164,9 +232,9 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
 
   // Location name field.
   // TODO: Display location ID (not editable).
-  Widget _locationNameField(Location item) {
+  Widget _locationTypeField(Location item) {
     final items = ref.watch(locationTypesProvider).value ?? [];
-    final value = ref.watch(locationName);
+    final value = ref.watch(locationType);
     if (items.length == 0 || value == null) return Container();
     var dropdown = DropdownButton(
       underline: Container(),
@@ -186,7 +254,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
           )
           .toList(),
       onChanged: (String? value) {
-        ref.read(locationName.notifier).state = value;
+        ref.read(locationType.notifier).state = value;
         // FIXME: Change location permissions.
       },
     );

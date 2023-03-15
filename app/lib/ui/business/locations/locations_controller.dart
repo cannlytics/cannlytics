@@ -56,10 +56,22 @@ class LocationsController extends AsyncNotifier<List<Location>> {
   }
 
   // TODO: Create locations.
+  Future<void> createLocations(List<Location> items) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async => items);
+  }
 
   // TODO: Update locations.
+  Future<void> updateLocations(List<Location> items) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async => items);
+  }
 
   // TODO: Delete locations.
+  Future<void> deleteLocations(List<Location> items) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async => items);
+  }
 }
 
 /* Table */
@@ -263,16 +275,22 @@ class LocationTypesNotifier extends AsyncNotifier<List<dynamic>> {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final orgId = ref.watch(primaryOrganizationProvider);
     final licenseState = ref.watch(primaryStateProvider);
-    List<dynamic> data = await MetrcLocations.getLocationTypes(
-      license: licenseNumber,
-      orgId: orgId,
-      state: licenseState,
-    );
-    final value = ref.read(locationName);
+    List<dynamic> data;
+    try {
+      data = await MetrcLocations.getLocationTypes(
+        license: licenseNumber,
+        orgId: orgId,
+        state: licenseState,
+      );
+    } catch (error) {
+      return [];
+    }
+
+    final value = ref.read(locationType);
     // Set initial location type and permissions.
     if (value == null && data.isNotEmpty) {
       Map initialValue = data[0];
-      ref.read(locationName.notifier).state = initialValue['name'];
+      ref.read(locationType.notifier).state = initialValue['name'];
       ref.read(forPlants.notifier).state = initialValue['for_plants'];
       ref.read(forPlantBatches.notifier).state =
           initialValue['for_plant_batches'];
@@ -284,7 +302,7 @@ class LocationTypesNotifier extends AsyncNotifier<List<dynamic>> {
 }
 
 // Location name field.
-final locationName = StateProvider<String?>((ref) => null);
+final locationType = StateProvider<String?>((ref) => null);
 
 // Boolean fields.
 final forPlants = StateProvider<bool?>((ref) => null);

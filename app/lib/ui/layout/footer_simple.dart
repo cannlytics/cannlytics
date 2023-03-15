@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/widgets/layout/responsive_center.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -31,22 +32,20 @@ class SimpleFooter extends ConsumerWidget {
     // Build the footer.
     return Container(
       margin: EdgeInsets.only(top: Insets(1).md),
-      child: Center(
-        child: SizedBox(
-          width: 320,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding(screenWidth),
-            ),
-            child: Column(
-              crossAxisAlignment:
-                  isWide ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-              children: [
-                gapH48,
-                FooterLinks(),
-                gapH6,
-              ],
-            ),
+      child: ResponsiveCenter(
+        maxContentWidth: Breakpoints.mobile,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding(screenWidth),
+          ),
+          child: Column(
+            crossAxisAlignment:
+                isWide ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+            children: [
+              gapH48,
+              FooterLinks(),
+              gapH6,
+            ],
           ),
         ),
       ),

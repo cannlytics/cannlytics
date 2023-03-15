@@ -28,20 +28,39 @@ class ResponsiveCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: ResponsiveCenter(
-        maxContentWidth: Breakpoints.mobile,
-        child: Padding(
-          padding: const EdgeInsets.all(Sizes.p16),
-          child: Card(
-            surfaceTintColor: isDark ? null : AppColors.surface,
-            child: Padding(
-              padding: const EdgeInsets.all(Sizes.p16),
-              child: child,
-            ),
+    return ResponsiveCenter(
+      maxContentWidth: Breakpoints.mobile,
+      child: Padding(
+        padding: const EdgeInsets.all(Sizes.p16),
+        child: Card(
+          surfaceTintColor: isDark ? null : AppColors.surface,
+          child: Padding(
+            padding: const EdgeInsets.all(Sizes.p16),
+            child: child,
           ),
         ),
       ),
     );
+    // return CustomScrollView(
+    //   slivers: [
+    //     // App header.
+    //     SliverToBoxAdapter(child: child),
+    //   ],
+    // );
+    // return SingleChildScrollView(
+    //   child: ResponsiveCenter(
+    //     maxContentWidth: Breakpoints.mobile,
+    //     child: Padding(
+    //       padding: const EdgeInsets.all(Sizes.p16),
+    //       child: Card(
+    //         surfaceTintColor: isDark ? null : AppColors.surface,
+    //         child: Padding(
+    //           padding: const EdgeInsets.all(Sizes.p16),
+    //           child: child,
+    //         ),
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 }
