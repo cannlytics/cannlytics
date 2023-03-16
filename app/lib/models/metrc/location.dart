@@ -64,30 +64,30 @@ class Location {
     };
   }
 
-  // Create location in Metrc.
-  Future<void> create(String? licenseNumber) async {
-    await MetrcLocations.createLocation(
-      name: this.name,
-      license: licenseNumber,
-      locationType: this.locationTypeName,
-    );
-  }
+  // // Create location in Metrc.
+  // Future<void> create(String? licenseNumber) async {
+  //   await MetrcLocations.createLocation(
+  //     name: this.name,
+  //     license: licenseNumber,
+  //     locationType: this.locationTypeName,
+  //   );
+  // }
 
-  // Update location in Metrc.
-  Future<void> update(String? licenseNumber) async {
-    await MetrcLocations.updateLocationName(
-      id: this.id,
-      name: this.name,
-      locationTypeName: this.locationTypeName ?? 'Default Location',
-      license: licenseNumber,
-    );
-  }
+  // // Update location in Metrc.
+  // Future<void> update(String? licenseNumber) async {
+  //   await MetrcLocations.updateLocationName(
+  //     id: this.id,
+  //     name: this.name,
+  //     locationTypeName: this.locationTypeName ?? 'Default Location',
+  //     license: licenseNumber,
+  //   );
+  // }
 
-  // Delete location from Metrc.
-  Future<void> delete(String? licenseNumber) async {
-    await MetrcLocations.deleteLocation(
-      id: this.id,
-      license: licenseNumber,
-    );
-  }
+  // // Delete location from Metrc.
+  // Future<void> delete(String? licenseNumber) async {
+  //   await MetrcLocations.deleteLocation(
+  //     id: this.id,
+  //     license: licenseNumber,
+  //   );
+  // }
 }

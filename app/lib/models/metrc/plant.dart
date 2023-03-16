@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/26/2023
-// Updated: 3/9/2023
+// Updated: 3/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -17,101 +17,100 @@ class Plant {
 // Initialization.
   const Plant({
     required this.id,
-    required this.destroyedByUserName,
-    required this.destroyedDate,
-    required this.destroyedNote,
-    required this.floweringDate,
-    required this.growthPhase,
-    required this.harvestCount,
-    required this.harvestedDate,
-    required this.harvestedUnitOfWeightAbbreviation,
-    required this.harvestedUnitOfWeightName,
-    required this.harvestedWetWeight,
-    required this.harvestId,
-    required this.isOnHold,
-    required this.isOnTrip,
-    required this.label,
-    required this.lastModified,
-    required this.locationId,
-    required this.locationName,
-    required this.locationTypeName,
-    required this.patientLicenseNumber,
-    required this.plantBatchId,
-    required this.plantBatchName,
-    required this.plantBatchTypeId,
-    required this.plantBatchTypeName,
-    required this.plantedDate,
-    required this.state,
-    required this.strainId,
-    required this.strainName,
-    required this.vegetativeDate,
+    this.destroyedByUserName,
+    this.destroyedDate,
+    this.destroyedNote,
+    this.floweringDate,
+    this.growthPhase,
+    this.harvestCount,
+    this.harvestedDate,
+    this.harvestedUnitOfWeightAbbreviation,
+    this.harvestedUnitOfWeightName,
+    this.harvestedWetWeight,
+    this.harvestId,
+    this.isOnHold,
+    this.isOnTrip,
+    this.label,
+    this.lastModified,
+    this.locationId,
+    this.locationName,
+    this.locationTypeName,
+    this.patientLicenseNumber,
+    this.plantBatchId,
+    this.plantBatchName,
+    this.plantBatchTypeId,
+    this.plantBatchTypeName,
+    this.plantedDate,
+    this.state,
+    this.strainId,
+    this.strainName,
+    this.vegetativeDate,
   });
 
 // Properties.
   final PlantId id;
-  final String destroyedByUserName;
-  final String destroyedDate;
+  final String? destroyedByUserName;
+  final String? destroyedDate;
   final String? destroyedNote;
   final String? floweringDate;
-  final String growthPhase;
-  final int harvestCount;
+  final String? growthPhase;
+  final int? harvestCount;
   final String? harvestedDate;
   final String? harvestedUnitOfWeightAbbreviation;
   final String? harvestedUnitOfWeightName;
   final double? harvestedWetWeight;
-  final int? harvestId;
-  final bool isOnHold;
-  final bool isOnTrip;
-  final String label;
-  final String lastModified;
-  final int locationId;
-  final String locationName;
+  final String? harvestId;
+  final bool? isOnHold;
+  final bool? isOnTrip;
+  final String? label;
+  final String? lastModified;
+  final String? locationId;
+  final String? locationName;
   final String? locationTypeName;
   final String? patientLicenseNumber;
-  final int plantBatchId;
-  final String plantBatchName;
-  final int plantBatchTypeId;
-  final String plantBatchTypeName;
-  final String plantedDate;
-  final String state;
-  final StrainId strainId;
-  final String strainName;
+  final String? plantBatchId;
+  final String? plantBatchName;
+  final String? plantBatchTypeId;
+  final String? plantBatchTypeName;
+  final String? plantedDate;
+  final String? state;
+  final StrainId? strainId;
+  final String? strainName;
   final String? vegetativeDate;
 
 // Create model.
   factory Plant.fromMap(Map<String, dynamic> data) {
     return Plant(
-      id: data['id'] as PlantId,
-      destroyedByUserName: data['destroyed_by_user_name'] as String,
-      destroyedDate: data['destroyed_date'] as String,
-      destroyedNote: data['destroyed_note'] as String?,
-      floweringDate: data['flowering_date'] as String?,
-      growthPhase: data['growth_phase'] as String,
-      harvestCount: data['harvest_count'] as int,
-      harvestedDate: data['harvested_date'] as String?,
+      id: data['id'].toString(),
+      destroyedByUserName: data['destroyed_by_user_name'] ?? '',
+      destroyedDate: data['destroyed_date'] ?? '',
+      destroyedNote: data['destroyed_note'] ?? '',
+      floweringDate: data['flowering_date'] ?? '',
+      growthPhase: data['growth_phase'] ?? '',
+      harvestCount: data['harvest_count'] ?? 0,
+      harvestedDate: data['harvested_date'] ?? '',
       harvestedUnitOfWeightAbbreviation:
-          data['harvested_unit_of_weight_abbreviation'] as String?,
-      harvestedUnitOfWeightName:
-          data['harvested_unit_of_weight_name'] as String?,
-      harvestedWetWeight: data['harvested_wet_weight'] as double?,
-      harvestId: data['harvest_id'] as int?,
-      isOnHold: data['is_on_hold'] as bool,
-      isOnTrip: data['is_on_trip'] as bool,
-      label: data['label'] as String,
-      lastModified: data['last_modified'] as String,
-      locationId: data['location_id'] as int,
-      locationName: data['location_name'] as String,
-      locationTypeName: data['location_type_name'] as String?,
-      patientLicenseNumber: data['patient_license_number'] as String?,
-      plantBatchId: data['plant_batch_id'] as int,
-      plantBatchName: data['plant_batch_name'] as String,
-      plantBatchTypeId: data['plant_batch_type_id'] as int,
-      plantBatchTypeName: data['plant_batch_type_name'] as String,
-      plantedDate: data['planted_date'] as String,
-      state: data['state'] as String,
-      strainId: data['strain_id'] as StrainId,
-      strainName: data['strain_name'] as String,
-      vegetativeDate: data['vegetative_date'] as String?,
+          data['harvested_unit_of_weight_abbreviation'] ?? '',
+      harvestedUnitOfWeightName: data['harvested_unit_of_weight_name'] ?? '',
+      harvestedWetWeight: data['harvested_wet_weight'] ?? 0.0,
+      harvestId: data['harvest_id'].toString(),
+      isOnHold: data['is_on_hold'] ?? false,
+      isOnTrip: data['is_on_trip'] ?? false,
+      label: data['label'] ?? '',
+      lastModified: data['last_modified'] ?? '',
+      locationId: data['location_id'].toString(),
+      locationName: data['location_name'] ?? '',
+      locationTypeName: data['location_type_name'] ?? '',
+      patientLicenseNumber: data['patient_license_number'] ?? '',
+      plantBatchId: data['plant_batch_id'] ?? 0,
+      plantBatchName: data['plant_batch_name'] ?? '',
+      plantBatchTypeId: data['plant_batch_type_id'] ?? 0,
+      plantBatchTypeName: data['plant_batch_type_name'] ?? '',
+      plantedDate: data['planted_date'] ?? '',
+      state: data['state'] ?? '',
+      strainId: data['strain_id'].toString(),
+      strainName: data['strain_name'] ?? '',
+      vegetativeDate: data['vegetative_date'] ?? '',
     );
   }
 

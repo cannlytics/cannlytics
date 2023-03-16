@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/13/2023
+// Updated: 3/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -12,10 +12,10 @@ import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/ui/business/locations/locations_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/widgets/inputs/checkbox_input.dart';
-import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/form_container.dart';
 import 'package:flutter/material.dart';
 
@@ -61,20 +61,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
         const SliverToBoxAdapter(child: AppHeader()),
 
         // Form.
-        // TODO: Add a loading placeholding.
-        // if (item == null)
-        //   SliverToBoxAdapter(
-        //     child: CustomPlaceholder(
-        //       image: 'assets/images/icons/facilities.png',
-        //       title: 'Add a location',
-        //       description:
-        //           'Locations are used to track packages, items, and plants.',
-        //       onTap: () {
-        //         context.go('/locations/new');
-        //       },
-        //     ),
-        //   )
-        // else
+        // TODO: Add a loading indicator.
         SliverToBoxAdapter(child: FormContainer(children: _fields(item))),
 
         // Footer
@@ -86,6 +73,17 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
   /// Form fields.
   List<Widget> _fields(Location item) {
     return <Widget>[
+      // Back to locations button.
+      CustomTextButton(
+        text: 'Locations',
+        onPressed: () {
+          context.go('/locations');
+          ref.read(nameController.notifier).change('');
+        },
+        fontStyle: FontStyle.italic,
+      ),
+
+      // Title row.
       Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -96,24 +94,27 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
           const Spacer(),
 
           // Actions.
-          // TODO: Handle creating / updating a location.
+          // Create / update a location.
           PrimaryButton(
             text: (widget.id == 'new') ? 'Create' : 'Save',
             onPressed: () async {
+              var name = ref.read(nameController).value.text;
+              var update = Location(
+                id: widget.id,
+                name: name,
+                locationTypeName: ref.read(locationType),
+              );
               if (widget.id == 'new') {
-                // TODO: Get fields.
-                print('FIELDS:');
-                var name = ref.read(nameController).value.text;
-                var update = Location(
-                  id: widget.id,
-                  name: name,
-                  locationTypeName: ref.read(locationType),
-                );
-                print('UPDATE:');
-                print(update);
-                // ref.read(locationsProvider.notifier).createLocations([entry]);
-              } else {}
-              // context.go('/locations');
+                await ref
+                    .read(locationsProvider.notifier)
+                    .createLocations([update]);
+              } else {
+                // FIXME:
+                await ref
+                    .read(locationsProvider.notifier)
+                    .updateLocations([update]);
+              }
+              context.go('/locations');
             },
           ),
         ],
@@ -162,21 +163,21 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
       // Optional: Look at packages / plants at the location.
 
       // Danger zone : Handle deleting an existing location.
-      // TODO: Add border to card / adjust background color.
-      // TODO: Change card width
-      if (widget.id == 'new') _deletebutton(),
+      if (widget.id.isNotEmpty && widget.id != 'new') _deleteOption(),
     ];
   }
 
-  Widget _deletebutton() {
+  Widget _deleteOption() {
     return Container(
       constraints: BoxConstraints(minWidth: 200), // set minimum width of 200
       child: Card(
+        margin: EdgeInsets.only(top: 36, bottom: 48),
         borderOnForeground: true,
         surfaceTintColor: null,
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
                 'Danger Zone',
@@ -188,7 +189,11 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
               PrimaryButton(
                 backgroundColor: Colors.red,
                 text: 'Delete',
-                onPressed: () {
+                onPressed: () async {
+                  await ref
+                      .read(locationsProvider.notifier)
+                      .deleteLocations([Location(id: widget.id, name: '')]);
+                  // FIXME: Clear search, etc. to make table load better.
                   context.go('/locations');
                 },
               ),
@@ -212,7 +217,10 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
   // Name field.
   Widget _nameField(Location item) {
     final _nameController = ref.watch(nameController);
+    // Hot-fix: Set the initial value.
     if (_nameController.text.isEmpty && item.name.isNotEmpty) {
+      ref.read(nameController.notifier).change(item.name);
+    } else if (_nameController.text != item.name) {
       ref.read(nameController.notifier).change(item.name);
     }
     final textField = TextField(
@@ -223,15 +231,12 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
       maxLines: null,
     );
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: 300,
-      ),
+      constraints: BoxConstraints(maxWidth: 300),
       child: textField,
     );
   }
 
   // Location name field.
-  // TODO: Display location ID (not editable).
   Widget _locationTypeField(Location item) {
     final items = ref.watch(locationTypesProvider).value ?? [];
     final value = ref.watch(locationType);

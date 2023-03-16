@@ -4,61 +4,48 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/27/2023
-// Updated: 3/8/2023
+// Updated: 3/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// Project imports:
-import 'package:cannlytics_app/services/metrc_service.dart';
-
-typedef EmployeeId = String;
 
 /// Model representing an employee.
 class Employee {
   // Initialization.
   const Employee({
-    required this.id,
     required this.fullName,
-    required this.license,
+    this.licenseNumber,
+    this.licenseStartDate,
+    this.licenseEndDate,
+    this.licenseType,
   });
 
   // Properties.
-  final EmployeeId id;
-  final String fullName;
-  final String license;
+  final String? fullName;
+  final String? licenseNumber;
+  final String? licenseStartDate;
+  final String? licenseEndDate;
+  final String? licenseType;
 
   // Create model.
   factory Employee.fromMap(Map<String, dynamic> data) {
     return Employee(
-      id: data['id'] ?? '',
       fullName: data['full_name'] ?? '',
-      license: data['license'] ?? '',
+      licenseNumber: data['license']['number'] ?? '',
+      licenseStartDate: data['license']['start_date'] ?? '',
+      licenseEndDate: data['license']['end_date'] ?? '',
+      licenseType: data['license']['license_type'] ?? '',
     );
   }
 
   // Create JSON.
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id,
       'full_name': fullName,
-      'license': license,
+      'license': {
+        'number': licenseNumber,
+        'start_date': licenseStartDate,
+        'end_date': licenseEndDate,
+        'license_type': licenseType,
+      },
     };
-  }
-
-  // Create Employee.
-  Future<void> create() async {
-    // Call an API or database to create a new employee.
-    // await MetrcService.createEmployee(this.toMap());
-  }
-
-  // Update Employee.
-  Future<void> update() async {
-    // Call an API or database to update the existing employee.
-    // await MetrcService.updateEmployee(this.id, this.toMap());
-  }
-
-  // Delete Employee.
-  Future<void> delete() async {
-    // Call an API or database to delete the existing employee.
-    // await MetrcService.deleteEmployee(this.id);
   }
 }

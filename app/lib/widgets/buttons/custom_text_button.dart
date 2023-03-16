@@ -16,9 +16,11 @@ class CustomTextButton extends StatelessWidget {
     super.key,
     required this.text,
     this.onPressed,
+    this.fontStyle,
   });
   final String text;
   final VoidCallback? onPressed;
+  final FontStyle? fontStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,7 @@ class CustomTextButton extends StatelessWidget {
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.titleMedium!.copyWith(
               color: Theme.of(context).textTheme.titleLarge!.color,
+              fontStyle: fontStyle,
             ),
       ),
     );

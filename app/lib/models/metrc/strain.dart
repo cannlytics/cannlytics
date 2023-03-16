@@ -37,7 +37,7 @@ class Strain {
   // Create model.
   factory Strain.fromMap(Map<String, dynamic> data) {
     return Strain(
-      id: data['id'] ?? 'new',
+      id: data['id'].toString(),
       name: data['name'] ?? '',
       testingStatus: data['testing_status'],
       thcLevel: data['thc_level'],

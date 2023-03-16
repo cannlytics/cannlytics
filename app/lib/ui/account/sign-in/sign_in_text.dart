@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/9/2023
+// Updated: 3/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 /// Form type for email & password authentication
@@ -22,7 +22,7 @@ extension SignInFormTypeX on SignInFormType {
   // Getters
   String get primaryButtonText {
     if (this == SignInFormType.register) {
-      return 'Create an account';
+      return 'Sign up';
     } else {
       return 'Sign in';
     }

@@ -34,14 +34,14 @@ class LocationsController extends AsyncNotifier<List<Location>> {
   /// Get locations.
   Future<List<Location>> getLocations() async {
     final licenseNumber = ref.watch(primaryLicenseProvider);
-    final orgId = ref.watch(primaryOrganizationProvider);
-    final state = ref.watch(primaryStateProvider);
+    final licenseState = ref.read(primaryStateProvider);
+    final orgId = ref.read(primaryOrganizationProvider);
     if (licenseNumber == null) return [];
     try {
       return await MetrcLocations.getLocations(
         license: licenseNumber,
         orgId: orgId,
-        state: state,
+        state: licenseState,
       );
     } catch (error) {
       print("Error decoding JSON: [error=${error.toString()}]");
@@ -55,22 +55,64 @@ class LocationsController extends AsyncNotifier<List<Location>> {
     state = await AsyncValue.guard(() async => items);
   }
 
-  // TODO: Create locations.
+  // Create locations.
   Future<void> createLocations(List<Location> items) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async => items);
+    state = await AsyncValue.guard(() async {
+      final licenseNumber = ref.read(primaryLicenseProvider);
+      final licenseState = ref.read(primaryStateProvider);
+      final orgId = ref.read(primaryOrganizationProvider);
+      for (Location item in items) {
+        await MetrcLocations.createLocation(
+          name: item.name,
+          locationTypeName: item.locationTypeName,
+          license: licenseNumber,
+          orgId: orgId,
+          state: licenseState,
+        );
+      }
+      return await getLocations();
+    });
   }
 
-  // TODO: Update locations.
+  // Update locations.
   Future<void> updateLocations(List<Location> items) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async => items);
+    state = await AsyncValue.guard(() async {
+      final licenseNumber = ref.read(primaryLicenseProvider);
+      final licenseState = ref.read(primaryStateProvider);
+      final orgId = ref.read(primaryOrganizationProvider);
+      for (Location item in items) {
+        await MetrcLocations.updateLocation(
+          id: item.id,
+          name: item.name,
+          locationTypeName: item.locationTypeName ?? 'Default Location Type',
+          license: licenseNumber,
+          orgId: orgId,
+          state: licenseState,
+        );
+      }
+      return await getLocations();
+    });
   }
 
-  // TODO: Delete locations.
+  // Delete locations.
   Future<void> deleteLocations(List<Location> items) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async => items);
+    state = await AsyncValue.guard(() async {
+      final licenseNumber = ref.read(primaryLicenseProvider);
+      final licenseState = ref.read(primaryStateProvider);
+      final orgId = ref.read(primaryOrganizationProvider);
+      for (Location item in items) {
+        await MetrcLocations.deleteLocation(
+          id: item.id,
+          license: licenseNumber,
+          orgId: orgId,
+          state: licenseState,
+        );
+      }
+      return await getLocations();
+    });
   }
 }
 
@@ -178,9 +220,7 @@ final locationId = StateProvider<String?>((ref) => null);
 // Location provider.
 final locationProvider =
     AsyncNotifierProvider.family<LocationController, Location?, String?>(
-  ({id}) {
-    return LocationController(id: id);
-  },
+  ({id}) => LocationController(id: id),
 );
 
 /// Locations controller.
@@ -199,11 +239,21 @@ class LocationController extends FamilyAsyncNotifier<Location?, String?> {
 
   /// Get location.
   Future<Location?> get(String id) async {
+    print('GETTING LOCATION...');
+    final items = ref.read(locationsProvider).value ?? [];
+    for (Location item in items) {
+      if (item.id == id) {
+        print('Returning item:');
+        print(item);
+        return item;
+      }
+    }
     final licenseNumber = ref.watch(primaryLicenseProvider);
-    final orgId = ref.watch(primaryOrganizationProvider);
-    final licenseState = ref.watch(primaryStateProvider);
+    final orgId = ref.read(primaryOrganizationProvider);
+    final licenseState = ref.read(primaryStateProvider);
     if (licenseNumber == null) return null;
     if (id == 'new') return Location(id: '', name: '');
+    print('GETTING LOCATION...');
     try {
       return await MetrcLocations.getLocation(
         id: id,
@@ -241,8 +291,7 @@ class LocationController extends FamilyAsyncNotifier<Location?, String?> {
 // Name field.
 final nameController =
     StateNotifierProvider<NameController, TextEditingController>(
-  (ref) => NameController(),
-);
+        (ref) => NameController());
 
 class NameController extends StateNotifier<TextEditingController> {
   NameController() : super(TextEditingController());
@@ -260,9 +309,8 @@ class NameController extends StateNotifier<TextEditingController> {
 
 // Location types provider.
 final locationTypesProvider =
-    AsyncNotifierProvider<LocationTypesNotifier, List<dynamic>>(() {
-  return LocationTypesNotifier();
-});
+    AsyncNotifierProvider<LocationTypesNotifier, List<dynamic>>(
+        () => LocationTypesNotifier());
 
 // Location types controller.
 class LocationTypesNotifier extends AsyncNotifier<List<dynamic>> {
@@ -286,8 +334,8 @@ class LocationTypesNotifier extends AsyncNotifier<List<dynamic>> {
       return [];
     }
 
-    final value = ref.read(locationType);
     // Set initial location type and permissions.
+    final value = ref.read(locationType);
     if (value == null && data.isNotEmpty) {
       Map initialValue = data[0];
       ref.read(locationType.notifier).state = initialValue['name'];

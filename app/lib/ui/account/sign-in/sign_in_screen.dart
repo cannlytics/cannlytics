@@ -70,10 +70,10 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
           SliverToBoxAdapter(child: ThemeToggle(isDark: isDark)),
 
           // Logo.
-          SliverToBoxAdapter(child: ResponsiveAppLogo(isDark: isDark)),
+          // SliverToBoxAdapter(child: ResponsiveAppLogo(isDark: isDark)),
 
           // User type selection.
-          SliverToBoxAdapter(child: gapH12),
+          // SliverToBoxAdapter(child: gapH12),
           // SliverToBoxAdapter(child: UserTypeButton()),
 
           // Sign in form.
@@ -174,6 +174,10 @@ class _SignInFormState extends ConsumerState<SignInForm>
     );
     final state = ref.watch(signInProvider);
 
+    // Get the theme.
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
+
     // Build the form.
     return ResponsiveCard(
       child: FocusScope(
@@ -183,15 +187,19 @@ class _SignInFormState extends ConsumerState<SignInForm>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              // Logo
+              gapH12,
+              ResponsiveAppLogo(isDark: isDark),
+              gapH6,
+
               // Title.
               Text(
                 (_formType == SignInFormType.signIn) ? 'Sign In' : 'Sign Up',
                 style: Theme.of(context).textTheme.titleLarge!.copyWith(
                       color: Theme.of(context).textTheme.titleLarge!.color,
+                      fontSize: 18,
                     ),
               ),
-
-              // Spacer.
               gapH18,
 
               // Email field.
@@ -202,6 +210,11 @@ class _SignInFormState extends ConsumerState<SignInForm>
                   labelText: 'Email',
                   hintText: 'test@cannlytics.com',
                   enabled: !state.isLoading,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 8,
+                  ),
+                  // border: UnderlineInputBorder(),
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (email) =>
@@ -227,6 +240,10 @@ class _SignInFormState extends ConsumerState<SignInForm>
                 decoration: InputDecoration(
                   labelText: _formType.passwordLabelText,
                   enabled: !state.isLoading,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 8,
+                  ),
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (password) => !_submitted
@@ -263,7 +280,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
               ),
 
               // Spacer.
-              gapH24,
+              gapH48,
 
               // Change forms (sign-in to register) button.
               CustomTextButton(

@@ -33,7 +33,7 @@ class ResponsiveCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(Sizes.p16),
         child: Card(
-          surfaceTintColor: isDark ? null : AppColors.surface,
+          surfaceTintColor: isDark ? null : AppColors.secondary,
           child: Padding(
             padding: const EdgeInsets.all(Sizes.p16),
             child: child,

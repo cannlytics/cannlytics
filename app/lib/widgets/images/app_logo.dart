@@ -45,9 +45,7 @@ class AppLogo extends StatelessWidget {
 
 /// App icon.
 class AppIcon extends StatelessWidget {
-  const AppIcon({
-    Key? key
-  }) : super(key: key);
+  const AppIcon({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +75,7 @@ class ResponsiveAppLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
-      widthFactor: 0.5,
+      widthFactor: 0.6,
       child: Image.asset(
         isDark
             ? 'assets/images/logos/cannlytics_logo_with_text_dark.png'

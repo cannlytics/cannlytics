@@ -9,6 +9,7 @@
 
 // Flutter imports:
 import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
 import 'package:cannlytics_app/widgets/cards/responsive_card.dart';
 import 'package:flutter/material.dart';
@@ -53,11 +54,7 @@ class AccountScreen extends StatelessWidget {
 
 /// Dashboard navigation cards.
 class AccountManagement extends ConsumerWidget {
-  const AccountManagement({
-    Key? key,
-    // required this.user,
-  }) : super(key: key);
-  // final User? user;
+  const AccountManagement({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -67,9 +64,9 @@ class AccountManagement extends ConsumerWidget {
     // Dynamic screen width.
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Get the theme.
-    final themeMode = ref.watch(themeModeProvider);
-    final bool isDark = themeMode == ThemeMode.dark;
+    // // Get the theme.
+    // final themeMode = ref.watch(themeModeProvider);
+    // final bool isDark = themeMode == ThemeMode.dark;
 
     // Listen to the current user.
     ref.listen<AsyncValue>(
@@ -110,123 +107,142 @@ class AccountManagement extends ConsumerWidget {
         preferredSize: const Size.fromHeight(130.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ...[
               // User photo.
               _userPhoto,
               gapH8,
 
-              // Account information
-              Card(
-                color: isDark ? AppColors.neutral5 : AppColors.neutral2,
-                margin: EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(3),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 21, horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Title
-                      Text(
-                        'Account Information',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium!
-                            .copyWith(
-                              color:
-                                  Theme.of(context).textTheme.titleLarge!.color,
-                            ),
-                      ),
-                      gapH12,
-
-                      // User name.
-                      // TODO: Change user name.
-                      if (user.displayName != null)
-                        Text(
-                          'Username: ${user.displayName!}',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      gapH8,
-
-                      // User email.
-                      // TODO: Change email.
-                      if (user.email != null)
-                        Text(
-                          'Email: ${user.email!}',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      gapH8,
-
-                      // User phone.
-                      // TODO: Change user phone.
-                      if (user.phoneNumber != null)
-                        Text(
-                          'Phone: ${user.phoneNumber!}',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-
-                      // TODO: Add phone number.
-                      if (user.phoneNumber == null)
-                        Row(
-                          children: [
-                            Text(
-                              'Phone: ',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            CustomTextButton(
-                              text: 'Add phone number',
-                              onPressed: () {
-                                // TODO: Add phone number.
-                              },
-                            ),
-                          ],
-                        ),
-
-                      gapH8,
-                    ],
+              Row(
+                children: [
+                  // Reset password.
+                  SecondaryButton(
+                    // isDark: isDark,
+                    text: 'Reset password',
+                    onPressed: state.isLoading
+                        ? null
+                        : () {
+                            context.go('/account/reset-password');
+                          },
                   ),
-                ),
+                  gapW8,
 
-                // TODO: Toggle light / dark theme.
-                // ThemeInput(),
-
-                // TODO: Implement a body for the user to manage their account!
-                // - Reset password.
-
-                // - View user data:
-                //  * Account created date.
-                //  * Last sign in date.
-                // - View logs.
-                // - View / manage organizations and teams.
-                // - Delete account.
-
-                // Business:
-                // - state (restrict to Cannlytics-verified states)
-                // - licenses (/admin/create-license and /admin/delete-license)
-                // - license type
-
-                // Sign out.
-                // SecondaryButton(
-                //   isDark: isDark,
-                //   text: 'Sign out',
-                //   onPressed: state.isLoading
-                //       ? null
-                //       : () async {
-                //           final logout = await showAlertDialog(
-                //             context: context,
-                //             title: 'Are you sure?',
-                //             cancelActionText: 'Cancel',
-                //             defaultActionText: 'Sign out',
-                //           );
-                //           if (logout == true) {
-                //             await ref.read(accountProvider.notifier).signOut();
-                //             context.go('/sign-in');
-                //           }
-                //         },
-                // ),
+                  // Sign out.
+                  SecondaryButton(
+                    // isDark: isDark,
+                    text: 'Sign out',
+                    onPressed: state.isLoading
+                        ? null
+                        : () async {
+                            final logout = await showAlertDialog(
+                              context: context,
+                              title: 'Are you sure?',
+                              cancelActionText: 'Cancel',
+                              defaultActionText: 'Sign out',
+                            );
+                            if (logout == true) {
+                              await ref
+                                  .read(accountProvider.notifier)
+                                  .signOut();
+                              context.go('/sign-in');
+                            }
+                          },
+                  ),
+                ],
               ),
+
+              // Account information
+              SizedBox(
+                // width: double.infinity,
+                child: Card(
+                  // color: isDark ? AppColors.neutral5 : AppColors.neutral2,
+                  margin: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 21, horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title
+                        Text(
+                          'Account Information',
+                          style:
+                              Theme.of(context).textTheme.titleMedium!.copyWith(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge!
+                                        .color,
+                                  ),
+                        ),
+                        gapH12,
+
+                        // User name.
+                        // TODO: Change user name.
+                        if (user.displayName != null)
+                          Text(
+                            'Username: ${user.displayName!}',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        gapH8,
+
+                        // User email.
+                        // TODO: Change email.
+                        if (user.email != null)
+                          Text(
+                            'Email: ${user.email!}',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        gapH8,
+
+                        // User phone.
+                        // TODO: Change user phone.
+                        if (user.phoneNumber != null)
+                          Text(
+                            'Phone: ${user.phoneNumber!}',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+
+                        // TODO: Add phone number.
+                        if (user.phoneNumber == null)
+                          CustomTextButton(
+                            text: 'Add phone number',
+                            fontStyle: FontStyle.italic,
+                            onPressed: () {
+                              // TODO: Add phone number.
+                            },
+                          ),
+
+                        gapH8,
+                      ],
+                    ),
+                  ),
+
+                  // TODO: Toggle light / dark theme.
+                  // ThemeInput(),
+
+                  // TODO: Implement a body for the user to manage their account!
+                  // - Reset password.
+
+                  // - View user data:
+                  //  * Account created date.
+                  //  * Last sign in date.
+                  // - View logs.
+                  // - View / manage organizations and teams.
+                  // - Delete account.
+
+                  // Business:
+                  // - state (restrict to Cannlytics-verified states)
+                  // - licenses (/admin/create-license and /admin/delete-license)
+                  // - license type
+                ),
+              ),
+
+              // Delete account option.
+              // _deleteAccount(context, screenWidth),
+              gapH48,
             ],
           ],
         ),
@@ -234,56 +250,49 @@ class AccountManagement extends ConsumerWidget {
     );
   }
 
-  // Widget _userPhoto(BuildContext context, state, user) {
-  //   return InkWell(
-  //     customBorder: const CircleBorder(),
-  //     splashColor: AppColors.accent1,
-  //     onTap: state.isLoading
-  //         ? null
-  //         : () async {
-  //             await ref.read(accountProvider.notifier).changePhoto();
-  //           },
-  //     child: ShimmerLoading(
-  //       isLoading: state.isLoading,
-  //       child: Avatar(
-  //         photoUrl: user.photoURL,
-  //         radius: 60,
-  //         borderColor: Theme.of(context).secondaryHeaderColor,
-  //         borderWidth: 1.0,
-  //       ),
-  //     ),
-  //   );
-  // }
+  Widget _deleteAccount(BuildContext context, double screenWidth) {
+    return SizedBox(
+      // width: double.infinity,
+      child: Card(
+        margin: EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(3),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 21, horizontal: 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Colors.red,
+              ),
+              gapW16,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Deleting this account will also remove your account data.',
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: Theme.of(context).textTheme.titleLarge!.color,
+                        ),
+                  ),
+                  Text(
+                      'Make sure that you have exported your data if you want to keep your data.'),
+                  gapH12,
+                  PrimaryButton(
+                    backgroundColor: Colors.red,
+                    text: 'Delete account',
+                    onPressed: () {
+                      print('TODO: DELETE ACCOUNT!');
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
-
-/// TODO: Light / dark theme input.
-// class ThemeInput extends StatelessWidget {
-//   const ThemeInput({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Consumer(builder: (context, ref, child) {
-//       final theme = ref.watch(themeModeProvider);
-//       return Row(
-//         mainAxisAlignment: MainAxisAlignment.end,
-//         children: [
-//           Padding(
-//             padding: const EdgeInsets.only(top: 6, right: 24, bottom: 6),
-//             child: IconButton(
-//               splashRadius: 18,
-//               onPressed: () {
-//                 // Toggle light / dark theme.
-//                 ref.read(themeModeProvider.notifier).state =
-//                     theme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-//               },
-//               icon: Icon(
-//                 theme == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-//                 color: AppColors.neutral4,
-//               ),
-//             ),
-//           ),
-//         ],
-//       );
-//     });
-//   }
-// }

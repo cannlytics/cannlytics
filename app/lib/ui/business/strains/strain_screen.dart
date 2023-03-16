@@ -11,6 +11,13 @@
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/models/metrc/strain.dart';
+import 'package:cannlytics_app/ui/business/strains/strains_controller.dart';
+import 'package:cannlytics_app/ui/layout/footer.dart';
+import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
+import 'package:cannlytics_app/widgets/layout/form_container.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -28,113 +35,144 @@ import 'package:cannlytics_app/widgets/inputs/date_time_input.dart';
 
 /// Strain screen.
 class StrainScreen extends ConsumerStatefulWidget {
-  const StrainScreen({
-    super.key,
-    required this.jobId,
-    this.entryId,
-    this.entry,
-  });
-  final JobID jobId;
-  final EntryID? entryId;
-  final Entry? entry;
+  const StrainScreen({super.key, required this.id, this.entry});
+
+  // Properties.
+  final StrainId id;
+  final Strain? entry;
 
   @override
   ConsumerState<StrainScreen> createState() => _StrainScreenState();
 }
 
+/// Strain screen state.
 class _StrainScreenState extends ConsumerState<StrainScreen> {
-  late DateTime _startDate;
-  late TimeOfDay _startTime;
-  late DateTime _endDate;
-  late TimeOfDay _endTime;
-  late String _comment;
-
-  @override
-  void initState() {
-    super.initState();
-    final start = widget.entry?.start ?? DateTime.now();
-    _startDate = DateTime(start.year, start.month, start.day);
-    _startTime = TimeOfDay.fromDateTime(start);
-
-    final end = widget.entry?.end ?? DateTime.now();
-    _endDate = DateTime(end.year, end.month, end.day);
-    _endTime = TimeOfDay.fromDateTime(end);
-
-    _comment = widget.entry?.comment ?? '';
-  }
-
-  Entry _entryFromState() {
-    final start = DateTime(
-      _startDate.year,
-      _startDate.month,
-      _startDate.day,
-      _startTime.hour,
-      _startTime.minute,
-    );
-    final end = DateTime(
-      _endDate.year,
-      _endDate.month,
-      _endDate.day,
-      _endTime.hour,
-      _endTime.minute,
-    );
-    final id = widget.entry?.id ?? documentIdFromCurrentDate();
-    return Entry(
-      id: id,
-      jobId: widget.jobId,
-      start: start,
-      end: end,
-      comment: _comment,
-    );
-  }
-
-  Future<void> _setEntryAndDismiss() async {
-    final entry = _entryFromState();
-    final success =
-        await ref.read(entryScreenControllerProvider.notifier).setEntry(entry);
-    if (success && mounted) {
-      context.pop();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Listen for errors.
     ref.listen<AsyncValue>(
-      entryScreenControllerProvider,
+      strainProvider(widget.id),
       (_, state) => state.showAlertDialogOnError(context),
     );
-    return Scaffold(
-      // App bar.
-      appBar: AppBar(
-        title: Text(widget.entry != null ? 'Edit Entry' : 'New Entry'),
-        actions: <Widget>[
-          TextButton(
-            child: Text(
-              widget.entry != null ? 'Update' : 'Create',
-              style: const TextStyle(
-                fontSize: 18.0,
-                color: Colors.white,
-              ),
-            ),
-            onPressed: () => _setEntryAndDismiss(),
+
+    // Listen for the strain data.
+    var item = ref.watch(strainProvider(widget.id)).value;
+    if (item == null) {
+      item = Strain(id: 'new', name: '');
+    }
+
+    // Body.
+    return CustomScrollView(
+      slivers: [
+        // App header.
+        const SliverToBoxAdapter(child: AppHeader()),
+
+        // Form.
+        // TODO: Add a loading placeholding.
+        // if (item == null)
+        //   SliverToBoxAdapter(
+        //     child: CustomPlaceholder(
+        //       image: 'assets/images/icons/facilities.png',
+        //       title: 'Add a strain',
+        //       description:
+        //           'Strains are used to track packages, items, and plants.',
+        //       onTap: () {
+        //         context.go('/strains/new');
+        //       },
+        //     ),
+        //   )
+        // else
+        SliverToBoxAdapter(child: FormContainer(children: _fields(item))),
+
+        // Footer
+        const SliverToBoxAdapter(child: Footer()),
+      ],
+    );
+  }
+
+  /// Form fields.
+  List<Widget> _fields(Strain item) {
+    return <Widget>[
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // ID.
+          _idField(item),
+
+          // Spacer.
+          const Spacer(),
+
+          // Actions.
+          // TODO: Handle creating / updating a strain.
+          PrimaryButton(
+            text: (widget.id == 'new') ? 'Create' : 'Save',
+            onPressed: () async {
+              if (widget.id == 'new') {
+                // TODO: Get fields.
+                print('FIELDS:');
+                var name = ref.read(nameController).value.text;
+                var update = Strain(
+                  id: widget.id,
+                  name: name,
+                );
+                print('UPDATE:');
+                print(update);
+                // ref.read(strainsProvider.notifier).createStrains([entry]);
+              } else {}
+              // context.go('/strains');
+            },
           ),
         ],
       ),
 
-      // Body.
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
+      // Name field.
+      gapH6,
+      _nameField(item),
+      gapH6,
+
+      // Strain type name and ID.
+      // _strainTypeField(item),
+
+      // Checkbox fields.
+      // ..._checkboxes(item),
+
+      // TODO: Allow user's to save additional data in Firestore:
+      // - strain_image
+      // - created_at
+      // - created_by
+      // - updated_at
+      // - updated_by
+
+      // Danger zone : Handle deleting an existing strain.
+      if (widget.id == 'new') _deleteOption(),
+    ];
+  }
+
+  Widget _deleteOption() {
+    return Container(
+      constraints: BoxConstraints(minWidth: 200), // set minimum width of 200
+      child: Card(
+        borderOnForeground: true,
+        surfaceTintColor: null,
+        child: Padding(
+          padding: EdgeInsets.all(16),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _buildStartDate(),
-              _buildEndDate(),
-              const SizedBox(height: 8.0),
-              _buildDuration(),
-              const SizedBox(height: 8.0),
-              _buildComment(),
+            children: [
+              Text(
+                'Danger Zone',
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
+              ),
+              gapH12,
+              PrimaryButton(
+                backgroundColor: Colors.red,
+                text: 'Delete',
+                onPressed: () {
+                  // FIXME: Actually delete the strain.
+                  context.go('/strains');
+                },
+              ),
             ],
           ),
         ),
@@ -142,68 +180,119 @@ class _StrainScreenState extends ConsumerState<StrainScreen> {
     );
   }
 
-  // Start date.
-  Widget _buildStartDate() {
-    return DateTimePicker(
-      labelText: 'Start',
-      selectedDate: _startDate,
-      selectedTime: _startTime,
-      onSelectedDate: (date) => setState(() => _startDate = date),
-      onSelectedTime: (time) => setState(() => _startTime = time),
-    );
-  }
-
-  // End date.
-  Widget _buildEndDate() {
-    return DateTimePicker(
-      labelText: 'End',
-      selectedDate: _endDate,
-      selectedTime: _endTime,
-      onSelectedDate: (date) => setState(() => _endDate = date),
-      onSelectedTime: (time) => setState(() => _endTime = time),
-    );
-  }
-
-  // Duration.
-  Widget _buildDuration() {
-    final currentEntry = _entryFromState();
-    final durationFormatted = Format.hours(currentEntry.durationInHours);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: <Widget>[
-        Text(
-          'Duration: $durationFormatted',
-          style: const TextStyle(
-            fontSize: 18.0,
-            fontWeight: FontWeight.w500,
+  // ID field.
+  Widget _idField(Strain item) {
+    return Text(
+      (item.id.isEmpty) ? 'New Strain' : 'Strain ${item.id}',
+      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+            color: Theme.of(context).textTheme.titleLarge!.color,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
     );
   }
 
-  // Comment.
-  Widget _buildComment() {
-    return TextField(
+  // Name field.
+  Widget _nameField(Strain item) {
+    final _nameController = ref.watch(nameController);
+    if (_nameController.text.isEmpty && item.name.isNotEmpty) {
+      ref.read(nameController.notifier).change(item.name);
+    }
+    final textField = TextField(
+      controller: _nameController,
+      decoration: const InputDecoration(labelText: 'Name'),
       keyboardType: TextInputType.text,
-      maxLength: 50,
-      controller: TextEditingController(text: _comment),
-      decoration: const InputDecoration(
-        labelText: 'Comment',
-        labelStyle: TextStyle(
-          fontSize: 18.0,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      keyboardAppearance: Brightness.light,
-      style: const TextStyle(
-        fontSize: 20.0,
-        color: Colors.black,
-      ),
+      maxLength: null,
       maxLines: null,
-      onChanged: (comment) => _comment = comment,
+    );
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: 300,
+      ),
+      child: textField,
     );
   }
+
+  // Strain name field.
+  // Widget _strainTypeField(Strain item) {
+  //   final items = ref.watch(strainTypesProvider).value ?? [];
+  //   final value = ref.watch(strainType);
+  //   if (items.length == 0 || value == null) return Container();
+  //   var dropdown = DropdownButton(
+  //     underline: Container(),
+  //     isDense: true,
+  //     isExpanded: true,
+  //     value: value,
+  //     items: items
+  //         .map(
+  //           (item) => DropdownMenuItem<String>(
+  //             onTap: () => item['name'],
+  //             value: item['name'],
+  //             child: ListTile(
+  //               dense: true,
+  //               title: Text(item['name']),
+  //             ),
+  //           ),
+  //         )
+  //         .toList(),
+  //     onChanged: (String? value) {
+  //       ref.read(strainType.notifier).state = value;
+  //       // FIXME: Change strain permissions.
+  //     },
+  //   );
+  //   return Column(
+  //     mainAxisAlignment: MainAxisAlignment.start,
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       gapH18,
+  //       Text(
+  //         'Strain Type Name',
+  //         style: Theme.of(context).textTheme.titleMedium!.copyWith(
+  //               color: Theme.of(context).textTheme.titleLarge!.color,
+  //             ),
+  //       ),
+  //       gapH6,
+  //       SizedBox(
+  //         height: 36,
+  //         child: ConstrainedBox(
+  //           constraints: BoxConstraints(
+  //             maxWidth: 300,
+  //           ),
+  //           child: dropdown,
+  //         ),
+  //       ),
+  //       gapH6,
+  //     ],
+  //   );
+  // }
+
+  // // Checkbox fields.
+  // List<Widget> _checkboxes(Strain item) {
+  //   final items = ref.watch(strainTypesProvider).value ?? [];
+  //   if (items.length == 0) return [Container()];
+  //   return [
+  //     gapH12,
+  //     Text(
+  //       'Permissions',
+  //       style: Theme.of(context).textTheme.titleMedium!.copyWith(
+  //             color: Theme.of(context).textTheme.titleLarge!.color,
+  //           ),
+  //     ),
+  //     gapH6,
+  //     CheckboxField(
+  //       title: 'For Packages',
+  //       value: ref.watch(forPackages) ?? false,
+  //     ),
+  //     CheckboxField(
+  //       title: 'For Plants',
+  //       value: ref.watch(forPlants) ?? false,
+  //     ),
+  //     CheckboxField(
+  //       title: 'For Plant Batches',
+  //       value: ref.watch(forPlantBatches) ?? false,
+  //     ),
+  //     CheckboxField(
+  //       title: 'For Harvests',
+  //       value: ref.watch(forHarvests) ?? false,
+  //     ),
+  //   ];
+  // }
 }

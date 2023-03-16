@@ -24,7 +24,6 @@ import 'package:cannlytics_app/models/metrc/plant_harvest.dart';
 import 'package:cannlytics_app/models/metrc/sales_receipt.dart';
 import 'package:cannlytics_app/models/metrc/sales_transaction.dart';
 import 'package:cannlytics_app/models/metrc/strain.dart';
-import 'package:cannlytics_app/models/metrc/transporter.dart';
 import 'package:cannlytics_app/services/api_service.dart';
 
 // TODO: Use models instead of Maps where possible.
@@ -121,21 +120,36 @@ class MetrcFacilities {
 /// Employees
 class MetrcEmployees {
   /// Get employees.
-  static Future<List<Employee>> getEmployees(
+  static Future<List<Employee>> getEmployees({
     String? license,
     String? orgId,
     String? state,
-  ) async {
+  }) async {
     String endpoint = '/api/metrc/employees';
-    List<Employee> items = [];
     List<dynamic> response = await APIService.apiRequest(
       endpoint,
       options: getParams(license, orgId, state),
     );
+    List<Employee> items = [];
     for (var item in response) {
       items.add(Employee.fromMap(item));
     }
     return items;
+  }
+
+  // Get an employee.
+  static Future<Employee> getEmployee({
+    required String id,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
+    String endpoint = '/api/metrc/employees/$id';
+    final response = await APIService.apiRequest(
+      endpoint,
+      options: getParams(license, orgId, state),
+    );
+    return Employee.fromMap(response);
   }
 }
 
@@ -150,26 +164,6 @@ class MetrcLocations {
     String endpoint = '/api/metrc/types/locations';
     return await APIService.apiRequest(
       endpoint,
-      options: getParams(license, orgId, state),
-    );
-  }
-
-  // Create a location.
-  static Future<void> createLocation({
-    required String name,
-    String? locationType,
-    String? license,
-    String? orgId,
-    String? state,
-  }) async {
-    String endpoint = '/api/metrc/locations';
-    Map data = {
-      'name': name,
-      'location_type': locationType ?? 'Default Location Type',
-    };
-    return await APIService.apiRequest(
-      endpoint,
-      data: data,
       options: getParams(license, orgId, state),
     );
   }
@@ -207,8 +201,28 @@ class MetrcLocations {
     return Location.fromMap(response);
   }
 
+  // Create a location.
+  static Future<void> createLocation({
+    required String name,
+    String? locationTypeName,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
+    String endpoint = '/api/metrc/locations';
+    Map data = {
+      'name': name,
+      'location_type': locationTypeName ?? 'Default Location Type',
+    };
+    return await APIService.apiRequest(
+      endpoint,
+      data: data,
+      options: getParams(license, orgId, state),
+    );
+  }
+
   // Update the name of a location.
-  static Future<void> updateLocationName({
+  static Future<void> updateLocation({
     required String id,
     required String name,
     required String locationTypeName,
@@ -220,7 +234,7 @@ class MetrcLocations {
     Map data = {
       'id': id,
       'name': name,
-      'location_type_name': locationTypeName,
+      'location_type': locationTypeName,
     };
     return await APIService.apiRequest(
       endpoint,
@@ -239,7 +253,7 @@ class MetrcLocations {
     String endpoint = '/api/metrc/locations/$id';
     return await APIService.apiRequest(
       endpoint,
-      options: getParams(license, orgId, state),
+      options: getParams(license, orgId, state, delete: true),
     );
   }
 }
@@ -402,24 +416,43 @@ class MetrcPlants {
   }
 
   /// Get plants.
-  static Future<List<dynamic>> getPlants(
-    String licenseNumber, {
+  static Future<List<Plant>> getPlants({
+    String? license,
+    String? state,
+    String? orgId,
     String? type,
     String? start,
     String? end,
   }) async {
     String endpoint = '/api/metrc/plants';
+    List<Map> queries = [
+      {'key': 'start', 'value': start},
+      {'key': 'end', 'value': end},
+    ];
     var response = await APIService.apiRequest(
       endpoint,
-      options: {
-        'params': {
-          'license': licenseNumber,
-          'start': start,
-          'end': end,
-        },
-      },
+      options: getParams(license, orgId, state, queries: queries),
     );
-    return response as List<dynamic>;
+    List<Plant> items = [];
+    for (var item in response) {
+      items.add(Plant.fromMap(item));
+    }
+    return items;
+  }
+
+  /// Get a strain.
+  static Future<Plant> getPlant({
+    required String id,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
+    String endpoint = '/api/metrc/plants/$id';
+    final response = await APIService.apiRequest(
+      endpoint,
+      options: getParams(license, orgId, state),
+    );
+    return Plant.fromMap(response);
   }
 
   /// Move a plant to a different room.

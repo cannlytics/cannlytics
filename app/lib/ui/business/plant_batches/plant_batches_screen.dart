@@ -16,7 +16,7 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:cannlytics_app/models/metrc/plant_batch.dart';
-import 'package:cannlytics_app/ui/business/plants/plant_batches_controller.dart';
+import 'package:cannlytics_app/ui/business/plant_batches/plant_batches_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';

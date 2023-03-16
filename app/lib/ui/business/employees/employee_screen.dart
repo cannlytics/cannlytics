@@ -4,206 +4,142 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/8/2023
-// Updated: 3/8/2023
+// Updated: 3/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Dart imports:
-import 'dart:async';
-
 // Flutter imports:
+import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/models/metrc/employee.dart';
+import 'package:cannlytics_app/ui/business/employees/employees_controller.dart';
+import 'package:cannlytics_app/ui/layout/footer.dart';
+import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/widgets/layout/form_container.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-// Project imports:
-import 'package:cannlytics_app/models/consumer/entry.dart';
-import 'package:cannlytics_app/models/consumer/job.dart';
-import 'package:cannlytics_app/ui/business/items/item_controller.dart';
-import 'package:cannlytics_app/ui/business/packages/packages_service.dart';
-import 'package:cannlytics_app/utils/string_utils.dart';
-import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/widgets/inputs/date_time_input.dart';
-
-/// The employee screen.
+/// Employee screen.
 class EmployeeScreen extends ConsumerStatefulWidget {
-  const EmployeeScreen({
-    super.key,
-    required this.jobId,
-    this.entryId,
-    this.entry,
-  });
-  final JobID jobId;
-  final EntryID? entryId;
-  final Entry? entry;
+  const EmployeeScreen({super.key, required this.id, this.entry});
+
+  // Properties
+  final String id;
+  final Employee? entry;
 
   @override
   ConsumerState<EmployeeScreen> createState() => _EmployeeScreenState();
 }
 
+/// Employee screen state.
 class _EmployeeScreenState extends ConsumerState<EmployeeScreen> {
-  late DateTime _startDate;
-  late TimeOfDay _startTime;
-  late DateTime _endDate;
-  late TimeOfDay _endTime;
-  late String _comment;
-
-  @override
-  void initState() {
-    super.initState();
-    final start = widget.entry?.start ?? DateTime.now();
-    _startDate = DateTime(start.year, start.month, start.day);
-    _startTime = TimeOfDay.fromDateTime(start);
-
-    final end = widget.entry?.end ?? DateTime.now();
-    _endDate = DateTime(end.year, end.month, end.day);
-    _endTime = TimeOfDay.fromDateTime(end);
-
-    _comment = widget.entry?.comment ?? '';
-  }
-
-  Entry _entryFromState() {
-    final start = DateTime(
-      _startDate.year,
-      _startDate.month,
-      _startDate.day,
-      _startTime.hour,
-      _startTime.minute,
-    );
-    final end = DateTime(
-      _endDate.year,
-      _endDate.month,
-      _endDate.day,
-      _endTime.hour,
-      _endTime.minute,
-    );
-    final id = widget.entry?.id ?? documentIdFromCurrentDate();
-    return Entry(
-      id: id,
-      jobId: widget.jobId,
-      start: start,
-      end: end,
-      comment: _comment,
-    );
-  }
-
-  Future<void> _setEntryAndDismiss() async {
-    final entry = _entryFromState();
-    final success =
-        await ref.read(entryScreenControllerProvider.notifier).setEntry(entry);
-    if (success && mounted) {
-      context.pop();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Listen for errors.
     ref.listen<AsyncValue>(
-      entryScreenControllerProvider,
+      employeeProvider(widget.id),
       (_, state) => state.showAlertDialogOnError(context),
     );
-    return Scaffold(
-      // App bar.
-      appBar: AppBar(
-        title: Text(widget.entry != null ? 'Edit Entry' : 'New Entry'),
-        actions: <Widget>[
-          TextButton(
-            child: Text(
-              widget.entry != null ? 'Update' : 'Create',
-              style: const TextStyle(
-                fontSize: 18.0,
-                color: Colors.white,
-              ),
-            ),
-            onPressed: () => _setEntryAndDismiss(),
-          ),
-        ],
-      ),
 
-      // Body.
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _buildStartDate(),
-              _buildEndDate(),
-              const SizedBox(height: 8.0),
-              _buildDuration(),
-              const SizedBox(height: 8.0),
-              _buildComment(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+    // Listen for the employee data.
+    var item = ref.watch(employeeProvider(widget.id)).value;
+    if (item == null) {
+      item = Employee(fullName: '', licenseNumber: '');
+    }
 
-  // Start date.
-  Widget _buildStartDate() {
-    return DateTimePicker(
-      labelText: 'Start',
-      selectedDate: _startDate,
-      selectedTime: _startTime,
-      onSelectedDate: (date) => setState(() => _startDate = date),
-      onSelectedTime: (time) => setState(() => _startTime = time),
-    );
-  }
+    // Body.
+    return CustomScrollView(
+      slivers: [
+        // App header.
+        const SliverToBoxAdapter(child: AppHeader()),
 
-  // End date.
-  Widget _buildEndDate() {
-    return DateTimePicker(
-      labelText: 'End',
-      selectedDate: _endDate,
-      selectedTime: _endTime,
-      onSelectedDate: (date) => setState(() => _endDate = date),
-      onSelectedTime: (time) => setState(() => _endTime = time),
-    );
-  }
+        // Form.
+        // TODO: Add a loading placeholding.
+        SliverToBoxAdapter(child: FormContainer(children: _fields(item))),
 
-  // Duration.
-  Widget _buildDuration() {
-    final currentEntry = _entryFromState();
-    final durationFormatted = Format.hours(currentEntry.durationInHours);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: <Widget>[
-        Text(
-          'Duration: $durationFormatted',
-          style: const TextStyle(
-            fontSize: 18.0,
-            fontWeight: FontWeight.w500,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        // Footer
+        const SliverToBoxAdapter(child: Footer()),
       ],
     );
   }
 
-  // Comment.
-  Widget _buildComment() {
-    return TextField(
-      keyboardType: TextInputType.text,
-      maxLength: 50,
-      controller: TextEditingController(text: _comment),
-      decoration: const InputDecoration(
-        labelText: 'Comment',
-        labelStyle: TextStyle(
-          fontSize: 18.0,
-          fontWeight: FontWeight.w500,
-        ),
+  /// Form fields.
+  List<Widget> _fields(Employee item) {
+    return <Widget>[
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // ID.
+          _idField(item),
+
+          // Spacer.
+          const Spacer(),
+
+          // Actions.
+          // Optional: Handle creating / updating a (non-Metrc) employee.
+        ],
       ),
-      keyboardAppearance: Brightness.light,
-      style: const TextStyle(
-        fontSize: 20.0,
-        color: Colors.black,
-      ),
-      maxLines: null,
-      onChanged: (comment) => _comment = comment,
+
+      // Name field.
+      gapH12,
+      _nameField(item),
+      gapH6,
+
+      // Employee type name and ID.
+      // _employeeTypeField(item),
+
+      // Checkbox fields.
+      // ..._checkboxes(item),
+
+      // Optional: Allow user's to save additional data in Firestore:
+      // - employee_image
+      // - created_at
+      // - created_by
+      // - updated_at
+      // - updated_by
+
+      // Optional: Handle deleting a non-Metrc employee.
+      // if (widget.id == 'new') _deleteOption(),
+    ];
+  }
+
+  // ID field.
+  Widget _idField(Employee item) {
+    return Text(
+      (item.licenseNumber!.isEmpty)
+          ? 'New Employee'
+          : 'Employee ${item.licenseNumber}',
+      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+            color: Theme.of(context).textTheme.titleLarge!.color,
+          ),
     );
   }
+
+  // Name field.
+  Widget _nameField(Employee item) {
+    final _nameController = ref.watch(nameController);
+    if (_nameController.text.isEmpty && item.fullName!.isNotEmpty) {
+      ref.read(nameController.notifier).change(item.fullName!);
+    }
+    final textField = TextField(
+      controller: _nameController,
+      decoration: const InputDecoration(labelText: 'Name'),
+      keyboardType: TextInputType.text,
+      maxLength: null,
+      maxLines: null,
+    );
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: 300,
+      ),
+      child: textField,
+    );
+  }
+
+  // TODO: licenseStartDate field.
+
+  // TODO: licenseEndDate field.
+
+  // TODO: licenseType field.
 }

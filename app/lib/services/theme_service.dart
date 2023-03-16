@@ -15,5 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// An instance of the theme provider.
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
-  return ThemeMode.dark;
+  // TODO: Allow the user to persist theme.
+  // TODO: If no theme, set theme by time of day.
+  return ThemeMode.light;
 });

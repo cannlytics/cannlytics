@@ -195,7 +195,6 @@ class StrainsTable extends ConsumerWidget {
         // Search box.
         SizedBox(
           width: 175,
-          height: 34,
           child: TypeAheadField(
             textFieldConfiguration: TextFieldConfiguration(
               // Controller.
@@ -205,7 +204,7 @@ class StrainsTable extends ConsumerWidget {
               decoration: InputDecoration(
                 hintText: 'Search...',
                 contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(3)),
                 ),
@@ -218,8 +217,6 @@ class StrainsTable extends ConsumerWidget {
               ),
               style: DefaultTextStyle.of(context).style.copyWith(
                     fontStyle: FontStyle.italic,
-                    fontSize: 16.0,
-                    height: 1.25,
                   ),
             ),
             // Search engine function.
@@ -270,13 +267,13 @@ class StrainsTable extends ConsumerWidget {
     // Return the table and actions.
     if (data.isEmpty)
       table = CustomPlaceholder(
-        image: 'assets/images/icons/facilities.png',
-        title: 'Add a location',
+        image: 'assets/images/icons/plant-data.png',
+        title: 'Add a strain',
         description: 'Strains are used to track packages, items, and plants.',
         onTap: () {
           context.go('/strains/new');
         },
       );
-    return Column(children: [actions, table]);
+    return Column(children: [actions, gapH12, table]);
   }
 }

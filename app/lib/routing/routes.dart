@@ -32,10 +32,10 @@ import 'package:cannlytics_app/ui/business/packages/package_items_screen.dart';
 import 'package:cannlytics_app/ui/business/packages/packages_screen.dart';
 import 'package:cannlytics_app/ui/business/patients/patient_screen.dart';
 import 'package:cannlytics_app/ui/business/patients/patients_screen.dart';
-import 'package:cannlytics_app/ui/business/plants/plant_batch_screen.dart';
-import 'package:cannlytics_app/ui/business/plants/plant_batches_screen.dart';
-import 'package:cannlytics_app/ui/business/plants/plant_harvest_screen.dart';
-import 'package:cannlytics_app/ui/business/plants/plant_harvests_screen.dart';
+import 'package:cannlytics_app/ui/business/plant_batches/plant_batch_screen.dart';
+import 'package:cannlytics_app/ui/business/plant_batches/plant_batches_screen.dart';
+import 'package:cannlytics_app/ui/business/plant_harvests/plant_harvest_screen.dart';
+import 'package:cannlytics_app/ui/business/plant_harvests/plant_harvests_screen.dart';
 import 'package:cannlytics_app/ui/business/plants/plant_screen.dart';
 import 'package:cannlytics_app/ui/business/plants/plants_screen.dart';
 import 'package:cannlytics_app/ui/business/results/result_screen.dart';
@@ -152,7 +152,7 @@ class Routes {
           name: AppRoutes.employee.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return EmployeeScreen(jobId: id);
+            return EmployeeScreen(id: id);
           },
         ),
       ],
@@ -356,7 +356,7 @@ class Routes {
           name: AppRoutes.strain.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return StrainScreen(jobId: id);
+            return StrainScreen(id: id);
           },
         ),
       ],
