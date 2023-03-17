@@ -103,7 +103,7 @@ void registerErrorHandlers() {
   FlutterError.onError = (FlutterErrorDetails details) {
     // FlutterError.presentError(details);
     // debugPrint(details.toString());
-    // FlutterError.dumpErrorToConsole(details);
+    FlutterError.dumpErrorToConsole(details);
     throw details.exception;
   };
 

@@ -11,6 +11,9 @@
 import 'dart:async';
 
 // Package imports:
+import 'package:cannlytics_app/services/firestore_service.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
@@ -45,5 +48,52 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
     final authService = ref.read(authProvider);
     state = const AsyncLoading();
     state = await AsyncValue.guard(authService.signOut);
+  }
+
+  /// Update the user's display name and email.
+  Future<void> updateUser({
+    String? email,
+    String? displayName,
+    String? phoneNumber,
+  }) async {
+    // final authService = ref.read(authProvider);
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final user = ref.read(userProvider).value;
+      final _firestore = ref.watch(firestoreProvider);
+
+      if (user != null) {
+        if (displayName != null && displayName != user.displayName) {
+          await user.updateDisplayName(displayName);
+        }
+
+        if (email != null && email != user.email) {
+          await user.updateEmail(email);
+        }
+
+        if (phoneNumber != null && phoneNumber != user.phoneNumber) {
+          // First, create a PhoneAuthCredential with the verification ID and verification code
+          // obtained from the user.
+          final credential = PhoneAuthProvider.credential(
+            verificationId:
+                "verificationId", // Replace with your verification ID
+            smsCode: "smsCode", // Replace with your verification code
+          );
+
+          // Then update the user's phone number with the new phone number.
+          await user.updatePhoneNumber(credential);
+        }
+
+        // Update the user's data in Firestore.
+        await _firestore.setData(
+          path: 'users/${user.uid}',
+          data: {
+            'email': user.email,
+            'display_name': user.displayName,
+            'phone_number': user.phoneNumber,
+          },
+        );
+      }
+    });
   }
 }

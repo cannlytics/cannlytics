@@ -12,6 +12,7 @@ library alert_dialogs;
 import 'dart:io';
 
 // Flutter imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,3 +26,4 @@ import 'package:cannlytics_app/constants/theme.dart';
 
 part 'alert_dialog_show.dart';
 part 'alert_dialog_error.dart';
+part 'reauth_dialog.dart';

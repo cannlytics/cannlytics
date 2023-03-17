@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/9/2023
+// Updated: 3/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -17,14 +17,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/services/firestore_service.dart';
 
 // Firebase Authentication provider.
-final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
-  return FirebaseAuth.instance;
-});
+final firebaseAuth = Provider<FirebaseAuth>((ref) => FirebaseAuth.instance);
 
 // Authentication service provider.
 final authProvider = Provider<AuthService>((ref) {
   return AuthService(
-    ref.watch(firebaseAuthProvider),
+    ref.watch(firebaseAuth),
     ref.watch(firestoreProvider),
   );
 });
@@ -103,5 +101,17 @@ class AuthService {
   /// Send the user a password reset email.
   Future<void> resetPassword(String email) async {
     await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  /// Danger zone: Allow the user to delete their account.
+  Future<void> deleteAccount() async {
+    // FIXME: Test this out.
+    print('TODO: IMPLEMENT!');
+    // Delete the user's data from Firestore.
+    // User? user = FirebaseAuth.instance.currentUser;
+    // _firestore.deleteData(path: 'users/${user?.uid}');
+
+    // Delete the user's account.
+    // await user!.delete();
   }
 }
