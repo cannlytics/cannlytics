@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/27/2023
-// Updated: 2/27/2023
+// Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -14,18 +14,18 @@ import 'package:cannlytics_app/services/metrc_service.dart';
 class Item {
   // Initialization.
   const Item({
-    required this.id,
-    required this.name,
-    required this.productCategoryName,
-    required this.productCategoryType,
-    required this.quantityType,
-    required this.unitOfMeasureName,
-    required this.approvalStatus,
-    required this.approvalStatusDateTime,
-    required this.defaultLabTestingState,
-    required this.isUsed,
-    required this.strainId,
-    required this.strainName,
+    this.id,
+    this.name,
+    this.productCategoryName,
+    this.productCategoryType,
+    this.quantityType,
+    this.unitOfMeasureName,
+    this.approvalStatus,
+    this.approvalStatusDateTime,
+    this.defaultLabTestingState,
+    this.isUsed,
+    this.strainId,
+    this.strainName,
     this.administrationMethod = '',
     this.description = '',
     this.numberOfDoses = 0,
@@ -50,85 +50,84 @@ class Item {
     this.unitWeightUnitOfMeasureName = '',
   });
   // Properties.
-  final int id;
-  final String name;
-  final String productCategoryName;
-  final String productCategoryType;
-  final String quantityType;
-  final String unitOfMeasureName;
-  final String approvalStatus;
-  final DateTime approvalStatusDateTime;
-  final String defaultLabTestingState;
-  final bool isUsed;
-  final int strainId;
-  final String strainName;
-  final String administrationMethod;
-  final String description;
-  final int numberOfDoses;
+  final String? id;
+  final String? name;
+  final String? productCategoryName;
+  final String? productCategoryType;
+  final String? quantityType;
+  final String? unitOfMeasureName;
+  final String? approvalStatus;
+  final String? approvalStatusDateTime;
+  final String? defaultLabTestingState;
+  final bool? isUsed;
+  final String? strainId;
+  final String? strainName;
+  final String? administrationMethod;
+  final String? description;
+  final int? numberOfDoses;
   final List<String>? publicIngredients;
-  final int servingSize;
-  final int supplyDurationDays;
-  final double unitCbdContent;
-  final double unitCbdContentDose;
-  final String unitCbdContentDoseUnitOfMeasureName;
-  final String unitCbdContentUnitOfMeasureName;
-  final double unitCbdPercent;
-  final int unitQuantity;
+  final int? servingSize;
+  final int? supplyDurationDays;
+  final double? unitCbdContent;
+  final double? unitCbdContentDose;
+  final String? unitCbdContentDoseUnitOfMeasureName;
+  final String? unitCbdContentUnitOfMeasureName;
+  final double? unitCbdPercent;
+  final int? unitQuantity;
   final String unitQuantityUnitOfMeasureName;
-  final double unitThcContent;
-  final double unitThcContentDose;
-  final String unitThcContentDoseUnitOfMeasureName;
-  final String unitThcContentUnitOfMeasureName;
-  final double unitThcPercent;
-  final double unitVolume;
-  final String unitVolumeUnitOfMeasureName;
-  final double unitWeight;
-  final String unitWeightUnitOfMeasureName;
+  final double? unitThcContent;
+  final double? unitThcContentDose;
+  final String? unitThcContentDoseUnitOfMeasureName;
+  final String? unitThcContentUnitOfMeasureName;
+  final double? unitThcPercent;
+  final double? unitVolume;
+  final String? unitVolumeUnitOfMeasureName;
+  final double? unitWeight;
+  final String? unitWeightUnitOfMeasureName;
   // Create model.
-  factory Item.fromMap(Map<String, dynamic> data, int uid) {
+  factory Item.fromMap(Map<String, dynamic> data) {
     return Item(
-      id: uid,
-      name: data['name'] as String,
-      productCategoryName: data['product_category_name'] as String,
-      productCategoryType: data['product_category_type'] as String,
-      quantityType: data['quantity_type'] as String,
-      unitOfMeasureName: data['unit_of_measure_name'] as String,
-      approvalStatus: data['approval_status'] as String,
-      approvalStatusDateTime:
-          DateTime.parse(data['approval_status_date_time'] as String),
-      defaultLabTestingState: data['default_lab_testing_state'] as String,
+      id: data['id'].toString(),
+      name: data['name'] ?? '',
+      productCategoryName: data['product_category_name'] ?? '',
+      productCategoryType: data['product_category_type'] ?? '',
+      quantityType: data['quantity_type'] ?? '',
+      unitOfMeasureName: data['unit_of_measure_name'] ?? '',
+      approvalStatus: data['approval_status'] ?? '',
+      approvalStatusDateTime: data['approval_status_date_time'] ?? '',
+      defaultLabTestingState: data['default_lab_testing_state'] ?? '',
       isUsed: data['is_used'] as bool,
-      strainId: data['strain_id'] as int,
-      strainName: data['strain_name'] as String,
-      administrationMethod: data['administration_method'] as String,
-      description: data['description'] as String,
-      numberOfDoses: data['number_of_doses'] as int,
+      strainId: data['strain_id'].toString(),
+      strainName: data['strain_name'] ?? '',
+      administrationMethod: data['administration_method'] ?? '',
+      description: data['description'] ?? '',
+      numberOfDoses: data['number_of_doses'] ?? 0,
       publicIngredients: (data['public_ingredients'] as List).cast<String>(),
-      servingSize: data['serving_size'] as int,
-      supplyDurationDays: data['supply_duration_days'] as int,
-      unitCbdContent: data['unit_cbd_content'] as double,
-      unitCbdContentDose: data['unit_cbd_content_dose'] as double,
+      servingSize: data['serving_size'] ?? 0,
+      supplyDurationDays: data['supply_duration_days'] ?? 0,
+      unitCbdContent: data['unit_cbd_content'] ?? 0.0,
+      unitCbdContentDose: data['unit_cbd_content_dose'] ?? 0.0,
       unitCbdContentDoseUnitOfMeasureName:
-          data['unit_cbd_content_dose_unit_of_measure_name'] as String,
+          data['unit_cbd_content_dose_unit_of_measure_name'] ?? '',
       unitCbdContentUnitOfMeasureName:
-          data['unit_cbd_content_unit_of_measure_name'] as String,
-      unitCbdPercent: data['unit_cbd_percent'] as double,
-      unitQuantity: data['unit_quantity'] as int,
+          data['unit_cbd_content_unit_of_measure_name'] ?? '',
+      unitCbdPercent: data['unit_cbd_percent'] ?? 0.0,
+      unitQuantity: data['unit_quantity'] ?? 0,
       unitQuantityUnitOfMeasureName:
-          data['unit_quantity_unit_of_measure_name'] as String,
-      unitThcContent: data['unit_thc_content'] as double,
-      unitThcContentDose: data['unit_thc_content_dose'] as double,
+          data['unit_quantity_unit_of_measure_name'] ?? '',
+      unitThcContent: data['unit_thc_content'] ?? 0.0,
+      unitThcContentDose: data['unit_thc_content_dose'] ?? 0.0,
       unitThcContentDoseUnitOfMeasureName:
-          data['unit_thc_content_dose_unit_of_measure_name'] as String,
+          data['unit_thc_content_dose_unit_of_measure_name'] ?? '',
       unitThcContentUnitOfMeasureName:
-          data['unit_thc_content_unit_of_measure_name'] as String,
-      unitThcPercent: data['unit_thc_percent'] as double,
-      unitVolume: data['unit_volume'] as double,
+          data['unit_thc_content_unit_of_measure_name'] ?? '',
+      unitThcPercent: data['unit_thc_percent'] ?? 0.0,
+      unitVolume: data['unit_volume'] ?? 0.0,
       unitVolumeUnitOfMeasureName:
-          data['unit_volume_unit_of_measure_name'] as String,
-      unitWeight: data['unit_weight'] as double,
+          data['unit_volume_unit_of_measure_name'] ?? '',
+      unitWeight: data['unit_weight'] ?? 0.0,
       unitWeightUnitOfMeasureName:
-          data['unit_weight_unit_of_measure_name'] as String,
+          data['unit_weight_unit_of_measure_name'] ?? '',
     );
   }
   // Create JSON.
@@ -141,7 +140,7 @@ class Item {
       'quantity_type': quantityType,
       'unit_of_measure_name': unitOfMeasureName,
       'approval_status': approvalStatus,
-      'approval_status_date_time': approvalStatusDateTime.toIso8601String(),
+      'approval_status_date_time': approvalStatusDateTime,
       'default_lab_testing_state': defaultLabTestingState,
       'is_used': isUsed,
       'strain_id': strainId,
@@ -173,19 +172,19 @@ class Item {
     };
   }
 
-  // Create Item.
-  Future<void> create() async {
-    // Call an API or database to create a new item.
-    // await MetrcService.createItem(this.toMap());
-  }
-  // Update Item.
-  Future<void> update() async {
-    // Call an API or database to update the existing item.
-    // await MetrcService.updateItem(this.id, this.toMap());
-  }
-  // Delete Item.
-  Future<void> delete() async {
-    // Call an API or database to delete the existing item.
-    // await MetrcService.deleteItem(this.id);
-  }
+  // // Create Item.
+  // Future<void> create() async {
+  //   // Call an API or database to create a new item.
+  //   // await MetrcService.createItem(this.toMap());
+  // }
+  // // Update Item.
+  // Future<void> update() async {
+  //   // Call an API or database to update the existing item.
+  //   // await MetrcService.updateItem(this.id, this.toMap());
+  // }
+  // // Delete Item.
+  // Future<void> delete() async {
+  //   // Call an API or database to delete the existing item.
+  //   // await MetrcService.deleteItem(this.id);
+  // }
 }

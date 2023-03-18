@@ -4,85 +4,101 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 3/2/2023
+// Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
 import 'package:cannlytics_app/services/metrc_service.dart';
 
-typedef SalesTransactionId = String;
+typedef SalesTransactionId = String?;
 
 class SalesTransaction {
   // Initialization.
   const SalesTransaction({
-    required this.cityTax,
-    required this.countyTax,
-    required this.discountAmount,
-    required this.exciseTax,
-    required this.invoiceNumber,
-    required this.municipalTax,
-    required this.packageLabel,
-    required this.price,
-    required this.quantity,
-    required this.salesTax,
-    required this.subTotal,
-    required this.totalAmount,
-    required this.unitOfMeasure,
-    required this.unitThcContent,
-    required this.unitThcContentUnitOfMeasure,
-    required this.unitThcPercent,
-    required this.unitWeight,
-    required this.unitWeightUnitOfMeasure,
+    this.salesDate,
+    this.totalTransactions,
+    this.totalPackages,
+    this.totalPrice,
+    this.cityTax,
+    this.countyTax,
+    this.discountAmount,
+    this.exciseTax,
+    this.invoiceNumber,
+    this.municipalTax,
+    this.packageLabel,
+    this.price,
+    this.quantity,
+    this.salesTax,
+    this.subTotal,
+    this.totalAmount,
+    this.unitOfMeasure,
+    this.unitThcContent,
+    this.unitThcContentUnitOfMeasure,
+    this.unitThcPercent,
+    this.unitWeight,
+    this.unitWeightUnitOfMeasure,
   });
 
   // Properties.
-  final double cityTax;
-  final double countyTax;
-  final double discountAmount;
-  final double exciseTax;
-  final String invoiceNumber;
-  final double municipalTax;
-  final String packageLabel;
-  final double price;
-  final double quantity;
-  final double salesTax;
-  final double subTotal;
-  final double totalAmount;
-  final String unitOfMeasure;
-  final double unitThcContent;
-  final String unitThcContentUnitOfMeasure;
-  final double unitThcPercent;
-  final double unitWeight;
-  final String unitWeightUnitOfMeasure;
+  final String? salesDate;
+  final int? totalTransactions;
+  final int? totalPackages;
+  final double? totalPrice;
+  final double? cityTax;
+  final double? countyTax;
+  final double? discountAmount;
+  final double? exciseTax;
+  final String? invoiceNumber;
+  final double? municipalTax;
+  final String? packageLabel;
+  final double? price;
+  final double? quantity;
+  final double? salesTax;
+  final double? subTotal;
+  final double? totalAmount;
+  final String? unitOfMeasure;
+  final double? unitThcContent;
+  final String? unitThcContentUnitOfMeasure;
+  final double? unitThcPercent;
+  final double? unitWeight;
+  final String? unitWeightUnitOfMeasure;
 
   // Create model.
   factory SalesTransaction.fromMap(Map<String, dynamic> data) {
     return SalesTransaction(
-      cityTax: data['city_tax'] as double,
-      countyTax: data['county_tax'] as double,
-      discountAmount: data['discount_amount'] as double,
-      exciseTax: data['excise_tax'] as double,
-      invoiceNumber: data['invoice_number'] as String,
-      municipalTax: data['municipal_tax'] as double,
-      packageLabel: data['package_label'] as String,
-      price: data['price'] as double,
-      quantity: data['quantity'] as double,
-      salesTax: data['sales_tax'] as double,
-      subTotal: data['sub_total'] as double,
-      totalAmount: data['total_amount'] as double,
-      unitOfMeasure: data['unit_of_measure'] as String,
-      unitThcContent: data['unit_thc_content'] as double,
+      salesDate: data['sales_date'] ?? '',
+      totalTransactions: data['total_transactions'] ?? 0,
+      totalPackages: data['total_packages'] ?? 0,
+      totalPrice: data['total_price'] ?? 0.0,
+      cityTax: data['city_tax'] ?? 0,
+      countyTax: data['county_tax'] ?? 0,
+      discountAmount: data['discount_amount'] ?? 0,
+      exciseTax: data['excise_tax'] ?? 0,
+      invoiceNumber: data['invoice_number'] ?? '',
+      municipalTax: data['municipal_tax'] ?? 0,
+      packageLabel: data['package_label'] ?? '',
+      price: data['price'] ?? 0,
+      quantity: data['quantity'] ?? 0,
+      salesTax: data['sales_tax'] ?? 0,
+      subTotal: data['sub_total'] ?? 0,
+      totalAmount: data['total_amount'] ?? 0,
+      unitOfMeasure: data['unit_of_measure'] ?? '',
+      unitThcContent: data['unit_thc_content'] ?? 0,
       unitThcContentUnitOfMeasure:
-          data['unit_thc_content_unit_of_measure'] as String,
-      unitThcPercent: data['unit_thc_percent'] as double,
-      unitWeight: data['unit_weight'] as double,
-      unitWeightUnitOfMeasure: data['unit_weight_unit_of_measure'] as String,
+          data['unit_thc_content_unit_of_measure'] ?? '',
+      unitThcPercent: data['unit_thc_percent'] ?? 0,
+      unitWeight: data['unit_weight'] ?? 0,
+      unitWeightUnitOfMeasure: data['unit_weight_unit_of_measure'] ?? '',
     );
   }
 
   // Create JSON.
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'sales_date': salesDate,
+      'total_transactions': totalTransactions,
+      'total_packages': totalPackages,
+      'total_price': totalPrice,
       'city_tax': cityTax,
       'county_tax': countyTax,
       'discount_amount': discountAmount,
@@ -104,21 +120,21 @@ class SalesTransaction {
     };
   }
 
-  // Create SalesTransaction.
-  Future<void> create() async {
-    // Call an API or database to create a new SalesTransaction.
-    // await Metrc.createSalesTransaction(this.toMap());
-  }
+  // // Create SalesTransaction.
+  // Future<void> create() async {
+  //   // Call an API or database to create a new SalesTransaction.
+  //   // await Metrc.createSalesTransaction(this.toMap());
+  // }
 
-  // Update SalesTransaction.
-  Future<void> update() async {
-    // Call an API or database to update the existing SalesTransaction.
-    // await Metrc.updateSalesTransaction(this.invoiceNumber, this.toMap());
-  }
+  // // Update SalesTransaction.
+  // Future<void> update() async {
+  //   // Call an API or database to update the existing SalesTransaction.
+  //   // await Metrc.updateSalesTransaction(this.invoiceNumber, this.toMap());
+  // }
 
-  // Delete SalesTransaction.
-  Future<void> delete() async {
-    // Call an API or database to delete the existing SalesTransaction.
-    // await Metrc.deleteSalesTransaction(this.invoiceNumber);
-  }
+  // // Delete SalesTransaction.
+  // Future<void> delete() async {
+  //   // Call an API or database to delete the existing SalesTransaction.
+  //   // await Metrc.deleteSalesTransaction(this.invoiceNumber);
+  // }
 }

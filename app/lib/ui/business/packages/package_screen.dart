@@ -3,21 +3,13 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 3/9/2023
-// Updated: 3/9/2023
+// Created: 2/17/2023
+// Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// TODO: Allow the user to keep logs for their plants.
-// Additional data:
-// - soil type
-// yield, potency, and quality of the buds
-// - Pests and Diseases
-// - weather conditions, air quality, and water source
-// - lighting
 
 // Flutter imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/ui/business/plants/plants_controller.dart';
+import 'package:cannlytics_app/ui/business/packages/packages_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
@@ -31,35 +23,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/metrc/plant.dart';
+import 'package:cannlytics_app/models/metrc/package.dart';
 import 'package:go_router/go_router.dart';
 
-/// Plant screen.
-class PlantScreen extends ConsumerStatefulWidget {
-  const PlantScreen({super.key, required this.id, this.entry});
+/// Package screen.
+class PackageScreen extends ConsumerStatefulWidget {
+  const PackageScreen({super.key, required this.id, this.entry});
 
   // Properties.
-  final PlantId id;
-  final Plant? entry;
+  final String id;
+  final Package? entry;
 
   @override
-  ConsumerState<PlantScreen> createState() => _PlantScreenState();
+  ConsumerState<PackageScreen> createState() => _PackageScreenState();
 }
 
-/// Plant screen state.
-class _PlantScreenState extends ConsumerState<PlantScreen> {
+/// Package screen state.
+class _PackageScreenState extends ConsumerState<PackageScreen> {
   @override
   Widget build(BuildContext context) {
     // Listen for errors.
     ref.listen<AsyncValue>(
-      plantProvider(widget.id),
+      packageProvider(widget.id),
       (_, state) => state.showAlertDialogOnError(context),
     );
 
-    // Listen for the plant data.
-    var item = ref.watch(plantProvider(widget.id)).value;
+    // Listen for the package data.
+    var item = ref.watch(packageProvider(widget.id)).value;
     if (item == null) {
-      item = Plant(id: 'new');
+      item = Package();
     }
 
     // Body.
@@ -79,13 +71,13 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   }
 
   /// Form fields.
-  List<Widget> _fields(Plant item) {
+  List<Widget> _fields(Package item) {
     return <Widget>[
-      // Back to plants button.
+      // Back to packages button.
       CustomTextButton(
-        text: 'Plants',
+        text: 'Packages',
         onPressed: () {
-          context.go('/plants');
+          context.go('/packages');
           ref.read(nameController.notifier).change('');
         },
         fontStyle: FontStyle.italic,
@@ -102,22 +94,23 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
           const Spacer(),
 
           // Actions.
-          // Create / update a plant.
+          // Create / update a package.
           PrimaryButton(
             text: (widget.id == 'new') ? 'Create' : 'Save',
             onPressed: () async {
-              // FIXME:
               var name = ref.read(nameController).value.text;
-              var update = Plant(
-                id: widget.id,
-              );
+              var update = Package(id: widget.id);
               if (widget.id == 'new') {
-                await ref.read(plantsProvider.notifier).createPlants([update]);
+                await ref
+                    .read(packagesProvider.notifier)
+                    .createPackages([update]);
               } else {
                 // FIXME:
-                await ref.read(plantsProvider.notifier).updatePlants([update]);
+                await ref
+                    .read(packagesProvider.notifier)
+                    .updatePackages([update]);
               }
-              context.go('/plants');
+              context.go('/packages');
             },
           ),
         ],
@@ -128,20 +121,20 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
       // _nameField(item),
       gapH6,
 
-      // Plant type name and ID.
-      // _plantTypeField(item),
+      // Package type name and ID.
+      // _packageTypeField(item),
 
       // Checkbox fields.
       // ..._checkboxes(item),
 
       // TODO: Allow user's to save additional data in Firestore:
-      // - plant_image
+      // - package_image
       // - created_at
       // - created_by
       // - updated_at
       // - updated_by
 
-      // Danger zone : Handle deleting an existing plant.
+      // Danger zone : Handle deleting an existing package.
       if (widget.id.isNotEmpty && widget.id != 'new') _deleteOption(),
     ];
   }
@@ -170,10 +163,10 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
                 text: 'Delete',
                 onPressed: () async {
                   await ref
-                      .read(plantsProvider.notifier)
-                      .deletePlants([Plant(id: widget.id)]);
+                      .read(packagesProvider.notifier)
+                      .deletePackages([Package(id: widget.id)]);
                   // FIXME: Clear search, etc. to make table load better.
-                  context.go('/plants');
+                  context.go('/packages');
                 },
               ),
             ],
@@ -184,9 +177,9 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   }
 
   // ID field.
-  Widget _idField(Plant item) {
+  Widget _idField(Package item) {
     return Text(
-      (item.id.isEmpty) ? 'New Plant' : 'Plant ${item.id}',
+      (item.id!.isEmpty) ? 'New Package' : 'Package ${item.id}',
       style: Theme.of(context).textTheme.titleLarge!.copyWith(
             color: Theme.of(context).textTheme.titleLarge!.color,
           ),
@@ -194,7 +187,7 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   }
 
   // Name field.
-  // Widget _nameField(Plant item) {
+  // Widget _nameField(Package item) {
   //   final _nameController = ref.watch(nameController);
   //   // Hot-fix: Set the initial value.
   //   if (_nameController.text.isEmpty && item.name.isNotEmpty) {
@@ -215,10 +208,10 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   //   );
   // }
 
-  // // Plant name field.
-  // Widget _plantTypeField(Plant item) {
-  //   final items = ref.watch(plantTypesProvider).value ?? [];
-  //   final value = ref.watch(plantType);
+  // // Package name field.
+  // Widget _packageTypeField(Package item) {
+  //   final items = ref.watch(packageTypesProvider).value ?? [];
+  //   final value = ref.watch(packageType);
   //   if (items.length == 0 || value == null) return Container();
   //   var dropdown = DropdownButton(
   //     underline: Container(),
@@ -238,8 +231,8 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   //         )
   //         .toList(),
   //     onChanged: (String? value) {
-  //       ref.read(plantType.notifier).state = value;
-  //       // FIXME: Change plant permissions.
+  //       ref.read(packageType.notifier).state = value;
+  //       // FIXME: Change package permissions.
   //     },
   //   );
   //   return Column(
@@ -248,7 +241,7 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   //     children: [
   //       gapH18,
   //       Text(
-  //         'Plant Type Name',
+  //         'Package Type Name',
   //         style: Theme.of(context).textTheme.titleMedium!.copyWith(
   //               color: Theme.of(context).textTheme.titleLarge!.color,
   //             ),
@@ -269,8 +262,8 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   // }
 
   // // Checkbox fields.
-  // List<Widget> _checkboxes(Plant item) {
-  //   final items = ref.watch(plantTypesProvider).value ?? [];
+  // List<Widget> _checkboxes(Package item) {
+  //   final items = ref.watch(packageTypesProvider).value ?? [];
   //   if (items.length == 0) return [Container()];
   //   return [
   //     gapH12,

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 3/2/2023
+// Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -16,28 +16,28 @@ typedef LabResultId = String;
 class LabResult {
   // Initialization.
   const LabResult({
-    required this.id,
-    required this.labTestTypeName,
-    required this.notes,
-    required this.passed,
-    required this.quantity,
+    this.id,
+    this.labTestTypeName,
+    this.notes,
+    this.passed,
+    this.quantity,
   });
 
   // Properties.
-  final LabResultId id;
-  final String labTestTypeName;
-  final String notes;
-  final bool passed;
-  final double quantity;
+  final LabResultId? id;
+  final String? labTestTypeName;
+  final String? notes;
+  final bool? passed;
+  final double? quantity;
 
   // Create model.
-  factory LabResult.fromMap(Map<String, dynamic> data, String uid) {
+  factory LabResult.fromMap(Map<String, dynamic> data) {
     return LabResult(
-      id: uid,
-      labTestTypeName: data['lab_test_type_name'] as String,
-      notes: data['notes'] as String,
-      passed: data['passed'] as bool,
-      quantity: data['quantity'] as double,
+      id: data['id'].toString(),
+      labTestTypeName: data['lab_test_type_name'] ?? '',
+      notes: data['notes'] ?? '',
+      passed: data['passed'] ?? false,
+      quantity: data['quantity'] ?? 0.0,
     );
   }
 
@@ -52,21 +52,21 @@ class LabResult {
     };
   }
 
-  // Create LabResult.
-  Future<void> create() async {
-    // Call an API or database to create a new lab result.
-    // await Metrc.createLabResult(this.toMap());
-  }
+  // // Create LabResult.
+  // Future<void> create() async {
+  //   // Call an API or database to create a new lab result.
+  //   // await Metrc.createLabResult(this.toMap());
+  // }
 
-  // Update LabResult.
-  Future<void> update() async {
-    // Call an API or database to update the existing lab result.
-    // await Metrc.updateLabResult(this.id, this.toMap());
-  }
+  // // Update LabResult.
+  // Future<void> update() async {
+  //   // Call an API or database to update the existing lab result.
+  //   // await Metrc.updateLabResult(this.id, this.toMap());
+  // }
 
-  // Delete LabResult.
-  Future<void> delete() async {
-    // Call an API or database to delete the existing lab result.
-    // await Metrc.deleteLabResult(this.id);
-  }
+  // // Delete LabResult.
+  // Future<void> delete() async {
+  //   // Call an API or database to delete the existing lab result.
+  //   // await Metrc.deleteLabResult(this.id);
+  // }
 }

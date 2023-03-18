@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/5/2023
+// Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -16,20 +16,28 @@ import 'package:http/http.dart' as http;
 
 /// Service to interface with the Cannlytics API.
 class APIService {
-  // Production / test base URL.
+  // PRODUCTION:
   // static final String baseUrl = 'https://cannlytics.com/api';
+
+  // DEV:
   static final String baseUrl = 'http://127.0.0.1:8000/api';
 
   /// Get a user's token. Set [refresh] to renew credentials.
   static Future<String> getUserToken({bool refresh = false}) async {
     final tokenResult = FirebaseAuth.instance.currentUser;
-    if (tokenResult == null) return '';
-    return await tokenResult.getIdToken(refresh);
+    if (tokenResult == null) {
+      return '';
+    } else {
+      return await tokenResult.getIdToken(refresh);
+    }
   }
 
   /// Make an authenticated HTTP request to the Cannlytics API.
-  static Future<dynamic> apiRequest(String endpoint,
-      {dynamic data, Map<String, dynamic>? options}) async {
+  static Future<dynamic> apiRequest(
+    String endpoint, {
+    dynamic data,
+    Map? options,
+  }) async {
     // Create default body, method, and headers.
     var body;
     var method = 'GET';
@@ -86,6 +94,7 @@ class APIService {
           ? responseData['data']
           : responseData;
     } catch (error) {
+      print("Request error: [error=${error.toString()}]");
       return response;
     }
   }

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/8/2023
-// Updated: 3/9/2023
+// Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -16,156 +16,154 @@ typedef TransferId = String;
 class Transfer {
   // Initialization.
   const Transfer({
-    required this.id,
-    required this.actualArrivalDateTime,
-    required this.actualDepartureDateTime,
-    required this.actualReturnArrivalDateTime,
-    required this.actualReturnDepartureDateTime,
-    required this.containsDonation,
-    required this.containsPlantPackage,
-    required this.containsProductPackage,
-    required this.containsProductRequiresRemediation,
-    required this.containsRemediatedProductPackage,
-    required this.containsTestingSample,
-    required this.containsTradeSample,
-    required this.createdByUserName,
-    required this.createdDateTime,
-    required this.deliveryCount,
-    required this.deliveryId,
-    required this.deliveryPackageCount,
-    required this.deliveryReceivedPackageCount,
-    required this.driverName,
-    required this.driverOccupationalLicenseNumber,
-    required this.driverVehicleLicenseNumber,
-    required this.estimatedArrivalDateTime,
-    required this.estimatedDepartureDateTime,
-    required this.estimatedReturnArrivalDateTime,
-    required this.estimatedReturnDepartureDateTime,
-    required this.lastModified,
-    required this.manifestNumber,
-    required this.name,
-    required this.packageCount,
-    required this.recipientFacilityLicenseNumber,
-    required this.recipientFacilityName,
-    required this.receivedDateTime,
-    required this.receivedDeliveryCount,
-    required this.receivedPackageCount,
-    required this.shipmentLicenseType,
-    required this.shipmentTransactionType,
-    required this.shipmentTypeName,
-    required this.shipperFacilityLicenseNumber,
-    required this.shipperFacilityName,
-    required this.transporterFacilityLicenseNumber,
-    required this.transporterFacilityName,
-    required this.vehicleLicensePlateNumber,
-    required this.vehicleMake,
-    required this.vehicleModel,
+    this.id,
+    this.actualArrivalDateTime,
+    this.actualDepartureDateTime,
+    this.actualReturnArrivalDateTime,
+    this.actualReturnDepartureDateTime,
+    this.containsDonation,
+    this.containsPlantPackage,
+    this.containsProductPackage,
+    this.containsProductRequiresRemediation,
+    this.containsRemediatedProductPackage,
+    this.containsTestingSample,
+    this.containsTradeSample,
+    this.createdByUserName,
+    this.createdDateTime,
+    this.deliveryCount,
+    this.deliveryId,
+    this.deliveryPackageCount,
+    this.deliveryReceivedPackageCount,
+    this.driverName,
+    this.driverOccupationalLicenseNumber,
+    this.driverVehicleLicenseNumber,
+    this.estimatedArrivalDateTime,
+    this.estimatedDepartureDateTime,
+    this.estimatedReturnArrivalDateTime,
+    this.estimatedReturnDepartureDateTime,
+    this.lastModified,
+    this.manifestNumber,
+    this.name,
+    this.packageCount,
+    this.recipientFacilityLicenseNumber,
+    this.recipientFacilityName,
+    this.receivedDateTime,
+    this.receivedDeliveryCount,
+    this.receivedPackageCount,
+    this.shipmentLicenseType,
+    this.shipmentTransactionType,
+    this.shipmentTypeName,
+    this.shipperFacilityLicenseNumber,
+    this.shipperFacilityName,
+    this.transporterFacilityLicenseNumber,
+    this.transporterFacilityName,
+    this.vehicleLicensePlateNumber,
+    this.vehicleMake,
+    this.vehicleModel,
   });
   // Properties.
-  final TransferId id;
-  final DateTime actualArrivalDateTime;
-  final DateTime actualDepartureDateTime;
-  final DateTime actualReturnArrivalDateTime;
-  final DateTime actualReturnDepartureDateTime;
-  final bool containsDonation;
-  final bool containsPlantPackage;
-  final bool containsProductPackage;
-  final bool containsProductRequiresRemediation;
-  final bool containsRemediatedProductPackage;
-  final bool containsTestingSample;
-  final bool containsTradeSample;
-  final String createdByUserName;
-  final DateTime createdDateTime;
-  final int deliveryCount;
-  final int deliveryId;
-  final int deliveryPackageCount;
-  final int deliveryReceivedPackageCount;
-  final String driverName;
-  final String driverOccupationalLicenseNumber;
-  final String driverVehicleLicenseNumber;
-  final DateTime estimatedArrivalDateTime;
-  final DateTime estimatedDepartureDateTime;
-  final DateTime estimatedReturnArrivalDateTime;
-  final DateTime estimatedReturnDepartureDateTime;
-  final DateTime lastModified;
-  final String manifestNumber;
-  final String name;
-  final int packageCount;
-  final String recipientFacilityLicenseNumber;
-  final String recipientFacilityName;
-  final DateTime receivedDateTime;
-  final int receivedDeliveryCount;
-  final int receivedPackageCount;
-  final int shipmentLicenseType;
-  final String shipmentTransactionType;
-  final String shipmentTypeName;
-  final String shipperFacilityLicenseNumber;
-  final String shipperFacilityName;
-  final String transporterFacilityLicenseNumber;
-  final String transporterFacilityName;
-  final String vehicleLicensePlateNumber;
-  final String vehicleMake;
-  final String vehicleModel;
+  final TransferId? id;
+  final String? actualArrivalDateTime;
+  final String? actualDepartureDateTime;
+  final String? actualReturnArrivalDateTime;
+  final String? actualReturnDepartureDateTime;
+  final bool? containsDonation;
+  final bool? containsPlantPackage;
+  final bool? containsProductPackage;
+  final bool? containsProductRequiresRemediation;
+  final bool? containsRemediatedProductPackage;
+  final bool? containsTestingSample;
+  final bool? containsTradeSample;
+  final String? createdByUserName;
+  final String? createdDateTime;
+  final int? deliveryCount;
+  final int? deliveryId;
+  final int? deliveryPackageCount;
+  final int? deliveryReceivedPackageCount;
+  final String? driverName;
+  final String? driverOccupationalLicenseNumber;
+  final String? driverVehicleLicenseNumber;
+  final String? estimatedArrivalDateTime;
+  final String? estimatedDepartureDateTime;
+  final String? estimatedReturnArrivalDateTime;
+  final String? estimatedReturnDepartureDateTime;
+  final String? lastModified;
+  final String? manifestNumber;
+  final String? name;
+  final int? packageCount;
+  final String? recipientFacilityLicenseNumber;
+  final String? recipientFacilityName;
+  final String? receivedDateTime;
+  final int? receivedDeliveryCount;
+  final int? receivedPackageCount;
+  final int? shipmentLicenseType;
+  final String? shipmentTransactionType;
+  final String? shipmentTypeName;
+  final String? shipperFacilityLicenseNumber;
+  final String? shipperFacilityName;
+  final String? transporterFacilityLicenseNumber;
+  final String? transporterFacilityName;
+  final String? vehicleLicensePlateNumber;
+  final String? vehicleMake;
+  final String? vehicleModel;
   // Create model.
   factory Transfer.fromMap(Map<String, dynamic> data) {
     return Transfer(
       id: data['id'] ?? '',
-      actualArrivalDateTime: data['actual_arrival_date_time'] as DateTime,
-      actualDepartureDateTime: data['actual_departure_date_time'] as DateTime,
+      actualArrivalDateTime: data['actual_arrival_date_time'] ?? '',
+      actualDepartureDateTime: data['actual_departure_date_time'] ?? '',
       actualReturnArrivalDateTime:
-          data['actual_return_arrival_date_time'] as DateTime,
+          data['actual_return_arrival_date_time'] ?? '',
       actualReturnDepartureDateTime:
-          data['actual_return_departure_date_time'] as DateTime,
-      containsDonation: data['contains_donation'] as bool,
-      containsPlantPackage: data['contains_plant_package'] as bool,
-      containsProductPackage: data['contains_product_package'] as bool,
+          data['actual_return_departure_date_time'] ?? '',
+      containsDonation: data['contains_donation'] ?? false,
+      containsPlantPackage: data['contains_plant_package'] ?? false,
+      containsProductPackage: data['contains_product_package'] ?? false,
       containsProductRequiresRemediation:
-          data['contains_product_requires_remediation'] as bool,
+          data['contains_product_requires_remediation'] ?? false,
       containsRemediatedProductPackage:
-          data['contains_remediated_product_package'] as bool,
-      containsTestingSample: data['contains_testing_sample'] as bool,
-      containsTradeSample: data['contains_trade_sample'] as bool,
-      createdByUserName: data['created_by_user_name'] as String,
-      createdDateTime: data['created_date_time'] as DateTime,
-      deliveryCount: data['delivery_count'] as int,
-      deliveryId: data['delivery_id'] as int,
-      deliveryPackageCount: data['delivery_package_count'] as int,
+          data['contains_remediated_product_package'] ?? false,
+      containsTestingSample: data['contains_testing_sample'] ?? false,
+      containsTradeSample: data['contains_trade_sample'] ?? false,
+      createdByUserName: data['created_by_user_name'] ?? '',
+      createdDateTime: data['created_date_time'] ?? '',
+      deliveryCount: data['delivery_count'] ?? 0,
+      deliveryId: data['delivery_id'] ?? 0,
+      deliveryPackageCount: data['delivery_package_count'] ?? 0,
       deliveryReceivedPackageCount:
-          data['delivery_received_package_count'] as int,
-      driverName: data['driver_name'] as String,
+          data['delivery_received_package_count'] ?? 0,
+      driverName: data['driver_name'] ?? '',
       driverOccupationalLicenseNumber:
-          data['driver_occupational_license_number'] as String,
-      driverVehicleLicenseNumber:
-          data['driver_vehicle_license_number'] as String,
-      estimatedArrivalDateTime: data['estimated_arrival_date_time'] as DateTime,
-      estimatedDepartureDateTime:
-          data['estimated_departure_date_time'] as DateTime,
+          data['driver_occupational_license_number'] ?? '',
+      driverVehicleLicenseNumber: data['driver_vehicle_license_number'] ?? '',
+      estimatedArrivalDateTime: data['estimated_arrival_date_time'] ?? '',
+      estimatedDepartureDateTime: data['estimated_departure_date_time'] ?? '',
       estimatedReturnArrivalDateTime:
-          data['estimated_return_arrival_date_time'] as DateTime,
+          data['estimated_return_arrival_date_time'] ?? '',
       estimatedReturnDepartureDateTime:
-          data['estimated_return_departure_date_time'] as DateTime,
-      lastModified: data['last_modified'] as DateTime,
-      manifestNumber: data['manifest_number'] as String,
-      name: data['name'] as String,
-      packageCount: data['package_count'] as int,
+          data['estimated_return_departure_date_time'] ?? '',
+      lastModified: data['last_modified'] ?? '',
+      manifestNumber: data['manifest_number'] ?? '',
+      name: data['name'] ?? '',
+      packageCount: data['package_count'] ?? 0,
       recipientFacilityLicenseNumber:
-          data['recipient_facility_license_number'] as String,
-      recipientFacilityName: data['recipient_facility_name'] as String,
-      receivedDateTime: data['received_date_time'] as DateTime,
-      receivedDeliveryCount: data['received_delivery_count'] as int,
-      receivedPackageCount: data['received_package_count'] as int,
-      shipmentLicenseType: data['shipment_license_type'] as int,
-      shipmentTransactionType: data['shipment_transaction_type'] as String,
-      shipmentTypeName: data['shipment_type_name'] as String,
+          data['recipient_facility_license_number'] ?? '',
+      recipientFacilityName: data['recipient_facility_name'] ?? '',
+      receivedDateTime: data['received_date_time'] ?? '',
+      receivedDeliveryCount: data['received_delivery_count'] ?? 0,
+      receivedPackageCount: data['received_package_count'] ?? 0,
+      shipmentLicenseType: data['shipment_license_type'] ?? 0,
+      shipmentTransactionType: data['shipment_transaction_type'] ?? '',
+      shipmentTypeName: data['shipment_type_name'] ?? '',
       shipperFacilityLicenseNumber:
-          data['shipper_facility_license_number'] as String,
-      shipperFacilityName: data['shipper_facility_name'] as String,
+          data['shipper_facility_license_number'] ?? '',
+      shipperFacilityName: data['shipper_facility_name'] ?? '',
       transporterFacilityLicenseNumber:
-          data['transporter_facility_license_number'] as String,
-      transporterFacilityName: data['transporter_facility_name'] as String,
-      vehicleLicensePlateNumber: data['vehicle_license_plate_number'] as String,
-      vehicleMake: data['vehicle_make'] as String,
-      vehicleModel: data['vehicle_model'] as String,
+          data['transporter_facility_license_number'] ?? '',
+      transporterFacilityName: data['transporter_facility_name'] ?? '',
+      vehicleLicensePlateNumber: data['vehicle_license_plate_number'] ?? '',
+      vehicleMake: data['vehicle_make'] ?? '',
+      vehicleModel: data['vehicle_model'] ?? '',
     );
   }
   // Create JSON.
@@ -219,19 +217,19 @@ class Transfer {
     };
   }
 
-  // Create Transfer.
-  Future<void> create() async {
-    // Call an API or database to create a new transfer.
-    // await Metrc.createTransfer(this.toMap());
-  }
-  // Update Transfer.
-  Future<void> update() async {
-    // Call an API or database to update the existing transfer.
-    // await Metrc.updateTransfer(this.id, this.toMap());
-  }
-  // Delete Transfer.
-  Future<void> delete() async {
-    // Call an API or database to delete the existing transfer.
-    // await Metrc.deleteTransfer(this.id);
-  }
+  // // Create Transfer.
+  // Future<void> create() async {
+  //   // Call an API or database to create a new transfer.
+  //   // await Metrc.createTransfer(this.toMap());
+  // }
+  // // Update Transfer.
+  // Future<void> update() async {
+  //   // Call an API or database to update the existing transfer.
+  //   // await Metrc.updateTransfer(this.id, this.toMap());
+  // }
+  // // Delete Transfer.
+  // Future<void> delete() async {
+  //   // Call an API or database to delete the existing transfer.
+  //   // await Metrc.deleteTransfer(this.id);
+  // }
 }

@@ -4,11 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/26/2023
-// Updated: 3/13/2023
+// Updated: 3/17/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
-import 'package:cannlytics_app/models/metrc/category.dart';
 import 'package:cannlytics_app/models/metrc/delivery.dart';
 import 'package:cannlytics_app/models/metrc/employee.dart';
 import 'package:cannlytics_app/models/metrc/facility.dart';
@@ -29,7 +28,7 @@ import 'package:cannlytics_app/services/api_service.dart';
 // TODO: Use models instead of Maps where possible.
 
 /// A helper function to format parameters.
-Map<String, dynamic> getParams(
+Map getParams(
   String? license,
   String? orgId,
   String? state, {
@@ -37,7 +36,7 @@ Map<String, dynamic> getParams(
   bool? delete,
   List<Map>? queries,
 }) {
-  Map<String, dynamic> params = {
+  Map params = {
     'params': {
       'license': license,
       'org_id': orgId,
@@ -99,16 +98,13 @@ class MetrcFacilities {
     String? state,
   }) async {
     String endpoint = '/api/metrc/facilities';
-    List<dynamic> response = await APIService.apiRequest(
-      endpoint,
-      // options: getParams(null, orgId, state),
-      options: {
-        'params': {
-          'org_id': orgId,
-          'state': state,
-        },
+    Map options = {
+      'params': {
+        'org_id': orgId,
+        'state': state,
       },
-    );
+    };
+    final response = await APIService.apiRequest(endpoint, options: options);
     List<Facility> items = [];
     for (var item in response) {
       items.add(Facility.fromMap(item));
@@ -162,10 +158,8 @@ class MetrcLocations {
     String? state,
   }) async {
     String endpoint = '/api/metrc/types/locations';
-    return await APIService.apiRequest(
-      endpoint,
-      options: getParams(license, orgId, state),
-    );
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   // Get locations.
@@ -175,10 +169,8 @@ class MetrcLocations {
     String? state,
   }) async {
     String endpoint = '/api/metrc/locations';
-    final response = await APIService.apiRequest(
-      endpoint,
-      options: getParams(license, orgId, state),
-    );
+    Map options = getParams(license, orgId, state);
+    final response = await APIService.apiRequest(endpoint, options: options);
     List<Location> items = [];
     for (var item in response) {
       items.add(Location.fromMap(item));
@@ -194,10 +186,8 @@ class MetrcLocations {
     String? state,
   }) async {
     String endpoint = '/api/metrc/locations/$id';
-    final response = await APIService.apiRequest(
-      endpoint,
-      options: getParams(license, orgId, state),
-    );
+    Map options = getParams(license, orgId, state);
+    final response = await APIService.apiRequest(endpoint, options: options);
     return Location.fromMap(response);
   }
 
@@ -214,11 +204,8 @@ class MetrcLocations {
       'name': name,
       'location_type': locationTypeName ?? 'Default Location Type',
     };
-    return await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: getParams(license, orgId, state),
-    );
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   // Update the name of a location.
@@ -236,11 +223,8 @@ class MetrcLocations {
       'name': name,
       'location_type': locationTypeName,
     };
-    return await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: getParams(license, orgId, state),
-    );
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   // Delete a location.
@@ -251,10 +235,8 @@ class MetrcLocations {
     String? state,
   }) async {
     String endpoint = '/api/metrc/locations/$id';
-    return await APIService.apiRequest(
-      endpoint,
-      options: getParams(license, orgId, state, delete: true),
-    );
+    Map options = getParams(license, orgId, state, delete: true);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 }
 
@@ -281,11 +263,8 @@ class MetrcStrains {
       'sativa_percentage': sativaPercentage,
     };
     String endpoint = '/api/metrc/strains';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: getParams(license, orgId, state),
-    );
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
     // TODO: Get the newly created strain's ID.
     // return Strain.fromMap(data, uid);
   }
@@ -297,10 +276,9 @@ class MetrcStrains {
     String? state,
   }) async {
     String endpoint = '/api/metrc/strains';
-    List<dynamic> response = await APIService.apiRequest(
-      endpoint,
-      options: getParams(license, orgId, state),
-    );
+    Map options = getParams(license, orgId, state);
+    List<dynamic> response =
+        await APIService.apiRequest(endpoint, options: options);
     List<Strain> items = [];
     for (var item in response) {
       items.add(Strain.fromMap(item));
@@ -316,10 +294,8 @@ class MetrcStrains {
     String? state,
   }) async {
     String endpoint = '/api/metrc/strain/$id';
-    final response = await APIService.apiRequest(
-      endpoint,
-      options: getParams(license, orgId, state),
-    );
+    Map options = getParams(license, orgId, state);
+    final response = await APIService.apiRequest(endpoint, options: options);
     return Strain.fromMap(response);
   }
 
@@ -346,11 +322,8 @@ class MetrcStrains {
       'sativa_percentage': sativaPercentage,
     };
     String endpoint = '/api/metrc/strains';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: getParams(license, orgId, state),
-    );
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
     return Strain.fromMap(data);
   }
 
@@ -362,57 +335,50 @@ class MetrcStrains {
     String? state,
   }) async {
     String endpoint = '/api/metrc/strains/$id';
-    await APIService.apiRequest(
-      endpoint,
-      options: getParams(license, orgId, state, delete: true),
-    );
+    Map options = getParams(license, orgId, state, delete: true);
+    await APIService.apiRequest(endpoint, options: options);
   }
 }
 
 /// Plants
 class MetrcPlants {
   /// Create a plant.
-  static Future<void> createPlant(
-    String licenseNumber,
-    Map data,
-  ) async {
+  static Future<void> createPlant({
+    required Map data,
+    String? license,
+    String? state,
+    String? orgId,
+  }) async {
     String endpoint = '/api/metrc/plants';
-    await APIService.apiRequest(
-      endpoint,
-      // TODO: Make more function like.
-      // data: {
-      //   'plant_label': 'PLANT_TAG',
-      //   'plant_batch_name': batch_name + ' #2',
-      //   'plant_batch_type': 'Clone',
-      //   'plant_count': 1,
-      //   'location_name': test_location,
-      //   'strain_name': strain_name,
-      //   'patient_license_number': None,
-      //   'PackageTag': packageTag,
-      //   'actual_date': plantedDate?.toIso8601String(),
-      // },
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-      },
-    );
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint,
+        // FIXME : Make more function like.
+        // data: {
+        //   'plant_label': 'PLANT_TAG',
+        //   'plant_batch_name': batch_name + ' #2',
+        //   'plant_batch_type': 'Clone',
+        //   'plant_count': 1,
+        //   'location_name': test_location,
+        //   'strain_name': strain_name,
+        //   'patient_license_number': None,
+        //   'PackageTag': packageTag,
+        //   'actual_date': plantedDate?.toIso8601String(),
+        // },
+        data: data,
+        options: options);
   }
 
   /// Change the growth phase of a plant
-  static Future<void> changePlantGrowthPhase(
-    String licenseNumber,
-    Map data, {
+  static Future<void> changePlantGrowthPhase({
+    required Map data,
     String? type,
+    String? license,
+    String? state,
+    String? orgId,
   }) async {
     String endpoint = '/api/metrc/plants';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': type,
-      },
-    );
+    Map options = getParams(license, orgId, state, action: type);
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Get plants.
@@ -429,10 +395,8 @@ class MetrcPlants {
       {'key': 'start', 'value': start},
       {'key': 'end', 'value': end},
     ];
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: getParams(license, orgId, state, queries: queries),
-    );
+    Map options = getParams(license, orgId, state, queries: queries);
+    var response = await APIService.apiRequest(endpoint, options: options);
     List<Plant> items = [];
     for (var item in response) {
       items.add(Plant.fromMap(item));
@@ -448,713 +412,640 @@ class MetrcPlants {
     String? state,
   }) async {
     String endpoint = '/api/metrc/plants/$id';
-    final response = await APIService.apiRequest(
-      endpoint,
-      options: getParams(license, orgId, state),
-    );
+    Map options = getParams(license, orgId, state);
+    final response = await APIService.apiRequest(endpoint, options: options);
     return Plant.fromMap(response);
   }
 
   /// Move a plant to a different room.
-  static Future<void> movePlant(
-    String licenseNumber, {
+  static Future<void> movePlant({
     String? id,
     String? label,
     String? location,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/plants';
-    await APIService.apiRequest(
-      endpoint,
-      data: {
-        'actual_date': DateTime.now().toIso8601String(),
-        'id': id,
-        'label': label,
-        'location': location,
-      },
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'move',
-      },
-    );
+    Map data = {
+      'actual_date': DateTime.now().toIso8601String(),
+      'id': id,
+      'label': label,
+      'location': location,
+    };
+    Map options = getParams(license, orgId, state, action: 'move');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Add additives to a plant.
-  static Future<void> addPlantAdditives(
-    String licenseNumber,
-    Map data,
-  ) async {
+  static Future<void> addPlantAdditives({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/plants';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {
-          'license': licenseNumber,
-          'action': 'add-additives',
-        }
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'add-additives');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Manicure a plant.
-  static Future<void> manicurePlant(
-    String licenseNumber,
-    Map data,
-  ) async {
+  static Future<void> manicurePlant({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/plants';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {
-          'license': licenseNumber,
-          'action': 'manicure',
-        }
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'manicure');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Harvest from a plant.
-  static Future<void> harvestPlant(
-    String licenseNumber,
-    Map data,
-  ) async {
+  static Future<void> harvestPlant({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/plants';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {
-          'license': licenseNumber,
-          'action': 'harvest',
-        }
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'harvest');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Destroy a plant.
-  static Future<void> destroyPlant(
-    String licenseNumber,
-    String id,
-  ) async {
+  static Future<void> destroyPlant({
+    required String id,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/plants/$id';
-    await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {
-          'license': licenseNumber,
-          'delete': true,
-        }
-      },
-    );
+    Map options = getParams(license, orgId, state, delete: true);
+    await APIService.apiRequest(endpoint, options: options);
   }
 }
 
 /// Plant batches
 class MetrcPlantBatches {
   /// Create a new plant batch.
-  static Future<void> createPlantBatch(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> createPlantBatch({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/batches';
-    await APIService.apiRequest(endpoint, data: data, options: {
-      'params': {'license': licenseNumber},
-    });
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get plant batches by date.
-  static Future<List<dynamic>> getPlantBatches(
-    String licenseNumber, {
+  static Future<List<PlantBatch>> getPlantBatches({
     required String startDate,
     required String endDate,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/batches';
-    var response = await APIService.apiRequest(endpoint, options: {
+    Map options = {
       'params': {
-        'license': licenseNumber,
+        'license': license,
+        'org_id': orgId,
+        'state': state,
         'start': startDate,
         'end': endDate,
       },
-    });
-    return response as List<dynamic>;
+    };
+    var response = await APIService.apiRequest(endpoint, options: options);
+    List<PlantBatch> items = [];
+    for (var item in response) {
+      items.add(PlantBatch.fromMap(item));
+    }
+    return items;
   }
 
   /// Create a package from a batch.
-  static Future<void> createPackageFromBatch(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
-    String endpoint = '/api/metrc/packages/v1/packages/createfromplantbatch';
-    await APIService.apiRequest(endpoint, data: data, options: {
-      'params': {'license': licenseNumber},
-    });
+  static Future<void> createPackageFromBatch({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
+    String endpoint = '/api/metrc/batches';
+    Map options =
+        getParams(license, orgId, state, action: 'create-plant-package');
+    await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Flower plants in a batch.
-  static Future<void> flowerPlantsBatch(
-    String licenseNumber, {
+  static Future<void> flowerPlantsBatch({
     required String id,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/batches';
-    await APIService.apiRequest(endpoint, options: {
-      'params': {'license': licenseNumber},
-      'action': 'flower',
-    });
+    Map options = getParams(license, orgId, state, action: 'flower');
+    await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Destroy plants in a batch.
-  static Future<void> destroyPlantsBatchPlants(
-    String licenseNumber, {
+  static Future<void> destroyPlantsBatchPlants({
     required String id,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/batches';
-    await APIService.apiRequest(endpoint, options: {
-      'params': {'license': licenseNumber},
-      'action': 'destroy-plants',
-    });
+    Map options = getParams(license, orgId, state, action: 'destroy-plants');
+    await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Add additives.
-  static Future<void> addPlantsBatchAdditives(
-    String licenseNumber,
-    Map data,
-  ) async {
+  static Future<void> addPlantsBatchAdditives({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/batches';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'add-additives',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'add-additives');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Move batch.
-  static Future<void> movePlantBatch(
-    String licenseNumber, {
+  static Future<void> movePlantBatch({
     required String name,
     required String location,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/batches';
-    await APIService.apiRequest(
-      endpoint,
-      data: {
-        'name': name,
-        'location': location,
-        'move_date': DateTime.now().toIso8601String(),
-      },
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'move',
-      },
-    );
+    Map data = {
+      'name': name,
+      'location': location,
+      'move_date': DateTime.now().toIso8601String(),
+    };
+    Map options = getParams(license, orgId, state, action: 'move');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Split batch.
-  static Future<void> splitPlantBatch(
-    String licenseNumber, {
+  static Future<void> splitPlantBatch({
     required String name,
     required String newName,
     required int count,
     required String location,
     required String strain,
     String? patientLicenseNumber,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/batches';
-    await APIService.apiRequest(
-      endpoint,
-      data: {
-        'plant_batch': name,
-        'group_name': newName,
-        'count': count,
-        'location': location,
-        'strain': strain,
-        'patient_license_number': patientLicenseNumber,
-        'actual_date': DateTime.now().toIso8601String(),
-      },
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'split',
-      },
-    );
+    Map data = {
+      'plant_batch': name,
+      'group_name': newName,
+      'count': count,
+      'location': location,
+      'strain': strain,
+      'patient_license_number': patientLicenseNumber,
+      'actual_date': DateTime.now().toIso8601String(),
+    };
+    Map options = getParams(license, orgId, state, action: 'split');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 }
 
 /// Harvests
 class MetrcHarvests {
   /// Get harvests.
-  static Future<List<dynamic>> getHarvests(
-    String licenseNumber, {
+  static Future<List<PlantHarvest>> getHarvests({
     String? start,
     String? end,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/harvests';
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {
-          'license': licenseNumber,
-          'start': start,
-          'end': end,
-        },
+    Map options = {
+      'params': {
+        'license': license,
+        'org_id': orgId,
+        'state': state,
+        'start': start,
+        'end': end,
       },
-    );
-    return response as List<dynamic>;
+    };
+    var response = await APIService.apiRequest(endpoint, options: options);
+    List<PlantHarvest> items = [];
+    for (var item in response) {
+      items.add(PlantHarvest.fromMap(item));
+    }
+    return items;
   }
 
   /// Create a package.
-  static Future<void> createPackage(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> createPackage({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/packages';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'create-packages',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'create-packages');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Create a testing package.
-  static Future<void> createTestingPackage(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> createTestingPackage({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/packages';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'create-testing-packages',
-      },
-    );
+    Map options =
+        getParams(license, orgId, state, action: 'create-testing-packages');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Remove waste weight from a harvest.
-  static Future<void> removeWaste(
-    String licenseNumber,
-    Map data,
-  ) async {
+  static Future<void> removeWaste({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/harvests';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'remove-waste',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'remove-waste');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Finish a harvest.
-  static Future<void> finishHarvest(
-    String licenseNumber,
-    String harvestId,
-  ) async {
-    String endpoint = '/api/metrc/harvests';
-    await APIService.apiRequest(
-      endpoint,
-      data: {
-        'actual_date': DateTime.now().toIso8601String(),
-        'id': harvestId,
-      },
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'finish',
-      },
-    );
+  static Future<void> finishHarvest({
+    required String id,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
+    String endpoint = '/api/metrc/harvests/$id';
+    Map data = {'actual_date': DateTime.now().toIso8601String()};
+    Map options = getParams(license, orgId, state, action: 'finish');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Unfinish a harvest.
-  static Future<void> unfinishHarvest(
-    String licenseNumber,
-    String harvestId,
-  ) async {
-    String endpoint = '/api/metrc/harvests';
-    await APIService.apiRequest(
-      endpoint,
-      data: {'id': harvestId},
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'unfinish',
-      },
-    );
+  static Future<void> unfinishHarvest({
+    required String id,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
+    String endpoint = '/api/metrc/harvests/$id';
+    Map options = getParams(license, orgId, state, action: 'unfinish');
+    await APIService.apiRequest(endpoint, options: options);
   }
 }
 
 /// Packages
 class MetrcPackages {
   /// Get packages.
-  static Future<List<dynamic>> getPackages(
-    String licenseNumber, {
+  static Future<List<Package>> getPackages({
     String? label,
     String? start,
     String? end,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/packages';
     if (label != null) label += '/$label';
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {
-          'license': licenseNumber,
-          'start': start,
-          'end': end,
-        },
+    Map options = {
+      'params': {
+        'license': license,
+        'org_id': orgId,
+        'state': state,
+        'start': start,
+        'end': end,
       },
-    );
-    return response as List<dynamic>;
+    };
+    var response = await APIService.apiRequest(endpoint, options: options);
+    List<Package> items = [];
+    for (var item in response) {
+      items.add(Package.fromMap(item));
+    }
+    return items;
   }
 
   /// Create a package from another package.
-  static Future<void> createPackageFromPackage(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> createPackageFromPackage({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/packages';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-      },
-    );
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Change the item of a package.
-  static Future<void> changePackageItem(
-    String licenseNumber, {
+  static Future<void> changePackageItem({
     required String label,
     required String itemName,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/packages';
-    await APIService.apiRequest(
-      endpoint,
-      data: {
-        'label': label,
-        'item': itemName,
-      },
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'change-package-items',
-      },
-    );
+    Map data = {
+      'label': label,
+      'item': itemName,
+    };
+    Map options =
+        getParams(license, orgId, state, action: 'change-package-items');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Change the location of a package.
-  static Future<void> changePackageLocation(
-    String licenseNumber, {
+  static Future<void> changePackageLocation({
     required String packageLabel,
     required String location,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/packages';
-    await APIService.apiRequest(
-      endpoint,
-      data: {
-        'label': packageLabel,
-        'location': location,
-        'move_date': DateTime.now().toIso8601String(),
-      },
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'move',
-      },
-    );
+    Map data = {
+      'label': packageLabel,
+      'location': location,
+      'move_date': DateTime.now().toIso8601String(),
+    };
+    Map options = getParams(license, orgId, state, action: 'move');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Create a plant batch from a package.
-  static Future<void> createPlantBatchFromPackage(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> createPlantBatchFromPackage({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/packages';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'create-plant-batches',
-      },
-    );
+    Map options =
+        getParams(license, orgId, state, action: 'create-plant-batches');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Adjust the weight of a package.
-  static Future<void> adjustPackageWeight(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> adjustPackageWeight({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/packages';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'adjust',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'adjust');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Finish a package.
-  static Future<void> finishPackage(
-    String licenseNumber, {
+  static Future<void> finishPackage({
     required String label,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/packages';
-    await APIService.apiRequest(
-      endpoint,
-      data: {
-        'label': label,
-        'actual_date': DateTime.now().toIso8601String(),
-      },
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'finish',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'finish');
+    Map data = {
+      'label': label,
+      'actual_date': DateTime.now().toIso8601String(),
+    };
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Unfinish a package.
-  static Future<void> unfinishPackage(
-    String licenseNumber, {
+  static Future<void> unfinishPackage({
     required String label,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/packages';
-    await APIService.apiRequest(
-      endpoint,
-      data: {'label': label},
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'unfinish',
-      },
-    );
+    Map data = {'label': label};
+    Map options = getParams(license, orgId, state, action: 'unfinish');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Remediate a package.
-  static Future<void> remediatePackage(
-    String licenseNumber,
-    Map data,
-  ) async {
+  static Future<void> remediatePackage({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/packages';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'remediate',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'remediate');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Update the note for a package.
-  static Future<void> updatePackageNote(
-    String licenseNumber, {
+  static Future<void> updatePackageNote({
     required String label,
     required String note,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/packages';
-    await APIService.apiRequest(
-      endpoint,
-      data: {
-        'package_label': label,
-        'note': note,
-      },
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'update-package-notes',
-      },
-    );
+    Map data = {
+      'package_label': label,
+      'note': note,
+    };
+    Map options =
+        getParams(license, orgId, state, action: 'update-package-notes');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 }
 
 /// Items
 class MetrcItems {
   /// Create items.
-  static Future<void> createItems(
-    String licenseNumber,
-    List<Map<String, dynamic>> data,
-  ) async {
+  static Future<void> createItems({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/items';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber}
-      },
-    );
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Get items.
-  static Future<List<dynamic>> getItems(
-    String licenseNumber, {
+  static Future<List<Item>> getItems({
     String? id,
     String? start,
     String? end,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/items';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {
-          'license': licenseNumber,
-          'start': start,
-          'end': end,
-        }
-      },
-    );
-    return response as List<dynamic>;
+    Map options = {
+      'params': {
+        'license': license,
+        'start': start,
+        'end': end,
+      }
+    };
+    var response = await APIService.apiRequest(endpoint, options: options);
+    List<Item> items = [];
+    for (var item in response) {
+      items.add(Item.fromMap(item));
+    }
+    return items;
   }
 
   /// Update an item.
-  static Future<void> updateItem(
-    String licenseNumber,
-    String id,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> updateItem({
+    required String id,
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/items/$id';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber}
-      },
-    );
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Delete an item.
-  static Future<void> deleteItem(
-    String licenseNumber,
-    String id,
-  ) async {
+  static Future<void> deleteItem({
+    required String id,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/items/$id';
-    await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {'license': licenseNumber},
-        'delete': true
-      },
-    );
+    Map options = getParams(license, orgId, state, delete: true);
+    await APIService.apiRequest(endpoint, options: options);
   }
 }
 
 /// Transfers
 class MetrcTransfers {
   /// Set up an external transfer.
-  static Future<void> createExternalTransfer(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> createExternalTransfer({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/transfers';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-      },
-    );
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Get external transfers.
-  static Future<List<dynamic>> getTransactions(
-    String licenseNumber, {
+  static Future<List<SalesTransaction>> getTransactions({
     String? id,
     String? type,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/transfers';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {'license': licenseNumber},
-        'type': type,
+    Map options = {
+      'params': {
+        'license': license,
+        'org_id': orgId,
+        'state': state,
       },
-    );
-    return response as List<dynamic>;
+      'type': type,
+    };
+    var response = await APIService.apiRequest(endpoint, options: options);
+    List<SalesTransaction> items = [];
+    for (var item in response) {
+      items.add(SalesTransaction.fromMap(item));
+    }
+    return items;
   }
 
   /// Update an external transfer.
-  static Future<void> updateExternalTransfer(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> updateExternalTransfer({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/transfers';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'update',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'update');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Create a transfer template.
-  static Future<void> createTransferTemplate(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> createTransferTemplate({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/transfers/templates';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-      },
-    );
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Get transfer templates.
-  static Future<List<dynamic>> getTransferTemplates(
-    String licenseNumber, {
+  static Future<List<dynamic>> getTransferTemplates({
     String? id,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/transactions';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {'license': licenseNumber},
-      },
-    );
-    return response as List<dynamic>;
+    Map options = getParams(license, orgId, state);
+    var response = await APIService.apiRequest(endpoint, options: options);
+    // TODO: Use a template model.
+    List<Map> items = [];
+    for (var item in response) {
+      items.add(item);
+    }
+    return items;
   }
 
   /// Update a transfer template.
-  static Future<void> updateTransferTemplate(
-    String licenseNumber,
-    String id,
-    String data,
-  ) async {
+  static Future<void> updateTransferTemplate({
+    required String id,
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/transfers/templates/$id';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'update',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'update');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Delete a transfer template.
-  Future<void> deleteTransferTemplate(
-    String licenseNumber, {
+  Future<void> deleteTransferTemplate({
     required String id,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/transfers/templates/$id';
-    await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {'license': licenseNumber},
-        'delete': true,
-      },
-    );
+    Map options = getParams(license, orgId, state, delete: true);
+    await APIService.apiRequest(endpoint, options: options);
   }
 }
 
@@ -1167,391 +1058,373 @@ class MetrcLabTests {
   /// TODO: Upload a COA.
 
   /// Get a COA by appending `id` to the URL.
-  static Future<dynamic> getCOA(
-    String licenseNumber, {
+  static Future<dynamic> getCOA({
     required String id,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/tests/coas/$id';
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {'license': licenseNumber},
-      },
-    );
-    return response;
+    Map options = getParams(license, orgId, state);
+    var response = await APIService.apiRequest(endpoint, options: options);
+    // TODO: Return a custom model.
     // return LabResult.fromMap(response);
+    return response;
   }
 }
 
 /// Patients
 class MetrcPatients {
   /// Get active patients.
-  static Future<List<Patient>> getPatients(
-    String licenseNumber, {
+  static Future<List<Patient>> getPatients({
     String? id,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/patients';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {
-          'license': licenseNumber,
-        },
-      },
-    );
-    return response as List<Patient>;
+    Map options = getParams(license, orgId, state);
+    final response = await APIService.apiRequest(endpoint, options: options);
+    List<Patient> items = [];
+    for (var item in response) {
+      items.add(Patient.fromMap(item));
+    }
+    return items;
   }
 
   /// Get patient.
-  static Future<Patient> getPatient(
-    String licenseNumber, {
-    String? id,
+  static Future<Patient> getPatient({
+    required String id,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
-    List<Patient> response = await getPatients(licenseNumber, id: id);
-    return response[0];
+    String endpoint = '/api/metrc/deliveries/$id';
+    Map options = getParams(license, orgId, state);
+    final response = await APIService.apiRequest(endpoint, options: options);
+    return Patient.fromMap(response);
   }
 
   /// Get patient registration locations.
-  static Future<List<dynamic>> getPatientLocations(
-    String licenseNumber,
-  ) async {
+  static Future<List<dynamic>> getPatientLocations({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/patients/locations';
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {'license': licenseNumber},
-      },
-    );
-    return response as List<dynamic>;
+    Map options = getParams(license, orgId, state);
+    var response = await APIService.apiRequest(endpoint, options: options);
+    // TODO: Use custom model.
+    List<Map> items = [];
+    for (var item in response) {
+      items.add(item);
+    }
+    return items;
   }
 
   /// Add a patient.
-  static Future<void> addPatient(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> addPatient({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/patients';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-      },
-    );
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Update a patient.
-  static Future<void> updatePatient(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> updatePatient({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/patients';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'update',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'update');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Delete a patient.
-  static Future<void> deletePatient(
-    String licenseNumber, {
+  static Future<void> deletePatient({
     required String id,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/patients/$id';
-    await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {'license': licenseNumber},
-        'delete': true,
-      },
-    );
+    Map options = getParams(license, orgId, state, delete: true);
+    await APIService.apiRequest(endpoint, options: options);
   }
 }
 
 /// Sales
-class MetrcSales {
-  /// Create a sales receipt for a package.
-  static Future<void> createSalesReceipt(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
-    String endpoint = '/api/metrc/sales';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-      },
-    );
-  }
-
+class MetrcSalesReceipts {
   /// Get sales by date or ID.
-  static Future<List<dynamic>> getSalesReceipts(
-    String licenseNumber, {
+  static Future<List<SalesReceipt>> getSalesReceipts({
     String? id,
     String? start,
     String? end,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/sales';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {
-          'license': licenseNumber,
-          'end': end,
-          'start': start,
-        },
+    Map options = {
+      'params': {
+        'license': license,
+        'org_id': orgId,
+        'state': state,
+        'end': end,
+        'start': start,
       },
-    );
-    return response as List<dynamic>;
+    };
+    var response = await APIService.apiRequest(endpoint, options: options);
+    List<SalesReceipt> items = [];
+    for (var item in response) {
+      items.add(SalesReceipt.fromMap(item));
+    }
+    return items;
+  }
+
+  /// Create a sales receipt for a package.
+  static Future<void> createSalesReceipt({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
+    String endpoint = '/api/metrc/sales';
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Update a sales receipt.
-  static Future<void> updateSalesReceipt(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> updateSalesReceipt({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/sales';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'update',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'update');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Void a sales receipt.
-  static Future<void> voidSalesReceipt(
-    String licenseNumber,
-    String id,
-  ) async {
+  static Future<void> voidSalesReceipt({
+    required String id,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/sales/$id';
-    await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {'license': licenseNumber},
-        'delete': true,
-      },
-    );
+    Map options = getParams(license, orgId, state, delete: true);
+    await APIService.apiRequest(endpoint, options: options);
   }
 }
 
 /// Transactions
-class MetrcTransactions {
+class MetrcSalesTransactions {
   /// Get transactions (daily statistics).
-  static Future<List<dynamic>> getTransactions(
-    String licenseNumber,
-    String start,
-    String end,
-  ) async {
+  static Future<List<SalesTransaction>> getTransactions({
+    String? license,
+    String? orgId,
+    String? state,
+    String? start,
+    String? end,
+  }) async {
     String endpoint = '/api/metrc/transactions';
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {'license': licenseNumber},
+    Map options = {
+      'params': {
+        'license': license,
+        'org_id': orgId,
+        'state': state,
         'end': end,
         'start': start,
       },
-    );
-    return response as List<dynamic>;
+    };
+    var response = await APIService.apiRequest(endpoint, options: options);
+    List<SalesTransaction> items = [];
+    for (var item in response) {
+      items.add(SalesTransaction.fromMap(item));
+    }
+    return items;
   }
 
   /// Add transactions on a particular day.
-  static Future<void> addTransaction(
-    String licenseNumber,
-    String date,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> addTransaction({
+    required String date,
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/transactions/$date';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-      },
-    );
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Update transactions on a particular day.
-  static Future<void> updateTransaction(
-    String licenseNumber,
-    String date,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> updateTransaction({
+    required String date,
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/transactions/$date';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'update',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'update');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 }
 
 /// Deliveries
 class MetrcDeliveries {
   /// Get deliveries.
-  static Future<List<dynamic>> getDeliveries(
-    String licenseNumber, {
+  static Future<List<Delivery>> getDeliveries({
     String? id,
     String? start,
     String? end,
     String? salesStart,
     String? salesEnd,
     String? type,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/deliveries';
     if (id != null) endpoint += '/$id';
-    var response = await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {
-          'license': licenseNumber,
-          'end': end,
-          'start': start,
-          'salesStart': salesStart,
-          'salesEnd': salesEnd,
-          'type': type,
-        },
+    Map options = {
+      'params': {
+        'license': license,
+        'org_id': orgId,
+        'state': state,
+        'end': end,
+        'start': start,
+        'salesStart': salesStart,
+        'salesEnd': salesEnd,
+        'type': type,
       },
-    );
-    return response as List<dynamic>;
+    };
+    var response = await APIService.apiRequest(endpoint, options: options);
+    List<Delivery> items = [];
+    for (var item in response) {
+      items.add(Delivery.fromMap(item));
+    }
+    return items;
+  }
+
+  // Get a location.
+  static Future<Delivery> getDelivery({
+    required String id,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
+    String endpoint = '/api/metrc/deliveries/$id';
+    Map options = getParams(license, orgId, state);
+    final response = await APIService.apiRequest(endpoint, options: options);
+    return Delivery.fromMap(response);
   }
 
   /// Create a delivery.
-  static Future<void> createDelivery(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> createDelivery({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/deliveries';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber}
-      },
-    );
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Update a delivery.
-  static Future<void> updateDelivery(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> updateDelivery({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/deliveries';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'update',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'update');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Delete a delivery.
-  Future<void> deleteDelivery(
-    String licenseNumber, {
+  static Future<void> deleteDelivery({
     required String id,
+    String? license,
+    String? orgId,
+    String? state,
   }) async {
     String endpoint = '/api/metrc/deliveries/$id';
-    await APIService.apiRequest(
-      endpoint,
-      options: {
-        'params': {'license': licenseNumber},
-        'delete': true,
-      },
-    );
+    Map options = getParams(license, orgId, state, delete: true);
+    await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Complete a delivery.
-  static Future<void> completeDelivery(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> completeDelivery({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/deliveries';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'complete',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'complete');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Depart a delivery.
-  static Future<void> departDelivery(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> departDelivery({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/deliveries';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'depart',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'depart');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Restock a delivery.
-  static Future<void> restockDelivery(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> restockDelivery({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/deliveries';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'restock',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'restock');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// Deliver a delivery.
-  static Future<void> deliverDelivery(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> deliverDelivery({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/deliveries';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'deliver',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'deliver');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// End a delivery.
-  static Future<void> endDelivery(
-    String licenseNumber,
-    Map<String, dynamic> data,
-  ) async {
+  static Future<void> endDelivery({
+    required Map data,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/deliveries';
-    await APIService.apiRequest(
-      endpoint,
-      data: data,
-      options: {
-        'params': {'license': licenseNumber},
-        'action': 'end',
-      },
-    );
+    Map options = getParams(license, orgId, state, action: 'end');
+    await APIService.apiRequest(endpoint, data: data, options: options);
   }
 
   /// TODO: Get drivers and vehicles.
@@ -1560,109 +1433,167 @@ class MetrcDeliveries {
 /// Types
 class MetrcTypes {
   /// Get adjustment reasons.
-  Future<List<dynamic>> getAdjustments() async {
+  Future<List<dynamic>> getAdjustments({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/adjustments';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get batch types.
-  Future<List<dynamic>> getBatchTypes() async {
+  Future<List<dynamic>> getBatchTypes({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/batches';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get categories.
-  Future<List<dynamic>> getCategories() async {
+  Future<List<dynamic>> getCategories({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/categories';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get customer types.
-  Future<List<dynamic>> getCustomerTypes() async {
+  Future<List<dynamic>> getCustomerTypes({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/customers';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get growth phases.
-  Future<List<dynamic>> getGrowthPhases() async {
+  Future<List<dynamic>> getGrowthPhases({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/growth-phases';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
-  // /// Get location types.
-  // Future<List<dynamic>> getLocationTypes() async {
-  //   String endpoint = '/api/metrc/types/locations';
-  //   return await APIService.apiRequest(endpoint);
-  // }
-
   /// Get package types.
-  Future<List<dynamic>> getPackageTypes() async {
+  Future<List<dynamic>> getPackageTypes({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/packages';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get package statuses.
-  Future<List<dynamic>> getPackageStatuses() async {
+  Future<List<dynamic>> getPackageStatuses({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/package-statuses';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get return reasons.
-  Future<List<dynamic>> getReturnReasons() async {
+  Future<List<dynamic>> getReturnReasons({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/return-reasons';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get test statuses.
-  static Future<List<dynamic>> getLocationTypes({
-    String? licenseNumber,
+  static Future<List<dynamic>> getTestStatuses({
+    String? license,
     String? orgId,
     String? state,
   }) async {
     String endpoint = '/api/metrc/types/test-statuses';
-    return await APIService.apiRequest(
-      endpoint,
-      options: getParams(licenseNumber, orgId, state),
-    );
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
-  // Future<List<dynamic>> getTestStatuses() async {
-  //   String endpoint = '/api/metrc/types/test-statuses';
-  //   return await APIService.apiRequest(endpoint);
-  // }
 
   /// Get test types.
-  Future<List<dynamic>> getTestTypes() async {
+  Future<List<dynamic>> getTestTypes({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/tests';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get transfer types.
-  Future<List<dynamic>> getTransferTypes() async {
+  Future<List<dynamic>> getTransferTypes({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/transfers';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get units of measure.
-  Future<List<dynamic>> getUnitsOfMeasure() async {
+  Future<List<dynamic>> getUnitsOfMeasure({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/units';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get waste types.
-  Future<List<dynamic>> getWasteTypes() async {
+  Future<List<dynamic>> getWasteTypes({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/waste';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get waste methods.
-  Future<List<dynamic>> getWasteMethods() async {
+  Future<List<dynamic>> getWasteMethods({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/waste-methods';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 
   /// Get waste reasons.
-  Future<List<dynamic>> getWasteReasons() async {
+  Future<List<dynamic>> getWasteReasons({
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
     String endpoint = '/api/metrc/types/waste-reasons';
-    return await APIService.apiRequest(endpoint);
+    Map options = getParams(license, orgId, state);
+    return await APIService.apiRequest(endpoint, options: options);
   }
 }

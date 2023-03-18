@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/9/2023
+// Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // Dart imports:
 
@@ -28,7 +28,7 @@ import 'package:cannlytics_app/ui/business/items/item_screen.dart';
 import 'package:cannlytics_app/ui/business/items/items_screen.dart';
 import 'package:cannlytics_app/ui/business/locations/location_screen.dart';
 import 'package:cannlytics_app/ui/business/locations/locations_screen.dart';
-import 'package:cannlytics_app/ui/business/packages/package_items_screen.dart';
+import 'package:cannlytics_app/ui/business/packages/package_screen.dart';
 import 'package:cannlytics_app/ui/business/packages/packages_screen.dart';
 import 'package:cannlytics_app/ui/business/patients/patient_screen.dart';
 import 'package:cannlytics_app/ui/business/patients/patients_screen.dart';
@@ -40,10 +40,10 @@ import 'package:cannlytics_app/ui/business/plants/plant_screen.dart';
 import 'package:cannlytics_app/ui/business/plants/plants_screen.dart';
 import 'package:cannlytics_app/ui/business/results/result_screen.dart';
 import 'package:cannlytics_app/ui/business/results/results_screen.dart';
-import 'package:cannlytics_app/ui/business/sales/receipt_screen.dart';
-import 'package:cannlytics_app/ui/business/sales/receipts_screen.dart';
-import 'package:cannlytics_app/ui/business/sales/transaction_screen.dart';
-import 'package:cannlytics_app/ui/business/sales/transactions_screen.dart';
+import 'package:cannlytics_app/ui/business/receipts/receipt_screen.dart';
+import 'package:cannlytics_app/ui/business/receipts/receipts_screen.dart';
+import 'package:cannlytics_app/ui/business/transactions/transaction_screen.dart';
+import 'package:cannlytics_app/ui/business/transactions/transactions_screen.dart';
 import 'package:cannlytics_app/ui/business/strains/strain_screen.dart';
 import 'package:cannlytics_app/ui/business/strains/strains_screen.dart';
 import 'package:cannlytics_app/ui/business/transfers/transfer_screen.dart';
@@ -135,7 +135,7 @@ class Routes {
           name: AppRoutes.delivery.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return DeliveryScreen(jobId: id);
+            return DeliveryScreen(id: id);
           },
         ),
       ],
@@ -169,7 +169,7 @@ class Routes {
           name: AppRoutes.facility.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return FacilityScreen(jobId: id);
+            return FacilityScreen(id: id);
           },
         ),
       ],
@@ -203,7 +203,7 @@ class Routes {
           name: AppRoutes.patient.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return PatientScreen(jobId: id);
+            return PatientScreen(id: id);
           },
         ),
       ],
@@ -220,7 +220,7 @@ class Routes {
           name: AppRoutes.package.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return PackageScreen(jobId: id);
+            return PackageScreen(id: id);
           },
         ),
       ],
@@ -237,7 +237,7 @@ class Routes {
           name: AppRoutes.item.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return ItemScreen(jobId: id);
+            return ItemScreen(id: id);
           },
         ),
       ],
@@ -254,7 +254,7 @@ class Routes {
           name: AppRoutes.plant.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return PlantScreen(jobId: id);
+            return PlantScreen(id: id);
           },
         ),
       ],
@@ -271,7 +271,7 @@ class Routes {
           name: AppRoutes.plantBatch.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return PlantBatchScreen(jobId: id);
+            return PlantBatchScreen(id: id);
           },
         ),
       ],
@@ -288,7 +288,7 @@ class Routes {
           name: AppRoutes.plantHarvest.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return PlantHarvestScreen(jobId: id);
+            return PlantHarvestScreen(id: id);
           },
         ),
       ],
@@ -298,14 +298,14 @@ class Routes {
     AppRoute(
       path: '/results',
       name: AppRoutes.results.name,
-      builder: (context, state) => ResultsScreen(),
+      builder: (context, state) => LabResultsScreen(),
       routes: [
         AppRoute(
           path: ':id',
           name: AppRoutes.result.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return ResultScreen(jobId: id);
+            return LabResultScreen(id: id);
           },
         ),
       ],
@@ -315,14 +315,14 @@ class Routes {
     AppRoute(
       path: '/receipts',
       name: AppRoutes.receipts.name,
-      builder: (context, state) => ReceiptsScreen(),
+      builder: (context, state) => SalesReceiptsScreen(),
       routes: [
         AppRoute(
           path: ':id',
           name: AppRoutes.receipt.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return ReceiptScreen(jobId: id);
+            return SalesReceiptScreen(id: id);
           },
         ),
       ],
@@ -332,14 +332,14 @@ class Routes {
     AppRoute(
       path: '/transactions',
       name: AppRoutes.transactions.name,
-      builder: (context, state) => TransactionsScreen(),
+      builder: (context, state) => SalesTransactionsScreen(),
       routes: [
         AppRoute(
           path: ':id',
           name: AppRoutes.transaction.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return TransactionScreen(jobId: id);
+            return SalesTransactionScreen(id: id);
           },
         ),
       ],
@@ -373,7 +373,7 @@ class Routes {
           name: AppRoutes.transfer.name,
           builder: (context, state) {
             final id = state.params['id']!;
-            return TransferScreen(jobId: id);
+            return TransferScreen(id: id);
           },
         ),
       ],

@@ -10,49 +10,46 @@
 // Project imports:
 import 'package:cannlytics_app/services/metrc_service.dart';
 
-typedef PatientId = String;
+typedef PatientId = String?;
 
 /// Model representing a patient.
 class Patient {
   // Initialization.
   const Patient({
-    required this.id,
-    required this.licenseNumber,
-    required this.registrationDate,
-    required this.licenseEffectiveStartDate,
-    required this.licenseEffectiveEndDate,
-    required this.recommendedPlants,
-    required this.recommendedSmokableQuantity,
-    required this.hasSalesLimitExemption,
-    required this.otherFacilitiesCount,
+    this.id,
+    this.licenseNumber,
+    this.registrationDate,
+    this.licenseEffectiveStartDate,
+    this.licenseEffectiveEndDate,
+    this.recommendedPlants,
+    this.recommendedSmokableQuantity,
+    this.hasSalesLimitExemption,
+    this.otherFacilitiesCount,
   });
 
   // Properties.
   final PatientId id;
-  final String licenseNumber;
-  final DateTime registrationDate;
-  final DateTime licenseEffectiveStartDate;
-  final DateTime licenseEffectiveEndDate;
-  final int recommendedPlants;
-  final double recommendedSmokableQuantity;
-  final bool hasSalesLimitExemption;
-  final int otherFacilitiesCount;
+  final String? licenseNumber;
+  final String? registrationDate;
+  final String? licenseEffectiveStartDate;
+  final String? licenseEffectiveEndDate;
+  final int? recommendedPlants;
+  final double? recommendedSmokableQuantity;
+  final bool? hasSalesLimitExemption;
+  final int? otherFacilitiesCount;
 
   // Create model.
   factory Patient.fromMap(Map<String, dynamic> data) {
     return Patient(
-      id: data['id'] ?? '',
-      licenseNumber: data['license_number'] as String,
-      registrationDate: DateTime.parse(data['registration_date'] as String),
-      licenseEffectiveStartDate:
-          DateTime.parse(data['license_effective_start_date'] as String),
-      licenseEffectiveEndDate:
-          DateTime.parse(data['license_effective_end_date'] as String),
-      recommendedPlants: data['recommended_plants'] as int,
-      recommendedSmokableQuantity:
-          data['recommended_smokable_quantity'] as double,
-      hasSalesLimitExemption: data['has_sales_limit_exemption'] as bool,
-      otherFacilitiesCount: data['other_facilities_count'] as int,
+      id: data['id'].toString(),
+      licenseNumber: data['license_number'] ?? '',
+      registrationDate: data['registration_date'] ?? '',
+      licenseEffectiveStartDate: data['license_effective_start_date'] ?? '',
+      licenseEffectiveEndDate: data['license_effective_end_date'] ?? '',
+      recommendedPlants: data['recommended_plants'] ?? 0,
+      recommendedSmokableQuantity: data['recommended_smokable_quantity'] ?? 0,
+      hasSalesLimitExemption: data['has_sales_limit_exemption'] ?? false,
+      otherFacilitiesCount: data['other_facilities_count'] ?? 0,
     );
   }
 
@@ -61,10 +58,9 @@ class Patient {
     return <String, dynamic>{
       'id': id,
       'license_number': licenseNumber,
-      'registration_date': registrationDate.toIso8601String(),
-      'license_effective_start_date':
-          licenseEffectiveStartDate.toIso8601String(),
-      'license_effective_end_date': licenseEffectiveEndDate.toIso8601String(),
+      'registration_date': registrationDate,
+      'license_effective_start_date': licenseEffectiveStartDate,
+      'license_effective_end_date': licenseEffectiveEndDate,
       'recommended_plants': recommendedPlants,
       'recommended_smokable_quantity': recommendedSmokableQuantity,
       'has_sales_limit_exemption': hasSalesLimitExemption,
@@ -72,21 +68,21 @@ class Patient {
     };
   }
 
-  // Create Patient.
-  Future<void> create() async {
-    // Call an API or database to create a new patient.
-    // await MetrcService.createPatient(this.toMap());
-  }
+  // // Create Patient.
+  // Future<void> create() async {
+  //   // Call an API or database to create a new patient.
+  //   // await MetrcService.createPatient(this.toMap());
+  // }
 
-  // Update Patient.
-  Future<void> update() async {
-    // Call an API or database to update the existing patient.
-    // await MetrcService.updatePatient(this.id, this.toMap());
-  }
+  // // Update Patient.
+  // Future<void> update() async {
+  //   // Call an API or database to update the existing patient.
+  //   // await MetrcService.updatePatient(this.id, this.toMap());
+  // }
 
-  // Delete Patient.
-  Future<void> delete() async {
-    // Call an API or database to delete the existing patient.
-    // await MetrcService.deletePatient(this.id);
-  }
+  // // Delete Patient.
+  // Future<void> delete() async {
+  //   // Call an API or database to delete the existing patient.
+  //   // await MetrcService.deletePatient(this.id);
+  // }
 }

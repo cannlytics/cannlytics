@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/9/2023
-// Updated: 3/18/2023
+// Updated: 3/17/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -14,110 +14,107 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/metrc/plant_batch.dart';
+import 'package:cannlytics_app/models/metrc/sales_receipt.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
 import 'package:cannlytics_app/ui/main/app_controller.dart';
 
-/* PlantBatches data */
+/* SalesReceipts data */
 
-// PlantBatches provider.
-final plantBatchesProvider =
-    AsyncNotifierProvider<PlantBatchesController, List<PlantBatch>>(
-        () => PlantBatchesController());
+// SalesReceipts provider.
+final salesReceiptsProvider =
+    AsyncNotifierProvider<SalesReceiptsController, List<SalesReceipt>>(
+        () => SalesReceiptsController());
 
-/// PlantBatches controller.
-class PlantBatchesController extends AsyncNotifier<List<PlantBatch>> {
+/// SalesReceipts controller.
+class SalesReceiptsController extends AsyncNotifier<List<SalesReceipt>> {
   // Load initial data from Metrc.
   @override
-  Future<List<PlantBatch>> build() async => getPlantBatches();
+  Future<List<SalesReceipt>> build() async => getSalesReceipts();
 
-  /// Get plantBatches.
-  Future<List<PlantBatch>> getPlantBatches() async {
+  /// Get salesReceipts.
+  Future<List<SalesReceipt>> getSalesReceipts() async {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final licenseState = ref.read(primaryStateProvider);
     final orgId = ref.read(primaryOrganizationProvider);
     if (licenseNumber == null) return [];
     try {
-      // FIXME:
-      // return await MetrcPlantBatches.getPlantBatches(
-      //   license: licenseNumber,
-      //   orgId: orgId,
-      //   state: licenseState,
-      // );
-      return [];
+      return await MetrcSalesReceipts.getSalesReceipts(
+        license: licenseNumber,
+        orgId: orgId,
+        state: licenseState,
+      );
     } catch (error) {
       print("Error decoding JSON: [error=${error.toString()}]");
       return [];
     }
   }
 
-  /// Set the plantBatch.
-  Future<void> setPlantBatches(List<PlantBatch> items) async {
+  /// Set the salesReceipt.
+  Future<void> setSalesReceipts(List<SalesReceipt> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => items);
   }
 
-  // Create plantBatches.
-  Future<void> createPlantBatches(List<PlantBatch> items) async {
+  // Create salesReceipts.
+  Future<void> createSalesReceipts(List<SalesReceipt> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final licenseNumber = ref.read(primaryLicenseProvider);
       final licenseState = ref.read(primaryStateProvider);
       final orgId = ref.read(primaryOrganizationProvider);
-      for (PlantBatch item in items) {
+      for (SalesReceipt item in items) {
         // FIXME:
-        // await MetrcPlantBatches.createPlantBatch(
+        // await MetrcSalesReceipts.createSalesReceipt(
         //   name: item.name,
-        //   plantBatchTypeName: item.plantBatchTypeName,
+        //   salesReceiptTypeName: item.salesReceiptTypeName,
         //   license: licenseNumber,
         //   orgId: orgId,
         //   state: licenseState,
         // );
       }
-      return await getPlantBatches();
+      return await getSalesReceipts();
     });
   }
 
-  // Update plantBatches.
-  Future<void> updatePlantBatches(List<PlantBatch> items) async {
+  // Update salesReceipts.
+  Future<void> updateSalesReceipts(List<SalesReceipt> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final licenseNumber = ref.read(primaryLicenseProvider);
       final licenseState = ref.read(primaryStateProvider);
       final orgId = ref.read(primaryOrganizationProvider);
-      for (PlantBatch item in items) {
+      for (SalesReceipt item in items) {
         // FIXME:
-        // await MetrcPlantBatches.updatePlantBatch(
+        // await MetrcSalesReceipts.updateSalesReceipt(
         //   id: item.id,
         //   name: item.name,
-        //   plantBatchTypeName:
-        //       item.plantBatchTypeName ?? 'Default PlantBatch Type',
+        //   salesReceiptTypeName: item.salesReceiptTypeName ?? 'Default SalesReceipt Type',
         //   license: licenseNumber,
         //   orgId: orgId,
         //   state: licenseState,
         // );
       }
-      return await getPlantBatches();
+      return await getSalesReceipts();
     });
   }
 
-  // Delete plantBatches.
-  Future<void> deletePlantBatches(List<PlantBatch> items) async {
+  // Delete salesReceipts.
+  Future<void> deleteSalesReceipts(List<SalesReceipt> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final licenseNumber = ref.read(primaryLicenseProvider);
       final licenseState = ref.read(primaryStateProvider);
       final orgId = ref.read(primaryOrganizationProvider);
-      for (PlantBatch item in items) {
+      for (SalesReceipt item in items) {
         // FIXME:
-        // await MetrcPlantBatches.deletePlantBatch(
+        // await MetrcSalesReceipts.deleteSalesReceipt(
         //   id: item.id,
         //   license: licenseNumber,
         //   orgId: orgId,
         //   state: licenseState,
         // );
       }
-      return await getPlantBatches();
+      return await getSalesReceipts();
     });
   }
 }
@@ -125,37 +122,37 @@ class PlantBatchesController extends AsyncNotifier<List<PlantBatch>> {
 /* Table */
 
 // Rows per page provider.
-final plantBatchesRowsPerPageProvider = StateProvider<int>((ref) => 5);
+final salesReceiptsRowsPerPageProvider = StateProvider<int>((ref) => 5);
 
 // Sorting providers.
-final plantBatchesSortColumnIndex = StateProvider<int>((ref) => 0);
-final plantBatchesSortAscending = StateProvider<bool>((ref) => true);
+final salesReceiptsSortColumnIndex = StateProvider<int>((ref) => 0);
+final salesReceiptsSortAscending = StateProvider<bool>((ref) => true);
 
 /* Search */
 
 // Search term provider.
 final searchTermProvider = StateProvider<String>((ref) => '');
 
-/// Filtered plantBatches provider.
-final filteredPlantBatchesProvider =
-    StateNotifierProvider<FilteredPlantBatchesNotifier, List<PlantBatch>>(
+/// Filtered salesReceipts provider.
+final filteredSalesReceiptsProvider =
+    StateNotifierProvider<FilteredSalesReceiptsNotifier, List<SalesReceipt>>(
   (ref) {
     // Listen to both data and search term.
-    final data = ref.watch(plantBatchesProvider).value;
+    final data = ref.watch(salesReceiptsProvider).value;
     final searchTerm = ref.watch(searchTermProvider);
-    return FilteredPlantBatchesNotifier(ref, data ?? [], searchTerm);
+    return FilteredSalesReceiptsNotifier(ref, data ?? [], searchTerm);
   },
 );
 
-/// Filtered plantBatches.
-class FilteredPlantBatchesNotifier extends StateNotifier<List<PlantBatch>> {
+/// Filtered salesReceipts.
+class FilteredSalesReceiptsNotifier extends StateNotifier<List<SalesReceipt>> {
   // Properties.
   final StateNotifierProviderRef<dynamic, dynamic> ref;
-  final List<PlantBatch> items;
+  final List<SalesReceipt> items;
   final String searchTerm;
 
   // Initialization.
-  FilteredPlantBatchesNotifier(
+  FilteredSalesReceiptsNotifier(
     this.ref,
     this.items,
     this.searchTerm,
@@ -166,11 +163,11 @@ class FilteredPlantBatchesNotifier extends StateNotifier<List<PlantBatch>> {
       return;
     }
     String keyword = searchTerm.toLowerCase();
-    List<PlantBatch> matched = [];
+    List<SalesReceipt> matched = [];
     items.forEach((x) {
       // Matching logic.
-      // FIXME:
-      if (x.id!.contains(keyword)) {
+      if (x.receiptNumber!.toLowerCase().contains(keyword) ||
+          x.id!.contains(keyword)) {
         matched.add(x);
       }
     });
@@ -194,24 +191,24 @@ class SearchController extends StateNotifier<TextEditingController> {
 
 /* Selection  */
 
-// PlantBatch selection provider.
-final selectedPlantBatchesProvider =
-    NotifierProvider<SelectedPlantBatchesNotifier, List<PlantBatch>>(
-        () => SelectedPlantBatchesNotifier());
+// SalesReceipt selection provider.
+final selectedSalesReceiptsProvider =
+    NotifierProvider<SelectedSalesReceiptsNotifier, List<SalesReceipt>>(
+        () => SelectedSalesReceiptsNotifier());
 
-// PlantBatch selection.
-class SelectedPlantBatchesNotifier extends Notifier<List<PlantBatch>> {
+// SalesReceipt selection.
+class SelectedSalesReceiptsNotifier extends Notifier<List<SalesReceipt>> {
   // Initialize with an empty list.
   @override
-  List<PlantBatch> build() => [];
+  List<SalesReceipt> build() => [];
 
-  // Select a plantBatch.
-  void selectPlantBatch(PlantBatch item) {
+  // Select a salesReceipt.
+  void selectSalesReceipt(SalesReceipt item) {
     state = [...state, item];
   }
 
-  // Unselect a plantBatch.
-  void unselectPlantBatch(PlantBatch item) {
+  // Unselect a salesReceipt.
+  void unselectSalesReceipt(SalesReceipt item) {
     state = [
       for (final obj in state)
         if (obj.id != item.id) item,
@@ -219,36 +216,37 @@ class SelectedPlantBatchesNotifier extends Notifier<List<PlantBatch>> {
   }
 }
 
-/* PlantBatch Details */
+/* SalesReceipt Details */
 
-// PlantBatch ID.
-final plantBatchId = StateProvider<String?>((ref) => null);
+// SalesReceipt ID.
+final salesReceiptId = StateProvider<String?>((ref) => null);
 
-// PlantBatch provider.
-final plantBatchProvider =
-    AsyncNotifierProvider.family<PlantBatchController, PlantBatch?, String?>(
-  ({id}) => PlantBatchController(id: id),
+// SalesReceipt provider.
+final salesReceiptProvider = AsyncNotifierProvider.family<
+    SalesReceiptController, SalesReceipt?, String?>(
+  ({id}) => SalesReceiptController(id: id),
 );
 
-/// PlantBatches controller.
-class PlantBatchController extends FamilyAsyncNotifier<PlantBatch?, String?> {
-  PlantBatchController({required this.id}) : super();
+/// SalesReceipts controller.
+class SalesReceiptController
+    extends FamilyAsyncNotifier<SalesReceipt?, String?> {
+  SalesReceiptController({required this.id}) : super();
 
   // Properties.
   final String? id;
 
   // Initialization.
   @override
-  FutureOr<PlantBatch?> build(String? id) async {
+  FutureOr<SalesReceipt?> build(String? id) async {
     if (id == null) return null;
     return await this.get(id);
   }
 
-  /// Get plantBatch.
-  Future<PlantBatch?> get(String id) async {
+  /// Get salesReceipt.
+  Future<SalesReceipt?> get(String id) async {
     print('GETTING LOCATION...');
-    final items = ref.read(plantBatchesProvider).value ?? [];
-    for (PlantBatch item in items) {
+    final items = ref.read(salesReceiptsProvider).value ?? [];
+    for (SalesReceipt item in items) {
       if (item.id == id) {
         print('Returning item:');
         print(item);
@@ -259,44 +257,43 @@ class PlantBatchController extends FamilyAsyncNotifier<PlantBatch?, String?> {
     final orgId = ref.read(primaryOrganizationProvider);
     final licenseState = ref.read(primaryStateProvider);
     if (licenseNumber == null) return null;
-    if (id == 'new') return PlantBatch(id: '', name: '');
+    if (id == 'new') return SalesReceipt();
     print('GETTING LOCATION...');
     try {
       // FIXME:
-      // return await MetrcPlantBatches.getPlantBatch(
+      // return await MetrcSalesReceipts.getSalesReceipt(
       //   id: id,
       //   license: licenseNumber,
       //   orgId: orgId,
       //   state: licenseState,
       // );
-      return null;
     } catch (error) {
       throw Exception("Error decoding JSON: [error=${error.toString()}]");
     }
   }
 
-  /// Set the plantBatch.
-  Future<bool> set(PlantBatch item) async {
+  /// Set the salesReceipt.
+  Future<bool> set(SalesReceipt item) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => item);
-    // FIXME:
+    // FIXME: Set values.
     // ref.read(nameController).value = TextEditingValue(text: item.name);
     return state.hasError == false;
   }
 
-  // TODO: Create plantBatch.
-  Future<bool> create(PlantBatch item) async {
+  // TODO: Create salesReceipt.
+  Future<bool> create(SalesReceipt item) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => item);
     return state.hasError == false;
   }
 
-  // TODO: Update plantBatch.
+  // TODO: Update salesReceipt.
 
-  // TODO: Delete plantBatch.
+  // TODO: Delete salesReceipt.
 }
 
-/* PlantBatch Form */
+/* SalesReceipt Form */
 
 // Name field.
 final nameController =
@@ -315,28 +312,28 @@ class NameController extends StateNotifier<TextEditingController> {
   void change(String value) => state.value = TextEditingValue(text: value);
 }
 
-/* PlantBatch Types */
+/* SalesReceipt Types */
 
-// PlantBatch types provider.
-final plantBatchTypesProvider =
-    AsyncNotifierProvider<PlantBatchTypesNotifier, List<dynamic>>(
-        () => PlantBatchTypesNotifier());
+// SalesReceipt types provider.
+final salesReceiptTypesProvider =
+    AsyncNotifierProvider<SalesReceiptTypesNotifier, List<dynamic>>(
+        () => SalesReceiptTypesNotifier());
 
-// PlantBatch types controller.
-class PlantBatchTypesNotifier extends AsyncNotifier<List<dynamic>> {
+// SalesReceipt types controller.
+class SalesReceiptTypesNotifier extends AsyncNotifier<List<dynamic>> {
   // Initialization.
   @override
-  Future<List<dynamic>> build() async => getPlantBatchTypes();
+  Future<List<dynamic>> build() async => getSalesReceiptTypes();
 
-  // Get plantBatch types from Metrc.
-  Future<List<dynamic>> getPlantBatchTypes() async {
+  // Get salesReceipt types from Metrc.
+  Future<List<dynamic>> getSalesReceiptTypes() async {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final orgId = ref.watch(primaryOrganizationProvider);
     final licenseState = ref.watch(primaryStateProvider);
     List<dynamic> data;
     try {
       // FIXME:
-      // data = await MetrcPlantBatches.getPlantBatchTypes(
+      // data = await MetrcSalesReceipts.getSalesReceiptTypes(
       //   license: licenseNumber,
       //   orgId: orgId,
       //   state: licenseState,
@@ -346,11 +343,11 @@ class PlantBatchTypesNotifier extends AsyncNotifier<List<dynamic>> {
       return [];
     }
 
-    // Set initial plantBatch type and permissions.
-    final value = ref.read(plantBatchType);
+    // Set initial salesReceipt type and permissions.
+    final value = ref.read(salesReceiptType);
     if (value == null && data.isNotEmpty) {
       Map initialValue = data[0];
-      ref.read(plantBatchType.notifier).state = initialValue['name'];
+      ref.read(salesReceiptType.notifier).state = initialValue['name'];
       ref.read(forPlants.notifier).state = initialValue['for_plants'];
       ref.read(forPlantBatches.notifier).state =
           initialValue['for_plant_batches'];
@@ -361,8 +358,8 @@ class PlantBatchTypesNotifier extends AsyncNotifier<List<dynamic>> {
   }
 }
 
-// PlantBatch name field.
-final plantBatchType = StateProvider<String?>((ref) => null);
+// SalesReceipt name field.
+final salesReceiptType = StateProvider<String?>((ref) => null);
 
 // Boolean fields.
 final forPlants = StateProvider<bool?>((ref) => null);

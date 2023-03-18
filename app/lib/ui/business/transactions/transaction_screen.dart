@@ -4,20 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/9/2023
-// Updated: 3/9/2023
+// Updated: 3/17/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// TODO: Allow the user to keep logs for their plants.
-// Additional data:
-// - soil type
-// yield, potency, and quality of the buds
-// - Pests and Diseases
-// - weather conditions, air quality, and water source
-// - lighting
 
 // Flutter imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/ui/business/plants/plants_controller.dart';
+import 'package:cannlytics_app/ui/business/transactions/transactions_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
@@ -31,35 +23,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/metrc/plant.dart';
+import 'package:cannlytics_app/models/metrc/sales_transaction.dart';
 import 'package:go_router/go_router.dart';
 
-/// Plant screen.
-class PlantScreen extends ConsumerStatefulWidget {
-  const PlantScreen({super.key, required this.id, this.entry});
+/// SalesTransaction screen.
+class SalesTransactionScreen extends ConsumerStatefulWidget {
+  const SalesTransactionScreen({super.key, required this.id, this.entry});
 
   // Properties.
-  final PlantId id;
-  final Plant? entry;
+  final SalesTransactionId id;
+  final SalesTransaction? entry;
 
   @override
-  ConsumerState<PlantScreen> createState() => _PlantScreenState();
+  ConsumerState<SalesTransactionScreen> createState() =>
+      _SalesTransactionScreenState();
 }
 
-/// Plant screen state.
-class _PlantScreenState extends ConsumerState<PlantScreen> {
+/// SalesTransaction screen state.
+class _SalesTransactionScreenState
+    extends ConsumerState<SalesTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     // Listen for errors.
     ref.listen<AsyncValue>(
-      plantProvider(widget.id),
+      salesTransactionProvider(widget.id),
       (_, state) => state.showAlertDialogOnError(context),
     );
 
-    // Listen for the plant data.
-    var item = ref.watch(plantProvider(widget.id)).value;
+    // Listen for the salesTransaction data.
+    var item = ref.watch(salesTransactionProvider(widget.id)).value;
     if (item == null) {
-      item = Plant(id: 'new');
+      item = SalesTransaction();
     }
 
     // Body.
@@ -79,13 +73,13 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   }
 
   /// Form fields.
-  List<Widget> _fields(Plant item) {
+  List<Widget> _fields(SalesTransaction item) {
     return <Widget>[
-      // Back to plants button.
+      // Back to salesTransactions button.
       CustomTextButton(
-        text: 'Plants',
+        text: 'SalesTransactions',
         onPressed: () {
-          context.go('/plants');
+          context.go('/salesTransactions');
           ref.read(nameController.notifier).change('');
         },
         fontStyle: FontStyle.italic,
@@ -96,28 +90,30 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           // ID.
-          _idField(item),
+          // _idField(item),
 
           // Spacer.
           const Spacer(),
 
           // Actions.
-          // Create / update a plant.
+          // Create / update a salesTransaction.
           PrimaryButton(
             text: (widget.id == 'new') ? 'Create' : 'Save',
             onPressed: () async {
-              // FIXME:
               var name = ref.read(nameController).value.text;
-              var update = Plant(
-                id: widget.id,
-              );
+              // FIXME:
+              var update = SalesTransaction();
               if (widget.id == 'new') {
-                await ref.read(plantsProvider.notifier).createPlants([update]);
+                await ref
+                    .read(salesTransactionsProvider.notifier)
+                    .createSalesTransactions([update]);
               } else {
                 // FIXME:
-                await ref.read(plantsProvider.notifier).updatePlants([update]);
+                await ref
+                    .read(salesTransactionsProvider.notifier)
+                    .updateSalesTransactions([update]);
               }
-              context.go('/plants');
+              context.go('/salesTransactions');
             },
           ),
         ],
@@ -128,21 +124,21 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
       // _nameField(item),
       gapH6,
 
-      // Plant type name and ID.
-      // _plantTypeField(item),
+      // SalesTransaction type name and ID.
+      // _salesTransactionTypeField(item),
 
       // Checkbox fields.
       // ..._checkboxes(item),
 
       // TODO: Allow user's to save additional data in Firestore:
-      // - plant_image
       // - created_at
       // - created_by
       // - updated_at
       // - updated_by
 
-      // Danger zone : Handle deleting an existing plant.
-      if (widget.id.isNotEmpty && widget.id != 'new') _deleteOption(),
+      // Danger zone : Handle deleting an existing salesTransaction.
+      // FIXME:
+      // if (widget.id.isNotEmpty && widget.id != 'new') _deleteOption(),
     ];
   }
 
@@ -170,10 +166,10 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
                 text: 'Delete',
                 onPressed: () async {
                   await ref
-                      .read(plantsProvider.notifier)
-                      .deletePlants([Plant(id: widget.id)]);
+                      .read(salesTransactionsProvider.notifier)
+                      .deleteSalesTransactions([SalesTransaction()]);
                   // FIXME: Clear search, etc. to make table load better.
-                  context.go('/plants');
+                  context.go('/salesTransactions');
                 },
               ),
             ],
@@ -184,17 +180,17 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   }
 
   // ID field.
-  Widget _idField(Plant item) {
-    return Text(
-      (item.id.isEmpty) ? 'New Plant' : 'Plant ${item.id}',
-      style: Theme.of(context).textTheme.titleLarge!.copyWith(
-            color: Theme.of(context).textTheme.titleLarge!.color,
-          ),
-    );
-  }
+  // Widget _idField(SalesTransaction item) {
+  //   return Text(
+  //     (item.id.isEmpty) ? 'New SalesTransaction' : 'SalesTransaction ${item.id}',
+  //     style: Theme.of(context).textTheme.titleLarge!.copyWith(
+  //           color: Theme.of(context).textTheme.titleLarge!.color,
+  //         ),
+  //   );
+  // }
 
-  // Name field.
-  // Widget _nameField(Plant item) {
+  // // Name field.
+  // Widget _nameField(SalesTransaction item) {
   //   final _nameController = ref.watch(nameController);
   //   // Hot-fix: Set the initial value.
   //   if (_nameController.text.isEmpty && item.name.isNotEmpty) {
@@ -215,10 +211,10 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   //   );
   // }
 
-  // // Plant name field.
-  // Widget _plantTypeField(Plant item) {
-  //   final items = ref.watch(plantTypesProvider).value ?? [];
-  //   final value = ref.watch(plantType);
+  // // SalesTransaction name field.
+  // Widget _salesTransactionTypeField(SalesTransaction item) {
+  //   final items = ref.watch(salesTransactionTypesProvider).value ?? [];
+  //   final value = ref.watch(salesTransactionType);
   //   if (items.length == 0 || value == null) return Container();
   //   var dropdown = DropdownButton(
   //     underline: Container(),
@@ -238,8 +234,8 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   //         )
   //         .toList(),
   //     onChanged: (String? value) {
-  //       ref.read(plantType.notifier).state = value;
-  //       // FIXME: Change plant permissions.
+  //       ref.read(salesTransactionType.notifier).state = value;
+  //       // FIXME: Change salesTransaction permissions.
   //     },
   //   );
   //   return Column(
@@ -248,7 +244,7 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   //     children: [
   //       gapH18,
   //       Text(
-  //         'Plant Type Name',
+  //         'SalesTransaction Type Name',
   //         style: Theme.of(context).textTheme.titleMedium!.copyWith(
   //               color: Theme.of(context).textTheme.titleLarge!.color,
   //             ),
@@ -269,8 +265,8 @@ class _PlantScreenState extends ConsumerState<PlantScreen> {
   // }
 
   // // Checkbox fields.
-  // List<Widget> _checkboxes(Plant item) {
-  //   final items = ref.watch(plantTypesProvider).value ?? [];
+  // List<Widget> _checkboxes(SalesTransaction item) {
+  //   final items = ref.watch(salesTransactionTypesProvider).value ?? [];
   //   if (items.length == 0) return [Container()];
   //   return [
   //     gapH12,

@@ -59,8 +59,8 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
           center: Alignment(1, -1),
           radius: 4.0,
           colors: [
-            isDark ? Colors.green : AppColors.neutral1,
-            isDark ? Colors.transparent : Colors.white,
+            isDark ? Colors.green : AppColors.white,
+            isDark ? Colors.transparent : AppColors.primary2,
           ],
         ),
       ),

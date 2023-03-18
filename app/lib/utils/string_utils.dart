@@ -20,6 +20,12 @@ class Format {
     return '${formatted}h';
   }
 
+  /// Create a URL-friendly ID based on the current time.
+  static String documentIdFromCurrentDate() {
+    final iso = DateTime.now().toIso8601String();
+    return iso.replaceAll(':', '-').replaceAll('.', '-');
+  }
+
   /// Format a [DateTime] as a human-readable date..
   static String date(DateTime date) {
     return DateFormat.yMMMd().format(date);

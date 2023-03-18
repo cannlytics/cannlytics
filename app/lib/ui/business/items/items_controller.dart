@@ -3,7 +3,7 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 3/9/2023
+// Created: 2/18/2023
 // Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
@@ -14,110 +14,106 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/metrc/plant_batch.dart';
+import 'package:cannlytics_app/models/metrc/item.dart';
 import 'package:cannlytics_app/services/metrc_service.dart';
 import 'package:cannlytics_app/ui/main/app_controller.dart';
 
-/* PlantBatches data */
+/* Items data */
 
-// PlantBatches provider.
-final plantBatchesProvider =
-    AsyncNotifierProvider<PlantBatchesController, List<PlantBatch>>(
-        () => PlantBatchesController());
+// Items provider.
+final itemsProvider =
+    AsyncNotifierProvider<ItemsController, List<Item>>(() => ItemsController());
 
-/// PlantBatches controller.
-class PlantBatchesController extends AsyncNotifier<List<PlantBatch>> {
+/// Items controller.
+class ItemsController extends AsyncNotifier<List<Item>> {
   // Load initial data from Metrc.
   @override
-  Future<List<PlantBatch>> build() async => getPlantBatches();
+  Future<List<Item>> build() async => getItems();
 
-  /// Get plantBatches.
-  Future<List<PlantBatch>> getPlantBatches() async {
+  /// Get items.
+  Future<List<Item>> getItems() async {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final licenseState = ref.read(primaryStateProvider);
     final orgId = ref.read(primaryOrganizationProvider);
     if (licenseNumber == null) return [];
     try {
-      // FIXME:
-      // return await MetrcPlantBatches.getPlantBatches(
-      //   license: licenseNumber,
-      //   orgId: orgId,
-      //   state: licenseState,
-      // );
-      return [];
+      return await MetrcItems.getItems(
+        license: licenseNumber,
+        orgId: orgId,
+        state: licenseState,
+      );
     } catch (error) {
       print("Error decoding JSON: [error=${error.toString()}]");
       return [];
     }
   }
 
-  /// Set the plantBatch.
-  Future<void> setPlantBatches(List<PlantBatch> items) async {
+  /// Set the item.
+  Future<void> setItems(List<Item> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => items);
   }
 
-  // Create plantBatches.
-  Future<void> createPlantBatches(List<PlantBatch> items) async {
+  // Create items.
+  Future<void> createItems(List<Item> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final licenseNumber = ref.read(primaryLicenseProvider);
       final licenseState = ref.read(primaryStateProvider);
       final orgId = ref.read(primaryOrganizationProvider);
-      for (PlantBatch item in items) {
+      for (Item item in items) {
         // FIXME:
-        // await MetrcPlantBatches.createPlantBatch(
+        // await MetrcItems.createItem(
         //   name: item.name,
-        //   plantBatchTypeName: item.plantBatchTypeName,
+        //   itemTypeName: item.itemTypeName,
         //   license: licenseNumber,
         //   orgId: orgId,
         //   state: licenseState,
         // );
       }
-      return await getPlantBatches();
+      return await getItems();
     });
   }
 
-  // Update plantBatches.
-  Future<void> updatePlantBatches(List<PlantBatch> items) async {
+  // Update items.
+  Future<void> updateItems(List<Item> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final licenseNumber = ref.read(primaryLicenseProvider);
       final licenseState = ref.read(primaryStateProvider);
       final orgId = ref.read(primaryOrganizationProvider);
-      for (PlantBatch item in items) {
+      for (Item item in items) {
         // FIXME:
-        // await MetrcPlantBatches.updatePlantBatch(
+        // await MetrcItems.updateItem(
         //   id: item.id,
         //   name: item.name,
-        //   plantBatchTypeName:
-        //       item.plantBatchTypeName ?? 'Default PlantBatch Type',
+        //   itemTypeName: item.itemTypeName ?? 'Default Item Type',
         //   license: licenseNumber,
         //   orgId: orgId,
         //   state: licenseState,
         // );
       }
-      return await getPlantBatches();
+      return await getItems();
     });
   }
 
-  // Delete plantBatches.
-  Future<void> deletePlantBatches(List<PlantBatch> items) async {
+  // Delete items.
+  Future<void> deleteItems(List<Item> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final licenseNumber = ref.read(primaryLicenseProvider);
       final licenseState = ref.read(primaryStateProvider);
       final orgId = ref.read(primaryOrganizationProvider);
-      for (PlantBatch item in items) {
+      for (Item item in items) {
         // FIXME:
-        // await MetrcPlantBatches.deletePlantBatch(
+        // await MetrcItems.deleteItem(
         //   id: item.id,
         //   license: licenseNumber,
         //   orgId: orgId,
         //   state: licenseState,
         // );
       }
-      return await getPlantBatches();
+      return await getItems();
     });
   }
 }
@@ -125,37 +121,37 @@ class PlantBatchesController extends AsyncNotifier<List<PlantBatch>> {
 /* Table */
 
 // Rows per page provider.
-final plantBatchesRowsPerPageProvider = StateProvider<int>((ref) => 5);
+final itemsRowsPerPageProvider = StateProvider<int>((ref) => 5);
 
 // Sorting providers.
-final plantBatchesSortColumnIndex = StateProvider<int>((ref) => 0);
-final plantBatchesSortAscending = StateProvider<bool>((ref) => true);
+final itemsSortColumnIndex = StateProvider<int>((ref) => 0);
+final itemsSortAscending = StateProvider<bool>((ref) => true);
 
 /* Search */
 
 // Search term provider.
 final searchTermProvider = StateProvider<String>((ref) => '');
 
-/// Filtered plantBatches provider.
-final filteredPlantBatchesProvider =
-    StateNotifierProvider<FilteredPlantBatchesNotifier, List<PlantBatch>>(
+/// Filtered items provider.
+final filteredItemsProvider =
+    StateNotifierProvider<FilteredItemsNotifier, List<Item>>(
   (ref) {
     // Listen to both data and search term.
-    final data = ref.watch(plantBatchesProvider).value;
+    final data = ref.watch(itemsProvider).value;
     final searchTerm = ref.watch(searchTermProvider);
-    return FilteredPlantBatchesNotifier(ref, data ?? [], searchTerm);
+    return FilteredItemsNotifier(ref, data ?? [], searchTerm);
   },
 );
 
-/// Filtered plantBatches.
-class FilteredPlantBatchesNotifier extends StateNotifier<List<PlantBatch>> {
+/// Filtered items.
+class FilteredItemsNotifier extends StateNotifier<List<Item>> {
   // Properties.
   final StateNotifierProviderRef<dynamic, dynamic> ref;
-  final List<PlantBatch> items;
+  final List<Item> items;
   final String searchTerm;
 
   // Initialization.
-  FilteredPlantBatchesNotifier(
+  FilteredItemsNotifier(
     this.ref,
     this.items,
     this.searchTerm,
@@ -166,10 +162,9 @@ class FilteredPlantBatchesNotifier extends StateNotifier<List<PlantBatch>> {
       return;
     }
     String keyword = searchTerm.toLowerCase();
-    List<PlantBatch> matched = [];
+    List<Item> matched = [];
     items.forEach((x) {
-      // Matching logic.
-      // FIXME:
+      // TODO: Matching logic.
       if (x.id!.contains(keyword)) {
         matched.add(x);
       }
@@ -194,24 +189,24 @@ class SearchController extends StateNotifier<TextEditingController> {
 
 /* Selection  */
 
-// PlantBatch selection provider.
-final selectedPlantBatchesProvider =
-    NotifierProvider<SelectedPlantBatchesNotifier, List<PlantBatch>>(
-        () => SelectedPlantBatchesNotifier());
+// Item selection provider.
+final selectedItemsProvider =
+    NotifierProvider<SelectedItemsNotifier, List<Item>>(
+        () => SelectedItemsNotifier());
 
-// PlantBatch selection.
-class SelectedPlantBatchesNotifier extends Notifier<List<PlantBatch>> {
+// Item selection.
+class SelectedItemsNotifier extends Notifier<List<Item>> {
   // Initialize with an empty list.
   @override
-  List<PlantBatch> build() => [];
+  List<Item> build() => [];
 
-  // Select a plantBatch.
-  void selectPlantBatch(PlantBatch item) {
+  // Select a item.
+  void selectItem(Item item) {
     state = [...state, item];
   }
 
-  // Unselect a plantBatch.
-  void unselectPlantBatch(PlantBatch item) {
+  // Unselect a item.
+  void unselectItem(Item item) {
     state = [
       for (final obj in state)
         if (obj.id != item.id) item,
@@ -219,36 +214,36 @@ class SelectedPlantBatchesNotifier extends Notifier<List<PlantBatch>> {
   }
 }
 
-/* PlantBatch Details */
+/* Item Details */
 
-// PlantBatch ID.
-final plantBatchId = StateProvider<String?>((ref) => null);
+// Item ID.
+final itemId = StateProvider<String?>((ref) => null);
 
-// PlantBatch provider.
-final plantBatchProvider =
-    AsyncNotifierProvider.family<PlantBatchController, PlantBatch?, String?>(
-  ({id}) => PlantBatchController(id: id),
+// Item provider.
+final itemProvider =
+    AsyncNotifierProvider.family<ItemController, Item?, String?>(
+  ({id}) => ItemController(id: id),
 );
 
-/// PlantBatches controller.
-class PlantBatchController extends FamilyAsyncNotifier<PlantBatch?, String?> {
-  PlantBatchController({required this.id}) : super();
+/// Items controller.
+class ItemController extends FamilyAsyncNotifier<Item?, String?> {
+  ItemController({required this.id}) : super();
 
   // Properties.
   final String? id;
 
   // Initialization.
   @override
-  FutureOr<PlantBatch?> build(String? id) async {
+  FutureOr<Item?> build(String? id) async {
     if (id == null) return null;
     return await this.get(id);
   }
 
-  /// Get plantBatch.
-  Future<PlantBatch?> get(String id) async {
-    print('GETTING LOCATION...');
-    final items = ref.read(plantBatchesProvider).value ?? [];
-    for (PlantBatch item in items) {
+  /// Get item.
+  Future<Item?> get(String id) async {
+    print('GETTING ITEM...');
+    final items = ref.read(itemsProvider).value ?? [];
+    for (Item item in items) {
       if (item.id == id) {
         print('Returning item:');
         print(item);
@@ -259,44 +254,42 @@ class PlantBatchController extends FamilyAsyncNotifier<PlantBatch?, String?> {
     final orgId = ref.read(primaryOrganizationProvider);
     final licenseState = ref.read(primaryStateProvider);
     if (licenseNumber == null) return null;
-    if (id == 'new') return PlantBatch(id: '', name: '');
-    print('GETTING LOCATION...');
+    if (id == 'new') return Item();
+    print('GETTING ITEM...');
     try {
       // FIXME:
-      // return await MetrcPlantBatches.getPlantBatch(
+      // return await MetrcItems.getItem(
       //   id: id,
       //   license: licenseNumber,
       //   orgId: orgId,
       //   state: licenseState,
       // );
-      return null;
     } catch (error) {
       throw Exception("Error decoding JSON: [error=${error.toString()}]");
     }
   }
 
-  /// Set the plantBatch.
-  Future<bool> set(PlantBatch item) async {
+  /// Set the item.
+  Future<bool> set(Item item) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => item);
-    // FIXME:
-    // ref.read(nameController).value = TextEditingValue(text: item.name);
+    ref.read(nameController).value = TextEditingValue(text: item.name ?? '');
     return state.hasError == false;
   }
 
-  // TODO: Create plantBatch.
-  Future<bool> create(PlantBatch item) async {
+  // TODO: Create item.
+  Future<bool> create(Item item) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => item);
     return state.hasError == false;
   }
 
-  // TODO: Update plantBatch.
+  // TODO: Update item.
 
-  // TODO: Delete plantBatch.
+  // TODO: Delete item.
 }
 
-/* PlantBatch Form */
+/* Item Form */
 
 // Name field.
 final nameController =
@@ -315,28 +308,28 @@ class NameController extends StateNotifier<TextEditingController> {
   void change(String value) => state.value = TextEditingValue(text: value);
 }
 
-/* PlantBatch Types */
+/* Item Types */
 
-// PlantBatch types provider.
-final plantBatchTypesProvider =
-    AsyncNotifierProvider<PlantBatchTypesNotifier, List<dynamic>>(
-        () => PlantBatchTypesNotifier());
+// Item types provider.
+final itemTypesProvider =
+    AsyncNotifierProvider<ItemTypesNotifier, List<dynamic>>(
+        () => ItemTypesNotifier());
 
-// PlantBatch types controller.
-class PlantBatchTypesNotifier extends AsyncNotifier<List<dynamic>> {
+// Item types controller.
+class ItemTypesNotifier extends AsyncNotifier<List<dynamic>> {
   // Initialization.
   @override
-  Future<List<dynamic>> build() async => getPlantBatchTypes();
+  Future<List<dynamic>> build() async => getItemTypes();
 
-  // Get plantBatch types from Metrc.
-  Future<List<dynamic>> getPlantBatchTypes() async {
+  // Get item types from Metrc.
+  Future<List<dynamic>> getItemTypes() async {
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final orgId = ref.watch(primaryOrganizationProvider);
     final licenseState = ref.watch(primaryStateProvider);
     List<dynamic> data;
     try {
       // FIXME:
-      // data = await MetrcPlantBatches.getPlantBatchTypes(
+      // data = await MetrcItems.getItemTypes(
       //   license: licenseNumber,
       //   orgId: orgId,
       //   state: licenseState,
@@ -346,11 +339,11 @@ class PlantBatchTypesNotifier extends AsyncNotifier<List<dynamic>> {
       return [];
     }
 
-    // Set initial plantBatch type and permissions.
-    final value = ref.read(plantBatchType);
+    // Set initial item type and permissions.
+    final value = ref.read(itemType);
     if (value == null && data.isNotEmpty) {
       Map initialValue = data[0];
-      ref.read(plantBatchType.notifier).state = initialValue['name'];
+      ref.read(itemType.notifier).state = initialValue['name'];
       ref.read(forPlants.notifier).state = initialValue['for_plants'];
       ref.read(forPlantBatches.notifier).state =
           initialValue['for_plant_batches'];
@@ -361,8 +354,8 @@ class PlantBatchTypesNotifier extends AsyncNotifier<List<dynamic>> {
   }
 }
 
-// PlantBatch name field.
-final plantBatchType = StateProvider<String?>((ref) => null);
+// Item name field.
+final itemType = StateProvider<String?>((ref) => null);
 
 // Boolean fields.
 final forPlants = StateProvider<bool?>((ref) => null);

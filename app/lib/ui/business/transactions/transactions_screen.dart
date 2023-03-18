@@ -3,8 +3,8 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 3/7/2023
-// Updated: 3/17/2023
+// Created: 3/9/2023
+// Updated: 3/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -20,16 +20,16 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/metrc/delivery.dart';
-import 'package:cannlytics_app/ui/business/deliveries/deliveries_controller.dart';
+import 'package:cannlytics_app/models/metrc/sales_transaction.dart';
+import 'package:cannlytics_app/ui/business/transactions/transactions_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/tables/table_form.dart';
 
-/// Deliveries screen.
-class DeliveriesScreen extends ConsumerWidget {
-  const DeliveriesScreen({super.key});
+/// SalesTransactions screen.
+class SalesTransactionsScreen extends ConsumerWidget {
+  const SalesTransactionsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,8 +42,8 @@ class DeliveriesScreen extends ConsumerWidget {
           // Form.
           SliverToBoxAdapter(
             child: TableForm(
-              title: 'Deliveries',
-              table: DeliveriesTable(),
+              title: 'Sales Transactions',
+              table: SalesTransactionsTable(),
             ),
           ),
 
@@ -55,9 +55,9 @@ class DeliveriesScreen extends ConsumerWidget {
   }
 }
 
-/// Deliveries table.
-class DeliveriesTable extends ConsumerWidget {
-  const DeliveriesTable({super.key});
+/// SalesTransactions table.
+class SalesTransactionsTable extends ConsumerWidget {
+  const SalesTransactionsTable({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -66,22 +66,30 @@ class DeliveriesTable extends ConsumerWidget {
     final isWide = screenWidth > Breakpoints.tablet;
 
     // Get the filtered data.
-    final data = ref.watch(filteredDeliveriesProvider);
+    final data = ref.watch(filteredSalesTransactionsProvider);
 
     // Define the cell builder function.
-    _buildCells(Delivery item) {
+    _buildCells(SalesTransaction item) {
       return <DataCell>[
-        DataCell(Text(item.consumerId ?? '')),
-        DataCell(Text(item.driverEmployeeId ?? '')),
-        DataCell(Text(item.driverName ?? '')),
+        // DataCell(Text(item.id)),
+        // DataCell(Text(item.name)),
+        // DataCell(Text(item.salesTransactionTypeName ?? '')),
+        // DataCell(Text(item.forPackages! ? '✓' : 'x')),
+        // DataCell(Text(item.forPlantBatches! ? '✓' : 'x')),
+        // DataCell(Text(item.forPlants! ? '✓' : 'x')),
+        // DataCell(Text(item.forHarvests! ? '✓' : 'x')),
       ];
     }
 
     // Define the table headers.
     List<Map> headers = [
-      {'name': 'Consumer ID', 'key': 'consumer_id', 'sort': true},
-      {'name': 'Driver Employee ID', 'key': 'driver_employee_id', 'sort': true},
-      {'name': 'Driver Name', 'key': 'driver_name', 'sort': true},
+      // {'name': 'ID', 'key': 'id', 'sort': true},
+      // {'name': 'Name', 'key': 'name', 'sort': true},
+      // {'name': 'Type', 'key': 'salesTransaction_type_name', 'sort': true},
+      // {'name': 'Packages', 'key': 'for_plant_batches', 'sort': false},
+      // {'name': 'Batches', 'key': 'for_plants', 'sort': false},
+      // {'name': 'Plants', 'key': 'for_harvests', 'sort': false},
+      // {'name': 'Harvests', 'key': 'for_packages', 'sort': false},
     ];
 
     // Format the table headers.
@@ -104,23 +112,30 @@ class DeliveriesTable extends ConsumerWidget {
             } else {
               sorted = data.sortedByDescending((x) => x.toMap()[field]);
             }
-            ref.read(deliveriesSortColumnIndex.notifier).state = columnIndex;
-            ref.read(deliveriesSortAscending.notifier).state = sortAscending;
-            ref.read(deliveriesProvider.notifier).setDeliveries(sorted);
+            ref.read(salesTransactionsSortColumnIndex.notifier).state =
+                columnIndex;
+            ref.read(salesTransactionsSortAscending.notifier).state =
+                sortAscending;
+            ref
+                .read(salesTransactionsProvider.notifier)
+                .setSalesTransactions(sorted);
           },
         ),
     ];
 
     // Get the rows per page.
-    final rowsPerPage = ref.watch(deliveriesRowsPerPageProvider);
+    final rowsPerPage = ref.watch(salesTransactionsRowsPerPageProvider);
 
     // Get the selected rows.
-    List<Delivery> selectedRows = ref.watch(selectedDeliveriesProvider);
-    List<dynamic> selectedIds = selectedRows.map((x) => x.consumerId).toList();
+    List<SalesTransaction> selectedRows =
+        ref.watch(selectedSalesTransactionsProvider);
+    // FIXME:
+    // List<String> selectedIds = selectedRows.map((x) => x.id).toList();
+    List<String> selectedIds = [];
 
     // Get the sorting state.
-    final sortColumnIndex = ref.read(deliveriesSortColumnIndex);
-    final sortAscending = ref.read(deliveriesSortAscending);
+    final sortColumnIndex = ref.read(salesTransactionsSortColumnIndex);
+    final sortAscending = ref.read(salesTransactionsSortAscending);
 
     // Build the data table.
     Widget table = PaginatedDataTable(
@@ -140,36 +155,38 @@ class DeliveriesTable extends ConsumerWidget {
       availableRowsPerPage: [5, 10, 25, 50, 100],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
-        ref.read(deliveriesRowsPerPageProvider.notifier).state = index!;
+        ref.read(salesTransactionsRowsPerPageProvider.notifier).state = index!;
       },
       // Table.
-      source: TableData<Delivery>(
+      source: TableData<SalesTransaction>(
         // Table data.
         data: data,
 
         // Table cells.
         cellsBuilder: _buildCells,
 
-        // Tap on a delivery.
-        onTap: (Delivery item) async {
-          // await ref.read(deliveryProvider.notifier).set(item);
-          // FIXME: Pass delivery data to avoid extra API request.
-          context.go('/deliveries/${item.consumerId}');
+        // Tap on a salesTransaction.
+        onTap: (SalesTransaction item) async {
+          // await ref.read(salesTransactionProvider.notifier).set(item);
+          // FIXME: Pass salesTransaction data to avoid extra API request.
+          context.go('/transactions/${item.salesDate}');
         },
 
-        // Select a delivery.
-        onSelect: (bool selected, Delivery item) {
+        // Select a salesTransaction.
+        onSelect: (bool selected, SalesTransaction item) {
           if (selected) {
-            ref.read(selectedDeliveriesProvider.notifier).selectDelivery(item);
+            ref
+                .read(selectedSalesTransactionsProvider.notifier)
+                .selectSalesTransaction(item);
           } else {
             ref
-                .read(selectedDeliveriesProvider.notifier)
-                .unselectDelivery(item);
+                .read(selectedSalesTransactionsProvider.notifier)
+                .unselectSalesTransaction(item);
           }
         },
 
-        // Specify selected deliveries.
-        isSelected: (item) => selectedIds.contains(item.consumerId),
+        // Specify selected salesTransactions.
+        // isSelected: (item) => selectedIds.contains(item.id),
       ),
     );
 
@@ -212,20 +229,20 @@ class DeliveriesTable extends ConsumerWidget {
             // Search engine function.
             suggestionsCallback: (pattern) async {
               ref.read(searchTermProvider.notifier).state = pattern;
-              final suggestions = ref.read(filteredDeliveriesProvider);
+              final suggestions = ref.read(filteredSalesTransactionsProvider);
               return suggestions;
             },
 
             // Autocomplete menu.
-            itemBuilder: (BuildContext context, Delivery suggestion) {
+            itemBuilder: (BuildContext context, SalesTransaction suggestion) {
               return ListTile(
-                title: Text(suggestion.driverName ?? ''),
+                title: Text(suggestion.salesDate ?? ''),
               );
             },
 
             // Menu selection function.
-            onSuggestionSelected: (Delivery suggestion) {
-              context.go('/deliveries/${suggestion.consumerId}');
+            onSuggestionSelected: (SalesTransaction suggestion) {
+              context.go('/transactions/${suggestion.salesDate}');
             },
           ),
         ),
@@ -237,7 +254,7 @@ class DeliveriesTable extends ConsumerWidget {
         if (selectedIds.length > 0)
           PrimaryButton(
             backgroundColor: Colors.red,
-            text: isWide ? 'Delete deliveries' : 'Delete',
+            text: isWide ? 'Delete salesTransactions' : 'Delete',
             onPressed: () {
               print('DELETE LOCATIONS!');
             },
@@ -246,9 +263,9 @@ class DeliveriesTable extends ConsumerWidget {
         // Add button.
         if (selectedIds.length > 0) gapW6,
         PrimaryButton(
-          text: isWide ? 'New delivery' : 'New',
+          text: isWide ? 'New salesTransaction' : 'New',
           onPressed: () {
-            context.go('/deliveries/new');
+            context.go('/salesTransactions/new');
           },
         ),
       ],
@@ -257,11 +274,12 @@ class DeliveriesTable extends ConsumerWidget {
     // Return the table and actions.
     if (data.isEmpty)
       table = CustomPlaceholder(
-        image: 'assets/images/icons/driver.png',
-        title: 'Add a delivery',
-        description: 'You do not have any active deliveries at this facility.',
+        image: 'assets/images/icons/facilities.png',
+        title: 'Add a salesTransaction',
+        description:
+            'SalesTransactions are used to track packages, items, and plants.',
         onTap: () {
-          context.go('/deliveries/new');
+          context.go('/salesTransactions/new');
         },
       );
     return Column(children: [actions, gapH12, table]);

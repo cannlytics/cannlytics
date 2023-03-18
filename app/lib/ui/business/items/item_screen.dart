@@ -7,112 +7,192 @@
 // Updated: 2/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Dart imports:
-import 'dart:async';
-
 // Flutter imports:
+import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/ui/business/items/items_controller.dart';
+import 'package:cannlytics_app/ui/layout/footer.dart';
+import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
+import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/widgets/inputs/checkbox_input.dart';
+import 'package:cannlytics_app/widgets/layout/form_container.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/consumer/entry.dart';
-import 'package:cannlytics_app/models/consumer/job.dart';
-import 'package:cannlytics_app/ui/business/items/item_controller.dart';
-import 'package:cannlytics_app/ui/business/packages/packages_service.dart';
-import 'package:cannlytics_app/utils/string_utils.dart';
-import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/widgets/inputs/date_time_input.dart';
+import 'package:cannlytics_app/models/metrc/item.dart';
+import 'package:go_router/go_router.dart';
 
+/// Item screen.
 class ItemScreen extends ConsumerStatefulWidget {
-  const ItemScreen({super.key, required this.jobId, this.entryId, this.entry});
-  final JobID jobId;
-  final EntryID? entryId;
-  final Entry? entry;
+  const ItemScreen({super.key, required this.id, this.entry});
+
+  // Properties.
+  final String id;
+  final Item? entry;
 
   @override
-  ConsumerState<ItemScreen> createState() => _EntryPageState();
+  ConsumerState<ItemScreen> createState() => _ItemScreenState();
 }
 
-class _EntryPageState extends ConsumerState<ItemScreen> {
-  late DateTime _startDate;
-  late TimeOfDay _startTime;
-  late DateTime _endDate;
-  late TimeOfDay _endTime;
-  late String _comment;
-
-  @override
-  void initState() {
-    super.initState();
-    final start = widget.entry?.start ?? DateTime.now();
-    _startDate = DateTime(start.year, start.month, start.day);
-    _startTime = TimeOfDay.fromDateTime(start);
-
-    final end = widget.entry?.end ?? DateTime.now();
-    _endDate = DateTime(end.year, end.month, end.day);
-    _endTime = TimeOfDay.fromDateTime(end);
-
-    _comment = widget.entry?.comment ?? '';
-  }
-
-  Entry _entryFromState() {
-    final start = DateTime(_startDate.year, _startDate.month, _startDate.day,
-        _startTime.hour, _startTime.minute);
-    final end = DateTime(_endDate.year, _endDate.month, _endDate.day,
-        _endTime.hour, _endTime.minute);
-    final id = widget.entry?.id ?? documentIdFromCurrentDate();
-    return Entry(
-      id: id,
-      jobId: widget.jobId,
-      start: start,
-      end: end,
-      comment: _comment,
-    );
-  }
-
-  Future<void> _setEntryAndDismiss() async {
-    final entry = _entryFromState();
-    final success =
-        await ref.read(entryScreenControllerProvider.notifier).setEntry(entry);
-    if (success && mounted) {
-      context.pop();
-    }
-  }
-
+/// Item screen state.
+class _ItemScreenState extends ConsumerState<ItemScreen> {
   @override
   Widget build(BuildContext context) {
+    // Listen for errors.
     ref.listen<AsyncValue>(
-      entryScreenControllerProvider,
+      itemProvider(widget.id),
       (_, state) => state.showAlertDialogOnError(context),
     );
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.entry != null ? 'Edit Entry' : 'New Entry'),
-        actions: <Widget>[
-          TextButton(
-            child: Text(
-              widget.entry != null ? 'Update' : 'Create',
-              style: const TextStyle(fontSize: 18.0, color: Colors.white),
-            ),
-            onPressed: () => _setEntryAndDismiss(),
+
+    // Listen for the item data.
+    var item = ref.watch(itemProvider(widget.id)).value;
+    if (item == null) {
+      item = Item(id: 'new', name: '');
+    }
+
+    // Body.
+    return CustomScrollView(
+      slivers: [
+        // App header.
+        const SliverToBoxAdapter(child: AppHeader()),
+
+        // Form.
+        // TODO: Add a loading indicator.
+        SliverToBoxAdapter(child: FormContainer(children: _fields(item))),
+
+        // Footer
+        const SliverToBoxAdapter(child: Footer()),
+      ],
+    );
+  }
+
+  /// Form fields.
+  List<Widget> _fields(Item item) {
+    return <Widget>[
+      // Back to items button.
+      CustomTextButton(
+        text: 'Items',
+        onPressed: () {
+          context.go('/items');
+          ref.read(nameController.notifier).change('');
+        },
+        fontStyle: FontStyle.italic,
+      ),
+
+      // Title row.
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // ID.
+          _idField(item),
+
+          // Spacer.
+          const Spacer(),
+
+          // Actions.
+          // Create / update a item.
+          PrimaryButton(
+            text: (widget.id == 'new') ? 'Create' : 'Save',
+            onPressed: () async {
+              var name = ref.read(nameController).value.text;
+              // FIXME:
+              var update = Item(
+                id: widget.id,
+                name: name,
+              );
+              if (widget.id == 'new') {
+                await ref.read(itemsProvider.notifier).createItems([update]);
+              } else {
+                // FIXME:
+                await ref.read(itemsProvider.notifier).updateItems([update]);
+              }
+              context.go('/items');
+            },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
+
+      // Name field.
+      gapH6,
+      // _nameField(item),
+      gapH6,
+
+      // Item type name and ID.
+      // _itemTypeField(item),
+
+      // Checkbox fields.
+      // ..._checkboxes(item),
+
+      // TODO: Allow user's to save additional data in Firestore:
+      // - item_image
+      // - created_at
+      // - created_by
+      // - updated_at
+      // - updated_by
+
+      // Lighting Data
+      // This information can help optimize the lighting conditions for
+      // the specific strain and maximize the yield and potency of the plants.
+      // - light intensity and duration.
+      // Energy Consumption Data: Cannabis cultivators may want to track
+      // energy consumption data, such as electricity usage and costs, to
+      // help identify ways to reduce energy consumption and costs.
+
+      // Climate data
+      // ensure that the growing environment is optimal for the plants.
+      // - temperature, humidity, precipitation, and wind speed
+
+      // Soil and Water Data
+      // This information can help optimize the soil conditions and
+      // ensure that the plants receive the right nutrients for healthy growth.
+      // - pH levels, nutrient content, and salinity levels
+
+      // Pest and Disease Data: Cannabis cultivators may want to track pest
+      // and disease data, such as the presence of pests, mold, or fungus.
+      // This information can help identify potential problems early on
+      // and take corrective action to prevent damage to the plants.
+
+      // Optional: Look at packages / plants at the item.
+
+      // Danger zone : Handle deleting an existing item.
+      if (widget.id.isNotEmpty && widget.id != 'new') _deleteOption(),
+    ];
+  }
+
+  Widget _deleteOption() {
+    return Container(
+      constraints: BoxConstraints(minWidth: 200), // set minimum width of 200
+      child: Card(
+        margin: EdgeInsets.only(top: 36, bottom: 48),
+        borderOnForeground: true,
+        surfaceTintColor: null,
+        child: Padding(
+          padding: EdgeInsets.all(16),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _buildStartDate(),
-              _buildEndDate(),
-              const SizedBox(height: 8.0),
-              _buildDuration(),
-              const SizedBox(height: 8.0),
-              _buildComment(),
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                'Danger Zone',
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
+              ),
+              gapH12,
+              PrimaryButton(
+                backgroundColor: Colors.red,
+                text: 'Delete',
+                onPressed: () async {
+                  await ref
+                      .read(itemsProvider.notifier)
+                      .deleteItems([Item(id: widget.id, name: '')]);
+                  // FIXME: Clear search, etc. to make table load better.
+                  context.go('/items');
+                },
+              ),
             ],
           ),
         ),
@@ -120,55 +200,120 @@ class _EntryPageState extends ConsumerState<ItemScreen> {
     );
   }
 
-  Widget _buildStartDate() {
-    return DateTimePicker(
-      labelText: 'Start',
-      selectedDate: _startDate,
-      selectedTime: _startTime,
-      onSelectedDate: (date) => setState(() => _startDate = date),
-      onSelectedTime: (time) => setState(() => _startTime = time),
+  // ID field.
+  Widget _idField(Item item) {
+    return Text(
+      (item.id!.isEmpty) ? 'New Item' : 'Item ${item.id}',
+      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+            color: Theme.of(context).textTheme.titleLarge!.color,
+          ),
     );
   }
 
-  Widget _buildEndDate() {
-    return DateTimePicker(
-      labelText: 'End',
-      selectedDate: _endDate,
-      selectedTime: _endTime,
-      onSelectedDate: (date) => setState(() => _endDate = date),
-      onSelectedTime: (time) => setState(() => _endTime = time),
-    );
-  }
+  // // Name field.
+  // Widget _nameField(Item item) {
+  //   final _nameController = ref.watch(nameController);
+  //   // Hot-fix: Set the initial value.
+  //   if (_nameController.text.isEmpty && item.name.isNotEmpty) {
+  //     ref.read(nameController.notifier).change(item.name);
+  //   } else if (_nameController.text != item.name) {
+  //     ref.read(nameController.notifier).change(item.name);
+  //   }
+  //   final textField = TextField(
+  //     controller: _nameController,
+  //     decoration: const InputDecoration(labelText: 'Name'),
+  //     keyboardType: TextInputType.text,
+  //     maxLength: null,
+  //     maxLines: null,
+  //   );
+  //   return ConstrainedBox(
+  //     constraints: BoxConstraints(maxWidth: 300),
+  //     child: textField,
+  //   );
+  // }
 
-  Widget _buildDuration() {
-    final currentEntry = _entryFromState();
-    final durationFormatted = Format.hours(currentEntry.durationInHours);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: <Widget>[
-        Text(
-          'Duration: $durationFormatted',
-          style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
+  // // Item name field.
+  // Widget _itemTypeField(Item item) {
+  //   final items = ref.watch(itemTypesProvider).value ?? [];
+  //   final value = ref.watch(itemType);
+  //   if (items.length == 0 || value == null) return Container();
+  //   var dropdown = DropdownButton(
+  //     underline: Container(),
+  //     isDense: true,
+  //     isExpanded: true,
+  //     value: value,
+  //     items: items
+  //         .map(
+  //           (item) => DropdownMenuItem<String>(
+  //             onTap: () => item['name'],
+  //             value: item['name'],
+  //             child: ListTile(
+  //               dense: true,
+  //               title: Text(item['name']),
+  //             ),
+  //           ),
+  //         )
+  //         .toList(),
+  //     onChanged: (String? value) {
+  //       ref.read(itemType.notifier).state = value;
+  //       // FIXME: Change item permissions.
+  //     },
+  //   );
+  //   return Column(
+  //     mainAxisAlignment: MainAxisAlignment.start,
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       gapH18,
+  //       Text(
+  //         'Item Type Name',
+  //         style: Theme.of(context).textTheme.titleMedium!.copyWith(
+  //               color: Theme.of(context).textTheme.titleLarge!.color,
+  //             ),
+  //       ),
+  //       gapH6,
+  //       SizedBox(
+  //         height: 36,
+  //         child: ConstrainedBox(
+  //           constraints: BoxConstraints(
+  //             maxWidth: 300,
+  //           ),
+  //           child: dropdown,
+  //         ),
+  //       ),
+  //       gapH6,
+  //     ],
+  //   );
+  // }
 
-  Widget _buildComment() {
-    return TextField(
-      keyboardType: TextInputType.text,
-      maxLength: 50,
-      controller: TextEditingController(text: _comment),
-      decoration: const InputDecoration(
-        labelText: 'Comment',
-        labelStyle: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
-      ),
-      keyboardAppearance: Brightness.light,
-      style: const TextStyle(fontSize: 20.0, color: Colors.black),
-      maxLines: null,
-      onChanged: (comment) => _comment = comment,
-    );
-  }
+  // // Checkbox fields.
+  // List<Widget> _checkboxes(Item item) {
+  //   final items = ref.watch(itemTypesProvider).value ?? [];
+  //   if (items.length == 0) return [Container()];
+  //   return [
+  //     gapH12,
+  //     Text(
+  //       'Permissions',
+  //       style: Theme.of(context).textTheme.titleMedium!.copyWith(
+  //             color: Theme.of(context).textTheme.titleLarge!.color,
+  //           ),
+  //     ),
+  //     gapH6,
+  //     CheckboxField(
+  //       title: 'For Packages',
+  //       value: ref.watch(forPackages) ?? false,
+  //     ),
+  //     CheckboxField(
+  //       title: 'For Plants',
+  //       value: ref.watch(forPlants) ?? false,
+  //     ),
+  //     CheckboxField(
+  //       title: 'For Plant Batches',
+  //       value: ref.watch(forPlantBatches) ?? false,
+  //     ),
+  //     CheckboxField(
+  //       title: 'For Harvests',
+  //       value: ref.watch(forHarvests) ?? false,
+  //     ),
+  //   ];
+  // }
 }

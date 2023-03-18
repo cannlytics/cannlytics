@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/27/2023
-// Updated: 3/9/2023
+// Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -16,79 +16,79 @@ typedef PlantBatchId = String;
 class PlantBatch {
   // Initialization.
   const PlantBatch({
-    required this.id,
-    required this.name,
-    required this.type,
-    required this.locationId,
-    required this.locationName,
-    required this.locationTypeName,
-    required this.strainId,
-    required this.strainName,
-    required this.patientLicenseNumber,
-    required this.untrackedCount,
-    required this.trackedCount,
-    required this.packagedCount,
-    required this.harvestedCount,
-    required this.destroyedCount,
-    required this.sourcePackageId,
-    required this.sourcePackageLabel,
-    required this.sourcePlantId,
-    required this.sourcePlantLabel,
-    required this.sourcePlantBatchId,
-    required this.sourcePlantBatchName,
-    required this.plantedDate,
-    required this.lastModified,
+    this.id,
+    this.name,
+    this.type,
+    this.locationId,
+    this.locationName,
+    this.locationTypeName,
+    this.strainId,
+    this.strainName,
+    this.patientLicenseNumber,
+    this.untrackedCount,
+    this.trackedCount,
+    this.packagedCount,
+    this.harvestedCount,
+    this.destroyedCount,
+    this.sourcePackageId,
+    this.sourcePackageLabel,
+    this.sourcePlantId,
+    this.sourcePlantLabel,
+    this.sourcePlantBatchId,
+    this.sourcePlantBatchName,
+    this.plantedDate,
+    this.lastModified,
   });
 
   // Properties.
-  final PlantBatchId id;
-  final String name;
-  final String type;
-  final int locationId;
-  final String locationName;
-  final String locationTypeName;
-  final StrainId strainId;
-  final String strainName;
-  final String patientLicenseNumber;
-  final int untrackedCount;
-  final int trackedCount;
-  final int packagedCount;
-  final int harvestedCount;
-  final int destroyedCount;
-  final int sourcePackageId;
-  final String sourcePackageLabel;
-  final int sourcePlantId;
-  final String sourcePlantLabel;
-  final int sourcePlantBatchId;
-  final String sourcePlantBatchName;
-  final DateTime plantedDate;
-  final DateTime lastModified;
+  final PlantBatchId? id;
+  final String? name;
+  final String? type;
+  final int? locationId;
+  final String? locationName;
+  final String? locationTypeName;
+  final StrainId? strainId;
+  final String? strainName;
+  final String? patientLicenseNumber;
+  final int? untrackedCount;
+  final int? trackedCount;
+  final int? packagedCount;
+  final int? harvestedCount;
+  final int? destroyedCount;
+  final int? sourcePackageId;
+  final String? sourcePackageLabel;
+  final int? sourcePlantId;
+  final String? sourcePlantLabel;
+  final int? sourcePlantBatchId;
+  final String? sourcePlantBatchName;
+  final String? plantedDate;
+  final String? lastModified;
 
   // Create model.
   factory PlantBatch.fromMap(Map<String, dynamic> data) {
     return PlantBatch(
       id: data['id'] ?? '',
-      name: data['name'] as String,
-      type: data['type'] as String,
-      locationId: data['location_id'] as int,
-      locationName: data['location_name'] as String,
-      locationTypeName: data['location_type_name'] as String,
+      name: data['name'] ?? '',
+      type: data['type'] ?? '',
+      locationId: data['location_id'] ?? 0,
+      locationName: data['location_name'] ?? '',
+      locationTypeName: data['location_type_name'] ?? '',
       strainId: data['strain_id'] as StrainId,
-      strainName: data['strain_name'] as String,
-      patientLicenseNumber: data['patient_license_number'] as String,
-      untrackedCount: data['untracked_count'] as int,
-      trackedCount: data['tracked_count'] as int,
-      packagedCount: data['packaged_count'] as int,
-      harvestedCount: data['harvested_count'] as int,
-      destroyedCount: data['destroyed_count'] as int,
-      sourcePackageId: data['source_package_id'] as int,
-      sourcePackageLabel: data['source_package_label'] as String,
-      sourcePlantId: data['source_plant_id'] as int,
-      sourcePlantLabel: data['source_plant_label'] as String,
-      sourcePlantBatchId: data['source_plant_batch_id'] as int,
-      sourcePlantBatchName: data['source_plant_batch_name'] as String,
-      plantedDate: DateTime.parse(data['planted_date'] as String),
-      lastModified: DateTime.parse(data['last_modified'] as String),
+      strainName: data['strain_name'] ?? '',
+      patientLicenseNumber: data['patient_license_number'] ?? '',
+      untrackedCount: data['untracked_count'] ?? 0,
+      trackedCount: data['tracked_count'] ?? 0,
+      packagedCount: data['packaged_count'] ?? 0,
+      harvestedCount: data['harvested_count'] ?? 0,
+      destroyedCount: data['destroyed_count'] ?? 0,
+      sourcePackageId: data['source_package_id'] ?? 0,
+      sourcePackageLabel: data['source_package_label'] ?? '',
+      sourcePlantId: data['source_plant_id'] ?? 0,
+      sourcePlantLabel: data['source_plant_label'] ?? '',
+      sourcePlantBatchId: data['source_plant_batch_id'] ?? 0,
+      sourcePlantBatchName: data['source_plant_batch_name'] ?? '',
+      plantedDate: data['planted_date'] ?? '',
+      lastModified: data['last_modified'] ?? '',
     );
   }
 
@@ -115,26 +115,26 @@ class PlantBatch {
       'source_plant_label': sourcePlantLabel,
       'source_plant_batch_id': sourcePlantBatchId,
       'source_plant_batch_name': sourcePlantBatchName,
-      'planted_date': plantedDate.toIso8601String(),
-      'last_modified': lastModified.toIso8601String(),
+      'planted_date': plantedDate,
+      'last_modified': lastModified,
     };
   }
 
-  // Create PlantBatch.
-  Future<void> create() async {
-    // Call an API or database to create a new plant batch.
-    // await MetrcService.createPlantBatch(this.toMap());
-  }
+  // // Create PlantBatch.
+  // Future<void> create() async {
+  //   // Call an API or database to create a new plant batch.
+  //   // await MetrcService.createPlantBatch(this.toMap());
+  // }
 
-  // Update PlantBatch.
-  Future<void> update() async {
-    // Call an API or database to update the existing plant batch.
-    // await MetrcService.updatePlantBatch(this.id, this.toMap());
-  }
+  // // Update PlantBatch.
+  // Future<void> update() async {
+  //   // Call an API or database to update the existing plant batch.
+  //   // await MetrcService.updatePlantBatch(this.id, this.toMap());
+  // }
 
-  // Delete PlantBatch.
-  Future<void> delete() async {
-    // Call an API or database to delete the existing plant batch.
-    // await MetrcService.deletePlantBatch(this.id);
-  }
+  // // Delete PlantBatch.
+  // Future<void> delete() async {
+  //   // Call an API or database to delete the existing plant batch.
+  //   // await MetrcService.deletePlantBatch(this.id);
+  // }
 }

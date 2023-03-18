@@ -227,8 +227,7 @@ class StrainController extends FamilyAsyncNotifier<Strain?, String?> {
 // Name field.
 final nameController =
     StateNotifierProvider<NameController, TextEditingController>(
-  (ref) => NameController(),
-);
+        (ref) => NameController());
 
 class NameController extends StateNotifier<TextEditingController> {
   NameController() : super(TextEditingController());
