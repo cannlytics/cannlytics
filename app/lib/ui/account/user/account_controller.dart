@@ -11,13 +11,13 @@
 import 'dart:async';
 
 // Package imports:
-import 'package:cannlytics_app/services/firestore_service.dart';
-import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_app/services/auth_service.dart';
+import 'package:cannlytics_app/services/firestore_service.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 
 // An instance of the account controller to use as a provider.
 final accountProvider =

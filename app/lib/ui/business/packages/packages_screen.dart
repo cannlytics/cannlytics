@@ -8,23 +8,23 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
-import 'package:cannlytics_app/widgets/tables/table_data.dart';
 import 'package:flutter/material.dart';
-import 'package:dartx/dartx.dart';
 
 // Package imports:
+import 'package:dartx/dartx.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/models/metrc/package.dart';
 import 'package:cannlytics_app/ui/business/packages/packages_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
+import 'package:cannlytics_app/widgets/tables/table_data.dart';
 import 'package:cannlytics_app/widgets/tables/table_form.dart';
 
 /// Packages screen.

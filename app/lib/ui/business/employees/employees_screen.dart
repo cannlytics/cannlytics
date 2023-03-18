@@ -9,37 +9,31 @@
 
 // Flutter imports:
 import 'package:flutter/material.dart';
-
-// Package imports:
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-
-// Project imports:
-import 'package:cannlytics_app/models/metrc/employee.dart';
-import 'package:cannlytics_app/ui/business/employees/employees_controller.dart';
-import 'package:cannlytics_app/ui/layout/footer.dart';
-import 'package:cannlytics_app/ui/layout/header.dart';
-import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
-import 'package:cannlytics_app/widgets/tables/table_form.dart';
-
-// Flutter imports:
-import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
-import 'package:cannlytics_app/widgets/tables/table_data.dart';
 import 'package:flutter/material.dart';
-import 'package:dartx/dartx.dart';
 
 // Package imports:
+import 'package:dartx/dartx.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:go_router/go_router.dart';
+import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/models/metrc/employee.dart';
 import 'package:cannlytics_app/models/metrc/employee.dart';
 import 'package:cannlytics_app/ui/business/employees/employees_controller.dart';
+import 'package:cannlytics_app/ui/business/employees/employees_controller.dart';
+import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
+import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
+import 'package:cannlytics_app/widgets/tables/table_data.dart';
+import 'package:cannlytics_app/widgets/tables/table_form.dart';
 import 'package:cannlytics_app/widgets/tables/table_form.dart';
 
 /// Employees screen.

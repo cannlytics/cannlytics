@@ -18,9 +18,9 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/routes.dart';
-import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:cannlytics_app/widgets/cards/border_card.dart';
 
 /// The initial screen the user sees after signing in.

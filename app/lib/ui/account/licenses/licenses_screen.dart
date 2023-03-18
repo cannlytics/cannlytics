@@ -17,9 +17,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/licenses/licenses_controller.dart';
-import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
 
 /// Licenses screen.

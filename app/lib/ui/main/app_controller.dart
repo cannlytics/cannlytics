@@ -8,13 +8,13 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
-import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_app/models/common/organization.dart';
 import 'package:cannlytics_app/services/api_service.dart';
+import 'package:cannlytics_app/services/auth_service.dart';
 
 // User type provider.
 final userTypeProvider = StateProvider<String>((ref) => 'business');

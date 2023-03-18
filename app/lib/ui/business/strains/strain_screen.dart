@@ -11,13 +11,6 @@
 import 'dart:async';
 
 // Flutter imports:
-import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/models/metrc/strain.dart';
-import 'package:cannlytics_app/ui/business/strains/strains_controller.dart';
-import 'package:cannlytics_app/ui/layout/footer.dart';
-import 'package:cannlytics_app/ui/layout/header.dart';
-import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
-import 'package:cannlytics_app/widgets/layout/form_container.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -25,7 +18,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_app/models/metrc/strain.dart';
+import 'package:cannlytics_app/ui/business/strains/strains_controller.dart';
+import 'package:cannlytics_app/ui/layout/footer.dart';
+import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
+import 'package:cannlytics_app/widgets/layout/form_container.dart';
 
 /// Strain screen.
 class StrainScreen extends ConsumerStatefulWidget {

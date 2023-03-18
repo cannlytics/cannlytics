@@ -8,15 +8,11 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/ui/account/sign-in/sign_in_validators.dart';
-import 'package:cannlytics_app/utils/validation_utils.dart';
-import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
-import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,9 +20,13 @@ import 'package:go_router/go_router.dart';
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
+import 'package:cannlytics_app/ui/account/sign-in/sign_in_validators.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
+import 'package:cannlytics_app/utils/validation_utils.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
+import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
 import 'package:cannlytics_app/widgets/images/avatar.dart';

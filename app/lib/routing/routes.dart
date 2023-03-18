@@ -38,18 +38,18 @@ import 'package:cannlytics_app/ui/business/plant_harvests/plant_harvest_screen.d
 import 'package:cannlytics_app/ui/business/plant_harvests/plant_harvests_screen.dart';
 import 'package:cannlytics_app/ui/business/plants/plant_screen.dart';
 import 'package:cannlytics_app/ui/business/plants/plants_screen.dart';
-import 'package:cannlytics_app/ui/business/results/result_screen.dart';
-import 'package:cannlytics_app/ui/business/results/results_screen.dart';
 import 'package:cannlytics_app/ui/business/receipts/receipt_screen.dart';
 import 'package:cannlytics_app/ui/business/receipts/receipts_screen.dart';
-import 'package:cannlytics_app/ui/business/transactions/transaction_screen.dart';
-import 'package:cannlytics_app/ui/business/transactions/transactions_screen.dart';
+import 'package:cannlytics_app/ui/business/results/result_screen.dart';
+import 'package:cannlytics_app/ui/business/results/results_screen.dart';
 import 'package:cannlytics_app/ui/business/strains/strain_screen.dart';
 import 'package:cannlytics_app/ui/business/strains/strains_screen.dart';
+import 'package:cannlytics_app/ui/business/transactions/transaction_screen.dart';
+import 'package:cannlytics_app/ui/business/transactions/transactions_screen.dart';
 import 'package:cannlytics_app/ui/business/transfers/transfer_screen.dart';
 import 'package:cannlytics_app/ui/business/transfers/transfers_screen.dart';
-import 'package:cannlytics_app/ui/main/dashboard.dart';
 import 'package:cannlytics_app/ui/layout/search_screen.dart';
+import 'package:cannlytics_app/ui/main/dashboard.dart';
 
 // The main app routes.
 class Routes {

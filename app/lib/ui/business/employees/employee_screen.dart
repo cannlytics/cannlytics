@@ -8,6 +8,12 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/models/metrc/employee.dart';
 import 'package:cannlytics_app/ui/business/employees/employees_controller.dart';
@@ -15,10 +21,6 @@ import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/widgets/layout/form_container.dart';
-import 'package:flutter/material.dart';
-
-// Package imports:
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Employee screen.
 class EmployeeScreen extends ConsumerStatefulWidget {

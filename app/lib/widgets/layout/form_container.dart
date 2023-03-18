@@ -7,8 +7,10 @@
 // Updated: 3/12/2023
 
 // Flutter imports:
-import 'package:cannlytics_app/constants/design.dart';
 import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:cannlytics_app/constants/design.dart';
 
 /// A container for forms.
 class FormContainer extends StatelessWidget {

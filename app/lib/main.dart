@@ -10,7 +10,6 @@
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 
 // Flutter imports:
-import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -24,6 +23,7 @@ import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/firebase_options.dart';
 import 'package:cannlytics_app/routing/app_router.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 
 // ignore:depend_on_referenced_packages
 
