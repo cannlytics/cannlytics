@@ -64,7 +64,7 @@ class CustomPlaceholder extends StatelessWidget {
                   gapH6,
                   Text(
                     description,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                   gapH12,
                 ],

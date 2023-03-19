@@ -4,13 +4,17 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 3/6/2023
+// Updated: 3/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
+import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
+import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
+import 'package:cannlytics_app/widgets/layout/form_container.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -46,6 +50,8 @@ class OrganizationScreen extends ConsumerWidget {
           // App header.
           const SliverToBoxAdapter(child: AppHeader()),
 
+          SliverToBoxAdapter(child: OrganizationForm()),
+
           // Footer
           const SliverToBoxAdapter(child: Footer()),
         ],
@@ -55,21 +61,21 @@ class OrganizationScreen extends ConsumerWidget {
 }
 
 /// Organization screen.
-class OrganizationForm extends ConsumerStatefulWidget {
-  const OrganizationForm({
-    super.key,
-    this.license,
-  });
-  final License? license;
+class OrganizationForm extends ConsumerWidget {
+//   const OrganizationForm({
+//     super.key,
+//     this.license,
+//   });
+//   final License? license;
 
-  @override
-  ConsumerState<OrganizationScreen> createState() => _OrganizationScreenState();
-}
+//   @override
+//   ConsumerState<OrganizationScreen> createState() => _OrganizationScreenState();
+// }
 
-/// Organization screen state.
-class _OrganizationScreenState extends ConsumerState<OrganizationScreen> {
-  // Fields.
-  String _license = 'OK';
+// /// Organization screen state.
+// class _OrganizationScreenState extends ConsumerState<OrganizationScreen> {
+//   // Fields.
+//   String _license = 'OK';
 
   // Save the license.
   Future<void> _setOrganizationAndDismiss() async {
@@ -90,15 +96,11 @@ class _OrganizationScreenState extends ConsumerState<OrganizationScreen> {
 
   // Main widget.
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // ref.listen<AsyncValue>(
     //   organizationProvider,
     //   (_, state) => state.showAlertDialogOnError(context),
     // );
-    // // App bar.
-    // appBar: AppBar(
-    //   title: Text(widget.license != null ? 'Edit License' : 'New License'),
-    //   actions: <Widget>[
     //     TextButton(
     //       child: Text(
     //         widget.license != null ? 'Update' : 'Create',
@@ -106,134 +108,368 @@ class _OrganizationScreenState extends ConsumerState<OrganizationScreen> {
     //       ),
     //       onPressed: () => _setOrganizationAndDismiss(),
     //     ),
-    //   ],
-    // ),
 
     // Body.
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // App header.
-          const SliverToBoxAdapter(child: AppHeader()),
+    return FormContainer(children: [
+      // Organization image.
+      _organizationImage(context),
 
-          // Footer
-          const SliverToBoxAdapter(child: Footer()),
+      // Team management.
+      _teamManagement(context),
+
+      // TODO: Licenses widget
+      // - Add license button
+      // - licenses list
+      // - Danger zone: Delete license
+
+      // TODO: Organization details
+      // Setup your organization for maximum impact.
+      // - name
+      // - trade_name
+      // - website
+      // - email
+      // - phone
+      // (show more)
+      // - address
+      // - city
+      // - state
+      // - country
+      // - zip code
+      // - external ID
+
+      // Organization type selection.
+      // Select the organization type for your appropriate functionality.
+      _organizationTypeSelection(context),
+
+      //  Visibility selection.
+      _visibilitySelection(context),
+
+      // Danger zone : Handle deleting an existing location.
+      // if (widget.id.isNotEmpty && widget.id != 'new')
+      _deleteOption(context),
+    ]);
+  }
+
+  /// Visibility selection.
+  Widget _visibilitySelection(BuildContext context) {
+    var _public = false;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Visibility',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Decide whether or not to list your organization for discovery by other users.',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Radio(
+                    value: true,
+                    groupValue: _public,
+                    onChanged: (value) {
+                      // setState(() {
+                      //   _public = value;
+                      // });
+                      // TODO: handle changeOrganizationPublicStatus
+                    },
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Public',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      Text(
+                        'Appears in search results.',
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              gapW12,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Radio(
+                    value: false,
+                    groupValue: _public,
+                    onChanged: (value) {
+                      // setState(() {
+                      //   _public = value;
+                      // });
+                      // TODO: handle changeOrganizationPublicStatus
+                    },
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Private',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      Text(
+                        'Only visible to you.',
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Organization type selection.
+  Widget _organizationTypeSelection(BuildContext context) {
+    var _selectedType = 'Free';
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 30.0),
+          Text(
+            'Organization Type',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          SizedBox(height: 10.0),
+          Text(
+            'Select the organization type for your appropriate functionality.',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          SizedBox(height: 20.0),
+          Row(
+            children: [
+              Text(
+                'Type',
+                style: TextStyle(fontSize: 16.0),
+              ),
+              SizedBox(width: 10.0),
+              SizedBox(
+                width: 150,
+                child: DropdownButton<String>(
+                  value: _selectedType,
+                  icon: Icon(Icons.arrow_drop_down),
+                  iconSize: 24,
+                  elevation: 16,
+                  onChanged: (String? newValue) {
+                    print('Changed: $newValue');
+                    // setState(() {
+                    //   _selectedType = newValue;
+                    // });
+                    // cannlytics.settings.changeOrganizationType(
+                    //     organizations[0]['organization_id']);
+                  },
+                  items: <String>['Free', 'Pro', 'Enterprise']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
-    //   body: SingleChildScrollView(
-    //     child: Container(
-    //       padding: const EdgeInsets.all(16.0),
-    //       child: Column(
-    //         mainAxisSize: MainAxisSize.min,
-    //         crossAxisAlignment: CrossAxisAlignment.start,
-    //         children: <Widget>[
-    //           // TODO: Team widget
+  }
 
-    //           // TODO: Invite team member widget
-    //           // - email / role
+  /// Team management widget.
+  // TODO: Invite team member widget
+  // Display:
+  // - email
+  // - role
+  Widget _teamManagement(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWide = screenWidth > Breakpoints.tablet;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 15.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Team',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  SizedBox(height: 10.0),
+                  Text(
+                    'Manage your organization\'s team.',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ],
+              ),
+              PrimaryButton(
+                // onPressed: toggleTeamMemberFields,
+                onPressed: () {
+                  print('ADD TEAM MEMBER!');
+                },
+                text: isWide ? 'Add team member' : 'Add',
+              ),
+            ],
+          ),
 
-    //           // TODO: Licenses widget
+          SizedBox(height: 10.0),
+          // SizedBox(
+          //   height: 200.0,
+          //   child: Image.asset('assets/images/icons/employees.png'),
+          // ),
+          CustomPlaceholder(
+            image: 'assets/images/icons/employees.png',
+            title: 'No team members',
+            description: 'Add a team member to your organization.',
+            onTap: () {
+              print('ADD TEAM MEMBER!');
+            },
+          )
+          // if (organization_id == 'new' || user.owner.contains(organization_id))
+        ],
+      ),
+    );
+  }
 
-    //           // TODO: Add license button
-
-    //           // TODO: Danger zone: Delete license
-
-    //           // TODO: Organization details
-    //           // Setup your organization for maximum impact.
-    //           // - name
-    //           // - trade_name
-    //           // - website
-    //           // - email
-    //           // - phone
-    //           // (show more)
-    //           // - address
-    //           // - city
-    //           // - state
-    //           // - country
-    //           // - zip code
-    //           // - external ID
-
-    //           // TODO: Visibility
-    //           // Decide whether or not to list your organization for discovery by other users.
-    //           // Public
-    //           // Appears in search results. Private
-    //           // Only visible to you.
-
-    //           // TODO: Organization image
-    //           // Choose an image for your organization, up to 5MB.
-
-    //           // TODO: Organization Type
-    //           // Select the organization type for your appropriate functionality.
-    //         ],
+  /// Organization image widget.
+  Widget _organizationImage(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 15.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Organization image',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          SizedBox(height: 8.0),
+          Text(
+            'Choose an image for your organization, up to 5MB.',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          Stack(
+            children: [
+              SizedBox(
+                height: 200.0,
+                child: Image.asset('assets/images/icons/organizations.png'),
+                // child: _imageFile != null
+                //     ? Image.file(
+                //         _imageFile!,
+                //         fit: BoxFit.cover,
+                //       )
+                //     : Image.network(
+                //         _organizationPhotoUrl ?? '',
+                //         fit: BoxFit.cover,
+                //       ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: InkWell(
+                  // onTap: () => _pickImage(),
+                  onTap: () {
+                    print('PICK IMAGE!');
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(8.0),
+                    color: Colors.white.withOpacity(0.6),
+                    child: Icon(
+                      Icons.photo_camera,
+                      color: Colors.grey[600],
+                      size: 30.0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+    // Optional: Remove image button.
+    //   SizedBox(height: 12.0),
+    //   TextButton.icon(
+    //     onPressed: () => _removeImage(),
+    //     icon: Icon(
+    //       Icons.delete,
+    //       color: Colors.grey[600],
+    //     ),
+    //     label: Text(
+    //       'Remove image',
+    //       style: TextStyle(
+    //         color: Colors.grey[600],
     //       ),
     //     ),
     //   ),
-    // );
+    // ],
   }
 
-  // // Start date.
-  // Widget _buildStartDate() {
-  //   return DateTimePicker(
-  //     labelText: 'Start',
-  //     selectedDate: _startDate,
-  //     selectedTime: _startTime,
-  //     onSelectedDate: (date) => setState(() => _startDate = date),
-  //     onSelectedTime: (time) => setState(() => _startTime = time),
-  //   );
-  // }
-
-  // // End date.
-  // Widget _buildEndDate() {
-  //   return DateTimePicker(
-  //     labelText: 'End',
-  //     selectedDate: _endDate,
-  //     selectedTime: _endTime,
-  //     onSelectedDate: (date) => setState(() => _endDate = date),
-  //     onSelectedTime: (time) => setState(() => _endTime = time),
-  //   );
-  // }
-
-  // // Duration.
-  // Widget _buildDuration() {
-  //   final currentLicense = _licenseFromState();
-  //   final durationFormatted = Format.hors(currentLicense.durationInHours);
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.end,
-  //     children: <Widget>[
-  //       Text(
-  //         'Duration: $durationFormatted',
-  //         style: const TextStyle(
-  //           fontSize: 18.0,
-  //           fontWeight: FontWeight.w500,
-  //         ),
-  //         maxLines: 1,
-  //         overflow: TextOverflow.ellipsis,
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // // Comment.
-  // Widget _buildComment() {
-  //   return TextField(
-  //     keyboardType: TextInputType.text,
-  //     maxLength: 50,
-  //     controller: TextEditingController(text: _comment),
-  //     decoration: const InputDecoration(
-  //       labelText: 'Comment',
-  //       labelStyle: TextStyle(
-  //         fontSize: 18.0,
-  //         fontWeight: FontWeight.w500,
-  //       ),
-  //     ),
-  //     keyboardAppearance: Brightness.light,
-  //     style: const TextStyle(
-  //       fontSize: 20.0,
-  //       color: Colors.black,
-  //     ),
-  //     maxLines: null,
-  //     onChanged: (comment) => _comment = comment,
-  //   );
-  // }
+  /// Delete organization option.
+  Widget _deleteOption(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(minWidth: 200), // set minimum width of 200
+      child: Card(
+        margin: EdgeInsets.only(top: 36, bottom: 48),
+        borderOnForeground: true,
+        surfaceTintColor: null,
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                'Danger Zone',
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
+              ),
+              gapH12,
+              PrimaryButton(
+                backgroundColor: Colors.red,
+                text: 'Delete',
+                onPressed: () async {
+                  print('DELETE ORG!');
+                  // await ref
+                  //     .read(locationsProvider.notifier)
+                  //     .deleteLocations([Location(id: widget.id, name: '')]);
+                  // // FIXME: Clear search, etc. to make table load better.
+                  // context.go('/locations');
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

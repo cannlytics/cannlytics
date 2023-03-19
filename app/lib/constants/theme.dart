@@ -243,12 +243,12 @@ class AppColors {
         labelLarge: TextStyle(
           fontSize: 18,
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
-          fontFamily: 'CormorantGaramond',
+          fontFamily: 'LibreBaskerville',
         ),
         labelMedium: TextStyle(
           fontSize: 16,
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
-          fontFamily: 'CormorantGaramond',
+          fontFamily: 'SourceSerifPro',
         ),
         labelSmall: TextStyle(
           fontSize: 15,

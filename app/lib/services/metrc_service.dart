@@ -25,8 +25,6 @@ import 'package:cannlytics_app/models/metrc/sales_transaction.dart';
 import 'package:cannlytics_app/models/metrc/strain.dart';
 import 'package:cannlytics_app/services/api_service.dart';
 
-// TODO: Use models instead of Maps where possible.
-
 /// A helper function to format parameters.
 Map getParams(
   String? license,
@@ -352,7 +350,7 @@ class MetrcPlants {
     String endpoint = '/api/metrc/plants';
     Map options = getParams(license, orgId, state);
     await APIService.apiRequest(endpoint,
-        // FIXME : Make more function like.
+        // TODO : Make more function like.
         // data: {
         //   'plant_label': 'PLANT_TAG',
         //   'plant_batch_name': batch_name + ' #2',
@@ -1015,7 +1013,7 @@ class MetrcTransfers {
     if (id != null) endpoint += '/$id';
     Map options = getParams(license, orgId, state);
     var response = await APIService.apiRequest(endpoint, options: options);
-    // TODO: Use a template model.
+    // TODO: Use a transfer template model?
     List<Map> items = [];
     for (var item in response) {
       items.add(item);
@@ -1051,11 +1049,11 @@ class MetrcTransfers {
 
 /// Lab Tests
 class MetrcLabTests {
-  /// TODO: Create a lab result record.
+  /// FIXME: Create a lab result record.
 
-  /// TODO: Release lab results.
+  /// FIXME: Release lab results.
 
-  /// TODO: Upload a COA.
+  /// FIXME: Upload a COA.
 
   /// Get a COA by appending `id` to the URL.
   static Future<dynamic> getCOA({
@@ -1115,7 +1113,7 @@ class MetrcPatients {
     String endpoint = '/api/metrc/patients/locations';
     Map options = getParams(license, orgId, state);
     var response = await APIService.apiRequest(endpoint, options: options);
-    // TODO: Use custom model.
+    // TODO: Use caregiver model?
     List<Map> items = [];
     for (var item in response) {
       items.add(item);

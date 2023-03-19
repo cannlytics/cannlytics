@@ -86,10 +86,15 @@ class Routes {
       routes: [
         // Organization screen.
         AppRoute(
-          path: 'add',
+          path: 'new',
           name: AppRoutes.organization.name,
           builder: (context, state) => OrganizationScreen(),
         ),
+        // AppRoute(
+        //   path: 'join',
+        //   name: AppRoutes.organization.name,
+        //   builder: (context, state) => OrganizationScreen(),
+        // ),
       ],
     ),
 

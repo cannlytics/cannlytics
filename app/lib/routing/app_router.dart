@@ -4,13 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/9/2023
+// Updated: 3/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_app/ui/layout/not_found_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -37,7 +38,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/sign-in',
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
-    // errorBuilder: (context, state) => const NotFoundScreen(),
+    errorBuilder: (context, state) => const NotFoundScreen(),
     refreshListenable: GoRouterRefreshStream(authService.authStateChanges()),
     redirect: (context, state) => routeRedirect(state, isLoggedIn),
     routes: Routes.mainRoutes,
