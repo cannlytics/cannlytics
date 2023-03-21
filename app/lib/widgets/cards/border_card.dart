@@ -15,8 +15,10 @@ import 'package:cannlytics_app/constants/theme.dart';
 
 /// A widget to add a border to a card that changes color on hover (on the web).
 class BorderCard extends StatefulWidget {
-  const BorderCard({Key? key, required this.builder}) : super(key: key);
+  const BorderCard({Key? key, required this.builder, this.backgroundColor})
+      : super(key: key);
   final Widget Function(BuildContext, double) builder;
+  final Color? backgroundColor;
 
   @override
   _BorderCardState createState() => _BorderCardState();
@@ -44,8 +46,10 @@ class _BorderCardState extends State<BorderCard>
         animation: _controller,
         builder: (context, _) {
           return Container(
+            // color: widget.backgroundColor ?? Colors.transparent,
             margin: const EdgeInsets.all(2),
             decoration: BoxDecoration(
+              color: widget.backgroundColor,
               border: Border.all(
                 color: (_controller.value < 0.01)
                     ? AppColors.neutral2

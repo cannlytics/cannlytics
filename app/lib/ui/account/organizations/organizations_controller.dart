@@ -4,13 +4,16 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 3/6/2023
+// Updated: 3/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Package imports:
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
@@ -64,8 +67,91 @@ class OrganizationsController extends AutoDisposeAsyncNotifier<void> {
     state = const AsyncValue.loading();
     // state = await AsyncValue.guard();
   }
+
+  /// Upload an organization photo through the API.
+  Future<void> uploadOrganizationPhoto() async {
+    // Read the organization ID.
+    final orgId = ref.read(organizationName).text;
+    print('ORG: $orgId');
+
+    // FIXME: Handle unique organizations IDs:
+    // - Check if the organization ID exists.
+    // - If it exists and it's not the users, return an error.
+    // - If the org does not exist, then temporarily assign it to the user?
+
+    // Allow the user to pick a file.
+    var pickedFile = await FilePicker.platform.pickFiles();
+
+    // If the user picks a photo.
+    if (pickedFile != null) {
+      // Perform pre-post validation.
+      List<String> acceptedTypes = ['jpeg', 'jpg', 'png'];
+      int photoSize = pickedFile.files.first.size;
+      String? photoType = pickedFile.files.first.extension ?? '';
+      photoType = photoType.toLowerCase();
+      if (photoSize >= 5 * 1024 * 1024) {
+        print('FILE TOO LARGE!');
+        return;
+      } else if (!acceptedTypes.contains(photoType)) {
+        print('WRONG FILE TYPE!');
+        return;
+      }
+
+      // TODO: Test
+      print('TODO: UPLOAD FILE...');
+      // // Upload the selected photo to Firebase Storage and get its download URL.
+      // final String photoRef = 'organizations/$orgId/photo.jpg';
+      // final storageRef = FirebaseStorage.instance.ref().child(photoRef);
+      // final uploadTask = storageRef.putData(pickedFile.files.first.bytes!);
+      // final snapshot = await uploadTask.whenComplete(() {});
+      // final downloadURL = await snapshot.ref.getDownloadURL();
+
+      // // Update the user's data in Firestore.
+      // final _firestore = ref.read(firestoreProvider);
+      // await _firestore.setData(
+      //   path: 'organizations/$orgId',
+      //   data: {
+      //     'photo_uploaded_at': DateTime.now().toIso8601String(),
+      //     'photo_size': photoSize,
+      //     'photo_type': photoType,
+      //     'photo_url': downloadURL,
+      //     'photo_ref': photoRef,
+      //   },
+      // );
+    }
+    // TODO: Show appropriate notifications.
+    //     showNotification('Photo saved', 'Organization photo saved with your organization files.', /* type = */ 'success');
+    //     setState(() {
+    //       _organizationPhotoUrl = url;
+    //     });
+    //   } catch (error) {
+    //     showNotification('Photo Change Error', 'Error saving photo.', /* type = */ 'error');
+    //   }
+  }
 }
 
+// Organization name field.
+final organizationName =
+    StateNotifierProvider<OrganizationName, TextEditingController>(
+        (ref) => OrganizationName());
+
+class OrganizationName extends StateNotifier<TextEditingController> {
+  OrganizationName() : super(TextEditingController());
+
+  @override
+  void dispose() {
+    state.dispose();
+    super.dispose();
+  }
+
+  void change(String value) => state.value = TextEditingValue(text: value);
+}
+
+// Organization ID field.
+final organizationId = StateProvider<String?>((ref) => null);
+
+// Organization image.
+final organizationImage = StateProvider<String?>((ref) => null);
 
 /* WORKING */
 

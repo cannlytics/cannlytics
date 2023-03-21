@@ -9,9 +9,11 @@
 
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
@@ -59,10 +61,25 @@ class ResetPasswordScreen extends ConsumerWidget {
             const SliverToBoxAdapter(child: ThemeToggle()),
 
             // Logo.
-            SliverToBoxAdapter(child: ResponsiveAppLogo(isDark: isDark)),
+            SliverToBoxAdapter(
+              // child: ResponsiveAppLogo(isDark: isDark)
+              child: SizedBox(
+                width: 200,
+                height: 50,
+                child: SvgPicture.asset(
+                  isDark
+                      ? 'assets/images/logos/logo_dark.svg'
+                      : 'assets/images/logos/logo_light.svg',
+                  semanticsLabel: 'Cannlytics',
+                ),
+              ),
+            ),
 
             // Account management.
-            SliverToBoxAdapter(child: ResetPasswordForm(isDark: isDark)),
+            SliverToBoxAdapter(
+                child: ResetPasswordForm(isDark: isDark)
+                    .animate()
+                    .fadeIn(duration: 1600.ms)),
 
             // Footer
             const SliverToBoxAdapter(child: SimpleFooter()),

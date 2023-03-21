@@ -4,16 +4,18 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/14/2023
+// Updated: 3/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
@@ -32,7 +34,6 @@ import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/buttons/theme_button.dart';
 import 'package:cannlytics_app/widgets/cards/responsive_card.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/widgets/images/app_logo.dart';
 
 /// Sign in screen.
 class EmailPasswordSignInScreen extends ConsumerWidget {
@@ -67,7 +68,10 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
       child: CustomScrollView(
         slivers: [
           // Light / dark theme toggle.
-          SliverToBoxAdapter(child: ThemeToggle(isDark: isDark)),
+          SliverToBoxAdapter(
+              child: ThemeToggle(isDark: isDark)
+                  .animate()
+                  .fadeIn(duration: 2000.ms)),
 
           // Logo.
           // SliverToBoxAdapter(child: ResponsiveAppLogo(isDark: isDark)),
@@ -82,7 +86,8 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
           ),
 
           // Footer
-          const SliverToBoxAdapter(child: SimpleFooter()),
+          SliverToBoxAdapter(
+              child: SimpleFooter().animate().fadeIn(duration: 2000.ms)),
         ],
       ),
     );
@@ -179,7 +184,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
     final bool isDark = themeMode == ThemeMode.dark;
 
     // Build the form.
-    return ResponsiveCard(
+    Widget card = ResponsiveCard(
       child: FocusScope(
         node: _node,
         child: Form(
@@ -189,7 +194,17 @@ class _SignInFormState extends ConsumerState<SignInForm>
             children: <Widget>[
               // Logo
               gapH12,
-              ResponsiveAppLogo(isDark: isDark),
+              // ResponsiveAppLogo(isDark: isDark),
+              SizedBox(
+                width: 200,
+                height: 50,
+                child: SvgPicture.asset(
+                  isDark
+                      ? 'assets/images/logos/logo_dark.svg'
+                      : 'assets/images/logos/logo_light.svg',
+                  semanticsLabel: 'Cannlytics',
+                ),
+              ),
               gapH6,
 
               // Title.
@@ -206,15 +221,20 @@ class _SignInFormState extends ConsumerState<SignInForm>
               TextFormField(
                 key: EmailPasswordSignInScreen.emailKey,
                 controller: _emailController,
+                style: TextStyle(
+                  fontFamily: 'SourceSerifPro',
+                  height: 1.33,
+                ),
                 decoration: InputDecoration(
                   labelText: 'Email',
                   hintText: 'test@cannlytics.com',
                   enabled: !state.isLoading,
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 8,
+                  contentPadding: EdgeInsets.only(
+                    top: 18,
+                    left: 8,
+                    right: 8,
+                    bottom: 8,
                   ),
-                  // border: UnderlineInputBorder(),
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (email) =>
@@ -237,12 +257,18 @@ class _SignInFormState extends ConsumerState<SignInForm>
               TextFormField(
                 key: EmailPasswordSignInScreen.passwordKey,
                 controller: _passwordController,
+                style: TextStyle(
+                  fontFamily: 'SourceSerifPro',
+                  height: 1.33,
+                ),
                 decoration: InputDecoration(
                   labelText: _formType.passwordLabelText,
                   enabled: !state.isLoading,
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 8,
+                  contentPadding: EdgeInsets.only(
+                    top: 18,
+                    left: 8,
+                    right: 8,
+                    bottom: 8,
                   ),
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -304,6 +330,9 @@ class _SignInFormState extends ConsumerState<SignInForm>
         ),
       ),
     );
+
+    // Add an animation to the card.
+    return card.animate().fadeIn(duration: 1600.ms);
   }
 }
 

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/14/2023
+// Updated: 3/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -143,13 +143,23 @@ class AppColors {
 
       // Input style.
       inputDecorationTheme: InputDecorationTheme(
-        labelStyle: null,
+        labelStyle: TextStyle(
+          fontFamily: 'SourceSerifPro',
+        ),
         floatingLabelStyle: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'SourceSerifPro',
         ),
-        helperStyle: null,
+        helperStyle: TextStyle(
+          // color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'SourceSerifPro',
+        ),
+        hintStyle: TextStyle(
+          fontFamily: 'SourceSerifPro',
+        ),
         errorStyle: TextStyle(
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          fontFamily: 'SourceSerifPro',
         ),
         isDense: true,
         contentPadding: null,
@@ -248,12 +258,12 @@ class AppColors {
         labelMedium: TextStyle(
           fontSize: 16,
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
-          fontFamily: 'SourceSerifPro',
+          fontFamily: 'IBMPlexSans',
         ),
         labelSmall: TextStyle(
           fontSize: 15,
           color: isDark ? AppColors.neutral2 : AppColors.neutral4,
-          fontFamily: 'CormorantGaramond',
+          fontFamily: 'IBMPlexSans',
           fontWeight: FontWeight.w700,
           letterSpacing: 0.25,
         ),

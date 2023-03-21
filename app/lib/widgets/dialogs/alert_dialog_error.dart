@@ -18,13 +18,15 @@ Future<void> showExceptionAlertDialog({
     context: context,
     title: title,
     content: _message(exception),
-    defaultActionText: 'Okay',
+    defaultActionText: 'Close',
   );
 }
 
 /// The error message.
 String _message(dynamic exception) {
   if (exception is FirebaseException) {
+    print('FIREBASE ERROR:');
+    print(exception.message ?? exception.toString());
     return exception.message ?? exception.toString();
   }
   if (exception is PlatformException) {

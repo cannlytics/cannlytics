@@ -4,10 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/6/2023
+// Updated: 3/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/theme.dart';
+import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -23,6 +25,7 @@ import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:cannlytics_app/widgets/cards/border_card.dart';
 
+/// Dashboard screen.
 /// The initial screen the user sees after signing in.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -44,21 +47,37 @@ class DashboardScreen extends ConsumerWidget {
           i, i + chunkSize > cards.length ? cards.length : i + chunkSize));
     }
 
+    // Get the theme.
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
+
     // Body.
     return Scaffold(
-      // backgroundColor: AppColors.white,
-      body: CustomScrollView(
-        slivers: [
-          // App header.
-          const SliverToBoxAdapter(child: AppHeader()),
+      body: Container(
+        // Optional: Add background gradient.
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(1, -1),
+            radius: 4.0,
+            colors: [
+              isDark ? Colors.green : AppColors.white,
+              isDark ? Colors.transparent : AppColors.primary2,
+            ],
+          ),
+        ),
+        child: CustomScrollView(
+          slivers: [
+            // App header.
+            const SliverToBoxAdapter(child: AppHeader()),
 
-          // Navigation cards.
-          for (var chunk in chunks)
-            SliverToBoxAdapter(child: DashboardCards(items: chunk)),
+            // Navigation cards.
+            for (var chunk in chunks)
+              SliverToBoxAdapter(child: DashboardCards(items: chunk)),
 
-          // Footer
-          const SliverToBoxAdapter(child: Footer()),
-        ],
+            // Footer
+            const SliverToBoxAdapter(child: Footer()),
+          ],
+        ),
       ),
     );
   }
@@ -91,7 +110,7 @@ class DashboardCards extends StatelessWidget {
   }
 }
 
-/// General grid to layout cards.
+/// Grid to layout cards.
 class ItemCardGrid extends StatelessWidget {
   const ItemCardGrid({
     Key? key,
@@ -103,14 +122,10 @@ class ItemCardGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<FlexibleTrackSize> columnSizes =
-        List.filled(crossAxisCount, const FlexibleTrackSize(1.5));
-    List<IntrinsicContentTrackSize> rowSizes =
-        List.filled(crossAxisCount, auto);
     return LayoutGrid(
-      columnSizes: columnSizes,
-      rowSizes: rowSizes,
-      rowGap: 12,
+      columnSizes: List.filled(crossAxisCount, const FlexibleTrackSize(1.5)),
+      rowSizes: List.filled(crossAxisCount, auto),
+      rowGap: 6,
       columnGap: 12,
       children: [
         for (var i = 0; i < items.length; i++) ItemCard(data: items[i]),
@@ -119,7 +134,7 @@ class ItemCardGrid extends StatelessWidget {
   }
 }
 
-/// A dashboard navigation card.
+/// Dashboard navigation card.
 class ItemCard extends StatelessWidget {
   const ItemCard({
     Key? key,
@@ -128,10 +143,13 @@ class ItemCard extends StatelessWidget {
   final ScreenData data;
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final horizontalPadding = screenWidth >= Breakpoints.tablet ? 48.0 : 24.0;
-    final verticalPadding = screenWidth >= Breakpoints.tablet ? 24.0 : 12.0;
+    // final screenWidth = MediaQuery.of(context).size.width;
+    // final horizontalPadding = screenWidth >= Breakpoints.tablet ? 48.0 : 24.0;
+    // final verticalPadding = screenWidth >= Breakpoints.tablet ? 24.0 : 12.0;
+    final horizontalPadding = 24.0;
+    final verticalPadding = 6.0;
     return BorderCard(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       builder: (context, value) => InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () {
@@ -145,15 +163,13 @@ class ItemCard extends StatelessWidget {
             // Image.
             AspectRatio(
               aspectRatio: 24.0 / 8.0,
+              // aspectRatio:
+              //     (screenWidth >= Breakpoints.tablet) ? 12.0 / 8.0 : 24.0 / 8.0,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     fit: BoxFit.fitHeight,
                     image: AssetImage(data.imageName),
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
                   ),
                 ),
               ),
@@ -171,7 +187,7 @@ class ItemCard extends StatelessWidget {
                     child: Text(
                       data.title,
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
 
@@ -181,8 +197,9 @@ class ItemCard extends StatelessWidget {
                   // Description.
                   Text(
                     data.description,
-                    style: Theme.of(context).textTheme.titleSmall,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
+                  gapH12,
                 ],
               ),
             ),

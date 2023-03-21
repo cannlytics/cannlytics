@@ -108,19 +108,30 @@ class OrganizationForm extends ConsumerWidget {
     //       ),
     //       onPressed: () => _setOrganizationAndDismiss(),
     //     ),
+    var _organizationImage = ref.watch(organizationImage);
 
     // Body.
     return FormContainer(children: [
+      // TODO: Name / ID.
+
       // Organization image.
-      _organizationImage(context),
+      _organizationImageSelection(
+        context,
+        image: _organizationImage,
+        onTap: () {
+          ref.read(organizationsController.notifier).uploadOrganizationPhoto();
+        },
+      ),
 
       // Team management.
-      _teamManagement(context),
+      // FIXME: Doesn't fit on small screens.
+      // _teamManagement(context),
 
       // TODO: Licenses widget
       // - Add license button
       // - licenses list
       // - Danger zone: Delete license
+      // _licensesList(context),
 
       // TODO: Organization details
       // Setup your organization for maximum impact.
@@ -139,15 +150,163 @@ class OrganizationForm extends ConsumerWidget {
 
       // Organization type selection.
       // Select the organization type for your appropriate functionality.
-      _organizationTypeSelection(context),
+      // _organizationTypeSelection(context),
 
       //  Visibility selection.
-      _visibilitySelection(context),
+      // _visibilitySelection(context),
 
       // Danger zone : Handle deleting an existing location.
       // if (widget.id.isNotEmpty && widget.id != 'new')
-      _deleteOption(context),
+      // _deleteOption(context),
     ]);
+  }
+
+  // Widget _teamMembers() {
+  //   return null;
+  // }
+
+  Widget _licensesList(BuildContext context) {
+    var _licenseStateValue = 'OK';
+    return Column(
+      children: [
+        // Licenses list
+        Padding(
+          padding: EdgeInsets.all(0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Primary license
+              Padding(
+                padding: EdgeInsets.only(bottom: 16),
+                child: Column(
+                  children: [
+                    // License number
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'License',
+                      ),
+                      // validator: (value) {
+                      //   if (value.isEmpty) {
+                      //     return 'Please enter a license number';
+                      //   }
+                      //   return null;
+                      // },
+                      onSaved: (value) {
+                        // Save license number
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      children: [
+                        // Expanded(
+                        //   child: Column(
+                        //     crossAxisAlignment: CrossAxisAlignment.start,
+                        //     children: [
+                        //       // License type
+                        //       DropdownButtonFormField<String>(
+                        //         decoration: InputDecoration(
+                        //           labelText: 'License Type',
+                        //         ),
+                        //         value: _licenseTypeValue,
+                        //         items: [
+                        //           DropdownMenuItem<String>(
+                        //             value: '',
+                        //             child: Text(''),
+                        //           ),
+                        //           // Optional: Dynamic license types
+                        //           DropdownMenuItem<String>(
+                        //             value: 'lab',
+                        //             child: Text('Lab'),
+                        //           ),
+                        //           DropdownMenuItem<String>(
+                        //             value: 'producer-cultivator',
+                        //             child: Text('Cultivator'),
+                        //           ),
+                        //           DropdownMenuItem<String>(
+                        //             value: 'producer-processor',
+                        //             child: Text('Processor'),
+                        //           ),
+                        //           DropdownMenuItem<String>(
+                        //             value: 'retailer',
+                        //             child: Text('Retailer'),
+                        //           ),
+                        //           DropdownMenuItem<String>(
+                        //             value: 'other',
+                        //             child: Text('Other'),
+                        //           ),
+                        //         ],
+                        //         onChanged: (value) {
+                        //           setState(() {
+                        //             _licenseTypeValue = value;
+                        //             if (value == 'other') {
+                        //               _showLicenseTypeOtherField = true;
+                        //             } else {
+                        //               _showLicenseTypeOtherField = false;
+                        //             }
+                        //           });
+                        //         },
+                        //       ),
+                        //       // Optional: Let user specify type if other
+                        //       if (_showLicenseTypeOtherField)
+                        //         TextFormField(
+                        //           decoration: InputDecoration(
+                        //             labelText: 'Please specify...',
+                        //           ),
+                        //           validator: (value) {
+                        //             if (value.isEmpty) {
+                        //               return 'Please enter a license type';
+                        //             }
+                        //             return null;
+                        //           },
+                        //           onSaved: (value) {
+                        //             // Save license type
+                        //           },
+                        //         ),
+                        //     ],
+                        //   ),
+                        // ),
+                        // SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // State
+                              DropdownButtonFormField<String>(
+                                decoration: InputDecoration(
+                                  labelText: 'State',
+                                ),
+                                value: _licenseStateValue,
+                                items: [
+                                  // TODO: Dynamically list states where Cannlytics is verified
+                                  DropdownMenuItem<String>(
+                                    value: 'OK',
+                                    child: Text('Oklahoma'),
+                                  ),
+                                  // DropdownMenuItem<String>(
+                                  //   value: 'other',
+                                  //   child: Text('Other'),
+                                  // ),
+                                ],
+                                onChanged: (value) {
+                                  // setState(() {
+                                  //   _licenseStateValue = value;
+                                  // });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   /// Visibility selection.
@@ -309,60 +468,61 @@ class OrganizationForm extends ConsumerWidget {
   Widget _teamManagement(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isWide = screenWidth > Breakpoints.tablet;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Team',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  SizedBox(height: 10.0),
-                  Text(
-                    'Manage your organization\'s team.',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ],
-              ),
-              PrimaryButton(
-                // onPressed: toggleTeamMemberFields,
-                onPressed: () {
-                  print('ADD TEAM MEMBER!');
-                },
-                text: isWide ? 'Add team member' : 'Add',
-              ),
-            ],
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Team',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                SizedBox(height: 10.0),
+                Text(
+                  'Manage your organization\'s team.',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            PrimaryButton(
+              // onPressed: toggleTeamMemberFields,
+              onPressed: () {
+                print('ADD TEAM MEMBER!');
+              },
+              text: isWide ? 'Add team member' : 'Add',
+            ),
+          ],
+        ),
 
-          SizedBox(height: 10.0),
-          // SizedBox(
-          //   height: 200.0,
-          //   child: Image.asset('assets/images/icons/employees.png'),
-          // ),
-          CustomPlaceholder(
-            image: 'assets/images/icons/employees.png',
-            title: 'No team members',
-            description: 'Add a team member to your organization.',
-            onTap: () {
-              print('ADD TEAM MEMBER!');
-            },
-          )
-          // if (organization_id == 'new' || user.owner.contains(organization_id))
-        ],
-      ),
+        SizedBox(height: 10.0),
+        // SizedBox(
+        //   height: 200.0,
+        //   child: Image.asset('assets/images/icons/employees.png'),
+        // ),
+        CustomPlaceholder(
+          image: 'assets/images/icons/employees.png',
+          title: 'No team members',
+          description: 'Add a team member to your organization.',
+          onTap: () {
+            print('ADD TEAM MEMBER!');
+          },
+        )
+        // if (organization_id == 'new' || user.owner.contains(organization_id))
+      ],
     );
   }
 
   /// Organization image widget.
-  Widget _organizationImage(BuildContext context) {
+  Widget _organizationImageSelection(
+    BuildContext context, {
+    String? image,
+    void Function()? onTap,
+  }) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 15.0),
       child: Column(
@@ -374,32 +534,28 @@ class OrganizationForm extends ConsumerWidget {
           ),
           SizedBox(height: 8.0),
           Text(
-            'Choose an image for your organization, up to 5MB.',
+            'Choose an image for your organization.',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           Stack(
             children: [
               SizedBox(
                 height: 200.0,
-                child: Image.asset('assets/images/icons/organizations.png'),
-                // child: _imageFile != null
-                //     ? Image.file(
-                //         _imageFile!,
-                //         fit: BoxFit.cover,
-                //       )
-                //     : Image.network(
-                //         _organizationPhotoUrl ?? '',
-                //         fit: BoxFit.cover,
-                //       ),
+                child: image == null
+                    ? Image.asset(
+                        'assets/images/icons/organizations.png',
+                        fit: BoxFit.fitHeight,
+                      )
+                    : Image.network(
+                        image,
+                        fit: BoxFit.cover,
+                      ),
               ),
               Positioned(
                 bottom: 0,
                 right: 0,
                 child: InkWell(
-                  // onTap: () => _pickImage(),
-                  onTap: () {
-                    print('PICK IMAGE!');
-                  },
+                  onTap: onTap,
                   child: Container(
                     padding: EdgeInsets.all(8.0),
                     color: Colors.white.withOpacity(0.6),
