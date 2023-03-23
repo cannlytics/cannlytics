@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/8/2023
+// Updated: 3/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -19,8 +19,6 @@ import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/routing/routes.dart';
-import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
 import 'package:cannlytics_app/ui/main/app_controller.dart';
@@ -28,6 +26,12 @@ import 'package:cannlytics_app/widgets/buttons/theme_button.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
 import 'package:cannlytics_app/widgets/images/app_logo.dart';
 import 'package:cannlytics_app/widgets/images/avatar.dart';
+
+// TODO:
+// - Use user photo on desktop and show small menu.
+// - Better theme toggle / perhaps in settings?
+// - Show about dialog (i).
+// - A sidebar menu is needed for desktop.
 
 /// The main navigation header.
 class AppHeader extends StatelessWidget {
@@ -55,10 +59,6 @@ class DesktopNavigationLayout extends ConsumerWidget {
     // Get the screen width.
     final screenWidth = MediaQuery.of(context).size.width;
     bool isVeryWide = screenWidth > Breakpoints.desktop;
-
-    // Get the theme.
-    final themeMode = ref.watch(themeModeProvider);
-    final bool isDark = themeMode == ThemeMode.dark;
 
     // Build the layout.
     return Container(
@@ -93,8 +93,6 @@ class DesktopNavigationLayout extends ConsumerWidget {
               path: AppRoutes.account.name,
             ),
             SizedBox(width: isVeryWide ? 24 : 12),
-
-            // TODO: A sidebar menu is needed for desktop!
 
             // Theme toggle.
             const ThemeToggle(),
@@ -133,10 +131,6 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
   Widget build(BuildContext context) {
     // Get the user type.
     final userType = ref.watch(userTypeProvider);
-
-    // Get the theme.
-    // final themeMode = ref.watch(themeModeProvider);
-    // final bool isDark = themeMode == ThemeMode.dark;
 
     // Build the layout.
     return AnimatedBuilder(
@@ -220,10 +214,8 @@ class MobileNavigationMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen to the current user.
     final state = ref.watch(accountProvider);
-    // final user = ref.watch(authProvider).currentUser;
     final user = ref.watch(userProvider).value;
     if (user == null) return Container();
-    print('USER: ${user.uid}');
 
     return Material(
       elevation: 8,
@@ -428,7 +420,6 @@ class OrganizationSelection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the user's organizations.
     final orgs = ref.watch(organizationsProvider).value ?? [];
-    print('ORGS: ${orgs.length}');
 
     // Return organizations link button.
     if (orgs.isEmpty) {
@@ -440,7 +431,6 @@ class OrganizationSelection extends ConsumerWidget {
 
     // Get the user's current organization.
     var value = ref.watch(primaryOrganizationProvider) ?? orgs[0].id;
-    print('CURRENT ORG: $value');
 
     // Build the selection.
     var dropdown = DropdownButton(
@@ -501,7 +491,6 @@ class FacilitySelection extends ConsumerWidget {
     // Get the active organization.
     final primaryOrg = ref.watch(primaryOrganizationProvider);
     if (primaryOrg == null) return Container();
-    print('PRIMARY ORG: $primaryOrg');
 
     // Get all organization's licenses.
     List<String> licenseIds = [];
@@ -525,7 +514,6 @@ class FacilitySelection extends ConsumerWidget {
 
     /// Get the user's facilities.
     final facilities = ref.watch(facilitiesProvider).value ?? [];
-    print('FACILITIES: ${facilities.length}');
 
     // Return prompt to add a license if no facilities.
     if (facilities.isEmpty) {
@@ -536,9 +524,7 @@ class FacilitySelection extends ConsumerWidget {
     }
 
     // Get the current facility.
-    var primaryFacility =
-        ref.watch(primaryFacilityProvider) ?? facilities[0].id;
-    print('PRIMARY FACILITY: $primaryFacility');
+    var currentFacility = ref.watch(primaryFacility) ?? facilities[0];
 
     // TODO: Add licenses and facilities to dropdown.
 
@@ -547,7 +533,7 @@ class FacilitySelection extends ConsumerWidget {
       underline: Container(),
       isDense: true,
       isExpanded: true,
-      value: primaryFacility,
+      value: currentFacility.id,
       items: facilities
               .map(
                 (item) => DropdownMenuItem<String>(
@@ -571,14 +557,18 @@ class FacilitySelection extends ConsumerWidget {
             ),
           ],
       onChanged: (String? value) {
+        print('CHANGED:');
+        print(value);
         if (value == 'add') {
           GoRouter.of(context).go('/licenses/add');
           return;
         }
-        ref.read(primaryFacilityProvider.notifier).state = value!;
+        // ref.read(primaryFacility.notifier).state = value!.id;
+        // ref.read(primaryLicenseProvider.notifier).state = value!.licenseNumber;
         for (Facility x in facilities) {
           if (x.id == value) {
             ref.read(primaryLicenseProvider.notifier).state = x.licenseNumber;
+            ref.read(primaryFacility.notifier).state = x;
           }
         }
       },

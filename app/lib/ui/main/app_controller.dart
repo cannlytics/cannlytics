@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 3/12/2023
+// Updated: 3/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
+import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,25 +17,31 @@ import 'package:cannlytics_app/models/common/organization.dart';
 import 'package:cannlytics_app/services/api_service.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 
+/* User */
+
 // User type provider.
 final userTypeProvider = StateProvider<String>((ref) => 'business');
-
-// Primary organization provider.
-final primaryOrganizationProvider = StateProvider<String?>((ref) => null);
-
-// Primary state.
-final primaryStateProvider = StateProvider<String?>((ref) => null);
-
-// Primary license number.
-final primaryLicenseProvider = StateProvider<String?>((ref) => null);
-
-// Primary facility ID.
-final primaryFacilityProvider = StateProvider<String?>((ref) => null);
 
 // User provider.
 final userProvider = StreamProvider<User?>((ref) {
   return ref.watch(authProvider).authStateChanges();
 });
+
+/* Business */
+
+// Primary state.
+final primaryStateProvider = StateProvider<String?>((ref) => null);
+
+// Primary facility.
+final primaryFacility = StateProvider<Facility?>((ref) => null);
+
+// Primary license number.
+final primaryLicenseProvider = StateProvider<String?>((ref) => null);
+
+/* Organization */
+
+// Primary organization provider.
+final primaryOrganizationProvider = StateProvider<String?>((ref) => null);
 
 /// Organizations provider.
 final organizationsProvider =
@@ -75,18 +82,3 @@ final organizationsProvider =
   // Return a list of organizations.
   return data;
 });
-
-// DEV:
-// /// The main controller for the app.
-// class AppController {
-//   // Set the primary facility and license number.
-//   static void setPrimaryFacility(WidgetRef ref, String? value) {
-//     ref.read(primaryFacilityProvider.notifier).state = value!;
-//     final facilities = ref.read(facilitiesProvider).value ?? [];
-//     for (Facility x in facilities) {
-//       if (x.id == value) {
-//         ref.read(primaryLicenseProvider.notifier).state = x.licenseNumber;
-//       }
-//     }
-//   }
-// }

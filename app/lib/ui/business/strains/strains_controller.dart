@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/8/2023
-// Updated: 3/13/2023
+// Updated: 3/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -57,11 +57,73 @@ class StrainsController extends AsyncNotifier<List<Strain>> {
     state = await AsyncValue.guard(() async => items);
   }
 
-  // TODO: Create strains.
+  /// Create strains.
+  Future<void> createStrains(List<Strain> items) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final licenseNumber = ref.read(primaryLicenseProvider);
+      final licenseState = ref.read(primaryStateProvider);
+      final orgId = ref.read(primaryOrganizationProvider);
+      for (Strain item in items) {
+        await MetrcStrains.createStrain(
+          name: item.name,
+          testingStatus: item.testingStatus!,
+          cbdLevel: item.cbdLevel ?? 0.0,
+          indicaPercentage: item.indicaPercentage ?? 50.0,
+          sativaPercentage: item.sativaPercentage ?? 50.0,
+          thcLevel: item.thcLevel ?? 0.0,
+          license: licenseNumber,
+          orgId: orgId,
+          state: licenseState,
+        );
+      }
+      return await getStrains();
+    });
+  }
 
-  // TODO: Update strains.
+  // Update strains.
+  Future<void> updateStrains(List<Strain> items) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final licenseNumber = ref.read(primaryLicenseProvider);
+      final licenseState = ref.read(primaryStateProvider);
+      final orgId = ref.read(primaryOrganizationProvider);
+      for (Strain item in items) {
+        await MetrcStrains.updateStrain(
+          id: item.id,
+          name: item.name,
+          testingStatus: item.testingStatus!,
+          cbdLevel: item.cbdLevel ?? 0.0,
+          indicaPercentage: item.indicaPercentage ?? 50.0,
+          sativaPercentage: item.sativaPercentage ?? 50.0,
+          thcLevel: item.thcLevel ?? 0.0,
+          license: licenseNumber,
+          orgId: orgId,
+          state: licenseState,
+        );
+      }
+      return await getStrains();
+    });
+  }
 
-  // TODO: Delete strains.
+  // Delete strains.
+  Future<void> deleteStrains(List<Strain> items) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final licenseNumber = ref.read(primaryLicenseProvider);
+      final licenseState = ref.read(primaryStateProvider);
+      final orgId = ref.read(primaryOrganizationProvider);
+      for (Strain item in items) {
+        await MetrcStrains.deleteStrain(
+          id: item.id,
+          license: licenseNumber,
+          orgId: orgId,
+          state: licenseState,
+        );
+      }
+      return await getStrains();
+    });
+  }
 }
 
 /* Table */
@@ -245,7 +307,7 @@ class NameController extends StateNotifier<TextEditingController> {
   void change(String value) => state.value = TextEditingValue(text: value);
 }
 
-/* Strain Types */
+// TODO: Convert to testing statuses.
 
 // Strain types provider.
 final testingStatusesProvider =
@@ -271,25 +333,14 @@ class StrainTypesNotifier extends AsyncNotifier<List<dynamic>> {
     //   state: licenseState,
     // );
     // final value = ref.read(strainName);
-    // // Set initial strain type and permissions.
-    // if (value == null && data.isNotEmpty) {
-    //   Map initialValue = data[0];
-    //   ref.read(strainName.notifier).state = initialValue['name'];
-    //   ref.read(forPlants.notifier).state = initialValue['for_plants'];
-    //   ref.read(forPlantBatches.notifier).state =
-    //       initialValue['for_plant_batches'];
-    //   ref.read(forHarvests.notifier).state = initialValue['for_harvests'];
-    //   ref.read(forPackages.notifier).state = initialValue['for_packages'];
-    // }
     // return data;
   }
 }
 
-// Strain name field.
+// Strain fields.
 final strainName = StateProvider<String?>((ref) => null);
-
-// Boolean fields.
-final forPlants = StateProvider<bool?>((ref) => null);
-final forPlantBatches = StateProvider<bool?>((ref) => null);
-final forHarvests = StateProvider<bool?>((ref) => null);
-final forPackages = StateProvider<bool?>((ref) => null);
+final testingStatus = StateProvider<String?>((ref) => null);
+final cbdLevel = StateProvider<double>((ref) => 0.0);
+final thcLevel = StateProvider<double>((ref) => 0.0);
+final indicaPercentage = StateProvider<double>((ref) => 50.0);
+final sativaPercentage = StateProvider<double>((ref) => 50.0);

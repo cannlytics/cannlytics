@@ -82,7 +82,8 @@ except ImportError:
     pass # Otherwise, ChromeDriver should be in your path.
 
 # Internal imports.
-from cannlytics.data.data import create_sample_id
+from cannlytics import __version__
+from cannlytics.data.data import create_hash, create_sample_id
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
@@ -155,8 +156,7 @@ def parse_cc_url(
         print('Failed to load page within %i seconds.' % max_delay)
 
     # Create a sample observation.
-    analyses = []
-    results = []
+    analyses, results = [], []
     obs = {'lims': 'Confident Cannabis'}
 
     # Find the sample image.
@@ -392,18 +392,22 @@ def parse_cc_url(
             obs['producer'] = producer
 
     # Return the sample with a freshly minted sample ID.
-    obs['analyses'] = analyses
+    obs = {**CONFIDENT_CANNABIS, **obs}
     obs['lab_results_url'] = url
-    obs['results'] = results
+    obs['analyses'] = json.dumps(list(set(analyses)))
+    obs['results'] = json.dumps(results)
+    obs['coa_algorithm_version'] = __version__
+    obs['coa_parsed_at'] = datetime.now().isoformat()
+    obs['results_hash'] = create_hash(results)
     obs['sample_id'] = create_sample_id(
         private_key=json.dumps(results),
         public_key=product_name,
         salt=producer,
     )
-    obs['coa_parsed_at'] = datetime.now().isoformat()
+    obs['sample_hash'] = create_hash(obs)
     if not persist:
         parser.quit()
-    return {**CONFIDENT_CANNABIS, **obs}
+    return obs
 
 
 def parse_cc_pdf(

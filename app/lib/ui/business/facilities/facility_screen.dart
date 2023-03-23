@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/widgets/layout/main_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -56,7 +57,7 @@ class _FacilityScreenState extends ConsumerState<FacilityScreen> {
     }
 
     // Body.
-    return CustomScrollView(
+    return MainScreen(
       slivers: [
         // App header.
         const SliverToBoxAdapter(child: AppHeader()),
@@ -93,37 +94,17 @@ class _FacilityScreenState extends ConsumerState<FacilityScreen> {
 
           // Spacer.
           const Spacer(),
-
-          // Actions.
-          // Create / update a facility.
-          // PrimaryButton(
-          //   text: (widget.id == 'new') ? 'Create' : 'Save',
-          //   onPressed: () async {
-          //     var name = ref.read(nameController).value.text;
-          //     var update = Facility(
-          //       id: widget.id,
-          //       name: name,
-          //       facilityTypeName: ref.read(facilityType),
-          //     );
-          //     if (widget.id == 'new') {
-          //       await ref
-          //           .read(facilitiesProvider.notifier)
-          //           .createFacilities([update]);
-          //     } else {
-          //       // FIXME:
-          //       await ref
-          //           .read(facilitiesProvider.notifier)
-          //           .updateFacilities([update]);
-          //     }
-          //     context.go('/facilities');
-          //   },
-          // ),
         ],
       ),
 
       // Name field.
-      gapH6,
+      gapH18,
       _nameField(item),
+      gapH6,
+
+      // Alias field
+      gapH18,
+      _aliasField(item),
       gapH6,
 
       // Facility type name and ID.
@@ -203,6 +184,28 @@ class _FacilityScreenState extends ConsumerState<FacilityScreen> {
     final textField = TextField(
       controller: _nameController,
       decoration: const InputDecoration(labelText: 'Name'),
+      keyboardType: TextInputType.text,
+      maxLength: null,
+      maxLines: null,
+    );
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 300),
+      child: textField,
+    );
+  }
+
+  // Alias field.
+  Widget _aliasField(Facility item) {
+    final _controller = ref.watch(aliasController);
+    // Hot-fix: Set the initial value.
+    if (_controller.text.isEmpty && item.name.isNotEmpty) {
+      ref.read(aliasController.notifier).change(item.name);
+    } else if (_controller.text != item.name) {
+      ref.read(aliasController.notifier).change(item.name);
+    }
+    final textField = TextField(
+      controller: _controller,
+      decoration: const InputDecoration(labelText: 'Alias'),
       keyboardType: TextInputType.text,
       maxLength: null,
       maxLines: null,

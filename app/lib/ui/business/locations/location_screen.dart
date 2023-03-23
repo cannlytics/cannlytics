@@ -49,7 +49,8 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
     );
 
     // Listen for the location data.
-    var item = ref.watch(locationProvider(widget.id)).value;
+    final state = ref.watch(locationProvider(widget.id));
+    var item = state.value;
     if (item == null) {
       item = Location(id: 'new', name: '');
     }
@@ -61,8 +62,8 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
         const SliverToBoxAdapter(child: AppHeader()),
 
         // Form.
-        // TODO: Add a loading indicator.
-        SliverToBoxAdapter(child: FormContainer(children: _fields(item))),
+        SliverToBoxAdapter(
+            child: FormContainer(children: _fields(state, item))),
 
         // Footer
         const SliverToBoxAdapter(child: Footer()),
@@ -71,11 +72,11 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
   }
 
   /// Form fields.
-  List<Widget> _fields(Location item) {
+  List<Widget> _fields(AsyncValue state, Location item) {
     return <Widget>[
       // Back to locations button.
       CustomTextButton(
-        text: 'Locations',
+        text: '\u2190 Locations',
         onPressed: () {
           context.go('/locations');
           ref.read(nameController.notifier).change('');
@@ -97,31 +98,34 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
           // Create / update a location.
           PrimaryButton(
             text: (widget.id == 'new') ? 'Create' : 'Save',
-            onPressed: () async {
-              var name = ref.read(nameController).value.text;
-              var update = Location(
-                id: widget.id,
-                name: name,
-                locationTypeName: ref.read(locationType),
-              );
-              if (widget.id == 'new') {
-                await ref
-                    .read(locationsProvider.notifier)
-                    .createLocations([update]);
-              } else {
-                // FIXME:
-                await ref
-                    .read(locationsProvider.notifier)
-                    .updateLocations([update]);
-              }
-              context.go('/locations');
-            },
+            isLoading: state.isLoading,
+            onPressed: state.isLoading
+                ? null
+                : () async {
+                    var name = ref.read(nameController).value.text;
+                    var update = Location(
+                      id: widget.id,
+                      name: name,
+                      locationTypeName: ref.read(locationType),
+                    );
+                    if (widget.id == 'new') {
+                      await ref
+                          .read(locationsProvider.notifier)
+                          .createLocations([update]);
+                    } else {
+                      // FIXME:
+                      await ref
+                          .read(locationsProvider.notifier)
+                          .updateLocations([update]);
+                    }
+                    context.go('/locations');
+                  },
           ),
         ],
       ),
 
       // Name field.
-      gapH6,
+      gapH18,
       _nameField(item),
       gapH6,
 
@@ -163,11 +167,11 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
       // Optional: Look at packages / plants at the location.
 
       // Danger zone : Handle deleting an existing location.
-      if (widget.id.isNotEmpty && widget.id != 'new') _deleteOption(),
+      if (widget.id.isNotEmpty && widget.id != 'new') _deleteOption(state),
     ];
   }
 
-  Widget _deleteOption() {
+  Widget _deleteOption(AsyncValue state) {
     return Container(
       constraints: BoxConstraints(minWidth: 200), // set minimum width of 200
       child: Card(
@@ -189,13 +193,17 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
               PrimaryButton(
                 backgroundColor: Colors.red,
                 text: 'Delete',
-                onPressed: () async {
-                  await ref
-                      .read(locationsProvider.notifier)
-                      .deleteLocations([Location(id: widget.id, name: '')]);
-                  // FIXME: Clear search, etc. to make table load better.
-                  context.go('/locations');
-                },
+                isLoading: state.isLoading,
+                onPressed: state.isLoading
+                    ? null
+                    : () async {
+                        await ref
+                            .read(locationsProvider.notifier)
+                            .deleteLocations(
+                                [Location(id: widget.id, name: '')]);
+                        // FIXME: Clear search, etc. to make table load better.
+                        context.go('/locations');
+                      },
               ),
             ],
           ),
@@ -224,8 +232,10 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
       ref.read(nameController.notifier).change(item.name);
     }
     final textField = TextField(
+      key: Key('name'),
       controller: _nameController,
-      decoration: const InputDecoration(labelText: 'Name'),
+      decoration: InputDecoration(labelText: 'Name'),
+      style: Theme.of(context).textTheme.titleMedium,
       keyboardType: TextInputType.text,
       maxLength: null,
       maxLines: null,
@@ -242,6 +252,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
     final value = ref.watch(locationType);
     if (items.length == 0 || value == null) return Container();
     var dropdown = DropdownButton(
+      key: Key('location_type_name'),
       underline: Container(),
       isDense: true,
       isExpanded: true,
@@ -303,18 +314,22 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
       ),
       gapH6,
       CheckboxField(
+        key: Key('for_packages'),
         title: 'For Packages',
         value: ref.watch(forPackages) ?? false,
       ),
       CheckboxField(
+        key: Key('for_plants'),
         title: 'For Plants',
         value: ref.watch(forPlants) ?? false,
       ),
       CheckboxField(
+        key: Key('for_plant_batches'),
         title: 'For Plant Batches',
         value: ref.watch(forPlantBatches) ?? false,
       ),
       CheckboxField(
+        key: Key('for_harvests'),
         title: 'For Harvests',
         value: ref.watch(forHarvests) ?? false,
       ),

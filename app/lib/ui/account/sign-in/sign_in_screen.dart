@@ -221,10 +221,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
               TextFormField(
                 key: EmailPasswordSignInScreen.emailKey,
                 controller: _emailController,
-                style: TextStyle(
-                  fontFamily: 'SourceSerifPro',
-                  height: 1.33,
-                ),
+                style: Theme.of(context).textTheme.titleMedium,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   hintText: 'test@cannlytics.com',
@@ -257,10 +254,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
               TextFormField(
                 key: EmailPasswordSignInScreen.passwordKey,
                 controller: _passwordController,
-                style: TextStyle(
-                  fontFamily: 'SourceSerifPro',
-                  height: 1.33,
-                ),
+                style: Theme.of(context).textTheme.titleMedium,
                 decoration: InputDecoration(
                   labelText: _formType.passwordLabelText,
                   enabled: !state.isLoading,

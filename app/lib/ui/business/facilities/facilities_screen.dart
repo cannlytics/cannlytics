@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/18/2023
+// Updated: 3/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/widgets/layout/main_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -22,7 +23,6 @@ import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
-import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/tables/table_data.dart';
 import 'package:cannlytics_app/widgets/tables/table_form.dart';
@@ -33,24 +33,22 @@ class FacilitiesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // App header.
-          const SliverToBoxAdapter(child: AppHeader()),
+    return MainScreen(
+      slivers: [
+        // App header.
+        const SliverToBoxAdapter(child: AppHeader()),
 
-          // Form.
-          SliverToBoxAdapter(
-            child: TableForm(
-              title: 'Facilities',
-              table: FacilitiesTable(),
-            ),
+        // Form.
+        SliverToBoxAdapter(
+          child: TableForm(
+            title: 'Facilities',
+            table: FacilitiesTable(),
           ),
+        ),
 
-          // Footer
-          const SliverToBoxAdapter(child: Footer()),
-        ],
-      ),
+        // Footer
+        const SliverToBoxAdapter(child: Footer()),
+      ],
     );
   }
 }
@@ -68,16 +66,6 @@ class FacilitiesTable extends ConsumerWidget {
     // Get the filtered data.
     final data = ref.watch(filteredFacilitiesProvider);
 
-    // Define the cell builder function.
-    _buildCells(Facility item) {
-      return <DataCell>[
-        DataCell(Text(item.id)),
-        DataCell(Text(item.name)),
-        DataCell(Text(item.displayName)),
-        DataCell(Text(item.licenseType)),
-      ];
-    }
-
     // Define the table headers.
     List<Map> headers = [
       {'name': 'ID', 'key': 'id', 'sort': true},
@@ -85,6 +73,22 @@ class FacilitiesTable extends ConsumerWidget {
       {'name': 'Display Name', 'key': 'display_name', 'sort': true},
       {'name': 'License Type', 'key': 'license.type', 'sort': false},
     ];
+
+    // Define the cell builder function.
+    _buildCells(Facility item) {
+      var values = [
+        item.id,
+        item.name,
+        item.displayName,
+        item.licenseType,
+      ];
+      return values.map((value) {
+        return DataCell(
+          Text(value),
+          onTap: () => context.go('/facilities/${item.id}'),
+        );
+      }).toList();
+    }
 
     // Format the table headers.
     List<DataColumn> tableHeader = <DataColumn>[
@@ -117,8 +121,8 @@ class FacilitiesTable extends ConsumerWidget {
     final rowsPerPage = ref.watch(facilitiesRowsPerPageProvider);
 
     // Get the selected rows.
-    List<Facility> selectedRows = ref.watch(selectedFacilitiesProvider);
-    List<String> selectedIds = selectedRows.map((x) => x.id).toList();
+    // List<Facility> selectedRows = ref.watch(selectedFacilitiesProvider);
+    // List<String> selectedIds = selectedRows.map((x) => x.id).toList();
 
     // Get the sorting state.
     final sortColumnIndex = ref.read(facilitiesSortColumnIndex);
@@ -127,23 +131,27 @@ class FacilitiesTable extends ConsumerWidget {
     // Build the data table.
     Widget table = PaginatedDataTable(
       // Options.
-      showCheckboxColumn: true,
+      showCheckboxColumn: false,
       showFirstLastButtons: true,
       sortColumnIndex: sortColumnIndex,
       sortAscending: sortAscending,
+
       // Columns
       columns: tableHeader,
+
       // Style.
       dataRowHeight: 48,
       columnSpacing: 48,
       headingRowHeight: 48,
       horizontalMargin: 12,
+
       // Pagination.
       availableRowsPerPage: [5, 10, 25, 50, 100],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
         ref.read(facilitiesRowsPerPageProvider.notifier).state = index!;
       },
+
       // Table.
       source: TableData<Facility>(
         // Table data.
@@ -151,13 +159,6 @@ class FacilitiesTable extends ConsumerWidget {
 
         // Table cells.
         cellsBuilder: _buildCells,
-
-        // Tap on a facility.
-        onTap: (Facility item) async {
-          // await ref.read(facilityProvider.notifier).set(item);
-          // FIXME: Pass facility data to avoid extra API request.
-          context.go('/facilities/${item.id}');
-        },
 
         // Select a facility.
         onSelect: (bool selected, Facility item) {
@@ -171,7 +172,7 @@ class FacilitiesTable extends ConsumerWidget {
         },
 
         // Specify selected facilities.
-        isSelected: (item) => selectedIds.contains(item.id),
+        // isSelected: (item) => selectedIds.contains(item.id),
       ),
     );
 
@@ -184,7 +185,6 @@ class FacilitiesTable extends ConsumerWidget {
         // Search box.
         SizedBox(
           width: 175,
-          // height: 34,
           child: TypeAheadField(
             textFieldConfiguration: TextFieldConfiguration(
               // Controller.
@@ -205,11 +205,9 @@ class FacilitiesTable extends ConsumerWidget {
                         child: Icon(Icons.clear),
                       ),
               ),
-              style: DefaultTextStyle.of(context).style.copyWith(
-                    fontStyle: FontStyle.italic,
-                    // fontSize: 16.0,
-                    // height: 1.25,
-                  ),
+              style: DefaultTextStyle.of(context)
+                  .style
+                  .copyWith(fontStyle: FontStyle.italic),
             ),
             // Search engine function.
             suggestionsCallback: (pattern) async {
@@ -220,9 +218,7 @@ class FacilitiesTable extends ConsumerWidget {
 
             // Autocomplete menu.
             itemBuilder: (BuildContext context, Facility suggestion) {
-              return ListTile(
-                title: Text(suggestion.name),
-              );
+              return ListTile(title: Text(suggestion.name));
             },
 
             // Menu selection function.
@@ -234,25 +230,6 @@ class FacilitiesTable extends ConsumerWidget {
 
         // Spacer
         const Spacer(),
-
-        // Delete button if any rows selected.
-        if (selectedIds.length > 0)
-          PrimaryButton(
-            backgroundColor: Colors.red,
-            text: isWide ? 'Delete facilities' : 'Delete',
-            onPressed: () {
-              print('DELETE LOCATIONS!');
-            },
-          ),
-
-        // Add button.
-        if (selectedIds.length > 0) gapW6,
-        PrimaryButton(
-          text: isWide ? 'New facility' : 'New',
-          onPressed: () {
-            context.go('/facilities/new');
-          },
-        ),
       ],
     );
 

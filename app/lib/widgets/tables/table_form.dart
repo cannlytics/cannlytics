@@ -36,7 +36,6 @@ class TableForm extends ConsumerWidget {
     return Consumer(
       builder: (context, ref, child) {
         return Container(
-          color: Theme.of(context).scaffoldBackgroundColor,
           margin: EdgeInsets.only(top: Insets(1).md),
           constraints: BoxConstraints(
             minHeight: 320,

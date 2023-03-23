@@ -36,15 +36,15 @@ class FacilitiesController extends AsyncNotifier<List<Facility>> {
   Future<List<Facility>> _getFacilities() async {
     final orgId = ref.watch(primaryOrganizationProvider);
     final state = ref.read(primaryStateProvider);
-    final primaryFacility = ref.read(primaryFacilityProvider);
+    final currentFacility = ref.read(primaryFacility);
     try {
       var data = await MetrcFacilities.getFacilities(
         orgId: orgId,
         state: state,
       );
       // Set primary facility.
-      if (data.isNotEmpty && primaryFacility == null) {
-        ref.read(primaryFacilityProvider.notifier).state = data[0].id;
+      if (data.isNotEmpty && currentFacility == null) {
+        ref.read(primaryFacility.notifier).state = data[0];
       }
       return data;
     } catch (error, stack) {
@@ -220,55 +220,41 @@ class NameController extends StateNotifier<TextEditingController> {
   void change(String value) => state.value = TextEditingValue(text: value);
 }
 
-/* Facility Types */
+final aliasController =
+    StateNotifierProvider<AliasController, TextEditingController>(
+        (ref) => AliasController());
 
-// // Facility types provider.
-// final facilityTypesProvider =
-//     AsyncNotifierProvider<FacilityTypesNotifier, List<dynamic>>(
-//         () => FacilityTypesNotifier());
+class AliasController extends StateNotifier<TextEditingController> {
+  AliasController() : super(TextEditingController());
+  @override
+  void dispose() {
+    state.dispose();
+    super.dispose();
+  }
 
-// // Facility types controller.
-// class FacilityTypesNotifier extends AsyncNotifier<List<dynamic>> {
-//   // Initialization.
-//   @override
-//   Future<List<dynamic>> build() async => getFacilityTypes();
+  void change(String value) => state.value = TextEditingValue(text: value);
+}
 
-//   // Get facility types from Metrc.
-//   Future<List<dynamic>> getFacilityTypes() async {
-//     final licenseNumber = ref.watch(primaryLicenseProvider);
-//     final orgId = ref.watch(primaryOrganizationProvider);
-//     final licenseState = ref.watch(primaryStateProvider);
-//     List<dynamic> data;
-//     try {
-//       data = await MetrcFacilities.getFacilityTypes(
-//         license: licenseNumber,
-//         orgId: orgId,
-//         state: licenseState,
-//       );
-//     } catch (error) {
-//       return [];
-//     }
+// TODO: Add remaining facility fields!
+// final aliasProvider = StateProvider<String?>((ref) => null);
+final credentialDateProvider = StateProvider<String?>((ref) => null);
+final displayNameProvider = StateProvider<String?>((ref) => null);
+final hireDateProvider = StateProvider<String?>((ref) => null);
+final isManagerProvider = StateProvider<bool?>((ref) => null);
+final isOwnerProvider = StateProvider<bool?>((ref) => null);
+final licenseEndDateProvider = StateProvider<String?>((ref) => null);
+final licenseNumberProvider = StateProvider<String?>((ref) => null);
+final licenseStartDateProvider = StateProvider<String?>((ref) => null);
+final licenseTypeProvider = StateProvider<String?>((ref) => null);
+final supportActivationDateProvider = StateProvider<String?>((ref) => null);
+final supportExpirationDateProvider = StateProvider<String?>((ref) => null);
+final supportLastPaidDateProvider = StateProvider<String?>((ref) => null);
 
-//     // Set initial facility type and permissions.
-//     final value = ref.read(facilityType);
-//     if (value == null && data.isNotEmpty) {
-//       Map initialValue = data[0];
-//       ref.read(facilityType.notifier).state = initialValue['name'];
-//       ref.read(forPlants.notifier).state = initialValue['for_plants'];
-//       ref.read(forPlantBatches.notifier).state =
-//           initialValue['for_plant_batches'];
-//       ref.read(forHarvests.notifier).state = initialValue['for_harvests'];
-//       ref.read(forPackages.notifier).state = initialValue['for_packages'];
-//     }
-//     return data;
-//   }
-// }
+// TODO: Facility type
+// final facilityTypeProvider = StateProvider<String?>((ref) => null);
 
-// // Facility name field.
-// final facilityType = StateProvider<String?>((ref) => null);
+// TODO: Occupation
+// final occupationProvider = StateProvider<String?>((ref) => null);
 
-// // Boolean fields.
-// final forPlants = StateProvider<bool?>((ref) => null);
-// final forPlantBatches = StateProvider<bool?>((ref) => null);
-// final forHarvests = StateProvider<bool?>((ref) => null);
-// final forPackages = StateProvider<bool?>((ref) => null);
+// TODO: Permissions
+// final permissionsProvider = StateProvider<List<String>?>((ref) => null);

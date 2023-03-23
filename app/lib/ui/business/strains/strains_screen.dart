@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/8/2023
-// Updated: 3/13/2023
+// Updated: 3/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/widgets/layout/main_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -33,24 +34,22 @@ class StrainsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // App header.
-          const SliverToBoxAdapter(child: AppHeader()),
+    return MainScreen(
+      slivers: [
+        // App header.
+        const SliverToBoxAdapter(child: AppHeader()),
 
-          // Strains form.
-          SliverToBoxAdapter(
-            child: TableForm(
-              title: 'Strains',
-              table: StrainsTable(),
-            ),
+        // Strains form.
+        SliverToBoxAdapter(
+          child: TableForm(
+            title: 'Strains',
+            table: StrainsTable(),
           ),
+        ),
 
-          // Footer
-          const SliverToBoxAdapter(child: Footer()),
-        ],
-      ),
+        // Footer
+        const SliverToBoxAdapter(child: Footer()),
+      ],
     );
   }
 }
@@ -75,19 +74,6 @@ class StrainsTable extends ConsumerWidget {
     // Get the filtered data.
     final data = ref.watch(filteredStrainsProvider);
 
-    // Define the cell builder function.
-    _buildCells(Strain item) {
-      return <DataCell>[
-        DataCell(Text(item.id)),
-        DataCell(Text(item.name)),
-        DataCell(Text(item.testingStatus ?? '')),
-        DataCell(Text(item.thcLevel.toString())),
-        DataCell(Text(item.cbdLevel.toString())),
-        DataCell(Text(item.indicaPercentage.toString())),
-        DataCell(Text(item.sativaPercentage.toString())),
-      ];
-    }
-
     // Define the table headers.
     List<Map> headers = [
       {'name': 'ID', 'key': 'id', 'sort': true},
@@ -98,6 +84,25 @@ class StrainsTable extends ConsumerWidget {
       {'name': 'Indica Percentage', 'key': 'indica_percentage', 'sort': false},
       {'name': 'Sativa Percentage', 'key': 'sativa_percentage', 'sort': false},
     ];
+
+    // Define the cell builder function.
+    _buildCells(Strain item) {
+      List<dynamic> values = [
+        item.id,
+        item.name,
+        item.testingStatus ?? '',
+        item.thcLevel.toString(),
+        item.cbdLevel.toString(),
+        item.indicaPercentage.toString(),
+        item.sativaPercentage.toString(),
+      ];
+      return values.map((value) {
+        return DataCell(
+          Text(value),
+          onTap: () => context.go('/strains/${item.id}'),
+        );
+      }).toList();
+    }
 
     // Format the table headers.
     List<DataColumn> tableHeader = <DataColumn>[
@@ -208,12 +213,15 @@ class StrainsTable extends ConsumerWidget {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(3)),
                 ),
-                suffixIcon: (_controller.text.isEmpty)
-                    ? null
-                    : GestureDetector(
-                        onTap: () => _controller.clear(),
+                suffixIcon: _controller.text.isNotEmpty
+                    ? GestureDetector(
+                        onTap: () {
+                          ref.read(searchTermProvider.notifier).state = '';
+                          _controller.clear();
+                        },
                         child: Icon(Icons.clear),
-                      ),
+                      )
+                    : null,
               ),
               style: DefaultTextStyle.of(context).style.copyWith(
                     fontStyle: FontStyle.italic,

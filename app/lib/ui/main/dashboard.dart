@@ -4,12 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/19/2023
+// Updated: 3/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/constants/theme.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
+import 'package:cannlytics_app/widgets/layout/main_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -36,49 +35,58 @@ class DashboardScreen extends ConsumerWidget {
     final userType = ref.watch(userTypeProvider);
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Break screen data into chunks.
-    var chunks = [];
+    // Get the primary license.
+    var currentFacility = ref.watch(primaryFacility);
+
+    // Get the cards depending on the user type.
     List cards = (userType == 'consumer')
         ? ScreenData.consumerScreens
         : ScreenData.businessScreens;
+
+    // Incorporate permissions when showing cards.
+    print('CARDS: ${cards.length}');
+    try {
+      for (int i = cards.length - 1; i >= 0; i--) {
+        ScreenData card = cards[i];
+        if (card.permissions != null) {
+          if (currentFacility == null) {
+            cards.removeAt(i);
+          } else {
+            bool authorized =
+                currentFacility.facilityType[card.permissions] ?? false;
+            if (!authorized) {
+              print('REMOVING CARD: $i');
+              cards.removeAt(i);
+            }
+          }
+        }
+      }
+      print('FINAL CARDS: ${cards.length}');
+    } catch (e) {
+      print('ERROR: $e');
+    }
+
+    // Break screen data into chunks.
+    var chunks = [];
     int chunkSize = (screenWidth >= Breakpoints.twoColLayoutMinWidth) ? 3 : 2;
     for (var i = 0; i < cards.length; i += chunkSize) {
       chunks.add(cards.sublist(
           i, i + chunkSize > cards.length ? cards.length : i + chunkSize));
     }
 
-    // Get the theme.
-    final themeMode = ref.watch(themeModeProvider);
-    final bool isDark = themeMode == ThemeMode.dark;
-
     // Body.
-    return Scaffold(
-      body: Container(
-        // Optional: Add background gradient.
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(1, -1),
-            radius: 4.0,
-            colors: [
-              isDark ? Colors.green : AppColors.white,
-              isDark ? Colors.transparent : AppColors.primary2,
-            ],
-          ),
-        ),
-        child: CustomScrollView(
-          slivers: [
-            // App header.
-            const SliverToBoxAdapter(child: AppHeader()),
+    return MainScreen(
+      slivers: [
+        // App header.
+        const SliverToBoxAdapter(child: AppHeader()),
 
-            // Navigation cards.
-            for (var chunk in chunks)
-              SliverToBoxAdapter(child: DashboardCards(items: chunk)),
+        // Navigation cards.
+        for (var chunk in chunks)
+          SliverToBoxAdapter(child: DashboardCards(items: chunk)),
 
-            // Footer
-            const SliverToBoxAdapter(child: Footer()),
-          ],
-        ),
-      ),
+        // Footer
+        const SliverToBoxAdapter(child: Footer()),
+      ],
     );
   }
 }
@@ -162,7 +170,7 @@ class ItemCard extends StatelessWidget {
 
             // Image.
             AspectRatio(
-              aspectRatio: 24.0 / 8.0,
+              aspectRatio: 36.0 / 8.0,
               // aspectRatio:
               //     (screenWidth >= Breakpoints.tablet) ? 12.0 / 8.0 : 24.0 / 8.0,
               child: DecoratedBox(

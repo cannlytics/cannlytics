@@ -242,7 +242,7 @@ class LocationController extends FamilyAsyncNotifier<Location?, String?> {
 
   /// Get location.
   Future<Location?> get(String id) async {
-    print('GETTING LOCATION...');
+    print('GETTING LOCATION LOCALLY...');
     final items = ref.read(locationsProvider).value ?? [];
     for (Location item in items) {
       if (item.id == id) {
@@ -251,12 +251,13 @@ class LocationController extends FamilyAsyncNotifier<Location?, String?> {
         return item;
       }
     }
+    // FIXME:
+    print('GETTING LOCATION FROM API...');
     final licenseNumber = ref.watch(primaryLicenseProvider);
     final orgId = ref.read(primaryOrganizationProvider);
     final licenseState = ref.read(primaryStateProvider);
     if (licenseNumber == null) return null;
     if (id == 'new') return Location(id: '', name: '');
-    print('GETTING LOCATION...');
     try {
       return await MetrcLocations.getLocation(
         id: id,
@@ -352,10 +353,8 @@ class LocationTypesNotifier extends AsyncNotifier<List<dynamic>> {
   }
 }
 
-// Location name field.
+// Location fields.
 final locationType = StateProvider<String?>((ref) => null);
-
-// Boolean fields.
 final forPlants = StateProvider<bool?>((ref) => null);
 final forPlantBatches = StateProvider<bool?>((ref) => null);
 final forHarvests = StateProvider<bool?>((ref) => null);

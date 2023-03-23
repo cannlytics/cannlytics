@@ -545,19 +545,21 @@ class ScreenData {
     required this.title,
     required this.description,
     required this.route,
+    this.permissions = '',
   });
   final String imageName;
   final String title;
   final String description;
   final String route;
+  final String? permissions;
 
   // Business screens.
   static const businessScreens = [
     ScreenData(
-      imageName: 'assets/images/icons/spending.png',
-      title: 'Deliveries',
-      description: 'Manage your deliveries to consumers.',
-      route: 'deliveries',
+      imageName: 'assets/images/icons/facilities.png',
+      title: 'Facilities',
+      description: 'Manage your facilities and locations.',
+      route: 'facilities',
     ),
     ScreenData(
       imageName: 'assets/images/icons/employees.png',
@@ -566,10 +568,10 @@ class ScreenData {
       route: 'employees',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/facilities.png',
-      title: 'Facilities',
-      description: 'Manage your facilities and locations.',
-      route: 'facilities',
+      imageName: 'assets/images/icons/locations.png',
+      title: 'Locations',
+      description: 'Manage your locations and addresses.',
+      route: 'locations',
     ),
     ScreenData(
       imageName: 'assets/images/icons/packages.png',
@@ -584,16 +586,11 @@ class ScreenData {
       route: 'items',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/locations.png',
-      title: 'Locations',
-      description: 'Manage your locations and addresses.',
-      route: 'locations',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/patients.png',
-      title: 'Patients',
-      description: 'Manage your patients and customers.',
-      route: 'patients',
+      imageName: 'assets/images/icons/strains.png',
+      title: 'Strains',
+      description: 'Manage your strains and variety catalog.',
+      route: 'strains',
+      permissions: 'can_report_strain_properties',
     ),
     ScreenData(
       imageName: 'assets/images/icons/plant.png',
@@ -614,10 +611,16 @@ class ScreenData {
       route: 'receipts',
     ),
     ScreenData(
-      imageName: 'assets/images/icons/strains.png',
-      title: 'Strains',
-      description: 'Manage your strains and variety catalog.',
-      route: 'strains',
+      imageName: 'assets/images/icons/patients.png',
+      title: 'Patients',
+      description: 'Manage your patients and customers.',
+      route: 'patients',
+    ),
+    ScreenData(
+      imageName: 'assets/images/icons/spending.png',
+      title: 'Deliveries',
+      description: 'Manage your deliveries to consumers.',
+      route: 'deliveries',
     ),
     ScreenData(
       imageName: 'assets/images/icons/transfers.png',

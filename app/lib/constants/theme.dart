@@ -97,12 +97,9 @@ class AppColors {
       useMaterial3: true,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       highlightColor: accent1,
-      visualDensity: VisualDensity.comfortable,
+      visualDensity: VisualDensity.compact,
       scaffoldBackgroundColor: isDark ? const Color(0xFF323443) : Colors.white,
       canvasColor: isDark ? const Color(0xFF323443) : AppColors.neutral1,
-      cardColor: isDark ? const Color(0xFF323443) : Colors.white,
-      dialogBackgroundColor:
-          isDark ? const Color(0xFF323443) : AppColors.neutral1,
 
       // App bar theme.
       appBarTheme: const AppBarTheme(
@@ -120,6 +117,7 @@ class AppColors {
       ),
 
       // Card style.
+      cardColor: isDark ? const Color(0xFF323443) : Colors.white,
       cardTheme: CardTheme(
         elevation: 1,
         surfaceTintColor: isDark ? null : AppColors.surface,
@@ -138,7 +136,16 @@ class AppColors {
         // dataRowColor: MaterialStateProperty.all(Colors.transparent),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(3),
         ),
+      ),
+
+      // Dialog style.
+      dialogBackgroundColor:
+          isDark ? const Color(0xFF323443) : AppColors.neutral1,
+      dialogTheme: DialogTheme(
+        elevation: 1,
+        surfaceTintColor: isDark ? null : AppColors.surface,
       ),
 
       // Input style.
@@ -166,6 +173,11 @@ class AppColors {
         outlineBorder: null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(3),
+          borderSide: BorderSide(color: Color(0xFFdadce0)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(3),
+          borderSide: BorderSide(color: Color(0xFFdadce0)),
         ),
       ),
 
@@ -226,6 +238,7 @@ class AppColors {
           color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
           fontFamily: 'SourceSerifPro',
           fontSize: 17,
+          height: 1.33,
         ),
         titleSmall: TextStyle(
           color: isDark ? AppColors.neutral2 : AppColors.neutral4,

@@ -200,7 +200,7 @@ class MetrcLocations {
     String endpoint = '/api/metrc/locations';
     Map data = {
       'name': name,
-      'location_type': locationTypeName ?? 'Default Location Type',
+      'location_type_name': locationTypeName ?? 'Default Location Type',
     };
     Map options = getParams(license, orgId, state);
     return await APIService.apiRequest(endpoint, data: data, options: options);
@@ -219,7 +219,7 @@ class MetrcLocations {
     Map data = {
       'id': id,
       'name': name,
-      'location_type': locationTypeName,
+      'location_type_name': locationTypeName,
     };
     Map options = getParams(license, orgId, state);
     return await APIService.apiRequest(endpoint, data: data, options: options);
@@ -240,33 +240,6 @@ class MetrcLocations {
 
 /// Strains
 class MetrcStrains {
-  /// Create a strain in Metrc.
-  static Future<void> createStrain({
-    required String name,
-    required String testingStatus,
-    required double thcLevel,
-    required double cbdLevel,
-    required double indicaPercentage,
-    required double sativaPercentage,
-    String? license,
-    String? orgId,
-    String? state,
-  }) async {
-    final data = <String, dynamic>{
-      'name': name,
-      'testing_status': testingStatus,
-      'thc_level': thcLevel,
-      'cbd_level': cbdLevel,
-      'indica_percentage': indicaPercentage,
-      'sativa_percentage': sativaPercentage,
-    };
-    String endpoint = '/api/metrc/strains';
-    Map options = getParams(license, orgId, state);
-    await APIService.apiRequest(endpoint, data: data, options: options);
-    // TODO: Get the newly created strain's ID.
-    // return Strain.fromMap(data, uid);
-  }
-
   /// Get strains.
   static Future<List<Strain>> getStrains({
     String? license,
@@ -295,6 +268,33 @@ class MetrcStrains {
     Map options = getParams(license, orgId, state);
     final response = await APIService.apiRequest(endpoint, options: options);
     return Strain.fromMap(response);
+  }
+
+  /// Create a strain in Metrc.
+  static Future<void> createStrain({
+    required String name,
+    required String testingStatus,
+    required double thcLevel,
+    required double cbdLevel,
+    required double indicaPercentage,
+    required double sativaPercentage,
+    String? license,
+    String? orgId,
+    String? state,
+  }) async {
+    final data = <String, dynamic>{
+      'name': name,
+      'testing_status': testingStatus,
+      'thc_level': thcLevel,
+      'cbd_level': cbdLevel,
+      'indica_percentage': indicaPercentage,
+      'sativa_percentage': sativaPercentage,
+    };
+    String endpoint = '/api/metrc/strains';
+    Map options = getParams(license, orgId, state);
+    await APIService.apiRequest(endpoint, data: data, options: options);
+    // TODO: Get the newly created strain's ID.
+    // return Strain.fromMap(data, uid);
   }
 
   /// Update a strain.

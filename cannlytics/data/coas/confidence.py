@@ -496,8 +496,7 @@ if __name__ == '__main__':
 
     # Set a Google Maps API key.
     config = dotenv_values('../../../.env')
-    api_key = config['GOOGLE_MAPS_API_KEY']
-    os.environ['GOOGLE_MAPS_API_KEY'] = api_key
+    os.environ['GOOGLE_MAPS_API_KEY'] = config['GOOGLE_MAPS_API_KEY']
 
     # Specify testing constants.
     coa_url = 'https://certs.conflabs.com/full/WA-kXIRbGqnLVBI-WA-221015-052.pdf'

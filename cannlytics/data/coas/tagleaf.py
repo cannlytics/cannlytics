@@ -1,12 +1,12 @@
 """
 Parse TagLeaf LIMS CoA
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/30/2022
+Updated: 3/21/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -19,11 +19,11 @@ Description:
 Data Points:
 
     ✓ analyses
-    - {analysis}_method
+    ✓ {analysis}_method
     ✓ {analysis}_status
     - coa_urls
     ✓ date_tested
-    - date_received
+    ✓ date_received
     ✓ distributor
     ✓ distributor_license_number
     ✓ distributor_license_type
@@ -42,26 +42,27 @@ Data Points:
     ✓ total_cannabinoids
     ✓ total_thc
     ✓ total_cbd
-    - total_terpenes (calculated)
+    ✓ total_terpenes (calculated)
     ✓ sample_id (generated)
     - lab_id
     ✓ lab
     ✓ lab_image_url
     ✓ lab_license_number
     ✓ lab_address
-    - lab_city
-    - lab_county (augmented)
-    - lab_state
-    - lab_zipcode
+    ✓ lab_city (augmented)
+    ✓ lab_county (augmented)
+    ✓ lab_state (augmented)
+    ✓ lab_zipcode (augmented)
+    ✓ lab_latitude (augmented)
+    ✓ lab_longitude (augmented)
     ✓ lab_phone
     - lab_email
-    - lab_latitude (augmented)
-    - lab_longitude (augmented)
 
 """
 # Standard imports.
 from datetime import datetime
 import json
+import os
 from typing import Any, Optional
 
 # External imports.
@@ -71,7 +72,9 @@ import pdfplumber
 from requests import Session
 
 # Internal imports.
-from cannlytics.data.data import create_sample_id
+from cannlytics import __version__
+from cannlytics.data.data import create_hash, create_sample_id
+from cannlytics.data.gis import search_for_address
 from cannlytics.utils.constants import ANALYSES, STANDARD_UNITS
 from cannlytics.utils.utils import (
     convert_to_numeric,
@@ -138,6 +141,20 @@ def parse_tagleaf_url(
     obs['lab_image_url'] = img.attrs['src']
     obs['lab_phone'] = details[2].replace('PH: ', '')
 
+    # Try to get lab address details.
+    try:
+        google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
+        location = search_for_address(address, google_maps_api_key)
+        obs['lab_street'] = location['street']
+        obs['lab_city'] = location['city']
+        obs['lab_county'] = location['county']
+        obs['lab_state'] = location['state']
+        obs['lab_zipcode'] = location['zipcode']
+        obs['lab_latitude'] = location['latitude']
+        obs['lab_longitude'] = location['longitude']
+    except:
+        pass
+
     # Get data from headings.
     text = soup.find_all('p', attrs={'class': 'h5'}, limit=2)
     parts = strip_whitespace(text[0].text.split('//')[0]).split(' (')
@@ -152,24 +169,29 @@ def parse_tagleaf_url(
     for row in rows:
         pars = row.find_all('p')
         key = snake_case(strip_whitespace(pars[1].text))
-        value = strip_whitespace(pars[0].text)
+        value = strip_whitespace(pars[0].text).replace('%', '').strip()
         if key == 'sample_weight':
             continue
         if key in ['value', 'mg_g', 'lod', 'loq']:
             value = convert_to_numeric(value, strip=True)
-        obs[key] = value
+        obs[key] = convert_to_numeric(value)
 
     # Get cultivator and distributor details.
-    els = soup.find_all('div', attrs={'class': 'license'})
-    values = [x.text for x in els[0].find_all('p')]
-    producer = values[1]
-    obs['producer'] = producer
-    obs['license_number'] = values[3]
-    obs['license_type'] = values[5]
-    values = [x.text for x in els[1].find_all('p')]
-    obs['distributor'] = values[1]
-    obs['distributor_license_number'] = values[3]
-    obs['distributor_license_type'] = values[5]
+    try:
+        els = soup.find_all('div', attrs={'class': 'license'})
+        values = [x.text for x in els[0].find_all('p')]
+        producer = values[1]
+        obs['producer'] = producer
+        obs['license_number'] = values[3]
+        obs['license_type'] = values[5]
+        values = [x.text for x in els[1].find_all('p')]
+        obs['distributor'] = values[1]
+        obs['distributor_license_number'] = values[3]
+        obs['distributor_license_type'] = values[5]
+    except:
+        client_span = soup.find('span', string='Client')
+        producer = client_span.next_sibling.replace(':', '').strip()
+        obs['producer'] = producer
 
     # Get the sample image.
     el = soup.find('div', attrs={'class': 'sample-photo'})
@@ -191,7 +213,9 @@ def parse_tagleaf_url(
 
     # Get the lab ID and metrc ID.
     obs['lab_id'] = obs.get('sample_id', '')
-    obs['metrc_ids'] = [obs.get('source_metrc_uid', '')]
+    metrc_uid = obs.get('source_metrc_uid')
+    if metrc_uid:
+        obs['metrc_ids'] = [metrc_uid]
 
     # Format `date_collected` and `date_received` dates.
     try:
@@ -209,12 +233,14 @@ def parse_tagleaf_url(
         if i % 2:
             analysis = analyses[-1]
             if value != '\xa0':
-                obs[f'{analysis}_status'] = value.lower()
+                key = analysis
+                if not analysis.endswith('_status'):
+                    key = f'{analysis}_status'
+                obs[key] = value.lower()
         else:
-            analysis = snake_case(value)
+            analysis = snake_case(value).replace('_status', '')
             analysis = keys.get(analysis, analysis) # Get preferred key.
             analyses.append(analysis)
-    obs['analyses'] = analyses
 
     # Get `{analysis}_method`s.
     els = soup.find_all('div', attrs={'class': 'table-header'})
@@ -276,18 +302,35 @@ def parse_tagleaf_url(
                 obs[analyte] = convert_to_numeric(value, strip=True)
             else:
                 results.append(result)
+    
+    # Hot-fix: Calculate total terpenes.
+    terp_results = [x for x in results if 'terp' in x['analysis']]
+    if terp_results:
+        total_terpenes = 0
+        for result in terp_results:
+            try:
+                total_terpenes += float(result['value'])
+            except ValueError:
+                pass
+        obs['total_terpenes'] = round(total_terpenes, 5)
 
     # Return the sample with a freshly minted sample ID.
-    obs['results'] = results
+    obs = {**TAGLEAF, **obs}
+    obs['lab_results_url'] = url
+    obs['analyses'] = json.dumps(list(set(analyses)))
+    obs['results'] = json.dumps(results)
+    obs['coa_algorithm_version'] = __version__
+    obs['coa_parsed_at'] = datetime.now().isoformat()
+    obs['results_hash'] = create_hash(results)
     obs['sample_id'] = create_sample_id(
         private_key=json.dumps(results),
         public_key=product_name,
         salt=producer,
     )
-    obs['coa_parsed_at'] = datetime.now().isoformat()
+    obs['sample_hash'] = create_hash(obs)
     if not persist:
         parser.quit()
-    return {**TAGLEAF, **obs}
+    return obs
 
 
 def parse_tagleaf_pdf(
@@ -332,23 +375,41 @@ def parse_tagleaf_coa(
     return data
 
 
+# === Tests ===
+# Uncomment tests to perform them.
+# Checked tests were successfully performed by Cannlytics on 3/21/2023.
+# Contact: <admin@cannlytics.com>.
 if __name__ == '__main__':
 
-    # Test TagLeaf LIMS CoAs parsing.
+    # Test TagLeaf LIMS COA parsing.
     from cannlytics.data.coas import CoADoc
+    from dotenv import dotenv_values
 
-     # Specify where your test data lives.
-    DATA_DIR = '../../../tests/assets/coas'
-    tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
+    # Set a Google Maps API key.
+    config = dotenv_values('../../../.env')
+    os.environ['GOOGLE_MAPS_API_KEY'] = config['GOOGLE_MAPS_API_KEY']
+
+    # Specify where your test data lives.
+    DATA_DIR = '../../../tests/assets/coas/tagleaf'
     tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
     tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
 
-    # [✓] TEST: Parse a CoA URL.
-    parser = CoADoc()
-    data = parse_tagleaf_url(parser, tagleaf_coa_url)
-    assert data is not None
+    # [✓] TEST: Parse a COA URL.
+    # parser = CoADoc()
+    # data = parse_tagleaf_url(parser, tagleaf_coa_url)
+    # assert data is not None
+    # print(data)
 
-    # [✓] TEST: Parse a TagLeaf LIMS CoA PDF.
-    parser = CoADoc()
-    data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
-    assert data is not None
+    # [✓] TEST: Parse a TagLeaf LIMS COA PDF.
+    # parser = CoADoc()
+    # tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
+    # data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
+    # assert data is not None
+    # print(data)
+
+    # [✓] TEST: Parse a TagLeaf LIMS COA PDF.
+    # parser = CoADoc()
+    # tagleaf_coa_pdf = f'{DATA_DIR}/BCL-211214-151.pdf'
+    # data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
+    # assert data is not None
+    # print(data)

@@ -706,7 +706,7 @@ def locations(request: Request, area_id: Optional[str] = ''):
                 create_items.append(item)
         if create_items:
             names = [x['name'] for x in create_items]
-            types = [x['location_type'] for x in create_items]
+            types = [x['location_type_name'] for x in create_items]
             try:
                 track.create_locations(names, types, return_obs=True)
             except MetrcAPIError as error:

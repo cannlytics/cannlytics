@@ -13,7 +13,7 @@ from setuptools import find_packages, setup
 # Define the package version.
 # Optional: Read from package.json? Pros and cons to tieing Python
 # package version to the Cannlytics project version.
-version = '0.0.13'
+version = '0.0.14'
 
 # Get the project description.
 README = ''

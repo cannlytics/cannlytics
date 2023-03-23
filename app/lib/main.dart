@@ -5,11 +5,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/6/2023
+// Updated: 3/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/licenses.dart';
+import 'package:cannlytics_app/utils/error_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -39,9 +41,6 @@ class CannlyticsApp extends ConsumerWidget {
     // Theme provider.
     final themeMode = ref.watch(themeModeProvider);
 
-    // Optional: Remove the native splash screen.
-    // FlutterNativeSplash.remove();
-
     // Material app.
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
@@ -56,10 +55,7 @@ class CannlyticsApp extends ConsumerWidget {
 /// [main] initializes the [CannlyticsApp].
 Future<void> main() async {
   // Initialize Flutter.
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-
-  // Optional: Keep the native splash screen open until the app initializes.
-  // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase.
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -70,57 +66,17 @@ Future<void> main() async {
   // Register error handlers.
   registerErrorHandlers();
 
-  // TODO: Register licenses.
-  LicenseRegistry.addLicense(() async* {
-    // final license = await rootBundle.loadString('google_fonts/OFL.txt');
-    // yield LicenseEntryWithLineBreaks(['google_fonts'], license);
-  });
-
-  // Optional: Add persisted local data.
-  // final sharedPreferences = await SharedPreferences.getInstance();
+  // Register licenses.
+  LicenseRegistry.addLicense(renderAppLicenses);
 
   // Create a container to serve as the app entry point.
-  final container = ProviderContainer(
-    overrides: [
-      // Optional: Initialize persisted local data.
-      // onboardingStoreProvider
-      //     .overrideWithValue(OnboardingStore(sharedPreferences)),
-    ],
-  );
+  final container = ProviderContainer();
 
-  // Wait for authentication to be determined.
-  // Note: This will prevent unnecessary redirects when the app starts.
+  // Run the app once authentication is determined.
+  // This will prevent unnecessary redirects when the app starts.
   await container.read(userProvider.future);
   runApp(UncontrolledProviderScope(
     container: container,
     child: const CannlyticsApp(),
   ));
-}
-
-/// [registerErrorHandlers] displays notifications if certain errors are thrown.
-void registerErrorHandlers() {
-  // Show an error notification if any uncaught exception happens.
-  FlutterError.onError = (FlutterErrorDetails details) {
-    // FlutterError.presentError(details);
-    // debugPrint(details.toString());
-    FlutterError.dumpErrorToConsole(details);
-    throw details.exception;
-  };
-
-  // Handle underlying platform/OS errors.
-  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
-    debugPrint(error.toString());
-    return true;
-  };
-
-  // Show an error notification when any widget in the app fails to build.
-  ErrorWidget.builder = (FlutterErrorDetails details) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.red,
-        title: Text('An error occurred'),
-      ),
-      body: Center(child: Text(details.toString())),
-    );
-  };
 }

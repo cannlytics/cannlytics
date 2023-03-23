@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/7/2023
-// Updated: 3/13/2023
+// Updated: 3/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/widgets/layout/main_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -30,27 +31,24 @@ import 'package:cannlytics_app/widgets/tables/table_form.dart';
 /// Locations screen.
 class LocationsScreen extends ConsumerWidget {
   const LocationsScreen({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // App header.
-          const SliverToBoxAdapter(child: AppHeader()),
+    return MainScreen(
+      slivers: [
+        // App header.
+        const SliverToBoxAdapter(child: AppHeader()),
 
-          // Form.
-          SliverToBoxAdapter(
-            child: TableForm(
-              title: 'Locations',
-              table: LocationsTable(),
-            ),
+        // Form.
+        SliverToBoxAdapter(
+          child: TableForm(
+            title: 'Locations',
+            table: LocationsTable(),
           ),
+        ),
 
-          // Footer
-          const SliverToBoxAdapter(child: Footer()),
-        ],
-      ),
+        // Footer
+        const SliverToBoxAdapter(child: Footer()),
+      ],
     );
   }
 }
@@ -68,20 +66,26 @@ class LocationsTable extends ConsumerWidget {
     // Get the filtered data.
     final data = ref.watch(filteredLocationsProvider);
 
-    // Define the cell builder function.
+    // Cell builder function.
     _buildCells(Location item) {
-      return <DataCell>[
-        DataCell(Text(item.id)),
-        DataCell(Text(item.name)),
-        DataCell(Text(item.locationTypeName ?? '')),
-        DataCell(Text(item.forPackages! ? '✓' : 'x')),
-        DataCell(Text(item.forPlantBatches! ? '✓' : 'x')),
-        DataCell(Text(item.forPlants! ? '✓' : 'x')),
-        DataCell(Text(item.forHarvests! ? '✓' : 'x')),
+      var values = [
+        item.id,
+        item.name,
+        item.locationTypeName ?? '',
+        item.forPackages! ? '✓' : 'x',
+        item.forPlantBatches! ? '✓' : 'x',
+        item.forPlants! ? '✓' : 'x',
+        item.forHarvests! ? '✓' : 'x',
       ];
+      return values.map((value) {
+        return DataCell(
+          Text(value),
+          onTap: () => context.go('/locations/${item.id}'),
+        );
+      }).toList();
     }
 
-    // Define the table headers.
+    // Table headers.
     List<Map> headers = [
       {'name': 'ID', 'key': 'id', 'sort': true},
       {'name': 'Name', 'key': 'name', 'sort': true},
@@ -158,13 +162,6 @@ class LocationsTable extends ConsumerWidget {
         // Table cells.
         cellsBuilder: _buildCells,
 
-        // Tap on a location.
-        onTap: (Location item) async {
-          // await ref.read(locationProvider.notifier).set(item);
-          // FIXME: Pass location data to avoid extra API request.
-          context.go('/locations/${item.id}');
-        },
-
         // Select a location.
         onSelect: (bool selected, Location item) {
           if (selected) {
@@ -202,17 +199,18 @@ class LocationsTable extends ConsumerWidget {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(3)),
                 ),
-                suffixIcon: (_controller.text.isEmpty)
-                    ? null
-                    : GestureDetector(
-                        onTap: () => _controller.clear(),
+                suffixIcon: _controller.text.isNotEmpty
+                    ? GestureDetector(
+                        onTap: () {
+                          ref.read(searchTermProvider.notifier).state = '';
+                          _controller.clear();
+                        },
                         child: Icon(Icons.clear),
-                      ),
+                      )
+                    : null,
               ),
               style: DefaultTextStyle.of(context).style.copyWith(
                     fontStyle: FontStyle.italic,
-                    // fontSize: 16.0,
-                    // height: 1.25,
                   ),
             ),
             // Search engine function.

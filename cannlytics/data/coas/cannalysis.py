@@ -487,9 +487,9 @@ def parse_cannalysis_coa(
     # TODO: Fix or make `sample_id` obsolete.
     obs = {**CANNALYSIS, **obs}
     obs['analyses'] = json.dumps(list(set(analyses)))
+    obs['results'] = json.dumps(results)
     obs['coa_algorithm_version'] = __version__
     obs['coa_parsed_at'] = datetime.now().isoformat()
-    obs['results'] = json.dumps(results)
     obs['results_hash'] = create_hash(results)
     obs['sample_id'] = create_sample_id(
         private_key=json.dumps(results),
