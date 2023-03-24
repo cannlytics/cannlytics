@@ -4,13 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/7/2023
+// Updated: 3/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_app/widgets/inputs/string_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -46,10 +47,13 @@ class FacilitiesController extends AsyncNotifier<List<Facility>> {
       if (data.isNotEmpty && currentFacility == null) {
         ref.read(primaryFacility.notifier).state = data[0];
       }
+      print('FOUND FACILITIES!');
       return data;
     } catch (error, stack) {
-      print(stack);
-      throw Exception("Error decoding JSON: [error=${error.toString()}]");
+      // print(stack);
+      // throw Exception("Error decoding JSON: [error=${error.toString()}]");
+      print("Error decoding JSON: [error=${error.toString()}]");
+      return [];
     }
   }
 
@@ -116,18 +120,18 @@ class FilteredFacilitiesNotifier extends StateNotifier<List<Facility>> {
 }
 
 // Search input.
-final searchController =
-    StateNotifierProvider<SearchController, TextEditingController>(
-        (ref) => SearchController());
+final facilitiesSearchController =
+    StateNotifierProvider<StringController, TextEditingController>(
+        (ref) => StringController());
 
-class SearchController extends StateNotifier<TextEditingController> {
-  SearchController() : super(TextEditingController());
-  @override
-  void dispose() {
-    state.dispose();
-    super.dispose();
-  }
-}
+// class SearchController extends StateNotifier<TextEditingController> {
+//   SearchController() : super(TextEditingController());
+//   @override
+//   void dispose() {
+//     state.dispose();
+//     super.dispose();
+//   }
+// }
 
 /* Selection  */
 
@@ -159,16 +163,15 @@ class SelectedFacilitiesNotifier extends Notifier<List<Facility>> {
 /* Facility Details */
 
 // Facility ID.
-final facilityId = StateProvider<String?>((ref) => null);
+final facilityId = StateProvider<String?>((ref) => 'new');
 
 // Facility provider.
 final facilityProvider =
-    AsyncNotifierProvider.family<FacilityController, Facility?, String?>(
-  ({id}) => FacilityController(id: id),
-);
+    AsyncNotifierProvider.family<FacilityController, Facility, String?>(
+        ({id}) => FacilityController(id: id));
 
 /// Facilities controller.
-class FacilityController extends FamilyAsyncNotifier<Facility?, String?> {
+class FacilityController extends FamilyAsyncNotifier<Facility, String?> {
   FacilityController({required this.id}) : super();
 
   // Properties.
@@ -176,27 +179,29 @@ class FacilityController extends FamilyAsyncNotifier<Facility?, String?> {
 
   // Initialization.
   @override
-  FutureOr<Facility?> build(String? id) async {
-    if (id == null) return null;
+  FutureOr<Facility> build(String? id) async {
+    if (id == null || id == 'new') return Facility(id: 'new');
     return await this.get(id);
   }
 
   /// Get facility.
-  Future<Facility?> get(String id) async {
+  Future<Facility> get(String id) async {
     final items = ref.read(facilitiesProvider).value ?? [];
     for (Facility item in items) {
       if (item.id == id) {
         return item;
       }
     }
-    return null;
+    return Facility(id: id);
   }
 
   /// Set the facility.
   Future<bool> set(Facility item) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => item);
+    // TODO: Set all of the initial values.
     ref.read(nameController).value = TextEditingValue(text: item.name);
+    ref.read(aliasController).value = TextEditingValue(text: item.alias);
     return state.hasError == false;
   }
 }
@@ -205,50 +210,27 @@ class FacilityController extends FamilyAsyncNotifier<Facility?, String?> {
 
 // Name field.
 final nameController =
-    StateNotifierProvider<NameController, TextEditingController>(
-        (ref) => NameController());
+    StateNotifierProvider<StringController, TextEditingController>(
+        (ref) => StringController());
 
-class NameController extends StateNotifier<TextEditingController> {
-  NameController() : super(TextEditingController());
-
-  @override
-  void dispose() {
-    state.dispose();
-    super.dispose();
-  }
-
-  void change(String value) => state.value = TextEditingValue(text: value);
-}
-
+// Alias field.
 final aliasController =
-    StateNotifierProvider<AliasController, TextEditingController>(
-        (ref) => AliasController());
-
-class AliasController extends StateNotifier<TextEditingController> {
-  AliasController() : super(TextEditingController());
-  @override
-  void dispose() {
-    state.dispose();
-    super.dispose();
-  }
-
-  void change(String value) => state.value = TextEditingValue(text: value);
-}
+    StateNotifierProvider<StringController, TextEditingController>(
+        (ref) => StringController());
 
 // TODO: Add remaining facility fields!
-// final aliasProvider = StateProvider<String?>((ref) => null);
-final credentialDateProvider = StateProvider<String?>((ref) => null);
-final displayNameProvider = StateProvider<String?>((ref) => null);
-final hireDateProvider = StateProvider<String?>((ref) => null);
-final isManagerProvider = StateProvider<bool?>((ref) => null);
-final isOwnerProvider = StateProvider<bool?>((ref) => null);
-final licenseEndDateProvider = StateProvider<String?>((ref) => null);
-final licenseNumberProvider = StateProvider<String?>((ref) => null);
-final licenseStartDateProvider = StateProvider<String?>((ref) => null);
-final licenseTypeProvider = StateProvider<String?>((ref) => null);
-final supportActivationDateProvider = StateProvider<String?>((ref) => null);
-final supportExpirationDateProvider = StateProvider<String?>((ref) => null);
-final supportLastPaidDateProvider = StateProvider<String?>((ref) => null);
+// final credentialDateProvider = StateProvider<String?>((ref) => null);
+// final displayNameProvider = StateProvider<String?>((ref) => null);
+// final hireDateProvider = StateProvider<String?>((ref) => null);
+// final isManagerProvider = StateProvider<bool?>((ref) => null);
+// final isOwnerProvider = StateProvider<bool?>((ref) => null);
+// final licenseEndDateProvider = StateProvider<String?>((ref) => null);
+// final licenseNumberProvider = StateProvider<String?>((ref) => null);
+// final licenseStartDateProvider = StateProvider<String?>((ref) => null);
+// final licenseTypeProvider = StateProvider<String?>((ref) => null);
+// final supportActivationDateProvider = StateProvider<String?>((ref) => null);
+// final supportExpirationDateProvider = StateProvider<String?>((ref) => null);
+// final supportLastPaidDateProvider = StateProvider<String?>((ref) => null);
 
 // TODO: Facility type
 // final facilityTypeProvider = StateProvider<String?>((ref) => null);

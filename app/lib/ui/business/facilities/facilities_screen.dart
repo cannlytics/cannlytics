@@ -59,20 +59,8 @@ class FacilitiesTable extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Determine the screen size.
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWide = screenWidth > Breakpoints.tablet;
-
     // Get the filtered data.
     final data = ref.watch(filteredFacilitiesProvider);
-
-    // Define the table headers.
-    List<Map> headers = [
-      {'name': 'ID', 'key': 'id', 'sort': true},
-      {'name': 'Name', 'key': 'name', 'sort': true},
-      {'name': 'Display Name', 'key': 'display_name', 'sort': true},
-      {'name': 'License Type', 'key': 'license.type', 'sort': false},
-    ];
 
     // Define the cell builder function.
     _buildCells(Facility item) {
@@ -89,6 +77,14 @@ class FacilitiesTable extends ConsumerWidget {
         );
       }).toList();
     }
+
+    // Define the table headers.
+    List<Map> headers = [
+      {'name': 'ID', 'key': 'id', 'sort': true},
+      {'name': 'Name', 'key': 'name', 'sort': true},
+      {'name': 'Display Name', 'key': 'display_name', 'sort': true},
+      {'name': 'License Type', 'key': 'license_type', 'sort': false},
+    ];
 
     // Format the table headers.
     List<DataColumn> tableHeader = <DataColumn>[
@@ -120,10 +116,6 @@ class FacilitiesTable extends ConsumerWidget {
     // Get the rows per page.
     final rowsPerPage = ref.watch(facilitiesRowsPerPageProvider);
 
-    // Get the selected rows.
-    // List<Facility> selectedRows = ref.watch(selectedFacilitiesProvider);
-    // List<String> selectedIds = selectedRows.map((x) => x.id).toList();
-
     // Get the sorting state.
     final sortColumnIndex = ref.read(facilitiesSortColumnIndex);
     final sortAscending = ref.read(facilitiesSortAscending);
@@ -154,30 +146,13 @@ class FacilitiesTable extends ConsumerWidget {
 
       // Table.
       source: TableData<Facility>(
-        // Table data.
         data: data,
-
-        // Table cells.
         cellsBuilder: _buildCells,
-
-        // Select a facility.
-        onSelect: (bool selected, Facility item) {
-          if (selected) {
-            ref.read(selectedFacilitiesProvider.notifier).selectFacility(item);
-          } else {
-            ref
-                .read(selectedFacilitiesProvider.notifier)
-                .unselectFacility(item);
-          }
-        },
-
-        // Specify selected facilities.
-        // isSelected: (item) => selectedIds.contains(item.id),
       ),
     );
 
-    // Read the controller.
-    final _controller = ref.watch(searchController);
+    // Read the search controller.
+    final _controller = ref.watch(facilitiesSearchController);
 
     // Define the table actions.
     var actions = Row(
@@ -198,12 +173,15 @@ class FacilitiesTable extends ConsumerWidget {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(3)),
                 ),
-                suffixIcon: (_controller.text.isEmpty)
-                    ? null
-                    : GestureDetector(
-                        onTap: () => _controller.clear(),
+                suffixIcon: _controller.text.isNotEmpty
+                    ? GestureDetector(
+                        onTap: () {
+                          ref.read(searchTermProvider.notifier).state = '';
+                          _controller.clear();
+                        },
                         child: Icon(Icons.clear),
-                      ),
+                      )
+                    : null,
               ),
               style: DefaultTextStyle.of(context)
                   .style
@@ -227,9 +205,6 @@ class FacilitiesTable extends ConsumerWidget {
             },
           ),
         ),
-
-        // Spacer
-        const Spacer(),
       ],
     );
 

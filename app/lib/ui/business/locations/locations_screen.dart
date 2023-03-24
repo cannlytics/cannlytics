@@ -141,19 +141,23 @@ class LocationsTable extends ConsumerWidget {
       showFirstLastButtons: true,
       sortColumnIndex: sortColumnIndex,
       sortAscending: sortAscending,
+
       // Columns
       columns: tableHeader,
+
       // Style.
       dataRowHeight: 48,
       columnSpacing: 48,
       headingRowHeight: 48,
       horizontalMargin: 12,
+
       // Pagination.
       availableRowsPerPage: [5, 10, 25, 50, 100],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
         ref.read(locationsRowsPerPageProvider.notifier).state = index!;
       },
+
       // Table.
       source: TableData<Location>(
         // Table data.
@@ -209,9 +213,9 @@ class LocationsTable extends ConsumerWidget {
                       )
                     : null,
               ),
-              style: DefaultTextStyle.of(context).style.copyWith(
-                    fontStyle: FontStyle.italic,
-                  ),
+              style: DefaultTextStyle.of(context)
+                  .style
+                  .copyWith(fontStyle: FontStyle.italic),
             ),
             // Search engine function.
             suggestionsCallback: (pattern) async {
@@ -222,9 +226,7 @@ class LocationsTable extends ConsumerWidget {
 
             // Autocomplete menu.
             itemBuilder: (BuildContext context, Location suggestion) {
-              return ListTile(
-                title: Text(suggestion.name),
-              );
+              return ListTile(title: Text(suggestion.name));
             },
 
             // Menu selection function.

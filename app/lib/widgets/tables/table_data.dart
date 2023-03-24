@@ -33,8 +33,10 @@ class TableData<T> extends DataTableSource {
     return DataRow.byIndex(
       index: index,
       cells: cellsBuilder(item),
-      selected: isSelected!(item),
-      onSelectChanged: (bool? selected) => onSelect!(selected ?? false, item),
+      selected: isSelected == null ? false : isSelected!(item),
+      onSelectChanged: isSelected == null
+          ? null
+          : (bool? selected) => onSelect!(selected ?? false, item),
       onLongPress: () => onTap!(item),
     );
   }

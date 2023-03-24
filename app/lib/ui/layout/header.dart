@@ -32,6 +32,9 @@ import 'package:cannlytics_app/widgets/images/avatar.dart';
 // - Better theme toggle / perhaps in settings?
 // - Show about dialog (i).
 // - A sidebar menu is needed for desktop.
+// - Style the organization and facility selection.
+//     * Outline
+//     * Icons
 
 /// The main navigation header.
 class AppHeader extends StatelessWidget {

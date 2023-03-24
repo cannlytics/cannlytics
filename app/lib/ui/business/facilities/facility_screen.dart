@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/23/2023
-// Updated: 3/18/2023
+// Updated: 3/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -18,14 +18,11 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/models/metrc/facility.dart';
-import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
-import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/widgets/inputs/checkbox_input.dart';
 import 'package:cannlytics_app/widgets/layout/form_container.dart';
 
 /// Facility screen.
@@ -55,6 +52,8 @@ class _FacilityScreenState extends ConsumerState<FacilityScreen> {
     if (item == null) {
       item = Facility(id: 'new', name: '');
     }
+    print('CURRENT FACILITY:');
+    print(item.toMap());
 
     // Body.
     return MainScreen(
@@ -77,7 +76,7 @@ class _FacilityScreenState extends ConsumerState<FacilityScreen> {
     return <Widget>[
       // Back to facilities button.
       CustomTextButton(
-        text: 'Facilities',
+        text: '\u2190  Facilities',
         onPressed: () {
           context.go('/facilities');
           ref.read(nameController.notifier).change('');
@@ -125,43 +124,6 @@ class _FacilityScreenState extends ConsumerState<FacilityScreen> {
     ];
   }
 
-  // Widget _deleteOption() {
-  //   return Container(
-  //     constraints: BoxConstraints(minWidth: 200), // set minimum width of 200
-  //     child: Card(
-  //       margin: EdgeInsets.only(top: 36, bottom: 48),
-  //       borderOnForeground: true,
-  //       surfaceTintColor: null,
-  //       child: Padding(
-  //         padding: EdgeInsets.all(16),
-  //         child: Column(
-  //           mainAxisAlignment: MainAxisAlignment.start,
-  //           children: [
-  //             Text(
-  //               'Danger Zone',
-  //               style: Theme.of(context).textTheme.titleLarge!.copyWith(
-  //                     color: Theme.of(context).textTheme.titleLarge!.color,
-  //                   ),
-  //             ),
-  //             gapH12,
-  //             PrimaryButton(
-  //               backgroundColor: Colors.red,
-  //               text: 'Delete',
-  //               onPressed: () async {
-  //                 await ref
-  //                     .read(facilitiesProvider.notifier)
-  //                     .deleteFacilities([Facility(id: widget.id, name: '')]);
-  //                 // FIXME: Clear search, etc. to make table load better.
-  //                 context.go('/facilities');
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   // ID field.
   Widget _idField(Facility item) {
     return Text(
@@ -198,10 +160,10 @@ class _FacilityScreenState extends ConsumerState<FacilityScreen> {
   Widget _aliasField(Facility item) {
     final _controller = ref.watch(aliasController);
     // Hot-fix: Set the initial value.
-    if (_controller.text.isEmpty && item.name.isNotEmpty) {
-      ref.read(aliasController.notifier).change(item.name);
-    } else if (_controller.text != item.name) {
-      ref.read(aliasController.notifier).change(item.name);
+    if (_controller.text.isEmpty && item.alias.isNotEmpty) {
+      ref.read(aliasController.notifier).change(item.alias);
+    } else if (_controller.text != item.alias) {
+      ref.read(aliasController.notifier).change(item.alias);
     }
     final textField = TextField(
       controller: _controller,
@@ -215,89 +177,4 @@ class _FacilityScreenState extends ConsumerState<FacilityScreen> {
       child: textField,
     );
   }
-
-  // Facility name field.
-  // Widget _facilityTypeField(Facility item) {
-  //   final items = ref.watch(facilityTypesProvider).value ?? [];
-  //   final value = ref.watch(facilityType);
-  //   if (items.length == 0 || value == null) return Container();
-  //   var dropdown = DropdownButton(
-  //     underline: Container(),
-  //     isDense: true,
-  //     isExpanded: true,
-  //     value: value,
-  //     items: items
-  //         .map(
-  //           (item) => DropdownMenuItem<String>(
-  //             onTap: () => item['name'],
-  //             value: item['name'],
-  //             child: ListTile(
-  //               dense: true,
-  //               title: Text(item['name']),
-  //             ),
-  //           ),
-  //         )
-  //         .toList(),
-  //     onChanged: (String? value) {
-  //       ref.read(facilityType.notifier).state = value;
-  //       // FIXME: Change facility permissions.
-  //     },
-  //   );
-  //   return Column(
-  //     mainAxisAlignment: MainAxisAlignment.start,
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       gapH18,
-  //       Text(
-  //         'Facility Type Name',
-  //         style: Theme.of(context).textTheme.titleMedium!.copyWith(
-  //               color: Theme.of(context).textTheme.titleLarge!.color,
-  //             ),
-  //       ),
-  //       gapH6,
-  //       SizedBox(
-  //         height: 36,
-  //         child: ConstrainedBox(
-  //           constraints: BoxConstraints(
-  //             maxWidth: 300,
-  //           ),
-  //           child: dropdown,
-  //         ),
-  //       ),
-  //       gapH6,
-  //     ],
-  //   );
-  // }
-
-  // // Checkbox fields.
-  // List<Widget> _checkboxes(Facility item) {
-  //   final items = ref.watch(facilityTypesProvider).value ?? [];
-  //   if (items.length == 0) return [Container()];
-  //   return [
-  //     gapH12,
-  //     Text(
-  //       'Permissions',
-  //       style: Theme.of(context).textTheme.titleMedium!.copyWith(
-  //             color: Theme.of(context).textTheme.titleLarge!.color,
-  //           ),
-  //     ),
-  //     gapH6,
-  //     CheckboxField(
-  //       title: 'For Packages',
-  //       value: ref.watch(forPackages) ?? false,
-  //     ),
-  //     CheckboxField(
-  //       title: 'For Plants',
-  //       value: ref.watch(forPlants) ?? false,
-  //     ),
-  //     CheckboxField(
-  //       title: 'For Plant Batches',
-  //       value: ref.watch(forPlantBatches) ?? false,
-  //     ),
-  //     CheckboxField(
-  //       title: 'For Harvests',
-  //       value: ref.watch(forHarvests) ?? false,
-  //     ),
-  //   ];
-  // }
 }

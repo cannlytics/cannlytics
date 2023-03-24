@@ -34,7 +34,7 @@ class Footer extends ConsumerWidget {
 
     // Build the footer.
     return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
+      // color: Theme.of(context).scaffoldBackgroundColor,
       margin: EdgeInsets.only(top: Insets(1).md),
       child: Center(
         child: SizedBox(

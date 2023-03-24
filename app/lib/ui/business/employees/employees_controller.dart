@@ -254,3 +254,10 @@ class NameController extends StateNotifier<TextEditingController> {
 
   void change(String value) => state.value = TextEditingValue(text: value);
 }
+
+// TODO: Add fields for all properties.
+// final String? fullName;
+// final String? licenseNumber;
+// final String? licenseStartDate;
+// final String? licenseEndDate;
+// final String? licenseType;

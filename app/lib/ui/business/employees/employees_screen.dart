@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/widgets/layout/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 
@@ -42,24 +43,22 @@ class EmployeesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // App header.
-          const SliverToBoxAdapter(child: AppHeader()),
+    return MainScreen(
+      slivers: [
+        // App header.
+        const SliverToBoxAdapter(child: AppHeader()),
 
-          // Form.
-          SliverToBoxAdapter(
-            child: TableForm(
-              title: 'Employees',
-              table: EmployeesTable(),
-            ),
+        // Form.
+        SliverToBoxAdapter(
+          child: TableForm(
+            title: 'Employees',
+            table: EmployeesTable(),
           ),
+        ),
 
-          // Footer
-          const SliverToBoxAdapter(child: Footer()),
-        ],
-      ),
+        // Footer
+        const SliverToBoxAdapter(child: Footer()),
+      ],
     );
   }
 }
@@ -79,16 +78,28 @@ class EmployeesTable extends ConsumerWidget {
 
     // Define the cell builder function.
     _buildCells(Employee item) {
-      return <DataCell>[
-        DataCell(Text(item.fullName ?? '')),
-        DataCell(Text(item.licenseNumber ?? '')),
+      var values = [
+        item.fullName ?? '',
+        item.licenseNumber ?? '',
+        item.licenseStartDate ?? '',
+        item.licenseEndDate ?? '',
+        item.licenseType ?? '',
       ];
+      return values.map((value) {
+        return DataCell(
+          Text(value),
+          onTap: () => context.go('/employees/${item.licenseNumber}'),
+        );
+      }).toList();
     }
 
     // Define the table headers.
     List<Map> headers = [
       {'name': 'Full Name', 'key': 'full_name', 'sort': true},
       {'name': 'License Number', 'key': 'license_number', 'sort': true},
+      {'name': 'Start', 'key': 'license_start_date', 'sort': true},
+      {'name': 'End', 'key': 'license_end_date', 'sort': true},
+      {'name': 'Type', 'key': 'license_type', 'sort': true},
     ];
 
     // Format the table headers.
@@ -121,11 +132,6 @@ class EmployeesTable extends ConsumerWidget {
     // Get the rows per page.
     final rowsPerPage = ref.watch(employeesRowsPerPageProvider);
 
-    // Get the selected rows.
-    List<Employee> selectedRows = ref.watch(selectedEmployeesProvider);
-    List<String> selectedIds =
-        selectedRows.map((x) => x.licenseNumber!).toList();
-
     // Get the sorting state.
     final sortColumnIndex = ref.read(employeesSortColumnIndex);
     final sortAscending = ref.read(employeesSortAscending);
@@ -133,49 +139,31 @@ class EmployeesTable extends ConsumerWidget {
     // Build the data table.
     Widget table = PaginatedDataTable(
       // Options.
-      showCheckboxColumn: true,
+      showCheckboxColumn: false,
       showFirstLastButtons: true,
       sortColumnIndex: sortColumnIndex,
       sortAscending: sortAscending,
+
       // Columns
       columns: tableHeader,
+
       // Style.
       dataRowHeight: 48,
       columnSpacing: 48,
       headingRowHeight: 48,
       horizontalMargin: 12,
+
       // Pagination.
       availableRowsPerPage: [5, 10, 25, 50, 100],
       rowsPerPage: rowsPerPage,
       onRowsPerPageChanged: (index) {
         ref.read(employeesRowsPerPageProvider.notifier).state = index!;
       },
+
       // Table.
       source: TableData<Employee>(
-        // Table data.
         data: data,
-
-        // Table cells.
         cellsBuilder: _buildCells,
-
-        // Tap on a employee.
-        onTap: (Employee item) async {
-          // await ref.read(employeeProvider.notifier).set(item);
-          // FIXME: Pass employee data to avoid extra API request.
-          context.go('/employees/${item.licenseNumber}');
-        },
-
-        // Select a employee.
-        onSelect: (bool selected, Employee item) {
-          if (selected) {
-            ref.read(selectedEmployeesProvider.notifier).selectEmployee(item);
-          } else {
-            ref.read(selectedEmployeesProvider.notifier).unselectEmployee(item);
-          }
-        },
-
-        // Specify selected employees.
-        isSelected: (item) => selectedIds.contains(item.licenseNumber),
       ),
     );
 
@@ -188,7 +176,6 @@ class EmployeesTable extends ConsumerWidget {
         // Search box.
         SizedBox(
           width: 175,
-          // height: 34,
           child: TypeAheadField(
             textFieldConfiguration: TextFieldConfiguration(
               // Controller.
@@ -209,11 +196,9 @@ class EmployeesTable extends ConsumerWidget {
                         child: Icon(Icons.clear),
                       ),
               ),
-              style: DefaultTextStyle.of(context).style.copyWith(
-                    fontStyle: FontStyle.italic,
-                    // fontSize: 16.0,
-                    // height: 1.25,
-                  ),
+              style: DefaultTextStyle.of(context)
+                  .style
+                  .copyWith(fontStyle: FontStyle.italic),
             ),
             // Search engine function.
             suggestionsCallback: (pattern) async {
@@ -235,28 +220,6 @@ class EmployeesTable extends ConsumerWidget {
             },
           ),
         ),
-
-        // Spacer
-        const Spacer(),
-
-        // // Delete button if any rows selected.
-        // if (selectedIds.length > 0)
-        //   PrimaryButton(
-        //     backgroundColor: Colors.red,
-        //     text: isWide ? 'Delete employees' : 'Delete',
-        //     onPressed: () {
-        //       print('DELETE LOCATIONS!');
-        //     },
-        //   ),
-
-        // Add button.
-        // if (selectedIds.length > 0) gapW6,
-        // PrimaryButton(
-        //   text: isWide ? 'New employee' : 'New',
-        //   onPressed: () {
-        //     context.go('/employees/new');
-        //   },
-        // ),
       ],
     );
 

@@ -72,11 +72,11 @@ class Facility {
       licenseStartDate: data['license']['start_date'] ?? '',
       licenseType: data['license']['type'] ?? '',
       name: data['name'] ?? '',
-      occupations: List<dynamic>.from(data['occupations'] ?? const []),
+      // occupations: List<dynamic>.from(data['occupations'] ?? const []),
       supportActivationDate: data['support_activation_date'] ?? '',
       supportExpirationDate: data['support_expiration_date'] ?? '',
       supportLastPaidDate: data['support_last_paid_date'] ?? '',
-      permissions: Permissions.fromMap(data['facility_type']),
+      // permissions: Permissions.fromMap(data['facility_type']),
     );
   }
 

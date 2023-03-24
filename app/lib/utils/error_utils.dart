@@ -20,9 +20,9 @@ void registerErrorHandlers() {
 
   // Show an error notification if any uncaught exception happens.
   FlutterError.onError = (FlutterErrorDetails details) {
-    debugPrint(details.exception.toString());
-    // FlutterError.presentError(details);
-    // debugPrint(details.toString());
+    // debugPrint(details.exception.toString());
+    FlutterError.presentError(details);
+    debugPrint(details.toString());
     // FlutterError.dumpErrorToConsole(details);
     // throw details.exception;
   };
