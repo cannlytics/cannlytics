@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/13/2021
-Updated: 3/24/2023
+Updated: 3/25/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API to interface with the Metrc API.
@@ -552,6 +552,7 @@ def add_metrc_user_api_key(request: HttpRequest):
         'suffix': suffix,
         'licenses': licenses,
         'user': False,
+        'sync': True,
     }
 
     # Save the data to Firestore.

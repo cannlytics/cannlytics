@@ -359,7 +359,7 @@ class _AccountFormState extends ConsumerState<AccountForm>
   ) {
     return InkWell(
       customBorder: const CircleBorder(),
-      splashColor: AppColors.accent1,
+      // splashColor: AppColors.accent1,
       onTap: state.isLoading
           ? null
           : () async {

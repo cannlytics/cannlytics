@@ -5,7 +5,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/23/2023
+// Updated: 3/25/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 
@@ -45,8 +45,8 @@ class CannlyticsApp extends ConsumerWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: goRouter,
-      theme: AppColors.toThemeData(false),
-      darkTheme: AppColors.toThemeData(true),
+      theme: AppTheme.toThemeData(),
+      darkTheme: AppTheme.toThemeData(isDark: true),
       themeMode: themeMode,
     );
   }
@@ -72,7 +72,7 @@ Future<void> main() async {
   // Create a container to serve as the app entry point.
   final container = ProviderContainer();
 
-  // Run the app once authentication is determined.
+  // Run the app after authentication is determined.
   // This will prevent unnecessary redirects when the app starts.
   await container.read(userProvider.future);
   runApp(UncontrolledProviderScope(
