@@ -4,10 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/17/2023
+// Updated: 3/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/widgets/cards/wide_card.dart';
+import 'package:cannlytics_app/widgets/layout/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,7 +26,6 @@ import 'package:cannlytics_app/ui/account/sign-in/sign_in_validators.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/utils/validation_utils.dart';
-import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
@@ -38,16 +39,14 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // App header.
-          const SliverToBoxAdapter(child: AppHeader()),
+    return MainScreen(
+      slivers: [
+        // App header.
+        const SliverToBoxAdapter(child: AppHeader()),
 
-          // Account management.
-          SliverToBoxAdapter(child: AccountManagement()),
-        ],
-      ),
+        // Account management.
+        SliverToBoxAdapter(child: AccountManagement()),
+      ],
     );
   }
 }
@@ -73,9 +72,7 @@ class AccountManagement extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // Account information
-          AccountForm(
-            key: Key('account-form'),
-          ),
+          AccountForm(key: Key('account-form')),
 
           // Delete account option.
           _deleteAccount(context, screenWidth),
@@ -87,63 +84,52 @@ class AccountManagement extends StatelessWidget {
 
   /// Delete account card.
   Widget _deleteAccount(BuildContext context, double screenWidth) {
-    return SizedBox(
-      width: double.infinity,
-      child: Card(
-        margin: EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(3),
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 21, horizontal: 16),
-          child: Row(
+    return WideCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: Colors.red,
+          ),
+          gapW16,
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.error_outline,
-                color: Colors.red,
+              SizedBox(
+                width: (screenWidth > Breakpoints.tablet) ? null : 275,
+                child: Text(
+                  'Deleting this account will also remove your account data.',
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        color: Theme.of(context).textTheme.titleLarge!.color,
+                      ),
+                ),
               ),
-              gapW16,
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: (screenWidth > Breakpoints.tablet) ? null : 275,
-                    child: Text(
-                      'Deleting this account will also remove your account data.',
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                            color:
-                                Theme.of(context).textTheme.titleLarge!.color,
-                          ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: (screenWidth > Breakpoints.tablet) ? null : 275,
-                    child: Text(
-                      'Make sure that you have exported your data if you want to keep your data.',
-                    ),
-                  ),
-                  gapH12,
-                  PrimaryButton(
-                    backgroundColor: Colors.red,
-                    text: 'Delete account',
-                    onPressed: () {
-                      print('TODO: DELETE ACCOUNT!');
-                      showReauthDialog(
-                        context: context,
-                        title: 'Reauthenticate',
-                        defaultActionText: 'Submit',
-                        cancelActionText: 'Cancel',
-                        auth: FirebaseAuth.instance,
-                        // content: Text('Password'),
-                      );
-                    },
-                  ),
-                ],
+              SizedBox(
+                width: (screenWidth > Breakpoints.tablet) ? null : 275,
+                child: Text(
+                  'Make sure that you have exported your data if you want to keep your data.',
+                ),
+              ),
+              gapH12,
+              PrimaryButton(
+                backgroundColor: Colors.red,
+                text: 'Delete account',
+                onPressed: () {
+                  print('TODO: DELETE ACCOUNT!');
+                  showReauthDialog(
+                    context: context,
+                    title: 'Reauthenticate',
+                    defaultActionText: 'Submit',
+                    cancelActionText: 'Cancel',
+                    auth: FirebaseAuth.instance,
+                    // content: Text('Password'),
+                  );
+                },
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
@@ -152,7 +138,6 @@ class AccountManagement extends StatelessWidget {
 /// Account form.
 class AccountForm extends ConsumerStatefulWidget {
   const AccountForm({super.key});
-
   @override
   ConsumerState<AccountForm> createState() => _AccountFormState();
 }
@@ -192,9 +177,6 @@ class _AccountFormState extends ConsumerState<AccountForm>
 
   @override
   Widget build(BuildContext context) {
-    // Dynamic screen width.
-    final screenWidth = MediaQuery.of(context).size.width;
-
     // Listen to the account state.
     ref.listen<AsyncValue>(
       accountProvider,
@@ -211,7 +193,29 @@ class _AccountFormState extends ConsumerState<AccountForm>
       _emailController.text = user.email ?? '';
     }
 
-    var formFields = <Widget>[
+    // Define the profile widget.
+    Widget profileWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title
+        Text(
+          'Profile',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        gapH24,
+
+        // User photo.
+        _userPhoto(context, ref, state, user),
+        gapH8,
+
+        // Reset password and sign out.
+        _accountOptions(context, ref, state),
+        gapH24,
+      ],
+    );
+
+    // Define the form.
+    List<Widget> formFields = <Widget>[
       Form(
         key: _formKey,
         child: Column(
@@ -220,33 +224,39 @@ class _AccountFormState extends ConsumerState<AccountForm>
             // Title
             Text(
               'Account Information',
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: Theme.of(context).textTheme.titleLarge!.color,
-                  ),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-            gapH12,
+            gapH24,
 
             // User name.
+            Text('Display Name'),
+            gapH6,
             SizedBox(
               width: 240,
               child: TextFormField(
                 key: Key('displayName'),
                 controller: _displayNameController,
+                autocorrect: false,
                 decoration: InputDecoration(
-                  labelText: 'Display Name',
+                  // border: OutlineInputBorder(),
+                  // labelText: 'Display Name',
                   enabled: !state.isLoading,
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 8,
+                  contentPadding: EdgeInsets.only(
+                    top: 18,
+                    left: 8,
+                    right: 8,
+                    bottom: 8,
                   ),
                 ),
-                autocorrect: false,
+                style: Theme.of(context).textTheme.titleMedium,
                 textInputAction: TextInputAction.next,
               ),
             ),
             gapH12,
 
             // Email field.
+            Text('Email'),
+            gapH6,
             SizedBox(
               width: 240,
               child: TextFormField(
@@ -255,11 +265,14 @@ class _AccountFormState extends ConsumerState<AccountForm>
                 decoration: InputDecoration(
                   labelText: 'Email',
                   enabled: !state.isLoading,
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 8,
+                  contentPadding: EdgeInsets.only(
+                    top: 18,
+                    left: 8,
+                    right: 8,
+                    bottom: 8,
                   ),
                 ),
+                style: Theme.of(context).textTheme.titleMedium,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (email) =>
                     !_submitted ? null : emailErrorText(email ?? ''),
@@ -272,7 +285,7 @@ class _AccountFormState extends ConsumerState<AccountForm>
                 ],
               ),
             ),
-            gapH8,
+            gapH18,
 
             // User phone.
             // TODO: Change user phone.
@@ -304,56 +317,37 @@ class _AccountFormState extends ConsumerState<AccountForm>
           ],
         ),
       ),
-      Column(
-        crossAxisAlignment: (screenWidth > Breakpoints.tablet)
-            ? CrossAxisAlignment.center
-            : CrossAxisAlignment.start,
-        children: [
-          // User photo.
-          _userPhoto(context, ref, state, user),
-          gapH8,
-
-          // Reset password and sign out.
-          _accountOptions(context, ref, state),
-          gapH24,
-        ],
-      ),
     ];
 
     // Render the form.
-    return SizedBox(
-      width: double.infinity,
-      child: Card(
-        margin: EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 21, horizontal: 16),
-          child: (screenWidth > Breakpoints.tablet)
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: formFields,
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: formFields.reversed.toList(),
-                ),
+    return Column(
+      children: [
+        // Profile fields.
+        WideCard(child: profileWidget),
+
+        // Account fields.
+        WideCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: formFields.reversed.toList(),
+          ),
         ),
-
-        // TODO: Toggle light / dark theme.
-        // ThemeInput(),
-
-        // TODO: Manage additional Firestore user data:
-        // - Account created date.
-        // - Last sign in date.
-        // - View logs.
-
-        // Business:
-        // - View / manage organizations and teams.
-        // - state (restrict to Cannlytics-verified states)
-        // - licenses (/admin/create-license and /admin/delete-license)
-        // - license type
-      ),
+      ],
     );
+
+    // TODO: Toggle light / dark theme.
+    // ThemeInput(),
+
+    // TODO: Manage additional Firestore user data:
+    // - Account created date.
+    // - Last sign in date.
+    // - View logs.
+
+    // Business:
+    // - View / manage organizations and teams.
+    // - state (restrict to Cannlytics-verified states)
+    // - licenses (/admin/create-license and /admin/delete-license)
+    // - license type
   }
 
   /// Display the user's photo, allowing the user to upload a new photo.

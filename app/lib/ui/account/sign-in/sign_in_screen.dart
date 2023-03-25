@@ -219,13 +219,28 @@ class _SignInFormState extends ConsumerState<SignInForm>
 
               // Email field.
               TextFormField(
-                key: EmailPasswordSignInScreen.emailKey,
                 controller: _emailController,
+                key: EmailPasswordSignInScreen.emailKey,
+                autofocus: true,
+                autocorrect: false,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (email) =>
+                    !_submitted ? null : emailErrorText(email ?? ''),
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.emailAddress,
+                keyboardAppearance: Brightness.light,
+                onEditingComplete: () => _emailEditingComplete(),
+                inputFormatters: <TextInputFormatter>[
+                  ValidatorInputFormatter(
+                    editingValidator: EmailEditingRegexValidator(),
+                  ),
+                ],
                 style: Theme.of(context).textTheme.titleMedium,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   hintText: 'test@cannlytics.com',
                   enabled: !state.isLoading,
+                  floatingLabelBehavior: FloatingLabelBehavior.auto,
                   contentPadding: EdgeInsets.only(
                     top: 18,
                     left: 8,
@@ -233,18 +248,6 @@ class _SignInFormState extends ConsumerState<SignInForm>
                     bottom: 8,
                   ),
                 ),
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (email) =>
-                    !_submitted ? null : emailErrorText(email ?? ''),
-                autocorrect: false,
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.emailAddress,
-                keyboardAppearance: Brightness.light,
-                onEditingComplete: () => _emailEditingComplete(),
-                inputFormatters: <TextInputFormatter>[
-                  ValidatorInputFormatter(
-                      editingValidator: EmailEditingRegexValidator()),
-                ],
               ),
 
               // Spacer.
@@ -254,10 +257,20 @@ class _SignInFormState extends ConsumerState<SignInForm>
               TextFormField(
                 key: EmailPasswordSignInScreen.passwordKey,
                 controller: _passwordController,
+                obscureText: true,
+                autocorrect: false,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (password) => !_submitted
+                    ? null
+                    : passwordErrorText(password ?? '', _formType),
+                textInputAction: TextInputAction.done,
+                keyboardAppearance: Brightness.light,
+                onEditingComplete: () => _passwordEditingComplete(),
                 style: Theme.of(context).textTheme.titleMedium,
                 decoration: InputDecoration(
                   labelText: _formType.passwordLabelText,
                   enabled: !state.isLoading,
+                  floatingLabelBehavior: FloatingLabelBehavior.auto,
                   contentPadding: EdgeInsets.only(
                     top: 18,
                     left: 8,
@@ -265,15 +278,6 @@ class _SignInFormState extends ConsumerState<SignInForm>
                     bottom: 8,
                   ),
                 ),
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (password) => !_submitted
-                    ? null
-                    : passwordErrorText(password ?? '', _formType),
-                obscureText: true,
-                autocorrect: false,
-                textInputAction: TextInputAction.done,
-                keyboardAppearance: Brightness.light,
-                onEditingComplete: () => _passwordEditingComplete(),
               ),
 
               // Spacer.

@@ -271,6 +271,7 @@ def get_collection( #pylint: disable=too-many-arguments
         limit: int = None,
         order_by: str = None,
         desc: bool = False,
+        # TODO: Allow user to pass a list of tuples.
         filters: List[dict] = None,
         database=None,
         start_at: dict = None,

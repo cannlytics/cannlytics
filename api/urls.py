@@ -133,16 +133,16 @@ urlpatterns = [
 
     # Metrc API endpoints.
     path('metrc', include([
-        path('/admin/create-license', api.metrc.add_license),
-        path('/admin/delete-license', api.metrc.delete_license),
+        path('/admin/add-key', api.metrc.add_metrc_user_api_key),
+        path('/admin/delete-key', api.metrc.delete_metrc_user_api_key),
         path('/batches', api.metrc.batches),
         path('/batches/<batch_id>', api.metrc.batches),
         path('/deliveries', api.metrc.deliveries),
         path('/deliveries/<delivery_id>', api.metrc.deliveries),
         path('/employees', api.metrc.employees),
-        path('/employees/<license_number>', api.metrc.employees),
+        path('/employees/<employee_id>', api.metrc.employees),
         path('/facilities', api.metrc.facilities),
-        path('/facilities/<license_number>', api.metrc.facilities),
+        path('/facilities/<facility_id>', api.metrc.facilities),
         path('/harvests', api.metrc.harvests),
         path('/harvests/<harvest_id>', api.metrc.harvests),
         path('/items', api.metrc.items),
