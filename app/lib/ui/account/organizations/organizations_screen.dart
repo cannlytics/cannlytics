@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/ui/account/organizations/organizations_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -43,13 +44,7 @@ class OrganizationsScreen extends ConsumerWidget {
     // Table actions.
     var actions = Row(children: [
       // Join an organization button.
-      SecondaryButton(
-        isDark: isDark,
-        text: isWide ? 'Join an organization' : 'Join',
-        onPressed: () {
-          context.go('/organizations/join');
-        },
-      ),
+      _joinOrganizationsButton(context, ref, isWide: isWide),
 
       // Add organization button.
       gapW6,
@@ -162,6 +157,59 @@ class OrganizationsScreen extends ConsumerWidget {
           const SliverToBoxAdapter(child: Footer()),
         ],
       ),
+    );
+  }
+
+  /// Join organizations button and dialog.
+  Widget _joinOrganizationsButton(
+    BuildContext context,
+    WidgetRef ref, {
+    bool isWide = false,
+  }) {
+    return SecondaryButton(
+      text: isWide ? 'Join an organization' : 'Join',
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              title: Text(
+                'Join Organization',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('ID of the organization that you want to join:'),
+                  TextField(
+                    controller: ref.read(joinOrgId),
+                    style: DefaultTextStyle.of(context).style,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(
+                    'Cancel',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                PrimaryButton(
+                    text: 'Send Request',
+                    isLoading: ref.read(organizationsController).isLoading,
+                    onPressed: () async {
+                      await ref
+                          .read(organizationsController.notifier)
+                          .joinOrganization();
+                      Navigator.of(context).pop(true);
+                    }),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

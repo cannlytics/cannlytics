@@ -11,6 +11,7 @@
 import 'dart:async';
 
 // Package imports:
+import 'package:cannlytics_app/widgets/inputs/string_controller.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ import 'package:cannlytics_app/models/common/organization.dart';
 import 'package:cannlytics_app/services/api_service.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/firestore_service.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 // Organizations controller.
 final organizationsController =
@@ -65,7 +67,35 @@ class OrganizationsController extends AutoDisposeAsyncNotifier<void> {
   // Request to join an organization.
   Future<void> joinOrganization() async {
     state = const AsyncValue.loading();
-    // state = await AsyncValue.guard();
+    state = await AsyncValue.guard(() async {
+      print('Joining organization...');
+      // TODO: Show notification to user.
+      String orgId = ref.read(joinOrgId).value.text;
+
+      try {
+        var response = await APIService.apiRequest('/api/organizations', data: {
+          'organization_id': orgId,
+          'join': true,
+        });
+        Fluttertoast.showToast(
+            msg: 'Request to join $orgId sent.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      } catch (error) {
+        Fluttertoast.showToast(
+            msg: 'Error sending request to join $orgId.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    });
     // TODO: Implement!
   }
 
@@ -147,6 +177,11 @@ class OrganizationName extends StateNotifier<TextEditingController> {
 
   void change(String value) => state.value = TextEditingValue(text: value);
 }
+
+// Join organization ID field.
+final joinOrgId =
+    StateNotifierProvider<StringController, TextEditingController>(
+        (ref) => StringController());
 
 // Organization ID field.
 final organizationId = StateProvider<String?>((ref) => null);
