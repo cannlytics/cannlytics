@@ -11,7 +11,6 @@
 import 'dart:async';
 
 // Flutter imports:
-import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/form_container.dart';
@@ -19,30 +18,27 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/models/metrc/license.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/ui/account/licenses/licenses_controller.dart';
 import 'package:cannlytics_app/ui/account/organizations/organizations_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
-import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 
+/// Organization screen.
 class OrganizationScreen extends ConsumerWidget {
   const OrganizationScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Determine the screen size.
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWide = screenWidth > Breakpoints.tablet;
+    // // Determine the screen size.
+    // final screenWidth = MediaQuery.of(context).size.width;
+    // final isWide = screenWidth > Breakpoints.tablet;
 
-    // Get the theme.
-    final themeMode = ref.watch(themeModeProvider);
-    final bool isDark = themeMode == ThemeMode.dark;
+    // // Get the theme.
+    // final themeMode = ref.watch(themeModeProvider);
+    // final bool isDark = themeMode == ThemeMode.dark;
 
     return Scaffold(
       body: CustomScrollView(

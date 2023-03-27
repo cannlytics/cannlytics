@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -43,7 +44,7 @@ class ThemeToggle extends StatelessWidget {
               },
               icon: Icon(
                 theme == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-                color: isDark ? AppColors.neutral2 : AppColors.neutral3,
+                color: isDark ? DarkColors.subtext0 : LightColors.subtext0,
               ),
             ),
           ),

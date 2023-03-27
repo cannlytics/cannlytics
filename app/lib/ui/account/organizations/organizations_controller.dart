@@ -62,10 +62,11 @@ class OrganizationsController extends AutoDisposeAsyncNotifier<void> {
     // state = await AsyncValue.guard();
   }
 
-  // TODO: Request to join an organization.
+  // Request to join an organization.
   Future<void> joinOrganization() async {
     state = const AsyncValue.loading();
     // state = await AsyncValue.guard();
+    // TODO: Implement!
   }
 
   /// Upload an organization photo through the API.

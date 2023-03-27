@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/5/2023
-// Updated: 3/6/2023
+// Updated: 3/26/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -29,7 +29,7 @@ class AppLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      splashColor: AppColors.accent1,
+      // splashColor: AppColors.accent1,
       onTap: () {
         context.goNamed('dashboard');
       },
@@ -50,7 +50,7 @@ class AppIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      splashColor: AppColors.accent1,
+      // splashColor: AppColors.accent1,
       onTap: () {
         context.goNamed('dashboard');
       },

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/24/2023
+// Updated: 3/26/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -20,14 +20,16 @@ class AppTheme {
     TextTheme textTheme = themeMode.textTheme;
     ColorScheme colorScheme = ColorScheme(
       brightness: isDark ? Brightness.dark : Brightness.light,
-      primary: isDark ? DarkColors.accent1 : LightColors.accent1,
-      primaryContainer: isDark ? DarkColors.accent1 : LightColors.accent1,
-      secondary: isDark ? DarkColors.accent1 : LightColors.accent1,
-      secondaryContainer: isDark ? DarkColors.accent1 : LightColors.accent1,
-      background: isDark ? DarkColors.offWhite : LightColors.offWhite,
+      primary: isDark ? DarkColors.primaryColors : LightColors.primaryColors,
+      primaryContainer:
+          isDark ? DarkColors.primaryColors : LightColors.primaryColors,
+      secondary: isDark ? DarkColors.primaryColors : LightColors.primaryColors,
+      secondaryContainer:
+          isDark ? DarkColors.primaryColors : LightColors.primaryColors,
+      background: isDark ? DarkColors.mantle : LightColors.mantle,
       surface: isDark ? const Color(0xFF323443) : Colors.white,
-      onBackground: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
-      onSurface: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+      onBackground: isDark ? DarkColors.surface0 : LightColors.crust,
+      onSurface: isDark ? DarkColors.surface0 : LightColors.mantle,
       onError: Colors.white,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
@@ -43,14 +45,16 @@ class AppTheme {
     ).copyWith(
       useMaterial3: true,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      highlightColor: isDark ? DarkColors.accent1 : LightColors.accent1,
+      highlightColor:
+          isDark ? DarkColors.primaryColors : LightColors.primaryColors,
       visualDensity: VisualDensity.compact,
       scaffoldBackgroundColor: isDark ? const Color(0xFF323443) : Colors.white,
+      dividerColor: isDark ? DarkColors.surface2 : LightColors.surface2,
       canvasColor: isDark
           ? const Color(0xFF323443)
           : isDark
-              ? DarkColors.neutral1
-              : LightColors.neutral1,
+              ? DarkColors.mantle
+              : LightColors.mantle,
 
       // App bar theme.
       appBarTheme: const AppBarTheme(
@@ -60,7 +64,7 @@ class AppTheme {
 
       // Button theme.
       buttonTheme: ButtonThemeData(
-        buttonColor: isDark ? DarkColors.primary2 : LightColors.primary2,
+        buttonColor: isDark ? DarkColors.green : LightColors.green,
         textTheme: ButtonTextTheme.primary,
         colorScheme: colorScheme.copyWith(
           secondary: isDark ? Colors.white : const Color(0xFF323443),
@@ -74,8 +78,8 @@ class AppTheme {
         surfaceTintColor: isDark
             ? null
             : isDark
-                ? DarkColors.surface
-                : LightColors.surface,
+                ? DarkColors.surface0
+                : LightColors.surface0,
       ),
 
       // Data table style.
@@ -96,11 +100,14 @@ class AppTheme {
       ),
 
       // Dialog style.
-      dialogBackgroundColor:
-          isDark ? const Color(0xFF323443) : AppColors.neutral1,
+      dialogBackgroundColor: isDark ? DarkColors.mantle : LightColors.mantle,
       dialogTheme: DialogTheme(
-        elevation: 1,
-        surfaceTintColor: isDark ? null : AppColors.surface,
+        elevation: 5,
+        backgroundColor: isDark ? DarkColors.base : LightColors.base,
+        surfaceTintColor: isDark ? DarkColors.base : LightColors.base,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(3),
+        ),
       ),
 
       // Input style.
@@ -110,18 +117,18 @@ class AppTheme {
         ),
         floatingLabelBehavior: FloatingLabelBehavior.never,
         floatingLabelStyle: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.subtext0 : LightColors.subtext0,
           fontFamily: 'SourceSerifPro',
         ),
         helperStyle: TextStyle(
-          // color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.subtext0 : LightColors.subtext0,
           fontFamily: 'SourceSerifPro',
         ),
         hintStyle: TextStyle(
           fontFamily: 'SourceSerifPro',
         ),
         errorStyle: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.red : LightColors.red,
           fontFamily: 'SourceSerifPro',
         ),
         isDense: true,
@@ -148,90 +155,90 @@ class AppTheme {
 
       // Text selection style.
       textSelectionTheme: TextSelectionThemeData(
-        cursorColor: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+        cursorColor: isDark ? DarkColors.surface0 : LightColors.text,
       ),
 
       // Text style.
       textTheme: TextTheme(
         displayLarge: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'LibreBaskerville',
           fontSize: 48,
           letterSpacing: 1.5,
         ),
         displayMedium: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'LibreBaskerville',
           fontSize: 36,
           letterSpacing: 1.2,
         ),
         displaySmall: TextStyle(
-          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'LibreBaskerville',
           fontSize: 28,
         ),
         headlineLarge: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'SourceSerifPro',
           fontSize: 24,
         ),
         headlineMedium: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'SourceSerifPro',
           fontSize: 21,
         ),
         headlineSmall: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'SourceSerifPro',
           fontSize: 18,
         ),
         titleLarge: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.darkText : LightColors.darkText,
           fontFamily: 'LibreBaskerville',
           fontSize: 21,
         ),
         titleMedium: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'SourceSerifPro',
           fontSize: 17,
           height: 1.33,
         ),
         titleSmall: TextStyle(
-          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'CormorantGaramond',
           fontSize: 16,
         ),
         bodyLarge: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'CormorantGaramond',
           fontSize: 18,
           height: 1.5,
         ),
         bodyMedium: TextStyle(
-          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'SourceSerifPro',
           fontSize: 16,
           height: 1.5,
         ),
         bodySmall: TextStyle(
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'SourceSerifPro',
           fontSize: 14,
           height: 1.5,
         ),
         labelLarge: TextStyle(
           fontSize: 18,
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'LibreBaskerville',
         ),
         labelMedium: TextStyle(
           fontSize: 16,
-          color: isDark ? const Color(0xFFf5f5f5) : const Color(0xFF24292e),
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'IBMPlexSans',
         ),
         labelSmall: TextStyle(
           fontSize: 15,
-          color: isDark ? AppColors.neutral2 : AppColors.neutral4,
+          color: isDark ? DarkColors.text : LightColors.text,
           fontFamily: 'IBMPlexSans',
           fontWeight: FontWeight.w700,
           letterSpacing: 0.25,

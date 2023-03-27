@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -18,7 +19,6 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
@@ -31,7 +31,6 @@ import 'package:cannlytics_app/widgets/buttons/theme_button.dart';
 import 'package:cannlytics_app/widgets/cards/responsive_card.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
-import 'package:cannlytics_app/widgets/images/app_logo.dart';
 
 /// Screen for the user to reset their password.
 class ResetPasswordScreen extends ConsumerWidget {
@@ -50,8 +49,8 @@ class ResetPasswordScreen extends ConsumerWidget {
             center: Alignment(1, -1),
             radius: 4.0,
             colors: [
-              isDark ? Colors.green : AppColors.neutral1,
-              isDark ? Colors.transparent : Colors.white,
+              isDark ? DarkColors.base : LightColors.base,
+              isDark ? DarkColors.crust : LightColors.crust,
             ],
           ),
         ),

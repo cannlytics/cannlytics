@@ -52,8 +52,10 @@ class _BorderCardState extends State<BorderCard>
               color: widget.backgroundColor,
               border: Border.all(
                 color: (_controller.value < 0.01)
-                    ? AppColors.neutral2
-                    : AppColors.primary.withOpacity(_controller.value),
+                    ? Theme.of(context).dividerColor
+                    : Theme.of(context)
+                        .primaryColor
+                        .withOpacity(_controller.value),
                 width: 1,
               ),
               borderRadius: BorderRadius.circular(3),

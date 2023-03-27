@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/6/2023
+// Updated: 3/26/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -15,7 +15,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/utils/web_utils.dart';
 
 /// A footer with links at the bottom of the app.
@@ -27,10 +26,6 @@ class Footer extends ConsumerWidget {
     // Determine the screen size.
     final screenWidth = MediaQuery.of(context).size.width;
     final isWide = screenWidth > Breakpoints.tablet;
-
-    // Get the theme.
-    // final themeMode = ref.watch(themeModeProvider);
-    // final bool isDark = themeMode == ThemeMode.dark;
 
     // Build the footer.
     return Container(
@@ -47,11 +42,6 @@ class Footer extends ConsumerWidget {
               crossAxisAlignment:
                   isWide ? CrossAxisAlignment.start : CrossAxisAlignment.center,
               children: [
-                // // Logo.
-                // gapH6,
-                // AppLogo(isDark: isDark),
-                // gapH6,
-
                 // Copyright and version.
                 Row(
                   mainAxisAlignment: isWide
@@ -66,7 +56,7 @@ class Footer extends ConsumerWidget {
 
                 // Horizontal rule.
                 Container(
-                  color: AppColors.neutral2,
+                  color: Theme.of(context).dividerColor,
                   height: 1,
                 ),
                 gapH6,

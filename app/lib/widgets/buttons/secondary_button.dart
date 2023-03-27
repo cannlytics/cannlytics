@@ -4,14 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/6/2023
+// Updated: 3/26/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/colors.dart';
 import 'package:flutter/material.dart';
-
-// Project imports:
-import 'package:cannlytics_app/constants/theme.dart';
 
 /// Secondary button based on [TextButton].
 /// [isDark] - Whether or not the theme is dark.
@@ -38,7 +36,7 @@ class SecondaryButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        backgroundColor: isDark ? AppColors.neutral4 : Colors.grey[200],
+        backgroundColor: isDark ? DarkColors.crust : LightColors.crust,
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),
@@ -53,7 +51,7 @@ class SecondaryButton extends StatelessWidget {
           : Text(
               text,
               style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: isDark ? AppColors.neutral2 : AppColors.neutral5,
+                    color: isDark ? DarkColors.text : LightColors.text,
                   ),
             ),
     );

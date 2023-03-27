@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/9/2023
+// Updated: 3/26/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -33,7 +33,7 @@ class ResponsiveCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(Sizes.p16),
         child: Card(
-          surfaceTintColor: isDark ? null : AppColors.secondary,
+          // surfaceTintColor: isDark ? null : AppColors.secondary,
           child: Padding(
             padding: const EdgeInsets.all(Sizes.p16),
             child: child,

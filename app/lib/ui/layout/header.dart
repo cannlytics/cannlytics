@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/23/2023
+// Updated: 3/26/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -16,7 +16,6 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
@@ -65,10 +64,10 @@ class DesktopNavigationLayout extends ConsumerWidget {
 
     // Build the layout.
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: AppColors.neutral2,
+            color: Theme.of(context).dividerColor,
             width: 1,
           ),
         ),
@@ -149,10 +148,10 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
         final menuHeight = 56 * screenCount + 64;
         final height = 64 + _menuController.value * menuHeight;
         return Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: AppColors.neutral2,
+                color: Theme.of(context).dividerColor,
                 width: 1,
               ),
             ),
@@ -279,13 +278,12 @@ class MobileNavigationMenu extends ConsumerWidget {
 
                 // Divider.
                 Divider(
-                  color: AppColors.neutral2,
+                  color: Theme.of(context).dividerColor,
                   thickness: 0.25,
                 ),
 
                 // Manage account.
                 InkWell(
-                  splashColor: AppColors.accent1,
                   onTap: () {
                     context.goNamed(AppRoutes.account.name);
                   },
@@ -301,7 +299,6 @@ class MobileNavigationMenu extends ConsumerWidget {
 
                 // Sign out.
                 InkWell(
-                  splashColor: AppColors.accent1,
                   onTap: state.isLoading
                       ? null
                       : () async {
@@ -330,7 +327,7 @@ class MobileNavigationMenu extends ConsumerWidget {
 
           // Divider.
           Divider(
-            color: AppColors.neutral2,
+            color: Theme.of(context).dividerColor,
             thickness: 0.25,
           ),
 
@@ -366,7 +363,7 @@ class MobileMenuListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       child: InkWell(
-        splashColor: AppColors.accent1,
+        // splashColor: AppColors.accent1,
         onTap: () {
           context.goNamed(route);
         },

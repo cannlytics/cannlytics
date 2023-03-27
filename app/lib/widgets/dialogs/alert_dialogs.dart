@@ -12,6 +12,8 @@ library alert_dialogs;
 import 'dart:io';
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +25,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/theme.dart';
+import 'package:cannlytics_app/widgets/buttons/secondary_button.dart';
 
 part 'alert_dialog_show.dart';
 part 'alert_dialog_error.dart';

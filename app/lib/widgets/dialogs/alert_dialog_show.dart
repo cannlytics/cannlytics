@@ -12,22 +12,32 @@ Future<bool?> showAlertDialog({
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title),
+        // Title.
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+
+        // Content.
         content: content != null ? Text(content) : null,
+
+        // Actions.
         actions: <Widget>[
+          // Cancel action.
           if (cancelActionText != null)
             TextButton(
               child: Text(
                 cancelActionText,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall!
-                    .copyWith(color: AppColors.neutral4),
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
               ),
               onPressed: () => Navigator.of(context).pop(false),
             ),
-          TextButton(
-            child: Text(defaultActionText),
+
+          // Confirm action.
+          SecondaryButton(
+            text: defaultActionText,
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],

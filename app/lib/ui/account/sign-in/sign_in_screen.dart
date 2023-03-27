@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/constants/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +21,6 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/routing/routes.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_controller.dart';
@@ -60,8 +60,8 @@ class EmailPasswordSignInScreen extends ConsumerWidget {
           center: Alignment(1, -1),
           radius: 4.0,
           colors: [
-            isDark ? Colors.green : AppColors.white,
-            isDark ? Colors.transparent : AppColors.primary2,
+            isDark ? DarkColors.base : LightColors.base,
+            isDark ? DarkColors.crust : LightColors.crust,
           ],
         ),
       ),

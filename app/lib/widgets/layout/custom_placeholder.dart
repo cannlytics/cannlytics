@@ -34,7 +34,7 @@ class CustomPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      surfaceTintColor: isDark ? null : AppColors.surface,
+      // surfaceTintColor: isDark ? null : AppColors.surface,
       margin: EdgeInsets.symmetric(vertical: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(3),

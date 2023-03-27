@@ -17,13 +17,8 @@ Future<bool?> showReauthDialog({
       actions: <Widget>[
         if (cancelActionText != null)
           TextButton(
-            child: Text(
-              cancelActionText,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleSmall!
-                  .copyWith(color: AppColors.neutral4),
-            ),
+            child: Text(cancelActionText,
+                style: Theme.of(context).textTheme.titleSmall),
             onPressed: () => Navigator.of(context).pop(false),
           ),
         TextButton(
