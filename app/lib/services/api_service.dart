@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/18/2023
+// Updated: 3/27/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -16,11 +16,17 @@ import 'package:http/http.dart' as http;
 
 /// Service to interface with the Cannlytics API.
 class APIService {
-  // PRODUCTION:
-  // static final String baseUrl = 'https://cannlytics.com/api';
+  // Define the base URL.
+  static String _baseUrl = 'http://127.0.0.1:8000/api';
 
-  // DEV:
-  static final String baseUrl = 'http://127.0.0.1:8000/api';
+  /// Initialize the API service.
+  static void initialize() {
+    bool isProduction = bool.fromEnvironment('dart.vm.product');
+    if (isProduction) _baseUrl = 'https://cannlytics.com/api';
+  }
+
+  /// API base URL.
+  static String get baseUrl => _baseUrl;
 
   /// Get a user's token. Set [refresh] to renew credentials.
   static Future<String> getUserToken({bool refresh = false}) async {

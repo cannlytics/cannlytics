@@ -111,7 +111,7 @@ def get_vendor_api_key(
 def get_user_api_key_data(org_id: str, license_number: Optional[str] = None):
     """Get the API key data that is valid for the license, 
     or get the 1st API key if no license is given."""
-    query = None
+    doc, query = {}, None
     ref = f'organizations/{org_id}/metrc_user_api_keys'
     if license_number:
         query = [{
@@ -119,8 +119,10 @@ def get_user_api_key_data(org_id: str, license_number: Optional[str] = None):
             'operation': 'array_contains',
             'value': license_number
         }]
-    return get_collection(ref, filters=query, limit=1, order_by='created_at')
-
+    docs = get_collection(ref, filters=query, limit=1, order_by='created_at')
+    if docs:
+        doc = docs[0]
+    return doc
 
 def increment_api_usage(org_id):
     """Increment organization usage."""
