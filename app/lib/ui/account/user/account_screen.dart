@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/26/2023
+// Updated: 4/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -38,6 +38,7 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Render the widget.
     return MainScreen(
       slivers: [
         // App header.
@@ -51,13 +52,16 @@ class AccountScreen extends StatelessWidget {
 }
 
 /// Account management cards.
-class AccountManagement extends StatelessWidget {
+class AccountManagement extends ConsumerWidget {
   const AccountManagement({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Dynamic screen width.
     final screenWidth = MediaQuery.of(context).size.width;
+
+    // Listen to the current user.
+    final user = ref.watch(authProvider).currentUser;
 
     // Render the widget.
     return Padding(
@@ -71,10 +75,10 @@ class AccountManagement extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // Account information
-          AccountForm(key: Key('account-form')),
+          if (user != null) AccountForm(key: Key('account-form')),
 
           // Delete account option.
-          _deleteAccount(context, screenWidth),
+          if (user != null) _deleteAccount(context, screenWidth),
           gapH48,
         ],
       ),
@@ -411,7 +415,7 @@ class _AccountFormState extends ConsumerState<AccountForm>
                     defaultActionText: 'Sign out',
                   );
                   if (logout == true) {
-                    await ref.read(accountProvider.notifier).signOut();
+                    await ref.read(authProvider).signOut();
                     context.go('/sign-in');
                   }
                 },

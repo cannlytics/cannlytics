@@ -40,8 +40,8 @@ class DashboardScreen extends ConsumerWidget {
 
     // Get the cards depending on the user type.
     List cards = (userType == 'consumer')
-        ? ScreenData.consumerScreens
-        : ScreenData.businessScreens;
+        ? List.from(ScreenData.consumerScreens)
+        : List.from(ScreenData.businessScreens);
 
     // Incorporate permissions when showing cards.
     print('CARDS: ${cards.length}');
@@ -79,6 +79,33 @@ class DashboardScreen extends ConsumerWidget {
       slivers: [
         // App header.
         const SliverToBoxAdapter(child: AppHeader()),
+
+        // FIXME: Sidebar for desktop.
+        // if (screenWidth >= Breakpoints.tablet)
+        //   SliverToBoxAdapter(
+        //     child: Drawer(
+        //       child: ListView(
+        //         padding: EdgeInsets.zero,
+        //         children: [
+        //           DrawerHeader(
+        //             child: Text('Sidebar'),
+        //           ),
+        //           ListTile(
+        //             title: Text('Option 1'),
+        //             onTap: () {
+        //               // Handle option 1 press
+        //             },
+        //           ),
+        //           ListTile(
+        //             title: Text('Option 2'),
+        //             onTap: () {
+        //               // Handle option 2 press
+        //             },
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //   ),
 
         // Navigation cards.
         for (var chunk in chunks)

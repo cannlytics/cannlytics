@@ -61,8 +61,8 @@ class AuthService {
   }
 
   /// Sign the user out.
-  Future<void> signOut() {
-    return _auth.signOut();
+  Future<void> signOut() async {
+    await _auth.signOut();
   }
 
   /// Change the user's photo.

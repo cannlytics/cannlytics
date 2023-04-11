@@ -125,3 +125,4 @@ public/website/
 
 # Exception for Flutter library.
 !app/lib/
+!data/lib/

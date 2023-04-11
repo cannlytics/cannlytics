@@ -1,0 +1,17 @@
+# Ignore environment variables.
+*.env
+
+# Ignore temporary files.
+*tmp
+
+# Ignore PDFs.
+*pdfs
+
+# Ignore external datasets.
+*.datasets
+
+# Ignore VS Code settings.
+*.vscode
+
+# Ignore PyCache
+*__pycache__

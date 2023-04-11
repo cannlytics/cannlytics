@@ -86,6 +86,28 @@ class AppRoute extends GoRoute {
             final pageContent = Scaffold(
               body: builder(context, state),
               resizeToAvoidBottomInset: false,
+              drawer: Drawer(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    DrawerHeader(
+                      child: Text('Sidebar'),
+                    ),
+                    ListTile(
+                      title: Text('Option 1'),
+                      onTap: () {
+                        // Handle option 1 press
+                      },
+                    ),
+                    ListTile(
+                      title: Text('Option 2'),
+                      onTap: () {
+                        // Handle option 2 press
+                      },
+                    ),
+                  ],
+                ),
+              ),
             );
 
             // Fade transition screen.

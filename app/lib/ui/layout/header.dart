@@ -4,10 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/26/2023
+// Updated: 4/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/services/auth_service.dart';
+import 'package:cannlytics_app/widgets/layout/shimmer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -27,7 +30,6 @@ import 'package:cannlytics_app/widgets/images/app_logo.dart';
 import 'package:cannlytics_app/widgets/images/avatar.dart';
 
 // TODO:
-// - Use user photo on desktop and show small menu.
 // - Better theme toggle / perhaps in settings?
 // - Show about dialog (i).
 // - A sidebar menu is needed for desktop.
@@ -62,18 +64,28 @@ class DesktopNavigationLayout extends ConsumerWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     bool isVeryWide = screenWidth > Breakpoints.desktop;
 
+    // Listen to the current user.
+    final user = ref.watch(authProvider).currentUser;
+
     // Build the layout.
     return Container(
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 1,
-          ),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(3),
+          bottomRight: Radius.circular(3),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).dividerColor,
+            spreadRadius: 1,
+            blurRadius: 1,
+            offset: Offset(0, 1),
+          ),
+        ],
       ),
       child: SizedBox(
-        height: 64,
+        height: 48,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -88,17 +100,88 @@ class DesktopNavigationLayout extends ConsumerWidget {
             gapW6,
             FacilitySelection(),
 
-            // Links.
+            // User photo menu.
             const Spacer(),
-            NavigationLink(
-              text: 'Account',
-              path: AppRoutes.account.name,
-            ),
+            if (user != null) _userPhotoMenu(context, ref, user),
             SizedBox(width: isVeryWide ? 24 : 12),
 
             // Theme toggle.
             const ThemeToggle(),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// User photo menu.
+  Widget _userPhotoMenu(
+    BuildContext context,
+    WidgetRef ref,
+    User? user,
+  ) {
+    return PopupMenuButton<String>(
+      surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(3),
+      ),
+      offset: Offset(0, 46),
+      onSelected: (value) async {
+        if (value == 'home') {
+          context.goNamed(AppRoutes.dashboard.name);
+        } else if (value == 'account') {
+          context.goNamed(AppRoutes.account.name);
+        } else if (value == 'sign-out') {
+          final logout = await showAlertDialog(
+            context: context,
+            title: 'Are you sure?',
+            cancelActionText: 'Cancel',
+            defaultActionText: 'Sign out',
+          );
+          if (logout == true) {
+            await ref.read(authProvider).signOut();
+            context.go('/sign-in');
+          }
+        }
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        PopupMenuItem<String>(
+          value: 'home',
+          child: Text(
+            'Home',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'account',
+          child: Text(
+            'Account',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'sign-out',
+          child: Text(
+            'Sign Out',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
+      ],
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        child: ShimmerLoading(
+          isLoading: user!.photoURL == null,
+          child: SizedBox(
+            width: 45,
+            height: 45,
+            child: Avatar(
+              photoUrl: user!.photoURL ??
+                  'https://cannlytics.com/robohash/${user.uid}',
+              radius: 30,
+              borderColor: Theme.of(context).secondaryHeaderColor,
+              borderWidth: 1.0,
+            ),
+          ),
         ),
       ),
     );
@@ -145,25 +228,33 @@ class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
 
         // Format the height.
         final int screenCount = screens.length;
-        final menuHeight = 56 * screenCount + 64;
-        final height = 64 + _menuController.value * menuHeight;
+        final menuHeight = 56 * screenCount + 48;
+        final height = 48 + _menuController.value * menuHeight;
         return Container(
           decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: Theme.of(context).dividerColor,
-                width: 1,
-              ),
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(3),
+              bottomRight: Radius.circular(3),
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).dividerColor,
+                spreadRadius: 1,
+                blurRadius: 1,
+                offset: Offset(0, 1),
+              ),
+            ],
           ),
           child: SizedBox(
             height: height,
             child: Column(
               children: [
                 SizedBox(
-                  height: 64,
+                  height: 48,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Icon.
                       gapW6,
@@ -473,7 +564,7 @@ class OrganizationSelection extends ConsumerWidget {
 
     // Render the dropdown.
     return Container(
-      height: 45.0,
+      // height: 45.0,
       width: 150.0,
       child: dropdown,
     );
@@ -557,14 +648,10 @@ class FacilitySelection extends ConsumerWidget {
             ),
           ],
       onChanged: (String? value) {
-        print('CHANGED:');
-        print(value);
         if (value == 'add') {
           GoRouter.of(context).go('/licenses/add');
           return;
         }
-        // ref.read(primaryFacility.notifier).state = value!.id;
-        // ref.read(primaryLicenseProvider.notifier).state = value!.licenseNumber;
         for (Facility x in facilities) {
           if (x.id == value) {
             ref.read(primaryLicenseProvider.notifier).state = x.licenseNumber;

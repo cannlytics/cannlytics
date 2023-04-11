@@ -1,6 +1,6 @@
 {
   "name": "cannlytics",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "license": "MIT",
   "homepage": "https://cannlytics.com",
   "description": "Cannlytics includes a LIMS, a console, documentation, a website, and vast amount of tools for cannabis analytics.",
@@ -51,6 +51,7 @@
     "console:deploy": "firebase deploy --project cannlytics --only hosting:console",
     "console:docker": "docker build . --tag gcr.io/cannlytics/cannlytics-console:latest & docker push gcr.io/cannlytics/cannlytics-console:latest",
     "console:publish": "npm run console:build & npm run console:docker & npm run console:run & npm run console:deploy",
+    "data:web": "cd data & flutter run -d chrome --web-browser-flag '--disable-web-security' & cd ../",
     "docs:install": "docker build -t squidfunk/mkdocs-material docs",
     "docs:build": "mkdocs build",
     "docs:publish": "firebase deploy --project cannlytics --only hosting:docs",

@@ -5,7 +5,7 @@ Copyright (c) 2021-2022 Cannlytics
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Contact: <keegan@cannlytics.com>
 Created: 1/21/2021
-Updated: 9/3/2022
+Updated: 4/8/2023
 License: MIT <https://opensource.org/licenses/MIT>
 """
 from setuptools import find_packages, setup
@@ -13,7 +13,7 @@ from setuptools import find_packages, setup
 # Define the package version.
 # Optional: Read from package.json? Pros and cons to tieing Python
 # package version to the Cannlytics project version.
-version = '0.0.14'
+version = '0.0.15'
 
 # Get the project description.
 README = ''

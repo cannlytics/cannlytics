@@ -56,7 +56,7 @@ class AppIcon extends StatelessWidget {
       },
       child: Image.asset(
         'assets/images/logos/cannlytics_calyx_192.png',
-        height: 33,
+        height: 30,
       ),
     );
   }
