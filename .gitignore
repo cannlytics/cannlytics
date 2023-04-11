@@ -126,3 +126,4 @@ public/website/
 # Exception for Flutter library.
 !app/lib/
 !data/lib/
+data/lib/firebase_options.dart
