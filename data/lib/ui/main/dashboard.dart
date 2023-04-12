@@ -67,7 +67,6 @@ class DashboardScreen extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: SideMenu()),
                 Expanded(
                   flex: 5,
                   child: Column(

@@ -268,7 +268,7 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D:\\data\\washington\\'
-    DATA_DIR = f'{base}\\CCRS PRR (1-27-23)\\CCRS PRR (1-27-23)\\'
+    DATA_DIR = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
     STATS_DIR = f'{base}\\ccrs-stats\\'
     curate_ccrs_sales(DATA_DIR, STATS_DIR)
 

@@ -49,6 +49,8 @@ def curate_ccrs_strains(data_dir, stats_dir):
     inventory_dir = os.path.join(stats_dir, 'inventory')
     inventory_files = sorted_nicely(os.listdir(inventory_dir))
 
+    # TODO: Calculate totals by month!
+
     # Calculate strain statistics using curated inventory items.
     strain_stats = pd.DataFrame({'total_weight': [], 'total_sold': []})
     for i, datafile in enumerate(inventory_files):
@@ -62,6 +64,10 @@ def curate_ccrs_strains(data_dir, stats_dir):
             usecols=list(FIELDS.keys()),
             dtype=FIELDS,
         )
+
+        # FIXME: Implement monthly stats.
+        # sample['product_created_at'].min()
+        # sample['product_created_at'].max()
 
         # Get all inventory types of `InventoryType == 'Usable Marijuana'`
         flower = data.copy(deep=True).loc[data['InventoryType'] == 'Usable Marijuana']
