@@ -1,11 +1,19 @@
 {
   "configurations": [
     {
-      "name": "Flutter",
+      "name": "App",
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
       "program": "${workspaceRoot}/app/lib/main.dart",
+      "args": ["--web-browser-flag=--disable-web-security"]
+    },
+    {
+      "name": "Data",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "program": "${workspaceRoot}/data/lib/main.dart",
       "args": ["--web-browser-flag=--disable-web-security"]
     }
   ]

@@ -65,6 +65,9 @@ urlpatterns = [
         path('/color', api.ai.text_to_color_api),
         path('/emoji', api.ai.text_to_emoji_api),
 
+        # Strain name generation.
+        path('/strain/name', api.ai.recipes_api),
+
     ])),
 
     # Data API endpoints.

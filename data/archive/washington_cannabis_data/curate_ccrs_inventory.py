@@ -37,7 +37,7 @@ import pandas as pd
 
 
 def read_licensees(data_dir: str):
-    """Read CCRS licensees data."""
+    """Read CCRS licensees data and format accordingly."""
     licensees = pd.read_csv(
         f'{data_dir}/Licensee_0/Licensee_0/Licensee_0.csv',
         sep='\t',
@@ -49,7 +49,7 @@ def read_licensees(data_dir: str):
             'DBA': 'string',
         },
     )
-    columns = {'Name': 'retailer', 'DBA': 'retailer_dba'}
+    columns = {'Name': 'licensee_name', 'DBA': 'licensee_dba'}
     return licensees.rename(columns, axis=1)
 
 
@@ -61,17 +61,27 @@ def merge_lab_results(
         verbose: Optional[bool] = True,
     ) -> pd.DataFrame:
     """Merge lab results with items in a given directory."""
-    matched = pd.DataFrame()
+
+    # Read the lab results.
     lab_results = pd.read_excel(results_file)
+
+    # Clean the lab results
     lab_results.rename(columns={
         'inventory_id': 'InventoryId',
         'lab_result_id': target,
     }, inplace=True)
     lab_results[on] = lab_results[on].astype(str)
+
+    # Iterate over all datafiles in the directory.
+    matched = pd.DataFrame()
     datafiles = sorted_nicely(os.listdir(directory))
     for datafile in datafiles:
+
+        # Skip temporary files.
         if datafile.startswith('~$'):
             continue
+
+        # Merge the lab results with the datafile.
         data = pd.read_excel(os.path.join(directory, datafile))
         data[on] = data[on].astype(str)
         match = rmerge(
@@ -85,6 +95,8 @@ def merge_lab_results(
         matched = pd.concat([matched, match], ignore_index=True)
         if verbose:
             print('Matched', len(matched), 'lab results...')
+    
+    # Return the matched lab results.
     return matched
 
 
@@ -130,6 +142,10 @@ def curate_ccrs_inventory(data_dir, stats_dir):
             usecols=item_cols,
             dtype=item_types,
         )
+        items.rename(columns={
+            'CreatedDate': 'inventory_created_at',
+            'updatedDate': 'inventory_updated_at',
+        }, inplace=True)
 
         # Merge licensee data using `LicenseeId`.
         print('Merging licensee data...')
@@ -174,6 +190,8 @@ def curate_ccrs_inventory(data_dir, stats_dir):
                'CreatedDate': 'strain_created_date',
             },
             drop=['CreatedBy', 'UpdatedBy', 'UpdatedDate'],
+            dedupe=True,
+            break_once_matched=False,
         )
 
         # Merge area `Name` using `AreaId`.
@@ -194,7 +212,6 @@ def curate_ccrs_inventory(data_dir, stats_dir):
         )
 
         # Save the curated inventory data.
-        # FIXME: This takes a long time.
         print('Saving the curated inventory data...')
         outfile = os.path.join(inventory_dir, f'inventory_{i}.xlsx')
         items = anonymize(items)
@@ -224,6 +241,6 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D:\\data\\washington\\'
-    DATA_DIR = f'{base}\\CCRS PRR (1-27-23)\\CCRS PRR (1-27-23)\\'
+    DATA_DIR = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
     STATS_DIR = f'{base}\\ccrs-stats\\'
     curate_ccrs_inventory(DATA_DIR, STATS_DIR)

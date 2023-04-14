@@ -11,6 +11,7 @@
 // Project imports:
 import 'package:cannlytics_data/routing/app_router.dart';
 import 'package:cannlytics_data/ui/main/dashboard.dart';
+import 'package:flutter/material.dart';
 
 // The main app routes.
 class Routes {
@@ -43,7 +44,7 @@ class Routes {
     AppRoute(
       path: '/dashboard',
       name: 'dashboard',
-      builder: (context, state) => DashboardScreen(),
+      builder: (context, state) => DashboardScreen(), // key: Key('dashboard')
     ),
   ];
 }

@@ -7,24 +7,48 @@
 // Updated: 3/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// FIXME
+// - Open by default.
+// - Define the routes.
+// - Highlight route accordingly.
+
 // Flutter imports:
+import 'package:cannlytics_data/constants/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Package imports:
 import 'package:flutter_svg/flutter_svg.dart';
 
-class SideMenu extends StatelessWidget {
+class SideMenu extends ConsumerWidget {
   const SideMenu({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get the theme.
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
+
+    // Render the side menu.
     return Drawer(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(3),
+          bottomRight: Radius.circular(3),
+        ),
+      ),
       child: ListView(
         children: [
           DrawerHeader(
-            child: Image.asset("assets/images/logo.png"),
+            child: Image.asset(
+              isDark
+                  ? 'assets/images/logos/cannlytics_logo_with_text_dark.png'
+                  : 'assets/images/logos/cannlytics_logo_with_text_light.png',
+              height: 24,
+            ),
           ),
           DrawerListTile(
             title: "Dashboard",

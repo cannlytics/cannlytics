@@ -164,8 +164,10 @@ def merge_datasets(
         how: Optional[str] = 'left',
         sep: Optional[str] = '\t',
         validate: Optional[str] = 'm:1',
+        dedupe: Optional[bool] = False,
         drop: Optional[dict] = None,
         rename: Optional[dict] = None,
+        break_once_matched: Optional[bool] = True,
         on_bad_lines: Optional[str] = 'skip',
         string_columns: Optional[list] = [
             'IsDeleted', 'UnitWeightGrams',
@@ -185,6 +187,7 @@ def merge_datasets(
         if dtype.get(column):
             dtype[column] = 'string'
     for datafile in datafiles:
+        print(datafile)
         supplement = pd.read_csv(
             datafile,
             sep=sep,
@@ -195,6 +198,8 @@ def merge_datasets(
             usecols=usecols,
             on_bad_lines=on_bad_lines,
         )
+        if dedupe:
+            supplement.drop_duplicates(subset=[on], inplace=True)
         if rename is not None:
             supplement.rename(rename, axis=1, inplace=True)
         if drop is not None:
@@ -209,8 +214,9 @@ def merge_datasets(
             validate=validate,
         )
         matched = match.loc[~match[target].isna()]
-        augmented = pd.concat([augmented, matched], ignore_index=True) 
-        if len(augmented) == n:
+        augmented = pd.concat([augmented, matched], ignore_index=True)
+        # FIXME: This is a hack to prevent the loop from running forever.
+        if len(augmented) == n and break_once_matched:
             break
     return augmented
 

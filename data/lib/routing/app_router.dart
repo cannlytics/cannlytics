@@ -4,13 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 4/9/2023
+// Updated: 4/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_data/widgets/layout/sidebar.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -24,8 +25,6 @@ import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
 
 // Flutter imports:
 // import 'package:cannlytics_app/ui/layout/not_found_screen.dart';
-
-
 
 // Private navigators.
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -90,29 +89,6 @@ class AppRoute extends GoRoute {
             final pageContent = Scaffold(
               body: builder(context, state),
               resizeToAvoidBottomInset: false,
-              // FIXME: Add a drawer.
-              drawer: Drawer(
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
-                    DrawerHeader(
-                      child: Text('Sidebar'),
-                    ),
-                    ListTile(
-                      title: Text('Option 1'),
-                      onTap: () {
-                        // Handle option 1 press
-                      },
-                    ),
-                    ListTile(
-                      title: Text('Option 2'),
-                      onTap: () {
-                        // Handle option 2 press
-                      },
-                    ),
-                  ],
-                ),
-              ),
             );
 
             // Fade transition screen.

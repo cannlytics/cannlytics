@@ -37,6 +37,9 @@ CREATE_TEXT_MODEL = 'text-davinci-003'
 MAX_TOKENS = 1_000 # The maximum number of OpenAI tokens per request.
 TEMPERATURE = 0
 
+# Firebase defaults.
+ID_LENGTH = 16
+
 
 def initialize_openai():
     """Initialize OpenAI."""

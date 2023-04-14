@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 4/11/2023
+Updated: 4/13/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -122,7 +122,13 @@ def stats_to_df(stats: dict[dict]) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def curate_ccrs_sales(data_dir, stats_dir):
+def curate_ccrs_sales(
+        data_dir,
+        stats_dir,
+        reverse: Optional[bool] = False,
+        first_file: Optional[int] = 0,
+        last_file: Optional[int] = None,
+    ):
     """Curate CCRS sales by merging additional datasets."""
 
     print('Curating sales...')
@@ -152,8 +158,10 @@ def curate_ccrs_sales(data_dir, stats_dir):
     lab_results_dir = os.path.join(stats_dir, 'lab_results')
     results_file = os.path.join(lab_results_dir, 'lab_results_0.xlsx')
     sales_items_files = get_datafiles(data_dir, 'SalesDetail_')
-    # sales_items_files.reverse()
-    for i, datafile in enumerate(sales_items_files):
+    if last_file: sales_items_files = sales_items_files[:last_file]
+    if reverse:
+        sales_items_files.reverse()
+    for i, datafile in enumerate(sales_items_files[first_file:]):
         print('Augmenting:', datafile)
         midpoint_start = datetime.now()
 
@@ -270,7 +278,12 @@ if __name__ == '__main__':
     base = 'D:\\data\\washington\\'
     DATA_DIR = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
     STATS_DIR = f'{base}\\ccrs-stats\\'
-    curate_ccrs_sales(DATA_DIR, STATS_DIR)
+    curate_ccrs_sales(
+        DATA_DIR,
+        STATS_DIR,
+        reverse=True,
+        first_file=2,
+    )
 
 
 #------------------------------------------------------------------------------

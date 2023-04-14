@@ -1,5 +1,7 @@
 // Flutter imports:
+import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Package imports:
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,42 +10,54 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
 
+/// Dashboard header
 class DashboardHeader extends StatelessWidget {
-  const DashboardHeader({
-    Key? key,
-  }) : super(key: key);
+  const DashboardHeader({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        if (!Responsive.isDesktop(context))
-          IconButton(
-            icon: Icon(Icons.menu),
-            // onPressed: context.read<MenuAppController>().controlMenu,
-            onPressed: () {},
-          ),
-        if (!Responsive.isMobile(context))
-          Text(
-            "Dashboard",
-            style: Theme.of(context).textTheme.headline6,
-          ),
-        if (!Responsive.isMobile(context))
-          Spacer(flex: Responsive.isDesktop(context) ? 2 : 1),
-        Expanded(child: SearchField()),
+        // Menu button.
+        // if (!Responsive.isDesktop(context))
+        IconButton(
+          icon: Icon(Icons.menu),
+          // onPressed: context.read<MenuAppController>().controlMenu,
+          onPressed: () {},
+        ),
+
+        // Title.
+        // if (!Responsive.isMobile(context))
+        //   Text(
+        //     "Data",
+        //     style: Theme.of(context).textTheme.titleLarge,
+        //   ),
+        // if (!Responsive.isMobile(context))
+        //   Spacer(flex: Responsive.isDesktop(context) ? 2 : 1),
+
+        // Search field.
+        // Expanded(child: SearchField()),
+
+        // User menu.
         ProfileCard()
       ],
     );
   }
 }
 
-class ProfileCard extends StatelessWidget {
+/// User menu.
+class ProfileCard extends ConsumerWidget {
   const ProfileCard({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Listen to the current user.
+    final user = ref.watch(authProvider).currentUser;
+    print('CURRENT USER: $user');
+
+    // Render the widget.
     return Container(
       margin: EdgeInsets.only(left: Defaults.defaultPadding),
       padding: EdgeInsets.symmetric(
@@ -74,6 +88,7 @@ class ProfileCard extends StatelessWidget {
   }
 }
 
+/// Search field.
 class SearchField extends StatelessWidget {
   const SearchField({
     Key? key,

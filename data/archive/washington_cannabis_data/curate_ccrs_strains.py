@@ -118,7 +118,7 @@ def curate_ccrs_strains(data_dir, stats_dir):
             strain_stats.loc[strain_sold.index, 'total_sold'] = strain_sold
 
         # Add strain type.
-        flower_types = flower.groupby('strain_name')['StrainType'].first().copy(deep=True)
+        flower_types = flower.groupby('strain_name')['StrainType'].first()
         # FIXME: This raises a warning on the 1st iteration.
         strain_stats.loc[flower_types.index, 'strain_type'] = flower_types
 
