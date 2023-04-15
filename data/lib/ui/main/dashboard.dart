@@ -4,22 +4,16 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 4/13/2023
+// Updated: 4/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-// import 'package:cannlytics_data/widgets/layout/main_screen.dart';
-
-// Flutter imports:
-import 'dart:async';
-
-import 'package:cannlytics_data/services/auth_service.dart';
-import 'package:cannlytics_data/widgets/buttons/custom_text_button.dart';
-import 'package:cannlytics_data/widgets/cards/fields_card.dart';
-import 'package:cannlytics_data/widgets/cards/recent_files_card.dart';
+import 'package:cannlytics_data/models/dataset.dart';
+import 'package:cannlytics_data/widgets/cards/datasets_cards.dart';
 import 'package:cannlytics_data/widgets/cards/storage_details_card.dart';
-import 'package:cannlytics_data/widgets/images/avatar.dart';
-import 'package:cannlytics_data/widgets/layout/dashboard_header.dart';
+import 'package:cannlytics_data/widgets/cards/wide_card.dart';
+import 'package:cannlytics_data/widgets/layout/header.dart';
+import 'package:cannlytics_data/widgets/layout/main_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -27,107 +21,187 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/ui/layout/footer.dart';
-import 'package:cannlytics_data/ui/layout/header.dart';
 import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
 import 'package:cannlytics_data/widgets/layout/sidebar.dart';
 
-GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
-
 /// Dashboard screen.
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // App bar.
+      appBar: DashboardHeader(),
+
+      // Side menu.
+      drawer: Responsive.isMobile(context) ? MobileDrawer() : null,
+
+      // Body.
+      body: Dashboard(),
+    );
+  }
+}
+
+/// Dashboard widget.
+class Dashboard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
-    print('CURRENT USER: $user');
+    // Get the menu state.
+    final _sideMenuOpen = ref.watch(sideMenuOpen);
 
-    // Dashboard widget.
-    var dashboard = SafeArea(
-      child: SingleChildScrollView(
-        primary: false,
-        padding: EdgeInsets.all(Defaults.defaultPadding),
-        child: Column(
-          children: [
-            // Header.
-            // DashboardHeader(),
-            // SizedBox(height: Defaults.defaultPadding),
-
-            // Body.
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Sidebar.
-                // CollapsibleSidebar(),
-
-                // Components.
-                // Expanded(
-                //   flex: 5,
-                //   child: Column(
-                //     children: [
-                //       // Files.
-                //       // MyFiles(),
-                //       SizedBox(height: Defaults.defaultPadding),
-
-                //       // Recent files.
-                //       // RecentFiles(),
-                //       if (Responsive.isMobile(context))
-                //         SizedBox(height: Defaults.defaultPadding),
-
-                //       // Storage details for mobile.
-                //       // if (Responsive.isMobile(context)) StarageDetails(),
-                //     ],
-                //   ),
-                // ),
-
-                // Storage details for desktop
-                // if (!Responsive.isMobile(context))
-                //   SizedBox(width: Defaults.defaultPadding),
-                // if (!Responsive.isMobile(context))
-                //   Expanded(
-                //     flex: 2,
-                //     child: StarageDetails(),
-                //   ),
-              ],
-            )
-          ],
+    /// Welcome message for new users.
+    /// TODO: Only show if the user hasn't already hidden.
+    _welcomeMessage() {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.all(Defaults.defaultPadding),
+          child: WideCard(
+              child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Welcome to the Cannlytics Data and Analytics Platform!',
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.left,
+                  ),
+                  gapH8,
+                  Text(
+                    'This is a new platform for managing data.',
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.left,
+                  ),
+                ],
+              ),
+              Spacer(),
+              IconButton(
+                onPressed: () {
+                  // TODO: Dismiss the welcome message.
+                },
+                icon: Icon(Icons.close),
+              )
+            ],
+          )),
         ),
-      ),
+      );
+    }
+
+    /// Datasets cards.
+    /// TODO: Get datasets from Firestore.
+    _datasetsCards() {
+      List cards = [
+        Dataset(
+          title: 'WA Lab Results',
+          numOfFiles: 1328,
+          svgSrc: "assets/icons/Documents.svg",
+          totalStorage: "1.9GB",
+          color: Defaults.primaryColor,
+          percentage: 35,
+        ),
+      ];
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.all(Defaults.defaultPadding),
+          child: DatasetsCards(title: 'Datasets', items: cards),
+        ),
+      );
+    }
+
+    /// Statistical models cards.
+    /// TODO: Get datasets from Firestore.
+    _statsModelsCards() {
+      List cards = [
+        Dataset(
+          title: 'CoA Doc',
+          numOfFiles: 1328,
+          svgSrc: "assets/icons/Documents.svg",
+          totalStorage: "1.9GB",
+          color: Defaults.primaryColor,
+          percentage: 35,
+        ),
+      ];
+      return SliverToBoxAdapter(
+        child: Padding(
+            padding: EdgeInsets.all(Defaults.defaultPadding),
+            child: DatasetsCards(title: 'Analytics', items: cards)),
+      );
+    }
+
+    // TODO: Design the dashboard!
+
+    // Render the dashboard.
+    return Console(
+      slivers: [
+        // Welcome message
+        _welcomeMessage(),
+
+        // Statistical models cards.
+        _statsModelsCards(),
+
+        // Dataset cards.
+        _datasetsCards(),
+      ],
     );
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        // automaticallyImplyLeading: false,
-        // leading: IconButton(
-        //     onPressed: () {
-        //       _scaffoldKey.currentState?.openDrawer();
-        //     },
-        //     icon: Icon(
-        //       Icons.menu,
-        //     )),
-        title: Text(
-          'Dashboard',
-          style: Theme.of(context).textTheme.titleMedium,
+  }
+}
+
+/// Console widget.
+class Console extends ConsumerWidget {
+  const Console({
+    Key? key,
+    required this.slivers,
+  }) : super(key: key);
+
+  // The slivers to render in the console.
+  final List<Widget> slivers;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get the menu state.
+    final _sideMenuOpen = ref.watch(sideMenuOpen);
+
+    // Render the console.
+    return Row(
+      children: [
+        // Desktop and tablet side menu.
+        if (!Responsive.isMobile(context) && _sideMenuOpen)
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(context).dividerColor,
+                    width: 1.0,
+                    style: BorderStyle.solid,
+                  ),
+                  right: BorderSide(
+                    color: Theme.of(context).dividerColor,
+                    width: 1.0,
+                    style: BorderStyle.solid,
+                  ),
+                ),
+              ),
+              child: SideMenu(),
+            ),
+          ),
+
+        // Main content.
+        Expanded(
+          flex: 5,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).dividerColor,
+                  width: 1.0,
+                  style: BorderStyle.solid,
+                ),
+              ),
+            ),
+            child: MainScreen(slivers: slivers),
+          ),
         ),
-        actions: [
-          if (user == null)
-            CustomTextButton(
-              text: 'Sign Up',
-              onPressed: () {},
-            ),
-          if (user != null)
-            Avatar(
-              photoUrl: user!.photoURL ?? 'https://robohash.org/${user.uid}',
-              radius: 30,
-              borderColor: Theme.of(context).secondaryHeaderColor,
-              borderWidth: 1.0,
-            ),
-          SizedBox(width: 8),
-        ],
-      ),
-      drawer: SideMenu(),
-      // drawerEnableOpenDragGesture: false,
-      body: dashboard,
+      ],
     );
   }
 }

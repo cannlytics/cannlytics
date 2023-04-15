@@ -414,6 +414,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.19"
+  flutter_openmoji:
+    dependency: "direct main"
+    description:
+      name: flutter_openmoji
+      sha256: "3913fe56f0a856bbba88356ba8c3dcfb25c6b4214fea6578ec309c85d0db8735"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.8"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:

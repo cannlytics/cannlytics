@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/16/2023
+// Updated: 4/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -50,7 +50,7 @@ class AuthService {
   }
 
   /// Create a user with email and password.
-  Future<void> createAccount(
+  Future<void> signUp(
     String email,
     String password,
   ) {

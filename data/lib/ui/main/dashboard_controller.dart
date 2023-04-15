@@ -4,10 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 4/9/2023
+// Updated: 4/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'dart:async';
+
+import 'package:cannlytics_data/widgets/inputs/string_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -16,6 +19,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/services/auth_service.dart';
+
+/* Navigation */
+
+// Current page provider.
+final currentPageProvider = StateProvider<String>((ref) => 'Data Dashboard');
+
+// Menu controller.
+final sideMenuOpen = StateProvider<bool>((ref) => true);
 
 /* User */
 
@@ -39,5 +50,52 @@ class MenuAppController extends ChangeNotifier {
     if (!_scaffoldKey.currentState!.isDrawerOpen) {
       _scaffoldKey.currentState!.openDrawer();
     }
+  }
+}
+
+/* Sign in / sign up */
+
+/// Sign up controller.
+// final signUpController = StateProvider<bool>((ref) => false);
+
+// Email text field.
+final emailController =
+    StateNotifierProvider<StringController, TextEditingController>(
+        (ref) => StringController());
+
+// Password text field.
+final passwordController =
+    StateNotifierProvider<StringController, TextEditingController>(
+        (ref) => StringController());
+
+// Sign-in controller.
+final signInProvider = AutoDisposeAsyncNotifierProvider<SignInController, void>(
+    SignInController.new);
+
+/// [SignInController] manages the sign in, sign up, and reset password screens.
+class SignInController extends AutoDisposeAsyncNotifier<void> {
+  @override
+  FutureOr<void> build() {}
+
+  /// [signIn] signs the user in with their email and password.
+  Future<void> signIn({
+    required String email,
+    required String password,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      return await ref.read(authProvider).signIn(email, password);
+    });
+  }
+
+  /// [signUp] signs the user up with their email and password.
+  Future<void> signUp({
+    required String email,
+    required String password,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      return await ref.read(authProvider).signUp(email, password);
+    });
   }
 }

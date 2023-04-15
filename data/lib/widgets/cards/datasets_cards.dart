@@ -9,16 +9,21 @@
 
 // Flutter imports:
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/models/file.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'file_info_card.dart';
+import 'info_card.dart';
 
-class MyFiles extends StatelessWidget {
-  const MyFiles({
+/// Dataset cards.
+class DatasetsCards extends StatelessWidget {
+  const DatasetsCards({
     Key? key,
+    required this.items,
+    required this.title,
   }) : super(key: key);
+
+  final List<dynamic> items;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +34,7 @@ class MyFiles extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "My Files",
+              title,
               style: Theme.of(context).textTheme.subtitle1,
             ),
             ElevatedButton.icon(
@@ -42,18 +47,22 @@ class MyFiles extends StatelessWidget {
               ),
               onPressed: () {},
               icon: Icon(Icons.add),
-              label: Text("Add New"),
+              label: Text('Add New'),
             ),
           ],
         ),
         SizedBox(height: Defaults.defaultPadding),
         Responsive(
           mobile: FileInfoCardGridView(
+            items: items,
             crossAxisCount: _size.width < 650 ? 2 : 4,
             childAspectRatio: _size.width < 650 && _size.width > 350 ? 1.3 : 1,
           ),
-          tablet: FileInfoCardGridView(),
+          tablet: FileInfoCardGridView(
+            items: items,
+          ),
           desktop: FileInfoCardGridView(
+            items: items,
             childAspectRatio: _size.width < 1400 ? 1.1 : 1.4,
           ),
         ),
@@ -62,13 +71,16 @@ class MyFiles extends StatelessWidget {
   }
 }
 
+/// Grid view of dataset cards.
 class FileInfoCardGridView extends StatelessWidget {
   const FileInfoCardGridView({
     Key? key,
+    required this.items,
     this.crossAxisCount = 4,
     this.childAspectRatio = 1,
   }) : super(key: key);
 
+  final List<dynamic> items;
   final int crossAxisCount;
   final double childAspectRatio;
 
@@ -77,14 +89,14 @@ class FileInfoCardGridView extends StatelessWidget {
     return GridView.builder(
       physics: NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: demoMyFiles.length,
+      itemCount: items.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         crossAxisSpacing: Defaults.defaultPadding,
         mainAxisSpacing: Defaults.defaultPadding,
         childAspectRatio: childAspectRatio,
       ),
-      itemBuilder: (context, index) => FileInfoCard(info: demoMyFiles[index]),
+      itemBuilder: (context, index) => InfoCard(info: items[index]),
     );
   }
 }

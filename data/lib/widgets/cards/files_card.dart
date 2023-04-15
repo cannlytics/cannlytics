@@ -13,12 +13,15 @@ import 'package:cannlytics_data/models/file.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'file_info_card.dart';
+import 'info_card.dart';
 
 class MyFiles extends StatelessWidget {
   const MyFiles({
     Key? key,
+    required this.items,
   }) : super(key: key);
+
+  final List<dynamic> items;
 
   @override
   Widget build(BuildContext context) {
@@ -49,11 +52,13 @@ class MyFiles extends StatelessWidget {
         SizedBox(height: Defaults.defaultPadding),
         Responsive(
           mobile: FileInfoCardGridView(
+            items: items,
             crossAxisCount: _size.width < 650 ? 2 : 4,
             childAspectRatio: _size.width < 650 ? 1.3 : 1,
           ),
-          tablet: FileInfoCardGridView(),
+          tablet: FileInfoCardGridView(items: items),
           desktop: FileInfoCardGridView(
+            items: items,
             childAspectRatio: _size.width < 1400 ? 1.1 : 1.4,
           ),
         ),
@@ -65,10 +70,12 @@ class MyFiles extends StatelessWidget {
 class FileInfoCardGridView extends StatelessWidget {
   const FileInfoCardGridView({
     Key? key,
+    required this.items,
     this.crossAxisCount = 4,
     this.childAspectRatio = 1,
   }) : super(key: key);
 
+  final List<dynamic> items;
   final int crossAxisCount;
   final double childAspectRatio;
 
@@ -77,14 +84,14 @@ class FileInfoCardGridView extends StatelessWidget {
     return GridView.builder(
       physics: NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: demoMyFiles.length,
+      itemCount: items.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         crossAxisSpacing: Defaults.defaultPadding,
         mainAxisSpacing: Defaults.defaultPadding,
         childAspectRatio: childAspectRatio,
       ),
-      itemBuilder: (context, index) => FileInfoCard(info: demoMyFiles[index]),
+      itemBuilder: (context, index) => InfoCard(info: items[index]),
     );
   }
 }

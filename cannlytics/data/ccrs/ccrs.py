@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/10/2022
-Updated: 1/8/2023
+Updated: 4/14/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -33,9 +33,11 @@ from cannlytics.utils.utils import (
 
 def anonymize(
         df: pd.DataFrame,
-        columns: Optional[List[str]] = ['CreatedBy', 'UpdatedBy'],
+        columns: Optional[List[str]] = None,
     ) -> pd.DataFrame:
     """Anonymize a CCRS dataset."""
+    if columns is None:
+        columns = df.filter(regex=r'.*_by$|.*_By$', axis=1).columns
     for column in columns:
         df.loc[:, column] = df[column].astype(str).apply(create_hash)
     return df

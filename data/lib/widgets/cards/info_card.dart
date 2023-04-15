@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/10/2023
-// Updated: 4/10/2023
+// Updated: 4/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -15,13 +15,13 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_svg/flutter_svg.dart';
 
-class FileInfoCard extends StatelessWidget {
-  const FileInfoCard({
+class InfoCard extends StatelessWidget {
+  const InfoCard({
     Key? key,
     required this.info,
   }) : super(key: key);
 
-  final CloudStorageInfo info;
+  final dynamic info;
 
   @override
   Widget build(BuildContext context) {
@@ -70,14 +70,14 @@ class FileInfoCard extends StatelessWidget {
                 "${info.numOfFiles} Files",
                 style: Theme.of(context)
                     .textTheme
-                    .caption!
+                    .bodySmall!
                     .copyWith(color: Colors.white70),
               ),
               Text(
                 info.totalStorage!,
                 style: Theme.of(context)
                     .textTheme
-                    .caption!
+                    .bodySmall!
                     .copyWith(color: Colors.white),
               ),
             ],
@@ -88,6 +88,7 @@ class FileInfoCard extends StatelessWidget {
   }
 }
 
+/// A progress bar that shows the percentage of a task.
 class ProgressLine extends StatelessWidget {
   const ProgressLine({
     Key? key,

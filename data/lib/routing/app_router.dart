@@ -4,14 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 4/13/2023
+// Updated: 4/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Flutter imports:
-import 'package:cannlytics_data/widgets/layout/sidebar.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -38,7 +37,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
   // Build the routes.
   return GoRouter(
-    initialLocation: '/dashboard',
+    initialLocation: '/',
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
     // errorBuilder: (context, state) => const NotFoundScreen(),
@@ -53,7 +52,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 // then navigate to either the dashboard or to sign in.
 String? routeRedirect(GoRouterState state, bool isLoggedIn) {
   if (isLoggedIn) {
-    if (state.subloc.startsWith('/sign-in')) return '/dashboard';
+    if (state.subloc.startsWith('/sign-in')) return '/';
   } else {
     if (!state.subloc.startsWith('/sign-in') &&
         !state.subloc.startsWith('/account/reset-password')) {

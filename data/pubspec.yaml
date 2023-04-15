@@ -32,6 +32,7 @@ dependencies:
   uuid: ^3.0.7
   flutter_launcher_icons: ^0.13.0
   fl_chart: ^0.61.0
+  flutter_openmoji: ^0.0.8
 
 dev_dependencies:
   import_sorter: ^4.6.0
@@ -86,6 +87,20 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
+    - assets/icons/emoji/rocket.svg
+    - assets/icons/emoji/glowing_star.svg
+    - assets/icons/emoji/house_with_garden.svg
+    - assets/icons/emoji/microscope.svg
+    - assets/icons/emoji/money_bag.svg
+    - assets/icons/emoji/package.svg
+    - assets/icons/emoji/ring_buoy.svg
+    - assets/icons/emoji/scroll.svg
+    - assets/icons/emoji/sign_out.svg
+    - assets/icons/emoji/tanabata_tree.svg
+    - assets/icons/emoji/tractor.svg
+    - assets/icons/emoji/broccoli.svg
+    - assets/icons/emoji/dna.svg
+    - assets/icons/emoji/gear.svg
     - assets/images/logo.png
     - assets/images/profile_pic.png
     - assets/images/logos/logo_dark.svg
