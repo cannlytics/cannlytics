@@ -8,25 +8,25 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/constants/colors.dart';
-import 'package:cannlytics_data/constants/theme.dart';
-import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cannlytics_data/widgets/dialogs/auth_dialogs.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 // Package imports:
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/layout/footer_simple.dart';
 import 'package:cannlytics_data/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_data/widgets/buttons/theme_button.dart';
+import 'package:cannlytics_data/widgets/dialogs/auth_dialogs.dart';
 
 /// Screen for the user to reset their password.
 class ResetPasswordScreen extends ConsumerWidget {

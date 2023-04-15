@@ -7,6 +7,7 @@
 // Updated: 4/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 /// Model representing a statistical model.

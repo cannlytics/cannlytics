@@ -7,10 +7,10 @@
 // Updated: 4/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Flutter imports:
+// Dart imports:
 import 'dart:async';
 
-import 'package:cannlytics_data/widgets/inputs/string_controller.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -19,6 +19,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/widgets/inputs/string_controller.dart';
 
 /* Navigation */
 

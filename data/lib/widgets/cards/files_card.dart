@@ -8,11 +8,11 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/models/file.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/models/file.dart';
 import 'info_card.dart';
 
 class MyFiles extends StatelessWidget {

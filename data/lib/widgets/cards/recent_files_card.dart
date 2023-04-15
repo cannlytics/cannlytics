@@ -8,12 +8,14 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/models/file.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_svg/svg.dart';
+
+// Project imports:
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/models/file.dart';
 
 class RecentFiles extends StatelessWidget {
   const RecentFiles({

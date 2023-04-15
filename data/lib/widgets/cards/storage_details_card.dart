@@ -8,11 +8,11 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/widgets/charts/charts.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/widgets/charts/charts.dart';
 import 'storage_info_card.dart';
 
 class StarageDetails extends StatelessWidget {

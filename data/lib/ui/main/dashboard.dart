@@ -8,12 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/models/dataset.dart';
-import 'package:cannlytics_data/widgets/cards/datasets_cards.dart';
-import 'package:cannlytics_data/widgets/cards/storage_details_card.dart';
-import 'package:cannlytics_data/widgets/cards/wide_card.dart';
-import 'package:cannlytics_data/widgets/layout/header.dart';
-import 'package:cannlytics_data/widgets/layout/main_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -21,7 +15,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/models/dataset.dart';
 import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
+import 'package:cannlytics_data/widgets/cards/datasets_cards.dart';
+import 'package:cannlytics_data/widgets/cards/storage_details_card.dart';
+import 'package:cannlytics_data/widgets/cards/wide_card.dart';
+import 'package:cannlytics_data/widgets/layout/header.dart';
+import 'package:cannlytics_data/widgets/layout/main_screen.dart';
 import 'package:cannlytics_data/widgets/layout/sidebar.dart';
 
 /// Dashboard screen.

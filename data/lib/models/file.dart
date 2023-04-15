@@ -7,8 +7,11 @@
 // Updated: 4/11/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-import 'package:cannlytics_data/constants/design.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:cannlytics_data/constants/design.dart';
 
 /// Model representing a file in cloud storage.
 class CloudStorageInfo {

@@ -8,13 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cannlytics_data/ui/main/dashboard.dart';
-import 'package:cannlytics_data/utils/utils.dart';
-import 'package:cannlytics_data/widgets/cards/wide_card.dart';
-import 'package:cannlytics_data/widgets/dialogs/auth_dialogs.dart';
-import 'package:cannlytics_data/widgets/layout/header.dart';
-import 'package:cannlytics_data/widgets/layout/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -26,10 +19,17 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cannlytics_data/ui/main/dashboard.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:cannlytics_data/utils/validation_utils.dart';
 import 'package:cannlytics_data/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_data/widgets/buttons/secondary_button.dart';
+import 'package:cannlytics_data/widgets/cards/wide_card.dart';
+import 'package:cannlytics_data/widgets/dialogs/auth_dialogs.dart';
 import 'package:cannlytics_data/widgets/images/avatar.dart';
+import 'package:cannlytics_data/widgets/layout/header.dart';
+import 'package:cannlytics_data/widgets/layout/sidebar.dart';
 
 /// Account screen.
 class AccountScreen extends StatelessWidget {

@@ -11,13 +11,15 @@
 import 'dart:io';
 
 // Flutter imports:
-import 'package:cannlytics_data/widgets/buttons/secondary_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:url_launcher/url_launcher.dart';
+
+// Project imports:
+import 'package:cannlytics_data/widgets/buttons/secondary_button.dart';
 
 /// Utility functions for the web.
 class WebUtils {

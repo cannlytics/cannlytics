@@ -7,18 +7,23 @@
 // Updated: 4/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Flutter imports:
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+
+// Project imports:
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
 import 'package:cannlytics_data/utils/validation_utils.dart';
 import 'package:cannlytics_data/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/widgets/buttons/primary_button.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 
 /// Sign in / create account form.
 class SignInDialog extends ConsumerStatefulWidget {

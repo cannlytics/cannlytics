@@ -8,19 +8,21 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+// Project imports:
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
 import 'package:cannlytics_data/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_data/widgets/dialogs/auth_dialogs.dart';
 import 'package:cannlytics_data/widgets/images/avatar.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// Project imports:
-import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
-import 'package:go_router/go_router.dart';
 
 /// Dashboard header.
 class DashboardHeader extends ConsumerWidget with PreferredSizeWidget {
