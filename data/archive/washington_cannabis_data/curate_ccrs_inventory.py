@@ -81,8 +81,8 @@ def read_licensees(data_dir: str):
 def merge_lab_results(
         results_file: str,
         directory: str,
-        on: Optional[str] = 'InventoryId',
-        target: Optional[str] = 'LabResultId',
+        on: Optional[str] = 'inventory_id',
+        target: Optional[str] = 'lab_result_id',
         verbose: Optional[bool] = True,
     ) -> pd.DataFrame:
     """Merge lab results with items in a given directory."""
@@ -91,10 +91,10 @@ def merge_lab_results(
     lab_results = pd.read_excel(results_file)
 
     # Clean the lab results
-    lab_results.rename(columns={
-        'inventory_id': 'InventoryId',
-        'lab_result_id': target,
-    }, inplace=True)
+    # lab_results.rename(columns={
+    #     'inventory_id': 'InventoryId',
+    #     'lab_result_id': target,
+    # }, inplace=True)
     lab_results[on] = lab_results[on].astype(str)
 
     # Iterate over all datafiles in the directory.
@@ -289,6 +289,6 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D:\\data\\washington\\'
-    DATA_DIR = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
-    STATS_DIR = f'{base}\\ccrs-stats\\'
-    curate_ccrs_inventory(DATA_DIR, STATS_DIR)
+    data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
+    stats_dir = f'{base}\\ccrs-stats\\'
+    curate_ccrs_inventory(data_dir, stats_dir)

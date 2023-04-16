@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 4/14/2023
+// Updated: 4/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -39,79 +39,111 @@ class AuthService {
   /// Get the current user.
   User? get currentUser => _auth.currentUser;
 
-  /// Signs the user in anonymously.
-  Future<void> signInAnonymously() {
-    return _auth.signInAnonymously();
-  }
-
   /// Sign in with email and password.
-  Future<void> signIn(String email, String password) {
-    return _auth.signInWithEmailAndPassword(email: email, password: password);
+  Future<String> signIn(
+    String email,
+    String password,
+  ) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return 'success';
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   /// Create a user with email and password.
-  Future<void> signUp(
+  Future<String> signUp(
     String email,
     String password,
-  ) {
-    return _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+  ) async {
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return 'success';
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   /// Sign the user out.
-  Future<void> signOut() async {
-    await _auth.signOut();
+  Future<String> signOut() async {
+    try {
+      await _auth.signOut();
+      return 'success';
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   /// Change the user's photo.
-  Future<void> changePhoto() async {
-    // Get the current user.
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      // Show the image picker to let the user select a new photo.
-      var pickedFile = await FilePicker.platform.pickFiles();
+  Future<String> changePhoto() async {
+    try {
+      // Get the current user.
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Show the image picker to let the user select a new photo.
+        var pickedFile = await FilePicker.platform.pickFiles();
 
-      // If the user picks a photo.
-      if (pickedFile != null) {
-        // Upload the selected photo to Firebase Storage and get its download URL.
-        final String photoRef = 'users/${user.uid}/photo.jpg';
-        final storageRef = FirebaseStorage.instance.ref().child(photoRef);
-        final uploadTask = storageRef.putData(pickedFile.files.first.bytes!);
-        final snapshot = await uploadTask.whenComplete(() {});
-        final downloadURL = await snapshot.ref.getDownloadURL();
+        // If the user picks a photo.
+        if (pickedFile != null) {
+          // Upload the selected photo to Firebase Storage and get its download URL.
+          final String photoRef = 'users/${user.uid}/photo.jpg';
+          final storageRef = FirebaseStorage.instance.ref().child(photoRef);
+          final uploadTask = storageRef.putData(pickedFile.files.first.bytes!);
+          final snapshot = await uploadTask.whenComplete(() {});
+          final downloadURL = await snapshot.ref.getDownloadURL();
 
-        // Update the user's data in Firestore.
-        await _firestore.setData(
-          path: 'users/${user.uid}',
-          data: {
-            'photo_url': downloadURL,
-            'photo_ref': photoRef,
-          },
-        );
+          // Update the user's data in Firestore.
+          await _firestore.setData(
+            path: 'users/${user.uid}',
+            data: {
+              'photo_url': downloadURL,
+              'photo_ref': photoRef,
+            },
+          );
 
-        // Update the user's photo URL in Firebase Authentication.
-        await user.updatePhotoURL(downloadURL);
-        // await user.reload();
+          // Update the user's photo URL in Firebase Authentication.
+          await user.updatePhotoURL(downloadURL);
+          // await user.reload();
+        }
       }
+      return 'success';
+    } catch (e) {
+      return e.toString();
     }
   }
 
   /// Send the user a password reset email.
-  Future<void> resetPassword(String email) async {
-    await _auth.sendPasswordResetEmail(email: email);
+  Future<String> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      return 'success';
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   /// Danger zone: Allow the user to delete their account.
-  Future<void> deleteAccount() async {
-    // FIXME: Test this out.
-    print('TODO: IMPLEMENT!');
-    // Delete the user's data from Firestore.
-    // User? user = FirebaseAuth.instance.currentUser;
-    // _firestore.deleteData(path: 'users/${user?.uid}');
-
-    // Delete the user's account.
-    // await user!.delete();
+  Future<String> deleteAccount() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    try {
+      // Delete the user's data from Firestore.
+      _firestore.deleteData(path: 'users/${user?.uid}');
+    } catch (e) {
+      // Unable to delete user data.
+    }
+    try {
+      // Delete the user's account.
+      await user!.delete();
+      return 'success';
+    } catch (e) {
+      return e.toString();
+    }
   }
 }

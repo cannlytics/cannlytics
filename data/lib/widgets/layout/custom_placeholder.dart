@@ -11,7 +11,7 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/design.dart';
+import 'package:cannlytics_data/constants/design.dart';
 
 /// A custom placeholder.
 class CustomPlaceholder extends StatelessWidget {

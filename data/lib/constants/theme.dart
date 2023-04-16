@@ -221,12 +221,12 @@ class AppTheme {
         ),
         titleSmall: TextStyle(
           color: isDark ? DarkColors.text : LightColors.text,
-          fontFamily: 'CormorantGaramond',
+          fontFamily: 'SourceSerifPro',
           fontSize: 16,
         ),
         bodyLarge: TextStyle(
           color: isDark ? DarkColors.text : LightColors.text,
-          fontFamily: 'CormorantGaramond',
+          fontFamily: 'SourceSerifPro',
           fontSize: 18,
           height: 1.5,
         ),
@@ -250,12 +250,12 @@ class AppTheme {
         labelMedium: TextStyle(
           fontSize: 16,
           color: isDark ? DarkColors.text : LightColors.text,
-          fontFamily: 'IBMPlexSans',
+          fontFamily: 'SourceSerifPro',
         ),
         labelSmall: TextStyle(
           fontSize: 15,
           color: isDark ? DarkColors.text : LightColors.text,
-          fontFamily: 'IBMPlexSans',
+          fontFamily: 'SourceSerifPro',
           fontWeight: FontWeight.w700,
           letterSpacing: 0.25,
         ),

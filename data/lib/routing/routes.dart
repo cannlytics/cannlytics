@@ -12,7 +12,11 @@
 import 'package:cannlytics_data/routing/app_router.dart';
 import 'package:cannlytics_data/ui/account/account_screen.dart';
 import 'package:cannlytics_data/ui/account/reset_password_screen.dart';
+import 'package:cannlytics_data/ui/licensees/licensees_screen.dart';
 import 'package:cannlytics_data/ui/main/dashboard.dart';
+import 'package:cannlytics_data/ui/results/results_screen.dart';
+import 'package:cannlytics_data/ui/sales/sales_screen.dart';
+import 'package:cannlytics_data/ui/strains/strains_screen.dart';
 
 // The main app routes.
 class Routes {
@@ -40,21 +44,60 @@ class Routes {
       useFade: true,
     ),
 
-    // TODO:
     // Licensees screen.
+    AppRoute(
+      path: '/licensees',
+      name: 'licensees',
+      builder: (context, state) => LicenseesScreen(),
+      useFade: true,
+    ),
 
     // Strains screen.
+    AppRoute(
+      path: '/strains',
+      name: 'strains',
+      builder: (context, state) => StrainsScreen(),
+      useFade: true,
+    ),
 
-    // Products screen.
+    // Optional: Products screen.
+    // AppRoute(
+    //   path: '/strains',
+    //   name: 'strains',
+    //   builder: (context, state) => StrainsScreen(),
+    //   useFade: true,
+    // ),
 
     // Lab results screen.
+    AppRoute(
+      path: '/results',
+      name: 'results',
+      builder: (context, state) => LabResultsScreen(),
+      useFade: true,
+    ),
 
     // Sales screen.
+    AppRoute(
+      path: '/sales',
+      name: 'sales',
+      builder: (context, state) => SalesScreen(),
+      useFade: true,
+    ),
 
-    // Research screen.
+    // // Industry screen.
+    // AppRoute(
+    //   path: '/production',
+    //   name: 'production',
+    //   builder: (context, state) => ProductionScreen(),
+    //   useFade: true,
+    // ),
 
-    // Settings screen.
-
-    // Help screen.
+    // // Research screen.
+    // AppRoute(
+    //   path: '/research',
+    //   name: 'research',
+    //   builder: (context, state) => ResearchScreen(),
+    //   useFade: true,
+    // ),
   ];
 }

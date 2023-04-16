@@ -69,13 +69,25 @@ class _SignInDialogState extends ConsumerState<SignInDialog>
     if (_formKey.currentState!.validate()) {
       // Sign up or sign in.
       final controller = ref.read(signInProvider.notifier);
-      if (_isSignUp)
-        await controller.signUp(email: email, password: password);
-      else
-        await controller.signIn(email: email, password: password);
-
-      // Close the dialog.
-      Navigator.of(context).pop(false);
+      var message;
+      if (_isSignUp) {
+        message = await controller.signUp(email: email, password: password);
+      } else {
+        message = await controller.signIn(email: email, password: password);
+      }
+      if (message == 'success') {
+        // Close the dialog.
+        Navigator.of(context).pop(false);
+      } else {
+        message = message.replaceAll(RegExp(r'\[.*?\]'), '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red.shade300,
+            content: Text('Error: $message'),
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
     }
   }
 

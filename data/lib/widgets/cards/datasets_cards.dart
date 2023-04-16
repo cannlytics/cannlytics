@@ -35,19 +35,7 @@ class DatasetsCards extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-            ElevatedButton.icon(
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.symmetric(
-                  horizontal: Defaults.defaultPadding * 1.5,
-                  vertical: Defaults.defaultPadding /
-                      (Responsive.isMobile(context) ? 2 : 1),
-                ),
-              ),
-              onPressed: () {},
-              icon: Icon(Icons.add),
-              label: Text('Add New'),
+              style: Theme.of(context).textTheme.labelMedium,
             ),
           ],
         ),

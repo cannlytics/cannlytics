@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/25/2023
-Updated: 4/14/2023
+Updated: 4/15/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -29,14 +29,15 @@ import pandas as pd
 
 # Define the fields that will be used.
 FIELDS = {
-    'StrainType': 'string',
-    'InventoryType': 'string',
-    'UnitWeightGrams': 'string',
-    'InitialQuantity': 'string',
-    'QuantityOnHand': 'string',
+    'initial_quantity': 'string',
+    'inventory_created_at': 'string',
+    'inventory_type': 'string',
+    'quantity_on_hand': 'string',
     'strain_name': 'string',
+    'strain_type': 'string',
+    'unit_weight_grams': 'string',
 }
-NUMERIC = ['UnitWeightGrams', 'InitialQuantity', 'QuantityOnHand']
+NUMERIC = ['unit_weight_grams', 'initial_quantity', 'quantity_on_hand']
 
 
 def curate_ccrs_strains(data_dir, stats_dir):
@@ -69,8 +70,8 @@ def curate_ccrs_strains(data_dir, stats_dir):
         # sample['product_created_at'].min()
         # sample['product_created_at'].max()
 
-        # Get all inventory types of `InventoryType == 'Usable Marijuana'`
-        flower = data.copy(deep=True).loc[data['InventoryType'] == 'Usable Marijuana']
+        # Identify all flower products.
+        flower = data.copy(deep=True).loc[data['inventory_type'] == 'Usable Marijuana']
 
         # Convert columns to numeric.
         for col in NUMERIC:
@@ -78,13 +79,12 @@ def curate_ccrs_strains(data_dir, stats_dir):
                 lambda x: pd.to_numeric(x, errors='coerce')
             )
 
-        # Sum `UnitWeightGrams` x `InitialQuantity` to get `total_weight`.
-        total_weight = flower['UnitWeightGrams'].mul(flower['InitialQuantity'])
+        # Calculate total weight.
+        total_weight = flower['unit_weight_grams'].mul(flower['initial_quantity'])
 
-        # Sum `UnitWeightGrams` x (`InitialQuantity` - `QuantityOnHand`)
-        # to get `total_sold`
-        quantity_sold = flower['InitialQuantity'] - flower['QuantityOnHand']
-        total_sold = flower['UnitWeightGrams'].mul(quantity_sold)
+        # Calculate total sold.
+        quantity_sold = flower['initial_quantity'] - flower['quantity_on_hand']
+        total_sold = flower['unit_weight_grams'].mul(quantity_sold)
 
         # Convert weight to pounds.
         flower = flower.assign(
@@ -118,7 +118,7 @@ def curate_ccrs_strains(data_dir, stats_dir):
             strain_stats.loc[strain_sold.index, 'total_sold'] = strain_sold
 
         # Add strain type.
-        flower_types = flower.groupby('strain_name')['StrainType'].first()
+        flower_types = flower.groupby('strain_name')['strain_type'].first()
         # FIXME: This raises a warning on the 1st iteration.
         strain_stats.loc[flower_types.index, 'strain_type'] = flower_types
 
@@ -139,6 +139,6 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D:\\data\\washington\\'
-    DATA_DIR = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
-    STATS_DIR = f'{base}\\ccrs-stats\\'
-    curate_ccrs_strains(DATA_DIR, STATS_DIR)
+    data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
+    stats_dir = f'{base}\\ccrs-stats\\'
+    curate_ccrs_strains(data_dir, stats_dir)

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/14/2023
-// Updated: 4/15/2023
+// Updated: 4/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -40,7 +40,9 @@ class DashboardHeader extends ConsumerWidget with PreferredSizeWidget {
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
 
+    // Render the widget.
     return AppBar(
+      // Menu button.
       leading: Responsive.isMobile(context)
           ? null
           : IconButton(
@@ -49,6 +51,8 @@ class DashboardHeader extends ConsumerWidget with PreferredSizeWidget {
               },
               icon: Icon(Icons.menu),
             ),
+
+      // Title.
       centerTitle: false,
       titleSpacing: 0,
       title: Row(
@@ -64,8 +68,9 @@ class DashboardHeader extends ConsumerWidget with PreferredSizeWidget {
           ),
         ],
       ),
+
+      // Actions.
       actions: [
-        // Actions.
         if (user == null)
           Row(
             children: [
@@ -82,8 +87,8 @@ class DashboardHeader extends ConsumerWidget with PreferredSizeWidget {
                 },
               ),
 
-              // Spacer.
-              SizedBox(width: 8),
+              // Space.
+              gapW8,
 
               // Sign up button.
               PrimaryButton(
@@ -97,6 +102,9 @@ class DashboardHeader extends ConsumerWidget with PreferredSizeWidget {
                   );
                 },
               ),
+
+              // Space.
+              gapW16,
             ],
           ),
 

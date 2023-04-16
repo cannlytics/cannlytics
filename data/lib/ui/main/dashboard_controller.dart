@@ -79,24 +79,28 @@ class SignInController extends AutoDisposeAsyncNotifier<void> {
   FutureOr<void> build() {}
 
   /// [signIn] signs the user in with their email and password.
-  Future<void> signIn({
+  Future<String> signIn({
     required String email,
     required String password,
   }) async {
     state = const AsyncValue.loading();
+    var message;
     state = await AsyncValue.guard(() async {
-      return await ref.read(authProvider).signIn(email, password);
+      message = await ref.read(authProvider).signIn(email, password);
     });
+    return message;
   }
 
   /// [signUp] signs the user up with their email and password.
-  Future<void> signUp({
+  Future<String> signUp({
     required String email,
     required String password,
   }) async {
     state = const AsyncValue.loading();
+    var message;
     state = await AsyncValue.guard(() async {
-      return await ref.read(authProvider).signUp(email, password);
+      message = await ref.read(authProvider).signUp(email, password);
     });
+    return message;
   }
 }

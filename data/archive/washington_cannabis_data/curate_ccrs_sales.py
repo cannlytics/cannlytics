@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 4/13/2023
+Updated: 4/16/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -208,9 +208,9 @@ def curate_ccrs_sales(
                 data = pd.read_excel(os.path.join(inventory_dir, datafile))
             except:
                 continue
-            data['InventoryId'] = data['InventoryId'].astype(str)
             # FIXME: Why are there duplicates?
-            data.drop_duplicates(subset='InventoryId', keep='first', inplace=True)
+            # data['InventoryId'] = data['inventory_id'].astype(str)
+            # data.drop_duplicates(subset='InventoryId', keep='first', inplace=True)
             data.rename(columns={
                 'inventory_id': 'InventoryId',
                 'CreatedBy': 'inventory_created_by',
@@ -276,18 +276,20 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D:\\data\\washington\\'
-    DATA_DIR = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
-    STATS_DIR = f'{base}\\ccrs-stats\\'
+    data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
+    stats_dir = f'{base}\\ccrs-stats\\'
     curate_ccrs_sales(
-        DATA_DIR,
-        STATS_DIR,
-        reverse=True,
-        first_file=2,
+        data_dir,
+        stats_dir,
+        reverse=False,
+        first_file=0,
     )
 
 
 #------------------------------------------------------------------------------
 # DEV: Should statistics be moved to `ccrs_sales_stats`?
+# ANSWER: No, try to keep all data processing in one place.
+#         Try to implement into the above function.
 #------------------------------------------------------------------------------
 
 # # Compile the statistics.

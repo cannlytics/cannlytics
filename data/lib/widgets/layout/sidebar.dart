@@ -8,9 +8,10 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO:
-// - Highlight route accordingly.
+// - Highlight active route accordingly.
 
 // Flutter imports:
+import 'package:cannlytics_data/widgets/dialogs/help_dialog.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -52,25 +53,12 @@ class SideMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // // Get the theme.
-    // final themeMode = ref.watch(themeModeProvider);
-    // final bool isDark = themeMode == ThemeMode.dark;
+    // Listen to the current user.
+    final user = ref.watch(authProvider).currentUser;
 
     // Render the side menu.
     return ListView(
       children: [
-        // Optional: Side menu header.
-        // DrawerHeader(
-        //   padding: EdgeInsets.symmetric(vertical: 24, horizontal: 48),
-        //   child: Image.asset(
-        //     isDark
-        //         ? 'assets/images/logos/cannlytics_logo_with_text_dark.png'
-        //         : 'assets/images/logos/cannlytics_logo_with_text_light.png',
-        //     width: 120,
-        //     height: 33,
-        //   ),
-        // ),
-
         // Dashboard link.
         DrawerListTile(
           title: 'Dashboard',
@@ -78,7 +66,7 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/house_with_garden.svg',
             width: 28,
           ),
-          onTap: () => context.go('/dashboard'),
+          onTap: () => context.go('/'),
         ),
 
         // Licensees link.
@@ -101,15 +89,15 @@ class SideMenu extends ConsumerWidget {
           onTap: () => context.go('/strains'),
         ),
 
-        // Products link.
-        DrawerListTile(
-          title: 'Products',
-          leading: SvgPicture.asset(
-            'assets/icons/emoji/package.svg',
-            width: 28,
-          ),
-          onTap: () => context.go('/products'),
-        ),
+        // // Products link.
+        // DrawerListTile(
+        //   title: 'Products',
+        //   leading: SvgPicture.asset(
+        //     'assets/icons/emoji/package.svg',
+        //     width: 28,
+        //   ),
+        //   onTap: () => context.go('/products'),
+        // ),
 
         // Lab results link.
         DrawerListTile(
@@ -131,25 +119,25 @@ class SideMenu extends ConsumerWidget {
           onTap: () => context.go('/sales'),
         ),
 
-        // Industry link.
-        DrawerListTile(
-          title: 'Industry',
-          leading: SvgPicture.asset(
-            'assets/icons/emoji/tractor.svg',
-            width: 28,
-          ),
-          onTap: () => context.go('/production'),
-        ),
+        // // Industry link.
+        // DrawerListTile(
+        //   title: 'Industry',
+        //   leading: SvgPicture.asset(
+        //     'assets/icons/emoji/tractor.svg',
+        //     width: 28,
+        //   ),
+        //   onTap: () => context.go('/production'),
+        // ),
 
-        // Research link.
-        DrawerListTile(
-          title: 'Research',
-          leading: SvgPicture.asset(
-            'assets/icons/emoji/dna.svg',
-            width: 28,
-          ),
-          onTap: () => context.go('/research'),
-        ),
+        // // Research link.
+        // DrawerListTile(
+        //   title: 'Research',
+        //   leading: SvgPicture.asset(
+        //     'assets/icons/emoji/dna.svg',
+        //     width: 28,
+        //   ),
+        //   onTap: () => context.go('/research'),
+        // ),
 
         // Divider
         Divider(),
@@ -171,7 +159,7 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/gear.svg',
             width: 28,
           ),
-          onTap: () => context.go('/settings'),
+          onTap: () => context.go('/account'),
         ),
 
         // Help link.
@@ -181,29 +169,37 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/ring_buoy.svg',
             width: 28,
           ),
-          onTap: () => context.go('/help'),
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return HelpDialog();
+              },
+            );
+          },
         ),
 
         // Sign out link.
-        DrawerListTile(
-          title: 'Sign Out',
-          leading: SvgPicture.asset(
-            'assets/icons/emoji/sign_out.svg',
-            width: 28,
+        if (user != null)
+          DrawerListTile(
+            title: 'Sign Out',
+            leading: SvgPicture.asset(
+              'assets/icons/emoji/sign_out.svg',
+              width: 28,
+            ),
+            onTap: () async {
+              final logout = await InterfaceUtils.showAlertDialog(
+                context: context,
+                title: 'Are you sure?',
+                cancelActionText: 'Cancel',
+                defaultActionText: 'Sign out',
+              );
+              if (logout == true) {
+                await ref.read(authProvider).signOut();
+                context.go('/dashboard');
+              }
+            },
           ),
-          onTap: () async {
-            final logout = await InterfaceUtils.showAlertDialog(
-              context: context,
-              title: 'Are you sure?',
-              cancelActionText: 'Cancel',
-              defaultActionText: 'Sign out',
-            );
-            if (logout == true) {
-              await ref.read(authProvider).signOut();
-              context.go('/dashboard');
-            }
-          },
-        ),
       ],
     );
   }

@@ -8,10 +8,10 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -71,10 +71,7 @@ class ResetPasswordScreen extends ConsumerWidget {
             ),
 
             // Account management.
-            SliverToBoxAdapter(
-                child: ResetPasswordForm(isDark: isDark)
-                    .animate()
-                    .fadeIn(duration: 1600.ms)),
+            SliverToBoxAdapter(child: ResetPasswordForm(isDark: isDark)),
 
             // Footer
             const SliverToBoxAdapter(child: SimpleFooter()),
@@ -124,13 +121,25 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm>
     setState(() => _submitted = true);
     if (_formKey.currentState!.validate()) {
       final controller = ref.read(accountProvider.notifier);
-      await controller.resetPassword(email);
-      // FIXME:
-      // showExceptionAlertDialog(
-      //   context: context,
-      //   title: 'Password reset email sent',
-      //   exception: 'Check your email for a link to reset your password.',
-      // );
+      var message = await controller.resetPassword(email);
+      if (message == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('Check your email for a link to reset your password.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        message = message.replaceAll(RegExp(r'\[.*?\]'), '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red.shade300,
+            content: Text('Error: $message'),
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
     }
   }
 

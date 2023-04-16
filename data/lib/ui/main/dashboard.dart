@@ -8,6 +8,9 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/ui/layout/footer.dart';
+import 'package:cannlytics_data/widgets/layout/console.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -18,11 +21,10 @@ import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/dataset.dart';
 import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
 import 'package:cannlytics_data/widgets/cards/datasets_cards.dart';
-import 'package:cannlytics_data/widgets/cards/storage_details_card.dart';
 import 'package:cannlytics_data/widgets/cards/wide_card.dart';
 import 'package:cannlytics_data/widgets/layout/header.dart';
-import 'package:cannlytics_data/widgets/layout/main_screen.dart';
 import 'package:cannlytics_data/widgets/layout/sidebar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Dashboard screen.
 class DashboardScreen extends StatelessWidget {
@@ -48,38 +50,63 @@ class Dashboard extends ConsumerWidget {
     // Get the menu state.
     final _sideMenuOpen = ref.watch(sideMenuOpen);
 
+    // Dynamic screen width.
+    final screenWidth = MediaQuery.of(context).size.width;
+
     /// Welcome message for new users.
     /// TODO: Only show if the user hasn't already hidden.
     _welcomeMessage() {
       return SliverToBoxAdapter(
         child: Padding(
-          padding: EdgeInsets.all(Defaults.defaultPadding),
+          padding: EdgeInsets.symmetric(horizontal: Defaults.defaultPadding),
           child: WideCard(
               child: Row(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome to the Cannlytics Data and Analytics Platform!',
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.left,
-                  ),
-                  gapH8,
-                  Text(
-                    'This is a new platform for managing data.',
-                    style: Theme.of(context).textTheme.titleMedium,
-                    textAlign: TextAlign.left,
-                  ),
-                ],
+              SizedBox(
+                width: (screenWidth > Breakpoints.tablet) ? 475 : 275,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Welcome to the Cannlytics\nData and Analytics Platform!',
+                      style: Theme.of(context).textTheme.titleLarge,
+                      textAlign: TextAlign.left,
+                    ),
+                    gapH8,
+                    Text.rich(
+                      TextSpan(
+                        text:
+                            'This is a new platform for managing your cannabis data. Stay tuned as new data and analytics are added. You can join the development on ',
+                        style: Theme.of(context).textTheme.titleMedium,
+                        children: [
+                          TextSpan(
+                            text: 'GitHub',
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: Colors.blue,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                launchUrl(Uri.parse(
+                                    'https://github.com/cannlytics/cannlytics'));
+                              },
+                          ),
+                          TextSpan(
+                            text: '.',
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ],
+                ),
               ),
               Spacer(),
-              IconButton(
-                onPressed: () {
-                  // TODO: Dismiss the welcome message.
-                },
-                icon: Icon(Icons.close),
-              )
+              // TODO: Make the welcome message dismissable.
+              // IconButton(
+              //   onPressed: () {},
+              //   icon: Icon(Icons.close),
+              // )
             ],
           )),
         ),
@@ -87,7 +114,7 @@ class Dashboard extends ConsumerWidget {
     }
 
     /// Datasets cards.
-    /// TODO: Get datasets from Firestore.
+    /// TODO: Get data from Firestore.
     _datasetsCards() {
       List cards = [
         Dataset(
@@ -101,14 +128,18 @@ class Dashboard extends ConsumerWidget {
       ];
       return SliverToBoxAdapter(
         child: Padding(
-          padding: EdgeInsets.all(Defaults.defaultPadding),
+          padding: EdgeInsets.only(
+            top: Defaults.defaultPadding * 2,
+            left: Defaults.defaultPadding,
+            right: Defaults.defaultPadding,
+          ),
           child: DatasetsCards(title: 'Datasets', items: cards),
         ),
       );
     }
 
     /// Statistical models cards.
-    /// TODO: Get datasets from Firestore.
+    /// TODO: Get data from Firestore.
     _statsModelsCards() {
       List cards = [
         Dataset(
@@ -122,12 +153,10 @@ class Dashboard extends ConsumerWidget {
       ];
       return SliverToBoxAdapter(
         child: Padding(
-            padding: EdgeInsets.all(Defaults.defaultPadding),
+            padding: EdgeInsets.symmetric(horizontal: Defaults.defaultPadding),
             child: DatasetsCards(title: 'Analytics', items: cards)),
       );
     }
-
-    // TODO: Design the dashboard!
 
     // Render the dashboard.
     return Console(
@@ -140,67 +169,9 @@ class Dashboard extends ConsumerWidget {
 
         // Dataset cards.
         _datasetsCards(),
-      ],
-    );
-  }
-}
 
-/// Console widget.
-class Console extends ConsumerWidget {
-  const Console({
-    Key? key,
-    required this.slivers,
-  }) : super(key: key);
-
-  // The slivers to render in the console.
-  final List<Widget> slivers;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Get the menu state.
-    final _sideMenuOpen = ref.watch(sideMenuOpen);
-
-    // Render the console.
-    return Row(
-      children: [
-        // Desktop and tablet side menu.
-        if (!Responsive.isMobile(context) && _sideMenuOpen)
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: Theme.of(context).dividerColor,
-                    width: 1.0,
-                    style: BorderStyle.solid,
-                  ),
-                  right: BorderSide(
-                    color: Theme.of(context).dividerColor,
-                    width: 1.0,
-                    style: BorderStyle.solid,
-                  ),
-                ),
-              ),
-              child: SideMenu(),
-            ),
-          ),
-
-        // Main content.
-        Expanded(
-          flex: 5,
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: Theme.of(context).dividerColor,
-                  width: 1.0,
-                  style: BorderStyle.solid,
-                ),
-              ),
-            ),
-            child: MainScreen(slivers: slivers),
-          ),
-        ),
+        // Footer.
+        const SliverToBoxAdapter(child: Footer()),
       ],
     );
   }

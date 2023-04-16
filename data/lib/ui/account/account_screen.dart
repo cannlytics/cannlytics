@@ -4,10 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 4/15/2023
+// Updated: 4/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/theme.dart';
+import 'package:cannlytics_data/ui/layout/footer.dart';
+import 'package:cannlytics_data/widgets/buttons/custom_text_button.dart';
+import 'package:cannlytics_data/widgets/layout/console.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -20,7 +24,6 @@ import 'package:go_router/go_router.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cannlytics_data/ui/main/dashboard.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:cannlytics_data/utils/validation_utils.dart';
 import 'package:cannlytics_data/widgets/buttons/primary_button.dart';
@@ -37,7 +40,6 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Render the widget.
     return Scaffold(
       // App bar.
       appBar: DashboardHeader(),
@@ -47,7 +49,14 @@ class AccountScreen extends StatelessWidget {
 
       // Body.
       body: Console(slivers: [
+        // Account card.
         SliverToBoxAdapter(child: AccountManagement()),
+
+        // Settings card.
+        SliverToBoxAdapter(child: ThemeSettings()),
+
+        // Footer.
+        const SliverToBoxAdapter(child: Footer()),
       ]),
     );
   }
@@ -68,27 +77,97 @@ class AccountManagement extends ConsumerWidget {
     // Render the widget.
     return Padding(
       padding: EdgeInsets.only(
+        top: 24,
         left: sliverHorizontalPadding(screenWidth),
         right: sliverHorizontalPadding(screenWidth),
-        top: 24,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          // Sign up prompt.
+          if (user == null) _signUpCard(context, screenWidth),
+
           // Account information
           if (user != null) AccountForm(key: Key('account-form')),
 
           // Delete account option.
-          if (user != null) _deleteAccount(context, screenWidth),
-          gapH48,
+          if (user != null) _deleteAccount(context, ref, screenWidth),
+        ],
+      ),
+    );
+  }
+
+  /// Sign up card.
+  Widget _signUpCard(BuildContext context, double screenWidth) {
+    return WideCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: (screenWidth > Breakpoints.tablet) ? null : 275,
+                child: Text(
+                  'Create an account',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              gapH6,
+              SizedBox(
+                width: (screenWidth > Breakpoints.tablet) ? null : 275,
+                child: Text(
+                  'Sign up to save and access your data from any device.',
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        color: Theme.of(context).textTheme.titleLarge!.color,
+                      ),
+                ),
+              ),
+              gapH18,
+              Row(
+                children: [
+                  // Sign in button.
+                  CustomTextButton(
+                    text: 'Sign In',
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SignInDialog(isSignUp: false);
+                        },
+                      );
+                    },
+                  ),
+
+                  // Spacer.
+                  SizedBox(width: 8),
+                  PrimaryButton(
+                    text: 'Sign up',
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SignInDialog(isSignUp: true);
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
   /// Delete account card.
-  Widget _deleteAccount(BuildContext context, double screenWidth) {
+  Widget _deleteAccount(
+    BuildContext context,
+    WidgetRef ref,
+    double screenWidth,
+  ) {
     return WideCard(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,17 +199,17 @@ class AccountManagement extends ConsumerWidget {
               PrimaryButton(
                 backgroundColor: Colors.red,
                 text: 'Delete account',
-                onPressed: () {
-                  print('TODO: DELETE ACCOUNT!');
-                  // FIXME:
-                  // showReauthDialog(
-                  //   context: context,
-                  //   title: 'Reauthenticate',
-                  //   defaultActionText: 'Submit',
-                  //   cancelActionText: 'Cancel',
-                  //   auth: FirebaseAuth.instance,
-                  //   // content: Text('Password'),
-                  // );
+                onPressed: () async {
+                  final delete = await InterfaceUtils.showAlertDialog(
+                    context: context,
+                    title: 'Are you sure you want to delete your account?',
+                    cancelActionText: 'Cancel',
+                    defaultActionText: 'Delete account',
+                  );
+                  if (delete == true) {
+                    await ref.read(authProvider).deleteAccount();
+                    context.go('/sign-in');
+                  }
                 },
               ),
             ],
@@ -181,6 +260,70 @@ class _AccountFormState extends ConsumerState<AccountForm>
     }
   }
 
+  /// Display the user's photo, allowing the user to upload a new photo.
+  Widget _userPhoto(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue state,
+    User? user,
+  ) {
+    return InkWell(
+      customBorder: const CircleBorder(),
+      onTap: state.isLoading
+          ? null
+          : () async {
+              String message =
+                  await ref.read(accountProvider.notifier).changePhoto();
+              if (message != 'success') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.red.shade300,
+                    content: Text('Error changing image!'),
+                    duration: Duration(seconds: 4),
+                  ),
+                );
+              }
+            },
+      child: Avatar(
+        photoUrl:
+            user!.photoURL ?? 'https://cannlytics.com/robohash/${user.uid}',
+        radius: 60,
+        borderColor: Theme.of(context).secondaryHeaderColor,
+        borderWidth: 1.0,
+      ),
+    );
+  }
+
+  /// Sign out button.
+  Widget _signOut(AsyncValue state) {
+    return CustomTextButton(
+      text: 'Sign out',
+      onPressed: state.isLoading
+          ? null
+          : () async {
+              final logout = await InterfaceUtils.showAlertDialog(
+                context: context,
+                title: 'Are you sure?',
+                cancelActionText: 'Cancel',
+                defaultActionText: 'Sign out',
+              );
+              if (logout == true) {
+                await ref.read(authProvider).signOut();
+                context.go('/sign-in');
+              }
+            },
+    );
+  }
+
+  /// Reset password button.
+  Widget _resetPassword(AsyncValue state) {
+    return SecondaryButton(
+      text: 'Reset password',
+      onPressed:
+          state.isLoading ? null : () => context.go('/account/reset-password'),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // FIXME: Listen to errors.
@@ -201,26 +344,83 @@ class _AccountFormState extends ConsumerState<AccountForm>
       _emailController.text = user.email ?? '';
     }
 
-    // Define the profile widget.
-    Widget profileWidget = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Title
-        Text(
-          'Profile',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        gapH24,
+    /// Username field.
+    Widget _userName() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Display Name'),
+          gapH6,
+          SizedBox(
+            width: 240,
+            child: TextFormField(
+              key: Key('displayName'),
+              controller: _displayNameController,
+              autocorrect: false,
+              decoration: InputDecoration(
+                enabled: !state.isLoading,
+                contentPadding: EdgeInsets.only(
+                  top: 18,
+                  left: 8,
+                  right: 8,
+                  bottom: 8,
+                ),
+              ),
+              style: Theme.of(context).textTheme.titleMedium,
+              textInputAction: TextInputAction.next,
+            ),
+          ),
+        ],
+      );
+    }
 
-        // User photo.
-        _userPhoto(context, ref, state, user),
-        gapH8,
+    /// User email field.
+    Widget _userEmail() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Email'),
+          gapH6,
+          SizedBox(
+            width: 240,
+            child: TextFormField(
+              key: Key('email'),
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                enabled: !state.isLoading,
+                contentPadding: EdgeInsets.only(
+                  top: 18,
+                  left: 8,
+                  right: 8,
+                  bottom: 8,
+                ),
+              ),
+              style: Theme.of(context).textTheme.titleMedium,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (email) =>
+                  !_submitted ? null : emailErrorText(email ?? ''),
+              autocorrect: false,
+              textInputAction: TextInputAction.next,
+              keyboardType: TextInputType.emailAddress,
+              inputFormatters: <TextInputFormatter>[
+                ValidatorInputFormatter(
+                    editingValidator: EmailEditingRegexValidator()),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
 
-        // Reset password and sign out.
-        _accountOptions(context, ref, state),
-        gapH24,
-      ],
-    );
+    /// Save button.
+    Widget _saveButton() {
+      return PrimaryButton(
+        text: 'Save',
+        isLoading: state.isLoading,
+        onPressed: state.isLoading ? null : () => _submit(),
+      );
+    }
 
     // Define the form.
     List<Widget> formFields = <Widget>[
@@ -231,120 +431,68 @@ class _AccountFormState extends ConsumerState<AccountForm>
           children: [
             // Title
             Text(
-              'Account Information',
+              'Account',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             gapH24,
 
+            // User photo.
+            _userPhoto(context, ref, state, user),
+            gapH24,
+
             // User name.
-            Text('Display Name'),
-            gapH6,
-            SizedBox(
-              width: 240,
-              child: TextFormField(
-                key: Key('displayName'),
-                controller: _displayNameController,
-                autocorrect: false,
-                decoration: InputDecoration(
-                  // border: OutlineInputBorder(),
-                  // labelText: 'Display Name',
-                  enabled: !state.isLoading,
-                  contentPadding: EdgeInsets.only(
-                    top: 18,
-                    left: 8,
-                    right: 8,
-                    bottom: 8,
-                  ),
-                ),
-                style: Theme.of(context).textTheme.titleMedium,
-                textInputAction: TextInputAction.next,
-              ),
-            ),
+            _userName(),
             gapH12,
 
-            // Email field.
-            Text('Email'),
-            gapH6,
-            SizedBox(
-              width: 240,
-              child: TextFormField(
-                key: Key('email'),
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  enabled: !state.isLoading,
-                  contentPadding: EdgeInsets.only(
-                    top: 18,
-                    left: 8,
-                    right: 8,
-                    bottom: 8,
-                  ),
-                ),
-                style: Theme.of(context).textTheme.titleMedium,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (email) =>
-                    !_submitted ? null : emailErrorText(email ?? ''),
-                autocorrect: false,
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.emailAddress,
-                inputFormatters: <TextInputFormatter>[
-                  ValidatorInputFormatter(
-                      editingValidator: EmailEditingRegexValidator()),
-                ],
-              ),
-            ),
-            gapH18,
+            // User email.
+            _userEmail(),
+            gapH12,
 
-            // User phone.
-            // TODO: Change user phone.
+            // TODO: User phone.
             // if (user.phoneNumber != null)
             //   Text(
             //     'Phone: ${user.phoneNumber!}',
             //     style: Theme.of(context).textTheme.bodyMedium,
             //   ),
 
-            // // Add phone number.
+            // TODO: Add phone number.
             // if (user.phoneNumber == null)
             //   CustomTextButton(
             //     text: 'Add phone number',
             //     fontStyle: FontStyle.italic,
-            //     onPressed: () {
-            //       // TODO: Add phone number.
-            //     },
+            //     onPressed: () {},
             //   ),
 
-            gapH8,
-            // Submit button.
-            // if (email != user!.email && displayName != user.displayName)
-            PrimaryButton(
-              text: 'Save',
-              isLoading: state.isLoading,
-              onPressed: state.isLoading ? null : () => _submit(),
-            ),
+            // Save button.
+            // gapH8,
+            // _saveButton(),
+            // gapH12,
+
+            // Additional account options.
             gapH12,
+            Row(
+              children: [
+                // Reset password.
+                _resetPassword(state),
+                gapW8,
+
+                // Sign out.
+                _saveButton(),
+              ],
+            ),
+            gapH24,
           ],
         ),
       ),
     ];
 
     // Render the form.
-    return Column(
-      children: [
-        // Profile fields.
-        WideCard(child: profileWidget),
-
-        // Account fields.
-        WideCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: formFields.reversed.toList(),
-          ),
-        ),
-      ],
+    return WideCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: formFields.reversed.toList(),
+      ),
     );
-
-    // TODO: Toggle light / dark theme.
-    // ThemeInput(),
 
     // TODO: Manage additional Firestore user data:
     // - Account created date.
@@ -357,78 +505,104 @@ class _AccountFormState extends ConsumerState<AccountForm>
     // - licenses (/admin/create-license and /admin/delete-license)
     // - license type
   }
+}
 
-  /// Display the user's photo, allowing the user to upload a new photo.
-  Widget _userPhoto(
-    BuildContext context,
-    WidgetRef ref,
-    AsyncValue state,
-    User? user,
-  ) {
-    return InkWell(
-      customBorder: const CircleBorder(),
-      onTap: state.isLoading
-          ? null
-          : () async {
-              // FIXME: Handle cancellation.
-              try {
-                await ref.read(accountProvider.notifier).changePhoto();
-              } catch (error) {
-                // Failed to change photo.
-              }
-            },
-      child: state.isLoading
-          ? null
-          : Avatar(
-              photoUrl: user!.photoURL ??
-                  'https://cannlytics.com/robohash/${user.uid}',
-              radius: 60,
-              borderColor: Theme.of(context).secondaryHeaderColor,
-              borderWidth: 1.0,
-            ),
+/// Settings card.
+class ThemeSettings extends ConsumerWidget {
+  const ThemeSettings({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Dynamic screen width.
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Render the widget.
+    return Padding(
+      padding: EdgeInsets.only(
+        top: 24,
+        left: sliverHorizontalPadding(screenWidth),
+        right: sliverHorizontalPadding(screenWidth),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          // Theme toggle.
+          _themeToggle(context, ref, screenWidth),
+        ],
+      ),
     );
   }
 
-  /// Reset password and sign out buttons.
-  Widget _accountOptions(
-    BuildContext context,
-    WidgetRef ref,
-    AsyncValue state,
-  ) {
-    return Row(
-      children: [
-        // Reset password.
-        SecondaryButton(
-          // isDark: isDark,
-          text: 'Reset password',
-          onPressed: state.isLoading
-              ? null
-              : () {
-                  context.go('/account/reset-password');
-                },
-        ),
-        gapW8,
-
-        // Sign out.
-        SecondaryButton(
-          // isDark: isDark,
-          text: 'Sign out',
-          onPressed: state.isLoading
-              ? null
-              : () async {
-                  final logout = await InterfaceUtils.showAlertDialog(
-                    context: context,
-                    title: 'Are you sure?',
-                    cancelActionText: 'Cancel',
-                    defaultActionText: 'Sign out',
-                  );
-                  if (logout == true) {
-                    await ref.read(authProvider).signOut();
-                    context.go('/sign-in');
-                  }
-                },
-        ),
-      ],
+  /// Sign up card.
+  Widget _themeToggle(BuildContext context, WidgetRef ref, double screenWidth) {
+    // Watch the theme.
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
+    return WideCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Settings',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              gapH6,
+              Row(
+                children: [
+                  CustomTextButton(
+                    text: 'Light mode',
+                    onPressed: () {
+                      ref.read(themeModeProvider.notifier).state =
+                          ThemeMode.light;
+                      ref
+                          .read(accountProvider.notifier)
+                          .saveUserData({'theme': 'light'});
+                    },
+                  ),
+                  gapW6,
+                  Transform.scale(
+                    scale: 0.75,
+                    child: Switch(
+                      value: themeMode == ThemeMode.dark,
+                      activeColor: Theme.of(context).primaryColor,
+                      inactiveTrackColor:
+                          isDark ? Colors.grey.shade400 : Colors.grey.shade300,
+                      activeTrackColor:
+                          isDark ? Colors.grey.shade600 : Colors.grey.shade200,
+                      inactiveThumbColor: isDark
+                          ? Colors.white
+                          : Theme.of(context).primaryColor,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onChanged: (value) {
+                        ref.read(themeModeProvider.notifier).state =
+                            value ? ThemeMode.dark : ThemeMode.light;
+                        ref
+                            .read(accountProvider.notifier)
+                            .saveUserData({'theme': value ? 'dark' : 'light'});
+                      },
+                    ),
+                  ),
+                  gapW6,
+                  CustomTextButton(
+                    text: 'Dark mode',
+                    onPressed: () {
+                      ref.read(themeModeProvider.notifier).state =
+                          ThemeMode.dark;
+                      ref
+                          .read(accountProvider.notifier)
+                          .saveUserData({'theme': 'dark'});
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

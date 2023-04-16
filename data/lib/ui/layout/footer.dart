@@ -35,8 +35,10 @@ class Footer extends ConsumerWidget {
         child: SizedBox(
           width: Breakpoints.desktop.toDouble(),
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding(screenWidth),
+            padding: EdgeInsets.only(
+              top: 48,
+              left: horizontalPadding(screenWidth),
+              right: horizontalPadding(screenWidth),
             ),
             child: Column(
               crossAxisAlignment:
