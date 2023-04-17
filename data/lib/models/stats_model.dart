@@ -11,20 +11,26 @@
 import 'package:flutter/material.dart';
 
 /// Model representing a statistical model.
-class StatsModel {
-  final String? svgSrc;
-  final String? title;
-  final String? totalStorage;
-  final int? numOfFiles;
-  final int? percentage;
-  final Color? color;
+class StatisticalModel {
+  final String? name;
+  final String? type;
+  final String? description;
+  final double? intercept;
+  final Map<String, double>? featureCoefficients;
+  final Map<String, double>? performanceMetrics;
+  final int? trainingDataSize;
+  final Map<String, double>? trainTestSplit;
+  final String? createdAt;
 
-  StatsModel({
-    this.svgSrc,
-    this.title,
-    this.totalStorage,
-    this.numOfFiles,
-    this.percentage,
-    this.color,
+  StatisticalModel({
+    this.name,
+    this.type,
+    this.description,
+    this.intercept,
+    this.featureCoefficients,
+    this.performanceMetrics,
+    this.trainingDataSize,
+    this.trainTestSplit,
+    this.createdAt,
   });
 }

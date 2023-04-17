@@ -12,11 +12,15 @@ source_datasets:
   - original
 tags:
   - cannabis
-  - washington
+  - lab results
+  - tests
 ---
 
-# Washington Cannabis Data
+# Cannabis Tests, Curated by Cannlytics
 
+<div style="margin-top:1rem; margin-bottom: 1rem;">
+  <img width="240px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fdatasets%2Fcannabis_tests%2Fcannabis_tests_curated_by_cannlytics.png?alt=media&token=22e4d1da-6b30-4c3f-9ff7-1954ac2739b2">
+</div>
 
 ## Table of Contents
 - [Table of Contents](#table-of-contents)
@@ -183,7 +187,11 @@ Certificates of analysis (CoAs) are abundant for cannabis cultivators, processor
 
 | Data Source | URL |
 |-------------|-----|
-| WSLCB PRR 2023-03-07 | <https://lcb.app.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml> |
+| MCR Labs Test Results | <https://reports.mcrlabs.com> |
+| PSI Labs Test Results | <https://results.psilabs.org/test-results/> |
+| Raw Garden Test Results | <https://rawgarden.farm/lab-results/> |
+| SC Labs Test Results | <https://client.sclabs.com/> |
+| Washington State Lab Test Results | <https://lcb.app.box.com/s/e89t59s0yb558tjoncjsid710oirqbgd> |
 
 #### Data Collection and Normalization
 
@@ -217,11 +225,10 @@ In the `algorithms` directory, you can find the data collection scripts describe
 | Algorithm |  Organization | Description | 
 |-----------|---------------|-------------|
 | `get_results_mcrlabs.py` | MCR Labs | Get lab results published by MCR Labs. |
-
-<!-- | Tool | Description |
-|------|-------------|
-| `ccrs_sales_by_licensee.py` | Calculate `total_price`, `total_discount`, `total_sales_tax`, and `total_other_tax` by `licensee_id` by `date`. |
-| `upload_ccrs_stats.py` | Calculate CCRS statistics and upload the statistics to Firestore (*Under development*). | -->
+| `get_results_psilabs.py` | PSI Labs | Get historic lab results published by MCR Labs. |
+| `get_results_rawgarden.py` | Raw Garden | Get lab results Raw Garden publishes for their products. |
+| `get_results_sclabs.py` | SC Labs | Get lab results published by SC Labs. |
+| `get_results_washington.py` | Washington State | Get historic lab results obtained through a FOIA request in Washington State. |
 
 ### Personal and Sensitive Information
 
@@ -239,7 +246,24 @@ Cannlytics is a for-profit data and analytics company that primarily serves cann
 
 ### Other Known Limitations
 
-The dataset presumably has missing data and errors.
+The data represents only a subset of the population of cannabis lab results. Non-standard values are coded as follows.
+
+| Actual | Coding |
+|--------|--------|
+| `'ND'` | `0.000000001` |
+| `'No detection in 1 gram'` | `0.000000001` |
+| `'Negative/1g'` | `0.000000001` |
+| '`PASS'` | `0.000000001` |
+| `'<LOD'` | `0.00000001` |
+| `'< LOD'` | `0.00000001` |
+| `'<LOQ'` | `0.0000001` |
+| `'< LOQ'` | `0.0000001` |
+| `'<LLOQ'` | `0.0000001` |
+| `'≥ LOD'` | `10001` |
+| `'NR'` | `None` |
+| `'N/A'` | `None` |
+| `'na'` | `None` |
+| `'NT'` | `None` |
 
 ## Additional Information
 
@@ -251,7 +275,7 @@ Curated by [🔥Cannlytics](https://cannlytics.com)<br>
 ### License
 
 ```
-Copyright (c) 2023 Cannlytics and the Cannabis Data Science Team
+Copyright (c) 2022 Cannlytics and the Cannabis Data Science Team
 
 The files associated with this dataset are licensed under a 
 Creative Commons Attribution 4.0 International license.
@@ -270,19 +294,14 @@ to a third party.
 Please cite the following if you use the code examples in your research:
 
 ```bibtex
-@misc{cannlytics2023,
+@misc{cannlytics2022,
   title={Cannabis Data Science},
   author={Skeate, Keegan and O'Sullivan-Sutherland, Candace},
-  journal={https://github.com/cannlytics/cannlytics},
-  year={2023}
+  journal={https://github.com/cannlytics/cannabis-data-science},
+  year={2022}
 }
 ```
 
 ### Contributions
 
-Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), [@keeganskeate](https://github.com/keeganskeate), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.
-
-<!-- ## Archive
-
-- [CCRS PRR 2023-03-06](https://lcb.app.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml)
-- [CCRS PRR 2023-01-27](https://lcb.box.com/s/wzfoqysl4v9aqljwc0pi0g5ea6bch759) -->
+Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), [@hcadeaux](https://huggingface.co/hcadeaux), [@keeganskeate](https://github.com/keeganskeate), [The CESC](https://thecesc.org), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.

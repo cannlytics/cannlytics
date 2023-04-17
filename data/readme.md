@@ -1,6 +1,10 @@
 # Cannlytics Data
 
-## Development
+## Archive
+
+## App
+
+### Development
 
 Sort imports:
 
@@ -19,10 +23,3 @@ Create launcher icons:
 ```shell
 flutter pub run flutter_launcher_icons
 ```
-
-## Testing
-
-## Publishing
-
-## References
-

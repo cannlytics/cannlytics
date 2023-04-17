@@ -11,6 +11,7 @@
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_data/widgets/buttons/secondary_button.dart';
+import 'package:cannlytics_data/widgets/cards/stats_model_card.dart';
 import 'package:cannlytics_data/widgets/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/widgets/layout/console.dart';
 import 'package:cannlytics_data/widgets/layout/custom_placeholder.dart';
@@ -96,11 +97,17 @@ class MainContent extends ConsumerWidget {
           // TODO: Parse COAs.
           Row(
             children: [
-              SecondaryButton(
-                text: 'Parse Certificate',
-                onPressed: () {
-                  context.go('/results/parse');
-                },
+              // SecondaryButton(
+              //   text: 'Parse Certificate',
+              //   onPressed: () {
+              //     context.go('/results/parse');
+              //   },
+              // ),
+              StatisticalModelCard(
+                imageUrl:
+                    'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3',
+                modelDescription: 'CoADoc - AI Certificate Parser',
+                route: 'CoADoc',
               ),
             ],
           ),

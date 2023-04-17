@@ -14,6 +14,7 @@ from .ccrs import (
     get_datafiles,
     merge_datasets,
     save_dataset,
+    standardize_dataset,
     unzip_datafiles,
 )
 from .constants import (
@@ -41,5 +42,6 @@ __all__ = [
     get_datafiles,
     merge_datasets,
     save_dataset,
+    standardize_dataset,
     unzip_datafiles,
 ]

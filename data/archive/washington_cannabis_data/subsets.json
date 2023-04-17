@@ -1,0 +1,8 @@
+{
+  "strains": {
+    "name": "Strains",
+    "url": "https://huggingface.co/datasets/cannlytics/washington_cannabis_data/blob/main/algorithms/wa_strains.py",
+    "data_source": "",
+    "data_url": ""
+  }
+}

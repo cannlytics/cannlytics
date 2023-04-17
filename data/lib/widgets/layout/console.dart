@@ -8,7 +8,9 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/ui/layout/footer.dart';
 import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
+import 'package:cannlytics_data/widgets/layout/header.dart';
 import 'package:cannlytics_data/widgets/layout/main_screen.dart';
 import 'package:cannlytics_data/widgets/layout/sidebar.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +20,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/constants/design.dart';
+
+/// General console screen that renders given widgets.
+class ConsoleScreen extends StatelessWidget {
+  const ConsoleScreen({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // App bar.
+      appBar: DashboardHeader(),
+
+      // Side menu.
+      drawer: Responsive.isMobile(context) ? MobileDrawer() : null,
+
+      // Body.
+      body: Console(slivers: [
+        // Main content.
+        ...children,
+
+        // Footer.
+        const SliverToBoxAdapter(child: Footer()),
+      ]),
+    );
+  }
+}
 
 /// Console widget.
 class Console extends ConsumerWidget {

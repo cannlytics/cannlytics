@@ -6,12 +6,12 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/10/2022
-Updated: 4/14/2023
+Updated: 4/16/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
 import os
-from typing import List, Optional
+from typing import Callable, List, Optional
 from zipfile import ZipFile
 
 # External imports:
@@ -25,6 +25,7 @@ from cannlytics.data.ccrs.constants import (
     CCRS_DATASETS,
 )
 from cannlytics.utils.utils import (
+    camel_to_snake,
     convert_to_numeric,
     rmerge,
     sorted_nicely,
@@ -240,6 +241,22 @@ def save_dataset(
         shard = data.iloc[start: stop, :]
         outfile = os.path.join(data_dir, f'{name}_{i}.{ext}')
         shard.to_excel(outfile, index=False)
+
+
+def standardize_dataset(
+        df: pd.DataFrame,
+        rename_function: Optional[Callable] = camel_to_snake,
+    ) -> pd.DataFrame:
+    """Standardize a given DataFrame."""
+    # Standardize column names.
+    columns = {col: rename_function(col) for col in df.columns}
+    df.rename(columns=columns, inplace=True)
+
+    # Anonymize the data.
+    df = anonymize(df)
+
+    # Return the sorted data.
+    return df.sort_index(axis=1)
 
 
 def unzip_datafiles(

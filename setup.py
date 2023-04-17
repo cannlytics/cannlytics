@@ -5,7 +5,7 @@ Copyright (c) 2021-2022 Cannlytics
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Contact: <keegan@cannlytics.com>
 Created: 1/21/2021
-Updated: 4/8/2023
+Updated: 4/16/2023
 License: MIT <https://opensource.org/licenses/MIT>
 """
 from setuptools import find_packages, setup

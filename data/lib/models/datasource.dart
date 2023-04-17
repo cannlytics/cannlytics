@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 4/1151/2023
+// Updated: 4/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:

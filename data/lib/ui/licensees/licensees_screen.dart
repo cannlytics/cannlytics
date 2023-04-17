@@ -7,6 +7,10 @@
 // Updated: 4/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// See:
+// https://pub.dev/packages/vector_map
+// https://www.amcharts.com/visited_states/#US-MT
+
 // Flutter imports:
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/widgets/layout/breadcrumbs.dart';

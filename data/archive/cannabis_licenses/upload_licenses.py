@@ -7,7 +7,10 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/29/2022
 Updated: 4/2/2023
-License: <https://github.com/cannabisdata/cannabisdata/blob/main/LICENSE>
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+Original author: Cannabis Data
+Original license: MIT <https://github.com/cannabisdata/cannabisdata/blob/main/LICENSE>
 
 Data Source:
 

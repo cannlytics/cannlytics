@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/6/2023
+// Updated: 4/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -120,4 +120,46 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
       }
     });
   }
+
+  /// Get the user's subscription.
+  Future<Map> getSubscription() async {
+    final _firestore = ref.watch(firestoreProvider);
+    var subscription = {};
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final user = ref.read(userProvider).value;
+      if (user != null) {
+        subscription = await _firestore.getDocument(
+          path: 'users/${user.uid}/subscription',
+        );
+      }
+    });
+    return subscription;
+  }
+
+  /// TODO: Subscribe to a paid subscription.
+  /// POST /src/payments/subscribe
+  /// data = {'email': userEmail, 'plan_name': planName, 'id': planId}
+  /// For now, link to: https://cannlytics.com/account/subscriptions
+
+  /// TODO: Unsubscribe from a paid subscription.
+  /// POST /src/payments/unsubscribe
+  /// data = {'plan_name': planName}
+
+  /// TODO: Get subscription plans.
+  /// public/subscriptions/subscription_plans/${name}
+
+  /// TODO: Get API Keys.
+  /// GET /api/auth/get-keys
+
+  /// TODO: Create API key.
+  /// POST /api/auth/create-key
+  /// data = {
+  ///   'name': 'My API Key',
+  ///   'permissions': ['read', 'write'],
+  /// }
+
+  /// TODO: Delete API key.
+  /// POST /api/auth/delete-key
+  /// data = {'name': 'My API Key'}
 }

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 4/16/2023
+Updated: 4/17/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -21,16 +21,18 @@ Data Source:
 # Standard imports:
 from datetime import datetime
 import os
-from typing import Optional
+from typing import  Optional
 
 # External imports:
 from cannlytics.data.ccrs import (
     get_datafiles,
     merge_datasets,
+    standardize_dataset,
     unzip_datafiles,
 )
+from cannlytics.data.ccrs.ccrs import anonymize
 from cannlytics.data.ccrs.constants import CCRS_DATASETS
-from cannlytics.utils import rmerge, sorted_nicely
+from cannlytics.utils import camel_to_snake, rmerge, sorted_nicely
 import pandas as pd
 
 
@@ -41,18 +43,18 @@ def calc_daily_sales(
     """Calculate sales by licensee by day.
     Note: The absolute value of the `Discount` is used.
     """
-    group = ['LicenseeId', 'SaleDate']
+    group = ['licensee_id', 'sale_date']
     daily = df.groupby(group, as_index=False).sum()
     for _, row in daily.iterrows():
-        licensee_id = row['LicenseeId']
-        date = row['SaleDate'].isoformat()[:10]
+        licensee_id = row['licensee_id']
+        date = row['sale_date'].isoformat()[:10]
         licensee_data = stats.get(licensee_id, {})
         date_data = licensee_data.get(date, {})
         licensee_data[date] = {
-            'total_price': date_data.get('total_price', 0) + row['UnitPrice'],
-            'total_discount': date_data.get('total_discount', 0) + abs(row['Discount']),
-            'total_sales_tax': date_data.get('total_sales_tax', 0) + row['SalesTax'],
-            'total_other_tax': date_data.get('total_other_tax', 0) + row['OtherTax'],
+            'total_price': date_data.get('total_price', 0) + row['unit_price'],
+            'total_discount': date_data.get('total_discount', 0) + abs(row['discount']),
+            'total_sales_tax': date_data.get('total_sales_tax', 0) + row['sales_tax'],
+            'total_other_tax': date_data.get('total_other_tax', 0) + row['other_tax'],
         }
         stats[licensee_id] = licensee_data
     return stats
@@ -70,11 +72,18 @@ def save_licensee_items_by_month(
     """Save items by licensee by month to licensee-specific directories.
     Note: Datafiles must be under 1 million items.
     """
-    licensees = list(df['LicenseeId'].unique())
-    for licensee_id in licensees:
+    licensees = list(df['licensee_id'].unique())
+    for index in licensees:
+        if isinstance(index, float):
+            try:
+                licensee_id = str(int(index))
+            except ValueError:
+                licensee_id = str(index)
+        else:
+            licensee_id = index
         licensee_dir = os.path.join(data_dir, licensee_id)
         if not os.path.exists(licensee_dir): os.makedirs(licensee_dir)
-        licensee_items = df.loc[df['LicenseeId'] == licensee_id]
+        licensee_items = df.loc[df['licensee_id'] == index]
         months = list(licensee_items['month'].unique())
         for month in months:
             outfile = f'{licensee_dir}/{item_type}-{licensee_id}-{month}.xlsx'
@@ -90,7 +99,7 @@ def save_licensee_items_by_month(
                 month_items.drop_duplicates(subset=subset, keep='last', inplace=True)
             except FileNotFoundError:
                 pass
-            month_items.to_excel(outfile, index=False)
+            month_items.sort_index(axis=1).to_excel(outfile, index=False)
             if verbose:
                 print('Saved', licensee_id, month, 'items:', len(month_items))
 
@@ -112,24 +121,34 @@ def save_stats_by_month(
 def stats_to_df(stats: dict[dict]) -> pd.DataFrame:
     """Compile statistics from a dictionary of dictionaries into a DataFrame."""
     data = []
-    for licensee_id, dates in stats.items():
+    for index, dates in stats.items():
         for date, values in dates.items():
             data.append({
-                'licensee_id': licensee_id,
+                'licensee_id': index,
                 'date': date,
                 **values,
             })
     return pd.DataFrame(data)
 
 
-def curate_ccrs_sales(
-        data_dir,
-        stats_dir,
-        reverse: Optional[bool] = False,
-        first_file: Optional[int] = 0,
-        last_file: Optional[int] = None,
-    ):
-    """Curate CCRS sales by merging additional datasets."""
+# def curate_ccrs_sales(
+#         data_dir,
+#         stats_dir,
+#         reverse: Optional[bool] = False,
+#         first_file: Optional[int] = 0,
+#         last_file: Optional[int] = None,
+#     ):
+#     """Curate CCRS sales by merging additional datasets."""
+
+# DEV:
+if __name__ == '__main__':
+
+    base = 'D:\\data\\washington\\'
+    data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
+    stats_dir = f'{base}\\ccrs-stats\\'
+    first_file = 3
+    last_file = None
+    reverse = False
 
     print('Curating sales...')
     start = datetime.now()
@@ -155,8 +174,6 @@ def curate_ccrs_sales(
     daily_licensee_sales = {}
     inventory_dir = os.path.join(stats_dir, 'inventory')
     inventory_files = sorted_nicely(os.listdir(inventory_dir))
-    lab_results_dir = os.path.join(stats_dir, 'lab_results')
-    results_file = os.path.join(lab_results_dir, 'lab_results_0.xlsx')
     sales_items_files = get_datafiles(data_dir, 'SalesDetail_')
     if last_file: sales_items_files = sales_items_files[:last_file]
     if reverse:
@@ -201,64 +218,44 @@ def curate_ccrs_sales(
             validate='m:1',
         )
 
+        # Standardize inventory items.
+        items = standardize_dataset(items)
+
         # Augment with curated inventory.
         print('Merging inventory data...')
         for datafile in inventory_files:
+
+            # Read inventory data file.
             try:
                 data = pd.read_excel(os.path.join(inventory_dir, datafile))
             except:
                 continue
+
+            # Remove inventory item duplicates.
             # FIXME: Why are there duplicates?
-            # data['InventoryId'] = data['inventory_id'].astype(str)
-            # data.drop_duplicates(subset='InventoryId', keep='first', inplace=True)
-            data.rename(columns={
-                'inventory_id': 'InventoryId',
-                'CreatedBy': 'inventory_created_by',
-                'CreatedDate': 'inventory_created_date',
-                'UpdatedBy': 'inventory_updated_by',
-                'UpdatedDate': 'product_updated_date',
-                'updatedDate': 'inventory_updated_date',
-                'LicenseeId': 'inventory_licensee_id',
-            }, inplace=True)
+            data['inventory_id'] = data['inventory_id'].astype(str)
+            data.drop_duplicates(subset='inventory_id', keep='first', inplace=True)
+            
+            # Merge inventory data with sales data.
             items = rmerge(
                 items,
                 data,
-                on='InventoryId',
+                on='inventory_id',
                 how='left',
                 validate='m:1',
             )
 
-        # Augment with curated lab results.
-        # FIXME: This appears to be overwriting data points.
-        print('Merging lab result data...')
-        data = pd.read_excel(results_file)
-        data.rename(columns={
-            'inventory_id': 'InventoryId',
-            'created_by': 'results_created_by',
-            'created_date': 'results_created_date',
-            'updated_by': 'results_updated_by',
-            'updated_date': 'results_updated_date',
-        }, inplace=True)
-        data['InventoryId'] = data['InventoryId'].astype(str)
-        items = rmerge(
-            items,
-            data,
-            on='InventoryId',
-            how='left',
-            validate='m:1',
-        )
-
         # At this stage, sales by licensee by day can be incremented.
-        # print('Updating sales statistics...')
-        # daily_licensee_sales = calc_daily_sales(items, daily_licensee_sales)
+        print('Updating sales statistics...')
+        daily_licensee_sales = calc_daily_sales(items, daily_licensee_sales)
 
         # Save augmented sales to licensee-specific files by month.
         print('Saving augmented sales...')
-        items['month'] = items['SaleDate'].apply(lambda x: x.isoformat()[:7])
+        items['month'] = items['sale_date'].apply(lambda x: x.isoformat()[:7])
         save_licensee_items_by_month(
             items,
             licensees_dir,
-            subset='SaleDetailId',
+            subset='sale_detail_id',
             verbose=False,
             # FIXME: Pass item date columns and types.
             # parse_dates=list(set(date_fields + supp_date_fields)),
@@ -267,39 +264,38 @@ def curate_ccrs_sales(
         midpoint_end = datetime.now()
         print('Curated sales file in:', midpoint_end - midpoint_start)
 
+    # Compile the sales statistics.
+    print('Compiling licensee sales statistics...')
+    stats = stats_to_df(daily_licensee_sales)
+
+    # Save the compiled statistics.
+    min_date = stats['date'].min()
+    max_date = stats['date'].max()
+    stats_file = f'{sales_dir}/sales-by-licensee-{min_date}-to-{max_date}.xlsx'
+    stats.to_excel(stats_file, index=False)
+
+    # Save the statistics by month.
+    save_stats_by_month(stats, sales_dir, 'sales-by-licensee')
+
+    # Future work: Calculate and save aggregate statistics.
+
+    # Finish curating sales.
     end = datetime.now()
     print('✓ Finished curating sales in', end - start)
 
 
 # === Test ===
 if __name__ == '__main__':
+    pass
 
     # Specify where your data lives.
-    base = 'D:\\data\\washington\\'
-    data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
-    stats_dir = f'{base}\\ccrs-stats\\'
-    curate_ccrs_sales(
-        data_dir,
-        stats_dir,
-        reverse=False,
-        first_file=0,
-    )
-
-
-#------------------------------------------------------------------------------
-# DEV: Should statistics be moved to `ccrs_sales_stats`?
-# ANSWER: No, try to keep all data processing in one place.
-#         Try to implement into the above function.
-#------------------------------------------------------------------------------
-
-# # Compile the statistics.
-# print('Compiling licensee sales statistics...')
-# stats = stats_to_df(daily_licensee_sales)
-
-# # Save the compiled statistics.
-# stats.to_excel(f'{sales_dir}/sales-by-licensee.xlsx', index=False)
-
-# # Save the statistics by month.
-# save_stats_by_month(stats, sales_dir, 'sales-by-licensee')
-
-# Future work: Calculate and save aggregate statistics.
+    # base = 'D:\\data\\washington\\'
+    # data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
+    # stats_dir = f'{base}\\ccrs-stats\\'
+    # curate_ccrs_sales(
+    #     data_dir,
+    #     stats_dir,
+    #     reverse=False,
+    #     first_file=0,
+    #     last_file=1,
+    # )

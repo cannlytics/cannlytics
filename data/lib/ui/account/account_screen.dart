@@ -34,6 +34,11 @@ import 'package:cannlytics_data/widgets/images/avatar.dart';
 import 'package:cannlytics_data/widgets/layout/header.dart';
 import 'package:cannlytics_data/widgets/layout/sidebar.dart';
 
+// See:
+// https://medium.com/flutter-community/paypal-payment-gateway-integration-in-flutter-379fbb3b87f5
+// https://stackoverflow.com/questions/57390362/flutter-integrate-paypal-buttons-with-webview
+// https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_create
+
 /// Account screen.
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -88,8 +93,14 @@ class AccountManagement extends ConsumerWidget {
           // Sign up prompt.
           if (user == null) _signUpCard(context, screenWidth),
 
-          // Account information
+          // Account information.
           if (user != null) AccountForm(key: Key('account-form')),
+
+          // Subscriptions.
+          if (user != null) SubscriptionsCard(key: Key('subscriptions')),
+
+          // API keys.
+          if (user != null) APIKeysCard(key: Key('api-keys')),
 
           // Delete account option.
           if (user != null) _deleteAccount(context, ref, screenWidth),
@@ -180,6 +191,11 @@ class AccountManagement extends ConsumerWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                'Danger Zone',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              gapH24,
               SizedBox(
                 width: (screenWidth > Breakpoints.tablet) ? null : 275,
                 child: Text(
@@ -599,6 +615,66 @@ class ThemeSettings extends ConsumerWidget {
                   ),
                 ],
               ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Subscriptions card.
+class SubscriptionsCard extends ConsumerWidget {
+  const SubscriptionsCard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Dynamic screen width.
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Render the widget.
+    return WideCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Subscription',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              gapH6,
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Subscriptions card.
+class APIKeysCard extends ConsumerWidget {
+  const APIKeysCard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Dynamic screen width.
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Render the widget.
+    return WideCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'API Keys',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              gapH6,
             ],
           ),
         ],
