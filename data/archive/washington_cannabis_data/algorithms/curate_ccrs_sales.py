@@ -20,6 +20,7 @@ Data Source:
 """
 # Standard imports:
 from datetime import datetime
+import gc
 import os
 from typing import  Optional
 
@@ -180,9 +181,9 @@ if __name__ == '__main__':
     base = 'D:\\data\\washington\\'
     data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
     stats_dir = f'{base}\\ccrs-stats\\'
-    first_file = 1
-    last_file = 39
-    reverse = True
+    first_file = 0
+    last_file = 31
+    reverse = False
 
     print('Curating sales...')
     start = datetime.now()
@@ -204,11 +205,15 @@ if __name__ == '__main__':
     item_types = {k: fields[k] for k in fields if k not in date_fields}
     item_types['IsDeleted'] = 'string'
 
-    # Iterate over all sales items files to calculate stats.
-    daily_licensee_sales = {}
+    # Get all datafiles.
     inventory_dir = os.path.join(stats_dir, 'inventory')
     inventory_files = sorted_nicely(os.listdir(inventory_dir))
     sales_items_files = get_datafiles(data_dir, 'SalesDetail_')
+    lab_results_dir = os.path.join(stats_dir, 'lab_results')
+    results_file = os.path.join(lab_results_dir, 'inventory_lab_results_0.xlsx')
+
+    # Iterate over all sales items files to calculate stats.
+    daily_licensee_sales = {}
     if last_file: sales_items_files = sales_items_files[:last_file]
     if reverse:
         sales_items_files.reverse()
@@ -264,26 +269,68 @@ if __name__ == '__main__':
 
             # Read inventory data file.
             try:
-                data = pd.read_excel(os.path.join(inventory_dir, datafile))
+                inventory_data = pd.read_excel(os.path.join(inventory_dir, datafile))
             except:
                 continue
 
             # Remove inventory item duplicates.
             # FIXME: Why are there duplicates?
-            data['inventory_id'] = data['inventory_id'].astype(str)
-            data.drop_duplicates(subset='inventory_id', keep='first', inplace=True)
+            inventory_data['inventory_id'] = inventory_data['inventory_id'].astype(str)
+            inventory_data.drop_duplicates(subset='inventory_id', keep='first', inplace=True)
             
             # Merge inventory data with sales data.
             items = rmerge(
                 items,
-                data,
+                inventory_data,
                 on='inventory_id',
                 how='left',
                 validate='m:1',
             )
 
-            # FIXME: Lab results are missing!
-
+        # Augment with curated lab results.
+        # FIXME: This may be overwriting data points.
+        print('Merging lab result data...')
+        lab_results_columns = {
+            'lab_id': str,
+            'created_by': str,
+            'created_date': str,
+            'updated_by': str,
+            'updated_date': str,
+            'delta_9_thc': str,
+            'thca': str,
+            'total_thc': str,
+            'cbd': str,
+            'cbda': str,
+            'total_cbd': str,
+            'moisture_content': str,
+            'water_activity': str,
+            'status': str,
+            'results': str,
+            'pesticides': str,
+            'residual_solvents': str,
+            'heavy_metals': str,
+        }
+        lab_results = pd.read_excel(
+            results_file,
+            usecols=list(lab_results_columns.keys()),
+            dtype=lab_results_columns,
+        )
+        lab_results.rename(columns={
+            'created_by': 'lab_result_created_by',
+            'created_date': 'lab_result_created_date',
+            'updated_by': 'lab_result_updated_by',
+            'updated_date': 'lab_result_updated_date',
+        }, inplace=True)
+        # TODO: Convert certain values to numeric?
+        items = rmerge(
+            items,
+            lab_results,
+            on='inventory_id',
+            how='left',
+            validate='m:1',
+        )
+        del lab_results
+        gc.collect()
 
         # At this stage, sales by licensee by day can be incremented.
         print('Updating sales statistics...')
@@ -339,6 +386,6 @@ if __name__ == '__main__':
     # Aggregate monthly sales items.
     aggregate_monthly_sales(
         data_dir=f'{base}\\ccrs-stats\\sales',
-        start=pd.to_datetime('2023-02-01'),
+        start=pd.to_datetime('2023-01-01'),
         end=pd.to_datetime('2023-03-01'),
     )
