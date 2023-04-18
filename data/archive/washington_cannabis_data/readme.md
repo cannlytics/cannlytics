@@ -5,18 +5,18 @@ language_creators:
   - expert-generated
 license:
   - cc-by-4.0
-pretty_name: cannabis_tests
+pretty_name: cannabis_sales
 size_categories:
-  - 1K<n<10K
+  - 10K<n<100K
 source_datasets:
   - original
 tags:
   - cannabis
+  - sales
   - washington
 ---
 
-# Washington Cannabis Data
-
+# Cannabis Sales
 
 ## Table of Contents
 - [Table of Contents](#table-of-contents)
@@ -44,48 +44,45 @@ tags:
 ## Dataset Description
 
 - **Homepage:** <https://github.com/cannlytics/cannlytics>
-- **Repository:** <https://huggingface.co/datasets/cannlytics/cannabis_tests>
+- **Repository:** <https://huggingface.co/datasets/cannlytics/cannabis_sales>
 - **Point of Contact:** <dev@cannlytics.com>
 
 ### Dataset Summary
 
-This dataset is a collection of public cannabis lab test results parsed by [`CoADoc`](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas), a certificate of analysis (COA) parsing tool.
+This dataset is a collection of Washington State cannabis traceability data that is in the public domain.
 
 ## Dataset Structure
 
-The dataset is partitioned into the various sources of lab results.
+The dataset is partitioned as follows.
 
-| Subset | Source | Observations |
+| Subset | Description | Number of Observations |
 |--------|--------|--------------|
-| `rawgarden` | Raw Gardens | 2,667 |
-| `mcrlabs` | MCR Labs | Coming soon! |
-| `psilabs` | PSI Labs | Coming soon! |
-| `sclabs` | SC Labs | Coming soon! |
-| `washington` | Washington State | Coming soon! |
+| `washington-2023-01` | Cannabis sales items in Washington State in January of 2023. | 81,768 |
 
 ### Data Instances
 
-You can load the `details` for each of the dataset files. For example:
+You can load the `data` for each of the dataset files. For example:
 
 ```py
 from datasets import load_dataset
 
-# Download Raw Garden lab result details.
-dataset = load_dataset('cannlytics/cannabis_tests', 'rawgarden')
-details = dataset['details']
-assert len(details) > 0
-print('Downloaded %i observations.' % len(details))
+# Download sales data for January 2023.
+dataset = load_dataset('cannlytics/cannabis_sales', 'washington-2023-01')
+data = dataset['data']
+assert len(data) > 0
+print('Downloaded %i observations.' % len(data))
 ```
 
-> Note: Configurations for `results` and `values` are planned. For now, you can create these data with `CoADoc().save(details, out_file)`.
+> Note: Data is requested through [a public records](https://lcb.wa.gov/records/make-public-records-request) request on the 21st of each month. Data is typically through the first week of the month. Data processing can take up to 1 week. Therefore, the latest month's data is likely incomplete until the end of the following month and data processing has occurred.
 
 ### Data Fields
 
-Below is a non-exhaustive list of fields, used to standardize the various data that are encountered, that you may expect encounter in the parsed COA data.
+Below are the standardized sales items fields:
 
 | Field | Example| Description |
 |-------|-----|-------------|
-| `analyses` | ["cannabinoids"] | A list of analyses performed on a given sample. |
+| `strain_name` | "Blue Rhino" | A strain name, if specified. |
+<!-- | `analyses` | ["cannabinoids"] | A list of analyses performed on a given sample. |
 | `{analysis}_method` | "HPLC" | The method used for each analysis. |
 | `{analysis}_status` | "pass" | The pass, fail, or N/A status for pass / fail analyses.   |
 | `coa_urls` | [{"url": "", "filename": ""}] | A list of certificate of analysis (CoA) URLs. |
@@ -127,80 +124,41 @@ Below is a non-exhaustive list of fields, used to standardize the various data t
 | `total_terpenes` | 0.42 | The sum of all terpenes measured. |
 | `results_hash` | "{sha256-hash}" | An HMAC of the sample's `results` JSON signed with Cannlytics' public key, `"cannlytics.eth"`. |
 | `sample_id` | "{sha256-hash}" | A generated ID to uniquely identify the `producer`, `product_name`, and `results`. |
-| `sample_hash` | "{sha256-hash}" | An HMAC of the entire sample JSON signed with Cannlytics' public key, `"cannlytics.eth"`. |
-<!-- | `strain_name` | "Blue Rhino" | A strain name, if specified. Otherwise, can be attempted to be parsed from the `product_name`. | -->
-
-Each result can contain the following fields.
-
-| Field | Example| Description |
-|-------|--------|-------------|
-| `analysis` | "pesticides" | The analysis used to obtain the result. |
-| `key` | "pyrethrins" | A standardized key for the result analyte. |
-| `name` | "Pyrethrins" | The lab's internal name for the result analyte |
-| `value` | 0.42 | The value of the result. |
-| `mg_g` | 0.00000042 | The value of the result in milligrams per gram. |
-| `units` | "ug/g" | The units for the result `value`, `limit`, `lod`, and `loq`. |
-| `limit` | 0.5 | A pass / fail threshold for contaminant screening analyses. |
-| `lod` | 0.01 | The limit of detection for the result analyte. Values below the `lod` are typically reported as `ND`. |
-| `loq` | 0.1 | The limit of quantification for the result analyte. Values above the `lod` but below the `loq` are typically reported as `<LOQ`. |
-| `status` | "pass" | The pass / fail status for contaminant screening analyses. |
+| `sample_hash` | "{sha256-hash}" | An HMAC of the entire sample JSON signed with Cannlytics' public key, `"cannlytics.eth"`. | -->
 
 ### Data Splits
 
-The data is split into `details`, `results`, and `values` data. Configurations for `results` and `values` are planned. For now, you can create these data with:
-
-```py
-from cannlytics.data.coas import CoADoc
-from datasets import load_dataset
-import pandas as pd
-
-# Download Raw Garden lab result details.
-repo = 'cannlytics/cannabis_tests'
-dataset = load_dataset(repo, 'rawgarden')
-details = dataset['details']
-
-# Save the data locally with "Details", "Results", and "Values" worksheets.
-outfile = 'details.xlsx'
-parser = CoADoc()
-parser.save(details.to_pandas(), outfile)
-
-# Read the values.
-values = pd.read_excel(outfile, sheet_name='Values')
-
-# Read the results.
-results = pd.read_excel(outfile, sheet_name='Results')
-```
-
-<!-- Training data is used for training your models. Validation data is used for evaluating your trained models, to help you determine a final model. Test data is used to evaluate your final model. -->
+The data is split by state and month, e.g. `washington-2023-01`. 
 
 ## Dataset Creation
 
 ### Curation Rationale
 
-Certificates of analysis (CoAs) are abundant for cannabis cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! CoADoc puts these vital data points in your hands by parsing PDFs and URLs, finding all the data, standardizing the data, and cleanly returning the data to you.
+Cannabis sales data is of interest to many parties and having a public repository of cannabis sales data could help data scientist in their endeavors.
 
 ### Source Data
 
 | Data Source | URL |
 |-------------|-----|
-| WSLCB PRR 2023-03-07 | <https://lcb.app.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml> |
+| WSLCB PRR 2023-03-06 | <https://lcb.app.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml> |
+| WSLCB PRR 2023-01-27 | <https://lcb.box.com/s/wzfoqysl4v9aqljwc0pi0g5ea6bch759> |
 
 #### Data Collection and Normalization
 
 You can recreate the dataset using the open source algorithms in the repository. First clone the repository:
 
 ```
-git clone https://huggingface.co/datasets/cannlytics/cannabis_tests
+git clone https://huggingface.co/datasets/cannlytics/cannabis_sales
 ```
 
-You can then install the algorithm Python (3.9+) requirements:
+You can then install the requirements:
 
 ```
-cd cannabis_tests
+cd cannabis_sales
 pip install -r requirements.txt
 ```
 
-Then you can run all of the data-collection algorithms:
+Then you can run all of the data collection algorithms:
 
 ```
 python algorithms/main.py
@@ -209,14 +167,14 @@ python algorithms/main.py
 Or you can run each algorithm individually. For example:
 
 ```
-python algorithms/get_results_mcrlabs.py
+python algorithms/washington_sales.py
 ```
 
 In the `algorithms` directory, you can find the data collection scripts described in the table below.
 
-| Algorithm |  Organization | Description | 
+| Algorithm |  State | Description | 
 |-----------|---------------|-------------|
-| `get_results_mcrlabs.py` | MCR Labs | Get lab results published by MCR Labs. |
+| `washington_sales.py` | WA | Curate Washington State cannabis sales items. |
 
 <!-- | Tool | Description |
 |------|-------------|
@@ -281,8 +239,3 @@ Please cite the following if you use the code examples in your research:
 ### Contributions
 
 Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), [@keeganskeate](https://github.com/keeganskeate), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.
-
-<!-- ## Archive
-
-- [CCRS PRR 2023-03-06](https://lcb.app.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml)
-- [CCRS PRR 2023-01-27](https://lcb.box.com/s/wzfoqysl4v9aqljwc0pi0g5ea6bch759) -->

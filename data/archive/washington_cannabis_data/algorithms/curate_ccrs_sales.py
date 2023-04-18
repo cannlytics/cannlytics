@@ -25,15 +25,49 @@ from typing import  Optional
 
 # External imports:
 from cannlytics.data.ccrs import (
+    CCRS_DATASETS,
     get_datafiles,
     merge_datasets,
     standardize_dataset,
     unzip_datafiles,
 )
-from cannlytics.data.ccrs.ccrs import anonymize
-from cannlytics.data.ccrs.constants import CCRS_DATASETS
-from cannlytics.utils import camel_to_snake, rmerge, sorted_nicely
+from cannlytics.utils import rmerge, sorted_nicely
 import pandas as pd
+
+
+def aggregate_monthly_sales(
+        data_dir: str,
+        start: Optional[datetime] = None,
+        end: Optional[datetime] = None,
+    ) -> None:
+    """Aggregate sales items by month."""
+
+    # Determine the month range.
+    months = []
+    count = (end.year - start.year) * 12 + (end.month - start.month) + 1
+    for i in range(count):
+        year = start.year + (start.month + i - 1) // 12
+        month = (start.month + i - 1) % 12 + 1
+        iso_month = f'{year}-{month:02d}'
+        months.append(iso_month)
+
+    # Iterate over months.
+    for month in months:
+
+        # Read all sales items for the month.
+        month_data = []
+        for root, _, files in os.walk(data_dir):
+            for file in files:
+                if file.endswith(f'{month}.xlsx'):
+                    file_path = os.path.join(root, file)
+                    month_data.append(pd.read_excel(file_path))
+
+        # Save the aggregated sales items for the month.
+        month_data = pd.concat(month_data)
+        outfile = os.path.join(data_dir, f'sales-items-{month}.xlsx')
+        month_data.to_excel(outfile, index=False)
+
+        # TODO: Save statistics for the aggregated data.
 
 
 def calc_daily_sales(
@@ -146,9 +180,9 @@ if __name__ == '__main__':
     base = 'D:\\data\\washington\\'
     data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
     stats_dir = f'{base}\\ccrs-stats\\'
-    first_file = 3
-    last_file = None
-    reverse = False
+    first_file = 1
+    last_file = 39
+    reverse = True
 
     print('Curating sales...')
     start = datetime.now()
@@ -158,7 +192,7 @@ if __name__ == '__main__':
 
     # Create stats directory if it doesn't already exist.
     licensees_dir = os.path.join(stats_dir, 'licensee_stats')
-    sales_dir = os.path.join(stats_dir, 'sales')
+    sales_dir = os.path.join(stats_dir, 'sales_stats')
     if not os.path.exists(licensees_dir): os.makedirs(licensees_dir)
     if not os.path.exists(stats_dir): os.makedirs(sales_dir)
 
@@ -203,11 +237,14 @@ if __name__ == '__main__':
         # that the headers are read. Currently reads all sale headers from
         # current to earliest then reads earliest to current for the
         # 2nd half to try to reduce unnecessary reads.
-        if i < len(sales_items_files) / 2:
-            sale_headers_files = get_datafiles(data_dir, 'SaleHeader_')
-        else:
-            sale_headers_files = get_datafiles(data_dir, 'SaleHeader_', desc=False)
         print('Merging sale header data...')
+        if i < len(sales_items_files) / 2 and reverse:
+            desc = False
+        elif i < len(sales_items_files) / 2 or reverse:
+            desc = True
+        else:
+            desc = False
+        sale_headers_files = get_datafiles(data_dir, 'SaleHeader_', desc=desc)
         items = merge_datasets(
             items,
             sale_headers_files,
@@ -245,6 +282,9 @@ if __name__ == '__main__':
                 validate='m:1',
             )
 
+            # FIXME: Lab results are missing!
+
+
         # At this stage, sales by licensee by day can be incremented.
         print('Updating sales statistics...')
         daily_licensee_sales = calc_daily_sales(items, daily_licensee_sales)
@@ -257,9 +297,6 @@ if __name__ == '__main__':
             licensees_dir,
             subset='sale_detail_id',
             verbose=False,
-            # FIXME: Pass item date columns and types.
-            # parse_dates=list(set(date_fields + supp_date_fields)),
-            # dtype={**supp_types, **item_types},
         )
         midpoint_end = datetime.now()
         print('Curated sales file in:', midpoint_end - midpoint_start)
@@ -277,7 +314,7 @@ if __name__ == '__main__':
     # Save the statistics by month.
     save_stats_by_month(stats, sales_dir, 'sales-by-licensee')
 
-    # Future work: Calculate and save aggregate statistics.
+    # TODO: Calculate and save aggregate statistics.
 
     # Finish curating sales.
     end = datetime.now()
@@ -286,12 +323,11 @@ if __name__ == '__main__':
 
 # === Test ===
 if __name__ == '__main__':
-    pass
 
     # Specify where your data lives.
-    # base = 'D:\\data\\washington\\'
-    # data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
-    # stats_dir = f'{base}\\ccrs-stats\\'
+    base = 'D:\\data\\washington\\'
+    data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
+    stats_dir = f'{base}\\ccrs-stats\\'
     # curate_ccrs_sales(
     #     data_dir,
     #     stats_dir,
@@ -299,3 +335,10 @@ if __name__ == '__main__':
     #     first_file=0,
     #     last_file=1,
     # )
+
+    # Aggregate monthly sales items.
+    aggregate_monthly_sales(
+        data_dir=f'{base}\\ccrs-stats\\sales',
+        start=pd.to_datetime('2023-02-01'),
+        end=pd.to_datetime('2023-03-01'),
+    )

@@ -362,30 +362,3 @@ if __name__ == '__main__':
     data = dataset['data']
     assert len(data) > 0
     print('Downloaded %i observations.' % len(data))
-
-
-# FIXME: Standardize collection.
-
-# # Internal imports:
-# from curate_ccrs_lab_results import curate_ccrs_lab_results
-# from curate_ccrs_inventory import curate_ccrs_inventory
-# from curate_ccrs_sales import curate_ccrs_sales
-# from curate_ccrs_strains import curate_ccrs_strains
-
-
-# # === Test ===
-# if __name__ == '__main__':
-
-#     # Specify the date of the public records request.
-#     DATE = '3-6-23'
-
-#     # TODO: Unzip the initial zipped folder.
-
-#     # Specify where your data lives.
-#     base = 'D:\\data\\washington\\'
-#     DATA_DIR = f'{base}\\CCRS PRR ({DATE})\\CCRS PRR ({DATE})\\'
-#     STATS_DIR = f'{base}\\ccrs-stats\\'
-#     curate_ccrs_lab_results(DATA_DIR, STATS_DIR)
-#     curate_ccrs_inventory(DATA_DIR, STATS_DIR)
-#     curate_ccrs_sales(DATA_DIR, STATS_DIR)
-#     curate_ccrs_strains(DATA_DIR, STATS_DIR)

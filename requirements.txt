@@ -45,3 +45,12 @@ waitress==2.1.2
 Wand==0.6.11
 whitenoise==6.2.0
 zipcodes==1.2.0
+
+# AI
+# spacy
+# pymc3
+# lifelines
+# opencv-python
+# PySimpleGUI
+# # pyzmq
+# # traitlets

@@ -1,7 +1,15 @@
 # Cannlytics Data Archive
+
 | Tool | Description |
 |------|-------------|
 | `upload_licenses.py` | Get [cannabis license data from Hugging Face](https://huggingface.co/datasets/cannlytics/cannabis_licenses) and upload the data to Firestore. |
+
+<!-- TODO:
+
+  upload_results.py
+  upload_washington.py
+
+-->
 
 ## Licensees Data
 

@@ -1,5 +1,5 @@
 """
-Reported Effects and Aromas Prediction Model
+SkunkFx | Effects and Aromas Prediction Model
 Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
