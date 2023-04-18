@@ -145,6 +145,7 @@ def merge_products(items, product_files):
         on='ProductId',
         target='InventoryType',
         how='left',
+        # FIXME: This may not be right.
         validate='m:1',
         rename={
             'CreatedDate': 'product_created_at',
@@ -152,6 +153,8 @@ def merge_products(items, product_files):
             'UpdatedDate': 'product_updated_at',
             'ExternalIdentifier': 'product_external_id',
             'LicenseeId': 'producer_licensee_id',
+            'Name': 'product_name',
+            'Description': 'product_description',
         },
     )
 
