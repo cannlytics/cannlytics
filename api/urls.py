@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2021
-Updated: 1/22/2023
+Updated: 4/23/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API URLs to interface with cannabis data and analytics.
@@ -41,14 +41,8 @@ urlpatterns = [
     # Authentication API endpoints.
     path('auth', include([
         path('/create-key', auth.create_api_key),
-        path('/create-pin', auth.create_user_pin),
-        path('/create-signature', auth.create_signature),
         path('/delete-key', auth.delete_api_key),
-        path('/delete-pin', auth.delete_user_pin),
-        path('/delete-signature', auth.delete_signature),
         path('/get-keys', auth.get_api_key_hmacs),
-        path('/get-signature', auth.get_signature),
-        path('/verify-pin', auth.verify_user_pin),
     ])),
 
     # AI API endpoints.
@@ -116,9 +110,8 @@ urlpatterns = [
         path('/regulations', api.data.regulation_data),
         path('/regulations/<state>', api.data.regulation_data),
 
-        # State data API endpoints.
-        path('/states', api.data.state_data),
-        path('/states/<state>', api.data.state_data),
+        # Patent data.
+        path('/patents', api.stats.patent_stats),
 
     ])),
 
@@ -130,7 +123,6 @@ urlpatterns = [
         path('/effects/<strain>', api.stats.effects_stats),
         path('/personality', api.stats.personality_stats),
         path('/recommendations', api.stats.recommendation_stats),
-        path('/patents', api.stats.patent_stats),
         # TODO: Flower Art API endpoint.
     ])),
 

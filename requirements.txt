@@ -1,6 +1,8 @@
 # Python Requirements | Cannlytics
+# Authors: Keegan Skeate <https://github.com/keeganskeate>
 # Created 1/5/2021
-# Updated: 1/31/2023
+# Updated: 4/23/2023
+# License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 beautifulsoup4
 chromedriver-binary==106.0.5249.21.0

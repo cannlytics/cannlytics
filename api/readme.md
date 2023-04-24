@@ -1,6 +1,6 @@
 # <img height="32" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics API
 
-The Cannlytics API allows users to seamlessly integrate with all of the functionality that Cannlytics has to offer. The Cannlytics API endpoints are simply an interface to the logic implemented in the `cannlytics` module. The API endpoints handle authentication, error handling, and identifying the precise logic to perform.
+The Cannlytics API allows users to interface with cannabis data and statistics. Each API endpoints handle authentication, error handling, and identifying the precise logic to perform.
 
 - [Getting Started with the Cannlytics API](#getting-started)
 - [Data API Endpoints](#data-api-endpoints)
