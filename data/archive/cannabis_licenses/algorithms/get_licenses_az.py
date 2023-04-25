@@ -1,6 +1,6 @@
 """
 Cannabis Licenses | Get Arizona Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>

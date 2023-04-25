@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 10/7/2022
+Updated: 4/24/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -14,21 +14,25 @@ Description:
     Collect all cannabis license data from states with permitted adult-use:
 
         ✓ Alaska (Selenium)
-        ✓ Arizona (Selenium)
+        x Arizona (Selenium)
         ✓ California
         ✓ Colorado
         ✓ Connecticut
+        - Delaware
         ✓ Illinois
-        ✓ Maine
+        x Maine
+        - Maryland
         ✓ Massachusetts
-        ✓ Michigan (Selenium)
+        x Michigan (Selenium)
+        - Missouri
         ✓ Montana
-        ✓ Nevada
+        x Nevada
         ✓ New Jersey
+        - New York
         x New Mexico (Selenium) (FIXME)
         ✓ Oregon
-        ✓ Rhode Island
-        ✓ Vermont
+        x Rhode Island
+        x Vermont
         ✓ Washington
 """
 # Standard imports.
@@ -101,12 +105,14 @@ def main(data_dir, env_file):
         try:
             print(f'Getting license data for {state.upper()}.')
             data = entry_point(data_dir, env_file=env_file)
-            if not os.path.exists(f'{DATA_DIR}/{state}'): os.makedirs(f'{DATA_DIR}/{state}')
+            if not os.path.exists(f'{DATA_DIR}/{state}'):
+                os.makedirs(f'{DATA_DIR}/{state}')
             timestamp = datetime.now().isoformat()[:19].replace(':', '-')
             data.to_csv(f'{DATA_DIR}/{state}/licenses-{state}-{timestamp}.csv', index=False)
+            print(f'Curated {state.upper()} licenses.')
             licenses = pd.concat([licenses, data])
         except:
-            print(f'Failed to collect {state.upper()} licenses.')
+            print(f'Failed to aggregate {state.upper()} licenses.')
     
     # Save all of the retailers.
     timestamp = datetime.now().isoformat()[:19].replace(':', '-')

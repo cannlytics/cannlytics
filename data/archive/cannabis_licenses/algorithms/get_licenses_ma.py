@@ -1,12 +1,12 @@
 """
 Cannabis Licenses | Get Massachusetts Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 10/7/2022
+Updated: 4/23/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -36,47 +36,6 @@ STATE = 'MA'
 MASSACHUSETTS = {
     'licensing_authority_id': 'MACCC',
     'licensing_authority': 'Massachusetts Cannabis Control Commission',
-    'licenses': {
-        'columns': {
-            'license_number': 'license_number',
-            'business_name': 'business_legal_name',
-            'establishment_address_1': 'premise_street_address',
-            'establishment_address_2': 'premise_street_address_2',
-            'establishment_city': 'premise_city',
-            'establishment_zipcode': 'premise_zip_code',
-            'county': 'premise_county',
-            'license_type': 'license_type',
-            'application_status': 'license_status',
-            'lic_status': 'license_term',
-            'approved_license_type': 'license_designation',
-            'commence_operations_date': 'license_status_date',
-            'massachusetts_business': 'id',
-            'dba_name': 'business_dba_name',
-            'establishment_activities': 'activity',
-            'cccupdatedate': 'data_refreshed_date',
-            'establishment_state': 'premise_state',
-            'latitude': 'premise_latitude',
-            'longitude': 'premise_longitude',
-        },
-        'drop': [
-            'square_footage_establishment',
-            'cooperative_total_canopy',
-            'cooperative_cultivation_environment',
-            'establishment_cultivation_environment',
-            'abutters_count',
-            'is_abutters_notified',
-            'business_zipcode',
-            'dph_rmd_number',
-            'geocoded_county',
-            'geocoded_address',
-            'name_of_rmd',
-            'priority_applicant_type',
-            'rmd_priority_certification',
-            'dba_registration_city',
-            'county_lat',
-            'county_long',
-        ]
-    },
 }
 
 
@@ -91,9 +50,6 @@ def get_licenses_ma(
     licenses = ccc.get_licensees('approved')
 
     # Standardize the licenses data.
-    constants = MASSACHUSETTS['licenses']
-    licenses.drop(columns=constants['drop'], inplace=True)
-    licenses.rename(columns=constants['columns'], inplace=True)
     licenses = licenses.assign(
         licensing_authority_id=MASSACHUSETTS['licensing_authority_id'],
         licensing_authority=MASSACHUSETTS['licensing_authority'],
@@ -107,14 +63,6 @@ def get_licenses_ma(
         business_website=None,
         business_phone=None,
     )
-
-    # Append `premise_street_address_2` to `premise_street_address`.
-    cols = ['premise_street_address', 'premise_street_address_2']
-    licenses['premise_street_address'] = licenses[cols].apply(
-        lambda x : '{} {}'.format(x[0].strip(), x[1]).replace('nan', '').strip().replace('  ', ' '),
-        axis=1,
-    )
-    licenses.drop(columns=['premise_street_address_2'], inplace=True)
 
     # Optional: Look-up business websites for each license.
 

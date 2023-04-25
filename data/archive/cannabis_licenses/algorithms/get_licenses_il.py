@@ -1,12 +1,12 @@
 """
 Cannabis Licenses | Get Illinois Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 10/3/2022
+Updated: 4/24/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -43,7 +43,7 @@ ILLINOIS = {
     'licensing_authority_id': 'IDFPR',
     'licensing_authority': 'Illinois Department of Financial and Professional Regulation',
     'retailers': {
-        'url': 'https://www.idfpr.com/LicenseLookup/AdultUseDispensaries.pdf',
+        'url': 'https://idfpr.illinois.gov/content/dam/soi/en/web/idfpr/licenselookup/adultusedispensaries.pdf',
         'columns': [
             'business_legal_name',
             'business_dba_name',
@@ -53,6 +53,8 @@ ILLINOIS = {
             'license_number', 
         ],
     },
+    # Alt: https://idfpr.illinois.gov/content/dam/soi/en/web/idfpr/forms/auc/2022-10-11-conditional-licenses-list.pdf
+    # Medical: https://idfpr.illinois.gov/content/dam/soi/en/web/idfpr/forms/mc/listoflicenseddispensaries.pdf
 }
 
 
@@ -89,6 +91,7 @@ def get_licenses_il(
         table_data += table
         
     # Standardize the data.
+    # rows = [[x for x in row if x] for row in table_data]
     licensee_columns = ILLINOIS['retailers']['columns']
     retailers = pd.DataFrame(table_data, columns=licensee_columns)
     retailers = retailers.assign(
