@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/27/2022
-Updated: 10/7/2022
+Updated: 4/24/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -21,13 +21,13 @@ Data Source:
 """
 # Standard imports.
 from datetime import datetime
-from dotenv import dotenv_values
+# from dotenv import dotenv_values
 import os
 from time import sleep
 from typing import Optional
 
 # External imports.
-from cannlytics.data.gis import geocode_addresses
+# from cannlytics.data.gis import geocode_addresses
 import pandas as pd
 import zipcodes
 
@@ -38,15 +38,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-try:
-    import chromedriver_binary  # Adds chromedriver binary to path.
-except ImportError:
-    pass # Otherwise, ChromeDriver should be in your path.
+# try:
+#     import chromedriver_binary  # Adds chromedriver binary to path.
+# except ImportError:
+#     pass # Otherwise, ChromeDriver should be in your path.
 
 
 # Specify where your data lives.
 DATA_DIR = '../data/az'
-ENV_FILE = '../.env'
+ENV_FILE = '../../../../.env'
 
 # Specify state-specific constants.
 STATE = 'AZ'
@@ -74,21 +74,17 @@ def get_licenses_az(
     # Create directories if necessary.
     if not os.path.exists(data_dir): os.makedirs(data_dir)
 
-    # Initialize Selenium and specify options.
-    service = Service()
-    options = Options()
-    options.add_argument('--window-size=1920,1200')
-
-    # DEV: Run with the browser open.
-    # options.headless = False
-
-    # PRODUCTION: Run with the browser closed.
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--no-sandbox')
-
-    # Initiate a Selenium driver.
-    driver = webdriver.Chrome(options=options, service=service)
+    # Initialize Selenium.
+    try:
+        service = Service()
+        options = Options()
+        options.add_argument('--window-size=1920,1200')
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        driver = webdriver.Chrome(options=options, service=service)
+    except:
+        driver = webdriver.Edge()
 
     # Load the license page.
     driver.get(ARIZONA['licenses_url'])
@@ -275,10 +271,10 @@ def get_licenses_az(
     manufacturers['premise_county'] = manufacturers['premise_zip_code'].apply(county_from_zip)
 
     # Setup geocoding
-    config = dotenv_values(env_file)
-    api_key = config['GOOGLE_MAPS_API_KEY']
-    drop_cols = ['state', 'state_name', 'county', 'address', 'formatted_address']
-    gis_cols = {'latitude': 'premise_latitude', 'longitude': 'premise_longitude'}
+    # config = dotenv_values(env_file)
+    # api_key = config['GOOGLE_MAPS_API_KEY']
+    # drop_cols = ['state', 'state_name', 'county', 'address', 'formatted_address']
+    # gis_cols = {'latitude': 'premise_latitude', 'longitude': 'premise_longitude'}
 
     # # Geocode cultivators.
     # cultivators = geocode_addresses(cultivators, api_key=api_key, address_field='address')
@@ -330,4 +326,3 @@ if __name__ == '__main__':
     data_dir = args.get('d', args.get('data_dir'))
     env_file = args.get('env_file')
     data = get_licenses_az(data_dir, env_file=env_file)
-

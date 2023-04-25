@@ -25,7 +25,7 @@ from typing import Optional
 
 # Specify where your data lives.
 DATA_DIR = '../data/ny'
-ENV_FILE = '../.env'
+ENV_FILE = '../../../../.env'
 
 # Specify state-specific constants.
 STATE = 'NY'

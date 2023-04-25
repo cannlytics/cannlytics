@@ -45,7 +45,7 @@ except ImportError:
 
 # Specify where your data lives.
 DATA_DIR = '../data/nm'
-ENV_FILE = '../.env'
+ENV_FILE = '../../../../.env'
 
 # Specify state-specific constants.
 STATE = 'NM'

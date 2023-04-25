@@ -246,10 +246,13 @@ def parse_rawgarden_coas(
                     )
                 except Exception as e:
                     # Hot-fix: Remove temporary `magick-*` files.
-                    for i in os.listdir(temp_path):
-                        magick_path = os.path.join(temp_path, i)
-                        if os.path.isfile(magick_path) and i.startswith('magick-'):
-                            os.remove(magick_path)
+                    try:
+                        for i in os.listdir(temp_path):
+                            magick_path = os.path.join(temp_path, i)
+                            if os.path.isfile(magick_path) and i.startswith('magick-'):
+                                os.remove(magick_path)
+                    except FileNotFoundError:
+                        pass
                     unidentified.append({'coa_pdf': filename})
                     if verbose:
                         print('Error:', filename)
@@ -387,9 +390,9 @@ if __name__ == '__main__':
 
     # Create custom column order.
     column_order = ['sample_hash', 'results_hash']
-    column_order += list(parser.column_order)
-    index = column_order.index('product_type') + 1
-    column_order.insert(index, 'product_subtype')
+    # column_order += list(parser.column_order)
+    column_index = coa_df.columns.get_loc('product_type') + 1
+    column_order.insert(column_index, 'product_subtype')
 
     # Optional: Save the COA data to a workbook.
     parser = CoADoc()

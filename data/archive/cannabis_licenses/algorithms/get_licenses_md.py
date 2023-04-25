@@ -25,7 +25,7 @@ from typing import Optional
 
 # Specify where your data lives.
 DATA_DIR = '../data/md'
-ENV_FILE = '../.env'
+ENV_FILE = '../../../../.env'
 
 # Specify state-specific constants.
 STATE = 'MD'

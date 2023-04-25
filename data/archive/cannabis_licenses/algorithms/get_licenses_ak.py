@@ -1,12 +1,12 @@
 """
 Cannabis Licenses | Get Alaska Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 10/6/2022
+Updated: 4/24/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -35,16 +35,10 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-try:
-    import chromedriver_binary  # Adds chromedriver binary to path.
-except ImportError:
-    pass # Otherwise, ChromeDriver should be in your path.
-
 
 # Specify where your data lives.
 DATA_DIR = '../data/ak'
-ENV_FILE = '../.env'
+ENV_FILE = '../../../../.env'
 
 # Specify state-specific constants.
 STATE = 'AK'
@@ -65,42 +59,20 @@ ALASKA = {
 }
 
 
-def get_licenses_ak(
-        data_dir: Optional[str] = None,
-        env_file: Optional[str] = '.env',
-    ):
-    """Get Alaska cannabis license data."""
-
-    # Initialize Selenium and specify options.
-    service = Service()
-    options = Options()
-    options.add_argument('--window-size=1920,1200')
-
-    # DEV: Run with the browser open.
-    # options.headless = False
-
-    # PRODUCTION: Run with the browser closed.
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--no-sandbox')
-
-    # Initiate a Selenium driver.
-    driver = webdriver.Chrome(options=options, service=service)
-
-    # Load the license page.
-    driver.get(ALASKA['licenses_url'])
-
-    # Get the license type select.
+def get_license_types(driver):
+    """Get all license types from the select on the page."""
     license_types = []
     options = driver.find_elements(by=By.TAG_NAME, value='option')
     for option in options:
         text = option.text
         if text:
             license_types.append(text)
+    return license_types
 
-    # Iterate over all of the license types.
+
+def extract_table_data(driver, columns, license_types):
+    """Extract data from the table on the page."""
     data = []
-    columns = list(ALASKA['licenses']['columns'].values())
     for license_type in license_types:
 
         # Set the text into the select.
@@ -124,10 +96,124 @@ def get_licenses_ak(
                 obs[column] = cell.text.replace('\n', ', ')
             data.append(obs)
 
-    # End the browser session.
-    service.stop()
+    return data
 
-    # Standardize the license data.
+
+def search_for_license_addresses(
+        licenses: pd.DataFrame,
+        api_key: str,
+        fields: Optional[list] = None,
+    ) -> pd.DataFrame:
+    """
+    Search for address for each retail license.
+    Args:
+        licenses (pd.DataFrame): A DataFrame containing retail license information, including business names and addresses.
+        api_key (str): A Google Places API key.
+        fields (list, optional): A list of fields to be returned by the API. Defaults to None.
+    Returns:
+        pd.DataFrame: A DataFrame containing the original license information, as well as corresponding address, phone, and website data.
+    """
+
+    # Initialize variables.
+    queries = {}
+    if fields is None:
+        fields = [
+            'formatted_address',
+            'formatted_phone_number',
+            'geometry/location/lat',
+            'geometry/location/lng',
+            'website',
+        ]
+
+    # Reset and assign new columns to the licenses DataFrame.
+    licenses = licenses.reset_index(drop=True)
+    licenses = licenses.assign(
+        premise_street_address=None,
+        premise_county=None,
+        premise_latitude=None,
+        premise_longitude=None,
+        business_phone=None,
+        business_website=None,
+    )
+
+    # Iterate over each license, search for the address, and record the results in the DataFrame.
+    for index, row in licenses.iterrows():
+        query = ', '.join([row['business_dba_name'], row['address']])
+        gis_data = queries.get(query)
+
+        # Query Google Place API, if necessary.
+        if gis_data is None:
+            try:
+                gis_data = search_for_address(query, api_key=api_key, fields=fields)
+            except:
+                gis_data = {}
+            queries[query] = gis_data
+
+        # Record the query results.
+        licenses.iat[index, licenses.columns.get_loc('premise_street_address')] = gis_data.get('street')
+        licenses.iat[index, licenses.columns.get_loc('premise_county')] = gis_data.get('county')
+        licenses.iat[index, licenses.columns.get_loc('premise_latitude')] = gis_data.get('latitude')
+        licenses.iat[index, licenses.columns.get_loc('premise_longitude')] = gis_data.get('longitude')
+        licenses.iat[index, licenses.columns.get_loc('business_phone')] = gis_data.get('formatted_phone_number')
+        licenses.iat[index, licenses.columns.get_loc('business_website')] = gis_data.get('website')
+
+    return licenses
+
+
+def save_license_data(
+        licenses: pd.DataFrame,
+        state: str,
+        data_dir: str = None,
+    ) -> None:
+    """
+    Save license data to CSV files.
+    Args:
+        licenses (pd.DataFrame): A DataFrame containing license information.
+        state (str): The two-letter abbreviation for the state associated with the licenses.
+        data_dir (str, optional): The directory in which to save the data. If None, the data will not be saved. Defaults to None.
+    """
+    # Set the timestamp and create the data directory, if necessary.
+    if data_dir is not None:
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
+        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+
+        # Filter for retail licenses and save both the full DataFrame and the filtered DataFrame.
+        retailers = licenses.loc[licenses['license_type'] == 'Retail Marijuana Store']
+        licenses.to_csv(f'{data_dir}/licenses-{state.lower()}-{timestamp}.csv', index=False)
+        retailers.to_csv(f'{data_dir}/retailers-{state.lower()}-{timestamp}.csv', index=False)
+
+
+def get_licenses_ak(
+        data_dir: Optional[str] = None,
+        env_file: Optional[str] = '.env',
+    ):
+    """Get Alaska cannabis license data."""
+
+    # Load the environment variables.
+    config = dotenv_values(env_file)
+    api_key = config['GOOGLE_MAPS_API_KEY']
+
+    # Initiate a Selenium driver.
+    # FIXME: ChromeDriver is not working on Windows.
+    try:
+        options = Options()
+        options.add_argument('--headless')
+        driver = webdriver.Chrome(options=options)
+    except:
+        driver = webdriver.Edge()
+
+    # Load the licenses page.
+    driver.get(ALASKA['licenses_url'])
+
+    # Get the license type select.
+    license_types = get_license_types(driver)
+
+    # Get all licenses by type.
+    columns = list(ALASKA['licenses']['columns'].values())
+    data = extract_table_data(driver, columns, license_types)
+
+    # Standardize the licenses.
     licenses = pd.DataFrame(data)
     licenses = licenses.assign(
         business_legal_name=licenses['business_dba_name'],
@@ -163,11 +249,6 @@ def get_licenses_ak(
     )
 
     # Search for address for each retail license.
-    # Only search for a query once, then re-use the response.
-    # Note: There is probably a much, much more efficient way to do this!!!
-    config = dotenv_values(env_file)
-    api_key = config['GOOGLE_MAPS_API_KEY']
-    queries = {}
     fields = [
         'formatted_address',
         'formatted_phone_number',
@@ -175,36 +256,9 @@ def get_licenses_ak(
         'geometry/location/lng',
         'website',
     ]
-    licenses = licenses.reset_index(drop=True)
-    licenses = licenses.assign(
-        premise_street_address=None,
-        premise_county=None,
-        premise_latitude=None,
-        premise_longitude=None,
-        business_phone=None,
-        business_website=None,
-    )
-    for index, row in licenses.iterrows():
+    licenses = search_for_license_addresses(licenses, api_key, fields)
 
-        # Query Google Place API, if necessary.
-        query = ', '.join([row['business_dba_name'], row['address']])
-        gis_data = queries.get(query)
-        if gis_data is None:
-            try:
-                gis_data = search_for_address(query, api_key=api_key, fields=fields)
-            except:
-                gis_data = {}
-            queries[query] = gis_data
-
-        # Record the query.
-        licenses.iat[index, licenses.columns.get_loc('premise_street_address')] = gis_data.get('street')
-        licenses.iat[index, licenses.columns.get_loc('premise_county')] = gis_data.get('county')
-        licenses.iat[index, licenses.columns.get_loc('premise_latitude')] = gis_data.get('latitude')
-        licenses.iat[index, licenses.columns.get_loc('premise_longitude')] = gis_data.get('longitude')
-        licenses.iat[index, licenses.columns.get_loc('business_phone')] = gis_data.get('formatted_phone_number')
-        licenses.iat[index, licenses.columns.get_loc('business_website')] = gis_data.get('website')
-
-    # Clean-up after GIS.
+    # Clean-up after adding GIS data.
     licenses.drop(columns=['address'], inplace=True)
 
     # Optional: Search for business website for email and a photo.
@@ -215,12 +269,7 @@ def get_licenses_ak(
     licenses['data_refreshed_date'] = datetime.now().isoformat()
 
     # Save and return the data.
-    if data_dir is not None:
-        if not os.path.exists(data_dir): os.makedirs(data_dir)
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-        retailers = licenses.loc[licenses['license_type'] == 'Retail Marijuana Store']
-        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
-        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
+    save_license_data(licenses, STATE, data_dir)
     return licenses
 
 

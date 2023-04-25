@@ -30,16 +30,19 @@ Requirements
     Cloud: <https://stackoverflow.com/questions/43036268/do-i-have-access-to-graphicsmagicks-or-imagemagicks-in-a-google-cloud-function>
 
 """
-# Standard imports.
+# Standard imports:
 import math
-import os
-from datetime import datetime
 import re
 from time import sleep
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
-# External imports.
+# External imports:
 from bs4 import BeautifulSoup
+import pandas as pd
+from pydantic import BaseModel
+import requests
+
+# Internal imports:
 from cannlytics.firebase.firebase import (
     initialize_firebase,
     update_document,
@@ -48,91 +51,33 @@ from cannlytics.firebase.firebase import (
 from cannlytics.utils.utils import (
     camel_to_snake,
     clean_dictionary,
-    kebab_case,
-    snake_case,
-    to_excel_with_style,
 )
-import pandas as pd
-import requests
 
 
-def curate_lab_results(
-        data_dir,
-        compound_folder='Terpene and Cannabinoid data',
-        cannabinoid_file='rawDATACana',
-        terpene_file='rawDATATerp',
-        max_cannabinoids=35,
-        max_terpenes=8,
-    ):
-    """Curate lab results for effects prediction model."""
+class CultivarResult(BaseModel):
+    """A data class representing a cannabis strain."""
+    key: str
+    avg: float
+    min: float
+    max: float
+    median: float
+    std: float
 
-    # Decarboxylation rate. Source: <https://www.conflabs.com/why-0-877/>
-    decarb = 0.877
 
-    # Read terpenes.
-    terpenes = None
-    if terpene_file:
-        file_path = os.path.join(data_dir, compound_folder, terpene_file)
-        terpenes = pd.read_csv(file_path, index_col=0)
-        terpenes.columns = [snake_case(x).strip('x_') for x in terpenes.columns]
-        terpene_names = list(terpenes.columns[3:])
-        compounds = terpenes
+class Cultivar(BaseModel):
+    """A data class representing a cannabis strain."""
+    cultivar: str
+    strain_name: str
+    first_produced_at: str
+    first_produced_by: str
+    first_produced_state: str
+    number_of_tests: int
+    results: List[CultivarResult]
 
-    # Read cannabinoids.
-    cannabinoids = None
-    if cannabinoid_file:
-        file_path = os.path.join(data_dir, compound_folder, cannabinoid_file)
-        cannabinoids = pd.read_csv(file_path, index_col=0)
-        cannabinoids.columns = [snake_case(x).strip('x_') for x in cannabinoids.columns]
-        cannabinoid_names = list(cannabinoids.columns[3:])
-        compounds = cannabinoids
 
-    # Merge terpenes and cannabinoids.
-    if terpene_file and cannabinoid_file:
-        compounds = pd.merge(
-            left=cannabinoids,
-            right=terpenes,
-            left_on='file',
-            right_on='file',
-            how='left',
-            suffixes=['', '_terpene']
-        )
-
-    # Rename any oddly named columns.
-    rename = {
-        'cb_da': 'cbda',
-        'cb_ga': 'cbda',
-        'delta_9_th_ca': 'delta_9_thca',
-        'th_ca': 'thca',
-    }
-    compounds.rename(columns=rename, inplace=True)
-
-    # Combine `delta_9_thca` and `thca`.
-    # FIXME: Ensure that this is combining the two fields correctly.
-    compounds['delta_9_thca'].fillna(compounds['thca'], inplace=True)
-    compounds.drop(columns=['thca'], inplace=True)
-    cannabinoid_names.remove('thca')
-
-    # FIXME: Combine any additional compounds.
-    # compounds['delta_9_thca'].fillna(compounds['thca'], inplace=True)
-    # compounds.drop(columns=['thca'], inplace=True)
-    # cannabinoid_names.remove('thca')
-
-    # FIXME: Calculate totals.
-    compounds['total_terpenes'] = compounds[terpene_names].sum(axis=1).round(2)
-    compounds['total_cannabinoids'] = compounds[cannabinoid_names].sum(axis=1).round(2)
-    compounds['total_thc'] = (compounds['delta_9_thc'] + compounds['delta_9_thca'].mul(decarb)).round(2)
-    compounds['total_cbd'] = (compounds['cbd'] + compounds['cbda'].mul(decarb)).round(2)
-
-    # Exclude outliers.
-    compounds = compounds.loc[
-        (compounds['total_cannabinoids'] < max_cannabinoids) &
-        (compounds['total_terpenes'] < max_terpenes)
-    ]
-
-    # Return compounds with nulls as 0.
-    compounds = compounds.fillna(0)
-    return compounds
+class CultivarIdentifier():
+    """Cultivar identifier."""
+    pass
 
 
 def search_patents(

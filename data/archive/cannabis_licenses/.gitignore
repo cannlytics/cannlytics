@@ -15,3 +15,6 @@
 
 # Ignore PyCache
 *__pycache__
+
+# Ignore curated data.
+data/*

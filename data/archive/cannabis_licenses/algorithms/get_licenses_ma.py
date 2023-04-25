@@ -25,7 +25,7 @@ import os
 from typing import Optional
 
 # External imports.
-from cannlytics.data.opendata import OpenData
+from cannlytics.data import OpenData
 
 
 # Specify where your data lives.

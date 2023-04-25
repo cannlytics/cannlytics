@@ -62,6 +62,7 @@
     }
   },
   "cSpell.words": [
+    "AAMCO",
     "abamectin",
     "Abamectin",
     "abcdefghijklmnopqrstuvwxyz",
@@ -531,6 +532,7 @@
     "pubspec",
     "Pulegone",
     "pycon",
+    "pydantic",
     "pygments",
     "pylint",
     "pymdownx",

@@ -34,7 +34,7 @@ import requests
 
 # Specify where your data lives.
 DATA_DIR = '../data/me'
-ENV_FILE = '../.env'
+ENV_FILE = '../../../../.env'
 
 # Specify state-specific constants.
 STATE = 'ME'

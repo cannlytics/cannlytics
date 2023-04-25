@@ -46,7 +46,7 @@ except ImportError:
 
 # Specify where your data lives.
 DATA_DIR = '../data/mi'
-ENV_FILE = '../.env'
+ENV_FILE = '../../../../.env'
 
 # Specify state-specific constants.
 STATE = 'MI'
@@ -84,21 +84,17 @@ def get_licenses_mi(
     ):
     """Get Michigan cannabis license data."""
 
-    # Initialize Selenium and specify options.
-    service = Service()
-    options = Options()
-    options.add_argument('--window-size=1920,1200')
-
-    # DEV: Run with the browser open.
-    options.headless = False
-
-    # PRODUCTION: Run with the browser closed.
-    # options.add_argument('--headless')
-    # options.add_argument('--disable-gpu')
-    # options.add_argument('--no-sandbox')
-
-    # Initiate a Selenium driver.
-    driver = webdriver.Chrome(options=options, service=service)
+    # Initialize Selenium.
+    try:
+        service = Service()
+        options = Options()
+        options.add_argument('--window-size=1920,1200')
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        driver = webdriver.Chrome(options=options, service=service)
+    except:
+        driver = webdriver.Edge()
 
     # Load the license page.
     url = MICHIGAN['licenses_url']

@@ -42,23 +42,50 @@ import pandas as pd
 
 # Specify state-specific algorithms.
 ALGORITHMS = {
-    'ak': 'get_licenses_ak',
+    # 'ak': 'get_licenses_ak',
+    # FIXME:
     'az': 'get_licenses_az',
-    'ca': 'get_licenses_ca',
-    'co': 'get_licenses_co',
+    # 'ca': 'get_licenses_ca',
+    # 'co': 'get_licenses_co',
+    # FIXME:
     'ct': 'get_licenses_ct',
     'il': 'get_licenses_il',
     'ma': 'get_licenses_ma',
     'me': 'get_licenses_me',
     'mi': 'get_licenses_mi',
     'mt': 'get_licenses_mt',
-    'nj': 'get_licenses_nj',
-    # 'nm': 'get_licenses_nm',
+    # 'nj': 'get_licenses_nj',
+    # FIXME:
+    'nm': 'get_licenses_nm',
     'nv': 'get_licenses_nv',
     'or': 'get_licenses_or',
     'ri': 'get_licenses_ri',
     'vt': 'get_licenses_vt',
     'wa': 'get_licenses_wa',
+    # TODO:
+    # 'ny': 'get_licenses_ny',
+    # 'md': 'get_licenses_md',
+    # 'mo': 'get_licenses_mo',
+    # 'de': 'get_licenses_de',
+    # Future:
+    # 'va': 'get_licenses_va',
+    # Medical:
+    # 'ok': 'get_licenses_ok',
+    # 'fl': 'get_licenses_fl',
+    # 'la': 'get_licenses_la',
+    # 'ms': 'get_licenses_ms',
+    # 'al': 'get_licenses_al',
+    # 'oh': 'get_licenses_oh',
+    # 'pa': 'get_licenses_pa',
+    # 'ar': 'get_licenses_ar',
+    # 'ky': 'get_licenses_ky',
+    # 'ut': 'get_licenses_ut',
+    # 'tx': 'get_licenses_tx',
+    # 'nd': 'get_licenses_nd',
+    # 'sd': 'get_licenses_sd',
+    # 'mn': 'get_licenses_mn',
+    # 'nh': 'get_licenses_nh',
+    # 'wv': 'get_licenses_wv',
 }
 DATA_DIR = '../data'
 

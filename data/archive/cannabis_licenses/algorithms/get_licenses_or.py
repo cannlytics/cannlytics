@@ -33,7 +33,7 @@ from cannlytics.data.gis import geocode_addresses
 
 # Specify where your data lives.
 DATA_DIR = '../data/or'
-ENV_FILE = '../.env'
+ENV_FILE = '../../../../.env'
 
 # Specify state-specific constants.
 OREGON = {

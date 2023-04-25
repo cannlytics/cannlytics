@@ -62,7 +62,7 @@ Getting data from COAs can be done with the combination of a handful of tools pl
 | Confident Cannabis | `parse_cc_coa` | 🟢 |
 | Green Leaf Lab | `parse_green_leaf_lab_coa` | 🟢 |
 | MCR Labs | `parse_mcr_labs_coa` | 🟢 |
-| SC Labs | `parse_sc_labs_coa` | 🟢 |
+| SC Labs | `parse_sc_labs_coa` | *Discontinued* |
 | Sonoma Lab Works | `parse_sonoma_coa` | 🟢 |
 | Steep Hill | `parse_steephill_coa` | 🟢 |
 | TagLeaf LIMS | `parse_tagleaf_coa` | 🟢 |
