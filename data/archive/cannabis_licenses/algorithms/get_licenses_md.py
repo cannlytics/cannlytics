@@ -197,7 +197,7 @@ def get_licenses_md(
     # if google_maps_api_key:
     #     retailers = get_gis_data(retailers, google_maps_api_key)
 
-    # Define metadata:
+    # Define metadata.
     retailers['data_refreshed_date'] = datetime.now().isoformat()
 
     # Save the data.

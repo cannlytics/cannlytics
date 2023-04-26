@@ -473,6 +473,7 @@
     "noinput",
     "noopener",
     "noreload",
+    "notna",
     "nrows",
     "numpy",
     "nunique",
