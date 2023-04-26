@@ -30,9 +30,9 @@ ENV_FILE = '../../../../.env'
 # Specify state-specific constants.
 STATE = 'MO'
 MISSOURI = {
-    'licensing_authority_id': '',
-    'licensing_authority': '',
-    'licenses_url': '',
+    'licensing_authority_id': 'MDHSS',
+    'licensing_authority': 'Missouri Department of Health and Senior Services',
+    'licenses_url': 'https://health.mo.gov/safety/cannabis/licensed-facilities.php',
 }
 
 

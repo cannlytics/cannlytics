@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 4/24/2023
+Updated: 4/25/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -18,11 +18,16 @@ Data Source:
     - Michigan Cannabis Regulatory Agency
     URL: <https://michigan.maps.arcgis.com/apps/webappviewer/index.html?id=cd5a1a76daaf470b823a382691c0ff60>
 
+TODO:
+
+    [ ] Separate the functionality into functions.
+    [ ] Make the code more robust to errors.
+    [ ] Make Google Maps API key optional.
+
 """
 # Standard imports.
 from datetime import datetime
 import os
-from time import sleep
 from typing import Optional
 
 # External imports.
@@ -38,10 +43,10 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
-try:
-    import chromedriver_binary  # Adds chromedriver binary to path.
-except ImportError:
-    pass # Otherwise, ChromeDriver should be in your path.
+# try:
+#     import chromedriver_binary  # Adds chromedriver binary to path.
+# except ImportError:
+#     pass # Otherwise, ChromeDriver should be in your path.
 
 
 # Specify where your data lives.
@@ -73,9 +78,8 @@ MICHIGAN = {
 
 def wait_for_id_invisible(driver, value, seconds=30):
     """Wait for a given value to be invisible."""
-    WebDriverWait(driver, seconds).until(
-        EC.invisibility_of_element((By.ID, value))
-    )
+    el = (By.ID, value)
+    WebDriverWait(driver, seconds).until(EC.invisibility_of_element(el))
 
 
 def get_licenses_mi(
@@ -83,6 +87,10 @@ def get_licenses_mi(
         env_file: Optional[str] = '.env',
     ):
     """Get Michigan cannabis license data."""
+
+    # Load the environment variables.
+    config = dotenv_values(env_file)
+    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
 
     # Initialize Selenium.
     try:
@@ -108,11 +116,11 @@ def get_licenses_mi(
         text = option.text
         if text and '--' not in text:
             license_types.append(text)
-    
+
     # Restrict certain license types.
     license_types = license_types[1:-2]
 
-    # FIXME: Iterate over license types.
+    # Iterate over license types to get the data.
     data = []
     columns = list(MICHIGAN['licenses']['columns'].values())
     for license_type in license_types:
@@ -160,7 +168,10 @@ def get_licenses_mi(
     # https://aca-prod.accela.com/MIMM/Cap/CapHome.aspx?module=Licenses&TabName=Licenses&TabList=Home%7C0%7CLicenses%7C1%7CAdult_Use%7C2%7CEnforcement%7C3%7CRegistryCards%7C4%7CCurrentTabIndex%7C1
 
     # End the browser session.
-    service.stop()
+    try:
+        service.stop()
+    except:
+        pass
 
     # Standardize the data.
     licenses = pd.DataFrame(data)
@@ -199,8 +210,6 @@ def get_licenses_mi(
     )
 
     # Geocode the licenses.
-    config = dotenv_values(env_file)
-    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
     licenses = geocode_addresses(
         licenses,
         api_key=google_maps_api_key,
@@ -232,6 +241,8 @@ def get_licenses_mi(
         if not os.path.exists(data_dir): os.makedirs(data_dir)
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+    
+    # Return the licenses.
     return licenses
 
 

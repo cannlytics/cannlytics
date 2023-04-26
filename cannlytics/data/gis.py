@@ -129,7 +129,7 @@ def geocode_addresses(
         if index and pause:
             sleep(pause)
         if address_field:
-            address = item.address
+            address = item[address_field]
         else:
             address = f'{item.street}, {item.city}, {item.state} {item.zip_code}'
         geocode_result = gmaps.geocode(address)

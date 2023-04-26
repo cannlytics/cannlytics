@@ -1,12 +1,12 @@
 """
 Cannabis Licenses | Get Nevada Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 9/29/2022
+Updated: 4/25/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -60,6 +60,10 @@ def get_licenses_nv(
         env_file: Optional[str] = '.env',
     ):
     """Get Nevada cannabis license data."""
+
+    # Get the environment variables.
+    config = dotenv_values(env_file)
+    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
 
     # Create the necessary directories.
     file_dir = f'{data_dir}/.datasets'
@@ -142,18 +146,19 @@ def get_licenses_nv(
         except AttributeError:
             continue
         rows = table.find_all('td')
-        for row in rows:
-            cells = row.text.split(' – ')
-            name = cells[0]
-            street = cells[1]
-            designation = cells[-1]
-            retailers.append({
-                'business_legal_name': name,
-                'business_dba_name': name,
-                'license_designation': designation,
-                'premise_city': city,
-                'premise_street_address': street,
-            })
+        vector = [x.text for x in rows]
+        retailer = {}
+        for cell in vector:
+            if ' – ' in cell:
+                parts = cell.split(' – ')
+                retailer['business_legal_name'] = parts[0]
+                retailer['business_dba_name'] = parts[0]
+                retailer['premise_street_address'] = parts[1]
+                retailer['license_designation'] = parts[-1]
+                retailer['premise_city'] = city
+            else:
+                retailer['delivery'] = cell
+            retailers.append(retailer)
 
     # Standardize the retailers.
     retailers = pd.DataFrame(retailers)
@@ -183,8 +188,6 @@ def get_licenses_nv(
     retailers['data_refreshed_date'] = datetime.now().isoformat()
 
     # Geocode the retailers.
-    config = dotenv_values(env_file)
-    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
     cols = ['premise_street_address', 'premise_city', 'premise_state']
     retailers['address'] = retailers[cols].apply(
         lambda row: ', '.join(row.values.astype(str)),
@@ -201,7 +204,7 @@ def get_licenses_nv(
         'latitude': 'premise_latitude',
         'longitude': 'premise_longitude'
     }
-    licenses['premise_zip_code'] = licenses['formatted_address'].apply(
+    retailers['premise_zip_code'] = retailers['formatted_address'].apply(
         lambda x: x.split(', ')[2].split(',')[0].split(' ')[-1] if STATE in str(x) else x
     )
     retailers.drop(columns=drop_cols, inplace=True)
@@ -216,6 +219,7 @@ def get_licenses_nv(
     return pd.concat([licenses, retailers])
 
 
+# === Test ===
 if __name__ == '__main__':
 
     # Support command line usage.

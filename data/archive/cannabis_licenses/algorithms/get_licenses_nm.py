@@ -1,12 +1,12 @@
 """
 Cannabis Licenses | Get New Mexico Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 10/6/2022
+Updated: 4/25/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -37,10 +37,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-try:
-    import chromedriver_binary  # Adds chromedriver binary to path.
-except ImportError:
-    pass # Otherwise, ChromeDriver should be in your path.
+# try:
+#     import chromedriver_binary  # Adds chromedriver binary to path.
+# except ImportError:
+#     pass # Otherwise, ChromeDriver should be in your path.
 
 
 # Specify where your data lives.
@@ -62,24 +62,24 @@ def get_licenses_nm(
     ):
     """Get New Mexico cannabis license data."""
 
+    # Load environment variables.
+    config = dotenv_values(env_file)
+    api_key = config['GOOGLE_MAPS_API_KEY']
+
     # Create directories if necessary.
     if not os.path.exists(data_dir): os.makedirs(data_dir)
 
-    # Initialize Selenium and specify options.
-    service = Service()
-    options = Options()
-    options.add_argument('--window-size=1920,1200')
-
-    # DEV: Run with the browser open.
-    options.headless = False
-
-    # PRODUCTION: Run with the browser closed.
-    # options.add_argument('--headless')
-    # options.add_argument('--disable-gpu')
-    # options.add_argument('--no-sandbox')
-
-    # Initiate a Selenium driver.
-    driver = webdriver.Chrome(options=options, service=service)
+    # Initialize Selenium.
+    try:
+        service = Service()
+        options = Options()
+        options.add_argument('--window-size=1920,1200')
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        driver = webdriver.Chrome(options=options, service=service)
+    except:
+        driver = webdriver.Edge()
 
     # Load the license page.
     driver.get(NEW_MEXICO['licenses_url'])
@@ -149,7 +149,10 @@ def get_licenses_nm(
         buttons = content.find_elements(by=By.TAG_NAME, value='button')
         for button in buttons:
             if button.text == 'Next Page':
-                button.click()
+                try:
+                    button.click()
+                except:
+                    break
                 sleep(5)
                 break
 
@@ -162,6 +165,7 @@ def get_licenses_nm(
             continue
 
         # Click the "Business Name" search field.
+        sleep(1)
         content = driver.find_element(by=By.CLASS_NAME, value='siteforceContentArea')
         radio = content.find_elements(by=By.CLASS_NAME, value='slds-radio--faux')[1]
         radio.click()
@@ -226,13 +230,19 @@ def get_licenses_nm(
             licensee['license_number'] = values[2]
             retailers = pd.concat([retailers, pd.DataFrame([licensee])])
 
+        # Scroll to the bottom of the page.
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        sleep(1)
+
         # Click the "Back to Search" button.
         back_button = page.find_element(by=By.CLASS_NAME, value='vlocity-btn')
         back_button.click()
-        sleep(1)
 
     # End the browser session.
-    service.stop()
+    try:
+        driver.close()
+    except:
+        pass
 
     # Standardize the data, restricting to "Approved" retailers.
     retailers = retailers.loc[retailers['license_status'] == 'Active']
@@ -259,8 +269,6 @@ def get_licenses_nm(
 
     # Geocode licenses.
     # FIXME: This is not working as intended. Perhaps try `search_for_address`?
-    config = dotenv_values(env_file)
-    api_key = config['GOOGLE_MAPS_API_KEY']
     retailers = geocode_addresses(retailers, api_key=api_key, address_field='address')
     retailers['premise_street_address'] = retailers['formatted_address'].apply(
         lambda x: x.split(',')[0] if STATE in str(x) else x
@@ -286,6 +294,8 @@ def get_licenses_nm(
         if not os.path.exists(data_dir): os.makedirs(data_dir)
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
+
+    # Return the licenses.
     return retailers
 
 

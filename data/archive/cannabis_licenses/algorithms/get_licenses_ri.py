@@ -1,12 +1,12 @@
 """
 Cannabis Licenses | Get Rhode Island Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 10/3/2022
+Updated: 4/25/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -17,6 +17,12 @@ Data Source:
 
     - Rhode Island
     URL: <https://dbr.ri.gov/office-cannabis-regulation/compassion-centers/licensed-compassion-centers>
+
+TODO:
+
+    [ ] Split up functionality into re-usable functions.
+    [ ] Make geocoding optional.
+    [ ] Make the code more robust to errors.
 
 """
 # Standard imports.
@@ -48,7 +54,9 @@ RHODE_ISLAND = {
             'business_legal_name',
             'address',
             'business_phone',
-            'license_designation',
+            'business_website',
+            'cultivator',
+            'retailer',
         ],
     }
 }
@@ -59,6 +67,10 @@ def get_licenses_ri(
         env_file: Optional[str] = '.env',
     ):
     """Get Rhode Island cannabis license data."""
+
+    # Load environment variables.
+    config = dotenv_values(env_file)
+    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
 
     # Get the licenses webpage.
     url = RHODE_ISLAND['retailers']['url']
@@ -75,7 +87,10 @@ def get_licenses_ri(
         obs = {}
         for i, cell in enumerate(cells):
             column = columns[i]
-            obs[column] = cell.text
+            if column == 'business_website':
+                obs[column] = cell.find('a')['href']
+            else:
+                obs[column] = cell.text.replace('\n', '').replace('\t\t\t', ' ')
         data.append(obs)
 
     # Optional: It's possible to download the certificate to get it's `issue_date`.
@@ -85,8 +100,8 @@ def get_licenses_ri(
     retailers['id'] = retailers['license_number']
     retailers['licensing_authority_id'] = RHODE_ISLAND['licensing_authority_id']
     retailers['licensing_authority'] = RHODE_ISLAND['licensing_authority']
-    retailers['premise_state'] = STATE
     retailers['license_type'] = 'Commercial - Retailer'
+    retailers['premise_state'] = STATE
     retailers['license_status'] = 'Active'
     retailers['license_status_date'] = None
     retailers['license_term'] = None
@@ -98,11 +113,10 @@ def get_licenses_ri(
     retailers['activity'] = None
     retailers['parcel_number'] = None
     retailers['business_image_url'] = None
-    retailers['business_website'] = None
 
     # Correct `license_designation`.
     coding = dict(Yes='Adult Use and Cultivation', No='Adult Use')
-    retailers['license_designation'] = retailers['license_designation'].map(coding)
+    retailers['license_designation'] = retailers['cultivator'].map(coding)
 
     # Correct `business_dba_name`.
     criterion = retailers['business_legal_name'].str.contains('D/B/A')
@@ -127,8 +141,6 @@ def get_licenses_ri(
     retailers['data_refreshed_date'] = pd.to_datetime(date).isoformat()
 
     # Geocode the licenses.
-    config = dotenv_values(env_file)
-    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
     retailers = geocode_addresses(
         retailers,
         api_key=google_maps_api_key,
@@ -157,6 +169,8 @@ def get_licenses_ri(
         if not os.path.exists(data_dir): os.makedirs(data_dir)
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         retailers.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+
+    # Return the curated licenses.
     return retailers
 
 

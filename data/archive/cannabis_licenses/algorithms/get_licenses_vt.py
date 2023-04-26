@@ -1,12 +1,12 @@
 """
 Cannabis Licenses | Get Vermont Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 10/7/2022
+Updated: 4/25/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -118,6 +118,10 @@ def get_licenses_vt(
     ):
     """Get Vermont cannabis license data."""
 
+    # Load the environment variables.
+    config = dotenv_values(env_file)
+    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
+
     # Get the licenses from the webpage.
     url = VERMONT['licenses_url']
     response = requests.get(url)
@@ -160,46 +164,47 @@ def get_licenses_vt(
     licenses['business_website'] = None
 
     # Separate the `license_designation` from `license_type` if (Tier x).
-    criterion = licenses['license_type'].str.contains('Tier ')
-    licenses.loc[criterion, 'license_designation'] = licenses.loc[criterion]['license_type'].apply(
-        lambda x: 'Tier ' + x.split('(Tier ')[1].rstrip(')')
-    )
-    licenses.loc[criterion, 'license_type'] = licenses.loc[criterion]['license_type'].apply(
-        lambda x: x.split('(Tier ')[0].strip()
-    )
+    # FIXME: The data has changed and this is no longer relevant.
+    # criterion = licenses['license_type'].str.contains('Tier ')
+    # licenses.loc[criterion, 'license_designation'] = licenses.loc[criterion]['license_type'].apply(
+    #     lambda x: 'Tier ' + x.split('(Tier ')[1].rstrip(')')
+    # )
+    # licenses.loc[criterion, 'license_type'] = licenses.loc[criterion]['license_type'].apply(
+    #     lambda x: x.split('(Tier ')[0].strip()
+    # )
 
     # Separate labs' `business_email` and `business_phone` from the `address`.
-    criterion = licenses['license_type'] == 'Testing Lab'
-    licenses.loc[criterion, 'business_email'] = licenses.loc[criterion]['address'].apply(
-        lambda x: x.split('Email: ')[-1].rstrip('\n') if isinstance(x, str) else x
-    )
-    licenses.loc[criterion, 'business_phone'] = licenses.loc[criterion]['address'].apply(
-        lambda x: x.split('Phone: ')[-1].split('Email: ')[0].rstrip('\n') if isinstance(x, str) else x
-    )
-    licenses.loc[criterion, 'address'] = licenses.loc[criterion]['address'].apply(
-        lambda x: x.split('Phone: ')[0].replace('\n', ' ').strip() if isinstance(x, str) else x
-    )
+    # FIXME: The data has changed and this is no longer relevant.
+    # criterion = licenses['license_type'] == 'Testing Lab'
+    # licenses.loc[criterion, 'business_email'] = licenses.loc[criterion]['address'].apply(
+    #     lambda x: x.split('Email: ')[-1].rstrip('\n') if isinstance(x, str) else x
+    # )
+    # licenses.loc[criterion, 'business_phone'] = licenses.loc[criterion]['address'].apply(
+    #     lambda x: x.split('Phone: ')[-1].split('Email: ')[0].rstrip('\n') if isinstance(x, str) else x
+    # )
+    # licenses.loc[criterion, 'address'] = licenses.loc[criterion]['address'].apply(
+    #     lambda x: x.split('Phone: ')[0].replace('\n', ' ').strip() if isinstance(x, str) else x
+    # )
 
     # Split any DBA from the legal name.
-    splits = [';', 'DBA - ', '(DBA)', 'DBA ', 'dba ']
-    licenses['business_dba_name'] = licenses['business_legal_name']
-    for split in splits:
-        criterion = licenses['business_legal_name'].str.contains(split)
-        licenses.loc[criterion, 'business_dba_name'] = licenses.loc[criterion]['business_legal_name'].apply(
-            lambda x: x.split(split)[1].replace(')', '').strip() if split in x else x
-        )
-        licenses.loc[criterion, 'business_legal_name'] = licenses.loc[criterion]['business_legal_name'].apply(
-            lambda x: x.split(split)[0].replace('(', '').strip()
-        )
-    licenses.loc[licenses['business_legal_name'] == '', 'business_legal_name'] = licenses['business_dba_name']
+    # FIXME: The data has changed and this is no longer relevant.
+    # splits = [';', 'DBA - ', '(DBA)', 'DBA ', 'dba ']
+    # licenses['business_dba_name'] = licenses['business_legal_name']
+    # for split in splits:
+    #     criterion = licenses['business_legal_name'].str.contains(split)
+    #     licenses.loc[criterion, 'business_dba_name'] = licenses.loc[criterion]['business_legal_name'].apply(
+    #         lambda x: x.split(split)[1].replace(')', '').strip() if split in x else x
+    #     )
+    #     licenses.loc[criterion, 'business_legal_name'] = licenses.loc[criterion]['business_legal_name'].apply(
+    #         lambda x: x.split(split)[0].replace('(', '').strip()
+    #     )
+    # licenses.loc[licenses['business_legal_name'] == '', 'business_legal_name'] = licenses['business_dba_name']
 
     # Get the refreshed date.
     licenses['data_refreshed_date'] = datetime.now().isoformat()
 
     # Geocode the licenses.
     # FIXME: There are some wonky addresses that are output!
-    config = dotenv_values(env_file)
-    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
     licenses = geocode_addresses(
         licenses,
         api_key=google_maps_api_key,
@@ -230,6 +235,8 @@ def get_licenses_vt(
         retailers = licenses.loc[licenses['license_type'] == 'Retail']
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
+
+    # Return the curated licenses.
     return licenses
 
 

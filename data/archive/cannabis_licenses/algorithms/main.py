@@ -20,19 +20,19 @@ Description:
         ✓ Connecticut
         - Delaware
         ✓ Illinois
-        x Maine
-        - Maryland
+        ✓ Maine
+        - Maryland (FIXME)
         ✓ Massachusetts
-        x Michigan (Selenium)
+        ✓ Michigan (Selenium)
         - Missouri
         ✓ Montana
-        x Nevada
+        ✓ Nevada
         ✓ New Jersey
         - New York
         x New Mexico (Selenium) (FIXME)
         ✓ Oregon
-        x Rhode Island
-        x Vermont
+        ✓ Rhode Island
+        ✓ Vermont
         ✓ Washington
 """
 # Standard imports.
@@ -46,20 +46,18 @@ import pandas as pd
 
 # Specify state-specific algorithms.
 ALGORITHMS = {
-    # 'ak': 'get_licenses_ak',
-    # FIXME:
+    'ak': 'get_licenses_ak',
     'az': 'get_licenses_az',
-    # 'ca': 'get_licenses_ca',
-    # 'co': 'get_licenses_co',
-    # FIXME:
+    'ca': 'get_licenses_ca',
+    'co': 'get_licenses_co',
     'ct': 'get_licenses_ct',
     'il': 'get_licenses_il',
     'ma': 'get_licenses_ma',
+    'md': 'get_licenses_md',
     'me': 'get_licenses_me',
     'mi': 'get_licenses_mi',
     'mt': 'get_licenses_mt',
-    # 'nj': 'get_licenses_nj',
-    # FIXME:
+    'nj': 'get_licenses_nj',
     'nm': 'get_licenses_nm',
     'nv': 'get_licenses_nv',
     'or': 'get_licenses_or',
@@ -68,7 +66,6 @@ ALGORITHMS = {
     'wa': 'get_licenses_wa',
     # TODO:
     # 'ny': 'get_licenses_ny',
-    # 'md': 'get_licenses_md',
     # 'mo': 'get_licenses_mo',
     # 'de': 'get_licenses_de',
     # Future:

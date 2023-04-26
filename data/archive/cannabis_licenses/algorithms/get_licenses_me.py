@@ -1,12 +1,12 @@
 """
 Cannabis Licenses | Get Maine Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 10/7/2022
+Updated: 4/25/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -17,6 +17,13 @@ Data Source:
 
     - Maine Office of Cannabis Policy
     URL: <https://www.maine.gov/dafs/ocp/open-data/adult-use>
+
+# TODO:
+
+    [ ] Priority: Save the retailers in a stand-alone data file.
+    [ ] Separate the functionality into functions.
+    [ ] Make the code more robust to errors.
+    [ ] Make Google Maps API key optional.    
 
 """
 # Standard imports.
@@ -67,6 +74,10 @@ def get_licenses_me(
         env_file: Optional[str] = '.env',
     ):
     """Get Maine cannabis license data."""
+
+    # Load the environment variables.
+    config = dotenv_values(env_file)
+    api_key = config['GOOGLE_MAPS_API_KEY']
 
     # Create the necessary directories.
     file_dir = f'{data_dir}/.datasets'
@@ -133,14 +144,14 @@ def get_licenses_me(
         )
 
     # Get the refreshed date.
-    date = licenses_source_file.split('\\')[-1].split('.')[0].replace(licenses_key, '')
-    date = date.replace('%20', '')
-    date = '-'.join([date[:2], date[2:4], date[4:]])
-    licenses['data_refreshed_date'] = pd.to_datetime(date).isoformat()
+    try:
+        date = licenses_source_file[-15:]
+        date = date.replace('_', '-').replace('.xlsx', '')
+        licenses['data_refreshed_date'] = pd.to_datetime(date).isoformat()
+    except:
+        licenses['data_refreshed_date'] = datetime.now().isoformat()
 
     # Geocode licenses to get `premise_latitude` and `premise_longitude`.
-    config = dotenv_values(env_file)
-    api_key = config['GOOGLE_MAPS_API_KEY']
     cols = ['premise_city', 'premise_state']
     licenses['address'] = licenses[cols].apply(
         lambda row: ', '.join(row.values.astype(str)),
@@ -164,6 +175,9 @@ def get_licenses_me(
     if data_dir is not None:
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+        # TODO: Save the retailers in a stand-alone data file.
+
+    # Return the licenses.
     return licenses
 
 

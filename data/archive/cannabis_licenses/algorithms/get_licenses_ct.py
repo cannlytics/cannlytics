@@ -135,11 +135,13 @@ def get_licenses_ct(
     # Get the refreshed date.
     retailers['data_refreshed_date'] = datetime.now().isoformat()
 
-    # Save and return the data.
+    # Save the data.
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
+
+    # Return the licenses.
     return retailers
 
 

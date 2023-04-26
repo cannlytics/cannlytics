@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/27/2022
-Updated: 4/24/2023
+Updated: 4/25/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -18,13 +18,19 @@ Data Source:
     - Arizona Department of Health Services | Division of Licensing
     URL: <https://azcarecheck.azdhs.gov/s/?licenseType=null>
 
+TODO:
+
+    [ ] Separate the functionality into functions.
+    [ ] Make the code more robust to errors.
+    [ ] Make Google Maps API key optional.    
+
 """
 # Standard imports.
 from datetime import datetime
 # from dotenv import dotenv_values
 import os
 from time import sleep
-from typing import Optional
+from typing import List, Optional
 
 # External imports.
 # from cannlytics.data.gis import geocode_addresses
@@ -57,12 +63,76 @@ ARIZONA = {
 }
 
 
-def county_from_zip(x):
+def get_county_from_zip(x):
     """Find a county given a zip code. Returns `None` if no match."""
     try:
         return zipcodes.matching(x)[0]['county']
     except KeyError:
         return None
+
+
+def initialize_selenium():
+    """Initialize a web driver."""
+    try:
+        service = Service()
+        options = Options()
+        options.add_argument('--window-size=1920,1200')
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        return webdriver.Chrome(options=options, service=service)
+    except:
+        return webdriver.Edge()
+    
+
+def click_load_more(driver, container):
+    """Click "Load more" until all of the licenses are visible."""
+    more = True
+    while(more):
+        button = container.find_element(by=By.TAG_NAME, value='button')
+        driver.execute_script('arguments[0].scrollIntoView(true);', button)
+        button.click()
+        counter = container.find_element(by=By.CLASS_NAME, value='count-text')
+        more = int(counter.text.replace(' more', ''))
+
+
+def get_license_data_from_html(el):
+    """Get a retailer's data."""
+    xpath = f'/html/body/div[3]/div[2]/div/div[2]/div[2]/div/div/c-azcc-portal-home/c-azcc-map/div/div[2]/div[2]/div[2]/div[{count}]/c-azcc-map-list-item/div'
+    list_item = el.find_element(by=By.XPATH, value=xpath)
+    body = list_item.find_element(by=By.CLASS_NAME, value='slds-media__body')
+    divs = body.find_elements(by=By.TAG_NAME, value='div')
+    name = divs[0].text
+    legal_name = divs[1].text
+    if not name:
+        name = legal_name
+    address = divs[3].text
+    address_parts = address.split(',')
+    parts = divs[2].text.split(' · ')
+    link = divs[-1].find_element(by=By.TAG_NAME, value='a')
+    href = link.get_attribute('href')
+    return {
+        'address': address,
+        'details_url': href,
+        'business_legal_name': legal_name,
+        'business_dba_name': name,
+        'business_phone': parts[-1],
+        'license_status': parts[0],
+        'license_type': parts[1],
+        'premise_street_address': address_parts[0].strip(),
+        'premise_city': address_parts[1].strip(),
+        'premise_zip_code': address_parts[-1].replace('AZ ', '').strip(),
+    }
+
+
+def get_value_from_links(links: List[str], prefix: str):
+    """Get a certain key from given links."""
+    for link in links:
+        href = link.get_attribute('href')
+        if href is None:
+            continue
+        if href.startswith(prefix):
+            return link.text
 
 
 def get_licenses_az(
@@ -75,16 +145,7 @@ def get_licenses_az(
     if not os.path.exists(data_dir): os.makedirs(data_dir)
 
     # Initialize Selenium.
-    try:
-        service = Service()
-        options = Options()
-        options.add_argument('--window-size=1920,1200')
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--no-sandbox')
-        driver = webdriver.Chrome(options=options, service=service)
-    except:
-        driver = webdriver.Edge()
+    driver = initialize_selenium()
 
     # Load the license page.
     driver.get(ARIZONA['licenses_url'])
@@ -94,52 +155,18 @@ def get_licenses_az(
     # Get the map container.
     container = driver.find_element(by=By.CLASS_NAME, value='slds-container_center')
 
+    # Scroll to the bottom of the page.
+    driver.execute_script('arguments[0].scrollTop = arguments[0].scrollHeight', container)
+    sleep(1)
+
     # Click "Load more" until all of the licenses are visible.
-    more = True
-    while(more):
-        button = container.find_element(by=By.TAG_NAME, value='button')
-        driver.execute_script('arguments[0].scrollIntoView(true);', button)
-        button.click()
-        counter = container.find_element(by=By.CLASS_NAME, value='count-text')
-        more = int(counter.text.replace(' more', ''))
+    click_load_more(driver, container)
 
     # Get license data for each retailer.
     data = []
     els = container.find_elements(by=By.CLASS_NAME, value='map-list__item')
-    for i, el in enumerate(els):
-
-        # Get a retailer's data.
-        count = i + 1
-        xpath = f'/html/body/div[3]/div[2]/div/div[2]/div[2]/div/div/c-azcc-portal-home/c-azcc-map/div/div[2]/div[2]/div[2]/div[{count}]/c-azcc-map-list-item/div'
-        list_item = el.find_element(by=By.XPATH, value=xpath)
-        body = list_item.find_element(by=By.CLASS_NAME, value='slds-media__body')
-        divs = body.find_elements(by=By.TAG_NAME, value='div')
-        name = divs[0].text
-        legal_name = divs[1].text
-        if not name:
-            name = legal_name
-        address = divs[3].text
-        address_parts = address.split(',')
-        parts = divs[2].text.split(' · ')
-
-        # Get the retailer's link to get more details.
-        link = divs[-1].find_element(by=By.TAG_NAME, value='a')
-        href = link.get_attribute('href')
-
-        # Record the retailer's data.
-        obs = {
-            'address': address,
-            'details_url': href,
-            'business_legal_name': legal_name,
-            'business_dba_name': name,
-            'business_phone': parts[-1],
-            'license_status': parts[0],
-            'license_type': parts[1],
-            'premise_street_address': address_parts[0].strip(),
-            'premise_city': address_parts[1].strip(),
-            'premise_zip_code': address_parts[-1].replace('AZ ', '').strip(),
-        }
-        data.append(obs)
+    for el in els:
+        data.append(get_license_data_from_html(el))
 
     # Standardize the retailer data.
     retailers = pd.DataFrame(data)
@@ -177,30 +204,24 @@ def get_licenses_az(
         container = driver.find_element(by=By.CLASS_NAME, value='slds-container_center')
         sleep(4)
 
-        # Get the `business_email`.
+        # Get links.
         links = container.find_elements(by=By.TAG_NAME, value='a')
-        for link in links:
-            href = link.get_attribute('href')
-            if href is None: continue
-            if href.startswith('mailto'):
-                business_email = href.replace('mailto:', '')
-                col = retailers.columns.get_loc('business_email')
-                retailers.iat[index, col] = business_email
-                break
 
-        # Get the `license_number`
-        for link in links:
-            href = link.get_attribute('href')
-            if href is None: continue
-            if href.startswith('https://azdhs-licensing'):
-                col = retailers.columns.get_loc('license_number')
-                retailers.iat[index, col] = link.text
-                break
+        # Get the `business_email`.
+        business_email = get_value_from_links(links, 'mailto:')
+        col = retailers.columns.get_loc('business_email')
+        retailers.iat[index, col] = business_email
+
+        # Get the `license_number`.
+        license_number = get_value_from_links(links, 'https://azdhs-licensing')
+        col = retailers.columns.get_loc('license_number')
+        retailers.iat[index, col] = license_number
 
         # Get the `premise_latitude` and `premise_longitude`.
         for link in links:
             href = link.get_attribute('href')
-            if href is None: continue
+            if href is None:
+                continue
             if href.startswith('https://maps.google.com/'):
                 coords = href.split('=')[1].split('&')[0].split(',')
                 lat_col = retailers.columns.get_loc('premise_latitude')
@@ -209,34 +230,38 @@ def get_licenses_az(
                 retailers.iat[index, long_col] = float(coords[1])
                 break
 
+        # FIXME: Scroll down to the bottom of the page.
+        driver.execute_script('arguments[0].scrollTop = arguments[0].scrollHeight', container)
+        sleep(1)
+
         # Get the `issue_date`.
         key = 'License Effective'
-        el = container.find_element_by_xpath(f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
+        el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
         col = retailers.columns.get_loc('issue_date')
         retailers.iat[index, col] = el.text
 
         # Get the `expiration_date`.
         key = 'License Expires'
-        el = container.find_element_by_xpath(f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
+        el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
         col = retailers.columns.get_loc('expiration_date')
         retailers.iat[index, col] = el.text
 
         # Get the `business_owner_name`.
         key = 'Owner / License'
-        el = container.find_element_by_xpath(f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
+        el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
         col = retailers.columns.get_loc('expiration_date')
         retailers.iat[index, col] = el.text
 
         # Get the `license_designation` ("Services").
         key = 'Services'
-        el = container.find_element_by_xpath(f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-rich-text")
+        el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-rich-text")
         col = retailers.columns.get_loc('license_designation')
         retailers.iat[index, col] = el.text
 
         # Create entries for cultivations.
         cultivator = retailers.iloc[index].copy()
         key = 'Offsite Cultivation Address'
-        el = container.find_element_by_xpath(f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
+        el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
         address = el.text
         if address:
             parts = address.split(',')
@@ -250,7 +275,7 @@ def get_licenses_az(
         # Create entries for manufacturers.
         manufacturer = retailers.iloc[index].copy()
         key = 'Manufacture Address'
-        el = container.find_element_by_xpath(f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
+        el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
         address = el.text
         if address:
             parts = address.split(',')
@@ -262,15 +287,20 @@ def get_licenses_az(
             manufacturers.append(manufacturer, ignore_index=True)
 
     # End the browser session.
-    service.stop()
-    retailers.drop(column=['address', 'details_url'], inplace=True)
+    try:
+        driver.close()
+    except:
+        pass
+
+    # Drop unnecessary columns.
+    retailers.drop(columns=['address', 'details_url'], inplace=True)
 
     # Lookup counties by zip code.
-    retailers['premise_county'] = retailers['premise_zip_code'].apply(county_from_zip)
-    cultivators['premise_county'] = cultivators['premise_zip_code'].apply(county_from_zip)
-    manufacturers['premise_county'] = manufacturers['premise_zip_code'].apply(county_from_zip)
+    retailers['premise_county'] = retailers['premise_zip_code'].apply(get_county_from_zip)
+    cultivators['premise_county'] = cultivators['premise_zip_code'].apply(get_county_from_zip)
+    manufacturers['premise_county'] = manufacturers['premise_zip_code'].apply(get_county_from_zip)
 
-    # Setup geocoding
+    # TODO: Setup geocoding
     # config = dotenv_values(env_file)
     # api_key = config['GOOGLE_MAPS_API_KEY']
     # drop_cols = ['state', 'state_name', 'county', 'address', 'formatted_address']
@@ -295,16 +325,18 @@ def get_licenses_az(
     timestamp = datetime.now().isoformat()
     licenses['data_refreshed_date'] = timestamp
     retailers['data_refreshed_date'] = timestamp
-    # cultivators['data_refreshed_date'] = timestamp
-    # manufacturers['data_refreshed_date'] = timestamp
+    cultivators['data_refreshed_date'] = timestamp
+    manufacturers['data_refreshed_date'] = timestamp
 
     # Save and return the data.
     if data_dir is not None:
         timestamp = timestamp[:19].replace(':', '-')
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
-        # cultivators.to_csv(f'{data_dir}/cultivators-{STATE.lower()}-{timestamp}.csv', index=False)
-        # manufacturers.to_csv(f'{data_dir}/manufacturers-{STATE.lower()}-{timestamp}.csv', index=False)
+        cultivators.to_csv(f'{data_dir}/cultivators-{STATE.lower()}-{timestamp}.csv', index=False)
+        manufacturers.to_csv(f'{data_dir}/manufacturers-{STATE.lower()}-{timestamp}.csv', index=False)
+
+    # Return the licenses.
     return licenses
 
 
