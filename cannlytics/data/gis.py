@@ -185,9 +185,13 @@ def search_for_address(
     if result.get('formatted_address'):
         formatted_address = result['formatted_address']
         parts = formatted_address.split(',')
-        candidate['street'] = parts[0]
-        candidate['city'] = parts[1].strip()
-        candidate['state'], candidate['zipcode'] = tuple(parts[2].strip().split(' '))
+        if len(parts) == 4:
+            candidate['street'] = parts[0]
+            candidate['city'] = parts[1].strip()
+            candidate['state'], candidate['zipcode'] = tuple(parts[2].strip().split(' '))
+        else:
+            candidate['city'] = parts[0].strip()
+            candidate['state'], candidate['zipcode'] = tuple(parts[1].strip().split(' '))
         try:
             candidate['county'] = zipcodes.matching(candidate['zipcode'])[0]['county']
         except:

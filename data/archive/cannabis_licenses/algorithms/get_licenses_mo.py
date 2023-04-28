@@ -1,17 +1,27 @@
 """
 Cannabis Licenses | Get Missouri Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
-Created: 11/29/2022
-Updated: 11/29/2022
+Created: 4/26/2023
+Updated: 4/27/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
     Collect Missouri cannabis license data.
+
+Requirements:
+
+    The script leverages Google Maps to attempt to geocode license
+    addresses. Ensure that you have a `.env` file with a valid
+    Google Maps API specified as `GOOGLE_MAPS_API_KEY`.
+
+Command-line Usage:
+
+    python get_licenses_mo.py --data_dir <DATA_DIR> --env <ENV_FILE>
 
 Data Source:
 
@@ -22,13 +32,17 @@ Data Source:
 # Standard imports:
 from datetime import datetime
 import os
+import re
 from typing import Optional
-from bs4 import BeautifulSoup
 
 # External imports:
+from bs4 import BeautifulSoup
+from cannlytics.data.gis import geocode_addresses
+from dotenv import dotenv_values
 import numpy as np
 import pandas as pd
 import requests
+import zipcodes
 
 
 # Specify where your data lives.
@@ -50,6 +64,7 @@ MISSOURI = {
         'City': 'premise_city',
         'State': 'premise_state',
         'Postal Code': 'premise_zip_code',
+        ' Contact \nInformation 1': 'first_name',
         'Contact \nInformation 1': 'first_name',
         'Contact \nInformation 2': 'last_name',
         'Contact \nPhone': 'business_phone'
@@ -58,11 +73,38 @@ MISSOURI = {
 }
 
 
+def format_phone_number(x):
+    """Format phone numbers as ###-###-####."""
+    digits = re.sub(r'\D', '', x)
+    return '{}-{}-{}'.format(digits[:3], digits[3:6], digits[6:])
+
+
+def get_gis_data(df: pd.DataFrame, api_key: str) -> pd.DataFrame:
+    """Get GIS data."""
+    drop_cols = ['state', 'state_name', 'address', 'formatted_address']
+    rename_cols = {
+        'county': 'premise_county',
+        'latitude': 'premise_latitude',
+        'longitude': 'premise_longitude'
+    }
+    df = geocode_addresses(df, api_key=api_key, address_field='address')
+    get_city = lambda x: x.split(', ')[1].split(',')[0] if STATE in str(x) else x
+    df['premise_city'] = df['formatted_address'].apply(get_city)
+    df.drop(columns=drop_cols, inplace=True)
+    return df.rename(columns=rename_cols)
+
+
 def get_licenses_mo(
         data_dir: Optional[str] = None,
         env_file: Optional[str] = '.env',
     ):
     """Get Missouri cannabis license data."""
+
+    # Load the environment variables.
+    config = dotenv_values(env_file)
+    google_maps_api_key = config.get('GOOGLE_MAPS_API_KEY')
+    if google_maps_api_key is None:
+        print('Proceeding without `GOOGLE_MAPS_API_KEY`.')
     
     # Create the download directory if it doesn't exist.
     download_dir = os.path.join(data_dir, '.datasets')
@@ -97,7 +139,6 @@ def get_licenses_mo(
         license_type = datafile.split('\\')[-1].replace('.xlsx', '') \
             .replace('licensed-', '') \
             .replace('-facilities', '')
-        print(license_type)
 
         # Open the workbook.
         data = pd.read_excel(datafile, skiprows=1)
@@ -105,12 +146,14 @@ def get_licenses_mo(
         # Rename columns.
         data.rename(columns=MISSOURI['columns'], inplace=True)
 
-        # Replace non-NaN columns with True and NaN columns with False
+        # Replace non-NaN columns with True and NaN columns with False.
         data['license_status'] = data['license_status'].notna() \
             .map({True: 'Active', False: 'Inactive'})
 
-        # FIXME: Combine medical / adult_use into `license_type`.
+        # Combine medical / adult_use into `license_designation`.
         try:
+            data['medical'] = data['medical'].notna().map({True: True, False: False})
+            data['adult_use'] = data['adult_use'].notna().map({True: True, False: False})
             conditions = [
                 (data['medical'] & data['adult_use']),
                 (data['medical']),
@@ -121,9 +164,9 @@ def get_licenses_mo(
                 'medical',
                 'adult-use'
             ]
-            data['license_type'] = np.select(conditions, choices, default=None)
+            data['license_designation'] = np.select(conditions, choices, default=None)
         except KeyError:
-            data['license_type'] = 'adult-use'
+            data['license_designation'] = 'adult-use'
 
         # Combine owner name columns.
         data['business_owner_name'] = data['first_name'].str.cat(
@@ -131,46 +174,63 @@ def get_licenses_mo(
             sep=' ',
         )
 
-        # Drop unused columns.
-        data.drop(MISSOURI['drop'], axis=1, inplace=True)
+        # Clean the phone numbers.
+        data['business_phone'] = data['business_phone'].apply(str).apply(format_phone_number)
 
-        # TODO: Augment GIS data.
+        # Drop unused columns.
+        unnamed = [x for x in data.columns if re.match('^Unnamed', x)]
+        to_drop = MISSOURI['drop'] + unnamed
+        data.drop(to_drop, axis=1, inplace=True)
+
+        # Augment GIS data.
+        data['address'] = data['business_legal_name'] + ', ' + data['premise_city'] + ', ' + data['premise_state'] + ' ' + data['premise_zip_code'].astype(str)
+        data = get_gis_data(data, google_maps_api_key)
+
+        # Get the county.
+        get_county = lambda x: zipcodes.matching(x)[0]['county']
+        data['county'] = data['premise_zip_code'].astype(str).apply(get_county)
 
         # Standardize the license data.
         data = data.assign(
-            id=data.index,
-            license_status=None,
+            id=data['license_number'].astype(str),
             business_dba_name=data['business_legal_name'],
-            license_number=None,
             licensing_authority_id=MISSOURI['licensing_authority_id'],
             licensing_authority=MISSOURI['licensing_authority'],
-            license_designation='Adult-Use',
             premise_state=STATE,
             license_status_date=None,
+            license_type=license_type,
             license_term=None,
             issue_date=None,
             expiration_date=None,
-            business_owner_name=None,
             business_structure=None,
             activity=None,
             parcel_number=None,
             business_image_url=None,
-            license_type=None,
         )
 
         # Define metadata.
         data['data_refreshed_date'] = datetime.now().isoformat()
 
+        # Sort the columns in alphabetical order
+        data.sort_index(axis=1, inplace=True)
+
         # Save the data.
         if data_dir is not None:
-            if not os.path.exists(data_dir): os.makedirs(data_dir)
-            timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-            outfile = f'{data_dir}/{license_type}-{STATE.lower()}-{timestamp}.csv'
+            if not os.path.exists(data_dir):
+                os.makedirs(data_dir)
+            date = datetime.now().isoformat()[:10]
+            outfile = f'{data_dir}/{license_type}-{STATE.lower()}-{date}.csv'
             data.to_csv(outfile, index=False)
         
         # Record the licenses.
         licenses.append(data)
 
+    # Save all of the licenses.
+    if data_dir is not None:
+        date = datetime.now().isoformat()[:10]
+        outfile = f'{data_dir}/licenses-{STATE.lower()}-{date}.csv'
+        data.to_csv(outfile, index=False)
+    
     # Return the licenses.
     return pd.concat(licenses)
 
@@ -187,7 +247,7 @@ if __name__ == '__main__':
         arg_parser.add_argument('--env', dest='env_file', type=str)
         args = arg_parser.parse_args()
     except SystemExit:
-        args = {'d': DATA_DIR, 'env_file': ENV_FILE}
+        args = {'data_dir': DATA_DIR, 'env_file': ENV_FILE}
 
     # Get licenses, saving them to the specified directory.
     data_dir = args.get('d', args.get('data_dir'))

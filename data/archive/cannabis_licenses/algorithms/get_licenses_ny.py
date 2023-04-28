@@ -1,12 +1,12 @@
 """
 Cannabis Licenses | Get New York Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 11/29/2022
-Updated: 11/29/2022
+Updated: 4/27/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -33,6 +33,7 @@ NEW_YORK = {
     'licensing_authority_id': '',
     'licensing_authority': '',
     'licenses_url': '',
+    'retailers_url': 'https://cannabis.ny.gov/dispensary-location-verification',
 }
 
 
@@ -41,6 +42,15 @@ def get_licenses_ny(
         env_file: Optional[str] = '.env',
     ):
     """Get New York cannabis license data."""
+    
+
+    # TODO: Get the various license files / HTML.
+
+    # TODO: Parse the data.
+
+    # TODO: Standardize the data.
+
+    # Return the licenses.
     raise NotImplementedError
 
 
