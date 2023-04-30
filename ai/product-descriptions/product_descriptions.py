@@ -78,3 +78,13 @@ knowledge = [
 # get_summary(text)
 
 
+# === Test ===
+
+if __name__ == '__main__':
+    
+
+    # TODO: Get the user's COA (by QR code, image, PDF, URL).
+    print('Getting COA...')
+
+
+    # 

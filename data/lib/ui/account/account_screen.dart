@@ -9,9 +9,9 @@
 
 // Flutter imports:
 import 'package:cannlytics_data/constants/theme.dart';
-import 'package:cannlytics_data/ui/layout/footer.dart';
-import 'package:cannlytics_data/widgets/buttons/custom_text_button.dart';
-import 'package:cannlytics_data/widgets/layout/console.dart';
+import 'package:cannlytics_data/common/layout/footer.dart';
+import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
+import 'package:cannlytics_data/common/layout/console.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -26,13 +26,13 @@ import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:cannlytics_data/utils/validation_utils.dart';
-import 'package:cannlytics_data/widgets/buttons/primary_button.dart';
-import 'package:cannlytics_data/widgets/buttons/secondary_button.dart';
-import 'package:cannlytics_data/widgets/cards/wide_card.dart';
-import 'package:cannlytics_data/widgets/dialogs/auth_dialogs.dart';
-import 'package:cannlytics_data/widgets/images/avatar.dart';
-import 'package:cannlytics_data/widgets/layout/header.dart';
-import 'package:cannlytics_data/widgets/layout/sidebar.dart';
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
+import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/common/cards/wide_card.dart';
+import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
+import 'package:cannlytics_data/common/images/avatar.dart';
+import 'package:cannlytics_data/common/layout/header.dart';
+import 'package:cannlytics_data/common/layout/sidebar.dart';
 
 // See:
 // https://medium.com/flutter-community/paypal-payment-gateway-integration-in-flutter-379fbb3b87f5

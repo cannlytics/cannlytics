@@ -11,7 +11,7 @@
 // - Highlight active route accordingly.
 
 // Flutter imports:
-import 'package:cannlytics_data/widgets/dialogs/help_dialog.dart';
+import 'package:cannlytics_data/common/dialogs/help_dialog.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:

@@ -274,7 +274,7 @@ class StrainsTable extends ConsumerWidget {
 
     // Return the table and actions.
     if (data.isEmpty)
-      table = CustomPlaceholder(
+      table = FormPlaceholder(
         image: 'assets/images/icons/plant-data.png',
         title: 'Add a strain',
         description: 'Strains are used to track packages, items, and plants.',

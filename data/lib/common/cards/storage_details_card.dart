@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/widgets/charts/charts.dart';
+import 'package:cannlytics_data/common/charts/charts.dart';
 import 'storage_info_card.dart';
 
 class StarageDetails extends StatelessWidget {

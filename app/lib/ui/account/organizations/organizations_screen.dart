@@ -227,7 +227,7 @@ class OrganizationsTable extends ConsumerWidget {
 
     // Return a placeholder if no organizations.
     if (orgs.length == 0)
-      return CustomPlaceholder(
+      return FormPlaceholder(
         image: 'assets/images/icons/facilities.png',
         title: 'Add an organization',
         description:

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 11/29/2022
-Updated: 4/27/2023
+Updated: 4/30/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -20,7 +20,20 @@ Data Source:
 
 """
 # Standard imports:
+from datetime import datetime
+import os
+import re
 from typing import Optional
+
+# External imports:
+from bs4 import BeautifulSoup
+import pdfplumber
+from cannlytics.data.gis import geocode_addresses
+from dotenv import dotenv_values
+import numpy as np
+import pandas as pd
+import requests
+import zipcodes
 
 
 # Specify where your data lives.
@@ -30,11 +43,94 @@ ENV_FILE = '../../../../.env'
 # Specify state-specific constants.
 STATE = 'NY'
 NEW_YORK = {
-    'licensing_authority_id': '',
-    'licensing_authority': '',
-    'licenses_url': '',
-    'retailers_url': 'https://cannabis.ny.gov/dispensary-location-verification',
+    'licensing_authority_id': 'OCM',
+    'licensing_authority': 'New York State Office of Cannabis Management',
+    # 'medical_url': 'https://cannabis.ny.gov/dispensing-facilities',
+    # 'retailers_url': 'https://cannabis.ny.gov/conditional-adult-use-retail-dispensary',
+    # 'active_retailers_url': 'https://cannabis.ny.gov/dispensary-location-verification',
+    # 'processors_url': 'https://cannabis.ny.gov/adult-use-conditional-processor',
+    # 'cultivators_url': '',
+    # 'labs_url': 'https://cannabis.ny.gov/cannabis-laboratories',
+    'cultivators': {
+        'source': 'https://cannabis.ny.gov/adult-use-conditional-cultivator',
+        'url': 'https://cannabis.ny.gov/list-aucc-licenses',
+    },
+    'retailers': {
+        'source': 'https://cannabis.ny.gov/conditional-adult-use-retail-dispensary',
+        'url': 'https://cannabis.ny.gov/caurd-licenses',
+    },
+    'processors': {
+        'source': 'https://cannabis.ny.gov/adult-use-conditional-processor',
+        'url': 'https://cannabis.ny.gov/list-aucp-licenses',
+    },
+    'labs': {
+        'source': 'https://cannabis.ny.gov/cannabis-laboratories',
+        'url': '',
+    },
 }
+
+
+def get_retailers_ny(data_dir):
+    """Get New York cannabis retailers."""
+
+    # Create a dataset directory.
+    dataset_dir = os.path.join(data_dir, '.datasets')
+    if not os.path.exists(dataset_dir):
+        os.mkdir(dataset_dir)
+
+    # Get the licenses website content.
+    # url = NEW_YORK['retailers_url']
+    # response = requests.get(url)
+    # soup = BeautifulSoup(response.content, 'html.parser')
+
+    # Download the licenses document.
+    url = NEW_YORK['retailers']['url']
+    response = requests.get(url)
+    pdf_file = os.path.join(dataset_dir, 'ny-retailers.pdf')
+    with open(pdf_file, 'wb') as f:
+        f.write(response.content)
+
+    # Read the PDF.
+    doc = pdfplumber.open(pdf_file)
+    data = []
+    for page in doc.pages:
+        table = page.extract_table()
+        rows = [x for x in table if x[0] and x[0] != 'License Number' and x[0] != 'Application ID']
+        data.extend(rows)
+
+    # Close the PDF.
+    doc.close()
+
+    # Create a dataframe.
+    columns = [
+        'License Number',
+        'business_legal_name',
+        'county',
+        'business_email',
+        'business_phone',
+    ]
+    licenses = pd.DataFrame(data, columns=columns)
+
+
+
+def get_processors_ny():
+    """Get New York cannabis processors."""
+    raise NotImplementedError
+
+
+def get_cultivators_ny():
+    """Get New York cannabis cultivators."""
+    raise NotImplementedError
+
+
+def get_labs_ny():
+    """Get New York cannabis labs."""
+    raise NotImplementedError
+
+
+def get_medical_ny():
+    """Get New York medical cannabis dispensaries."""
+    raise NotImplementedError
 
 
 def get_licenses_ny(

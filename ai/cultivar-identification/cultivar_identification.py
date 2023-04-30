@@ -1,10 +1,10 @@
 """
-Cultivar Prediction | Cannlytics AI
-Copyright (c) 2022 Cannlytics
+Cultivar Prediction Model (Cultivarification) | Cannlytics AI
+Copyright (c) 2022-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/5/2022
-Updated: 8/5/2022
+Updated: 4/30/2023
 License: MIT License <https://opensource.org/licenses/MIT>
 
 Description:

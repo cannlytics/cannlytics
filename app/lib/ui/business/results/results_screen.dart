@@ -252,7 +252,7 @@ class LabResultsTable extends ConsumerWidget {
 
     // Return the table and actions.
     if (data.isEmpty)
-      table = CustomPlaceholder(
+      table = FormPlaceholder(
         image: 'assets/images/icons/facilities.png',
         title: 'Add a labResult',
         description:

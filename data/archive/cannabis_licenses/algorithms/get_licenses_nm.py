@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 4/25/2023
+Updated: 4/30/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -17,6 +17,15 @@ Data Source:
 
     - New Mexico Regulation and Licensing Department | Cannabis Control Division
     URL: <https://nmrldlpi.force.com/bcd/s/public-search-license?division=CCD&language=en_US>
+
+TODO:
+    - [ ] Also collect:
+        * "Cannabis Manufacturer"
+        * "Cannabis Producer"
+        * "Cannabis Producer Microbusiness"
+    - [ ] Replace `sleep` with `WebDriverWait` where possible.
+    - [ ] Handle multiple search results for a single address.
+    - [ ] Ensure geocoding is working correctly.
 
 """
 # Standard imports.
@@ -59,12 +68,20 @@ NEW_MEXICO = {
 def get_licenses_nm(
         data_dir: Optional[str] = None,
         env_file: Optional[str] = '.env',
+        verbose: Optional[bool] = True,
     ):
     """Get New Mexico cannabis license data."""
 
     # Load environment variables.
-    config = dotenv_values(env_file)
-    api_key = config['GOOGLE_MAPS_API_KEY']
+    geocode = False
+    try:
+        config = dotenv_values(env_file)
+        api_key = config['GOOGLE_MAPS_API_KEY']
+        geocode = True
+        if verbose:
+            print('Retrieved Google Maps API key for geocoding addresses.')
+    except:
+        print('Proceeding without geocoding. Set `GOOGLE_MAPS_API_KEY` in your `env_file` to enable the geocoding of addresses.')
 
     # Create directories if necessary.
     if not os.path.exists(data_dir): os.makedirs(data_dir)
@@ -82,6 +99,8 @@ def get_licenses_nm(
         driver = webdriver.Edge()
 
     # Load the license page.
+    if verbose:
+        print('Driver initialized. Loading license page...')
     driver.get(NEW_MEXICO['licenses_url'])
 
     # FIXME: Wait for the page to load by waiting to detect the image.
@@ -92,7 +111,7 @@ def get_licenses_nm(
     #     print('Failed to load page within %i seconds.' % (30))
     sleep(5)
 
-    # Get the main content and click "License Type" raido.
+    # Get the main content and click "License Type" radio.
     content = driver.find_element(by=By.CLASS_NAME, value='siteforceContentArea')
     radio = content.find_element(by=By.CLASS_NAME, value='slds-radio--faux')
     radio.click()
@@ -106,6 +125,8 @@ def get_licenses_nm(
     choices = content.find_elements(by=By.CLASS_NAME, value='slds-listbox__item')
     for choice in choices:
         if choice.text == 'Cannabis Retailer':
+            if verbose:
+                print('Searching cannabis retailers...')
             choice.click()
             sleep(2)
             break
@@ -120,6 +141,8 @@ def get_licenses_nm(
     sleep(5)
     data = []
     iterate = True
+    if verbose:
+        print('Getting all licenses...')
     while(iterate):
 
         # Get all of the licenses.
@@ -138,10 +161,11 @@ def get_licenses_nm(
             })
 
         # Get the page number and stop at the last page.
-        # FIXME: This doesn't correctly break!
         par = content.find_elements(by=By.TAG_NAME, value='p')[-1].text
         page_number = int(par.split(' ')[2])
         total_pages = int(par.split(' ')[-2])
+        if verbose:
+            print('Retrieved licenses from page %i/%i' % (page_number, total_pages))
         if page_number == total_pages:
             iterate = False
 
@@ -158,6 +182,8 @@ def get_licenses_nm(
 
     # Search for each license name, 1 by 1, to get details.
     retailers = pd.DataFrame(columns=['business_legal_name'])
+    if verbose:
+        print('Getting details for %i licenses...' % len(data))
     for i, licensee in enumerate(data):
 
         # Skip recorded rows.
@@ -165,7 +191,7 @@ def get_licenses_nm(
             continue
 
         # Click the "Business Name" search field.
-        sleep(1)
+        sleep(2)
         content = driver.find_element(by=By.CLASS_NAME, value='siteforceContentArea')
         radio = content.find_elements(by=By.CLASS_NAME, value='slds-radio--faux')[1]
         radio.click()
@@ -180,29 +206,27 @@ def get_licenses_nm(
         search = content.find_element(by=By.CLASS_NAME, value='vlocity-btn')
         search.click()
 
-        # FIXME: Wait for the table to load.
+        # Wait for the table to load.
+        # TODO: Prefer to use WebDriverWait over sleep.
         # WebDriverWait(content, 5).until(EC.presence_of_element_located((By.CLASS_NAME, 'slds-button_icon')))
-        sleep(1.5)
+        sleep(3)
 
         # Click the "Action" button to get to the details page.
-        # FIXME: There can be multiple search candidates!
+        # FIXME: There can be multiple search candidates! How to handle this?
         action = content.find_element(by=By.CLASS_NAME, value='slds-button_icon')
         try:
             action.click()
         except:
-            continue # FIXME: Formally check if "No record found!".
+            # TODO: Formally check if "No record found!".
+            continue
 
-        # FIXME: Wait for the details page to load.
-        el = (By.CLASS_NAME, 'body')
-        WebDriverWait(driver, 5).until(EC.presence_of_element_located(el))
+        # Wait for the details page to load.
+        # TODO: Prefer to use WebDriverWait over sleep.
+        # WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, 'body')))
+        sleep(5)
 
         # Get the page
         page = driver.find_element(by=By.CLASS_NAME, value='body')
-
-        # FIXME: Wait for the details to load!
-        # el = (By.TAG_NAME, 'vlocity_ins-omniscript-step')
-        # WebDriverWait(page, 5).until(EC.presence_of_element_located(el))
-        sleep(1.5)
 
         # Get all of the details!
         fields = [
@@ -222,7 +246,7 @@ def get_licenses_nm(
             for j, value in enumerate(values):
                 data[i][fields[j]] = value.text
 
-        # Create multiple entries for each address!!!
+        # Create multiple entries for each address.
         premises = page.find_elements(by=By.CLASS_NAME, value='block-header')
         for premise in premises:
             values = premise.text.split('\n')
@@ -235,8 +259,13 @@ def get_licenses_nm(
         sleep(1)
 
         # Click the "Back to Search" button.
-        back_button = page.find_element(by=By.CLASS_NAME, value='vlocity-btn')
-        back_button.click()
+        if verbose:
+            print('%i. Details collected for %s' % (i + 1, licensee['business_legal_name']))
+        try:
+            back_button = page.find_element(by=By.CLASS_NAME, value='vlocity-btn')
+            back_button.click()
+        except:
+            driver.get(NEW_MEXICO['licenses_url']) # FIXME: Hot-fix.
 
     # End the browser session.
     try:
@@ -268,32 +297,36 @@ def get_licenses_nm(
     retailers['data_refreshed_date'] = datetime.now().isoformat()
 
     # Geocode licenses.
-    # FIXME: This is not working as intended. Perhaps try `search_for_address`?
-    retailers = geocode_addresses(retailers, api_key=api_key, address_field='address')
-    retailers['premise_street_address'] = retailers['formatted_address'].apply(
-        lambda x: x.split(',')[0] if STATE in str(x) else x
-    )
-    retailers['premise_city'] = retailers['formatted_address'].apply(
-        lambda x: x.split(', ')[1].split(',')[0] if STATE in str(x) else x
-    )
-    retailers['premise_zip_code'] = retailers['formatted_address'].apply(
-        lambda x: x.split(', ')[2].split(',')[0].split(' ')[-1] if STATE in str(x) else x
-    )
-    drop_cols = ['state', 'state_name', 'address', 'formatted_address',
-        'details_url']
-    gis_cols = {
-        'county': 'premise_county',
-        'latitude': 'premise_latitude',
-        'longitude': 'premise_longitude'
-    }
-    retailers.drop(columns=drop_cols, inplace=True)
-    retailers.rename(columns=gis_cols, inplace=True)
+    if geocode:
+
+        # FIXME: This is not working as intended.
+        # Perhaps try `search_for_address`?
+        retailers = geocode_addresses(retailers, api_key=api_key, address_field='address')
+        retailers['premise_street_address'] = retailers['formatted_address'].apply(
+            lambda x: x.split(',')[0] if STATE in str(x) else x
+        )
+        retailers['premise_city'] = retailers['formatted_address'].apply(
+            lambda x: x.split(', ')[1].split(',')[0] if STATE in str(x) else x
+        )
+        retailers['premise_zip_code'] = retailers['formatted_address'].apply(
+            lambda x: x.split(', ')[2].split(',')[0].split(' ')[-1] if STATE in str(x) else x
+        )
+        drop_cols = ['state', 'state_name', 'address', 'formatted_address',
+            'details_url']
+        gis_cols = {
+            'county': 'premise_county',
+            'latitude': 'premise_latitude',
+            'longitude': 'premise_longitude'
+        }
+        retailers.drop(columns=drop_cols, inplace=True)
+        retailers.rename(columns=gis_cols, inplace=True)
 
     # Save and return the data.
     if data_dir is not None:
-        if not os.path.exists(data_dir): os.makedirs(data_dir)
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
+        date = datetime.now().isoformat()[:10]
+        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{date}.csv', index=False)
 
     # Return the licenses.
     return retailers

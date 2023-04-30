@@ -256,7 +256,7 @@ class DeliveriesTable extends ConsumerWidget {
 
     // Return the table and actions.
     if (data.isEmpty)
-      table = CustomPlaceholder(
+      table = FormPlaceholder(
         image: 'assets/images/icons/driver.png',
         title: 'Add a delivery',
         description: 'You do not have any active deliveries at this facility.',

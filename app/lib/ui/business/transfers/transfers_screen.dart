@@ -252,7 +252,7 @@ class TransfersTable extends ConsumerWidget {
 
     // Return the table and actions.
     if (data.isEmpty)
-      table = CustomPlaceholder(
+      table = FormPlaceholder(
         image: 'assets/images/icons/facilities.png',
         title: 'Add a transfer',
         description: 'Transfers are used to track packages, items, and plants.',

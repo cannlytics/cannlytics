@@ -68,16 +68,17 @@ The dataset is partitioned into 18 subsets for each state and the aggregate.
 |  [California](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/ca) | `ca`  | ✅ |
 |  [Colorado](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/co) | `co`  | ✅ |
 |  [Connecticut](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/ct) | `ct`  | ✅ |
+| [Delaware](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/de) | `md` | ⚠️ Under development |
 |  [Illinois](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/il) | `il`  | ✅ |
 |  [Maine](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/me) | `me`  | ✅ |
 | [Maryland](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/md) | `md` | ⚠️ Under development |
 |  [Massachusetts](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/ma) | `ma`  | ✅ |
 |  [Michigan](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/mi) | `mi`  | ✅ |
-| [Missouri](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/mo) | `mo` | ⚠️ Under development |
+| [Missouri](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/mo) | `mo` | ✅ |
 |  [Montana](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/mt) | `mt`  | ✅ |
 |  [Nevada](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/nv) | `nv`  | ✅ |
 |  [New Jersey](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/nj) | `nj`  | ✅ |
-|  [New Mexico](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/nm) | `nm`  | ⚠️ Under development |
+|  [New Mexico](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/nm) | `nm`  | ✅ |
 | [New York](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/ny) | `ny` | ⚠️ Under development |
 |  [Oregon](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/or) | `or`  | ✅  |
 |  [Rhode Island](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/ri) | `ri`  | ✅ |
@@ -89,9 +90,9 @@ The following states have issued medical cannabis licenses, but are not (yet) in
 
 - Alabama
 - Arkansas
-- Delaware
 - District of Columbia (D.C.)
 - Florida
+- Kentucky (2024)
 - Louisiana
 - Minnesota
 - Mississippi
@@ -112,10 +113,8 @@ You can load the licenses for each state. For example:
 from datasets import load_dataset
 
 # Get the licenses for a specific state.
-dataset = load_dataset('cannlytics/cannabis_licenses', 'ca')
+dataset = load_dataset('cannlytics/cannabis_licenses', 'ny')
 data = dataset['data']
-assert len(data) > 0
-print('%i licenses.' % len(data))
 ```
 
 ### Data Fields
@@ -161,8 +160,7 @@ The data is split into subsets by state. You can retrieve all licenses by reques
 from datasets import load_dataset
 
 # Get all cannabis licenses.
-repo = 'cannlytics/cannabis_licenses'
-dataset = load_dataset(repo, 'all')
+dataset = load_dataset('cannlytics/cannabis_licenses', 'all')
 data = dataset['data']
 ```
 
@@ -181,14 +179,18 @@ Data about organizations operating in the cannabis industry for each state is va
 |  California | <https://search.cannabis.ca.gov/> |
 |  Colorado | <https://sbg.colorado.gov/med/licensed-facilities> |
 |  Connecticut | <https://portal.ct.gov/DCP/Medical-Marijuana-Program/Connecticut-Medical-Marijuana-Dispensary-Facilities> |
+|  Delaware | <https://dhss.delaware.gov/dhss/dph/hsp/medmarcc.html> |
 |  Illinois | <https://www.idfpr.com/LicenseLookup/AdultUseDispensaries.pdf> |
 |  Maine | <https://www.maine.gov/dafs/ocp/open-data/adult-use> |
+|  Maryland | <https://mmcc.maryland.gov/Pages/Dispensaries.aspx> |
 |  Massachusetts | <https://masscannabiscontrol.com/open-data/data-catalog/> |
 |  Michigan | <https://michigan.maps.arcgis.com/apps/webappviewer/index.html?id=cd5a1a76daaf470b823a382691c0ff60> |
+|  Missouri | <https://health.mo.gov/safety/cannabis/licensed-facilities.php> |
 |  Montana | <https://mtrevenue.gov/cannabis/#CannabisLicenses> |
 |  Nevada | <https://ccb.nv.gov/list-of-licensees/> |
 |  New Jersey | <https://data.nj.gov/stories/s/ggm4-mprw> |
 |  New Mexico | <https://nmrldlpi.force.com/bcd/s/public-search-license?division=CCD&language=en_US> |
+|  New York | <https://cannabis.ny.gov/licensing> |
 |  Oregon | <https://www.oregon.gov/olcc/marijuana/pages/recreational-marijuana-licensing.aspx> |
 |  Rhode Island | <https://dbr.ri.gov/office-cannabis-regulation/compassion-centers/licensed-compassion-centers> |
 |  Vermont | <https://ccb.vermont.gov/licenses> |
@@ -218,7 +220,7 @@ python algorithms/main.py
 Or you can run each algorithm individually. For example:
 
 ```
-python algorithms/get_licenses_ca.py
+python algorithms/get_licenses_ny.py
 ```
 
 ### Personal and Sensitive Information
@@ -249,7 +251,7 @@ Curated by [🔥Cannlytics](https://cannlytics.com)<br>
 ### License
 
 ```
-Copyright (c) 2022 Cannlytics and the Cannabis Data Science Team
+Copyright (c) 2022-2023 Cannlytics and the Cannabis Data Science Team
 
 The files associated with this dataset are licensed under a 
 Creative Commons Attribution 4.0 International license.
@@ -268,7 +270,7 @@ to a third party.
 Please cite the following if you use the code examples in your research:
 
 ```bibtex
-@misc{cannlytics2022,
+@misc{cannlytics2023,
   title={Cannabis Data Science},
   author={Skeate, Keegan and O'Sullivan-Sutherland, Candace},
   journal={https://github.com/cannlytics/cannabis-data-science},

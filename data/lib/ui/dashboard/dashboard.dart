@@ -8,9 +8,9 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/widgets/cards/card_grid.dart';
-import 'package:cannlytics_data/widgets/cards/stats_model_card.dart';
-import 'package:cannlytics_data/widgets/layout/console.dart';
+import 'package:cannlytics_data/common/cards/card_grid.dart';
+import 'package:cannlytics_data/common/cards/stats_model_card.dart';
+import 'package:cannlytics_data/common/layout/console.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -20,8 +20,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/dataset.dart';
-import 'package:cannlytics_data/widgets/cards/datasets_cards.dart';
-import 'package:cannlytics_data/widgets/cards/wide_card.dart';
+import 'package:cannlytics_data/common/cards/datasets_cards.dart';
+import 'package:cannlytics_data/common/cards/wide_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Dashboard screen.

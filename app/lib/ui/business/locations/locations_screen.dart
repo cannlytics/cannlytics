@@ -262,7 +262,7 @@ class LocationsTable extends ConsumerWidget {
 
     // Return the table and actions.
     if (data.isEmpty)
-      table = CustomPlaceholder(
+      table = FormPlaceholder(
         image: 'assets/images/icons/facilities.png',
         title: 'Add a location',
         description: 'Locations are used to track packages, items, and plants.',

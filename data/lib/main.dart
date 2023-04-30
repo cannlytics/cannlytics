@@ -23,7 +23,7 @@ import 'package:cannlytics_data/constants/licenses.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/firebase_options.dart';
 import 'package:cannlytics_data/routing/app_router.dart';
-import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 
 // ignore:depend_on_referenced_packages

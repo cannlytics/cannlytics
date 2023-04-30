@@ -17,7 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
-import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 
 // An instance of the account controller to use as a provider.
 final accountProvider =

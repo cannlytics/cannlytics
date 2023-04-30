@@ -13,15 +13,15 @@
 
 // Flutter imports:
 import 'package:cannlytics_data/services/auth_service.dart';
-import 'package:cannlytics_data/widgets/layout/breadcrumbs.dart';
-import 'package:cannlytics_data/widgets/layout/console.dart';
-import 'package:cannlytics_data/widgets/layout/custom_placeholder.dart';
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
+import 'package:cannlytics_data/common/layout/console.dart';
+import 'package:cannlytics_data/common/forms/form_placeholder.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/widgets/layout/header.dart';
-import 'package:cannlytics_data/widgets/layout/sidebar.dart';
+import 'package:cannlytics_data/common/layout/header.dart';
+import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -258,7 +258,7 @@ class LicenseesTable extends ConsumerWidget {
 
     // TODO: Loading placeholder.
     if (data.isEmpty)
-      table = CustomPlaceholder(
+      table = FormPlaceholder(
         image: 'assets/images/icons/facilities.png',
         title: 'Add a facility',
         description:

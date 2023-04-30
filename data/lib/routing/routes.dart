@@ -14,7 +14,7 @@ import 'package:cannlytics_data/ui/account/account_screen.dart';
 import 'package:cannlytics_data/ui/account/reset_password_screen.dart';
 import 'package:cannlytics_data/ui/ai/coa_doc/coa_doc.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_screen.dart';
-import 'package:cannlytics_data/ui/main/dashboard.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard.dart';
 import 'package:cannlytics_data/ui/results/results_screen.dart';
 import 'package:cannlytics_data/ui/sales/sales_screen.dart';
 import 'package:cannlytics_data/ui/strains/strains_screen.dart';

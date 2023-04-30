@@ -259,7 +259,7 @@ class PlantsTable extends ConsumerWidget {
 
     // Return the table and actions.
     if (data.isEmpty)
-      table = CustomPlaceholder(
+      table = FormPlaceholder(
         image: 'assets/images/icons/plant.png',
         title: 'Add a plant',
         description: 'Plants are used to track packages, items, and plants.',

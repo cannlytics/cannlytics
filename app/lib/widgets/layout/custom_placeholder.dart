@@ -14,8 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:cannlytics_app/constants/design.dart';
 
 /// A custom placeholder.
-class CustomPlaceholder extends StatelessWidget {
-  const CustomPlaceholder({
+class FormPlaceholder extends StatelessWidget {
+  const FormPlaceholder({
     Key? key,
     required this.image,
     required this.title,

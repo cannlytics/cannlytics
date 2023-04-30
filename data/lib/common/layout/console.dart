@@ -8,11 +8,11 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/ui/layout/footer.dart';
-import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
-import 'package:cannlytics_data/widgets/layout/header.dart';
-import 'package:cannlytics_data/widgets/layout/main_screen.dart';
-import 'package:cannlytics_data/widgets/layout/sidebar.dart';
+import 'package:cannlytics_data/common/layout/footer.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
+import 'package:cannlytics_data/common/layout/header.dart';
+import 'package:cannlytics_data/common/layout/main_screen.dart';
+import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:

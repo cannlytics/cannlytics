@@ -500,7 +500,7 @@ class OrganizationForm extends ConsumerWidget {
         //   height: 200.0,
         //   child: Image.asset('assets/images/icons/employees.png'),
         // ),
-        CustomPlaceholder(
+        FormPlaceholder(
           image: 'assets/images/icons/employees.png',
           title: 'No team members',
           description: 'Add a team member to your organization.',

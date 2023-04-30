@@ -225,7 +225,7 @@ class EmployeesTable extends ConsumerWidget {
 
     // Return the table and actions.
     if (data.isEmpty)
-      table = CustomPlaceholder(
+      table = FormPlaceholder(
         image: 'assets/images/icons/figures.png',
         title: 'Add a employee',
         description: 'Employees are used to track packages, items, and plants.',

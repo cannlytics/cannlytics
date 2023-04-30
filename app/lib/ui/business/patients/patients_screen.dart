@@ -252,7 +252,7 @@ class PatientsTable extends ConsumerWidget {
 
     // Return the table and actions.
     if (data.isEmpty)
-      table = CustomPlaceholder(
+      table = FormPlaceholder(
         image: 'assets/images/icons/document.png',
         title: 'Add a patient',
         description: 'You do not have any patients at this facility.',

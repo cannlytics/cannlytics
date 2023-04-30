@@ -20,7 +20,7 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_data/routing/routes.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
-import 'package:cannlytics_data/ui/main/dashboard_controller.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 
 // Flutter imports:
 // import 'package:cannlytics_app/ui/layout/not_found_screen.dart';

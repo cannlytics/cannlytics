@@ -7,7 +7,7 @@
 // Updated: 4/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-import 'package:cannlytics_data/widgets/layout/console.dart';
+import 'package:cannlytics_data/common/layout/console.dart';
 import 'package:flutter/material.dart';
 
 /// CoA Doc screen.
