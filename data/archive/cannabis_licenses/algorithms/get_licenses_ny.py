@@ -111,6 +111,11 @@ def get_retailers_ny(data_dir):
     ]
     licenses = pd.DataFrame(data, columns=columns)
 
+    # TODO: Determine active vs inactive licenses by * in `business_legal_name`.
+
+
+    # TODO: Standardize the licenses.
+
 
 
 def get_processors_ny():

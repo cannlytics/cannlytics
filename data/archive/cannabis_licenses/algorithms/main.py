@@ -18,7 +18,7 @@ Description:
         ✓ California
         ✓ Colorado
         ✓ Connecticut
-        - Delaware (TODO)
+        ✓ Delaware
         ✓ Illinois
         ✓ Maine
         - Maryland (FIXME)
@@ -51,7 +51,7 @@ ALGORITHMS = {
     'ca': 'get_licenses_ca',
     'co': 'get_licenses_co',
     'ct': 'get_licenses_ct',
-    # 'de': 'get_licenses_de',
+    'de': 'get_licenses_de',
     'il': 'get_licenses_il',
     'ma': 'get_licenses_ma',
     # 'md': 'get_licenses_md',

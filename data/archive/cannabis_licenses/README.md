@@ -68,7 +68,7 @@ The dataset is partitioned into 18 subsets for each state and the aggregate.
 |  [California](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/ca) | `ca`  | ✅ |
 |  [Colorado](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/co) | `co`  | ✅ |
 |  [Connecticut](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/ct) | `ct`  | ✅ |
-| [Delaware](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/de) | `md` | ⚠️ Under development |
+| [Delaware](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/de) | `md` | ✅ |
 |  [Illinois](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/il) | `il`  | ✅ |
 |  [Maine](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/me) | `me`  | ✅ |
 | [Maryland](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/md) | `md` | ⚠️ Under development |
