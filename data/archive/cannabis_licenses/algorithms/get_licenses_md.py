@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 11/29/2022
-Updated: 4/25/2023
+Updated: 4/30/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -55,14 +55,11 @@ def get_gis_data(df, api_key):
         'latitude': 'premise_latitude',
         'longitude': 'premise_longitude'
     }
-    df = geocode_addresses(
-        df,
-        api_key=api_key,
-        address_field='address',
-    )
-    df['premise_city'] = df['formatted_address'].apply(
-        lambda x: x.split(', ')[1].split(',')[0] if STATE in str(x) else x
-    )
+    df = geocode_addresses(df, api_key=api_key, address_field='address')
+    get_city = lambda x: x.split(', ')[1].split(',')[0] if STATE in str(x) else x
+    get_street = lambda x: str(x).split(', ')[0]
+    df['premise_city'] = df['formatted_address'].apply(get_city)
+    df['premise_street_address'] = df['formatted_address'].apply(get_street)
     df.drop(columns=drop_cols, inplace=True)
     return df.rename(columns=rename_cols)
 
@@ -84,7 +81,7 @@ def get_licenses_md(
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    #  Extract the license data.
+    # Extract the license data.
     data = []
     for td in soup.find_all('td'):
         entry = {}
@@ -110,14 +107,31 @@ def get_licenses_md(
                 domain = entry['business_email'].split('@')[1]
                 entry['business_website'] = 'https://www.' + domain
 
-            # FIXME: This is a hack to get the business name.
+            # Get the business name.
             entry['business_legal_name'] = img['alt']
             if not entry['business_legal_name']:
                 parsed_url = urlparse(url)
                 entry['business_legal_name'] = parsed_url.netloc.split('.')[0].title()
 
+            # Hot-fix: Get the business name from the website.
+            # FIXME: This is sub-perfect.
+            if entry['business_legal_name'] == 'Mmcc':
+                website = entry['business_website']
+                if 'www' in website:
+                    entry['business_legal_name'] =  \
+                        website \
+                        .split('www.')[1] \
+                        .split('.')[0] \
+                        .title()
+                else:
+                    entry['business_legal_name'] =  \
+                        website \
+                        .split('//')[1] \
+                        .split('.')[0] \
+                        .title()
+
             # Find phone numbers in text.
-            # Uses regular expression to match: xxx-xxx-xxxx
+            # Note: Uses regular expression to match: xxx-xxx-xxxx
             text = td.text.strip()
             phone_number_pattern = re.compile(r'\d{3}-\d{3}-\d{4}')
             phone_numbers = phone_number_pattern.findall(text)
@@ -126,22 +140,6 @@ def get_licenses_md(
             else:
                 entry['business_phone'] = None
 
-            # Find address in the text.
-            # Uses regular expression to match "City, State Zip" pattern.
-            # Assumes the previous lines contains the street address.
-            lines = text.replace('\u200b', '').split('\n')
-            lines = [x for x in lines if x]
-            city_state_zip_pattern = re.compile(r'\b[A-Za-z\s]+,\s[A-Z]{2}\s\d{5}\b')
-            for i in range(len(lines)):
-                line = lines[i].strip()
-                if city_state_zip_pattern.search(line):
-                    index = i - 1
-                    if index > 0:
-                        street = lines[:index].join().strip()
-                    else:
-                        street = lines[index].strip()
-                    entry['premise_street_address'] = f'{street} {line}'
-        
         # Otherwise record just the name and address.
         else:
             lines = [x.text.replace('\u200b', '') for x in td.contents]
@@ -149,18 +147,43 @@ def get_licenses_md(
             if not lines:
                 continue
             entry['business_legal_name'] = lines[0].strip()
+
+            # Get the street address.
             address = ', '.join(line.strip() for line in lines[1:])
-            address = address.replace('\xa0', '')
-            entry['premise_street_address'] = address
+            address = address.replace('\xa0', ' ')
+            entry['address'] = address
 
             # Look for phone number below address.
             phone_number_pattern = re.compile(r'\d{3}-\d{3}-\d{4}')
             phone_numbers = phone_number_pattern.findall(address)
             if phone_numbers:
                 entry['business_phone'] = phone_numbers[0]
-                entry['premise_street_address'] = address.replace(phone_numbers[0], '').strip()
+                entry['address'] = address.split(phone_numbers[0])[0].strip()
             else:
                 entry['business_phone'] = None
+        
+        # Handle missed addresses.
+        if not entry.get('address'):
+            address = td.text.split(', MD ')[0] \
+                .replace('\u200b', ' ') \
+                .replace('\n', ' ') \
+                .replace('\xa0', ' ') \
+                .replace('  ', ' ') \
+                .strip()
+            zip_code = re.findall(r'MD \b\d{5}\b', td.text)
+            if zip_code:
+                zip_code = zip_code[0].split('MD ')[-1]
+            else:
+                zip_code = ''
+            address = f'{address}, MD {zip_code}'.strip()
+
+            # Clean address.
+            address = address.split('http')[0].strip()
+            if entry.get('business_phone'):
+                address = address.split(entry['business_phone'])[0].strip()
+            if entry.get('business_email'):
+                address = address.split(entry['business_email'])[0].strip()
+            entry['address'] = address
 
         # Add the entry to the data.
         data.append(entry)
@@ -188,23 +211,19 @@ def get_licenses_md(
         license_type=None,
     )
 
-    # # FIXME: Format street, city, state, and zip code.
-    # pattern = r'^(.*),\s*([A-Za-z\s]+),\s*([A-Z]{2})\s*(\d{5})$'
-    # addresses = retailers['premise_street_address'].str.extract(pattern)
-    # retailers[['premise_street_address', 'street', 'city', 'state', 'zip_code']] = addresses
-
-    # # FIXME: Get GIS data.
-    # if google_maps_api_key:
-    #     retailers = get_gis_data(retailers, google_maps_api_key)
+    # Get GIS data.
+    if google_maps_api_key:
+        retailers = get_gis_data(retailers, google_maps_api_key)
 
     # Define metadata.
     retailers['data_refreshed_date'] = datetime.now().isoformat()
 
     # Save the data.
     if data_dir is not None:
-        if not os.path.exists(data_dir): os.makedirs(data_dir)
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
+        date = datetime.now().isoformat()[:10]
+        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{date}.csv', index=False)
 
     # Return the licenses.
     return retailers

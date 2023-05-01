@@ -21,7 +21,7 @@ Description:
         ✓ Delaware
         ✓ Illinois
         ✓ Maine
-        - Maryland (FIXME)
+        ✓ Maryland
         ✓ Massachusetts
         ✓ Michigan (Requires Selenium)
         ✓ Missouri
@@ -54,7 +54,7 @@ ALGORITHMS = {
     'de': 'get_licenses_de',
     'il': 'get_licenses_il',
     'ma': 'get_licenses_ma',
-    # 'md': 'get_licenses_md',
+    'md': 'get_licenses_md',
     'me': 'get_licenses_me',
     'mi': 'get_licenses_mi',
     'mo': 'get_licenses_mo',
@@ -62,6 +62,7 @@ ALGORITHMS = {
     'nj': 'get_licenses_nj',
     'nm': 'get_licenses_nm',
     'nv': 'get_licenses_nv',
+    # TODO:
     # 'ny': 'get_licenses_ny',
     'or': 'get_licenses_or',
     'ri': 'get_licenses_ri',
