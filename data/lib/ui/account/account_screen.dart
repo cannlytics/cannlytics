@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 4/16/2023
+// Updated: 5/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -12,6 +12,8 @@ import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/common/layout/console.dart';
+import 'package:cannlytics_data/ui/account/api_key_management.dart';
+import 'package:cannlytics_data/ui/account/subscription_management.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -97,10 +99,10 @@ class AccountManagement extends ConsumerWidget {
           if (user != null) AccountForm(key: Key('account-form')),
 
           // Subscriptions.
-          if (user != null) SubscriptionsCard(key: Key('subscriptions')),
+          if (user != null) SubscriptionManagement(key: Key('subscriptions')),
 
           // API keys.
-          if (user != null) APIKeysCard(key: Key('api-keys')),
+          if (user != null) APIKeyManagement(key: Key('api-keys')),
 
           // Delete account option.
           if (user != null) _deleteAccount(context, ref, screenWidth),
@@ -615,66 +617,6 @@ class ThemeSettings extends ConsumerWidget {
                   ),
                 ],
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Subscriptions card.
-class SubscriptionsCard extends ConsumerWidget {
-  const SubscriptionsCard({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Dynamic screen width.
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Render the widget.
-    return WideCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Subscription',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              gapH6,
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Subscriptions card.
-class APIKeysCard extends ConsumerWidget {
-  const APIKeysCard({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Dynamic screen width.
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Render the widget.
-    return WideCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'API Keys',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              gapH6,
             ],
           ),
         ],
