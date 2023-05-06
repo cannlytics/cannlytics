@@ -16,6 +16,8 @@ import 'package:http/http.dart' as http;
 
 /// Service to interface with the Cannlytics API.
 class APIService {
+  const APIService._();
+
   // Define the base URL.
   static String _baseUrl = 'http://127.0.0.1:8000/api';
 

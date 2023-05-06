@@ -88,6 +88,7 @@ flutter:
   assets:
     - assets/icons/
     - assets/icons/emoji/rocket.svg
+    - assets/icons/emoji/green_check.svg
     - assets/icons/emoji/glowing_star.svg
     - assets/icons/emoji/house_with_garden.svg
     - assets/icons/emoji/microscope.svg

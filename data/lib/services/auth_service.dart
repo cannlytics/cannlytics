@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 4/15/2023
+// Updated: 5/5/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -29,7 +29,9 @@ final authProvider = Provider<AuthService>((ref) {
 
 /// [AuthService] manages authentication with Firebase.
 class AuthService {
-  AuthService(this._auth, this._firestore);
+  const AuthService(this._auth, this._firestore);
+
+  // Parameters.
   final FirebaseAuth _auth;
   final FirestoreService _firestore;
 

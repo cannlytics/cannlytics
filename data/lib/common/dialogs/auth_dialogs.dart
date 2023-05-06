@@ -196,7 +196,7 @@ class _SignInDialogState extends ConsumerState<SignInDialog>
                 style: Theme.of(context).textTheme.titleMedium,
                 decoration: InputDecoration(
                   labelText: 'Email',
-                  hintText: 'test@cannlytics.com',
+                  // hintText: 'test@cannlytics.com',
                   enabled: !state.isLoading,
                   floatingLabelBehavior: FloatingLabelBehavior.auto,
                   contentPadding: EdgeInsets.only(

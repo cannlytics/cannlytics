@@ -7,9 +7,12 @@
 // Updated: 5/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/cards/wide_card.dart';
+import 'package:cannlytics_data/constants/design.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// Subscriptions cards.
 class SubscriptionManagement extends ConsumerWidget {
@@ -17,9 +20,6 @@ class SubscriptionManagement extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Dynamic screen width.
-    final screenWidth = MediaQuery.of(context).size.width;
-
     // Render the widget.
     return WideCard(
       child: Row(
@@ -32,6 +32,7 @@ class SubscriptionManagement extends ConsumerWidget {
                 'Subscription',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
+              // TODO: Display the user's current subscription.
               SizedBox(height: 8),
               SubscriptionPlanCards(),
             ],
@@ -42,34 +43,86 @@ class SubscriptionManagement extends ConsumerWidget {
   }
 }
 
+/// Subscription plan cards.
 class SubscriptionPlanCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          SubscriptionCard(
-            title: 'Basic Plan',
-            price: '\$10',
-            features: ['Feature 1', 'Feature 2'],
-          ),
-          SubscriptionCard(
-            title: 'Pro Plan',
-            price: '\$20',
-            features: ['Feature 1', 'Feature 2', 'Feature 3'],
-          ),
-          SubscriptionCard(
-            title: 'Premium Plan',
-            price: '\$30',
-            features: ['Feature 1', 'Feature 2', 'Feature 3', 'Feature 4'],
-          ),
+    // Dynamic screen width.
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Subscription cards.
+    // TODO: Get from Firestore.
+    var cards = [
+      SubscriptionCard(
+        title: 'Standard Plan',
+        price: '\$4.20',
+        features: [
+          'Limited AI access',
+          'Limited data access',
+          'Limited API access',
         ],
       ),
+      SubscriptionCard(
+        title: 'Pro Plan',
+        price: '\$42.0',
+        features: [
+          'Unlimited AI access',
+          'Unlimited data access',
+          'Unlimited API access',
+        ],
+      ),
+      SubscriptionCard(
+        title: 'Enterprise Plan',
+        price: '\$420',
+        features: [
+          'Unlimited AI access',
+          'Unlimited data access',
+          'Unlimited API access',
+          '*White-labeling license',
+        ],
+      ),
+    ];
+
+    // * Unless, you purchase a white-labeling license, then you must provide
+    // the following copyright and license when you use datasets, AI-generated
+    // material, or other services provided by the Cannlytics API.
+
+    // Copyright (c) 2020-2023 Cannlytics and The Cannabis Data Science Team
+
+    // Permission is hereby granted, free of charge, to any person obtaining
+    // a copy of this software and associated documentation files (the
+    // "Software"), to deal in the Software without restriction, including
+    // without limitation the rights to use, copy, modify, merge, publish,
+    // distribute, sublicense, and/or sell copies of the Software, and to
+    // permit persons to whom the Software is furnished to do so, subject to
+    // the following conditions:
+
+    // The above copyright notice and this permission notice shall be
+    // included in all copies or substantial portions of the Software.
+
+    // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+    // LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+    // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+    // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+    // Row of cards (column on tablet and mobile).
+    return Center(
+      child: (screenWidth < Breakpoints.desktop)
+          ? Column(
+              children: cards,
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: cards,
+            ),
     );
   }
 }
 
+/// Subscription card.
 class SubscriptionCard extends StatelessWidget {
   final String title;
   final String price;
@@ -83,30 +136,82 @@ class SubscriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text(
-              price,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            Text('Features:'),
-            SizedBox(height: 8),
-            ...features.map((feature) => Padding(
+    return SizedBox(
+      width: 260.0,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(3),
+        ),
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Title.
+              // TODO: Color title depending on plan.
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+
+              // Price.
+              SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                children: [
+                  Text(
+                    price,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  Text(
+                    ' / month',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Billed monthly',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+
+              // TODO: Display active if this is the user's current plan.
+
+              // TODO: Display a button to upgrade to this plan.
+              PrimaryButton(
+                text: 'Select Plan',
+                // backgroundColor: Colors.green,
+              ),
+
+              // Features.
+              SizedBox(height: 8),
+              ...features.map(
+                (feature) => Padding(
                   padding: EdgeInsets.only(bottom: 4),
-                  child: Text('• $feature'),
-                )),
-          ],
+                  child: Column(
+                    children: [
+                      Divider(
+                        color: Colors.grey,
+                        thickness: 1,
+                        height: 16,
+                      ),
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/icons/emoji/green_check.svg',
+                            height: 24,
+                            width: 24,
+                          ),
+                          Text(feature),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
