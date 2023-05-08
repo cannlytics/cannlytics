@@ -21,6 +21,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/common/inputs/string_controller.dart';
 
+/* Data */
+
+/// TODO: Get data from Firestore.
+
+final List<Map> mainDatasets = [
+  {
+    "image_url":
+        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3",
+    "description": "Cannabis Licenses",
+    "route": "licenses"
+  },
+];
+
+List<Map> aiModels = [
+  {
+    "image_url":
+        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3",
+    "description": "AI Lab Results Parser",
+    "route": "CoADoc"
+  },
+  {
+    "image_url":
+        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30",
+    "description": "Effects & Aromas Predictor",
+    "route": "SkunkFx"
+  }
+];
+
 /* Navigation */
 
 // Current page provider.

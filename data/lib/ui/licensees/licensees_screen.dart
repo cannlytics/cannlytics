@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:cannlytics_data/common/layout/console.dart';
 import 'package:cannlytics_data/ui/licensees/usa_map.dart';
@@ -18,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/common/layout/header.dart';
 import 'package:cannlytics_data/common/layout/sidebar.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Screen.
@@ -73,9 +75,21 @@ class LicenseesScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Licenses by State',
-            style: Theme.of(context).textTheme.titleLarge,
+          // Text(
+          //   'Licenses by State',
+          //   style: Theme.of(context).textTheme.titleLarge,
+          // ),
+          Breadcrumbs(
+            items: [
+              BreadcrumbItem(
+                  title: 'Data',
+                  onTap: () {
+                    context.push('/');
+                  }),
+              BreadcrumbItem(
+                title: 'Licenses',
+              ),
+            ],
           ),
           SizedBox(
             height: 8,

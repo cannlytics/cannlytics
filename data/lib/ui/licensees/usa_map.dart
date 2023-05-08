@@ -9,6 +9,11 @@
 // Original code: <https://gist.github.com/pskink/afd4f20a40ae7756555877ec030daa46>
 // Map Credit: MapSVG <https://mapsvg.com/maps>
 // Map License: CC-BY 4.0 <https://creativecommons.org/licenses/by/4.0/>
+
+// See:
+// - https://en.wikipedia.org/wiki/Legality_of_cannabis
+// - https://commons.wikimedia.org/wiki/File:Medical_cannabis_%2B_CBD_United_States_map_2.svg
+
 import 'dart:math';
 
 import 'package:collection/collection.dart';

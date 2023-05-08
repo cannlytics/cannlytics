@@ -153,7 +153,7 @@ class MainContent extends ConsumerWidget {
                   context.push('/');
                 }),
             BreadcrumbItem(
-                title: 'Licensees',
+                title: 'Licenses',
                 onTap: () {
                   context.push('/licenses');
                 }),
