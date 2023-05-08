@@ -58,6 +58,7 @@ class Insets {
 
 // Constant paddings.
 class Sizes {
+  static const p2 = 2.0;
   static const p4 = 4.0;
   static const p6 = 6.0;
   static const p8 = 8.0;
@@ -72,6 +73,7 @@ class Sizes {
 }
 
 // Constant gap widths.
+const gapW2 = SizedBox(width: Sizes.p2);
 const gapW4 = SizedBox(width: Sizes.p4);
 const gapW6 = SizedBox(width: Sizes.p6);
 const gapW8 = SizedBox(width: Sizes.p8);
@@ -85,6 +87,7 @@ const gapW48 = SizedBox(width: Sizes.p48);
 const gapW64 = SizedBox(width: Sizes.p64);
 
 // Constant gap heights.
+const gapH2 = SizedBox(height: Sizes.p2);
 const gapH4 = SizedBox(height: Sizes.p4);
 const gapH6 = SizedBox(height: Sizes.p6);
 const gapH8 = SizedBox(height: Sizes.p8);

@@ -4,13 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/16/2023
-// Updated: 4/16/2023
+// Updated: 5/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+/// A card used to display information about a statistical model.
 class StatisticalModelCard extends StatelessWidget {
   final String modelDescription;
   final String imageUrl;
@@ -49,70 +50,91 @@ class StatisticalModelCard extends StatelessWidget {
   }
 }
 
-class CustomCard extends StatelessWidget {
+/// A card used to display information about a dataset.
+class DatasetCard extends StatelessWidget {
   final String imageUrl;
   final String title;
   final String description;
-  final String category;
-  final String instances;
-  final String attributes;
+  final String tier;
+  final String rows;
+  final String columns;
+  final void Function()? onTap;
 
-  CustomCard({
+  DatasetCard({
     required this.imageUrl,
     required this.title,
     required this.description,
-    required this.category,
-    required this.instances,
-    required this.attributes,
+    required this.tier,
+    required this.rows,
+    required this.columns,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
       elevation: 2,
       child: InkWell(
-        onTap: () {}, // Add your onTap event or navigation here
+        // Action.
+        onTap: onTap,
+
+        // Border.
         child: Padding(
           padding: EdgeInsets.all(8),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrl,
-                  width: 48,
-                  height: 48,
+              // Image.
+              Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    imageUrl,
+                    width: 48,
+                    height: 48,
+                  ),
                 ),
               ),
-              SizedBox(width: 8),
+
+              // Body.
+              gapW16,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Title.
+                    gapH8,
                     Text(
                       title,
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: Theme.of(context).textTheme.titleLarge!.color),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+
+                    // Description.
                     Text(
                       description,
+                      style: Theme.of(context).textTheme.bodyMedium,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 8),
+
+                    // Row of information.
+                    gapH6,
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        buildInfoItem(Icons.search, category),
-                        buildInfoItem(
-                            Icons.insert_drive_file_outlined, instances),
-                        buildInfoItem(Icons.apps, attributes),
+                        // TODO: Pick appropriate icons.
+                        buildInfoItem(Icons.data_array_sharp, tier),
+                        buildInfoItem(Icons.insert_drive_file_outlined, rows),
+                        buildInfoItem(Icons.apps, columns),
+                        gapW4,
                       ],
                     ),
+                    gapH2,
                   ],
                 ),
               ),
@@ -123,6 +145,7 @@ class CustomCard extends StatelessWidget {
     );
   }
 
+  /// Builds a single cell in the row of information.
   Widget buildInfoItem(IconData icon, String text) {
     return Row(
       children: [

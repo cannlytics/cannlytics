@@ -27,10 +27,15 @@ import 'package:cannlytics_data/common/inputs/string_controller.dart';
 
 final List<Map> mainDatasets = [
   {
+    "title": "Cannabis Licenses",
     "image_url":
         "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3",
-    "description": "Cannabis Licenses",
-    "route": "licenses"
+    "description":
+        "A collection of 11,060 cannabis licenses from each state with permitted adult-use cannabis.",
+    "tier": "Free",
+    "path": "/licenses",
+    "observations": 11060,
+    "fields": 28,
   },
 ];
 
