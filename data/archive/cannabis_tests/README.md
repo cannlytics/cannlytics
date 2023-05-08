@@ -1,22 +1,18 @@
 ---
+pretty_name: cannabis_tests
 annotations_creators:
   - expert-generated
 language_creators:
   - expert-generated
 license:
   - cc-by-4.0
-pretty_name: cannabis_tests
-size_categories:
-  - 1K<n<10K
-source_datasets:
-  - original
 tags:
   - cannabis
   - lab results
   - tests
 ---
 
-# Cannabis Tests, Curated by Cannlytics
+# Cannabis Tests
 
 <div style="margin-top:1rem; margin-bottom: 1rem;">
   <img width="240px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fdatasets%2Fcannabis_tests%2Fcannabis_tests_curated_by_cannlytics.png?alt=media&token=22e4d1da-6b30-4c3f-9ff7-1954ac2739b2">
@@ -305,3 +301,13 @@ Please cite the following if you use the code examples in your research:
 ### Contributions
 
 Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), [@hcadeaux](https://huggingface.co/hcadeaux), [@keeganskeate](https://github.com/keeganskeate), [The CESC](https://thecesc.org), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.
+
+
+
+<!-- NEW:
+
+Archival process:
+
+
+
+-->

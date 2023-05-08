@@ -6,7 +6,7 @@ Copyright (c) 2022-2023 Cannabis Data
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/29/2022
-Updated: 4/2/2023
+Updated: 5/7/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -33,14 +33,11 @@ from dotenv import dotenv_values
 import uuid
 
 
-# Define the dataset.
-DATASET = 'cannlytics/cannabis_licenses'
-
-
 def upload_cannabis_licenses(
         subset: str = 'all',
-        collection: str = 'licenses',
-        doc_id: str = 'hex'
+        collection: str = 'public/data/licenses',
+        doc_id: str = 'hex',
+        verbose: bool = True,
     ):
     """Get cannabis license data from Hugging Face and upload the data
     to Firestore.
@@ -50,10 +47,12 @@ def upload_cannabis_licenses(
         doc_id (str): How to create a document ID, a `hex`, `uuid`, or
             the field of the document to use.
     """
-    
+
     # Get the data from Hugging Face.
-    dataset = load_dataset(DATASET, subset)
+    dataset = load_dataset('cannlytics/cannabis_licenses', subset)
     data = dataset['data'].to_pandas()
+    if verbose:
+        print(f'Uploading {len(data)} licenses ({subset}).')
 
     # Compile the references and documents.
     refs, docs = [], []
@@ -68,7 +67,7 @@ def upload_cannabis_licenses(
         ref = f'{collection}/{_id}'
         refs.append(ref)
         docs.append(doc)
-    
+
     # Upload the data to Firestore.
     db = firebase.initialize_firebase()
     firebase.update_documents(refs, docs, database=db)
@@ -79,7 +78,7 @@ if __name__ == '__main__':
 
     # Set Firebase credentials.
     try:
-        config = dotenv_values('../.env')
+        config = dotenv_values('../../.env')
         credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
     except KeyError:
         config = dotenv_values('./.env')
@@ -89,9 +88,11 @@ if __name__ == '__main__':
     # Get any subset specified from the command line.
     try:
         subset = sys.argv[1]
+        if subset.startswith('--ip'):
+            subset = 'all'
     except KeyError:
         subset = 'all'
-
+    
     # Upload Firestore with cannabis license data.
     upload_cannabis_licenses(subset=subset)
     print('Uploaded license data to Firestore.')

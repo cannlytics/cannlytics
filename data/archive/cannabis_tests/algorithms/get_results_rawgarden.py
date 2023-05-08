@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/23/2022
-Updated: 4/9/2023
+Updated: 5/5/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Description:
@@ -60,7 +60,7 @@ STORAGE_REF = 'data/lab_results/rawgarden'
 # Create directories if they don't already exist.
 # TODO: Edit `ENV_FILE` and `DATA_DIR` as needed for your desired setup.
 ENV_FILE = '../../../../.env'
-DATA_DIR = 'D:/archive/coas/ca'
+DATA_DIR = 'D:/data/california/lab_results'
 COA_DATA_DIR = f'{DATA_DIR}/rawgarden'
 COA_PDF_DIR = f'{COA_DATA_DIR}/pdfs'
 TEMP_PATH = f'{COA_DATA_DIR}/tmp'

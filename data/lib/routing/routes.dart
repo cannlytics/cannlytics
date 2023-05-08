@@ -13,8 +13,10 @@ import 'package:cannlytics_data/routing/app_router.dart';
 import 'package:cannlytics_data/ui/account/account_screen.dart';
 import 'package:cannlytics_data/ui/account/reset_password_screen.dart';
 import 'package:cannlytics_data/ui/ai/coa_doc/coa_doc.dart';
+import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_screen.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard.dart';
+import 'package:cannlytics_data/ui/licensees/state_licensees.dart';
 import 'package:cannlytics_data/ui/results/results_screen.dart';
 import 'package:cannlytics_data/ui/sales/sales_screen.dart';
 import 'package:cannlytics_data/ui/strains/strains_screen.dart';
@@ -47,10 +49,21 @@ class Routes {
 
     // Licensees screen.
     AppRoute(
-      path: '/licensees',
-      name: 'licensees',
+      path: '/licenses',
+      name: 'licenses',
       builder: (context, state) => LicenseesScreen(),
       useFade: true,
+      // TODO: Add licensees by state pages!
+      routes: [
+        AppRoute(
+          path: ':license_number',
+          builder: (context, state) {
+            // FIXME: Either return state or license number.
+            // final state = USAStates[state.params['license_number']!];
+            return StateLicensesScreen(id: state.params['license_number']!);
+          },
+        )
+      ],
     ),
 
     // Strains screen.

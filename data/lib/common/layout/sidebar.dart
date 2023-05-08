@@ -76,7 +76,7 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/scroll.svg',
             width: 28,
           ),
-          onTap: () => context.go('/licensees'),
+          onTap: () => context.push('/licenses'),
         ),
 
         // Strains link.

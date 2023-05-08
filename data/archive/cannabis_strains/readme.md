@@ -1,5 +1,5 @@
 ---
-pretty_name: cannabis_licenses
+pretty_name: cannabis_strains
 annotations_creators:
   - expert-generated
 language_creators:
@@ -8,10 +8,11 @@ license:
   - cc-by-4.0
 tags:
   - cannabis
-  - licenses
+  - strains
+  - cultivars
 ---
 
-# Cannabis Licenses
+# Cannabis Strains
 
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
   <img style="max-height:365px;width:100%;max-width:720px;" alt="" src="analysis/figures/cannabis-licenses-map.png">
@@ -245,7 +246,7 @@ Curated by [🔥Cannlytics](https://cannlytics.com)<br>
 ### License
 
 ```
-Copyright (c) 2022-2023 Cannlytics and the Cannabis Data Science Team
+Copyright (c) 2023 Cannlytics and the Cannabis Data Science Team
 
 The files associated with this dataset are licensed under a 
 Creative Commons Attribution 4.0 International license.
@@ -274,4 +275,4 @@ Please cite the following if you use the code examples in your research:
 
 ### Contributions
 
-Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), [@hcadeaux](https://huggingface.co/hcadeaux), [@keeganskeate](https://github.com/keeganskeate), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.
+Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.

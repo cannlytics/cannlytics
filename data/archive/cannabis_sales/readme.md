@@ -1,5 +1,5 @@
 ---
-pretty_name: cannabis_licenses
+pretty_name: cannabis_sales
 annotations_creators:
   - expert-generated
 language_creators:
@@ -8,10 +8,10 @@ license:
   - cc-by-4.0
 tags:
   - cannabis
-  - licenses
+  - sales
 ---
 
-# Cannabis Licenses
+# Cannabis Sales
 
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
   <img style="max-height:365px;width:100%;max-width:720px;" alt="" src="analysis/figures/cannabis-licenses-map.png">
@@ -245,7 +245,7 @@ Curated by [🔥Cannlytics](https://cannlytics.com)<br>
 ### License
 
 ```
-Copyright (c) 2022-2023 Cannlytics and the Cannabis Data Science Team
+Copyright (c) 2023 Cannlytics and the Cannabis Data Science Team
 
 The files associated with this dataset are licensed under a 
 Creative Commons Attribution 4.0 International license.

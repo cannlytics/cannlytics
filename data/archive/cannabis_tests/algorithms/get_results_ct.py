@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/8/2023
-Updated: 4/9/2023
+Updated: 5/6/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Data Source:
@@ -29,8 +29,8 @@ import pandas as pd
 CT_RESULTS_URL = 'https://data.ct.gov/api/views/egd5-wb6r/rows.json'
 
 # Specify where your data lives.
-DATA_DIR = 'D:/archive/coas/ct'
-PDF_DIR = 'D:/archive/coas/ct/ct-2023-04-09'
+DATA_DIR = 'D:/data/connecticut/lab_results'
+PDF_DIR = 'D:/data/connecticut/lab_results/pdfs'
 
 
 def get_results_ct(url: str = CT_RESULTS_URL) -> pd.DataFrame:
@@ -71,7 +71,7 @@ def download_pdfs(
         download_path: str,
         column_name: Optional[str] = 'lab_analysis',
         id_column: Optional[str] = 'id',
-        verbose: Optional[bool] = False,
+        verbose: Optional[bool] = True,
     ) -> None:
     """
     Downloads all PDFs from a specified column in a Pandas DataFrame.
@@ -95,14 +95,14 @@ def download_pdfs(
         outfile = os.path.join(download_path, filename)
 
         # Continue if the PDF is already downloaded.
-        if os.path.isfile(outfile):
+        if os.path.isfile(outfile) or pdf_url is None:
             continue
 
         # Send a GET request to download the PDF.
         try:
             response = requests.get(pdf_url)
         except:
-            print(f'Failed to download PDF: {filename}')
+            print(f'Failed to download PDF: {pdf_url}')
             continue
 
         # Check if the request was successful (status code 200).
@@ -145,8 +145,8 @@ if __name__ == '__main__':
     download_pdfs(results, download_path)
 
     # Save the results to Excel.
-    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-    datafile = f'{data_dir}/ct-results-{timestamp}.xlsx'
+    date = datetime.now().isoformat()[:10]
+    datafile = f'{data_dir}/ct-results-{date}.xlsx'
     cannlytics.utils.to_excel_with_style(results, datafile)
     print('Connecticut lab results archived:', datafile)
 

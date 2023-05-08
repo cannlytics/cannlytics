@@ -55,10 +55,10 @@ class Breadcrumbs extends StatelessWidget {
 /// A breadcrumb item.
 class BreadcrumbItem {
   final String title;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   BreadcrumbItem({
     required this.title,
-    required this.onTap,
+    this.onTap,
   });
 }

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 4/23/2023
+Updated: 5/5/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Description:
@@ -72,9 +72,10 @@ all_results = get_mcr_labs_test_results(
 
 # Save the results to Excel.
 data = pd.DataFrame(all_results)
-timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-if not os.path.exists(data_dir): os.makedirs(data_dir)
-datafile = f'{data_dir}/mcr-lab-results-{timestamp}.xlsx'
+date = datetime.now().isoformat()[:10]
+if not os.path.exists(data_dir):
+    os.makedirs(data_dir)
+datafile = f'{data_dir}/mcr-lab-results-{date}.xlsx'
 to_excel_with_style(data, datafile)
 
 # Optionally upload the data to Firestore.

@@ -1,4 +1,4 @@
-# Cannabis Tests | Python Requirements
+# Washington Cannabis Data | Python Requirements
 # Created: 9/15/2022
 # Updated: 9/15/2022
 beautifulsoup4==4.11.1

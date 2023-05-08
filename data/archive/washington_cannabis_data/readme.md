@@ -1,22 +1,17 @@
 ---
+pretty_name: washington_cannabis_data
 annotations_creators:
   - expert-generated
 language_creators:
   - expert-generated
 license:
   - cc-by-4.0
-pretty_name: cannabis_sales
-size_categories:
-  - 10K<n<100K
-source_datasets:
-  - original
 tags:
-  - cannabis
-  - sales
   - washington
+  - cannabis
 ---
 
-# Cannabis Sales
+# Washington Cannabis Data
 
 ## Table of Contents
 - [Table of Contents](#table-of-contents)
@@ -140,6 +135,7 @@ Cannabis sales data is of interest to many parties and having a public repositor
 
 | Data Source | URL |
 |-------------|-----|
+| WSLCB PRR 2023-04-04 | <https://lcb.box.com/s/lg50ow8qx2xki2d4lr6raj0c2r22v711> |
 | WSLCB PRR 2023-03-06 | <https://lcb.app.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml> |
 | WSLCB PRR 2023-01-27 | <https://lcb.box.com/s/wzfoqysl4v9aqljwc0pi0g5ea6bch759> |
 
@@ -239,3 +235,14 @@ Please cite the following if you use the code examples in your research:
 ### Contributions
 
 Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), [@keeganskeate](https://github.com/keeganskeate), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.
+
+<!-- NEW:
+
+Archival process:
+
+
+1. File a public records request with the WSLCB to receive a link to the latest PRR. The PRR is a dropbox link that contains a zip file with the data. E.g. <https://lcb.box.com/s/lg50ow8qx2xki2d4lr6raj0c2r22v711> Take note of where you store your data as this will be used as your `DATA_DIR` throughout the process. The default is `D:\data\washington`
+
+
+
+-->

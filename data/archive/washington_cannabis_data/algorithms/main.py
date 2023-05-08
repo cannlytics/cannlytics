@@ -7,7 +7,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/7/2023
-Updated: 4/17/2023
+Updated: 5/5/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -24,17 +24,23 @@ Command-line Usage:
 
 """
 # Internal imports:
-from .curate_ccrs_lab_results import curate_ccrs_lab_results
-from .curate_ccrs_inventory import curate_ccrs_inventory
-from .curate_ccrs_sales import curate_ccrs_sales
-from .curate_ccrs_strains import curate_ccrs_strains
+try:
+    from .curate_ccrs_lab_results import curate_ccrs_lab_results
+    from .curate_ccrs_inventory import curate_ccrs_inventory
+    # from .curate_ccrs_sales import curate_ccrs_sales
+    # from .curate_ccrs_strains import curate_ccrs_strains
+except:
+    from curate_ccrs_lab_results import curate_ccrs_lab_results
+    from curate_ccrs_inventory import curate_ccrs_inventory
+    # from curate_ccrs_sales import curate_ccrs_sales
+    # from curate_ccrs_strains import curate_ccrs_strains
 
 
 # === Test ===
 if __name__ == '__main__':
 
     # Specify the date of the public records request.
-    DATE = '3-6-23'
+    DATE = '4-4-23'
 
     # TODO: Unzip the initial zipped folder.
 
@@ -44,5 +50,5 @@ if __name__ == '__main__':
     STATS_DIR = f'{base}\\ccrs-stats\\'
     curate_ccrs_lab_results(DATA_DIR, STATS_DIR)
     curate_ccrs_inventory(DATA_DIR, STATS_DIR)
-    curate_ccrs_sales(DATA_DIR, STATS_DIR)
-    curate_ccrs_strains(DATA_DIR, STATS_DIR)
+    # curate_ccrs_sales(DATA_DIR, STATS_DIR)
+    # curate_ccrs_strains(DATA_DIR, STATS_DIR)

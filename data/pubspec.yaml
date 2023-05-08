@@ -33,6 +33,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.0
   fl_chart: ^0.61.0
   flutter_openmoji: ^0.0.8
+  path_drawing: ^1.0.1
 
 dev_dependencies:
   import_sorter: ^4.6.0
@@ -86,6 +87,10 @@ flutter_native_splash:
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/maps/united_states_map.svg
+    - assets/images/maps/us_map.svg
+    - assets/images/maps/world.svg
+    - assets/images/maps/usa-with-labels.svg
     - assets/icons/
     - assets/icons/emoji/rocket.svg
     - assets/icons/emoji/green_check.svg

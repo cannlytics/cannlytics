@@ -120,6 +120,32 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // === Data ===
+
+    // Allow anyone to read the public licenses data.
+    match /public/data/licenses/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow anyone to read the public lab results data.
+    match /public/data/lab_results/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow anyone to read the public strain data.
+    match /public/data/strains/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow anyone to read the public patents data.
+    match /public/data/patents/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
     // === Recipes ===
 
     // Allow anyone to read public AI data.
