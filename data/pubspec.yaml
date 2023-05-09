@@ -34,6 +34,7 @@ dependencies:
   fl_chart: ^0.61.0
   flutter_openmoji: ^0.0.8
   path_drawing: ^1.0.1
+  excel: ^2.1.0
 
 dev_dependencies:
   import_sorter: ^4.6.0

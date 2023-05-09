@@ -4,15 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/7/2023
-// Updated: 5/7/2023
+// Updated: 5/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO:
-// [ ] Create a list of licensees by state.
-// [ ] Open a licensees page when selected.
-// [ ] Download data button (requires subscription).
+// [ ] Download data button (require subscription).
 
 // Flutter imports:
+import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/console.dart';
@@ -49,38 +48,13 @@ class StateLicensesScreen extends StatelessWidget {
 
       // Body.
       body: Console(slivers: [
-        // Title.
-        // SliverToBoxAdapter(child: _title(context, id)),
-        // SliverToBoxAdapter(child: _breadcrumbs(context)),
-
-        // TODO: Ability to download licenses.
-
         // Table.
-        // SliverToBoxAdapter(child: MainContent(id: id)),
-        // SliverToBoxAdapter(child: LicenseesTable(id: id)),
         SliverToBoxAdapter(
           child: Container(
             height: 750,
             child: MainContent(id: id),
           ),
         ),
-        // SliverToBoxAdapter(
-        //   child: Column(
-        //     children: [
-        //       // Other widgets
-        //       Expanded(
-        //         child: Padding(
-        //           padding: EdgeInsets.only(
-        //             top: 24,
-        //             left: 16,
-        //             right: 16,
-        //           ),
-        //           child: LicenseesTable(id: id),
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        // ),
 
         // Footer.
         const SliverToBoxAdapter(child: Footer()),
@@ -176,7 +150,11 @@ class LicenseesTable extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // FIXME: Get the filtered data.
     // public/data/licensees where state = id.toUpperCase()
-    final data = ref.watch(stateLicensesProvider).value ?? [];
+    final data = ref.watch(stateLicensesProvider(id)).value;
+    print('NO DATA YET...');
+    if (data == null) {
+      return Center(child: CircularProgressIndicator(strokeWidth: 1.42));
+    }
     print('DATA: ${data.length}');
     if (data.isEmpty) {
       return FormPlaceholder(
@@ -184,36 +162,10 @@ class LicenseesTable extends ConsumerWidget {
         title: 'No licenses',
         description: 'There are no active licenses in this state.',
         onTap: () {
-          context.go('/licenses');
+          context.push('/licenses');
         },
       );
     }
-
-    // TODO: Actions and breadcrumbs.
-    // Widget actions = Row(
-    //   children: [
-    //     Breadcrumbs(
-    //       items: [
-    //         BreadcrumbItem(
-    //             title: 'Data',
-    //             onTap: () {
-    //               context.push('/');
-    //             }),
-    //         BreadcrumbItem(
-    //             title: 'Licensees',
-    //             onTap: () {
-    //               context.push('/licenses');
-    //             }),
-    //         BreadcrumbItem(
-    //           title: id.toUpperCase(),
-    //         ),
-    //       ],
-    //     ),
-    //   ],
-    // );
-
-    // FIXME: Create a licensees table.
-    // var table;
 
     // Define the cell builder function.
     _buildCells(Map item) {
@@ -226,7 +178,7 @@ class LicenseesTable extends ConsumerWidget {
       return values.map((value) {
         return DataCell(
           Text(value),
-          onTap: () => context.go('/licenses/$id/${item["license_number"]}'),
+          onTap: () => context.push('/licenses/$id/${item["license_number"]}'),
         );
       }).toList();
     }
@@ -348,21 +300,32 @@ class LicenseesTable extends ConsumerWidget {
             // Search engine function.
             suggestionsCallback: (pattern) async {
               ref.read(searchTermProvider.notifier).state = pattern;
-              final suggestions = ref.read(filteredLicenseesProvider);
+              final suggestions =
+                  ref.read(filteredLicenseesProvider(id)).value!.toList();
               return suggestions;
             },
 
             // Autocomplete menu.
-            itemBuilder: (BuildContext context, Licensee? suggestion) {
-              return ListTile(title: Text(suggestion!.license));
+            itemBuilder:
+                (BuildContext context, Map<String, dynamic>? suggestion) {
+              return ListTile(title: Text(suggestion!['business_legal_name']));
             },
 
             // Menu selection function.
-            onSuggestionSelected: (Licensee? suggestion) {
-              context.go('/licenses/$id/${suggestion!.license}');
+            onSuggestionSelected: (Map<String, dynamic>? suggestion) {
+              context.push('/licenses/$id/${suggestion!['id']}');
             },
           ),
         ),
+
+        // Download button.
+        SecondaryButton(
+            text: 'Download',
+            onPressed: () {
+              var items = ref.read(stateLicensesProvider(id)).value;
+              if (items == null) return;
+              LicenseesService.downloadLicensees(items);
+            }),
       ],
     );
 
@@ -375,7 +338,7 @@ class LicenseesTable extends ConsumerWidget {
         title: 'No licenses',
         description: 'There are no active licenses in this state.',
         onTap: () {
-          context.go('/licenses');
+          context.push('/licenses');
         },
       );
 
