@@ -32,7 +32,7 @@ final List<Map> mainDatasets = [
         "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3",
     "description":
         "A collection of 11,060 cannabis licenses from each state with permitted adult-use cannabis.",
-    "tier": "Free",
+    "tier": "Premium",
     "path": "/licenses",
     "observations": 11060,
     "fields": 28,

@@ -80,8 +80,8 @@ class _InteractiveMapState extends State<InteractiveMap>
     Rect out = alignment.inscribe(fittedSrc, dst);
     return Matrix4.identity()
       ..translate(out.left, out.top)
-      ..scale(scaleX, scaleY)
-      ..translate(-src.left, -src.top);
+      ..scale(scaleX * 0.8, scaleY * 0.8)
+      ..translate(-src.left + 10, -src.top + 10);
   }
 
   /// Zoom to a rectangle.

@@ -38,12 +38,18 @@ class Breadcrumbs extends StatelessWidget {
                 // Breadcrumb text.
                 child: Text(
                   item.title,
-                  style: Theme.of(context).textTheme.labelLarge,
+                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color),
                 ),
               ),
 
               // Caret icon.
-              if (!isLast) Icon(Icons.chevron_right, size: 16),
+              if (!isLast)
+                Icon(
+                  Icons.chevron_right,
+                  size: 16,
+                  color: Theme.of(context).textTheme.labelSmall!.color,
+                ),
             ],
           );
         },

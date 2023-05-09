@@ -74,7 +74,9 @@ class DashboardScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Data', style: Theme.of(context).textTheme.labelLarge),
+              Text('Data',
+                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color)),
             ],
           ),
           gapH8,

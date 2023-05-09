@@ -103,7 +103,7 @@ class LicenseesScreen extends StatelessWidget {
   Widget _footnotes(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        top: 24,
+        top: 12,
         left: 16,
         right: 16,
       ),
@@ -114,18 +114,19 @@ class LicenseesScreen extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Map Credit: ',
+                  text: 'Map credit: ',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 _hyperlink(context, 'MapSVG', 'https://mapsvg.com/maps'),
               ],
             ),
           ),
+          gapH4,
           RichText(
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Map License:',
+                  text: 'Map license: ',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 _hyperlink(
