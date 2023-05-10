@@ -54,6 +54,9 @@ def upload_cannabis_licenses(
     if verbose:
         print(f'Uploading {len(data)} licenses ({subset}).')
 
+    # TODO: Upload data to Firebase Storage.
+    
+
     # Compile the references and documents.
     refs, docs = [], []
     for _, row in data.iterrows():
@@ -70,7 +73,7 @@ def upload_cannabis_licenses(
 
     # Upload the data to Firestore.
     db = firebase.initialize_firebase()
-    firebase.update_documents(refs, docs, database=db)
+    firebase.update_documents(refs, docs, database=db)  
 
 
 # === Test ===

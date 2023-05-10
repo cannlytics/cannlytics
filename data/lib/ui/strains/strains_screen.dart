@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/console.dart';
@@ -65,7 +66,31 @@ class MainContent extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          StrainsTable(),
+          // StrainsTable(),
+          Row(
+            children: [
+              Breadcrumbs(
+                items: [
+                  BreadcrumbItem(
+                      title: 'Data',
+                      onTap: () {
+                        context.go('/');
+                      }),
+                  BreadcrumbItem(
+                      title: 'Strains',
+                      onTap: () {
+                        // Add navigation to Category screen.
+                      })
+                ],
+              ),
+            ],
+          ),
+
+          // Sponsorship placeholder.
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: SponsorshipCard(),
+          ),
           gapH48,
         ],
       ),

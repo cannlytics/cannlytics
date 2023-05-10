@@ -4,17 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/7/2023
-// Updated: 5/7/2023
+// Updated: 5/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // Original code: <https://gist.github.com/pskink/afd4f20a40ae7756555877ec030daa46>
 // Map Credit: MapSVG <https://mapsvg.com/maps>
 // Map License: CC-BY 4.0 <https://creativecommons.org/licenses/by/4.0/>
 
-// See:
-// - https://en.wikipedia.org/wiki/Legality_of_cannabis
-// - https://commons.wikimedia.org/wiki/File:Medical_cannabis_%2B_CBD_United_States_map_2.svg
-
 import 'dart:math';
+import 'package:http/http.dart' as http;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -25,8 +22,28 @@ import 'package:go_router/go_router.dart';
 
 // Global map properties.
 const String mapSvg = 'assets/images/maps/usa-with-labels.svg';
+const String permissionsRawSvg = 'assets/images/maps/united_states_map.svg';
+const String permissionsMapSvg =
+    'https://upload.wikimedia.org/wikipedia/commons/d/d2/Medical_cannabis_%2B_CBD_United_States_map_2.svg';
 final Color mapBorderColor = Colors.grey.shade400;
 const Duration mapAnimationDuration = Duration(milliseconds: 400);
+final List mapLegend = [
+  {
+    'status': 'Legal',
+    'pattern': RegExp(r'/\* Legal \*/(.*?)\/*'),
+    'color': '#1C6CA2',
+  },
+  {
+    'status': 'Medical',
+    'pattern': RegExp(r'/\* Medical \*/(.*?)\/*'),
+    'color': '#42AA41',
+  },
+  {
+    'status': 'Low-THC, high-CBD',
+    'pattern': RegExp(r'/\* Low-THC, high-CBD \*/(.*?)\/*'),
+    'color': '#B2DF8A',
+  },
+];
 
 /// An interactive map of the united states.
 class InteractiveMap extends StatefulWidget {
@@ -162,13 +179,7 @@ class _InteractiveMapState extends State<InteractiveMap>
     return DecoratedBox(
       decoration: ShapeDecoration(
         shape: shape,
-
-        /// FIXME: Color appropriately.
-        // gradient: stateData.gradient,
-        // shadows: const [
-        //   BoxShadow(blurRadius: 0.5),
-        //   BoxShadow(blurRadius: 0.5, offset: Offset(0.5, 0.5)),
-        // ],
+        color: stateData.color,
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -181,21 +192,23 @@ class _InteractiveMapState extends State<InteractiveMap>
           // Action.
           onTap: () {
             if (stateData.id == 'labels') {
-              // FIXME:
               return;
             }
             context.push('/licenses/${stateData.id.toLowerCase()}');
           },
 
           // Optional: Label.
-          // child: Center(
-          //     child: Text(
-          //   stateData.id,
-          //   textScaleFactor: 0.1,
-          // )),
+          // child: Center(child: Text(stateData.id, textScaleFactor: 0.1)),
         ),
       ),
     );
+  }
+
+  /// Create a Flutter `Color` from a hex string.
+  Color _colorFromHex(String hexColor) {
+    final hexCode = hexColor.replaceFirst('#', '');
+    final intValue = int.parse(hexCode, radix: 16);
+    return Color(0xFF000000 | intValue);
   }
 
   /// Parse the map SVG.
@@ -208,35 +221,63 @@ class _InteractiveMapState extends State<InteractiveMap>
     final w = double.parse(doc.rootElement.getAttribute('width')!);
     final h = double.parse(doc.rootElement.getAttribute('height')!);
 
-    // Determine colors.
-    // FIXME: Color by cannabis status.
-    List<Color> colors(double h) {
-      return [
-        HSVColor.fromAHSV(1, h * 360, 1, 0.9).toColor(),
-        HSVColor.fromAHSV(1, h * 360, 1, 0.3).toColor(),
-      ];
+    // FIXME: Load the statuses from the web, otherwise use local SVG.
+    var permissionsSvgData;
+    try {
+      var statePermissionsUrl =
+          'https://upload.wikimedia.org/wikipedia/commons/d/d2/Medical_cannabis_%2B_CBD_United_States_map_2.svg';
+      final response = await http.get(Uri.parse(statePermissionsUrl));
+      final svg = response.body;
+      permissionsSvgData = await rootBundle.loadString(svg);
+    } catch (error) {
+      permissionsSvgData = await rootBundle.loadString(permissionsRawSvg);
+    }
+    final permissionsSvg = XmlDocument.parse(permissionsSvgData);
+    final css = permissionsSvg.rootElement.text.split('Alabama')[0];
+
+    // Determine the map colors from the SVG.
+    Map<String, dynamic> stateColors = {};
+    var categories = [
+      css.split('/*')[1],
+      css.split('/*')[2],
+      css.split('/*')[3],
+    ];
+    for (var text in categories) {
+      var status = text.split('*/')[0].trim();
+      RegExp fillPattern = RegExp(r'fill:(#[0-9a-fA-F]{6});');
+      RegExpMatch? match = fillPattern.firstMatch(text);
+      Color fillColor = _colorFromHex(match?.group(1) ?? '#BDC3C7');
+      RegExp statePattern = RegExp(r'#([A-Z]{2})');
+      Iterable<RegExpMatch> matches = statePattern.allMatches(text);
+      List<String> states = matches.map((match) => match.group(1)!).toList();
+      for (var state in states) {
+        stateColors[state] = {
+          "state": state,
+          "status": status,
+          "color": fillColor,
+        };
+      }
     }
 
+    // Render each state.
     const padding = EdgeInsets.all(40);
-    final allCountries = doc.rootElement.findElements('path');
-    final numCountries = allCountries.length;
-    final states = allCountries.mapIndexed((i, stateData) => StateData(
-          path: parseSvgPathData(stateData.getAttribute('d')!)
-              .shift(padding.topLeft),
-          id: stateData.getAttribute('id') ?? 'id_$i ???',
-          title: stateData.getAttribute('title') ?? 'title_$i ???',
-          // FIXME: Assign color by status.
-          gradient: LinearGradient(
-            colors: colors(i / numCountries),
-            stops: const [0.2, 1],
-          ),
-          seqNo: i,
-        ));
+    final allStates = doc.rootElement.findElements('path');
+    final states = allStates.mapIndexed((i, stateData) {
+      return StateData(
+        path: parseSvgPathData(stateData.getAttribute('d')!)
+            .shift(padding.topLeft),
+        id: stateData.getAttribute('id') ?? 'id_$i ???',
+        title: stateData.getAttribute('title') ?? 'title_$i ???',
+        color: stateColors[stateData.getAttribute('id')]?['color'] ??
+            Color(0xFFBDC3C7),
+        seqNo: i,
+      );
+    });
+
+    // Return the map data.
     return MapData(
       size: Size(w + padding.horizontal, h + padding.vertical),
-      states: {
-        for (final stateData in states) stateData.id: stateData,
-      },
+      states: {for (final stateData in states) stateData.id: stateData},
     );
   }
 }
@@ -260,7 +301,6 @@ class MapDelegate extends FlowDelegate {
       context.paintChild(stateData.seqNo,
           transform: Matrix4.translationValues(offset.dx, offset.dy, 0));
     }
-    // print('paintChildren, ${filteredCountries.map((c) => c.id)}');
   }
 
   /// Get the constraints for a shape.
@@ -297,7 +337,7 @@ class StateData {
     required this.path,
     required this.id,
     required this.title,
-    required this.gradient,
+    required this.color,
     required this.seqNo,
   }) : rect = path.getBounds();
 
@@ -305,7 +345,7 @@ class StateData {
   final Rect rect;
   final String id;
   final String title;
-  final Gradient gradient;
+  final Color color;
   final int seqNo;
 }
 
@@ -328,6 +368,7 @@ class ExtendedViewport extends ValueNotifier<Rect> {
     }
   }
 
+  // Viewport parameters.
   Rect innerRect = Rect.zero;
   double prevScale = 0;
 
@@ -336,7 +377,6 @@ class ExtendedViewport extends ValueNotifier<Rect> {
     assert(_size != Size.zero);
     final offset = ctrl.toScene(_size.center(Offset.zero));
     final scale = ctrl.value.getMaxScaleOnAxis();
-
     if (!innerRect.contains(offset) || scale != prevScale) {
       prevScale = scale;
       value = Rect.fromCenter(
@@ -344,7 +384,6 @@ class ExtendedViewport extends ValueNotifier<Rect> {
         width: _size.width * cacheFactor / scale,
         height: _size.height * cacheFactor / scale,
       );
-      // print('value: $value');
       innerRect = EdgeInsets.symmetric(
         horizontal: _size.width * 0.5 / scale,
         vertical: _size.height * 0.5 / scale,
@@ -394,6 +433,7 @@ class StateBorder extends ShapeBorder {
   ShapeBorder scale(double t) => this;
 }
 
+/// Splash for shapes factory.
 class _InkFactory extends InteractiveInkFeatureFactory {
   @override
   InteractiveInkFeature create({
@@ -418,6 +458,7 @@ class _InkFactory extends InteractiveInkFeatureFactory {
   }
 }
 
+/// Splash for shapes.
 class _InkFeature extends InteractiveInkFeature {
   _InkFeature({
     required MaterialInkController controller,
@@ -457,9 +498,6 @@ class _InkFeature extends InteractiveInkFeature {
     final t = Curves.easeInOut.transform(_controller.value);
     final rect = Offset.zero & referenceBox.size;
     final side = 2 * rect.bottomRight.distance;
-
-    // FIXME: Color the states appropriately.
-    // lerpDouble(100, 255, _controller.value)!.toInt(), 0, 0, 0)
     final paint = Paint()
       ..color = Color.fromARGB(33, 0, 0, 0)
       ..shader = gradient.createShader(rect);

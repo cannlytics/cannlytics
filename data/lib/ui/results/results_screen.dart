@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
@@ -88,42 +89,48 @@ class MainContent extends ConsumerWidget {
             ],
           ),
 
-          // Title.
-          Text(
-            'Tools',
-            style: Theme.of(context).textTheme.titleMedium,
+          // Sponsorship placeholder.
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: SponsorshipCard(),
           ),
+
+          // Title.
+          // Text(
+          //   'Tools',
+          //   style: Theme.of(context).textTheme.titleMedium,
+          // ),
 
           // TODO: Parse COAs.
-          Row(
-            children: [
-              // SecondaryButton(
-              //   text: 'Parse Certificate',
-              //   onPressed: () {
-              //     context.go('/results/parse');
-              //   },
-              // ),
-              StatisticalModelCard(
-                imageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3',
-                modelDescription: 'CoADoc - AI Certificate Parser',
-                route: 'CoADoc',
-              ),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     // SecondaryButton(
+          //     //   text: 'Parse Certificate',
+          //     //   onPressed: () {
+          //     //     context.go('/results/parse');
+          //     //   },
+          //     // ),
+          //     StatisticalModelCard(
+          //       imageUrl:
+          //           'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3',
+          //       modelDescription: 'CoADoc - AI Certificate Parser',
+          //       route: 'CoADoc',
+          //     ),
+          //   ],
+          // ),
 
-          // Lab result data sources.
-          Text(
-            'Data Sources',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          // // Lab result data sources.
+          // Text(
+          //   'Data Sources',
+          //   style: Theme.of(context).textTheme.titleMedium,
+          // ),
 
-          // TODO: Lab results archive
-          // Explore an archive of cannabis lab results.
-          Text(
-            'Archive',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          // // TODO: Lab results archive
+          // // Explore an archive of cannabis lab results.
+          // Text(
+          //   'Archive',
+          //   style: Theme.of(context).textTheme.titleMedium,
+          // ),
 
           // TODO: Lab results table.
           // LabResultsTable(),

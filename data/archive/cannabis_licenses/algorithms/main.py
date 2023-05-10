@@ -100,6 +100,7 @@ def main(data_dir, env_file):
     for state, algorithm in ALGORITHMS.items():
 
         # Import the module and get the entry point.
+        # FIXME: Requires the module to be in the same directory.
         module = importlib.import_module(f'{algorithm}')
         entry_point = getattr(module, algorithm)
 

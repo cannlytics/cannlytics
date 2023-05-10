@@ -66,7 +66,7 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/house_with_garden.svg',
             width: 28,
           ),
-          onTap: () => context.go('/'),
+          onTap: () => context.push('/'),
         ),
 
         // Licensees link.
@@ -86,7 +86,7 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/tanabata_tree.svg',
             width: 28,
           ),
-          onTap: () => context.go('/strains'),
+          onTap: () => context.push('/strains'),
         ),
 
         // // Products link.
@@ -96,7 +96,7 @@ class SideMenu extends ConsumerWidget {
         //     'assets/icons/emoji/package.svg',
         //     width: 28,
         //   ),
-        //   onTap: () => context.go('/products'),
+        //   onTap: () => context.push('/products'),
         // ),
 
         // Lab results link.
@@ -106,7 +106,7 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/microscope.svg',
             width: 28,
           ),
-          onTap: () => context.go('/results'),
+          onTap: () => context.push('/results'),
         ),
 
         // Sales link.
@@ -116,7 +116,7 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/money_bag.svg',
             width: 28,
           ),
-          onTap: () => context.go('/sales'),
+          onTap: () => context.push('/sales'),
         ),
 
         // // Industry link.
@@ -126,7 +126,7 @@ class SideMenu extends ConsumerWidget {
         //     'assets/icons/emoji/tractor.svg',
         //     width: 28,
         //   ),
-        //   onTap: () => context.go('/production'),
+        //   onTap: () => context.push('/production'),
         // ),
 
         // // Research link.
@@ -136,31 +136,33 @@ class SideMenu extends ConsumerWidget {
         //     'assets/icons/emoji/dna.svg',
         //     width: 28,
         //   ),
-        //   onTap: () => context.go('/research'),
+        //   onTap: () => context.push('/research'),
         // ),
 
         // Divider
         Divider(),
 
         // Upgrade link.
-        DrawerListTile(
-          title: 'Upgrade',
-          leading: SvgPicture.asset(
-            'assets/icons/emoji/glowing_star.svg',
-            width: 28,
+        if (user == null)
+          DrawerListTile(
+            title: 'Upgrade',
+            leading: SvgPicture.asset(
+              'assets/icons/emoji/glowing_star.svg',
+              width: 28,
+            ),
+            onTap: () => context.push('/account?upgrade=true'),
           ),
-          onTap: () => context.go('/account?upgrade=true'),
-        ),
 
         // Settings link.
-        DrawerListTile(
-          title: 'Settings',
-          leading: SvgPicture.asset(
-            'assets/icons/emoji/gear.svg',
-            width: 28,
+        if (user != null)
+          DrawerListTile(
+            title: 'Settings',
+            leading: SvgPicture.asset(
+              'assets/icons/emoji/gear.svg',
+              width: 28,
+            ),
+            onTap: () => context.push('/account'),
           ),
-          onTap: () => context.go('/account'),
-        ),
 
         // Help link.
         DrawerListTile(
@@ -196,7 +198,7 @@ class SideMenu extends ConsumerWidget {
               );
               if (logout == true) {
                 await ref.read(authProvider).signOut();
-                context.go('/dashboard');
+                context.push('/dashboard');
               }
             },
           ),

@@ -7,9 +7,6 @@
 // Updated: 5/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// TODO:
-// [ ] Download data button (require subscription).
-
 // Flutter imports:
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
@@ -20,6 +17,7 @@ import 'package:cannlytics_data/common/layout/header.dart';
 import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:cannlytics_data/common/tables/table_data.dart';
 import 'package:cannlytics_data/models/licensee.dart';
+import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 import 'package:dartx/dartx.dart';
 import 'package:flutter/material.dart';
@@ -149,12 +147,12 @@ class LicenseesTable extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // FIXME: Get the filtered data.
-    // public/data/licensees where state = id.toUpperCase()
-    final data = ref.watch(stateLicensesProvider(id)).value;
+    final data = ref.watch(filteredLicenseesProvider);
     print('NO DATA YET...');
-    if (data == null) {
-      return Center(child: CircularProgressIndicator(strokeWidth: 1.42));
-    }
+    // if (ref.read(activeStateProvider) == null) {
+    //   ref.read(activeStateProvider.notifier).state = id;
+    //   // return Center(child: CircularProgressIndicator(strokeWidth: 1.42));
+    // }
     print('DATA: ${data.length}');
     if (data.isEmpty) {
       return FormPlaceholder(
@@ -218,7 +216,7 @@ class LicenseesTable extends ConsumerWidget {
             ref.read(licenseesSortColumnIndex.notifier).state = columnIndex;
             ref.read(licenseesSortAscending.notifier).state = sortAscending;
             // FIXME:
-            // ref.read(licenseesProvider.notifier).setLicensees(sorted);
+            ref.read(licenseesProvider.notifier).setLicensees(sorted);
           },
         ),
     ];
@@ -300,8 +298,7 @@ class LicenseesTable extends ConsumerWidget {
             // Search engine function.
             suggestionsCallback: (pattern) async {
               ref.read(searchTermProvider.notifier).state = pattern;
-              final suggestions =
-                  ref.read(filteredLicenseesProvider(id)).value!.toList();
+              final suggestions = ref.read(filteredLicenseesProvider);
               return suggestions;
             },
 
@@ -320,12 +317,18 @@ class LicenseesTable extends ConsumerWidget {
 
         // Download button.
         SecondaryButton(
-            text: 'Download',
-            onPressed: () {
-              var items = ref.read(stateLicensesProvider(id)).value;
-              if (items == null) return;
-              LicenseesService.downloadLicensees(items);
-            }),
+          text: 'Download',
+          onPressed: () {
+            // FIXME: Require the user to be signed in.
+
+            // FIXME: Get the correct datafile (Get download URL from Firebase Storage).
+            String url =
+                'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fdata%2Flicenses%2Fwa%2Flicenses-wa-2023-04-24T21-21-31.csv?alt=media&token=33ab0328-9fa5-4658-b927-5511268fef1a';
+
+            // Download the datafile.
+            DataService.openInANewTab(url);
+          },
+        ),
       ],
     );
 

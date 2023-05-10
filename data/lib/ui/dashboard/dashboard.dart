@@ -4,11 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 5/8/2023
+// Updated: 5/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_data/common/cards/card_grid.dart';
+import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 import 'package:cannlytics_data/common/cards/stats_model_card.dart';
 import 'package:cannlytics_data/common/layout/console.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
@@ -39,9 +40,26 @@ class DashboardScreen extends ConsumerWidget {
         // Future work: Statistical models cards.
         // _statsModelsCards(),
 
-        // TODO: Call for contributions.
-
-        // TODO: Use call for contributions as a placeholder on unfinished pages.
+        // Call for contributions.
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: 24,
+              horizontal: Defaults.defaultPadding,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Statistics',
+                    style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                        color: Theme.of(context).textTheme.titleLarge!.color)),
+                gapH8,
+                SponsorshipCard(),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

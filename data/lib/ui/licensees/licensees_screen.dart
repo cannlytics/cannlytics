@@ -4,13 +4,15 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 5/7/2023
+// Updated: 5/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:cannlytics_data/common/layout/console.dart';
+import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/ui/licensees/usa_map.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -39,8 +41,6 @@ class LicenseesScreen extends StatelessWidget {
       body: Console(slivers: [
         // Title.
         SliverToBoxAdapter(child: _title(context)),
-
-        // TODO: Ability to download all licensees.
 
         // Optional: Toggle between map and master list.
 
@@ -71,14 +71,11 @@ class LicenseesScreen extends StatelessWidget {
         top: 24,
         left: 16,
         right: 16,
+        bottom: 8,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Text(
-          //   'Licenses by State',
-          //   style: Theme.of(context).textTheme.titleLarge,
-          // ),
           Breadcrumbs(
             items: [
               BreadcrumbItem(
@@ -91,8 +88,14 @@ class LicenseesScreen extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(
-            height: 8,
+          SecondaryButton(
+            text: 'Download all licenses',
+            onPressed: () {
+              // FIXME: Require the user to be signed in.
+              String url =
+                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fdata%2Flicenses%2Fall%2Flicenses-2022-10-08T14-03-08.csv?alt=media&token=4d9c2350-a901-4846-9a1e-574720ec70d3';
+              DataService.openInANewTab(url);
+            },
           ),
         ],
       ),
@@ -114,10 +117,16 @@ class LicenseesScreen extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Map credit: ',
+                  text: 'Map credits: ',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 _hyperlink(context, 'MapSVG', 'https://mapsvg.com/maps'),
+                TextSpan(
+                  text: ', ',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                _hyperlink(context, 'Jamesy0627144',
+                    'https://commons.wikimedia.org/wiki/File:Medical_cannabis_%2B_CBD_United_States_map_2.svg'),
               ],
             ),
           ),
@@ -126,13 +135,22 @@ class LicenseesScreen extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Map license: ',
+                  text: 'Map licenses: ',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 _hyperlink(
                   context,
                   'CC-BY 4.0',
                   'https://creativecommons.org/licenses/by/4.0/',
+                ),
+                TextSpan(
+                  text: ', ',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                _hyperlink(
+                  context,
+                  'CC BY-SA 3.0',
+                  'https://creativecommons.org/licenses/by-sa/3.0/',
                 ),
               ],
             ),

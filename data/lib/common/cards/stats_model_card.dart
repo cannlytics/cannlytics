@@ -108,11 +108,7 @@ class DatasetCard extends StatelessWidget {
                     gapH8,
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                            color:
-                                Theme.of(context).textTheme.titleLarge!.color,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.titleLarge,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -130,7 +126,6 @@ class DatasetCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // TODO: Pick appropriate icons.
                         buildInfoItem(Icons.workspace_premium, tier),
                         buildInfoItem(Icons.list_sharp, rows),
                         buildInfoItem(Icons.table_chart_outlined, columns),
