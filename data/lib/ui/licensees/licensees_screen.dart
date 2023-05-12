@@ -8,21 +8,23 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/buttons/secondary_button.dart';
-import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
-import 'package:cannlytics_data/common/layout/footer.dart';
-import 'package:cannlytics_data/common/layout/console.dart';
-import 'package:cannlytics_data/services/data_service.dart';
-import 'package:cannlytics_data/ui/licensees/usa_map.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-// Project imports:
-import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/common/layout/header.dart';
-import 'package:cannlytics_data/common/layout/sidebar.dart';
+// Package imports:
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+// Project imports:
+import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
+import 'package:cannlytics_data/common/layout/console.dart';
+import 'package:cannlytics_data/common/layout/footer.dart';
+import 'package:cannlytics_data/common/layout/header.dart';
+import 'package:cannlytics_data/common/layout/sidebar.dart';
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/services/data_service.dart';
+import 'package:cannlytics_data/ui/licensees/usa_map.dart';
 
 /// Screen.
 class LicenseesScreen extends StatelessWidget {

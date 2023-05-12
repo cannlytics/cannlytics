@@ -7,9 +7,14 @@
 // Updated: 5/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-import 'package:cannlytics_data/constants/design.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
+
+// Project imports:
+import 'package:cannlytics_data/constants/design.dart';
 
 /// A card used to display information about a statistical model.
 class StatisticalModelCard extends StatelessWidget {

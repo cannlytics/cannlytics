@@ -11,14 +11,18 @@
 // import 'dart:io';
 // import 'package:path/path.dart';
 
-import 'package:cannlytics_data/common/inputs/string_controller.dart';
-import 'package:cannlytics_data/models/licensee.dart';
-import 'package:cannlytics_data/services/data_service.dart';
-import 'package:cannlytics_data/services/firestore_service.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
+import 'package:cannlytics_data/common/inputs/string_controller.dart';
+import 'package:cannlytics_data/models/licensee.dart';
+import 'package:cannlytics_data/services/data_service.dart';
+import 'package:cannlytics_data/services/firestore_service.dart';
+
 // import 'package:excel/excel.dart';
 // import 'package:intl/intl.dart';
 

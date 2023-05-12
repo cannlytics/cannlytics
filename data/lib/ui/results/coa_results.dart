@@ -1,8 +1,15 @@
-import 'package:cannlytics_data/ui/results/coa_doc_service.dart';
+// Dart imports:
+import 'dart:convert';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+// Project imports:
+import 'package:cannlytics_data/ui/results/coa_doc_service.dart';
 
 /// COA results page.
 class CoAResultsPage extends StatefulWidget {

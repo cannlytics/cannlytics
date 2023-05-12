@@ -6,9 +6,15 @@
 // Created: 5/4/2023
 // Updated: 5/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-import 'package:cannlytics_data/common/cards/wide_card.dart';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
+import 'package:cannlytics_data/common/cards/wide_card.dart';
 
 /// API key management.
 class APIKeyManagement extends ConsumerWidget {

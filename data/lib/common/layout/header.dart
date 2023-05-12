@@ -15,14 +15,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/constants/theme.dart';
-import 'package:cannlytics_data/services/auth_service.dart';
-import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
 import 'package:cannlytics_data/common/images/avatar.dart';
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/constants/theme.dart';
+import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 
 /// Dashboard header.
 class DashboardHeader extends ConsumerWidget with PreferredSizeWidget {

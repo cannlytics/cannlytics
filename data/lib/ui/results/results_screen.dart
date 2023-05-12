@@ -8,24 +8,25 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
-import 'package:cannlytics_data/common/layout/footer.dart';
-import 'package:cannlytics_data/services/auth_service.dart';
-import 'package:cannlytics_data/common/buttons/primary_button.dart';
-import 'package:cannlytics_data/common/buttons/secondary_button.dart';
-import 'package:cannlytics_data/common/cards/stats_model_card.dart';
-import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
-import 'package:cannlytics_data/common/layout/console.dart';
-import 'package:cannlytics_data/common/forms/form_placeholder.dart';
 import 'package:flutter/material.dart';
 
-// Project imports:
-import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/common/layout/header.dart';
-import 'package:cannlytics_data/common/layout/sidebar.dart';
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+// Project imports:
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
+import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
+import 'package:cannlytics_data/common/cards/stats_model_card.dart';
+import 'package:cannlytics_data/common/forms/form_placeholder.dart';
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
+import 'package:cannlytics_data/common/layout/console.dart';
+import 'package:cannlytics_data/common/layout/footer.dart';
+import 'package:cannlytics_data/common/layout/header.dart';
+import 'package:cannlytics_data/common/layout/sidebar.dart';
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/services/auth_service.dart';
 import 'coa_doc.dart';
 
 /// Screen.

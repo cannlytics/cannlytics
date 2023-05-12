@@ -8,18 +8,18 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/layout/footer.dart';
-import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
-import 'package:cannlytics_data/common/layout/header.dart';
-import 'package:cannlytics_data/common/layout/main_screen.dart';
-import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
+import 'package:cannlytics_data/common/layout/footer.dart';
+import 'package:cannlytics_data/common/layout/header.dart';
+import 'package:cannlytics_data/common/layout/main_screen.dart';
+import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 
 /// General console screen that renders given widgets.
 class ConsoleScreen extends StatelessWidget {

@@ -8,6 +8,15 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:dartx/dartx.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:go_router/go_router.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
@@ -16,17 +25,10 @@ import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:cannlytics_data/common/layout/header.dart';
 import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:cannlytics_data/common/tables/table_data.dart';
+import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/licensee.dart';
 import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
-import 'package:dartx/dartx.dart';
-import 'package:flutter/material.dart';
-
-// Project imports:
-import 'package:cannlytics_data/constants/design.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:go_router/go_router.dart';
 
 /// Screen.
 class StateLicensesScreen extends StatelessWidget {

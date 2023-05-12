@@ -8,10 +8,16 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // import 'dart:io';
+
+// Dart imports:
 import 'dart:convert';
 import 'dart:html' as html;
-import 'package:http/http.dart' as http;
+
+// Package imports:
 import 'package:csv/csv.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+
 // import 'dart:io';
 // import 'package:flutter/material.dart';
 // import 'package:http/http.dart' as http;
@@ -19,7 +25,6 @@ import 'package:csv/csv.dart';
 // import 'package:path/path.dart';
 
 // import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:intl/intl.dart';
 // import 'package:excel/excel.dart';
 
 /// Data service.

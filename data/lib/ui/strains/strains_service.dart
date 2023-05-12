@@ -7,9 +7,14 @@
 // Updated: 5/11/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+// Dart imports:
 import 'dart:convert';
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:http/http.dart' as http;
 
 /// Strains service.
 class StrainsService {

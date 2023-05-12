@@ -14,10 +14,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/common/forms/form_container.dart';
+import 'package:cannlytics_data/common/layout/footer.dart';
+import 'package:cannlytics_data/constants/design.dart';
 
 /// Simple not found screen used for 404 errors.
 class NotFoundScreen extends StatelessWidget {

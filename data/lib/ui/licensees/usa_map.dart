@@ -10,15 +10,19 @@
 // Map Credit: MapSVG <https://mapsvg.com/maps>
 // Map License: CC-BY 4.0 <https://creativecommons.org/licenses/by/4.0/>
 
+// Dart imports:
 import 'dart:math';
-import 'package:http/http.dart' as http;
 
-import 'package:collection/collection.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:collection/collection.dart';
+import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:path_drawing/path_drawing.dart';
 import 'package:xml/xml.dart';
-import 'package:go_router/go_router.dart';
 
 // Global map properties.
 const String mapSvg = 'assets/images/maps/usa-with-labels.svg';

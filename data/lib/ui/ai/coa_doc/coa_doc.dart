@@ -7,8 +7,11 @@
 // Updated: 4/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-import 'package:cannlytics_data/common/layout/console.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:cannlytics_data/common/layout/console.dart';
 
 /// CoA Doc screen.
 class CoADocScreen extends StatelessWidget {

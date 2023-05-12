@@ -7,8 +7,11 @@
 // Updated: 5/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-import 'package:cannlytics_data/constants/design.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:cannlytics_data/constants/design.dart';
 
 /// General cards.
 class CardGrid extends StatelessWidget {

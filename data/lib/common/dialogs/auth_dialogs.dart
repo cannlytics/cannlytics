@@ -18,12 +18,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:cannlytics_data/utils/validation_utils.dart';
-import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
-import 'package:cannlytics_data/common/buttons/primary_button.dart';
 
 /// Sign in / create account form.
 class SignInDialog extends ConsumerStatefulWidget {
