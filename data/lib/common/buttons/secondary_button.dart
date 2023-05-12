@@ -38,10 +38,14 @@ class SecondaryButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        backgroundColor: isDark ? DarkColors.crust : LightColors.crust,
+        backgroundColor: isDark ? DarkColors.crust : Colors.transparent,
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),
+          side: BorderSide(
+            color: isDark ? Color(0xFF6E7681) : Color(0x1b1f2326),
+            width: 1,
+          ),
         ),
       ),
       child: isLoading

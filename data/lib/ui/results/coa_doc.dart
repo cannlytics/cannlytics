@@ -4,23 +4,27 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 5/11/2023
+// Updated: 5/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
+import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/constants/theme.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
 
 // Package imports:
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_data/common/forms/form_placeholder.dart';
 import 'package:cannlytics_data/constants/design.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
-/// CoA Doc.
+/// CoADoc user interface.
 class CoADocInterface extends ConsumerWidget {
   const CoADocInterface({super.key});
 
@@ -28,130 +32,205 @@ class CoADocInterface extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Padding(
-          padding: EdgeInsets.only(top: 24),
-          child: Text(
-            'Your lab results',
-            style: Theme.of(context).textTheme.titleLarge,
+        // COA parser.
+        Card(
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                // Title.
+                Text(
+                  'Add lab results',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+
+                // COA search.
+                gapH8,
+                Row(
+                  children: [
+                    Text(
+                      'Search for lab results',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.info_outline),
+                      onPressed: () {},
+                      tooltip: "Enter a URL, ID, or what you want to find.",
+                    ),
+                  ],
+                ),
+                CoASearch(),
+
+                // COA upload actions.
+                gapH24,
+                Row(
+                  children: [
+                    Text(
+                      'File Upload',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.info_outline),
+                      onPressed: () {},
+                      tooltip:
+                          'We support most COA formats: .pdf, .jpeg, .png, .zip',
+                    ),
+                    Spacer(),
+                    SecondaryButton(
+                      text: 'Upload COAs',
+                      onPressed: () async {
+                        FilePickerResult? result =
+                            await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['pdf', 'zip'],
+                        );
+                        if (result != null) {
+                          // FIXME: Handle file
+                          print('HANDLE FILE: ${result.files.first.name}');
+                        } else {
+                          // User canceled the picker
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                gapH4,
+
+                // COA file upload.
+                CoAUpload(),
+                gapH12,
+              ],
+            ),
           ),
         ),
-        gapH8,
 
-        // Placeholder if no lab results yet.
-        // FormPlaceholder(
-        //   image: 'assets/images/icons/certificate.png',
-        //   title: 'No lab results collected yet.',
-        //   description:
-        //       'Lab results that you collect will appear here. Upload an image of your labels, receipts, or certificates, or enter the URL of your lab results, and we will do our best to put the results in your hands.',
-        //   onTap: () {
-        //     context.push('/results/coas');
-        //   },
-        // ),
+        // Grid / table of parsed lab results.
+        gapH32,
+        Card(
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                // Title.
+                Row(
+                  children: [
+                    Text(
+                      'Your lab results',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
 
-        // TODO: Show grid / table of parsed lab results.
+                    // Results tabs.
+                    Spacer(),
+                    // TabToggleButtons(),
+                  ],
+                ),
 
-        // Parser card.
-        AnalysisParserCard(),
+                // FIXME: Grid of user results.
 
-        // COA input.
-        gapH24,
-        COAInputContainer(),
+                // // Sample results options.
+                // SampleResultsOptions(),
 
-        // Results tabs.
-        TabToggleButtons(),
+                // // Sample card template.
+                // SampleCardTemplate(),
 
-        // Sample results placeholder.
-        SampleResultsPlaceholder(),
+                // // Sample results.
+                // SampleCard(),
 
-        // Sample results options.
-        SampleResultsOptions(),
+                // FIXME: Table of user results.
+                UserResultsList(),
+              ],
+            ),
+          ),
+        ),
 
-        // Sample card template.
-        SampleCardTemplate(),
+        // Grid / table of public lab results.
+        gapH32,
+        Card(
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                // Title.
+                Row(
+                  children: [
+                    Text(
+                      'Public lab results',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
 
-        // Sample results.
-        SampleCard(),
+                    // Results tabs.
+                    Spacer(),
+                    // TabToggleButtons(),
+                  ],
+                ),
 
-        // List of COAs.
-        CoaList(),
+                // FIXME: Grid / table of public lab results.
+                UserResultsList(),
+              ],
+            ),
+          ),
+        ),
 
-        // User guide.
-        CustomParsingAlgorithms(),
+        // TODO: User guide.
+        // CustomParsingAlgorithms(),
 
-        // API documentation.
-        CoADocAPI(),
+        // TODO: API documentation.
+        // CoADocAPI(),
 
-        // Python SDK documentation.
-        CoADocPythonSDK(),
+        // TODO: Python SDK documentation.
+        // CoADocPythonSDK(),
       ],
     );
   }
 }
 
 /// Instructions shown when no lab results have been collected yet.
-class AnalysisParserCard extends StatelessWidget {
+class CoAParsingInstructions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(3),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                'Certificate of Analysis Parser',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: 560,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        'Your sample results from uploaded CoAs will render below. At this time, only certificates of analysis (CoAs) from validated labs and LIMS can be parsed. Please see the list of validated labs below.',
-                        style: TextStyle(
-                          fontSize: 16,
-                          height: 1.5,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.info_outline,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                      onPressed: () {
-                        // TODO: Implement.
-                      },
-                      tooltip:
-                          'At this time, only certificates of analysis (CoAs) from validated labs and LIMS can be parsed. Please see the list of validated labs below.',
-                    ),
-                  ],
-                ),
-              ),
-            ],
+    return Container(
+      width: 560,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              'Your sample results from uploaded CoAs will render below. At this time, only certificates of analysis (CoAs) from validated labs and LIMS can be parsed. Please see the list of validated labs below.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-/// COA input container.
-class COAInputContainer extends StatelessWidget {
+/// COA search.
+class CoASearch extends StatelessWidget {
   final TextEditingController coaSearchController = TextEditingController();
   final TextEditingController coaUrlController = TextEditingController();
 
@@ -159,27 +238,46 @@ class COAInputContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(top: 16.0),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: TextField(
-                  controller: coaSearchController,
-                  decoration: InputDecoration(
-                    labelText: 'Search by CoA URL or Metrc ID...',
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: TextFormField(
+                key: Key('resultsSearch'),
+                controller: coaSearchController,
+                autocorrect: false,
+                decoration: InputDecoration(
+                  // enabled: !state.isLoading,
+                  contentPadding: EdgeInsets.only(
+                    top: 18,
+                    left: 8,
+                    right: 8,
+                    bottom: 8,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(3),
+                      bottomLeft: Radius.circular(3),
+                      topRight: Radius.zero,
+                      bottomRight: Radius.zero,
+                    ),
                   ),
                 ),
+                style: Theme.of(context).textTheme.bodyMedium,
+                textInputAction: TextInputAction.next,
               ),
-              SizedBox(width: 8),
-              ElevatedButton(
+            ),
+            SizedBox(
+              height: 42,
+              child: PrimaryButton(
+                inline: true,
+                backgroundColor: Colors.green,
+                text: 'Get results',
                 onPressed: () {
                   // Handle the search action here
                 },
-                child: Text('Search'),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
         // Hidden text field
         Offstage(
@@ -193,10 +291,13 @@ class COAInputContainer extends StatelessWidget {
   }
 }
 
-/// File input.
-class FileInputWidget extends StatelessWidget {
+/// COA upload.
+class CoAUpload extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    late DropzoneViewController controller;
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
     return Column(
       children: <Widget>[
         Row(
@@ -205,53 +306,130 @@ class FileInputWidget extends StatelessWidget {
             Expanded(
               child: Column(
                 children: [
-                  // Drag and Drop Zone
-                  // Here, you would use the flutter_dropzone package or equivalent
-                  Container(
-                    padding: EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
+                  // Drag and drop a file.
+                  if (kIsWeb)
+                    Container(
+                      height: 250,
+                      child: DottedBorder(
+                        color: isDark ? Color(0xFF6E7681) : Color(0x1b1f2326),
+                        strokeWidth: 1,
+                        child: Stack(
+                          children: [
+                            // Drop zone.
+                            DropzoneView(
+                              operation: DragOperation.copy,
+                              cursor: CursorType.grab,
+                              onCreated: (ctrl) => controller = ctrl,
+                              onLoaded: () => print('Zone 1 loaded'),
+                              onError: (ev) => print('Zone 1 error: $ev'),
+                              onHover: () {
+                                // print('Zone 1 hovered');
+                              },
+                              onLeave: () {
+                                // print('Zone 1 left');
+                              },
+                              onDrop: (ev) async {
+                                print('Zone 1 drop: ${ev.name}');
+                                final bytes = await controller.getFileData(ev);
+                                print(bytes.sublist(0, 20));
+                              },
+                              onDropMultiple: (ev) async {
+                                print('Zone 1 drop multiple: $ev');
+                              },
+                            ),
+
+                            // Text.
+                            Center(child: UserResultsPlaceholder()),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Text(
-                      'Drop a CoA .pdf or a .zip of CoAs to parse.',
+
+                  // File picker button.
+                  if (!kIsWeb)
+                    SecondaryButton(
+                      text: 'Import your COAs',
+                      onPressed: () async {
+                        FilePickerResult? result =
+                            await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['pdf', 'zip'],
+                        );
+                        if (result != null) {
+                          // Handle file
+                          print('HANDLE FILE: ${result.files.first.name}');
+                        } else {
+                          // User canceled the picker
+                        }
+                      },
                     ),
-                  ),
-                  // File picker button
-                  TextButton(
-                    child: Text('Alternatively, import your CoA file'),
-                    onPressed: () async {
-                      FilePickerResult? result =
-                          await FilePicker.platform.pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: ['pdf', 'zip'],
-                      );
-                      if (result != null) {
-                        // Handle file
-                      } else {
-                        // User canceled the picker
-                      }
-                    },
-                  ),
-                  // Uploading state
-                  // Display these based on your upload status
-                  // Text('Uploading…'),
-                  // Text('Done!'),
-                  // Text('Error!'),
                 ],
               ),
             ),
-            // QR Code Scanner
-            // Use qr_code_scanner package or equivalent here
-            Expanded(
-              child: Container(
-                color: Colors.black,
-                height: 200.0, // Adjust this as needed
-                // Child would be QRView widget or similar
+
+            // QR code scanner.
+            if (!kIsWeb)
+              Expanded(
+                child: Container(
+                  height: 200.0,
+                  child: MobileScanner(
+                    fit: BoxFit.contain,
+                    onDetect: (capture) {
+                      final List<Barcode> barcodes = capture.barcodes;
+                      final Uint8List? image = capture.image;
+                      for (final barcode in barcodes) {
+                        debugPrint('Barcode found! ${barcode.rawValue}');
+                      }
+                    },
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Sample results placeholder.
+class UserResultsPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Image.
+            Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3',
+                  width: 128,
+                  height: 128,
+                ),
+              ),
+            ),
+            // Text.
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: DefaultTextStyle.of(context).style,
+                children: <TextSpan>[
+                  TextSpan(
+                      text: 'Waiting on your COAs boss!\n',
+                      style: TextStyle(fontSize: 20)),
+                  TextSpan(
+                      text: 'Drop a CoA PDF, image, or folder to parse.',
+                      style: Theme.of(context).textTheme.bodyMedium),
+                ],
               ),
             ),
           ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -295,32 +473,6 @@ class _TabToggleButtonsState extends State<TabToggleButtons> {
           isSelected: _isSelected,
         ),
       ],
-    );
-  }
-}
-
-/// Sample results placeholder.
-class SampleResultsPlaceholder extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: RichText(
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            style: DefaultTextStyle.of(context).style,
-            children: <TextSpan>[
-              TextSpan(
-                  text: '🥸 Waiting on your CoAs Boss!\n',
-                  style: TextStyle(fontSize: 20)),
-              TextSpan(
-                  text: 'Upload your CoAs above to begin parsing.',
-                  style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
@@ -462,10 +614,10 @@ class SampleCard extends StatelessWidget {
   }
 }
 
-/// List of COAs.
-class CoaList extends StatelessWidget {
+/// List of user's results.
+class UserResultsList extends StatelessWidget {
   final bool isLoading =
-      true; // This would typically come from your state management system
+      false; // This would typically come from your state management system
 
   @override
   Widget build(BuildContext context) {
@@ -592,7 +744,7 @@ class CustomParsingAlgorithms extends StatelessWidget {
                     ),
                     Text(
                       "Custom CoA Parsing",
-                      style: Theme.of(context).textTheme.headline5,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ],
                 ),
@@ -600,7 +752,7 @@ class CustomParsingAlgorithms extends StatelessWidget {
                 Text(
                   "At this time, CoADoc can only parse certificates of analysis (CoAs)"
                   " from labs and LIMS with validated parsing algorithms. We've validated:",
-                  style: Theme.of(context).textTheme.bodyText2,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 SizedBox(height: 16),
                 DataTable(
@@ -638,7 +790,7 @@ class CustomParsingAlgorithms extends StatelessWidget {
                   " and chances are that they can be included. Alternatively, because Cannlytics is open source,"
                   " you can clone the source code and write a custom parsing algorithm for your lab or LIMS for free!"
                   " It is as easy as 1, 2, 3 to add a new lab.",
-                  style: Theme.of(context).textTheme.bodyText2,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -685,7 +837,7 @@ class CoADocAPI extends StatelessWidget {
                     ),
                     Text(
                       "CoADoc API",
-                      style: Theme.of(context).textTheme.headline5,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ],
                 ),
@@ -694,7 +846,7 @@ class CoADocAPI extends StatelessWidget {
                   "You can integrate rich lab result data into your app with one quick request to the CoADoc API."
                   " Given a QR code scanner or any other mechanism to input CoA URLs or PDFs,"
                   " make a simple request and you will receive your CoA data neatly organized and ready for your use.",
-                  style: Theme.of(context).textTheme.bodyText2,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -705,12 +857,12 @@ class CoADocAPI extends StatelessWidget {
                 SizedBox(height: 16),
                 Text(
                   "POST https://cannlytics.com/api/data/coas",
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
                 SizedBox(height: 8),
                 Text(
                   "{\n\"urls\": [\"https://cannlytics.page.link/test-coa\"]\n}",
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),
@@ -744,7 +896,7 @@ class CoADocPythonSDK extends StatelessWidget {
                     ),
                     Text(
                       "CoADoc Python SDK",
-                      style: Theme.of(context).textTheme.headline5,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ],
                 ),
@@ -752,7 +904,7 @@ class CoADocPythonSDK extends StatelessWidget {
                 Text(
                   "Are you interested in developing a new parsing routine for a lab or LIMS? Then you can easily use CoADoc directly"
                   " with the cannlytics Python package to parse CoAs to your heart's content.",
-                  style: Theme.of(context).textTheme.bodyText2,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -769,7 +921,7 @@ class CoADocPythonSDK extends StatelessWidget {
                   "urls = [\"https://cannlytics.page.link/test-coa\"]\n"
                   "data = parser.parse(urls)\n"
                   "parser.quit()\n",
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),

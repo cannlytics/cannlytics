@@ -20,6 +20,7 @@ class PrimaryButton extends StatelessWidget {
     super.key,
     required this.text,
     this.isLoading = false,
+    this.inline = false,
     this.onPressed,
     this.backgroundColor,
   });
@@ -29,6 +30,7 @@ class PrimaryButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback? onPressed;
   final Color? backgroundColor;
+  final bool? inline;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +40,14 @@ class PrimaryButton extends StatelessWidget {
             (backgroundColor == null) ? Colors.green : backgroundColor,
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(3),
+          borderRadius: (inline ?? false)
+              ? BorderRadius.only(
+                  topLeft: Radius.zero,
+                  bottomLeft: Radius.zero,
+                  topRight: Radius.circular(3),
+                  bottomRight: Radius.circular(3),
+                )
+              : BorderRadius.circular(3),
         ),
       ),
       onPressed: onPressed,

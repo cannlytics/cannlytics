@@ -110,6 +110,7 @@ class MainContent extends ConsumerWidget {
           // ),
 
           // Your Results
+          gapH12,
           CoADocInterface(),
 
           // TODO: Public Results
