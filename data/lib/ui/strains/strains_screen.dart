@@ -91,6 +91,11 @@ class MainContent extends ConsumerWidget {
             padding: EdgeInsets.symmetric(vertical: 24),
             child: SponsorshipCard(),
           ),
+
+          // TODO: Your strains.
+
+          // TODO: Public strains.
+
           gapH48,
         ],
       ),

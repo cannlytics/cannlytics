@@ -4,11 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 4/15/2023
+// Updated: 5/11/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
+import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
@@ -25,6 +26,8 @@ import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'coa_doc.dart';
+
 /// Screen.
 class LabResultsScreen extends StatelessWidget {
   const LabResultsScreen({super.key});
@@ -40,7 +43,11 @@ class LabResultsScreen extends StatelessWidget {
 
       // Body.
       body: Console(slivers: [
+        // Main content.
         SliverToBoxAdapter(child: MainContent()),
+
+        // Footer.
+        const SliverToBoxAdapter(child: Footer()),
       ]),
     );
   }
@@ -90,16 +97,21 @@ class MainContent extends ConsumerWidget {
           ),
 
           // Sponsorship placeholder.
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: SponsorshipCard(),
-          ),
+          // Padding(
+          //   padding: EdgeInsets.symmetric(vertical: 24),
+          //   child: SponsorshipCard(),
+          // ),
 
           // Title.
           // Text(
           //   'Tools',
           //   style: Theme.of(context).textTheme.titleMedium,
           // ),
+
+          // Your Results
+          CoADocInterface(),
+
+          // TODO: Public Results
 
           // TODO: Parse COAs.
           // Row(
@@ -151,7 +163,7 @@ class LabResultsTable extends ConsumerWidget {
     // final data = ref.watch(filteredFacilitiesProvider);
     final data = [];
 
-    // TODO: Actions and breadcrumbs.
+    // Actions and breadcrumbs.
     Widget actions = Row(
       children: [
         Breadcrumbs(
@@ -171,7 +183,7 @@ class LabResultsTable extends ConsumerWidget {
       ],
     );
 
-    // FIXME: Create a licensees table.
+    // FIXME: Public lab results table.
     var table;
 
     // // Define the cell builder function.
@@ -320,7 +332,7 @@ class LabResultsTable extends ConsumerWidget {
     //   ],
     // );
 
-    // TODO: Loading placeholder.
+    // Loading placeholder.
     if (data.isEmpty)
       table = FormPlaceholder(
         image: 'assets/images/icons/facilities.png',

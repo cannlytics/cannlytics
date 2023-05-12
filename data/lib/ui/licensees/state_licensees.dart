@@ -59,29 +59,6 @@ class StateLicensesScreen extends StatelessWidget {
       ]),
     );
   }
-
-  /// Page title.
-  Widget _title(BuildContext context, String id) {
-    return Padding(
-      padding: EdgeInsets.only(
-        top: 24,
-        left: 16,
-        right: 16,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'State Licenses',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          SizedBox(
-            height: 8,
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// Main content.

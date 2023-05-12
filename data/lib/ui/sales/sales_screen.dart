@@ -92,6 +92,11 @@ class MainContent extends ConsumerWidget {
             padding: EdgeInsets.symmetric(vertical: 24),
             child: SponsorshipCard(),
           ),
+
+          // TODO: Your purchases.
+
+          // TODO: Aggregate sales data.
+
           gapH48,
         ],
       ),

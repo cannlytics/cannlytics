@@ -71,12 +71,32 @@ class SideMenu extends ConsumerWidget {
 
         // Licensees link.
         DrawerListTile(
-          title: 'Licensees',
+          title: 'Companies',
           leading: SvgPicture.asset(
-            'assets/icons/emoji/scroll.svg',
+            'assets/icons/emoji/dispensary.svg',
             width: 28,
           ),
           onTap: () => context.push('/licenses'),
+        ),
+
+        // Lab results link.
+        DrawerListTile(
+          title: 'Lab Results',
+          leading: SvgPicture.asset(
+            'assets/icons/emoji/microscope.svg',
+            width: 28,
+          ),
+          onTap: () => context.push('/results'),
+        ),
+
+        // Sales link.
+        DrawerListTile(
+          title: 'Sales',
+          leading: SvgPicture.asset(
+            'assets/icons/emoji/money_bag.svg',
+            width: 28,
+          ),
+          onTap: () => context.push('/sales'),
         ),
 
         // Strains link.
@@ -98,26 +118,6 @@ class SideMenu extends ConsumerWidget {
         //   ),
         //   onTap: () => context.push('/products'),
         // ),
-
-        // Lab results link.
-        DrawerListTile(
-          title: 'Lab Results',
-          leading: SvgPicture.asset(
-            'assets/icons/emoji/microscope.svg',
-            width: 28,
-          ),
-          onTap: () => context.push('/results'),
-        ),
-
-        // Sales link.
-        DrawerListTile(
-          title: 'Sales',
-          leading: SvgPicture.asset(
-            'assets/icons/emoji/money_bag.svg',
-            width: 28,
-          ),
-          onTap: () => context.push('/sales'),
-        ),
 
         // // Industry link.
         // DrawerListTile(
