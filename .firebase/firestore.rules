@@ -146,6 +146,18 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // === User Data ===
+
+    // Allow users to read and write their own receipts.
+    match /users/{userId}/receipts/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow users to read and write their own COAs.
+    match /users/{userId}/coas/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
     // === Recipes ===
 
     // Allow anyone to read public AI data.
@@ -158,7 +170,7 @@ service cloud.firestore {
     match /users/{userId}/recipes/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    
+
     // TODO: Allow users to read the details of their team members.
 
     // Extra (common patterns / objects)

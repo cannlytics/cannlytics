@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 5/9/2023
+// Updated: 5/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -29,38 +29,74 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final screenWidth = MediaQuery.of(context).size.width;
     return ConsoleScreen(
       children: [
-        // Optional: Welcome message
-        // _welcomeMessage(context, screenWidth),
-
         // Call for contributions.
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: 18,
-              horizontal: sliverHorizontalPadding(screenWidth) / 2,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SponsorshipCard(),
-              ],
-            ),
-          ),
-        ),
+        _contributions(context),
 
         // AI tools.
         _aiCards(context),
 
         // Datasets.
         _datasetsCards(context),
-
-        // Future work: Statistical models cards.
-        // _statsModelsCards(),
       ],
+    );
+  }
+
+  /// Call for contributions card.
+  Widget _contributions(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: 18,
+          horizontal: sliverHorizontalPadding(screenWidth) / 2,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SponsorshipCard(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// AI cards.
+  Widget _aiCards(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: 18,
+          horizontal: sliverHorizontalPadding(screenWidth) / 2,
+        ),
+        child: Column(children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text('AI',
+                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color)),
+            ],
+          ),
+          gapH8,
+          CardGridView(
+            crossAxisCount: screenWidth < Breakpoints.desktop ? 1 : 2,
+            childAspectRatio: 3,
+            items: aiModels.map((model) {
+              return DatasetCard(
+                imageUrl: model['image_url'],
+                title: model['title'],
+                description: model['description'],
+                tier: model['tier'],
+                onTap: () => context.push(model['path']),
+              );
+            }).toList(),
+          ),
+        ]),
+      ),
     );
   }
 
@@ -96,43 +132,6 @@ class DashboardScreen extends ConsumerWidget {
                     ' rows',
                 columns:
                     NumberFormat('#,###').format(model['fields']) + ' columns',
-                onTap: () => context.push(model['path']),
-              );
-            }).toList(),
-          ),
-        ]),
-      ),
-    );
-  }
-
-  /// AI cards.
-  Widget _aiCards(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: 18,
-          horizontal: sliverHorizontalPadding(screenWidth) / 2,
-        ),
-        child: Column(children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text('AI',
-                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                      color: Theme.of(context).textTheme.titleLarge!.color)),
-            ],
-          ),
-          gapH8,
-          CardGridView(
-            crossAxisCount: screenWidth < Breakpoints.desktop ? 1 : 2,
-            childAspectRatio: 3,
-            items: aiModels.map((model) {
-              return DatasetCard(
-                imageUrl: model['image_url'],
-                title: model['title'],
-                description: model['description'],
-                tier: model['tier'],
                 onTap: () => context.push(model['path']),
               );
             }).toList(),

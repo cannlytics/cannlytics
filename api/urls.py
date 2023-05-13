@@ -80,6 +80,9 @@ urlpatterns = [
         path('/coas', api.data.coa_data),
         path('/coas/download', api.data.download_coa_data),
 
+        # TODO: Receipt data API endpoints.
+        
+
         # Labs data API endpoints.
         path('labs', include([
             path('', api.data.lab_data),

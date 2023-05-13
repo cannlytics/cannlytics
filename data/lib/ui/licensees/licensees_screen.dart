@@ -4,12 +4,16 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 5/9/2023
+// Updated: 5/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/cards/card_grid.dart';
+import 'package:cannlytics_data/common/cards/stats_model_card.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/services/storage_service.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
@@ -38,6 +43,7 @@ class LicenseesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen to the current user.
     final user = ref.watch(authProvider).currentUser;
+    final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       // App bar.
       appBar: DashboardHeader(),
@@ -57,7 +63,7 @@ class LicenseesScreen extends ConsumerWidget {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: SizedBox(
-              height: 540, // Specify the height for the Container
+              height: screenWidth < Breakpoints.tablet ? 420 : 540,
               child: InteractiveMap(),
             ),
           ),
@@ -65,6 +71,9 @@ class LicenseesScreen extends ConsumerWidget {
 
         // Footnotes.
         SliverToBoxAdapter(child: _footnotes(context)),
+
+        // License datasets.
+        _datasetsCards(context, ref),
 
         // Footer.
         const SliverToBoxAdapter(child: Footer()),
@@ -98,7 +107,7 @@ class LicenseesScreen extends ConsumerWidget {
           ),
           SecondaryButton(
             text: 'Download all licenses',
-            onPressed: () {
+            onPressed: () async {
               // Note: Requires the user to be signed in.
               if (user == null) {
                 showDialog(
@@ -109,8 +118,9 @@ class LicenseesScreen extends ConsumerWidget {
                 );
                 return;
               }
-              String url =
-                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fdata%2Flicenses%2Fall%2Flicenses-2022-10-08T14-03-08.csv?alt=media&token=4d9c2350-a901-4846-9a1e-574720ec70d3';
+              // Get URL for file in Firebase Storage.
+              String? url = await StorageService.getDownloadUrl(
+                  'data/licenses/all/licenses-2022-10-08T14-03-08.csv');
               DataService.openInANewTab(url);
             },
           ),
@@ -188,6 +198,65 @@ class LicenseesScreen extends ConsumerWidget {
         ..onTap = () async {
           await launchUrl(Uri.parse(url));
         },
+    );
+  }
+
+  /// Dataset cards.
+  Widget _datasetsCards(BuildContext context, WidgetRef ref) {
+    var datasets =
+        mainDatasets.where((element) => element['type'] == 'licenses').toList();
+    final screenWidth = MediaQuery.of(context).size.width;
+    final user = ref.watch(authProvider).currentUser;
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: 32,
+          horizontal: sliverHorizontalPadding(screenWidth) / 2,
+        ),
+        child: Column(children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text('Company Datasets',
+                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color)),
+            ],
+          ),
+          gapH12,
+          CardGridView(
+            crossAxisCount: screenWidth < Breakpoints.desktop ? 1 : 2,
+            childAspectRatio: 3,
+            items: datasets.map((model) {
+              return DatasetCard(
+                imageUrl: model['image_url'],
+                title: model['title'],
+                description: model['description'],
+                tier: model['tier'],
+                rows: NumberFormat('#,###').format(model['observations']) +
+                    ' rows',
+                columns:
+                    NumberFormat('#,###').format(model['fields']) + ' columns',
+                onTap: () async {
+                  // Note: Requires the user to be signed in.
+                  if (user == null) {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SignInDialog(isSignUp: false);
+                      },
+                    );
+                    return;
+                  }
+                  // Get URL for file in Firebase Storage.
+                  String? url =
+                      await StorageService.getDownloadUrl(model['file_ref']);
+                  DataService.openInANewTab(url);
+                },
+              );
+            }).toList(),
+          ),
+        ]),
+      ),
     );
   }
 }

@@ -91,7 +91,7 @@ class CoADocInterface extends ConsumerWidget {
                         FilePickerResult? result =
                             await FilePicker.platform.pickFiles(
                           type: FileType.custom,
-                          allowedExtensions: ['pdf', 'zip'],
+                          allowedExtensions: ['pdf', 'zip', 'jpeg', 'png'],
                         );
                         if (result != null) {
                           // FIXME: Handle file
@@ -159,40 +159,40 @@ class CoADocInterface extends ConsumerWidget {
           ),
         ),
 
-        // Grid / table of public lab results.
-        gapH32,
-        Card(
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(3),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                // Title.
-                Row(
-                  children: [
-                    Text(
-                      'Public lab results',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
+        // TODO: Grid / table of public lab results.
+        // gapH32,
+        // Card(
+        //   margin: EdgeInsets.zero,
+        //   shape: RoundedRectangleBorder(
+        //     borderRadius: BorderRadius.circular(3),
+        //   ),
+        //   child: Padding(
+        //     padding: const EdgeInsets.all(16.0),
+        //     child: Column(
+        //       mainAxisAlignment: MainAxisAlignment.start,
+        //       crossAxisAlignment: CrossAxisAlignment.start,
+        //       mainAxisSize: MainAxisSize.min,
+        //       children: <Widget>[
+        //         // Title.
+        //         Row(
+        //           children: [
+        //             Text(
+        //               'Public lab results',
+        //               style: Theme.of(context).textTheme.titleLarge,
+        //             ),
 
-                    // Results tabs.
-                    Spacer(),
-                    // TabToggleButtons(),
-                  ],
-                ),
+        //             // Results tabs.
+        //             Spacer(),
+        //             // TabToggleButtons(),
+        //           ],
+        //         ),
 
-                // FIXME: Grid / table of public lab results.
-                UserResultsList(),
-              ],
-            ),
-          ),
-        ),
+        //         // FIXME: Grid / table of public lab results.
+        //         UserResultsList(),
+        //       ],
+        //     ),
+        //   ),
+        // ),
 
         // TODO: User guide.
         // CustomParsingAlgorithms(),
@@ -353,7 +353,7 @@ class CoAUpload extends ConsumerWidget {
                         FilePickerResult? result =
                             await FilePicker.platform.pickFiles(
                           type: FileType.custom,
-                          allowedExtensions: ['pdf', 'zip'],
+                          allowedExtensions: ['pdf', 'zip', 'jpeg', 'png'],
                         );
                         if (result != null) {
                           // Handle file

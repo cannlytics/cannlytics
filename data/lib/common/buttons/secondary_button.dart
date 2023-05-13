@@ -38,12 +38,14 @@ class SecondaryButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        backgroundColor: isDark ? DarkColors.crust : Colors.transparent,
+        backgroundColor: Colors.transparent,
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),
           side: BorderSide(
-            color: isDark ? Color(0xFF6E7681) : Color(0x1b1f2326),
+            color: isDark
+                ? Theme.of(context).textTheme.titleMedium!.color!
+                : Color(0x1b1f2326),
             width: 1,
           ),
         ),
@@ -56,9 +58,10 @@ class SecondaryButton extends StatelessWidget {
             )
           : Text(
               text,
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: isDark ? DarkColors.text : LightColors.text,
-                  ),
+              style: Theme.of(context).textTheme.titleMedium,
+              // !.copyWith(
+              //       color: isDark ? DarkColors.text : LightColors.text,
+              //     ),
             ),
     );
   }

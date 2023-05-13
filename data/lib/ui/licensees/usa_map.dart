@@ -25,6 +25,7 @@ import 'package:path_drawing/path_drawing.dart';
 import 'package:xml/xml.dart';
 
 // Global map properties.
+const Duration animationDuration = Duration(milliseconds: 0);
 const String mapSvg = 'assets/images/maps/usa-with-labels.svg';
 const String permissionsRawSvg = 'assets/images/maps/united_states_map.svg';
 const String permissionsMapSvg =
@@ -122,24 +123,33 @@ class _InteractiveMapState extends State<InteractiveMap>
       fit: BoxFit.contain,
     );
     final ctrl = TransformationController(matrix);
-    extendedViewport = ExtendedViewport(
-      ctrl: ctrl,
-      cacheFactor: 1.75,
-    );
+    extendedViewport = ExtendedViewport(ctrl: ctrl, cacheFactor: 1.5);
+
+    // Limit viewport to map size.
+    // ctrl.addListener(() {
+    //   final offset = ctrl.value.getTranslation();
+    //   const maxDragDistance = 100.0;
+    //   if (offset.x.abs() > maxDragDistance) {
+    //     final newDx = offset.x > 0 ? maxDragDistance : -maxDragDistance;
+    //     final matrix = ctrl.value.clone();
+    //     matrix.setTranslationRaw(newDx, offset.y, 0);
+    //     ctrl.value = matrix;
+    //   }
+    //   if (offset.y.abs() > maxDragDistance) {
+    //     final newDy = offset.y > 0 ? maxDragDistance : -maxDragDistance;
+    //     final matrix = ctrl.value.clone();
+    //     matrix.setTranslationRaw(offset.x, newDy, 0);
+    //     ctrl.value = matrix;
+    //   }
+    // });
 
     // Initial zoom.
-    Future.delayed(const Duration(milliseconds: 0), () {
-      animation = Matrix4Tween(
-        begin: ctrl.value,
-        end: _zoomTo('labels', size),
-      ).animate(animationController);
+    Future.delayed(animationDuration, () {
+      animation = Matrix4Tween(begin: ctrl.value, end: _zoomTo('labels', size))
+          .animate(animationController);
       animationController
         ..value = 0
-        ..animateTo(
-          1,
-          curve: Curves.easeInExpo,
-          duration: const Duration(milliseconds: 0),
-        );
+        ..animateTo(1, curve: Curves.easeInExpo, duration: animationDuration);
     });
     return ctrl;
   }
@@ -156,14 +166,17 @@ class _InteractiveMapState extends State<InteractiveMap>
     return Theme(
       data: Theme.of(context).copyWith(splashFactory: _InkFactory()),
       child: LayoutBuilder(builder: (context, constraints) {
-        transformationController ??= _initController(constraints.biggest);
+        transformationController ??= _initController(constraints.smallest);
         extendedViewport.size = constraints.biggest;
         return ColoredBox(
           color: Theme.of(context).cardColor,
           child: InteractiveViewer(
             constrained: true,
             transformationController: transformationController,
-            maxScale: 10,
+            maxScale: 5,
+            minScale: 2,
+            // panAxis: PanAxis.aligned,
+            // scaleFactor: 500,
             child: Flow(
               delegate: MapDelegate(mapData!, extendedViewport),
               children: mapData!.states.values

@@ -116,7 +116,10 @@ class SponsorshipCard extends StatelessWidget {
                         alignment: Alignment.centerRight,
                         child: Text(
                           '\$408 to go!',
-                          style: Theme.of(context).textTheme.labelSmall,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall!
+                              .copyWith(color: Color(0xFF6E7681)),
                         )),
                   ),
                 ),
@@ -197,7 +200,6 @@ class SponsorshipCard extends StatelessWidget {
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: Colors.green,
-                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ],

@@ -4,11 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/27/2023
+// Updated: 5/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:convert';
+import 'package:path/path.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
@@ -44,6 +45,7 @@ class APIService {
   static Future<dynamic> apiRequest(
     String endpoint, {
     dynamic data,
+    dynamic files,
     Map? options,
   }) async {
     // Create default body, method, and headers.
@@ -84,7 +86,17 @@ class APIService {
     // Make the request.
     final client = http.Client();
     final request;
-    if (body == null) {
+    if (files != null) {
+      request = http.MultipartRequest('POST', Uri.parse(url))
+        ..headers.addAll(headers);
+      for (var file in files) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'file',
+          file.path,
+          filename: basename(file.path),
+        ));
+      }
+    } else if (body == null) {
       request = http.Request(method, Uri.parse(url))..headers.addAll(headers);
     } else {
       request = http.Request(method, Uri.parse(url))
