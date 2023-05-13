@@ -4,10 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/7/2023
-// Updated: 5/8/2023
+// Updated: 5/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
+import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -26,7 +28,6 @@ import 'package:cannlytics_data/common/layout/header.dart';
 import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:cannlytics_data/common/tables/table_data.dart';
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/models/licensee.dart';
 import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 
@@ -127,12 +128,11 @@ class LicenseesTable extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // FIXME: Get the filtered data.
     final data = ref.watch(filteredLicenseesProvider);
-    print('NO DATA YET...');
     // if (ref.read(activeStateProvider) == null) {
     //   ref.read(activeStateProvider.notifier).state = id;
     //   // return Center(child: CircularProgressIndicator(strokeWidth: 1.42));
     // }
-    print('DATA: ${data.length}');
+    // TODO: Add loading state.
     if (data.isEmpty) {
       return FormPlaceholder(
         image: 'assets/images/icons/document.png',
@@ -143,6 +143,9 @@ class LicenseesTable extends ConsumerWidget {
         },
       );
     }
+
+    // Listen to the current user.
+    final user = ref.watch(authProvider).currentUser;
 
     // Define the cell builder function.
     _buildCells(Map item) {
@@ -298,7 +301,16 @@ class LicenseesTable extends ConsumerWidget {
         SecondaryButton(
           text: 'Download',
           onPressed: () {
-            // FIXME: Require the user to be signed in.
+            // Note: Requires the user to be signed in.
+            if (user == null) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SignInDialog(isSignUp: false);
+                },
+              );
+              return;
+            }
 
             // FIXME: Get the correct datafile (Get download URL from Firebase Storage).
             String url =
@@ -310,8 +322,6 @@ class LicenseesTable extends ConsumerWidget {
         ),
       ],
     );
-
-    // TODO: Loading placeholder.
 
     // No data placeholder.
     if (data.isEmpty)

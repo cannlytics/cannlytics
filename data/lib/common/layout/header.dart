@@ -119,7 +119,7 @@ class DashboardHeader extends ConsumerWidget with PreferredSizeWidget {
               onTap: () => context.go('/account'),
               customBorder: CircleBorder(),
               child: Avatar(
-                photoUrl: user!.photoURL ?? 'https://robohash.org/${user.uid}',
+                photoUrl: user.photoURL ?? 'https://robohash.org/${user.uid}',
                 radius: 33,
                 borderColor: Theme.of(context).secondaryHeaderColor,
                 borderWidth: 1.0,

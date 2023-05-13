@@ -8,8 +8,12 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
+import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
@@ -27,11 +31,13 @@ import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/ui/licensees/usa_map.dart';
 
 /// Screen.
-class LicenseesScreen extends StatelessWidget {
+class LicenseesScreen extends ConsumerWidget {
   const LicenseesScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Listen to the current user.
+    final user = ref.watch(authProvider).currentUser;
     return Scaffold(
       // App bar.
       appBar: DashboardHeader(),
@@ -42,7 +48,7 @@ class LicenseesScreen extends StatelessWidget {
       // Body.
       body: Console(slivers: [
         // Title.
-        SliverToBoxAdapter(child: _title(context)),
+        SliverToBoxAdapter(child: _title(context, user)),
 
         // Optional: Toggle between map and master list.
 
@@ -67,7 +73,7 @@ class LicenseesScreen extends StatelessWidget {
   }
 
   /// Map title.
-  Widget _title(BuildContext context) {
+  Widget _title(BuildContext context, User? user) {
     return Padding(
       padding: EdgeInsets.only(
         top: 24,
@@ -93,7 +99,16 @@ class LicenseesScreen extends StatelessWidget {
           SecondaryButton(
             text: 'Download all licenses',
             onPressed: () {
-              // FIXME: Require the user to be signed in.
+              // Note: Requires the user to be signed in.
+              if (user == null) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return SignInDialog(isSignUp: false);
+                  },
+                );
+                return;
+              }
               String url =
                   'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fdata%2Flicenses%2Fall%2Flicenses-2022-10-08T14-03-08.csv?alt=media&token=4d9c2350-a901-4846-9a1e-574720ec70d3';
               DataService.openInANewTab(url);

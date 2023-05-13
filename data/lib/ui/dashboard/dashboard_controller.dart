@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 4/14/2023
+// Updated: 5/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -27,9 +27,9 @@ import 'package:cannlytics_data/services/auth_service.dart';
 
 final List<Map> mainDatasets = [
   {
-    "title": "Cannabis Licenses",
+    "title": "US Cannabis Licenses",
     "image_url":
-        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3",
+        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ffigures%2Funited_states_map.png?alt=media&token=6e182e97-8fa6-4e42-8d6f-7cad92a5606d",
     "description":
         "A collection of 11,060 cannabis licenses from each state with permitted adult-use cannabis.",
     "tier": "Premium",
@@ -37,21 +37,59 @@ final List<Map> mainDatasets = [
     "observations": 11060,
     "fields": 28,
   },
+  {
+    "title": "South Africa Cannabis Licenses",
+    "image_url":
+        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ffigures%2Fsouth-africa-cannabis-cultivations-no-text.png?alt=media&token=f1876242-09c0-4a5c-a3e5-02f60fba6b3d",
+    "description":
+        "A collection of 88 cannabis licenses from by province in South Africa.",
+    "tier": "Premium",
+    "path": "/licenses/sa",
+    "observations": 88,
+    "fields": 28,
+  },
+  {
+    "title": "Washington Lab Results",
+    "image_url":
+        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fregulators%2Fwashington-seal.png?alt=media&token=d486f3af-0282-447e-a176-c4a62352d00e",
+    "description":
+        "Curated cannabis traceability lab tests from Washington State from 2021 to 2023.",
+    "tier": "Premium",
+    "path": "/results/wa",
+    "observations": 60000,
+    "fields": 28,
+  },
 ];
 
 List<Map> aiModels = [
   {
+    "title": "COA Parser",
     "image_url":
         "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3",
-    "description": "AI Lab Results Parser",
-    "route": "CoADoc"
+    "description":
+        "`CoADoc` puts lab result data in your hands by parsing COAs, finding all the data, standardizing the data, and cleanly returning the data to you.",
+    "tier": "Premium",
+    "path": "/results",
+    "observations": null,
+    "fields": null,
   },
   {
+    "title": "Receipt Parser",
     "image_url":
-        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30",
-    "description": "Effects & Aromas Predictor",
-    "route": "SkunkFx"
-  }
+        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fbud_spender_small.png?alt=media&token=e9a7b91b-65cc-47ef-bcf2-f19f30ea79b8",
+    "description":
+        "Get data from your receipts and keep track of your spending and consumption.",
+    "tier": "Premium",
+    "path": "/sales",
+    "observations": null,
+    "fields": null,
+  },
+  // {
+  //   "image_url":
+  //       "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30",
+  //   "description": "Effects & Aromas Predictor",
+  //   "route": "SkunkFx"
+  // }
 ];
 
 /* Navigation */
@@ -88,9 +126,6 @@ class MenuAppController extends ChangeNotifier {
 }
 
 /* Sign in / sign up */
-
-/// Sign up controller.
-// final signUpController = StateProvider<bool>((ref) => false);
 
 // Email text field.
 final emailController =

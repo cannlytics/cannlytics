@@ -70,6 +70,9 @@ class Console extends ConsumerWidget {
         if (!Responsive.isMobile(context) && _sideMenuOpen)
           Expanded(
             child: Container(
+              // constraints: BoxConstraints(
+              //   minWidth: 275, // Set the desired minimum width
+              // ),
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
@@ -90,7 +93,7 @@ class Console extends ConsumerWidget {
 
         // Main content.
         Expanded(
-          flex: 5,
+          flex: 4,
           child: Container(
             decoration: BoxDecoration(
               border: Border(

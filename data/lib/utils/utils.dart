@@ -32,6 +32,11 @@ class WebUtils {
       throw 'Could not launch $url';
     }
   }
+
+  // Convert a color to a HTML hex code.
+  static String colorToHexCode(Color color) {
+    return '#' + color.value.toRadixString(16).substring(2).toUpperCase();
+  }
 }
 
 /// [registerErrorHandlers] displays notifications if certain errors are thrown.

@@ -8,18 +8,23 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/services/data_service.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 /// Sponsorship card.
 class SponsorshipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
       child: Container(
@@ -29,34 +34,47 @@ class SponsorshipCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Title.
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  'More coming soon!',
+                  'Advance cannabis science!',
                   style: Theme.of(context).textTheme.titleLarge,
-                ),
-                PrimaryButton(
-                  text: 'Contribute',
-                  backgroundColor: Colors.green,
-                  onPressed: () {
-                    DataService.openInANewTab(
-                        'https://cannlytics.com/sponsors');
-                  },
                 ),
               ],
             ),
-            SizedBox(height: 8),
+
+            // Description.
+            gapH4,
             Text(
-              'Rich analytics takes time and money to develop. Please consider making a donation to help us reach our funding requirement sooner so that we can offer this feature to you.',
+              'Cannabis data takes time to collect and statistics take time to calculate. Please consider making a contribution to help expedite the curation of cannabis data and AI-powered tools.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            SizedBox(height: 8),
-            Text(
-              'Goal: \$1,420',
-              style: Theme.of(context).textTheme.labelLarge,
+
+            // Goal.
+            gapH12,
+            Text.rich(
+              TextSpan(
+                text: '',
+                style: Theme.of(context).textTheme.bodySmall,
+                children: [
+                  TextSpan(
+                    text: '\$1,012',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: ' USD of '),
+                  TextSpan(
+                    text: '\$1,420',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: ' USD / month raised (71%).'),
+                ],
+              ),
             ),
-            SizedBox(height: 8),
+
+            // Progress bar.
+            gapH4,
             Stack(
               children: [
                 Container(
@@ -67,7 +85,7 @@ class SponsorshipCard extends StatelessWidget {
                   ),
                 ),
                 FractionallySizedBox(
-                  widthFactor: 0.70,
+                  widthFactor: 0.71,
                   child: Container(
                     height: 24,
                     decoration: BoxDecoration(
@@ -80,7 +98,7 @@ class SponsorshipCard extends StatelessWidget {
                     ),
                     child: Center(
                         child: Text(
-                      '\$1,000 funded',
+                      '\$1,012 funded',
                       style: Theme.of(context)
                           .textTheme
                           .labelSmall!
@@ -97,14 +115,95 @@ class SponsorshipCard extends StatelessWidget {
                     child: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          '\$420 to go!',
+                          '\$408 to go!',
                           style: Theme.of(context).textTheme.labelSmall,
                         )),
                   ),
                 ),
               ],
             ),
+
+            // Tiers.
+            gapH18,
+            Text(
+              'Donate now',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             gapH8,
+            Container(
+              width: double.infinity,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  SecondaryButton(
+                    text: '\$1',
+                    onPressed: () {
+                      DataService.openInANewTab(
+                          'https://opencollective.com/cannlytics-company/contribute/seedling-31614/checkout');
+                    },
+                  ),
+                  gapW8,
+                  SecondaryButton(
+                    text: '\$4.20',
+                    onPressed: () {
+                      DataService.openInANewTab(
+                          'https://opencollective.com/cannlytics-company/contribute/cannabis-data-scientist-29278/checkout');
+                    },
+                  ),
+                  gapW8,
+                  SecondaryButton(
+                    text: 'Other',
+                    onPressed: () {
+                      DataService.openInANewTab(
+                          'https://opencollective.com/cannlytics-company/donate');
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            // Link.
+            gapH4,
+            InkWell(
+              onTap: () async {
+                String url =
+                    'https://opencollective.com/cannlytics-company/donate';
+                await Clipboard.setData(ClipboardData(text: url));
+                Fluttertoast.showToast(
+                  msg: 'Copied link!',
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.TOP,
+                  timeInSecForIosWeb: 2,
+                  backgroundColor: Theme.of(context).dialogBackgroundColor,
+                  textColor: Theme.of(context).textTheme.titleLarge!.color,
+                  fontSize: 16.0,
+                  webBgColor: WebUtils.colorToHexCode(
+                      Theme.of(context).dialogBackgroundColor),
+                  webPosition: 'center',
+                  webShowClose: true,
+                );
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Icon(Icons.link, size: 12, color: Colors.green),
+                    SizedBox(width: 4),
+                    Text(
+                      'Copy link',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

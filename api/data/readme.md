@@ -1,24 +1,48 @@
 # Data API Endpoints
 
-You can use the Cannlytics Data API, `https://cannlytics.com/api/data`, to access cannabis datasets. You can query:
+You can use the Cannlytics Data API, `https://cannlytics.com/api/data`, to access cannabis data. You can query:
 
-- [Lab Result Data](#lab-result-data)
-- [Licensee Data](#licensee-data)
-- [State Data](#state-data)
+- [COA Data](#coa-data)
+<!-- - [Licensee Data](#licensee-data)
+- [State Data](#state-data) -->
 - [Strain Data](#strain-data)
 
-## Lab Result Data <a name="lab-result-data"></a>
+## COA Data <a name="lab-result-data"></a>
 
+Certificates of analysis (COAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! The `CoADoc` API puts these vital data points in your hands by parsing PDFs and URLs, finding all the data, standardizing the data, and cleanly returning the data to you.
+
+Parse COA files:
+
+```
+const response = await authRequest('/api/data/coas', data);
+```
+
+Parse URLs:
+
+```
+const postData = { urls: [decodedText] };
+const response = await authRequest('/api/data/coas', postData);
+```
+
+Download COA data:
+
+```
+const response = await authRequest('/api/data/coas/download', postData, { file: true });
+const blob = await response.blob();
+downloadBlob(blob, /* filename = */ `coa-data-${timestamp}.xlsx`);
+```
+
+Get your COA data:
+
+```
+# Coming soon!
+```
+
+<!-- ## Licensee Data <a name="licensee-data"></a> -->
 <!-- TODO: Describe and give examples -->
 
 
-## Licensee Data <a name="licensee-data"></a>
-
-<!-- TODO: Describe and give examples -->
-
-
-## State Data <a name="state-data"></a>
-
+<!-- ## State Data <a name="state-data"></a> -->
 <!-- TODO: Describe and give examples -->
 
 

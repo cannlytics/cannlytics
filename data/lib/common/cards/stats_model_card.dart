@@ -61,8 +61,8 @@ class DatasetCard extends StatelessWidget {
   final String title;
   final String description;
   final String tier;
-  final String rows;
-  final String columns;
+  final String? rows;
+  final String? columns;
   final void Function()? onTap;
 
   DatasetCard({
@@ -70,14 +70,15 @@ class DatasetCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.tier,
-    required this.rows,
-    required this.columns,
+    this.rows,
+    this.columns,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
       elevation: 2,
       child: InkWell(
@@ -97,8 +98,8 @@ class DatasetCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
                     imageUrl,
-                    width: 48,
-                    height: 48,
+                    width: 64,
+                    height: 64,
                   ),
                 ),
               ),
@@ -132,8 +133,10 @@ class DatasetCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         buildInfoItem(Icons.workspace_premium, tier),
-                        buildInfoItem(Icons.list_sharp, rows),
-                        buildInfoItem(Icons.table_chart_outlined, columns),
+                        if (rows != null)
+                          buildInfoItem(Icons.list_sharp, rows!),
+                        if (columns != null)
+                          buildInfoItem(Icons.table_chart_outlined, columns!),
                         gapW4,
                       ],
                     ),

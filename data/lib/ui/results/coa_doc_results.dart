@@ -177,7 +177,7 @@ class SampleResultsTable extends StatelessWidget {
       cells: [
         DataCell(Text(item['analysis'] ?? '')),
         DataCell(Text(item['name'] ?? '')),
-        DataCell(Text(item['value'].toString() ?? '')),
+        DataCell(Text(item['value'].toString())),
         DataCell(Text(item['units'] ?? '')),
         DataCell(Text(item['status'] ?? '')),
       ],

@@ -73,7 +73,7 @@ class SideMenu extends ConsumerWidget {
         DrawerListTile(
           title: 'Companies',
           leading: SvgPicture.asset(
-            'assets/icons/emoji/dispensary.svg',
+            'assets/icons/emoji/dispensary-plain.svg',
             width: 28,
           ),
           onTap: () => context.push('/licenses'),
@@ -230,9 +230,13 @@ class DrawerListTile extends StatelessWidget {
       leading: leading,
 
       // Title.
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.labelMedium,
+      title: Row(
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+        ],
       ),
 
       // Action.

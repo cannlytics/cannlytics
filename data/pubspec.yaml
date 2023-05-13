@@ -99,6 +99,7 @@ flutter:
     - assets/images/maps/usa-with-labels.svg
     - assets/icons/
     - assets/icons/emoji/dispensary.svg
+    - assets/icons/emoji/dispensary-plain.svg
     - assets/icons/emoji/farmer.svg
     - assets/icons/emoji/rocket.svg
     - assets/icons/emoji/green_check.svg
