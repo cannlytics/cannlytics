@@ -4,11 +4,8 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 3/18/2023
+// Updated: 5/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// Project imports:
-import 'package:cannlytics_app/services/metrc_service.dart';
 
 typedef SalesTransactionId = String?;
 
@@ -119,22 +116,4 @@ class SalesTransaction {
       'unit_weight_unit_of_measure': unitWeightUnitOfMeasure,
     };
   }
-
-  // // Create SalesTransaction.
-  // Future<void> create() async {
-  //   // Call an API or database to create a new SalesTransaction.
-  //   // await Metrc.createSalesTransaction(this.toMap());
-  // }
-
-  // // Update SalesTransaction.
-  // Future<void> update() async {
-  //   // Call an API or database to update the existing SalesTransaction.
-  //   // await Metrc.updateSalesTransaction(this.invoiceNumber, this.toMap());
-  // }
-
-  // // Delete SalesTransaction.
-  // Future<void> delete() async {
-  //   // Call an API or database to delete the existing SalesTransaction.
-  //   // await Metrc.deleteSalesTransaction(this.invoiceNumber);
-  // }
 }

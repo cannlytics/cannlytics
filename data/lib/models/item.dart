@@ -4,11 +4,8 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/27/2023
-// Updated: 3/18/2023
+// Updated: 5/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// Project imports:
-import 'package:cannlytics_app/services/metrc_service.dart';
 
 /// Model representing an item.
 class Item {
@@ -171,20 +168,4 @@ class Item {
       'unit_weight_unit_of_measure_name': unitWeightUnitOfMeasureName,
     };
   }
-
-  // // Create Item.
-  // Future<void> create() async {
-  //   // Call an API or database to create a new item.
-  //   // await MetrcService.createItem(this.toMap());
-  // }
-  // // Update Item.
-  // Future<void> update() async {
-  //   // Call an API or database to update the existing item.
-  //   // await MetrcService.updateItem(this.id, this.toMap());
-  // }
-  // // Delete Item.
-  // Future<void> delete() async {
-  //   // Call an API or database to delete the existing item.
-  //   // await MetrcService.deleteItem(this.id);
-  // }
 }

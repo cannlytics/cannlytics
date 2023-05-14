@@ -7,11 +7,8 @@
 // Updated: 4/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Flutter imports:
-import 'package:flutter/material.dart';
-
 /// Model representing a statistical model.
-class StatisticalModel {
+class AIModel {
   final String? name;
   final String? type;
   final String? description;
@@ -22,7 +19,7 @@ class StatisticalModel {
   final Map<String, double>? trainTestSplit;
   final String? createdAt;
 
-  StatisticalModel({
+  AIModel({
     this.name,
     this.type,
     this.description,

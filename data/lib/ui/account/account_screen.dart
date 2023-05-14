@@ -7,6 +7,9 @@
 // Updated: 5/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// TODO:
+// [ ] Allow patients to keep track of their recommendation / card.
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

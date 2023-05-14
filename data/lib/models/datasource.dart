@@ -4,11 +4,8 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 4/16/2023
+// Updated: 5/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// Flutter imports:
-import 'package:flutter/material.dart';
 
 /// Model representing a data source.
 class DataSource {

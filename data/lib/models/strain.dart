@@ -4,11 +4,8 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/25/2023
-// Updated: 3/13/2023
+// Updated: 5/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// Project imports:
-import 'package:cannlytics_app/services/metrc_service.dart';
 
 typedef StrainId = String;
 
@@ -58,23 +55,5 @@ class Strain {
       'indica_percentage': indicaPercentage,
       'sativa_percentage': sativaPercentage,
     };
-  }
-
-  // Create Strain.
-  Future<void> create() async {
-    // Call an API or database to create a new strain.
-    // await MetrcService.createStrain(this.toMap());
-  }
-
-  // Update Strain.
-  Future<void> update() async {
-    // Call an API or database to update the existing strain.
-    // await MetrcService.updateStrain(this.id, this.toMap());
-  }
-
-  // Delete Strain.
-  Future<void> delete() async {
-    // Call an API or database to delete the existing strain.
-    // await MetrcService.deleteStrain(this.id);
   }
 }

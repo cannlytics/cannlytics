@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 4/16/2023
+// Updated: 5/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -20,20 +20,62 @@ final firestoreProvider = Provider<FirestoreService>((ref) {
 class FirestoreService {
   const FirestoreService._();
 
-  /// Set data in Firestore given a path, optionally merging data.
-  Future<void> setData({
-    required String path,
-    required Map<String, dynamic> data,
-    bool merge = true,
-  }) async {
+  /// Get a document.
+  Future<Map<String, dynamic>> getDocument({required String path}) async {
     final reference = FirebaseFirestore.instance.doc(path);
-    await reference.set(data, SetOptions(merge: merge));
+    final snapshot = await reference.get();
+    var data = snapshot.data();
+    if (data == null) data = {};
+    data['id'] = snapshot.id;
+    return data;
   }
 
-  /// Delete a document from Firestore.
-  Future<void> deleteData({required String path}) async {
+  /// Get documents from a collection.
+  Future<List<T>> fetchCollection<T>({
+    required String path,
+    required T Function(Map? data, String documentID) builder,
+    Query<Map>? Function(Query<Map> query)? queryBuilder,
+    int Function(T lhs, T rhs)? sort,
+  }) async {
+    Query<Map> query = FirebaseFirestore.instance.collection(path);
+    if (queryBuilder != null) {
+      query = queryBuilder(query)!;
+    }
+    final snapshot = await query.get();
+    final result = snapshot.docs
+        .map((snapshot) => builder(
+              snapshot.data(),
+              snapshot.id,
+            ))
+        .where((value) => value != null)
+        .toList();
+    if (sort != null) {
+      result.sort(sort);
+    }
+    return result;
+  }
+
+  /// Watch a document as streams.
+  Stream<T> watchDocument<T>({
+    required String path,
+    required T Function(
+      Map<String, dynamic>? data,
+      String documentID,
+    )
+        builder,
+  }) {
+    // Create a reference.
     final reference = FirebaseFirestore.instance.doc(path);
-    await reference.delete();
+
+    // Listen to the document.
+    final Stream<DocumentSnapshot<Map<String, dynamic>>> snapshots =
+        reference.snapshots();
+
+    // Return the document data.
+    return snapshots.map((snapshot) => builder(
+          snapshot.data(),
+          snapshot.id,
+        ));
   }
 
   /// Watch a collection as streams.
@@ -76,61 +118,19 @@ class FirestoreService {
     });
   }
 
-  /// Watch a document as streams.
-  Stream<T> watchDocument<T>({
+  /// Set data in Firestore given a path, optionally merging data.
+  Future<void> setData({
     required String path,
-    required T Function(
-      Map<String, dynamic>? data,
-      String documentID,
-    )
-        builder,
-  }) {
-    // Create a reference.
-    final reference = FirebaseFirestore.instance.doc(path);
-
-    // Listen to the document.
-    final Stream<DocumentSnapshot<Map<String, dynamic>>> snapshots =
-        reference.snapshots();
-
-    // Return the document data.
-    return snapshots.map((snapshot) => builder(
-          snapshot.data(),
-          snapshot.id,
-        ));
-  }
-
-  /// Get documents from a collection.
-  Future<List<T>> fetchCollection<T>({
-    required String path,
-    required T Function(Map? data, String documentID) builder,
-    Query<Map>? Function(Query<Map> query)? queryBuilder,
-    int Function(T lhs, T rhs)? sort,
+    required Map<String, dynamic> data,
+    bool merge = true,
   }) async {
-    Query<Map> query = FirebaseFirestore.instance.collection(path);
-    if (queryBuilder != null) {
-      query = queryBuilder(query)!;
-    }
-    final snapshot = await query.get();
-    final result = snapshot.docs
-        .map((snapshot) => builder(
-              snapshot.data(),
-              snapshot.id,
-            ))
-        .where((value) => value != null)
-        .toList();
-    if (sort != null) {
-      result.sort(sort);
-    }
-    return result;
+    final reference = FirebaseFirestore.instance.doc(path);
+    await reference.set(data, SetOptions(merge: merge));
   }
 
-  /// Get a document.
-  Future<Map<String, dynamic>> getDocument({required String path}) async {
+  /// Delete a document from Firestore.
+  Future<void> deleteData({required String path}) async {
     final reference = FirebaseFirestore.instance.doc(path);
-    final snapshot = await reference.get();
-    var data = snapshot.data();
-    if (data == null) data = {};
-    data['id'] = snapshot.id;
-    return data;
+    await reference.delete();
   }
 }

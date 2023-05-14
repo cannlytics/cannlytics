@@ -4,11 +4,8 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/27/2023
-// Updated: 3/18/2023
+// Updated: 5/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// Project imports:
-import 'package:cannlytics_app/services/metrc_service.dart';
 
 class Package {
   // Initialization.
@@ -219,22 +216,4 @@ class Package {
       'items': items,
     };
   }
-
-  // // Create Package.
-  // Future<void> create() async {
-  //   // Call an API or database to create a new package.
-  //   // await MetrcService.createPackage(this.toMap());
-  // }
-
-  // // Update Package.
-  // Future<void> update() async {
-  //   // Call an API or database to update the existing package.
-  //   // await MetrcService.updatePackage(this.id, this.toMap());
-  // }
-
-  // // Delete Package.
-  // Future<void> delete() async {
-  //   // Call an API or database to delete the existing package.
-  //   // await MetrcService.deletePackage(this.id);
-  // }
 }

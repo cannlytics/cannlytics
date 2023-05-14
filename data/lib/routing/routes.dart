@@ -12,7 +12,6 @@
 import 'package:cannlytics_data/routing/app_router.dart';
 import 'package:cannlytics_data/ui/account/account_screen.dart';
 import 'package:cannlytics_data/ui/account/reset_password_screen.dart';
-import 'package:cannlytics_data/ui/ai/coa_doc/coa_doc.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_screen.dart';
@@ -115,25 +114,25 @@ class Routes {
     // ),
 
     // AI Models.
-    AppRoute(
-      path: '/models',
-      name: 'models',
-      builder: (context, state) => DashboardScreen(),
-      routes: [
-        // CoADoc screen.
-        AppRoute(
-          path: 'coas',
-          name: 'CoADoc',
-          builder: (context, state) => CoADocScreen(),
-        ),
+    // AppRoute(
+    //   path: '/models',
+    //   name: 'models',
+    //   builder: (context, state) => DashboardScreen(),
+    //   routes: [
+    //     // CoADoc screen.
+    //     AppRoute(
+    //       path: 'coas',
+    //       name: 'CoADoc',
+    //       builder: (context, state) => CoADocScreen(),
+    //     ),
 
-        // SkunkFx screen.
-        AppRoute(
-          path: 'effects',
-          name: 'SkunkFx',
-          builder: (context, state) => CoADocScreen(),
-        ),
-      ],
-    ),
+    //     // SkunkFx screen.
+    //     AppRoute(
+    //       path: 'effects',
+    //       name: 'SkunkFx',
+    //       builder: (context, state) => CoADocScreen(),
+    //     ),
+    //   ],
+    // ),
   ];
 }

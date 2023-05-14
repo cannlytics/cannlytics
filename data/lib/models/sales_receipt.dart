@@ -4,11 +4,8 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 3/17/2023
+// Updated: 5/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// Project imports:
-import 'package:cannlytics_app/services/metrc_service.dart';
 
 typedef SalesReceiptId = String;
 
@@ -95,22 +92,4 @@ class SalesReceipt {
       'last_modified': lastModified,
     };
   }
-
-  // // Create Sales Receipt.
-  // Future<void> create() async {
-  //   // Call an API or database to create a new sales receipt.
-  //   // await MetrcService.createSalesReceipt(this.toMap());
-  // }
-
-  // // Update Sales Receipt.
-  // Future<void> update() async {
-  //   // Call an API or database to update the existing sales receipt.
-  //   // await MetrcService.updateSalesReceipt(this.toMap());
-  // }
-
-  // // Delete Sales Receipt.
-  // Future<void> delete() async {
-  //   // Call an API or database to delete the existing sales receipt.
-  //   // await MetrcService.deleteSalesReceipt(this.toMap());
-  // }
 }
