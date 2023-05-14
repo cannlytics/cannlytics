@@ -96,19 +96,20 @@ else:
 # Define apps used in the project.
 INSTALLED_APPS = [
     PROJECT_NAME,
+    # 'api.apps.APIConfig',
     'api',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    # 'corsheaders',
     'django_feather',
     'django_robohash',
-    'django.contrib.humanize',
 ]
+print('INSTALLED_APPS:', INSTALLED_APPS)
 
 #----------------------------------------------------------------------#
 # Middleware

@@ -59,7 +59,7 @@
     "website:start": "npm-run-all --parallel website:serve website:livereload website:dev",
     "website:serve": "cd website & webpack serve --env development & cd ../",
     "website:livereload": "set PROJECT=website & python manage.py livereload --ignore-static-dirs",
-    "website:dev": "set PROJECT=website & python manage.py runserver",
+    "website:dev": "set PROJECT=website & python manage.py runserver --noreload",
     "website:build": "cd website & webpack --env production & cd ../",
     "website:collectstatic": "set PROJECT=website & python manage.py collectstatic --noinput",
     "website:container": "npm run website:collectstatic --noinput & gcloud builds submit --tag gcr.io/cannlytics/cannlytics-website",

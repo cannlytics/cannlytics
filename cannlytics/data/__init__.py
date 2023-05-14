@@ -6,8 +6,8 @@ Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2022
 Updated: 9/9/2022
 """
-from .coas.coas import CoADoc
-from .receipts.receipt_parser import BudSpender
+# from .coas.coas import CoADoc
+# from .receipts.receipt_parser import BudSpender
 from .opendata.opendata import OpenData
 from .data import (
     aggregate_datasets,
@@ -19,8 +19,8 @@ from .data import (
 )
 
 __all__ = [
-    'CoADoc',
-    'BudSpender',
+    # 'CoADoc',
+    # 'BudSpender',
     'OpenData',
     'aggregate_datasets',
     'create_hash',

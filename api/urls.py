@@ -82,8 +82,8 @@ urlpatterns = [
         path('/coas/<coa_id>', api.data.coa_data),
 
         # Receipt data API endpoints.
-        path('/receipts', api.data.receipt_data),
-        path('/receipts/<receipt_id>', api.data.receipt_data),
+        # path('/receipts', api.data.receipt_data),
+        # path('/receipts/<receipt_id>', api.data.receipt_data),
 
         # Labs data API endpoints.
         path('labs', include([

@@ -125,34 +125,35 @@ class BudSpender(object):
         return products
 
 # === Test ===
+if __name__ == '__main__':
 
-import os
+    import os
 
-# Initialize a receipt parser.
-parser = BudSpender()
+    # Initialize a receipt parser.
+    parser = BudSpender()
 
-# Specify where your receipts live.
-RECEIPT_DIR = '../../.datasets/receipts'
-receipt_filenames = []
-filenames = os.listdir(RECEIPT_DIR)
-for filename in filenames:
-    if filename.endswith('.jpg'):
-        receipt_filenames.append(f'{RECEIPT_DIR}/{filename}')
+    # Specify where your receipts live.
+    RECEIPT_DIR = '../../.datasets/receipts'
+    receipt_filenames = []
+    filenames = os.listdir(RECEIPT_DIR)
+    for filename in filenames:
+        if filename.endswith('.jpg'):
+            receipt_filenames.append(f'{RECEIPT_DIR}/{filename}')
 
-# Example: Extract the text from a receipt.
-image_file = '../../.datasets/receipts/receipt-1.jpg'
-image_text = parser.image_to_text(image_file)
+    # Example: Extract the text from a receipt.
+    image_file = '../../.datasets/receipts/receipt-1.jpg'
+    image_text = parser.image_to_text(image_file)
 
-# Example: Extract the text from all receipts.
-receipt_texts = []
-for filename in receipt_filenames:
-    image_text = parser.image_to_text(filename)
-    receipt_texts.append(image_text)
+    # Example: Extract the text from all receipts.
+    receipt_texts = []
+    for filename in receipt_filenames:
+        image_text = parser.image_to_text(filename)
+        receipt_texts.append(image_text)
 
-# Save the receipt text.
-with open('receipt_texts.txt', 'w+') as f:
-    for s in receipt_texts:
-        f.write(str(s) + '\n')
+    # Save the receipt text.
+    with open('receipt_texts.txt', 'w+') as f:
+        for s in receipt_texts:
+            f.write(str(s) + '\n')
 
-# Use a pre-trained model to tokenize the receipts.
+    # Use a pre-trained model to tokenize the receipts.
 
