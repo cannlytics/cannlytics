@@ -7,6 +7,13 @@
 // Updated: 5/11/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// TODO:
+// - [ ] Searchable database of observed strains
+// - [ ] Variety Identification Prediction (V.I.P.) model
+// - [ ] Patented strains dataset
+// - [ ] Connecticut strains dataset
+// - [ ] Washington strains dataset
+
 // Dart imports:
 import 'dart:convert';
 
