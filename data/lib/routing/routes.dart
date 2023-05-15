@@ -50,19 +50,26 @@ class Routes {
     AppRoute(
       path: '/licenses',
       name: 'licenses',
-      builder: (context, state) => LicenseesScreen(),
       useFade: true,
-      // TODO: Add licensees by state pages!
-      routes: [
-        AppRoute(
-          path: ':license_number',
-          builder: (context, state) {
-            // FIXME: Either return state or license number.
-            // final state = USAStates[state.params['license_number']!];
-            return StateLicensesScreen(id: state.params['license_number']!);
-          },
-        )
-      ],
+      builder: (context, state) => LicenseesScreen(),
+    ),
+
+    // Licenses by state screen.
+    AppRoute(
+      path: '/licenses/:state_id',
+      name: 'state_licenses',
+      useFade: true,
+      builder: (context, state) {
+        return StateLicensesScreen(id: state.params['state_id']!);
+      },
+    ),
+
+    // FIXME: Return license screen if a license number is passed.
+    AppRoute(
+      path: '/licenses/:state_id/:license_number',
+      builder: (context, state) {
+        return StateLicensesScreen(id: state.params['state_id']!);
+      },
     ),
 
     // Strains screen.

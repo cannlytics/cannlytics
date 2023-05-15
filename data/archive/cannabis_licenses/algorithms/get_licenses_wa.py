@@ -245,6 +245,7 @@ def get_licenses_wa(
     if data_dir is not None:
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
         retailers = licenses.loc[licenses['license_type'] == 'Adult-Use Retailer']
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
         labs = licenses.loc[licenses['license_type'] == 'Lab']

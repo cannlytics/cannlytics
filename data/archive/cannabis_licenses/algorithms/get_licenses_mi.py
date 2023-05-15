@@ -241,6 +241,7 @@ def get_licenses_mi(
         if not os.path.exists(data_dir): os.makedirs(data_dir)
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
     
     # Return the licenses.
     return licenses

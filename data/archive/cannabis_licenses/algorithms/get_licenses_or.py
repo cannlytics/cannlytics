@@ -191,6 +191,7 @@ def get_licenses_or(
     if data_dir is not None:
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         data.to_csv(f'{data_dir}/licenses-or-{timestamp}.csv', index=False)
+        data.to_csv(f'{data_dir}/licenses-or-latest.csv', index=False)
     return data
 
 

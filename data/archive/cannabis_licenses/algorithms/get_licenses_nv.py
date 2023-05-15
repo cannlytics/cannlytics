@@ -132,6 +132,7 @@ def get_licenses_nv(
     if data_dir is not None:
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
 
     #--------------------------------------------------------------------------
     # Get retailer data
@@ -214,6 +215,7 @@ def get_licenses_nv(
     if data_dir is not None:
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
+        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-latest.csv', index=False)
 
     # Return all of the data.
     return pd.concat([licenses, retailers])

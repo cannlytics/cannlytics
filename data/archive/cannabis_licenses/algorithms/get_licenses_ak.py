@@ -181,6 +181,7 @@ def save_license_data(
         # Filter for retail licenses and save both the full DataFrame and the filtered DataFrame.
         retailers = licenses.loc[licenses['license_type'] == 'Retail Marijuana Store']
         licenses.to_csv(f'{data_dir}/licenses-{state.lower()}-{timestamp}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{state.lower()}-latest.csv', index=False)
         retailers.to_csv(f'{data_dir}/retailers-{state.lower()}-{timestamp}.csv', index=False)
 
 

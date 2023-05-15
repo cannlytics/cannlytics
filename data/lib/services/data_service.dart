@@ -67,7 +67,7 @@ class DataService {
           .map((row) =>
               Map.fromIterables(headerRow, row.map((e) => e.toString())))
           .toList();
-      print('CONVERTED TO CSV');
+      print('CONVERTED TO CSV: ${csvDataAsListOfMaps.length}');
 
       return csvDataAsListOfMaps;
     } else {

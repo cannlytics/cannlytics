@@ -73,6 +73,7 @@ def get_licenses_ma(
         retailers = licenses.loc[licenses['license_type'].str.contains('Retailer')]
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
     return licenses
 
 

@@ -327,6 +327,8 @@ def get_licenses_nm(
             os.makedirs(data_dir)
         date = datetime.now().isoformat()[:10]
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{date}.csv', index=False)
+        retailers.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
+        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-latest.csv', index=False)
 
     # Return the licenses.
     return retailers

@@ -4,14 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/7/2023
-// Updated: 5/9/2023
+// Updated: 5/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-// import 'dart:io';
-// import 'package:path/path.dart';
+import 'dart:html';
 
-// Flutter imports:
+import 'package:cannlytics_data/services/storage_service.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -23,32 +22,35 @@ import 'package:cannlytics_data/models/licensee.dart';
 import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 
-// import 'package:excel/excel.dart';
-// import 'package:intl/intl.dart';
-
 /* Data */
 
 // Licenses state.
 final activeStateProvider = StateProvider<String?>((ref) => null);
 
 // Licensees provider.
-final licenseesProvider =
-    AsyncNotifierProvider<LicenseesController, List<Map<String, dynamic>>>(
-        () => LicenseesController());
+final licenseesProvider = AutoDisposeAsyncNotifierProvider<LicenseesController,
+    List<Map<String, dynamic>>>(() => LicenseesController());
 
 /// Licensees controller.
-class LicenseesController extends AsyncNotifier<List<Map<String, dynamic>>> {
-  // Load initial licensees list from Metrc.
+class LicenseesController
+    extends AutoDisposeAsyncNotifier<List<Map<String, dynamic>>> {
+  // Load initial licensees list.
   @override
   Future<List<Map<String, dynamic>>> build() async => _getLicensees();
 
   /// Get licensees.
   Future<List<Map<String, dynamic>>> _getLicensees() async {
-    // FIXME: Get the correct datafile for the state.
-    final stateId = ref.read(activeStateProvider) ?? 'all';
-    print('STATE WHEN GETTING LICENSEES: $stateId');
-    var url =
-        'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fdata%2Flicenses%2Fwa%2Flicenses-wa-2023-04-24T21-21-31.csv?alt=media&token=33ab0328-9fa5-4658-b927-5511268fef1a';
+    var stateId = ref.watch(activeStateProvider);
+    if (stateId == null) {
+      print('URL: ${window.location.href}');
+      stateId = window.location.href.split('/').last;
+    }
+    print('STATE ID: $stateId');
+    // // FIXME: If a user is not signed in, then get a sample instead.
+    String? url = await StorageService.getDownloadUrl(
+        'data/licenses/$stateId/licenses-$stateId-latest.csv');
+    print('DOWNLOAD URL: $url');
+    if (url == null) return [];
     return await DataService.fetchCSVFromURL(url);
   }
 
@@ -58,30 +60,6 @@ class LicenseesController extends AsyncNotifier<List<Map<String, dynamic>>> {
     state = await AsyncValue.guard(() async => items);
   }
 }
-
-/// Get state licenses.
-// final stateLicensesProvider = FutureProvider.autoDispose
-//     .family<List<Map<String, dynamic>>, String>((ref, stateId) async {
-//   // FIXME: Get the correct datafile..
-//   var url =
-//       'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fdata%2Flicenses%2Fwa%2Flicenses-wa-2023-04-24T21-21-31.csv?alt=media&token=33ab0328-9fa5-4658-b927-5511268fef1a';
-//   var data = await DataService.fetchCSVFromURL(url);
-//   return data;
-// });
-
-// Example Stream:
-// final stateLicensesProvider =
-//     StreamProvider.family<List<Map<String, dynamic>>, String>(
-//         (ref, stateId) async* {
-//   final FirestoreService _dataSource = ref.watch(firestoreProvider);
-//   yield* _dataSource.watchCollection(
-//     path: 'public/data/licenses',
-//     builder: (data, documentId) => data!,
-//     queryBuilder: (query) => query
-//         .where('premise_state', isEqualTo: stateId.toUpperCase())
-//         .limit(10),
-//   );
-// });
 
 /* Table */
 
@@ -98,35 +76,12 @@ final licenseesSortAscending = StateProvider<bool>((ref) => true);
 final searchTermProvider = StateProvider<String>((ref) => '');
 
 /// Filtered licensees provider.
-// final filteredLicenseesProvider =
-//     StreamProvider.family<List<Map<String, dynamic>>, String>(
-//         (ref, stateId) async* {
-//   final searchTerm = ref.watch(searchTermProvider);
-//   final data = ref.watch(stateLicensesProvider(stateId)).value ?? [];
-//   if (searchTerm.isEmpty) {
-//     yield data;
-//   }
-//   String keyword = searchTerm.toLowerCase();
-//   List<Map<String, dynamic>> matched = [];
-//   data.forEach((x) {
-//     // Matching logic.
-//     if (x['business_legal_name'].toLowerCase().contains(keyword) ||
-//         x['license_number'].toLowerCase().contains(keyword)) {
-//       matched.add(x);
-//     }
-//   });
-//   yield matched;
-// });
-
-/// Filtered licensees provider.
-final filteredLicenseesProvider = StateNotifierProvider<
+final filteredLicenseesProvider = StateNotifierProvider.autoDispose<
     FilteredLicenseesNotifier, List<Map<String, dynamic>>>(
   (ref) {
     // Listen to search term and read the data.
-    final stateId = ref.read(activeStateProvider) ?? 'all';
-    print('STATE WHEN FILTERED: $stateId');
     final searchTerm = ref.watch(searchTermProvider);
-    final data = ref.read(licenseesProvider).value;
+    final data = ref.watch(licenseesProvider).value;
     return FilteredLicenseesNotifier(ref, data ?? [], searchTerm);
   },
 );
@@ -151,15 +106,16 @@ class FilteredLicenseesNotifier
       return;
     }
     String keyword = searchTerm.toLowerCase();
-    List<Map<String, dynamic>> matched = [];
-    items.forEach((x) {
-      // Matching logic.
-      if (x['business_legal_name'].toLowerCase().contains(keyword) ||
-          x['license_number'].toLowerCase().contains(keyword)) {
-        matched.add(x);
-      }
-    });
-    state = matched;
+    // FIXME:
+    // List<Map<String, dynamic>> matched = [];
+    // items.forEach((x) {
+    //   // Matching logic.
+    //   if (x['business_legal_name'].toLowerCase().contains(keyword) ||
+    //       x['license_number'].toLowerCase().contains(keyword)) {
+    //     matched.add(x);
+    //   }
+    // });
+    state = items;
   }
 }
 
@@ -183,57 +139,3 @@ final licenseeProvider =
     queryBuilder: (query) => query.where('id', isEqualTo: id).limit(1),
   );
 });
-
-/* Service */
-
-/// Licensees service.
-// class LicenseesService {
-//   const LicenseesService._();
-
-//   // /// Create a data download filename.
-//   // static String createFileName() {
-//   //   DateTime now = DateTime.now();
-//   //   String formattedDateTime = DateFormat('yyyy-MM-dd-HH-mm-ss').format(now);
-//   //   String fileName = 'cannlytics-data-$formattedDateTime.xlsx';
-//   //   return fileName;
-//   // }
-
-//   // Download licensees data.
-//   static Future<void> downloadLicensees(List<Map> data) async {
-//     print('Download licensees....');
-//     // Create a workbook.
-//     var excel = Excel.createExcel();
-//     var rows = [
-//       ['business_legal_name', 'license_number', 'premise_state'],
-//       ...data.map((x) => [
-//             x['business_legal_name'],
-//             x['license_number'],
-//             x['premise_state'],
-//           ])
-//     ];
-//     excel.rename('Sheet1', 'Data');
-//     Sheet sheetObject = excel['Data'];
-//     rows.forEach((row) => sheetObject.appendRow(row));
-
-//     // TODO: Add Copyright / License / Sources sheets.
-
-//     // TODO: Create filename.
-//     String fileName = DataService.createDataFileName();
-
-//     // Download the workbook.
-//     var fileBytes = excel.save(fileName: 'data.xlsx');
-
-//     // FIXME: Handle downloading on mobile.
-//     // try {
-//     //   // Download mobile.
-//     //   var fileBytes = excel.save();
-//     //   var directory = await getApplicationDocumentsDirectory();
-//     //   File(join('$directory/output_file_name.xlsx'))
-//     //     ..createSync(recursive: true)
-//     //     ..writeAsBytesSync(fileBytes);
-//     // } catch(error) {
-//     //   // Download on the web.
-//     //   var fileBytes = excel.save(fileName: 'My_Excel_File_Name.xlsx');
-//     // }
-//   }
-// }

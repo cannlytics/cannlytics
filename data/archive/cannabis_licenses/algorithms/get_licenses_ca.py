@@ -92,6 +92,7 @@ def get_licenses_ca(
         if not os.path.exists(data_dir): os.makedirs(data_dir)
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         license_data.to_csv(f'{data_dir}/licenses-ca-{timestamp}.csv', index=False)
+        license_data.to_csv(f'{data_dir}/licenses-ca-latest.csv', index=False)
     return license_data
 
 if __name__ == '__main__':

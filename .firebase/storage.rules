@@ -59,7 +59,8 @@ service firebase.storage {
 
     // Allow users to download public hemp data.
     match /data/hemp/{allPaths=**} {
-      allow read: if isSignedIn();
+      // allow read: if isSignedIn();
+      allow read: if true,
       allow write: if false;
     }
 

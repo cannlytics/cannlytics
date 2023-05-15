@@ -72,8 +72,6 @@ class MainContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final screenWidth = MediaQuery.of(context).size.width;
-    // FIXME: Set the active state.
-    // ref.read(activeStateProvider.notifier).state = id;
     return Padding(
       padding: EdgeInsets.only(
         left: sliverHorizontalPadding(screenWidth) / 2,
@@ -126,13 +124,12 @@ class LicenseesTable extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // FIXME: Get the filtered data.
+    // Listen to the filtered licensees.
     final data = ref.watch(filteredLicenseesProvider);
-    // if (ref.read(activeStateProvider) == null) {
-    //   ref.read(activeStateProvider.notifier).state = id;
-    //   // return Center(child: CircularProgressIndicator(strokeWidth: 1.42));
-    // }
-    // TODO: Add loading state.
+
+    // FIXME:: Loading data placeholder.
+
+    // No data placeholder.
     if (data.isEmpty) {
       return FormPlaceholder(
         image: 'assets/images/icons/document.png',
@@ -198,7 +195,7 @@ class LicenseesTable extends ConsumerWidget {
             ref.read(licenseesSortColumnIndex.notifier).state = columnIndex;
             ref.read(licenseesSortAscending.notifier).state = sortAscending;
             // FIXME:
-            ref.read(licenseesProvider.notifier).setLicensees(sorted);
+            // ref.read(licenseesProvider.notifier).setLicensees(sorted);
           },
         ),
     ];
@@ -225,7 +222,7 @@ class LicenseesTable extends ConsumerWidget {
       dataRowHeight: 48,
       columnSpacing: 48,
       headingRowHeight: 48,
-      horizontalMargin: 12,
+      // horizontalMargin: 12,
 
       // Pagination.
       availableRowsPerPage: [5, 10, 25, 50, 100],
@@ -246,6 +243,7 @@ class LicenseesTable extends ConsumerWidget {
 
     // Define the table actions.
     var actions = Row(
+      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Search box.
         SizedBox(
@@ -298,6 +296,7 @@ class LicenseesTable extends ConsumerWidget {
         ),
 
         // Download button.
+        Spacer(),
         SecondaryButton(
           text: 'Download',
           onPressed: () {

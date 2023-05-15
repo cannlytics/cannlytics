@@ -229,8 +229,8 @@ def get_licenses_mo(
     licenses = pd.concat(licenses)
     if data_dir is not None:
         date = datetime.now().isoformat()[:10]
-        outfile = f'{data_dir}/licenses-{STATE.lower()}-{date}.csv'
-        licenses.to_csv(outfile, index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
     
     # Return the licenses.
     return licenses

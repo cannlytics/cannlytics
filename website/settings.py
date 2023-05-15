@@ -96,7 +96,6 @@ else:
 # Define apps used in the project.
 INSTALLED_APPS = [
     PROJECT_NAME,
-    # 'api.apps.APIConfig',
     'api',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -109,7 +108,6 @@ INSTALLED_APPS = [
     'django_feather',
     'django_robohash',
 ]
-print('INSTALLED_APPS:', INSTALLED_APPS)
 
 #----------------------------------------------------------------------#
 # Middleware

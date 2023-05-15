@@ -154,8 +154,8 @@ def get_licenses_de(
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
         date = datetime.now().isoformat()[:10]
-        outfile = f'{data_dir}/licenses-{STATE.lower()}-{date}.csv'
-        data.to_csv(outfile, index=False)
+        data.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
+        data.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
     
     # Return the licenses.
     return data

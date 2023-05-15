@@ -14,11 +14,13 @@
 import 'dart:math';
 
 // Flutter imports:
+import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:collection/collection.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_drawing/path_drawing.dart';
@@ -51,13 +53,13 @@ final List mapLegend = [
 ];
 
 /// An interactive map of the united states.
-class InteractiveMap extends StatefulWidget {
+class InteractiveMap extends ConsumerStatefulWidget {
   @override
-  State<InteractiveMap> createState() => _InteractiveMapState();
+  ConsumerState<InteractiveMap> createState() => _InteractiveMapState();
 }
 
 /// Map state.
-class _InteractiveMapState extends State<InteractiveMap>
+class _InteractiveMapState extends ConsumerState<InteractiveMap>
     with TickerProviderStateMixin {
   // Properties.
   MapData? mapData;
@@ -211,7 +213,9 @@ class _InteractiveMapState extends State<InteractiveMap>
             if (stateData.id == 'labels') {
               return;
             }
-            context.push('/licenses/${stateData.id.toLowerCase()}');
+            String stateId = stateData.id.toLowerCase();
+            ref.read(activeStateProvider.notifier).state = stateId;
+            context.push('/licenses/$stateId');
           },
 
           // Optional: Label.

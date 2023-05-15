@@ -175,6 +175,7 @@ def get_licenses_me(
     if data_dir is not None:
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
         # TODO: Save the retailers in a stand-alone data file.
 
     # Return the licenses.
