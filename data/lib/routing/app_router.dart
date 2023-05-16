@@ -4,13 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 4/14/2023
+// Updated: 5/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_data/ui/general/not_found_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -20,49 +21,21 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_data/routing/routes.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
-import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 
-// Flutter imports:
-// import 'package:cannlytics_app/ui/layout/not_found_screen.dart';
-
-// Private navigators.
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
-
-// Navigation.
+// App navigation.
 final goRouterProvider = Provider<GoRouter>((ref) {
-  // Determine if the user is signed in.
-  final authService = ref.watch(authProvider);
-  final user = ref.watch(userProvider).value;
-  final isLoggedIn = user != null;
-
-  // Build the routes.
   return GoRouter(
     initialLocation: '/',
-    navigatorKey: _rootNavigatorKey,
+    navigatorKey: GlobalKey<NavigatorState>(),
     debugLogDiagnostics: true,
-    // errorBuilder: (context, state) => const NotFoundScreen(),
-    refreshListenable: GoRouterRefreshStream(authService.authStateChanges()),
-    // redirect: (context, state) => routeRedirect(state, isLoggedIn),
+    errorBuilder: (context, state) => const NotFoundScreen(),
+    refreshListenable:
+        GoRouterRefreshStream(ref.watch(authProvider).authStateChanges()),
     routes: Routes.mainRoutes,
   );
 });
 
-// Redirect function.
-// First, determine if the user is logged in,
-// then navigate to either the dashboard or to sign in.
-String? routeRedirect(GoRouterState state, bool isLoggedIn) {
-  if (isLoggedIn) {
-    if (state.subloc.startsWith('/sign-in')) return '/';
-  } else {
-    if (!state.subloc.startsWith('/sign-in') &&
-        !state.subloc.startsWith('/account/reset-password')) {
-      return '/sign-in';
-    }
-  }
-  return null;
-}
-
-/// Custom GoRoute class to make route declaration easier.
+/// Custom `GoRoute` class to make route declaration easier.
 class AppRoute extends GoRoute {
   // Route properties.
   final String? name;
@@ -126,17 +99,14 @@ class AppRoute extends GoRoute {
         );
 }
 
-/// GoRouter stream.
+/// GoRouter stream (required logic for `go_router`, generally you can ignore).
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
     notifyListeners();
-    _subscription = stream.asBroadcastStream().listen((dynamic _) {
-      return notifyListeners();
-    });
+    _subscription =
+        stream.asBroadcastStream().listen((dynamic _) => notifyListeners());
   }
-
   late final StreamSubscription<dynamic> _subscription;
-
   @override
   void dispose() {
     _subscription.cancel();

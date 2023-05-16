@@ -5,7 +5,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/25/2023
+// Updated: 5/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 
@@ -24,7 +24,7 @@ import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/firebase_options.dart';
 import 'package:cannlytics_data/routing/app_router.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
-import 'package:cannlytics_data/utils/utils.dart';
+import 'package:cannlytics_data/constants/errors.dart';
 
 // ignore:depend_on_referenced_packages
 

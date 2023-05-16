@@ -68,6 +68,9 @@ class DataService {
               Map.fromIterables(headerRow, row.map((e) => e.toString())))
           .toList();
       print('CONVERTED TO CSV: ${csvDataAsListOfMaps.length}');
+      if (csvDataAsListOfMaps.length > 0) {
+        print('SAMPLE OBSERVATION: ${csvDataAsListOfMaps[0]}');
+      }
 
       return csvDataAsListOfMaps;
     } else {

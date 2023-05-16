@@ -13,6 +13,7 @@ import 'package:cannlytics_data/routing/app_router.dart';
 import 'package:cannlytics_data/ui/account/account_screen.dart';
 import 'package:cannlytics_data/ui/account/reset_password_screen.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard.dart';
+import 'package:cannlytics_data/ui/licensees/licensee_screen.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_screen.dart';
 import 'package:cannlytics_data/ui/licensees/state_licensees.dart';
@@ -64,11 +65,14 @@ class Routes {
       },
     ),
 
-    // FIXME: Return license screen if a license number is passed.
+    // Licensee screen if a license number is passed.
     AppRoute(
       path: '/licenses/:state_id/:license_number',
       builder: (context, state) {
-        return StateLicensesScreen(id: state.params['state_id']!);
+        return LicenseeScreen(
+          stateId: state.params['state_id']!,
+          licenseId: state.params['license_number']!,
+        );
       },
     ),
 

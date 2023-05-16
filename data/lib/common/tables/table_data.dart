@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/11/2023
-// Updated: 3/11/2023
+// Updated: 5/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -33,6 +33,7 @@ class TableData<T> extends DataTableSource {
     return DataRow.byIndex(
       index: index,
       cells: cellsBuilder(item),
+      // color: MaterialStateColor.resolveWith(_getDataRowColor),
       selected: isSelected == null ? false : isSelected!(item),
       onSelectChanged: isSelected == null
           ? null
@@ -49,4 +50,12 @@ class TableData<T> extends DataTableSource {
 
   @override
   int get selectedRowCount => 0;
+
+  // Define the color of the row.
+  // Color _getDataRowColor(Set<MaterialState> states) {
+  //   if (states.contains(MaterialState.hovered)) {
+  //     return Colors.blue;
+  //   }
+  //   return Colors.transparent;
+  // }
 }

@@ -100,15 +100,13 @@ class AppTheme {
 
       // Data table style.
       dataTableTheme: DataTableThemeData(
-        // headingTextStyle: TextStyle(
-        //   fontWeight: FontWeight.bold,
-        //   fontSize: 16.0,
-        // ),
-        // dataTextStyle: TextStyle(
-        //   fontSize: 14.0,
-        // ),
-        // headingRowColor: MaterialStateProperty.all(Colors.transparent),
-        // dataRowColor: MaterialStateProperty.all(Colors.transparent),
+        dataRowColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
+          if (states.contains(MaterialState.hovered)) {
+            return isDark ? DarkColors.mantle : LightColors.mantle;
+          }
+          return Colors.transparent;
+        }),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey),
           borderRadius: BorderRadius.circular(3),

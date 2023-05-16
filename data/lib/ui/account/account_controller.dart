@@ -129,9 +129,8 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
     state = await AsyncValue.guard(() async {
       final user = ref.read(userProvider).value;
       if (user != null) {
-        subscription = await _firestore.getDocument(
-          path: 'users/${user.uid}/subscription',
-        );
+        String path = 'users/${user.uid}/subscription';
+        subscription = await _firestore.getDocument(path: path) ?? {};
       }
     });
     return subscription;

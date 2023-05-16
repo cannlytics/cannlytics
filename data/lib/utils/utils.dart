@@ -33,39 +33,29 @@ class WebUtils {
     }
   }
 
-  // Convert a color to a HTML hex code.
+  /// Convert a color to a HTML hex code.
   static String colorToHexCode(Color color) {
     return '#' + color.value.toRadixString(16).substring(2).toUpperCase();
   }
-}
 
-/// [registerErrorHandlers] displays notifications if certain errors are thrown.
-void registerErrorHandlers() {
-  // Handle underlying platform/OS errors.
-  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
-    debugPrint(error.toString());
-    return true;
-  };
+  /// Slugify text.
+  static String slugify(String input) {
+    // Remove leading and trailing whitespace and convert to lowercase.
+    String result = input.trim().toLowerCase();
 
-  // Show an error notification if any uncaught exception happens.
-  FlutterError.onError = (FlutterErrorDetails details) {
-    // debugPrint(details.exception.toString());
-    FlutterError.presentError(details);
-    debugPrint(details.toString());
-    // FlutterError.dumpErrorToConsole(details);
-    // throw details.exception;
-  };
+    // Replace special characters with a hyphen.
+    result = result.replaceAll(RegExp(r"[^\w\s-]"), "-");
 
-  // Show an error notification when any widget in the app fails to build.
-  ErrorWidget.builder = (FlutterErrorDetails details) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.red,
-        title: Text('Error! Please contact support@cannlytics.com'),
-      ),
-      body: Center(child: Text(details.toString())),
-    );
-  };
+    // Replace consecutive whitespace and hyphens with a single hyphen.
+    result = result.replaceAll(RegExp(r"[\s-]+"), "-");
+
+    // Remove leading and trailing hyphens.
+    result = result
+        .replaceAll(RegExp(r"^[-]+"), "")
+        .replaceAll(RegExp(r"[-]+$"), "");
+
+    return result;
+  }
 }
 
 /// Utility functions for the interface.

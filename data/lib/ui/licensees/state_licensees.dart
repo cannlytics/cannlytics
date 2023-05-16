@@ -10,6 +10,8 @@
 // Flutter imports:
 import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/services/storage_service.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -40,6 +42,7 @@ class StateLicensesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       // App bar.
       appBar: DashboardHeader(),
@@ -49,45 +52,35 @@ class StateLicensesScreen extends StatelessWidget {
 
       // Body.
       body: Console(slivers: [
+        // Breadcrumbs.
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: sliverHorizontalPadding(screenWidth) / 2,
+              right: sliverHorizontalPadding(screenWidth) / 2,
+              top: 24,
+            ),
+            child: _breadcrumbs(context),
+          ),
+        ),
+
         // Table.
         SliverToBoxAdapter(
-          child: Container(
-            height: 750,
-            child: MainContent(id: id),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: sliverHorizontalPadding(screenWidth) / 2,
+                right: sliverHorizontalPadding(screenWidth) / 2,
+                top: 24,
+              ),
+              child: Column(children: [LicenseesTable(id: id)]),
+            ),
           ),
         ),
 
         // Footer.
         const SliverToBoxAdapter(child: Footer()),
       ]),
-    );
-  }
-}
-
-/// Main content.
-class MainContent extends ConsumerWidget {
-  const MainContent({Key? key, required this.id}) : super(key: key);
-  final String id;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return Padding(
-      padding: EdgeInsets.only(
-        left: sliverHorizontalPadding(screenWidth) / 2,
-        right: sliverHorizontalPadding(screenWidth) / 2,
-        top: 24,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          _breadcrumbs(context),
-          gapH8,
-          LicenseesTable(id: id),
-          gapH48,
-        ],
-      ),
     );
   }
 
@@ -144,6 +137,9 @@ class LicenseesTable extends ConsumerWidget {
     // Listen to the current user.
     final user = ref.watch(authProvider).currentUser;
 
+    // Responsive screen width.
+    final screenWidth = MediaQuery.of(context).size.width;
+
     // Define the cell builder function.
     _buildCells(Map item) {
       var values = [
@@ -155,7 +151,11 @@ class LicenseesTable extends ConsumerWidget {
       return values.map((value) {
         return DataCell(
           Text(value),
-          onTap: () => context.push('/licenses/$id/${item["license_number"]}'),
+          onTap: () {
+            // FIXME: This doesn't update the URL correctly.
+            String slug = WebUtils.slugify(item['id']);
+            context.go('/licenses/$id/$slug');
+          },
         );
       }).toList();
     }
@@ -222,7 +222,7 @@ class LicenseesTable extends ConsumerWidget {
       dataRowHeight: 48,
       columnSpacing: 48,
       headingRowHeight: 48,
-      // horizontalMargin: 12,
+      horizontalMargin: 0,
 
       // Pagination.
       availableRowsPerPage: [5, 10, 25, 50, 100],
@@ -243,7 +243,6 @@ class LicenseesTable extends ConsumerWidget {
 
     // Define the table actions.
     var actions = Row(
-      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Search box.
         SizedBox(
@@ -275,6 +274,7 @@ class LicenseesTable extends ConsumerWidget {
                   .style
                   .copyWith(fontStyle: FontStyle.italic),
             ),
+
             // Search engine function.
             suggestionsCallback: (pattern) async {
               ref.read(searchTermProvider.notifier).state = pattern;
@@ -290,7 +290,8 @@ class LicenseesTable extends ConsumerWidget {
 
             // Menu selection function.
             onSuggestionSelected: (Map<String, dynamic>? suggestion) {
-              context.push('/licenses/$id/${suggestion!['id']}');
+              // FIXME: What to do?
+              // context.push('/licenses/$id/${suggestion!['id']}');
             },
           ),
         ),
@@ -299,7 +300,7 @@ class LicenseesTable extends ConsumerWidget {
         Spacer(),
         SecondaryButton(
           text: 'Download',
-          onPressed: () {
+          onPressed: () async {
             // Note: Requires the user to be signed in.
             if (user == null) {
               showDialog(
@@ -311,9 +312,10 @@ class LicenseesTable extends ConsumerWidget {
               return;
             }
 
-            // FIXME: Get the correct datafile (Get download URL from Firebase Storage).
-            String url =
-                'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fdata%2Flicenses%2Fwa%2Flicenses-wa-2023-04-24T21-21-31.csv?alt=media&token=33ab0328-9fa5-4658-b927-5511268fef1a';
+            // Get download URL from Firebase Storage.
+            String storageRef = 'data/licenses/$id/licenses-$id-latest.csv';
+            String? url = await StorageService.getDownloadUrl(storageRef);
+            if (url == null) return;
 
             // Download the datafile.
             DataService.openInANewTab(url);
@@ -337,11 +339,70 @@ class LicenseesTable extends ConsumerWidget {
     table = Material(
       // color: Theme.of(context).secondaryHeaderColor,
       color: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(3.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3.0)),
       child: table,
     );
     return Column(children: [actions, gapH12, table]);
   }
 }
+
+/// Data rows.
+// class DataSource extends DataTableSource {
+//   DataSource(this.list);
+
+//   // Properties.
+//   final List<Map<String, dynamic>> list;
+
+//   int _selectedCount = 0;
+
+//   @override
+//   int get rowCount => list.length;
+
+//   @override
+//   bool get isRowCountApproximate => false;
+
+//   @override
+//   int get selectedRowCount => _selectedCount;
+
+//   @override
+//   DataRow getRow(int index) {
+//     return DataRow.byIndex(
+//       index: index,
+//       cells: _buildCells(list[index]),
+//       color: MaterialStateColor.resolveWith(_getDataRowColor),
+//     );
+//   }
+
+//   // Define the color of the row.
+//   Color _getDataRowColor(Set<MaterialState> states) {
+//     const Set<MaterialState> interactiveStates = <MaterialState>{
+//       MaterialState.pressed,
+//       MaterialState.hovered,
+//       MaterialState.focused,
+//     };
+//     if (states.any(interactiveStates.contains)) {
+//       return Colors.grey;
+//     }
+//     return Colors.transparent;
+//   }
+
+//   // Define the cell builder function.
+//   _buildCells(Map item) {
+//     var values = [
+//       item['license_number'],
+//       item['business_legal_name'],
+//       item['license_type'],
+//       item['premise_city'],
+//     ];
+//     return values.map((value) {
+//       return DataCell(
+//         Text(value),
+//         onTap: () {
+//           String slug = WebUtils.slugify(item['id']);
+//           print('NAVIGATE TO SLUG: $slug');
+//           // context.push('/licenses/$id/$slug');
+//         },
+//       );
+//     }).toList();
+//   }
+// }

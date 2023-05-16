@@ -525,7 +525,7 @@ class SampleCardTemplate extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(strokeWidth: 1.42),
               ),
             ),
           ),

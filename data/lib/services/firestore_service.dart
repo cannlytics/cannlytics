@@ -21,17 +21,17 @@ class FirestoreService {
   const FirestoreService._();
 
   /// Get a document.
-  Future<Map<String, dynamic>> getDocument({required String path}) async {
+  Future<Map<String, dynamic>?> getDocument({required String path}) async {
     final reference = FirebaseFirestore.instance.doc(path);
     final snapshot = await reference.get();
     var data = snapshot.data();
-    if (data == null) data = {};
-    data['id'] = snapshot.id;
+    if (data == null) return null;
+    data['doc_id'] = snapshot.id;
     return data;
   }
 
   /// Get documents from a collection.
-  Future<List<T>> fetchCollection<T>({
+  Future<List<T>> getCollection<T>({
     required String path,
     required T Function(Map? data, String documentID) builder,
     Query<Map>? Function(Query<Map> query)? queryBuilder,

@@ -30,7 +30,6 @@ from typing import List
 from cannlytics import firebase
 from datasets import load_dataset
 from dotenv import dotenv_values
-import uuid
 
 
 def upload_cannabis_licenses_datafiles(
@@ -70,8 +69,7 @@ def upload_cannabis_licenses_datafiles(
 
 def upload_cannabis_licenses(
         subset: str = 'all',
-        collection: str = 'public/data/licenses',
-        doc_id: str = 'hex',
+        collection: str = 'data/licenses',
         repo: str = 'cannlytics/cannabis_licenses',
         verbose: bool = True,
     ):
@@ -99,13 +97,10 @@ def upload_cannabis_licenses(
     refs, docs = [], []
     for _, row in data.iterrows():
         doc = row.to_dict()
-        if doc_id == 'hex':
-            _id = uuid.uuid4().hex
-        elif doc_id == 'uuid':
-            _id = str(uuid.uuid4())
-        else:
-            _id = doc[doc_id]
-        ref = f'{collection}/{_id}'
+        _id = str(doc['id'])
+        # FIXME: Not all stats are parsed correctly.
+        state = doc['premise_state'].lower()
+        ref = f'{collection}/{state}/{_id}'
         refs.append(ref)
         docs.append(doc)
 
@@ -136,16 +131,16 @@ if __name__ == '__main__':
         subset = 'all'
     
     # Upload Firestore with cannabis license data.
-    try:
-        upload_cannabis_licenses(subset=subset)
-        print('Uploaded license data to Firestore.')
-    except:
-        print('Failed to upload license data to Firestore.')
+    # try:
+    upload_cannabis_licenses(subset=subset)
+    print('Uploaded license data to Firestore.')
+    # except:
+    #     print('Failed to upload license data to Firestore.')
 
     # Upload datafiles to Firebase Storage.
-    try:
-        bucket_name = config['FIREBASE_STORAGE_BUCKET']
-        upload_cannabis_licenses_datafiles(bucket_name)
-        print('Uploaded license datafiles to Firebase Storage.')
-    except:
-        print('Failed to upload datafiles to Firebase Storage.')
+    # try:
+    #     bucket_name = config['FIREBASE_STORAGE_BUCKET']
+    #     upload_cannabis_licenses_datafiles(bucket_name)
+    #     print('Uploaded license datafiles to Firebase Storage.')
+    # except:
+    #     print('Failed to upload datafiles to Firebase Storage.')

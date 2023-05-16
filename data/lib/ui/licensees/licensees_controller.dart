@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/7/2023
-// Updated: 5/15/2023
+// Updated: 5/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -22,7 +22,7 @@ import 'package:cannlytics_data/models/licensee.dart';
 import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 
-/* Data */
+/* === Data === */
 
 // Licenses state.
 final activeStateProvider = StateProvider<String?>((ref) => null);
@@ -42,14 +42,11 @@ class LicenseesController
   Future<List<Map<String, dynamic>>> _getLicensees() async {
     var stateId = ref.watch(activeStateProvider);
     if (stateId == null) {
-      print('URL: ${window.location.href}');
       stateId = window.location.href.split('/').last;
     }
-    print('STATE ID: $stateId');
-    // // FIXME: If a user is not signed in, then get a sample instead.
+    // TODO: If a user is not signed in, then get a sample instead.
     String? url = await StorageService.getDownloadUrl(
         'data/licenses/$stateId/licenses-$stateId-latest.csv');
-    print('DOWNLOAD URL: $url');
     if (url == null) return [];
     return await DataService.fetchCSVFromURL(url);
   }
@@ -61,7 +58,7 @@ class LicenseesController
   }
 }
 
-/* Table */
+/* === Table === */
 
 // Rows per page.
 final licenseesRowsPerPageProvider = StateProvider<int>((ref) => 10);
@@ -70,10 +67,15 @@ final licenseesRowsPerPageProvider = StateProvider<int>((ref) => 10);
 final licenseesSortColumnIndex = StateProvider<int>((ref) => 0);
 final licenseesSortAscending = StateProvider<bool>((ref) => true);
 
-/* Search */
+/* === Search === */
 
 // Search term.
 final searchTermProvider = StateProvider<String>((ref) => '');
+
+// Search input.
+final licenseesSearchController =
+    StateNotifierProvider<StringController, TextEditingController>(
+        (ref) => StringController());
 
 /// Filtered licensees provider.
 final filteredLicenseesProvider = StateNotifierProvider.autoDispose<
@@ -106,7 +108,7 @@ class FilteredLicenseesNotifier
       return;
     }
     String keyword = searchTerm.toLowerCase();
-    // FIXME:
+    // FIXME: Fix search logic.
     // List<Map<String, dynamic>> matched = [];
     // items.forEach((x) {
     //   // Matching logic.
@@ -119,23 +121,40 @@ class FilteredLicenseesNotifier
   }
 }
 
-// Search input.
-final licenseesSearchController =
-    StateNotifierProvider<StringController, TextEditingController>(
-        (ref) => StringController());
+/* === Details === */
 
-/* Licensee Details */
+// Unused: Licensee ID.
+// final licenseeId = StateProvider<String?>((ref) => 'new');
 
-// Licensee ID.
-final licenseeId = StateProvider<String?>((ref) => 'new');
-
-// Licensee provider.
+/// Licensee provider.
 final licenseeProvider =
-    StreamProvider.family<List<Map<String, dynamic>>, String>((ref, id) async* {
-  final FirestoreService _dataSource = ref.watch(firestoreProvider);
-  yield* await _dataSource.watchCollection(
-    path: 'public/data/licenses',
-    builder: (data, documentId) => data!,
-    queryBuilder: (query) => query.where('id', isEqualTo: id).limit(1),
-  );
-});
+    AutoDisposeAsyncNotifierProvider<LicenseeController, Map<String, dynamic>?>(
+        LicenseeController.new);
+
+/// Licensee controller.
+class LicenseeController
+    extends AutoDisposeAsyncNotifier<Map<String, dynamic>?> {
+  // Constructor.
+  LicenseeController();
+
+  /// Get licensee data.
+  Future<Map<String, dynamic>> _getLicensee() async {
+    var parts = window.location.href.split('/');
+    // FIXME: Standardize to lowercase after re-uploading data.
+    var stateId = parts[parts.length - 2].toUpperCase();
+    var licenseId = parts.last;
+    final _dataSource = ref.read(firestoreProvider);
+    String path = 'data/licenses/$stateId/$licenseId';
+    // FIXME: Path is not correct when coming from state licensees screen.
+    print('PATH: $path');
+    final data = await _dataSource.getDocument(path: path);
+    print('RETRIEVED DATA: $data');
+    return data ?? {};
+  }
+
+  // Load initial licensee list from Firestore
+  @override
+  Future<Map<String, dynamic>> build() async {
+    return await _getLicensee();
+  }
+}
