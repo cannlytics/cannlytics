@@ -76,7 +76,10 @@ date = datetime.now().isoformat()[:10]
 if not os.path.exists(data_dir):
     os.makedirs(data_dir)
 datafile = f'{data_dir}/mcr-lab-results-{date}.xlsx'
-to_excel_with_style(data, datafile)
+try:
+    to_excel_with_style(data, datafile)
+except:
+    data.to_excel(datafile)
 
 # Optionally upload the data to Firestore.
 if upload:

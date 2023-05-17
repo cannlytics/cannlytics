@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 5/12/2023
+// Updated: 5/17/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -23,8 +23,13 @@ import 'package:cannlytics_data/services/auth_service.dart';
 
 /* Data */
 
-/// TODO: Get data from Firestore.
-
+/// Main datasets.
+/// TODO: Get this data from Firestore.
+/// CA results: (6590, 56)
+// CT results: (17142, 67)
+// MA results: (7479, 34)
+// MI results: (45637, 13)
+// WA results: (50900, 51)
 final List<Map> mainDatasets = [
   {
     "title": "US Cannabis Licenses",
@@ -50,8 +55,55 @@ final List<Map> mainDatasets = [
     "observations": 88,
     "fields": 28,
     "type": "licenses",
-    // FIXME:
     "file_ref": "data/licenses/south-africa/.csv",
+  },
+  {
+    "title": "California Lab Results",
+    "image_url": "",
+    "description": "",
+    "tier": "Premium",
+    "path": "/results/ca",
+    "observations": 0,
+    "fields": 0,
+    "type": "results",
+    "file_ref": "data/lab_results/ca/.csv",
+    "url": "",
+  },
+  {
+    "title": "Connecticut Lab Results",
+    "image_url": "",
+    "description": "",
+    "tier": "Premium",
+    "path": "/results/ct",
+    "observations": 0,
+    "fields": 0,
+    "type": "results",
+    "file_ref": "data/lab_results/ct/.csv",
+    "url": "",
+  },
+  {
+    "title": "Massachusetts Lab Results",
+    "image_url": "",
+    "description": "",
+    "tier": "Premium",
+    "path": "/results/ma",
+    "observations": 0,
+    "fields": 0,
+    "type": "results",
+    "file_ref": "data/lab_results/ma/.csv",
+    "url": "",
+  },
+  {
+    "title": "Michigan Lab Results",
+    "image_url": "",
+    "description": "",
+    "tier": "Premium",
+    "path": "/results/mi",
+    "observations": 0,
+    "fields": 0,
+    "type": "results",
+    "file_ref": "data/lab_results/mi/.csv",
+    "url": "",
   },
   {
     "title": "Washington Lab Results",
@@ -60,70 +112,18 @@ final List<Map> mainDatasets = [
     "description":
         "Curated cannabis traceability lab tests from Washington State from 2021 to 2023.",
     "tier": "Premium",
-    "path": "/results",
+    "path": "/results/wa",
     "observations": 59501,
     "fields": 53,
     "type": "results",
     "file_ref":
         "data/lab_results/washington/ccrs-inventory-lab-results-2023-03-07.xlsx",
-    "keys": [
-      "licensee_id",
-      "inventory_id",
-      "strain_id",
-      "area_id",
-      "product_id",
-      "inventory_identifier",
-      "initial_quantity",
-      "quantity_on_hand",
-      "total_cost",
-      "is_medical",
-      "external_identifier",
-      "created_date",
-      "updated_date",
-      "retailer",
-      "retailer_dba",
-      "producer_licensee_id",
-      "inventory_type",
-      "name",
-      "description",
-      "unit_weight_grams",
-      "product_external_id",
-      "created_by",
-      "product_created_at",
-      "updated_by",
-      "updated_date",
-      "strain_type",
-      "strain_name",
-      "is_deleted",
-      "strain_created_date",
-      "area_name",
-      "lab_result_id",
-      "lab_licensee_id",
-      "licensee_id",
-      "test_date",
-      "lab_id",
-      "is_deleted",
-      "created_by",
-      "created_date",
-      "updated_by",
-      "updated_date",
-      "delta_9_thc",
-      "thca",
-      "total_thc",
-      "cbd",
-      "cbda",
-      "total_cbd",
-      "moisture_content",
-      "water_activity",
-      "status",
-      "results",
-      "pesticides",
-      "residual_solvents",
-      "heavy_metals"
-    ],
+    "url": "",
   },
 ];
 
+/// Main AI models.
+/// TODO: Get this data from Firestore.
 List<Map> aiModels = [
   {
     "title": "COA Parser",
@@ -147,6 +147,7 @@ List<Map> aiModels = [
     "observations": null,
     "fields": null,
   },
+  // Out-of-commission for now:
   // {
   //   "image_url":
   //       "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30",

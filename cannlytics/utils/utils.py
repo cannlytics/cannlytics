@@ -613,7 +613,7 @@ def to_excel_with_style(
     bold = workbook.add_format(style)
     for idx, val in enumerate(df.columns):
         worksheet.write(0, idx, val, bold)
-    writer.save()
+    writer.close()
 
 
 #-----------------------------------------------------------------------

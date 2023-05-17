@@ -14,6 +14,7 @@ import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:cannlytics_data/common/layout/header.dart';
 import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/ui/licensees/licensee_map.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -324,6 +325,7 @@ class LicenseeForm extends ConsumerWidget {
         ),
         // - premise_latitude
         // - premise_longitude
+        LicenseeMap(),
 
         // TODO: Photos.
         gapH48,

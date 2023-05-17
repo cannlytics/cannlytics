@@ -1,62 +1,63 @@
+// Cannlytics Data
+// Copyright (c) 2023 Cannlytics
 
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 5/16/2023
+// Updated: 5/16/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-// class MapSample extends StatefulWidget {
-//   const MapSample({super.key});
+/// Licensee map.
+class LicenseeMap extends StatefulWidget {
+  const LicenseeMap({super.key});
 
-//   @override
-//   State<MapSample> createState() => MapSampleState();
-// }
+  @override
+  State<LicenseeMap> createState() => LicenseeMapState();
+}
 
-// class MapSampleState extends State<MapSample> {
-//   final Completer<GoogleMapController> _controller =
-//       Completer<GoogleMapController>();
+/// Licensee map state.
+class LicenseeMapState extends State<LicenseeMap> {
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
 
-//   static const CameraPosition _kGooglePlex = CameraPosition(
-//     target: LatLng(37.42796133580664, -122.085749655962),
-//     zoom: 14.4746,
-//   );
+  // TODO: Get the licensee's location.
+  // _locationServices=Provider.of<LocationServices>(context);
+  Set<Marker> allMapMarkers = {
+    Marker(
+      markerId: MarkerId('Licensee'),
+      draggable: false,
+      position: LatLng(37.43296265331129, -122.08832357078792),
+      // onTap: () {},
+    ),
+  };
 
-//   static const CameraPosition _kLake = CameraPosition(
-//       bearing: 192.8334901395799,
-//       target: LatLng(37.43296265331129, -122.08832357078792),
-//       tilt: 59.440717697143555,
-//       zoom: 19.151926040649414);
+  // Camera position.
+  static const CameraPosition _cameraPosition = CameraPosition(
+    target: LatLng(37.42796133580664, -122.085749655962),
+    zoom: 14.4746,
+  );
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: GoogleMap(
-//         mapType: MapType.hybrid,
-//         initialCameraPosition: _kGooglePlex,
-//         onMapCreated: (GoogleMapController controller) {
-//           _controller.complete(controller);
-//         },
-//       ),
-//       floatingActionButton: FloatingActionButton.extended(
-//         onPressed: _goToTheLake,
-//         label: const Text('To the lake!'),
-//         icon: const Icon(Icons.directions_boat),
-//       ),
-//     );
-//   }
-
-//   Future<void> _goToTheLake() async {
-//     final GoogleMapController controller = await _controller.future;
-//     controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
-//   }
-// }
-
-
-// // Marker(
-// //   onTap: () {
-// //     debugPrint('Tapped');
-// //   },
-// //   draggable: true,
-// //   markerId: MarkerId('Marker'),
-// //   onDragEnd: ((LatLng newPosition) {
-// //     debugPrint(newPosition.latitude);
-// //     debugPrint(newPosition.longitude);
-// //   }),
-// // )
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Stack(
+        children: [
+          GoogleMap(
+            compassEnabled: false,
+            zoomControlsEnabled: false,
+            markers: allMapMarkers,
+            mapType: MapType.normal,
+            initialCameraPosition: _cameraPosition,
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}

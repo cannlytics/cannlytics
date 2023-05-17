@@ -147,7 +147,10 @@ if __name__ == '__main__':
     # Save the results to Excel.
     date = datetime.now().isoformat()[:10]
     datafile = f'{data_dir}/ct-results-{date}.xlsx'
-    cannlytics.utils.to_excel_with_style(results, datafile)
+    try:
+        cannlytics.utils.to_excel_with_style(results, datafile)
+    except:
+        results.to_excel(datafile)
     print('Connecticut lab results archived:', datafile)
 
     # TODO: Parse the PDFs with CoADoc (to train a custom GPT model).
