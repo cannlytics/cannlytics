@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/8/2023
-Updated: 5/6/2023
+Updated: 5/16/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Data Source:
@@ -150,6 +150,4 @@ if __name__ == '__main__':
     cannlytics.utils.to_excel_with_style(results, datafile)
     print('Connecticut lab results archived:', datafile)
 
-    # TODO: Parse the PDFs with CoADoc.
-
-    # TODO: Parse the PDFs with CoAGPT.
+    # TODO: Parse the PDFs with CoADoc (to train a custom GPT model).

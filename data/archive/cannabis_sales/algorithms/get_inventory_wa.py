@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 4/15/2023
+Updated: 5/16/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -198,8 +198,15 @@ def merge_areas(items, area_files):
     )
 
 
-def curate_ccrs_inventory(data_dir, stats_dir):
-    """Curate CCRS inventory by merging additional datasets."""
+# def curate_ccrs_inventory(data_dir, stats_dir):
+#     """Curate CCRS inventory by merging additional datasets."""
+
+# DEV:
+if __name__ == '__main__':
+    base = 'D:\\data\\washington\\'
+    data_dir = f'{base}\\CCRS PRR (4-4-23)\\CCRS PRR (4-4-23)\\'
+    stats_dir = f'{base}\\ccrs-stats\\'
+
     print('Curating inventory...')
     start = datetime.now()
 
@@ -249,7 +256,7 @@ def curate_ccrs_inventory(data_dir, stats_dir):
         print('Merging strain data...')
         items = merge_strains(items, strain_files)
 
-        # Merge area `Name` using `AreaId`.
+        # Merge area data.
         print('Merging area data...')
         items = merge_areas(items, area_files)
 
@@ -287,11 +294,11 @@ def curate_ccrs_inventory(data_dir, stats_dir):
     print('✓ Finished curating inventory in', end - start)
 
 
-# === Test ===
-if __name__ == '__main__':
+# # === Test ===
+# if __name__ == '__main__':
 
-    # Specify where your data lives.
-    base = 'D:\\data\\washington\\'
-    data_dir = f'{base}\\CCRS PRR (4-4-23)\\CCRS PRR (4-4-23)\\'
-    stats_dir = f'{base}\\ccrs-stats\\'
-    curate_ccrs_inventory(data_dir, stats_dir)
+#     # Specify where your data lives.
+#     base = 'D:\\data\\washington\\'
+#     data_dir = f'{base}\\CCRS PRR (4-4-23)\\CCRS PRR (4-4-23)\\'
+#     stats_dir = f'{base}\\ccrs-stats\\'
+#     curate_ccrs_inventory(data_dir, stats_dir)

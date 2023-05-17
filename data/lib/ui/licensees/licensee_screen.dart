@@ -47,12 +47,9 @@ class LicenseeScreen extends StatelessWidget {
       body: Console(slivers: [
         // Table.
         SliverToBoxAdapter(
-          child: Container(
-            height: 750,
-            child: MainContent(
-              stateId: stateId,
-              licenseId: licenseId,
-            ),
+          child: MainContent(
+            stateId: stateId,
+            licenseId: licenseId,
           ),
         ),
 
@@ -89,7 +86,7 @@ class MainContent extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           _breadcrumbs(context),
-          gapH8,
+          gapH24,
           LicenseeForm(
             stateId: stateId,
             licenseId: licenseId,
@@ -173,14 +170,18 @@ class LicenseeForm extends ConsumerWidget {
         // if (obj?['business_dba_name'] != null &&
         //     obj?['business_dba_name'] != obj?['business_dba_name'])
         Text(
-          obj?['business_dba_name'] ?? '',
+          "DBA: ${obj?['business_dba_name']}",
           style: Theme.of(context).textTheme.titleMedium,
         ),
 
         // Address.
         Row(
           children: [
-            Text('Address'),
+            gapH24,
+            Text(
+              'Address',
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
             IconButton(
               onPressed: () async {
                 // FIXME: This is not the correct address.
@@ -206,41 +207,171 @@ class LicenseeForm extends ConsumerWidget {
         ),
         Row(
           children: [
-            Text('Street'),
-            Text(obj?['premise_street_address'] ?? ''),
+            Text(
+              'Street',
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium!
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            gapW8,
+            Text(
+              obj?['premise_street_address'] ?? '',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
           ],
         ),
         Row(
           children: [
-            Text('City'),
-            Text(obj?['premise_city'] ?? ''),
+            Text(
+              'City',
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium!
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            gapW8,
+            Text(
+              obj?['premise_city'] ?? '',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
           ],
         ),
         Row(
           children: [
-            Text('County'),
-            Text(obj?['premise_county'] ?? ''),
+            Text(
+              'County',
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium!
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            gapW8,
+            Text(
+              obj?['premise_county'] ?? '',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
           ],
         ),
         Row(
           children: [
-            Text('State'),
-            Text(obj?['premise_state'] ?? ''),
+            Text(
+              'State',
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium!
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            gapW8,
+            Text(
+              obj?['premise_state'] ?? '',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
           ],
         ),
         Row(
           children: [
-            Text('Zip code'),
-            Text(obj?['premise_zip_code'] ?? ''),
+            Text(
+              'Zip code',
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium!
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            gapW8,
+            Text(
+              obj?['premise_zip_code'] ?? '',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+          ],
+        ),
+
+        // TODO: License details.
+        gapH48,
+        Text(
+          'License details',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        // - license_type
+        // - license_number
+        // - license_status
+        // - license_status_date
+        // - license_term
+        // - license_designation
+        // - issue_date
+        // - expiration_date
+        // - licensing_authority_id
+        // - licensing_authority
+        // - business_owner_name
+        // - business_structure
+        // - activity
+
+        // TODO: Contact.
+        gapH48,
+        Text(
+          'Contact information',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        // - business_email
+        // - business_phone
+        // - business_website
+
+        // TODO: Location.
+        gapH48,
+        Text(
+          'Location',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        // - premise_latitude
+        // - premise_longitude
+
+        // TODO: Photos.
+        gapH48,
+        Text(
+          'Photos',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+
+        // TODO: Reviews.
+        gapH48,
+        Text(
+          'Reviews',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+
+        // TODO: Products / strains.
+        gapH48,
+        Text(
+          'Products and strains',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+
+        // TODO: Sales.
+        gapH48,
+        Text(
+          'Sales',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+
+        // Data refreshed date.
+        gapH48,
+        Row(
+          children: [
+            Text(
+              'Data refreshed at:',
+              style: Theme.of(context)
+                  .textTheme
+                  .labelSmall!
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            gapW8,
+            Text(
+              obj?['data_refreshed_date'] ?? '',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       ],
-
-      // TODO: Photos.
-
-      // TODO: Reviews.
-
-      // TODO: Products / sales / strains.
     );
   }
 

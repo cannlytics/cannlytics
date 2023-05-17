@@ -1,7 +1,0 @@
-# Washington Cannabis Data | Python Requirements
-# Created: 9/15/2022
-# Updated: 9/15/2022
-beautifulsoup4==4.11.1
-cannlytics==0.0.12
-firebase_admin==5.3.0
-pandas==1.4.4

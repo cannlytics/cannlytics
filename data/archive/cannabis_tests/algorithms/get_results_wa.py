@@ -184,7 +184,7 @@ def augment_lab_results(
     return pd.DataFrame(curated_results)
 
 
-def curate_ccrs_lab_results(data_dir, stats_dir):
+def curate_ccrs_lab_results(data_dir: str, stats_dir: str) -> pd.DataFrame:
     """Curate CCRS lab results."""
 
     # Start curating lab results.
@@ -210,6 +210,7 @@ def curate_ccrs_lab_results(data_dir, stats_dir):
     # Finish curating lab results.
     end = datetime.now()
     print('✓ Finished curating lab results in', end - start)
+    return lab_results
 
 
 # === Test ===
@@ -217,6 +218,7 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D:\\data\\washington\\'
-    DATA_DIR = f'{base}\\CCRS PRR (1-27-23)\\CCRS PRR (1-27-23)\\'
+    DATA_DIR = f'{base}\\CCRS PRR (4-4-23)\\CCRS PRR (4-4-23)\\'
     STATS_DIR = f'{base}\\ccrs-stats\\'
-    curate_ccrs_lab_results(DATA_DIR, STATS_DIR)
+    lab_results = curate_ccrs_lab_results(DATA_DIR, STATS_DIR)
+    print('Curated %i WA lab results.' % len(lab_results))
