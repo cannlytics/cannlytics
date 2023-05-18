@@ -30,6 +30,31 @@ class Strain {
   final double? cbdLevel;
   final double? indicaPercentage;
   final double? sativaPercentage;
+  // alias
+  // description
+  // origin
+  // breeder
+  // feminized
+  // autoflowering
+  // avg_flowering_time
+  // strain_url
+  // avg_yield_indoor
+  // avg_yield_outdoor
+  // avg_height_indoor
+  // avg_height_outdoor
+  // location (indoor, outdoor, greenhouse)
+  // chemotype (type 1, type 2, type 3)
+  // - NOT CBD RICH (< 2% CBD || < approx. 1:8 CBD:THC)
+  // - CBD < THC (max. 2:3 CBD:THC)
+  // - CBD ≈ THC (min. 2:3 CBD:THC - max. 3:2 CBD:THC)
+  // - CBD > THC (min. 3:2 CBD:THC)
+  // - CBD ONLY (< 2% THC)
+  // lab_results (array of lab results)
+  // images (array of images)
+  // genealogy (array of parent strains)
+  // crossbreeds (array of children)
+  // reviews (array of reviews)
+  // sources (array of data sources)
 
   // Create model.
   factory Strain.fromMap(Map<String, dynamic> data) {

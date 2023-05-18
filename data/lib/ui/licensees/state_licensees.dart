@@ -118,9 +118,14 @@ class LicenseesTable extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen to the filtered licensees.
-    final data = ref.watch(filteredLicenseesProvider);
+    final data = ref.watch(filteredLicenseesProvider).value!;
 
     // FIXME:: Loading data placeholder.
+    // return asyncData.when(
+    //   data: (obj) => _form(context, obj),
+    //   loading: () => _loadingIndicator(),
+    //   error: (error, stack) => _errorMessage(context, error, stack),
+    // );
 
     // No data placeholder.
     if (data.isEmpty) {
@@ -279,7 +284,7 @@ class LicenseesTable extends ConsumerWidget {
             suggestionsCallback: (pattern) async {
               ref.read(searchTermProvider.notifier).state = pattern;
               final suggestions = ref.read(filteredLicenseesProvider);
-              return suggestions;
+              return suggestions.value!;
             },
 
             // Autocomplete menu.

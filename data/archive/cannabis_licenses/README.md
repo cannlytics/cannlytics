@@ -113,7 +113,7 @@ data = dataset['data']
 
 ### Data Fields
 
-Below is a non-exhaustive list of fields, used to standardize the various data that are encountered, that you may expect encounter in the parsed COA data.
+Below is a non-exhaustive list of fields, used to standardize the various data that are encountered, that you may expect to find for each observation.
 
 | Field | Example | Description |
 |-------|-----|-------------|

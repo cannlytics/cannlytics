@@ -7,6 +7,14 @@
 // Updated: 5/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// TODO: Links to places where users can get their COAs:
+// ACS Labs: https://portal.acslabcannabis.com/clientpage
+// Curaleaf: https://curaleaf.com/transparency
+// Fluent: https://getfluent.com/testresults/
+// Jungle Boys: https://www.jungleboys.com/verify/
+// Sunnyside: https://www.verifyhemp.com/
+// Trulieve: https://www.trulieve.com/discover/product-test-search
+
 // Flutter imports:
 import 'package:cannlytics_data/common/cards/card_grid.dart';
 import 'package:cannlytics_data/common/cards/stats_model_card.dart';

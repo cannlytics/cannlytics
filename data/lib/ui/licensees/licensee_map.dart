@@ -3,61 +3,76 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 5/16/2023
-// Updated: 5/16/2023
+// Created: 5/18/2023
+// Updated: 5/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:html';
 
-/// Licensee map.
-class LicenseeMap extends StatefulWidget {
-  const LicenseeMap({super.key});
+import 'package:flutter/cupertino.dart';
+import 'package:google_maps/google_maps.dart';
+import 'dart:ui' as ui;
+
+/// Web map.
+class WebMap extends StatefulWidget {
+  WebMap({
+    Key? key,
+    required this.latitude,
+    required this.longitude,
+    required this.title,
+  }) : super(key: key);
+
+  // Properties.
+  final double latitude;
+  final double longitude;
+  final String title;
 
   @override
-  State<LicenseeMap> createState() => LicenseeMapState();
+  State<WebMap> createState() => WebMapState();
 }
 
-/// Licensee map state.
-class LicenseeMapState extends State<LicenseeMap> {
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
-
-  // TODO: Get the licensee's location.
-  // _locationServices=Provider.of<LocationServices>(context);
-  Set<Marker> allMapMarkers = {
-    Marker(
-      markerId: MarkerId('Licensee'),
-      draggable: false,
-      position: LatLng(37.43296265331129, -122.08832357078792),
-      // onTap: () {},
-    ),
-  };
-
-  // Camera position.
-  static const CameraPosition _cameraPosition = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
-
+/// Web map state.
+class WebMapState extends State<WebMap> {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Stack(
-        children: [
-          GoogleMap(
-            compassEnabled: false,
-            zoomControlsEnabled: false,
-            markers: allMapMarkers,
-            mapType: MapType.normal,
-            initialCameraPosition: _cameraPosition,
-            onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
-            },
-          ),
-        ],
-      ),
+    return getMap(
+      widget.latitude,
+      widget.longitude,
+      widget.title,
     );
   }
+}
+
+/// Map initialization.
+Widget getMap(double latitude, double longitude, String title) {
+  // Properties.
+  String htmlId = 'licensee-map';
+
+  // ignore: undefined_prefixed_name
+  ui.platformViewRegistry.registerViewFactory(htmlId, (int viewId) {
+    // Map options.
+    final mapOptions = new MapOptions()
+      ..zoom = 16
+      ..center = new LatLng(latitude, longitude);
+
+    // Map style.
+    final elem = DivElement()
+      ..id = htmlId
+      ..style.width = '100%'
+      ..style.height = '100%'
+      ..style.border = 'none';
+
+    // Create map.
+    final map = GMap(elem, mapOptions);
+
+    // Add map marker.
+    Marker(MarkerOptions()
+      ..position = new LatLng(latitude, longitude)
+      ..map = map
+      ..title = title);
+
+    return elem;
+  });
+
+  return HtmlElementView(viewType: htmlId);
 }

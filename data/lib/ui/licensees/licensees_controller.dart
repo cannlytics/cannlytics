@@ -79,7 +79,7 @@ final licenseesSearchController =
 
 /// Filtered licensees provider.
 final filteredLicenseesProvider = StateNotifierProvider.autoDispose<
-    FilteredLicenseesNotifier, List<Map<String, dynamic>>>(
+    FilteredLicenseesNotifier, AsyncValue<List<Map<String, dynamic>>>>(
   (ref) {
     // Listen to search term and read the data.
     final searchTerm = ref.watch(searchTermProvider);
@@ -90,7 +90,7 @@ final filteredLicenseesProvider = StateNotifierProvider.autoDispose<
 
 /// Filtered licensees.
 class FilteredLicenseesNotifier
-    extends StateNotifier<List<Map<String, dynamic>>> {
+    extends StateNotifier<AsyncValue<List<Map<String, dynamic>>>> {
   // Properties.
   final StateNotifierProviderRef<dynamic, dynamic> ref;
   final List<Map<String, dynamic>> items;
@@ -101,10 +101,10 @@ class FilteredLicenseesNotifier
     this.ref,
     this.items,
     this.searchTerm,
-  ) : super([]) {
+  ) : super(const AsyncLoading()) {
     // Search function.
     if (searchTerm.isEmpty) {
-      state = items;
+      state = AsyncValue.data(items);
       return;
     }
     String keyword = searchTerm.toLowerCase();
@@ -117,7 +117,7 @@ class FilteredLicenseesNotifier
     //     matched.add(x);
     //   }
     // });
-    state = items;
+    state = AsyncValue.data(items);
   }
 }
 
