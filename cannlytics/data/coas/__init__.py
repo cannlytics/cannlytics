@@ -9,7 +9,7 @@ Updated: 8/30/2022
 try:
     from .coas import CoADoc
     __all__ = [
-        CoADoc
+        CoADoc,
     ]
 except ImportError:
     pass

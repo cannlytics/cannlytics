@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/5/2021
-Updated: 1/26/2022
+Updated: 5/18/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # Standard imports
@@ -12,6 +12,7 @@ import os
 from datetime import datetime
 from json import loads
 import requests
+from typing import Optional
 
 # External imports
 from django.core.exceptions import ValidationError
@@ -36,12 +37,34 @@ from cannlytics.firebase import (
     update_document,
 )
 from website.settings import DEFAULT_FROM_EMAIL, FIREBASE_API_KEY, FIREBASE_PROJECT_ID
-# from cannlytics.data import market
-from cannlytics.paypal import (
-    get_paypal_access_token,
-    # get_paypal_payment,
-)
 from website.views.mixins import BaseMixin
+
+
+def get_paypal_access_token(
+        client_id: str,
+        secret: str,
+        base: Optional[str] = 'https://api-m.paypal.com',
+) -> str:
+    """Get a PayPal access token.
+    Args:
+        client_id (str): Your PayPal client ID.
+        secret (str): Your PayPal secret.
+        base (str): The base API URL, with the live URL as the default.
+    Returns:
+        (str): The PayPal access token.
+    """
+    data = {'grant_type': 'client_credentials'}
+    url = f'{base}/v1/oauth2/token'
+    auth = (client_id, secret)
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Accept-Language': 'en_US',
+    }
+    response = requests.post(url, data=data, headers=headers, auth=auth)
+    body = response.json()
+    return body['access_token']
+
 
 
 # TODO: Publish cannlytics v0.0.11

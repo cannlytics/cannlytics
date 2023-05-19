@@ -1,10 +1,54 @@
-# 🥸 `CoADoC` | COA Data Parser
 
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
   <img width="150px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3">
+  <div style="font-style: italic;">COA Data Parser</div>
 </div>
 
 Certificates of analysis (COAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! `CoADoc` puts these vital data points in your hands by parsing PDFs and URLs, finding all the data, standardizing the data, and cleanly returning the data to you.
+
+In order to parse CoAs well, CoADoc takes into consideration:
+
+* The lab or LIMS that generated the CoA;
+* PDF properties, such as the fonts used and the page dimensions;
+* All detected words, lines, columns, white-space, etc.
+
+The roadmap for CoADoc is to continue adding lab and LIMS CoA parsing algorithms until a general CoA parsing algorithm may be able to be created. As CoA parsing algorithms are still under development, if you want a specific lab or LIMS CoA parsed, then please contact The Cannlytics Team: <dev@cannlytics.com>
+
+## Algorithms
+
+You can methodically get data from COAs for various labs with the combination of a handful of tools plus a little human ingenuity. All COAs that are extracted through manually written routines are quite useful because these can then be used for training natural language processing (NLP) models to further extract data from COAs!
+
+| Status | | |
+|---|---|---|
+| 🟠 Development | 🟡 Operational | 🟢 Live |
+
+| Lab / LIMS | Algorithm | Status |
+|------------|-----------|--------|
+| Anresco Laboratories | `parse_anresco_coa` | 🟢 |
+| Cannalysis | `parse_cannalysis_coa` | 🟢 |
+| Confidence Analytics | `parse_confidence_coa` | 🟢 |
+| Confident Cannabis | `parse_cc_coa` | 🟢 |
+| Green Leaf Lab | `parse_green_leaf_lab_coa` | 🟢 |
+| MCR Labs | `parse_mcr_labs_coa` | 🟢 |
+| SC Labs | `parse_sc_labs_coa` | 🟢 |
+| Sonoma Lab Works | `parse_sonoma_coa` | 🟢 |
+| Steep Hill | `parse_steephill_coa` | 🟢 |
+| TagLeaf LIMS | `parse_tagleaf_coa` | 🟢 |
+| Veda Scientific | `parse_veda_coa` | 🟡 |
+
+## Installation
+
+First, make sure that you have installed `cannlytics`:
+
+```
+pip install cannlytics
+```
+
+Then make sure to install the following dependencies:
+
+1. Install `Tesseract` ([Windows](https://github.com/UB-Mannheim/tesseract/wiki) | [iOS](https://github.com/madmaze/pytesseract>)).
+2. Install `ImageMagick` ([Download](https://imagemagick.org/script/download.php#windows) | [Cloud](https://stackoverflow.com/questions/43036268/do-i-have-access-to-graphicsmagicks-or-imagemagicks-in-a-google-cloud-function)
+3. Install `zbar` ([Download](http://zbar.sourceforge.net/download.html)).
 
 ## Usage
 
@@ -46,27 +90,7 @@ Close the client when you are finished to perform garbage cleaning.
 parser.quit()
 ```
 
-## Algorithms
 
-Getting data from COAs can be done with the combination of a handful of tools plus a little human ingenuity. We can methodically parse COAs produced by various labs that test cannabis. All COAs that are extracted through manually written routines are quite useful because these can then be used for training natural language processing (NLP) models to further extract data from COAs!
-
-| Status | | |
-|---|---|---|
-| 🟠 Development | 🟡 Operational | 🟢 Live |
-
-| Lab / LIMS | Algorithm | Status |
-|------------|-----------|--------|
-| Anresco Laboratories | `parse_anresco_coa` | 🟢 |
-| Cannalysis | `parse_cannalysis_coa` | 🟢 |
-| Confidence Analytics | `parse_confidence_coa` | 🟢 |
-| Confident Cannabis | `parse_cc_coa` | 🟢 |
-| Green Leaf Lab | `parse_green_leaf_lab_coa` | 🟢 |
-| MCR Labs | `parse_mcr_labs_coa` | 🟢 |
-| SC Labs | `parse_sc_labs_coa` | *Discontinued* |
-| Sonoma Lab Works | `parse_sonoma_coa` | 🟢 |
-| Steep Hill | `parse_steephill_coa` | 🟢 |
-| TagLeaf LIMS | `parse_tagleaf_coa` | 🟢 |
-| Veda Scientific | `parse_veda_coa` | 🟡 |
 
 ## Core Methods
 

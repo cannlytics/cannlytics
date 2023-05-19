@@ -47,7 +47,7 @@ from time import sleep
 import pandas as pd
 
 # Internal imports.
-from cannlytics.data.coas.sclabs import (
+from cannlytics.data.coas.algorithms.sclabs import (
     get_sc_labs_sample_details,
     get_sc_labs_test_results,
 )

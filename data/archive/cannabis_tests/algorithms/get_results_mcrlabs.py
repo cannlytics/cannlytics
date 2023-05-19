@@ -29,7 +29,7 @@ import os
 import pandas as pd
 
 # Internal imports.
-from cannlytics.data.coas.mcrlabs import get_mcr_labs_test_results
+from cannlytics.data.coas.algorithms.mcrlabs import get_mcr_labs_test_results
 from cannlytics.firebase import initialize_firebase, update_documents
 from cannlytics.utils.utils import to_excel_with_style
 

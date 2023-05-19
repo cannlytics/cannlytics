@@ -7,6 +7,11 @@
 // Updated: 5/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// TODO: Quick actions
+// - Search for a lab result / strain / company
+// - Archive a COA
+// - Archive a receipt
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 

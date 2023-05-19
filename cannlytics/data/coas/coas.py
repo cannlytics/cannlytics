@@ -1,12 +1,12 @@
 """
-CoADoc | A Certificate of Analysis (CoA) Parser
-Copyright (c) 2022 Cannlytics
+CoADoc | A Certificate of Analysis (COA) Parser
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 12/1/2022
+Updated: 5/18/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -18,50 +18,11 @@ Description:
     parsing PDFs and URLs, finding all the data, standardizing the data,
     and cleanly returning the data to you.
 
-    In order to parse CoAs well, CoADoc takes into consideration:
-
-        * The lab or LIMS that generated the CoA;
-        * PDF properties, such as the fonts used and the page dimensions;
-        * All detected words, lines, columns, white-space, etc.
-    
-    The roadmap for CoADoc is to continue adding lab and LIMS CoA
-    parsing algorithms until a general CoA parsing algorithm may be able
-    to be created. As CoA parsing algorithms are still under development,
-    if you want a specific lab or LIMS CoA parsed, then please contact
-    The Cannlytics Team: <dev@cannlytics.com>
-
-Supported Labs and LIMS:
-
-    ✓ Anresco Laboratories
-    ✓ Cannalysis
-    ✓ Confident Cannabis
-    ✓ Green Leaf Lab
-    ✓ MCR Labs
-    ✓ SC Labs
-    ✓ Sonoma Lab Works
-    ✓ Steep Hill Massachusetts
-    ✓ TagLeaf LIMS
-    ✓ Veda Scientific
-
 Future work:
 
     - [ ] Integrate `create_hash` into `save` and `standardize`.
     - [ ] Improve the `standardize` method.
-    - [ ] Parse unidentified CoAs to the best of our abilities.
-    
-Setup:
-
-    1. Install `Tesseract`.
-    For Windows: <https://github.com/UB-Mannheim/tesseract/wiki>
-    For all other OS: <https://github.com/madmaze/pytesseract>
-
-    2. Install `ImageMagick`
-    Download: <https://imagemagick.org/script/download.php#windows>
-    Cloud: <https://stackoverflow.com/questions/43036268/do-i-have-access-to-graphicsmagicks-or-imagemagicks-in-a-google-cloud-function>
-
-    3. Install `zbar`.
-    Download: <http://zbar.sourceforge.net/download.html>
-    Cloud: TODO: Install in the cloud!
+    - [ ] Parse unidentified COAs with OpenAI's GPT.
 
 """
 # Standard imports.
@@ -116,17 +77,17 @@ from cannlytics.utils.constants import (
 )
 
 # Lab and LIMS CoA parsing algorithms.
-from cannlytics.data.coas.anresco import ANRESCO
-from cannlytics.data.coas.cannalysis import CANNALYSIS
-from cannlytics.data.coas.confidence import CONFIDENCE
-from cannlytics.data.coas.confidentcannabis import CONFIDENT_CANNABIS
-from cannlytics.data.coas.greenleaflab import GREEN_LEAF_LAB
-from cannlytics.data.coas.mcrlabs import MCR_LABS
-from cannlytics.data.coas.sclabs import SC_LABS
-from cannlytics.data.coas.sonoma import SONOMA
-from cannlytics.data.coas.tagleaf import TAGLEAF
-from cannlytics.data.coas.steephill import STEEPHILL
-from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
+from cannlytics.data.coas.algorithms.anresco import ANRESCO
+from cannlytics.data.coas.algorithms.cannalysis import CANNALYSIS
+from cannlytics.data.coas.algorithms.confidence import CONFIDENCE
+from cannlytics.data.coas.algorithms.confidentcannabis import CONFIDENT_CANNABIS
+from cannlytics.data.coas.algorithms.greenleaflab import GREEN_LEAF_LAB
+from cannlytics.data.coas.algorithms.mcrlabs import MCR_LABS
+from cannlytics.data.coas.algorithms.sclabs import SC_LABS
+from cannlytics.data.coas.algorithms.sonoma import SONOMA
+from cannlytics.data.coas.algorithms.tagleaf import TAGLEAF
+from cannlytics.data.coas.algorithms.steephill import STEEPHILL
+from cannlytics.data.coas.algorithms.veda import VEDA_SCIENTIFIC
 
 # Labs and LIMS that CoADoc can parse.
 LIMS = {
@@ -160,7 +121,7 @@ DEFAULT_NUMERIC_COLUMNS = ['value', 'mg_g', 'lod', 'loq', 'limit', 'margin_of_er
 METRC_PREFIXES = ['1A40603', '1A40A01']
 
 # A custom `ValueError` message to raise when no known LIMS is identified.
-UNIDENTIFIED_LIMS = 'CoA not recognized as a CoA from a supported LIMS: '
+UNIDENTIFIED_LIMS = 'COA not recognized as a COA from a known lab: '
 UNIDENTIFIED_LIMS += ', '.join([f'"{x}"' for x in LIMS.keys()])
 
 

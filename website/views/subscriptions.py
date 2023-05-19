@@ -4,13 +4,14 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/5/2021
-Updated: 9/3/2022
+Updated: 5/18/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # Standard imports
 from datetime import datetime
 from json import loads
 import os
+from typing import Optional
 
 # External imports
 from django.core.exceptions import ValidationError
@@ -19,6 +20,7 @@ from django.core.validators import validate_email
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+import requests
 
 # Internal imports.
 from cannlytics.auth.auth import authenticate_request
@@ -30,12 +32,62 @@ from cannlytics.firebase import (
     get_document,
     update_document,
 )
-from cannlytics.paypal import (
-    cancel_paypal_subscription,
-    get_paypal_access_token,
-)
 from website.settings import DEFAULT_FROM_EMAIL
 from website.utils.utils import get_promo_code
+
+
+def get_paypal_access_token(
+        client_id: str,
+        secret: str,
+        base: Optional[str] = 'https://api-m.paypal.com',
+) -> str:
+    """Get a PayPal access token.
+    Args:
+        client_id (str): Your PayPal client ID.
+        secret (str): Your PayPal secret.
+        base (str): The base API URL, with the live URL as the default.
+    Returns:
+        (str): The PayPal access token.
+    """
+    data = {'grant_type': 'client_credentials'}
+    url = f'{base}/v1/oauth2/token'
+    auth = (client_id, secret)
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Accept-Language': 'en_US',
+    }
+    response = requests.post(url, data=data, headers=headers, auth=auth)
+    body = response.json()
+    return body['access_token']
+
+
+def cancel_paypal_subscription(
+        access_token: str,
+        subscription_id: str,
+        reason: Optional[str] = 'No reason provided.',
+        base: Optional[str] = 'https://api-m.paypal.com',
+):
+    """Cancel a PayPal subscription for an individual subscriber.
+    Args:
+        access_token (str): A required access token.
+        subscription_id (str): A specific subscription ID.
+        reason (str): The reason for cancellation.
+        base (str): The base API URL, with the live URL as the default.
+    Returns:
+        (bool): An indicator if cancellation was successful.
+    """
+    url = f'{base}/v1/billing/subscriptions/{subscription_id}/cancel'
+    authorization = {'Authorization': f'Bearer {access_token}'}
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Accept-Language': 'en_US',
+    }
+    headers = {**headers, **authorization}
+    data = {'reason': reason}
+    response = requests.post(url, data=data, headers=headers)
+    return response.status_code == 200
 
 
 def subscribe(request):

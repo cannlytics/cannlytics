@@ -4,24 +4,24 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/18/2020
-Updated: 1/13/2022
+Updated: 5/18/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 """
-# Standard imports
+# Standard imports:
 from datetime import datetime
 from json import loads
 import os
 from random import randint
 from typing import Optional
-from cannlytics.paypal import cancel_paypal_subscription, get_paypal_access_token
-from django.core.exceptions import ValidationError
 
-# External imports
+# External imports:
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.http.response import JsonResponse
+import requests
 
-# Internal imports.
+# Internal imports:
 from cannlytics.auth.auth import authenticate_request
 from cannlytics.firebase import (
     access_secret_version,
@@ -34,6 +34,34 @@ from cannlytics.firebase import (
 from console.settings import (
     DEFAULT_FROM_EMAIL,
 )
+
+
+def cancel_paypal_subscription(
+        access_token: str,
+        subscription_id: str,
+        reason: Optional[str] = 'No reason provided.',
+        base: Optional[str] = 'https://api-m.paypal.com',
+):
+    """Cancel a PayPal subscription for an individual subscriber.
+    Args:
+        access_token (str): A required access token.
+        subscription_id (str): A specific subscription ID.
+        reason (str): The reason for cancellation.
+        base (str): The base API URL, with the live URL as the default.
+    Returns:
+        (bool): An indicator if cancellation was successful.
+    """
+    url = f'{base}/v1/billing/subscriptions/{subscription_id}/cancel'
+    authorization = {'Authorization': f'Bearer {access_token}'}
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Accept-Language': 'en_US',
+    }
+    headers = {**headers, **authorization}
+    data = {'reason': reason}
+    response = requests.post(url, data=data, headers=headers)
+    return response.status_code == 200
 
 
 def get_promo_code(num_chars: Optional[int] = 7) -> str:

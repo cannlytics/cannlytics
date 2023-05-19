@@ -14,6 +14,11 @@
 // Jungle Boys: https://www.jungleboys.com/verify/
 // Sunnyside: https://www.verifyhemp.com/
 // Trulieve: https://www.trulieve.com/discover/product-test-search
+// Green Scientific Labs: https://www.greenscientificlabs.com/find-coa.php
+// VidaCann: https://www.vidacann.com/lab-results/
+// HT Medical Cannabis: https://htcannabis.com/lab-results/
+
+// TODO: Allow users to search by batch number, product name, etc.
 
 // Flutter imports:
 import 'package:cannlytics_data/common/cards/card_grid.dart';

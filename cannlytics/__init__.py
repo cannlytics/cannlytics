@@ -13,7 +13,6 @@ import cannlytics.firebase as firebase
 import cannlytics.lims as lims
 import cannlytics.metrc as metrc
 import cannlytics.models as models
-import cannlytics.paypal as paypal
 import cannlytics.stats as stats
 import cannlytics.utils as utils
 
