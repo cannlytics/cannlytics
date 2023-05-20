@@ -7,11 +7,6 @@
 // Updated: 5/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// TODO: Quick actions
-// - Search for a lab result / strain / company
-// - Archive a COA
-// - Archive a receipt
-
 // Flutter imports:
 import 'package:flutter/material.dart';
 
@@ -35,9 +30,15 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ConsoleScreen(
+      bottomSearch: true,
       children: [
         // Call for contributions.
         _contributions(context),
+
+        // TODO: Quick actions
+        // - Search for a lab result / strain / company
+        // - Archive a COA
+        // - Archive a receipt
 
         // AI tools.
         _aiCards(context),
@@ -67,6 +68,43 @@ class DashboardScreen extends ConsumerWidget {
       ),
     );
   }
+
+  /// Quick actions card.
+  // Widget _quickActions(BuildContext context) {
+  //   final screenWidth = MediaQuery.of(context).size.width;
+  //   return SliverToBoxAdapter(
+  //     child: Padding(
+  //       padding: EdgeInsets.symmetric(
+  //         vertical: 18,
+  //         horizontal: sliverHorizontalPadding(screenWidth) / 2,
+  //       ),
+  //       child: Column(children: [
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.start,
+  //           children: [
+  //             Text('AI',
+  //                 style: Theme.of(context).textTheme.labelLarge!.copyWith(
+  //                     color: Theme.of(context).textTheme.titleLarge!.color)),
+  //           ],
+  //         ),
+  //         gapH8,
+  //         CardGridView(
+  //           crossAxisCount: screenWidth < Breakpoints.desktop ? 1 : 2,
+  //           childAspectRatio: 3,
+  //           items: aiModels.map((model) {
+  //             return DatasetCard(
+  //               imageUrl: model['image_url'],
+  //               title: model['title'],
+  //               description: model['description'],
+  //               tier: model['tier'],
+  //               onTap: () => context.push(model['path']),
+  //             );
+  //           }).toList(),
+  //         ),
+  //       ]),
+  //     ),
+  //   );
+  // }
 
   /// AI cards.
   Widget _aiCards(BuildContext context) {

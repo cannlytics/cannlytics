@@ -23,9 +23,14 @@ import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 
 /// General console screen that renders given widgets.
 class ConsoleScreen extends StatelessWidget {
-  const ConsoleScreen({super.key, required this.children});
+  const ConsoleScreen({
+    super.key,
+    required this.children,
+    this.bottomSearch = false,
+  });
 
   final List<Widget> children;
+  final bool bottomSearch;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +49,9 @@ class ConsoleScreen extends StatelessWidget {
         // Footer.
         const SliverToBoxAdapter(child: Footer()),
       ]),
+
+      // Navigation.
+      bottomNavigationBar: bottomSearch ? HoverSearchBar() : null,
     );
   }
 }
@@ -108,6 +116,42 @@ class Console extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Bottom search button.
+class HoverSearchBar extends StatefulWidget {
+  @override
+  _HoverSearchBarState createState() => _HoverSearchBarState();
+}
+
+class _HoverSearchBarState extends State<HoverSearchBar> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomAppBar(
+      child: Container(
+        height: 250,
+        width: double.maxFinite,
+        decoration: BoxDecoration(
+            color: Colors.orange,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20.0))),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            IconButton(
+              icon: Icon(Icons.arrow_forward),
+              onPressed: () {
+//on Presses functionaluty goes here
+              },
+            ),
+            //add as many tabs as you want here
+          ],
+        ),
+      ),
     );
   }
 }

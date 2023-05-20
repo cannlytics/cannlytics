@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 5/18/2023
+Updated: 5/19/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -21,8 +21,10 @@ Data Sources:
 Resources:
 
     - 'https://www.reddit.com/r/FLMedicalTrees/search/?q=COA'
+    - https://www.reddit.com/r/FLMedicalTrees/comments/11hfwjl/question_on_dispensaries_and_coas/
     - https://www.reddit.com/r/FLMedicalTrees/comments/1272per/anyone_have_batch_s_they_can_share_for_our/
     - https://www.reddit.com/r/FLMedicalTrees/comments/vdnpqf/coa_accumulation/
+    - https://www.reddit.com/r/FLMedicalTrees/comments/13jizze/vidacann_finally_put_all_coas_up/
 
 """
 # Standard imports:
@@ -49,7 +51,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 
 # Specify where your data lives.
-DATA_DIR = '../data/fl'
+DATA_DIR = 'D://data/florida/lab_results'
 ENV_FILE = '../../../../.env'
 
 
@@ -57,261 +59,259 @@ ENV_FILE = '../../../../.env'
 # Parse Kaycha Labs COAs.
 #-----------------------------------------------------------------------
 
-# # Initialize Selenium.
-# try:
-#     service = Service()
-#     options = Options()
-#     options.add_argument('--window-size=1920,1200')
-#     options.add_argument('--headless')
-#     options.add_argument('--disable-gpu')
-#     options.add_argument('--no-sandbox')
-#     driver = webdriver.Chrome(options=options, service=service)
-# except:
-#     driver = webdriver.Edge()
-
-# # Load the license page.
-# url = 'https://yourcoa.com/company/company?t=Jungle+Boys'
-# driver.get(url)
-
-# # Find all <a> tags with "coa-download" in the href attribute
-# links = driver.find_elements(By.CSS_SELECTOR, 'a[href*="coa-download"]')
-
-# # Extract the href attribute from each link
-# download_links = [link.get_attribute('href') for link in links]
-# download_links = list(set(download_links))
-
-# # Print the download links
-# for link in download_links:
-#     print(link)
-
-
-
 # Get a list of Florida companies.
 # Note: It may be best to retrieve this list dynamically.
+# TODO: Try to find COAs for the remaining companies.
+# - Plant 13 Florida, Inc.
+# - House of Platinum Cannabis
+# - Cookies Florida, Inc.
 licenses = {
     'MMTC-2015-0002': {
         'business_dba_name': 'Ayr Cannabis Dispensary',
-        'slug': 'Ayr',
+        'business_legal_name': 'Liberty Health Sciences, FL',
+        'slug': 'Liberty+Health+Sciences%2C+FL',
+        'total': 3924,
     },
     'MMTC-2017-0011': {
         'business_dba_name': 'Cannabist',
         'slug': 'Cannabist',
+        'total': 3,
     },
     'MMTC-2019-0018': {
         'business_dba_name': 'Cookies Florida, Inc.',
         'slug': '',
+        'total': 0,
     },
     'MMTC-2015-0001': {
         'business_dba_name': 'Curaleaf',
         'slug': 'CURALEAF+FLORIDA+LLC',
+        'total': 8905,
     },
     'MMTC-2015-0003': {
         'business_dba_name': 'Fluent ',
         'slug': 'Fluent',
+        'total': 70,
     },
     'MMTC-2019-0019': {
         'business_dba_name': 'Gold Leaf',
         'slug': 'Gold+Leaf',
+        'total': 6,
     },
     'MMTC-2019-0021': {
         'business_dba_name': 'Green Dragon',
         'slug': 'Green+Dragon',
+        'total': 0,
     },
     'MMTC-2016-0007': {
         'business_dba_name': 'GrowHealthy',
         'slug': 'GrowHealthy',
+        'total': 28,
     },
     'MMTC-2017-0013': {
         'business_dba_name': 'GTI (Rise Dispensaries)',
-        'slug': '',
+        'slug': 'GTI',
+        'total': 0,
     },
     'MMTC-2018-0014': {
         'business_dba_name': 'House of Platinum Cannabis',
         'slug': '',
+        'total': 0,
     },
     'MMTC-2019-0016': {
         'business_dba_name': 'Insa - Cannabis for Real Life',
-        'slug': '',
+        'slug': 'Insa',
+        'total': 0,
     },
     'MMTC-2019-0015': {
         'business_dba_name': 'Jungle Boys',
         'slug': 'Jungle+Boys',
+        'total': 2,
     },
     'MMTC-2017-0010': {
         'business_dba_name': 'MüV',
         'slug': 'Muv',
+        'total': 0,
     },
     'MMTC-2016-0006': {
         'business_dba_name': 'Planet 13 Florida, Inc.',
         'slug': '',
+        'total': 0,
     },
     'MMTC-2019-0022': {
         'business_dba_name': 'Revolution Florida',
         'slug': 'Revolution',
+        'total': 0,
     },
     'MMTC-2019-0017': {
         'business_dba_name': 'Sanctuary Cannabis',
-        'slug': '',
+        'slug': 'Sanctuary',
+        'total': 581,
     },
     'MMTC-2017-0012': {
         'business_dba_name': 'Sunburn',
         'slug': '',
+        'total': 0,
     },
     'MMTC-2017-0008': {
         'business_dba_name': 'Sunnyside*',
         'slug': 'Sunnyside',
+        'total': 886,
     },
     'MMTC-2015-0004': {
         'business_dba_name': 'Surterra Wellness',
-        'slug': '',
+        'slug': 'Surterra+Wellness',
+        'total': 1,
     },
     'MMTC-2019-0020': {
         'business_dba_name': 'The Flowery',
         'slug': '',
+        'total': 0,
     },
     'MMTC-2015-0005': {
         'business_dba_name': 'Trulieve',
-        'slug': '',
+        'slug': 'Trulieve',
+        'total': 0,
     },
     'MMTC-2017-0009': {
         'business_dba_name': 'VidaCann',
         'slug': 'VidaCann',
+        'total': 4,
     },
 }
 
-# FIND:
-# url = 'https://yourcoa.com/company/company?t=Planet+13+Florida+Inc'
-# Surterra Wellness
-# Sunburn
-# Sanctuary Cannabis
-# Insa - Cannabis for Real Life
-# House of Platinum Cannabis
-# GTI (Rise Dispensaries) [privat?]
-# Trulieve [private?]
-# Cookies Florida, Inc.
-# Liberty Health Sciences, FL (3,924+ COAs)
-url = 'https://yourcoa.com/company/company?t=Cookies+Florida%2C+Inc.'
-url = 'https://yourcoa.com/company/company?t=Liberty+Health+Sciences%2C+FL'
 
-# Sunnyside COAs (886+ COAs).
-url = 'https://yourcoa.com/company/company?t=Sunnyside'
+def download_license_coas_kaycha(
+        data_dir: str,
+        slug: str,
+        dba: Optional[str] = None,
+        producer_license_number: Optional[str] = None,
+        overwrite: Optional[bool] = False,
+        base: Optional[str] = 'https://yourcoa.com',
+        columns: Optional[list] = None,
+    ):
+    """Download Kaycha Labs COAs uploaded to the public web."""
 
-# Curaleaf COAs (8,905+ COAs)
-url = 'https://yourcoa.com/company/company/17?t=CURALEAF+FLORIDA+LLC'
+    # Initialize COA URL collection.
+    if columns is None:
+        columns = ['lab_id', 'batch_number', 'product_name']
 
-# Fluent (70+ COAs).
-url = 'https://yourcoa.com/company/company?t=Fluent'
+    # Create an output directory.
+    datasets_dir = os.path.join(data_dir, '.datasets')
+    if not os.path.exists(datasets_dir):
+        os.makedirs(datasets_dir)
 
-# Grow Health (28 COAs).
-url = 'https://yourcoa.com/company/company/303?t=GrowHealthy'
+    # Request each page until the maximum is reached.
+    page = 0
+    observations = []
+    iterate = True
+    while iterate:
 
-# Gold Leaf COAs (6+ COAs).
-url = 'https://yourcoa.com/company/company?t=Gold+Leaf'
+        # Get the first/next page of COAs.
+        page += 1
+        url = f'{base}/company/company?t={slug}&page={page}'
+        response = requests.get(url, headers=DEFAULT_HEADERS)
+        if response.status_code != 200:
+            print(f"Request failed with status {response.status_code}")
 
-# Cannabis (3 COAs).
-url = 'https://yourcoa.com/company/company?t=Cannabist'
+        # Get the download URLs.
+        soup = BeautifulSoup(response.content, 'html.parser')
+        links = soup.find_all('a')
+        links = [x['href'] for x in links if 'coa-download' in x['href']]
+        links = list(set(links))
+        links = [base + x for x in links]
 
-# VidaCann (4 COAs).
-url = 'https://yourcoa.com/company/company?t=VidaCann'
+        # Get the details from the page.
+        divs = soup.find_all(class_='pdf_box')
+        print('Found %i samples on page %i.' % (len(divs), page))
+        for n, div in enumerate(divs):
+            observation = {}
+            spans = div.find_all('span')[:len(columns)]
+            values = [x.text for x in spans]
+            for k, value in enumerate(values):
+                observation[columns[k]] = value
+            observation['download_url'] = links[n]
+            if dba is not None:
+                observation['business_dba_name'] = dba
+            if producer_license_number is not None:
+                observation['producer_license_number'] = producer_license_number
+            observations.append(observation)
 
-# Jungle Boys (2 COAs).
-url = 'https://yourcoa.com/company/company?t=Jungle+Boys'
+        # See if the next button is disabled to know when to stop iterating.
+        next_element = soup.find(class_='next')
+        if not next_element:
+            iterate = False
+        elif next_element and 'disabled' in next_element.get('class', []):
+            iterate = False
 
-# Green Dragon (0 COAs).
-url = 'https://yourcoa.com/company/company?t=Green+Dragon'
+        # Otherwise pause to respect the server.
+        sleep(0.3)
 
-# Muv (0 COAs).
-url = 'https://yourcoa.com/company/company?t=Muv'
+    # Save the observed lab result URLs.
+    date = datetime.now().isoformat()[:19].replace(':', '-')
+    df = pd.DataFrame(observations)
+    df.to_excel(f'{datasets_dir}/fl-lab-result-urls-{slug}-{date}.xlsx', index=False)
+    print('Saved %i lab result URLs for %s' % (len(df), slug))
 
-# Milk and Cookies (0 COAs).
-url = 'https://yourcoa.com/company/company?t=Cookies'
+    # Create a directory for COA PDFs.
+    pdf_dir = os.path.join(datasets_dir, 'pdfs')
+    if not os.path.exists(pdf_dir):
+        os.makedirs(pdf_dir)
 
-# Ayr Wellness (0 COAs).
-url = 'https://yourcoa.com/company/company?t=Ayr'
+    # Create a directory for each licensees COAs.
+    license_pdf_dir = os.path.join(pdf_dir, producer_license_number)
+    if not os.path.exists(license_pdf_dir):
+        os.makedirs(license_pdf_dir)
 
-# Revolution (0 COAs).
-url = 'https://yourcoa.com/company/company?t=Revolution'
-
-
-# TODO: Create slugs for each company
-
-# Get a company's slug.
-slug = 'GrowHealthy'
-dba = 'GrowHealthy'
-producer_license_number = 'MMTC-2016-0007'
-
-# Request each page until the maximum is reached.
-page = 0
-observations = []
-iterate = True
-while iterate:
-
-    # Get the first/next page of COAs.
-    page += 1
-    url = f'https://yourcoa.com/company/company?t={slug}&page={page}'
-    response = requests.get(url, headers=DEFAULT_HEADERS)
-    if response.status_code != 200:
-        print(f"Request failed with status {response.status_code}")
-    else:
-        print('Retrieved results page %i for %s' % (page, slug))
+    # Download the PDF.
+    for _, row in df.iterrows():
+        sleep(0.3)
+        sample_id = row['lab_id']
+        outfile = os.path.join(license_pdf_dir, f'{sample_id}.pdf')
+        if os.path.exists(outfile) and not overwrite:
+            continue
+        response = requests.get(row['download_url'], headers=DEFAULT_HEADERS)
+        with open(outfile, 'wb') as pdf:
+            pdf.write(response.content)
+        print('Downloaded: %s' % outfile)
     
-    # Get the download URLs.
-    soup = BeautifulSoup(response.content, 'html.parser')
-    links = soup.find_all('a')
-    links = [x['href'] for x in links if 'coa-download' in x['href']]
-    links = list(set(links))
-    links = ['https://yourcoa.com' + x for x in links]
+    # Return the COA URLs.
+    return df
 
-    # Get the details from the page.
-    divs = soup.find_all(class_='pdf_box')
-    print('%i samples found on page %i' % (len(divs), page))
-    keys = ['lab_id', 'batch_number', 'product_name']
-    for n, div in enumerate(divs):
-        observation = {}
-        spans = div.find_all('span')[:len(keys)]
-        values = [x.text for x in spans]
-        for k, value in enumerate(values):
-            observation[keys[k]] = value
-        observation['download_url'] = links[n]
-        observation['business_dba_name'] = dba
-        observation['producer_license_number'] = producer_license_number
-        observations.append(observation)
 
-    # See if the next button is disabled to know when to stop iterating.
-    next_element = soup.find(class_='next')
-    if not next_element:
-        iterate = False
-    elif next_element and 'disabled' in next_element.get('class', []):
-        iterate = False
+# def get_results_kaycha(data_dir: str, **kwargs):
+#     """Get lab results published by Kaycha Labs on the public web."""
 
-    # Otherwise pause to respect the server.
-    sleep(3)
+# DEV:
+data_dir = DATA_DIR
 
-# Create an output directory.
-datasets_dir = os.path.join(DATA_DIR, '.datasets')
-if not os.path.exists(datasets_dir):
-    os.makedirs(datasets_dir)
+# Sort licenses by the number of COAs.
+licenses = dict(sorted(licenses.items(), key=lambda x: x[1]['total']))
 
-# Save the observed lab result URLs.
+# Iterate over each producer.
+coa_urls = []
+for license_number, licensee in licenses.items():
+    expected_total = licensee['total']
+    if expected_total == 0:
+        continue
+    print('Preparing to download %i+ COAs for %s' % (expected_total, licensee['business_dba_name']))
+    urls = download_license_coas_kaycha(
+        data_dir,
+        slug=licensee['slug'],
+        dba=licensee['business_dba_name'],
+        producer_license_number=license_number,
+    )
+    coa_urls.append(urls)
+
+# Save and return all of the COA URLs.
 date = datetime.now().isoformat()[:19].replace(':', '-')
-df = pd.DataFrame(observations)
-df.to_excel(f'{datasets_dir}/fl-lab-result-urls-{slug}-{date}.xlsx', index=False)
+data = pd.concat(coa_urls)
+datasets_dir = os.path.join(data_dir, '.datasets')
+data.to_excel(f'{datasets_dir}/fl-lab-result-urls-{date}.xlsx', index=False)
+print('Saved %i lab result URLs for Kaycha Labs.' % len(data))
+# return data
 
-
-# Create a directory for COA PDFs.
-pdf_dir = os.path.join(datasets_dir, 'pdfs')
-if not os.path.exists(pdf_dir):
-    os.makedirs(pdf_dir)
-
-# Create a directory for each licensees COAs.
-license_pdf_dir = os.path.join(pdf_dir, producer_license_number)
-if not os.path.exists(license_pdf_dir):
-    os.makedirs(license_pdf_dir)
 
 # TODO: Begin to parse lab results from the PDFs!
-for row, values in df.iterrows():
-    raise NotImplementedError
-
 
 
 # TODO: Parse a COA from a URL.
@@ -325,11 +325,15 @@ url = 'https://www.trulieve.com/files/lab-results/35603_0001748379.pdf'
 # ACS Labs
 #-----------------------------------------------------------------------
 
-# VIA Trulieve URL.
+# TODO: Parse Trulieve COA from a URL.
 url = 'https://www.trulieve.com/files/lab-results/18362_0003059411.pdf'
 
-# ACS Labs URL.
+
+# TODO: Parse a ACS Labs PDF from a URL.
 url = 'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEQzA2Mi0wNjAzMjItOTlQUi1SMzUtMDcxNDIwMjI='
+
+
+# TODO: Parse a ACS Labs PDF.
 
 
 #-----------------------------------------------------------------------
@@ -338,6 +342,7 @@ url = 'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEQzA2Mi0wNjAzMjItOT
 
 # TODO: Get COAs from TerpLife Labs
 url = 'https://www.terplifelabs.com/coa/'
+
 
 # TODO: Search for strains, e.g. ChryTop
 
@@ -353,6 +358,7 @@ url = 'https://www.terplifelabs.com/coa/'
 # US Cannalytics Labs
 #-----------------------------------------------------------------------
 
+# TODO: Parse COA from URL.
 us_cannalytics_coa = 'https://www.vidacann.com/wp-content/uploads/2023/04/Batch-0653-0603-5236-3992-Lot-8391-232004.pdf'
 
 
@@ -360,12 +366,14 @@ us_cannalytics_coa = 'https://www.vidacann.com/wp-content/uploads/2023/04/Batch-
 # Method Testing Labs
 #-----------------------------------------------------------------------
 
+# TODO: Parse a MTL COA PDF.
+
 
 #-----------------------------------------------------------------------
 # Modern Canna
 #-----------------------------------------------------------------------
 
-# Parse COAs from URL.
+# TODO: Parse COAs from URL.
 url = 'https://moderncanna.com/coa/GD22003-07.pdf'
 url = 'https://moderncanna.com/coa/GF23007-01.pdf'
 
@@ -375,10 +383,11 @@ url = 'https://moderncanna.com/coa/GF23007-01.pdf'
 # 710 Labs
 #-----------------------------------------------------------------------
 
-# Get list of COA lists.
+# TODO: Get list of COA lists.
 lists_url = 'https://support.theflowery.co/hc/en-us/sections/7240468576283-Drop-Information'
 
-# Get COA URLs.
+
+# TODO: Get COA URLs.
 list_url = 'https://support.theflowery.co/hc/en-us/articles/14986163938459-Drop-20-05-01-23-'
 
 
@@ -389,4 +398,4 @@ list_url = 'https://support.theflowery.co/hc/en-us/articles/14986163938459-Drop-
 # Lab result analysis.
 #-----------------------------------------------------------------------
 
-# Heatmap of lab results throughout the state.
+# TODO: Heatmap of lab results throughout Florida.
