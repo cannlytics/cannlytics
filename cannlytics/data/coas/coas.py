@@ -259,7 +259,7 @@ class CoADoc:
         if init_all:
             for values in self.lims.values():
                 script = values['coa_algorithm'].replace('.py', '')
-                module = f'cannlytics.data.coas.{script}'
+                module = f'cannlytics.data.coas.algorithms.{script}'
                 entry_point = values['coa_algorithm_entry_point']
                 setattr(self, entry_point, importlib.import_module(module))
 

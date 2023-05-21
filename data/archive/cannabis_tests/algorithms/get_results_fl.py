@@ -1,30 +1,33 @@
 """
-Florida cannabis licenses and lab results
+Florida cannabis lab results
 Copyright (c) 2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 5/19/2023
+Updated: 5/20/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Archive Florida cannabis license data.
+    Archive Florida cannabis lab result data.
 
 Data Sources:
 
     - [Florida Labs](https://knowthefactsmmj.com/cmtl/)
     - [Florida Licenses](https://knowthefactsmmj.com/mmtc/)
+    - [Kaycha Labs](https://yourcoa.com)
 
 Resources:
 
-    - 'https://www.reddit.com/r/FLMedicalTrees/search/?q=COA'
+    - https://www.reddit.com/r/FLMedicalTrees/search/?q=COA
     - https://www.reddit.com/r/FLMedicalTrees/comments/11hfwjl/question_on_dispensaries_and_coas/
     - https://www.reddit.com/r/FLMedicalTrees/comments/1272per/anyone_have_batch_s_they_can_share_for_our/
     - https://www.reddit.com/r/FLMedicalTrees/comments/vdnpqf/coa_accumulation/
     - https://www.reddit.com/r/FLMedicalTrees/comments/13jizze/vidacann_finally_put_all_coas_up/
+    - https://www.reddit.com/r/FLMedicalTrees/comments/13j1tua/rick_james_coa/
+    - https://www.reddit.com/r/FLMedicalTrees/comments/13d7bwb/can_someone_explain_some_terps_to_me/
 
 """
 # Standard imports:
@@ -43,12 +46,12 @@ import requests
 
 # Selenium imports.
 from selenium import webdriver
+from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.ui import Select
 
 # Specify where your data lives.
 DATA_DIR = 'D://data/florida/lab_results'
@@ -164,7 +167,7 @@ licenses = {
     },
     'MMTC-2019-0020': {
         'business_dba_name': 'The Flowery',
-        'slug': '',
+        'slug': 'The+Flowery',
         'total': 0,
     },
     'MMTC-2015-0005': {
@@ -278,37 +281,34 @@ def download_license_coas_kaycha(
     return df
 
 
-# def get_results_kaycha(data_dir: str, **kwargs):
-#     """Get lab results published by Kaycha Labs on the public web."""
+def get_results_kaycha(data_dir: str, **kwargs):
+    """Get lab results published by Kaycha Labs on the public web."""
 
-# DEV:
-data_dir = DATA_DIR
+    # Sort licenses by the number of COAs.
+    licenses = dict(sorted(licenses.items(), key=lambda x: x[1]['total']))
 
-# Sort licenses by the number of COAs.
-licenses = dict(sorted(licenses.items(), key=lambda x: x[1]['total']))
+    # Iterate over each producer.
+    coa_urls = []
+    for license_number, licensee in licenses.items():
+        expected_total = licensee['total']
+        if expected_total == 0:
+            continue
+        print('Preparing to download %i+ COAs for %s' % (expected_total, licensee['business_dba_name']))
+        urls = download_license_coas_kaycha(
+            data_dir,
+            slug=licensee['slug'],
+            dba=licensee['business_dba_name'],
+            producer_license_number=license_number,
+        )
+        coa_urls.append(urls)
 
-# Iterate over each producer.
-coa_urls = []
-for license_number, licensee in licenses.items():
-    expected_total = licensee['total']
-    if expected_total == 0:
-        continue
-    print('Preparing to download %i+ COAs for %s' % (expected_total, licensee['business_dba_name']))
-    urls = download_license_coas_kaycha(
-        data_dir,
-        slug=licensee['slug'],
-        dba=licensee['business_dba_name'],
-        producer_license_number=license_number,
-    )
-    coa_urls.append(urls)
-
-# Save and return all of the COA URLs.
-date = datetime.now().isoformat()[:19].replace(':', '-')
-data = pd.concat(coa_urls)
-datasets_dir = os.path.join(data_dir, '.datasets')
-data.to_excel(f'{datasets_dir}/fl-lab-result-urls-{date}.xlsx', index=False)
-print('Saved %i lab result URLs for Kaycha Labs.' % len(data))
-# return data
+    # Save and return all of the COA URLs.
+    date = datetime.now().isoformat()[:19].replace(':', '-')
+    data = pd.concat(coa_urls)
+    datasets_dir = os.path.join(data_dir, '.datasets')
+    data.to_excel(f'{datasets_dir}/fl-lab-result-urls-{date}.xlsx', index=False)
+    print('Saved %i lab result URLs for Kaycha Labs.' % len(data))
+    return data
 
 
 # TODO: Begin to parse lab results from the PDFs!
@@ -320,6 +320,237 @@ url = 'https://yourcoa.com/coa/coa-download?sample=DA30314006-007-mrk'
 url = 'https://www.trulieve.com/files/lab-results/35603_0001748379.pdf'
 # Broken: https://yourcoa.com/company/company?t=Green+Ops+FL+OpCo+LLC
 
+#-----------------------------------------------------------------------
+# The Flowery (892+ results).
+#-----------------------------------------------------------------------
+
+def get_results_the_flowery(
+        slug = 'the-flowery',
+        producer_license_number = 'MMTC-2019-0020',
+        lists_url = 'https://support.theflowery.co/hc/en-us/sections/7240468576283-Drop-Information',
+        overwrite = False,
+    ):
+    """Get lab results published by The Flowery on the public web."""
+
+    # Initialize Selenium.
+    try:
+        service = Service()
+        options = Options()
+        options.add_argument('--window-size=1920,1200')
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        driver = webdriver.Chrome(options=options, service=service)
+    except:
+        driver = webdriver.Edge()
+
+    # Load the lists page to get each list of COAs.
+    coa_lists = []
+    driver.get(lists_url)
+    links = driver.find_elements(by=By.TAG_NAME, value='a')
+    for link in links:
+        if 'COAs' in link.text:
+            coa_lists.append(link.get_attribute('href'))
+
+    # Get COA URLs.
+    coa_urls = []
+    for coa_list in coa_lists:
+        driver = webdriver.Edge()
+        driver.get(coa_list)
+        links = driver.find_elements(by=By.TAG_NAME, value='a')
+        for link in links:
+            href = link.get_attribute('href')
+            if href and href.endswith('.pdf'):
+                coa_urls.append(href)
+        driver.quit()
+
+    # Close the browser.
+    driver.quit()
+
+    # Create an output directory.
+    datasets_dir = os.path.join(DATA_DIR, '.datasets')
+    if not os.path.exists(datasets_dir):
+        os.makedirs(datasets_dir)
+
+    # Save the COA URLs.
+    date = datetime.now().isoformat()[:19].replace(':', '-')
+    df = pd.DataFrame(coa_urls)
+    df.to_excel(f'{datasets_dir}/fl-lab-result-urls-{slug}-{date}.xlsx', index=False)
+    print('Saved %i lab result URLs for %s' % (len(df), slug))
+
+    # Create a directory for COA PDFs.
+    pdf_dir = os.path.join(datasets_dir, 'pdfs')
+    if not os.path.exists(pdf_dir):
+        os.makedirs(pdf_dir)
+
+    # Create a directory for each licensees COAs.
+    license_pdf_dir = os.path.join(pdf_dir, producer_license_number)
+    if not os.path.exists(license_pdf_dir):
+        os.makedirs(license_pdf_dir)
+
+    # Download the COA PDFs.
+    for coa_url in coa_urls:
+        sample_id = coa_url.split('/')[-1].split('.')[0]
+        batch_id = coa_url.split('/')[-2]
+        outfile = os.path.join(license_pdf_dir, f'{batch_id}-{sample_id}.pdf')
+        if os.path.exists(outfile) and not overwrite:
+            continue
+        sleep(0.3)
+        response = requests.get(coa_url, headers=DEFAULT_HEADERS)
+        with open(outfile, 'wb') as pdf:
+            pdf.write(response.content)
+        print('Downloaded: %s' % outfile)
+
+
+#-----------------------------------------------------------------------
+# TerpLife Labs (in development).
+#-----------------------------------------------------------------------
+
+def get_search_box(driver):
+    """Find the search box and enter text."""
+    inputs = driver.find_elements(By.TAG_NAME, 'input')
+    for input in inputs:
+        if input.get_attribute('placeholder') == 'Enter a keyword to search':
+            return input
+    return None
+
+def query_search_box(driver, character):
+    """Query the search box."""
+    search_box = get_search_box()
+    driver.execute_script("arguments[0].scrollIntoView();", search_box)
+    sleep(0.3)
+    search_box.clear()
+    search_box.send_keys(character)
+
+
+def download_search_results(driver, license_pdf_dir, wait=10):
+    """Download the results of a search."""
+
+    # Get all of the rows.
+    # table = driver.find_element(By.CLASS_NAME, 'file-list')
+    table = WebDriverWait(driver, wait).until(
+        EC.presence_of_element_located((By.CLASS_NAME, 'file-item'))
+    )
+    rows = table.find_elements(By.CLASS_NAME, 'file-item')
+
+    # Download COA PDFs for each row.
+    for row in rows:
+
+        # Skip if the file has already be downloaded.
+        file_name = row.find_element(By.CLASS_NAME, 'file-item-name').text
+        outfile = os.path.join(license_pdf_dir, file_name)
+        if os.path.exists(outfile):
+            continue
+
+        # Click on the icons for each row.
+        driver.execute_script("arguments[0].scrollIntoView();", row)
+        sleep(3.33)
+        row.click()
+
+        # Click the download button.
+        sleep(3.33)
+        download_button = driver.find_element(By.CLASS_NAME, 'lg-download')
+        download_button.click()
+
+        # Click the close button.
+        try:
+            sleep(3.33)
+            close_button = driver.find_element(By.CLASS_NAME, 'lg-close')
+            close_button.click()
+        except:
+            # Return unsuccessful completion.
+            print('LARGE FILE: %s' % file_name)
+            return False
+    
+    # Return successful completion.
+    return True
+
+
+def get_results_terplife(
+        url = 'https://www.terplifelabs.com/coa/',
+    ):
+    """Get lab results published by TerpLife Labs on the public web."""
+
+    # Create an output directory.
+    datasets_dir = os.path.join(DATA_DIR, '.datasets')
+    if not os.path.exists(datasets_dir):
+        os.makedirs(datasets_dir)
+
+    # Create a directory for COA PDFs.
+    pdf_dir = os.path.join(datasets_dir, 'pdfs')
+    if not os.path.exists(pdf_dir):
+        os.makedirs(pdf_dir)
+
+    # Create a directory for TerpLife Labs.
+    license_pdf_dir = os.path.join(pdf_dir, 'terplife')
+    if not os.path.exists(license_pdf_dir):
+        os.makedirs(license_pdf_dir)
+
+    # Initialize Selenium.
+    try:
+        service = Service()
+        options = Options()
+        options.add_argument('--window-size=1920,1200')
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        driver = webdriver.Chrome(options=options, service=service)
+    except:
+        options = EdgeOptions()
+        # options.use_chromium = True
+        options.add_experimental_option('prefs', {
+            'download.default_directory': 'D:\\data\\florida\\lab_results\\.datasets\\pdfs\\terplife',
+            'download.prompt_for_download': False,
+            'download.directory_upgrade': True,
+            'plugins.always_open_pdf_externally': True,
+        })
+        driver = webdriver.Edge(options=options)
+
+    # Open the website.
+    driver.get(url)
+    sleep(1)
+
+    # FIXME: Iterate through the alphabet.
+    # alphabet = ['z']
+    # for character in alphabet:
+    character = 'z'
+
+    # Query the results.
+    query_search_box(driver, character)
+
+    # Download files until all have been downloaded.
+    iterate = True
+    while iterate:
+
+        # Stop iteration once all rows are downloaded.
+        success = download_search_results(driver, license_pdf_dir)
+        if success:
+            iterate = False
+
+        # Otherwise, download large files.
+        drive_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, 'uc-download-link'))
+        )
+        drive_button.click()
+
+        # Go back.
+        driver.back()
+
+        # FIXME: Re-search.
+        query_search_box(driver, character)
+
+    # Close the browser
+    driver.quit()
+
+    # TODO: Return the COA PDF paths.
+    return []
+
+
+
+# TODO: Search TerpLife for known strains, e.g. ChryTop.
+
+
+# TODO: Parse TerpLife Labs COA PDF.
 
 #-----------------------------------------------------------------------
 # ACS Labs
@@ -334,23 +565,6 @@ url = 'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEQzA2Mi0wNjAzMjItOT
 
 
 # TODO: Parse a ACS Labs PDF.
-
-
-#-----------------------------------------------------------------------
-# TerpLife Labs
-#-----------------------------------------------------------------------
-
-# TODO: Get COAs from TerpLife Labs
-url = 'https://www.terplifelabs.com/coa/'
-
-
-# TODO: Search for strains, e.g. ChryTop
-
-
-# TODO: Download all PDFs.
-
-
-# TODO: Extract data from the PDFs.
 
 
 
@@ -376,22 +590,6 @@ us_cannalytics_coa = 'https://www.vidacann.com/wp-content/uploads/2023/04/Batch-
 # TODO: Parse COAs from URL.
 url = 'https://moderncanna.com/coa/GD22003-07.pdf'
 url = 'https://moderncanna.com/coa/GF23007-01.pdf'
-
-
-
-#-----------------------------------------------------------------------
-# 710 Labs
-#-----------------------------------------------------------------------
-
-# TODO: Get list of COA lists.
-lists_url = 'https://support.theflowery.co/hc/en-us/sections/7240468576283-Drop-Information'
-
-
-# TODO: Get COA URLs.
-list_url = 'https://support.theflowery.co/hc/en-us/articles/14986163938459-Drop-20-05-01-23-'
-
-
-
 
 
 #-----------------------------------------------------------------------

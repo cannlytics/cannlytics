@@ -1,16 +1,16 @@
 """
-Parse ACS Labs COAs
+Parse Modern Canna Science COAs
 Copyright (c) 2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
-Created: 5/18/2023
+Created: 5/20/2023
 Updated: 5/20/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Parse ACS Labs COA PDFs.
+    Parse Modern Canna Science Labs COA PDFs.
 
 Data Points:
 
@@ -99,8 +99,8 @@ from cannlytics.utils.utils import (
 
 # It is assumed that the lab has the following details.
 ACS_LABS = {
-    'coa_algorithm': 'acs.py',
-    'coa_algorithm_entry_point': 'parse_acs_coa',
+    'coa_algorithm': 'moderncanna.py',
+    'coa_algorithm_entry_point': 'parse_moderncanna_coa',
     'lims': 'ACS Labs',
     'lab': 'ACS Labs',
     'lab_image_url': '',
@@ -118,13 +118,13 @@ ACS_LABS = {
 }
 
 
-def parse_acs_coa(
+def parse_moderncanna_coa(
         parser,
         doc: Any,
         temp_path: Optional[str] = None,
         **kwargs,
     ) -> dict:
-    """Parse a TerpLife Labs COA PDF.
+    """Parse a ModernCanna Labs COA PDF.
     Args:
         doc (str or PDF): A PDF file path or pdfplumber PDF.
     Returns:
