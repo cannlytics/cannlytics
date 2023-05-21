@@ -121,10 +121,8 @@ def get_labs_fl(
             api_key=google_maps_api_key,
             address_field='address',
         )
-        # FIXME: Would be ideal to also get the county.
-        df['premise_county'] = None
         df.rename(columns={
-            # 'county': 'premise_county',
+            'county': 'premise_county',
             'latitude': 'premise_latitude',
             'longitude': 'premise_longitude'
         }, inplace=True)
@@ -133,7 +131,7 @@ def get_labs_fl(
         df['premise_city'] = parts[1]
         df['premise_state'] = STATE
         df['premise_zip_code'] = parts[2].str.replace(STATE, '').str.strip()
-        drop_cols = ['address', 'formatted_address']
+        drop_cols = ['address', 'formatted_address', 'county', 'state', 'state_name']
         df.drop(columns=drop_cols, inplace=True)
 
     # Standardize the licenses data.
@@ -159,8 +157,6 @@ def get_labs_fl(
     # Save the data.
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
-        date = datetime.now().isoformat()[:10]
-        df.to_csv(f'{data_dir}/labs-{STATE.lower()}-{date}.csv', index=False)
         df.to_csv(f'{data_dir}/labs-{STATE.lower()}-latest.csv', index=False)
 
     # Return the data.
@@ -283,8 +279,6 @@ def get_licenses_fl(
     # Save the data.
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
-        date = datetime.now().isoformat()[:10]
-        df.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
         df.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
 
     # Return the data.
@@ -303,4 +297,4 @@ if __name__ == '__main__':
 
 
     # [ ] TEST: Get Florida licenses.
-    licenses = get_licenses_fl(data_dir=DATA_DIR, env_file=ENV_FILE)
+    # licenses = get_licenses_fl(data_dir=DATA_DIR, env_file=ENV_FILE)

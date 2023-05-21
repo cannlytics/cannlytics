@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/20/2023
-Updated: 5/20/2023
+Updated: 5/21/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -101,6 +101,7 @@ from cannlytics.utils.utils import (
 MTL_LABS = {
     'coa_algorithm': 'mtl.py',
     'coa_algorithm_entry_point': 'parse_mtl_coa',
+    'url': 'http://mete.labdrive.net',
     'lims': 'Method Testing Labs',
     'lab': 'Method Testing Labs',
     'lab_image_url': '',
@@ -173,3 +174,22 @@ if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
     from dotenv import dotenv_values
+
+    # [✓] TEST: Identify LIMS from a COA URL.
+    parser = CoADoc()
+    url = 'http://mete.labdrive.net/s/KmXMdYTFR3dsceG'
+    lims = parser.identify_lims(url, lims={'Method Testing Labs': MTL_LABS})
+    assert lims == 'Method Testing Labs'
+
+    # [✓] TEST: Identify LIMS from a COA PDF.
+    parser = CoADoc()
+    doc = 'D://data/florida/lab_results/.datasets/pdfs/mtl/COA_2305CBR0001-004.pdf'
+    lims = parser.identify_lims(doc, lims={'Method Testing Labs': MTL_LABS})
+    assert lims == 'Method Testing Labs'
+
+    # [ ] TEST: Parse a Method Testing Labs COA from a URL.
+    urls = [
+        'http://mete.labdrive.net/s/KmXMdYTFR3dsceG',
+        'http://mete.labdrive.net/s/KmXMdYTFR3dsceG/download/COA_2305CBR0001-004.pdf',
+        'https://mete.labdrive.net/s/se8BcYZJAMqaYrE',
+    ]

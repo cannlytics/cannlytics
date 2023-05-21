@@ -5,7 +5,7 @@ Copyright (c) 2022-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/17/2022
-Updated: 5/20/2023
+Updated: 5/21/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -219,7 +219,41 @@ fields = {
 # Read the PDF.
 report = pdfplumber.open(doc)
 
+import base64
+import pdfplumber
+from PIL import Image
+import io
+import os
+import tempfile
+from cannlytics import firebase
+
+# TODO: Make this a main function.
+def save_image_data(image_data, image_file='image.png'):
+    """Save image data to a file."""
+    image_bytes = base64.b64decode(image_data)
+    image_io = io.BytesIO(image_bytes)
+    image = Image.open(image_io)
+    image.save(image_file)
+
+
+# for i, image in enumerate(front_page.images):
+# image_data = parser.get_pdf_image_data(front_page, image_index=5)
+# image_bytes = base64.b64decode(image_data)
+# image_io = io.BytesIO(image_bytes)
+# image = Image.open(image_io)
+# display(image)
+
+
 # TODO: Save the image to Firebase Storage.
+image_index = 5
+temp_dir = tempfile.gettempdir()
+file_ref = f'data/lab_results/images/{lab_id}/image_data.png'
+file_path = os.path.join(temp_dir, 'image_data.png')
+image_data = parser.get_pdf_image_data(front_page, image_index=image_index)
+save_image_data(image_data, image_file=file_path)
+firebase.upload_file(file_ref, file_path)
+obs['image_data_ref'] = file_ref
+
 
 # Get the text of the first page.
 front_page = report.pages[0]

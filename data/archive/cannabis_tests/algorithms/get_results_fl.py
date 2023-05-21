@@ -28,6 +28,7 @@ Resources:
     - https://www.reddit.com/r/FLMedicalTrees/comments/13jizze/vidacann_finally_put_all_coas_up/
     - https://www.reddit.com/r/FLMedicalTrees/comments/13j1tua/rick_james_coa/
     - https://www.reddit.com/r/FLMedicalTrees/comments/13d7bwb/can_someone_explain_some_terps_to_me/
+    - https://www.reddit.com/r/FLMedicalTrees/comments/11v4pa5/holy_farnesene_batman/
 
 """
 # Standard imports:
@@ -596,4 +597,7 @@ url = 'https://moderncanna.com/coa/GF23007-01.pdf'
 # Lab result analysis.
 #-----------------------------------------------------------------------
 
-# TODO: Heatmap of lab results throughout Florida.
+# TODO: Heatmap of number of lab results throughout Florida by zipcode.
+
+
+# TODO: Heatmap of terpene concentrations throughout Florida by zipcode.

@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/20/2023
-Updated: 5/20/2023
+Updated: 5/21/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -103,18 +103,18 @@ TERPLIFE_LABS = {
     'coa_algorithm_entry_point': 'parse_terplife_coa',
     'lims': 'TerpLife Labs',
     'lab': 'TerpLife Labs',
-    'lab_image_url': '',
-    'lab_address': '',
-    'lab_street': '',
-    'lab_city': '',
-    'lab_county': '',
-    'lab_state': '',
-    'lab_zipcode': '',
-    'lab_phone': '',
-    'lab_email': '',
-    'lab_website': '',
-    'lab_latitude': 0,
-    'lab_longitude': 0,
+    'lab_image_url': 'https://www.terplifelabs.com/wp-content/uploads/2022/03/website-logo.png',
+    'lab_address': '10350 Fisher Ave, Tampa',
+    'lab_street': '10350 Fisher Ave',
+    'lab_city': 'Tampa',
+    'lab_county': 'Hillsborough County',
+    'lab_state': 'FL',
+    'lab_zipcode': '33619',
+    'lab_phone': '813-726-3103',
+    'lab_email': 'info@terplifelabs.com',
+    'lab_website': 'https://www.terplifelabs.com/',
+    'lab_latitude': 27.959174,
+    'lab_longitude': -82.3278,
 }
 
 
@@ -173,3 +173,9 @@ if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
     from dotenv import dotenv_values
+
+    # [ ] TEST: Identify LIMS.
+    parser = CoADoc()
+    doc = ''
+    lims = parser.identify_lims(doc, lims={'TerpLife Labs': TERPLIFE_LABS})
+    assert lims == 'TerpLife Labs'

@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/20/2023
-Updated: 5/20/2023
+Updated: 5/21/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -98,23 +98,23 @@ from cannlytics.utils.utils import (
 )
 
 # It is assumed that the lab has the following details.
-ACS_LABS = {
+MODERNCANNA = {
     'coa_algorithm': 'moderncanna.py',
     'coa_algorithm_entry_point': 'parse_moderncanna_coa',
-    'lims': 'ACS Labs',
-    'lab': 'ACS Labs',
-    'lab_image_url': '',
-    'lab_address': '',
-    'lab_street': '',
-    'lab_city': '',
-    'lab_county': '',
+    'lims': 'Modern Canna Science',
+    'lab': 'Modern Canna Science',
+    'lab_image_url': 'https://moderncanna.com/wp-content/uploads/2019/08/logo2019.png',
+    'lab_address': 'https://moderncanna.com/',
+    'lab_street': '4705 Old Rd 37',
+    'lab_city': 'Lakeland',
+    'lab_county': 'Polk County',
     'lab_state': 'FL',
-    'lab_zipcode': '',
-    'lab_phone': '',
-    'lab_email': '',
-    'lab_website': '',
-    'lab_latitude': 0,
-    'lab_longitude': 0,
+    'lab_zipcode': '33813',
+    'lab_phone': '863-608-7800',
+    'lab_email': 'info@moderncanna.com',
+    'lab_website': 'https://moderncanna.com/',
+    'lab_latitude': 27.980038,
+    'lab_longitude': -81.961967,
 }
 
 
@@ -173,3 +173,18 @@ if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
     from dotenv import dotenv_values
+
+    # [ ] TEST: Identify LIMS.
+    parser = CoADoc()
+    doc = ''
+    lims = parser.identify_lims(doc, lims={'Modern Canna Science': MODERNCANNA})
+    assert lims == 'Modern Canna Science'
+
+
+    # [ ] TEST: Parse a Modern Canna Science COA from a URL.
+    urls = [
+        'https://moderncanna.com/coa/HD10010-01.pdf',
+        'https://moderncanna.com/coa/HD12005-01.pdf',
+        'https://moderncanna.com/coa/HD19005-11.pdf',
+    ]
+
