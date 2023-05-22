@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 5/20/2023
+Updated: 5/22/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -18,6 +18,8 @@ Data Sources:
     - [Florida Labs](https://knowthefactsmmj.com/cmtl/)
     - [Florida Licenses](https://knowthefactsmmj.com/mmtc/)
     - [Kaycha Labs](https://yourcoa.com)
+    - [The Flowery](https://support.theflowery.co)
+    - [TerpLife Labs](https://www.terplifelabs.com)
 
 Resources:
 
@@ -69,122 +71,122 @@ ENV_FILE = '../../../../.env'
 # - Plant 13 Florida, Inc.
 # - House of Platinum Cannabis
 # - Cookies Florida, Inc.
-licenses = {
-    'MMTC-2015-0002': {
-        'business_dba_name': 'Ayr Cannabis Dispensary',
-        'business_legal_name': 'Liberty Health Sciences, FL',
-        'slug': 'Liberty+Health+Sciences%2C+FL',
-        'total': 3924,
-    },
-    'MMTC-2017-0011': {
-        'business_dba_name': 'Cannabist',
-        'slug': 'Cannabist',
-        'total': 3,
-    },
-    'MMTC-2019-0018': {
-        'business_dba_name': 'Cookies Florida, Inc.',
-        'slug': '',
-        'total': 0,
-    },
-    'MMTC-2015-0001': {
-        'business_dba_name': 'Curaleaf',
-        'slug': 'CURALEAF+FLORIDA+LLC',
-        'total': 8905,
-    },
-    'MMTC-2015-0003': {
-        'business_dba_name': 'Fluent ',
-        'slug': 'Fluent',
-        'total': 70,
-    },
-    'MMTC-2019-0019': {
-        'business_dba_name': 'Gold Leaf',
-        'slug': 'Gold+Leaf',
-        'total': 6,
-    },
-    'MMTC-2019-0021': {
-        'business_dba_name': 'Green Dragon',
-        'slug': 'Green+Dragon',
-        'total': 0,
-    },
-    'MMTC-2016-0007': {
-        'business_dba_name': 'GrowHealthy',
-        'slug': 'GrowHealthy',
-        'total': 28,
-    },
-    'MMTC-2017-0013': {
-        'business_dba_name': 'GTI (Rise Dispensaries)',
-        'slug': 'GTI',
-        'total': 0,
-    },
-    'MMTC-2018-0014': {
-        'business_dba_name': 'House of Platinum Cannabis',
-        'slug': '',
-        'total': 0,
-    },
-    'MMTC-2019-0016': {
-        'business_dba_name': 'Insa - Cannabis for Real Life',
-        'slug': 'Insa',
-        'total': 0,
-    },
-    'MMTC-2019-0015': {
-        'business_dba_name': 'Jungle Boys',
-        'slug': 'Jungle+Boys',
-        'total': 2,
-    },
+FLORIDA_LICENSES = {
+    # 'MMTC-2015-0002': {
+    #     'business_dba_name': 'Ayr Cannabis Dispensary',
+    #     'business_legal_name': 'Liberty Health Sciences, FL',
+    #     'slug': 'Liberty+Health+Sciences%2C+FL',
+    #     'total': 3924,
+    # },
+    # 'MMTC-2017-0011': {
+    #     'business_dba_name': 'Cannabist',
+    #     'slug': 'Cannabist',
+    #     'total': 3,
+    # },
+    # 'MMTC-2019-0018': {
+    #     'business_dba_name': 'Cookies Florida, Inc.',
+    #     'slug': '',
+    #     'total': 0,
+    # },
+    # 'MMTC-2015-0001': {
+    #     'business_dba_name': 'Curaleaf',
+    #     'slug': 'CURALEAF+FLORIDA+LLC',
+    #     'total': 8905,
+    # },
+    # 'MMTC-2015-0003': {
+    #     'business_dba_name': 'Fluent ',
+    #     'slug': 'Fluent',
+    #     'total': 70,
+    # },
+    # 'MMTC-2019-0019': {
+    #     'business_dba_name': 'Gold Leaf',
+    #     'slug': 'Gold+Leaf',
+    #     'total': 6,
+    # },
+    # 'MMTC-2019-0021': {
+    #     'business_dba_name': 'Green Dragon',
+    #     'slug': 'Green+Dragon',
+    #     'total': 0,
+    # },
+    # 'MMTC-2016-0007': {
+    #     'business_dba_name': 'GrowHealthy',
+    #     'slug': 'GrowHealthy',
+    #     'total': 28,
+    # },
+    # 'MMTC-2017-0013': {
+    #     'business_dba_name': 'GTI (Rise Dispensaries)',
+    #     'slug': 'GTI',
+    #     'total': 0,
+    # },
+    # 'MMTC-2018-0014': {
+    #     'business_dba_name': 'House of Platinum Cannabis',
+    #     'slug': '',
+    #     'total': 0,
+    # },
+    # 'MMTC-2019-0016': {
+    #     'business_dba_name': 'Insa - Cannabis for Real Life',
+    #     'slug': 'Insa',
+    #     'total': 0,
+    # },
+    # 'MMTC-2019-0015': {
+    #     'business_dba_name': 'Jungle Boys',
+    #     'slug': 'Jungle+Boys',
+    #     'total': 2,
+    # },
     'MMTC-2017-0010': {
         'business_dba_name': 'MüV',
-        'slug': 'Muv',
-        'total': 0,
+        'slug': 'Altmed+Florida',
+        'total': 1633,
     },
-    'MMTC-2016-0006': {
-        'business_dba_name': 'Planet 13 Florida, Inc.',
-        'slug': '',
-        'total': 0,
-    },
-    'MMTC-2019-0022': {
-        'business_dba_name': 'Revolution Florida',
-        'slug': 'Revolution',
-        'total': 0,
-    },
-    'MMTC-2019-0017': {
-        'business_dba_name': 'Sanctuary Cannabis',
-        'slug': 'Sanctuary',
-        'total': 581,
-    },
-    'MMTC-2017-0012': {
-        'business_dba_name': 'Sunburn',
-        'slug': '',
-        'total': 0,
-    },
-    'MMTC-2017-0008': {
-        'business_dba_name': 'Sunnyside*',
-        'slug': 'Sunnyside',
-        'total': 886,
-    },
-    'MMTC-2015-0004': {
-        'business_dba_name': 'Surterra Wellness',
-        'slug': 'Surterra+Wellness',
-        'total': 1,
-    },
-    'MMTC-2019-0020': {
-        'business_dba_name': 'The Flowery',
-        'slug': 'The+Flowery',
-        'total': 0,
-    },
-    'MMTC-2015-0005': {
-        'business_dba_name': 'Trulieve',
-        'slug': 'Trulieve',
-        'total': 0,
-    },
-    'MMTC-2017-0009': {
-        'business_dba_name': 'VidaCann',
-        'slug': 'VidaCann',
-        'total': 4,
-    },
+    # 'MMTC-2016-0006': {
+    #     'business_dba_name': 'Planet 13 Florida, Inc.',
+    #     'slug': '',
+    #     'total': 0,
+    # },
+    # 'MMTC-2019-0022': {
+    #     'business_dba_name': 'Revolution Florida',
+    #     'slug': 'Revolution',
+    #     'total': 0,
+    # },
+    # 'MMTC-2019-0017': {
+    #     'business_dba_name': 'Sanctuary Cannabis',
+    #     'slug': 'Sanctuary',
+    #     'total': 581,
+    # },
+    # 'MMTC-2017-0012': {
+    #     'business_dba_name': 'Sunburn',
+    #     'slug': '',
+    #     'total': 0,
+    # },
+    # 'MMTC-2017-0008': {
+    #     'business_dba_name': 'Sunnyside*',
+    #     'slug': 'Sunnyside',
+    #     'total': 886,
+    # },
+    # 'MMTC-2015-0004': {
+    #     'business_dba_name': 'Surterra Wellness',
+    #     'slug': 'Surterra+Wellness',
+    #     'total': 1,
+    # },
+    # 'MMTC-2019-0020': {
+    #     'business_dba_name': 'The Flowery',
+    #     'slug': 'The+Flowery',
+    #     'total': 0,
+    # },
+    # 'MMTC-2015-0005': {
+    #     'business_dba_name': 'Trulieve',
+    #     'slug': 'Trulieve',
+    #     'total': 0,
+    # },
+    # 'MMTC-2017-0009': {
+    #     'business_dba_name': 'VidaCann',
+    #     'slug': 'VidaCann',
+    #     'total': 4,
+    # },
 }
 
 
-def download_license_coas_kaycha(
+def download_coas_kaycha(
         data_dir: str,
         slug: str,
         dba: Optional[str] = None,
@@ -266,7 +268,7 @@ def download_license_coas_kaycha(
     if not os.path.exists(license_pdf_dir):
         os.makedirs(license_pdf_dir)
 
-    # Download the PDF.
+    # Download the PDFs.
     for _, row in df.iterrows():
         sleep(0.3)
         sample_id = row['lab_id']
@@ -282,34 +284,48 @@ def download_license_coas_kaycha(
     return df
 
 
-def get_results_kaycha(data_dir: str, **kwargs):
-    """Get lab results published by Kaycha Labs on the public web."""
+# def get_results_kaycha(data_dir: str, licenses=None, **kwargs):
+#     """Get lab results published by Kaycha Labs on the public web."""
 
-    # Sort licenses by the number of COAs.
-    licenses = dict(sorted(licenses.items(), key=lambda x: x[1]['total']))
+# DEV:
+data_dir = DATA_DIR
+licenses = FLORIDA_LICENSES
 
-    # Iterate over each producer.
-    coa_urls = []
-    for license_number, licensee in licenses.items():
-        expected_total = licensee['total']
-        if expected_total == 0:
-            continue
-        print('Preparing to download %i+ COAs for %s' % (expected_total, licensee['business_dba_name']))
-        urls = download_license_coas_kaycha(
-            data_dir,
-            slug=licensee['slug'],
-            dba=licensee['business_dba_name'],
-            producer_license_number=license_number,
-        )
-        coa_urls.append(urls)
+# Sort licenses by the number of COAs.
+if licenses is None:
+    licenses = FLORIDA_LICENSES
+licenses = dict(sorted(licenses.items(), key=lambda x: x[1]['total']))
 
-    # Save and return all of the COA URLs.
-    date = datetime.now().isoformat()[:19].replace(':', '-')
-    data = pd.concat(coa_urls)
-    datasets_dir = os.path.join(data_dir, '.datasets')
-    data.to_excel(f'{datasets_dir}/fl-lab-result-urls-{date}.xlsx', index=False)
-    print('Saved %i lab result URLs for Kaycha Labs.' % len(data))
-    return data
+# Iterate over each producer.
+coa_urls = []
+for license_number, licensee in licenses.items():
+    expected_total = licensee['total']
+    if expected_total == 0:
+        continue
+    print('Preparing to download %i+ COAs for %s' % (expected_total, licensee['business_dba_name']))
+    urls = download_coas_kaycha(
+        data_dir,
+        slug=licensee['slug'],
+        dba=licensee['business_dba_name'],
+        producer_license_number=license_number,
+    )
+    coa_urls.append(urls)
+
+# Save and return all of the COA URLs.
+date = datetime.now().isoformat()[:19].replace(':', '-')
+data = pd.concat(coa_urls)
+datasets_dir = os.path.join(data_dir, '.datasets')
+data.to_excel(f'{datasets_dir}/fl-lab-result-urls-{date}.xlsx', index=False)
+print('Saved %i lab result URLs for Kaycha Labs.' % len(data))
+#     return data
+
+
+# # === Test ===
+# if __name__ == '__main__':
+
+#     # [ ] TEST: Get Kaycha COAs.
+#     kaycha_coas = get_results_kaycha(DATA_DIR)
+
 
 
 # TODO: Begin to parse lab results from the PDFs!
@@ -320,6 +336,7 @@ url = 'https://yourcoa.com/coa/coa-download?sample=DA20708002-010'
 url = 'https://yourcoa.com/coa/coa-download?sample=DA30314006-007-mrk'
 url = 'https://www.trulieve.com/files/lab-results/35603_0001748379.pdf'
 # Broken: https://yourcoa.com/company/company?t=Green+Ops+FL+OpCo+LLC
+
 
 #-----------------------------------------------------------------------
 # The Flowery (892+ results).
@@ -401,6 +418,16 @@ def get_results_the_flowery(
         with open(outfile, 'wb') as pdf:
             pdf.write(response.content)
         print('Downloaded: %s' % outfile)
+
+    # Return the COA URLs.
+    return df
+
+
+# # === Test ===
+# if __name__ == '__main__':
+
+#     # [ ] TEST: Get The Flowery COAs.
+#     the_flowery_coas = get_results_the_flowery(DATA_DIR)
 
 
 #-----------------------------------------------------------------------

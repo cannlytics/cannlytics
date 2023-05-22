@@ -45,6 +45,9 @@ class DashboardScreen extends ConsumerWidget {
 
         // Datasets.
         _datasetsCards(context),
+
+        // TODO: Infinitely scrolling logs of activity.
+        // - Show CannBot's activity of data collection.
       ],
     );
   }

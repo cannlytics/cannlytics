@@ -60,20 +60,20 @@ Data Points:
     - total_terpenes
     - sample_id
     - strain_name (augmented)
-    - lab
-    - lab_image_url
-    - lab_license_number
-    - lab_address
-    - lab_street
-    - lab_city
-    - lab_county (augmented)
-    - lab_state
-    - lab_zipcode
-    - lab_phone
-    - lab_email
-    - lab_website
-    - lab_latitude (augmented)
-    - lab_longitude (augmented)
+    ✓ lab
+    ✓ lab_image_url
+    ✓ lab_license_number
+    ✓ lab_address
+    ✓ lab_street
+    ✓ lab_city
+    ✓ lab_county (augmented)
+    ✓ lab_state
+    ✓ lab_zipcode
+    ✓ lab_phone
+    ✓ lab_email
+    ✓ lab_website
+    ✓ lab_latitude (augmented)
+    ✓ lab_longitude (augmented)
 
 """
 # Standard imports.
@@ -104,6 +104,7 @@ ACS_LABS = {
     'lims': 'ACS Labs',
     'url': 'https://portal.acslabcannabis.com',
     'lab': 'ACS Labs',
+    'lab_license_number': 'CMTL-0003',
     'lab_image_url': 'https://global-uploads.webflow.com/630470e960f8722190672cb4/6305a2e849811b34bf18777d_Desktop%20Logo.svg',
     'lab_address': '721 Cortaro Dr, Sun City Center, FL 33573',
     'lab_street': '721 Cortaro Dr',
@@ -181,7 +182,7 @@ if __name__ == '__main__':
 
     # [✓] TEST: Identify LIMS from a COA URL.
     parser = CoADoc()
-    doc = 'D://data/florida/lab_results/.datasets/pdfs/acs/AAEK703_494480004136268_05082023_64595d681311d-COA_EN.pdf'
+    url = 'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQzc0OS0wMTA1MjMtU0dMQzEyLVIzNS0wMjIxMjAyMw=='
     lims = parser.identify_lims(url, lims={'ACS Labs': ACS_LABS})
     assert lims == 'ACS Labs'
 
@@ -218,11 +219,11 @@ if __name__ == '__main__':
         'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzc4M180OTQ0NzAwMDM4NzY5MzZfMDUwOTIwMjNfNjQ1YTUwNWE2OTFmNA==',
         'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFDWjkxNl8xODM2MzAwMDI0NDc4NzlSMl8wNjI3MjAyMl82MmI5Y2E4YTI5YmI3',
         'https://www.trulieve.com/files/lab-results/18362_0003059411.pdf',
+        'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzcwM180OTQ0ODAwMDQxMzYyNjhfMDUwODIwMjNfNjQ1OTVkNjgxMzExZA==',
     ]
 
     # [ ] TEST: Parse a full panel COA from a URL.
     urls = [
-        'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzcwM180OTQ0ODAwMDQxMzYyNjhfMDUwODIwMjNfNjQ1OTVkNjgxMzExZA==',
         'https://www.trulieve.com/files/lab-results/27675_0002407047.pdf',
     ]
 
@@ -232,32 +233,16 @@ if __name__ == '__main__':
 #-----------------------------------------------------------------------
 
 import base64
+import re
+
 import pdfplumber
 from PIL import Image
 import io
 import os
 import tempfile
 from cannlytics import firebase
-
-doc = 'D://data/florida/lab_results/.datasets/pdfs/acs/AAEK703_494480004136268_05082023_64595d681311d-COA_EN.pdf'
-
-# Read the PDF.
-obs = {}
-if isinstance(doc, str):
-    report = pdfplumber.open(doc)
-    obs['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
-else:
-    report = doc
-    obs['coa_pdf'] = report.stream.name.replace('\\', '/').split('/')[-1]
-
-# Get the front page.
-front_page = report.pages[0]
-front_page_text = front_page.extract_text()
-front_page.extract_tables()
-
-# Split the text into lines
-lines = front_page_text.split('\n')
-
+from cannlytics import __version__
+from cannlytics.data.data import create_hash, create_sample_id
 
 
 # TODO: Make this a main function.
@@ -276,11 +261,118 @@ def upload_image_data(storage_ref, image_file):
     firebase.upload_file(storage_ref, image_file)
 
 
-# TODO: Ensure Firebase is initialized.
-firebase.initialize_firebase()
+# DEV: Parse partial COA.
+# doc = 'D://data/florida/lab_results/.datasets/pdfs/acs/AAEK703_494480004136268_05082023_64595d681311d-COA_EN.pdf'
 
-# TODO: Get lab ID.
-lab_id = 'lab-id-here'
+# DEV: Parse full COA.
+doc = 'D://data/florida/lab_results/.datasets/pdfs/acs/full/27675_0002407047.pdf'
+
+# Read the PDF.
+# TODO: Get `coa_urls`
+obs = {}
+if isinstance(doc, str):
+    report = pdfplumber.open(doc)
+    obs['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
+else:
+    report = doc
+    obs['coa_pdf'] = report.stream.name.replace('\\', '/').split('/')[-1]
+
+# Get the front page.
+front_page = report.pages[0]
+text = front_page.extract_text()
+
+# Split the text into lines
+lines = text.split('\n')
+
+fields = {
+    'Batch Date': 'date_packaged',
+    'Completion Date': 'date_tested',
+    'Cultivation Facility': 'producer_address',
+    'Cultivars': 'strain_name',
+    'Initial Gross Weight': 'sample_weight',
+    'Lab Batch Date': 'date_received',
+    'Lot ID': 'area_id',
+    'Net Weight per Unit': 'serving_size',
+    'Number of Units': 'servings_per_package',
+    'Order #': 'lab_id',
+    'Order Date': 'date_received',
+    'Production Date': 'date_harvested',
+    'Production Facility': 'distributor_address',
+    'Sample #': 'sample_id',
+    'Sampling Date': 'date_collected',
+    'Sampling Method': 'method_sampling',
+    'Seed to Sale #': 'traceability_id',
+    'Total Number of Final Products': 'total_products'
+}
+
+# FIXME: Get analysis data.
+# - analyses
+# - {analysis}_method
+# - {analysis}_status
+analyses = []
+analyses = re.findall(r"(Potency|Terpenes|Heavy Metals|Mycotoxins|Pesticides|Residual Solvents|Moisture|Water Activity|Pathogenic Microbiology|Filth and Foreign Total Contaminant|Total Contaminant)\s+(Tested|Not Tested|Passed)", text)
+
+# TODO: Get status.
+# - status
+
+# TODO: Get dates.
+# - date_collected
+# - date_tested
+# - date_received
+date_collected = re.findall(r"Sampling Date:\s+([0-9]{4}-[0-9]{2}-[0-9]{2})", text)[0]
+date_tested = re.findall(r"Lab Batch Date:\s+([0-9]{4}-[0-9]{2}-[0-9]{2})", text)[0]
+date_received = re.findall(r"Order Date:\s+([0-9]{4}-[0-9]{2}-[0-9]{2})", text)[0]
+
+
+# TODO: Get producer data.
+# - producer
+# - producer_address
+# - producer_street
+# - producer_city
+# - producer_state
+# - producer_zipcode
+# - producer_license_number (augment)
+
+# TODO: Get sample data.
+# - lab_id
+# - sample_id
+# - strain_name
+# - product_name
+# - product_type
+# - batch_number
+# - product_size
+# - serving_size
+# - servings_per_package
+# - sample_weight
+# - traceability_id
+# - area_id (Lot ID)
+
+# - metrc_ids
+# - metrc_lab_id
+# - metrc_source_id
+
+
+
+# TODO: Get totals.
+# - total_cannabinoids
+# - total_thc
+# - total_cbd
+# - total_terpenes
+
+# TODO: Get the methods.
+methods = []
+
+# TODO: Get results.
+# - results
+results = []
+
+# TODO: Get cannabinoids.
+
+# TODO: Get heavy metals.
+
+# TODO: Get terpenes.
+
+
 
 # Get the image data (Optional: Also get a URL for the image?).
 image_index = 5
@@ -289,6 +381,7 @@ file_ref = f'data/lab_results/images/{lab_id}/image_data.png'
 file_path = os.path.join(temp_dir, 'image_data.png')
 image_data = parser.get_pdf_image_data(front_page, image_index=image_index)
 save_image_data(image_data, image_file=file_path)
+firebase.initialize_firebase()
 firebase.upload_file(file_ref, file_path)
 obs['image_data_ref'] = file_ref
 
@@ -304,5 +397,33 @@ obs['image_data_ref'] = file_ref
 # image_io = io.BytesIO(image_bytes)
 # image = Image.open(image_io)
 # display(image)
-    
 
+# Get the lab results URL from the QR code.
+obs['lab_results_url'] = parser.find_pdf_qr_code_url(front_page)
+
+# Close the report.
+report.close()
+
+# Turn dates to ISO format.
+date_columns = [x for x in obs.keys() if x.startswith('date')]
+for date_column in date_columns:
+    try:
+        obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+    except:
+        pass
+
+# Finish data collection with a freshly minted sample ID.
+obs = {**ACS_LABS, **obs}
+obs['analyses'] = json.dumps(list(set(analyses)))
+obs['coa_algorithm_version'] = __version__
+obs['coa_parsed_at'] = datetime.now().isoformat()
+obs['methods'] = json.dumps(methods)
+obs['results'] = results
+obs['results_hash'] = create_hash(results)
+obs['sample_id'] = create_sample_id(
+    private_key=json.dumps(results),
+    public_key=obs['product_name'],
+    salt=obs.get('producer', obs.get('date_tested', 'cannlytics.eth')),
+)
+obs['sample_hash'] = create_hash(obs)
+# return obs

@@ -490,6 +490,21 @@ class CoADoc:
         img_str = base64.b64encode(buffered.getvalue())
         return img_str.decode('utf-8')
 
+    def save_image_data(
+            self,
+            image_data: str,
+            image_file: Optional[str] ='image.png',
+        ):
+        """Save image data to a file.
+        Args:
+            image_data (str): The image data.
+            image_file (str): A filename for the image.
+        """
+        image_bytes = base64.b64decode(image_data)
+        image_io = BytesIO(image_bytes)
+        image = Image.open(image_io)
+        image.save(image_file)
+
     def identify_lims(
             self,
             doc: Any,

@@ -28,8 +28,8 @@ Data Points:
     - distributor_state
     - distributor_zipcode
     - distributor_license_number
-    - images
-    - lab_results_url
+    ✓ images
+    ✓ lab_results_url
     - producer
     - producer_address
     - producer_street
@@ -59,21 +59,21 @@ Data Points:
     - total_cbdv
     - total_terpenes
     - sample_id
-    - strain_name (augmented)
-    - lab
-    - lab_image_url
+    - strain_name
+    ✓ lab
+    ✓ lab_image_url
     - lab_license_number
-    - lab_address
-    - lab_street
-    - lab_city
-    - lab_county (augmented)
-    - lab_state
-    - lab_zipcode
-    - lab_phone
-    - lab_email
-    - lab_website
-    - lab_latitude (augmented)
-    - lab_longitude (augmented)
+    ✓ lab_address
+    ✓ lab_street
+    ✓ lab_city
+    ✓ lab_county (augmented)
+    ✓ lab_state
+    ✓ lab_zipcode
+    ✓ lab_phone
+    ✓ lab_email
+    ✓ lab_website
+    ✓ lab_latitude (augmented)
+    ✓ lab_longitude (augmented)
 
 """
 # Standard imports.
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     from dotenv import dotenv_values
 
     # Set a Google Maps API key.
-    # config = dotenv_values('../../../.env')
+    config = dotenv_values('../../../../.env')
     # os.environ['GOOGLE_MAPS_API_KEY'] = config['GOOGLE_MAPS_API_KEY']
 
     # [✓] TEST: Identify LIMS.
@@ -185,27 +185,47 @@ if __name__ == '__main__':
     assert lims == 'Kaycha Labs'
 
     # [ ] TEST: Parse Kaycha Labs COAs from URL.
-    url = 'https://tn.yourcoa.com/api/coa-download?sample=KN20119003-002&wl_id=291'
+    urls = [
+        'https://tn.yourcoa.com/api/coa-download?sample=KN20119003-002&wl_id=291',
+    ]
 
+    # [ ] TEST: Parse a full panel COA from a URL.
+    urls = [
+        'https://getfluent.com/wp-content/uploads/2023/03/DA30318004-001-Original.pdf',
+    ]
 
-    # [ ] TEST: Parse a cannabinoid and terpene only COA.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/MMTC-2019-0015/GA11104001-001.pdf'
+    # [ ] TEST: Parse a cannabinoid and terpene only COA PDF.
+    doc = 'D://data/florida/lab_results/.datasets/pdfs/MMTC-2019-0015/GA11104001-001.pdf'
 
+    # [ ] TEST: Parse a non-mandatory COA PDF.
+    doc = 'D://data/florida/lab_results/.datasets/pdfs/MMTC-2019-0015/GA11104001-001.pdf'
 
-    # [ ] TEST: Parse a full panel COA.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/MMTC-2019-0020/7240484786331-King_Louis_OG_Persy_Rosin.pdf'
+    # [ ] TEST: Parse a full panel COA PDF.
+    doc = 'D://data/florida/lab_results/.datasets/pdfs/MMTC-2019-0020/7240484786331-King_Louis_OG_Persy_Rosin.pdf'
 
 
 # === DEV ===
 
+import base64
+import pdfplumber
+from PIL import Image
+import json
+import io
+import os
+import tempfile
+from cannlytics import firebase
+from cannlytics import __version__
+from cannlytics.data.data import create_hash, create_sample_id
+
+# COA specific fields.
 fields = {
-    'Matrix': '',
+    'Matrix': 'product_type',
     'Sample': '',
     'Harvest/Lot ID': '',
     'Batch#': '',
     'Cultivation Facility': '',
     'Processing Facility': '',
-    'Seed to Sale#': '',
+    'Seed to Sale#': 'traceability_id',
     'Batch Date': '',
     'Sample Size Received': '',
     'Total Batch Size': '',
@@ -213,72 +233,137 @@ fields = {
     'Ordered': '',
     'Sampled': '',
     'Completed': '',
-    'Sampling Method': '',
+    'Sampling Method': 'method_sampling',
 }
 
 # Read the PDF.
-report = pdfplumber.open(doc)
-
-import base64
-import pdfplumber
-from PIL import Image
-import io
-import os
-import tempfile
-from cannlytics import firebase
-
-# TODO: Make this a main function.
-def save_image_data(image_data, image_file='image.png'):
-    """Save image data to a file."""
-    image_bytes = base64.b64decode(image_data)
-    image_io = io.BytesIO(image_bytes)
-    image = Image.open(image_io)
-    image.save(image_file)
-
-
-# for i, image in enumerate(front_page.images):
-# image_data = parser.get_pdf_image_data(front_page, image_index=5)
-# image_bytes = base64.b64decode(image_data)
-# image_io = io.BytesIO(image_bytes)
-# image = Image.open(image_io)
-# display(image)
-
-
-# TODO: Save the image to Firebase Storage.
-image_index = 5
-temp_dir = tempfile.gettempdir()
-file_ref = f'data/lab_results/images/{lab_id}/image_data.png'
-file_path = os.path.join(temp_dir, 'image_data.png')
-image_data = parser.get_pdf_image_data(front_page, image_index=image_index)
-save_image_data(image_data, image_file=file_path)
-firebase.upload_file(file_ref, file_path)
-obs['image_data_ref'] = file_ref
-
+# TODO: Get `coa_urls`
+obs = {}
+if isinstance(doc, str):
+    report = pdfplumber.open(doc)
+    obs['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
+else:
+    report = doc
+    obs['coa_pdf'] = report.stream.name.replace('\\', '/').split('/')[-1]
 
 # Get the text of the first page.
 front_page = report.pages[0]
 text = front_page.extract_text()
 lines = text.split('\n')
 
+# Get lab details.
+parts = lines[5].split(',')
+city, state, zipcode = [x.strip() for x in parts[:3]]
+obs['lab_street'] = lines[4].title()
+obs['lab_city'] = city.title()
+obs['lab_state'] = state
+obs['lab_zipcode'] = zipcode
+
+# TODO: Get analysis data.
+# - analyses
+# - {analysis}_method
+# - {analysis}_status
+analyses = ['Pesticides', 'Heavy Metals', 'Microbials', 'Mycotoxins', 'Residuals Solvents', 'Filth', 'Water Activity', 'Moisture', 'Terpenes', 'Cannabinoid']
+
+
+# TODO: Get dates.
+# - date_collected
+# - date_tested
+# - date_received
+
+
+# TODO: Get producer data.
+# - producer
+# - producer_address
+# - producer_street
+# - producer_city
+# - producer_state
+# - producer_zipcode
+# - producer_license_number
+
+
+# TODO: Get sample data.
 product_name = lines[1]
 strain_name = lines[2]
 product_type = lines[3].split(':')[-1].strip()
-lab_street = lines[4].title()
-parts = lines[5].split(',')
-city, state, zipcode = [x.strip() for x in parts[:3]]
-city = city.title()
-
 lab_id = lines[6].split(':')[-1].strip()
+# ✓ lab_id
+# - sample_id
+# ✓ strain_name
+# ✓ product_name
+# ✓ product_type
+# - batch_number
+# - metrc_ids
+# - metrc_lab_id
+# - metrc_source_id
+# - product_size
+# - serving_size
+# - servings_per_package
+# - sample_weight
 
-import json
 
-# Certificate text
-text = """
-[Your Certificate Data Here]
-"""
+# TODO: Get status.
+# - status
 
-# Split the text into lines
-lines = text.split('\n')
 
-# Extract necessary data
-analyses = ['Pesticides', 'Heavy Metals', 'Microbials', 'Mycotoxins', 'Residuals Solvents', 'Filth', 'Water Activity', 'Moisture', 'Terpenes', 'Cannabinoid']
+# TODO: Get totals.
+# - total_cannabinoids
+# - total_thc
+# - total_cbd
+# - total_terpenes
+
+
+# TODO: Get the methods.
+methods = []
+
+
+# TODO: Get results.
+# - results
+results = []
+
+
+# Save the image data to Firebase Storage.
+image_index = 5
+try:
+    temp_dir = tempfile.gettempdir()
+    file_ref = f'data/lab_results/images/{lab_id}/image_data.png'
+    file_path = os.path.join(temp_dir, 'image_data.png')
+    image_data = parser.get_pdf_image_data(front_page, image_index=image_index)
+    parser.save_image_data(image_data, image_file=file_path)
+    bucket_name = config['FIREBASE_STORAGE_BUCKET']
+    firebase.upload_file(file_ref, file_path, bucket_name=bucket_name)
+    download_url = firebase.get_file_url(file_ref, bucket_name=bucket_name)
+    obs['images'] = [{'ref': file_ref, 'url': download_url, 'filename': 'image_data.png'}]
+except:
+    print('Failed to get image data.')
+    obs['images'] = []
+
+# Get the lab results URL from the QR code.
+obs['lab_results_url'] = parser.find_pdf_qr_code_url(front_page)
+
+# Close the report.
+report.close()
+
+# Turn dates to ISO format.
+date_columns = [x for x in obs.keys() if x.startswith('date')]
+for date_column in date_columns:
+    try:
+        obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+    except:
+        pass
+
+# Finish data collection with a freshly minted sample ID.
+obs = {**KAYCHA_LABS, **obs}
+obs['analyses'] = json.dumps(list(set(analyses)))
+obs['coa_algorithm_version'] = __version__
+obs['coa_parsed_at'] = datetime.now().isoformat()
+obs['methods'] = json.dumps(methods)
+obs['results'] = results
+obs['results_hash'] = create_hash(results)
+obs['sample_id'] = create_sample_id(
+    private_key=json.dumps(results),
+    public_key=obs['product_name'],
+    salt=obs.get('producer', obs.get('date_tested', 'cannlytics.eth')),
+)
+obs['sample_hash'] = create_hash(obs)
+# return obs

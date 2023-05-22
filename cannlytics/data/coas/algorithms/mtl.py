@@ -192,4 +192,8 @@ if __name__ == '__main__':
         'http://mete.labdrive.net/s/KmXMdYTFR3dsceG',
         'http://mete.labdrive.net/s/KmXMdYTFR3dsceG/download/COA_2305CBR0001-004.pdf',
         'https://mete.labdrive.net/s/se8BcYZJAMqaYrE',
+        'https://coaportal.com/sunburn/report/?search=0524324712189959',
+        'https://coaportal.com/sunburn/report/?search=9586770498778201',
+        'https://coaportal.com/sunburn/report/?search=8315430847060831',
+        'https://coaportal.com/sunburn/report/?search=Sunburn-3807806169682269-2303CTB0044-003',
     ]

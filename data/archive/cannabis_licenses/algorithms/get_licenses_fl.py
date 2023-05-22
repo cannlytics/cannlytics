@@ -122,7 +122,7 @@ def get_labs_fl(
             address_field='address',
         )
         df.rename(columns={
-            'county': 'premise_county',
+            # 'county': 'premise_county',
             'latitude': 'premise_latitude',
             'longitude': 'premise_longitude'
         }, inplace=True)
