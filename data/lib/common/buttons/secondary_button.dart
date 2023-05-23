@@ -25,6 +25,7 @@ class SecondaryButton extends StatelessWidget {
     this.isDark = false,
     this.isLoading = false,
     this.onPressed,
+    this.leading,
   });
 
   // Properties.
@@ -32,6 +33,7 @@ class SecondaryButton extends StatelessWidget {
   final String text;
   final bool isLoading;
   final VoidCallback? onPressed;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
@@ -56,13 +58,26 @@ class SecondaryButton extends StatelessWidget {
               height: 16,
               child: CircularProgressIndicator(strokeWidth: 1.42),
             )
-          : Text(
-              text,
-              style: Theme.of(context).textTheme.titleMedium,
-              // !.copyWith(
-              //       color: isDark ? DarkColors.text : LightColors.text,
-              //     ),
-            ),
+          : (leading != null)
+              ? Row(
+                  children: [
+                    leading!,
+                    Text(
+                      text,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      // !.copyWith(
+                      //       color: isDark ? DarkColors.text : LightColors.text,
+                      //     ),
+                    ),
+                  ],
+                )
+              : Text(
+                  text,
+                  style: Theme.of(context).textTheme.titleMedium,
+                  // !.copyWith(
+                  //       color: isDark ? DarkColors.text : LightColors.text,
+                  //     ),
+                ),
     );
   }
 }

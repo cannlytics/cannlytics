@@ -51,7 +51,7 @@ class ConsoleScreen extends StatelessWidget {
       ]),
 
       // Navigation.
-      bottomNavigationBar: bottomSearch ? HoverSearchBar() : null,
+      // bottomNavigationBar: bottomSearch ? HoverSearchBar() : null,
     );
   }
 }

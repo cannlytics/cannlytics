@@ -19,7 +19,7 @@ Data Source:
 
 Command-line Usage:
 
-    python tools/upload_licenses.py all
+    python data/archive/upload_licenses.py all
 
 """
 # Standard imports:

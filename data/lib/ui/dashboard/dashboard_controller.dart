@@ -11,6 +11,7 @@
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -188,6 +189,122 @@ class MenuAppController extends ChangeNotifier {
     }
   }
 }
+
+/* Search */
+
+// final firebaseIdeaProvider = StreamProvider.autoDispose<List<Idea>>((ref) {
+//   final stream = FirebaseFirestore.instance.collection('ideas').snapshots();
+//   return stream.map((snapshot) => snapshot.docs.map((doc) => Idea.fromJson(doc.data())).toList());
+// });
+
+// Search term.
+final resultsSearchTermProvider = StateProvider<String>((ref) => '');
+
+// FIXME:
+// class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
+//   Future<List<Todo>> _fetchTodo() async {
+//     final json = await http.get('api/todos');
+//     final todos = jsonDecode(json) as List<Map<String, dynamic>>;
+//     return todos.map(Todo.fromJson).toList();
+//   }
+
+//   @override
+//   Future<List<Todo>> build() async {
+//     // Load initial todo list from the remote repository
+//     return _fetchTodo();
+//   }
+
+//   Future<void> addTodo(Todo todo) async {
+//     // Set the state to loading
+//     state = const AsyncValue.loading();
+//     // Add the new todo and reload the todo list from the remote repository
+//     state = await AsyncValue.guard(() async {
+//       await http.post('api/todos', todo.toJson());
+//       return _fetchTodo();
+//     });
+//   }
+
+//   // Let's allow removing todos
+//   Future<void> removeTodo(String todoId) async {
+//     state = const AsyncValue.loading();
+//     state = await AsyncValue.guard(() async {
+//       await http.delete('api/todos/$todoId');
+//       return _fetchTodo();
+//     });
+//   }
+
+//   // Let's mark a todo as completed
+//   Future<void> toggle(String todoId) async {
+//     state = const AsyncValue.loading();
+//     state = await AsyncValue.guard(() async {
+//       await http.patch(
+//         'api/todos/$todoId',
+//         <String, dynamic>{'completed': true},
+//       );
+//       return _fetchTodo();
+//     });
+//   }
+// }
+
+// // Finally, we are using NotifierProvider to allow the UI to interact with
+// // our TodosNotifier class.
+// final asyncTodosProvider =
+//     AsyncNotifierProvider<AsyncTodosNotifier, List<Todo>>(() {
+//   return AsyncTodosNotifier();
+// });
+
+// // Search input.
+// final resultsSearchController =
+//     AsyncNotifierProvider<StringController, TextEditingController>(
+//         (ref) => StringController());
+
+// /// Search results.
+// final resultsSearchProvider = AsyncNotifierProvider.autoDispose<
+//     ResultsSearchNotifier, AsyncValue<List<Map<String, dynamic>>>>(
+//   (ref) {
+//     // Listen to search term and read the data.
+//     final searchTerm = ref.watch(resultsSearchTermProvider);
+//     return ResultsSearchNotifier(ref, searchTerm);
+//   },
+// );
+
+// /// Filtered licensees.
+// class ResultsSearchNotifier
+//     extends AsyncNotifier<AsyncValue<List<Map<String, dynamic>>>> {
+//   // Properties.
+//   final StateNotifierProviderRef<dynamic, dynamic> ref;
+//   final String searchTerm;
+
+//   // Initialization.
+//   ResultsSearchNotifier(
+//     this.ref,
+//     this.searchTerm,
+//   )
+//   // : super(const AsyncLoading()) {
+//   //   if (searchTerm.isEmpty) {
+//   //     state = AsyncValue.data([]);
+//   //     return;
+//   //   }
+//   //   String keyword = searchTerm.toLowerCase();
+//   //   // FIXME: Fix search logic.
+//   //   // List<Map<String, dynamic>> matched = [];
+//   //   // items.forEach((x) {
+//   //   //   // Matching logic.
+//   //   //   if (x['business_legal_name'].toLowerCase().contains(keyword) ||
+//   //   //       x['license_number'].toLowerCase().contains(keyword)) {
+//   //   //     matched.add(x);
+//   //   //   }
+//   //   // });
+//   //   final _dataSource = ref.read(firestoreProvider);
+//   //   // FIXME:
+//   //   var items = await _dataSource.getCollection(
+//   //     path: 'data/lab_results',
+//   //     // builder: (data, documentId) => License.fromMap(data!),
+//   //     builder: (data, documentId) => data!,
+//   //   );
+//   //   state = AsyncValue.data(items);
+//   // }
+// }
 
 /* Sign in / sign up */
 

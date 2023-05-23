@@ -307,6 +307,10 @@ lab_id = lines[6].split(':')[-1].strip()
 
 
 # TODO: Get totals.
+for n, line in enumerate(lines):
+    if 'Total THC' in line:
+        values = lines[n + 1].replace('%', '').split(' ')
+        break
 # - total_cannabinoids
 # - total_thc
 # - total_cbd
@@ -320,6 +324,14 @@ methods = []
 # TODO: Get results.
 # - results
 results = []
+
+# TODO: Get cannabinoids.
+
+
+# TODO: Get terpenes.
+
+
+# TODO: Get 
 
 
 # Save the image data to Firebase Storage.
