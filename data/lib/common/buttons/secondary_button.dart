@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/design.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -62,6 +63,7 @@ class SecondaryButton extends StatelessWidget {
               ? Row(
                   children: [
                     leading!,
+                    gapW8,
                     Text(
                       text,
                       style: Theme.of(context).textTheme.titleMedium,

@@ -36,12 +36,8 @@ class DashboardScreen extends ConsumerWidget {
         // Call for contributions.
         _contributions(context),
 
-        // TODO: Quick actions
-        // - Search for a lab result / strain / company
+        // Quick search.
         _search(context),
-        // SliverToBoxAdapter(child: ResultsSearch(key: Key('results-search'))),
-        // - Archive a COA
-        // - Archive a receipt
 
         // AI tools.
         _aiCards(context),
@@ -61,7 +57,7 @@ class DashboardScreen extends ConsumerWidget {
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.symmetric(
-          vertical: 18,
+          vertical: 36,
           horizontal: sliverHorizontalPadding(screenWidth) / 2,
         ),
         child: Column(
@@ -81,7 +77,7 @@ class DashboardScreen extends ConsumerWidget {
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.symmetric(
-          vertical: 18,
+          vertical: 36,
           horizontal: sliverHorizontalPadding(screenWidth) / 2,
         ),
         child: Column(children: [
@@ -89,7 +85,7 @@ class DashboardScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // Title.
-              Text('Cannabis Lab Results',
+              Text('Lab Results',
                   style: Theme.of(context).textTheme.labelLarge!.copyWith(
                       color: Theme.of(context).textTheme.titleLarge!.color)),
             ],
@@ -109,7 +105,7 @@ class DashboardScreen extends ConsumerWidget {
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.symmetric(
-          vertical: 18,
+          vertical: 36,
           horizontal: sliverHorizontalPadding(screenWidth) / 2,
         ),
         child: Column(children: [
@@ -146,7 +142,7 @@ class DashboardScreen extends ConsumerWidget {
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.symmetric(
-          vertical: 18,
+          vertical: 36,
           horizontal: sliverHorizontalPadding(screenWidth) / 2,
         ),
         child: Column(children: [
@@ -183,6 +179,7 @@ class DashboardScreen extends ConsumerWidget {
 }
 
 /// Results search.
+/// - Search for a lab result / strain / company, etc.
 class ResultsSearch extends StatefulWidget {
   ResultsSearch({required Key key}) : super(key: key);
 
@@ -241,6 +238,7 @@ class _ResultsSearchState extends State<ResultsSearch> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Card(
       margin: EdgeInsets.zero,
       elevation: 2,
@@ -249,50 +247,96 @@ class _ResultsSearchState extends State<ResultsSearch> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title
+          gapH16,
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: screenWidth < Breakpoints.tablet
+                  ? CrossAxisAlignment.center
+                  : CrossAxisAlignment.end,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Search',
-                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                          color: Theme.of(context).textTheme.titleLarge!.color),
-                    ),
-                    Text(
-                      'You can enter a product name, ID, or generally query for lab results.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
+                Container(
+                  width: screenWidth < Breakpoints.tablet ? null : 420,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Search',
+                        style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            color:
+                                Theme.of(context).textTheme.titleLarge!.color),
+                      ),
+                      if (screenWidth >= Breakpoints.tablet)
+                        Text(
+                          'You can enter a product name, ID, or generally query for lab results.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                    ],
+                  ),
                 ),
+                if (screenWidth < Breakpoints.tablet) gapW4,
+                if (screenWidth < Breakpoints.tablet)
+                  Tooltip(
+                    message:
+                        'You can enter a product name, ID, or generally query for lab results.',
+                    child: Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
+                  ),
                 Spacer(),
                 SecondaryButton(
-                  leading: Icon(Icons.qr_code),
+                  leading: Icon(
+                    Icons.qr_code,
+                    size: 16,
+                    color: Theme.of(context).textTheme.titleLarge!.color,
+                  ),
                   text: 'Scan',
-                  onPressed: () {},
+                  onPressed: () {
+                    // TODO: Implement.
+                  },
                 ),
                 gapW8,
                 SecondaryButton(
+                  leading: Icon(
+                    Icons.cloud_upload,
+                    size: 16,
+                    color: Theme.of(context).textTheme.titleLarge!.color,
+                  ),
                   text: 'Upload',
-                  onPressed: () {},
+                  onPressed: () {
+                    // TODO: Implement.
+                  },
                 ),
               ],
             ),
           ),
-          gapH8,
 
           // Text field.
+          gapH8,
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextField(
               controller: _searchController,
               autocorrect: false,
               decoration: InputDecoration(
                 labelText: 'Search',
-                suffixIcon: Icon(Icons.search),
+                labelStyle: TextStyle(
+                  color: Theme.of(context).textTheme.labelMedium!.color,
+                ),
+                suffixIcon: InkWell(
+                  onTap: () {
+                    // Perform action when the suffix icon is clicked
+                    print('Suffix icon clicked');
+                  },
+                  child: Icon(
+                    Icons.send,
+                    color: Theme.of(context).textTheme.labelMedium!.color,
+                  ),
+                ),
                 contentPadding: EdgeInsets.only(
                   top: 18,
                   left: 8,
@@ -301,27 +345,6 @@ class _ResultsSearchState extends State<ResultsSearch> {
                 ),
               ),
             ),
-            // child: TextFormField(
-            //   key: Key('results-search'),
-            //   controller: _searchController,
-            //   style: Theme.of(context).textTheme.titleMedium,
-            //   decoration: InputDecoration(
-            //     labelText: 'Search',
-            //     suffixIcon: Icon(Icons.search),
-            //     floatingLabelBehavior: FloatingLabelBehavior.auto,
-            //     contentPadding: EdgeInsets.only(
-            //       top: 18,
-            //       left: 8,
-            //       right: 8,
-            //       bottom: 8,
-            //     ),
-            //   ),
-            //   autocorrect: false,
-            //   textInputAction: TextInputAction.next,
-            //   keyboardType: TextInputType.emailAddress,
-            //   keyboardAppearance: Brightness.light,
-            //   autovalidateMode: AutovalidateMode.onUserInteraction,
-            // ),
           ),
 
           // TODO: Search button.
@@ -341,6 +364,58 @@ class _ResultsSearchState extends State<ResultsSearch> {
           //     );
           //   },
           // ),
+          // TODO: Open lab results COA.
+          // TODO: Download COA.
+          // TODO: Open lab's website.
+          gapH16,
+        ],
+      ),
+    );
+  }
+}
+
+class LabResultItem extends StatelessWidget {
+  final Map labResult;
+
+  LabResultItem({required this.labResult});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.all(10.0),
+      padding: EdgeInsets.all(10.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            labResult['product_name'],
+            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            'Producer: ${labResult['business_dba_name']}',
+            style: TextStyle(fontSize: 16.0),
+          ),
+          // Text(
+          //   'Status: ${labResult['status']}',
+          //   style: TextStyle(fontSize: 16.0),
+          // ),
+          // Text(
+          //   'Total Cannabinoids: ${labResult['total_cannabinoids']}',
+          //   style: TextStyle(fontSize: 16.0),
+          // ),
+          // Add more fields as needed
         ],
       ),
     );

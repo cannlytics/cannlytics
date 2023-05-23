@@ -306,6 +306,12 @@ final resultsSearchTermProvider = StateProvider<String>((ref) => '');
 //   // }
 // }
 
+// TODO: Implement search functionality.
+// First search each for an exact match. Then search for a partial match.
+// - lab_id
+// - batch_number
+// - product_name
+
 /* Sign in / sign up */
 
 // Email text field.

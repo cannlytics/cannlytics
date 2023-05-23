@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 5/20/2023
+Updated: 5/23/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -28,25 +28,15 @@ Resources:
 # Standard imports:
 from datetime import datetime
 import os
-from time import sleep
 from typing import Optional
 
 # External imports:
 from bs4 import BeautifulSoup
-from cannlytics.utils.constants import DEFAULT_HEADERS
 from cannlytics.data.gis import geocode_addresses
 from dotenv import dotenv_values
 import pandas as pd
 import requests
 
-# Selenium imports.
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.ui import Select
 
 # Specify where your data lives.
 DATA_DIR = '../data/fl'

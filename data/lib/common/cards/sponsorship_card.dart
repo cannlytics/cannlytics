@@ -128,7 +128,7 @@ class SponsorshipCard extends StatelessWidget {
             // Tiers.
             gapH18,
             Text(
-              'Donate now',
+              'Contribute:',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             gapH8,
@@ -160,49 +160,50 @@ class SponsorshipCard extends StatelessWidget {
                           'https://opencollective.com/cannlytics-company/donate');
                     },
                   ),
+                  gapW8,
+                  _shareLink(context),
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
 
-            // Link.
-            gapH4,
-            InkWell(
-              onTap: () async {
-                String url =
-                    'https://opencollective.com/cannlytics-company/donate';
-                await Clipboard.setData(ClipboardData(text: url));
-                Fluttertoast.showToast(
-                  msg: 'Copied link!',
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.TOP,
-                  timeInSecForIosWeb: 2,
-                  backgroundColor: Theme.of(context).dialogBackgroundColor,
-                  textColor: Theme.of(context).textTheme.titleLarge!.color,
-                  fontSize: 16.0,
-                  webBgColor: WebUtils.colorToHexCode(
-                      Theme.of(context).dialogBackgroundColor),
-                  webPosition: 'center',
-                  webShowClose: true,
-                );
-              },
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Icon(Icons.link, size: 12, color: Colors.green),
-                    SizedBox(width: 4),
-                    Text(
-                      'Copy link',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
-                      ),
-                    ),
-                  ],
-                ),
+  Widget _shareLink(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        String url = 'https://opencollective.com/cannlytics-company/donate';
+        await Clipboard.setData(ClipboardData(text: url));
+        Fluttertoast.showToast(
+          msg: 'Copied link!',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Theme.of(context).dialogBackgroundColor,
+          textColor: Theme.of(context).textTheme.titleLarge!.color,
+          fontSize: 16.0,
+          webBgColor:
+              WebUtils.colorToHexCode(Theme.of(context).dialogBackgroundColor),
+          webPosition: 'center',
+          webShowClose: true,
+        );
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Icon(Icons.link, size: 12, color: Colors.green),
+            SizedBox(width: 4),
+            Text(
+              'Share',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
               ),
             ),
           ],
