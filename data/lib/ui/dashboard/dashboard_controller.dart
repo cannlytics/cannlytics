@@ -11,6 +11,7 @@
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:flutter/material.dart';
 
@@ -200,6 +201,52 @@ class MenuAppController extends ChangeNotifier {
 // Search term.
 final resultsSearchTermProvider = StateProvider<String>((ref) => '');
 
+final productControllerProvider = ChangeNotifierProvider<ProductListController>(
+  (ref) => ProductListController(),
+);
+
+// final _products = StateProvider<List<LabResult>>((ref) => <LabResult>[]);
+
+class ProductListController extends ChangeNotifier {
+  ProductListController([List<LabResult>? state]) : super();
+
+  // List<LabResult> get products => _products;
+  List<LabResult> get products => [];
+
+  List<LabResult> getByCatName(String catName) {
+    // List<LabRes
+    return [];
+  }
+
+  List<LabResult> getByBrandName(String brandName) {
+    // List<LabResult> brandList = _products
+    //     .where((e) => e.brand.toLowerCase() == brandName.toLowerCase())
+    //     .toList();
+    // return brandList;
+    return [];
+  }
+
+  List<LabResult> get popularProducts {
+    // return _products.where((e) => e.isPopular).toList();
+    return [];
+  }
+
+  LabResult getById(String prodId) {
+    // return _products.firstWhere((e) => e.id == prodId);
+    return LabResult();
+  }
+
+  List<LabResult> getBySearch(String query) {
+    final RegExp regex = RegExp(query, caseSensitive: false);
+    // FIXME:
+    var _products = <LabResult>[];
+    List<LabResult> prodSearchResult =
+        _products.where((e) => e.labId!.contains(regex)).toList();
+    notifyListeners();
+    return prodSearchResult;
+  }
+}
+
 // FIXME:
 // class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
 //   Future<List<Todo>> _fetchTodo() async {
@@ -253,10 +300,10 @@ final resultsSearchTermProvider = StateProvider<String>((ref) => '');
 //   return AsyncTodosNotifier();
 // });
 
-// // Search input.
-// final resultsSearchController =
-//     AsyncNotifierProvider<StringController, TextEditingController>(
-//         (ref) => StringController());
+// Search input.
+final resultsSearchController =
+    StateNotifierProvider<StringController, TextEditingController>(
+        (ref) => StringController());
 
 // /// Search results.
 // final resultsSearchProvider = AsyncNotifierProvider.autoDispose<

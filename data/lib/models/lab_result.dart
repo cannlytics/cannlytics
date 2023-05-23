@@ -4,13 +4,122 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 5/14/2023
+// Updated: 5/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-typedef LabResultId = String;
+typedef LabTestResultId = String;
 typedef LabTestId = String;
 
-/// Model representing a lab test.
+/// A general lab result class.
+class LabResult {
+  // Initialization.
+  const LabResult({
+    this.labId,
+    this.batchNumber,
+    this.productName,
+    this.downloadUrl,
+    this.businessDbaName,
+    this.producerLicenseNumber,
+    this.lims,
+    this.lab,
+    this.labImageUrl,
+    this.labAddress,
+    this.labStreet,
+    this.labCity,
+    this.labCounty,
+    this.labState,
+    this.labZipcode,
+    this.labPhone,
+    this.labEmail,
+    this.labWebsite,
+    this.labLatitude,
+    this.labLongitude,
+    this.licensingAuthorityId,
+    this.licensingAuthority,
+  });
+
+  // Properties.
+  final String? labId;
+  final String? batchNumber;
+  final String? productName;
+  final String? downloadUrl;
+  final String? businessDbaName;
+  final String? producerLicenseNumber;
+  final String? lims;
+  final String? lab;
+  final String? labImageUrl;
+  final String? labAddress;
+  final String? labStreet;
+  final String? labCity;
+  final String? labCounty;
+  final String? labState;
+  final String? labZipcode;
+  final String? labPhone;
+  final String? labEmail;
+  final String? labWebsite;
+  final double? labLatitude;
+  final double? labLongitude;
+  final String? licensingAuthorityId;
+  final String? licensingAuthority;
+
+  // Create model.
+  factory LabResult.fromMap(Map<String, dynamic> data) {
+    return LabResult(
+      labId: data['lab_id'] ?? '',
+      batchNumber: data['batch_number'] ?? '',
+      productName: data['product_name'] ?? '',
+      downloadUrl: data['download_url'] ?? '',
+      businessDbaName: data['business_dba_name'] ?? '',
+      producerLicenseNumber: data['producer_license_number'] ?? '',
+      lims: data['lims'] ?? '',
+      lab: data['lab'] ?? '',
+      labImageUrl: data['lab_image_url'] ?? '',
+      labAddress: data['lab_address'] ?? '',
+      labStreet: data['lab_street'] ?? '',
+      labCity: data['lab_city'] ?? '',
+      labCounty: data['lab_county'] ?? '',
+      labState: data['lab_state'] ?? '',
+      labZipcode: data['lab_zipcode'] ?? '',
+      labPhone: data['lab_phone'] ?? '',
+      labEmail: data['lab_email'] ?? '',
+      labWebsite: data['lab_website'] ?? '',
+      labLatitude: data['lab_latitude']?.toDouble() ?? 0.0,
+      labLongitude: data['lab_longitude']?.toDouble() ?? 0.0,
+      licensingAuthorityId: data['licensing_authority_id'] ?? '',
+      licensingAuthority: data['licensing_authority'] ?? '',
+    );
+  }
+
+  // Create JSON.
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'lab_id': labId,
+      'batch_number': batchNumber,
+      'product_name': productName,
+      'download_url': downloadUrl,
+      'business_dba_name': businessDbaName,
+      'producer_license_number': producerLicenseNumber,
+      'lims': lims,
+      'lab': lab,
+      'lab_image_url': labImageUrl,
+      'lab_address': labAddress,
+      'lab_street': labStreet,
+      'lab_city': labCity,
+      'lab_county': labCounty,
+      'lab_state': labState,
+      'lab_zipcode': labZipcode,
+      'lab_phone': labPhone,
+      'lab_email': labEmail,
+      'lab_website': labWebsite,
+      'lab_latitude': labLatitude,
+      'lab_longitude': labLongitude,
+      'licensing_authority_id': licensingAuthorityId,
+      'licensing_authority': licensingAuthority,
+    };
+  }
+}
+
+/// Model representing a lab test for traceability.
 class LabTest {
   // Initialization.
   const LabTest({
@@ -104,10 +213,10 @@ class LabTest {
   }
 }
 
-/// Model representing a lab result.
-class LabResult {
+/// Model representing a singular lab test result for traceability.
+class LabTestResult {
   // Initialization.
-  const LabResult({
+  const LabTestResult({
     this.id,
     this.labTestTypeName,
     this.notes,
@@ -116,15 +225,15 @@ class LabResult {
   });
 
   // Properties.
-  final LabResultId? id;
+  final LabTestResultId? id;
   final String? labTestTypeName;
   final String? notes;
   final bool? passed;
   final double? quantity;
 
   // Create model.
-  factory LabResult.fromMap(Map<String, dynamic> data) {
-    return LabResult(
+  factory LabTestResult.fromMap(Map<String, dynamic> data) {
+    return LabTestResult(
       id: data['id'].toString(),
       labTestTypeName: data['lab_test_type_name'] ?? '',
       notes: data['notes'] ?? '',

@@ -159,6 +159,8 @@ def upload_results(
     # FIXME: Generalize to all states / labs.
     for constant, value in CONSTANTS.items():
         data[constant] = value
+    
+    # TODO: Augment license data.
 
     # Compile the references and documents.
     refs, docs = [], []

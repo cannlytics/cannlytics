@@ -42,6 +42,7 @@ dependencies:
   path_provider: ^2.0.15
   google_maps_flutter: ^2.2.6
   google_maps_flutter_web: ^0.4.0+8
+  hooks_riverpod: ^2.3.6
 
 dev_dependencies:
   import_sorter: ^4.6.0

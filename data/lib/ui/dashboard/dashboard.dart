@@ -9,11 +9,13 @@
 
 // Flutter imports:
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
@@ -93,7 +95,12 @@ class DashboardScreen extends ConsumerWidget {
           gapH8,
 
           // Search card.
-          ResultsSearch(key: Key('results-search')),
+          SizedBox(
+            height: 420,
+            width: double.infinity,
+            child: LabResultsSearchForm(),
+          ),
+          // ResultsSearch(key: Key('results-search')),
         ]),
       ),
     );
@@ -374,8 +381,119 @@ class _ResultsSearchState extends State<ResultsSearch> {
   }
 }
 
+/// Lab results search form.
+class LabResultsSearchForm extends HookConsumerWidget {
+  LabResultsSearchForm({Key? key}) : super(key: key);
+
+  // late List<LabResult> _searchList = [];
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final List<LabResult> prodSearchList =
+        ref.watch(productControllerProvider.notifier).products;
+
+    final _searchTextController = ref.read(resultsSearchController);
+    final FocusNode _node = FocusNode();
+
+    late List<LabResult> _searchList = [];
+
+    // Handle empty search.
+    // final _isSearchFieldEmpty = useState<bool>(true);
+    // bool isSearchFieldEmpty() {
+    //   return _searchTextController.text.isEmpty;
+    // }
+
+    // useEffect(() {
+    //   _searchTextController.addListener(() {
+    //     _isSearchFieldEmpty.value = isSearchFieldEmpty();
+    //   });
+    // }, [_searchTextController]);
+
+    // final kTextInputDecoration = Theme.of(context).inputDecorationTheme;
+    return Column(
+      children: [
+        TextField(
+          autofocus: true,
+          controller: _searchTextController,
+          focusNode: _node,
+          decoration: InputDecoration(
+            hintText: 'Item name here ...',
+            filled: true,
+            fillColor: Theme.of(context).cardColor,
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: IconButton(
+              onPressed: _searchTextController.text.isEmpty
+                  ? null
+                  : () {
+                      _searchTextController.clear();
+                    },
+              icon: Icon(Icons.close,
+                  color: _searchTextController.text.isNotEmpty
+                      ? Colors.red
+                      : Colors.grey),
+            ),
+          ),
+          onChanged: (val) {
+            _searchList =
+                ref.watch(productControllerProvider.notifier).getBySearch(val);
+          },
+        ),
+        _searchTextController.text.isNotEmpty && _searchList.isEmpty
+            // ? Center(
+            //     child: Column(
+            //       mainAxisAlignment: MainAxisAlignment.center,
+            //       children: const [
+            //         SizedBox(
+            //           height: 50,
+            //         ),
+            //         Icon(
+            //           Icons.search,
+            //           size: 50,
+            //         ),
+            //         SizedBox(
+            //           height: 60,
+            //         ),
+            //         Text(
+            //           'Sorry no results found.',
+            //           style: TextStyle(fontSize: 20),
+            //         ),
+            //       ],
+            //     ),
+            //   )
+            ? Text(
+                'Sorry no results found.',
+                style: TextStyle(fontSize: 20),
+              )
+            // : Padding(
+            //     padding: const EdgeInsets.all(8.0),
+            //     child: GridView.builder(
+            //       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            //         crossAxisCount: 2,
+            //         crossAxisSpacing: 10,
+            //         childAspectRatio: 2 / 3,
+            //         mainAxisSpacing: 10,
+            //       ),
+            //       itemCount: prodSearchList.length,
+            //       itemBuilder: (context, i) {
+            //         if (_searchTextController.text.isNotEmpty) {
+            //           return LabResultItem(labResult: _searchList[i]);
+            //         } else {
+            //           return null;
+            //         }
+            //       },
+            //     ),
+            //   ),
+            : Text(
+                'Under development.',
+                style: TextStyle(fontSize: 20),
+              )
+      ],
+    );
+  }
+}
+
+/// A lab result list item.
 class LabResultItem extends StatelessWidget {
-  final Map labResult;
+  final LabResult labResult;
 
   LabResultItem({required this.labResult});
 
@@ -396,28 +514,38 @@ class LabResultItem extends StatelessWidget {
           ),
         ],
       ),
+
+      // TODO: Add image.
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            labResult['product_name'],
+            'Product: ${labResult.productName}',
             style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
           ),
+          // TODO: Link to producer website.
           Text(
-            'Producer: ${labResult['business_dba_name']}',
+            'Producer: ${labResult.businessDbaName}',
             style: TextStyle(fontSize: 16.0),
           ),
-          // Text(
-          //   'Status: ${labResult['status']}',
-          //   style: TextStyle(fontSize: 16.0),
-          // ),
-          // Text(
-          //   'Total Cannabinoids: ${labResult['total_cannabinoids']}',
-          //   style: TextStyle(fontSize: 16.0),
-          // ),
-          // Add more fields as needed
+          // TODO: Link to lab website.
+          Text(
+            'Lab: ${labResult.lab}',
+            style: TextStyle(fontSize: 16.0),
+          ),
+          Text(
+            'ID: ${labResult.labId}',
+            style: TextStyle(fontSize: 16.0),
+          ),
+          Text(
+            'Batch: ${labResult.batchNumber}',
+            style: TextStyle(fontSize: 16.0),
+          ),
         ],
       ),
+      // TODO: Link to COA (download_url).
+      // TODO: Copy download COA link to clipboard.
     );
   }
 }
