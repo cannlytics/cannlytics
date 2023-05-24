@@ -175,12 +175,12 @@ class LicenseeForm extends ConsumerWidget {
         // if (obj?['business_dba_name'] != null &&
         //     obj?['business_dba_name'] != obj?['business_dba_name'])
         Text(
-          "DBA: ${obj?['business_dba_name']}",
+          "DBA: ${obj?['business_dba_name'] ?? ''}",
           style: Theme.of(context).textTheme.titleMedium,
         ),
 
         // Address.
-        gapH48,
+        gapH24,
         Text(
           'Location',
           style: Theme.of(context)
@@ -193,15 +193,17 @@ class LicenseeForm extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Licensee map.
-              SizedBox(
-                height: (screenWidth < Breakpoints.tablet) ? 300 : 350,
-                width: (screenWidth < Breakpoints.tablet) ? 300 : 540,
-                child: WebMap(
-                  title: obj?['business_legal_name'],
-                  latitude: obj?['premise_latitude'],
-                  longitude: obj?['premise_longitude'],
+              if (obj?['premise_latitude'] != null &&
+                  obj?['premise_longitude'] != null)
+                SizedBox(
+                  height: (screenWidth < Breakpoints.tablet) ? 300 : 350,
+                  width: (screenWidth < Breakpoints.tablet) ? 300 : 540,
+                  child: WebMap(
+                    title: obj?['business_legal_name'] ?? '',
+                    latitude: obj?['premise_latitude'],
+                    longitude: obj?['premise_longitude'],
+                  ),
                 ),
-              ),
 
               // Location data.
               _location(context, obj),
@@ -228,6 +230,14 @@ class LicenseeForm extends ConsumerWidget {
         // - business_owner_name
         // - business_structure
         // - activity
+        gapH8,
+        Text(
+          'Coming soon!',
+          style: Theme.of(context)
+              .textTheme
+              .labelSmall!
+              .copyWith(fontStyle: FontStyle.italic),
+        ),
 
         // TODO: Contact.
         gapH48,
@@ -238,12 +248,28 @@ class LicenseeForm extends ConsumerWidget {
         // - business_email
         // - business_phone
         // - business_website
+        gapH8,
+        Text(
+          'Coming soon!',
+          style: Theme.of(context)
+              .textTheme
+              .labelSmall!
+              .copyWith(fontStyle: FontStyle.italic),
+        ),
 
         // TODO: Photos.
         gapH48,
         Text(
           'Photos',
           style: Theme.of(context).textTheme.labelLarge,
+        ),
+        gapH8,
+        Text(
+          'Coming soon!',
+          style: Theme.of(context)
+              .textTheme
+              .labelSmall!
+              .copyWith(fontStyle: FontStyle.italic),
         ),
 
         // TODO: Reviews.
@@ -252,6 +278,14 @@ class LicenseeForm extends ConsumerWidget {
           'Reviews',
           style: Theme.of(context).textTheme.labelLarge,
         ),
+        gapH8,
+        Text(
+          'Coming soon!',
+          style: Theme.of(context)
+              .textTheme
+              .labelSmall!
+              .copyWith(fontStyle: FontStyle.italic),
+        ),
 
         // TODO: Products / strains.
         gapH48,
@@ -259,12 +293,28 @@ class LicenseeForm extends ConsumerWidget {
           'Products and strains',
           style: Theme.of(context).textTheme.labelLarge,
         ),
+        gapH8,
+        Text(
+          'Coming soon!',
+          style: Theme.of(context)
+              .textTheme
+              .labelSmall!
+              .copyWith(fontStyle: FontStyle.italic),
+        ),
 
         // TODO: Sales.
         gapH48,
         Text(
           'Sales',
           style: Theme.of(context).textTheme.labelLarge,
+        ),
+        gapH8,
+        Text(
+          'Coming soon!',
+          style: Theme.of(context)
+              .textTheme
+              .labelSmall!
+              .copyWith(fontStyle: FontStyle.italic),
         ),
 
         // Data refreshed date.

@@ -131,8 +131,9 @@ class LicenseesTable extends ConsumerWidget {
     if (data.isEmpty) {
       return FormPlaceholder(
         image: 'assets/images/icons/document.png',
-        title: 'No licenses',
-        description: 'There are no active licenses in this state.',
+        title: 'No licenses found',
+        description:
+            'Either there are no active licenses in this state or the data has not yet been populated.\nPlease contact dev@cannlytics.com to get a person on this ASAP.',
         onTap: () {
           context.push('/licenses');
         },
@@ -333,8 +334,9 @@ class LicenseesTable extends ConsumerWidget {
     if (data.isEmpty)
       table = FormPlaceholder(
         image: 'assets/images/icons/document.png',
-        title: 'No licenses',
-        description: 'There are no active licenses in this state.',
+        title: 'No licenses found',
+        description:
+            'Either there are no active licenses in this state or the data has not yet been populated.\nPlease contact dev@cannlytics.com to get a person on this ASAP.',
         onTap: () {
           context.push('/licenses');
         },

@@ -393,6 +393,11 @@ class CoAUpload extends ConsumerWidget {
 
 /// Sample results placeholder.
 class UserResultsPlaceholder extends StatelessWidget {
+  final String? title;
+  final String? subtitle;
+
+  UserResultsPlaceholder({this.title, this.subtitle});
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -419,10 +424,11 @@ class UserResultsPlaceholder extends StatelessWidget {
                 style: DefaultTextStyle.of(context).style,
                 children: <TextSpan>[
                   TextSpan(
-                      text: 'Waiting on your COAs boss!\n',
+                      text: title ?? 'Waiting on your COAs boss!\n',
                       style: TextStyle(fontSize: 20)),
                   TextSpan(
-                      text: 'Drop a CoA PDF, image, or folder to parse.',
+                      text: subtitle ??
+                          'Drop a CoA PDF, image, or folder to parse.',
                       style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),

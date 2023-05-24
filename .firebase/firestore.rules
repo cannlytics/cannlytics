@@ -129,6 +129,12 @@ service cloud.firestore {
     }
 
     // Allow anyone to read the public lab results data.
+    match /data/lab_results/{state}/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow anyone to read the public lab results data.
     match /public/data/lab_results/{document=**} {
     	allow read: if true;
       allow write: if false;

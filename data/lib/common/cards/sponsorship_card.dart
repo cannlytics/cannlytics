@@ -22,6 +22,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 class SponsorshipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Card(
       margin: EdgeInsets.zero,
       elevation: 2,
@@ -37,7 +38,7 @@ class SponsorshipCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(
+                SelectableText(
                   'Advance cannabis science!',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
@@ -46,14 +47,14 @@ class SponsorshipCard extends StatelessWidget {
 
             // Description.
             gapH4,
-            Text(
+            SelectableText(
               'Cannabis data takes time to collect and statistics take time to calculate. Please consider making a contribution to help expedite the curation of cannabis data and AI-powered tools.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
 
             // Goal.
             gapH12,
-            Text.rich(
+            SelectableText.rich(
               TextSpan(
                 text: '',
                 style: Theme.of(context).textTheme.bodySmall,
@@ -127,16 +128,23 @@ class SponsorshipCard extends StatelessWidget {
 
             // Tiers.
             gapH18,
-            Text(
-              'Contribute:',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            gapH8,
+            if (screenWidth <= Breakpoints.mobile)
+              SelectableText(
+                'Contribute',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            if (screenWidth <= Breakpoints.mobile) gapH8,
             Container(
               width: double.infinity,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
+                  if (screenWidth > Breakpoints.mobile)
+                    SelectableText(
+                      'Contribute:',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  gapW8,
                   SecondaryButton(
                     text: '\$1',
                     onPressed: () {

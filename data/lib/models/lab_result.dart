@@ -6,6 +6,7 @@
 // Created: 3/2/2023
 // Updated: 5/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+import 'package:equatable/equatable.dart';
 
 typedef LabTestResultId = String;
 typedef LabTestId = String;
@@ -62,8 +63,11 @@ class LabResult {
   final String? licensingAuthorityId;
   final String? licensingAuthority;
 
+  @override
+  List<String?> get props => [labId];
+
   // Create model.
-  factory LabResult.fromMap(Map<String, dynamic> data) {
+  factory LabResult.fromMap(Map data) {
     return LabResult(
       labId: data['lab_id'] ?? '',
       batchNumber: data['batch_number'] ?? '',

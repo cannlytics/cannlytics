@@ -14,6 +14,7 @@ Command-line Usage:
 
 """
 # Standard imports:
+from datetime import datetime
 import os
 from typing import List
 
@@ -160,14 +161,30 @@ def upload_results(
     for constant, value in CONSTANTS.items():
         data[constant] = value
     
-    # TODO: Augment license data.
+    # FIXME: Augment license data.
+    # This is a hot-fix.
+    from cannabis_licenses.algorithms.get_licenses_fl import get_licenses_fl
+    licenses = get_licenses_fl()
+    licenses['license_type'] = 'Medical - Retailer'
+    data = pd.merge(
+        data,
+        licenses,
+        suffixes=['', '_copy'],
+        left_on='producer_license_number',
+        right_on='license_number',
+    )
+    data = data.filter(regex='^(?!.*_copy$)')
+
+    # Add keywords.
+    data['keywords'] = data['product_name'].apply(lambda x: str(x).lower().split())
 
     # Compile the references and documents.
     refs, docs = [], []
-    for _, row in data[:10].iterrows():
+    for _, row in data[:1000].iterrows():
         doc = row.to_dict()
         _id = str(doc['lab_id'])
         state = doc['lab_state'].lower()
+        doc['updated_at'] = datetime.now().isoformat()
         ref = f'{collection}/{state}/{_id}'
         refs.append(ref)
         docs.append(doc)

@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:cannlytics_data/ui/sales/bud_spender_ui.dart';
 import 'package:flutter/material.dart';
@@ -88,7 +89,10 @@ class MainContent extends ConsumerWidget {
 
           // Sponsorship placeholder.
           gapH12,
-          BudSpenderInterface(),
+          // BudSpenderInterface(),
+
+          // Sponsorship placeholder.
+          SponsorshipCard(),
 
           // TODO: Sales datasets.
           // gapH32,

@@ -258,7 +258,7 @@ def get_licenses_fl(
         business_website=None,
         license_status='Active',
         license_status_date=None,
-        license_type='Lab',
+        license_type='Medical - Retailer',
         license_designation=None,
         activity=None,
     )
