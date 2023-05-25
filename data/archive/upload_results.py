@@ -141,7 +141,9 @@ def upload_results(
     # TODO: Generalize to all states / labs.
     results = []
     for dataset in DATASETS:
-        folder_path = DATA_DIR + dataset['data_dir']
+        folder_path = os.path.join(DATA_DIR, dataset.get('data_dir', './datasets'))
+        if not os.path.exists(folder_path):
+            continue
         for file_name in os.listdir(folder_path):
             if file_name.endswith('.xlsx'):
                 file_path = os.path.join(folder_path, file_name)
@@ -160,7 +162,7 @@ def upload_results(
     # FIXME: Generalize to all states / labs.
     for constant, value in CONSTANTS.items():
         data[constant] = value
-    
+
     # FIXME: Augment license data.
     # This is a hot-fix.
     from cannabis_licenses.algorithms.get_licenses_fl import get_licenses_fl
@@ -180,7 +182,7 @@ def upload_results(
 
     # Compile the references and documents.
     refs, docs = [], []
-    for _, row in data[:1000].iterrows():
+    for _, row in data[1000:].iterrows():
         doc = row.to_dict()
         _id = str(doc['lab_id'])
         state = doc['lab_state'].lower()

@@ -4,15 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 5/17/2023
+// Updated: 5/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Flutter imports:
-import 'package:cannlytics_data/models/lab_result.dart';
-import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:

@@ -18,8 +18,6 @@
 // VidaCann: https://www.vidacann.com/lab-results/
 // HT Medical Cannabis: https://htcannabis.com/lab-results/
 
-// TODO: Allow users to search by batch number, product name, etc.
-
 // Flutter imports:
 import 'package:cannlytics_data/common/cards/card_grid.dart';
 import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
@@ -39,12 +37,9 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/console.dart';
-import 'package:cannlytics_data/common/layout/footer.dart';
-import 'package:cannlytics_data/common/layout/header.dart';
-import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:intl/intl.dart';
-import 'coa_doc_ui.dart';
+// import 'coa_doc_ui.dart';
 
 /// Screen.
 class LabResultsScreen extends StatelessWidget {
@@ -52,22 +47,6 @@ class LabResultsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return Scaffold(
-    //   // App bar.
-    //   appBar: DashboardHeader(),
-
-    //   // Side menu.
-    //   drawer: Responsive.isMobile(context) ? MobileDrawer() : null,
-
-    //   // Body.
-    //   body: Console(slivers: [
-    //     // Main content.
-    //     SliverToBoxAdapter(child: MainContent()),
-
-    //     // Footer.
-    //     const SliverToBoxAdapter(child: Footer()),
-    //   ]),
-    // );
     return ConsoleScreen(
       children: [
         // SliverToBoxAdapter(child: MainContent()),

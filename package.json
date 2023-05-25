@@ -52,6 +52,7 @@
     "console:docker": "docker build . --tag gcr.io/cannlytics/cannlytics-console:latest & docker push gcr.io/cannlytics/cannlytics-console:latest",
     "console:publish": "npm run console:build & npm run console:docker & npm run console:run & npm run console:deploy",
     "data:web": "cd data & flutter run -d chrome --web-browser-flag '--disable-web-security' & cd ../",
+    "data:publish": "cd data & flutter build web --no-sound-null-safety --dart-define=PRODUCTION=true & firebase deploy --project cannlytics --only hosting:data & cd ../",
     "docs:install": "docker build -t squidfunk/mkdocs-material docs",
     "docs:build": "mkdocs build",
     "docs:publish": "firebase deploy --project cannlytics --only hosting:docs",

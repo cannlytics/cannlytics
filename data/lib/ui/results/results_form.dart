@@ -4,13 +4,18 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/23/2023
-// Updated: 5/23/2023
+// Updated: 5/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/results/results_form_controller.dart';
+import 'package:cannlytics_data/utils/utils.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 // Package imports:
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -24,7 +29,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Listen to data.
+    // Listen to the data.
     final asyncData = ref.watch(asyncLabResultsProvider);
     final prodSearchList = asyncData.value ?? [];
 
@@ -50,7 +55,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
     /// No samples found placeholder.
     Widget _emptyResults() {
       return UserResultsPlaceholder(
-        title: 'Waiting to get your COAs boss!\n',
+        title: 'Waiting to get your COAs, boss!\n',
         subtitle:
             'You can search by product name keywords, lab ID, or batch number.',
       );
@@ -67,17 +72,19 @@ class LabResultsSearchForm extends HookConsumerWidget {
 
     /// Results list.
     Widget _resultsList() {
-      return ListView.builder(
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        itemCount: prodSearchList.length,
-        itemBuilder: (context, i) {
-          if (_searchTextController.text.isNotEmpty) {
-            return LabResultItem(labResult: prodSearchList[i]);
-          } else {
-            return null;
-          }
-        },
+      return SelectionArea(
+        child: ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: prodSearchList.length,
+          itemBuilder: (context, i) {
+            if (_searchTextController.text.isNotEmpty) {
+              return LabResultItem(labResult: prodSearchList[i]);
+            } else {
+              return null;
+            }
+          },
+        ),
       );
     }
 
@@ -92,11 +99,12 @@ class LabResultsSearchForm extends HookConsumerWidget {
                   : _resultsList();
     }
 
+    /// Search icon.
     Widget _searchIcon() {
       return asyncData.isLoading
-          ? SizedBox(
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 1.42),
+          ? Icon(
+              Icons.hourglass_full,
+              color: Theme.of(context).textTheme.labelMedium!.color,
             )
           : InkWell(
               onTap: () {
@@ -113,6 +121,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
             );
     }
 
+    /// Clear icon.
     Widget? _clearIcon() {
       return _searchTextController.text.isNotEmpty
           ? IconButton(
@@ -166,7 +175,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Results list.
+          // Results list, centered when there are no results, top-aligned otherwise.
           Container(
             height: MediaQuery.of(context).size.height * 0.75,
             child: _searchTextController.text.isNotEmpty &&
@@ -191,10 +200,13 @@ class LabResultsSearchForm extends HookConsumerWidget {
 
           // Search field.
           Container(
-            height: MediaQuery.of(context).size.height * 0.15,
-            padding: EdgeInsets.all(16),
+            height: MediaQuery.of(context).size.height * 0.1,
+            padding: EdgeInsets.only(top: 16, left: 24, right: 24),
             child: _buildSearchTextField(context),
           ),
+
+          // Disclaimer.
+          ModelInformationWidget(),
         ],
       ),
     );
@@ -202,6 +214,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
 }
 
 /// A lab result list item.
+/// Optional: Add image.
 class LabResultItem extends StatelessWidget {
   final LabResult labResult;
 
@@ -209,37 +222,72 @@ class LabResultItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Card(
-      margin: EdgeInsets.zero,
+      margin: EdgeInsets.symmetric(horizontal: 24),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+      color: Theme.of(context).scaffoldBackgroundColor,
+      surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
       child: Container(
         margin: EdgeInsets.all(0),
         padding: EdgeInsets.all(16.0),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(3.0)),
-
-        // Optional: Add image.
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // Product name.
-            SelectableText(
-              'Product: ${labResult.productName}',
-              style: Theme.of(context).textTheme.labelLarge,
+            // Product name and COA link.
+            Row(
+              children: [
+                if (screenWidth <= Breakpoints.tablet)
+                  Expanded(
+                    child: Text(
+                      labResult.productName ?? 'Unknown',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                  ),
+                if (screenWidth > Breakpoints.tablet)
+                  Text(
+                    labResult.productName ?? 'Unknown',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                GestureDetector(
+                  onTap: () {
+                    if (labResult.downloadUrl != null) {
+                      launchUrl(Uri.parse(labResult.downloadUrl!));
+                    }
+                  },
+                  child: Icon(
+                    Icons.open_in_new,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    size: 16,
+                  ),
+                ),
+              ],
             ),
+            gapH8,
 
             // Producer.
             // Future work: Link to producer website.
-            SelectableText(
+            Text(
               'Producer: ${labResult.businessDbaName}',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+
+            // IDs
+            Text(
+              'ID: ${labResult.labId}',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            Text(
+              'Batch: ${labResult.batchNumber}',
               style: Theme.of(context).textTheme.labelMedium,
             ),
 
             // Lab.
             Row(
               children: [
-                SelectableText(
+                Text(
                   'Lab: ',
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
@@ -247,7 +295,7 @@ class LabResultItem extends StatelessWidget {
                   onTap: () {
                     launchUrl(Uri.parse(labResult.labWebsite!));
                   },
-                  child: SelectableText(
+                  child: Text(
                     labResult.lab!,
                     style: Theme.of(context).textTheme.labelMedium!.copyWith(
                           color: Colors.blue,
@@ -257,20 +305,53 @@ class LabResultItem extends StatelessWidget {
               ],
             ),
 
-            // IDs
-            SelectableText(
-              'ID: ${labResult.labId}',
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-            SelectableText(
-              'Batch: ${labResult.batchNumber}',
-              style: Theme.of(context).textTheme.labelMedium,
+            // Copy COA link.
+            if (labResult.downloadUrl != null) gapH4,
+            if (labResult.downloadUrl != null)
+              _coaLink(context, labResult.downloadUrl!),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Copy COA link.
+  Widget _coaLink(BuildContext context, String url) {
+    return InkWell(
+      onTap: () async {
+        await Clipboard.setData(ClipboardData(text: url));
+        Fluttertoast.showToast(
+          msg: 'Copied link!',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Theme.of(context).dialogBackgroundColor,
+          textColor: Theme.of(context).textTheme.titleLarge!.color,
+          fontSize: 16.0,
+          webBgColor:
+              WebUtils.colorToHexCode(Theme.of(context).dialogBackgroundColor),
+          webPosition: 'center',
+          webShowClose: true,
+        );
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Icon(Icons.link, size: 12, color: Colors.blueAccent),
+            SizedBox(width: 4),
+            Text(
+              'Copy COA link',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueAccent,
+              ),
             ),
           ],
         ),
-        // FIXME: Link to COA (download_url).
-
-        // TODO: Copy download COA link to clipboard.
       ),
     );
   }
@@ -323,4 +404,46 @@ class UserResultsPlaceholder extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Model information.
+class ModelInformationWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      // constraints: BoxConstraints(maxWidth: 560),
+      margin: EdgeInsets.symmetric(horizontal: 24),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: 'This is a test release. ',
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            TextSpan(
+              text:
+                  'Please bear in mind that the data is incomplete and not up-to-date. Use at your own discretion.',
+            ),
+          ],
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ),
+    );
+  }
+}
+
+/// Text link.
+class LinkTextSpan extends TextSpan {
+  LinkTextSpan({TextStyle? style, required String text, required String url})
+      : super(
+          style: style?.copyWith(
+            color: Colors.blue,
+            decoration: TextDecoration.underline,
+          ),
+          text: text,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () => launchUrl(Uri.parse(url)),
+        );
 }

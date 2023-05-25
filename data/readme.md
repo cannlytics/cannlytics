@@ -13,7 +13,7 @@ The app is built with Flutter and is a gateway to the data. The `assets` directo
 Once you have everything installed, you can run the app with:
 
 ```shell
-flutter run -d chrome --web-renderer html
+flutter run -d chrome
 ```
 
 You can sort imports with:
@@ -33,3 +33,19 @@ You can create launch icons with:
 ```shell
 flutter pub run flutter_launcher_icons
 ```
+
+### App Publishing
+
+First, build the app:
+
+```shell
+flutter build web --no-sound-null-safety --dart-define=PRODUCTION=true
+```
+
+Second, publish the app to the web:
+
+```shell
+firebase deploy --project cannlytics --only hosting:data
+```
+
+Congratulations! You've published the Cannlytics Data app to the web!

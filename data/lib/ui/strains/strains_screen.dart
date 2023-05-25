@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -39,7 +40,11 @@ class StrainsScreen extends StatelessWidget {
 
       // Body.
       body: Console(slivers: [
+        // Main content.
         SliverToBoxAdapter(child: MainContent()),
+
+        // Footer.
+        const SliverToBoxAdapter(child: Footer()),
       ]),
     );
   }

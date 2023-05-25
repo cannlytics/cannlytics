@@ -17,6 +17,15 @@
       ]
     },
     {
+      "target": "data",
+      "public": "data/build/web",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    },
+    {
       "target": "docs",
       "public": "docs/build"
     },

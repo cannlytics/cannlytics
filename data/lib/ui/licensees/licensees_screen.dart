@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 5/13/2023
+// Updated: 5/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -211,7 +211,7 @@ class LicenseesScreen extends ConsumerWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(
           vertical: 32,
-          horizontal: sliverHorizontalPadding(screenWidth) / 2,
+          horizontal: 24,
         ),
         child: Column(children: [
           Row(
