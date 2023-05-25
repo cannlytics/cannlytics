@@ -7,11 +7,15 @@
 // Updated: 5/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Dart imports:
 import 'dart:html';
-
-import 'package:flutter/cupertino.dart';
-import 'package:google_maps/google_maps.dart';
 import 'dart:ui' as ui;
+
+// Flutter imports:
+import 'package:flutter/cupertino.dart';
+
+// Package imports:
+import 'package:google_maps/google_maps.dart';
 
 /// Web map.
 class WebMap extends StatefulWidget {

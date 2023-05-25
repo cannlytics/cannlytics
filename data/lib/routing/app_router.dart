@@ -11,7 +11,6 @@
 import 'dart:async';
 
 // Flutter imports:
-import 'package:cannlytics_data/ui/general/not_found_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -21,6 +20,7 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_data/routing/routes.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/ui/general/not_found_screen.dart';
 
 // App navigation.
 final goRouterProvider = Provider<GoRouter>((ref) {

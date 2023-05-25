@@ -8,20 +8,20 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+// Project imports:
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/results/results_form_controller.dart';
 import 'package:cannlytics_data/utils/utils.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-
-// Package imports:
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-// Project imports:
-import 'package:url_launcher/url_launcher.dart';
 
 /// Lab results search form.
 class LabResultsSearchForm extends HookConsumerWidget {

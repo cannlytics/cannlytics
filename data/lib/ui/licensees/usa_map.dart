@@ -14,7 +14,6 @@
 import 'dart:math';
 
 // Flutter imports:
-import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -25,6 +24,9 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_drawing/path_drawing.dart';
 import 'package:xml/xml.dart';
+
+// Project imports:
+import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 
 // Global map properties.
 const Duration animationDuration = Duration(milliseconds: 0);

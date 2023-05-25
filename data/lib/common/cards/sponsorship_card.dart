@@ -8,15 +8,17 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/buttons/secondary_button.dart';
-import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:fluttertoast/fluttertoast.dart';
 
 // Project imports:
+import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/services/data_service.dart';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 
 /// Sponsorship card.
 class SponsorshipCard extends StatelessWidget {

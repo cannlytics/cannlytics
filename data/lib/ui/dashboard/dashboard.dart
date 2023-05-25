@@ -8,7 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/ui/results/results_form.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -17,6 +16,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 import 'package:cannlytics_data/common/layout/console.dart';
+import 'package:cannlytics_data/ui/results/results_form.dart';
 
 /// Dashboard screen.
 class DashboardScreen extends ConsumerWidget {

@@ -7,9 +7,12 @@
 // Updated: 5/11/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Listen to the user's receipts.
 final userReceipts = StreamProvider.family<List<Map<String, dynamic>>, String>(

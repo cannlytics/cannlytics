@@ -6,6 +6,8 @@
 // Created: 3/2/2023
 // Updated: 5/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Package imports:
 import 'package:equatable/equatable.dart';
 
 typedef LabTestResultId = String;

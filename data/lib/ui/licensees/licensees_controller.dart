@@ -7,10 +7,10 @@
 // Updated: 5/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Flutter imports:
+// Dart imports:
 import 'dart:html';
 
-import 'package:cannlytics_data/services/storage_service.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -21,6 +21,7 @@ import 'package:cannlytics_data/common/inputs/string_controller.dart';
 import 'package:cannlytics_data/models/licensee.dart';
 import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
+import 'package:cannlytics_data/services/storage_service.dart';
 
 /* === Data === */
 

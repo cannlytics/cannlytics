@@ -8,7 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -21,6 +20,7 @@ import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
 import 'package:cannlytics_data/common/images/avatar.dart';
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/services/auth_service.dart';

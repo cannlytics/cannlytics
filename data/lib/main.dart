@@ -19,12 +19,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 // Project imports:
+import 'package:cannlytics_data/constants/errors.dart';
 import 'package:cannlytics_data/constants/licenses.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/firebase_options.dart';
 import 'package:cannlytics_data/routing/app_router.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
-import 'package:cannlytics_data/constants/errors.dart';
 
 // ignore:depend_on_referenced_packages
 

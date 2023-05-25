@@ -7,6 +7,16 @@
 // Updated: 5/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Flutter imports:
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/cards/wide_card.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
@@ -15,14 +25,9 @@ import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:cannlytics_data/common/layout/header.dart';
 import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 import 'package:cannlytics_data/ui/licensees/licensee_map.dart';
+import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 import 'package:cannlytics_data/utils/utils.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
 
 /// Screen.
 class ResultScreen extends StatelessWidget {

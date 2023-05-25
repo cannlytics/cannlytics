@@ -8,23 +8,23 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/buttons/primary_button.dart';
-import 'package:cannlytics_data/common/buttons/secondary_button.dart';
-import 'package:cannlytics_data/constants/theme.dart';
-import 'package:cannlytics_data/services/api_service.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dropzone/flutter_dropzone.dart';
 
 // Package imports:
+import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// Project imports:
-import 'package:cannlytics_data/constants/design.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+
+// Project imports:
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
+import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/constants/theme.dart';
+import 'package:cannlytics_data/services/api_service.dart';
 
 /// CoADoc user interface.
 class BudSpenderInterface extends ConsumerWidget {

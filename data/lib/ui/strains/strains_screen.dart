@@ -8,7 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -20,6 +19,7 @@ import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/console.dart';
+import 'package:cannlytics_data/common/layout/footer.dart';
 import 'package:cannlytics_data/common/layout/header.dart';
 import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
