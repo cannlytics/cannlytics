@@ -55,13 +55,14 @@ This dataset is a collection of public cannabis lab test results parsed by [`CoA
 
 The dataset is partitioned into the various sources of lab results.
 
-| Subset | Source | Observations |
+| Dataset | Key | Observations |
 |--------|--------|--------------|
-| `rawgarden` | Raw Gardens | 2,667 |
-| `mcrlabs` | MCR Labs | Coming soon! |
-| `psilabs` | PSI Labs | Coming soon! |
-| `sclabs` | SC Labs | Coming soon! |
-| `washington` | Washington State | Coming soon! |
+| California | `ca` | Coming soon |
+| Connecticut | `ct` | Coming soon |
+| Florida | `fl` | Coming soon |
+| Massachusetts | `ma` | Coming soon |
+| Michigan | `mi` | Coming soon |
+| Washington | `wa` | Coming soon |
 
 ### Data Instances
 

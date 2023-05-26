@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 5/12/2023
+// Updated: 5/25/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO: Links to places where users can get their COAs:
@@ -17,6 +17,8 @@
 // Green Scientific Labs: https://www.greenscientificlabs.com/find-coa.php
 // VidaCann: https://www.vidacann.com/lab-results/
 // HT Medical Cannabis: https://htcannabis.com/lab-results/
+
+// TODO: Infinitely scrolling grid of recently added lab results.
 
 // Flutter imports:
 import 'package:flutter/material.dart';

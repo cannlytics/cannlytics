@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 5/23/2023
+Updated: 5/25/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -67,6 +67,7 @@ ENV_FILE = '../../../../.env'
 
 # Get a list of Florida companies.
 # Note: It may be best to retrieve this list dynamically.
+# TODO: Keep track of the last page of results for each company.
 # TODO: Try to find COAs for the remaining companies.
 # - Plant 13 Florida, Inc.
 # - House of Platinum Cannabis
@@ -575,7 +576,7 @@ def get_results_terplife(
 
 
 
-# TODO: Search TerpLife for known strains, e.g. ChryTop.
+# TODO: Search TerpLife for known strains.
 
 
 # TODO: Parse TerpLife Labs COA PDF.

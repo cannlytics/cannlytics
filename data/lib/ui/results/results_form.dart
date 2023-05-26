@@ -88,6 +88,8 @@ class LabResultsSearchForm extends HookConsumerWidget {
       );
     }
 
+    /// TODO: Use a PaginatedDataTable to display the results.
+
     /// Search results list.
     Widget _buildSearchResults(BuildContext context) {
       return asyncData.isLoading

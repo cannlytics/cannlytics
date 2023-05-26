@@ -152,6 +152,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Allow anyone to write, but not read, data logs.
+    // TODO: Make write more restrictive.
+    match /logs/data/coas/{document=**} {
+    	allow read: if false;
+      allow write: if true;
+    }
+
     // === User Data ===
 
     // Allow users to read and write their own receipts.

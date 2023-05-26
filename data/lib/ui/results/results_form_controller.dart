@@ -126,7 +126,7 @@ class AsyncLabResultsNotifier extends AsyncNotifier<List<LabResult>> {
     // Create a log of the search.
     final _user = ref.read(authProvider).currentUser;
     String timestamp = DateTime.now().toIso8601String();
-    String logPath = 'logs/data/coas/$timestamp';
+    String logPath = 'logs/data/coas/${timestamp.replaceAll('.', '-')}';
     Map<String, dynamic> logData = {
       'search_term': term ?? null,
       'search_results': results.length,

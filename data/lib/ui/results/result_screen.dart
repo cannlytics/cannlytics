@@ -29,6 +29,8 @@ import 'package:cannlytics_data/ui/licensees/licensee_map.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 
+/// TODO: Allow users to pay $1 to parse a COA with AI.
+
 /// Screen.
 class ResultScreen extends StatelessWidget {
   const ResultScreen({
