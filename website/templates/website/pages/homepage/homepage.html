@@ -32,18 +32,6 @@
     <!-- Hero -->
     {% include "website/pages/homepage/components/hero.html" with hero=homepage.hero only %}
 
-    <!-- List of Metrc Validations -->
-    <div class="ground">
-    {% include "website/pages/homepage/components/metrc_state_list.html" with verifications=verifications only %}
-    </div>
-
-    <!-- Wave -->
-    <div class="wave small upside-down" >
-      <svg viewBox="0 0 500 150" preserveAspectRatio="none">
-        <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
-      </svg>
-    </div>
-
     <!-- Demo -->
     {% include "website/pages/homepage/components/demo.html" %}
 
@@ -54,31 +42,19 @@
       </svg>
     </div>
 
-    <!-- Shopify products -->
-    <div class="ground">
-      {% include "./components/shopify_products.html" %}
-    </div>
-
     <!-- Video Banner -->
     <div class="ground">
     {% include "website/components/banners/video_banner.html" %}
     </div>
 
-    <!-- Wave -->
+    {% comment %} <!-- Wave -->
     <div class="wave small upside-down" >
       <svg viewBox="0 0 500 150" preserveAspectRatio="none">
         <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
       </svg>
-    </div>
+    </div> {% endcomment %}
 
     {% comment %}
-    <!-- Alternative sections -->
-
-    <!-- Features -->
-    {% include "website/pages/homepage/components/features.html" with features=homepage.features only %}
-
-    <!--  Partners -->
-    {% include "website/components/banners/partners_banner.html" %}
 
     <!-- Future work: List Cannlytics products with links to each GitHub repository | card style
       - Cannlytics AI
@@ -90,6 +66,26 @@
   
     {% endcomment %}
 
+    <!-- TODO: Problem / Solution section -->
+
+    <!-- List of Metrc Validations -->
+    <div class="ground py-5">
+      {% include "website/pages/homepage/components/metrc_state_list.html" with verifications=verifications only %}
+    </div>
+
+    <!-- Shopify products -->
+    <div class="ground pt-5">
+      {% include "./components/shopify_products.html" %}
+    </div>
+
+    <!-- Wave -->
+    <div class="wave small upside-down" >
+      <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+        <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
+      </svg>
+    </div>
+
+    <!-- TODO: List of contributors -->
 
     <!-- Call to Action -->
     {% include "website/pages/homepage/components/call_to_action.html" with app=app only %}
@@ -103,13 +99,7 @@
 
 <!-- Homepage JavaScript -->
 {% block page_js %}
-  <script src="{% static "website/js/particles.js" %}"></script>
   <script>
-
-    // Initialize particles.
-    particlesJS.load('particles-js', './static/website/js/particles.json', function() {
-      console.log('callback - particles.js config loaded');
-    });
 
     function CopyToClipboard(id) {
       /**

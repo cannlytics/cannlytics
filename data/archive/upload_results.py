@@ -199,7 +199,6 @@ def upload_results(
 # === Test ===
 if __name__ == '__main__':
     
-
     # Set Firebase credentials.
     try:
         config = dotenv_values('../../.env')

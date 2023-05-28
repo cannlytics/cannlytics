@@ -24,6 +24,7 @@ import os
 from time import sleep
 
 # External imports:
+from cannlytics.data.coas import CoADoc
 from bs4 import BeautifulSoup
 from cannlytics.utils.constants import DEFAULT_HEADERS
 import pandas as pd
@@ -32,6 +33,13 @@ import requests
 
 # Specify where your data lives.
 DATA_DIR = 'D://data/california/lab_results'
+
+
+# FIXME: Create a function.
+def get_glass_house_farms_lab_results():
+    """Get lab results published by Glass House Farms."""
+    raise NotImplementedError
+
 
 # Glass House Farms constants.
 GLASS_HOUSE_FARMS = {
@@ -99,7 +107,7 @@ STRAIN_TYPES = {
 # ✓ indica_percentage
 # ✓ sativa_percentage
 # ✓ strain_url
-# ✓ genetics
+# ✓ lineage
 # ✓ lab_result_id
 # ✓ coa_url
 overwrite = False
@@ -172,11 +180,15 @@ for obs in observations:
     response = requests.get(obs['strain_url'] , headers=DEFAULT_HEADERS)
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    # Get the lineage (genetics).
-    content = soup.find('div', class_='content')
-    divs = content.find_all('div', class_='et_pb_column')
+    # Get the lineage.
+    try:
+        content = soup.find('div', class_='content')
+        divs = content.find_all('div', class_='et_pb_column')
+    except:
+        print('No content found:', obs['strain_url'])
+        continue
     lineage = divs[2].text.split('Lineage')[1].replace('\n', '').strip()
-    obs['genetics'] = lineage.split(' x ')
+    obs['lineage'] = lineage.split(' x ')
 
     # Get all COA URLs
     pdf_links = []
@@ -209,4 +221,38 @@ date = datetime.now().strftime('%Y-%m-%d')
 outfile = os.path.join(DATA_DIR, f'glass-house-farms-lab-results-{date}.xlsx')
 results.to_excel(outfile, index=False)
 
-# Future work: Parse all COAs.
+# Initialize CoADoc.
+parser = CoADoc()
+
+# Parse the data from all COAs.
+# for pdf_file in unparsed:
+coa_data = []
+for index, result in results.iterrows():
+    lab_result_id = result['lab_result_id']
+    pdf_file = os.path.join(license_pdf_dir, f'{lab_result_id}.pdf')  
+    if not os.path.exists(pdf_file):
+        print('File not found:', pdf_file)
+        continue
+    try:
+        coa = parser.parse(pdf_file)
+        coa_data.extend(coa)
+        print('Parsed:', pdf_file)
+    except:
+        print('Error parsing:', pdf_file)
+        continue
+
+# Save the lab results.
+date = datetime.now().strftime('%Y-%m-%d')
+outfile = os.path.join(DATA_DIR, f'ca-lab-results-{date}.xlsx')
+try:
+    parser.save(coa_data, outfile)
+except:
+    print('Error saving:', outfile)
+    coa_df = pd.DataFrame(coa_data)
+    coa_df.to_excel(outfile, index=False)
+
+
+# FIXME: Merge the strain, lab result, and COA data.
+lab_result_data = parser.standardize(coa_data)
+
+# Save everything once done.

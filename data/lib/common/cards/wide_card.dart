@@ -13,14 +13,22 @@ import 'package:flutter/material.dart';
 /// A full-width card.
 class WideCard extends StatelessWidget {
   final Widget child;
+  final Color? color;
+  final Color? surfaceTintColor;
 
-  const WideCard({required this.child});
+  const WideCard({
+    required this.child,
+    this.color,
+    this.surfaceTintColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: Card(
+        color: color,
+        surfaceTintColor: surfaceTintColor,
         margin: EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),

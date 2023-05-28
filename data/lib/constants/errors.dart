@@ -21,18 +21,25 @@ void registerErrorHandlers() {
     return true;
   };
 
+  String _lastLoggedErrorMessage = '';
+
   // Show an error notification if any uncaught exception happens.
   FlutterError.onError = (FlutterErrorDetails details) {
-    // Standard error message:
+    // Default error message:
     // debugPrint(details.exception.toString());
 
     // Verbose error message:
     // FlutterError.presentError(details);
     // debugPrint(details.toString());
+    // FlutterError.dumpErrorToConsole(details);
+    // throw details.exception;
 
     // Short error message:
-    FlutterError.dumpErrorToConsole(details);
-    throw details.exception;
+    String errorMessage = details.exception.toString();
+    if (_lastLoggedErrorMessage != 'error') {
+      debugPrint(errorMessage);
+      _lastLoggedErrorMessage = 'error';
+    }
   };
 
   // Show an error notification when any widget in the app fails to build.
@@ -55,7 +62,7 @@ void registerErrorHandlers() {
         // Dev error UI:
         child: Text(
           details.toString(),
-          style: TextStyle(fontSize: 18),
+          style: TextStyle(fontSize: 12),
         ),
       ),
     );

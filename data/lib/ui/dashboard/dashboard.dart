@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/ui/account/subscription_management.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -27,6 +28,9 @@ class DashboardScreen extends ConsumerWidget {
     return ConsoleScreen(
       bottomSearch: true,
       children: [
+        // Subscriptions.
+        SliverToBoxAdapter(child: SubscriptionManagement()),
+
         // Quick search.
         SliverToBoxAdapter(child: LabResultsSearchForm()),
 

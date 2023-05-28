@@ -11,7 +11,7 @@
 {% load static icon %}
 
 <!-- Banner offer -->
-{% include "website/components/banners/banner_support.html" with
+{% include "./banner.html" with
   email="contact@cannlytics.com"
   phone=app.contact_phone
   phone_number=app.contact_phone_number
@@ -75,7 +75,7 @@
         <li class="nav-item mb-0">
           <a
             class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'data' in request.path %}active{% endif %}"
-            href="{% url 'page' page='data' %}"
+            href="https://data.cannlytics.com"
           >
             Data
           </a>
@@ -103,18 +103,30 @@
                 <div class="row">
 
                   <div class="col-12 col-sm-4 col-md-3 py-4">
-                    <h5 class="fw-bold px-3 serif text-dark">Core</h5>
+                    <h5 class="fw-bold px-3 serif text-dark">Apps</h5>
                     <div class="list-group border-none">
                       <!-- TODO: Replace AI with analytics? -->
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='ai' %}">🦾 AI <span class="badge rounded-pill bg-success">New</span></a>
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='api' %}">📡 API</a>
-                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://console.cannlytics.com">📱 App</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://app.cannlytics.com">📱 App</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://data.cannlytics.com">🖧 Data</a>
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://pypi.org/project/cannlytics/">🐍 Python SDK</a>
-                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='support' %}">⛑️ Support</a>
                     </div>
                   </div>
 
                   <div class="col-12 col-sm-4 col-md-3 py-4">
+                    <h5 class="fw-bold px-3 serif text-dark">Material</h5>
+                    <div class="list-group">
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://open.spotify.com/show/026mnrCyi1QmyGnPRxdH1u">🎙️ Podcast</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://www.youtube.com/channel/UCDzZAV2c0pEimgLo3mUqMaw">📺 YouTube</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="https://substack.com/@cannlytics">🗞️ Substack</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='whitepapers' %}">📜 Whitepapers</a>
+                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='subscriptions' %}">📮 Subscriptions</a>
+                      {% comment %} <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='support' %}">⛑️ Support</a> {% endcomment %}
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-sm-4 col-md-6 py-4">
                     <h5 class="fw-bold serif text-dark">Cannabis Data Science</h5>
                     <div class="card no-border bg-transparent">
                       <a href="https://www.meetup.com/cannabis-data-science/events/">
@@ -136,18 +148,9 @@
                     </div>
                   </div>
 
-                  <div class="col-12 col-sm-4 col-md-3 py-4">
-                    <h5 class="fw-bold px-3 serif text-dark">Material</h5>
-                    <div class="list-group">
-                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='articles' %}">🗞️ Articles</a>
-                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='events' %}">🎫 Events</a>
-                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='videos' %}">📺 Videos</a>
-                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='whitepapers' %}">📜 Whitepapers</a>
-                      <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='subscriptions' %}">📮 Subscriptions</a>
-                    </div>
-                  </div>
+                  
 
-                  <div class="col-12 col-sm-12 col-md-3 py-4">
+                  {% comment %} <div class="col-12 col-sm-12 col-md-3 py-4">
                     <h5 class="fw-bold px-3 serif text-dark">Data</h5>
                     <div class="list-group">
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'section' page='data' section='market' %}">🪙 Data Market</a>
@@ -156,7 +159,7 @@
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='data' %}#state-data">🏛️ Public state data</a>
                       <a class="list-group-item no-border serif text-dark bg-transparent background-hover" href="{% url 'page' page='data' %}#regulations">⚖️ Regulations</a>
                     </div>
-                  </div>
+                  </div> {% endcomment %}
 
                 </div>
               </div>
@@ -182,7 +185,7 @@
           <a
             type="button"
             class="btn btn-sm bg-gradient-orange text-white text-nowrap serif"
-            href="https://console.cannlytics.com"
+            href="https://data.cannlytics.com"
           >
             Launch App
           </a>

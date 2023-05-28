@@ -1198,6 +1198,7 @@ class CoADoc:
                     except:
                         json.loads(sample_results)
                 for result in sample_results:
+                    
                     analysis = result.get('analysis')
                     result['analysis'] = standard_analyses.get(analysis, analysis)
                     for c in numeric_columns:

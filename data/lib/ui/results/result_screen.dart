@@ -30,6 +30,10 @@ import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 
 /// TODO: Allow users to pay $1 to parse a COA with AI.
+///
+/// TODO: Talk with your COA (for pro subscribers).
+///
+/// TODO: Link to strains where user can find more lab results.
 
 /// Screen.
 class ResultScreen extends StatelessWidget {

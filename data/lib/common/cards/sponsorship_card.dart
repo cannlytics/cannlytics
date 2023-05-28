@@ -29,6 +29,7 @@ class SponsorshipCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+      // FIXME: Make this whole area selectable.
       child: Container(
         width: 720,
         padding: EdgeInsets.all(16),

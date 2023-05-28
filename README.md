@@ -29,7 +29,9 @@
 
 Do you want to join a team of data scientists from around the world who are advancing cannabis science, molecule by molecule? 🧬 Come to the [Cannabis Data Science Meetup Group](https://www.meetup.com/cannabis-data-science)! At the meetup, you will be introduced to many useful notes, notebooks, and video tutorials to help you get, wrangle, and analyze cannabis data with the best of them. Please join the fun on Wednesdays at 8:30am PST / 9:30am MT / 10:30am CT / 11:30am EST. You are always welcome to use the [code](https://github.com/cannlytics/cannabis-data-science), watch the [videos](https://www.youtube.com/@cannlytics), and make contributions of your own! Please tune in 🚀
 
-<!-- **Cannlytics Data Catalogue**
+<!-- TODO: **Cannlytics Data Catalogue**
+
+<!-- TODO: Diagram of Cannlytics data -->
 
 | Dataset | Description |  -->
 

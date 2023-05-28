@@ -20,6 +20,9 @@
 
 // TODO: Infinitely scrolling grid of recently added lab results.
 
+// TODO: Allow user's to add lab results through URLS, images that contain
+// QR codes, or by uploading a COA PDF.
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 

@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/15/2020
-Updated: 1/31/2023
+Updated: 5/27/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # pylint:disable=line-too-long
@@ -19,33 +19,33 @@ app_context = {
     "footer": {
         "index": [
             {
-                "name": "Solutions",
+                "name": "Explore",
                 "links": [
-                    {"title": "Labs", "page": "testing"},
-                    {"title": "Producers", "page": "producers"},
-                    {"title": "Retailers", "page": "retailers"},
-                    {"title": "Integrators", "page": "integrators"},
-                    {"title": "Data Scientists", "page": "data-science"},
+                    {"title": "Contributors", "page": "contributors"},
+                    {"title": "Sponsors", "page": "sponsors"},
+                    {"title": "Whitepapers", "page": "whitepapers"},
+                    {"title": "Support", "page": "support"},
+                    {"title": "GitHub", "url": "https://github.com/cannlytics"},
                 ]
             },
             {
                 "name": "Docs",
                 "links": [
-                    {"title": "API", "url": "https://docs.cannlytics.com/api/about"},
-                    {"title": "Developers", "url": "https://docs.cannlytics.com/developers/development"},
-                    {"title": "LIMS", "url": "https://docs.cannlytics.com/cannlytics/lims/lims"},
-                    {"title": "Metrc", "url": "https://docs.cannlytics.com/cannlytics/traceability/metrc"},
-                    {"title": "Users", "url": "https://docs.cannlytics.com/console/get-started"},
+                    {"title": "AI", "url": "https://github.com/cannlytics/cannlytics/tree/main/ai"},
+                    {"title": "API", "url": "https://github.com/cannlytics/cannlytics/tree/main/api"},
+                    {"title": "CoADoc", "url": "https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas"},
+                    {"title": "Metrc SDK", "url": "https://github.com/cannlytics/cannlytics/tree/main/cannlytics/metrc"},
+                    {"title": "Developers", "url": "https://github.com/cannlytics/cannlytics/tree/main/docs/developers"},
                 ]
             },
             {
                 "name": "About",
                 "links": [
+                    {"title": "Meetup", "url": "https://meetup.com/cannabis-data-science"},
+                    {"title": "Issues", "url": "https://github.com/cannlytics/cannlytics/issues"},
                     {"title": "Story", "url": "https://docs.cannlytics.com/about/about"},
-                    {"title": "Roadmap", "url": "https://docs.cannlytics.com/developers/roadmap"},
-                    {"title": "Whitepapers", "page": "whitepapers"},
-                    {"title": "Sponsor", "page": "sponsors"},
-                    {"title": "Support", "page": "support"},
+                    {"title": "Jobs", "page": "jobs"},
+                    {"title": "Contact", "page": "contact"},
                 ]
             }
         ]
@@ -102,14 +102,14 @@ material = {
     },
     "homepage": {
         "hero": {
-            "title": "Advanced Statistics and Cannabis Data",
-            "message": "Automated statistics and the finest curated data for your cannabis OP to push the bounds of what is possible. Open-source, decentralized, and made with 💖!",
-            "image": "website/images/engine_icons/space_cultivation.svg",
+            "title": '<span class="serif" style="color: #ffa600;">Cann</span>abis Data and Ana<span class="serif" style="color: #ffa600;">lytics</span>',
+            "message": "And a suite of tools that you can use to wrangle, standardize, and analyze cannabis data.",
+            "image": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_A_super_wealthy_Hippie_muscular_gorilla_with_a_glue__e978598d-f8af-4f28-94c9-7064815d80e8.png?alt=media&token=0655d43c-456b-48cb-9703-2b49d8ed8a13",
             # "image": "website/images/decoration/data-pipeline.png",
             "primary_action": "Get Started 🌱",
-            "primary_action_url": "https://docs.cannlytics.com",
+            "primary_action_url": "https://data.cannlytics.com",
             "secondary_action": "Sign Up 🚀",
-            "secondary_action_url": "https://console.cannlytics.com/account/sign-up",
+            "secondary_action_url": "https://app.cannlytics.com",
         },
         "features": [
             {
@@ -321,6 +321,17 @@ page_data = {
     "checkout": {"documents": [{"name": "paypal", "ref": "credentials/paypal"}]},
     "contributors": {
         "collections": [{"name": "contributors", "ref": "public/contributors/contributor_data"}],
+    },
+    "jobs": {
+        "collections": [
+            {
+                "name": "jobs",
+                "ref": "public/data/jobs",
+                "limit": 10,
+                "order_by": "job_title",
+                "desc": True
+            }
+        ],
     },
     "effects": {
         "documents": [

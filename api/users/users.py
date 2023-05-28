@@ -4,8 +4,8 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/22/2021
-Updated: 3/14/2022
-License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+Updated: 5/27/2023
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API interface for Cannlytics users to manage their personal data.
 """

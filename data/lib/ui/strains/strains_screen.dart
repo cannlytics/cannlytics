@@ -25,27 +25,20 @@ import 'package:cannlytics_data/common/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 
+// TODO: Allow user's to report new strains.
+
+/// TODO: Show newest strains, favorite strains, and "your" strains.
+
 /// Screen.
 class StrainsScreen extends StatelessWidget {
   const StrainsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // App bar.
-      appBar: DashboardHeader(),
-
-      // Side menu.
-      drawer: Responsive.isMobile(context) ? MobileDrawer() : null,
-
-      // Body.
-      body: Console(slivers: [
-        // Main content.
+    return ConsoleScreen(
+      children: [
         SliverToBoxAdapter(child: MainContent()),
-
-        // Footer.
-        const SliverToBoxAdapter(child: Footer()),
-      ]),
+      ],
     );
   }
 }
@@ -110,7 +103,87 @@ class MainContent extends ConsumerWidget {
   }
 }
 
-/// Table.
+enum Filter { newest, hot, yours }
+
+/// Grid of strains.
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  ScrollController _scrollController = ScrollController();
+  List<String> _data = List.generate(20, (index) => "Item $index");
+  Filter _filter = Filter.newest;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _loadMoreData();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      GridView.builder(
+        controller: _scrollController,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+        ),
+        itemCount: _data.length,
+        itemBuilder: (context, index) {
+          return Card(
+            child: Center(
+              child: Text(_data[index]),
+            ),
+          );
+        },
+      ),
+    ]);
+    // appBar: AppBar(
+    //   title: Text('Infinite Scrolling Grid'),
+    //   actions: [
+    //     PopupMenuButton<Filter>(
+    //       onSelected: (Filter result) {
+    //         setState(() {
+    //           _filter = result;
+    //         });
+    //       },
+    //       itemBuilder: (BuildContext context) => <PopupMenuEntry<Filter>>[
+    //         const PopupMenuItem<Filter>(
+    //           value: Filter.newest,
+    //           child: Text('Newest'),
+    //         ),
+    //         const PopupMenuItem<Filter>(
+    //           value: Filter.hot,
+    //           child: Text('Hot'),
+    //         ),
+    //         const PopupMenuItem<Filter>(
+    //           value: Filter.yours,
+    //           child: Text('Yours'),
+    //         ),
+    //       ],
+    //     ),
+    //   ],
+    // ),
+  }
+
+  Future<void> _loadMoreData() async {
+    // Implement your logic here to fetch more data. For now, we will simply add 20 more items to the _data list.
+    await Future.delayed(Duration(seconds: 2)); // Emulates network delay
+    setState(() {
+      _data
+          .addAll(List.generate(20, (index) => "Item ${_data.length + index}"));
+    });
+  }
+}
+
+/// FIXME: Table.
 class StrainsTable extends ConsumerWidget {
   const StrainsTable({super.key});
 

@@ -4,12 +4,16 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 1/17/2021
- * Updated: 1/31/2023
+ * Updated: 5/28/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { getDocument } from '../firebase.js';
 import { authRequest, getUrlParameter, showNotification, validateEmail } from '../utils.js';
 import { hideLoadingButton, showLoadingButton } from '../ui/ui.js';
+
+/**---------------------------------------------------------------------------
+ * PayPal Subscriptions
+ *--------------------------------------------------------------------------*/
 
 const submitSubscription = async function(details, subscriptionID, planName) {
   /**
@@ -76,6 +80,38 @@ export const payments = {
     addPayPalButton(premiumSubscription.plan_id, 'premium');
   },
 
+  async subscribe(subscription, subscriptionType = 'subscribe') {
+    /**
+     * Subscribe email, then navigate to the confirmation page.
+     * @param {Object} subscription An object with subscription data.
+     * @param {String} subscriptionType The type of subscription.
+     */
+    let data;
+    const form = document.getElementById('account-information');
+    showLoadingButton(`${subscriptionType}-button`);
+    if (form) {
+      data = Object.fromEntries(new FormData(form).entries());
+      data = { ...data, ...subscription };
+    } else {
+      const userEmail = document.getElementById(`${subscriptionType}-email`).value;
+      if (!validateEmail(userEmail)) {
+        const message = 'Please provide a valid email.'
+        showNotification('Invalid email', message, /* type = */ 'error');
+        hideLoadingButton(`${subscriptionType}-button`);
+        return;
+      }
+      data = { email: userEmail, plan_name: 'newsletter' };
+    }
+    const response = await authRequest('/src/payments/subscribe', data);
+    if (response.success) {
+      window.location.href = `${window.location.origin}/subscriptions/subscribed`;
+    } else {
+      const message = 'An error occurred when processing your subscription. Please contact dev@cannlytics.com for help.';
+      showNotification('Error saving your account', response.message, /* type = */ 'error');
+      hideLoadingButton(`${subscriptionType}-button`);
+    }
+  },
+
   /**---------------------------------------------------------------------------
    * Manage Subscriptions
    *--------------------------------------------------------------------------*/
@@ -112,6 +148,22 @@ export const payments = {
     // Initialize subscriptions.
     // this.initializePremiumSubscription();
     this.initializeSupport();
+  },
+
+  async getSubscription(name) {
+    /**
+     * Get a subscription given its name.
+     * @param {String} name The name of the subscription plan.
+     */
+    return await getDocument(`public/subscriptions/subscription_plans/${name}`);
+  },
+
+  async getUserSubscriptions() {
+    /**
+     * Get the current user's subscriptions.
+     */
+    const response = await authRequest('/src/payments/subscriptions');
+    return response.data;
   },
 
   async changeSupportSubscription() {
@@ -168,8 +220,23 @@ export const payments = {
     document.getElementById('cancel-support-button').classList.add('d-none');
   },
 
+  async cancelSubscription(planName) {
+    /**
+     * Cancel a PayPal subscription for a user.
+     * @param {String} planName The name of the subscription to cancel.
+     */
+    await authRequest('/api/payments/unsubscribe', { plan_name: planName });
+    if (response.success) {
+      const message = 'An error occurred when saving your account.';
+      showNotification('Subscription canceled', message, /* type = */ 'success');
+    } else {
+      const message = 'An error occurred when canceling your subscription. Please email support.';
+      showNotification('Error Canceling Subscription', message, /* type = */ 'error');
+    }
+  },
+
   /**---------------------------------------------------------------------------
-   * Newsletter
+   * Subscription Plans
    *--------------------------------------------------------------------------*/
 
   async subscribeToFreeNewsletter() {
@@ -187,10 +254,6 @@ export const payments = {
       showNotification('Unsubscribed', message, /* type = */ 'success');
     }
   },
-
-  /**---------------------------------------------------------------------------
-   * Premium
-   *--------------------------------------------------------------------------*/
 
   async subscribeToPremium() {
     /**
@@ -458,71 +521,9 @@ export const payments = {
 
   },
 
-  async subscribe(subscription) {
-    /**
-     * Subscribe email, then navigate to the confirmation page.
-     * @param {Object} subscription An object with subscription data.
-     */
-    const form = document.getElementById('account-information');
-    let data;
-    showLoadingButton('subscribe-button');
-    if (form) {
-      data = Object.fromEntries(new FormData(form).entries());
-      data = { ...data, ...subscription };
-    } else {
-      const userEmail = document.getElementById('sign-up-email').value;
-      if (!validateEmail(userEmail)) {
-        const message = 'Please provide a valid email.'
-        showNotification('Invalid email', message, /* type = */ 'error');
-        hideLoadingButton('subscribe-button');
-        return;
-      }
-      data = { email: userEmail, plan_name: 'newsletter' };
-    }
-    const response = await authRequest('/src/payments/subscribe', data);
-    if (response.success) {
-      window.location.href = `${window.location.origin}/subscriptions/subscribed`;
-    } else {
-      const message = 'An error occurred when saving your account.';
-      showNotification('Error saving your account', response.message, /* type = */ 'error');
-      hideLoadingButton('subscribe-button');
-    }
-  },
-
   /**---------------------------------------------------------------------------
    * Misc
    *--------------------------------------------------------------------------*/
-
-  async cancelSubscription(planName) {
-    /**
-     * Cancel a PayPal subscription for a user.
-     * @param {String} planName The name of the subscription to cancel.
-     */
-    await authRequest('/api/payments/unsubscribe', { plan_name: planName });
-    if (response.success) {
-      const message = 'An error occurred when saving your account.';
-      showNotification('Subscription canceled', message, /* type = */ 'success');
-    } else {
-      const message = 'An error occurred when canceling your subscription. Please email support.';
-      showNotification('Error Canceling Subscription', message, /* type = */ 'error');
-    }
-  },
-
-  async getSubscription(name) {
-    /**
-     * Get a subscription given its name.
-     * @param {String} name The name of the subscription plan.
-     */
-    return await getDocument(`public/subscriptions/subscription_plans/${name}`);
-  },
-
-  async getUserSubscriptions() {
-    /**
-     * Get the current user's subscriptions.
-     */
-    const response = await authRequest('/src/payments/subscriptions');
-    return response.data;
-  },
 
   async logPromo() {
     /**
@@ -535,6 +536,10 @@ export const payments = {
   },
 
 };
+
+/**---------------------------------------------------------------------------
+ * Notifications
+ *--------------------------------------------------------------------------*/
 
 export const reportError = async () => {
   /**

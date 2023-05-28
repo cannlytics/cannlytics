@@ -344,6 +344,7 @@ if __name__ == '__main__':
 #-----------------------------------------------------------------------
 
 def get_results_the_flowery(
+        data_dir: str,
         slug = 'the-flowery',
         producer_license_number = 'MMTC-2019-0020',
         lists_url = 'https://support.theflowery.co/hc/en-us/sections/7240468576283-Drop-Information',
@@ -387,7 +388,7 @@ def get_results_the_flowery(
     driver.quit()
 
     # Create an output directory.
-    datasets_dir = os.path.join(DATA_DIR, '.datasets')
+    datasets_dir = os.path.join(data_dir, '.datasets')
     if not os.path.exists(datasets_dir):
         os.makedirs(datasets_dir)
 

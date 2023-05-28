@@ -21,33 +21,33 @@
           <use href="{% static "website/images/emojies/brain.svg" %}#brain-emoji"></use>
         </svg>
         <h2 class="fs-3 text-dark fw-bold my-2">
-          The Cannlytics Console
+          Get Cannabis Data
         </h2>
         <p class="fs-6 double-line mb-2">
-          If you need a hosted solution, then you can 
-          take advantage of the ready to use Cannlytics console for
-          hosting, analysis, and data and file storage.
-          You can manage your lab results and provide your
-          clients with a simple, yet complete, client portal.
+          Abundant, rich, valuable cannabis data is so close,
+          yet so far away!
+          Cannlytics puts these vital data in your hands
+          by finding, wrangling, standardizing, and cleanly
+          returning the data to you.
         </p>
         <div class="d-none d-lg-flex mt-3">
           <a
             class="btn btn-sm-light btn-md-light serif"
-            href="https://console.cannlytics.com/account/sign-up"
+            href="https://data.cannlytics.com"
           >
-            Create an account &rarr;
+            Get cannabis data &rarr;
           </a>
         </div>
       </div>
     </div>
-    <a class="col-11 col-md-8 col-lg-6" href="https://console.cannlytics.com">
+    <a class="col-11 col-md-8 col-lg-6" href="https://data.cannlytics.com">
       <img
-        src="{% static 'website/images/screenshots/console_dashboard_light.png' %}"
+        src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fdemos%2Fcannlytics-data%2Fcannlytics-data-app-light.png?alt=media&token=91f7c01c-d6dd-4e7f-9f82-5d8faef770a2"
         class="rounded shadow light-only"
         height="275px"
       >
       <img
-        src="{% static 'website/images/screenshots/console_dashboard_dark.png' %}"
+        src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fdemos%2Fcannlytics-data%2Fcannlytics-data-app-dark.png?alt=media&token=fb10a14c-bd45-4bcd-b6fe-63c0b749d9f8"
         class="rounded shadow dark-only"
         height="275px"
       >
@@ -116,9 +116,9 @@
         <div class="d-none d-lg-flex mt-3">
           <a
             class="btn btn-sm-light btn-md-light serif"
-            href="https://docs.cannlytics.com/developers/development"
+            href="https://pypi.org/project/cannlytics/"
           >
-            Use the Components &rarr;
+            Use the SDK &rarr;
           </a>
         </div>
       </div>
@@ -132,16 +132,14 @@ title="Copy snippet"
 {% icon "copy" class="link-secondary" height="24px" width="24px" %}
 </button>
 
-<pre><span></span><code id="codeblock-2"><span class="kn">from</span> <span class="nn">cannlytics</span> <span class="kn">import</span> <span class="n">metrc</span>
+<pre><span></span><code id="codeblock-2"><span class="c1"># pip install cannlytics</span>
+<span class="kn">from</span> <span class="nn">cannlytics.metrc</span> <span class="kn">import</span> <span class="n">Metrc</span>
 
-<span class="c1"># Initalize Metrc.</span>
-<span class="n">track</span> <span class="o">=</span> <span class="n">metrc</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="s2">"vendor"</span><span class="o">, </span><span class="s2">"user"</span><span class="p">)</span>
+<span class="c1"># Connect to Metrc.</span>
+<span class="n">track</span> <span class="o">=</span> <span class="n">Metrc</span><span class="p">(</span><span class="s2">"vendor-api-key"</span><span class="o">, </span><span class="s2">"user-api-key"</span><span class="p">)</span>
 
-<span class="c1"># Labs can post lab results.</span>
-<span class="n">track.post_lab_results([{...}, {...}])</span>
-
-<span class="c1"># You can get your lab results!</span>
-<span class="n">lab_results = track.get_lab_results(uid=</span><span class="s2">"tag"</span><span class="o">)</span>
+<span class="c1"># Get your lab results!</span>
+<span class="n">results = track.get_lab_results(uid=</span><span class="s2">"tag"</span><span class="o">)</span>
 </code></pre></div>
   </div>
 

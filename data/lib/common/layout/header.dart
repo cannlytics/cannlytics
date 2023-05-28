@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+// import 'package:package_info_plus/package_info_plus.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
@@ -169,40 +169,40 @@ class TestBadge extends StatelessWidget {
           ),
           SizedBox(width: 4),
           Text(
-            'Test Version ',
+            'Test Release',
             style: Theme.of(context)
                 .textTheme
                 .bodySmall!
                 .copyWith(color: LightColors.text),
           ),
-          FutureBuilder<String>(
-            future: getVersionNumber(),
-            builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-              if (snapshot.hasData && snapshot.data != null) {
-                return Text(
-                  snapshot.data ?? '',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall!
-                      .copyWith(color: LightColors.text),
-                );
-              } else if (snapshot.hasError) {
-                return gapW2;
-              } else {
-                return gapW2;
-              }
-            },
-          )
+          // FutureBuilder<String>(
+          //   future: getVersionNumber(),
+          //   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          //     if (snapshot.hasData && snapshot.data != null) {
+          //       return Text(
+          //         snapshot.data ?? '',
+          //         style: Theme.of(context)
+          //             .textTheme
+          //             .bodySmall!
+          //             .copyWith(color: LightColors.text),
+          //       );
+          //     } else if (snapshot.hasError) {
+          //       return gapW2;
+          //     } else {
+          //       return gapW2;
+          //     }
+          //   },
+          // )
         ],
       ),
     );
   }
 
-  /// Get app version number.
-  Future<String> getVersionNumber() async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    List<String> parts = packageInfo.version.split('.');
-    String truncatedVersion = parts[0] + '.' + parts[1];
-    return truncatedVersion;
-  }
+  // /// Get app version number.
+  // Future<String> getVersionNumber() async {
+  //   PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  //   List<String> parts = packageInfo.version.split('.');
+  //   String truncatedVersion = parts[0] + '.' + parts[1];
+  //   return truncatedVersion;
+  // }
 }
