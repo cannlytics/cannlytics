@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/15/2020
-Updated: 5/27/2023
+Updated: 5/29/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # pylint:disable=line-too-long
@@ -12,20 +12,21 @@ from website.settings import DEFAULT_FROM_EMAIL
 
 app_context = {
     "app_name": "Cannlytics",
+    "homepage": "https://cannlytics.com",
+    "description": "Cannlytics is a suite of free software for cannabis-testing laboratories, empowering you with a state-of-the-art system.",
     "contact_email": DEFAULT_FROM_EMAIL,
     "contact_phone": "(828) 395-3954",
     "contact_phone_number": "18283953954",
-    "description": "Cannlytics is a suite of free software for cannabis-testing laboratories, empowering you with a state-of-the-art system.",
     "footer": {
         "index": [
             {
                 "name": "Explore",
                 "links": [
-                    {"title": "Contributors", "page": "contributors"},
-                    {"title": "Sponsors", "page": "sponsors"},
-                    {"title": "Whitepapers", "page": "whitepapers"},
-                    {"title": "Support", "page": "support"},
                     {"title": "GitHub", "url": "https://github.com/cannlytics"},
+                    {"title": "Hugging Face", "url": "https://huggingface.co/cannlytics"},
+                    {"title": "Whitepapers", "page": "whitepapers"},
+                    {"title": "Slack", "url": "https://join.slack.com/t/cannlytics/shared_invite/zt-1wfbpb61s-JyN2Rt0H4xCmNigop4roWg"},
+                    {"title": "Meetup", "url": "https://meetup.com/cannabis-data-science"},
                 ]
             },
             {
@@ -41,16 +42,16 @@ app_context = {
             {
                 "name": "About",
                 "links": [
-                    {"title": "Meetup", "url": "https://meetup.com/cannabis-data-science"},
-                    {"title": "Issues", "url": "https://github.com/cannlytics/cannlytics/issues"},
+                    {"title": "Contributors", "page": "contributors"},
+                    {"title": "Support", "page": "support"},
                     {"title": "Story", "url": "https://docs.cannlytics.com/about/about"},
+                    # {"title": "Issues", "url": "https://github.com/cannlytics/cannlytics/issues"},
                     {"title": "Jobs", "page": "jobs"},
                     {"title": "Contact", "page": "contact"},
                 ]
             }
         ]
     },
-    "homepage": "https://cannlytics.com",
     "logos": {
         "light": "website/images/logos/cannlytics_logo_with_phrase.svg",
         "dark": "website/images/logos/cannlytics_logo_with_phrase_dark.svg",
@@ -105,87 +106,12 @@ material = {
             "title": '<span class="serif" style="color: #ffa600;">Cann</span>abis Data and Ana<span class="serif" style="color: #ffa600;">lytics</span>',
             "message": "And a suite of tools that you can use to wrangle, standardize, and analyze cannabis data.",
             "image": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_A_super_wealthy_Hippie_muscular_gorilla_with_a_glue__e978598d-f8af-4f28-94c9-7064815d80e8.png?alt=media&token=0655d43c-456b-48cb-9703-2b49d8ed8a13",
-            # "image": "website/images/decoration/data-pipeline.png",
             "primary_action": "Get Started 🌱",
             "primary_action_url": "https://data.cannlytics.com",
             "secondary_action": "Sign Up 🚀",
             "secondary_action_url": "https://app.cannlytics.com",
         },
-        "features": [
-            {
-                "title": "Smart Integrations",
-                "message": "We believe that everyone benefits when people are able to study and tinker with their software. With the freedom provided by Cannlytics, users control their software and what it does for them.",
-                "image": "website/images/illustrations/cannlytics_developer.svg",
-                "action": "Begin customizing",
-                "action_url": "/support",
-            },
-            {
-                "title": "Analysis Tailored",
-                "message": "Cannlytics provides a user-friendly interface to quickly receive samples, perform analyses, collect and review results, and publish certificates of analysis (CoAs). There are also built in logistics, CRM (client relationship management), inventory management, and invoicing tools.",
-                "image": "website/images/illustrations/cannlytics_scientist.svg",
-                "action": "View capabilities",
-                "action_url": "/community",
-            },
-            {
-                "title": "Community Driven",
-                "message": "Built by scientist for scientists. Cannlytics empowers you with control over the development process, resources, and decision making authority. We believe that the Cannlytics community is the best judge of how Cannlytics can be improved, so, we have entrusted the Cannlytics source code with you.",
-                "image": "website/images/illustrations/cannlytics_collaboration.svg",
-                "action": "Join today",
-                "action_url": "/testing",
-            }
-        ],
-        "featurettes": [
-            {
-                "title": "Automate your lab.",
-                "subtitle": "Free your time for science and analysis.",
-                "message": "The more mundane tasks that you can automate and execute quickly and efficiently with the Cannlytics Engine, then the more time you have to conduct science and experiments.",
-                "image": "website/images/screenshots/console_intake_light.png",
-                "image_dark": "website/images/screenshots/console_intake_dark.png",
-            },
-            {
-                "title": "Extend, modify, and personalize.",
-                "subtitle": "Add anything that you need.",
-                "message": "An advantage of the Cannlytics Engine over proprietary software solutions is that Cannlytics lets you make modifications as you need because Cannlytics is an open box of free software.",
-                "image": "website/images/screenshots/console_account_light.png",
-                "image_dark": "website/images/screenshots/console_account_dark.png",
-            },
-            {
-                "title": "Freedom at your fingertips.",
-                "subtitle": "It's all yours.",
-                "message": "Cannlytics is a system of free software that you can use to power your lab. Cannlytics belongs to you so that you can use the Cannlytics Engine however that you please. Free software lets you operate ethically with the sky as the limit.",
-                "image": "website/images/screenshots/console_help_light.png",
-                "image_dark": "website/images/screenshots/console_help_dark.png",
-            }
-        ]
     },
-    # "sponsors": {
-    #     "tiers": [
-    #         # {
-    #         #     "price": "$1,600",
-    #         #     "frequency": "one time",
-    #         #     "reward": "The founder and CEO of Cannlytics will give a talk at your conference.",
-    #         #     "tier": "1",
-    #         # },
-    #         {
-    #             "price": "$240 / mo.",
-    #             "frequency": "a month",
-    #             "reward": "One hour of pair-programming with a lead Cannlytics developer each week.",
-    #             "tier": "3",
-    #         },
-    #         {
-    #             "price": "$100 / mo.",
-    #             "frequency": "a month",
-    #             "reward": "Your logo or name is displayed on the Cannlytics website homepage.",
-    #             "tier": "2",
-    #         },
-    #         {
-    #             "price": "$14.20 / mo.",
-    #             "frequency": "a month",
-    #             "reward": "Your logo or name goes is included in each Cannlytics README to be displayed on GitHub.",
-    #             "tier": "4",
-    #         },
-    #     ]
-    # },
     "subscriptions": {
         "premium": {
             "name": "Premium",
@@ -206,44 +132,40 @@ material = {
             {
                 "name": "Enterprise",
                 "plan_name": "enterprise",
-                "price": "$1,420 / mo.",
+                "price": "$420 / mo.",
                 "color": "purple",
                 "action": "Launch Now 🚀",
                 "url": "/subscriptions/checkout?name=enterprise",
                 "attributes": [
-                    {"title": "Metrc integration*", "active": True},
-                    {"title": "Unlimited API access", "active": True},
-                    {"title": "Custom installation", "active": True},
-                    {"title": "24/7 phone support", "active": True},
-                    # "Prioritized issues",
+                    {"title": "10,000 AI tasks", "active": True},
+                    {"title": "30 requests / second", "active": True},
+                    {"title": "4 hours support", "active": True},
                 ],
             },
             {
                 "name": "Developer",
                 "plan_name": "pro",
-                "price": "$420 / mo.",
+                "price": "$42 / mo.",
                 "color": "orange",
                 "action": "Get Started 🏃‍♀️",
                 "url": "/subscriptions/checkout?name=pro",
                 "attributes": [
-                    {"title": "Metrc integration*", "active": True},
-                    {"title": "Unlimited API access", "active": True},
-                    {"title": "Custom installation", "active": False},
-                    {"title": "24/7 phone support", "active": False},
+                    {"title": "750 AI tasks", "active": True},
+                    {"title": "3 requests / second", "active": True},
+                    {"title": "1 hour of support", "active": True},
                 ],
             },
             {
-                "name": "API Only",
+                "name": "Standard",
                 "plan_name": "premium",
                 "price": "$4.20 / mo.",
                 "color": "green",
                 "action": "Sign Up ✍️",
                 "url": "/subscriptions/checkout?name=premium",
                 "attributes": [
-                    {"title": "Unlimited API access", "active": True},
-                    {"title": "Metrc integration*", "active": False},
-                    {"title": "Custom installation", "active": False},
-                    {"title": "24/7 phone support", "active": False},
+                    {"title": "50 AI tasks", "active": True},
+                    {"title": "1 request / 3 seconds", "active": True},
+                    {"title": "15 minutes of support", "active": True},
                 ],
             },
         ],
@@ -289,6 +211,8 @@ lab_state = {
 # Page-specific markdown documents.
 #-----------------------------------------------------------------------
 
+# Page documents where the key is the page name and the value is a list
+# of markdown documents to load.
 page_docs = {
     "ai": ["ai", "ai_conclusion"],
     "api": ["api"],
@@ -306,6 +230,8 @@ page_docs = {
 # Page-specific data loaded from Firestore.
 #-----------------------------------------------------------------------
 
+# Page data where the key is the page name and the value is a dictionary
+# of `collections` and `documents` that contain Firestore queries.
 page_data = {
     "articles": {
         "collections": [
@@ -316,44 +242,39 @@ page_data = {
                 "order_by": "published_at",
                 "desc": True
             }
-        ],
+        ]
     },
-    "checkout": {"documents": [{"name": "paypal", "ref": "credentials/paypal"}]},
+    "checkout": {
+        "documents": [
+            {
+                "name": "paypal",
+                "ref": "credentials/paypal"
+            }
+        ]
+    },
     "contributors": {
-        "collections": [{"name": "contributors", "ref": "public/contributors/contributor_data"}],
-    },
-    "jobs": {
         "collections": [
             {
-                "name": "jobs",
-                "ref": "public/data/jobs",
-                "limit": 10,
-                "order_by": "job_title",
-                "desc": True
+                "name": "contributors",
+                "ref": "public/contributors/contributor_data"
             }
-        ],
+        ]
     },
     "effects": {
         "documents": [
-            {"name": "variables", "ref": "public/data/variables/effects_and_aromas"}
+            {
+                "name": "variables",
+                "ref": "public/data/variables/effects_and_aromas"
+            }
         ]
     },
-    "map": {
-        "documents": [{"name": "google", "ref": "credentials/google"}],
-    },
-    "market": {
+    "events": {
         "collections": [
             {
-                "name": "datasets",
-                "ref": "public/data/datasets",
-                "limit": 10,
-                "order_by": "price_usd",
-                "desc": True
+                "name": "events",
+                "ref": "public/events/event_data"
             }
-        ],
-    },
-    "events": {
-        "collections": [{"name": "events", "ref": "public/events/event_data"}],
+        ]
     },
     "homepage": {
         "collections": [
@@ -368,40 +289,99 @@ page_data = {
                 "name": "verifications",
                 "ref": "public/verifications/verification_data",
                 "limit": None,
-                "order_by": "state",
+                "order_by": "state"
+            }
+        ]
+    },
+    "jobs": {
+        "collections": [
+            {
+                "name": "jobs",
+                "ref": "public/data/jobs",
+                "limit": 10,
             },
+            {
+                "name": "team",
+                "ref": "public/team/team_members"
+            }
+        ],
+    },
+    "map": {
+        "documents": [
+            {
+                "name": "google",
+                "ref": "credentials/google"
+            }
+        ]
+    },
+    "market": {
+        "collections": [
+            {
+                "name": "datasets",
+                "ref": "public/data/datasets",
+                "limit": 10,
+                "order_by": "price_usd",
+                "desc": True
+            }
         ],
     },
     "partners": {
-        "collections": [{"name": "partners_list", "ref": "public/partners/partner_data"}],
+        "collections": [
+            {
+                "name": "partners_list",
+                "ref": "public/partners/partner_data"
+            }
+        ]
     },
     "personality": {
         "documents": [
-            {"name": "variables", "ref": "public/data/variables/personality_test"}
+            {
+                "name": "variables",
+                "ref": "public/data/variables/personality_test"
+            }
         ]
     },
     "sponsors": {
-        "collections": [{
-            "name": "sponsorships",
-            "ref": "public/subscriptions/sponsorships",
-            "order_by": "cost",
-            "desc": True,
-        }],
+        "collections": [
+            {
+                "name": "sponsorships",
+                "ref": "public/subscriptions/sponsorships",
+                "order_by": "cost",
+                "desc": True,
+            }
+        ]
     },
     "subscriptions": {
-        "documents": [{"name": "paypal", "ref": "credentials/paypal"}],
-        "collections": [{
-            "name": "sponsorships",
-            "ref": "public/subscriptions/sponsorships",
-            "order_by": "cost",
-            "desc": True,
-        }],
+        "documents": [
+            {
+                "name": "paypal",
+                "ref": "credentials/paypal"
+            }
+        ],
+        "collections": [
+            {
+                "name": "sponsorships",
+                "ref": "public/subscriptions/sponsorships",
+                "order_by": "cost",
+                "desc": True
+            }
+        ]
     },
     "support": {
-        "documents":[{"name": "paypal", "ref": "credentials/paypal"}],
+        "documents": [
+            {
+                "name": "paypal",
+                "ref": "credentials/paypal"
+            }
+        ]
     },
     "team": {
-        "collections": [{"name": "team", "ref": "public/team/team_members"}],
+        "collections": [
+            {
+                "name": "team",
+                "ref": "public/team/team_members"
+            }
+        ]
     },
     "videos": {
         "collections": [
@@ -415,6 +395,11 @@ page_data = {
         ],
     },
     "whitepapers": {
-        "collections": [{"name": "whitepapers", "ref": "public/whitepapers/whitepaper_data"}],
+        "collections": [
+            {
+                "name": "whitepapers",
+                "ref": "public/whitepapers/whitepaper_data"
+            }
+        ]
     }
 }

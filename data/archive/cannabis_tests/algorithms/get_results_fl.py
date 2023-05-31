@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 5/25/2023
+Updated: 5/30/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -326,7 +326,7 @@ if __name__ == '__main__':
 
     # [✓] TEST: Get Kaycha COAs.
     kaycha_coas = get_results_kaycha(DATA_DIR)
-
+    pass
 
 
 # TODO: Begin to parse lab results from the PDFs!
@@ -421,16 +421,127 @@ def get_results_the_flowery(
             pdf.write(response.content)
         print('Downloaded: %s' % outfile)
 
+    # TODO: Save details about each COA, including The Flowery company data.
+
     # Return the COA URLs.
     return df
+
+# FIXME: Turn into a function.
+
+# import requests
+
+# # Setup
+# overwrite = False
+
+# # Initialize Selenium.
+# try:
+#     service = Service()
+#     options = Options()
+#     options.add_argument('--window-size=1920,1200')
+#     options.add_argument('--headless')
+#     options.add_argument('--disable-gpu')
+#     options.add_argument('--no-sandbox')
+#     driver = webdriver.Chrome(options=options, service=service)
+# except:
+#     driver = webdriver.Edge()
+
+# # Iterate over all of the product types.
+# observations = []
+# categories = ['Flower', 'Concentrates', 'Pre-Rolls', 'Vaporizers', 'Tinctures']
+# for category in categories:
+
+#     # Load the category page.
+#     url = f'https://theflowery.co/shop?categories[]={category}'
+#     driver.get(url)
+#     sleep(3.33)
+
+#     # Get all of the product cards.
+#     divs = driver.find_elements(by=By.CSS_SELECTOR, value='a.s-shop-product-card')
+#     for div in divs:
+        
+#         # Extract product name.
+#         product_name = div.find_element(by=By.CLASS_NAME, value='title').text
+
+#         # Extract product image URL.
+#         product_image = div.find_element(by=By.TAG_NAME, value='img').get_attribute('src')
+
+#         # Extract product price.
+#         product_price = float(div.find_element(by=By.CLASS_NAME, value='full-price').text.strip('$'))
+
+#         # Extract strain type.
+#         strain_type = div.find_element(by=By.CLASS_NAME, value='sort').text
+
+#         # Extract product URL (assuming the URL is stored in the href attribute of a link)
+#         product_url = div.get_attribute('href')
+
+#         # Store the extracted data in a dictionary
+#         obs = {
+#             'product_name': product_name,
+#             'image_url': product_image,
+#             'product_price': product_price,
+#             'strain_type': strain_type,
+#             'product_url': product_url
+#         }
+#         observations.append(obs)
+
+# # TODO: Get the COA URL for each product.
+# # - image_url
+# for i, obs in enumerate(observations):
+#     coa_url = ''
+#     driver.get(obs['product_url'])
+#     sleep(3.33)
+#     links = driver.find_elements(by=By.TAG_NAME, value='a')
+#     for link in links:
+#         if link.get_attribute('href') and '.pdf' in link.get_attribute('href'):
+#             coa_url = link.get_attribute('href')
+#             break
+#     observations[i]['coa_url'] = coa_url
+#     print('Found COA URL: %s' % coa_url)
+
+# # Download the COA PDFs.
+# license_pdf_dir = os.path.join(DATA_DIR, '.datasets', 'pdfs', 'MMTC-2019-0020')
+# for obs in observations:
+#     coa_url = obs['coa_url']
+
+#     # Get the sample ID
+#     sample_id = coa_url.split('/')[-1].split('.')[0]
+
+#     # Format the file.
+#     outfile = os.path.join(license_pdf_dir, f'{sample_id}.pdf')
+#     if os.path.exists(outfile) and not overwrite:
+#         continue
+#     sleep(0.3)
+
+#     # Download the PDF.
+#     response = requests.get(coa_url, headers=DEFAULT_HEADERS)
+#     with open(outfile, 'wb') as pdf:
+#         pdf.write(response.content)
+#     print('Downloaded: %s' % outfile)
+#     sleep(3.33)
+
+# # Merge The Flowery data with the COA data.
+# the_flowery = FLORIDA_LICENSES['MMTC-2019-0020']
+# observations = [{**the_flowery, **x} for x in observations]
+
+# # Save the data.
+# date = datetime.now().isoformat()[:19].replace(':', '-')
+# data = pd.DataFrame(observations)
+# datasets_dir = os.path.join(DATA_DIR, '.datasets')
+# data.to_excel(f'{datasets_dir}/the-flowery-lab-result-urls-{date}.xlsx', index=False)
+# print('Saved %i lab result URLs for The Flowery.' % len(data))
+# # return data
+
+
+
+
 
 
 # === Test ===
 if __name__ == '__main__':
 
     # [✓] TEST: Get The Flowery COAs.
-    the_flowery_coas = get_results_the_flowery(DATA_DIR)
-
+    # the_flowery_coas = get_results_the_flowery(DATA_DIR)
+    pass
 
 #-----------------------------------------------------------------------
 # TerpLife Labs (in development).
@@ -581,3 +692,4 @@ def get_results_terplife(
 
 
 # TODO: Parse TerpLife Labs COA PDF.
+

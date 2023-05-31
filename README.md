@@ -12,7 +12,7 @@
 
 </div>
 
-🔥 **Cannlytics** is a suite of tools that you can use to create, wrangle, and analyze cannabis data. We believe that people in the cannabis space would benefit from organized, decentralized, and accessible data. This repository contains each core component of Cannlytics and detailed instructions on how to build, develop, publish, and use each tool. You can find more information about each tool below:
+🔥 **Cannlytics** is a suite of tools that you can use to wrangle, standardize, and analyze cannabis data. We believe that people in the cannabis space would benefit from organized, decentralized, and accessible data. This repository contains each core component of Cannlytics and detailed instructions on how to build, develop, publish, and use each tool. You can find more information about each tool below:
 
 | Component | Status | Production URL |
 |---------|--------|----------|

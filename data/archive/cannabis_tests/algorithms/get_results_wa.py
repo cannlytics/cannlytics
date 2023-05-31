@@ -120,7 +120,7 @@ def augment_lab_results(
         print('Estimated runtime:', round(N * 0.000064, 2), 'hours')
 
     # Find lab results for each item by iterating over all items.
-    # FIXME: This is ridiculously slow. Is there any way to optimize?
+    # TODO: This is ridiculously slow. Is there any way to optimize?
     for n, item_id in enumerate(item_ids):
 
         # Find all lab results for the given item.
@@ -218,7 +218,7 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D:\\data\\washington\\'
-    DATA_DIR = f'{base}\\CCRS PRR (4-4-23)\\CCRS PRR (4-4-23)\\'
+    DATA_DIR = f'{base}\\CCRS PRR (5-7-23)\\CCRS PRR (5-7-23)\\'
     STATS_DIR = f'{base}\\ccrs-stats\\'
     lab_results = curate_ccrs_lab_results(DATA_DIR, STATS_DIR)
     print('Curated %i WA lab results.' % len(lab_results))

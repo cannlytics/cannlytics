@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 11/17/2021
-  Updated: 12/24/2021
+  Updated: 5/30/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -23,7 +23,8 @@
       primary_action_url='/contact?topic=join'
       secondary_action='Browse opportunities'
       secondary_action_url='https://github.com/orgs/cannlytics/projects'
-      image_url='website/images/illustrations/outline/lab_analyst_prep.svg'
+      background_image='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_A_very_beautiful_man_from_South_Africa_and_a_man_fro_38def0a8-1b4d-4751-9473-40312e6504d9.png?alt=media&token=af293e83-c0d0-4554-909f-8f0714d587a4'
+      background_position='top left'
       only
     %}
 
@@ -83,7 +84,7 @@
         <p class="text-start mt-3">
           <a
             class="btn btn-sm bg-gradient-green text-white"
-            href="{% url 'page' page='contact' %}?topic=join"
+            href="{% url 'page' page='jobs' %}"
           >
             <small>Join today</small> &rarr;
           </a>

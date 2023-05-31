@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/25/2023
-Updated: 5/25/2023
+Updated: 5/30/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -29,16 +29,6 @@ from bs4 import BeautifulSoup
 from cannlytics.utils.constants import DEFAULT_HEADERS
 import pandas as pd
 import requests
-
-
-# Specify where your data lives.
-DATA_DIR = 'D://data/california/lab_results'
-
-
-# FIXME: Create a function.
-def get_glass_house_farms_lab_results():
-    """Get lab results published by Glass House Farms."""
-    raise NotImplementedError
 
 
 # Glass House Farms constants.
@@ -99,160 +89,171 @@ STRAIN_TYPES = {
 #     obs['producer_longitude'] = licensee['premise_longitude']
 #     obs['producer_license_number'] = licensee['license_number']
 
-# Get Glass House Farms lab results.
-# ✓ image_url
-# ✓ strain_id
-# ✓ strain_name
-# ✓ strain_type
-# ✓ indica_percentage
-# ✓ sativa_percentage
-# ✓ strain_url
-# ✓ lineage
-# ✓ lab_result_id
-# ✓ coa_url
-overwrite = False
 
-# Create output directory.
-license_number = GLASS_HOUSE_FARMS['producer_license_number']
-license_pdf_dir = os.path.join(DATA_DIR, f'.datasets/{license_number}/pdfs')
-if not os.path.exists(license_pdf_dir):
-    os.makedirs(license_pdf_dir)
+def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
+    """Get lab results published by Glass House Farms.
+    Data points:
+        ✓ image_url
+        ✓ strain_id
+        ✓ strain_name
+        ✓ strain_type
+        ✓ indica_percentage
+        ✓ sativa_percentage
+        ✓ strain_url
+        ✓ lineage
+        ✓ lab_result_id
+        ✓ coa_url
+    """
 
-# Read the strains website.
-url = 'https://glasshousefarms.org/strains/'
-response = requests.get(url, headers=DEFAULT_HEADERS)
-soup = BeautifulSoup(response.content, 'html.parser')
+    # Create output directory.
+    license_number = GLASS_HOUSE_FARMS['producer_license_number']
+    license_pdf_dir = os.path.join(data_dir, f'.datasets/{license_number}/pdfs')
+    if not os.path.exists(license_pdf_dir):
+        os.makedirs(license_pdf_dir)
 
-# Get the data for each strain.
-observations = []
-strains = soup.find_all(class_='item')
-for strain in strains:
-    obs = {}
-
-    # Extract image URL
-    img_tag = strain.find('img')
-    obs['image_url'] = img_tag['src']
-
-    # Extract item type
-    strain_type = strain.find('h5').text
-    obs['strain_type'] = strain_type
-
-    # Extract item name
-    strain_name = strain.find('h4').text
-    strain_name = strain_name.replace('\n', '').replace(strain_type, '').strip()
-    obs['strain_name'] = strain_name
-
-    # Get the strain URL.
-    strain_url = strain.find('a', class_='exp')['href']
-    obs['strain_url'] = strain_url
-
-    # Get the strain ID.
-    obs['strain_id'] = strain_url.rstrip('/').split('/')[-1]
-
-    # Get the indica and sativa percentages.
-    wave = strain.find('div', class_='wave')
-    wave_class = wave.get('class')
-    wave_class = [cls for cls in wave_class if cls != 'wave']
-    if wave_class:
-        for cls in wave_class:
-            if cls in STRAIN_TYPES:
-                obs['indica_percentage'] = STRAIN_TYPES[cls]['indica_percentage']
-                obs['sativa_percentage'] = STRAIN_TYPES[cls]['sativa_percentage']
-                break
-
-    # Record the observation.
-    observations.append(obs)
-
-# Compile the strain data.
-strain_data = pd.DataFrame(observations)
-
-# Save the strain data.
-date = datetime.now().strftime('%Y-%m-%d')
-outfile = os.path.join(DATA_DIR, f'glass-house-farms-strains-{date}.xlsx')
-strain_data.to_excel(outfile, index=False)
-
-# Get the lab results for each strain.
-lab_results = []
-for obs in observations:
-
-    # Get the strain page.
-    sleep(1)
-    response = requests.get(obs['strain_url'] , headers=DEFAULT_HEADERS)
+    # Read the strains website.
+    url = 'https://glasshousefarms.org/strains/'
+    response = requests.get(url, headers=DEFAULT_HEADERS)
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    # Get the lineage.
+    # Get the data for each strain.
+    observations = []
+    strains = soup.find_all(class_='item')
+    for strain in strains:
+        obs = {}
+
+        # Extract image URL
+        img_tag = strain.find('img')
+        obs['image_url'] = img_tag['src']
+
+        # Extract item type
+        strain_type = strain.find('h5').text
+        obs['strain_type'] = strain_type
+
+        # Extract item name
+        strain_name = strain.find('h4').text
+        strain_name = strain_name.replace('\n', '').replace(strain_type, '').strip()
+        obs['strain_name'] = strain_name
+
+        # Get the strain URL.
+        strain_url = strain.find('a', class_='exp')['href']
+        obs['strain_url'] = strain_url
+
+        # Get the strain ID.
+        obs['strain_id'] = strain_url.rstrip('/').split('/')[-1]
+
+        # Get the indica and sativa percentages.
+        wave = strain.find('div', class_='wave')
+        wave_class = wave.get('class')
+        wave_class = [cls for cls in wave_class if cls != 'wave']
+        if wave_class:
+            for cls in wave_class:
+                if cls in STRAIN_TYPES:
+                    obs['indica_percentage'] = STRAIN_TYPES[cls]['indica_percentage']
+                    obs['sativa_percentage'] = STRAIN_TYPES[cls]['sativa_percentage']
+                    break
+
+        # Record the observation.
+        observations.append(obs)
+
+    # Compile the strain data.
+    strain_data = pd.DataFrame(observations)
+
+    # Save the strain data.
+    date = datetime.now().strftime('%Y-%m-%d')
+    outfile = os.path.join(data_dir, f'ca-strains-{date}.xlsx')
+    strain_data.to_excel(outfile, index=False)
+
+    # Get the lab results for each strain.
+    lab_results = []
+    for obs in observations:
+
+        # Get the strain page.
+        sleep(3.33)
+        response = requests.get(obs['strain_url'] , headers=DEFAULT_HEADERS)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # Get the lineage.
+        try:
+            content = soup.find('div', class_='content')
+            divs = content.find_all('div', class_='et_pb_column')
+        except:
+            print('No content found:', obs['strain_url'])
+            continue
+        lineage = divs[2].text.split('Lineage')[1].replace('\n', '').strip()
+        obs['lineage'] = lineage.split(' x ')
+
+        # Get all of the COA PDF links found.
+        pdf_links = []
+        for link in soup.find_all('a'):
+            href = link.get('href')
+            if href and href.endswith('.pdf'):
+                pdf_links.append(href)
+
+        # Format all of the COA PDF links found.
+        for link in pdf_links:
+            lab_result_id = link.split('/')[-1].split('.')[0]
+            result = {'coa_url': link, 'lab_result_id': lab_result_id}
+            lab_results.append({**GLASS_HOUSE_FARMS, **obs, **result})
+
+    # Download COA PDFs.
+    for lab_result in lab_results:
+        lab_result_id = lab_result['lab_result_id']
+        outfile = os.path.join(license_pdf_dir, f'{lab_result_id}.pdf')
+        if os.path.exists(outfile) and not overwrite:
+            continue
+        sleep(1)
+        response = requests.get(lab_result['coa_url'], headers=DEFAULT_HEADERS)
+        with open(outfile, 'wb') as pdf:
+            pdf.write(response.content)
+        print('Downloaded: %s' % outfile)
+
+    # Save all lab results.
+    results = pd.DataFrame(lab_results)
+    date = datetime.now().strftime('%Y-%m-%d')
+    outfile = os.path.join(data_dir, f'ca-lab-results-{date}.xlsx')
+    results.to_excel(outfile, index=False)
+
+    # Initialize CoADoc.
+    parser = CoADoc()
+
+    # Parse the data from all COAs.
+    coa_data = []
+    for _, result in results.iterrows():
+        lab_result_id = result['lab_result_id']
+        pdf_file = os.path.join(license_pdf_dir, f'{lab_result_id}.pdf')  
+        if not os.path.exists(pdf_file):
+            print('File not found:', pdf_file)
+            continue
+        try:
+            parsed = parser.parse(pdf_file)
+            coa_data.append({**result.to_dict(), **parsed[0]})
+            print('Parsed:', pdf_file)
+        except:
+            print('Error parsing:', pdf_file)
+            continue
+
+    # Save the lab results.
+    date = datetime.now().strftime('%Y-%m-%d')
+    outfile = os.path.join(data_dir, f'ca-lab-results-{date}.xlsx')
     try:
-        content = soup.find('div', class_='content')
-        divs = content.find_all('div', class_='et_pb_column')
+        parser.save(coa_data, outfile)
     except:
-        print('No content found:', obs['strain_url'])
-        continue
-    lineage = divs[2].text.split('Lineage')[1].replace('\n', '').strip()
-    obs['lineage'] = lineage.split(' x ')
-
-    # Get all COA URLs
-    pdf_links = []
-    for link in soup.find_all('a'):
-        href = link.get('href')
-        if href and href.endswith('.pdf'):
-            pdf_links.append(href)
-
-    # Print all the PDF links found
-    for link in pdf_links:
-        lab_result_id = link.split('/')[-1].split('.')[0]
-        result = {'coa_url': link, 'lab_result_id': lab_result_id}
-        lab_results.append({**GLASS_HOUSE_FARMS, **obs, **result})
-
-# Download COA PDFs.
-for lab_result in lab_results:
-    lab_result_id = lab_result['lab_result_id']
-    outfile = os.path.join(license_pdf_dir, f'{lab_result_id}.pdf')
-    if os.path.exists(outfile) and not overwrite:
-        continue
-    sleep(1)
-    response = requests.get(lab_result['coa_url'], headers=DEFAULT_HEADERS)
-    with open(outfile, 'wb') as pdf:
-        pdf.write(response.content)
-    print('Downloaded: %s' % outfile)
-
-# Save all lab results.
-results = pd.DataFrame(lab_results)
-date = datetime.now().strftime('%Y-%m-%d')
-outfile = os.path.join(DATA_DIR, f'glass-house-farms-lab-results-{date}.xlsx')
-results.to_excel(outfile, index=False)
-
-# Initialize CoADoc.
-parser = CoADoc()
-
-# Parse the data from all COAs.
-# for pdf_file in unparsed:
-coa_data = []
-for index, result in results.iterrows():
-    lab_result_id = result['lab_result_id']
-    pdf_file = os.path.join(license_pdf_dir, f'{lab_result_id}.pdf')  
-    if not os.path.exists(pdf_file):
-        print('File not found:', pdf_file)
-        continue
-    try:
-        coa = parser.parse(pdf_file)
-        coa_data.extend(coa)
-        print('Parsed:', pdf_file)
-    except:
-        print('Error parsing:', pdf_file)
-        continue
-
-# Save the lab results.
-date = datetime.now().strftime('%Y-%m-%d')
-outfile = os.path.join(DATA_DIR, f'ca-lab-results-{date}.xlsx')
-try:
-    parser.save(coa_data, outfile)
-except:
-    print('Error saving:', outfile)
-    coa_df = pd.DataFrame(coa_data)
-    coa_df.to_excel(outfile, index=False)
+        try:
+            coa_df = pd.DataFrame(coa_data)
+            coa_df.to_excel(outfile, index=False)
+        except:
+            print('Error saving:', outfile)
+    
+    # Return the data.
+    return pd.DataFrame(coa_data)
 
 
-# FIXME: Merge the strain, lab result, and COA data.
-lab_result_data = parser.standardize(coa_data)
+# === Test ===
+if __name__ == '__main__':
 
-# Save everything once done.
+    # Specify where your data lives.
+    DATA_DIR = 'D://data/california/lab_results'
+
+    # Get CA lab results.
+    ca_results = get_glass_house_farms_lab_results(DATA_DIR)

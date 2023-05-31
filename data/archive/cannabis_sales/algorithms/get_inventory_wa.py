@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 5/16/2023
+Updated: 5/30/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -20,6 +20,7 @@ Data Source:
 """
 # Standard imports:
 from datetime import datetime
+import gc
 import os
 from typing import Optional
 
@@ -198,14 +199,8 @@ def merge_areas(items, area_files):
     )
 
 
-# def curate_ccrs_inventory(data_dir, stats_dir):
-#     """Curate CCRS inventory by merging additional datasets."""
-
-# DEV:
-if __name__ == '__main__':
-    base = 'D:\\data\\washington\\'
-    data_dir = f'{base}\\CCRS PRR (4-4-23)\\CCRS PRR (4-4-23)\\'
-    stats_dir = f'{base}\\ccrs-stats\\'
+def curate_ccrs_inventory(data_dir, stats_dir):
+    """Curate CCRS inventory by merging additional datasets."""
 
     print('Curating inventory...')
     start = datetime.now()
@@ -275,6 +270,9 @@ if __name__ == '__main__':
         items.to_excel(outfile, index=False)
         print('Curated inventory datafile:', i + 1, '/', len(inventory_files))
 
+        # Perform garbage cleaning.
+        gc.collect()
+
     # Merge and save inventory data with curated lab result data.
     try:
         print('Merging lab results...')
@@ -294,11 +292,11 @@ if __name__ == '__main__':
     print('✓ Finished curating inventory in', end - start)
 
 
-# # === Test ===
-# if __name__ == '__main__':
+# === Test ===
+if __name__ == '__main__':
 
-#     # Specify where your data lives.
-#     base = 'D:\\data\\washington\\'
-#     data_dir = f'{base}\\CCRS PRR (4-4-23)\\CCRS PRR (4-4-23)\\'
-#     stats_dir = f'{base}\\ccrs-stats\\'
-#     curate_ccrs_inventory(data_dir, stats_dir)
+    # Specify where your data lives.
+    base = 'D:\\data\\washington\\'
+    data_dir = f'{base}\\CCRS PRR (5-7-23)\\CCRS PRR (5-7-23)\\'
+    stats_dir = f'{base}\\ccrs-stats\\'
+    curate_ccrs_inventory(data_dir, stats_dir)

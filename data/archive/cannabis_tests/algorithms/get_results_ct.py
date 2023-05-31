@@ -146,7 +146,7 @@ if __name__ == '__main__':
 
     # Save the results to Excel.
     date = datetime.now().isoformat()[:10]
-    datafile = f'{data_dir}/ct-results-{date}.xlsx'
+    datafile = f'{data_dir}/ct-lab-results-{date}.xlsx'
     try:
         cannlytics.utils.to_excel_with_style(results, datafile)
     except:

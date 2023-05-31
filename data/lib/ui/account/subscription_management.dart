@@ -245,7 +245,7 @@ class SubscriptionCard extends StatelessWidget {
                   text: 'Select Plan',
                   // backgroundColor: Colors.green,
                   onPressed: () {
-                    print('TODO: Proceed to checkout plan:', title);
+                    print('TODO: Proceed to checkout plan: $title');
                   },
                 ),
               ),

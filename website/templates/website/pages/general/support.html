@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/15/2021
-  Updated: 1/31/2023
+  Updated: 5/29/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -86,12 +86,20 @@
       </div><!-- End of tiers -->
 
       <!-- Note -->
-      <p class="markdown fs-6 serif text-dark w-50">
+      {% comment %} <p class="markdown fs-6 serif text-dark w-50">
         <small>
           * If Cannlytics is verified with Metrc in your state and your company is licensed or a verified Metrc integrator.
           Please <a class="serif" href="{% url 'index' %}#metrc">check our current validation list</a>
           and request your state if you
           do not see your state in the list.
+        </small>
+      </p> {% endcomment %}
+      <p class="markdown fs-6 serif text-dark w-50">
+        <small>
+          <strong>Note:</strong> Additional AI tasks are available for $0.10 per task. Additional support
+          can be purchased for $60 per hour. Please contact
+          <a class="serif" href="mailto:dev@cannlytics.com">dev@cannlytics.com</a> if you need a higher number
+          of requests per second or have additional needs.
         </small>
       </p>
 
@@ -105,10 +113,7 @@
           <p class="mt-2">
             Your laboratory data are valuable to you and your clients,
             therefore, you can have us work to migrate your
-            historic lab data into a user-friendly format that you can
-            interact with programatically with the 
-            <a href="{% url 'page' page='api' %}">Cannlytics API</a>
-            and manage in the <a href="https://console.cannlytics.com/account/sign-in">Cannlytics Console</a>.
+            historic lab data into a user-friendly format.
           </p>
           <p class="text-start mt-3">
             <a

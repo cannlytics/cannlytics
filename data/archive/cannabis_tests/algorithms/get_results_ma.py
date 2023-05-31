@@ -1,24 +1,21 @@
 """
-Cannabis Tests | Get MCR Labs Test Result Data
+Get MA Lab Result Data
 Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 5/5/2023
+Updated: 5/30/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Description:
 
-    Collect all of MCR Labs' publicly published lab results.
-
-Data Points: See `cannlytics.data.coas.mcrlabs.py`.
+    Collect all public Massachusetts lab result data.
 
 Data Sources:
     
-    - MCR Labs Test Results
-    URL: <https://reports.mcrlabs.com>
+    - [MCR Labs Test Results](https://reports.mcrlabs.com)
 
 """
 # Standard imports.
@@ -50,43 +47,41 @@ def upload_results(data: pd.DataFrame):
     print('Uploaded %i lab results to Firestore!' % len(refs))
 
 
-# def get_results_mcrlabs(
-#         data_dir: str = DATA_DIR,
-#         starting_page: int = 1,
-#         pause: int = 3,
-#         upload: bool = False,
-#     ):
-#     """Get all of the MCR Labs test results."""
+def get_results_mcrlabs(
+        data_dir: str = DATA_DIR,
+        starting_page: int = 1,
+        pause: int = 3,
+        upload: bool = False,
+    ):
+    """Get all of the MCR Labs test results."""
 
-# DEV:
-data_dir = DATA_DIR
-starting_page = 1
-pause = 3
-upload = False
+    # Get all of the results!
+    all_results = get_mcr_labs_test_results(
+        starting_page=starting_page,
+        pause=pause,
+    )
 
-# Get all of the results!
-all_results = get_mcr_labs_test_results(
-    starting_page=starting_page,
-    pause=pause,
-)
+    # Save the results to Excel.
+    data = pd.DataFrame(all_results)
+    date = datetime.now().isoformat()[:10]
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+    datafile = f'{data_dir}/ma-lab-results-{date}.xlsx'
+    try:
+        to_excel_with_style(data, datafile)
+    except:
+        data.to_excel(datafile)
 
-# Save the results to Excel.
-data = pd.DataFrame(all_results)
-date = datetime.now().isoformat()[:10]
-if not os.path.exists(data_dir):
-    os.makedirs(data_dir)
-datafile = f'{data_dir}/mcr-lab-results-{date}.xlsx'
-try:
-    to_excel_with_style(data, datafile)
-except:
-    data.to_excel(datafile)
+    # Optionally upload the data to Firestore.
+    if upload:
+        upload_results(data)
 
-# Optionally upload the data to Firestore.
-if upload:
-    upload_results(data)
+    # Return the data.
+    return data
 
 
-# if __name__ == '__main__':
+# === Test ===
+if __name__ == '__main__':
 
-#     # Get all of the MCR Labs test results.
-#     get_results_mcrlabs(DATA_DIR)
+    # Get all of the MCR Labs test results.
+    ma_results = get_results_mcrlabs(DATA_DIR)

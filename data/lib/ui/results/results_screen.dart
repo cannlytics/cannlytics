@@ -15,6 +15,7 @@
 // Sunnyside: https://www.verifyhemp.com/
 // Trulieve: https://www.trulieve.com/discover/product-test-search
 // Green Scientific Labs: https://www.greenscientificlabs.com/find-coa.php
+// Sanctuary: https://sanctuary-coa-portal.anvil.app/
 // VidaCann: https://www.vidacann.com/lab-results/
 // HT Medical Cannabis: https://htcannabis.com/lab-results/
 
@@ -22,6 +23,8 @@
 
 // TODO: Allow user's to add lab results through URLS, images that contain
 // QR codes, or by uploading a COA PDF.
+
+// TODO: Move lab results search to : /results/search
 
 // Flutter imports:
 import 'package:flutter/material.dart';

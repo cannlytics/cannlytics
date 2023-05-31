@@ -22,6 +22,8 @@ Description:
 # Standard imports:
 from datetime import datetime, timedelta
 
+from dotenv import dotenv_values
+
 # External imports:
 from cannlytics import firebase
 from email.mime.multipart import MIMEMultipart
@@ -31,46 +33,44 @@ import requests
 import smtplib
 
 
-def get_contributors():
+def get_contributors(slug='cannlytics-company', limit=25, offset=0):
     """Get Cannlytics contributors from Open Collective."""
-    graphql_url = 'https://api.opencollective.com/graphql/v2'
-    query = """
-    query account($slug: String) {
-    account(slug: $slug) {
-        name
-        slug
-        members(role: BACKER, limit: 100) {
-        totalCount
-        nodes {
-            account {
-            name
-            profile
-            email
-            image
-            twitterHandle
-            website
-            tier
-            totalAmountDonated
-            lastTransactionAt
-
-            }
-        }
-        }
-    }
-    }
-    """
-    variables = {'slug': 'cannlytics-company'}
-    response = requests.post(
-        graphql_url,
-        json={'query': query, 'variables': variables},
-        headers={'Content-Type': 'application/json'}
-    )
+    # graphql_url = 'https://api.opencollective.com/graphql/v2'
+    # query = """
+    # query account($slug: String) {
+    #   account(slug: $slug) {
+    #     name
+    #     slug
+    #     members(role: BACKER, limit: 100) {
+    #       totalCount
+    #       nodes {
+    #         account {
+    #           name
+    #         }
+    #       }
+    #     }
+    #   }
+    # }
+    # """
+    # variables = {'slug': 'cannlytics-company'}
+    # response = requests.post(
+    #     graphql_url,
+    #     json={'query': query, 'variables': variables},
+    #     headers={'Content-Type': 'application/json'}
+    # )
+    # if response.status_code == 200:
+    #     json_data = response.json()   
+    #     return json_data
+    # else:
+    #     print(f'Request failed with status code {response.status_code}')
+    #     return {}
+    url = f'https://opencollective.com/{slug}/members/all.json?limit={limit}&offset={offset}'
+    response = requests.get(url)
     if response.status_code == 200:
-        json_data = response.json()
-        return json_data
+        return response.json()
     else:
-        print(f'Request failed with status code {response.status_code}')
-        return {}
+        print(f"Request failed with status code {response.status_code}")
+        return []
 
 
 def get_latest_videos(
@@ -119,6 +119,36 @@ def get_latest_datasets(
     return latest
 
 
+def email_newsletter(
+        subscribers: list,
+        template: str,
+        from_email = 'dev@cannlytics.com',
+        subject = 'Cannlytics Newsletter',
+    ):
+    """Email the newsletter to subscribers."""
+    # Setup the SMTP server and login.
+    config = dotenv_values('../../.env')
+    app_email = config['EMAIL_HOST_USER']
+    app_password = config['EMAIL_HOST_PASSWORD']
+    email_port = config.get('EMAIL_PORT', '587')
+    email_host = config.get('EMAIL_HOST', 'smtp.gmail.com')
+    smtp_server = smtplib.SMTP(email_host, email_port)
+    smtp_server.starttls()
+    smtp_server.login(app_email, app_password)
+
+    # Send the email to all subscribers.
+    for subscriber in subscribers:
+        msg = MIMEMultipart()
+        msg['From'] = from_email
+        msg['To'] = subscriber.get('email')
+        msg['Subject'] = subject
+        msg.attach(MIMEText(template, 'html'))
+        smtp_server.send_message(msg)
+
+    # Quit the SMTP server.
+    smtp_server.quit()
+
+
 # === Test ===
 if __name__ == '__main__':
 
@@ -163,22 +193,16 @@ if __name__ == '__main__':
     )
     subscribers.extend(anonymous)
 
+    # Email the newsletter to all subscribers.
+    # email_newsletter(subscribers, rendered_template)
 
-    # TODO: Send the newsletter.
-
-    # # Setup the SMTP server and login
-    # smtp_server = smtplib.SMTP('smtp.gmail.com', 587)
-    # smtp_server.starttls()
-    # smtp_server.login('your_email@example.com', 'your_password')
-
-    # # Send the email to all subscribers
-    # for subscriber in subscribers:
-    #     msg = MIMEMultipart()
-    #     msg['From'] = 'dev@cannlytics.com'
-    #     msg['To'] = subscriber.get('email')
-    #     msg['Subject'] = 'Cannlytics Newsletter'
-    #     msg.attach(MIMEText(rendered_template, 'html'))
-    #     smtp_server.send_message(msg)
-
-    # # Quit the SMTP server
-    # smtp_server.quit()
+    # Log the activity.
+    timestamp = datetime.now().isoformat()
+    doc = {
+        'html': rendered_template,
+        'subscribers': subscribers,
+        'timestamp': timestamp,
+        'month': current_month,
+    }
+    ref = f'logs/newsletter/{current_month}'
+    firebase.update_document(ref, doc)
