@@ -70,10 +70,10 @@ Data Points:
         ✓ cannabinoids
         ✓ terpenes
         - pesticides
-        - heavy_metals
-        - microbes
-        - mycotoxins
-        - residual_solvents
+        ✓ heavy_metals
+        ✓ microbes
+        ✓ mycotoxins
+        ✓ residual_solvents
         ✓ foreign_matter
         ✓ water_activity
         ✓ moisture
@@ -281,9 +281,11 @@ def parse_kaycha_coa(
 
         # Get sample fields.
         for key, value in coa_parameters['fields'].items():
-            if f'{key}:' in line or f'{key} :' in line:
+            field = key.lower()
+            cell = line.lower()
+            if f'{field}:' in cell or f'{field} :' in cell:
                 obs[value] = line.split(':')[-1].strip()
-            elif '{key}#' in line:
+            elif f'{field}#' in cell:
                 obs[value] = line.split('#')[-1].strip()
 
         # Get distributor, distributor address, and testing status.
@@ -309,11 +311,17 @@ def parse_kaycha_coa(
                 obs[totals[v]] = value
         
         # Get cannabinoids.
+        # Optional: Also record mg/unit, method, and instrument.
         if line.startswith('%'):
             analytes = lines[i - 1].split(' (DRY)')[0].split(' ')
+            if len(analytes) <= 2:
+                analytes = lines[i - 2].split(' ')
             keys = [parser.analytes.get(snake_case(x), snake_case(x)) for x in analytes]
-            values = [convert_to_numeric(x) for x in line.lstrip('% ').split(' ') if x != '']
-            lod = [convert_to_numeric(x) for x in lines[i + 2].lstrip('LOD ').split(' ') if x != '']
+            values = [convert_to_numeric(x) for x in line.split('Analyte')[0].lstrip('% ').split(' ') if x != '']
+            if lines[i + 2].startswith('Analysis'):
+                lod = [convert_to_numeric(x) for x in lines[i + 3].lstrip('LOD ').split(' ') if x != '']
+            else:
+                lod = [convert_to_numeric(x) for x in lines[i + 2].lstrip('LOD ').split(' ') if x != '']
             for k, key in enumerate(keys):
                 results.append({
                     'analysis': 'cannabinoids',
@@ -322,7 +330,6 @@ def parse_kaycha_coa(
                     'value': values[k],
                     'unit': 'percent',
                     'lod': lod[k],
-                    'mg_g': None, # Optional: Calculate mg/g.
                 })
             break
 
@@ -344,6 +351,8 @@ def parse_kaycha_coa(
     for i, status in enumerate(statuses):
         if status == 'NOT_TESTED':
             continue
+        if status == 'Solvents':
+            status = safety_results[3]
         analysis = screening_analyses[i]
         obs[f'{analysis}_status'] = screening_statuses.get(status, status)
         analyses.append(analysis)
@@ -360,9 +369,31 @@ def parse_kaycha_coa(
     if num_of_pages > 2:
         for page in report.pages[2:]:
 
+            # Handle residual solvents page.
+            page_text = page.extract_text()
+            if 'Residual Solvents' in page_text:
+                lines = page_text.split('Residual Solvents')[1].strip().split('\n')
+                for line in lines[2:]:
+                    first_value = find_first_value(line)
+                    name = line[:first_value].strip()
+                    key = parser.analytes.get(snake_case(name), snake_case(name))
+                    values = line[first_value:].strip().split(' ')
+                    print(name, key, values)
+                    results.append({
+                        'analysis': 'residual_solvents',
+                        'key': key,
+                        'lod': convert_to_numeric(values[0]),
+                        'name': name,
+                        'units': values[1],
+                        'value': convert_to_numeric(values[-1]),
+                        'status': values[-2],
+                        'limit': convert_to_numeric(values[2]),
+                    })
+                continue
+
             # Split the page in half.
-            left = page.within_bbox((0, 0, page.width * 0.475, page.height)).extract_text()
-            right = page.within_bbox((page.width * 0.475, 0, page.width, page.height)).extract_text()
+            left = page.within_bbox((0, 0, page.width * 0.49, page.height)).extract_text()
+            right = page.within_bbox((page.width * 0.49, 0, page.width, page.height)).extract_text()
 
             # Get the relevant portions.
             left = re.split(r'Page \d+ of \d+', left)[-1].split('This Kaycha Labs Certification shall not be reproduced')[0]
@@ -378,21 +409,58 @@ def parse_kaycha_coa(
     rows = [x for x in rows if len(x.split(' ')) > 3]
     rows = [x for x in rows if x != obs['product_name']]
     rows = [x for x in rows if ', US' not in x]
+    cells = [x for x in rows if x[:3].isupper() and not x.startswith('SOP.')]
+    cells = [x .replace('*', '').replace('Not Present', 'ND') for x in cells]
 
+    # Define contaminants.
+    microbes = ['ASPERGILLUS', 'SALMONELLA', 'ESCHERICHIA', 'TOTAL YEAST']
+    mycotoxins = ['AFLATOXIN', 'OCHRATOXIN']
+    heavy_metals = ['TOTAL CONTAMINANT LOAD METALS', 'ARSENIC', 'CADMIUM', 'MERCURY', 'LEAD']
+    contaminants = [{'name': microbe, 'analysis': 'microbes', 'units': 'CFU/g'} for microbe in microbes] + \
+        [{'name': mycotoxin, 'analysis': 'mycotoxins', 'units': 'ppm'} for mycotoxin in mycotoxins] + \
+        [{'name': metal, 'analysis': 'heavy_metals', 'units': 'ppm'} for metal in heavy_metals]
+
+    # Get contaminants: microbes, mycotoxins, and heavy metals.
+    remove = []
+    for contaminant in contaminants:
+        analyte = contaminant['name']
+        analysis = contaminant['analysis']
+        units = contaminant['units']
+        for cell in cells:
+            if analyte in cell:
+                remove.append(cell)
+                line = cell
+                line = line.replace('TOTAL YEAST AND MOLD', 'MOLD')
+                first_value = find_first_value(line)
+                name = line[:first_value].strip()
+                key = parser.analytes.get(snake_case(name), snake_case(name))
+                values = line[first_value:].strip().split(' ')
+                if len(values) == 2:
+                    results.append({
+                        'analysis': analysis,
+                        'key': key,
+                        'lod': None,
+                        'name': name,
+                        'units': units,
+                        'value': convert_to_numeric(values[0]),
+                        'status': values[-1],
+                    })
+                else:
+                    results.append({
+                        'analysis': analysis,
+                        'key': key,
+                        'lod': convert_to_numeric(values[0]),
+                        'name': name,
+                        'units': values[1],
+                        'value': convert_to_numeric(values[2]),
+                        'status': values[-2],
+                        'limit': convert_to_numeric(values[-1]),
+                    })
+
+    # Remove collected cells.
+    cells = [x for x in cells if x not in remove]
 
     # TODO: Get pesticides.
-
-
-    # TODO: Get residual solvents (if tested).
-
-
-    # TODO: Get microbes.
-
-
-    # TODO: Get mycotoxins.
-
-
-    # TODO: Get heavy metals.
 
 
     # Get moisture content, water activity, and foreign matter.
@@ -498,6 +566,10 @@ if __name__ == '__main__':
     # doc = 'D://data/florida/lab_results/.datasets/pdfs/MMTC-2019-0015/GA11104001-001.pdf'
 
 
+    # [ ] TEST: Parse a COA with residual solvent screening.
+    doc = '../../../../tests/assets/coas/kaycha-labs/DA20330006-008.pdf'
+
+
     # [ ] TEST: Parse a non-mandatory COA PDF.
     # doc = 'D://data/florida/lab_results/.datasets/pdfs/MMTC-2019-0015/GA11104001-001.pdf'
 
@@ -518,3 +590,7 @@ if __name__ == '__main__':
 
 
     # [ ] TEST: Parse historic COAs.
+    # doc = '../../../../tests/assets/coas/kaycha-labs/DA90911001-009.pdf'
+
+
+    # TODO: Handle Evio Labs COAs.
