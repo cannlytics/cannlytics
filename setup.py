@@ -5,14 +5,12 @@ Copyright (c) 2021-2022 Cannlytics
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Contact: <keegan@cannlytics.com>
 Created: 1/21/2021
-Updated: 4/16/2023
+Updated: 6/1/2023
 License: MIT <https://opensource.org/licenses/MIT>
 """
 from setuptools import find_packages, setup
 
 # Define the package version.
-# Optional: Read from package.json? Pros and cons to tieing Python
-# package version to the Cannlytics project version.
 version = '0.0.15'
 
 # Get the project description.
@@ -44,7 +42,7 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 3.9',
     ],
-    description='🔥 Cannlytics = cannabis + analytics. Data pipelines, user interfaces, and the best statistics in the game. Made with ❤️!', #pylint: disable=line-too-long
+    description='🔥 Cannlytics is a suite of tools that you can use to wrangle, standardize, and analyze cannabis data', #pylint: disable=line-too-long
     extras_require={
         'test': test_requirements,
         'dev': dev_requirements + test_requirements,

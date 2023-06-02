@@ -617,8 +617,6 @@ PRODUCT_TYPES = {
 STRAINS = {
     'Cannatonic #4': 'Cannatonic',
     'Cannatonic #4 - RP': 'Cannatonic',
-    'Chem Dog': 'Chemdawg',
-    'Chemdog': 'Chemdawg',
     'GSC': 'Girl Scout Cookies',
     'Gorilla Glue #4': 'Gorilla Glue',
     'GG': 'Gorilla Glue',

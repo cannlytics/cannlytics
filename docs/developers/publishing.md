@@ -6,6 +6,12 @@ First, you will need to save your environment variables as a secret. Then, you m
 npm run website:publish
 ```
 
+Note, ensure that you have Docker running when you are publishing the website. You can check this by running `docker ps` in the command line. If you do not have Docker running, then you will see an error like:
+
+```shell
+error during connect: This error may indicate that the docker daemon is not running.
+```
+
 ## Create your secret environment variables
 
 Open [Google Cloud Shell](https://console.cloud.google.com/) and run the following command to ensure that you are working under the correct email and with the correct project:
@@ -199,7 +205,6 @@ You can now monitor your app with the following tools.
 | [Error Reporting](https://console.cloud.google.com/errors) | Provides detailed historic errors that occurred when running your app. |
 
 
-
 ## (Optional) Setup a Custom Domain
 
 You can register a domain with [Google Domains](https://domains.google.com/registrar/). You can then add a custom domain in the Firebase Hosting console.
@@ -209,7 +214,6 @@ You can register a domain with [Google Domains](https://domains.google.com/regis
 ## Conclusion
 
 You now have a simple, yet complex, website running on Cloud Run, which will automatically scale to handle your website's traffic, optimizing CPU and memory so that your website runs with the smallest footprint possible, saving you money. If you desire, you can now seamlessly integrate services such as Cloud Storage into your Django website. You can now plug and play and tinker to your heart's content while your users enjoy your beautiful material!
-
 
 ## Helpful Resources
 

@@ -196,7 +196,7 @@ def parse_cc_url(
     href = button.get_attribute('href')
     base = url.split('/report')[0]
     coa_url = base.replace('/#!', '') + href
-    filename = image_url.split('/')[-1].split('?')[0] + '.pdf'
+    filename = url.split('/')[-1].split('?')[0] + '.pdf'
     obs['coa_urls'] = [{'url': coa_url, 'filename': filename}]
 
     # Find the `analyses` and `results`.
