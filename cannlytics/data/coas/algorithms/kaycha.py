@@ -5,7 +5,7 @@ Copyright (c) 2022-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/17/2022
-Updated: 6/2/2023
+Updated: 6/3/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -66,10 +66,10 @@ Data Points:
     ✓ total_thc
     ✓ total_cbd
     ✓ total_terpenes
-    - results
+    ✓ results
         ✓ cannabinoids
         ✓ terpenes
-        - pesticides
+        ✓ pesticides
         ✓ heavy_metals
         ✓ microbes
         ✓ mycotoxins
@@ -230,7 +230,7 @@ def parse_kaycha_coa(
     # FIXME: If the `doc` is a URL, then download the PDF to `temp_path`.
     # And then use the downloaded PDF as the doc.
     if temp_path is None:
-        temp_path = '/tmp' # TODO: Get the user's temp path with tempfile.
+        temp_path = tempfile.gettempdir()
 
     # Get the lab's parameters.
     screening_analyses = coa_parameters['screening_analyses']
@@ -460,8 +460,23 @@ def parse_kaycha_coa(
     # Remove collected cells.
     cells = [x for x in cells if x not in remove]
 
-    # TODO: Get pesticides.
-
+    # Get any pesticides analyzed.
+    if cells:
+        for line in cells:
+            first_value = find_first_value(line)
+            name = line[:first_value].strip()
+            key = parser.analytes.get(snake_case(name), snake_case(name))
+            values = line[first_value:].strip().split(' ')
+            results.append({
+                'analysis': 'pesticides',
+                'key': key,
+                'lod': convert_to_numeric(values[0]),
+                'name': name,
+                'units': values[1],
+                'value': convert_to_numeric(values[-1]),
+                'status': values[-2],
+                'limit': convert_to_numeric(values[2]),
+            })
 
     # Get moisture content, water activity, and foreign matter.
     screens = [

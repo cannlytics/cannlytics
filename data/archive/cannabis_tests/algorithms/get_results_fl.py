@@ -36,13 +36,15 @@ Resources:
 # Standard imports:
 from datetime import datetime
 import os
+import tempfile
 from time import sleep
 from typing import Optional
 
 # External imports:
 from bs4 import BeautifulSoup
-from cannlytics.utils.constants import DEFAULT_HEADERS
+from cannlytics.data.coas import CoADoc
 from cannlytics.data.gis import geocode_addresses
+from cannlytics.utils.constants import DEFAULT_HEADERS
 from dotenv import dotenv_values
 import pandas as pd
 import requests
@@ -55,10 +57,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
-# Specify where your data lives.
-DATA_DIR = 'D://data/florida/lab_results'
-ENV_FILE = '../../../../.env'
 
 
 #-----------------------------------------------------------------------
@@ -321,12 +319,72 @@ def get_results_kaycha(data_dir: str, licenses=None, **kwargs):
     return data
 
 
+def parse_results_kaycha(
+        data_dir: str,
+        outfile: Optional[str] = None,
+        temp_path: Optional[str] = None,
+    ):
+    """Parse lab results from Kaycha Labs COAs."""
+    # Initialize a parser.
+    parser = CoADoc()
+
+    # Create the output data directory if it does not exist.
+    if outfile:
+        output_dir = os.path.dirname(outfile)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+    # Get a temporary path for storing images.
+    if temp_path is None:
+        temp_path = tempfile.gettempdir()
+
+    # Iterate over PDF directory.
+    all_data = []
+    for path, _, files in os.walk(data_dir):
+        for filename in files:
+
+            # Skip all files except PDFs.
+            if not filename.endswith('.pdf'):
+                continue
+
+            # Parse COA PDFs one by one.
+            try:
+                doc = os.path.join(path, filename)
+                data = parser.parse(doc, temp_path=temp_path)
+                all_data.extend(data)
+                print('Parsed:', doc)
+            except:
+                print('Error:', doc)
+
+    # Save the data.
+    if outfile:
+        parser.save(all_data, outfile)
+        print('Saved COA data:', outfile)
+
+    # Return the data.
+    return all_data
+
+
 # === Test ===
 if __name__ == '__main__':
 
+    # Specify where your data lives.
+    DATA_DIR = 'D://data/florida/lab_results'
+    ENV_FILE = '../../../../.env'
+
     # [✓] TEST: Get Kaycha COAs.
-    kaycha_coas = get_results_kaycha(DATA_DIR)
-    pass
+    # kaycha_coas = get_results_kaycha(DATA_DIR)
+    # pass
+
+    # [ ] TEST: PArse Kaycha COAs.
+    pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
+    date = datetime.now().strftime('%Y-%m-%d')
+    for folder in os.listdir(pdf_dir):
+        if folder.startswith('MMTC-2019-0019'):
+            data_dir = os.path.join(pdf_dir, folder)
+            outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
+            print('Parsing:', folder)
+            parse_results_kaycha(data_dir, outfile)
 
 
 # TODO: Begin to parse lab results from the PDFs!
