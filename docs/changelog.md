@@ -1,5 +1,11 @@
 # Change Log
 
+## 2023-06-02 v0.0.15
+
+
+
+## 2023-02-17 v0.0.13
+
 ## 2022-03-13 v0.0.11
 
 Unified the entire codebase, cleaning and organizing code that was marked for refactoring. Added placeholders for planned future development.

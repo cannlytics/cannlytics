@@ -29,7 +29,7 @@ copyright: Copyright &copy; 2023 Cannlytics
 repo_name: Cannlytics
 repo_url: https://github.com/cannlytics/cannlytics
 edit_uri: ""
-docs_dir: ./docs
+docs_dir: ./
 site_dir: ./public/docs
 
 # Configuration
@@ -146,26 +146,40 @@ extra:
 plugins:
   - autorefs
   - search
-  - mkdocstrings:
-      handlers:
-        python:
-          setup_commands:
-            - import sys
-            - from unittest.mock import MagicMock as mock
-            - sys.path.append('cannlytics')
-            - sys.modules["numpy"] = mock()
-            - sys.modules["pandas"] = mock()
-            - sys.modules["firebase_admin"] = mock()
-            - sys.modules["googlemaps"] = mock()
-            - sys.modules["google-cloud"] = mock()
-            - sys.modules["google-cloud-firestore"] = mock()
-            - sys.modules["ulid"] = mock()
-            - sys.modules["requests"] = mock()
-            - sys.modules["django"] = mock()
-            - sys.modules["xlwings"] = mock()
-            - sys.modules["dotenv"] = mock()
-            - sys.modules["enforce_typing"] = mock()
-            - sys.modules["pytz"] = mock()
+  - same-dir
+  - exclude:
+      glob:
+        - public/*
+        - node_modules/*
+        - dist/*
+        - build/*
+        - tests/*
+        - ai/*
+        - app/*
+        - console/*
+        - tests/*
+        - tools/*
+        - website/*
+  # - mkdocstrings:
+  #     handlers:
+  #       python:
+  #         setup_commands:
+  #           - import sys
+  #           - from unittest.mock import MagicMock as mock
+  #           - sys.path.append('cannlytics')
+  #           - sys.modules["numpy"] = mock()
+  #           - sys.modules["pandas"] = mock()
+  #           - sys.modules["firebase_admin"] = mock()
+  #           - sys.modules["googlemaps"] = mock()
+  #           - sys.modules["google-cloud"] = mock()
+  #           - sys.modules["google-cloud-firestore"] = mock()
+  #           - sys.modules["ulid"] = mock()
+  #           - sys.modules["requests"] = mock()
+  #           - sys.modules["django"] = mock()
+  #           - sys.modules["xlwings"] = mock()
+  #           - sys.modules["dotenv"] = mock()
+  #           - sys.modules["enforce_typing"] = mock()
+  #           - sys.modules["pytz"] = mock()
 
 # Site map
 nav:
@@ -174,18 +188,18 @@ nav:
   # About
   #------------
   - About:
-    - Overview: about/about.md
-    - FAQ: about/faq.md
-    - Support: about/support.md
-    - License: about/license.md
-    - Privacy policy: about/privacy-policy.md
-    - Security policy: about/security-policy.md
-    - Terms of service: about/terms-of-service.md
+    - Overview: docs/about/about.md
+    - FAQ: docs/about/faq.md
+    - Support: docs/about/support.md
+    - License: docs/about/license.md
+    - Privacy policy: docs/about/privacy-policy.md
+    - Security policy: docs/about/security-policy.md
+    - Terms of service: docs/about/terms-of-service.md
 
   # API
   #------------
   - API:
-    - Overview: ../api/readme.md
+    - Overview: api/readme.md
     - Authentication: api/auth/readme.md
     - Data: api/data/readme.md
     # - LIMS:
@@ -209,6 +223,12 @@ nav:
     # TODO: Flesh out traceability documentation.
 
   # Data
+  #------------
+
+  # TODO: Examples
+  #------------
+
+  # TODO: Quickstart
   #------------
   
   # Users
@@ -257,10 +277,9 @@ nav:
     - Metrc: cannlytics/metrc/readme.md
     - Stats: cannlytics/stats/readme.md
     - Utils: cannlytics/utils/readme.md
-    - SDK API References:
-      - Firebase: sdk/firebase.md
-      - Metrc: sdk/metrc.md
-      - Utils: sdk/utils.md
+    # - API References:
+    #   - Firebase: cannlytics/firebase/firebase.md
+    #   - Utils: cannlytics/utils/firebase.md
   
   # Developers
   #------------

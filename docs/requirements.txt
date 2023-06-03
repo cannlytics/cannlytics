@@ -6,3 +6,5 @@
 mkdocs-autorefs==0.4.1
 mkdocs-material==9.1.15
 mkdocstrings==0.22.0
+mkdocs-same-dir==0.1.2
+mkdocs-exclude==1.0.2

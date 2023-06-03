@@ -6,9 +6,9 @@
 
 <https://cannlytics.com>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
+<!-- [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/pypi/v/cannlytics.svg)](https://pypi.org/project/cannlytics)
-[![PyPI download month](https://img.shields.io/pypi/dm/cannlytics?color=orange)](https://pypi.python.org/pypi/cannlytics/)
+[![PyPI download month](https://img.shields.io/pypi/dm/cannlytics?color=orange)](https://pypi.python.org/pypi/cannlytics/) -->
 
 </div>
 
