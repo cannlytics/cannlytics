@@ -1,3 +1,8 @@
-
-
+# Documentation Requirements | Cannlytics
+# Authors: Keegan Skeate <https://github.com/keeganskeate>
+# Created 6/2/2023
+# Updated: 6/2/2023
+# License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 mkdocs-autorefs==0.4.1
+mkdocs-material==9.1.15
+mkdocstrings==0.22.0

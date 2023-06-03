@@ -5,7 +5,7 @@
 # create a new Dockerfile and extend the official Docker
 # image with your custom installation routine:
 FROM squidfunk/mkdocs-material
-# RUN pip install mkdocstrings cannlytics
+RUN pip install mkdocstrings
 
 #  requests
 

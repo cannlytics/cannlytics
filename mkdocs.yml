@@ -19,26 +19,23 @@
 # IN THE SOFTWARE.
 
 # Project information
-site_name: Cannlytics
+site_name: Cannlytics Documentation
 site_url: https://docs.cannlytics.com/
 site_author: Keegan Skeate
-site_description: Cannlytics is simple, easy-to-use, end-to-end cannabis analytics software
-  designed to make data and information accessible. We believe that everyone in the
-  cannabis industry should be able to access rich, valuable data quickly and easily and
-  that everyone, especially yourself, will be better off for it.
-copyright: Copyright &copy; 2021 Cannlytics
+site_description: Cannlytics is a suite of tools that you can use to wrangle, standardize, and analyze cannabis data.
+copyright: Copyright &copy; 2023 Cannlytics
 
 # Repository
 repo_name: Cannlytics
 repo_url: https://github.com/cannlytics/cannlytics
 edit_uri: ""
-docs_dir: ../
-site_dir: ./build
+docs_dir: ./docs
+site_dir: ./public/docs
 
 # Configuration
 theme:
   name: material
-  custom_dir: ./theme
+  custom_dir: ./docs/theme
 
   # Static files
   static_templates:
@@ -169,85 +166,86 @@ plugins:
             - sys.modules["dotenv"] = mock()
             - sys.modules["enforce_typing"] = mock()
             - sys.modules["pytz"] = mock()
-  - minify:
-      minify_html: true
 
 # Site map
 nav:
-  - Home: docs/index.md
+  # - Home: index.md
 
   # About
   #------------
   - About:
-    - Overview: docs/about/about.md
-    - FAQ: docs/about/faq.md
-    - Support: docs/about/support.md
-    - License: docs/about/license.md
-    - Privacy policy: docs/about/privacy-policy.md
-    - Security policy: docs/about/security-policy.md
-    - Terms of service: docs/about/terms-of-service.md
+    - Overview: about/about.md
+    - FAQ: about/faq.md
+    - Support: about/support.md
+    - License: about/license.md
+    - Privacy policy: about/privacy-policy.md
+    - Security policy: about/security-policy.md
+    - Terms of service: about/terms-of-service.md
 
   # API
   #------------
   - API:
-    - Overview: api/readme.md
+    - Overview: ../api/readme.md
     - Authentication: api/auth/readme.md
     - Data: api/data/readme.md
-    - LIMS:
-      - Analyses: api/analyses/readme.md
-      - Analytes: api/analytes/readme.md
-      - Areas: api/areas/readme.md
-      - Contacts: api/contacts/readme.md
-      - Instruments: api/instruments/readme.md
-      - Inventory: api/inventory/readme.md
-      - Invoices: invoices/readme.md
-      - Measurements: api/measurements/readme.md
-      - Projects: api/projects/readme.md
-      - Results: api/results/readme.md
-      - Samples: api/samples/readme.md
-      - Transfers: api/transfers/readme.md
+    # - LIMS:
+    #   - Analyses: api/analyses/readme.md
+    #   - Analytes: api/analytes/readme.md
+    #   - Areas: api/areas/readme.md
+    #   - Contacts: api/contacts/readme.md
+    #   - Instruments: api/instruments/readme.md
+    #   - Inventory: api/inventory/readme.md
+    #   - Invoices: invoices/readme.md
+    #   - Measurements: api/measurements/readme.md
+    #   - Projects: api/projects/readme.md
+    #   - Results: api/results/readme.md
+    #   - Samples: api/samples/readme.md
+    #   - Transfers: api/transfers/readme.md
       # TODO: Add waste docs
     - Organizations: api/organizations/readme.md
     - Users: api/users/readme.md
     - Settings: api/settings/readme.md
-    - Traceability: api/traceability/readme.md
+    - Metrc: api/traceability/readme.md
     # TODO: Flesh out traceability documentation.
+
+  # Data
+  #------------
   
   # Users
   #------------
-  - Users:
-    - Getting Started: docs/console/get-started.md
-    - Authentication: docs/console/authentication.md
-    - Analyses: docs/console/lims/analyses.md
-    - Analytes: docs/console/lims/analytes.md
-    - Areas: docs/console/lims/areas.md
-    - Contacts: docs/console/lims/contacts.md
-    # FIXME: Touch up, remove, or condense these documents.
-    - Data:
-      # - Overview: console/lims/data/data.md
-      - Data Collection: docs/console/lims/data/data_collection.md
-      # - Data Analysis: console/lims/data/data_analysis.md
-      # - Data Review: console/lims/data/data_review.md
-      # - Importing and exporting data: console/lims/data/exports.md
-      # - Generating CoAs: console/lims/generating_coas.md
-      # - Posting Results: console/lims/posting_results.md
-      # - Quality Control: console/lims/qc.md
-      - Logs: docs/console/lims/data/logs.md
-    - Instruments: docs/console/lims/instruments.md
-    - Inventory: docs/console/lims/inventory.md
-    - Invoices: docs/console/lims/invoices.md
-    - Organizations: docs/console/lims/organizations.md
-    - Projects: docs/console/lims/projects.md
-    - Results: docs/console/lims/results.md
-    - Samples: docs/console/lims/samples.md
-    - Transfers: docs/console/lims/transfers.md
-    - Traceability: docs/console/lims/traceability.md
-    - Worksheets: docs/console/lims/worksheets.md
-    - Settings: docs/console/lims/settings.md
+  # - Users:
+  #   - Getting Started: console/get-started.md
+  #   - Authentication: console/authentication.md
+  #   - Analyses: console/lims/analyses.md
+  #   - Analytes: console/lims/analytes.md
+  #   - Areas: console/lims/areas.md
+  #   - Contacts: console/lims/contacts.md
+  #   # FIXME: Touch up, remove, or condense these documents.
+  #   - Data:
+  #     # - Overview: console/lims/data/data.md
+  #     - Data Collection: console/lims/data/data_collection.md
+  #     # - Data Analysis: console/lims/data/data_analysis.md
+  #     # - Data Review: console/lims/data/data_review.md
+  #     # - Importing and exporting data: console/lims/data/exports.md
+  #     # - Generating CoAs: console/lims/generating_coas.md
+  #     # - Posting Results: console/lims/posting_results.md
+  #     # - Quality Control: console/lims/qc.md
+  #     - Logs: console/lims/data/logs.md
+  #   - Instruments: console/lims/instruments.md
+  #   - Inventory: console/lims/inventory.md
+  #   - Invoices: console/lims/invoices.md
+  #   - Organizations: console/lims/organizations.md
+  #   - Projects: console/lims/projects.md
+  #   - Results: console/lims/results.md
+  #   - Samples: console/lims/samples.md
+  #   - Transfers: console/lims/transfers.md
+  #   - Traceability: console/lims/traceability.md
+  #   - Worksheets: console/lims/worksheets.md
+  #   - Settings: console/lims/settings.md
 
   # Cannlytics SDK
   #---------------
-  - Cannlytics SDK:
+  - Python SDK:
     - Overview: cannlytics/readme.md
     - Auth: cannlytics/auth/readme.md
     - Data:
@@ -260,22 +258,22 @@ nav:
     - Stats: cannlytics/stats/readme.md
     - Utils: cannlytics/utils/readme.md
     - SDK API References:
-      - Firebase: docs/sdk/firebase.md
-      - Metrc: docs/sdk/metrc.md
-      - Utils: docs/sdk/utils.md
+      - Firebase: sdk/firebase.md
+      - Metrc: sdk/metrc.md
+      - Utils: sdk/utils.md
   
   # Developers
   #------------
-  - Developers:
-    - Getting Started: docs/developers/development.md
-    - Installation: docs/developers/installation.md
-    - Contributing: docs/developers/contributing.md
-    - Packaging: docs/developers/packaging.md
-    - Publishing: docs/developers/publishing.md
-    - Roadmap: docs/developers/roadmap.md
-    - Security: docs/developers/security.md
-    - Testing: docs/developers/testing.md
-    - Version control: docs/developers/version_control.md
-    - SOPs:
-      - Control of Documents: docs/developers/sops/control-of-documents.md
-      - COA Parsing: docs/developers/sops/coa-parsing.md
+  # - Developers:
+  #   - Getting Started: developers/development.md
+  #   - Installation: developers/installation.md
+  #   - Contributing: developers/contributing.md
+  #   - Packaging: developers/packaging.md
+  #   - Publishing: developers/publishing.md
+  #   - Roadmap: developers/roadmap.md
+  #   - Security: developers/security.md
+  #   - Testing: developers/testing.md
+  #   - Version control: developers/version_control.md
+  #   - SOPs:
+  #     - Control of Documents: developers/sops/control-of-documents.md
+  #     - COA Parsing: developers/sops/coa-parsing.md

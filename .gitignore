@@ -122,6 +122,7 @@ website/static/website/js/bundles/*
 /public/static/*
 public/console/
 public/website/
+public/docs/
 
 # Exception for Flutter library.
 !app/lib/
