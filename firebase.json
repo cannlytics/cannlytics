@@ -27,7 +27,7 @@
     },
     {
       "target": "docs",
-      "public": "docs/build"
+      "public": "public/docs"
     },
     {
       "target": "dev",

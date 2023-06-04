@@ -341,10 +341,14 @@ def parse_results_kaycha(
     # Iterate over PDF directory.
     all_data = []
     for path, _, files in os.walk(data_dir):
-        for filename in files:
+        for filename in reversed(files):
 
             # Skip all files except PDFs.
             if not filename.endswith('.pdf'):
+                continue
+
+            # Skip parsed files.
+            if filename in COMPLETED:
                 continue
 
             # Parse COA PDFs one by one.
@@ -358,8 +362,11 @@ def parse_results_kaycha(
 
     # Save the data.
     if outfile:
-        parser.save(all_data, outfile)
-        print('Saved COA data:', outfile)
+        try:
+            parser.save(all_data, outfile)
+            print('Saved COA data:', outfile)
+        except:
+            print('Failed to save COA data.')
 
     # Return the data.
     return all_data
@@ -371,23 +378,38 @@ if __name__ == '__main__':
     # Specify where your data lives.
     DATA_DIR = 'D://data/florida/lab_results'
     ENV_FILE = '../../../../.env'
+    COMPLETED = []
 
     # [✓] TEST: Get Kaycha COAs.
     # kaycha_coas = get_results_kaycha(DATA_DIR)
     # pass
 
-    # [ ] TEST: PArse Kaycha COAs.
+    # [✓] TEST: Parse Kaycha COAs.
     pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
-    date = datetime.now().strftime('%Y-%m-%d')
+    # date = datetime.now().strftime('%Y-%m-%d')
+    date = datetime.now().isoformat()[:19].replace(':', '-')
     for folder in os.listdir(pdf_dir):
-        if folder.startswith('MMTC-2019-0019'):
+        if folder.startswith('MMTC-2015-0002'):
             data_dir = os.path.join(pdf_dir, folder)
             outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
             print('Parsing:', folder)
-            parse_results_kaycha(data_dir, outfile)
+            coa_data = parse_results_kaycha(data_dir, outfile)
 
 
 # TODO: Begin to parse lab results from the PDFs!
+# MMTC-2019-0020 (513) (parsed)
+# MMTC-2017-0008 (887) (running in interactive 1)
+# MMTC-2017-0009 (4) (parsed 1/4)
+# MMTC-2017-0010 (1637) (running in interactive 2)
+# MMTC-2017-0011 (3) (errored)
+# MMTC-2019-0015 (3) (errored)
+# MMTC-2019-0017 (585) (parsed)
+# MMTC-2015-0001 (8969) (running in interactive 3)
+# MMTC-2015-0002 (3963) (queued in interactive 4)
+# MMTC-2015-0003 (70) (errored)
+# MMTC-2015-0004 (1) (errored)
+# MMTC-2016-0007 (39) (parsed 39/39)
+# MMTC-2019-0019 (6) (parsed 6/6)
 
 
 # TODO: Parse a COA from a URL.

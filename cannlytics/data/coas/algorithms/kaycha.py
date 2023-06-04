@@ -22,6 +22,8 @@ Data Points:
     - serving_size
     - servings_per_package
     ✓ sample_weight
+    ✓ sample_id (augmented)
+    ✓ strain_name
     ✓ lab
     ✓ lab_image_url
     - lab_license_number
@@ -57,8 +59,6 @@ Data Points:
     ✓ analyses
     ✓ {analysis}_status
     ✓ status
-    ✓ sample_id (augmented)
-    ✓ strain_name
     ✓ lab_results_url
     ✓ coa_urls
     ✓ methods
@@ -258,7 +258,7 @@ def parse_kaycha_coa(
     # Format `coa_urls`
     if coa_url is not None:
         filename = coa_url.split('/')[-1].split('?')[0] + '.pdf'
-        obs['coa_urls'] = [{'url': coa_url, 'filename': filename}]
+        obs['coa_urls'] = json.dumps([{'url': coa_url, 'filename': filename}])
 
     # Get lab details.
     parts = lines[5].split(',')
@@ -378,7 +378,6 @@ def parse_kaycha_coa(
                     name = line[:first_value].strip()
                     key = parser.analytes.get(snake_case(name), snake_case(name))
                     values = line[first_value:].strip().split(' ')
-                    print(name, key, values)
                     results.append({
                         'analysis': 'residual_solvents',
                         'key': key,
