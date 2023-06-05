@@ -323,6 +323,7 @@ def parse_results_kaycha(
         data_dir: str,
         outfile: Optional[str] = None,
         temp_path: Optional[str] = None,
+        reverse: Optional[bool] = True,
     ):
     """Parse lab results from Kaycha Labs COAs."""
     # Initialize a parser.
@@ -341,7 +342,9 @@ def parse_results_kaycha(
     # Iterate over PDF directory.
     all_data = []
     for path, _, files in os.walk(data_dir):
-        for filename in reversed(files):
+        if reverse:
+            files = reversed(files)
+        for filename in files:
 
             # Skip all files except PDFs.
             if not filename.endswith('.pdf'):
@@ -378,7 +381,7 @@ if __name__ == '__main__':
     # Specify where your data lives.
     DATA_DIR = 'D://data/florida/lab_results'
     ENV_FILE = '../../../../.env'
-    COMPLETED = []
+    # COMPLETED = []
 
     # [✓] TEST: Get Kaycha COAs.
     # kaycha_coas = get_results_kaycha(DATA_DIR)
@@ -393,12 +396,12 @@ if __name__ == '__main__':
             data_dir = os.path.join(pdf_dir, folder)
             outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
             print('Parsing:', folder)
-            coa_data = parse_results_kaycha(data_dir, outfile)
+            coa_data = parse_results_kaycha(data_dir, outfile, reverse=True)
 
 
 # TODO: Begin to parse lab results from the PDFs!
 # MMTC-2019-0020 (513) (parsed)
-# MMTC-2017-0008 (887) (running in interactive 1)
+# MMTC-2017-0008 (887) (parsed)
 # MMTC-2017-0009 (4) (parsed 1/4)
 # MMTC-2017-0010 (1637) (running in interactive 2) (unfinished)
 # MMTC-2017-0011 (3) (errored)

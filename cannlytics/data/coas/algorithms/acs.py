@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/18/2023
-Updated: 6/4/2023
+Updated: 6/5/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -87,6 +87,7 @@ import base64
 from datetime import datetime
 import json
 import io
+import os
 import re
 import tempfile
 from typing import Any, List, Optional
@@ -95,6 +96,7 @@ from typing import Any, List, Optional
 import pandas as pd
 import pdfplumber
 from PIL import Image
+import requests
 
 # Internal imports.
 from cannlytics import firebase
@@ -104,6 +106,7 @@ from cannlytics.data.data import (
     create_sample_id,
     find_first_value,
 )
+from cannlytics.utils.constants import DEFAULT_HEADERS
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
@@ -217,6 +220,7 @@ ACS_LABS_COA = {
         'Cultivars': 'strain_name',
         'Initial Gross Weight': 'sample_weight',
         'Lab Batch Date': 'date_received',
+        'Cultivation Date': 'date_harvested',
         # FIXME: This is getting "Cultivation Date" mixed in.
         'Lot ID': 'batch_number',
         'Net Weight per Unit': 'product_size',
@@ -241,9 +245,11 @@ def parse_acs_coa(
         doc: Any,
         temp_path: Optional[str] = None,
         coa_parameters: Optional[dict] = ACS_LABS_COA,
+        session: Optional[Any] = None,
+        headers: Optional[dict] = DEFAULT_HEADERS,
         **kwargs,
     ) -> dict:
-    """Parse a TerpLife Labs COA PDF.
+    """Parse a ACS Labs COA PDF.
     Args:
         doc (str or PDF): A PDF file path or pdfplumber PDF.
     Returns:
@@ -251,19 +257,34 @@ def parse_acs_coa(
     """
 
     # Get the lab's parameters.
+    obs = {}
+    analyses, methods, results = [], [], []
     lab_analyses = coa_parameters['analyses']
     lab_fields = coa_parameters['fields']
 
-    # FIXME: If the `doc` is a URL, then download the PDF to `temp_path`.
-    # And then use the downloaded PDF as the doc.
-    if temp_path is None:
-        temp_path = tempfile.gettempdir()
-
+    # If the `doc` is a URL, then download the PDF to the `temp_path`.
+    # Then use the path of the downloaded PDF as the doc.
     # Read the PDF.
-    obs = {}
     if isinstance(doc, str):
-        report = pdfplumber.open(doc)
-        obs['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
+        if doc.startswith('https'):
+            if temp_path is None: temp_path = tempfile.gettempdir()
+            if not os.path.exists(temp_path): os.makedirs(temp_path)
+            try:
+                filename = doc.split('/')[-1].split('?')[0] + '.pdf'
+            except:
+                filename = 'coa.pdf'
+            coa_pdf = os.path.join(temp_path, filename)
+            if session is not None:
+                response = session.get(doc)
+            else:
+                response = requests.get(doc, headers=headers)
+            with open(coa_pdf, 'wb') as pdf:
+                pdf.write(response.content)
+            report = pdfplumber.open(coa_pdf)
+            obs['coa_pdf'] = filename
+        else:
+            report = pdfplumber.open(doc)
+            obs['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
     else:
         report = doc
         obs['coa_pdf'] = report.stream.name.replace('\\', '/').split('/')[-1]
@@ -278,6 +299,8 @@ def parse_acs_coa(
 
     # Get the lab results URL from the QR code.
     coa_url = parser.find_pdf_qr_code_url(page)
+    if coa_url is None and doc.startswith('https'):
+        coa_url = doc
     obs['lab_results_url'] = coa_url
 
     # Format the `coa_urls`.
@@ -289,8 +312,14 @@ def parse_acs_coa(
     obs['product_name'] = lines[0]
 
     # Get the product type.
-    # FIXME: Product type could be more extensive.
-    obs['product_type'] = lines[2]
+    top_corner = page.within_bbox((page.width * 0.25, 0, page.width, page.height * 0.25))
+    top_lines = top_corner.extract_text().split('\n')
+    top_lines = get_rows_between_values(
+        top_lines,
+        start='Sample Matrix',
+        stop='Certificate of Analysis'
+    )
+    obs['product_type'] = ' '.join(top_lines)
 
     # Get sample detail fields.    
     names = list(lab_fields.keys())
@@ -325,7 +354,6 @@ def parse_acs_coa(
     tests = [x.split(' ') for x in tests.split('\n') if x]
 
     # Determine status for each analysis.
-    analyses = []
     overall_status = 'Pass'
     for index, sublist in enumerate(tests):
         if index % 2 == 0:
@@ -338,9 +366,6 @@ def parse_acs_coa(
                 if 'fail' in status.lower():
                     overall_status = 'Fail'
     obs['status'] = overall_status
-
-    # Get the results and methods.
-    methods, results = [], []
 
     # Get total cannabinoids.
     crop = page.within_bbox((0.5 * page.width, 0.33 * page.height, page.width, page.height * 0.8))
@@ -800,66 +825,59 @@ def parse_acs_coa(
 # === Tests ===
 if __name__ == '__main__':
 
+    # Initialize CoADoc.
     from cannlytics.data.coas import CoADoc
+    from time import sleep
+    parser = CoADoc()
 
     # [✓] TEST: Identify LIMS from a COA URL.
-    parser = CoADoc()
     url = 'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQzc0OS0wMTA1MjMtU0dMQzEyLVIzNS0wMjIxMjAyMw=='
     lims = parser.identify_lims(url, lims={'ACS Labs': ACS_LABS})
     assert lims == 'ACS Labs'
+    print('Identified LIMS:', lims)
 
     # [✓] TEST: Identify LIMS from a COA PDF.
-    # parser = CoADoc()
-    # doc = 'D://data/florida/lab_results/.datasets/pdfs/acs/AAEK703_494480004136268_05082023_64595d681311d-COA_EN.pdf'
-    # lims = parser.identify_lims(doc, lims={'ACS Labs': ACS_LABS})
-    # assert lims == 'ACS Labs'
+    parser = CoADoc()
+    doc = '../../../../tests/assets/coas/acs/AAEC749-010523-SGLC12-R35-02212023-COA_EN.pdf'
+    lims = parser.identify_lims(doc, lims={'ACS Labs': ACS_LABS})
+    assert lims == 'ACS Labs'
+    print('Identified LIMS:', lims)
 
     # [✓] TEST: Parse partial COA.
     doc = '../../../../tests/assets/coas/acs/AAEC749-010523-SGLC12-R35-02212023-COA_EN.pdf'
     data = parse_acs_coa(parser, doc)
     assert data is not None
+    print('Parsed:', data)
 
     # [✓] TEST: Parse full panel COA for a concentrate.
     doc = '../../../../tests/assets/coas/acs/27675_0002407047.pdf'
     data = parse_acs_coa(parser, doc)
     assert data is not None
+    print('Parsed:', data)
 
     # [✓] TEST: Parse a full panel COA for a flower.
     doc = '../../../../tests/assets/coas/acs/49448_0004136268.pdf'
     data = parse_acs_coa(parser, doc)
     assert data is not None
+    print('Parsed:', data)
 
-    # [ ] TEST: Parse partial COA from a URL.
-    # urls = [
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQzc0OS0wMTA1MjMtU0dMQzEyLVIzNS0wMjIxMjAyMw==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEVjIxMC0xMDI1MjItREJGSy1SMzUtMTIxMTIwMjI=',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFRTI3OV8yNDEyNzAwMDM4MjU0NzZfMDMwOTIwMjNfNjQwYTcyMTFmMTAyMA==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFRDk5MV81NzEwNjAwMDM3MTk4MzRfMDMwNjIwMjNfNjQwNjgyN2Y2ZjU4Mg==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSDc5N18zMjE1NjAwMDM5ODYxMzZfMDQxMDIwMjNfNjQzNDlhNTJlMmRlYg==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTk5MF8yOTM1MzAwMDM5NDA2MjBfMDQyMTIwMjNfNjQ0MmFhNTJlYjcxMw==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSjM5MV8yOTUyNzAwMDQxMzQ3ODZfMDQyNTIwMjNfNjQ0ODFlOTQ1NDBlNQ==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFRjg3MV80OTQ0NzAwMDQwNDgxODVfMDMyMzIwMjNfNjQxY2FmNTllYjcxMA==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQTU4NF81NTMxMjAwMDM3ODAxNTBfMDEzMDIwMjNfNjNkODZjNGI2MzQxZQ==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFDSDEyMl8yNjU4LTE1OTQtNjk5NC0yNjg5XzEyMjgyMDIxXzYxY2I1MDA1M2YxZjk=',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQjQ4OF81NTMwMDAwMDI4OTQ2MzNfMDIxMDIwMjNfNjNlNmM3N2Y1OWJjYw==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQjE5OV8xODM2MTAwMDM3MDUzNzVfMDIwODIwMjNfNjNlM2M5ZmMyMzY4ZQ==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzAwOS1ETFItNDEtU1RQQS1MUkM1LTA1MDEyMDIz',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEWjQ5Ny0xMjE0MjItOTlQUi1SMzUtMDEyMTIwMjM=',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzI3Ny1JRDI0Mi1MUi1RU0ZHLUxSNS0wNTAzMjAyMw==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSjU1Ml81NTc3MzAwMDQwOTUwNzJfMDQyODIwMjNfNjQ0YzFmNjc4YjM3Mg==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFESzE5NV8xODM2MjAwMDMwNTk0MTFfMDkxNTIwMjJfNjMyMzk5M2Y2NTU4MA==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFESzE5NV8xODM2MjAwMDMwNTk0MTFfMDkxNTIwMjJfNjMyMzk5M2Y2NTU4MA==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTYyOF82MzQyMjAwMDQwNDU4MjFfMDQxOTIwMjNfNjQzZmVjNDliNzk4MQ==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTYyOF82MzQyMjAwMDQwNDU4MjFfMDQxOTIwMjNfNjQzZmVjNDliNzk4MQ==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSDkxMS0wMzA2MjMtREJTRC1TSC1TRzM1LTA0MTAyMDIz',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEUTY3MV80OTQ0NzAwMDM0NDUwMTlfMTEwMTIwMjJfNjM2MWM3Y2Q5MGM3MA==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzc4M180OTQ0NzAwMDM4NzY5MzZfMDUwOTIwMjNfNjQ1YTUwNWE2OTFmNA==',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFDWjkxNl8xODM2MzAwMDI0NDc4NzlSMl8wNjI3MjAyMl82MmI5Y2E4YTI5YmI3',
-    #     'https://www.trulieve.com/files/lab-results/18362_0003059411.pdf',
-    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzcwM180OTQ0ODAwMDQxMzYyNjhfMDUwODIwMjNfNjQ1OTVkNjgxMzExZA==',
-    # ]
+    # [✓] TEST: Parse partial COA from a URL.
+    urls = [
+        'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEVjIxMC0xMDI1MjItREJGSy1SMzUtMTIxMTIwMjI=',
+        'https://www.trulieve.com/files/lab-results/18362_0003059411.pdf',
+    ]
+    for url in urls:
+        data = parse_acs_coa(parser, url)
+        assert data is not None
+        print('Parsed:', data)
+        sleep(3)
 
-    # [ ] TEST: Parse a full panel COA from a URL.
-    # urls = [
-    #     'https://www.trulieve.com/files/lab-results/27675_0002407047.pdf',
-    # ]
+    # [✓] TEST: Parse a full panel COA from a URL.
+    urls = [
+        'https://www.trulieve.com/files/lab-results/27675_0002407047.pdf',
+    ]
+    for url in urls:
+        data = parse_acs_coa(parser, url)
+        assert data is not None
+        print('Parsed:', data)
+        sleep(3)
