@@ -264,7 +264,6 @@ def parse_acs_coa(
 
     # If the `doc` is a URL, then download the PDF to the `temp_path`.
     # Then use the path of the downloaded PDF as the doc.
-    # Read the PDF.
     if isinstance(doc, str):
         if doc.startswith('https'):
             if temp_path is None: temp_path = tempfile.gettempdir()
@@ -291,7 +290,7 @@ def parse_acs_coa(
 
     # Get the front page.
     page = report.pages[0]
-    page_text = page.extract_text()
+    page_text = page.extract_text().replace(r'\u0000', '')
     lines = page_text.split('\n')
     left = page.within_bbox((0, 0, page.width * 0.5, page.height))
     right = page.within_bbox((page.width * 0.5, 0, page.width, page.height))
@@ -313,7 +312,7 @@ def parse_acs_coa(
 
     # Get the product type.
     top_corner = page.within_bbox((page.width * 0.25, 0, page.width, page.height * 0.25))
-    top_lines = top_corner.extract_text().split('\n')
+    top_lines = top_corner.extract_text().replace('\x00', 'fi').split('\n')
     top_lines = get_rows_between_values(
         top_lines,
         start='Sample Matrix',
@@ -350,7 +349,7 @@ def parse_acs_coa(
     tests = 'Potency' + page_text.split('Potency')[1].split('Product Image')[0]
     tests = tests.replace('Not Tested', 'NT')
     for k, v in lab_analyses.items():
-        tests = tests.replace(k, v)
+        tests = tests.replace('\x00', 'fi').replace(k, v)
     tests = [x.split(' ') for x in tests.split('\n') if x]
 
     # Determine status for each analysis.
@@ -398,6 +397,7 @@ def parse_acs_coa(
             break
 
     # Get cannabinoids.
+    # FIXME: This isn't working on all COAs.
     crop = page.within_bbox((0, 0.4 * page.height, page.width * 0.5, page.height * 0.8))
     cells = crop.extract_text().split('\n')
     if 'Potency' in page_text:
@@ -475,10 +475,11 @@ def parse_acs_coa(
     for page in report.pages[1:]:
         
         # Get page rows from the double column layout.
-        page_text = page.extract_text()
+        page_text = page.extract_text().replace(r'\u0000', '')
         left = page.within_bbox((0, 0, page.width * 0.5, page.height))
         right = page.within_bbox((page.width * 0.5, 0, page.width, page.height))
-        rows = left.extract_text().split('\n') + right.extract_text().split('\n')
+        rows = left.extract_text().replace(r'\u0000', '').split('\n')
+        rows += right.extract_text().replace(r'\u0000', '').split('\n')
 
         # Handle wide first column for mycotoxins.
         if 'Mycotoxins' in page_text and 'Prep. By' in page_text:
@@ -807,9 +808,9 @@ def parse_acs_coa(
 
     # Finish data collection with a freshly minted sample ID.
     obs = {**ACS_LABS, **obs}
-    obs['analyses'] = json.dumps(list(set(analyses)))
     obs['coa_algorithm_version'] = __version__
     obs['coa_parsed_at'] = datetime.now().isoformat()
+    obs['analyses'] = json.dumps(list(set(analyses)))
     obs['methods'] = json.dumps(methods)
     obs['results'] = json.dumps(results)
     obs['results_hash'] = create_hash(results)
@@ -881,3 +882,35 @@ if __name__ == '__main__':
         assert data is not None
         print('Parsed:', data)
         sleep(3)
+
+"""
+# EXAMPLE: Parse a folder of ACS labs COAs.
+
+from datetime import datetime
+import os
+import pandas as pd
+from cannlytics.data.coas import CoADoc
+
+# Initialize CoADoc.
+parser = CoADoc()
+
+# Specify where your ACS Labs COAs live.
+all_data = []
+data_dir = 'D://data/florida/lab_results/.datasets/pdfs/acs'
+coa_pdfs = os.listdir(data_dir)
+for coa_pdf in coa_pdfs:
+    filename = os.path.join(data_dir, coa_pdf)
+    try:
+        data = parser.parse(filename)
+        all_data.extend(data)
+        print('Parsed:', filename)
+    except:
+        print('Failed to parse:', filename)
+
+# Save the data.
+date = datetime.now().isoformat()[:19].replace(':', '-')
+outfile = f'D://data/florida/lab_results/.datasets/acs-lab-results-{date}.xlsx'
+df = pd.DataFrame(all_data)
+df.replace(r'\\u0000', '', regex=True, inplace=True)
+parser.save(df, outfile)
+"""

@@ -424,6 +424,7 @@ if __name__ == '__main__':
 
 #-----------------------------------------------------------------------
 # The Flowery (892+ results).
+# TODO: Automate to be a daily script.
 #-----------------------------------------------------------------------
 
 def get_results_the_flowery(
@@ -776,3 +777,35 @@ def get_results_terplife(
 
 # TODO: Parse TerpLife Labs COA PDF.
 
+
+
+#-----------------------------------------------------------------------
+# Parse ACS labs COAs.
+#-----------------------------------------------------------------------
+
+from datetime import datetime
+import os
+from cannlytics.data.coas import CoADoc
+
+# Initialize CoADoc.
+parser = CoADoc()
+
+# Specify where your ACS Labs COAs live.
+all_data = []
+data_dir = 'D://data/florida/lab_results/.datasets/pdfs/acs'
+coa_pdfs = os.listdir(data_dir)
+for coa_pdf in coa_pdfs[:5]:
+    filename = os.path.join(data_dir, coa_pdf)
+    # try:
+    data = parser.parse(filename)
+    all_data.extend(data)
+    print('Parsed:', filename)
+    # except:
+    #     print('Failed to parse:', filename)
+
+# Save the data.
+date = datetime.now().isoformat()[:19].replace(':', '-')
+outfile = f'D://data/florida/lab_results/.datasets/acs-lab-results-{date}.xlsx'
+# df = pd.DataFrame(test_data)
+# df.replace(r'\\u0000', '', regex=True, inplace=True)
+parser.save(all_data, outfile, nuisance_columns=[])

@@ -275,6 +275,7 @@ def parse_kaycha_coa(
     obs['lab_id'] = lines[6].split(':')[-1].strip()
 
     # Get additional sample details.
+    # FIXME: These are dry weight! People want wet weight.
     results = []
     totals = ['total_thc', 'total_cbd', 'total_cannabinoids']
     for i, line in enumerate(lines):

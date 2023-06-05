@@ -1290,7 +1290,10 @@ class CoADoc:
 
                 # Apply codings to results.
                 # FIXME: This is super slow (2-3 mins for 2.5k observations)!
-                details_data['results'].replace(codings, inplace=True)
+                if 'results' in details_data.columns:
+                    details_data['results'].replace(codings, inplace=True)
+                # except KeyError:
+                #     pass
 
                 # Convert totals to numeric.
                 # TODO: Calculate totals if they don't already exist:
