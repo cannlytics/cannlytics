@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 5/18/2023
+Updated: 6/4/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -22,7 +22,7 @@ Future work:
 
     - [ ] Integrate `create_hash` into `save` and `standardize`.
     - [ ] Improve the `standardize` method.
-    - [ ] Parse unidentified COAs with OpenAI's GPT.
+    - [ ] Parse unidentified COAs with OpenAI's GPT model.
 
 """
 # Standard imports.
@@ -77,6 +77,7 @@ from cannlytics.utils.constants import (
 )
 
 # Lab and LIMS CoA parsing algorithms.
+from cannlytics.data.coas.algorithms.acs import ACS_LABS
 from cannlytics.data.coas.algorithms.anresco import ANRESCO
 from cannlytics.data.coas.algorithms.cannalysis import CANNALYSIS
 from cannlytics.data.coas.algorithms.confidence import CONFIDENCE
@@ -92,6 +93,7 @@ from cannlytics.data.coas.algorithms.veda import VEDA_SCIENTIFIC
 
 # Labs and LIMS that CoADoc can parse.
 LIMS = {
+    'ACS Labs': ACS_LABS,
     'Anresco Laboratories': ANRESCO,
     'Cannalysis': CANNALYSIS,
     'Confidence Analytics': CONFIDENCE,

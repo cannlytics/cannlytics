@@ -192,6 +192,8 @@ ANALYTES = {
     'cbca_3': 'cbca',
     'cbna_3': 'cbna',
     'cbl_3': 'cbl',
+    'THCA-A': 'thca',
+    'thca_a': 'thca',
     'ddvp_dichlorvous': 'dichlorvos',
     'Dichlorvos (DDVP)': 'dichlorvos',
     'dichlorvos_ddvp': 'dichlorvos',
