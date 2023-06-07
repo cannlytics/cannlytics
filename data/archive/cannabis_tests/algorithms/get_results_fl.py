@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 5/30/2023
+Updated: 6/7/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -324,6 +324,7 @@ def parse_results_kaycha(
         outfile: Optional[str] = None,
         temp_path: Optional[str] = None,
         reverse: Optional[bool] = True,
+        completed: Optional[list] = [],
     ):
     """Parse lab results from Kaycha Labs COAs."""
     # Initialize a parser.
@@ -351,7 +352,7 @@ def parse_results_kaycha(
                 continue
 
             # Skip parsed files.
-            if filename in COMPLETED:
+            if filename in completed:
                 continue
 
             # Parse COA PDFs one by one.
@@ -384,42 +385,41 @@ if __name__ == '__main__':
     # COMPLETED = []
 
     # [✓] TEST: Get Kaycha COAs.
-    # kaycha_coas = get_results_kaycha(DATA_DIR)
-    # pass
+    kaycha_coas = get_results_kaycha(DATA_DIR)
 
-    # [✓] TEST: Parse Kaycha COAs.
-    pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
-    # date = datetime.now().strftime('%Y-%m-%d')
-    date = datetime.now().isoformat()[:19].replace(':', '-')
-    for folder in os.listdir(pdf_dir):
-        if folder.startswith('MMTC-2015-0002'):
-            data_dir = os.path.join(pdf_dir, folder)
-            outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
-            print('Parsing:', folder)
-            coa_data = parse_results_kaycha(data_dir, outfile, reverse=True)
+    # === DEV ===
+    # TODO: Begin to parse lab results from the PDFs!
+    # MMTC-2019-0020 (513) (parsed)
+    # MMTC-2017-0008 (887) (parsed)
+    # MMTC-2017-0009 (4) (parsed 1/4)
+    # MMTC-2017-0010 (1637) (parsed 363 / 1637)
+    # MMTC-2017-0011 (3) (errored)
+    # MMTC-2019-0015 (3) (errored)
+    # MMTC-2019-0017 (585) (parsed)
+    # MMTC-2015-0001 (8969) (running in interactive 3) (unfinished)
+    # MMTC-2015-0002 (3963) (queued in interactive 4) (unfinished)
+    # MMTC-2015-0003 (70) (errored)
+    # MMTC-2015-0004 (1) (errored)
+    # MMTC-2016-0007 (39) (parsed 39/39)
+    # MMTC-2019-0019 (6) (parsed 6/6)
+    # with open(r'D:\data\results\parsed-2023-06-06.txt', 'r') as file:
+    #     COMPLETED = [line.strip() for line in file]
 
-
-# TODO: Begin to parse lab results from the PDFs!
-# MMTC-2019-0020 (513) (parsed)
-# MMTC-2017-0008 (887) (parsed)
-# MMTC-2017-0009 (4) (parsed 1/4)
-# MMTC-2017-0010 (1637) (running in interactive 2) (unfinished)
-# MMTC-2017-0011 (3) (errored)
-# MMTC-2019-0015 (3) (errored)
-# MMTC-2019-0017 (585) (parsed)
-# MMTC-2015-0001 (8969) (running in interactive 3) (unfinished)
-# MMTC-2015-0002 (3963) (queued in interactive 4) (unfinished)
-# MMTC-2015-0003 (70) (errored)
-# MMTC-2015-0004 (1) (errored)
-# MMTC-2016-0007 (39) (parsed 39/39)
-# MMTC-2019-0019 (6) (parsed 6/6)
-
-
-# TODO: Parse a COA from a URL.
-# url = 'https://yourcoa.com/coa/coa-download?sample=DA20708002-010'
-# url = 'https://yourcoa.com/coa/coa-download?sample=DA30314006-007-mrk'
-# url = 'https://www.trulieve.com/files/lab-results/35603_0001748379.pdf'
-# Broken: https://yourcoa.com/company/company?t=Green+Ops+FL+OpCo+LLC
+    # [ ] TEST: Parse Kaycha COAs.
+    # pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
+    # # date = datetime.now().strftime('%Y-%m-%d')
+    # date = datetime.now().isoformat()[:19].replace(':', '-')
+    # for folder in os.listdir(pdf_dir):
+    #     if folder.startswith('MMTC-2015-0002'):
+    #         data_dir = os.path.join(pdf_dir, folder)
+    #         outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
+    #         print('Parsing:', folder)
+    #         coa_data = parse_results_kaycha(
+    #             data_dir,
+    #             outfile,
+    #             reverse=True,
+    #             completed=COMPLETED
+    #         )
 
 
 #-----------------------------------------------------------------------
@@ -510,122 +510,121 @@ def get_results_the_flowery(
     # Return the COA URLs.
     return df
 
-# FIXME: Turn into a function.
-
-# import requests
-
-# # Setup
-# overwrite = False
-
-# # Initialize Selenium.
-# try:
-#     service = Service()
-#     options = Options()
-#     options.add_argument('--window-size=1920,1200')
-#     options.add_argument('--headless')
-#     options.add_argument('--disable-gpu')
-#     options.add_argument('--no-sandbox')
-#     driver = webdriver.Chrome(options=options, service=service)
-# except:
-#     driver = webdriver.Edge()
-
-# # Iterate over all of the product types.
-# observations = []
-# categories = ['Flower', 'Concentrates', 'Pre-Rolls', 'Vaporizers', 'Tinctures']
-# for category in categories:
-
-#     # Load the category page.
-#     url = f'https://theflowery.co/shop?categories[]={category}'
-#     driver.get(url)
-#     sleep(3.33)
-
-#     # Get all of the product cards.
-#     divs = driver.find_elements(by=By.CSS_SELECTOR, value='a.s-shop-product-card')
-#     for div in divs:
-        
-#         # Extract product name.
-#         product_name = div.find_element(by=By.CLASS_NAME, value='title').text
-
-#         # Extract product image URL.
-#         product_image = div.find_element(by=By.TAG_NAME, value='img').get_attribute('src')
-
-#         # Extract product price.
-#         product_price = float(div.find_element(by=By.CLASS_NAME, value='full-price').text.strip('$'))
-
-#         # Extract strain type.
-#         strain_type = div.find_element(by=By.CLASS_NAME, value='sort').text
-
-#         # Extract product URL (assuming the URL is stored in the href attribute of a link)
-#         product_url = div.get_attribute('href')
-
-#         # Store the extracted data in a dictionary
-#         obs = {
-#             'product_name': product_name,
-#             'image_url': product_image,
-#             'product_price': product_price,
-#             'strain_type': strain_type,
-#             'product_url': product_url
-#         }
-#         observations.append(obs)
-
-# # TODO: Get the COA URL for each product.
-# # - image_url
-# for i, obs in enumerate(observations):
-#     coa_url = ''
-#     driver.get(obs['product_url'])
-#     sleep(3.33)
-#     links = driver.find_elements(by=By.TAG_NAME, value='a')
-#     for link in links:
-#         if link.get_attribute('href') and '.pdf' in link.get_attribute('href'):
-#             coa_url = link.get_attribute('href')
-#             break
-#     observations[i]['coa_url'] = coa_url
-#     print('Found COA URL: %s' % coa_url)
-
-# # Download the COA PDFs.
-# license_pdf_dir = os.path.join(DATA_DIR, '.datasets', 'pdfs', 'MMTC-2019-0020')
-# for obs in observations:
-#     coa_url = obs['coa_url']
-
-#     # Get the sample ID
-#     sample_id = coa_url.split('/')[-1].split('.')[0]
-
-#     # Format the file.
-#     outfile = os.path.join(license_pdf_dir, f'{sample_id}.pdf')
-#     if os.path.exists(outfile) and not overwrite:
-#         continue
-#     sleep(0.3)
-
-#     # Download the PDF.
-#     response = requests.get(coa_url, headers=DEFAULT_HEADERS)
-#     with open(outfile, 'wb') as pdf:
-#         pdf.write(response.content)
-#     print('Downloaded: %s' % outfile)
-#     sleep(3.33)
-
-# # Merge The Flowery data with the COA data.
-# the_flowery = FLORIDA_LICENSES['MMTC-2019-0020']
-# observations = [{**the_flowery, **x} for x in observations]
-
-# # Save the data.
-# date = datetime.now().isoformat()[:19].replace(':', '-')
-# data = pd.DataFrame(observations)
-# datasets_dir = os.path.join(DATA_DIR, '.datasets')
-# data.to_excel(f'{datasets_dir}/the-flowery-lab-result-urls-{date}.xlsx', index=False)
-# print('Saved %i lab result URLs for The Flowery.' % len(data))
-# # return data
-
-
-
-
-
 
 # === Test ===
 if __name__ == '__main__':
 
+    # FIXME: Turn this into a function.
+    import requests
+
+    # Setup
+    overwrite = False
+
+    # Initialize Selenium.
+    try:
+        service = Service()
+        options = Options()
+        options.add_argument('--window-size=1920,1200')
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        driver = webdriver.Chrome(options=options, service=service)
+    except:
+        driver = webdriver.Edge()
+
+    # Iterate over all of the product types.
+    observations = []
+    categories = ['Flower', 'Concentrates', 'Pre-Rolls', 'Vaporizers', 'Tinctures']
+    for category in categories:
+
+        # Load the category page.
+        url = f'https://theflowery.co/shop?categories[]={category}'
+        driver.get(url)
+        sleep(3.33)
+
+        # Get all of the product cards.
+        divs = driver.find_elements(by=By.CSS_SELECTOR, value='a.s-shop-product-card')
+        for div in divs:
+            
+            # Extract product name.
+            product_name = div.find_element(by=By.CLASS_NAME, value='title').text
+
+            # Extract product image URL.
+            product_image = div.find_element(by=By.TAG_NAME, value='img').get_attribute('src')
+
+            # Extract product price.
+            product_price = float(div.find_element(by=By.CLASS_NAME, value='full-price').text.strip('$'))
+
+            # Extract strain type.
+            strain_type = div.find_element(by=By.CLASS_NAME, value='sort').text
+
+            # Extract product URL (assuming the URL is stored in the href attribute of a link)
+            product_url = div.get_attribute('href')
+
+            # Store the extracted data in a dictionary
+            obs = {
+                'product_name': product_name,
+                'image_url': product_image,
+                'product_price': product_price,
+                'strain_type': strain_type,
+                'product_url': product_url
+            }
+            observations.append(obs)
+
+    # TODO: Get the COA URL for each product.
+    # - image_url
+    for i, obs in enumerate(observations):
+        coa_url = ''
+        driver.get(obs['product_url'])
+        sleep(3.33)
+        links = driver.find_elements(by=By.TAG_NAME, value='a')
+        for link in links:
+            if link.get_attribute('href') and '.pdf' in link.get_attribute('href'):
+                coa_url = link.get_attribute('href')
+                break
+        observations[i]['coa_url'] = coa_url
+        print('Found COA URL: %s' % coa_url)
+
+    # Close the driver.
+    driver.close()
+
+    # Download the COA PDFs.
+    license_pdf_dir = os.path.join(DATA_DIR, '.datasets', 'pdfs', 'MMTC-2019-0020')
+    for obs in observations:
+        coa_url = obs['coa_url']
+
+        # Get the sample ID
+        sample_id = coa_url.split('/')[-1].split('.')[0]
+
+        # Format the file.
+        outfile = os.path.join(license_pdf_dir, f'{sample_id}.pdf')
+        if os.path.exists(outfile) and not overwrite:
+            print('Cached: %s' % outfile)
+            continue
+        sleep(0.3)
+
+        # Download the PDF.
+        response = requests.get(coa_url, headers=DEFAULT_HEADERS)
+        with open(outfile, 'wb') as pdf:
+            pdf.write(response.content)
+        print('Downloaded: %s' % outfile)
+        sleep(3.33)
+
+    # Merge The Flowery data with the COA data.
+    the_flowery = FLORIDA_LICENSES['MMTC-2019-0020']
+    observations = [{**the_flowery, **x} for x in observations]
+
+    # Save the data.
+    date = datetime.now().isoformat()[:19].replace(':', '-')
+    data = pd.DataFrame(observations)
+    datasets_dir = os.path.join(DATA_DIR, '.datasets')
+    data.to_excel(f'{datasets_dir}/the-flowery-lab-result-urls-{date}.xlsx', index=False)
+    print('Saved %i lab result URLs for The Flowery.' % len(data))
+    # return data
+
     # [✓] TEST: Get The Flowery COAs.
-    # the_flowery_coas = get_results_the_flowery(DATA_DIR)
-    pass
+    the_flowery_coas = get_results_the_flowery(DATA_DIR)
+
 
 #-----------------------------------------------------------------------
 # TerpLife Labs (in development).
@@ -771,41 +770,79 @@ def get_results_terplife(
     return []
 
 
-
 # TODO: Search TerpLife for known strains.
 
-
 # TODO: Parse TerpLife Labs COA PDF.
-
 
 
 #-----------------------------------------------------------------------
 # Parse ACS labs COAs.
 #-----------------------------------------------------------------------
 
+# # EXAMPLE: Parse a folder of ACS labs COAs.
+
+# from datetime import datetime
+# import os
+# import pandas as pd
+# from cannlytics.data.coas import CoADoc
+
+# # Initialize CoADoc.
+# parser = CoADoc()
+
+# # Specify where your ACS Labs COAs live.
+# all_data = []
+# data_dir = 'D://data/florida/lab_results/.datasets/pdfs/acs'
+# coa_pdfs = os.listdir(data_dir)
+# for coa_pdf in coa_pdfs:
+#     filename = os.path.join(data_dir, coa_pdf)
+#     # try:
+#     data = parser.parse(filename)
+#     all_data.extend(data)
+#     print('Parsed:', filename)
+#     # except:
+#     #     print('Failed to parse:', filename)
+
+# # Save the data.
+# date = datetime.now().isoformat()[:19].replace(':', '-')
+# outfile = f'D://data/florida/lab_results/.datasets/acs-lab-results-{date}.xlsx'
+# df = pd.DataFrame(all_data)
+# df.replace(r'\\u0000', '', regex=True, inplace=True)
+# parser.save(df, outfile)
+
+
+#-----------------------------------------------------------------------
+# Aggregate all parsed COAs.
+#-----------------------------------------------------------------------
+
 from datetime import datetime
 import os
 from cannlytics.data.coas import CoADoc
-
-# Initialize CoADoc.
-parser = CoADoc()
+import pandas as pd
 
 # Specify where your ACS Labs COAs live.
-all_data = []
-data_dir = 'D://data/florida/lab_results/.datasets/pdfs/acs'
-coa_pdfs = os.listdir(data_dir)
-for coa_pdf in coa_pdfs[:5]:
-    filename = os.path.join(data_dir, coa_pdf)
-    # try:
-    data = parser.parse(filename)
-    all_data.extend(data)
-    print('Parsed:', filename)
-    # except:
-    #     print('Failed to parse:', filename)
+folder_path = 'D://data/florida/lab_results/.datasets/'
 
-# Save the data.
+# Aggregate all of the parsed COAs.
+data_frames = []
+for filename in os.listdir(folder_path):
+    if filename.endswith('.xlsx'):
+        file_path = os.path.join(folder_path, filename)
+        try:
+            df = pd.read_excel(file_path, sheet_name='Details')
+            data_frames.append(df)
+            print('Compiled %i results:' % len(df), filename)
+        except:
+            continue
+
+# Sort by when the COA was parsed and keep only the most recent by sample ID.
+aggregate = pd.concat(data_frames, ignore_index=True)
+aggregate.sort_values('coa_parsed_at', ascending=False, inplace=True)
+aggregate.drop_duplicates(subset='sample_id', keep='first', inplace=True)
+print('Aggregated %i COAs.' % len(aggregate))
+
+# Save the results.
+parser = CoADoc()
 date = datetime.now().isoformat()[:19].replace(':', '-')
-outfile = f'D://data/florida/lab_results/.datasets/acs-lab-results-{date}.xlsx'
-# df = pd.DataFrame(test_data)
-# df.replace(r'\\u0000', '', regex=True, inplace=True)
-parser.save(all_data, outfile, nuisance_columns=[])
+outfile = f'D://data/florida/lab_results/.datasets/fl-lab-results-{date}.xlsx'
+parser.save(aggregate, outfile)
+print('Saved aggregated COAs data:', outfile)

@@ -24,7 +24,7 @@ from rest_framework.response import Response
 
 # Internal imports
 from cannlytics.auth.auth import authenticate_request
-from cannlytics.data.receipts.receipt_parser import BudSpender
+from cannlytics.data.sales.receipt_parser import BudSpender
 from cannlytics.firebase.firebase import create_log, update_documents
 
 # Maximum number of files that can be parsed in 1 request.

@@ -13,27 +13,28 @@ Description:
 
     Collect all cannabis license data from states with permitted adult-use:
 
-        ✓ Alaska (Requires Selenium)
-        ✓ Arizona (Requires Selenium)
+        ✓ Alaska (Requires Selenium) (FIXME)
+        ✓ Arizona (Requires Selenium) (FIXME)
         ✓ California
-        ✓ Colorado
+        ✓ Colorado (FIXME)
         ✓ Connecticut
         ✓ Delaware
-        ✓ Illinois
-        ✓ Maine
+        ✓ Illinois (FIXME)
+        ✓ Maine (FIXME)
         ✓ Maryland
         ✓ Massachusetts
-        ✓ Michigan (Requires Selenium)
-        ✓ Missouri
-        ✓ Montana
+        ✓ Michigan (Requires Selenium) (FIXME)
+        - Minnesota (TODO)
+        ✓ Missouri (FIXME)
+        ✓ Montana (FIXME)
         ✓ Nevada
         ✓ New Jersey
         - New York (TODO)
-        ✓ New Mexico (Requires Selenium)
-        ✓ Oregon
-        ✓ Rhode Island
-        ✓ Vermont
-        ✓ Washington
+        ✓ New Mexico (Requires Selenium) (FIXME)
+        ✓ Oregon (FIXME)
+        ✓ Rhode Island (FIXME)
+        ✓ Vermont (FIXME)
+        ✓ Washington (FIXME)
 """
 # Standard imports.
 from datetime import datetime

@@ -242,6 +242,7 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
         try:
             coa_df = pd.DataFrame(coa_data)
             coa_df.to_excel(outfile, index=False)
+            print('Saved %i results:' % len(coa_data), outfile)
         except:
             print('Error saving:', outfile)
     

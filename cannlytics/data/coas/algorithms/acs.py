@@ -206,6 +206,7 @@ ACS_LABS_COA = {
         'Heavy Metals': 'heavy_metals',
         'Pathogenic': 'microbes',
         'Microbiology (qPCR)': 'microbes',
+        'Microbiology Petrifilm': 'microbes',
         'Mycotoxins': 'mycotoxins',
         'Residual Solvents': 'residuals_solvents',
         'Filth and Foreign': 'foreign_matter',
@@ -365,6 +366,7 @@ def parse_acs_coa(
                 if 'fail' in status.lower():
                     overall_status = 'Fail'
     obs['status'] = overall_status
+    analyses = list(set(analyses))
 
     # Get total cannabinoids.
     crop = page.within_bbox((0.5 * page.width, 0.33 * page.height, page.width, page.height * 0.8))
@@ -397,14 +399,14 @@ def parse_acs_coa(
             break
 
     # Get cannabinoids.
-    # FIXME: This isn't working on all COAs.
     crop = page.within_bbox((0, 0.4 * page.height, page.width * 0.5, page.height * 0.8))
     cells = crop.extract_text().split('\n')
     if 'Potency' in page_text:
+        stop = 'Sample Prepared By' if 'Sample Prepared By' in page_text else 'Total'
         elements = get_rows_between_values(
             rows,
-            start='Analyte Dilution',
-            stop='Total',
+            start='Analyte',
+            stop=stop,
         )
         for line in elements[1:]:
             first_value = find_first_value(line)
