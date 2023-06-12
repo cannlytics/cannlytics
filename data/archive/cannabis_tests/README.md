@@ -49,7 +49,7 @@ tags:
 
 ### Dataset Summary
 
-This dataset is a collection of public cannabis lab test results parsed by [`CoADoc`](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas), a certificate of analysis (COA) parsing tool.
+This dataset is a collection of public cannabis lab test results.
 
 ## Dataset Structure
 
@@ -57,12 +57,12 @@ The dataset is partitioned into the various sources of lab results.
 
 | Dataset | Key | Observations |
 |--------|--------|--------------|
-| California | `ca` | Coming soon |
-| Connecticut | `ct` | Coming soon |
-| Florida | `fl` | Coming soon |
-| Massachusetts | `ma` | Coming soon |
+| California | `ca` | 1202 |
+| Connecticut | `ct` | 17325 |
+| Florida | `fl` | 16167 |
+| Massachusetts | `ma` | 7482 |
 | Michigan | `mi` | Coming soon |
-| Washington | `wa` | Coming soon |
+| Washington | `wa` | 59501 |
 
 ### Data Instances
 

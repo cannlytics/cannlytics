@@ -20,7 +20,7 @@ import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/theme_button.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
-import 'package:cannlytics_data/common/layout/footer.dart';
+import 'package:cannlytics_data/ui/layout/footer.dart';
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';

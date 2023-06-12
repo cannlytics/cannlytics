@@ -26,7 +26,13 @@
 
 // TODO: Move lab results search to : /results/search
 
+// TODO: Allow people to make queries like the following:
+// - full spectrum surterra carts?
+// - Bernie Mac Hangover Haze
+// - I'm looking for a high terpinolene cart
+
 // Flutter imports:
+import 'package:cannlytics_data/ui/results/coa_doc_ui.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -39,8 +45,8 @@ import 'package:cannlytics_data/common/cards/card_grid.dart';
 import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 import 'package:cannlytics_data/common/cards/stats_model_card.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
-import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
-import 'package:cannlytics_data/common/layout/console.dart';
+import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
+import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/data_service.dart';
@@ -58,8 +64,8 @@ class LabResultsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConsoleScreen(
       children: [
-        // SliverToBoxAdapter(child: MainContent()),
-        SliverToBoxAdapter(child: LabResultsSearchForm()),
+        SliverToBoxAdapter(child: MainContent()),
+        // SliverToBoxAdapter(child: LabResultsSearchForm()),
       ],
     );
   }
@@ -105,9 +111,9 @@ class MainContent extends ConsumerWidget {
 
           // Your Results
           gapH12,
-          // CoADocInterface(),
+          CoADocInterface(),
           // Sponsorship placeholder.
-          SponsorshipCard(),
+          // SponsorshipCard(),
 
           // Lab results datasets.
           // gapH32,

@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/8/2023
-Updated: 5/16/2023
+Updated: 6/10/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Data Source:
@@ -22,15 +22,111 @@ from typing import Optional
 
 # External imports:
 import cannlytics
+from cannlytics.utils import convert_to_numeric
 import pandas as pd
 
 
 # Connecticut lab results API URL.
 CT_RESULTS_URL = 'https://data.ct.gov/api/views/egd5-wb6r/rows.json'
 
-# Specify where your data lives.
-DATA_DIR = 'D:/data/connecticut/lab_results'
-PDF_DIR = 'D:/data/connecticut/lab_results/pdfs'
+# Connecticut lab results fields.
+CT_FIELDS = {
+    'sid': 'id',
+    'id': 'lab_id',
+    'position': None,
+    'created_at': None,
+    'created_meta': None,
+    'updated_at': 'data_refreshed_date',
+    'updated_meta': None,
+    'meta': None,
+    'brand_name': 'product_name',
+    'dosage_form': 'product_type',
+    'producer': 'producer',
+    'product_image': 'image_url',
+    'label_image': 'images',
+    'lab_analysis': 'lab_results_url',
+    'approval_date': 'date_tested',
+    'registration_number': 'traceability_id',
+}
+CT_CANNABINOIDS = {
+    'cbg': 'cbg',
+    'cbg_a': 'cbga',
+    'cannabavarin_cbdv': 'cbdv',
+    'cannabichromene_cbc': 'cbc',
+    'cannbinol_cbn': 'cbn',
+    'tetrahydrocannabivarin_thcv': 'thcv',
+    'tetrahydrocannabinol_thc': 'thc',
+    'tetrahydrocannabinol_acid_thca': 'thca',
+    'cannabidiols_cbd': 'cbd',
+    'cannabidiol_acid_cbda': 'cbda',
+}
+CT_TERPENES = {
+    'a_pinene': 'alpha_pinene',
+    'b_myrcene': 'beta_myrcene',
+    'b_caryophyllene': 'beta_caryophyllene',
+    'b_pinene': 'beta_pinene',
+    'limonene': 'limonene',
+    'ocimene': 'ocimene',
+    'linalool_lin': 'linalool_lin',
+    'humulene_hum': 'humulene_hum',
+    'a_bisabolol': 'alpha_bisabolol',
+    'a_phellandrene': 'alpha_phellandrene',
+    'a_terpinene': 'alpha_terpinene',
+    'b_eudesmol': 'beta_eudesmol',
+    'b_terpinene': 'beta_terpinene',
+    'fenchone': 'fenchone',
+    'pulegol': 'pulegol',
+    'borneol': 'borneol',
+    'isopulegol': 'isopulegol',
+    'carene': 'carene',
+    'camphene': 'camphene',
+    'camphor': 'camphor',
+    'caryophyllene_oxide': 'caryophyllene_oxide',
+    'cedrol': 'cedrol',
+    'eucalyptol': 'eucalyptol',
+    'geraniol': 'geraniol',
+    'guaiol': 'guaiol',
+    'geranyl_acetate': 'geranyl_acetate',
+    'isoborneol': 'isoborneol',
+    'menthol': 'menthol',
+    'l_fenchone': 'l_fenchone',
+    'nerol': 'nerol',
+    'sabinene': 'sabinene',
+    'terpineol': 'terpineol',
+    'terpinolene': 'terpinolene',
+    'trans_b_farnesene': 'trans_beta_farnesene',
+    'valencene': 'valencene',
+    'a_cedrene': 'alpha_cedrene',
+    'a_farnesene': 'alpha_farnesene',
+    'b_farnesene': 'beta_farnesene',
+    'cis_nerolidol': 'cis_nerolidol',
+    'fenchol': 'fenchol',
+    'trans_nerolidol': 'trans_nerolidol'
+}
+
+
+def flatten_results(x):
+    """Flatten the results."""
+    results = []
+    for name, analyte in CT_CANNABINOIDS.items():
+        print(analyte, x[name])
+        results.append({
+            'key': analyte,
+            'name': name,
+            'value': convert_to_numeric(x[name]),
+            'units': 'percent',
+            'analysis': 'cannabinoids',
+        })
+    for name, analyte in CT_TERPENES.items():
+        print(analyte, x[name])
+        results.append({
+            'key': analyte,
+            'name': name,
+            'value': convert_to_numeric(x[name]),
+            'units': 'percent',
+            'analysis': 'terpenes',
+        })
+    return results
 
 
 def get_results_ct(url: str = CT_RESULTS_URL) -> pd.DataFrame:
@@ -41,32 +137,49 @@ def get_results_ct(url: str = CT_RESULTS_URL) -> pd.DataFrame:
         df (pd.DataFrame): A Pandas DataFrame of the test results.
     """
 
-    # Send a GET request to the URL.
+    # Get the data from the OpenData API.
     response = requests.get(url)
-
-    # Check if the request was successful (status code 200).
     if response.status_code == 200:
-
-        # Load the JSON data from the response.
         json_data = response.json()
-
-        # Get the metadata to get the columns.
         metadata = json_data['meta']
         header = metadata['view']['columns']
         headers = [h['name'] for h in header]
         columns = [cannlytics.utils.snake_case(h) for h in headers]
-
-        # Get the CSV data.
         rows = json_data['data']
-
-        # Create a Pandas DataFrame from the columns and rows.
         df = pd.DataFrame(rows, columns=columns)
-        return df
     else:
         print('Failed to fetch CT results. Status code:', response.status_code)
+    
+    # FIXME: Standardize the results.
+    # Note: The results do not match the COAs!!!
+    df['results'] = df.apply(flatten_results, axis=1)
+
+    # Drop unnecessary columns.
+    drop_columns = ['meta', 'position', 'created_at', 'created_meta',
+        'updated_at', 'updated_meta']
+    drop_columns += list(CT_CANNABINOIDS.keys()) + list(CT_TERPENES.keys())
+    df.drop(columns=drop_columns, inplace=True)
+
+    # Rename the columns.
+    df.rename(columns=CT_FIELDS, inplace=True)
+
+    # TODO: Extract product_size, serving_size, servings_per_package, sample_weight
+    # from dosage_form and standardize product type.
+
+    # TODO: Format COA URLs.
+    # coa_urls
+
+    # Save the results to Excel.
+    date = datetime.now().isoformat()[:10]
+    datafile = f'{data_dir}/ct-lab-results-{date}.xlsx'
+    try:
+        cannlytics.utils.to_excel_with_style(df, datafile)
+    except:
+        df.to_excel(datafile)
+    print('Connecticut lab results archived:', datafile)
 
 
-def download_pdfs(
+def download_pdfs_ct(
         df: pd.DataFrame,
         download_path: str,
         column_name: Optional[str] = 'lab_analysis',
@@ -80,7 +193,6 @@ def download_pdfs(
         column_name (str): The name of the column containing the PDF URLs.
         download_path (str): The path to the directory where the PDFs will be downloaded.
     """
-    # Iterate over the rows in the specified column
     for _, row in df.iterrows():
         pdf_url = row[column_name]
         if isinstance(pdf_url, list):
@@ -92,23 +204,18 @@ def download_pdfs(
             filename = filename + '.pdf'
 
         # Create the local file path for downloading the PDF.
-        outfile = os.path.join(download_path, filename)
-
         # Continue if the PDF is already downloaded.
+        outfile = os.path.join(download_path, filename)
         if os.path.isfile(outfile) or pdf_url is None:
             continue
 
-        # Send a GET request to download the PDF.
+        # Download the PDF.
         try:
             response = requests.get(pdf_url)
         except:
             print(f'Failed to download PDF: {pdf_url}')
             continue
-
-        # Check if the request was successful (status code 200).
         if response.status_code == 200:
-
-            # Write the PDF content to the local file.
             with open(outfile, 'wb') as file:
                 file.write(response.content)
             if verbose:
@@ -130,9 +237,13 @@ if __name__ == '__main__':
     except SystemExit:
         args = {}
 
+    # Specify where your data lives.
+    DATA_DIR = 'D:/data/connecticut/lab_results'
+    PDF_DIR = 'D:/data/connecticut/lab_results/pdfs'
+
     # Set the destination for the PDFs.
-    download_path = args.get('pdf_dir', PDF_DIR)
     data_dir = args.get('data_dir', DATA_DIR)
+    pdf_dir = args.get('pdf_dir', os.path.join(data_dir, 'pdfs'))
 
     # Get the test results.
     print('Getting Connecticut test results...')
@@ -140,17 +251,16 @@ if __name__ == '__main__':
 
     # Download the PDFs.
     print('Downloading PDFs...')
-    if not os.path.exists(download_path):
-        os.makedirs(download_path)
-    download_pdfs(results, download_path)
+    if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
+    download_pdfs_ct(results, pdf_dir)
 
-    # Save the results to Excel.
-    date = datetime.now().isoformat()[:10]
-    datafile = f'{data_dir}/ct-lab-results-{date}.xlsx'
-    try:
-        cannlytics.utils.to_excel_with_style(results, datafile)
-    except:
-        results.to_excel(datafile)
-    print('Connecticut lab results archived:', datafile)
+    # # Save the results to Excel.
+    # date = datetime.now().isoformat()[:10]
+    # datafile = f'{data_dir}/ct-lab-results-{date}.xlsx'
+    # try:
+    #     cannlytics.utils.to_excel_with_style(results, datafile)
+    # except:
+    #     results.to_excel(datafile)
+    # print('Connecticut lab results archived:', datafile)
 
-    # TODO: Parse the PDFs with CoADoc (to train a custom GPT model).
+    # Future work: Parse the PDFs with CoADoc (to train a custom GPT model).

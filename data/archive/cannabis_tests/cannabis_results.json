@@ -1,0 +1,135 @@
+{
+  "all": {
+    "title": "Aggregated Lab Results 2023-05-30",
+    "data_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/data/all/all-lab-results-latest.csv",
+    "data_path": "data/lab_results/ca/ca-lab-results-latest.csv"
+  },
+  "ca": {
+    "title": "California Lab Results Non-Random Sample 2023-05-30",
+    "description": "",
+    "observations": 1202,
+    "fields": 106,
+    "file_ref": "data/lab_results/ca/ca-lab-results-latest.csv",
+    "data_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/data/ca/ca-lab-results-latest.csv",
+    "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fcalifornia-flag.png?alt=media&token=f64aaaba-d9cf-4e6f-9f06-4d431cb01d31",
+    "algorithm_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/algorithms/get_results_ca.py",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "license": "CC-BY 4.0",
+    "created_at": "2023-05-30",
+    "updated_at": "2023-05-30",
+    "state": "CA",
+    "state_name": "California",
+    "tier": "Premium",
+    "type": "results",
+    "data_sources": [
+      {
+        "name": "Glass House Farms",
+        "url": "https://glasshousefarms.org/strains/"
+      }
+    ]
+  },
+  "ct": {
+    "title": "Connecticut Lab Results 2023-05-30",
+    "description": "",
+    "observations": 17325,
+    "fields": 67,
+    "file_ref": "data/lab_results/ct/ct-lab-results-latest.csv",
+    "data_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/data/ct/ct-lab-results-latest.csv",
+    "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fconnecticut-flag.png?alt=media&token=bdac5bd6-4d1e-4652-aa39-55b247ed0a4b",
+    "algorithm_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/algorithms/get_results_ct.py",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "license": "CC-BY 4.0",
+    "created_at": "2023-05-30",
+    "updated_at": "2023-05-30",
+    "state": "CT",
+    "state_name": "Connecticut",
+    "tier": "Premium",
+    "type": "results",
+    "data_sources": [
+      {
+        "name": "Connecticut Medical Marijuana Brand Registry",
+        "url": "https://data.ct.gov/Health-and-Human-Services/Medical-Marijuana-Brand-Registry/egd5-wb6r/data"
+      }
+    ]
+  },
+  "fl": {
+    "title": "Florida Lab Results Non-Random Sample 2023-05-30",
+    "description": "",
+    "observations": 16167,
+    "fields": 6,
+    "file_ref": "data/lab_results/fl/fl-lab-results-latest.csv",
+    "data_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/data/fl/fl-lab-results-latest.csv",
+    "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fflorida-flag.png?alt=media&token=f7129c6b-a2cf-4e21-9c0d-a060eb5a372d",
+    "algorithm_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/algorithms/get_results_fl.py",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "license": "CC-BY 4.0",
+    "created_at": "2023-05-30",
+    "updated_at": "2023-05-30",
+    "state": "FL",
+    "state_name": "Florida",
+    "tier": "Premium",
+    "type": "results",
+    "data_sources": [
+      {
+        "name": "Florida Labs",
+        "url": "https://knowthefactsmmj.com/cmtl/"
+      },
+      {
+        "name": "Florida Licenses",
+        "url": "https://knowthefactsmmj.com/mmtc/"
+      },
+      {
+        "name": "Kaycha Labs",
+        "url": "https://yourcoa.com"
+      }
+    ]
+  },
+  "ma": {
+    "title": "Massachusetts Lab Results Non-Random Sample 2023-05-30",
+    "description": "",
+    "observations": 7482,
+    "fields": 34,
+    "file_ref": "data/lab_results/ma/ma-lab-results-latest.csv",
+    "data_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/data/ma/ma-lab-results-latest.csv",
+    "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fmassachusetts-flag.png?alt=media&token=d500905e-522a-4577-bc9d-0e6f5534831c",
+    "algorithm_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/algorithms/get_results_ma.py",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "license": "CC-BY 4.0",
+    "created_at": "2023-05-30",
+    "updated_at": "2023-05-30",
+    "state": "MA",
+    "state_name": "Massachusetts",
+    "tier": "Premium",
+    "type": "results",
+    "data_sources": [
+      {
+        "name": "MCR Labs Test Results",
+        "url": "https://reports.mcrlabs.com"
+      }
+    ]
+  },
+  "wa": {
+    "title": "Washington Lab Results 2023-05-30",
+    "description": "",
+    "observations": 59501,
+    "fields": 53,
+    "file_ref": "data/lab_results/wa/wa-lab-results-latest.csv",
+    "data_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/data/wa/wa-lab-results-latest.csv",
+    "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fwashington-flag.png?alt=media&token=0df433c2-e3b2-419f-b4ce-b999f961ad62",
+    "algorithm_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/algorithms/get_results_wa.py",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "license": "CC-BY 4.0",
+    "created_at": "2023-05-30",
+    "updated_at": "2023-05-30",
+    "state": "WA",
+    "state_name": "Washington",
+    "tier": "Premium",
+    "type": "results",
+    "data_sources": [
+      {
+        "name": "Washington State Liquor and Cannabis Board Public Records Request",
+        "url": "https://lcb.box.com/s/bj3g5inm77n8mrf7gk0h07f1o13dkfc7"
+      }
+    ]
+  }
+}

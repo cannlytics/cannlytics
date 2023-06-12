@@ -74,12 +74,12 @@ FIELDS = datasets.Features({
 })
 
 # DEV: Read subsets from local source.
-# with open('subsets.json', 'r') as f:
+# with open('cannabis_licenses.json', 'r') as f:
 #     SUBSETS = json.loads(f.read())
 
 # PRODUCTION: Read subsets from the official source.
 import urllib.request
-with urllib.request.urlopen('https://huggingface.co/datasets/cannlytics/cannabis_licenses/raw/main/subsets.json') as url:
+with urllib.request.urlopen('https://huggingface.co/datasets/cannlytics/cannabis_licenses/raw/main/cannabis_licenses.json') as url:
     SUBSETS = json.load(url)
 
 

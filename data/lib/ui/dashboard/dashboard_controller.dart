@@ -130,9 +130,9 @@ List<Map> aiModels = [
     "image_url":
         "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3",
     "description":
-        "`CoADoc` puts lab result data in your hands by parsing COAs, finding all the data, standardizing the data, and cleanly returning the data to you.",
+        "Do you want your lab results? CoADoc is here to help you get your lab results.",
     "tier": "Premium",
-    "path": "/results",
+    "path": "/results/ai",
     "observations": null,
     "fields": null,
   },
@@ -141,19 +141,23 @@ List<Map> aiModels = [
     "image_url":
         "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fbud_spender_small.png?alt=media&token=e9a7b91b-65cc-47ef-bcf2-f19f30ea79b8",
     "description":
-        "Get data from your receipts and keep track of your spending and consumption.",
+        "Parse your receipts and track your spending and consumption.",
     "tier": "Premium",
-    "path": "/sales",
+    "path": "/sales/ai",
     "observations": null,
     "fields": null,
   },
-  // Out-of-commission for now:
-  // {
-  //   "image_url":
-  //       "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30",
-  //   "description": "Effects & Aromas Predictor",
-  //   "route": "SkunkFx"
-  // }
+  {
+    "title": "Strain Identifier",
+    "image_url":
+        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30",
+    "description":
+        "Identify, classify, and quantify cannabis strains using product name, description, and lab results.",
+    "tier": "Premium",
+    "path": "/strains/ai",
+    "observations": null,
+    "fields": null,
+  }
 ];
 
 /* Navigation */

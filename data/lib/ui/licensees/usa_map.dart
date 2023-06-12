@@ -129,24 +129,6 @@ class _InteractiveMapState extends ConsumerState<InteractiveMap>
     final ctrl = TransformationController(matrix);
     extendedViewport = ExtendedViewport(ctrl: ctrl, cacheFactor: 1.5);
 
-    // Limit viewport to map size.
-    // ctrl.addListener(() {
-    //   final offset = ctrl.value.getTranslation();
-    //   const maxDragDistance = 100.0;
-    //   if (offset.x.abs() > maxDragDistance) {
-    //     final newDx = offset.x > 0 ? maxDragDistance : -maxDragDistance;
-    //     final matrix = ctrl.value.clone();
-    //     matrix.setTranslationRaw(newDx, offset.y, 0);
-    //     ctrl.value = matrix;
-    //   }
-    //   if (offset.y.abs() > maxDragDistance) {
-    //     final newDy = offset.y > 0 ? maxDragDistance : -maxDragDistance;
-    //     final matrix = ctrl.value.clone();
-    //     matrix.setTranslationRaw(offset.x, newDy, 0);
-    //     ctrl.value = matrix;
-    //   }
-    // });
-
     // Initial zoom.
     Future.delayed(animationDuration, () {
       animation = Matrix4Tween(begin: ctrl.value, end: _zoomTo('labels', size))
@@ -179,8 +161,6 @@ class _InteractiveMapState extends ConsumerState<InteractiveMap>
             transformationController: transformationController,
             maxScale: 5,
             minScale: 2,
-            // panAxis: PanAxis.aligned,
-            // scaleFactor: 500,
             child: Flow(
               delegate: MapDelegate(mapData!, extendedViewport),
               children: mapData!.states.values
@@ -194,7 +174,7 @@ class _InteractiveMapState extends ConsumerState<InteractiveMap>
     );
   }
 
-  /// Render shape.
+  /// Render each state.
   Widget _shapeBuilder(StateData stateData, Size size) {
     final shape = StateBorder(stateData.path.shift(-stateData.rect.topLeft));
     return DecoratedBox(
@@ -244,7 +224,7 @@ class _InteractiveMapState extends ConsumerState<InteractiveMap>
     final w = double.parse(doc.rootElement.getAttribute('width')!);
     final h = double.parse(doc.rootElement.getAttribute('height')!);
 
-    // FIXME: Load the statuses from the web, otherwise use local SVG.
+    // Load the statuses from the web, otherwise use local SVG.
     var permissionsSvgData;
     try {
       var statePermissionsUrl =
@@ -275,9 +255,9 @@ class _InteractiveMapState extends ConsumerState<InteractiveMap>
       List<String> states = matches.map((match) => match.group(1)!).toList();
       for (var state in states) {
         stateColors[state] = {
-          "state": state,
-          "status": status,
-          "color": fillColor,
+          'state': state,
+          'status': status,
+          'color': fillColor,
         };
       }
     }
@@ -329,7 +309,6 @@ class MapDelegate extends FlowDelegate {
   /// Get the constraints for a shape.
   @override
   BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
-    // print('getConstraintsForChild $i');
     final stateData = mapData.states.values.elementAt(i);
     return BoxConstraints.tight(stateData.rect.size);
   }
@@ -448,7 +427,7 @@ class StateBorder extends ShapeBorder {
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 0.25
-            ..color = Colors.grey.shade400)
+            ..color = Colors.white)
       ..restore();
   }
 
@@ -488,9 +467,15 @@ class _InkFeature extends InteractiveInkFeature {
     required RenderBox referenceBox,
     required Color color,
     required this.position,
-  }) : super(controller: controller, referenceBox: referenceBox, color: color) {
+  }) : super(
+          controller: controller,
+          referenceBox: referenceBox,
+          color: color,
+        ) {
     _controller = AnimationController(
-        duration: mapAnimationDuration, vsync: controller.vsync)
+      duration: mapAnimationDuration,
+      vsync: controller.vsync,
+    )
       ..addListener(controller.markNeedsPaint)
       ..forward();
     controller.addInkFeature(this);

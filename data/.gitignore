@@ -113,3 +113,6 @@ android/app/google-services.json
 
 # Firebase hosting
 .firebase/
+
+# Google Maps API key configuration.
+web/config.json

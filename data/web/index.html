@@ -1,4 +1,6 @@
-<!DOCTYPE html><html><head>
+<!DOCTYPE html>
+<html>
+<head>
   <!--
     Cannlytics Data
     Copyright (c) 2023 Cannlytics
@@ -12,49 +14,85 @@
   <base href="$FLUTTER_BASE_HREF">
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="An app to interface with cannabis data and analytics.">
-  <meta name="author" content="Keegan Skeate admin@cannlytics.com">
 
-  <!-- iOS meta tags & icons -->
+  <!-- Title -->
+  <title>Data | Cannlytics</title>
+
+  <!-- Description -->
+  <meta name="description" content="An app to interface with cannabis data and analytics.">
+  
+  <!-- Author -->
+  <meta name="author" content="Cannlytics admin@cannlytics.com">
+
+  <!-- Icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="cannlytics_data">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="mask-icon" color="#e48632" href="images/logos/safari-pinned-tab.svg">
-
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="icons/favicon.ico">
   <link rel="shortcut icon" type="image/x-icon" href="icons/favicon.ico">
-  <!-- <link rel="icon" sizes="32x32" type="image/png" href="images/logos/favicon-32x32.png">
-  <link rel="icon" sizes="16x16" type="image/png" href="images/logos/favicon-16x16.png"> -->
-
-  <!-- Title -->
-  <title>Data | Cannlytics</title>
 
   <!-- Manifest -->
   <link rel="manifest" href="manifest.json">
 
-  <!-- Google Maps -->
-  <!-- TODO: Figure out a good way to dynamically load API key -->
-  <script src="https://maps.googleapis.com/maps/api/js?key="></script>
-
+  <!-- Flutter service worker -->
   <script>
     // The value below is injected by flutter build, do not touch.
     var serviceWorkerVersion = null;
   </script>
+
+  <!-- Local configuration -->
+  <!-- <script src="config.json"></script> -->
+
+  <!-- Initialize Google Maps with the API key from the `config.json` -->
+  <script>
+    async function loadGoogleMaps() {
+      const response = await fetch('config.json');
+      const config = await response.json();
+      console.log(config);
+      const script = document.createElement('script');
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=' + config.GOOGLE_MAPS_API_KEY;
+      document.head.appendChild(script);
+    }
+    loadGoogleMaps();
+  </script>
+
+  <!-- IMPORTANT: load pdfjs files -->
+  <script
+  src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.min.js"
+  type="text/javascript"
+  ></script>
+  <script type="text/javascript">
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.worker.min.js";
+  pdfRenderOptions = {
+    // where cmaps are downloaded from
+    cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/cmaps/",
+    // The cmaps are compressed in the case
+    cMapPacked: true,
+    // any other options for pdfjsLib.getDocument.
+    // params: {}
+  };
+  </script>
+
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer=""></script>
   <link rel="stylesheet" type="text/css" href="splash/style.css">
   <script src="splash/splash.js"></script>
 </head>
-<body>  <picture id="splash">
-      <source srcset="splash/img/light-1x.png 1x, splash/img/light-2x.png 2x, splash/img/light-3x.png 3x, splash/img/light-4x.png 4x" media="(prefers-color-scheme: light)">
-      <source srcset="splash/img/dark-1x.png 1x, splash/img/dark-2x.png 2x, splash/img/dark-3x.png 3x, splash/img/dark-4x.png 4x" media="(prefers-color-scheme: dark)">
-      <img class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
-  </picture>            
+<body>
+
+  <!-- Splash Screen -->
+  <picture id="splash">
+    <source srcset="splash/img/light-1x.png 1x, splash/img/light-2x.png 2x, splash/img/light-3x.png 3x, splash/img/light-4x.png 4x" media="(prefers-color-scheme: light)">
+    <source srcset="splash/img/dark-1x.png 1x, splash/img/dark-2x.png 2x, splash/img/dark-3x.png 3x, splash/img/dark-4x.png 4x" media="(prefers-color-scheme: dark)">
+    <img class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
+  </picture>
+  
+  <!-- Dart initialization -->
   <script>
     window.addEventListener('load', function(ev) {
-      // Download main.dart.js
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
@@ -67,4 +105,6 @@
       });
     });
   </script>
-</body></html>
+
+</body>
+</html>

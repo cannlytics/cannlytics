@@ -23,13 +23,27 @@ Command-line Usage:
 
 """
 # Standard imports:
+import math
 import os
 from typing import List
 
+import pandas as pd
+
 # External imports:
+from cannlytics.data import create_hash
 from cannlytics import firebase
+from cannlytics.utils.constants import states
 from datasets import load_dataset
 from dotenv import dotenv_values
+
+
+def replace_nan_with_none(data):
+    """Replace NaN values with None values in a dictionary."""
+    for dict_item in data:
+        for key, value in dict_item.items():
+            if isinstance(value, float) and math.isnan(value):
+                dict_item[key] = None
+    return data
 
 
 def upload_cannabis_licenses_datafiles(
@@ -69,7 +83,7 @@ def upload_cannabis_licenses_datafiles(
 
 def upload_cannabis_licenses(
         subset: str = 'all',
-        collection: str = 'data/licenses',
+        col: str = 'data/licenses',
         repo: str = 'cannlytics/cannabis_licenses',
         verbose: bool = True,
     ):
@@ -77,7 +91,7 @@ def upload_cannabis_licenses(
     to Firestore.
     Args:
         subset (str): The subset of the Hugging Face data, `all` by default.
-        collection (str): The Firestore collection where the data should be saved.
+        col (str): The Firestore base document where the data should be saved.
         repo (str): The Hugging Face dataset repository.
         doc_id (str): How to create a document ID, a `hex`, `uuid`, or
             the field of the document to use.
@@ -87,22 +101,42 @@ def upload_cannabis_licenses(
     # Initialize Firebase.
     db = firebase.initialize_firebase()
 
-    # Get the data from Hugging Face.
-    dataset = load_dataset(repo, subset)
-    data = dataset['data'].to_pandas()
-    if verbose:
-        print(f'Uploading {len(data)} licenses ({subset}).')
+    # Get the data from local storage.
+    try:
+        data = pd.read_csv('./cannabis_licenses/data/all/licenses-all-latest.csv')
+
+    # Otherwise get the data from Hugging Face.
+    except:
+        dataset = load_dataset(repo, subset)
+        data = dataset['data'].to_pandas()
 
     # Compile the references and documents.
     refs, docs = [], []
-    for _, row in data.iterrows():
-        doc = row.to_dict()
-        _id = str(doc['id'])
-        # FIXME: Not all stats are parsed correctly.
-        state = doc['premise_state'].lower()
-        ref = f'{collection}/{state}/{_id}'
-        refs.append(ref)
-        docs.append(doc)
+    data['id'] = data['license_number'].fillna(data['id']).apply(str)
+    data = data.loc[data['id'].notnull()]
+    state_names = [x.lower() for x in states.keys()]
+    for index, row in data.iterrows():
+
+        # Format the document and collection IDs
+        doc_id = row['id']
+        collection_id = row['premise_state'].lower()
+
+        # FIXME: Not all states are parsed correctly.
+        if collection_id not in state_names:
+            print('Invalid state:', index, row.to_dict())
+            continue
+
+        # Handle NaN values.
+        obs = replace_nan_with_none(row.to_dict())
+
+        # Create an entry for each state.
+        refs.append(f'{col}/{collection_id}/{doc_id}')
+        docs.append(obs)
+
+        # Create a second entry for aggregate queries.
+        uid = create_hash(doc_id, collection_id)
+        refs.append(f'{col}/all/{uid}')
+        docs.append(obs)
 
     # Upload the data to Firestore.
     firebase.update_documents(refs, docs, database=db)
@@ -131,11 +165,11 @@ if __name__ == '__main__':
         subset = 'all'
     
     # Upload Firestore with cannabis license data.
-    # try:
-    upload_cannabis_licenses(subset=subset)
-    print('Uploaded license data to Firestore.')
-    # except:
-    #     print('Failed to upload license data to Firestore.')
+    try:
+        all_licenses = upload_cannabis_licenses(subset=subset)
+        print('Uploaded %i license data to Firestore.' % len(all_licenses))
+    except:
+        print('Failed to upload license data to Firestore.')
 
     # Upload datafiles to Firebase Storage.
     # try:

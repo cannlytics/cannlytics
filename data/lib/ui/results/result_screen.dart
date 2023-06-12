@@ -19,11 +19,11 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_data/common/cards/wide_card.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
-import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
-import 'package:cannlytics_data/common/layout/console.dart';
-import 'package:cannlytics_data/common/layout/footer.dart';
-import 'package:cannlytics_data/common/layout/header.dart';
-import 'package:cannlytics_data/common/layout/sidebar.dart';
+import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
+import 'package:cannlytics_data/ui/layout/console.dart';
+import 'package:cannlytics_data/ui/layout/footer.dart';
+import 'package:cannlytics_data/ui/layout/header.dart';
+import 'package:cannlytics_data/ui/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/ui/licensees/licensee_map.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';

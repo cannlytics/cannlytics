@@ -45,6 +45,11 @@ class CoADocService {
 
   Future<void> uploadCoAFile(File file) async {
     // FIXME:
+    // final name = event.name;
+    // final mime = await controller.getFileMIME(event);
+    // final byte = await controller.getFileSize(event);
+    // final url = await controller.createFileUrl(event);
+
     // var request = MultipartRequest();
 
     // // Set your API endpoint

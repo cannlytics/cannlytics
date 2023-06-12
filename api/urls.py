@@ -95,8 +95,8 @@ urlpatterns = [
 
         # License data.
         path('/licenses', include([
-            path('', api.data.license_data),
-            path('/<license_number>', api.data.license_data),
+            path('', api.data.api_data_licenses),
+            path('/<license_number>', api.data.api_data_licenses),
         ])),
 
         # Lab result data API endpoints.

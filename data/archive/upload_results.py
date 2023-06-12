@@ -15,6 +15,9 @@ Command-line Usage:
 """
 # Standard imports:
 from datetime import datetime
+import json
+import math
+import numpy as np
 import os
 from typing import List
 
@@ -25,110 +28,68 @@ from dotenv import dotenv_values
 import pandas as pd
 
 
-# Specify where your data lives.
-DATA_DIR = 'D://data'
+def replace_nan_with_none(data):
+    """Replace NaN values with None values in a dictionary."""
+    for dict_item in data:
+        for key, value in dict_item.items():
+            if isinstance(value, float) and math.isnan(value):
+                dict_item[key] = None
+    return data
 
-# Lab result data files.
-DATASETS = [
-    {
-        "title": "California Lab Results",
-        "image_url": "",
-        "description": "",
-        "tier": "Premium",
-        "path": "/results/ca",
-        "observations": 0,
-        "fields": 0,
-        "type": "results",
-        "file_ref": "data/lab_results/ca/.csv",
-        "url": "",
-    },
-    {
-        "title": "Connecticut Lab Results",
-        "image_url": "",
-        "description": "",
-        "tier": "Premium",
-        "path": "/results/ct",
-        "observations": 0,
-        "fields": 0,
-        "type": "results",
-        "file_ref": "data/lab_results/ct/.csv",
-        "url": "",
-    },
-    {
-        "title": "Florida Lab Results",
-        "data_dir": "florida\lab_results\.datasets",
-        "image_url": "",
-        "description": "",
-        "tier": "Premium",
-        "path": "/results/fl",
-        "observations": 0,
-        "fields": 0,
-        "type": "results",
-        "file_ref": "data/lab_results/fl/fl-lab-results-latest.csv",
-        "url": "",
-    },
-    {
-        "title": "Massachusetts Lab Results",
-        "image_url": "",
-        "description": "",
-        "tier": "Premium",
-        "path": "/results/ma",
-        "observations": 0,
-        "fields": 0,
-        "type": "results",
-        "file_ref": "data/lab_results/ma/.csv",
-        "url": "",
-    },
-    {
-        "title": "Michigan Lab Results",
-        "image_url": "",
-        "description": "",
-        "tier": "Premium",
-        "path": "/results/mi",
-        "observations": 0,
-        "fields": 0,
-        "type": "results",
-        "file_ref": "data/lab_results/mi/.csv",
-        "url": "",
-    },
-    {
-        "title": "Washington Lab Results",
-        "image_url": "",
-        "description": "Curated cannabis traceability lab tests from Washington State from 2021 to 2023.",
-        "tier": "Premium",
-        "path": "/results/wa",
-        "observations": 59501,
-        "fields": 53,
-        "type": "results",
-        "file_ref": "data/lab_results/washington/ccrs-inventory-lab-results-2023-03-07.xlsx",
-        "url": "",
-    },
-]
 
-# Lab result constants.
-CONSTANTS = {
-    'lims': 'Kaycha Labs',
-    'lab': 'Kaycha Labs',
-    'lab_image_url': 'https://www.kaychalabs.com/wp-content/uploads/2020/06/newlogo-2.png',
-    'lab_address': '4101 SW 47th Ave, Suite 105, Davie, FL 33314',
-    'lab_street': '4101 SW 47th Ave, Suite 105',
-    'lab_city': 'Davie',
-    'lab_county': 'Broward',
-    'lab_state': 'FL',
-    'lab_zipcode': '33314',
-    'lab_phone': '833-465-8378',
-    'lab_email': 'info@kaychalabs.com',
-    'lab_website': 'https://www.kaychalabs.com/',
-    'lab_latitude': 26.071350,
-    'lab_longitude': -80.210750,
-    'licensing_authority_id': 'OMMU',
-    'licensing_authority': 'Florida Office of Medical Marijuana Use',
-}
+def aggregate_lab_results(metadata, sheet_name='Details'):
+    """Aggregate all lab results into a single dataset."""
+
+    # Find datafiles.
+    with open(metadata, 'r') as f:
+        datafiles = json.load(f)
+
+    # Read all datafiles, except the aggregate.
+    # FIXME: Standardize all lab result files in their algorithms!
+    results = []
+    for name, datafile in datafiles.items():
+        if name == 'all':
+            continue
+
+        # Read a datafile.
+        try:
+            file_path = os.path.join(f'./data/{name}/{name}-lab-results-latest.xlsx')
+            results.append(pd.read_excel(file_path, sheet_name=sheet_name))
+        except:
+            try:
+                results.append(pd.read_excel(file_path))
+            except:
+                print('ERROR READING:', name)
+
+    # Aggregate all lab results.
+    df = pd.concat(results, ignore_index=True)
+    df = df.drop_duplicates()
+    # df.dropna(subset=['download_url'], inplace=True)
+
+    # Add keywords.
+    keywords = df['product_name'].apply(lambda x: str(x).lower().split())
+    df = df.assign(keywords=keywords)
+
+    # Replace NaN with None
+    df = df.replace(np.nan, None)
+
+    print('AGGREGATED %i LAB RESULTS' % len(df))
+
+    # Save the aggregated lab results.
+    date = datetime.now().strftime('%Y-%m-%d')
+    df.to_excel(f'./data/all/all-lab-results-{date}.xlsx', sheet_name='Data')
+    df.to_excel('./data/all/all-lab-results-latest.xlsx', sheet_name='Data')
+
+    # Return the data.
+    return df
+
+
+aggregate_lab_results('cannabis_results.json')
 
 
 def upload_results(
         subset: str = 'all',
-        collection: str = 'data/lab_results',
+        col: str = 'data/lab_results',
         repo: str = 'cannlytics/cannabis_tests',
         verbose: bool = True,
     ):
@@ -137,10 +98,13 @@ def upload_results(
     # Initialize Firebase.
     db = firebase.initialize_firebase()
 
+    # Read datasets.
+    with open('./cannabis_tests/cannabis_results.json', 'r') as f:
+        datafiles = json.load(f)
+
     # Read all lab results.
-    # TODO: Generalize to all states / labs.
     results = []
-    for dataset in DATASETS:
+    for dataset in datafiles:
         folder_path = os.path.join(DATA_DIR, dataset.get('data_dir', './datasets'))
         if not os.path.exists(folder_path):
             continue
@@ -158,37 +122,28 @@ def upload_results(
     if verbose:
         print('Aggregated %i lab results.' % len(data))
 
-    # Standardize the data.
-    # FIXME: Generalize to all states / labs.
-    for constant, value in CONSTANTS.items():
-        data[constant] = value
-
-    # FIXME: Augment license data.
-    # This is a hot-fix.
-    from cannabis_licenses.algorithms.get_licenses_fl import get_licenses_fl
-    licenses = get_licenses_fl()
-    licenses['license_type'] = 'Medical - Retailer'
-    data = pd.merge(
-        data,
-        licenses,
-        suffixes=['', '_copy'],
-        left_on='producer_license_number',
-        right_on='license_number',
-    )
-    data = data.filter(regex='^(?!.*_copy$)')
-
     # Add keywords.
     data['keywords'] = data['product_name'].apply(lambda x: str(x).lower().split())
 
     # Compile the references and documents.
     refs, docs = [], []
     for _, row in data[1000:].iterrows():
+
+        # Handle NaN values.
         doc = row.to_dict()
-        _id = str(doc['lab_id'])
-        state = doc['lab_state'].lower()
         doc['updated_at'] = datetime.now().isoformat()
-        ref = f'{collection}/{state}/{_id}'
-        refs.append(ref)
+        doc = replace_nan_with_none(doc)
+
+        # Format the document and collection IDs
+        doc_id = str(doc['lab_id'])
+        collection_id = doc['lab_state'].lower()
+
+        # Create an entry for each state.
+        refs.append(f'{col}/{collection_id}/{doc_id}')
+        docs.append(doc)
+
+        # Create a second entry for aggregate queries.
+        refs.append(f'{col}/all/{doc_id}')
         docs.append(doc)
 
     # Upload the data to Firestore.
@@ -198,6 +153,9 @@ def upload_results(
 
 # === Test ===
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = 'D://data'
     
     # Set Firebase credentials.
     try:

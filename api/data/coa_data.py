@@ -115,6 +115,8 @@ def coa_data(request, sample_id=None):
         data = parser.parse(urls)
         parser.quit()
 
+        # TODO: Create a thumbnail of PDFs.
+
         # Create a usage log and save any public lab results.
         changes, refs, docs = [], [], []
         for item in data:
