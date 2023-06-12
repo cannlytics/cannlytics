@@ -1,9 +1,8 @@
 # Python Requirements | Cannlytics
 # Authors: Keegan Skeate <https://github.com/keeganskeate>
 # Created 1/5/2021
-# Updated: 5/14/2023
+# Updated: 6/12/2023
 # License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
 beautifulsoup4==4.12.2
 datasets==2.12.0
 django==4.2.1
@@ -23,7 +22,7 @@ googlemaps==4.10.0
 gunicorn==20.1.0
 Markdown==3.4.3
 numexpr==2.8.4
-openai==0.27.6
+openai==0.27.8
 openpyxl==3.1.2
 opencv-python==4.7.0.72
 pandas==2.0.1
@@ -40,6 +39,7 @@ pyzbar==0.1.9
 scikit-learn==1.2.2
 selenium==4.9.1
 statsmodels==0.14.0
+tiktoken==0.4.0
 ulid-py==1.1.0
 waitress==2.1.2
 Wand==0.6.11

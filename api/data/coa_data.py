@@ -27,11 +27,14 @@ from cannlytics.auth.auth import authenticate_request
 from cannlytics.data.coas.coas import CoADoc
 from cannlytics.firebase.firebase import create_log, update_documents
 
-# Maximum number of files that can be parsed in 1 request.
-MAX_NUMBER_OF_FILES = 120
+# Maximum number of files that can be parsed in one request.
+MAX_NUMBER_OF_FILES = 10
 
-# Maximum file size for a single file: 100 MB.
-MAX_FILE_SIZE = 1024 * 1000 * 100
+# Maximum file size for a single file.
+MAX_FILE_SIZE = 1024 * 1000 * 100 # (100 MB)
+
+# Specify file types.
+FILE_TYPES = ['pdf', 'png', 'jpg', 'jpeg']
 
 
 @api_view(['GET', 'POST'])
@@ -48,9 +51,8 @@ def coa_data(request, sample_id=None):
     # Get a specific CoA or query open-source CoAs.
     if request.method == 'GET':
 
-        # TODO: Implement querying pre-parsed CoA data!
-        # That is, if a CoA is parsed once and is public, then we should
-        # be able to speedily retrieve that data for the user.
+        # FIXME: Implement querying pre-parsed CoA data!
+        # That is, if a CoA is parsed once and is public, then we should be able to speedily retrieve that data for the user.
         params = request.query_params
         ref = 'public/coas/coa_data'
 
@@ -67,40 +69,43 @@ def coa_data(request, sample_id=None):
             body = {}
         urls = body.get('urls', [])
 
-        # TODO: Allow the user to pass method parameters:
-        # - headers
-        # - kind
-        # - lims
-        # - max_delay
-        # - persist
-
         # Get any user-posted files.
+        pdfs, images = [], []
         request_files = request.FILES
         if request_files is not None:
             for key, coa_file in request.FILES.items():
 
                 # File safety check.
                 ext = coa_file.name.split('.').pop()
+
+                # Reject files that are too large.
                 if coa_file.size >= MAX_FILE_SIZE:
                     message = 'File too large. The maximum number of bytes is %i.' % MAX_FILE_SIZE
                     response = {'error': True, 'message': message}
                     return JsonResponse(response, status=406)
-                if ext != 'pdf' and ext != 'zip':
-                    message = 'Invalid file type. Expecting a .pdf or .zip file.'
+                
+                # Reject files that are not PDFs or ZIPs or common image types.
+                if ext.lower not in FILE_TYPES:
+                    message = 'Invalid file type. Valid file types are: %s' % ', '.join(FILE_TYPES)
                     response = {'error': True, 'message': message}
                     return JsonResponse(response, status=406)
 
-                # Keep temp file to open as a PDF.
+                # Save the file as a temp file for parsing.
                 temp = tempfile.mkstemp(key)
                 temp_file = os.fdopen(temp[0], 'wb')
                 temp_file.write(coa_file.read())
                 temp_file.close()
                 filepath = temp[1]
-                urls.append(filepath)
+                
+                # Parse PDFs and images separately.
+                if ext.lower() == 'pdf':
+                    pdfs.append(filepath)
+                else:
+                    images.append(filepath)
 
         # Return an error if no PDFs or URLs are passed.
-        if not urls:
-            message = 'Expecting an array of `urls` in the request body.'
+        if not urls and not pdfs and not images:
+            message = 'Expecting an array of `urls`, `pdfs`, or `images` in the request body.'
             response = {'success': False, 'message': message}
             return Response(response, status=400)
 
@@ -110,9 +115,37 @@ def coa_data(request, sample_id=None):
             response = {'success': False, 'message': message}
             return Response(response, status=400)
 
-        # Parse CoA data.
+        # Parse COA data.
         parser = CoADoc()
-        data = parser.parse(urls)
+        coa_data = []
+
+        # Try to parse URLs and PDFs.
+        for doc in urls + pdfs:
+            try:
+                data = parser.parse(doc)
+            except:
+                try:
+                    data = parser.parse_with_ai(doc)
+                except:
+                    print('Failed to parse:', doc)
+                    continue
+            coa_data.append(data)
+
+        # Try to parse images.
+        for doc in images:
+            try:
+                coa_url = parser.scan(doc)
+                print('Scanned:', coa_url)
+                data = parser.parse(coa_url)
+            except:
+                try:
+                    data = parser.parse_with_ai(url)
+                except:
+                    print('Failed to parse URL:', url)
+                    continue
+            coa_data.append(data)
+
+        # Finish parsing.
         parser.quit()
 
         # TODO: Create a thumbnail of PDFs.
@@ -130,13 +163,13 @@ def coa_data(request, sample_id=None):
         create_log(
             'logs/website/coa_doc',
             claims=claims,
-            action='Parsed CoAs.',
+            action='Parsed COAs.',
             log_type='coa_data',
             key='coa_data',
             changes=changes
         )
 
-        # Return either file or JSON.
+        # Return any extracted data.
         response = {'success': True, 'data': data}
         return Response(response, status=200)
 
