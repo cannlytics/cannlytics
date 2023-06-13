@@ -815,7 +815,7 @@ def parse_acs_coa(
     obs['analyses'] = json.dumps(list(set(analyses)))
     obs['methods'] = json.dumps(methods)
     obs['results'] = json.dumps(results)
-    obs['results_hash'] = create_hash(results)
+    obs['results_hash'] = create_hash(obs['results'])
     obs['sample_id'] = create_sample_id(
         private_key=json.dumps(results),
         public_key=obs['product_name'],

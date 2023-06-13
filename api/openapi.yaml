@@ -166,7 +166,7 @@ paths:
   /data/coas:
     get:
       summary: Retrieve COA data.
-      operationId: api.data.coa_data
+      operationId: api.data.api_data_coas
       responses:
         '200':
           description: A list of COA data.

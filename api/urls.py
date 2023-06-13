@@ -77,9 +77,9 @@ urlpatterns = [
         path('/analytes/<analyte_id', api.data.analytes_data),
 
         # COA data and parser API endpoints.
-        path('/coas', api.data.coa_data),
+        path('/coas', api.data.api_data_coas),
         path('/coas/download', api.data.download_coa_data),
-        path('/coas/<coa_id>', api.data.coa_data),
+        path('/coas/<coa_id>', api.data.api_data_coas),
 
         # Receipt data API endpoints.
         path('/receipts', api.data.receipt_data),

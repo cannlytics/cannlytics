@@ -120,8 +120,8 @@ Below is a non-exhaustive list of fields, used to standardize the various data t
 | Field | Example| Description |
 |-------|-----|-------------|
 | `analyses` | ["cannabinoids"] | A list of analyses performed on a given sample. |
-| `{analysis}_method` | "HPLC" | The method used for each analysis. |
 | `{analysis}_status` | "pass" | The pass, fail, or N/A status for pass / fail analyses.   |
+| `methods` | [{"analysis: "cannabinoids", "method": "HPLC"}] | The methods used for each analysis. |
 | `coa_urls` | [{"url": "", "filename": ""}] | A list of certificate of analysis (COA) URLs. |
 | `date_collected` | 2022-04-20T04:20 | An ISO-formatted time when the sample was collected. |
 | `date_tested` | 2022-04-20T16:20 | An ISO-formatted time when the sample was tested. |

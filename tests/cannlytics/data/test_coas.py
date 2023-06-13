@@ -123,29 +123,26 @@ def parse_coa_images(data_dir: str, temp_path = None):
 # [ ] TEST: Parse COAs with AI.
 #-----------------------------------------------------------------------
 
+# TODO: Write a test to batch parse COAs with AI.
 
-# Get a sample of COA PDFs.
-pdf_files = glob.glob(os.path.join(DATA_DIR, "*.pdf"))
+# # Get a sample of COA PDFs.
+# pdf_files = glob.glob(os.path.join(DATA_DIR, "*.pdf"))
 
-# Parse each COA PDF with AI.
-parsed_coas = []
-for pdf_file in pdf_files[:5]:
-    coa_data = parse_coa_with_ai(pdf_file)
-    coa_data['filename'] = pdf_file
-    parsed_coas.append(coa_data)
+# # Parse each COA PDF with AI.
+# parsed_coas = []
+# for pdf_file in pdf_files[:5]:
+#     coa_data = parse_coa_with_ai(pdf_file)
+#     coa_data['filename'] = pdf_file
+#     parsed_coas.append(coa_data)
 
-# Format the data as a DataFrame.
-coa_df = pd.DataFrame(parsed_coas)
+# # Format the data as a DataFrame.
+# coa_df = pd.DataFrame(parsed_coas)
 
-# Remove any COAs that could not be parsed.
-coa_df.dropna(inplace=True)
+# # Remove any COAs that could not be parsed.
+# coa_df.dropna(inplace=True)
 
-# Save the data.
-coa_df.to_csv(os.path.join(DATA_DIR, 'parsed-fl-coas.csv'), index=False)
-
-
-
-
+# # Save the data.
+# coa_df.to_csv(os.path.join(DATA_DIR, 'parsed-fl-coas.csv'), index=False)
 
 
 # === Tests ===

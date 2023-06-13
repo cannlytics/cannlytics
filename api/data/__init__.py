@@ -8,7 +8,7 @@ Updated: 9/26/2022
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 from api.data.api_data import data_base
-from api.data.coa_data import coa_data, download_coa_data
+from api.data.api_data_coas import api_data_coas, download_coa_data
 from api.data.lab_data import (
     analyses_data,
     analytes_data,
@@ -28,7 +28,7 @@ __all__ = [
     api_data_licenses,
     analyses_data,
     analytes_data,
-    coa_data,
+    api_data_coas,
     data_base,
     download_coa_data,
     lab_analyses,

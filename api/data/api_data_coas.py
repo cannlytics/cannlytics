@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 8/21/2022
+Updated: 6/12/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with CoA data.
@@ -16,6 +16,7 @@ import os
 import tempfile
 
 # External imports
+import google.auth
 from django.http import HttpResponse
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -25,7 +26,12 @@ from rest_framework.response import Response
 # Internal imports
 from cannlytics.auth.auth import authenticate_request
 from cannlytics.data.coas.coas import CoADoc
-from cannlytics.firebase.firebase import create_log, update_documents
+from cannlytics.firebase import (
+    access_secret_version,
+    create_log,
+    update_documents,
+)
+
 
 # Maximum number of files that can be parsed in one request.
 MAX_NUMBER_OF_FILES = 10
@@ -37,26 +43,39 @@ MAX_FILE_SIZE = 1024 * 1000 * 100 # (100 MB)
 FILE_TYPES = ['pdf', 'png', 'jpg', 'jpeg']
 
 
+# def initialize_openai() -> None:
+#     """Initialize OpenAI."""
+#     _, project_id = google.auth.default()
+#     openai_api_key = access_secret_version(
+#         project_id=project_id,
+#         secret_id='OPENAI_API_KEY',
+#         version_id='latest',
+#     )
+#     openai.api_key = openai_api_key
+
+
 @api_view(['GET', 'POST'])
-def coa_data(request, sample_id=None):
+def api_data_coas(request, sample_id=None):
     """Get CoA data (public API endpoint)."""
 
-    # TODO: Authenticate the user, throttle requests if unauthenticated.
-    throttle = False
+    # Authenticate the user.
+    public, throttle = False, False
     claims = authenticate_request(request)
+    total_cost = 0
+    all_prompts = []
     if not claims:
-        throttle = True
+        uid = None
+        public, throttle = True, True
         # return HttpResponse(status=401)
+    else:
+        uid = claims['uid']
 
     # Get a specific CoA or query open-source CoAs.
     if request.method == 'GET':
 
-        # FIXME: Implement querying pre-parsed CoA data!
-        # That is, if a CoA is parsed once and is public, then we should be able to speedily retrieve that data for the user.
+        # FIXME: Implement querying of pre-parsed CoA data!
         params = request.query_params
-        ref = 'public/coas/coa_data'
-
-        # TODO: Get Metrc results here!!!
+        ref = 'public/data/lab_results'
 
 
     # Parse posted CoA PDFs or URLs.
@@ -71,12 +90,13 @@ def coa_data(request, sample_id=None):
 
         # Get any user-posted files.
         pdfs, images = [], []
-        request_files = request.FILES
+        request_files = request.FILES.getlist('file')
         if request_files is not None:
-            for key, coa_file in request.FILES.items():
+            print('POSTED FILES:', request_files)
+            for coa_file in request_files:
 
                 # File safety check.
-                ext = coa_file.name.split('.').pop()
+                ext: str = coa_file.name.split('.').pop()
 
                 # Reject files that are too large.
                 if coa_file.size >= MAX_FILE_SIZE:
@@ -85,13 +105,13 @@ def coa_data(request, sample_id=None):
                     return JsonResponse(response, status=406)
                 
                 # Reject files that are not PDFs or ZIPs or common image types.
-                if ext.lower not in FILE_TYPES:
+                if ext.lower() not in FILE_TYPES:
                     message = 'Invalid file type. Valid file types are: %s' % ', '.join(FILE_TYPES)
                     response = {'error': True, 'message': message}
                     return JsonResponse(response, status=406)
 
                 # Save the file as a temp file for parsing.
-                temp = tempfile.mkstemp(key)
+                temp = tempfile.mkstemp(f'.{ext}')
                 temp_file = os.fdopen(temp[0], 'wb')
                 temp_file.write(coa_file.read())
                 temp_file.close()
@@ -117,33 +137,82 @@ def coa_data(request, sample_id=None):
 
         # Parse COA data.
         parser = CoADoc()
-        coa_data = []
+        parsed_data = []
+
+        # Initialize OpenAI.
+        try:
+            _, project_id = google.auth.default()
+            openai_api_key = access_secret_version(
+                project_id=project_id,
+                secret_id='OPENAI_API_KEY',
+                version_id='latest',
+            )
+        except:
+            try:
+                openai_api_key = os.environ['OPENAI_API_KEY']
+            except:
+                # Load credentials from a local environment variables file if provided.
+                from dotenv import dotenv_values
+                env_file = os.path.join('../../', '.env')
+                if os.path.isfile(env_file):
+                    config = dotenv_values(env_file)
+                    key = 'OPENAI_API_KEY'
+                    os.environ[key] = config[key]
+        
+        if not openai_api_key:
+            message = 'OpenAI API key not found.'
+            response = {'success': False, 'message': message}
+            return Response(response, status=400)
 
         # Try to parse URLs and PDFs.
         for doc in urls + pdfs:
             try:
+                print('Parsing:', doc)
                 data = parser.parse(doc)
+                parsed_data.extend(data)
             except:
-                try:
-                    data = parser.parse_with_ai(doc)
-                except:
-                    print('Failed to parse:', doc)
-                    continue
-            coa_data.append(data)
+                # try:
+                print('Parsing with AI:', doc)
+                data, prompts, cost = parser.parse_with_ai(
+                    doc,
+                    openai_api_key=openai_api_key,
+                    user=uid,
+                    use_cached=True,
+                    verbose=True,
+                )
+                parsed_data.extend([data])
+                all_prompts.extend(prompts)
+                total_cost += cost
+                # except:
+                #     print('Failed to parse:', doc)
+                #     continue
+            
 
         # Try to parse images.
         for doc in images:
+            coa_url = None
             try:
+                print('Scanning:', doc)
                 coa_url = parser.scan(doc)
                 print('Scanned:', coa_url)
                 data = parser.parse(coa_url)
+                parsed_data.extend(data)
             except:
-                try:
-                    data = parser.parse_with_ai(url)
-                except:
-                    print('Failed to parse URL:', url)
-                    continue
-            coa_data.append(data)
+                # try:
+                print('Parsing with AI:', doc)
+                data, prompts, cost = parser.parse_with_ai(
+                    doc,
+                    openai_api_key=openai_api_key,
+                    user=uid,
+                    use_cached=True,
+                    verbose=True,
+                )
+                parsed_data.extend([data])
+                all_prompts.extend(prompts)
+                total_cost += cost
+                # except:
+                #     print('Failed to parse URL:', coa_url)
+                #     continue
 
         # Finish parsing.
         parser.quit()
@@ -152,14 +221,23 @@ def coa_data(request, sample_id=None):
 
         # Create a usage log and save any public lab results.
         changes, refs, docs = [], [], []
-        for item in data:
-            if item.get('public'):
-                changes.append(item)
-                sample_id = item['sample_id']
+        for obs in parsed_data:
+            sample_id = obs['sample_id']
+
+            # Create public lab result entries.
+            if obs.get('public') or public:
                 refs.append(f'public/data/lab_results/{sample_id}')
-                docs.append(item)
-        if refs:
-            update_documents(refs, docs)
+                docs.append(obs)
+
+            # Create entries for the user.
+            if claims:
+                refs.append(f'users/{uid}/lab_results/{sample_id}')
+                docs.append(obs)
+
+            # Create a log entry.
+            changes.append(obs)
+
+        # Create a usage log.
         create_log(
             'logs/website/coa_doc',
             claims=claims,
@@ -169,8 +247,29 @@ def coa_data(request, sample_id=None):
             changes=changes
         )
 
+        # Record cost and prompts.
+        timestamp = datetime.now().isoformat()
+        doc_id = timestamp.replace(':', '-').replace('.', '-')
+        refs.append(f'admin/ai/coa_doc_usage/{doc_id}')
+        docs.append({
+            'uid': uid,
+            'timestamp': timestamp,
+            'total_cost': total_cost,
+            'prompts': all_prompts,
+        })
+        if claims:
+            refs.append(f'users/{uid}/usage/{doc_id}')
+            docs.append({
+                'timestamp': timestamp,
+                'total_cost': total_cost,
+            })
+
+        # Update the database.
+        if refs:
+            update_documents(refs, docs)
+
         # Return any extracted data.
-        response = {'success': True, 'data': data}
+        response = {'success': True, 'data': parsed_data}
         return Response(response, status=200)
 
 
