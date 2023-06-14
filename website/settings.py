@@ -107,6 +107,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_feather',
     'django_robohash',
+    'corsheaders',
 ]
 
 #----------------------------------------------------------------------#
@@ -121,6 +122,7 @@ MIDDLEWARE = [
     'django_permissions_policy.PermissionsPolicyMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -374,3 +376,6 @@ STORAGE_BUCKET = config['FIREBASE_STORAGE_BUCKET']
 # Allow CORS.
 # See: https://stackoverflow.com/questions/35760943/how-can-i-enable-cors-on-django-rest-framework
 # CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [
+    'https://data.cannlytics.com',
+]

@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 6/13/2023
+// Updated: 6/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:flutter/material.dart';
@@ -36,10 +37,10 @@ class DashboardScreen extends ConsumerWidget {
             ? 2
             : 3;
     final double childAspectRatio = screenWidth < 600
-        ? 3
+        ? 2.5
         : screenWidth < 1120
-            ? 1.5
-            : 1.75;
+            ? 1.44
+            : 1.66;
 
     // Render the widget.
     return ConsoleScreen(
@@ -52,7 +53,7 @@ class DashboardScreen extends ConsumerWidget {
             child: Text('AI'),
           ),
         ),
-        SliverFillRemaining(
+        SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.only(
               left: 24,
@@ -72,6 +73,50 @@ class DashboardScreen extends ConsumerWidget {
                 return _card(context, aiModels[index]);
               },
             ),
+          ),
+        ),
+
+        // Data cards.
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.only(left: 24, top: 24),
+            child: Text('Data'),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(
+              left: 24,
+              right: 24,
+              bottom: 16,
+              top: 8,
+            ),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: mainDatasets.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount.toInt(),
+                childAspectRatio: childAspectRatio,
+              ),
+              itemBuilder: (context, index) {
+                return _card(context, mainDatasets[index]);
+              },
+            ),
+          ),
+        ),
+
+        // Sponsorship
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.only(left: 24, top: 24),
+            child: Text('Sponsor'),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 24, horizontal: 28),
+            child: SponsorshipCard(),
           ),
         ),
       ],

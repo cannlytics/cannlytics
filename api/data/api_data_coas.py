@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 6/12/2023
+Updated: 6/14/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with CoA data.
@@ -41,6 +41,9 @@ MAX_FILE_SIZE = 1024 * 1000 * 100 # (100 MB)
 
 # Specify file types.
 FILE_TYPES = ['pdf', 'png', 'jpg', 'jpeg']
+
+# Maximum number of observations that can be downloaded at once.
+MAX_OBSERVATIONS_PER_FILE = 200_000
 
 
 # def initialize_openai() -> None:
@@ -183,21 +186,21 @@ def api_data_coas(request, sample_id=None):
                 data = parser.parse(doc)
                 parsed_data.extend(data)
             except:
-                # try:
-                print('Parsing with AI:', doc)
-                data, prompts, cost = parser.parse_with_ai(
-                    doc,
-                    openai_api_key=openai_api_key,
-                    user=uid,
-                    use_cached=True,
-                    verbose=True,
-                )
-                parsed_data.extend([data])
-                all_prompts.extend(prompts)
-                total_cost += cost
-                # except:
-                #     print('Failed to parse:', doc)
-                #     continue
+                try:
+                    print('Parsing with AI:', doc)
+                    data, prompts, cost = parser.parse_with_ai(
+                        doc,
+                        openai_api_key=openai_api_key,
+                        user=uid,
+                        use_cached=True,
+                        verbose=True,
+                    )
+                    parsed_data.extend([data])
+                    all_prompts.extend(prompts)
+                    total_cost += cost
+                except:
+                    print('Failed to parse:', doc)
+                    continue
             
 
         # Try to parse images.
@@ -210,21 +213,21 @@ def api_data_coas(request, sample_id=None):
                 data = parser.parse(coa_url)
                 parsed_data.extend(data)
             except:
-                # try:
-                print('Parsing with AI:', doc)
-                data, prompts, cost = parser.parse_with_ai(
-                    doc,
-                    openai_api_key=openai_api_key,
-                    user=uid,
-                    use_cached=True,
-                    verbose=True,
-                )
-                parsed_data.extend([data])
-                all_prompts.extend(prompts)
-                total_cost += cost
-                # except:
-                #     print('Failed to parse URL:', coa_url)
-                #     continue
+                try:
+                    print('Parsing with AI:', doc)
+                    data, prompts, cost = parser.parse_with_ai(
+                        doc,
+                        openai_api_key=openai_api_key,
+                        user=uid,
+                        use_cached=True,
+                        verbose=True,
+                    )
+                    parsed_data.extend([data])
+                    all_prompts.extend(prompts)
+                    total_cost += cost
+                except:
+                    print('Failed to parse URL:', coa_url)
+                    continue
 
         # Finish parsing.
         parser.quit()
@@ -300,6 +303,10 @@ def download_coa_data(request):
 
     # Read the posted data.
     data = loads(request.body.decode('utf-8'))['data']
+    if len(data) > MAX_OBSERVATIONS_PER_FILE:
+        message = f'Too many observations, please limit your request to {MAX_OBSERVATIONS_PER_FILE} observations at a time.'
+        response = {'success': False, 'message': message}
+        return Response(response, status=400)
 
     # Create an Excel Workbook response.
     content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -309,7 +316,11 @@ def download_coa_data(request):
     response['Content-Disposition'] = f'attachment; filename={filename}'
 
     # Create the Workbook and save it to the response.
-    parser = CoADoc(init_all=False)
-    parser.save(data, response)
-    parser.quit()
+    try:
+        parser = CoADoc(init_all=False)
+        parser.save(data, response)
+        parser.quit()
+    except:
+        import pandas as pd
+        pd.DataFrame(data).to_excel(response, index=False, sheet_name='Data')
     return response

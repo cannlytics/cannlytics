@@ -6,6 +6,7 @@
 beautifulsoup4==4.12.2
 datasets==2.12.0
 django==4.2.1
+django-cors-headers==4.1.0
 django-environ==0.10.0
 django-feather==0.3.0
 django-livereload-server==0.4

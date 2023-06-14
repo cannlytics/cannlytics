@@ -4,13 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/13/2023
-// Updated: 6/13/2023
+// Updated: 6/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:html' as html;
 
 // Flutter imports:
 import 'package:cannlytics_data/common/inputs/string_controller.dart';
@@ -19,7 +19,6 @@ import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 
 /* === Data === */
 
@@ -38,12 +37,6 @@ final userResults = StreamProvider.family<List<Map<String, dynamic>>, String>(
 
 /// Parse COA data through the API.
 class COAParser extends AsyncNotifier<List<Map?>> {
-  // Future<List<Map?>> _getParsedResults() async {
-  //   final json = await APIService.apiRequest('/api/data/coas');
-  //   final items = jsonDecode(json) as List<Map<String, dynamic>>;
-  //   return items;
-  // }
-
   /// Initialize the parser.
   @override
   Future<List<Map?>> build() async {
@@ -51,7 +44,7 @@ class COAParser extends AsyncNotifier<List<Map?>> {
   }
 
   /// Parse a COA from a URL.
-  /// [ ]: TEST: https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTM3N181NzU5NDAwMDQwMzA0NTVfMDQxNzIwMjNfNjQzZDhiOTcyMzE1YQ==
+  /// [✓]: TEST: https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTM3N181NzU5NDAwMDQwMzA0NTVfMDQxNzIwMjNfNjQzZDhiOTcyMzE1YQ==
   Future<void> parseUrl(String url) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
@@ -78,11 +71,8 @@ class COAParser extends AsyncNotifier<List<Map?>> {
   Future<void> parseCOAs(List<dynamic> files) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      // FIXME: Implement!!!
       final json = await APIService.apiRequest('/api/data/coas', files: files);
-      print('JSON: $json');
       final items = jsonDecode(json) as List<Map<String, dynamic>>;
-      print('ITEMS: $items');
       return items;
     });
   }
@@ -115,7 +105,7 @@ class DownloadService {
   const DownloadService._();
 
   /// Download COA data.
-  static Future<File> downloadData(List<Map<String, dynamic>> data) async {
+  static Future<void> downloadData(List<Map<String, dynamic>> data) async {
     var response = await APIService.apiRequest(
       '/api/data/coas/download',
       data: {'data': data},
@@ -126,8 +116,23 @@ class DownloadService {
           .toIso8601String()
           .substring(0, 19)
           .replaceAll(':', '-');
-      var filePath = await _localFilePath('coa-data-$timestamp.xlsx');
-      return File(filePath).writeAsBytes(response.bodyBytes);
+
+      // Web download.
+      String filename = 'coa-data-$timestamp.xlsx';
+      final blob = html.Blob([response.bodyBytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.document.createElement('a') as html.AnchorElement
+        ..href = url
+        ..style.display = 'none'
+        ..download = filename;
+      html.document.body?.children.add(anchor);
+      anchor.click();
+      html.document.body?.children.remove(anchor);
+      html.Url.revokeObjectUrl(url);
+
+      // TODO: Handle mobile download.
+      // var filename = await _localFilePath('coa-data-$timestamp.xlsx');
+      // return File(filePath).writeAsBytes(response.bodyBytes);
     } else {
       print('Error downloading file: ${response.statusCode}');
       throw Exception('Error downloading file');
@@ -135,8 +140,8 @@ class DownloadService {
   }
 
   /// Get the local file path.
-  static Future<String> _localFilePath(String filename) async {
-    var dir = await getApplicationDocumentsDirectory();
-    return '${dir.path}/$filename';
-  }
+  // static Future<String> _localFilePath(String filename) async {
+  //   var dir = await getApplicationDocumentsDirectory();
+  //   return '${dir.path}/$filename';
+  // }
 }

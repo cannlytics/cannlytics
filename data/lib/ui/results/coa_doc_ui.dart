@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 6/13/2023
+// Updated: 6/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -90,7 +90,53 @@ class CoADocInterface extends HookConsumerWidget {
       loading: () => _body(context, ref, child: ParsingResultsPlaceholder()),
 
       // Error state.
-      error: (err, stack) => SelectableText('Error: $err'),
+      error: (err, stack) => _errorMessage(context),
+    );
+  }
+
+  /// Message displayed when an error occurs.
+  Widget _errorMessage(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Image.
+            Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: ClipOval(
+                child: Image.network(
+                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_a_scroll_with_robot_arms_and_a_disguise_for_a_face_a_57549317-7365-4350-9b7b-84fd7421b103.png?alt=media&token=72631010-56c8-4981-a936-58b89294f336',
+                  width: 128,
+                  height: 128,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            // Text.
+            Container(
+              width: 540,
+              child: Column(
+                children: <Widget>[
+                  SelectableText(
+                    'An error occurred while parsing your COAs',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).textTheme.titleLarge!.color),
+                  ),
+                  SelectableText(
+                    'An unknown error occurred while parsing your COAs. Please report this issue on GitHub or to dev@cannlytics.com to get a human to help ASAP.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -382,8 +428,6 @@ class _ParsingResultsPlaceholderState extends State<ParsingResultsPlaceholder>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // CircularProgressIndicator(), // Loading indicator
-            SizedBox(height: 20), // Spacing
             // Image.
             Padding(
               padding: EdgeInsets.only(top: 16),
@@ -398,8 +442,7 @@ class _ParsingResultsPlaceholderState extends State<ParsingResultsPlaceholder>
                     'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_Portrait_of_an_old_republic_data_parser_wizard_in_th_2ccc0074-2eba-4b05-b642-c0f648e266b6.png?alt=media&token=9e409eb8-de58-4528-b395-5c32c4f4a488',
                     width: 128,
                     height: 128,
-                    fit: BoxFit
-                        .cover, // Ensures the image covers the entire widget
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),

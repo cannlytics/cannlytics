@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 5/13/2023
+// Updated: 6/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -20,7 +20,9 @@ class APIService {
   const APIService._();
 
   // Define the base URL.
-  static String _baseUrl = 'http://127.0.0.1:8000/api';
+  // FIXME: Smoothly switch between dev and production.
+  // static String _baseUrl = 'http://127.0.0.1:8000/api';
+  static String _baseUrl = 'https://cannlytics.com/api';
 
   /// Initialize the API service.
   static void initialize() {
@@ -89,6 +91,8 @@ class APIService {
     final client = http.Client();
     final request;
     if (files != null) {
+      headers['Content-Type'] = 'application/octet-stream';
+      headers['Accept'] = 'application/octet-stream';
       request = http.MultipartRequest('POST', Uri.parse(url))
         ..headers.addAll(headers);
       for (var file in files) {
@@ -118,6 +122,21 @@ class APIService {
     } catch (error) {
       print("Request error: [error=${error.toString()}]");
       return response;
+      // try {
+      //   final blob = html.Blob([response.bodyBytes]);
+      //   final url = html.Url.createObjectUrlFromBlob(blob);
+      //   final anchor = html.document.createElement('a') as html.AnchorElement
+      //     ..href = url
+      //     ..style.display = 'none'
+      //     ..download = filename;
+      //   html.document.body?.children.add(anchor);
+      //   anchor.click();
+      //   html.document.body?.children.remove(anchor);
+      //   html.Url.revokeObjectUrl(url);
+      // } catch (error) {
+      //   print("Request error: [error=${error.toString()}]");
+      //   return response;
+      // }
     }
   }
 }

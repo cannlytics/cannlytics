@@ -4,13 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/23/2023
-// Updated: 5/24/2023
+// Updated: 6/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'dart:convert';
-
-import 'package:cannlytics_data/ui/results/coa_screen.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -273,11 +270,11 @@ class LabResultItem extends StatelessWidget {
                   // Download COA data.
                   GestureDetector(
                     onTap: () {
-                      // FIXME:
+                      // FIXME: Handle malformed results.
                       var data = labResult.toMap();
-                      // FIXME: Turn results to JSON.
-                      // data['results'] = jsonDecode(data['results']);
-                      // data['results'] = [];
+                      if (data['results'] == null) {
+                        data['results'] = [];
+                      }
                       DownloadService.downloadData([data]);
                     },
                     child: Icon(
@@ -288,6 +285,7 @@ class LabResultItem extends StatelessWidget {
                   ),
 
                   // Open COA URL link.
+                  if (labResult.downloadUrl!.isNotEmpty) gapW8,
                   if (labResult.downloadUrl!.isNotEmpty)
                     GestureDetector(
                       onTap: () {

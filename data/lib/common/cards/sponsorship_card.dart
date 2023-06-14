@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/9/2023
-// Updated: 5/9/2023
+// Updated: 6/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -43,16 +43,20 @@ class SponsorshipCard extends StatelessWidget {
               children: [
                 SelectableText(
                   'Advance cannabis science!',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: Theme.of(context).textTheme.titleLarge!.color),
                 ),
               ],
             ),
 
             // Description.
-            gapH4,
-            SelectableText(
-              'Cannabis data takes time to collect and statistics take time to calculate. Please consider making a contribution to help expedite the curation of cannabis data and AI-powered tools.',
-              style: Theme.of(context).textTheme.bodyMedium,
+            Container(
+              width: 540,
+              child: SelectableText(
+                'Cannabis data takes time to collect and statistics take time to calculate. Please consider making a contribution to help expedite the process.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
 
             // Goal.
@@ -63,7 +67,7 @@ class SponsorshipCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
                 children: [
                   TextSpan(
-                    text: '\$1,012',
+                    text: '\$1,013',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   TextSpan(text: ' USD of '),
@@ -101,7 +105,7 @@ class SponsorshipCard extends StatelessWidget {
                     ),
                     child: Center(
                         child: Text(
-                      '\$1,012 funded',
+                      '\$1,013 funded',
                       style: Theme.of(context)
                           .textTheme
                           .labelSmall!
@@ -131,18 +135,18 @@ class SponsorshipCard extends StatelessWidget {
 
             // Tiers.
             gapH18,
-            if (screenWidth <= Breakpoints.mobile)
+            if (screenWidth <= Breakpoints.tablet)
               SelectableText(
                 'Contribute',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-            if (screenWidth <= Breakpoints.mobile) gapH8,
+            if (screenWidth <= Breakpoints.tablet) gapH8,
             Container(
               width: double.infinity,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-                  if (screenWidth > Breakpoints.mobile)
+                  if (screenWidth > Breakpoints.tablet)
                     SelectableText(
                       'Contribute:',
                       style: Theme.of(context).textTheme.titleMedium,
