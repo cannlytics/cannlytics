@@ -8,6 +8,10 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'dart:convert';
+
+import 'package:cannlytics_data/ui/results/coa_screen.dart';
+import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -179,7 +183,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
         children: [
           // Results list, centered when there are no results, top-aligned otherwise.
           Container(
-            height: MediaQuery.of(context).size.height * 0.75,
+            height: MediaQuery.of(context).size.height * 0.5,
             child: _searchTextController.text.isNotEmpty &&
                     prodSearchList.isNotEmpty
                 ? SingleChildScrollView(
@@ -218,100 +222,131 @@ class LabResultsSearchForm extends HookConsumerWidget {
 /// A lab result list item.
 /// Optional: Add image.
 class LabResultItem extends StatelessWidget {
-  final LabResult labResult;
-
   LabResultItem({required this.labResult});
+
+  // Properties
+  final LabResult labResult;
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: 24),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-      color: Theme.of(context).scaffoldBackgroundColor,
-      surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-      child: Container(
-        margin: EdgeInsets.all(0),
-        padding: EdgeInsets.all(16.0),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(3.0)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // Product name and COA link.
-            Row(
-              children: [
-                if (screenWidth <= Breakpoints.tablet)
-                  Expanded(
-                    child: Text(
+    return GestureDetector(
+      onTap: () {
+        // showDialog(
+        //   context: context,
+        //   builder: (BuildContext context) {
+        //     return Dialog(
+        //       child: COAScreen(labResult: labResult),
+        //     );
+        //   },
+        // );
+      },
+      child: Card(
+        margin: EdgeInsets.symmetric(horizontal: 24),
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+        child: Container(
+          margin: EdgeInsets.all(0),
+          padding: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(3.0)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // Product name and COA link.
+              Row(
+                children: [
+                  if (screenWidth <= Breakpoints.tablet)
+                    Expanded(
+                      child: Text(
+                        labResult.productName ?? 'Unknown',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                    ),
+                  if (screenWidth > Breakpoints.tablet)
+                    Text(
                       labResult.productName ?? 'Unknown',
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
+
+                  // Download COA data.
+                  GestureDetector(
+                    onTap: () {
+                      // FIXME:
+                      var data = labResult.toMap();
+                      // FIXME: Turn results to JSON.
+                      // data['results'] = jsonDecode(data['results']);
+                      // data['results'] = [];
+                      DownloadService.downloadData([data]);
+                    },
+                    child: Icon(
+                      Icons.download_sharp,
+                      color: Theme.of(context).textTheme.labelMedium!.color,
+                      size: 16,
+                    ),
                   ),
-                if (screenWidth > Breakpoints.tablet)
+
+                  // Open COA URL link.
+                  if (labResult.downloadUrl!.isNotEmpty)
+                    GestureDetector(
+                      onTap: () {
+                        launchUrl(Uri.parse(labResult.downloadUrl!));
+                      },
+                      child: Icon(
+                        Icons.open_in_new,
+                        color: Theme.of(context).textTheme.labelMedium!.color,
+                        size: 16,
+                      ),
+                    ),
+                ],
+              ),
+              gapH8,
+
+              // Producer.
+              // Future work: Link to producer website.
+              Text(
+                'Producer: ${labResult.businessDbaName != null && labResult.businessDbaName!.isNotEmpty ? labResult.businessDbaName : labResult.producer}',
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+
+              // IDs
+              Text(
+                'ID: ${labResult.labId}',
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+              Text(
+                'Batch: ${labResult.batchNumber}',
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+
+              // Lab.
+              Row(
+                children: [
                   Text(
-                    labResult.productName ?? 'Unknown',
-                    style: Theme.of(context).textTheme.labelLarge,
+                    'Lab: ',
+                    style: Theme.of(context).textTheme.labelMedium,
                   ),
-                GestureDetector(
-                  onTap: () {
-                    if (labResult.downloadUrl != null) {
-                      launchUrl(Uri.parse(labResult.downloadUrl!));
-                    }
-                  },
-                  child: Icon(
-                    Icons.open_in_new,
-                    color: Theme.of(context).colorScheme.onSurface,
-                    size: 16,
+                  GestureDetector(
+                    onTap: () {
+                      launchUrl(Uri.parse(labResult.labWebsite!));
+                    },
+                    child: Text(
+                      labResult.lab!,
+                      style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                            color: Colors.blue,
+                          ),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            gapH8,
+                ],
+              ),
 
-            // Producer.
-            // Future work: Link to producer website.
-            Text(
-              'Producer: ${labResult.businessDbaName}',
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-
-            // IDs
-            Text(
-              'ID: ${labResult.labId}',
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-            Text(
-              'Batch: ${labResult.batchNumber}',
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-
-            // Lab.
-            Row(
-              children: [
-                Text(
-                  'Lab: ',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    launchUrl(Uri.parse(labResult.labWebsite!));
-                  },
-                  child: Text(
-                    labResult.lab!,
-                    style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                          color: Colors.blue,
-                        ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Copy COA link.
-            if (labResult.downloadUrl != null) gapH4,
-            if (labResult.downloadUrl != null)
-              _coaLink(context, labResult.downloadUrl!),
-          ],
+              // Copy COA link.
+              if (labResult.downloadUrl!.isNotEmpty) gapH4,
+              if (labResult.downloadUrl!.isNotEmpty)
+                _coaLink(context, labResult.downloadUrl!),
+            ],
+          ),
         ),
       ),
     );

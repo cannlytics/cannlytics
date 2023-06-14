@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/23/2023
-// Updated: 5/24/2023
+// Updated: 6/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -46,7 +46,7 @@ class AsyncLabResultsNotifier extends AsyncNotifier<List<LabResult>> {
     final String _dataPath = 'data/lab_results/fl';
 
     // TODO: Allow the user to change ordered by?
-    final String orderBy = 'updated_at';
+    // final String orderBy = 'updated_at';
 
     // TODO: Allow the user to change limit?
     final int limit = 1000;

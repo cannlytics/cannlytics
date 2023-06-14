@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 5/25/2023
+// Updated: 6/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO: Links to places where users can get their COAs:
@@ -33,28 +33,18 @@
 
 // Flutter imports:
 import 'package:cannlytics_data/ui/results/coa_doc_ui.dart';
+import 'package:cannlytics_data/ui/results/results_form.dart';
+import 'package:cannlytics_data/ui/results/user_results.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 // Project imports:
-import 'package:cannlytics_data/common/cards/card_grid.dart';
-import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
-import 'package:cannlytics_data/common/cards/stats_model_card.dart';
-import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
 import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/services/auth_service.dart';
-import 'package:cannlytics_data/services/data_service.dart';
-import 'package:cannlytics_data/services/storage_service.dart';
-import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
-import 'package:cannlytics_data/ui/results/results_form.dart';
-
-// import 'coa_doc_ui.dart';
 
 /// Screen.
 class LabResultsScreen extends StatelessWidget {
@@ -65,7 +55,6 @@ class LabResultsScreen extends StatelessWidget {
     return ConsoleScreen(
       children: [
         SliverToBoxAdapter(child: MainContent()),
-        // SliverToBoxAdapter(child: LabResultsSearchForm()),
       ],
     );
   }
@@ -109,15 +98,9 @@ class MainContent extends ConsumerWidget {
             ],
           ),
 
-          // Your Results
+          // Main interface.
           gapH12,
-          CoADocInterface(),
-          // Sponsorship placeholder.
-          // SponsorshipCard(),
-
-          // Lab results datasets.
-          // gapH32,
-          // _datasetsCards(context, ref),
+          ResultsTabs(),
           gapH48,
         ],
       ),
@@ -125,51 +108,104 @@ class MainContent extends ConsumerWidget {
   }
 
   /// Dataset cards.
-  Widget _datasetsCards(BuildContext context, WidgetRef ref) {
-    var datasets =
-        mainDatasets.where((element) => element['type'] == 'results').toList();
-    final screenWidth = MediaQuery.of(context).size.width;
-    final user = ref.watch(authProvider).currentUser;
-    return Column(children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Text('Lab Results Datasets',
-              style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                  color: Theme.of(context).textTheme.titleLarge!.color)),
+  // Widget _datasetsCards(BuildContext context, WidgetRef ref) {
+  //   var datasets =
+  //       mainDatasets.where((element) => element['type'] == 'results').toList();
+  //   final screenWidth = MediaQuery.of(context).size.width;
+  //   final user = ref.watch(authProvider).currentUser;
+  //   return Column(children: [
+  //     Row(
+  //       mainAxisAlignment: MainAxisAlignment.start,
+  //       children: [
+  //         Text('Lab Results Datasets',
+  //             style: Theme.of(context).textTheme.labelLarge!.copyWith(
+  //                 color: Theme.of(context).textTheme.titleLarge!.color)),
+  //       ],
+  //     ),
+  //     gapH12,
+  //     CardGridView(
+  //       crossAxisCount: screenWidth < Breakpoints.desktop ? 1 : 2,
+  //       childAspectRatio: 3,
+  //       items: datasets.map((model) {
+  //         return DatasetCard(
+  //           imageUrl: model['image_url'],
+  //           title: model['title'],
+  //           description: model['description'],
+  //           tier: model['tier'],
+  //           rows: NumberFormat('#,###').format(model['observations']) + ' rows',
+  //           columns: NumberFormat('#,###').format(model['fields']) + ' columns',
+  //           onTap: () async {
+  //             // Note: Requires the user to be signed in.
+  //             if (user == null) {
+  //               showDialog(
+  //                 context: context,
+  //                 builder: (BuildContext context) {
+  //                   return SignInDialog(isSignUp: false);
+  //                 },
+  //               );
+  //               return;
+  //             }
+  //             // Get URL for file in Firebase Storage.
+  //             String? url =
+  //                 await StorageService.getDownloadUrl(model['file_ref']);
+  //             DataService.openInANewTab(url);
+  //           },
+  //         );
+  //       }).toList(),
+  //     ),
+  //   ]);
+  // }
+}
+
+/// Tabs of results.
+class ResultsTabs extends StatelessWidget {
+  const ResultsTabs({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      child: Column(
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+              // color: Theme.of(context).scaffoldBackgroundColor,
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(3),
+              border: Border.all(
+                color: Theme.of(context).dividerColor,
+                width: 1,
+              ),
+            ),
+            child: TabBar(
+              isScrollable: true,
+              unselectedLabelColor:
+                  Theme.of(context).textTheme.titleSmall!.color,
+              labelColor: Theme.of(context).textTheme.titleLarge!.color,
+              indicatorSize: TabBarIndicatorSize.label,
+              // indicator: BoxDecoration(
+              //   borderRadius: BorderRadius.circular(3),
+              //   color: Colors.greenAccent,
+              // ),
+              tabs: [
+                Tab(text: 'Parse'),
+                Tab(text: 'Explore'),
+                Tab(text: 'Your Results'),
+              ],
+            ),
+          ),
+          Container(
+            height: MediaQuery.of(context).size.height * 0.75,
+            child: TabBarView(
+              children: [
+                CoADocInterface(),
+                LabResultsSearchForm(),
+                UserResultsInterface(),
+              ],
+            ),
+          ),
         ],
       ),
-      gapH12,
-      CardGridView(
-        crossAxisCount: screenWidth < Breakpoints.desktop ? 1 : 2,
-        childAspectRatio: 3,
-        items: datasets.map((model) {
-          return DatasetCard(
-            imageUrl: model['image_url'],
-            title: model['title'],
-            description: model['description'],
-            tier: model['tier'],
-            rows: NumberFormat('#,###').format(model['observations']) + ' rows',
-            columns: NumberFormat('#,###').format(model['fields']) + ' columns',
-            onTap: () async {
-              // Note: Requires the user to be signed in.
-              if (user == null) {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return SignInDialog(isSignUp: false);
-                  },
-                );
-                return;
-              }
-              // Get URL for file in Firebase Storage.
-              String? url =
-                  await StorageService.getDownloadUrl(model['file_ref']);
-              DataService.openInANewTab(url);
-            },
-          );
-        }).toList(),
-      ),
-    ]);
+    );
   }
 }

@@ -13,9 +13,6 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:go_router/go_router.dart';
 
-// Project imports:
-import 'package:cannlytics_data/constants/theme.dart';
-
 /// App logo.
 class AppLogo extends StatelessWidget {
   const AppLogo({

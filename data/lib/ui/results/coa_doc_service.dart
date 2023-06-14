@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 5/11/2023
+// Updated: 6/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -16,8 +16,8 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
-import 'package:http_parser/http_parser.dart';
+// import 'package:http/http.dart';
+// import 'package:http_parser/http_parser.dart';
 
 /// Certificate of Analysis (COA) model.
 class CoAResult {
@@ -43,6 +43,13 @@ class CoADocService {
   final defaultImage =
       'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fmisc%2Fsample-placeholder.png?alt=media&token=e8b96368-5d80-49ec-bbd0-3d21654b677f';
 
+  /// Parse COA files.
+  static Future<void> parseCOAs(List<dynamic>? files) async {
+    print('Parsing COAs....');
+    print(files);
+  }
+
+  /// Upload a COA file.
   Future<void> uploadCoAFile(File file) async {
     // FIXME:
     // final name = event.name;
@@ -90,12 +97,13 @@ class CoADocService {
     // }
   }
 
-  Future<void> downloadCoAData(List<Map<String, dynamic>> data) async {
+  /// Download COA data.
+  Future<void> downloadCOAData(List<Map<String, dynamic>> data) async {
     final postData = {'data': data};
-    final timestamp = DateTime.now()
-        .toIso8601String()
-        .substring(0, 19)
-        .replaceAll(RegExp(r'[T:]'), '-');
+    // final timestamp = DateTime.now()
+    //     .toIso8601String()
+    //     .substring(0, 19)
+    //     .replaceAll(RegExp(r'[T:]'), '-');
 
     final response = await http.post(
       Uri.parse('https://cannlytics/api/data/coas/download'),
@@ -103,8 +111,8 @@ class CoADocService {
     );
 
     if (response.statusCode == 200) {
-      final blob = response.bodyBytes;
-      final filename = 'coa-data-$timestamp.xlsx';
+      // final blob = response.bodyBytes;
+      // final filename = 'coa-data-$timestamp.xlsx';
 
       // FIXME: Request storage permissions
       // if (await Permission.storage.request().isGranted) {

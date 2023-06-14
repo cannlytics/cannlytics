@@ -11,7 +11,6 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 
 /// Secondary button based on [TextButton].

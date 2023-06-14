@@ -127,7 +127,7 @@ class HoverSearchBar extends StatefulWidget {
 }
 
 class _HoverSearchBarState extends State<HoverSearchBar> {
-  bool _isHovered = false;
+  // bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {

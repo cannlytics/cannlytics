@@ -4,16 +4,18 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 5/23/2023
+// Updated: 6/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
-import 'package:equatable/equatable.dart';
+// import 'package:equatable/equatable.dart';
+
+import 'dart:convert';
 
 typedef LabTestResultId = String;
 typedef LabTestId = String;
 
-/// A general lab result class.
+/// A general lab result model for users.
 class LabResult {
   // Initialization.
   const LabResult({
@@ -22,7 +24,6 @@ class LabResult {
     this.productName,
     this.downloadUrl,
     this.businessDbaName,
-    this.producerLicenseNumber,
     this.lims,
     this.lab,
     this.labImageUrl,
@@ -39,6 +40,40 @@ class LabResult {
     this.labLongitude,
     this.licensingAuthorityId,
     this.licensingAuthority,
+    this.analyses,
+    this.analysisStatus,
+    this.methods,
+    this.dateCollected,
+    this.dateTested,
+    this.dateReceived,
+    this.distributor,
+    this.distributorAddress,
+    this.distributorStreet,
+    this.distributorCity,
+    this.distributorState,
+    this.distributorZipcode,
+    this.distributorLicenseNumber,
+    this.producer,
+    this.producerLicenseNumber,
+    this.producerAddress,
+    this.producerStreet,
+    this.producerCity,
+    this.producerState,
+    this.producerZipcode,
+    this.productType,
+    this.traceabilityIds,
+    this.productSize,
+    this.servingSize,
+    this.servingsPerPackage,
+    this.sampleWeight,
+    this.status,
+    this.totalCannabinoids,
+    this.totalThc,
+    this.totalCbd,
+    this.totalTerpenes,
+    this.sampleId,
+    this.strainName,
+    this.results,
   });
 
   // Properties.
@@ -47,7 +82,6 @@ class LabResult {
   final String? productName;
   final String? downloadUrl;
   final String? businessDbaName;
-  final String? producerLicenseNumber;
   final String? lims;
   final String? lab;
   final String? labImageUrl;
@@ -64,9 +98,44 @@ class LabResult {
   final double? labLongitude;
   final String? licensingAuthorityId;
   final String? licensingAuthority;
+  final List<dynamic>? analyses;
+  final String? analysisStatus;
+  final List<dynamic>? methods;
+  final String? dateCollected;
+  final String? dateTested;
+  final String? dateReceived;
+  final String? distributor;
+  final String? distributorAddress;
+  final String? distributorStreet;
+  final String? distributorCity;
+  final String? distributorState;
+  final String? distributorZipcode;
+  final String? distributorLicenseNumber;
+  final String? producer;
+  final String? producerLicenseNumber;
+  final String? producerAddress;
+  final String? producerStreet;
+  final String? producerCity;
+  final String? producerState;
+  final String? producerZipcode;
+  final String? productType;
+  final List<dynamic>? traceabilityIds;
+  final int? productSize;
+  final int? servingSize;
+  final int? servingsPerPackage;
+  final double? sampleWeight;
+  final String? status;
+  final double? totalCannabinoids;
+  final double? totalThc;
+  final double? totalCbd;
+  final double? totalTerpenes;
+  final String? sampleId;
+  final String? strainName;
+  // final List<Result?>? results;
+  final dynamic results;
 
-  @override
-  List<String?> get props => [labId];
+  // @override
+  // List<String?> get props => [labId];
 
   // Create model.
   factory LabResult.fromMap(Map data) {
@@ -76,7 +145,6 @@ class LabResult {
       productName: data['product_name'] ?? '',
       downloadUrl: data['download_url'] ?? '',
       businessDbaName: data['business_dba_name'] ?? '',
-      producerLicenseNumber: data['producer_license_number'] ?? '',
       lims: data['lims'] ?? '',
       lab: data['lab'] ?? '',
       labImageUrl: data['lab_image_url'] ?? '',
@@ -89,10 +157,80 @@ class LabResult {
       labPhone: data['lab_phone'] ?? '',
       labEmail: data['lab_email'] ?? '',
       labWebsite: data['lab_website'] ?? '',
-      labLatitude: data['lab_latitude']?.toDouble() ?? 0.0,
-      labLongitude: data['lab_longitude']?.toDouble() ?? 0.0,
+      labLatitude:
+          data['lab_latitude'] != null ? data['lab_latitude'].toDouble() : null,
+      labLongitude: data['lab_longitude'] != null
+          ? data['lab_longitude'].toDouble()
+          : null,
       licensingAuthorityId: data['licensing_authority_id'] ?? '',
       licensingAuthority: data['licensing_authority'] ?? '',
+      analyses: data['analyses'] is List<dynamic>
+          ? data['analyses']
+          : (data['analyses'] != null
+              ? jsonDecode(data['analyses']) as List<dynamic>
+              : null),
+      analysisStatus: data['analysis_status'],
+      methods: data['methods'] is List<dynamic>
+          ? (data['methods'] as List)
+              .map((method) => (method as Map).cast<String, dynamic>())
+              .toList()
+          : (data['methods'] != null
+              ? (jsonDecode(data['methods']) as List)
+                  .map((method) => (method as Map).cast<String, dynamic>())
+                  .toList()
+              : null),
+      dateCollected: data['date_collected'],
+      dateTested: data['date_tested'],
+      dateReceived: data['date_received'],
+      distributor: data['distributor'],
+      distributorAddress: data['distributor_address'],
+      distributorStreet: data['distributor_street'],
+      distributorCity: data['distributor_city'],
+      distributorState: data['distributor_state'],
+      distributorZipcode: data['distributor_zipcode'],
+      distributorLicenseNumber: data['distributor_license_number'],
+      producer: data['producer'] ?? '',
+      producerLicenseNumber: data['producer_license_number'] ?? '',
+      producerAddress: data['producer_address'],
+      producerStreet: data['producer_street'],
+      producerCity: data['producer_city'],
+      producerState: data['producer_state'],
+      producerZipcode: data['producer_zipcode'],
+      productType: data['product_type'],
+      traceabilityIds: data['traceability_ids'] is List<dynamic>
+          ? data['traceability_ids'] as List<dynamic>
+          : (data['traceability_ids'] != null
+              ? jsonDecode(data['traceability_ids']) as List<dynamic>
+              : null),
+      productSize: data['product_size'] is String
+          ? int.tryParse(data['product_size'] as String)
+          : data['product_size'] as int?,
+      servingSize: data['serving_size'] is String
+          ? int.tryParse(data['serving_size'] as String)
+          : data['serving_size'] as int?,
+      servingsPerPackage: data['servings_per_package'] is String
+          ? int.tryParse(data['servings_per_package'] as String)
+          : data['servings_per_package'] as int?,
+      sampleWeight: (data['sample_weight'] is String)
+          ? double.tryParse(data['sample_weight'] as String)
+          : (data['sample_weight'] as num?)?.toDouble(),
+      totalCannabinoids: (data['total_cannabinoids'] is String)
+          ? double.tryParse(data['total_cannabinoids'] as String)
+          : (data['total_cannabinoids'] as num?)?.toDouble(),
+      totalThc: (data['total_thc'] is String)
+          ? double.tryParse(data['total_thc'] as String)
+          : (data['total_thc'] as num?)?.toDouble(),
+      totalCbd: (data['total_cbd'] is String)
+          ? double.tryParse(data['total_cbd'] as String)
+          : (data['total_cbd'] as num?)?.toDouble(),
+      totalTerpenes: (data['total_terpenes'] is String)
+          ? double.tryParse(data['total_terpenes'] as String)
+          : (data['total_terpenes'] as num?)?.toDouble(),
+      status: data['status'],
+      sampleId: data['sample_id'],
+      strainName: data['strain_name'],
+      // FIXME: Initialize results!
+      results: data['results'],
     );
   }
 
@@ -104,7 +242,6 @@ class LabResult {
       'product_name': productName,
       'download_url': downloadUrl,
       'business_dba_name': businessDbaName,
-      'producer_license_number': producerLicenseNumber,
       'lims': lims,
       'lab': lab,
       'lab_image_url': labImageUrl,
@@ -121,9 +258,106 @@ class LabResult {
       'lab_longitude': labLongitude,
       'licensing_authority_id': licensingAuthorityId,
       'licensing_authority': licensingAuthority,
+      'analyses': analyses,
+      'analysis_status': analysisStatus,
+      'methods': methods,
+      'date_collected': dateCollected,
+      'date_tested': dateTested,
+      'date_received': dateReceived,
+      'distributor': distributor,
+      'distributor_address': distributorAddress,
+      'distributor_street': distributorStreet,
+      'distributor_city': distributorCity,
+      'distributor_state': distributorState,
+      'distributor_zipcode': distributorZipcode,
+      'distributor_license_number': distributorLicenseNumber,
+      'producer': producer,
+      'producer_license_number': producerLicenseNumber,
+      'producer_address': producerAddress,
+      'producer_street': producerStreet,
+      'producer_city': producerCity,
+      'producer_state': producerState,
+      'producer_zipcode': producerZipcode,
+      'product_type': productType,
+      'traceability_ids': traceabilityIds,
+      'product_size': productSize,
+      'serving_size': servingSize,
+      'servings_per_package': servingsPerPackage,
+      'sample_weight': sampleWeight,
+      'status': status,
+      'total_cannabinoids': totalCannabinoids,
+      'total_thc': totalThc,
+      'total_cbd': totalCbd,
+      'total_terpenes': totalTerpenes,
+      'sample_id': sampleId,
+      'strain_name': strainName,
+      'results': results,
     };
   }
 }
+
+/// Model representing a singular lab test result for users.
+class Result {
+  // Initialization.
+  const Result({
+    this.analysis,
+    this.key,
+    this.name,
+    this.value,
+    this.mg_g,
+    this.units,
+    this.limit,
+    this.lod,
+    this.loq,
+    this.status,
+  });
+
+  // Properties.
+  final String? analysis;
+  final String? key;
+  final String? name;
+  final double? value;
+  final double? mg_g;
+  final String? units;
+  final double? limit;
+  final double? lod;
+  final double? loq;
+  final String? status;
+
+  // Create model.
+  factory Result.fromMap(Map<String, dynamic> data) {
+    return Result(
+      analysis: data['analysis'] as String?,
+      key: data['key'] as String?,
+      name: data['name'] as String?,
+      value: data['value'] as double?,
+      mg_g: data['mg_g'] as double?,
+      units: data['units'] as String?,
+      limit: data['limit'] as double?,
+      lod: data['lod'] as double?,
+      loq: data['loq'] as double?,
+      status: data['status'] as String?,
+    );
+  }
+
+  // Create JSON.
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'analysis': analysis,
+      'key': key,
+      'name': name,
+      'value': value,
+      'mg_g': mg_g,
+      'units': units,
+      'limit': limit,
+      'lod': lod,
+      'loq': loq,
+      'status': status,
+    };
+  }
+}
+
+/* === Metrc Lab Result Models === */
 
 /// Model representing a lab test for traceability.
 class LabTest {

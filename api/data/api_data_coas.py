@@ -69,13 +69,21 @@ def api_data_coas(request, sample_id=None):
         # return HttpResponse(status=401)
     else:
         uid = claims['uid']
+    
+    print('USER:', uid)
 
     # Get a specific CoA or query open-source CoAs.
     if request.method == 'GET':
 
         # FIXME: Implement querying of pre-parsed CoA data!
+        data = []
         params = request.query_params
         ref = 'public/data/lab_results'
+
+
+        # Return the data.
+        response = {'success': True, 'data': data}
+        return Response(response, status=200)
 
 
     # Parse posted CoA PDFs or URLs.
@@ -87,6 +95,8 @@ def api_data_coas(request, sample_id=None):
         except:
             body = {}
         urls = body.get('urls', [])
+
+        print('POSTED URLS:', urls)
 
         # Get any user-posted files.
         pdfs, images = [], []
@@ -116,6 +126,8 @@ def api_data_coas(request, sample_id=None):
                 temp_file.write(coa_file.read())
                 temp_file.close()
                 filepath = temp[1]
+
+                # TODO: Save user's file to Firebase Storage.
                 
                 # Parse PDFs and images separately.
                 if ext.lower() == 'pdf':

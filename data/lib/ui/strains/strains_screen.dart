@@ -19,11 +19,8 @@ import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
 import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
-import 'package:cannlytics_data/ui/layout/footer.dart';
-import 'package:cannlytics_data/ui/layout/header.dart';
-import 'package:cannlytics_data/ui/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/services/auth_service.dart';
+// import 'package:cannlytics_data/services/auth_service.dart';
 
 // TODO: Allow user's to report new strains.
 
@@ -53,7 +50,7 @@ class MainContent extends ConsumerWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
+    // final user = ref.watch(authProvider).currentUser;
 
     // Render the widget.
     return Padding(
@@ -114,7 +111,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   ScrollController _scrollController = ScrollController();
   List<String> _data = List.generate(20, (index) => "Item $index");
-  Filter _filter = Filter.newest;
+  // Filter _filter = Filter.newest;
 
   @override
   void initState() {

@@ -20,7 +20,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 // Project imports:
-import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
@@ -196,6 +195,7 @@ class ReceiptUpload extends ConsumerWidget {
                                 // final bytes = await controller.getFileData(ev);
                                 // final response = await AuthRequestService().authRequest(url);
                                 try {
+                                  // ignore: unused_local_variable
                                   var response = await APIService.apiRequest(
                                       '/api/ai/receipts',
                                       files: ev);
@@ -259,7 +259,7 @@ class ReceiptUpload extends ConsumerWidget {
                     fit: BoxFit.contain,
                     onDetect: (capture) {
                       final List<Barcode> barcodes = capture.barcodes;
-                      final Uint8List? image = capture.image;
+                      // final Uint8List? image = capture.image;
                       for (final barcode in barcodes) {
                         debugPrint('Barcode found! ${barcode.rawValue}');
                       }

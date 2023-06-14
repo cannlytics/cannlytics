@@ -18,7 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/inputs/string_controller.dart';
-import 'package:cannlytics_data/models/licensee.dart';
+// import 'package:cannlytics_data/models/licensee.dart';
 import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:cannlytics_data/services/storage_service.dart';
@@ -108,7 +108,7 @@ class FilteredLicenseesNotifier
       state = AsyncValue.data(items);
       return;
     }
-    String keyword = searchTerm.toLowerCase();
+    // String keyword = searchTerm.toLowerCase();
     // FIXME: Fix search logic.
     // List<Map<String, dynamic>> matched = [];
     // items.forEach((x) {

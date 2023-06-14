@@ -120,7 +120,7 @@ def parse_coa_images(data_dir: str, temp_path = None):
 
 
 #-----------------------------------------------------------------------
-# [ ] TEST: Parse COAs with AI.
+# [ ] TEST: Parse a folder of COAs with AI.
 #-----------------------------------------------------------------------
 
 # TODO: Write a test to batch parse COAs with AI.

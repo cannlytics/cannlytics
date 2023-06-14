@@ -9,6 +9,9 @@
 
 // TODO:
 // [ ] Allow patients to keep track of their recommendation / card.
+// [ ] Manage API keys.
+// [ ] Manage subscription.
+// [ ] View usage.
 
 // Flutter imports:
 import 'package:flutter/material.dart';

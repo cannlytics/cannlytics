@@ -1,6 +1,6 @@
 """
 COA AI | CoADoc
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/12/2023

@@ -60,7 +60,7 @@ void registerErrorHandlers() {
         // TODO: Production error UI:
 
         // Dev error UI:
-        child: Text(
+        child: SelectableText(
           details.toString(),
           style: TextStyle(fontSize: 12),
         ),

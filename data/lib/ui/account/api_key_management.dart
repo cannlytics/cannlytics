@@ -23,7 +23,7 @@ class APIKeyManagement extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Dynamic screen width.
-    final screenWidth = MediaQuery.of(context).size.width;
+    // final screenWidth = MediaQuery.of(context).size.width;
 
     // Render the widget.
     return WideCard(

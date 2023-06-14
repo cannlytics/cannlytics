@@ -83,6 +83,8 @@ class APIService {
         ? endpoint
         : '$baseUrl${endpoint.replaceFirst('/api', '')}';
 
+    print('URL: $url');
+
     // Make the request.
     final client = http.Client();
     final request;

@@ -1441,6 +1441,7 @@ class CoADoc:
                     )
 
                 # Map keys to analysis for ordering for Values worksheet columns.
+                # FIXME:
                 pairs = []
                 analytes = list(results_data['key'].unique())
                 for a in analytes:

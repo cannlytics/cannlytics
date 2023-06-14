@@ -144,7 +144,7 @@ class LicenseesTable extends ConsumerWidget {
     final user = ref.watch(authProvider).currentUser;
 
     // Responsive screen width.
-    final screenWidth = MediaQuery.of(context).size.width;
+    // final screenWidth = MediaQuery.of(context).size.width;
 
     // Define the cell builder function.
     _buildCells(Map item) {
@@ -192,6 +192,7 @@ class LicenseesTable extends ConsumerWidget {
             var field = headers[columnIndex]['key'];
             var sort = headers[columnIndex]['sort'];
             if (!sort) return;
+            // ignore: unused_local_variable
             var sorted = data;
             if (sortAscending) {
               sorted = data.sortedBy((x) => x.toMap()[field]);

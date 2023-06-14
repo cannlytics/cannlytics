@@ -22,7 +22,6 @@ import 'package:cannlytics_data/ui/layout/footer.dart';
 import 'package:cannlytics_data/ui/layout/header.dart';
 import 'package:cannlytics_data/ui/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/ui/sales/bud_spender_ui.dart';
 
 /// Screen.
 class SalesScreen extends StatelessWidget {

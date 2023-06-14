@@ -26,7 +26,7 @@ import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cannlytics_data/utils/utils.dart';
+// import 'package:cannlytics_data/utils/utils.dart';
 
 /// Screen for the user to reset their password.
 class ResetPasswordScreen extends ConsumerWidget {
@@ -106,6 +106,7 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm>
 
   // State.
   String get email => _emailController.text;
+  // ignore: unused_field
   var _submitted = false;
 
   // Dispose controllers.

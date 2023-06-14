@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/3/2023
-// Updated: 5/24/2023
+// Updated: 6/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -25,11 +25,6 @@ import 'package:cannlytics_data/services/auth_service.dart';
 
 /// Main datasets.
 /// TODO: Get this data from Firestore.
-/// CA results: (6590, 56)
-// CT results: (17142, 67)
-// MA results: (7479, 34)
-// MI results: (45637, 13)
-// WA results: (50900, 51)
 final List<Map> mainDatasets = [
   {
     "title": "US Cannabis Licenses",
@@ -129,35 +124,33 @@ List<Map> aiModels = [
     "title": "COA Parser",
     "image_url":
         "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3",
-    "description":
-        "Do you want your lab results? CoADoc is here to help you get your lab results.",
+    "description": "Get your raw lab results from QR codes, URLs, and PDFs.",
     "tier": "Premium",
-    "path": "/results/ai",
+    "path": "/results",
     "observations": null,
     "fields": null,
   },
-  {
-    "title": "Receipt Parser",
-    "image_url":
-        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fbud_spender_small.png?alt=media&token=e9a7b91b-65cc-47ef-bcf2-f19f30ea79b8",
-    "description":
-        "Parse your receipts and track your spending and consumption.",
-    "tier": "Premium",
-    "path": "/sales/ai",
-    "observations": null,
-    "fields": null,
-  },
-  {
-    "title": "Strain Identifier",
-    "image_url":
-        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30",
-    "description":
-        "Identify, classify, and quantify cannabis strains using product name, description, and lab results.",
-    "tier": "Premium",
-    "path": "/strains/ai",
-    "observations": null,
-    "fields": null,
-  }
+  // {
+  //   "title": "Receipt Parser",
+  //   "image_url":
+  //       "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fbud_spender_small.png?alt=media&token=e9a7b91b-65cc-47ef-bcf2-f19f30ea79b8",
+  //   "description":
+  //       "Parse your receipts to track your spending and consumption.",
+  //   "tier": "Premium",
+  //   "path": "/sales/ai",
+  //   "observations": null,
+  //   "fields": null,
+  // },
+  // {
+  //   "title": "Strain Identifier",
+  //   "image_url":
+  //       "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30",
+  //   "description": "Identify, classify, and quantify cannabis strains.",
+  //   "tier": "Premium",
+  //   "path": "/strains/ai",
+  //   "observations": null,
+  //   "fields": null,
+  // }
 ];
 
 /* Navigation */
