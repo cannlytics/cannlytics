@@ -21,8 +21,8 @@ class APIService {
 
   // Define the base URL.
   // FIXME: Smoothly switch between dev and production.
-  // static String _baseUrl = 'http://127.0.0.1:8000/api';
-  static String _baseUrl = 'https://cannlytics.com/api';
+  static String _baseUrl = 'http://127.0.0.1:8000/api';
+  // static String _baseUrl = 'https://cannlytics.com/api';
 
   /// Initialize the API service.
   static void initialize() {
@@ -85,8 +85,6 @@ class APIService {
         ? endpoint
         : '$baseUrl${endpoint.replaceFirst('/api', '')}';
 
-    print('URL: $url');
-
     // Make the request.
     final client = http.Client();
     final request;
@@ -120,23 +118,7 @@ class APIService {
           ? responseData['data']
           : responseData;
     } catch (error) {
-      print("Request error: [error=${error.toString()}]");
       return response;
-      // try {
-      //   final blob = html.Blob([response.bodyBytes]);
-      //   final url = html.Url.createObjectUrlFromBlob(blob);
-      //   final anchor = html.document.createElement('a') as html.AnchorElement
-      //     ..href = url
-      //     ..style.display = 'none'
-      //     ..download = filename;
-      //   html.document.body?.children.add(anchor);
-      //   anchor.click();
-      //   html.document.body?.children.remove(anchor);
-      //   html.Url.revokeObjectUrl(url);
-      // } catch (error) {
-      //   print("Request error: [error=${error.toString()}]");
-      //   return response;
-      // }
     }
   }
 }

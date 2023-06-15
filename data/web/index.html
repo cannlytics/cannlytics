@@ -50,7 +50,6 @@
     async function loadGoogleMaps() {
       const response = await fetch('config.json');
       const config = await response.json();
-      console.log(config);
       const script = document.createElement('script');
       script.src = 'https://maps.googleapis.com/maps/api/js?key=' + config.GOOGLE_MAPS_API_KEY;
       document.head.appendChild(script);

@@ -7,9 +7,9 @@ Created: 5/13/2023
 Updated: 5/13/2023
 """
 try:
-    from .receipt_parser import BudSpender
+    from .receipts_ai import ReceiptsParser
     __all__ = [
-        BudSpender,
+        ReceiptsParser,
     ]
 except ImportError:
     pass

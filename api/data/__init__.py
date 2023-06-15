@@ -20,7 +20,7 @@ from api.data.lab_data import (
 from api.data.api_data_licenses import api_data_licenses
 from api.data.patent_data import patent_data
 from api.data.regulation_data import regulation_data
-from api.data.receipt_data import receipt_data
+from api.data.api_data_receipts import receipt_data
 from api.data.state_data import state_data
 from api.data.strain_data import strain_data
 

@@ -10,6 +10,12 @@
     {
       "target": "app",
       "public": "app/build/web",
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ],
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -19,6 +25,12 @@
     {
       "target": "data",
       "public": "data/build/web",
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ],
       "ignore": [
         "firebase.json",
         "**/.*",

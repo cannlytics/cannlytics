@@ -66,7 +66,7 @@ class AccountScreen extends StatelessWidget {
         SliverToBoxAdapter(child: AccountManagement()),
 
         // Settings card.
-        SliverToBoxAdapter(child: ThemeSettings()),
+        // SliverToBoxAdapter(child: ThemeSettings()),
 
         // Footer.
         const SliverToBoxAdapter(child: Footer()),
@@ -99,16 +99,22 @@ class AccountManagement extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // Sign up prompt.
-          if (user == null) _signUpCard(context, screenWidth),
+          // if (user == null) _signUpCard(context, screenWidth),
+          // FIXME:
+          SubscriptionManagement(key: Key('no-user-subscriptions')),
 
           // Account information.
           if (user != null) AccountForm(key: Key('account-form')),
 
           // Subscriptions.
-          if (user != null) SubscriptionManagement(key: Key('subscriptions')),
+          if (user != null)
+            SubscriptionManagement(key: Key('user-subscriptions')),
 
           // API keys.
           if (user != null) APIKeyManagement(key: Key('api-keys')),
+
+          // Settings.
+          ThemeSettings(),
 
           // Delete account option.
           if (user != null) _deleteAccount(context, ref, screenWidth),
@@ -143,37 +149,41 @@ class AccountManagement extends ConsumerWidget {
                       ),
                 ),
               ),
-              gapH18,
-              Row(
-                children: [
-                  // Sign in button.
-                  CustomTextButton(
-                    text: 'Sign In',
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return SignInDialog(isSignUp: false);
-                        },
-                      );
-                    },
-                  ),
 
-                  // Spacer.
-                  SizedBox(width: 8),
-                  PrimaryButton(
-                    text: 'Sign up',
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return SignInDialog(isSignUp: true);
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
+              // Subscription choices.
+              SubscriptionManagement(key: Key('subscriptions')),
+
+              // gapH18,
+              // Row(
+              //   children: [
+              //     // Sign in button.
+              //     CustomTextButton(
+              //       text: 'Sign In',
+              //       onPressed: () {
+              //         showDialog(
+              //           context: context,
+              //           builder: (BuildContext context) {
+              //             return SignInDialog(isSignUp: false);
+              //           },
+              //         );
+              //       },
+              //     ),
+
+              //     // Spacer.
+              //     SizedBox(width: 8),
+              //     PrimaryButton(
+              //       text: 'Sign up',
+              //       onPressed: () {
+              //         showDialog(
+              //           context: context,
+              //           builder: (BuildContext context) {
+              //             return SignInDialog(isSignUp: true);
+              //           },
+              //         );
+              //       },
+              //     ),
+              //   ],
+              // ),
             ],
           ),
         ],
@@ -203,20 +213,15 @@ class AccountManagement extends ConsumerWidget {
                 'Danger Zone',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              gapH24,
-              SizedBox(
-                width: (screenWidth > Breakpoints.tablet) ? null : 275,
-                child: Text(
-                  'Deleting this account will also remove your account data.',
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+              gapH8,
+              Container(
+                width: 540,
+                child: SelectableText(
+                  'Deleting this account will also remove your account data. ' +
+                      'Make sure that you have exported your data if you want to keep your data.',
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         color: Theme.of(context).textTheme.titleLarge!.color,
                       ),
-                ),
-              ),
-              SizedBox(
-                width: (screenWidth > Breakpoints.tablet) ? null : 275,
-                child: Text(
-                  'Make sure that you have exported your data if you want to keep your data.',
                 ),
               ),
               gapH12,

@@ -288,7 +288,7 @@ def api_data_coas(request, sample_id=None):
         return Response(response, status=200)
 
 
-@csrf_exempt
+@api_view(['POST'])
 def download_coa_data(request):
     """Download posted data as a .xlsx file. Pass a `data` field in the
     body with the data, an object or an array of objects, to standardize
@@ -314,6 +314,8 @@ def download_coa_data(request):
     filename = f'coa-data-{timestamp}.xlsx'
     response = HttpResponse(content_type=content_type)
     response['Content-Disposition'] = f'attachment; filename={filename}'
+    response['Access-Control-Allow-Origin'] = '*'
+    response['Access-Control-Allow-Headers'] = '*'
 
     # Create the Workbook and save it to the response.
     try:

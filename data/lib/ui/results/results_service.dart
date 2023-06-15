@@ -48,12 +48,9 @@ class COAParser extends AsyncNotifier<List<Map?>> {
   Future<void> parseUrl(String url) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      // FIXME: Implement!!!
-      print('PARSING URL: $url');
       final items = await APIService.apiRequest('/api/data/coas', data: {
         'urls': [url]
       });
-      print('ITEMS: $items');
       if (items is List<dynamic>) {
         List<Map<String, dynamic>> mappedItems = items.map((item) {
           return item as Map<String, dynamic>;
@@ -134,7 +131,6 @@ class DownloadService {
       // var filename = await _localFilePath('coa-data-$timestamp.xlsx');
       // return File(filePath).writeAsBytes(response.bodyBytes);
     } else {
-      print('Error downloading file: ${response.statusCode}');
       throw Exception('Error downloading file');
     }
   }

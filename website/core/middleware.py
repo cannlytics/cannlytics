@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/1/2021
-Updated: 12/9/2021
+Updated: 6/14/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 from urllib.parse import quote
@@ -83,3 +83,13 @@ def _is_valid_path(path, urlconf=None):
         return True
     except urls.Resolver404:
         return False
+
+
+def open_access_middleware(get_response):
+    """Allow all requests to access the API."""
+    def middleware(request):
+        response = get_response(request)
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Headers'] = '*'
+        return response
+    return middleware

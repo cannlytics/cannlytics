@@ -128,35 +128,45 @@ class SubscriptionPlanCards extends StatelessWidget {
     // TODO: Get from Firestore.
     var cards = [
       SubscriptionCard(
+          title: 'Free',
+          price: '🤗',
+          color: Color(0xff16c995),
+          features: [
+            '10 free AI jobs',
+            'Personal archive',
+            'Access all data',
+          ],
+          notes: 'No credit card required'),
+      SubscriptionCard(
         title: 'Standard Plan',
         price: '\$4.20',
         color: Color(0xffFF7F00),
         features: [
-          '512 MB data storage',
-          '2 hours of AI runtime',
-          '10,000 API calls',
+          '100 AI jobs',
+          '4.2\u00A2 / job',
+          'Throttled API',
         ],
       ),
       SubscriptionCard(
         title: 'Pro Plan',
-        price: '\$42.00',
-        color: Color(0xff006400),
-        features: [
-          '4 GB data storage',
-          '8 hours of AI runtime',
-          '50,000 API Calls',
-        ],
-      ),
-      SubscriptionCard(
-        title: 'Enterprise Plan',
-        price: '\$420',
+        price: '\$42',
         color: Color(0xff7B4EA8),
         features: [
-          '50+ GB data storage',
-          '40+ hours of AI runtime',
-          '1,000,000+ API Calls',
+          '1,250 AI jobs',
+          '3.3\u00A2 / job',
+          '🚀 Unthrottled API',
         ],
       ),
+      // SubscriptionCard(
+      //   title: 'Enterprise Plan',
+      //   price: '\$420',
+      //   color: Color(0xff7B4EA8),
+      //   features: [
+      //     '1,000 AI Jobs',
+      //     '40+ hours of AI runtime',
+      //     '1,000,000+ API Calls',
+      //   ],
+      // ),
     ];
 
     // Row of cards (column on tablet and mobile).
@@ -186,12 +196,14 @@ class SubscriptionCard extends StatelessWidget {
   final String price;
   final List<String> features;
   final Color? color;
+  final String? notes;
 
   SubscriptionCard({
     required this.title,
     required this.price,
     required this.features,
     this.color,
+    this.notes,
   });
 
   @override
@@ -211,10 +223,11 @@ class SubscriptionCard extends StatelessWidget {
               // Title.
               Text(
                 title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium!
-                    .copyWith(color: color),
+                textAlign: TextAlign.start,
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
 
               // Price.

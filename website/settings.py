@@ -122,16 +122,19 @@ MIDDLEWARE = [
     'django_permissions_policy.PermissionsPolicyMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # f'{PROJECT_NAME}.core.middleware.open_access_middleware',
+    "corsheaders.middleware.CorsMiddleware",
     f'{PROJECT_NAME}.core.middleware.AppendOrRemoveSlashMiddleware',
-    # 'corsheaders.middleware.CorsMiddleware',
-    # 'csp.middleware.CSPMiddleware',
-    # 'csp.context_processors.nonce',
+]
+
+# Allow CORS from the following domains.
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://\w+\.cannlytics\.com$",
 ]
 
 #----------------------------------------------------------------------#
@@ -372,10 +375,3 @@ base.tag_re = re.compile(base.tag_re.pattern, re.DOTALL)
 FIREBASE_API_KEY = config['FIREBASE_API_KEY']
 FIREBASE_PROJECT_ID = config['FIREBASE_PROJECT_ID']
 STORAGE_BUCKET = config['FIREBASE_STORAGE_BUCKET']
-
-# Allow CORS.
-# See: https://stackoverflow.com/questions/35760943/how-can-i-enable-cors-on-django-rest-framework
-# CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOWED_ORIGINS = [
-    'https://data.cannlytics.com',
-]
