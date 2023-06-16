@@ -4,12 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 6/14/2023
+// Updated: 6/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_data/models/lab_result.dart';
-import 'package:cannlytics_data/ui/results/results_form.dart';
+import 'package:cannlytics_data/ui/results/results_search.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,16 +26,16 @@ import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 
-class CoADocInterface extends HookConsumerWidget {
-  CoADocInterface({Key? key}) : super(key: key);
+class ResultsParserInterface extends HookConsumerWidget {
+  ResultsParserInterface({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen the the COA parser provider.
-    final asyncResults = ref.watch(coaParser);
+    final asyncData = ref.watch(coaParser);
 
     // Dynamic rendering.
-    return asyncResults.when(
+    return asyncData.when(
       // Data loaded state.
       data: (items) => (items.length == 0)
           ? _body(context, ref, child: CoAUpload())
@@ -266,19 +266,6 @@ class CoAUpload extends ConsumerWidget {
                               operation: DragOperation.copy,
                               cursor: CursorType.grab,
                               onCreated: (ctrl) => controller = ctrl,
-                              // onLoaded: () => print('Zone 1 loaded'),
-                              // onError: (ev) => print('Zone 1 error: $ev'),
-                              // onHover: () {
-                              //   // print('Zone 1 hovered');
-                              // },
-                              // onLeave: () {
-                              //   // print('Zone 1 left');
-                              // },
-                              // onDrop: (ev) async {
-                              //   print('Zone 1 drop: ${ev.name}');
-                              //   final bytes = await controller.getFileData(ev);
-                              //   print(bytes.sublist(0, 20));
-                              // },
                               onDropMultiple: (files) async {
                                 if (files!.isNotEmpty)
                                   ref.read(coaParser.notifier).parseCOAs(files);
@@ -297,14 +284,14 @@ class CoAUpload extends ConsumerWidget {
                     SecondaryButton(
                       text: 'Import your COAs',
                       onPressed: () async {
-                        FilePickerResult? result =
+                        FilePickerResult? file =
                             await FilePicker.platform.pickFiles(
                           type: FileType.custom,
-                          allowedExtensions: ['pdf', 'zip', 'jpeg', 'png'],
+                          allowedExtensions: ['pdf', 'jpeg', 'png'],
                         );
-                        if (result != null) {
-                          // Handle file
-                          print('HANDLE FILE: ${result.files.first.name}');
+                        if (file != null) {
+                          // Upload file
+                          ref.read(coaParser.notifier).parseCOAs([file]);
                         } else {
                           // User canceled the picker
                         }
@@ -323,9 +310,10 @@ class CoAUpload extends ConsumerWidget {
                     fit: BoxFit.contain,
                     onDetect: (capture) {
                       final List<Barcode> barcodes = capture.barcodes;
-                      // final Uint8List? image = capture.image;
-                      for (final barcode in barcodes) {
-                        debugPrint('Barcode found! ${barcode.rawValue}');
+                      if (barcodes.isNotEmpty) {
+                        ref
+                            .read(coaParser.notifier)
+                            .parseUrl(barcodes.first.rawValue!);
                       }
                     },
                   ),
@@ -340,10 +328,11 @@ class CoAUpload extends ConsumerWidget {
 
 /// Lab results placeholder.
 class LabResultsPlaceholder extends StatelessWidget {
+  LabResultsPlaceholder({this.title, this.subtitle});
+
+  // Parameters.
   final String? title;
   final String? subtitle;
-
-  LabResultsPlaceholder({this.title, this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -377,8 +366,8 @@ class LabResultsPlaceholder extends StatelessWidget {
                           color:
                               Theme.of(context).textTheme.titleLarge!.color)),
                   TextSpan(
-                      text: subtitle ??
-                          'Drop a CoA PDF, image, or folder to parse.',
+                      text:
+                          subtitle ?? 'Drop COA PDFs or images here to parse.',
                       style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
@@ -392,16 +381,18 @@ class LabResultsPlaceholder extends StatelessWidget {
 
 /// Parsing results placeholder.
 class ParsingResultsPlaceholder extends StatefulWidget {
+  ParsingResultsPlaceholder({this.title, this.subtitle});
+
+  // Parameters.
   final String? title;
   final String? subtitle;
-
-  ParsingResultsPlaceholder({this.title, this.subtitle});
 
   @override
   _ParsingResultsPlaceholderState createState() =>
       _ParsingResultsPlaceholderState();
 }
 
+/// Parsing results placeholder state.
 class _ParsingResultsPlaceholderState extends State<ParsingResultsPlaceholder>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
@@ -411,11 +402,11 @@ class _ParsingResultsPlaceholderState extends State<ParsingResultsPlaceholder>
   void initState() {
     super.initState();
 
+    // Fade the image in and out.
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
-
     _opacityAnimation =
         Tween<double>(begin: 0.33, end: 0.88).animate(_controller);
   }

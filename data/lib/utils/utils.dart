@@ -4,11 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/22/2023
-// Updated: 4/14/2023
+// Updated: 6/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:io';
+import 'dart:html' as html;
 
 // Flutter imports:
 import 'package:flutter/cupertino.dart';
@@ -31,6 +32,20 @@ class WebUtils {
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  /// Download a file from bytes.
+  static Future<void> downloadBytes(List<String> bytes, String filename) async {
+    final blob = html.Blob(bytes);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.document.createElement('a') as html.AnchorElement
+      ..href = url
+      ..style.display = 'none'
+      ..download = filename;
+    html.document.body?.children.add(anchor);
+    anchor.click();
+    html.document.body?.children.remove(anchor);
+    html.Url.revokeObjectUrl(url);
   }
 
   /// Convert a color to a HTML hex code.

@@ -32,8 +32,8 @@
 // - I'm looking for a high terpinolene cart
 
 // Flutter imports:
-import 'package:cannlytics_data/ui/results/coa_doc_ui.dart';
-import 'package:cannlytics_data/ui/results/results_form.dart';
+import 'package:cannlytics_data/ui/results/results_parser.dart';
+import 'package:cannlytics_data/ui/results/results_search.dart';
 import 'package:cannlytics_data/ui/results/user_results.dart';
 import 'package:flutter/material.dart';
 
@@ -198,7 +198,7 @@ class ResultsTabs extends StatelessWidget {
             height: MediaQuery.of(context).size.height * 0.75,
             child: TabBarView(
               children: [
-                CoADocInterface(),
+                ResultsParserInterface(),
                 LabResultsSearchForm(),
                 UserResultsInterface(),
               ],

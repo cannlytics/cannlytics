@@ -21,7 +21,7 @@ import 'package:url_launcher/url_launcher.dart';
 // Project imports:
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
-import 'package:cannlytics_data/ui/results/results_form_controller.dart';
+import 'package:cannlytics_data/ui/results/results_search_controller.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 
 /// Lab results search form.
@@ -233,7 +233,7 @@ class LabResultItem extends StatelessWidget {
         //   context: context,
         //   builder: (BuildContext context) {
         //     return Dialog(
-        //       child: COAScreen(labResult: labResult),
+        //       child: ResultScreen(labResult: labResult),
         //     );
         //   },
         // );

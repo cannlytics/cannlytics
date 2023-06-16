@@ -3,16 +3,16 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 6/13/2023
+// Created: 6/15/2023
 // Updated: 6/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/cards/scrollable_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// User lab results user interface.
-class UserResultsInterface extends ConsumerWidget {
-  const UserResultsInterface({super.key});
+/// User receipts user interface.
+class UserReceiptsInterface extends ConsumerWidget {
+  const UserReceiptsInterface({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,38 +24,29 @@ class UserResultsInterface extends ConsumerWidget {
         Row(
           children: [
             Text(
-              'Your lab results',
+              'Your receipts',
               style: Theme.of(context).textTheme.titleLarge,
             ),
 
-            // Results tabs.
+            // Receipts tabs.
             Spacer(),
             // TabToggleButtons(),
           ],
         ),
 
-        // Placeholder for when there are no results.
-        _userResultsPlaceholder(context),
+        // Placeholder for when there are no receipts.
+        _userReceiptsPlaceholder(context),
 
-        // TODO: Grid of user results.
+        // TODO: Grid of user receipts.
 
-        // // Sample results options.
-        // SampleResultsOptions(),
-
-        // // Sample card template.
-        // SampleCardTemplate(),
-
-        // // Sample results.
-        // SampleCard(),
-
-        // TODO: Table of user results.
-        // UserResultsList(),
+        // TODO: Table of user receipts.
+        // UserReceiptsList(),
       ],
     );
   }
 
-  /// Message displayed when there are no user results.
-  Widget _userResultsPlaceholder(BuildContext context) {
+  /// Message displayed when there are no user receipts.
+  Widget _userReceiptsPlaceholder(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -87,7 +78,7 @@ class UserResultsInterface extends ConsumerWidget {
                         color: Theme.of(context).textTheme.titleLarge!.color),
                   ),
                   SelectableText(
-                    'If you are signed in, then we will save your parsed lab results and you will be able to access them here in the near future. If you need your lab results pronto, then please email dev@cannlytics.com to get any data associated with your account. Thank you for your patience as we implement this feature.',
+                    'If you are signed in, then we will save your parsed receipts and you will be able to access them here in the near future. If you need your data pronto, then please email dev@cannlytics.com to get any data associated with your account. Thank you for your patience as we implement this feature.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
@@ -102,7 +93,7 @@ class UserResultsInterface extends ConsumerWidget {
 }
 
 /// List of user's results.
-class UserResultsList extends StatelessWidget {
+class UserReceiptsList extends StatelessWidget {
   final bool isLoading =
       false; // This would typically come from your state management system
 

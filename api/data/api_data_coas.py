@@ -4,10 +4,10 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 6/14/2023
+Updated: 6/15/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-Description: API endpoints to interface with CoA data.
+Description: API endpoints to interface with COA data.
 """
 # Standard imports.
 from datetime import datetime
@@ -46,20 +46,9 @@ FILE_TYPES = ['pdf', 'png', 'jpg', 'jpeg']
 MAX_OBSERVATIONS_PER_FILE = 200_000
 
 
-# def initialize_openai() -> None:
-#     """Initialize OpenAI."""
-#     _, project_id = google.auth.default()
-#     openai_api_key = access_secret_version(
-#         project_id=project_id,
-#         secret_id='OPENAI_API_KEY',
-#         version_id='latest',
-#     )
-#     openai.api_key = openai_api_key
-
-
 @api_view(['GET', 'POST'])
 def api_data_coas(request, sample_id=None):
-    """Get CoA data (public API endpoint)."""
+    """Get COA data (public API endpoint)."""
 
     # Authenticate the user.
     public, throttle = False, False
@@ -67,27 +56,26 @@ def api_data_coas(request, sample_id=None):
     total_cost = 0
     all_prompts = []
     if not claims:
-        uid = None
+        uid = 'cannlytics'
         public, throttle = True, True
         # return HttpResponse(status=401)
     else:
         uid = claims['uid']
     
+    # Log the user ID.
     print('USER:', uid)
 
     # Get a specific CoA or query open-source CoAs.
     if request.method == 'GET':
 
-        # FIXME: Implement querying of pre-parsed CoA data!
+        # FIXME: Implement querying of pre-parsed COA data!
         data = []
         params = request.query_params
         ref = 'public/data/lab_results'
 
-
         # Return the data.
         response = {'success': True, 'data': data}
         return Response(response, status=200)
-
 
     # Parse posted CoA PDFs or URLs.
     if request.method == 'POST':
@@ -99,13 +87,18 @@ def api_data_coas(request, sample_id=None):
             body = {}
         urls = body.get('urls', [])
 
+        # Log the posted data.
         print('POSTED URLS:', urls)
 
         # Get any user-posted files.
         pdfs, images = [], []
         request_files = request.FILES.getlist('file')
         if request_files is not None:
+
+            # Log the posted files.
             print('POSTED FILES:', request_files)
+
+            # Save each file to the temporary directory.
             for coa_file in request_files:
 
                 # File safety check.
@@ -174,6 +167,7 @@ def api_data_coas(request, sample_id=None):
                     key = 'OPENAI_API_KEY'
                     os.environ[key] = config[key]
         
+        # Return an error if OpenAI can't be initialized.
         if not openai_api_key:
             message = 'OpenAI API key not found.'
             response = {'success': False, 'message': message}
@@ -245,7 +239,7 @@ def api_data_coas(request, sample_id=None):
                 docs.append(obs)
 
             # Create entries for the user.
-            if claims:
+            if uid:
                 refs.append(f'users/{uid}/lab_results/{sample_id}')
                 docs.append(obs)
 
@@ -254,19 +248,21 @@ def api_data_coas(request, sample_id=None):
 
         # Create a usage log.
         create_log(
-            'logs/website/coa_doc',
+            'logs/data/coas',
             claims=claims,
             action='Parsed COAs.',
-            log_type='coa_data',
-            key='coa_data',
+            log_type='data',
+            key='api_data_coas',
             changes=changes
         )
 
         # Record cost and prompts.
+        ai_model = 'coa_doc'
         timestamp = datetime.now().isoformat()
         doc_id = timestamp.replace(':', '-').replace('.', '-')
-        refs.append(f'admin/ai/coa_doc_usage/{doc_id}')
+        refs.append(f'admin/ai/{ai_model}_usage/{doc_id}')
         docs.append({
+            'ai_model': ai_model,
             'uid': uid,
             'timestamp': timestamp,
             'total_cost': total_cost,
@@ -275,6 +271,7 @@ def api_data_coas(request, sample_id=None):
         if claims:
             refs.append(f'users/{uid}/usage/{doc_id}')
             docs.append({
+                'ai_model': ai_model,
                 'timestamp': timestamp,
                 'total_cost': total_cost,
             })

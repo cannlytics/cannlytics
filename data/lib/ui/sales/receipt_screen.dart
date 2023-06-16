@@ -1,298 +1,296 @@
-// // Cannlytics App
-// // Copyright (c) 2023 Cannlytics
+// Cannlytics App
+// Copyright (c) 2023 Cannlytics
 
-// // Authors:
-// //   Keegan Skeate <https://github.com/keeganskeate>
-// // Created: 3/9/2023
-// // Updated: 3/17/2023
-// // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+// Authors:
+//   Keegan Skeate <https://github.com/keeganskeate>
+// Created: 3/9/2023
+// Updated: 6/15/2023
+// License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+import 'package:cannlytics_data/models/lab_result.dart';
+import 'package:flutter/material.dart';
+import 'package:pdfx/pdfx.dart';
+import 'package:internet_file/internet_file.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-// // Flutter imports:
-// import 'package:flutter/material.dart';
+// TODO: Ability to download data as an Excel file!!!
 
-// // Package imports:
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:go_router/go_router.dart';
+/// TODO: Allow users to parse a COA with AI if they have a subscription.
+///
+/// TODO: Talk with your COA (for pro subscribers).
+///
+/// TODO: Link to strains where user can find more lab results.
 
-// // Project imports:
-// import 'package:cannlytics_app/constants/design.dart';
-// import 'package:cannlytics_app/models/metrc/sales_receipt.dart';
-// import 'package:cannlytics_app/ui/business/receipts/receipts_controller.dart';
-// import 'package:cannlytics_app/ui/layout/footer.dart';
-// import 'package:cannlytics_app/ui/layout/header.dart';
-// import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
-// import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
-// import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
-// import 'package:cannlytics_app/widgets/inputs/checkbox_input.dart';
-// import 'package:cannlytics_app/widgets/layout/form_container.dart';
+/// TODO: Link to producer / retailer / lab.
 
-// /// SalesReceipt screen.
-// class SalesReceiptScreen extends ConsumerStatefulWidget {
-//   const SalesReceiptScreen({super.key, required this.id, this.entry});
+/// COA screen.
+class ResultScreen extends StatefulWidget {
+  ResultScreen({required this.labResult});
 
-//   // Properties.
-//   final SalesReceiptId id;
-//   final SalesReceipt? entry;
+  // Properties
+  final LabResult labResult;
 
-//   @override
-//   ConsumerState<SalesReceiptScreen> createState() => _SalesReceiptScreenState();
-// }
+  @override
+  _ResultScreenState createState() => _ResultScreenState();
+}
 
-// /// SalesReceipt screen state.
-// class _SalesReceiptScreenState extends ConsumerState<SalesReceiptScreen> {
-//   @override
-//   Widget build(BuildContext context) {
-//     // Listen for errors.
-//     ref.listen<AsyncValue>(
-//       salesReceiptProvider(widget.id),
-//       (_, state) => state.showAlertDialogOnError(context),
-//     );
+class _ResultScreenState extends State<ResultScreen> {
+  static const int _initialPage = 1;
+  late PdfController _pdfController;
+  late String _pdfUrl;
 
-//     // Listen for the salesReceipt data.
-//     var item = ref.watch(salesReceiptProvider(widget.id)).value;
-//     if (item == null) {
-//       item = SalesReceipt();
-//     }
+  // Initialize the PDF document.
+  @override
+  void initState() {
+    super.initState();
+    _pdfUrl =
+        'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/tests%2Fassets%2Fcoas%2Facs%2F27675_0002355100.pdf?alt=media&token=bc9abde9-4fe6-4a45-8be4-68e92c8ea8f9';
+    _pdfController = PdfController(
+      document: PdfDocument.openData(InternetFile.get(_pdfUrl)),
+      initialPage: _initialPage,
+    );
+  }
 
-//     // Body.
-//     return CustomScrollView(
-//       slivers: [
-//         // App header.
-//         const SliverToBoxAdapter(child: AppHeader()),
+  // Dispose of the PDF.
+  @override
+  void dispose() {
+    _pdfController.dispose();
+    super.dispose();
+  }
 
-//         // Form.
-//         // TODO: Add a loading indicator.
-//         SliverToBoxAdapter(child: FormContainer(children: _fields(item))),
+  // Render the screen.
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Results list, centered when there are no results, top-aligned otherwise.
+          Container(
+            height: MediaQuery.of(context).size.height * 0.75,
+            child: SingleChildScrollView(
+              child: Card(
+                margin: EdgeInsets.only(top: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      // PDF actions.
+                      _pdfActions(),
 
-//         // Footer
-//         const SliverToBoxAdapter(child: Footer()),
-//       ],
-//     );
-//   }
+                      // COA PDF.
+                      Row(
+                        children: [
+                          // COA PDF.
+                          _coaPDF(),
 
-//   /// Form fields.
-//   List<Widget> _fields(SalesReceipt item) {
-//     return <Widget>[
-//       // Back to salesReceipts button.
-//       CustomTextButton(
-//         text: 'SalesReceipts',
-//         onPressed: () {
-//           context.go('/salesReceipts');
-//           ref.read(nameController.notifier).change('');
-//         },
-//         fontStyle: FontStyle.italic,
-//       ),
+                          // COA fields.
+                          _coaFields(),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-//       // Title row.
-//       Row(
-//         mainAxisAlignment: MainAxisAlignment.end,
-//         children: [
-//           // ID.
-//           _idField(item),
+  // COA PDF.
+  Widget _coaPDF() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      width: MediaQuery.of(context).size.width * 0.5,
+      child: PdfView(
+        builders: PdfViewBuilders<DefaultBuilderOptions>(
+          options: const DefaultBuilderOptions(),
+          documentLoaderBuilder: (_) =>
+              const Center(child: CircularProgressIndicator()),
+          pageLoaderBuilder: (_) =>
+              const Center(child: CircularProgressIndicator()),
+          pageBuilder: _pageBuilder,
+        ),
+        controller: _pdfController,
+      ),
+    );
+  }
 
-//           // Spacer.
-//           const Spacer(),
+  // PDF actions.
+  Widget _pdfActions() {
+    return Row(
+      children: [
+        // Previous page.
+        IconButton(
+          icon: const Icon(Icons.navigate_before),
+          onPressed: () {
+            _pdfController.previousPage(
+              curve: Curves.ease,
+              duration: const Duration(milliseconds: 100),
+            );
+          },
+        ),
 
-//           // Actions.
-//           // Create / update a salesReceipt.
-//           PrimaryButton(
-//             text: (widget.id == 'new') ? 'Create' : 'Save',
-//             onPressed: () async {
-//               var name = ref.read(nameController).value.text;
-//               // FIXME:
-//               var update = SalesReceipt(
-//                 id: widget.id,
-//               );
-//               if (widget.id == 'new') {
-//                 await ref
-//                     .read(salesReceiptsProvider.notifier)
-//                     .createSalesReceipts([update]);
-//               } else {
-//                 // FIXME:
-//                 await ref
-//                     .read(salesReceiptsProvider.notifier)
-//                     .updateSalesReceipts([update]);
-//               }
-//               context.go('/salesReceipts');
-//             },
-//           ),
-//         ],
-//       ),
+        // Page count.
+        PdfPageNumber(
+          controller: _pdfController,
+          builder: (_, loadingState, page, pagesCount) => Container(
+            alignment: Alignment.center,
+            child: Text(
+              '$page/${pagesCount ?? 0}',
+              style: const TextStyle(fontSize: 22),
+            ),
+          ),
+        ),
 
-//       // Name field.
-//       gapH6,
-//       // _nameField(item),
-//       gapH6,
+        // Next page.
+        IconButton(
+          icon: const Icon(Icons.navigate_next),
+          onPressed: () {
+            _pdfController.nextPage(
+              curve: Curves.ease,
+              duration: const Duration(milliseconds: 100),
+            );
+          },
+        ),
 
-//       // SalesReceipt type name and ID.
-//       // _salesReceiptTypeField(item),
+        // TODO: Implement zoom.
 
-//       // Checkbox fields.
-//       // ..._checkboxes(item),
+        // Refresh button.
+        // IconButton(
+        //   icon: const Icon(Icons.refresh),
+        //   onPressed: () {
+        //     _pdfController
+        //         .loadDocument(PdfDocument.openData(InternetFile.get(_pdfUrl)));
+        //   },
+        // ),
 
-//       // TODO: Allow user's to save additional data in Firestore:
-//       // - salesReceipt_image
-//       // - created_at
-//       // - created_by
-//       // - updated_at
-//       // - updated_by
+        // Open in new button.
+        GestureDetector(
+          onTap: () {
+            launchUrl(Uri.parse(_pdfUrl));
+          },
+          child: Icon(
+            Icons.open_in_new,
+            color: Theme.of(context).colorScheme.onSurface,
+            size: 16,
+          ),
+        ),
+      ],
+    );
+  }
 
-//       // Danger zone : Handle deleting an existing salesReceipt.
-//       if (widget.id.isNotEmpty && widget.id != 'new') _deleteOption(),
-//     ];
-//   }
+  // PDF page builder.
+  PhotoViewGalleryPageOptions _pageBuilder(
+    BuildContext context,
+    Future<PdfPageImage> pageImage,
+    int index,
+    PdfDocument document,
+  ) {
+    return PhotoViewGalleryPageOptions(
+      imageProvider: PdfPageImageProvider(
+        pageImage,
+        index,
+        document.id,
+      ),
+      minScale: PhotoViewComputedScale.contained * 1,
+      maxScale: PhotoViewComputedScale.contained * 2,
+      initialScale: PhotoViewComputedScale.contained * 1.0,
+      heroAttributes: PhotoViewHeroAttributes(tag: '${document.id}-$index'),
+    );
+  }
 
-//   Widget _deleteOption() {
-//     return Container(
-//       constraints: BoxConstraints(minWidth: 200), // set minimum width of 200
-//       child: Card(
-//         margin: EdgeInsets.only(top: 36, bottom: 48),
-//         borderOnForeground: true,
-//         surfaceTintColor: null,
-//         child: Padding(
-//           padding: EdgeInsets.all(16),
-//           child: Column(
-//             mainAxisAlignment: MainAxisAlignment.start,
-//             children: [
-//               Text(
-//                 'Danger Zone',
-//                 style: Theme.of(context).textTheme.titleLarge!.copyWith(
-//                       color: Theme.of(context).textTheme.titleLarge!.color,
-//                     ),
-//               ),
-//               gapH12,
-//               PrimaryButton(
-//                 backgroundColor: Colors.red,
-//                 text: 'Delete',
-//                 onPressed: () async {
-//                   await ref
-//                       .read(salesReceiptsProvider.notifier)
-//                       .deleteSalesReceipts([SalesReceipt(id: widget.id)]);
-//                   // FIXME: Clear search, etc. to make table load better.
-//                   context.go('/receipts');
-//                 },
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
+  /// Fields.
+  Widget _coaFields() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      width: MediaQuery.of(context).size.width * 0.5,
+      child: SingleChildScrollView(
+        child: LabResultForm(),
+        // child: FormBuilder(
+        //   child: Column(
+        //     children: <Widget>[
+        //       FormBuilderTextField(name: 'Product Name'),
+        //       // FIXME: Add fields!!!
+        //       Text(widget.labResult.productName ?? ''),
+        //     ],
+        //   ),
+        // ),
+      ),
+    );
+  }
+}
 
-//   // ID field.
-//   Widget _idField(SalesReceipt item) {
-//     return Text(
-//       (item.id!.isEmpty) ? 'New SalesReceipt' : 'SalesReceipt ${item.id}',
-//       style: Theme.of(context).textTheme.titleLarge!.copyWith(
-//             color: Theme.of(context).textTheme.titleLarge!.color,
-//           ),
-//     );
-//   }
+/// Lab result form.
+class LabResultForm extends StatefulWidget {
+  @override
+  _LabResultFormState createState() => _LabResultFormState();
+}
 
-//   // Name field.
-//   // Widget _nameField(SalesReceipt item) {
-//   //   final _nameController = ref.watch(nameController);
-//   //   // Hot-fix: Set the initial value.
-//   //   if (_nameController.text.isEmpty && item.name.isNotEmpty) {
-//   //     ref.read(nameController.notifier).change(item.name);
-//   //   } else if (_nameController.text != item.name) {
-//   //     ref.read(nameController.notifier).change(item.name);
-//   //   }
-//   //   final textField = TextField(
-//   //     controller: _nameController,
-//   //     decoration: const InputDecoration(labelText: 'Name'),
-//   //     keyboardType: TextInputType.text,
-//   //     maxLength: null,
-//   //     maxLines: null,
-//   //   );
-//   //   return ConstrainedBox(
-//   //     constraints: BoxConstraints(maxWidth: 300),
-//   //     child: textField,
-//   //   );
-//   // }
+class _LabResultFormState extends State<LabResultForm> {
+  final _formKey = GlobalKey<FormState>();
 
-//   // // SalesReceipt name field.
-//   // Widget _salesReceiptTypeField(SalesReceipt item) {
-//   //   final items = ref.watch(salesReceiptTypesProvider).value ?? [];
-//   //   final value = ref.watch(salesReceiptType);
-//   //   if (items.length == 0 || value == null) return Container();
-//   //   var dropdown = DropdownButton(
-//   //     underline: Container(),
-//   //     isDense: true,
-//   //     isExpanded: true,
-//   //     value: value,
-//   //     items: items
-//   //         .map(
-//   //           (item) => DropdownMenuItem<String>(
-//   //             onTap: () => item['name'],
-//   //             value: item['name'],
-//   //             child: ListTile(
-//   //               dense: true,
-//   //               title: Text(item['name']),
-//   //             ),
-//   //           ),
-//   //         )
-//   //         .toList(),
-//   //     onChanged: (String? value) {
-//   //       ref.read(salesReceiptType.notifier).state = value;
-//   //       // FIXME: Change salesReceipt permissions.
-//   //     },
-//   //   );
-//   //   return Column(
-//   //     mainAxisAlignment: MainAxisAlignment.start,
-//   //     crossAxisAlignment: CrossAxisAlignment.start,
-//   //     children: [
-//   //       gapH18,
-//   //       Text(
-//   //         'SalesReceipt Type Name',
-//   //         style: Theme.of(context).textTheme.titleMedium!.copyWith(
-//   //               color: Theme.of(context).textTheme.titleLarge!.color,
-//   //             ),
-//   //       ),
-//   //       gapH6,
-//   //       SizedBox(
-//   //         height: 36,
-//   //         child: ConstrainedBox(
-//   //           constraints: BoxConstraints(
-//   //             maxWidth: 300,
-//   //           ),
-//   //           child: dropdown,
-//   //         ),
-//   //       ),
-//   //       gapH6,
-//   //     ],
-//   //   );
-//   // }
+  final _labIdController = TextEditingController();
+  final _batchNumberController = TextEditingController();
+  final _productNameController = TextEditingController();
+  // ... Add the rest of the TextEditingController for other fields
 
-//   // // Checkbox fields.
-//   // List<Widget> _checkboxes(SalesReceipt item) {
-//   //   final items = ref.watch(salesReceiptTypesProvider).value ?? [];
-//   //   if (items.length == 0) return [Container()];
-//   //   return [
-//   //     gapH12,
-//   //     Text(
-//   //       'Permissions',
-//   //       style: Theme.of(context).textTheme.titleMedium!.copyWith(
-//   //             color: Theme.of(context).textTheme.titleLarge!.color,
-//   //           ),
-//   //     ),
-//   //     gapH6,
-//   //     CheckboxField(
-//   //       title: 'For Packages',
-//   //       value: ref.watch(forPackages) ?? false,
-//   //     ),
-//   //     CheckboxField(
-//   //       title: 'For Plants',
-//   //       value: ref.watch(forPlants) ?? false,
-//   //     ),
-//   //     CheckboxField(
-//   //       title: 'For Plant Batches',
-//   //       value: ref.watch(forPlantBatches) ?? false,
-//   //     ),
-//   //     CheckboxField(
-//   //       title: 'For Harvests',
-//   //       value: ref.watch(forHarvests) ?? false,
-//   //     ),
-//   //   ];
-//   // }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: <Widget>[
+          TextFormField(
+            controller: _labIdController,
+            decoration: const InputDecoration(
+              labelText: 'Lab ID',
+            ),
+          ),
+          TextFormField(
+            controller: _batchNumberController,
+            decoration: const InputDecoration(
+              labelText: 'Batch Number',
+            ),
+          ),
+          TextFormField(
+            controller: _productNameController,
+            decoration: const InputDecoration(
+              labelText: 'Product Name',
+            ),
+          ),
+          // ... Add the rest of the TextFormFields for other fields
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Processing Data')),
+                  );
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _labIdController.dispose();
+    _batchNumberController.dispose();
+    _productNameController.dispose();
+    // ... Dispose the rest of the TextEditingController for other fields
+
+    super.dispose();
+  }
+}

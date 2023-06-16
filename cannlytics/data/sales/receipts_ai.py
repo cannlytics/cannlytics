@@ -11,6 +11,7 @@ License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 # Standard imports:
 from datetime import datetime
 import json
+import gc
 import re
 from typing import List, Optional
 
@@ -115,9 +116,16 @@ class ReceiptsParser(object):
         ) -> None:
         """Initialize an Open Data API client.
         """
+        # Parameters.
         self.default_config = default_config
         self.openai_api_key = openai_api_key
         self.model = model
+
+        # State.
+        self.total_cost = 0
+        self.img = None
+        self.image_text = ''
+        self.extracted_data = None
     
     def image_to_pdf_to_text(self, image_file):
         """Extract the text from an image by converting to to a PDF,
@@ -255,6 +263,16 @@ class ReceiptsParser(object):
             pd.DataFrame([obs]).to_excel(filename)
         else:
             raise ValueError(f'Unknown file type: {filename}')
+        
+    def quit(self):
+        """Reset the parser and perform garbage cleaning."""
+        self.model = 'gpt-4'
+        self.openai_api_key = None
+        self.total_cost = 0
+        self.img = None
+        self.image_text = ''
+        self.extracted_data = None
+        gc.collect()
 
 
 # === Tests ===

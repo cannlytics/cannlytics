@@ -4,10 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 5/13/2023
+// Updated: 6/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
 // Flutter imports:
+import 'package:cannlytics_data/common/layout/tabs.dart';
+import 'package:cannlytics_data/ui/sales/receipts_parser.dart';
+import 'package:cannlytics_data/ui/sales/user_receipts.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -15,12 +17,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
-import 'package:cannlytics_data/ui/layout/footer.dart';
-import 'package:cannlytics_data/ui/layout/header.dart';
-import 'package:cannlytics_data/ui/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
 
 /// Screen.
@@ -29,21 +27,10 @@ class SalesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // App bar.
-      appBar: DashboardHeader(),
-
-      // Side menu.
-      drawer: Responsive.isMobile(context) ? MobileDrawer() : null,
-
-      // Body.
-      body: Console(slivers: [
-        // Main content.
+    return ConsoleScreen(
+      children: [
         SliverToBoxAdapter(child: MainContent()),
-
-        // Footer.
-        const SliverToBoxAdapter(child: Footer()),
-      ]),
+      ],
     );
   }
 }
@@ -80,22 +67,26 @@ class MainContent extends ConsumerWidget {
                       }),
                   BreadcrumbItem(
                     title: 'Sales',
-                  ),
+                  )
                 ],
               ),
             ],
           ),
 
-          // Sponsorship placeholder.
+          // Main interface.
           gapH12,
-          // BudSpenderInterface(),
-
-          // Sponsorship placeholder.
-          SponsorshipCard(),
-
-          // TODO: Sales datasets.
-          // gapH32,
-          // _datasetsCards(context, ref),
+          Tabs(
+            tabs: [
+              Tab(text: 'Parse'),
+              Tab(text: 'Analytics'),
+              Tab(text: 'Your Results'),
+            ],
+            views: [
+              ReceiptsParserInterface(),
+              UserReceiptsInterface(),
+              UserReceiptsInterface(),
+            ],
+          ),
           gapH48,
         ],
       ),

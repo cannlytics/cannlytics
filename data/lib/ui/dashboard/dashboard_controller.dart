@@ -131,17 +131,17 @@ List<Map> aiModels = [
     "observations": null,
     "fields": null,
   },
-  // {
-  //   "title": "Receipt Parser",
-  //   "image_url":
-  //       "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fbud_spender_small.png?alt=media&token=e9a7b91b-65cc-47ef-bcf2-f19f30ea79b8",
-  //   "description":
-  //       "Parse your receipts to track your spending and consumption.",
-  //   "tier": "Premium",
-  //   "path": "/sales/ai",
-  //   "observations": null,
-  //   "fields": null,
-  // },
+  {
+    "title": "Receipt Parser",
+    "image_url":
+        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fbud_spender_small.png?alt=media&token=e9a7b91b-65cc-47ef-bcf2-f19f30ea79b8",
+    "description":
+        "Parse your receipts to track your spending and consumption.",
+    "tier": "Premium",
+    "path": "/sales",
+    "observations": null,
+    "fields": null,
+  },
   // {
   //   "title": "Strain Identifier",
   //   "image_url":
