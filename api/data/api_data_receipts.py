@@ -22,16 +22,27 @@ from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-import pandas as pd
+from tempfile import NamedTemporaryFile
+from openpyxl import Workbook
 
 # Internal imports
 from cannlytics.auth.auth import authenticate_request
+from cannlytics.data.data import write_to_worksheet
 from cannlytics.data.sales.receipts_ai import ReceiptsParser
 from cannlytics.firebase import (
     access_secret_version,
     create_log,
+    create_short_url,
+    get_collection,
+    get_document,
+    get_file_url,
     update_documents,
+    upload_file,
+    delete_document,
+    delete_file,
 )
+from website.settings import STORAGE_BUCKET
+
 
 # Maximum number of files that can be parsed in one request.
 MAX_NUMBER_OF_FILES = 10
@@ -46,8 +57,8 @@ FILE_TYPES = ['png', 'jpg', 'jpeg']
 MAX_OBSERVATIONS_PER_FILE = 200_000
 
 
-@api_view(['GET', 'POST'])
-def api_data_receipts(request, sample_id=None):
+@api_view(['GET', 'POST', 'DELETE'])
+def api_data_receipts(request, receipt_id=None):
     """Manage receipt data (public API endpoint)."""
 
     # Authenticate the user.
@@ -68,10 +79,76 @@ def api_data_receipts(request, sample_id=None):
     # Get previously parsed receipts.
     if request.method == 'GET':
 
-        # FIXME: Implement querying of receipts.
-        data = []
+        # Get a specific receipt.
+        if receipt_id:
+            ref = f'users/{uid}/receipts/{receipt_id}'
+            data = get_document(ref)
+            response = {'success': True, 'data': data}
+            return Response(response, status=200)
+
+        # Query receipts.
+        data, filters = [], []
+        available_queries = [
+            {
+                'key': 'product_names',
+                'operation': 'array_contains_any',
+                'param': 'product_name',
+            },
+            {
+                'key': 'product_types',
+                'operation': 'array_contains_any',
+                'param': 'product_type',
+            },
+            {
+                'key': 'date_sold',
+                'operation': '>=',
+                'param': 'date',
+            },
+            {
+                'key': 'total_price',
+                'operation': '>=',
+                'param': 'price',
+            },
+            {
+                'key': 'retailer_license_number',
+                'operation': '==',
+                'param': 'license',
+            },
+            {
+                'key': 'invoice_number',
+                'operation': '==',
+                'param': 'number',
+            },
+        ]
         params = request.query_params
+        for query in available_queries:
+            key = query['key']
+            value = params.get(key)
+            if value:
+                filters.append({
+                    'key': key,
+                    'operation': params.get(key + '_op', query['operation']),
+                    'value': value,
+                })
+
+        # Limit the number of observations.
+        limit = int(params.get('limit', 1000))
+        if limit > 1000:
+            limit = 1000
+        
+        # Order the data.
+        order_by = params.get('order_by', 'parsed_at')
+        desc = params.get('desc', True)
+
+        # Query documents.
         ref = f'users/{uid}/receipts'
+        data = get_collection(
+            ref,
+            desc=desc,
+            filters=filters,
+            limit=limit,
+            order_by=order_by,
+        )
 
         # Return the data.
         response = {'success': True, 'data': data}
@@ -160,18 +237,31 @@ def api_data_receipts(request, sample_id=None):
         # Parse the receipts.
         parser = ReceiptsParser()
         data = []
-        total_cost = 0
         for image in images:
-            receipt_data, cost = parser.parse(
+
+            # Parse the receipt.
+            receipt_data = parser.parse(
                 image,
                 openai_api_key=openai_api_key,
                 verbose=True,
                 user=uid,
             )
-            total_cost += cost
+
+            # Upload the file to Firebase Storage.
+            ext = image.split('.').pop()
+            ref = 'users/%s/receipts/%s.%s' % (uid, obs['hash'], ext)
+            upload_file(image, ref, bucket_name=STORAGE_BUCKET)
+            download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
+            short_url = create_short_url(download_url, project_name=project_id)
+            receipt_data['file_ref'] = ref
+            receipt_data['download_url'] = download_url
+            receipt_data['short_url'] = short_url
+
+            # Record the extracted data
             data.append(receipt_data)
 
-        # Close the parser.
+        # Record the cost and close the parser.
+        total_cost = parser.total_cost
         parser.quit()
 
         # Create a usage log and save the user's results.
@@ -197,7 +287,7 @@ def api_data_receipts(request, sample_id=None):
             changes=changes
         )
 
-        # FIXME: Record cost and prompts.
+        # Record costs for the admin and the user.
         ai_model = 'bud_spender'
         timestamp = datetime.now().isoformat()
         doc_id = timestamp.replace(':', '-').replace('.', '-')
@@ -223,6 +313,33 @@ def api_data_receipts(request, sample_id=None):
 
         # Return the data.
         response = {'success': True, 'data': data}
+        return Response(response, status=200)
+    
+    # Return the data.
+    if request.method == 'DELETE':
+
+        # Get the receipt ID.
+        if not receipt_id:
+            try:
+                receipt_id = loads(request.body.decode('utf-8'))['receipt_id']
+            except:
+                message = 'Please provide a `receipt_id` in the URL or your request body.'
+                response = {'success': False, message: message}
+                return Response(response, status=200)
+        
+        # Delete the receipt data.
+        ref = f'users/{uid}/receipts/{receipt_id}'
+        doc = get_document(ref)
+        file_ref = doc.get('file_ref')
+        delete_document(ref)
+
+        # Delete the receipt file.
+        if file_ref:
+            delete_file(file_ref, bucket_name=STORAGE_BUCKET)
+
+        # Return a success message.
+        message = f'Receipt {receipt_id} deleted.'
+        response = {'success': True, 'data': [], 'message': message}
         return Response(response, status=200)
 
 
@@ -256,5 +373,13 @@ def download_receipts_data(request):
     response['Access-Control-Allow-Headers'] = '*'
 
     # Create the Workbook and save it to the response.
-    pd.DataFrame(data).to_excel(response, index=False, sheet_name='Data')
+    wb = Workbook()
+    ws = wb.worksheets[0]
+    ws.title = 'Data'
+    with NamedTemporaryFile() as tmp:
+        tmp.close() # with statement opened tmp, close it so wb.save can open it
+        wb.save(tmp.name)
+        with open(tmp.name, 'rb') as f:
+            f.seek(0) # probably not needed anymore
+            new_file_object = f.read()
     return response

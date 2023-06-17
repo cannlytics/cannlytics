@@ -148,7 +148,9 @@ class DashboardScreen extends ConsumerWidget {
               gapH8,
               Text(
                 item['title'],
-                style: Theme.of(context).textTheme.titleSmall,
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
               ),
               Text(
                 item['description'],

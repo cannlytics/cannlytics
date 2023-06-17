@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 5/14/2023
+// Updated: 6/15/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 typedef SalesReceiptId = String;
@@ -28,6 +28,28 @@ class SalesReceipt {
     this.recordedDateTime,
     this.recordedByUserName,
     this.lastModified,
+    this.dateSold,
+    this.productNames,
+    this.productTypes,
+    this.productQuantities,
+    this.productPrices,
+    this.productIds,
+    this.totalAmount,
+    this.subtotal,
+    this.totalDiscount,
+    this.totalPaid,
+    this.changeDue,
+    this.rewardsEarned,
+    this.rewardsSpent,
+    this.totalRewards,
+    this.cityTax,
+    this.countyTax,
+    this.stateTax,
+    this.exciseTax,
+    this.retailer,
+    this.retailerLicenseNumber,
+    this.retailerAddress,
+    this.budtender,
   });
 
   // Properties.
@@ -47,9 +69,31 @@ class SalesReceipt {
   final String? recordedDateTime;
   final String? recordedByUserName;
   final String? lastModified;
+  final DateTime? dateSold;
+  final List<dynamic>? productNames;
+  final List<dynamic>? productTypes;
+  final List<int>? productQuantities;
+  final List<double>? productPrices;
+  final List<dynamic>? productIds;
+  final double? totalAmount;
+  final double? subtotal;
+  final double? totalDiscount;
+  final double? totalPaid;
+  final double? changeDue;
+  final double? rewardsEarned;
+  final double? rewardsSpent;
+  final double? totalRewards;
+  final double? cityTax;
+  final double? countyTax;
+  final double? stateTax;
+  final double? exciseTax;
+  final String? retailer;
+  final String? retailerLicenseNumber;
+  final String? retailerAddress;
+  final String? budtender;
 
   // Create model.
-  factory SalesReceipt.fromMap(Map<String, dynamic> data) {
+  factory SalesReceipt.fromMap(Map<dynamic, dynamic> data) {
     return SalesReceipt(
       id: data['id'] ?? '',
       receiptNumber: data['receipt_number'] as String?,
@@ -68,6 +112,33 @@ class SalesReceipt {
       recordedDateTime: data['recorded_date_time'] as String?,
       recordedByUserName: data['recorded_by_user_name'] as String?,
       lastModified: data['last_modified'] as String?,
+      dateSold: DateTime.parse(data['date_sold'] as String? ?? ''),
+      productNames:
+          List<String>.from(data['product_names'] as List<dynamic>? ?? []),
+      productTypes:
+          List<String>.from(data['product_types'] as List<dynamic>? ?? []),
+      productQuantities:
+          List<int>.from(data['product_quantities'] as List<dynamic>? ?? []),
+      productPrices:
+          List<double>.from(data['product_prices'] as List<dynamic>? ?? []),
+      productIds:
+          List<String>.from(data['product_ids'] as List<dynamic>? ?? []),
+      totalAmount: data['total_amount'] as double?,
+      subtotal: data['subtotal'] as double?,
+      totalDiscount: data['total_discount'] as double?,
+      totalPaid: data['total_paid'] as double?,
+      changeDue: data['change_due'] as double?,
+      rewardsEarned: data['rewards_earned'] as double?,
+      rewardsSpent: data['rewards_spent'] as double?,
+      totalRewards: data['total_rewards'] as double?,
+      cityTax: data['city_tax'] as double?,
+      countyTax: data['county_tax'] as double?,
+      stateTax: data['state_tax'] as double?,
+      exciseTax: data['excise_tax'] as double?,
+      retailer: data['retailer'] as String?,
+      retailerLicenseNumber: data['retailer_license_number'] as String?,
+      retailerAddress: data['retailer_address'] as String?,
+      budtender: data['budtender'] as String?,
     );
   }
 
@@ -90,6 +161,28 @@ class SalesReceipt {
       'recorded_date_time': recordedDateTime,
       'recorded_by_user_name': recordedByUserName,
       'last_modified': lastModified,
+      'date_sold': dateSold?.toIso8601String(),
+      'product_names': productNames,
+      'product_types': productTypes,
+      'product_quantities': productQuantities,
+      'product_prices': productPrices,
+      'product_ids': productIds,
+      'total_amount': totalAmount,
+      'subtotal': subtotal,
+      'total_discount': totalDiscount,
+      'total_paid': totalPaid,
+      'change_due': changeDue,
+      'rewards_earned': rewardsEarned,
+      'rewards_spent': rewardsSpent,
+      'total_rewards': totalRewards,
+      'city_tax': cityTax,
+      'county_tax': countyTax,
+      'state_tax': stateTax,
+      'excise_tax': exciseTax,
+      'retailer': retailer,
+      'retailer_license_number': retailerLicenseNumber,
+      'retailer_address': retailerAddress,
+      'budtender': budtender,
     };
   }
 }

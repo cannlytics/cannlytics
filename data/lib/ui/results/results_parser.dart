@@ -4,10 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 6/15/2023
+// Updated: 6/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+
+import 'dart:convert';
+import 'dart:html' as html;
+
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/results/results_search.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
@@ -90,12 +94,12 @@ class ResultsParserInterface extends HookConsumerWidget {
       loading: () => _body(context, ref, child: ParsingResultsPlaceholder()),
 
       // Error state.
-      error: (err, stack) => _errorMessage(context),
+      error: (err, stack) => _errorMessage(context, error: err),
     );
   }
 
   /// Message displayed when an error occurs.
-  Widget _errorMessage(BuildContext context) {
+  Widget _errorMessage(BuildContext context, {dynamic error}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -127,7 +131,8 @@ class ResultsParserInterface extends HookConsumerWidget {
                         color: Theme.of(context).textTheme.titleLarge!.color),
                   ),
                   SelectableText(
-                    'An unknown error occurred while parsing your COAs. Please report this issue on GitHub or to dev@cannlytics.com to get a human to help ASAP.',
+                    error.toString(),
+                    // 'An unknown error occurred while parsing your COAs. Please report this issue on GitHub or to dev@cannlytics.com to get a human to help ASAP.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
@@ -193,7 +198,7 @@ class ResultsParserInterface extends HookConsumerWidget {
                           Spacer(),
 
                           // Upload COAs button.
-                          // FIXME: Make disabled when parsing.
+                          // TODO: Make disabled when parsing.
                           SecondaryButton(
                             text: 'Upload COAs',
                             onPressed: () async {
@@ -202,7 +207,7 @@ class ResultsParserInterface extends HookConsumerWidget {
                                 type: FileType.custom,
                                 allowedExtensions: [
                                   'pdf',
-                                  'zip',
+                                  'jpg',
                                   'jpeg',
                                   'png'
                                 ],
@@ -244,7 +249,73 @@ class CoAUpload extends ConsumerWidget {
     late DropzoneViewController controller;
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
+
+    // Dropzone.
+    _dropzone() {
+      return DropzoneView(
+        operation: DragOperation.copy,
+        cursor: CursorType.grab,
+        onCreated: (ctrl) => controller = ctrl,
+        onDropMultiple: (files) async {
+          if (files!.isNotEmpty) {
+            print(files[0].runtimeType);
+            var imageFilesFutures = <Future>[];
+            var fileNamesFutures = <Future>[];
+            for (var file in files) {
+              imageFilesFutures.add(controller.getFileData(file));
+              fileNamesFutures.add(controller.getFilename(file));
+            }
+            var imageBytes = await Future.wait(imageFilesFutures);
+            var fileNames = await Future.wait(fileNamesFutures);
+            print('FILENAMES:');
+            print(fileNames);
+            print('BYTES: ${imageBytes.length}');
+            List<List<int>> imageFiles = imageBytes.map<List<int>>((item) {
+              return item as List<int>;
+            }).toList();
+            ref
+                .read(coaParser.notifier)
+                .parseCOAs(imageFiles, fileNames: fileNames);
+          }
+        },
+      );
+    }
+
+    // File picker.
+    _filePicker() {
+      return SecondaryButton(
+        text: 'Import your COAs',
+        onPressed: () async {
+          FilePickerResult? file = await FilePicker.platform.pickFiles(
+            type: FileType.custom,
+            allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+          );
+          if (file != null) {
+            // Upload file
+            ref.read(coaParser.notifier).parseCOAs([file]);
+          } else {
+            // User canceled the picker
+          }
+        },
+      );
+    }
+
+    // QR code reader.
+    _qrCodeReader() {
+      return MobileScanner(
+        fit: BoxFit.contain,
+        onDetect: (capture) {
+          final List<Barcode> barcodes = capture.barcodes;
+          if (barcodes.isNotEmpty) {
+            ref.read(coaParser.notifier).parseUrl(barcodes.first.rawValue!);
+          }
+        },
+      );
+    }
+
+    // Render the widget.
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Row(
           children: <Widget>[
@@ -262,15 +333,7 @@ class CoAUpload extends ConsumerWidget {
                         child: Stack(
                           children: [
                             // Drop zone.
-                            DropzoneView(
-                              operation: DragOperation.copy,
-                              cursor: CursorType.grab,
-                              onCreated: (ctrl) => controller = ctrl,
-                              onDropMultiple: (files) async {
-                                if (files!.isNotEmpty)
-                                  ref.read(coaParser.notifier).parseCOAs(files);
-                              },
-                            ),
+                            _dropzone(),
 
                             // Text.
                             Center(child: LabResultsPlaceholder()),
@@ -280,23 +343,7 @@ class CoAUpload extends ConsumerWidget {
                     ),
 
                   // File picker button.
-                  if (!kIsWeb)
-                    SecondaryButton(
-                      text: 'Import your COAs',
-                      onPressed: () async {
-                        FilePickerResult? file =
-                            await FilePicker.platform.pickFiles(
-                          type: FileType.custom,
-                          allowedExtensions: ['pdf', 'jpeg', 'png'],
-                        );
-                        if (file != null) {
-                          // Upload file
-                          ref.read(coaParser.notifier).parseCOAs([file]);
-                        } else {
-                          // User canceled the picker
-                        }
-                      },
-                    ),
+                  if (!kIsWeb) _filePicker(),
                 ],
               ),
             ),
@@ -306,20 +353,21 @@ class CoAUpload extends ConsumerWidget {
               Expanded(
                 child: Container(
                   height: 200.0,
-                  child: MobileScanner(
-                    fit: BoxFit.contain,
-                    onDetect: (capture) {
-                      final List<Barcode> barcodes = capture.barcodes;
-                      if (barcodes.isNotEmpty) {
-                        ref
-                            .read(coaParser.notifier)
-                            .parseUrl(barcodes.first.rawValue!);
-                      }
-                    },
-                  ),
+                  child: _qrCodeReader(),
                 ),
               ),
           ],
+        ),
+
+        // Notes informing user of data usage.
+        gapH24,
+        Container(
+          width: 540,
+          child: SelectableText(
+            'Note: Data extraction can take a while. Please note that COAs may be parsed with AI and the data is an approximation, may contain incorrect values, and should be validated. Your data is private, but lab result data may be used in data analysis while preserving your anonymity.',
+            textAlign: TextAlign.start,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ),
       ],
     );
@@ -489,7 +537,7 @@ class COASearch extends ConsumerWidget {
               controller: coaSearchController,
               autocorrect: false,
               decoration: InputDecoration(
-                // FIXME: Disable when parsing.
+                // TODO: Disable when parsing.
                 // enabled: !state.isLoading,
                 hintText: 'Enter a URL to parse...',
                 contentPadding: EdgeInsets.only(

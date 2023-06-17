@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/15/2023
+// Updated: 6/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -21,7 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /* === Data === */
 
 /// Stream user receipts from Firebase.
-final userResults = StreamProvider.family<List<Map<String, dynamic>>, String>(
+final userReceipts = StreamProvider.family<List<Map<String, dynamic>>, String>(
     (ref, stateId) async* {
   final FirestoreService _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(authProvider).currentUser;
@@ -87,19 +87,10 @@ class DownloadService {
 
       // Web download.
       String filename = 'receipt-data-$timestamp.xlsx';
-      WebUtils.downloadBytes([response.bodyBytes], filename);
-
-      // TODO: Handle mobile download.
-      // var filename = await _localFilePath('coa-data-$timestamp.xlsx');
-      // return File(filePath).writeAsBytes(response.bodyBytes);
+      String base64String = base64Encode(response.bodyBytes);
+      WebUtils.downloadBytes([base64String], filename);
     } else {
       throw Exception('Error downloading file');
     }
   }
-
-  /// Get the local file path.
-  // static Future<String> _localFilePath(String filename) async {
-  //   var dir = await getApplicationDocumentsDirectory();
-  //   return '${dir.path}/$filename';
-  // }
 }

@@ -39,19 +39,19 @@ final List<Map> mainDatasets = [
     "type": "licenses",
     "file_ref": "data/licenses/all/licenses-2022-10-08T14-03-08.csv",
   },
-  {
-    "title": "South Africa Cannabis Licenses",
-    "image_url":
-        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ffigures%2Fsouth-africa-cannabis-cultivations-no-text.png?alt=media&token=f1876242-09c0-4a5c-a3e5-02f60fba6b3d",
-    "description":
-        "A collection of 88 cannabis licenses from by province in South Africa.",
-    "tier": "Premium",
-    "path": "/licenses",
-    "observations": 88,
-    "fields": 28,
-    "type": "licenses",
-    "file_ref": "data/licenses/south-africa/.csv",
-  },
+  // {
+  //   "title": "South Africa Cannabis Licenses",
+  //   "image_url":
+  //       "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ffigures%2Fsouth-africa-cannabis-cultivations-no-text.png?alt=media&token=f1876242-09c0-4a5c-a3e5-02f60fba6b3d",
+  //   "description":
+  //       "A collection of 88 cannabis licenses from by province in South Africa.",
+  //   "tier": "Premium",
+  //   "path": "/licenses",
+  //   "observations": 88,
+  //   "fields": 28,
+  //   "type": "licenses",
+  //   "file_ref": "data/licenses/south-africa/.csv",
+  // },
   // {
   //   "title": "California Lab Results",
   //   "image_url": "",

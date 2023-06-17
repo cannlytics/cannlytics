@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/8/2022
-Updated: 9/26/2022
+Updated: 6/15/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 from api.data.api_data import data_base
@@ -37,7 +37,8 @@ __all__ = [
     lab_results_data,
     patent_data,
     regulation_data,
-    receipt_data,
+    api_data_receipts,
+    download_receipts_data,
     state_data,
     strain_data,
 ]

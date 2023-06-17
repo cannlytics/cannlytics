@@ -166,8 +166,8 @@ INSTRUCTIONAL_PROMPT = 'Only return JSON and always return at least an empty obj
 # Prompt to parse metadata from the first page.
 COA_PROMPT = """Given text, extract JSON, where:
 
-| Field | Example| Description |
-|-------|-----|-------------|
+| Field | Example | Description |
+|-------|---------|-------------|
 | `analyses` | ["cannabinoids"] | A list of analyses performed on a given sample. |
 | `{analysis}_status` | "pass" | The pass, fail, or N/A status for pass / fail analyses.   |
 | `methods` | [{"analysis: "cannabinoids", "method": "HPLC"}] | The methods used for each analysis. |

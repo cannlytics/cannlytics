@@ -4,16 +4,17 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 6/14/2023
+// Updated: 6/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
+import 'dart:async';
 import 'dart:convert';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
 
 /// Service to interface with the Cannlytics API.
 class APIService {
@@ -48,6 +49,7 @@ class APIService {
     String endpoint, {
     dynamic data,
     dynamic files,
+    dynamic fileNames,
     Map? options,
   }) async {
     // Create default body, method, and headers.
@@ -89,20 +91,53 @@ class APIService {
     final client = http.Client();
     final request;
     if (files != null) {
-      headers['Content-Type'] = 'application/octet-stream';
-      headers['Accept'] = 'application/octet-stream';
-      request = http.MultipartRequest('POST', Uri.parse(url))
-        ..headers.addAll(headers);
-      for (var file in files) {
-        request.files.add(await http.MultipartFile.fromPath(
-          'file',
-          file.path,
-          filename: basename(file.path),
-        ));
+      // Create a multipart request.
+      request = http.MultipartRequest(
+        'POST',
+        Uri.parse(url),
+      )..headers.addAll(headers);
+
+      // Add the files to the request.
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var bytes;
+        var filename;
+        try {
+          bytes = await file.bytes;
+          print('BYTES from PlatformFile:');
+          filename = file.name;
+        } catch (error) {
+          try {
+            bytes = await file.readAsBytes();
+            print('BYTES from File:');
+            filename = file.name;
+          } catch (error) {
+            bytes = file;
+            filename = fileNames[i];
+            print('ASSUMING already BYTES:');
+          }
+        }
+        print('File type: ${bytes.runtimeType}');
+        try {
+          request.files.add(await http.MultipartFile.fromBytes(
+            'file',
+            bytes,
+            filename: filename,
+          ));
+        } catch (error) {
+          print('Trying with strings');
+          request.files.add(await http.MultipartFile.fromString(
+            'file',
+            bytes,
+            filename: filename,
+          ));
+        }
       }
     } else if (body == null) {
+      // Create a GET request.
       request = http.Request(method, Uri.parse(url))..headers.addAll(headers);
     } else {
+      // Create a POST request.
       request = http.Request(method, Uri.parse(url))
         ..headers.addAll(headers)
         ..body = body;
@@ -110,6 +145,8 @@ class APIService {
 
     // Get the response.
     final response = await client.send(request).then(http.Response.fromStream);
+    print('RESPONSE:');
+    print(response.body);
 
     // Return the data.
     try {

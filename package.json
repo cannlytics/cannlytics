@@ -3,11 +3,12 @@
   "version": "0.0.15",
   "license": "MIT",
   "homepage": "https://cannlytics.com",
-  "description": "Cannlytics includes a LIMS, a console, documentation, a website, and vast amount of tools for cannabis analytics.",
+  "description": "Cannlytics is a suite of tools that you can use to wrangle, standardize, and analyze cannabis data.",
   "keywords": [
     "cannabis",
     "analytics",
     "data science",
+    "ai",
     "artificial intelligence",
     "machine learning",
     "automation",
