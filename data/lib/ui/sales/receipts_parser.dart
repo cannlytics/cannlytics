@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/16/2023
+// Updated: 6/17/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -34,6 +34,12 @@ class ReceiptsParserInterface extends HookConsumerWidget {
 
     // Dynamic rendering.
     return asyncData.when(
+      // Loading state.
+      loading: () => _body(context, ref, child: ParsingPlaceholder()),
+
+      // Error state.
+      error: (err, stack) => _errorMessage(context, ref, err.toString()),
+
       // Data loaded state.
       data: (items) => (items.length == 0)
           ? _body(context, ref, child: CoAUpload())
@@ -58,7 +64,11 @@ class ReceiptsParserInterface extends HookConsumerWidget {
                         ),
                         Spacer(),
                         IconButton(
-                          icon: const Icon(Icons.refresh),
+                          icon: Icon(
+                            Icons.refresh,
+                            color:
+                                Theme.of(context).textTheme.bodyMedium!.color,
+                          ),
                           onPressed: () {
                             ref.read(receiptParser.notifier).clear();
                           },
@@ -83,23 +93,33 @@ class ReceiptsParserInterface extends HookConsumerWidget {
                 ),
               ),
             ),
-
-      // Loading state.
-      loading: () => _body(context, ref, child: ParsingPlaceholder()),
-
-      // Error state.
-      error: (err, stack) => _errorMessage(context, err.toString()),
     );
   }
 
   /// Message displayed when an error occurs.
-  Widget _errorMessage(BuildContext context, String? message) {
+  Widget _errorMessage(BuildContext context, WidgetRef ref, String? message) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Reset button.
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.refresh,
+                    color: Theme.of(context).textTheme.bodyMedium!.color,
+                  ),
+                  onPressed: () {
+                    ref.read(receiptParser.notifier).clear();
+                  },
+                ),
+              ],
+            ),
+
             // Image.
             Padding(
               padding: EdgeInsets.only(top: 16),
@@ -112,6 +132,7 @@ class ReceiptsParserInterface extends HookConsumerWidget {
                 ),
               ),
             ),
+
             // Text.
             Container(
               width: 540,
@@ -236,6 +257,35 @@ class CoAUpload extends ConsumerWidget {
     late DropzoneViewController controller;
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
+
+    // Dropzone.
+    _dropzone() {
+      return DropzoneView(
+        operation: DragOperation.copy,
+        cursor: CursorType.grab,
+        onCreated: (ctrl) => controller = ctrl,
+        onDropMultiple: (files) async {
+          if (files!.isNotEmpty) {
+            var imageFilesFutures = <Future>[];
+            var fileNamesFutures = <Future>[];
+            for (var file in files) {
+              imageFilesFutures.add(controller.getFileData(file));
+              fileNamesFutures.add(controller.getFilename(file));
+            }
+            var imageBytes = await Future.wait(imageFilesFutures);
+            var fileNames = await Future.wait(fileNamesFutures);
+            List<List<int>> imageFiles = imageBytes.map<List<int>>((item) {
+              return item as List<int>;
+            }).toList();
+            ref
+                .read(receiptParser.notifier)
+                .parseImages(imageFiles, fileNames: fileNames);
+          }
+        },
+      );
+    }
+
+    // Render the widget.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -255,17 +305,7 @@ class CoAUpload extends ConsumerWidget {
                         child: Stack(
                           children: [
                             // Drop zone.
-                            DropzoneView(
-                              operation: DragOperation.copy,
-                              cursor: CursorType.grab,
-                              onCreated: (ctrl) => controller = ctrl,
-                              onDropMultiple: (files) async {
-                                if (files!.isNotEmpty)
-                                  ref
-                                      .read(receiptParser.notifier)
-                                      .parseImages(files);
-                              },
-                            ),
+                            _dropzone(),
 
                             // Text.
                             Center(child: ReceiptsPlaceholder()),
@@ -274,29 +314,29 @@ class CoAUpload extends ConsumerWidget {
                       ),
                     ),
 
-                  // File picker button.
-                  if (!kIsWeb)
-                    SecondaryButton(
-                      text: 'Import your receipts',
-                      onPressed: () async {
-                        // Pick files.
-                        FilePickerResult? file =
-                            await FilePicker.platform.pickFiles(
-                          type: FileType.custom,
-                          allowedExtensions: ['jpg', 'jpeg', 'png'],
-                          withData: true,
-                          withReadStream: true,
-                        );
+                  // // File picker button.
+                  // if (!kIsWeb)
+                  //   SecondaryButton(
+                  //     text: 'Import your receipts',
+                  //     onPressed: () async {
+                  //       // Pick files.
+                  //       FilePickerResult? file =
+                  //           await FilePicker.platform.pickFiles(
+                  //         type: FileType.custom,
+                  //         allowedExtensions: ['jpg', 'jpeg', 'png'],
+                  //         withData: true,
+                  //         withReadStream: true,
+                  //       );
 
-                        // Parse files.
-                        if (file != null) {
-                          // Upload file
-                          ref.read(receiptParser.notifier).parseImages([file]);
-                        } else {
-                          // User canceled the picker
-                        }
-                      },
-                    ),
+                  //       // Parse files.
+                  //       if (file != null) {
+                  //         // Upload file
+                  //         ref.read(receiptParser.notifier).parseImages([file]);
+                  //       } else {
+                  //         // User canceled the picker
+                  //       }
+                  //     },
+                  //   ),
                 ],
               ),
             ),
@@ -464,6 +504,7 @@ class _ParsingPlaceholderState extends State<ParsingPlaceholder>
 }
 
 /// Parsed item.
+/// FIXME: Spruce up this widget.
 /// TODO: Add image.
 class ParsedReceiptCard extends StatelessWidget {
   ParsedReceiptCard({required this.item});

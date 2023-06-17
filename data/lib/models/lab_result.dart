@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 6/13/2023
+// Updated: 6/17/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -98,9 +98,9 @@ class LabResult {
   final double? labLongitude;
   final String? licensingAuthorityId;
   final String? licensingAuthority;
-  final List<dynamic>? analyses;
+  final dynamic analyses;
   final String? analysisStatus;
-  final List<dynamic>? methods;
+  final dynamic methods;
   final String? dateCollected;
   final String? dateTested;
   final String? dateReceived;
@@ -119,7 +119,7 @@ class LabResult {
   final String? producerState;
   final String? producerZipcode;
   final String? productType;
-  final List<dynamic>? traceabilityIds;
+  final dynamic traceabilityIds;
   final int? productSize;
   final int? servingSize;
   final int? servingsPerPackage;
@@ -139,6 +139,19 @@ class LabResult {
 
   // Create model.
   factory LabResult.fromMap(Map data) {
+    // Standardize results.
+    var results = null;
+    try {
+      results = jsonDecode(data['results']) as List<dynamic>;
+    } catch (error) {
+      try {
+        results = data['results'] as List<dynamic>;
+      } catch (error) {
+        results = null;
+      }
+      results = data['results'] as List<dynamic>;
+    }
+
     return LabResult(
       labId: data['lab_id'] ?? '',
       batchNumber: data['batch_number'] ?? '',
@@ -229,8 +242,7 @@ class LabResult {
       status: data['status'],
       sampleId: data['sample_id'],
       strainName: data['strain_name'],
-      // FIXME: Initialize results!
-      results: data['results'],
+      results: results,
     );
   }
 

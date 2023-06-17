@@ -4,16 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 6/16/2023
+// Updated: 6/17/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-
-import 'dart:convert';
-import 'dart:html' as html;
-
 import 'package:cannlytics_data/models/lab_result.dart';
-import 'package:cannlytics_data/ui/results/results_search.dart';
+import 'package:cannlytics_data/ui/results/result_list_item.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -64,9 +60,13 @@ class ResultsParserInterface extends HookConsumerWidget {
                         ),
                         Spacer(),
                         IconButton(
-                          icon: const Icon(Icons.refresh),
+                          icon: Icon(
+                            Icons.refresh,
+                            color:
+                                Theme.of(context).textTheme.bodyMedium!.color,
+                          ),
                           onPressed: () {
-                            ref.read(coaParser.notifier).clearResults();
+                            ref.read(coaParser.notifier).clear();
                           },
                         ),
                       ],
@@ -94,18 +94,34 @@ class ResultsParserInterface extends HookConsumerWidget {
       loading: () => _body(context, ref, child: ParsingResultsPlaceholder()),
 
       // Error state.
-      error: (err, stack) => _errorMessage(context, error: err),
+      error: (err, stack) => _errorMessage(context, ref, error: err),
     );
   }
 
   /// Message displayed when an error occurs.
-  Widget _errorMessage(BuildContext context, {dynamic error}) {
+  Widget _errorMessage(BuildContext context, WidgetRef ref, {dynamic error}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Reset button.
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.refresh,
+                    color: Theme.of(context).textTheme.bodyMedium!.color,
+                  ),
+                  onPressed: () {
+                    ref.read(coaParser.notifier).clear();
+                  },
+                ),
+              ],
+            ),
+
             // Image.
             Padding(
               padding: EdgeInsets.only(top: 16),
@@ -118,6 +134,7 @@ class ResultsParserInterface extends HookConsumerWidget {
                 ),
               ),
             ),
+
             // Text.
             Container(
               width: 540,
@@ -211,6 +228,8 @@ class ResultsParserInterface extends HookConsumerWidget {
                                   'jpeg',
                                   'png'
                                 ],
+                                withData: true,
+                                withReadStream: false,
                               );
                               if (result != null) {
                                 // Parse COAs.
@@ -258,7 +277,6 @@ class CoAUpload extends ConsumerWidget {
         onCreated: (ctrl) => controller = ctrl,
         onDropMultiple: (files) async {
           if (files!.isNotEmpty) {
-            print(files[0].runtimeType);
             var imageFilesFutures = <Future>[];
             var fileNamesFutures = <Future>[];
             for (var file in files) {
@@ -267,9 +285,6 @@ class CoAUpload extends ConsumerWidget {
             }
             var imageBytes = await Future.wait(imageFilesFutures);
             var fileNames = await Future.wait(fileNamesFutures);
-            print('FILENAMES:');
-            print(fileNames);
-            print('BYTES: ${imageBytes.length}');
             List<List<int>> imageFiles = imageBytes.map<List<int>>((item) {
               return item as List<int>;
             }).toList();
@@ -289,6 +304,8 @@ class CoAUpload extends ConsumerWidget {
           FilePickerResult? file = await FilePicker.platform.pickFiles(
             type: FileType.custom,
             allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+            withData: true,
+            withReadStream: false,
           );
           if (file != null) {
             // Upload file

@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 6/15/2023
+Updated: 6/17/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with COA data.
@@ -29,8 +29,16 @@ from cannlytics.data.coas.coas import CoADoc
 from cannlytics.firebase import (
     access_secret_version,
     create_log,
+    create_short_url,
+    get_collection,
+    get_document,
+    get_file_url,
     update_documents,
+    upload_file,
+    delete_document,
+    delete_file,
 )
+from website.settings import FIREBASE_API_KEY, STORAGE_BUCKET
 
 
 # Maximum number of files that can be parsed in one request.
@@ -90,6 +98,8 @@ def api_data_coas(request, sample_id=None):
         # Log the posted data.
         print('POSTED URLS:', urls)
 
+        # FIXME: Save the files from the URLs to Firebase Storage.
+
         # Get any user-posted files.
         pdfs, images = [], []
         request_files = request.FILES.getlist('file')
@@ -123,7 +133,7 @@ def api_data_coas(request, sample_id=None):
                 temp_file.close()
                 filepath = temp[1]
 
-                # TODO: Save user's file to Firebase Storage.
+                # FIXME: Save user's file to Firebase Storage.
                 
                 # Parse PDFs and images separately.
                 if ext.lower() == 'pdf':
@@ -292,11 +302,14 @@ def download_coa_data(request):
     and save in a workbook."""
 
     # TODO: Authenticate the user, throttle requests if unauthenticated.
-    throttle = False
+    public, throttle = False, False
     claims = authenticate_request(request)
     if not claims:
-        throttle = True
+        uid = 'cannlytics'
+        public, throttle = True, True
         # return HttpResponse(status=401)
+    else:
+        uid = claims['uid']
 
     # Read the posted data.
     data = loads(request.body.decode('utf-8'))['data']
@@ -304,22 +317,45 @@ def download_coa_data(request):
         message = f'Too many observations, please limit your request to {MAX_OBSERVATIONS_PER_FILE} observations at a time.'
         response = {'success': False, 'message': message}
         return Response(response, status=400)
-
-    # Create an Excel Workbook response.
-    content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    
+    # Specify the filename.
     timestamp = datetime.now().isoformat()[:19].replace(':', '-')
     filename = f'coa-data-{timestamp}.xlsx'
-    response = HttpResponse(content_type=content_type)
-    response['Content-Disposition'] = f'attachment; filename={filename}'
-    response['Access-Control-Allow-Origin'] = '*'
-    response['Access-Control-Allow-Headers'] = '*'
 
-    # Create the Workbook and save it to the response.
+    # Save a temporary workbook.
     try:
         parser = CoADoc(init_all=False)
-        parser.save(data, response)
-        parser.quit()
+        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as temp:
+            parser.save(data, temp.name)
+            parser.quit()
     except:
         import pandas as pd
-        pd.DataFrame(data).to_excel(response, index=False, sheet_name='Data')
-    return response
+        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as temp:
+            pd.DataFrame(data).to_excel(temp.name, index=False, sheet_name='Data')
+
+    # Upload the file to Firebase Storage.
+    ref = 'users/%s/lab_results/%s' % (uid, filename)
+    _, project_id = google.auth.default()
+    upload_file(
+        destination_blob_name=ref,
+        source_file_name=temp.name,
+        bucket_name=STORAGE_BUCKET
+    )
+
+    # Get download and short URLs.
+    download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
+    short_url = create_short_url(
+        api_key=FIREBASE_API_KEY,
+        long_url=download_url,
+        project_name=project_id
+    )
+    data = {
+        'file_ref': ref,
+        'download_url': download_url,
+        'short_url': short_url,
+    }
+
+    # Delete the temporary file and return the data.
+    os.unlink(temp.name)
+    response = {'success': True, 'data': data}
+    return Response(response, status=200)

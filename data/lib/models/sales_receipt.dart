@@ -50,6 +50,9 @@ class SalesReceipt {
     this.retailerLicenseNumber,
     this.retailerAddress,
     this.budtender,
+    this.fileRef,
+    this.downloadUrl,
+    this.shortUrl,
   });
 
   // Properties.
@@ -91,6 +94,9 @@ class SalesReceipt {
   final String? retailerLicenseNumber;
   final String? retailerAddress;
   final String? budtender;
+  final String? fileRef;
+  final String? downloadUrl;
+  final String? shortUrl;
 
   // Create model.
   factory SalesReceipt.fromMap(Map<dynamic, dynamic> data) {
@@ -139,6 +145,9 @@ class SalesReceipt {
       retailerLicenseNumber: data['retailer_license_number'] as String?,
       retailerAddress: data['retailer_address'] as String?,
       budtender: data['budtender'] as String?,
+      fileRef: data['file_ref'] as String?,
+      downloadUrl: data['download_url'] as String?,
+      shortUrl: data['short_url'] as String?,
     );
   }
 

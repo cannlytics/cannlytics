@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/13/2023
-Updated: 6/15/2023
+Updated: 6/17/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with receipt data.
@@ -17,17 +17,13 @@ import tempfile
 
 # External imports
 import google.auth
-from django.http import HttpResponse
 from django.http.response import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from tempfile import NamedTemporaryFile
-from openpyxl import Workbook
+import pandas as pd
 
 # Internal imports
 from cannlytics.auth.auth import authenticate_request
-from cannlytics.data.data import write_to_worksheet
 from cannlytics.data.sales.receipts_ai import ReceiptsParser
 from cannlytics.firebase import (
     access_secret_version,
@@ -41,7 +37,7 @@ from cannlytics.firebase import (
     delete_document,
     delete_file,
 )
-from website.settings import STORAGE_BUCKET
+from website.settings import FIREBASE_API_KEY, STORAGE_BUCKET
 
 
 # Maximum number of files that can be parsed in one request.
@@ -249,10 +245,21 @@ def api_data_receipts(request, receipt_id=None):
 
             # Upload the file to Firebase Storage.
             ext = image.split('.').pop()
-            ref = 'users/%s/receipts/%s.%s' % (uid, obs['hash'], ext)
-            upload_file(image, ref, bucket_name=STORAGE_BUCKET)
+            doc_id = receipt_data['hash']
+            ref = 'users/%s/receipts/%s.%s' % (uid, doc_id, ext)
+            upload_file(
+                destination_blob_name=ref,
+                source_file_name=image,
+                bucket_name=STORAGE_BUCKET
+            )
+
+            # Get download and short URLs.
             download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
-            short_url = create_short_url(download_url, project_name=project_id)
+            short_url = create_short_url(
+                api_key=FIREBASE_API_KEY,
+                long_url=download_url,
+                project_name=project_id,
+            )
             receipt_data['file_ref'] = ref
             receipt_data['download_url'] = download_url
             receipt_data['short_url'] = short_url
@@ -353,8 +360,11 @@ def download_receipts_data(request):
     throttle = False
     claims = authenticate_request(request)
     if not claims:
-        throttle = True
+        uid = 'cannlytics'
+        public, throttle = True, True
         # return HttpResponse(status=401)
+    else:
+        uid = claims['uid']
 
     # Read the posted data.
     data = loads(request.body.decode('utf-8'))['data']
@@ -362,24 +372,38 @@ def download_receipts_data(request):
         message = f'Too many observations, please limit your request to {MAX_OBSERVATIONS_PER_FILE} observations at a time.'
         response = {'success': False, 'message': message}
         return Response(response, status=400)
-
-    # Create an Excel Workbook response.
-    content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    
+    # Specify the filename.
     timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-    filename = f'coa-data-{timestamp}.xlsx'
-    response = HttpResponse(content_type=content_type)
-    response['Content-Disposition'] = f'attachment; filename={filename}'
-    response['Access-Control-Allow-Origin'] = '*'
-    response['Access-Control-Allow-Headers'] = '*'
+    filename = f'receipt-data-{timestamp}.xlsx'
 
-    # Create the Workbook and save it to the response.
-    wb = Workbook()
-    ws = wb.worksheets[0]
-    ws.title = 'Data'
-    with NamedTemporaryFile() as tmp:
-        tmp.close() # with statement opened tmp, close it so wb.save can open it
-        wb.save(tmp.name)
-        with open(tmp.name, 'rb') as f:
-            f.seek(0) # probably not needed anymore
-            new_file_object = f.read()
-    return response
+    # Save a temporary workbook.
+    with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as temp:
+        pd.DataFrame(data).to_excel(temp.name, index=False, sheet_name='Data')
+
+    # Upload the file to Firebase Storage.
+    ref = 'users/%s/receipts/%s' % (uid, filename)
+    _, project_id = google.auth.default()
+    upload_file(
+        destination_blob_name=ref,
+        source_file_name=temp.name,
+        bucket_name=STORAGE_BUCKET
+    )
+
+    # Get download and short URLs.
+    download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
+    short_url = create_short_url(
+        api_key=FIREBASE_API_KEY,
+        long_url=download_url,
+        project_name=project_id
+    )
+    data = {
+        'file_ref': ref,
+        'download_url': download_url,
+        'short_url': short_url,
+    }
+
+    # Delete the temporary file and return the data.
+    os.unlink(temp.name)
+    response = {'success': True, 'data': data}
+    return Response(response, status=200)

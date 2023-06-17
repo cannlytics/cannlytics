@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/22/2023
-// Updated: 6/15/2023
+// Updated: 6/17/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -32,6 +32,13 @@ class WebUtils {
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  /// Download a file from a URL.
+  static void downloadUrl(String url) {
+    html.AnchorElement anchorElement = new html.AnchorElement(href: url);
+    anchorElement.download = url;
+    anchorElement.click();
   }
 
   /// Download a file from bytes.

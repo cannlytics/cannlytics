@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 6/16/2023
+// Updated: 6/17/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -13,7 +13,6 @@ import 'dart:convert';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:http/http.dart' as http;
 
 /// Service to interface with the Cannlytics API.
@@ -103,29 +102,29 @@ class APIService {
         var bytes;
         var filename;
         try {
+          // PlatformFile to bytes.
           bytes = await file.bytes;
-          print('BYTES from PlatformFile:');
           filename = file.name;
         } catch (error) {
           try {
+            // File to bytes.
             bytes = await file.readAsBytes();
-            print('BYTES from File:');
             filename = file.name;
           } catch (error) {
+            // File already in bytes.
             bytes = file;
             filename = fileNames[i];
-            print('ASSUMING already BYTES:');
           }
         }
-        print('File type: ${bytes.runtimeType}');
         try {
+          // Add file from bytes.
           request.files.add(await http.MultipartFile.fromBytes(
             'file',
             bytes,
             filename: filename,
           ));
         } catch (error) {
-          print('Trying with strings');
+          // Add file from a string.
           request.files.add(await http.MultipartFile.fromString(
             'file',
             bytes,
@@ -145,8 +144,6 @@ class APIService {
 
     // Get the response.
     final response = await client.send(request).then(http.Response.fromStream);
-    print('RESPONSE:');
-    print(response.body);
 
     // Return the data.
     try {
