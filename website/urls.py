@@ -21,7 +21,7 @@ from website.views import (
     email,
     main,
     market,
-    subscriptions,
+    payments,
     testing,
     videos,
 )
@@ -44,9 +44,9 @@ urlpatterns = [
         # path('market/publish', market.publish_data),
         # path('market/sell', market.sell_data),
         path('market/buy-data', market.buy_data),
-        path('payments/subscribe', subscriptions.subscribe, name='subscribe'),
-        path('payments/subscriptions', subscriptions.get_user_subscriptions),
-        path('payments/unsubscribe', subscriptions.unsubscribe),
+        path('payments/subscribe', payments.subscribe, name='subscribe'),
+        path('payments/subscriptions', payments.get_user_subscriptions),
+        path('payments/unsubscribe', payments.unsubscribe),
     ])),
     # Optional: Redirect data/wa or data/washington to data/states/washington?
     path('data/market/<dataset_id>', market.DatasetView.as_view(), name='dataset'),

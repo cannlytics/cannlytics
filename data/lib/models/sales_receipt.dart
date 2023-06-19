@@ -4,15 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 6/15/2023
+// Updated: 6/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-typedef SalesReceiptId = String;
-
+/// A sales receipt model.
 class SalesReceipt {
   // Initialization.
   const SalesReceipt({
-    this.id,
+    this.hash,
     this.receiptNumber,
     this.salesDateTime,
     this.salesCustomerType,
@@ -53,10 +52,16 @@ class SalesReceipt {
     this.fileRef,
     this.downloadUrl,
     this.shortUrl,
+    this.totalTax,
+    this.totalTransactions,
+    this.parsedAt,
+    this.algorithm,
+    this.algorithmVersion,
+    this.warning,
   });
 
   // Properties.
-  final SalesReceiptId? id;
+  final String? hash;
   final String? receiptNumber;
   final String? salesDateTime;
   final String? salesCustomerType;
@@ -97,11 +102,17 @@ class SalesReceipt {
   final String? fileRef;
   final String? downloadUrl;
   final String? shortUrl;
+  final double? totalTax;
+  final double? totalTransactions;
+  final DateTime? parsedAt;
+  final String? algorithm;
+  final String? algorithmVersion;
+  final String? warning;
 
   // Create model.
   factory SalesReceipt.fromMap(Map<dynamic, dynamic> data) {
     return SalesReceipt(
-      id: data['id'] ?? '',
+      hash: data['hash'] ?? '',
       receiptNumber: data['receipt_number'] as String?,
       salesDateTime: data['sales_date_time'] as String?,
       salesCustomerType: data['sales_customer_type'] as String?,
@@ -148,13 +159,19 @@ class SalesReceipt {
       fileRef: data['file_ref'] as String?,
       downloadUrl: data['download_url'] as String?,
       shortUrl: data['short_url'] as String?,
+      totalTax: data['total_tax'] as double?,
+      totalTransactions: data['total_transactions'] as double?,
+      parsedAt: DateTime.parse(data['parsed_at'] as String? ?? ''),
+      algorithm: data['algorithm'] as String?,
+      algorithmVersion: data['algorithm_version'] as String?,
+      warning: data['warning'] as String?,
     );
   }
 
   // Create JSON.
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id,
+      'hash': hash,
       'receipt_number': receiptNumber,
       'sales_date_time': salesDateTime,
       'sales_customer_type': salesCustomerType,
@@ -192,6 +209,12 @@ class SalesReceipt {
       'retailer_license_number': retailerLicenseNumber,
       'retailer_address': retailerAddress,
       'budtender': budtender,
+      'total_tax': totalTax,
+      'total_transactions': totalTransactions,
+      'parsed_at': parsedAt?.toIso8601String(),
+      'algorithm': algorithm,
+      'algorithm_version': algorithmVersion,
+      'warning': warning,
     };
   }
 }

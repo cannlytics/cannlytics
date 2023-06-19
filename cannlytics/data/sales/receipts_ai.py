@@ -4,6 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
+    Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/24/2023
 Updated: 6/16/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>

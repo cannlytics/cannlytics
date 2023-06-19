@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/26/2023
+// Updated: 6/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -49,7 +49,7 @@ class AppTheme {
       onError: Colors.white,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
-      error: Colors.red.shade400,
+      error: isDark ? DarkColors.darkOrange : LightColors.darkOrange,
     );
 
     // Create the ThemeData with the ColorScheme and TextTheme.
@@ -142,7 +142,7 @@ class AppTheme {
           fontFamily: 'SourceSerifPro',
         ),
         errorStyle: TextStyle(
-          color: isDark ? DarkColors.red : LightColors.red,
+          color: isDark ? DarkColors.darkOrange : LightColors.darkOrange,
           fontFamily: 'SourceSerifPro',
         ),
         isDense: true,

@@ -4,11 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/17/2023
+// Updated: 6/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_data/models/sales_receipt.dart';
+import 'package:cannlytics_data/ui/sales/receipt_card.dart';
 import 'package:cannlytics_data/ui/sales/sales_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +84,7 @@ class ReceiptsParserInterface extends HookConsumerWidget {
                         shrinkWrap: true,
                         children: [
                           for (final item in items)
-                            ParsedReceiptCard(
+                            ReceiptCard(
                               item: SalesReceipt.fromMap(item ?? {}),
                             ),
                         ],
@@ -145,11 +146,13 @@ class ReceiptsParserInterface extends HookConsumerWidget {
                         fontSize: 20,
                         color: Theme.of(context).textTheme.titleLarge!.color),
                   ),
+                  // DEV:
                   SelectableText(
                     message ?? '',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                  // PRODUCTION:
                   // SelectableText(
                   //   'An unknown error occurred while parsing your receipts. Please report this issue on GitHub or to dev@cannlytics.com to get a human to help ASAP.',
                   //   textAlign: TextAlign.center,
@@ -368,21 +371,23 @@ class ReceiptsPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Dynamic image size.
+    final screenWidth = MediaQuery.of(context).size.width;
+    final double imageSize = screenWidth < 600 ? 96 : 128;
+
+    // Render.
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             // Image.
-            Padding(
-              padding: EdgeInsets.only(top: 16),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fbud_spender.png?alt=media&token=e0de707b-9c18-44b9-9944-b36fcffd9fd3',
-                  width: 128,
-                  height: 128,
-                ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fbud_spender.png?alt=media&token=e0de707b-9c18-44b9-9944-b36fcffd9fd3',
+                width: imageSize,
+                height: imageSize,
               ),
             ),
             // Text.
@@ -506,78 +511,78 @@ class _ParsingPlaceholderState extends State<ParsingPlaceholder>
 /// Parsed item.
 /// FIXME: Spruce up this widget.
 /// TODO: Add image.
-class ParsedReceiptCard extends StatelessWidget {
-  ParsedReceiptCard({required this.item});
+// class ParsedReceiptCard extends StatelessWidget {
+//   ParsedReceiptCard({required this.item});
 
-  // Properties
-  final SalesReceipt item;
+//   // Properties
+//   final SalesReceipt item;
 
-  @override
-  Widget build(BuildContext context) {
-    // final screenWidth = MediaQuery.of(context).size.width;
-    return GestureDetector(
-      onTap: () {
-        // showDialog(
-        //   context: context,
-        //   builder: (BuildContext context) {
-        //     return Dialog(
-        //       child: ResultScreen(labResult: labResult),
-        //     );
-        //   },
-        // );
-      },
-      child: Card(
-        margin: EdgeInsets.symmetric(horizontal: 24),
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-        color: Theme.of(context).scaffoldBackgroundColor,
-        surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-        child: Container(
-          margin: EdgeInsets.all(0),
-          padding: EdgeInsets.all(16.0),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(3.0)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Product name and options.
-              Row(
-                children: [
-                  Text(
-                    item.dateSold?.toIso8601String() ?? '',
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  Spacer(),
+//   @override
+//   Widget build(BuildContext context) {
+//     // final screenWidth = MediaQuery.of(context).size.width;
+//     return GestureDetector(
+//       onTap: () {
+//         // showDialog(
+//         //   context: context,
+//         //   builder: (BuildContext context) {
+//         //     return Dialog(
+//         //       child: ResultScreen(labResult: labResult),
+//         //     );
+//         //   },
+//         // );
+//       },
+//       child: Card(
+//         margin: EdgeInsets.symmetric(horizontal: 24),
+//         elevation: 2,
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+//         color: Theme.of(context).scaffoldBackgroundColor,
+//         surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+//         child: Container(
+//           margin: EdgeInsets.all(0),
+//           padding: EdgeInsets.all(16.0),
+//           decoration: BoxDecoration(borderRadius: BorderRadius.circular(3.0)),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: <Widget>[
+//               // Product name and options.
+//               Row(
+//                 children: [
+//                   Text(
+//                     item.dateSold?.toIso8601String() ?? '',
+//                     style: Theme.of(context).textTheme.labelLarge,
+//                   ),
+//                   Spacer(),
 
-                  // Download data.
-                  GestureDetector(
-                    onTap: () {
-                      DownloadService.downloadData([item.toMap()]);
-                    },
-                    child: Icon(
-                      Icons.download_sharp,
-                      color: Theme.of(context).textTheme.labelMedium!.color,
-                      size: 16,
-                    ),
-                  ),
-                ],
-              ),
-              gapH8,
+//                   // Download data.
+//                   GestureDetector(
+//                     onTap: () {
+//                       DownloadService.downloadData([item.toMap()]);
+//                     },
+//                     child: Icon(
+//                       Icons.download_sharp,
+//                       color: Theme.of(context).textTheme.labelMedium!.color,
+//                       size: 16,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               gapH8,
 
-              // TODO: Products.
-              // Text(
-              //   'Products: ${item.producer != null && labResult.businessDbaName!.isNotEmpty ? labResult.businessDbaName : labResult.producer}',
-              //   style: Theme.of(context).textTheme.labelMedium,
-              // ),
+//               // TODO: Products.
+//               // Text(
+//               //   'Products: ${item.producer != null && labResult.businessDbaName!.isNotEmpty ? labResult.businessDbaName : labResult.producer}',
+//               //   style: Theme.of(context).textTheme.labelMedium,
+//               // ),
 
-              // TODO: Receipt details
-              Text(
-                'Total: ${item.totalPrice.toString()}',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+//               // TODO: Receipt details
+//               Text(
+//                 'Total: ${item.totalPrice.toString()}',
+//                 style: Theme.of(context).textTheme.labelMedium,
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

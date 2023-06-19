@@ -4,12 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 6/15/2023
+// Updated: 6/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // Flutter imports:
 import 'package:cannlytics_data/common/layout/tabs.dart';
 import 'package:cannlytics_data/ui/sales/receipts_parser.dart';
 import 'package:cannlytics_data/ui/sales/user_receipts.dart';
+// import 'package:cannlytics_data/ui/sales/user_receipts_analytics.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -77,13 +78,28 @@ class MainContent extends ConsumerWidget {
           gapH12,
           Tabs(
             tabs: [
-              Tab(text: 'Parse'),
-              Tab(text: 'Analytics'),
-              Tab(text: 'Your Results'),
+              Tab(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text('Parse Receipts'),
+                ),
+              ),
+              // Tab(
+              //   child: Padding(
+              //     padding: EdgeInsets.symmetric(horizontal: 8),
+              //     child: Text('Analytics'),
+              //   ),
+              // ),
+              Tab(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text('Your Receipts'),
+                ),
+              ),
             ],
             views: [
               ReceiptsParserInterface(),
-              UserReceiptsInterface(),
+              // UserReceiptsAnalytics(),
               UserReceiptsInterface(),
             ],
           ),

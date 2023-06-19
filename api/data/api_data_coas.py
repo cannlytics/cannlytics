@@ -69,6 +69,8 @@ def api_data_coas(request, sample_id=None):
         # return HttpResponse(status=401)
     else:
         uid = claims['uid']
+
+    # TODO: Keep track of the number of jobs per user.
     
     # Log the user ID.
     print('USER:', uid)

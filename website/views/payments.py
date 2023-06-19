@@ -135,7 +135,7 @@ def subscribe(request):
     try:
         name = (data.get('first_name', '') + data.get('last_name', '')).strip()
         _, password = create_user(name, user_email)
-        message = f'Congratulations,\n\nYou can now login to the Cannlytics console (https://console.cannlytics.com) with the following credentials.\n\nEmail: {user_email}\nPassword: {password}\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
+        message = f'Congratulations,\n\nYou can now login to Cannlytics (https://cannlytics.com) with the following credentials.\n\nEmail: {user_email}\nPassword: {password}\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
         subject = 'Welcome to the Cannlytics Platform'
     except:
         message = f'Congratulations,\n\nYou are now subscribed to Cannlytics.\n\nPlease stay tuned for more material or email {DEFAULT_FROM_EMAIL} to begin.\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
@@ -244,3 +244,6 @@ def unsubscribe(request):
     message = 'Successfully unsubscribed from subscription.'
     response = {'success': True, 'message': message}
     return JsonResponse(response)
+
+
+# TODO: Allow users to purchase tokens.

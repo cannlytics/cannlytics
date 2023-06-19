@@ -47,6 +47,18 @@ import 'package:cannlytics_data/utils/validation_utils.dart';
 // https://stackoverflow.com/questions/57390362/flutter-integrate-paypal-buttons-with-webview
 // https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_create
 
+// TODO: Allow users to manage their API keys.
+
+// TODO: Allow users to manage their billing.
+
+// TODO: Allow users to view their invoices.
+
+// TODO: Allow users to purchase additional tokens.
+
+// TODO: Allow users to cancel their subscription!
+
+// TODO: Allow users to upgrade their subscription.
+
 /// Account screen.
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -215,7 +227,7 @@ class AccountManagement extends ConsumerWidget {
               ),
               gapH8,
               Container(
-                width: 540,
+                width: (screenWidth < 640) ? 240 : 500,
                 child: SelectableText(
                   'Deleting this account will also remove your account data. ' +
                       'Make sure that you have exported your data if you want to keep your data.',
@@ -543,31 +555,10 @@ class ThemeSettings extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Dynamic screen width.
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Render the widget.
-    return Padding(
-      padding: EdgeInsets.only(
-        top: 24,
-        left: sliverHorizontalPadding(screenWidth),
-        right: sliverHorizontalPadding(screenWidth),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          // Theme toggle.
-          _themeToggle(context, ref, screenWidth),
-        ],
-      ),
-    );
-  }
-
-  /// Sign up card.
-  Widget _themeToggle(BuildContext context, WidgetRef ref, double screenWidth) {
-    // Watch the theme.
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
+
+    // Render the widget.
     return WideCard(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

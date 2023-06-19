@@ -31,7 +31,7 @@ class DashboardScreen extends ConsumerWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Calculate the aspect ratio of grid based on screen width
-    final double crossAxisCount = screenWidth < 600
+    final int crossAxisCount = screenWidth < 600
         ? 1
         : screenWidth < 1120
             ? 2
@@ -66,7 +66,7 @@ class DashboardScreen extends ConsumerWidget {
               physics: NeverScrollableScrollPhysics(),
               itemCount: aiModels.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount.toInt(),
+                crossAxisCount: crossAxisCount,
                 childAspectRatio: childAspectRatio,
               ),
               itemBuilder: (context, index) {

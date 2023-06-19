@@ -37,10 +37,17 @@ class Tabs extends StatelessWidget {
             ),
             child: TabBar(
               isScrollable: true,
-              unselectedLabelColor:
-                  Theme.of(context).textTheme.titleSmall!.color,
+              // unselectedLabelColor:
+              //     Theme.of(context).textTheme.titleSmall!.color,
+              labelPadding: EdgeInsets.symmetric(horizontal: 0),
               labelColor: Theme.of(context).textTheme.titleLarge!.color,
+              unselectedLabelColor:
+                  Theme.of(context).textTheme.titleMedium!.color,
               indicatorSize: TabBarIndicatorSize.label,
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.circular(3),
+                color: Theme.of(context).dividerColor.withOpacity(0.21),
+              ),
               tabs: tabs,
             ),
           ),

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/9/2023
-// Updated: 6/15/2023
+// Updated: 6/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:flutter/material.dart';
@@ -14,10 +14,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 // TODO: Ability to download data as an Excel file!!!
 
-/// TODO: Allow users to parse a COA with AI if they have a subscription.
-///
-/// TODO: Talk with your COA (for pro subscribers).
-///
+/// TODO: Allow user's to link lab results for their products.
+
 /// TODO: Link to strains where user can find more lab results.
 
 /// TODO: Link to producer / retailer / lab.

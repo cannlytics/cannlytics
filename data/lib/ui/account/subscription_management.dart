@@ -60,63 +60,6 @@ class SubscriptionManagement extends ConsumerWidget {
   }
 }
 
-/// Yearly or monthly choice.
-// class YearlyMonthlySubscriptions extends StatefulWidget {
-//   @override
-//   _YearlyMonthlySubscriptionsState createState() =>
-//       _YearlyMonthlySubscriptionsState();
-// }
-
-// class _YearlyMonthlySubscriptionsState
-//     extends State<YearlyMonthlySubscriptions> {
-//   @override
-//   Widget build(BuildContext context) {
-//     final screenWidth = MediaQuery.of(context).size.width;
-//     return DefaultTabController(
-//       length: 2,
-//       child: Column(
-//         mainAxisSize: MainAxisSize.min,
-//         children: [
-//           Container(
-//             width: 300,
-//             child: TabBar(
-//               overlayColor: MaterialStateProperty.resolveWith<Color?>(
-//                 (Set<MaterialState> states) {
-//                   if (states.contains(MaterialState.hovered)) {
-//                     return Colors.orange.withOpacity(
-//                         0.8);
-//                   } else if (states.contains(MaterialState.disabled)) {
-//                     return Colors.orange.withOpacity(
-//                         0.5);
-//                   } else {
-//                     return Colors.orange;
-//                   }
-//                 },
-//               ),
-//               indicatorSize: TabBarIndicatorSize.label,
-//               labelStyle: Theme.of(context).textTheme.labelMedium,
-//               unselectedLabelStyle: TextStyle(fontSize: 16.0),
-//               tabs: [
-//                 Tab(text: 'Yearly'),
-//                 Tab(text: 'Monthly'),
-//               ],
-//             ),
-//           ),
-//           Container(
-//             height: (screenWidth < Breakpoints.desktop) ? 1000 : 420,
-//             child: TabBarView(
-//               children: [
-//                 SubscriptionPlanCards(),
-//                 SubscriptionPlanCards(),
-//               ],
-//             ),
-//           )
-//         ],
-//       ),
-//     );
-//   }
-// }
-
 /// Subscription plan cards.
 class SubscriptionPlanCards extends StatelessWidget {
   @override
@@ -132,7 +75,7 @@ class SubscriptionPlanCards extends StatelessWidget {
           price: '🤗',
           color: Color(0xff16c995),
           features: [
-            '10 free AI jobs',
+            '10 AI jobs',
             'Personal archive',
             'Access all data',
           ],
@@ -143,7 +86,7 @@ class SubscriptionPlanCards extends StatelessWidget {
         color: Color(0xffFF7F00),
         features: [
           '100 AI jobs',
-          '4.2\u00A2 / job',
+          '4.2\u00A2 / additional job',
           'Throttled API',
         ],
       ),
@@ -153,7 +96,7 @@ class SubscriptionPlanCards extends StatelessWidget {
         color: Color(0xff7B4EA8),
         features: [
           '1,250 AI jobs',
-          '3.3\u00A2 / job',
+          '3.3\u00A2 / additional job',
           '🚀 Unthrottled API',
         ],
       ),

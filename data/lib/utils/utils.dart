@@ -15,6 +15,7 @@ import 'dart:html' as html;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 // Package imports:
 import 'package:url_launcher/url_launcher.dart';
@@ -144,5 +145,13 @@ class InterfaceUtils {
         ],
       ),
     );
+  }
+}
+
+/// Date and time utility functions.
+class TimeUtils {
+  /// Format a DateTime as a human readable time.
+  static String getReadableTime(DateTime date) {
+    return DateFormat('MMMM d, y HH:mm').format(date);
   }
 }

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/17/2023
+// Updated: 6/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -26,6 +26,7 @@ final userReceipts = StreamProvider<List<Map?>>((ref) async* {
   final user = ref.watch(authProvider).currentUser;
   if (user == null) return;
   print('STREAMING RECEIPTS FOR USER: ${user.uid}');
+  // FIXME: Apply limit based on user's subscription.
   yield* _dataSource.watchCollection(
     path: 'users/${user.uid}/receipts',
     builder: (data, documentId) => data!,
@@ -34,9 +35,31 @@ final userReceipts = StreamProvider<List<Map?>>((ref) async* {
   );
 });
 
-// TODO: Update user receipts.
+// Receipt service provider.
+final receiptService = Provider<ReceiptService>((ref) {
+  return ReceiptService(ref.watch(firestoreProvider));
+});
 
-// TODO: Delete user receipts.
+/// Receipt service.
+class ReceiptService {
+  const ReceiptService(this._dataSource);
+  final FirestoreService _dataSource;
+
+  // Update receipt.
+  Future<void> updateReceipt(String id, Map data) async {
+    print('Updating receipt...');
+    String url = '/api/data/receipts/$id';
+    await APIService.apiRequest(url, data: {'data': data});
+  }
+
+  // Delete receipt.
+  Future<void> deleteReceipt(String id) async {
+    print('Delete receipt...');
+    // _dataSource.deleteData(path: 'users/$uid/receipts/$id');
+    String url = '/api/data/receipts/$id';
+    await APIService.apiRequest(url, options: {'delete': true});
+  }
+}
 
 /* === Extraction === */
 
@@ -85,11 +108,12 @@ class DownloadService {
   const DownloadService._();
 
   /// Download receipt data.
-  static Future<void> downloadData(List<Map<String, dynamic>> data) async {
+  static Future<void> downloadData(List<Map<dynamic, dynamic>?> data) async {
     var response = await APIService.apiRequest(
       '/api/data/receipts/download',
       data: {'data': data},
     );
+    print('RESPONSE: $response');
     if (kIsWeb) {
       WebUtils.downloadUrl(response['download_url']);
     } else {
