@@ -38,7 +38,7 @@ export const accountSettings = {
       if (user) {
         const fileElem = document.getElementById('user-photo-url');
         fileElem.addEventListener('change', this.uploadUserPhoto, false);
-        document.getElementById('account-photo').src = user.photoURL;
+        if (user.photoURL) document.getElementById('account-photo').src = user.photoURL;
         this.resetAccountForm();
       } else {
         window.location.href = `${window.location.origin}/account/sign-up`;

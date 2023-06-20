@@ -27,7 +27,7 @@ const submitSubscription = async function(details, subscriptionID, planName) {
     window.location.href = `${window.location.origin}/subscriptions/subscribed`;
   } else {
     const message = `An error occurred when subscribing to ${planName} subscription. Please try again later or email support.`;
-    showNotification('Error Subscribing', response.message, /* type = */ 'error');
+    showNotification('Error Subscribing', message, /* type = */ 'error');
   }
 }
 
@@ -107,7 +107,7 @@ export const payments = {
       window.location.href = `${window.location.origin}/subscriptions/subscribed`;
     } else {
       const message = 'An error occurred when processing your subscription. Please contact dev@cannlytics.com for help.';
-      showNotification('Error saving your account', response.message, /* type = */ 'error');
+      showNotification('Error saving your account', message, /* type = */ 'error');
       hideLoadingButton(`${subscriptionType}-button`);
     }
   },
@@ -123,12 +123,12 @@ export const payments = {
 
     // Setup the user interface.
     const newsletter = JSON.parse(document.getElementById('user_newsletter').textContent);
-    const premium = JSON.parse(document.getElementById('user_premium').textContent);
+    // const premium = JSON.parse(document.getElementById('user_premium').textContent);
     const support = JSON.parse(document.getElementById('user_support').textContent);
     const newsletterCheckbox = document.getElementById('free-newsletter-checkbox');
-    const premiumCheckbox = document.getElementById('premium-material-checkbox');
+    // const premiumCheckbox = document.getElementById('premium-material-checkbox');
     if (newsletter) newsletterCheckbox.checked = true;
-    if (premium) premiumCheckbox.checked = true;
+    // if (premium) premiumCheckbox.checked = true;
     if (support) {
       document.getElementById(`support-option-${support}`).checked = true;
       document.getElementById('support-option-no-support').checked = false;
@@ -136,11 +136,12 @@ export const payments = {
     
     // Attach functionality.
     newsletterCheckbox.addEventListener('click', this.subscribeToFreeNewsletter);
-    premiumCheckbox.addEventListener('click', this.subscribeToPremium);
-    document.getElementById('save-premium-button').addEventListener('click', this.savePremiumSubscription);
-    document.getElementById('cancel-premium-button').addEventListener('click', this.cancelSubscribeToPremium);
+    // premiumCheckbox.addEventListener('click', this.subscribeToPremium);
+    // document.getElementById('save-premium-button').addEventListener('click', this.savePremiumSubscription);
+    // document.getElementById('cancel-premium-button').addEventListener('click', this.cancelSubscribeToPremium);
     document.getElementById('support-option-enterprise').addEventListener('click', this.changeSupportSubscription);
     document.getElementById('support-option-pro').addEventListener('click', this.changeSupportSubscription);
+    document.getElementById('support-option-premium').addEventListener('click', this.changeSupportSubscription);
     document.getElementById('support-option-no-support').addEventListener('click', this.changeSupportSubscription);
     document.getElementById('save-support-button').addEventListener('click', this.saveSupportSubscription);
     document.getElementById('cancel-support-button').addEventListener('click', this.cancelChangeSupportSubscription);
@@ -172,6 +173,9 @@ export const payments = {
      */
     const newSupport = this.id.replace('support-option-', '');
     const currentSupport = JSON.parse(document.getElementById('user_support').textContent);
+    document.getElementById('checkout-enterprise-button').classList.add('d-none');
+    document.getElementById('checkout-pro-button').classList.add('d-none');
+    document.getElementById('checkout-premium-button').classList.add('d-none');
     if (newSupport === currentSupport) {
       cannlytics.payments.cancelChangeSupportSubscription();
     }
@@ -181,6 +185,7 @@ export const payments = {
         document.getElementById('cancel-support-button').classList.remove('d-none');
         document.getElementById('checkout-enterprise-button').classList.add('d-none');
         document.getElementById('checkout-pro-button').classList.add('d-none');
+        document.getElementById('checkout-premium-button').classList.add('d-none');
       } else {
         document.getElementById('save-support-button').classList.add('d-none');
         document.getElementById('cancel-support-button').classList.remove('d-none');
@@ -198,6 +203,7 @@ export const payments = {
     document.getElementById('cancel-support-button').classList.add('d-none');
     document.getElementById('checkout-enterprise-button').classList.add('d-none');
     document.getElementById('checkout-pro-button').classList.add('d-none');
+    document.getElementById('checkout-premium-button').classList.add('d-none');
     const support = JSON.parse(document.getElementById('user_support').textContent);
     if (support) {
       const supportId = support.toLowerCase();
@@ -520,6 +526,101 @@ export const payments = {
     }).render('#paypal-button-container');
 
   },
+
+  /**---------------------------------------------------------------------------
+   * Tokens
+   *--------------------------------------------------------------------------*/
+
+  showBuyTokensButton() {
+    /**
+     * Show a PayPal button that the user can use to purchase tokens.
+     * @param {String} buttonId PayPal's hosted button ID.
+     */
+    const button = document.getElementById('paypal-order-tokens-button');
+    button.innerHTML = '';
+    button.classList.remove('d-none');
+
+    // Render the PayPal button.
+    const FUNDING_SOURCES = [
+      // FUNDING SOURCES
+      paypal.FUNDING.PAYPAL,
+      paypal.FUNDING.PAYLATER,
+      paypal.FUNDING.VENMO,
+      paypal.FUNDING.CARD,
+    ];
+    FUNDING_SOURCES.forEach(fundingSource => {
+      paypal.Buttons({
+        fundingSource,
+
+        // Style.
+        style: {
+          layout: 'vertical',
+          shape: 'rect',
+          color: (fundingSource == paypal.FUNDING.PAYLATER) ? 'gold' : '',
+        },
+
+        createOrder: async (data, actions) => {
+          /* Create an order for tokens. */
+          try {
+            // Make an orders request.
+            const tokens = document.getElementById('tokenSlider').value;
+            const details = await authRequest('/src/payments/orders', { tokens });
+            return details.id;
+          } catch (error) {
+            console.error(error);
+            const message = `An error occurred when buying tokens. Please email dev@cannlytics.com for help.`;
+            showNotification('Error buying tokens', message, /* type = */ 'error');
+          }
+        },
+
+        onApprove: async (data, actions) => {
+          /* Handle approved transactions. */
+          try {
+            // Make an approval request.
+            const tokens = document.getElementById('tokenSlider').value;
+            const url = `/src/payments/orders/${data.orderID}/capture`;
+            const details = await authRequest(url, { tokens });
+
+            // Three cases to handle:
+            //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
+            //   (2) Other non-recoverable errors -> Show a failure message
+            //   (3) Successful transaction -> Show confirmation or thank you message
+            // This example reads a v2/checkout/orders capture response, propagated from the server
+            // You could use a different API or structure for your 'orderData'
+            // See: https://developer.paypal.com/docs/checkout/integration-features/funding-failure/
+            var errorDetail = false;
+            try {
+              errorDetail = Array.isArray(details.details) && details.details[0];
+              if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
+                return actions.restart();
+              }
+            } catch(error) {
+              // No error to handle.
+            }
+
+            // Show an error notification if the transaction failed.
+            if (errorDetail) {
+              let msg = 'Sorry, your transaction could not be processed.';
+              msg += errorDetail.description ? ' ' + errorDetail.description : '';
+              msg += details.debug_id ? ' (' + details.debug_id + ')' : '';
+              showNotification('Error buying tokens', msg, /* type = */ 'error');
+              return;
+            }
+
+            // Successful transaction.
+            var msg = `You have successfully purchased ${tokens} Cannlytics AI tokens! You can use your tokens to run AI-powered jobs in the app. Put your AI jobs to good use!`;
+            showNotification('Cannlytics AI tokens purchased', msg, /* type = */ 'success', /* delay = */ 10000);
+          } catch (error) {
+            console.error(error);
+            // Handle the error and display an appropriate error message to the user.
+            const message = `An error occurred when approving your purchase of tokens. Please email dev@cannlytics.com for help.`;
+            showNotification('Error approving your purchase', message, /* type = */ 'error');
+          }
+        },
+      }).render('#paypal-order-tokens-button');
+    });
+  },
+
 
   /**---------------------------------------------------------------------------
    * Misc

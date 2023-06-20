@@ -117,6 +117,12 @@ service cloud.firestore {
 
     // === Data ===
 
+    // Allow anyone to read the data subscriptions.
+    match /public/subscriptions/data_subscriptions/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
     // Allow anyone to read the public licenses data.
     match /data/licenses/{state}/{document=**} {
     	allow read: if true;
@@ -188,20 +194,30 @@ service cloud.firestore {
 
     // === Subscriptions ===
     
-    function hasStandardSubscription() {
-      return request.auth.token.subscription == "standard";
-    }
+    // function hasStandardSubscription() {
+    //   return request.auth.token.support == "standard";
+    // }
 
-    function hasProSubscription() {
-      return request.auth.token.subscription == "pro";
-    }
+    // function hasProSubscription() {
+    //   return request.auth.token.support == "pro";
+    // }
 
-    function hasEnterpriseSubscription() {
-      return request.auth.token.subscription == "enterprise";
-    }
+    // function hasEnterpriseSubscription() {
+    //   return request.auth.token.support == "enterprise";
+    // }
 
     // Allow user's to read their own subscription plan.
     match /subscribers/{userId} {
+    	allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // Allow user's to see their own orders and transactions.
+    match /payments/orders/{userId}/{document=**} {
+    	allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+    match /payments/transactions/{userId}/{document=**} {
     	allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if false;
     }

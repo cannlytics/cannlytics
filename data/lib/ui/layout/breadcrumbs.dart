@@ -40,8 +40,6 @@ class Breadcrumbs extends StatelessWidget {
                 child: Text(
                   item.title,
                   style: Theme.of(context).textTheme.labelMedium,
-                  // style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                  //     color: Theme.of(context).textTheme.titleLarge!.color),
                 ),
               ),
 

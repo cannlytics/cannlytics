@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 4/16/2023
+// Updated: 6/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -68,44 +68,34 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
     String? displayName,
     String? phoneNumber,
   }) async {
-    // final authService = ref.read(authProvider);
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      // Get the appropriate providers.
       final user = ref.read(userProvider).value;
       final _firestore = ref.watch(firestoreProvider);
 
-      if (user != null) {
-        if (displayName != null && displayName != user.displayName) {
-          await user.updateDisplayName(displayName);
-        }
+      // Return if there is no user.
+      if (user == null) return;
 
-        if (email != null && email != user.email) {
-          await user.updateEmail(email);
-        }
-
-        if (phoneNumber != null && phoneNumber != user.phoneNumber) {
-          // First, create a PhoneAuthCredential with the verification ID and verification code
-          // obtained from the user.
-          final credential = PhoneAuthProvider.credential(
-            verificationId:
-                "verificationId", // Replace with your verification ID
-            smsCode: "smsCode", // Replace with your verification code
-          );
-
-          // Then update the user's phone number with the new phone number.
-          await user.updatePhoneNumber(credential);
-        }
-
-        // Update the user's data in Firestore.
-        await _firestore.setData(
-          path: 'users/${user.uid}',
-          data: {
-            'email': user.email,
-            'display_name': user.displayName,
-            'phone_number': user.phoneNumber,
-          },
-        );
+      // Update the user's display name.
+      if (displayName != null && displayName != user.displayName) {
+        await user.updateDisplayName(displayName);
       }
+
+      // Update the user's email.
+      if (email != null && email != user.email) {
+        await user.updateEmail(email);
+      }
+
+      // Update the user's data in Firestore.
+      await _firestore.setData(
+        path: 'users/${user.uid}',
+        data: {
+          'email': user.email,
+          'display_name': user.displayName,
+          'phone_number': user.phoneNumber,
+        },
+      );
     });
   }
 
@@ -138,32 +128,6 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
     });
     return subscription;
   }
-
-  /// TODO: Subscribe to a paid subscription.
-  /// POST /src/payments/subscribe
-  /// data = {'email': userEmail, 'plan_name': planName, 'id': planId}
-  /// For now, link to: https://cannlytics.com/account/subscriptions
-
-  /// TODO: Unsubscribe from a paid subscription.
-  /// POST /src/payments/unsubscribe
-  /// data = {'plan_name': planName}
-
-  /// TODO: Get subscription plans.
-  /// public/subscriptions/subscription_plans/${name}
-
-  /// TODO: Get API Keys.
-  /// GET /api/auth/get-keys
-
-  /// TODO: Create API key.
-  /// POST /api/auth/create-key
-  /// data = {
-  ///   'name': 'My API Key',
-  ///   'permissions': ['read', 'write'],
-  /// }
-
-  /// TODO: Delete API key.
-  /// POST /api/auth/delete-key
-  /// data = {'name': 'My API Key'}
 }
 
 /* === Subscription === */
@@ -207,7 +171,25 @@ class SubscriptionService {
   }
 }
 
+/* === Usage === */
+
+/// Stream a user's subscription data from Firebase.
+final userSubscription = StreamProvider<Map>((ref) async* {
+  final FirestoreService _dataSource = ref.watch(firestoreProvider);
+  final user = ref.watch(authProvider).currentUser;
+  if (user == null) return;
+  print('STREAMING SUBSCRIPTION FOR USER: ${user.uid}');
+  yield* _dataSource.watchDocument(
+    path: 'subscribers/${user.uid}',
+    builder: (data, documentId) => data!,
+  );
+});
+
 /* === Invoices === */
+
+// TODO: Get invoices.
+
+// TODO: Download invoice.
 
 /* === API Keys === */
 

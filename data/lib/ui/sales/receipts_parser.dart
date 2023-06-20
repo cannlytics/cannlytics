@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/18/2023
+// Updated: 6/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -25,12 +25,13 @@ import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 
+/// Receipts parser interface.
 class ReceiptsParserInterface extends HookConsumerWidget {
   ReceiptsParserInterface({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Listen the the COA parser provider.
+    // Listen the the receipts parser provider.
     final asyncData = ref.watch(receiptParser);
 
     // Dynamic rendering.
@@ -43,57 +44,8 @@ class ReceiptsParserInterface extends HookConsumerWidget {
 
       // Data loaded state.
       data: (items) => (items.length == 0)
-          ? _body(context, ref, child: CoAUpload())
-          : Card(
-              margin: EdgeInsets.only(top: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    // Title.
-                    Row(
-                      children: [
-                        SelectableText(
-                          'Parsed receipts',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        Spacer(),
-                        IconButton(
-                          icon: Icon(
-                            Icons.refresh,
-                            color:
-                                Theme.of(context).textTheme.bodyMedium!.color,
-                          ),
-                          onPressed: () {
-                            ref.read(receiptParser.notifier).clear();
-                          },
-                        ),
-                      ],
-                    ),
-                    gapH16,
-
-                    // TODO: Grid of parsed receipts.
-                    Expanded(
-                      child: ListView(
-                        shrinkWrap: true,
-                        children: [
-                          for (final item in items)
-                            ReceiptCard(
-                              item: SalesReceipt.fromMap(item ?? {}),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          ? _body(context, ref, child: ReceiptUpload())
+          : ReceiptsParserForm(items: items, ref: ref),
     );
   }
 
@@ -252,8 +204,70 @@ class ReceiptsParserInterface extends HookConsumerWidget {
   }
 }
 
-/// COA upload.
-class CoAUpload extends ConsumerWidget {
+/// Receipt parsing form
+class ReceiptsParserForm extends StatelessWidget {
+  ReceiptsParserForm({required this.items, required this.ref});
+
+  // Parameters.
+  final List<Map<dynamic, dynamic>?> items;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.only(top: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // Title.
+            Row(
+              children: [
+                SelectableText(
+                  'Parsed receipts',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Spacer(),
+                IconButton(
+                  icon: Icon(
+                    Icons.refresh,
+                    color: Theme.of(context).textTheme.bodyMedium!.color,
+                  ),
+                  onPressed: () {
+                    ref.read(receiptParser.notifier).clear();
+                  },
+                ),
+              ],
+            ),
+            gapH16,
+
+            // Grid of parsed receipts.
+            Expanded(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final item in items)
+                    ReceiptCard(
+                      item: SalesReceipt.fromMap(item ?? {}),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Receipt upload.
+class ReceiptUpload extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // ignore: unused_local_variable
@@ -316,30 +330,6 @@ class CoAUpload extends ConsumerWidget {
                         ),
                       ),
                     ),
-
-                  // // File picker button.
-                  // if (!kIsWeb)
-                  //   SecondaryButton(
-                  //     text: 'Import your receipts',
-                  //     onPressed: () async {
-                  //       // Pick files.
-                  //       FilePickerResult? file =
-                  //           await FilePicker.platform.pickFiles(
-                  //         type: FileType.custom,
-                  //         allowedExtensions: ['jpg', 'jpeg', 'png'],
-                  //         withData: true,
-                  //         withReadStream: true,
-                  //       );
-
-                  //       // Parse files.
-                  //       if (file != null) {
-                  //         // Upload file
-                  //         ref.read(receiptParser.notifier).parseImages([file]);
-                  //       } else {
-                  //         // User canceled the picker
-                  //       }
-                  //     },
-                  //   ),
                 ],
               ),
             ),
@@ -507,82 +497,3 @@ class _ParsingPlaceholderState extends State<ParsingPlaceholder>
     super.dispose();
   }
 }
-
-/// Parsed item.
-/// FIXME: Spruce up this widget.
-/// TODO: Add image.
-// class ParsedReceiptCard extends StatelessWidget {
-//   ParsedReceiptCard({required this.item});
-
-//   // Properties
-//   final SalesReceipt item;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // final screenWidth = MediaQuery.of(context).size.width;
-//     return GestureDetector(
-//       onTap: () {
-//         // showDialog(
-//         //   context: context,
-//         //   builder: (BuildContext context) {
-//         //     return Dialog(
-//         //       child: ResultScreen(labResult: labResult),
-//         //     );
-//         //   },
-//         // );
-//       },
-//       child: Card(
-//         margin: EdgeInsets.symmetric(horizontal: 24),
-//         elevation: 2,
-//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-//         color: Theme.of(context).scaffoldBackgroundColor,
-//         surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-//         child: Container(
-//           margin: EdgeInsets.all(0),
-//           padding: EdgeInsets.all(16.0),
-//           decoration: BoxDecoration(borderRadius: BorderRadius.circular(3.0)),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: <Widget>[
-//               // Product name and options.
-//               Row(
-//                 children: [
-//                   Text(
-//                     item.dateSold?.toIso8601String() ?? '',
-//                     style: Theme.of(context).textTheme.labelLarge,
-//                   ),
-//                   Spacer(),
-
-//                   // Download data.
-//                   GestureDetector(
-//                     onTap: () {
-//                       DownloadService.downloadData([item.toMap()]);
-//                     },
-//                     child: Icon(
-//                       Icons.download_sharp,
-//                       color: Theme.of(context).textTheme.labelMedium!.color,
-//                       size: 16,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//               gapH8,
-
-//               // TODO: Products.
-//               // Text(
-//               //   'Products: ${item.producer != null && labResult.businessDbaName!.isNotEmpty ? labResult.businessDbaName : labResult.producer}',
-//               //   style: Theme.of(context).textTheme.labelMedium,
-//               // ),
-
-//               // TODO: Receipt details
-//               Text(
-//                 'Total: ${item.totalPrice.toString()}',
-//                 style: Theme.of(context).textTheme.labelMedium,
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

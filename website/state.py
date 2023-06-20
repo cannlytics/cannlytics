@@ -139,22 +139,22 @@ material = {
                 "action": "Launch Now 🚀",
                 "url": "/subscriptions/checkout?name=enterprise",
                 "attributes": [
-                    {"title": "10,000 AI tasks", "active": True},
-                    {"title": "30 requests / second", "active": True},
-                    {"title": "4 hours support", "active": True},
+                    {"title": "17,500 AI jobs", "active": True},
+                    {"title": "2.4￠ / additional job", "active": True},
+                    {"title": "Private API", "active": True},
                 ],
             },
             {
-                "name": "Developer",
+                "name": "Pro",
                 "plan_name": "pro",
                 "price": "$42 / mo.",
                 "color": "orange",
                 "action": "Get Started 🏃‍♀️",
                 "url": "/subscriptions/checkout?name=pro",
                 "attributes": [
-                    {"title": "750 AI tasks", "active": True},
-                    {"title": "3 requests / second", "active": True},
-                    {"title": "1 hour of support", "active": True},
+                    {"title": "1,250 AI jobs", "active": True},
+                    {"title": "3.3￠ / additional job", "active": True},
+                    {"title": "Unthrottled API", "active": True},
                 ],
             },
             {
@@ -165,9 +165,9 @@ material = {
                 "action": "Sign Up ✍️",
                 "url": "/subscriptions/checkout?name=premium",
                 "attributes": [
-                    {"title": "50 AI tasks", "active": True},
-                    {"title": "1 request / 3 seconds", "active": True},
-                    {"title": "15 minutes of support", "active": True},
+                    {"title": "100 AI jobs", "active": True},
+                    {"title": "4.2￠ / additional job", "active": True},
+                    {"title": "Throttled API", "active": True},
                 ],
             },
         ],
@@ -370,6 +370,14 @@ page_data = {
         ]
     },
     "support": {
+        "collections": [
+            {
+                "name": "verifications",
+                "ref": "public/verifications/verification_data",
+                "limit": None,
+                "order_by": "state"
+            }
+        ],
         "documents": [
             {
                 "name": "paypal",

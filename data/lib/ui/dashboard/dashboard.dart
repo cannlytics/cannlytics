@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 6/14/2023
+// Updated: 6/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -44,7 +44,6 @@ class DashboardScreen extends ConsumerWidget {
 
     // Render the widget.
     return ConsoleScreen(
-      bottomSearch: true,
       children: [
         // AI cards.
         SliverToBoxAdapter(

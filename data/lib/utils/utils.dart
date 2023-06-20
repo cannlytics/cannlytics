@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/22/2023
-// Updated: 6/17/2023
+// Updated: 6/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -12,6 +12,7 @@ import 'dart:io';
 import 'dart:html' as html;
 
 // Flutter imports:
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +62,11 @@ class WebUtils {
     return '#' + color.value.toRadixString(16).substring(2).toUpperCase();
   }
 
+  /// Convert a HTML hex code to a color.
+  static Color hexCodeToColor(String hexCode) {
+    return Color(int.parse(hexCode.substring(1, 7), radix: 16) + 0xFF000000);
+  }
+
   /// Slugify text.
   static String slugify(String input) {
     // Remove leading and trailing whitespace and convert to lowercase.
@@ -90,6 +96,7 @@ class InterfaceUtils {
     String? content,
     String? cancelActionText,
     required String defaultActionText,
+    Color? primaryActionColor,
   }) async {
     if (kIsWeb || !Platform.isIOS) {
       return showDialog(
@@ -98,7 +105,9 @@ class InterfaceUtils {
           // Title.
           title: Text(
             title,
-            style: Theme.of(context).textTheme.titleLarge,
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  color: Theme.of(context).textTheme.titleLarge!.color,
+                ),
           ),
 
           // Content.
@@ -108,20 +117,16 @@ class InterfaceUtils {
           actions: <Widget>[
             // Cancel action.
             if (cancelActionText != null)
-              TextButton(
-                child: Text(
-                  cancelActionText,
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        color: Theme.of(context).textTheme.titleLarge!.color,
-                      ),
-                ),
+              SecondaryButton(
+                text: cancelActionText,
                 onPressed: () => Navigator.of(context).pop(false),
               ),
 
             // Confirm action.
-            SecondaryButton(
+            PrimaryButton(
               text: defaultActionText,
               onPressed: () => Navigator.of(context).pop(true),
+              backgroundColor: primaryActionColor,
             ),
           ],
         ),

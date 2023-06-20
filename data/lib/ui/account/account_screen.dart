@@ -4,22 +4,18 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 5/4/2023
+// Updated: 6/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// TODO:
-// [ ] Allow patients to keep track of their recommendation / card.
-// [ ] Manage API keys.
-// [ ] Manage subscription.
-// [ ] View usage.
-
 // Flutter imports:
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
@@ -30,9 +26,6 @@ import 'package:cannlytics_data/common/cards/wide_card.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
 import 'package:cannlytics_data/common/images/avatar.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
-import 'package:cannlytics_data/ui/layout/footer.dart';
-import 'package:cannlytics_data/ui/layout/header.dart';
-import 'package:cannlytics_data/ui/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
@@ -42,47 +35,16 @@ import 'package:cannlytics_data/ui/account/subscription_management.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:cannlytics_data/utils/validation_utils.dart';
 
-// See:
-// https://medium.com/flutter-community/paypal-payment-gateway-integration-in-flutter-379fbb3b87f5
-// https://stackoverflow.com/questions/57390362/flutter-integrate-paypal-buttons-with-webview
-// https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_create
-
-// TODO: Allow users to manage their API keys.
-
-// TODO: Allow users to manage their billing.
-
-// TODO: Allow users to view their invoices.
-
-// TODO: Allow users to purchase additional tokens.
-
-// TODO: Allow users to cancel their subscription!
-
-// TODO: Allow users to upgrade their subscription.
-
 /// Account screen.
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // App bar.
-      appBar: DashboardHeader(),
-
-      // Side menu.
-      drawer: Responsive.isMobile(context) ? MobileDrawer() : null,
-
-      // Body.
-      body: Console(slivers: [
-        // Account card.
+    return ConsoleScreen(
+      children: [
         SliverToBoxAdapter(child: AccountManagement()),
-
-        // Settings card.
-        // SliverToBoxAdapter(child: ThemeSettings()),
-
-        // Footer.
-        const SliverToBoxAdapter(child: Footer()),
-      ]),
+      ],
     );
   }
 }
@@ -111,159 +73,41 @@ class AccountManagement extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // Sign up prompt.
-          // if (user == null) _signUpCard(context, screenWidth),
-          // FIXME:
-          SubscriptionManagement(key: Key('no-user-subscriptions')),
+          if (user == null)
+            SubscriptionManagement(key: Key('no_user_subscriptions')),
 
           // Account information.
-          if (user != null) AccountForm(key: Key('account-form')),
+          if (user != null) AccountForm(key: Key('account_form')),
+
+          // TODO: Allow users to view their usage.
 
           // Subscriptions.
           if (user != null)
-            SubscriptionManagement(key: Key('user-subscriptions')),
+            SubscriptionManagement(key: Key('user_subscriptions')),
+
+          // TODO: Allow users to manage their billing.
+
+          // TODO: Allow users to view their invoices.
+
+          // General settings.
+          ThemeSettings(key: Key('theme_settings')),
 
           // API keys.
-          if (user != null) APIKeyManagement(key: Key('api-keys')),
-
-          // Settings.
-          ThemeSettings(),
+          // TODO: Finish implementing
+          if (user != null) APIKeyManagement(key: Key('api_keys')),
 
           // Delete account option.
-          if (user != null) _deleteAccount(context, ref, screenWidth),
-        ],
-      ),
-    );
-  }
-
-  /// Sign up card.
-  Widget _signUpCard(BuildContext context, double screenWidth) {
-    return WideCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: (screenWidth > Breakpoints.tablet) ? null : 275,
-                child: Text(
-                  'Create an account',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              gapH6,
-              SizedBox(
-                width: (screenWidth > Breakpoints.tablet) ? null : 275,
-                child: Text(
-                  'Sign up to save and access your data from any device.',
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        color: Theme.of(context).textTheme.titleLarge!.color,
-                      ),
-                ),
-              ),
-
-              // Subscription choices.
-              SubscriptionManagement(key: Key('subscriptions')),
-
-              // gapH18,
-              // Row(
-              //   children: [
-              //     // Sign in button.
-              //     CustomTextButton(
-              //       text: 'Sign In',
-              //       onPressed: () {
-              //         showDialog(
-              //           context: context,
-              //           builder: (BuildContext context) {
-              //             return SignInDialog(isSignUp: false);
-              //           },
-              //         );
-              //       },
-              //     ),
-
-              //     // Spacer.
-              //     SizedBox(width: 8),
-              //     PrimaryButton(
-              //       text: 'Sign up',
-              //       onPressed: () {
-              //         showDialog(
-              //           context: context,
-              //           builder: (BuildContext context) {
-              //             return SignInDialog(isSignUp: true);
-              //           },
-              //         );
-              //       },
-              //     ),
-              //   ],
-              // ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Delete account card.
-  Widget _deleteAccount(
-    BuildContext context,
-    WidgetRef ref,
-    double screenWidth,
-  ) {
-    return WideCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.error_outline,
-            color: Colors.red,
-          ),
-          gapW16,
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Danger Zone',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              gapH8,
-              Container(
-                width: (screenWidth < 640) ? 240 : 500,
-                child: SelectableText(
-                  'Deleting this account will also remove your account data. ' +
-                      'Make sure that you have exported your data if you want to keep your data.',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Theme.of(context).textTheme.titleLarge!.color,
-                      ),
-                ),
-              ),
-              gapH12,
-              PrimaryButton(
-                backgroundColor: Colors.red,
-                text: 'Delete account',
-                onPressed: () async {
-                  final delete = await InterfaceUtils.showAlertDialog(
-                    context: context,
-                    title: 'Are you sure you want to delete your account?',
-                    cancelActionText: 'Cancel',
-                    defaultActionText: 'Delete account',
-                  );
-                  if (delete == true) {
-                    await ref.read(authProvider).deleteAccount();
-                    context.go('/sign-in');
-                  }
-                },
-              ),
-            ],
-          ),
+          if (user != null) DeleteAccountCard(),
         ],
       ),
     );
   }
 }
 
-/// Account form.
+/// Form for the user to manage their display name, email, and picture.
 class AccountForm extends ConsumerStatefulWidget {
-  const AccountForm({super.key});
+  const AccountForm({Key? key}) : super(key: key);
+
   @override
   ConsumerState<AccountForm> createState() => _AccountFormState();
 }
@@ -293,11 +137,26 @@ class _AccountFormState extends ConsumerState<AccountForm>
   Future<void> _submit() async {
     setState(() => _submitted = true);
     if (_formKey.currentState!.validate()) {
+      // Save the user's data.
       await ref.read(accountProvider.notifier).updateUser(
             email: email,
             displayName: displayName,
           );
-      // TODO: Show notification upon save.
+
+      // Show a notification upon save.
+      Fluttertoast.showToast(
+        msg: 'Your account has been saved.',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 2,
+        backgroundColor: LightColors.lightGreen.withAlpha(60),
+        textColor: Colors.white,
+        fontSize: 16.0,
+        // webBgColor:
+        //     WebUtils.colorToHexCode(LightColors.lightGreen.withAlpha(60)),
+        webPosition: 'center',
+        webShowClose: true,
+      );
     }
   }
 
@@ -306,7 +165,7 @@ class _AccountFormState extends ConsumerState<AccountForm>
     BuildContext context,
     WidgetRef ref,
     AsyncValue state,
-    User? user,
+    User user,
   ) {
     return InkWell(
       customBorder: const CircleBorder(),
@@ -318,7 +177,7 @@ class _AccountFormState extends ConsumerState<AccountForm>
               if (message != 'success') {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    backgroundColor: Colors.red.shade300,
+                    backgroundColor: LightColors.darkOrange.withOpacity(0.15),
                     content: Text('Error changing image!'),
                     duration: Duration(seconds: 4),
                   ),
@@ -326,8 +185,9 @@ class _AccountFormState extends ConsumerState<AccountForm>
               }
             },
       child: Avatar(
-        photoUrl:
-            user!.photoURL ?? 'https://cannlytics.com/robohash/${user.uid}',
+        key: Key('user_photo'),
+        photoUrl: user.photoURL ??
+            'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fplaceholders%2Fhomegrower-placeholder.png?alt=media&token=29331691-c2ef-4bc5-89e8-cec58a7913e4',
         radius: 60,
         borderColor: Theme.of(context).secondaryHeaderColor,
         borderWidth: 1.0,
@@ -336,25 +196,25 @@ class _AccountFormState extends ConsumerState<AccountForm>
   }
 
   /// Sign out button.
-  Widget _signOut(AsyncValue state) {
-    return CustomTextButton(
-      text: 'Sign out',
-      onPressed: state.isLoading
-          ? null
-          : () async {
-              final logout = await InterfaceUtils.showAlertDialog(
-                context: context,
-                title: 'Are you sure?',
-                cancelActionText: 'Cancel',
-                defaultActionText: 'Sign out',
-              );
-              if (logout == true) {
-                await ref.read(authProvider).signOut();
-                context.go('/sign-in');
-              }
-            },
-    );
-  }
+  // Widget _signOut(AsyncValue state) {
+  //   return CustomTextButton(
+  //     text: 'Sign out',
+  //     onPressed: state.isLoading
+  //         ? null
+  //         : () async {
+  //             final logout = await InterfaceUtils.showAlertDialog(
+  //               context: context,
+  //               title: 'Are you sure?',
+  //               cancelActionText: 'Cancel',
+  //               defaultActionText: 'Sign out',
+  //             );
+  //             if (logout == true) {
+  //               await ref.read(authProvider).signOut();
+  //               context.go('/sign-in');
+  //             }
+  //           },
+  //   );
+  // }
 
   /// Reset password button.
   Widget _resetPassword(AsyncValue state) {
@@ -367,7 +227,7 @@ class _AccountFormState extends ConsumerState<AccountForm>
 
   @override
   Widget build(BuildContext context) {
-    // FIXME: Listen to errors.
+    // Listen to errors.
     // ref.listen<AsyncValue>(
     //   accountProvider,
     //   (_, state) => state.showAlertDialogOnError(context),
@@ -472,13 +332,13 @@ class _AccountFormState extends ConsumerState<AccountForm>
           children: [
             // Title
             Text(
-              'Account',
+              'Your account',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             gapH24,
 
             // User photo.
-            _userPhoto(context, ref, state, user),
+            if (user != null) _userPhoto(context, ref, state, user),
             gapH24,
 
             // User name.
@@ -488,26 +348,6 @@ class _AccountFormState extends ConsumerState<AccountForm>
             // User email.
             _userEmail(),
             gapH12,
-
-            // TODO: User phone.
-            // if (user.phoneNumber != null)
-            //   Text(
-            //     'Phone: ${user.phoneNumber!}',
-            //     style: Theme.of(context).textTheme.bodyMedium,
-            //   ),
-
-            // TODO: Add phone number.
-            // if (user.phoneNumber == null)
-            //   CustomTextButton(
-            //     text: 'Add phone number',
-            //     fontStyle: FontStyle.italic,
-            //     onPressed: () {},
-            //   ),
-
-            // Save button.
-            // gapH8,
-            // _saveButton(),
-            // gapH12,
 
             // Additional account options.
             gapH12,
@@ -618,6 +458,65 @@ class ThemeSettings extends ConsumerWidget {
                     },
                   ),
                 ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Delete account card.
+class DeleteAccountCard extends ConsumerWidget {
+  DeleteAccountCard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    return WideCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: Colors.red,
+          ),
+          gapW16,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Danger Zone',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              gapH8,
+              Container(
+                width: (screenWidth < 640) ? 240 : 500,
+                child: SelectableText(
+                  'Deleting this account will also remove your account data. ' +
+                      'Make sure that you have exported your data if you want to keep your data.',
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).textTheme.titleLarge!.color,
+                      ),
+                ),
+              ),
+              gapH12,
+              PrimaryButton(
+                backgroundColor: Colors.red,
+                text: 'Delete account',
+                onPressed: () async {
+                  final delete = await InterfaceUtils.showAlertDialog(
+                    context: context,
+                    title: 'Are you sure you want to delete your account?',
+                    cancelActionText: 'Cancel',
+                    defaultActionText: 'Delete account',
+                  );
+                  if (delete == true) {
+                    await ref.read(authProvider).deleteAccount();
+                    context.go('/sign-in');
+                  }
+                },
               ),
             ],
           ),

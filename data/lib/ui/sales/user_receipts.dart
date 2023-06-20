@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/18/2023
+// Updated: 6/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
@@ -209,85 +209,6 @@ class UserReceiptsInterface extends ConsumerWidget {
     );
   }
 }
-
-// /// A list of the user's results.
-// class UserReceiptsList extends ConsumerWidget {
-//   const UserReceiptsList({super.key, required this.items});
-
-//   // Parameters.
-//   final List<Map?> items;
-
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     // Listen to the user.
-//     final user = ref.watch(authProvider).currentUser;
-
-//     // Render.
-//     return Card(
-//       margin: EdgeInsets.only(top: 12),
-//       shape: RoundedRectangleBorder(
-//         borderRadius: BorderRadius.circular(3),
-//       ),
-//       child: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.start,
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           mainAxisSize: MainAxisSize.min,
-//           children: <Widget>[
-//             // Title.
-//             Row(
-//               children: [
-//                 SelectableText(
-//                   'Your analytics',
-//                   style: Theme.of(context).textTheme.titleLarge,
-//                 ),
-//                 Spacer(),
-//                 if (user != null)
-//                   SecondaryButton(
-//                     text: 'Download all',
-//                     onPressed: () {
-//                       var items = ref.read(userReceipts).value;
-//                       if (items == null || items.isEmpty) return;
-//                       DownloadService.downloadData(items);
-//                     },
-//                   ),
-//               ],
-//             ),
-
-//             // List of receipts.
-//             Expanded(
-//               child: ListView(
-//                 shrinkWrap: true,
-//                 children: [
-//                   for (final item in items)
-//                     ReceiptCard(
-//                       item: SalesReceipt.fromMap(item ?? {}),
-//                       onDownload: () {
-//                         DownloadService.downloadData([item!]);
-//                       },
-//                       onDelete: () async {
-//                         final delete = await InterfaceUtils.showAlertDialog(
-//                           context: context,
-//                           title:
-//                               'Are you sure that you want to delete this receipt?',
-//                           cancelActionText: 'Cancel',
-//                           defaultActionText: 'Delete',
-//                         );
-//                         if (delete == true) {
-//                           ref.read(receiptService).deleteReceipt(item!['id']);
-//                         }
-//                       },
-//                     ),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 /// A grid of the user's results.
 class UserReceiptsGrid extends ConsumerWidget {

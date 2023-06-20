@@ -10,7 +10,7 @@
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
-{% load static %}
+{% load static icon %}
 {% block title %}Support | Cannlytics{% endblock %}
 {% block page_css %}
 
@@ -25,6 +25,8 @@
     {% include "website/components/heros/hero_banner.html" with
       title="Software Support"
       description="In addition to crafting you awesome software, we can meet you where you are and assist you with custom solutions."
+      background_image="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2Fcannbot-ai.png?alt=media&token=3f2b4dcd-d661-404e-b417-c38768f1cb44"
+      background_position="top left"
       only
     %}
 
@@ -94,14 +96,69 @@
           do not see your state in the list.
         </small>
       </p> {% endcomment %}
-      <p class="markdown fs-6 serif text-dark w-50">
+      {% comment %} <p class="markdown fs-6 serif text-dark w-50">
         <small>
           <strong>Note:</strong> Additional AI tasks are available for $0.10 per task. Additional support
           can be purchased for $60 per hour. Please contact
           <a class="serif" href="mailto:dev@cannlytics.com">dev@cannlytics.com</a> if you need a higher number
           of requests per second or have additional needs.
         </small>
-      </p>
+      </p> {% endcomment %}
+
+      <!-- Purchase tokens -->
+      <div class="container mt-3">
+        <div class="markdown py-5" style="max-width:560px;">
+          <img src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fopenmoji%2Fai-coin.svg?alt=media&token=98a9cfd7-94a0-46cb-a59e-f7ee3c1b6dbf"
+            style="float:left;width:125px;height:125px;"
+            class="pt-3 pe-3"
+          />
+          <h1 class="pt-4 text-dark">Purchase AI Jobs</h1>
+          <p class="mt-2">
+            AI jobs can be purchased at a rate of <strong>5￠ per job</strong>.
+            A minimum of 20 jobs must be purchased at a time.
+            Only successful jobs will be credited.
+            Your tokens are valid for <strong>1 month</strong> after purchase.
+            Put your AI to good use now!
+          </p>
+
+          <!-- TODO: Input for how many tokens. -->
+        <div class="mt-3 mx-3">
+          <label>AI Tokens:</label>
+          <div id="tokenCount" style="position: relative; left: 0;">100</div>
+          <input
+            type="range"
+            class="form-range"
+            id="tokenSlider"
+            min="100"
+            max="2000"
+            step="100"
+            value="100"
+          >
+          <label>Price: <span id="tokenPrice">$5.00</span></label>
+        </div>
+
+        <!-- PayPal checkout button -->
+        <div class="mt-3 mx-3">
+          {% if not user %}
+            <button
+              id="order-tokens-button-no-user"
+              class="btn btn-sm bg-gradient-orange text-white serif"
+              type="button"
+              data-bs-target="#sign-in-dialog"
+              data-bs-toggle="modal"
+            >
+            {% icon 'coin' width="16px" height="16px" class="me-1" %}
+              Sign in to buy tokens
+            </button>
+          {% else %}
+            <p>Rate: <span id="price_per_token"></span>￠ per job</p>
+            <div id="paypal-order-tokens-button" class="d-none"></div>
+          {% endif %}
+        
+        </div>
+
+      </div>
+
 
       <!-- Historic Lab Result Migration -->
       <div class="container mb-5 mt-5">
@@ -109,11 +166,13 @@
           <svg class="pt-3 pe-3" style="float:left;width:125px;height:125px;">
             <use href="{% static "website/images/emojies/sparkler.svg" %}#sparkler-emoji"></use>
           </svg>
-          <h1 class="pt-4 text-dark">Historic Lab Data Migration</h1>
+          <h1 class="pt-4 text-dark">Standardize your lab results archive</h1>
           <p class="mt-2">
             Your laboratory data are valuable to you and your clients,
-            therefore, you can have us work to migrate your
-            historic lab data into a user-friendly format.
+            therefore, you can have us standardize your
+            archive of lab results, in whatever format they may be in, into a clean,
+            well-formatted, accessible workbook for you. Our rate is
+            <strong>$500 per 10,000 lab results</strong>.
           </p>
           <p class="text-start mt-3">
             <a
@@ -150,6 +209,9 @@
         </div>
       </div>
 
+      <!-- Metrc support -->
+      {% include "website/pages/homepage/components/metrc_state_list.html" with verifications=verifications only %}
+
     </div>
   </div>
 
@@ -162,6 +224,31 @@
 {% block page_js %}
 <script>
   cannlytics.payments.initializeSupport();
+
+  // Get the slider and price elements.
+  const slider = document.getElementById('tokenSlider');
+  const tokenCount = document.getElementById('tokenCount');
+  const tokenPrice = document.getElementById('tokenPrice');
+
+  // Update the token count and price when the slider value changes.
+  slider.oninput = function() {
+    // Change the price.
+    const tokens = this.value;
+    const price = tokens * 0.05;
+    tokenCount.textContent = `${tokens}`;
+    tokenPrice.textContent = `$${price.toFixed(2)}`;
+
+    // Calculate the position of the slider thumb.
+    const percent = (this.value - this.min) / (this.max - this.min);
+    const left = percent * this.offsetWidth - 18;
+
+    // Position the token count above the slider thumb.
+    tokenCount.style.left = `${left}px`;
+  }
+
+  // TODO: Get the user's subscription.
+
+  // TODO: Update the price per token based on the user's subscription.
 </script>
 {% endblock page_js %}
 

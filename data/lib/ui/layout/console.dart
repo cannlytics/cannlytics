@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 4/15/2023
+// Updated: 6/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -16,27 +16,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_data/ui/layout/footer.dart';
 import 'package:cannlytics_data/ui/layout/header.dart';
-import 'package:cannlytics_data/ui/layout/main_screen.dart';
 import 'package:cannlytics_data/ui/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 
 /// General console screen that renders given widgets.
 class ConsoleScreen extends StatelessWidget {
-  const ConsoleScreen({
-    super.key,
-    required this.children,
-    this.bottomSearch = false,
-  });
+  const ConsoleScreen({Key? key, required this.children}) : super(key: key);
 
+  // Parameters.
   final List<Widget> children;
-  final bool bottomSearch;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       // App bar.
-      appBar: DashboardHeader(),
+      appBar: DashboardHeader(key: Key('app_header')),
 
       // Side menu.
       drawer: Responsive.isMobile(context) ? MobileDrawer() : null,
@@ -49,9 +44,6 @@ class ConsoleScreen extends StatelessWidget {
         // Footer.
         const SliverToBoxAdapter(child: Footer()),
       ]),
-
-      // Navigation.
-      // bottomNavigationBar: bottomSearch ? HoverSearchBar() : null,
     );
   }
 }
@@ -63,7 +55,7 @@ class Console extends ConsumerWidget {
     required this.slivers,
   }) : super(key: key);
 
-  // The slivers to render in the console.
+  // Parameters.
   final List<Widget> slivers;
 
   @override
@@ -78,9 +70,6 @@ class Console extends ConsumerWidget {
         if (!Responsive.isMobile(context) && _sideMenuOpen)
           Expanded(
             child: Container(
-              // constraints: BoxConstraints(
-              //   minWidth: 275, // Set the desired minimum width
-              // ),
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
@@ -120,37 +109,30 @@ class Console extends ConsumerWidget {
   }
 }
 
-/// Bottom search button.
-class HoverSearchBar extends StatefulWidget {
-  @override
-  _HoverSearchBarState createState() => _HoverSearchBarState();
-}
+/// The main screen of the app.
+class MainScreen extends StatelessWidget {
+  const MainScreen({Key? key, required this.slivers}) : super(key: key);
 
-class _HoverSearchBarState extends State<HoverSearchBar> {
-  // bool _isHovered = false;
+  // Parameters.
+  final List<Widget> slivers;
 
   @override
   Widget build(BuildContext context) {
-    return BottomAppBar(
-      child: Container(
-        height: 250,
-        width: double.maxFinite,
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      body: Container(
+        // Background gradient.
         decoration: BoxDecoration(
-            color: Colors.orange,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20.0))),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.arrow_forward),
-              onPressed: () {
-//on Presses functionaluty goes here
-              },
-            ),
-            //add as many tabs as you want here
-          ],
+          gradient: RadialGradient(
+            center: Alignment(1, -1),
+            radius: 4.0,
+            colors: [
+              isDark ? Colors.transparent : Colors.white,
+              isDark ? Color(0xFF4E5165) : Color(0xFFe8e8e8),
+            ],
+          ),
         ),
+        child: CustomScrollView(slivers: slivers),
       ),
     );
   }

@@ -42,7 +42,7 @@
       </div>
       <div class="text-center order-md-2 border rounded">
         <img
-          src="{% if user.photo_url %}{{ user.photo_url }}{% else %}{% static "website/images/account/user.png" %}{% endif %}"
+          src="{% if user.photo_url %}{{ user.photo_url }}{% else %}https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fplaceholders%2Fhomegrower-placeholder.png?alt=media&token=29331691-c2ef-4bc5-89e8-cec58a7913e4{% endif %}"
           style="height:200px;"
           class="pe-1"
           id="account-photo"
