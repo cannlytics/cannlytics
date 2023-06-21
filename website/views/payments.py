@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/5/2021
-Updated: 6/20/2023
+Updated: 6/21/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # Standard imports
@@ -35,12 +35,20 @@ from cannlytics.firebase import (
     update_document,
     update_custom_claims,
 )
-from website.settings import DEFAULT_FROM_EMAIL
+from website.settings import DEFAULT_FROM_EMAIL, PRODUCTION
 from website.utils.utils import get_promo_code
 
 
 # Constants.
 DEFAULT_PRICE_PER_TOKEN = 0.05
+PAYPAL_SECRET = 'paypal-test'
+BASE = 'https://api-m.sandbox.paypal.com'
+if PRODUCTION == 'True' or PRODUCTION == True:
+    PAYPAL_SECRET = 'paypal'
+    BASE = 'https://api-m.paypal.com'
+
+print('PRODUCTION: {}'.format(PRODUCTION))
+print('BASE: {}'.format(BASE))
 
 
 @api_view(['GET'])
@@ -290,8 +298,8 @@ def create_order(request):
         response = {'success': False, 'message': 'Number of `tokens` required in the request body.'}
         return JsonResponse(response)
     
-    print('User: {}'.format(uid))
-    print('User wants to purchase {} tokens.'.format(number_of_tokens))
+    # Log.
+    print('User {} wants to purchase {} tokens.'.format(uid, number_of_tokens))
 
     # Get the user's price per token.
     plan_name = None
@@ -301,67 +309,77 @@ def create_order(request):
         price_per_token = user_subscription.get('price_per_token', DEFAULT_PRICE_PER_TOKEN)
         plan_name = user_subscription.get('plan_name')
 
-    print('Plan: {}'.format(plan_name))
+    # Log.
     print('Price per token: {}'.format(price_per_token))
 
-    # try:
-    # Calculate the price.
-    price = price_per_token * number_of_tokens
-    print('Price: {}'.format(price))
-
-    # Record the order in Firestore.
+    # Attempt to make the PayPal request.
     try:
-        timestamp = datetime.now().isoformat()
-        order_id = timestamp.replace(':', '-').replace('.', '-')
-        order_ref = f'payments/orders/{uid}/{order_id}'
-        order_data = {
-            'created_at': timestamp,
-            'uid': uid,
-            'user_email': user_email,
-            'plan_name': plan_name,
-            'price': price,
-            'price_per_token': price_per_token,
-            'number_of_tokens': number_of_tokens,
+        # Calculate the price.
+        price = price_per_token * number_of_tokens
+        print('Price: {}'.format(price))
+
+        # Record the order in Firestore.
+        try:
+            timestamp = datetime.now().isoformat()
+            order_id = timestamp.replace(':', '-').replace('.', '-')
+            order_ref = f'payments/orders/{uid}/{order_id}'
+            order_data = {
+                'created_at': timestamp,
+                'uid': uid,
+                'user_email': user_email,
+                'plan_name': plan_name,
+                'price': price,
+                'price_per_token': price_per_token,
+                'number_of_tokens': number_of_tokens,
+            }
+            update_document(order_ref, order_data)
+        except:
+            pass
+
+        # Get PayPal access token.
+        try:
+            project_id = os.environ['GOOGLE_CLOUD_PROJECT']
+        except:
+            _, project_id = google.auth.default()
+        payload = access_secret_version(project_id, PAYPAL_SECRET, 'latest')
+        paypal_secrets = loads(payload)
+        paypal_client_id = paypal_secrets['client_id']
+        paypal_secret = paypal_secrets['secret']
+        paypal_access_token = get_paypal_access_token(
+            paypal_client_id,
+            paypal_secret,
+            base=BASE,
+        )
+
+        # Define the order payload.
+        purchase = [{'amount': {'currency_code': 'USD', 'value': round(price, 2)}}]
+        payload = {'intent': 'CAPTURE', 'purchase_units': purchase}
+
+        # Make the request to create the order.
+        url = f'{BASE}/v2/checkout/orders'
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {paypal_access_token}',
         }
-        update_document(order_ref, order_data)
-        print('Made entry in Firestore')
-    except:
-        pass
+        response = requests.post(url, data=dumps(payload), headers=headers)
+        data = response.json()
+        print('PAYPAL RESPONSE:')
+        print(response.json())
+        response.raise_for_status()
 
-    # Get PayPal access token.
-    try:
-        project_id = os.environ['GOOGLE_CLOUD_PROJECT']
-    except:
-        _, project_id = google.auth.default()
-    payload = access_secret_version(project_id, 'paypal', 'latest')
-    paypal_secrets = loads(payload)
-    paypal_client_id = paypal_secrets['client_id']
-    paypal_secret = paypal_secrets['secret']
-    paypal_access_token = get_paypal_access_token(paypal_client_id, paypal_secret)
+        # Update the order with the order ID.
+        try:
+            update_document(order_ref, {'order_id': data['id']})
+        except:
+            pass
 
-    # Define the order payload.
-    purchase = [{'amount': {'currency_code': 'USD', 'value': str(price)}}]
-    payload = {'intent': 'CAPTURE', 'purchase_units': purchase}
+        # Return the response.
+        response = {'success': True, 'data': data}
+        return Response(response, content_type='application/json', status=200)
 
-    print('Making PayPal request...')
-
-    # Make the request to create the order.
-    url = 'https://api-m.paypal.com/v2/checkout/orders'
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {paypal_access_token}',
-    }
-    response = requests.post(url, json=dumps(payload), headers=headers)
-    print(response.json())
-    response.raise_for_status()
-
-    print('Successful PayPal request.')
-
-    # Return the response.
-    return Response(response.json(), content_type='application/json')
-
-    # except Exception as e:
-    #     return Response({'error': str(e)}, status=500)
+    # Handle internal errors.
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
 
 
 @api_view(['POST'])
@@ -377,7 +395,9 @@ def capture_order(request, order_id):
         response = {'success': False, 'message': 'Unable to authenticate.'}
         return JsonResponse(response)
 
+    # Attempt to make the PayPal request.
     try:
+
         # Get PayPal access token.
         try:
             project_id = os.environ['GOOGLE_CLOUD_PROJECT']
@@ -387,10 +407,14 @@ def capture_order(request, order_id):
         paypal_secrets = loads(payload)
         paypal_client_id = paypal_secrets['client_id']
         paypal_secret = paypal_secrets['secret']
-        paypal_access_token = get_paypal_access_token(paypal_client_id, paypal_secret)
+        paypal_access_token = get_paypal_access_token(
+            paypal_client_id,
+            paypal_secret,
+            base=BASE,
+        )
 
         # Make the request to capture the order.
-        url = f'https://api-m.paypal.com/v2/checkout/orders/{order_id}/capture'
+        url = f'{BASE}/v2/checkout/orders/{order_id}/capture'
         headers = {
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {paypal_access_token}',
@@ -399,40 +423,42 @@ def capture_order(request, order_id):
         response.raise_for_status()
         order_data = response.json()
 
-        # Record the completed order in Firestore.
-        try:
+    # Handle PayPal errors.
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
 
-            # Get the number of tokens.
-            data = loads(request.body)
-            number_of_tokens = data['tokens']
+    # Record the completed order in Firestore.
+    try:
 
-            # Get the user's rate.
-            plan_name = None
-            price_per_token = DEFAULT_PRICE_PER_TOKEN
-            user_subscription = get_document(f'subscribers/{uid}')
-            if user_subscription:
-                price_per_token = user_subscription.get('price_per_token', DEFAULT_PRICE_PER_TOKEN)
-                plan_name = user_subscription.get('plan_name')
+        # Get the number of tokens.
+        data = loads(request.body)
+        number_of_tokens = float(data['tokens'])
 
-            # Calculate the price.
-            price = price_per_token * number_of_tokens
+        # Get the user's rate.
+        plan_name = None
+        price_per_token = DEFAULT_PRICE_PER_TOKEN
+        user_subscription = get_document(f'subscribers/{uid}')
+        if user_subscription:
+            price_per_token = user_subscription.get('price_per_token', DEFAULT_PRICE_PER_TOKEN)
+            plan_name = user_subscription.get('plan_name')
 
-            # Make a transaction entry in Firestore.
-            timestamp = datetime.now().isoformat()
-            transaction_id = timestamp.replace(':', '-').replace('.', '-')
-            order_ref = f'payments/transactions/{uid}/{transaction_id}'
-            order_data = {**{
-                'created_at': timestamp,
-                'uid': uid,
-                'user_email': user_email,
-                'plan_name': plan_name,
-                'price': price,
-                'price_per_token': price_per_token,
-                'number_of_tokens': number_of_tokens,
-            }, **order_data}
-            update_document(order_ref, order_data)
-        except:
-            pass
+        # Calculate the price.
+        price = price_per_token * number_of_tokens
+
+        # Make a transaction entry in Firestore.
+        timestamp = datetime.now().isoformat()
+        transaction_id = timestamp.replace(':', '-').replace('.', '-')
+        order_ref = f'payments/transactions/{uid}/{transaction_id}'
+        order_data = {**{
+            'created_at': timestamp,
+            'uid': uid,
+            'user_email': user_email,
+            'plan_name': plan_name,
+            'price': price,
+            'price_per_token': price_per_token,
+            'number_of_tokens': number_of_tokens,
+        }, **order_data}
+        update_document(order_ref, order_data)
 
         # Credit the user with the appropriate tokens.
         subject = 'Cannlytics AI Tokens Purchased'
@@ -459,8 +485,15 @@ def capture_order(request, order_id):
         except:
             pass
 
-        # Return the response.
-        return Response(order_data, content_type='application/json')
+        # Get the user's current amount of tokens.
+        user_subscription = get_document(f'subscribers/{uid}')
+        current_tokens = user_subscription.get('tokens', 0)
+        data = {**order_data, **{'tokens': current_tokens}}
 
+        # Return the response.
+        response = {'success': True, 'data': data}
+        return Response(response, content_type='application/json')
+
+    # Handle internal errors.
     except Exception as e:
         return Response({'error': str(e)}, status=500)

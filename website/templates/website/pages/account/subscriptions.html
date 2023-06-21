@@ -44,7 +44,9 @@
   </style>
 
   <!-- PayPal JavaScript -->
-  <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&components=buttons"></script>
+  <script data-sdk-integration-source="integrationbuilder_sc"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=Ae4CcPpl9WnMMNNVxvrhf6MMEpBPsf42UQki5hCivL7cEIQRc89-oWpVEF7sSif8k65CxTWrutGELsHR&components=buttons"></script>
+  {% comment %} <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script> {% endcomment %}
 
 {% endblock page_css %}
 {% block material %}
@@ -313,7 +315,7 @@
   // FIXME:
   // Initialize the interface with the user's current subscriptions.
   // cannlytics.payments.initializeSubscriptions();
-  cannlytics.payments.initializeSupport();
+  // cannlytics.payments.initializeSupport();
 
   // TODO: Automatically unsubscribe user from newsletter if they navigate with
   // special query parameter that is a salted hash of their email.

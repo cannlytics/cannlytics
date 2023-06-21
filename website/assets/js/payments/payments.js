@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 1/17/2021
- * Updated: 5/28/2023
+ * Updated: 6/21/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { getDocument } from '../firebase.js';
@@ -558,18 +558,16 @@ export const payments = {
     const FUNDING_SOURCES = [
       // FUNDING SOURCES
       paypal.FUNDING.PAYPAL,
-      // paypal.FUNDING.PAYLATER,
-      // paypal.FUNDING.VENMO,
       paypal.FUNDING.CARD,
     ];
     FUNDING_SOURCES.forEach(fundingSource => {
       paypal.Buttons({
         fundingSource,
-        // intent: 'CAPTURE',
 
         // Style.
         style: {
-          layout: 'vertical',
+          color: 'silver',
+          layout: 'horizontal',
           shape: 'rect',
           color: (fundingSource == paypal.FUNDING.PAYLATER) ? 'gold' : '',
         },
@@ -580,7 +578,9 @@ export const payments = {
             // Make an orders request.
             const tokens = document.getElementById('tokenSlider').value;
             const details = await authRequest('/src/payments/orders', { tokens });
-            return details.id ?? details.orderId;
+            console.log('DETAILS:');
+            console.log(details);
+            return details.data.id;
           } catch (error) {
             console.error(error);
             const message = `An error occurred when buying tokens. Please email dev@cannlytics.com for help.`;
@@ -595,7 +595,10 @@ export const payments = {
             // Make an approval request.
             const tokens = document.getElementById('tokenSlider').value;
             const url = `/src/payments/orders/${data.orderID}/capture`;
-            const details = await authRequest(url, { tokens });
+            const response = await authRequest(url, { tokens });
+            const details = response.data;
+            console.log('DETAILS:');
+            console.log(details);
 
             // Three cases to handle:
             //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
@@ -626,6 +629,10 @@ export const payments = {
             // Successful transaction.
             var msg = `You have successfully purchased ${tokens} Cannlytics AI tokens! You can use your tokens to run AI-powered jobs in the app. Put your AI jobs to good use!`;
             showNotification('Cannlytics AI tokens purchased', msg, /* type = */ 'success', /* delay = */ 10000);
+
+            // Update the user's token count.
+            document.getElementById('current_tokens').textContent = details.tokens;
+
           } catch (error) {
             console.error(error);
             // Handle the error and display an appropriate error message to the user.
