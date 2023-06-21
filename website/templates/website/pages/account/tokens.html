@@ -3,7 +3,7 @@
 <!--
   Token Management | Cannlytics Website
   Created: 6/20/2023
-  Updated: 6/20/2023
+  Updated: 6/21/2023
 -->
 {% load icon %}
 
@@ -20,18 +20,35 @@
       or at a discounted rate that depends on your subscription.
       A minimum of 100 AI job tokens must be purchased at a time.
       Only successful jobs will consume tokens.
-      Your tokens are valid for <strong>1 month</strong> after purchase.
+      Your tokens are valid for <strong>one month</strong> after purchase.
       If you need usage beyond 2,000 tokens at time, then please
       contact <a href="mailto:dev@cannlytics.com">dev@cannlytics.com</a> for a custom quote.
       Put your AI to good use now!
     </p>
 
-    <!-- TODO: Show the user's current amount of tokens. -->
 
-    <!-- TODO: Input for how many tokens. -->
+    <!-- Purchase tokens. -->
   <div class="mt-3 mx-3">
-    <label>AI Tokens:</label>
-    <div id="tokenCount" style="position: relative; left: 0;">100</div>
+    {% if user %}
+      <div class="row">
+        <div
+          class="col-4 btn btn-sm-light btn-md-light me-2"
+          data-bs-toggle="tooltip"
+          data-bs-title="Your tokens are refreshed every month. Purchased tokens are valid for 1 month after purchase."
+        >
+          Your tokens: <span id="current_tokens">0</span>
+        </div>
+        <div
+         class="col-4 btn btn-sm-light btn-md-light"
+         data-bs-toggle="tooltip"
+         data-bs-title="Your rate depends on your subscription. Upgrade your subscription to get a better rate."
+        >
+          Your rate: <span id="price_per_token">5</span>￠ per job
+        </div>
+      </div>
+    {% endif %}
+    <label class="serif mb-2 mt-3">Puchase AI Tokens:</label>
+    <div id="tokenCount" style="position: relative; left: 0;" class="serif">100</div>
     <input
       type="range"
       class="form-range"
@@ -41,7 +58,7 @@
       step="100"
       value="100"
     >
-    <label>Price: <span id="tokenPrice">$5.00</span></label>
+    <label class="serif mt-1">Price: <span id="tokenPrice" class="serif">$5.00</span></label>
   </div>
 
   <!-- PayPal checkout button -->
@@ -58,8 +75,6 @@
         Sign in to buy tokens
       </button>
     {% else %}
-      <p>Rate: <span id="price_per_token">5</span>￠ per job</p>
-      <p>Current tokens: <span id="price_per_token"></span>0</p>
       <div id="paypal-order-tokens-button" class="d-none"></div>
     {% endif %}
   
@@ -91,9 +106,12 @@
     tokenCount.style.left = `${left}px`;
   }
 
-  // TODO: Get the user's subscription.
+  // Get the user's subscription.
+  cannlytics.payments.getUserTokens();
 
-  // TODO: Update the price per token based on the user's subscription.
+  // Render the buy tokens button.
+  cannlytics.payments.renderBuyTokensButton();
+
 </script>
 
 </html>

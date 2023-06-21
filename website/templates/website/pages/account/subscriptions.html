@@ -44,7 +44,7 @@
   </style>
 
   <!-- PayPal JavaScript -->
-  <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&vault=true&intent=subscription"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&components=buttons"></script>
 
 {% endblock page_css %}
 {% block material %}
@@ -92,8 +92,8 @@
      - If no subscription, then show Upgrade on all.
      - If subscription, then show Cancel on current subscription and Change on others.
     -->
-    <div class="markdown mb-5 mt-3">
-      <img src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fopenmoji%2Fai-coin.svg?alt=media&token=98a9cfd7-94a0-46cb-a59e-f7ee3c1b6dbf"
+    <div class="markdown mt-3">
+      <img src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_calyx_ai.png?alt=media&token=012e8364-8ee2-4d91-9ec2-ab5f55b23059"
         style="float:left;width:125px;height:125px;"
         class="pt-3 pe-3"
       />
@@ -106,12 +106,9 @@
         <a href="https://data.cannlytics.com/licenses">licenses data archive</a>, and
         <a href="https://cannlytics.com/api">API access</a>.
       </p>
-      <div class="row px-3">
-        <div class="col-10 col-md-8 col-lg-12 card my-3 p-3 border rounded text-dark">
-          <h3 class="mb-3 mt-0">Support Options</h3>
-
+      
       <!-- Tiers -->
-      <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+      <div class="row row-cols-1 row-cols-md-3 mb-3 mt-4 text-center">
         {% for item in subscription_plans %}
           <div class="col-8 col-md-6 col-lg-4">
             <div class="card mb-4 shadow-sm">
@@ -143,8 +140,6 @@
         {% endfor %}
       </div><!-- End of tiers -->
 
-        </div>
-      </div>
     </div><!-- End of support options -->
 
     

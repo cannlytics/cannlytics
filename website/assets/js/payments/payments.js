@@ -531,7 +531,21 @@ export const payments = {
    * Tokens
    *--------------------------------------------------------------------------*/
 
-  showBuyTokensButton() {
+  async getUserTokens() {
+    /**
+     * Get the current user's subscriptions.
+     */
+    const response = await authRequest('/src/payments/subscriptions');
+    if (response.data) {
+      console.log('DATA:');
+      console.log(response.data);
+      document.getElementById('current_tokens').textContent = response.data.tokens ?? 0;
+      document.getElementById('price_per_token').textContent = (response.data.price_per_token ?? 0.05) * 100;
+    }
+    return response.data;
+  },
+
+  renderBuyTokensButton() {
     /**
      * Show a PayPal button that the user can use to purchase tokens.
      * @param {String} buttonId PayPal's hosted button ID.
@@ -544,13 +558,14 @@ export const payments = {
     const FUNDING_SOURCES = [
       // FUNDING SOURCES
       paypal.FUNDING.PAYPAL,
-      paypal.FUNDING.PAYLATER,
-      paypal.FUNDING.VENMO,
+      // paypal.FUNDING.PAYLATER,
+      // paypal.FUNDING.VENMO,
       paypal.FUNDING.CARD,
     ];
     FUNDING_SOURCES.forEach(fundingSource => {
       paypal.Buttons({
         fundingSource,
+        // intent: 'CAPTURE',
 
         // Style.
         style: {
@@ -565,11 +580,12 @@ export const payments = {
             // Make an orders request.
             const tokens = document.getElementById('tokenSlider').value;
             const details = await authRequest('/src/payments/orders', { tokens });
-            return details.id;
+            return details.id ?? details.orderId;
           } catch (error) {
             console.error(error);
             const message = `An error occurred when buying tokens. Please email dev@cannlytics.com for help.`;
             showNotification('Error buying tokens', message, /* type = */ 'error');
+            return null;
           }
         },
 

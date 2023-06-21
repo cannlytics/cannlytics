@@ -47,8 +47,8 @@ urlpatterns = [
         path('payments/subscribe', payments.subscribe, name='subscribe'),
         path('payments/subscriptions', payments.get_user_subscriptions),
         path('payments/unsubscribe', payments.unsubscribe),
-        path('payments/orders/', payments.create_order, name='create_order'),
-        path('payments/orders/<str:order_id>/capture/', payments.capture_order, name='capture_order'),
+        path('payments/orders', payments.create_order, name='create_order'),
+        path('payments/orders/<str:order_id>/capture', payments.capture_order, name='capture_order'),
     ])),
     # Optional: Redirect data/wa or data/washington to data/states/washington?
     path('data/market/<dataset_id>', market.DatasetView.as_view(), name='dataset'),

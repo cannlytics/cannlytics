@@ -21,6 +21,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import requests
+import google.auth
 
 # Internal imports.
 from cannlytics.auth.auth import authenticate_request
@@ -79,7 +80,10 @@ def get_paypal_access_token(
     }
     response = requests.post(url, data=data, headers=headers, auth=auth)
     body = response.json()
-    return body['access_token']
+    try:
+        return body['access_token']
+    except KeyError:
+        print('ERROR:', body)
 
 
 def cancel_paypal_subscription(
@@ -265,6 +269,7 @@ def unsubscribe(request):
     return JsonResponse(response)
 
 
+@api_view(['POST'])
 def create_order(request):
     """Place an order for tokens through PayPal."""
 
@@ -280,10 +285,13 @@ def create_order(request):
     # Get the number of tokens the user wishes to purchase.
     data = loads(request.body)
     try:
-        number_of_tokens = data['tokens']
+        number_of_tokens = float(data['tokens'])
     except:
         response = {'success': False, 'message': 'Number of `tokens` required in the request body.'}
         return JsonResponse(response)
+    
+    print('User: {}'.format(uid))
+    print('User wants to purchase {} tokens.'.format(number_of_tokens))
 
     # Get the user's price per token.
     plan_name = None
@@ -293,56 +301,70 @@ def create_order(request):
         price_per_token = user_subscription.get('price_per_token', DEFAULT_PRICE_PER_TOKEN)
         plan_name = user_subscription.get('plan_name')
 
+    print('Plan: {}'.format(plan_name))
+    print('Price per token: {}'.format(price_per_token))
+
+    # try:
+    # Calculate the price.
+    price = price_per_token * number_of_tokens
+    print('Price: {}'.format(price))
+
+    # Record the order in Firestore.
     try:
-        # Calculate the price.
-        price = price_per_token * number_of_tokens
-
-        # Record the order in Firestore.
-        try:
-            timestamp = datetime.now().isoformat()
-            order_id = timestamp.replace(':', '-').replace('.', '-')
-            order_ref = f'payments/orders/{uid}/{order_id}'
-            order_data = {
-                'created_at': timestamp,
-                'uid': uid,
-                'user_email': user_email,
-                'plan_name': plan_name,
-                'price': price,
-                'price_per_token': price_per_token,
-                'number_of_tokens': number_of_tokens,
-            }
-            update_document(order_ref, order_data)
-        except:
-            pass
-
-        # Get PayPal access token.
-        project_id = os.environ['GOOGLE_CLOUD_PROJECT']
-        payload = access_secret_version(project_id, 'paypal', 'latest')
-        paypal_secrets = loads(payload)
-        paypal_client_id = paypal_secrets['client_id']
-        paypal_secret = paypal_secrets['secret']
-        paypal_access_token = get_paypal_access_token(paypal_client_id, paypal_secret)
-
-        # Define the order payload.
-        purchase = [{'amount': {'currency_code': 'USD', 'value': price}}]
-        payload = {'intent': 'CAPTURE', 'purchase_units': purchase}
-
-        # Make the request to create the order.
-        url = 'https://api-m.paypal.com/v2/checkout/orders'
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {paypal_access_token}',
+        timestamp = datetime.now().isoformat()
+        order_id = timestamp.replace(':', '-').replace('.', '-')
+        order_ref = f'payments/orders/{uid}/{order_id}'
+        order_data = {
+            'created_at': timestamp,
+            'uid': uid,
+            'user_email': user_email,
+            'plan_name': plan_name,
+            'price': price,
+            'price_per_token': price_per_token,
+            'number_of_tokens': number_of_tokens,
         }
-        response = requests.post(url, data=dumps(payload), headers=headers)
-        response.raise_for_status()
+        update_document(order_ref, order_data)
+        print('Made entry in Firestore')
+    except:
+        pass
 
-        # Return the response.
-        return Response(response.json(), content_type='application/json')
+    # Get PayPal access token.
+    try:
+        project_id = os.environ['GOOGLE_CLOUD_PROJECT']
+    except:
+        _, project_id = google.auth.default()
+    payload = access_secret_version(project_id, 'paypal', 'latest')
+    paypal_secrets = loads(payload)
+    paypal_client_id = paypal_secrets['client_id']
+    paypal_secret = paypal_secrets['secret']
+    paypal_access_token = get_paypal_access_token(paypal_client_id, paypal_secret)
 
-    except Exception as e:
-        return Response({'error': str(e)}, status=500)
+    # Define the order payload.
+    purchase = [{'amount': {'currency_code': 'USD', 'value': str(price)}}]
+    payload = {'intent': 'CAPTURE', 'purchase_units': purchase}
+
+    print('Making PayPal request...')
+
+    # Make the request to create the order.
+    url = 'https://api-m.paypal.com/v2/checkout/orders'
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {paypal_access_token}',
+    }
+    response = requests.post(url, json=dumps(payload), headers=headers)
+    print(response.json())
+    response.raise_for_status()
+
+    print('Successful PayPal request.')
+
+    # Return the response.
+    return Response(response.json(), content_type='application/json')
+
+    # except Exception as e:
+    #     return Response({'error': str(e)}, status=500)
 
 
+@api_view(['POST'])
 def capture_order(request, order_id):
     """Capture a PayPal order of AI tokens."""
 
@@ -357,7 +379,10 @@ def capture_order(request, order_id):
 
     try:
         # Get PayPal access token.
-        project_id = os.environ['GOOGLE_CLOUD_PROJECT']
+        try:
+            project_id = os.environ['GOOGLE_CLOUD_PROJECT']
+        except:
+            _, project_id = google.auth.default()
         payload = access_secret_version(project_id, 'paypal', 'latest')
         paypal_secrets = loads(payload)
         paypal_client_id = paypal_secrets['client_id']
