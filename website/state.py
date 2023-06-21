@@ -235,6 +235,16 @@ page_docs = {
 # Page data where the key is the page name and the value is a dictionary
 # of `collections` and `documents` that contain Firestore queries.
 page_data = {
+    "account": {
+        "collections": [
+            {
+                "name": "subscription_plans",
+                "ref": "public/subscriptions/subscription_plans",
+                "order_by": "price_per_token",
+                "desc": False
+            }
+        ]
+    },
     "articles": {
         "collections": [
             {

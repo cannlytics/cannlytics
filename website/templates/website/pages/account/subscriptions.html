@@ -76,164 +76,84 @@
 
 {% else %}
 
+  <!-- Header -->
+  {% include "website/components/heros/hero_banner.html" with
+    title="Manage your Cannlytics Subscription"
+    description="Explore subscription plans and find the right plan for you."
+    background_image="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2Fcannbot-ai.png?alt=media&token=3f2b4dcd-d661-404e-b417-c38768f1cb44"
+    background_position="top left"
+    only
+  %}
+
   <!-- Subscription Management -->
   <section class="container mb-2 mt-5">
 
-    <!-- Header -->
-    <div class="text-center pb-3">
-      <h2 class="mb-3 pt-5 serif text-dark">
-        Manage your Cannlytics Subscription
-      </h2>
-      <p class="fs-6 double-line mb-5 mx-auto" style="max-width:540px;">
-        Showing subscriptions for {{ user.email }}.
-      </p>
-    </div>
-
-    <!-- Subscribe / unsubscribe from enterprise / pro support -->
-    <div class="markdown mb-5 mt-3" style="max-width:560px;">
+    <!-- FIXME: 
+     - If no subscription, then show Upgrade on all.
+     - If subscription, then show Cancel on current subscription and Change on others.
+    -->
+    <div class="markdown mb-5 mt-3">
       <img src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fopenmoji%2Fai-coin.svg?alt=media&token=98a9cfd7-94a0-46cb-a59e-f7ee3c1b6dbf"
         style="float:left;width:125px;height:125px;"
         class="pt-3 pe-3"
       />
       <h1 class="pt-4 text-dark">Cannlytics AI Subscription</h1>
-      <p class="mt-2">
+      <p class="mt-2" style="max-width:560px;">
         You can get access to bleeding-edge AI tools to give yourself
         a competitive edge, including:
-        <a href="https://data.cannlytics.com/sales">a receipt parser</a>,
         <a href="https://data.cannlytics.com/results">a COA parser</a>,
-        <a href="https://data.cannlytics.com/licenses">licenses archive</a>, and
+        <a href="https://data.cannlytics.com/sales">a receipt parser</a>,
+        <a href="https://data.cannlytics.com/licenses">licenses data archive</a>, and
         <a href="https://cannlytics.com/api">API access</a>.
       </p>
       <div class="row px-3">
-        <div class="col-10 col-md-8 card my-3 p-3 border rounded text-dark">
+        <div class="col-10 col-md-8 col-lg-12 card my-3 p-3 border rounded text-dark">
           <h3 class="mb-3 mt-0">Support Options</h3>
 
-          <!-- TODO: Add details under each -->
-
-          <!-- Enterprise -->
-          <div class="d-flex justify-content-between mb-3">
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="support-option"
-                id="support-option-enterprise"
-              >
-              <label
-                class="app-action background-hover form-check-label"
-                for="support-option-enterprise"
-              >
-                Enterprise
-              </label>
-              {% comment %} {% icon 'info' width="16px" height="16px" class="ms-1"
-                data-bs-toggle="tooltip"
-                data-bs-placement="right"
-                title="Custom installation, access to admin tools, feature requests, and talk with devs."
-              %} {% endcomment %}
-            </div>
-            <div class="text-secondary text-nowrap">$420 / mo.</div>
-          </div>
-
-          <!-- Pro -->
-          <div class="d-flex justify-content-between mb-3">
-            <div class="form-check">
-              <input
-                class="form-check-input danger"
-                type="radio"
-                name="support-option"
-                id="support-option-pro"
-              >
-              <label
-                class="app-action background-hover form-check-label"
-                for="support-option-pro"
-              >
-                Pro
-              </label>
-              {% comment %} {% icon 'info' width="16px" height="16px" class="ms-1"
-                data-bs-toggle="tooltip"
-                data-bs-placement="right"
-                title="Metrc integration, access to dev tools, unlimited data storage, and email support."
-              %} {% endcomment %}
-            </div>
-            <div class="text-secondary text-nowrap">$42 / mo.</div>
-          </div>
-
-          <!-- Premium -->
-          <div class="d-flex justify-content-between mb-3">
-            <div class="form-check">
-              <input
-                class="form-check-input danger"
-                type="radio"
-                name="support-option"
-                id="support-option-premium"
-              >
-              <label
-                class="app-action background-hover form-check-label"
-                for="support-option-premium"
-              >
-                Standard
-              </label>
-              {% comment %} {% icon 'info' width="16px" height="16px" class="ms-1"
-                data-bs-toggle="tooltip"
-                data-bs-placement="right"
-                title="Metrc integration, access to dev tools, unlimited data storage, and email support."
-              %} {% endcomment %}
-            </div>
-            <div class="text-secondary text-nowrap">$4.20 / mo.</div>
-          </div>
-          
-
-          <!-- No support -->
-          <div class="d-flex justify-content-between mb-3">
-            <div class="form-check pe-4">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="support-option"
-                id="support-option-no-support"
-                checked
-              >
-              <label
-                class="app-action background-hover form-check-label"
-                for="support-option-no-support"
-              >
-                No support
-              </label>
+      <!-- Tiers -->
+      <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+        {% for item in subscription_plans %}
+          <div class="col-8 col-md-6 col-lg-4">
+            <div class="card mb-4 shadow-sm">
+              <div class="card-header bg-gradient-{{ item.color }}">
+                <h4 class="fw-bold text-white my-0">
+                  {{ item.name }}
+                </h4>
+              </div>
+              <div class="card-body bg-transparent d-flex flex-column justify-content-between align-items-center">
+                <h1 class="text-dark card-title pricing-card-title">
+                  {{ item.price }}
+                </h1>
+                <ul class="text-dark list-unstyled mt-3 mb-4 text-start w-75">
+                  {% for attribute in item.attributes %}
+                      <li class="fs-6 mb-1">
+                        <svg class="" style="width:24px;height:24px;">
+                          <use href="{% static "website/images/emojies/check.svg" %}#check-emoji"></use>
+                        </svg>
+                        <small class="serif text-dark">
+                          {{ attribute }}
+                        </small>
+                      </li>
+                  {% endfor %}
+                </ul>
+                <div id="paypal-{{ item.plan_name }}"></div>
+              </div>
             </div>
           </div>
-        </div>
+        {% endfor %}
+      </div><!-- End of tiers -->
 
-        <!-- PayPal buttons -->
-        <div id="checkout-enterprise-button" class="col-3 my-3 d-none">
-          <div id="paypal-enterprise"></div>
-        </div>
-        <div id="checkout-pro-button" class="col-3 my-3 d-none">
-          <div id="paypal-pro"></div>
-        </div>
-        <div id="checkout-premium-button" class="col-3 my-3 d-none">
-          <div id="paypal-premium"></div>
         </div>
       </div>
+    </div><!-- End of support options -->
 
-      <!-- Actions -->
-      <div class="col-8 d-flex justify-content-end">
-        <button
-          id="cancel-support-button"
-          class="btn btn-sm btn-sm-light serif me-2 d-none"
-        >
-          Cancel
-        </button>
-        <button
-          id="save-support-button"
-          class="btn btn-sm bg-gradient-green text-white serif d-none"
-        >
-          Save
-        </button>
-      </div>
-
-    </div>
+    
 
     <!-- TODO: Usage / tokens-->
+    {% include "website/pages/account/tokens.html" with
+      user=user
+      only
+    %}
     {% comment %} <div class="row">
       <div class="col-lg-4">
         <div class="card text-center">
@@ -395,8 +315,10 @@
 
 <script>
 
+  // FIXME:
   // Initialize the interface with the user's current subscriptions.
-  cannlytics.payments.initializeSubscriptions();
+  // cannlytics.payments.initializeSubscriptions();
+  cannlytics.payments.initializeSupport();
 
   // TODO: Automatically unsubscribe user from newsletter if they navigate with
   // special query parameter that is a salted hash of their email.
