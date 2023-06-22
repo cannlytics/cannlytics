@@ -92,8 +92,8 @@ material = {
                 "section": "subscriptions",
             },
             {
-                "title": "Make a suggestion",
-                "section": "feedback",
+                "title": "Manage your API keys",
+                "section": "api-keys",
             },
         ],
     },

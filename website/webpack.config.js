@@ -21,8 +21,8 @@ module.exports = env => {
       devMiddleware: {
       	writeToDisk: true, // Write files to disk in dev mode, so that Django can serve the assets.
       },
-      hot: true,
-      liveReload: true,
+      hot: false,
+      liveReload: false,
     },
     resolve: {
       extensions: ['.js'],

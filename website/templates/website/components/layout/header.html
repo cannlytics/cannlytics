@@ -3,7 +3,7 @@
 <!--
   Header | Cannlytics Website
   Created: 1/7/2021
-  Updated: 5/29/2023
+  Updated: 6/22/2023
 
   Optional links to add:
     - Examples?
@@ -61,8 +61,10 @@
     <!-- Navigation Links -->
     <div
       id="navbarNavDropdown"
-      class="collapse navbar-collapse justify-content-between"
+      class="collapse navbar-collapse d-flex justify-content-between align-items-start align-items-lg-center"
     >
+
+      <!-- Navigation -->
       <ul class="navbar-nav me-2">
         <li class="nav-item mb-0">
           <a
@@ -190,8 +192,8 @@
         </li>
       </ul>
 
-      <!-- Right Navigation (Not signed in) -->
-      <ul class="navbar-nav align-items-center me-3 indicates-auth visually-hidden">
+      <!-- No user menu -->
+      <ul class="navbar-nav align-items-end align-items-lg-center me-3 indicates-auth visually-hidden">
         {% if section != 'sign-in' %}
         <li class="nav-item h6 mb-0">
           <a

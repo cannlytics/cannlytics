@@ -1,13 +1,13 @@
 /**
  * Payment JavaScript | Cannlytics Website
- * Copyright (c) 2021-2022 Cannlytics
+ * Copyright (c) 2021-2023 Cannlytics
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 1/17/2021
  * Updated: 6/21/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
-import { getDocument } from '../firebase.js';
+import { getDocument, onAuthChange } from '../firebase.js';
 import { authRequest, getUrlParameter, showNotification, validateEmail } from '../utils.js';
 import { hideLoadingButton, showLoadingButton } from '../ui/ui.js';
 
@@ -37,6 +37,7 @@ const addPayPalButton = function(planId, planName) {
    * Create a PayPal button for a given subscription plan ID and name.
    */
   paypal.Buttons({
+    intent: 'subscription',
     createSubscription: function(data, actions) {
       return actions.subscription.create({'plan_id': planId});
     },
@@ -121,34 +122,16 @@ export const payments = {
      * Initialize the user's current subscriptions.
      */
 
-    // Setup the user interface.
-    const newsletter = JSON.parse(document.getElementById('user_newsletter').textContent);
-    // const premium = JSON.parse(document.getElementById('user_premium').textContent);
+    // Get the user's level of support.
     const support = JSON.parse(document.getElementById('user_support').textContent);
-    const newsletterCheckbox = document.getElementById('free-newsletter-checkbox');
-    // const premiumCheckbox = document.getElementById('premium-material-checkbox');
-    if (newsletter) newsletterCheckbox.checked = true;
-    // if (premium) premiumCheckbox.checked = true;
-    if (support) {
-      document.getElementById(`support-option-${support}`).checked = true;
-      document.getElementById('support-option-no-support').checked = false;
-    }
-    
-    // Attach functionality.
-    newsletterCheckbox.addEventListener('click', this.subscribeToFreeNewsletter);
-    // premiumCheckbox.addEventListener('click', this.subscribeToPremium);
-    // document.getElementById('save-premium-button').addEventListener('click', this.savePremiumSubscription);
-    // document.getElementById('cancel-premium-button').addEventListener('click', this.cancelSubscribeToPremium);
-    document.getElementById('support-option-enterprise').addEventListener('click', this.changeSupportSubscription);
-    document.getElementById('support-option-pro').addEventListener('click', this.changeSupportSubscription);
-    document.getElementById('support-option-premium').addEventListener('click', this.changeSupportSubscription);
-    document.getElementById('support-option-no-support').addEventListener('click', this.changeSupportSubscription);
-    document.getElementById('save-support-button').addEventListener('click', this.saveSupportSubscription);
-    document.getElementById('cancel-support-button').addEventListener('click', this.cancelChangeSupportSubscription);
-    
-    // Initialize subscriptions.
-    // this.initializePremiumSubscription();
-    this.initializeSupport();
+    console.log('Users level of support:');
+    console.log(support);
+
+    // TODO: If no subscription, then show Upgrade on all.
+
+    // TODO: If subscription, then show Cancel on current subscription and Change on others.
+
+
   },
 
   async getSubscription(name) {
@@ -244,6 +227,19 @@ export const payments = {
   /**---------------------------------------------------------------------------
    * Subscription Plans
    *--------------------------------------------------------------------------*/
+
+  async initializeFreeNewsletter() {
+    /** 
+     * Initialize the user's free newsletter subscription.
+     */
+    onAuthChange(async (user) => {
+      if (!user) return;
+        const userData = await authRequest('/api/users');
+        console.log('USER DATA:');
+        console.log(userData);
+        document.getElementById('free-newsletter-checkbox').checked = userData.data.newsletter;
+    });
+  },
 
   async subscribeToFreeNewsletter() {
     /**
@@ -531,6 +527,12 @@ export const payments = {
    * Tokens
    *--------------------------------------------------------------------------*/
 
+  navigateToBuyTokens() {
+    /** Navigate the user to the buy tokens page. */
+    const tokens = document.getElementById('tokenSlider').value;
+    
+  },
+
   async getUserTokens() {
     /**
      * Get the current user's subscriptions.
@@ -541,6 +543,26 @@ export const payments = {
       console.log(response.data);
       document.getElementById('current_tokens').textContent = response.data.tokens ?? 0;
       document.getElementById('price_per_token').textContent = (response.data.price_per_token ?? 0.05) * 100;
+    }
+    try {
+      // Get the number of tokens from the URL.
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokens = urlParams.get('tokens');
+      document.getElementById('tokens').textContent = tokens.toString();
+
+      // Get the price per token.
+      const pricePerTokenElement = document.getElementById('price_per_token');
+      const pricePerToken = parseFloat(pricePerTokenElement.textContent);
+
+      // Calculate the total price.
+      const totalPrice = tokens * pricePerToken / 100;
+
+      // Now you can use totalPrice wherever you need it.
+      // For example, to display it in an element with id "totalPrice":
+      const totalPriceElement = document.getElementById('price');
+      totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
+    } catch(error) {
+      // No price to calculate.
     }
     return response.data;
   },
@@ -629,6 +651,8 @@ export const payments = {
             // Successful transaction.
             var msg = `You have successfully purchased ${tokens} Cannlytics AI tokens! You can use your tokens to run AI-powered jobs in the app. Put your AI jobs to good use!`;
             showNotification('Cannlytics AI tokens purchased', msg, /* type = */ 'success', /* delay = */ 10000);
+
+            // TODO: Show a success form to the user.
 
             // Update the user's token count.
             document.getElementById('current_tokens').textContent = details.tokens;

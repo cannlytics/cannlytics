@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 11/16/2021
-  Updated: 1/4/2022
+  Updated: 6/21/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -17,8 +17,7 @@
   <!-- Minor Style Adjustments -->
   <style>
     .tooltip-inner {
-      text-
-      align: left;
+      text-align: left;
     }
     .bg-purple {
       background-color: #7B4EA8 !important;
@@ -43,18 +42,23 @@
     }
   </style>
 
-  <!-- PayPal JavaScript -->
-  <script data-sdk-integration-source="integrationbuilder_sc"></script>
-  <script src="https://www.paypal.com/sdk/js?client-id=Ae4CcPpl9WnMMNNVxvrhf6MMEpBPsf42UQki5hCivL7cEIQRc89-oWpVEF7sSif8k65CxTWrutGELsHR&components=buttons"></script>
-  {% comment %} <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script> {% endcomment %}
+  <!-- PayPal Subscriptions JavaScript -->
+  <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
 
 {% endblock page_css %}
 {% block material %}
 
-{% if not user.email %}
+  <!-- Header -->
+  {% include "website/components/heros/hero_banner.html" with
+    title="Manage your Cannlytics Subscription"
+    description="Explore subscription plans and find the right plan for you."
+    background_image="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2Fcannbot-ai.png?alt=media&token=3f2b4dcd-d661-404e-b417-c38768f1cb44"
+    background_position="top left"
+    only
+  %}
 
   <!-- Sign In Prompt -->
-  <section class="container mb-2 mt-5 d-flex justify-content-center">
+  <section class="indicates-auth container mb-2 mt-5 d-flex justify-content-center">
     <div class="markdown py-5" style="max-width:560px;">
       <svg class="pe-3 pt-3" style="float:left;width:125px;height:125px;">
         <use href="{% static "website/images/emojies/newspaper.svg" %}#newspaper-emoji"></use>
@@ -66,29 +70,48 @@
       </p>
       <div class="d-flex justify-content-center mt-3">
         <a
-          class="btn btn-sm bg-gradient-green text-white serif"
+          class="btn bg-gradient-green text-white serif mx-2"
           data-bs-target="#sign-in-dialog"
           data-bs-toggle="modal"
         >
-          Sign in &raquo;
+          Sign in
+        </a>
+        <a
+          class="btn bg-gradient-orange text-white serif mx-2"
+          href="{% url 'section' page='account' section='sign-up' %}"
+        >
+          Sign Up
         </a>
       </div>
     </div>
   </section>
 
-{% else %}
-
-  <!-- Header -->
-  {% include "website/components/heros/hero_banner.html" with
-    title="Manage your Cannlytics Subscription"
-    description="Explore subscription plans and find the right plan for you."
-    background_image="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2Fcannbot-ai.png?alt=media&token=3f2b4dcd-d661-404e-b417-c38768f1cb44"
-    background_position="top left"
-    only
-  %}
-
   <!-- Subscription Management -->
-  <section class="container mb-2 mt-5">
+  <section class="requires-auth container mb-2">
+
+    <!-- Breadcrumbs -->
+    <div class="d-flex mt-4 markdown">
+      <nav
+        style="--bs-breadcrumb-divider: '>';"
+        aria-label="breadcrumb"
+      >
+        <ol class="breadcrumb bg-transparent p-0 mb-0">
+          <li class="breadcrumb-item fs-6 lh-sm">
+            <a
+              class="text-dark serif action"
+              href="{% url 'page' page='account' %}"
+            >
+              Account
+            </a>
+          </li>
+          <li class="breadcrumb-item active fs-6 lh-sm text-dark serif" aria-current="page">
+            Subscriptions
+          </li>
+        </ol>
+        <div>
+      </div>
+      </nav>
+    </div>
 
     <!-- FIXME: 
      - If no subscription, then show Upgrade on all.
@@ -135,6 +158,20 @@
                       </li>
                   {% endfor %}
                 </ul>
+                <div class="d-grid gap-2">
+                  <button
+                    id="subscribe-{{ item.plan_name }}-button"
+                    class="btn bg-gradient-{{ item.color }} text-white serif"
+                  >
+                    {{ item.action|safe }}
+                  </button>
+                  <button
+                    id="unsubscribe-{{ item.plan_name }}-button"
+                    class="btn bg-gradient-{{ item.color }} btn-lg d-none"
+                  >
+                    Unsubscribe
+                  </button>
+                </div>
                 <div id="paypal-{{ item.plan_name }}"></div>
               </div>
             </div>
@@ -144,120 +181,13 @@
 
     </div><!-- End of support options -->
 
-    
-
-    <!-- TODO: Usage / tokens-->
+    <!-- Tokens-->
     {% include "website/pages/account/tokens.html" with
       user=user
       only
     %}
-    {% comment %} <div class="row">
-      <div class="col-lg-4">
-        <div class="card text-center">
-          <div class="card-header bg-green">
-            <h4 class="text-white serif fw-bold my-2">Free</h4>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title text-dark fw-bold">$0 / month</h5>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">10 AI jobs</li>
-              <li class="list-group-item">Personal archive</li>
-              <li class="list-group-item">Access all data</li>
-            </ul>
-            <button class="btn btn-green mt-3">Select Plan</button>
-          </div>
-        </div>
-      </div>
-    
-      <div class="col-lg-4">
-        <div class="card text-center">
-          <div class="card-header bg-orange text-white">
-            <h4 class="text-white serif fw-bold my-2">Standard Plan</h4>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title text-dark fw-bold">$4.20 / month</h5>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">100 AI jobs</li>
-              <li class="list-group-item">4.2¢ / additional job</li>
-              <li class="list-group-item">Throttled API</li>
-            </ul>
-            <button class="btn btn-orange mt-3">Select Plan</button>
-          </div>
-        </div>
-      </div>
-    
-      <div class="col-lg-4">
-        <div class="card text-center">
-          <div class="card-header bg-purple text-white">
-            <h4 class="text-white serif fw-bold my-2">Pro Plan</h4>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title text-dark fw-bold">$42 / month</h5>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">1,250 AI jobs</li>
-              <li class="list-group-item">3.3¢ / additional job</li>
-              <li class="list-group-item">🚀 Unthrottled API</li>
-            </ul>
-            <button class="btn btn-purple mt-3">Select Plan</button>
-          </div>
-        </div>
-      </div>
-    </div> {% endcomment %}
 
-    {% comment %} <!-- Subscribe / unsubscribe from premium material -->
-    <div class=" markdown mb-5 mt-3" style="max-width:560px;">
-      <svg class="pe-1 pt-3" style="float:left;width:125px;height:125px;">
-        <use href="{% static "website/images/emojies/coin.svg" %}#coin-emoji"></use>
-      </svg>
-      <h1 class="pt-4 text-dark">Premium Material</h1>
-      <p class="mt-2">
-        You can get premium material to gain a competitive edge, including all
-        <a href="{% url 'page' page='data' %}">datasets</a>,
-        <a href="{% url 'page' page='videos' %}">premium videos</a>,
-        <a href="{% url 'page' page='whitepapers' %}">whitepapers</a>, and
-        <a href="{% url 'page' page='api' %}">API access</a>.
-      </p>
-      <div class="row px-3">
-        <div class="col-10 col-md-8 card my-3 p-3 border rounded text-dark">
-          <h3 class="mb-3 mt-0">Premium Material</h3>
-          <div class="d-flex justify-content-between mb-3">
-            <div class="form-check pe-4">
-              <input
-                id="premium-material-checkbox"
-                class="form-check-input"
-                type="checkbox"
-                value=""
-              >
-              <label
-                class="app-action background-hover form-check-label"
-                for="premium-material-checkbox"
-              >
-                Subscribe to all videos, whitepapers, datasets,
-                and API access
-              </label>
-            </div>
-            <div class="text-secondary text-nowrap">$4.20 / mo.</div>
-          </div>
-        </div>
-        <div id="checkout-premium-button" class="col-3 my-3 d-none">
-          <div id="paypal-premium"></div>
-        </div>
-      </div>
-      <div class="col-8 d-flex justify-content-end">
-        <button
-          id="cancel-premium-button"
-          class="btn btn-sm btn-sm-light serif me-2 d-none"
-        >
-          Cancel
-        </button>
-        <button
-          id="save-premium-button"
-          class="btn btn-sm bg-gradient-green text-white serif d-none"
-        >
-          Save
-        </button>
-      </div>
-    </div> {% endcomment %}
+    <!-- Future work: Usage -->
 
     <!-- Subscribe / unsubscribe from newsletter -->
     <div class="markdown mb-5 mt-3" style="max-width:560px;">
@@ -278,13 +208,12 @@
               id="free-newsletter-checkbox"
               class="form-check-input"
               type="checkbox"
-              value=""
             >
             <label
               class="app-action background-hover form-check-label"
               for="free-newsletter-checkbox"
             >
-              Subscribe to Free Weekly Newsletter
+              Subscribe to Free Monthly Newsletter
             </label>
           </div>
           <div class="text-secondary text-nowrap">Free</div>
@@ -297,25 +226,29 @@
 
   </section>
 
-{% endif %}
-
 {% endblock material %}
 
 <!-- JavaScript -->
 {% block page_js %}
 
 <!-- Make user's subscriptions available to JavaScript -->
-{{ user.newsletter|json_script:"user_newsletter" }}
-{% comment %} {{ user.premium|json_script:"user_premium" }} {% endcomment %}
+{% comment %} {{ user.newsletter|json_script:"user_newsletter" }}
+{{ user.premium|json_script:"user_premium" }}
 {{ user.subscriptions|json_script:"user_subscriptions" }}
-{{ user.support|json_script:"user_support" }}
+{{ user.support|json_script:"user_support" }} {% endcomment %}
 
 <script>
 
   // FIXME:
   // Initialize the interface with the user's current subscriptions.
-  // cannlytics.payments.initializeSubscriptions();
+  cannlytics.payments.initializeSubscriptions();
   // cannlytics.payments.initializeSupport();
+
+  // Initialize the newsletter
+  cannlytics.payments.initializeFreeNewsletter();
+  $('#free-newsletter-checkbox').change(function() {
+    cannlytics.payments.subscribeToFreeNewsletter();
+  })
 
   // TODO: Automatically unsubscribe user from newsletter if they navigate with
   // special query parameter that is a salted hash of their email.

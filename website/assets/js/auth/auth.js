@@ -179,7 +179,7 @@ export async function signUp() {
    */
   const terms = document.getElementById('sign-up-terms-accepted');
   if (!terms.checked) {
-    const message = 'Please agree with our terms of service and read our privacy policy to create an account.';
+    const message = 'Please read and agree to our terms of service and privacy policy to create an account.';
     showNotification('Terms not accepted', message, /* type = */ 'error');
     terms.classList.add('is-invalid');
     return;
