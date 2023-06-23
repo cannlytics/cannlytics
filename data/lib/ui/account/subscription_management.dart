@@ -4,12 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/4/2023
-// Updated: 6/19/2023
+// Updated: 6/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/ui/account/subscription_controller.dart';
-import 'package:cannlytics_data/utils/utils.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -20,11 +19,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/cards/wide_card.dart';
 import 'package:cannlytics_data/constants/design.dart';
-
-// TODO: Allow users to upgrade their subscription.
-// TODO: Allow users to cancel their subscription!
-
-// TODO: Allow users to purchase additional tokens.
+import 'package:url_launcher/url_launcher.dart';
 
 /// Subscriptions cards.
 class SubscriptionManagement extends ConsumerWidget {
@@ -32,52 +27,60 @@ class SubscriptionManagement extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // FIXME: Get subscriptions.
-    // final asyncData = ref.read(appSubscriptions).value;
-    // print('ASYNC DATA: $asyncData');
+    // Get subscriptions.
+    final asyncSnapshot = ref.watch(userSubscriptionProvider);
 
-    // Render the widget.
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        WideCard(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-          child: Column(
-            // crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Choose a Subscription',
-                style: Theme.of(context).textTheme.titleLarge,
+    return asyncSnapshot.when(
+      data: (data) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            WideCard(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+              child: Column(
+                // crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Choose a Subscription',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  gapH8,
+                  Text(
+                    'Choose the plan that works best for you.',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+
+                  // Subscriptions for user's without a subscription.
+                  gapH8,
+                  SubscriptionPlanCards(
+                    items: [],
+                    activeSubscription: data['support'],
+                  ),
+                ],
               ),
-              gapH8,
-              Text(
-                'Choose the plan that works best for you.',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-
-              // Subscriptions for user's without a subscription.
-              gapH8,
-              SubscriptionPlanCards(items: []),
-              // YearlyMonthlySubscriptions(),
-
-              // TODO: Display the user's current subscription.
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
+      loading: () => CircularProgressIndicator(),
+      error: (error, stack) => Text('Error: $error'),
     );
   }
 }
 
 /// Subscription plan cards.
 class SubscriptionPlanCards extends StatelessWidget {
-  const SubscriptionPlanCards({Key? key, required this.items})
-      : super(key: key);
+  const SubscriptionPlanCards({
+    Key? key,
+    required this.items,
+    this.activeSubscription,
+  }) : super(key: key);
 
   // Parameters.
   final List<Map> items;
+  final String? activeSubscription;
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +100,7 @@ class SubscriptionPlanCards extends StatelessWidget {
     // }).toList();
     var cards = [
       SubscriptionCard(
+          active: activeSubscription == 'free',
           title: 'Free',
           price: '\$0',
           color: Color(0xff16c995),
@@ -107,6 +111,7 @@ class SubscriptionPlanCards extends StatelessWidget {
           ],
           notes: 'No credit card required'),
       SubscriptionCard(
+        active: activeSubscription == 'premium',
         title: 'Standard Plan',
         price: '\$4.20',
         color: Color(0xffFF7F00),
@@ -117,6 +122,7 @@ class SubscriptionPlanCards extends StatelessWidget {
         ],
       ),
       SubscriptionCard(
+        active: activeSubscription == 'pro',
         title: 'Pro Plan',
         price: '\$42',
         color: Color(0xff7B4EA8),
@@ -146,13 +152,13 @@ class SubscriptionPlanCards extends StatelessWidget {
 }
 
 /// Subscription card.
-/// TODO: Display active if this is the user's current plan.
 class SubscriptionCard extends StatelessWidget {
   final String title;
   final String price;
   final List<String> features;
   final Color? color;
   final String? notes;
+  final bool? active;
 
   SubscriptionCard({
     required this.title,
@@ -160,6 +166,7 @@ class SubscriptionCard extends StatelessWidget {
     required this.features,
     this.color,
     this.notes,
+    this.active,
   });
 
   @override
@@ -167,6 +174,10 @@ class SubscriptionCard extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(3),
+        side: BorderSide(
+          color: active! ? Color(0xff16c995) : Colors.transparent,
+          width: 2.0,
+        ),
       ),
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
@@ -202,16 +213,15 @@ class SubscriptionCard extends StatelessWidget {
             ),
 
             // Select plan button.
-            // TODO: Display a button to upgrade to this plan.
             Container(
               margin: EdgeInsets.symmetric(vertical: 16),
               width: double.infinity,
               child: PrimaryButton(
                 backgroundColor: color,
-                text: 'Select Plan',
-                // backgroundColor: Colors.green,
-                onPressed: () {
-                  print('TODO: Proceed to checkout plan: $title');
+                text: active! ? 'Cancel' : 'Select Plan',
+                onPressed: () async {
+                  const url = 'https://cannlytics.com/account/subscriptions';
+                  await launchUrl(Uri.parse(url));
                 },
               ),
             ),

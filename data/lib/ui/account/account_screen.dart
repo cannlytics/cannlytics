@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 6/19/2023
+// Updated: 6/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -30,10 +30,10 @@ import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cannlytics_data/ui/account/api_key_management.dart';
 import 'package:cannlytics_data/ui/account/subscription_management.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:cannlytics_data/utils/validation_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Account screen.
 class AccountScreen extends StatelessWidget {
@@ -79,21 +79,14 @@ class AccountManagement extends ConsumerWidget {
           // Account information.
           if (user != null) AccountForm(key: Key('account_form')),
 
-          // TODO: Allow users to view their usage.
-
           // Subscriptions.
           if (user != null)
             SubscriptionManagement(key: Key('user_subscriptions')),
-
-          // TODO: Allow users to manage their billing.
-
-          // TODO: Allow users to view their invoices.
 
           // General settings.
           ThemeSettings(key: Key('theme_settings')),
 
           // API keys.
-          // TODO: Finish implementing
           if (user != null) APIKeyManagement(key: Key('api_keys')),
 
           // Delete account option.
@@ -195,27 +188,6 @@ class _AccountFormState extends ConsumerState<AccountForm>
     );
   }
 
-  /// Sign out button.
-  // Widget _signOut(AsyncValue state) {
-  //   return CustomTextButton(
-  //     text: 'Sign out',
-  //     onPressed: state.isLoading
-  //         ? null
-  //         : () async {
-  //             final logout = await InterfaceUtils.showAlertDialog(
-  //               context: context,
-  //               title: 'Are you sure?',
-  //               cancelActionText: 'Cancel',
-  //               defaultActionText: 'Sign out',
-  //             );
-  //             if (logout == true) {
-  //               await ref.read(authProvider).signOut();
-  //               context.go('/sign-in');
-  //             }
-  //           },
-  //   );
-  // }
-
   /// Reset password button.
   Widget _resetPassword(AsyncValue state) {
     return SecondaryButton(
@@ -227,12 +199,6 @@ class _AccountFormState extends ConsumerState<AccountForm>
 
   @override
   Widget build(BuildContext context) {
-    // Listen to errors.
-    // ref.listen<AsyncValue>(
-    //   accountProvider,
-    //   (_, state) => state.showAlertDialogOnError(context),
-    // );
-
     // Listen to the account state.
     final state = ref.watch(accountProvider);
 
@@ -375,12 +341,10 @@ class _AccountFormState extends ConsumerState<AccountForm>
       ),
     );
 
-    // TODO: Manage additional Firestore user data:
+    // Optional: Manage additional Firestore user data:
     // - Account created date.
     // - Last sign in date.
     // - View logs.
-
-    // Business:
     // - View / manage organizations and teams.
     // - state (restrict to Cannlytics-verified states)
     // - licenses (/admin/create-license and /admin/delete-license)
@@ -518,6 +482,45 @@ class DeleteAccountCard extends ConsumerWidget {
                   }
                 },
               ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// API key management.
+class APIKeyManagement extends ConsumerWidget {
+  const APIKeyManagement({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return WideCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Title.
+              Text(
+                'API Keys',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              SizedBox(height: 8),
+
+              // Manage your account link.
+              SecondaryButton(
+                text: 'Manage your API keys',
+                onPressed: () {
+                  const url = 'https://cannlytics.com/account/subscriptions';
+                  launchUrl(Uri.parse(url));
+                },
+              ),
+
+              // Future work: Table of API keys.
+              // ApiKeysTable(),
             ],
           ),
         ],

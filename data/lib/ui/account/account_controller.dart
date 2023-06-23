@@ -4,15 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 6/18/2023
+// Updated: 6/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Package imports:
-import 'package:cannlytics_data/services/api_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
@@ -113,122 +111,16 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
       }
     });
   }
-
-  /// Get the user's subscription.
-  Future<Map> getSubscription() async {
-    final _firestore = ref.watch(firestoreProvider);
-    var subscription = {};
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final user = ref.read(userProvider).value;
-      if (user != null) {
-        String path = 'users/${user.uid}/subscription';
-        subscription = await _firestore.getDocument(path: path) ?? {};
-      }
-    });
-    return subscription;
-  }
 }
-
-/* === Subscription === */
-
-// Subscription service provider.
-final subscriptionService = Provider<SubscriptionService>((ref) {
-  return SubscriptionService();
-});
-
-/// Subscription service.
-class SubscriptionService {
-  const SubscriptionService();
-
-  // Get subscriptions.
-  Future<void> getSubscriptions(String uid) async {
-    print('Getting subscriptions...');
-    String url = '/src/payments/subscriptions';
-    var response = await APIService.apiRequest(url, options: {'get': true});
-    return response;
-  }
-
-  // Unsubscribe from a plan.
-  Future<void> unsubscribe(String uid, String planName) async {
-    print('Unsubscribing from plan...');
-    String url = '/src/payments/unsubscribe';
-    await APIService.apiRequest(url, data: {'plan_name': planName});
-  }
-
-  // Purchase additional tokens.
-  Future<void> purchaseTokens(String uid, int tokenCount) async {
-    print('Purchasing tokens...');
-    String url = '/src/payments/tokens';
-    await APIService.apiRequest(url, data: {'token_count': tokenCount});
-  }
-
-  // Purchase additional tokens with PayPal.
-  Future<void> purchaseTokensWithPayPal(String uid, int tokenCount) async {
-    print('Purchasing tokens with PayPal...');
-    // You would need to implement the PayPal payment flow here.
-    // This is a placeholder as the implementation would depend on your specific PayPal integration.
-  }
-}
-
-/* === Usage === */
 
 /// Stream a user's subscription data from Firebase.
-final userSubscription = StreamProvider<Map>((ref) async* {
-  final FirestoreService _dataSource = ref.watch(firestoreProvider);
-  final user = ref.watch(authProvider).currentUser;
-  if (user == null) return;
-  print('STREAMING SUBSCRIPTION FOR USER: ${user.uid}');
-  yield* _dataSource.watchDocument(
-    path: 'subscribers/${user.uid}',
-    builder: (data, documentId) => data!,
+final userSubscriptionProvider = StreamProvider.autoDispose<Map>((ref) {
+  final _database = ref.watch(firestoreProvider);
+  final user = ref.watch(userProvider).value;
+  return _database.watchDocument(
+    path: 'subscribers/${user!.uid}',
+    builder: (data, documentId) {
+      return data ?? {};
+    },
   );
 });
-
-/* === Invoices === */
-
-// TODO: Get invoices.
-
-// TODO: Download invoice.
-
-/* === API Keys === */
-
-// API Key service provider.
-final apiKeyService = Provider<APIKeyService>((ref) {
-  return APIKeyService();
-});
-
-/// API Key service.
-class APIKeyService {
-  const APIKeyService();
-
-  // Create API key.
-  Future<String> createAPIKey() async {
-    print('Creating API key...');
-    String url = '/api/auth/create-key';
-    var data = {}; // Replace with your form data
-    var response = await APIService.apiRequest(url, data: data);
-    return response['api_key'];
-  }
-
-  // Delete API key.
-  Future<void> deleteAPIKey() async {
-    print('Deleting API key...');
-    String url = '/api/auth/delete-key';
-    var data = {}; // Replace with your form data
-    var response = await APIService.apiRequest(url, data: data);
-    if (!response['success']) {
-      print('Error deleting API key: ${response['message']}');
-      return;
-    }
-    print('API key deleted successfully');
-  }
-
-  // Get API keys.
-  Future<List> getAPIKeys() async {
-    print('Getting API keys...');
-    String url = '/api/auth/get-keys';
-    var response = await APIService.apiRequest(url);
-    return response['data'];
-  }
-}

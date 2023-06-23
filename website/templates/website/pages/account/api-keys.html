@@ -29,7 +29,7 @@
   only
 %}
 
-<!-- API Key Management -->
+<!-- API Keys Management -->
 <section class="requires-auth container mb-2">
 
   <!-- Breadcrumbs -->
@@ -68,7 +68,7 @@
             API Keys
           </h1>
           <button
-            class="btn bg-gradient-green text-white serif"
+            class="btn btn-sm bg-gradient-green text-white serif"
             onclick="showNewKeyForm();"
           >
             Add a key
@@ -86,8 +86,6 @@
 
     <!-- Options -->
     <div class="col mt-2 mx-3">
-
-      <!-- TODO: No keys placeholder -->
 
       <!-- Create a key card -->
       <div
@@ -127,7 +125,7 @@
                 >
               </div>
             </div>
-            {% comment %} <div class="row mb-3">
+            <div class="row mb-3">
               <label
                 for="input-expiration-at"
                 class="col-sm-3 col-form-label col-form-label-sm pe-2 text-dark text-no-wrap serif"
@@ -136,7 +134,7 @@
               </label>
               <div class="col-sm-9">
                 <input
-                  id="input-key-name"
+                  id="input-expiration-at"
                   type="text"
                   class="form-control form-control-sm"
                   name="expiration_at"
@@ -144,7 +142,7 @@
                   data-date-start-date="-0d"
                 >
               </div>
-            </div> {% endcomment %}
+            </div>
             {% comment %} <div class="row mb-3">
               <label
                 for="input-permissions"
@@ -170,9 +168,9 @@
           </form>
 
           <!-- Cancel and create buttons -->
-          <div class="d-flex justify-content-start">
+          <div class="d-flex justify-content-start mt-4">
             <button
-              class="btn btn-sm-light text-dark serif me-2"
+              class="btn btn-sm-light btn-md-light text-dark serif me-2"
               onclick="hideNewKeyForm()"
             >
               Cancel
@@ -180,7 +178,6 @@
             <button
               id='create-api-key-button'
               class="btn btn-sm bg-gradient-green text-white serif"
-              onclick="cannlytics.settings.createAPIKey();"
             >
               Create key
             </button>
@@ -201,17 +198,19 @@
       <!-- Key created card -->
       <div
         id="key-created-card"
-        class="card bg-transparent border-secondary rounded-3 px-2 py-2 d-none"
+        class="card bg-transparent border-secondary rounded-3 py-2 my-5 d-none"
         style="max-width: 600px;"
       >
-        <div class="simple-flex border-bottom pb-2 mb-3">
-          <h4 class="fs-5 text-dark mb-0">API Key Created</h4>
+        <div class="card-header">
+          <h4 class="fs-5 serif text-dark mb-0">API Key Created</h4>
         </div>
-        <div class="col pb-2">
-          <h1 class="fs-6 lh-base text-dark mb-0">You can store your API key now</h1>
+        <div class="card-body bg-transparent pb-2">
+          <h1 class="fs-6 lh-base text-dark serif">
+            Save your API key
+          </h1>
           <p class="fs-6 text-secondary mb-3">
             <small>
-              Your API key is not stored in any other place and cannot be retrieved or re-created.
+              Your API key is not stored in our system and cannot be retrieved or re-created.
               We strongly recommend that you encrypt your API keys in your data store
               and in memory when working with them, except when you need to access them
               to interface with the API.
@@ -222,11 +221,11 @@
           <div class="my-3 row">
             <label
               for="api-key"
-              class="col-sm-1 col-form-label col-form-label-sm text-dark"
+              class="col-form-label col-form-label-sm text-dark serif"
             >
-              Key
+              Cannlytics API Key
             </label>
-            <div class="col-sm-11">
+            <div class="col-12">
               <input
                 id="api-key"
                 type="text"
@@ -236,9 +235,9 @@
               >
             </div>
           </div>
-          <div class="d-flex justify-content-start">
+          <div class="d-flex justify-content-start mt-4">
             <button
-              class="btn btn-sm btn-sm-light text-dark me-2"
+              class="btn btn-sm-light btn-md-light text-dark me-2"
               onclick="closeKeyCreatedForm();"
             >
               Close
@@ -267,7 +266,10 @@
        */
       document.getElementById('key-created-card').classList.add('d-none');
       document.getElementById('api-key').value = '';
-      window.location.reload();
+      document.getElementById('key-table-container').classList.remove('d-none');
+      cannlytics.settings.getAPIKeys().then(function(data) {
+        gridOptions.api.setRowData(data);
+      });
     }
 
 
@@ -296,9 +298,7 @@
       hideNewKeyForm();
       const selectedRows = gridOptions.api.getSelectedRows();
       localStorage.setItem('api-key', JSON.stringify(selectedRows[0]));
-      console.log(selectedRows[0]);
-      // const key = selectedRows[0].key;
-      // window.location.href = `${window.location.origin}/account/api-key/${key}`;
+      window.location.href = `${window.location.origin}/account/api-key`;
     }
 
     // Specify the table columns.
@@ -306,7 +306,6 @@
       { field: 'name', headerName: 'Name' },
       { field: 'created_at', headerName: 'Created' },
       { field: 'expiration_at', headerName: 'Expiration' },
-      { field: 'permissions', headerName: 'Permissions' },
     ];
 
     // Specify the table options.
@@ -314,7 +313,7 @@
       columnDefs: columnDefs,
       defaultColDef: { flex: 1,  minWidth: 100 },
       rowClass: 'app-action',
-      rowHeight: 25,
+      rowHeight: 40,
       rowSelection: 'single',
       onSelectionChanged: onSelectionChanged,
       overlayLoadingTemplate: `
@@ -346,17 +345,29 @@
     // Render the table.
     const eGridDiv = document.querySelector('#key-table');
     new agGrid.Grid(eGridDiv, gridOptions);
-    // FIXME:
-    console.log(cannlytics.ui);
-    //cannlytics.ui.theme.setTableTheme();
+    cannlytics.ui.setTableTheme();
 
-    // FIXME:
+    // Add create API key functionality.
+    const createAPIKeyButton = document.getElementById('create-api-key-button');
+    createAPIKeyButton.addEventListener('click', function() {
+      cannlytics.settings.createAPIKey().then(function(data) {
+        gridOptions.api.setRowData(data);
+      });
+    });
+
     // Get the row data and provide it to the table via the AG Grid API.
     // Note that the user UID is passed from Django's user session.
-    //cannlytics.settings.getAPIKeys('{{ user.uid }}').then(function(data) {
-    //  gridOptions.api.setRowData(data);
-    //});
-    gridOptions.api.setRowData([]);
+    cannlytics.settings.getAPIKeys().then(function(data) {
+      gridOptions.api.setRowData(data);
+    });
+
+    // Set the expiration date.
+    const expirationInput = document.getElementById('input-expiration-at');
+    const currentDate = new Date();
+    const oneYearFromNow = new Date();
+    oneYearFromNow.setFullYear(currentDate.getFullYear() + 1);
+    const formattedDate = (oneYearFromNow.getMonth() + 1) + '/' + oneYearFromNow.getDate() + '/' + oneYearFromNow.getFullYear();
+    expirationInput.value = formattedDate;
 
   </script>
 {% endblock page_js %}

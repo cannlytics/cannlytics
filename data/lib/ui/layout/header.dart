@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/14/2023
-// Updated: 6/19/2023
+// Updated: 6/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -26,6 +26,7 @@ import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Dashboard header.
 class DashboardHeader extends ConsumerWidget implements PreferredSizeWidget {
@@ -39,10 +40,14 @@ class DashboardHeader extends ConsumerWidget implements PreferredSizeWidget {
     // Listen to the current user.
     final user = ref.watch(authProvider).currentUser;
 
-    // FIXME: Listen to the user's subscription data.
-    // final subscription = ref.watch(userSubscription).value;
-    // print('SUBSCRIPTION DATA: $subscription');
-    final subscription = {'tokens': 0};
+    // Listen to the user's current amount of tokens.
+    final asyncSnapshot = ref.watch(userSubscriptionProvider);
+    final int currentTokens = asyncSnapshot.when(
+      data: (data) => data['tokens'] ?? 0,
+      loading: () => 0,
+      error: (error, stack) => 0,
+    );
+    print('CURRENT TOKENS: $currentTokens');
 
     // Get the theme.
     final themeMode = ref.watch(themeModeProvider);
@@ -74,7 +79,6 @@ class DashboardHeader extends ConsumerWidget implements PreferredSizeWidget {
           if (screenWidth > Breakpoints.tablet - 200)
             GestureDetector(
               onTap: () => context.go('/'),
-              // FIXME:
               child: Image.asset(
                 isDark
                     ? 'assets/images/logos/cannlytics_logo_with_text_dark.png'
@@ -134,7 +138,11 @@ class DashboardHeader extends ConsumerWidget implements PreferredSizeWidget {
                   message:
                       "Each AI job requires 1 token.\nYou can get tokens with a\nsubscription or piecemeal.",
                   child: InkWell(
-                    onTap: () => context.push('/account'),
+                    onTap: () {
+                      const url =
+                          'https://cannlytics.com/account/subscriptions';
+                      launchUrl(Uri.parse(url));
+                    },
                     child: Row(
                       children: [
                         Image.network(
@@ -144,7 +152,7 @@ class DashboardHeader extends ConsumerWidget implements PreferredSizeWidget {
                         ),
                         gapW2,
                         Text(
-                          '${subscription?['tokens'].toString() ?? 0} tokens',
+                          '$currentTokens tokens',
                           style: Theme.of(context)
                               .textTheme
                               .bodyLarge!
@@ -204,6 +212,30 @@ class UserMenu extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
         itemBuilder: (context) => [
           PopupMenuItem(
+            enabled: false,
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                  child: Text(
+                    displayName,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                  child: Text(
+                    email,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                Divider(),
+              ],
+            ),
+          ),
+          PopupMenuItem(
             padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
             value: 'account',
             child: Text(
@@ -212,24 +244,24 @@ class UserMenu extends ConsumerWidget {
                   color: Theme.of(context).textTheme.bodyLarge!.color),
             ),
           ),
-          // PopupMenuItem(
-          //   padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-          //   value: 'subscription',
-          //   child: Text(
-          //     'Manage subscription',
-          //     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-          //         color: Theme.of(context).textTheme.bodyLarge!.color),
-          //   ),
-          // ),
-          // PopupMenuItem(
-          //   padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-          //   value: 'api-keys',
-          //   child: Text(
-          //     'Manage API keys',
-          //     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-          //         color: Theme.of(context).textTheme.bodyLarge!.color),
-          //   ),
-          // ),
+          PopupMenuItem(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+            value: 'subscription',
+            child: Text(
+              'Manage your subscription',
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).textTheme.bodyLarge!.color),
+            ),
+          ),
+          PopupMenuItem(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+            value: 'api-keys',
+            child: Text(
+              'Manage your API keys',
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).textTheme.bodyLarge!.color),
+            ),
+          ),
           PopupMenuItem(
             padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
             value: 'sign-out',
@@ -254,14 +286,15 @@ class UserMenu extends ConsumerWidget {
               // Navigate to the account page.
               context.push('/account');
               break;
-            // case 'api-keys':
-            //   // Navigate to the account page.
-            //   context.push('/account/api-keys');
-            //   break;
-            // case 'subscription':
-            //   // Navigate to the account page.
-            //   context.push('/account/subscription');
-            //   break;
+            case 'subscription':
+              // Navigate to the subscriptions page.
+              launchUrl(
+                  Uri.parse('https://cannlytics.com/account/subscriptions'));
+              break;
+            case 'api-keys':
+              // Navigate to the API keys page.
+              launchUrl(Uri.parse('https://cannlytics.com/account/api-keys'));
+              break;
             case 'sign-out':
               // Sign out.
               final logout = await InterfaceUtils.showAlertDialog(

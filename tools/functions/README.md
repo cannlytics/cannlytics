@@ -8,10 +8,20 @@ gcloud services enable cloudfunctions.googleapis.com cloudscheduler.googleapis.c
 
 *Functions*
 
+- [Auth Sign Up](#auth-sign-up)
 - [CannBot](#cannbot)
 - [Metrc Sync](#metrc-sync)
 - [Get YouTube Video Views](#get-youtube-video-views)
 
+## Auth Sign Up
+
+You can deploy the `auth_signup` cloud function with:
+
+```shell
+gcloud functions deploy auth_signup --source auth_signup --entry-point auth_signup  --trigger-event providers/firebase.auth/eventTypes/user.create  --trigger-resource cannlytics --runtime python39
+```
+
+The `auth_signup` cloud function is designed to create any new user data in Firestore when a new user is created in Firebase Authentication. Specifically, it populates the user's subscription with 10 trial tokens.
 
 ## CannBot
 

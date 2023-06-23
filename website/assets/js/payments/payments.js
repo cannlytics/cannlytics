@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 1/17/2021
- * Updated: 6/22/2023
+ * Updated: 6/23/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { getDocument, onAuthChange } from '../firebase.js';
@@ -94,7 +94,9 @@ export const payments = {
             var msg = `You have successfully subscribed to Cannlytics AI! You can use your tokens to run AI-powered jobs in the app. Put your AI jobs to good use!`;
             showNotification('Cannlytics AI tokens purchased', msg, /* type = */ 'success', /* delay = */ 10000);
 
-            // TODO: Show a success form to the user.
+            // Show a success form to the user.
+            document.getElementById('checkout').classList.add('d-none');
+            document.getElementById('thank-you-message').classList.remove('d-none');
 
             // Update the user's token count.
             try {
@@ -156,7 +158,7 @@ export const payments = {
     try {
       // Update the user's newsletter subscription through the API.
       await authRequest('/api/users', { newsletter: true });
-      window.location.href = `${window.location.origin}/subscriptions/subscribed`;
+      window.location.href = `${window.location.origin}/account/subscriptions`;
     } catch(error) {
       const message = 'An error occurred when processing your subscription. Please contact dev@cannlytics.com for help.';
       showNotification('Error saving your account', message, /* type = */ 'error');
@@ -181,7 +183,7 @@ export const payments = {
     for (let button of subscribeButtons) {
       button.textContent = 'Subscribe';
     }
-    if (!userSubscription.support) return;
+    if (!userSubscription.support || userSubscription.support == 'free') return;
   
     // If subscription, then show Cancel on current subscription and Change on others.
     // Add a selected border to the current user's subscription.
@@ -406,7 +408,9 @@ export const payments = {
             var msg = `You have successfully purchased ${tokens} Cannlytics AI tokens! You can use your tokens to run AI-powered jobs in the app. Put your AI jobs to good use!`;
             showNotification('Cannlytics AI tokens purchased', msg, /* type = */ 'success', /* delay = */ 10000);
 
-            // TODO: Show a success form to the user.
+            // Show a success form to the user.
+            document.getElementById('checkout').classList.add('d-none');
+            document.getElementById('thank-you-message').classList.remove('d-none');
 
             // Update the user's token count.
             document.getElementById('current_tokens').textContent = details.tokens;

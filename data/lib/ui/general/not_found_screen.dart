@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/19/2023
-// Updated: 3/19/2023
+// Updated: 6/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -28,11 +28,7 @@ class NotFoundScreen extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // App header.
-          // const SliverToBoxAdapter(child: AppHeader()),
-
           // Form.
-          // TODO: Add a loading indicator.
           SliverToBoxAdapter(
               child: FormContainer(children: [
             Text(
@@ -49,18 +45,6 @@ class NotFoundScreen extends StatelessWidget {
             gapH24,
             Row(
               children: [
-                // CustomTextButton(
-                //   text: 'Back',
-                //   onPressed: () {
-                //     try {
-                //       context.pop();
-                //     } catch (error) {
-                //       // Can't navigate.
-                //     }
-                //   },
-                //   fontStyle: FontStyle.italic,
-                // ),
-                // gapW12,
                 CustomTextButton(
                   text: 'Dashboard',
                   onPressed: () {
@@ -68,14 +52,6 @@ class NotFoundScreen extends StatelessWidget {
                   },
                   fontStyle: FontStyle.italic,
                 ),
-                // gapW12,
-                // CustomTextButton(
-                //   text: 'Sign In',
-                //   onPressed: () {
-                //     context.go('/account/sign-in');
-                //   },
-                //   fontStyle: FontStyle.italic,
-                // ),
               ],
             ),
             gapH48,

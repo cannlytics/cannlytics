@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 4/14/2023
+// Updated: 6/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // Dart imports:
 
@@ -35,12 +35,6 @@ class Routes {
           name: 'resetPassword',
           builder: (context, state) => ResetPasswordScreen(),
         ),
-
-        // Subscription screen.
-
-        // API keys screen.
-
-        // Invoices screen.
       ],
     ),
 
@@ -89,14 +83,6 @@ class Routes {
       useFade: true,
     ),
 
-    // Optional: Products screen.
-    // AppRoute(
-    //   path: '/strains',
-    //   name: 'strains',
-    //   builder: (context, state) => StrainsScreen(),
-    //   useFade: true,
-    // ),
-
     // Lab results screen.
     AppRoute(
       path: '/results',
@@ -120,43 +106,5 @@ class Routes {
       builder: (context, state) => SalesScreen(),
       useFade: true,
     ),
-
-    // // Industry screen.
-    // AppRoute(
-    //   path: '/production',
-    //   name: 'production',
-    //   builder: (context, state) => ProductionScreen(),
-    //   useFade: true,
-    // ),
-
-    // // Research screen.
-    // AppRoute(
-    //   path: '/research',
-    //   name: 'research',
-    //   builder: (context, state) => ResearchScreen(),
-    //   useFade: true,
-    // ),
-
-    // AI Models.
-    // AppRoute(
-    //   path: '/models',
-    //   name: 'models',
-    //   builder: (context, state) => DashboardScreen(),
-    //   routes: [
-    //     // CoADoc screen.
-    //     AppRoute(
-    //       path: 'coas',
-    //       name: 'CoADoc',
-    //       builder: (context, state) => CoADocScreen(),
-    //     ),
-
-    //     // SkunkFx screen.
-    //     AppRoute(
-    //       path: 'effects',
-    //       name: 'SkunkFx',
-    //       builder: (context, state) => CoADocScreen(),
-    //     ),
-    //   ],
-    // ),
   ];
 }

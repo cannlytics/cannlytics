@@ -17,7 +17,7 @@
 
   <!-- PayPal Orders JavaScript -->
   <script data-sdk-integration-source="integrationbuilder_sc"></script>
-  <script src="https://www.paypal.com/sdk/js?client-id=Ae4CcPpl9WnMMNNVxvrhf6MMEpBPsf42UQki5hCivL7cEIQRc89-oWpVEF7sSif8k65CxTWrutGELsHR&components=buttons"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&components=buttons"></script>
 
 {% endblock page_css %}
 {% block material %}
@@ -31,8 +31,11 @@
     only
   %}
 
+  <!-- Sign In Prompt -->
+  {% include "website/components/placeholders/sign_in_placeholder.html" %}
+
   <!-- Checkout -->
-  <div class="container mb-2">
+  <div id="checkout" class="requires-auth container mb-2">
 
     <!-- Breadcrumbs -->
     <div class="d-flex mt-4 markdown">
@@ -65,8 +68,6 @@
       </div>
       </nav>
     </div>
-
-    <!-- FIXME: Handle no user, prompting them to sign in. -->
 
     <!-- Cart -->
     <div class="requires-auth col-12 col-md-8 col-lg-8 mt-5">
@@ -137,8 +138,8 @@
 
   </div><!-- End of form-->
 
-  {% comment %} <!-- FIXME: Show thank you message after purchase -->
-  <div id="thank-you-message" class="">
+  <!-- Thank you message for after purchase -->
+  <div id="thank-you-message" class="d-none">
     {% include "website/components/heros/hero_banner.html" with
       title='Checkout Successful'
       description="Congratulations on your purchase, you have successfully purchased Cannlytics AI tokens. You can use your tokens to run AI-powered jobs in the app: https://data.cannlytics.com. Put your AI jobs to good use! Always here to help, The Cannlytics Team."
@@ -146,10 +147,10 @@
       primary_action_url='/account/subscriptions#buy-tokens'
       secondary_action='Get started'
       secondary_action_url='https://data.cannlytics.com'
-      image_url="website/images/illustrations/multi-tone/vials.svg"
+      image_url="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fopenmoji%2Fai-coin.svg?alt=media&token=98a9cfd7-94a0-46cb-a59e-f7ee3c1b6dbf"
       only
     %}
-  </div> {% endcomment %}
+  </div>
 
 {% endblock material %}
 

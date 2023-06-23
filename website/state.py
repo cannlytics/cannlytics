@@ -243,6 +243,12 @@ page_data = {
                 "order_by": "price_per_token",
                 "desc": False
             }
+        ],
+        "documents": [
+            {
+                "name": "paypal",
+                "ref": "credentials/paypal"
+            }
         ]
     },
     "articles": {

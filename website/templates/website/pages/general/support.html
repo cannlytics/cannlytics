@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/15/2021
-  Updated: 5/29/2023
+  Updated: 6/23/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -80,85 +80,21 @@
                     {% endif %}
                   {% endfor %}
                 </ul>
-                <div id="paypal-{{ item.plan_name }}"></div>
+                <a
+                  id="subscribe-button-{{ item.id }}"
+                  class="subscribe-button btn bg-gradient-{{ item.color }} text-white serif"
+                  href="{% url 'section' page='account' section='subscriptions' %}"
+                >
+                  Subscribe
+                </a>
               </div>
             </div>
           </div>
         {% endfor %}
       </div><!-- End of tiers -->
 
-      <!-- Note -->
-      {% comment %} <p class="markdown fs-6 serif text-dark w-50">
-        <small>
-          * If Cannlytics is verified with Metrc in your state and your company is licensed or a verified Metrc integrator.
-          Please <a class="serif" href="{% url 'index' %}#metrc">check our current validation list</a>
-          and request your state if you
-          do not see your state in the list.
-        </small>
-      </p> {% endcomment %}
-      {% comment %} <p class="markdown fs-6 serif text-dark w-50">
-        <small>
-          <strong>Note:</strong> Additional AI tasks are available for $0.10 per task. Additional support
-          can be purchased for $60 per hour. Please contact
-          <a class="serif" href="mailto:dev@cannlytics.com">dev@cannlytics.com</a> if you need a higher number
-          of requests per second or have additional needs.
-        </small>
-      </p> {% endcomment %}
-
       <!-- Purchase tokens -->
-      <div class="container mt-3">
-        <div class="markdown py-5" style="max-width:560px;">
-          <img src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fopenmoji%2Fai-coin.svg?alt=media&token=98a9cfd7-94a0-46cb-a59e-f7ee3c1b6dbf"
-            style="float:left;width:125px;height:125px;"
-            class="pt-3 pe-3"
-          />
-          <h1 class="pt-4 text-dark">Purchase AI Jobs</h1>
-          <p class="mt-2">
-            AI jobs can be purchased at a rate of <strong>5￠ per job</strong>.
-            A minimum of 20 jobs must be purchased at a time.
-            Only successful jobs will be credited.
-            Your tokens are valid for <strong>1 month</strong> after purchase.
-            Put your AI to good use now!
-          </p>
-
-          <!-- TODO: Input for how many tokens. -->
-        <div class="mt-3 mx-3">
-          <label>AI Tokens:</label>
-          <div id="tokenCount" style="position: relative; left: 0;">100</div>
-          <input
-            type="range"
-            class="form-range"
-            id="tokenSlider"
-            min="100"
-            max="2000"
-            step="100"
-            value="100"
-          >
-          <label>Price: <span id="tokenPrice">$5.00</span></label>
-        </div>
-
-        <!-- PayPal checkout button -->
-        <div class="mt-3 mx-3">
-          {% if not user %}
-            <button
-              id="order-tokens-button-no-user"
-              class="btn btn-sm bg-gradient-orange text-white serif"
-              type="button"
-              data-bs-target="#sign-in-dialog"
-              data-bs-toggle="modal"
-            >
-            {% icon 'coin' width="16px" height="16px" class="me-1" %}
-              Sign in to buy tokens
-            </button>
-          {% else %}
-            <p>Rate: <span id="price_per_token"></span>￠ per job</p>
-            <div id="paypal-order-tokens-button" class="d-none"></div>
-          {% endif %}
-        
-        </div>
-
-      </div>
-
+      {% include "website/pages/account/tokens.html" with user=user only%}
 
       <!-- Historic Lab Result Migration -->
       <div class="container mb-5 mt-5">
@@ -186,7 +122,7 @@
       </div>
 
       <!-- Consulting -->
-      <div class="container mb-5 mt-3">
+      <div class="container mb-5 mt-3 pt-5">
         <div class="markdown" style="max-width:560px;">
           <svg class="pt-3 pe-3" style="float:left;width:125px;height:125px;">
             <use href="{% static "website/images/emojies/toolbox.svg" %}#toolbox-emoji"></use>
@@ -210,7 +146,9 @@
       </div>
 
       <!-- Metrc support -->
-      {% include "website/pages/homepage/components/metrc_state_list.html" with verifications=verifications only %}
+      <div class="my-5 pt-5">
+        {% include "website/pages/homepage/components/metrc_state_list.html" with verifications=verifications only %}
+      </div>
 
     </div>
   </div>
@@ -223,7 +161,7 @@
 <!-- JavaScript -->
 {% block page_js %}
 <script>
-  cannlytics.payments.initializeSupport();
+  //cannlytics.payments.initializeSupport();
 
   // Get the slider and price elements.
   const slider = document.getElementById('tokenSlider');

@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/13/2023
-Updated: 6/17/2023
+Updated: 6/23/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with receipt data.
@@ -32,6 +32,7 @@ from cannlytics.firebase import (
     get_collection,
     get_document,
     get_file_url,
+    increment_value,
     update_documents,
     upload_file,
     delete_document,
@@ -68,7 +69,7 @@ def api_data_receipts(request, receipt_id=None):
         # return HttpResponse(status=401)
     else:
         uid = claims['uid']
-    
+
     # Log the user ID.
     print('USER:', uid)
 
@@ -153,11 +154,16 @@ def api_data_receipts(request, receipt_id=None):
     # Parse posted receipt images.
     if request.method == 'POST':
 
-        # Get any user-posted data.
-        try:
-            body = loads(request.body.decode('utf-8'))
-        except:
-            body = {}
+        # Get the user's level of support.
+        user_subscription = get_document(f'subscribers/{uid}')
+        if not user_subscription:
+            current_tokens = 0
+        else:
+            current_tokens = user_subscription.get('tokens', 0)
+        if current_tokens < 1:
+            message = 'You have 0 Cannlytics AI tokens. You need 1 AI token per AI job. You can purchase more tokens at https://cannlytics.com/account/subscriptions.'
+            response = {'success': False, 'message': message}
+            return Response(response, status=402)
         
         # Get any user-posted files.
         images = []
@@ -223,7 +229,7 @@ def api_data_receipts(request, receipt_id=None):
                     config = dotenv_values(env_file)
                     key = 'OPENAI_API_KEY'
                     os.environ[key] = config[key]
-        
+
         # Return an error if OpenAI can't be initialized.
         if not openai_api_key:
             message = 'OpenAI API key not found.'
@@ -266,6 +272,18 @@ def api_data_receipts(request, receipt_id=None):
 
             # Record the extracted data
             data.append(receipt_data)
+
+            # Debit the tokens from the user's account.
+            current_tokens -= 1
+            increment_value(
+                ref=f'subscribers/{uid}',
+                field='tokens',
+                amount=-1,
+            )
+
+            # Stop parsing if the user runs out of tokens.
+            if current_tokens < 1:
+                break
 
         # Record the cost and close the parser.
         total_cost = parser.total_cost

@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 6/17/2023
+Updated: 6/23/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with COA data.
@@ -33,6 +33,7 @@ from cannlytics.firebase import (
     get_collection,
     get_document,
     get_file_url,
+    increment_value,
     update_documents,
     upload_file,
     delete_document,
@@ -69,8 +70,6 @@ def api_data_coas(request, sample_id=None):
         # return HttpResponse(status=401)
     else:
         uid = claims['uid']
-
-    # TODO: Keep track of the number of jobs per user.
     
     # Log the user ID.
     print('USER:', uid)
@@ -89,6 +88,17 @@ def api_data_coas(request, sample_id=None):
 
     # Parse posted CoA PDFs or URLs.
     if request.method == 'POST':
+
+        # Get the user's level of support.
+        user_subscription = get_document(f'subscribers/{uid}')
+        if not user_subscription:
+            current_tokens = 0
+        else:
+            current_tokens = user_subscription.get('tokens', 0)
+        if current_tokens < 1:
+            message = 'You have 0 Cannlytics AI tokens. You need 1 AI token per AI job. You can purchase more tokens at https://cannlytics.com/account/subscriptions.'
+            response = {'success': False, 'message': message}
+            return Response(response, status=402)
 
         # Get any user-posted data.
         try:
@@ -187,12 +197,20 @@ def api_data_coas(request, sample_id=None):
 
         # Try to parse URLs and PDFs.
         for doc in urls + pdfs:
+
+            # Parse the document.
             try:
                 print('Parsing:', doc)
                 data = parser.parse(doc)
                 parsed_data.extend(data)
             except:
                 try:
+
+                    # Require tokens to parse with AI.
+                    if current_tokens < 1:
+                        continue
+
+                    # Parse COA with AI.
                     print('Parsing with AI:', doc)
                     data, prompts, cost = parser.parse_with_ai(
                         doc,
@@ -204,6 +222,14 @@ def api_data_coas(request, sample_id=None):
                     parsed_data.extend([data])
                     all_prompts.extend(prompts)
                     total_cost += cost
+                    
+                    # Debit the tokens from the user's account.
+                    current_tokens -= 1
+                    increment_value(
+                        ref=f'subscribers/{uid}',
+                        field='tokens',
+                        amount=-1,
+                    )
                 except:
                     print('Failed to parse:', doc)
                     continue
@@ -219,6 +245,12 @@ def api_data_coas(request, sample_id=None):
                 data = parser.parse(coa_url)
                 parsed_data.extend(data)
             except:
+
+                # Require tokens to parse with AI.
+                if current_tokens < 1:
+                    continue
+
+                # Try to parse with AI.
                 try:
                     print('Parsing with AI:', doc)
                     data, prompts, cost = parser.parse_with_ai(
@@ -231,6 +263,14 @@ def api_data_coas(request, sample_id=None):
                     parsed_data.extend([data])
                     all_prompts.extend(prompts)
                     total_cost += cost
+
+                    # Debit the tokens from the user's account.
+                    current_tokens -= 1
+                    increment_value(
+                        ref=f'subscribers/{uid}',
+                        field='tokens',
+                        amount=-1,
+                    )
                 except:
                     print('Failed to parse URL:', coa_url)
                     continue
