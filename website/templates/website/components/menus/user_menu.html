@@ -5,7 +5,7 @@
   Created: 11/15/2021
   Updated: 6/22/2023
 -->
-<ul class="navbar-nav align-items-end align-items-lg-center me-3 requires-auth visually-hidden">
+<ul class="navbar-nav align-items-start align-items-lg-center me-3 ms-auto requires-auth visually-hidden">
   
   <!-- Open app button -->
   <li class="nav-item h6 mb-0">
@@ -84,14 +84,15 @@
         </a>
       </li>
 
-      {% comment %} <li>
+      <!-- Manage API keys -->
+      <li>
         <a
           class="serif dropdown-item background-hover"
-          href="{% url 'section' page='account' section='feedback' %}"
+          href="{% url 'section' page='account' section='api-keys' %}"
         >
-          <small class="serif">Make a suggestion</small>
+          <small class="serif">Manage your API keys</small>
         </a>
-      </li> {% endcomment %}
+      </li>
       
       <!-- Sign out -->
       <li><hr class="dropdown-divider"></li>

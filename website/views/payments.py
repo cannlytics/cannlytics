@@ -4,39 +4,33 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/5/2021
-Updated: 6/21/2023
+Updated: 6/22/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
-# Standard imports
+# Standard imports:
 from datetime import datetime
 from json import loads, dumps
 import os
 from typing import Optional
 
-# External imports
-from django.core.exceptions import ValidationError
+# External imports:
 from django.core.mail import send_mail
-from django.core.validators import validate_email
-from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import requests
 import google.auth
 
-# Internal imports.
+# Internal imports:
 from cannlytics.auth.auth import authenticate_request
 from cannlytics.firebase import (
     access_secret_version,
-    add_to_array,
     create_log,
-    create_user,
     get_document,
     increment_value,
     update_document,
     update_custom_claims,
 )
 from website.settings import DEFAULT_FROM_EMAIL, PRODUCTION
-from website.utils.utils import get_promo_code
 
 
 # Constants.
@@ -47,9 +41,6 @@ if PRODUCTION == 'True' or PRODUCTION == True:
     PAYPAL_SECRET = 'paypal'
     BASE = 'https://api-m.paypal.com'
 
-print('PRODUCTION: {}'.format(PRODUCTION))
-print('BASE: {}'.format(BASE))
-
 
 @api_view(['GET'])
 def get_user_subscriptions(request):
@@ -59,10 +50,10 @@ def get_user_subscriptions(request):
         uid = claims['uid']
         user_subscription = get_document(f'subscribers/{uid}')
         response = {'success': True, 'data': user_subscription}
-        return Response(response, content_type='application/json')
+        return Response(response, content_type='application/json', status=200)
     except KeyError:
         response = {'success': False, 'message': 'Invalid authentication.'}
-        return Response(response, content_type='application/json')
+        return Response(response, content_type='application/json', status=401)
 
 
 def get_paypal_access_token(
@@ -122,161 +113,6 @@ def cancel_paypal_subscription(
     return response.status_code == 200
 
 
-def subscribe(request):
-    """Subscribe a user to newsletters, sending them a notification with the
-    ability to unsubscribe. Creates a Cannlytics account and sends a welcome
-    email if the user does not have an account yet.
-    """
-
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    if claims:
-        uid = claims['uid']
-
-    # Ensure that the user has a valid email.
-    data = loads(request.body)
-    try:
-        user_email = data['email']
-        validate_email(user_email)
-    except ValidationError:
-        response = {'success': False, 'message': 'Invalid email in request body.'}
-        return JsonResponse(response)
-
-    # Create a promo code that can be used to download data.
-    promo_code = get_promo_code(8)
-    add_to_array('promos/data', 'promo_codes', promo_code)
-
-    # Create an account if one does not exist.
-    try:
-        name = (data.get('first_name', '') + data.get('last_name', '')).strip()
-        user, password = create_user(name, user_email)
-        message = f'Congratulations,\n\nYou can now login to Cannlytics (https://cannlytics.com) with the following credentials.\n\nEmail: {user_email}\nPassword: {password}\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
-        subject = 'Welcome to the Cannlytics Platform'
-        uid = user.uid
-    except:
-        message = f'Congratulations,\n\nYou are now subscribed to Cannlytics.\n\nPlease stay tuned for more material or email {DEFAULT_FROM_EMAIL} to begin.\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
-        subject = 'Welcome to the Cannlytics Newsletter'
-
-    # Record the subscription in the subscribers collection in Firestore.
-    now = datetime.now()
-    iso_time = now.isoformat()
-    plan_name = data['plan_name']
-    data['created_at'] = iso_time
-    data['updated_at'] = iso_time
-    data['subscribed_at'] = iso_time
-    data['promo_code'] = promo_code
-    plan_data = get_document(f'public/subscriptions/subscription_plans/{plan_name}')
-    if plan_data:
-        data['tokens'] = plan_data.get('tokens', 0)
-        data['price_per_token'] = plan_data.get('price_per_token', DEFAULT_PRICE_PER_TOKEN)
-    update_document(f'subscribers/{user_email}', data)
-
-    # Save the user's subscription.
-    try:
-        user_data = {'support': plan_name}
-        if plan_name == 'newsletter':
-            user_data['newsletter'] = True
-        else:
-            user_data[f'{plan_name}_subscription_id'] = data['id']
-        update_document(f'users/{uid}', user_data)
-    except KeyError:
-        pass
-
-    # Update the user's custom claims.
-    claims = {**claims, **{'support': plan_name}}
-    update_custom_claims(uid, claims=claims)
-
-    # Create an activity log.
-    create_log(
-        ref='logs/website/subscriptions',
-        claims=claims,
-        action=f'User ({user_email}) subscribed to {plan_name}.',
-        log_type='subscription',
-        key='subscribe',
-        changes=data,
-    )
-
-    # Send a welcome / thank you email.
-    # TODO: Use HTML template and load messages / templates from state.
-    # template_url = 'website/emails/newsletter_subscription_thank_you.html'
-    send_mail(
-        subject=subject,
-        message=message,
-        from_email=DEFAULT_FROM_EMAIL,
-        recipient_list=[user_email, DEFAULT_FROM_EMAIL],
-        fail_silently=False,
-        # html_message = render_to_string(template_url, {'context': 'values'})
-    )
-
-    # Return a success message.
-    response = {'success': True, 'message': 'User successfully subscribed.'}
-    return JsonResponse(response)
-
-
-def unsubscribe(request):
-    """Unsubscribe a user from a PayPal subscription."""
-
-    # Authenticate the user.
-    claims = authenticate_request(request)
-    try:
-        uid = claims['uid']
-        user_email = claims['email']
-    except KeyError:
-        response = {'success': False, 'message': 'Unable to authenticate.'}
-        return JsonResponse(response)
-
-    # Get the subscription they wish to unsubscribe from.
-    data = loads(request.body)
-    plan_name = data['plan_name']
-
-    # Unsubscribe the user with the PayPal SDK.
-    try:
-        project_id = os.environ['GOOGLE_CLOUD_PROJECT']
-        payload = access_secret_version(project_id, 'paypal', 'latest')
-        paypal_secrets = loads(payload)
-        paypal_client_id = paypal_secrets['client_id']
-        paypal_secret = paypal_secrets['secret']
-        paypal_access_token = get_paypal_access_token(paypal_client_id, paypal_secret)
-        user_data = get_document(f'users/{uid}')
-        subscription_id = user_data[f'{plan_name}_subscription_id']
-        cancel_paypal_subscription(paypal_access_token, subscription_id)
-        updated_user_data = {'support': False}
-        updated_user_data[f'{plan_name}_subscription_id'] = ''
-        update_document(f'users/{uid}', updated_user_data)
-    except:
-        subscription_id = 'Unidentified'
-
-    # Create an activity log.
-    create_log(
-        ref='logs/website/subscriptions',
-        claims=claims,
-        action=f'User ({user_email}) unsubscribed from {plan_name}.',
-        log_type='subscription',
-        key='subscribe',
-        changes=data,
-    )
-
-    # Notify the staff.
-    staff_message = """Confirm that the following subscription has been canceled:
-    User: {}
-    Email: {}
-    Plan: {}
-    Subscription ID: {}
-    """.format(uid, user_email, plan_name, subscription_id)
-    send_mail(
-        subject='User unsubscribed from a PayPal subscription.',
-        message=staff_message,
-        from_email=DEFAULT_FROM_EMAIL,
-        recipient_list=[DEFAULT_FROM_EMAIL],
-        fail_silently=False,
-    )
-
-    # Return a success message.
-    message = 'Successfully unsubscribed from subscription.'
-    response = {'success': True, 'message': message}
-    return JsonResponse(response)
-
-
 @api_view(['POST'])
 def create_order(request):
     """Place an order for tokens through PayPal."""
@@ -288,35 +124,50 @@ def create_order(request):
         user_email = claims['email']
     except KeyError:
         response = {'success': False, 'message': 'Unable to authenticate.'}
-        return JsonResponse(response)
-
-    # Get the number of tokens the user wishes to purchase.
-    data = loads(request.body)
-    try:
-        number_of_tokens = float(data['tokens'])
-    except:
-        response = {'success': False, 'message': 'Number of `tokens` required in the request body.'}
-        return JsonResponse(response)
+        return Response(response, content_type='application/json', status=401)
     
-    # Log.
-    print('User {} wants to purchase {} tokens.'.format(uid, number_of_tokens))
+    # Get the amount if a user is ordering a subscription.
+    data = loads(request.body)
+    amount = data.get('amount', 0)
 
-    # Get the user's price per token.
-    plan_name = None
-    price_per_token = DEFAULT_PRICE_PER_TOKEN
-    user_subscription = get_document(f'subscribers/{uid}')
-    if user_subscription:
-        price_per_token = user_subscription.get('price_per_token', DEFAULT_PRICE_PER_TOKEN)
-        plan_name = user_subscription.get('plan_name')
+    # Get the amount of the subscription the user wishes to purchase.
+    if amount:
+        subscription_id = data['subscription_id']
+        subscription_data = get_document(f'public/subscriptions/subscription_plans/{subscription_id}')
+        number_of_tokens = subscription_data['tokens']
+        price = subscription_data['price_usd']
+        plan_id = subscription_data['plan_id']
 
-    # Log.
-    print('Price per token: {}'.format(price_per_token))
+    # Otherwise, get the number of tokens the user wishes to purchase.
+    else:
 
-    # Attempt to make the PayPal request.
-    try:
+        # Get the number of tokens the user wishes to purchase.
+        try:
+            number_of_tokens = float(data['tokens'])
+        except:
+            response = {'success': False, 'message': 'Number of `tokens` or `amount` required in the request body.'}
+            return Response(response, content_type='application/json', status=405)
+
+        # Log.
+        print('User {} wants to purchase {} tokens.'.format(uid, number_of_tokens))
+
+        # Get the user's price per token.
+        plan_id = None
+        price_per_token = DEFAULT_PRICE_PER_TOKEN
+        user_subscription = get_document(f'subscribers/{uid}')
+        if user_subscription:
+            price_per_token = user_subscription.get('price_per_token', DEFAULT_PRICE_PER_TOKEN)
+            plan_id = user_subscription.get('plan_id')
+
+        # Log.
+        print('Price per token: {}'.format(price_per_token))
+
         # Calculate the price.
         price = price_per_token * number_of_tokens
         print('Price: {}'.format(price))
+
+    # Attempt to make the PayPal request.
+    try:
 
         # Record the order in Firestore.
         try:
@@ -327,7 +178,7 @@ def create_order(request):
                 'created_at': timestamp,
                 'uid': uid,
                 'user_email': user_email,
-                'plan_name': plan_name,
+                'plan_id': plan_id,
                 'price': price,
                 'price_per_token': price_per_token,
                 'number_of_tokens': number_of_tokens,
@@ -393,7 +244,7 @@ def capture_order(request, order_id):
         user_email = claims['email']
     except KeyError:
         response = {'success': False, 'message': 'Unable to authenticate.'}
-        return JsonResponse(response)
+        return Response(response, content_type='application/json', status=401)
 
     # Attempt to make the PayPal request.
     try:
@@ -430,20 +281,32 @@ def capture_order(request, order_id):
     # Record the completed order in Firestore.
     try:
 
-        # Get the number of tokens.
+        # Get the amount if a user is ordering a subscription.
         data = loads(request.body)
-        number_of_tokens = float(data['tokens'])
+        amount = data.get('amount', 0)
 
-        # Get the user's rate.
-        plan_name = None
-        price_per_token = DEFAULT_PRICE_PER_TOKEN
-        user_subscription = get_document(f'subscribers/{uid}')
-        if user_subscription:
-            price_per_token = user_subscription.get('price_per_token', DEFAULT_PRICE_PER_TOKEN)
-            plan_name = user_subscription.get('plan_name')
+        # Get the amount of the subscription the user wishes to purchase.
+        if amount:
+            subscription_id = data['subscription_id']
+            subscription_data = get_document(f'public/subscriptions/subscription_plans/{subscription_id}')
+            number_of_tokens = subscription_data['tokens']
+            price = subscription_data['price']
+            plan_id = subscription_data['plan_id']
 
-        # Calculate the price.
-        price = price_per_token * number_of_tokens
+        # Otherwise, get the number of tokens.
+        else:
+            number_of_tokens = float(data['tokens'])
+
+            # Get the user's rate.
+            plan_id = None
+            price_per_token = DEFAULT_PRICE_PER_TOKEN
+            user_subscription = get_document(f'subscribers/{uid}')
+            if user_subscription:
+                price_per_token = user_subscription.get('price_per_token', DEFAULT_PRICE_PER_TOKEN)
+                plan_id = user_subscription.get('plan_id')
+
+            # Calculate the price.
+            price = price_per_token * number_of_tokens
 
         # Make a transaction entry in Firestore.
         timestamp = datetime.now().isoformat()
@@ -453,25 +316,48 @@ def capture_order(request, order_id):
             'created_at': timestamp,
             'uid': uid,
             'user_email': user_email,
-            'plan_name': plan_name,
+            'plan_id': plan_id,
             'price': price,
             'price_per_token': price_per_token,
             'number_of_tokens': number_of_tokens,
         }, **order_data}
         update_document(order_ref, order_data)
 
-        # Credit the user with the appropriate tokens.
-        subject = 'Cannlytics AI Tokens Purchased'
-        message = f'Congratulations,\n\nYou have successfully purchased {number_of_tokens} Cannlytics AI tokens. You can use your tokens to run AI-powered jobs in the app:\n\nhttps://data.cannlytics.com\n\nPut your AI jobs to good use!\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
-        try:
-            increment_value(
-                ref=f'subscribers/{uid}',
-                field='tokens',
-                amount=number_of_tokens,
-            )
-        except:
-            subject = 'Cannlytics AI Tokens Purchase Failed'
-            message = f'Please be in touch,\n\nYou have ordered {number_of_tokens} Cannlytics AI tokens, but we had trouble crediting your account. Please email dev@cannlytics.com and we will credit your account with your tokens.\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
+        # Create subscriber entry.
+        if amount:
+
+            # Add tokens to the user's subscription.
+            data = {**order_data, **{'tokens': number_of_tokens, 'support': subscription_id}}
+            update_document(f'subscribers/{uid}', data)
+
+            # Update the user's custom claims.
+            claims = {**claims, **{'support': subscription_id}}
+            update_custom_claims(uid, claims=claims)
+
+            # Format the email.
+            subject = 'Subscribed to Cannlytics AI'
+            message = f'Congratulations,\n\nYou have successfully subscribed to Cannlytics AI. You can use your tokens to run AI-powered jobs in the app:\n\nhttps://data.cannlytics.com\n\nPut your AI jobs to good use!\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
+
+        # Otherwise, update the user's amount of tokens.
+        else:
+
+            # Get the user's current amount of tokens.
+            user_subscription = get_document(f'subscribers/{uid}')
+            current_tokens = user_subscription.get('tokens', 0)
+            data = {**order_data, **{'tokens': current_tokens}}
+
+            # Credit the user with the appropriate tokens.
+            subject = 'Cannlytics AI Tokens Purchased'
+            message = f'Congratulations,\n\nYou have successfully purchased {number_of_tokens} Cannlytics AI tokens. You can use your tokens to run AI-powered jobs in the app:\n\nhttps://data.cannlytics.com\n\nPut your AI jobs to good use!\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
+            try:
+                increment_value(
+                    ref=f'subscribers/{uid}',
+                    field='tokens',
+                    amount=number_of_tokens,
+                )
+            except:
+                subject = 'Cannlytics AI Tokens Purchase Failed'
+                message = f'Please be in touch,\n\nYou have ordered {number_of_tokens} Cannlytics AI tokens, but we had trouble crediting your account. Please email dev@cannlytics.com and we will credit your account with your tokens.\n\nAlways here to help,\nThe Cannlytics Team' #pylint: disable=line-too-long
 
         # Send an email to the admin and the user.
         try:
@@ -485,15 +371,82 @@ def capture_order(request, order_id):
         except:
             pass
 
-        # Get the user's current amount of tokens.
-        user_subscription = get_document(f'subscribers/{uid}')
-        current_tokens = user_subscription.get('tokens', 0)
-        data = {**order_data, **{'tokens': current_tokens}}
-
         # Return the response.
         response = {'success': True, 'data': data}
-        return Response(response, content_type='application/json')
+        return Response(response, content_type='application/json', status=200)
 
     # Handle internal errors.
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
+
+@api_view(['POST'])
+def unsubscribe(request):
+    """Unsubscribe a user from a PayPal subscription."""
+
+    # Authenticate the user.
+    claims = authenticate_request(request)
+    try:
+        uid = claims['uid']
+        user_email = claims['email']
+    except KeyError:
+        response = {'success': False, 'message': 'Unable to authenticate.'}
+        return Response(response, content_type='application/json', status=401)
+
+    # Unsubscribe the user with the PayPal SDK.
+    try:
+
+        # Get user's subscription.
+        user_subscription = get_document(f'subscribers/{uid}')
+        subscription_id = user_subscription['id']
+
+        # Get PayPal access token.
+        project_id = os.environ['GOOGLE_CLOUD_PROJECT']
+        payload = access_secret_version(project_id, 'paypal', 'latest')
+        paypal_secrets = loads(payload)
+        paypal_client_id = paypal_secrets['client_id']
+        paypal_secret = paypal_secrets['secret']
+        paypal_access_token = get_paypal_access_token(paypal_client_id, paypal_secret)
+
+        # Cancel the subscription.
+        cancel_paypal_subscription(paypal_access_token, subscription_id)
+        print('CANCELED SUBSCRIPTION: {}'.format(subscription_id))
+
+        # Update the user's data in Firestore.
+        update_document(f'users/{uid}', {'support': None})
+        update_document(f'subscribers/{uid}', {'id': None})
+
+    # Handle errors manually.
+    except:
+        subscription_id = 'Unidentified'
+
+    # Create an activity log.
+    create_log(
+        ref='logs/website/subscriptions',
+        claims=claims,
+        action=f'User {uid} ({user_email}) unsubscribed from {subscription_id}.',
+        log_type='subscription',
+        key='unsubscribe',
+        changes=[{'id': subscription_id, 'uid': uid}],
+    )
+
+    # Notify the staff.
+    staff_message = """Confirm that the following subscription has been canceled:
+    User: {}
+    Email: {}
+    Subscription ID: {}
+    """.format(uid, user_email, subscription_id)
+    send_mail(
+        subject='User unsubscribed from a PayPal subscription.',
+        message=staff_message,
+        from_email=DEFAULT_FROM_EMAIL,
+        recipient_list=[DEFAULT_FROM_EMAIL],
+        fail_silently=False,
+    )
+
+    # Optional: Should the user be notified?
+
+    # Return a success message.
+    message = 'You have been successfully unsubscribed from your subscription.'
+    response = {'success': True, 'message': message}
+    return Response(response, content_type='application/json', status=200)

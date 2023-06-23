@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/22/2021
-Updated: 1/9/2023
+Updated: 6/22/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Description: Authentication mechanisms for the Cannlytics API, including API key
@@ -45,10 +45,11 @@ except ValueError:
 
 #-----------------------------------------------------------------------
 # API Key Utilities
-# FIXME: Insufficient permissions with desired design (data lives in 1 place)
-# Current fix is to save key data to both the user's collection and the admin
-# collection. It would be ideal to fix the Firestore security rules so
-# data only needs to be stored in admin/api/api_key_hmacs
+# FIXME: Insufficient Firestore permissions requires duel records.
+# A desired design would have data living in 1 place.
+# The current solution is to save key data to both the user's collection
+# and the admin collection. It would be ideal to fix the Firestore
+# security rules so data only needs to be stored in `admin/api/api_key_hmacs`.
 #-----------------------------------------------------------------------
 
 def create_api_key(request, *args, **argv): #pylint: disable=unused-argument
@@ -60,29 +61,46 @@ def create_api_key(request, *args, **argv): #pylint: disable=unused-argument
         (JsonResponse): A JSON response containing the API key in an
             `api_key` field.
     """
+    # Authenticate the user.
     user_claims = authenticate_request(request)
     uid = user_claims['uid']
+
+    # Mint an API key.
     api_key = token_urlsafe(48)
     app_secret = get_document('admin/api')['app_secret_key']
     app_salt = get_document('admin/api')['app_salt']
     code = sha256_hmac(app_secret, api_key + app_salt)
+
+    # Add API key parameters.
     post_data = loads(request.body.decode('utf-8'))
+
+    # Add expiration date.
     now = datetime.now()
-    expiration_at = post_data['expiration_at']
+    expiration_at = post_data.get('expiration_at', (now + timedelta(365)).isoformat())
     try:
         expiration_at = datetime.fromisoformat(expiration_at)
     except:
         expiration_at = datetime.strptime(expiration_at, '%m/%d/%Y')
     if expiration_at - now > timedelta(365):
         expiration_at = now + timedelta(365)
+
+    # Get the name of the desired key to create.
+    key_name = post_data.get('name', api_key[:4])
+
+    # Get the permissions for the key.
+    permissions = post_data.get('permissions', ['*'])
+
+    # Save the key data.
     key_data = {
         'created_at': now.isoformat(),
         'expiration_at': expiration_at.isoformat(),
-        'name': post_data['name'],
-        'permissions': post_data['permissions'],
+        'name': key_name,
+        'permissions': permissions,
         'uid': uid,
         'user_email': user_claims['email'],
-        'user_name': user_claims.get('name', 'No Name'),
+        'user_name': user_claims.get('name', 'Anonymous'),
+        'prefix': api_key[:4],
+        'suffix': api_key[-4:],
     }
     update_document(f'admin/api/api_key_hmacs/{code}', key_data)
     update_document(f'users/{uid}/api_key_hmacs/{code}', key_data)

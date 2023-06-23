@@ -44,7 +44,6 @@ urlpatterns = [
         # path('market/publish', market.publish_data),
         # path('market/sell', market.sell_data),
         path('market/buy-data', market.buy_data),
-        path('payments/subscribe', payments.subscribe, name='subscribe'),
         path('payments/subscriptions', payments.get_user_subscriptions),
         path('payments/unsubscribe', payments.unsubscribe),
         path('payments/orders', payments.create_order, name='create_order'),

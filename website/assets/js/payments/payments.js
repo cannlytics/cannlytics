@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 1/17/2021
- * Updated: 6/21/2023
+ * Updated: 6/22/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { getDocument, onAuthChange } from '../firebase.js';
@@ -12,48 +12,8 @@ import { authRequest, getUrlParameter, showNotification, validateEmail } from '.
 import { hideLoadingButton, showLoadingButton } from '../ui/ui.js';
 
 /**---------------------------------------------------------------------------
- * PayPal Subscriptions
+ * PayPal Payments
  *--------------------------------------------------------------------------*/
-
-const submitSubscription = async function(details, subscriptionID, planName) {
-  /**
-   * Submit a subscription through the API.
-   */
-  const name = details.payer.name.given_name;
-  const email = details.payer.email_address;
-  const postData = { name, email, id: subscriptionID, plan_name: planName }
-  const response = await authRequest('/src/payments/subscribe', postData);
-  if (response.success) {
-    window.location.href = `${window.location.origin}/subscriptions/subscribed`;
-  } else {
-    const message = `An error occurred when subscribing to ${planName} subscription. Please try again later or email support.`;
-    showNotification('Error Subscribing', message, /* type = */ 'error');
-  }
-}
-
-
-const addPayPalButton = function(planId, planName) {
-  /**
-   * Create a PayPal button for a given subscription plan ID and name.
-   */
-  paypal.Buttons({
-    intent: 'subscription',
-    createSubscription: function(data, actions) {
-      return actions.subscription.create({'plan_id': planId});
-    },
-    onApprove: function(data, actions) {
-      try {
-        const { subscriptionID } = data;
-        return actions.order.capture().then(async function(details) {
-          submitSubscription(details, subscriptionID, planName);
-        });
-      } catch(error) {
-        reportError();
-      }
-    }
-  }).render(`#paypal-${planName}`);
-}
-
 
 export const payments = {
 
@@ -61,24 +21,114 @@ export const payments = {
    * Setup Subscriptions
    *--------------------------------------------------------------------------*/
 
-  async initializeSupport() {
+  async initializeSupport(tier) {
     /**
      * Initialize PayPal support subscription checkouts.
+     * @param {String} tier The tier of subscription.
      */
-    const enterpriseSubscription = await this.getSubscription('enterprise');
-    const proSubscription = await this.getSubscription('pro');
-    const premiumSubscription = await this.getSubscription('premium');
-    addPayPalButton(enterpriseSubscription.plan_id, 'enterprise');
-    addPayPalButton(proSubscription.plan_id, 'pro');
-    addPayPalButton(premiumSubscription.plan_id, 'premium');
-  },
+    const subscriptionData = await this.getSubscription(tier);
+    console.log(subscriptionData);
 
-  async initializePremiumSubscription() {
-    /**
-     * Initialize premium PayPal subscription checkout.
-      */
-    const premiumSubscription = await this.getSubscription('premium');
-    addPayPalButton(premiumSubscription.plan_id, 'premium');
+    // Add PayPal button.
+    const FUNDING_SOURCES = [
+      paypal.FUNDING.PAYPAL,
+      paypal.FUNDING.CARD
+    ];
+    FUNDING_SOURCES.forEach(fundingSource => {
+      paypal.Buttons({
+        fundingSource,
+
+        // Style.
+        style: {
+          layout: 'vertical',
+          shape: 'rect',
+          color: (fundingSource == paypal.FUNDING.PAYLATER) ? 'gold' : '',
+        },
+
+        createSubscription: function(data, actions) {
+          /* Create a subscription with PayPal. */
+          return actions.subscription.create({
+            plan_id: 'PROD-6B902169SV204835Y',
+          });
+        },
+
+        onApprove: async (data, actions) => {
+          /* Approve the subscription with the API. */
+          try {
+            // Make an approval request.
+            const amount = document.getElementById('price').textContent;
+            const body = { amount, 'subscription_id': subscriptionData.id };
+            const url = `/src/payments/orders/${data.orderID}/capture`;
+            const response = await authRequest(url, body);
+            const details = response.data;
+            console.log('DETAILS:');
+            console.log(details);
+
+            // Three cases to handle:
+            //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
+            //   (2) Other non-recoverable errors -> Show a failure message
+            //   (3) Successful transaction -> Show confirmation or thank you message
+            // This example reads a v2/checkout/orders capture response, propagated from the server
+            // You could use a different API or structure for your 'orderData'
+            // See: https://developer.paypal.com/docs/checkout/integration-features/funding-failure/
+            var errorDetail = false;
+            try {
+              errorDetail = Array.isArray(details.details) && details.details[0];
+              if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
+                return actions.restart();
+              }
+            } catch(error) {
+              // No error to handle.
+            }
+
+            // Show an error notification if the transaction failed.
+            if (errorDetail) {
+              let msg = 'Sorry, your transaction could not be processed.';
+              msg += errorDetail.description ? ' ' + errorDetail.description : '';
+              msg += details.debug_id ? ' (' + details.debug_id + ')' : '';
+              showNotification('Error buying tokens', msg, /* type = */ 'error');
+              return;
+            }
+
+            // Successful transaction.
+            var msg = `You have successfully subscribed to Cannlytics AI! You can use your tokens to run AI-powered jobs in the app. Put your AI jobs to good use!`;
+            showNotification('Cannlytics AI tokens purchased', msg, /* type = */ 'success', /* delay = */ 10000);
+
+            // TODO: Show a success form to the user.
+
+            // Update the user's token count.
+            try {
+              document.getElementById('current_tokens').textContent = details.tokens;
+            } catch(error) {
+              // No tokens displayed on the page.
+            }
+
+          } catch (error) {
+            console.error(error);
+            // Handle the error and display an appropriate error message to the user.
+            const message = `An error occurred when approving your subscription. Please email dev@cannlytics.com for help.`;
+            showNotification('Error approving your subscription', message, /* type = */ 'error');
+          }
+        },
+      }).render("#paypal-button-container");
+    });
+
+    // Render the price.
+    document.getElementById('rate').textContent = subscriptionData.price;
+    document.getElementById('price').textContent = subscriptionData.price_now;
+    document.getElementById('subscription_name').textContent = subscriptionData.id;
+
+    // Render the attributes.
+    let ul = document.getElementById('subscription-attributes');
+    subscriptionData.attributes.forEach(attribute => {
+      let li = document.createElement('li');
+      li.className = "fs-6 mb-1";
+      let small = document.createElement('small');
+      small.className = "serif text-dark";
+      small.textContent = attribute;
+      li.appendChild(small);
+      ul.appendChild(li);
+    });
   },
 
   async subscribe(subscription, subscriptionType = 'subscribe') {
@@ -103,10 +153,11 @@ export const payments = {
       }
       data = { email: userEmail, plan_name: 'newsletter' };
     }
-    const response = await authRequest('/src/payments/subscribe', data);
-    if (response.success) {
+    try {
+      // Update the user's newsletter subscription through the API.
+      await authRequest('/api/users', { newsletter: true });
       window.location.href = `${window.location.origin}/subscriptions/subscribed`;
-    } else {
+    } catch(error) {
       const message = 'An error occurred when processing your subscription. Please contact dev@cannlytics.com for help.';
       showNotification('Error saving your account', message, /* type = */ 'error');
       hideLoadingButton(`${subscriptionType}-button`);
@@ -116,21 +167,33 @@ export const payments = {
   /**---------------------------------------------------------------------------
    * Manage Subscriptions
    *--------------------------------------------------------------------------*/
-
-  initializeSubscriptions() {
+  
+  async initializeSubscriptions() {
     /**
      * Initialize the user's current subscriptions.
      */
-
+  
     // Get the user's level of support.
-    const support = JSON.parse(document.getElementById('user_support').textContent);
-    console.log('Users level of support:');
-    console.log(support);
-
-    // TODO: If no subscription, then show Upgrade on all.
-
-    // TODO: If subscription, then show Cancel on current subscription and Change on others.
-
+    const userSubscription = await this.getUserSubscriptions();
+  
+    // If no subscription, then show Upgrade on all and stop.
+    const subscribeButtons = document.getElementsByClassName('subscribe-button');
+    for (let button of subscribeButtons) {
+      button.textContent = 'Subscribe';
+    }
+    if (!userSubscription.support) return;
+  
+    // If subscription, then show Cancel on current subscription and Change on others.
+    // Add a selected border to the current user's subscription.
+    const subscriptionButton = document.getElementById(`subscribe-button-${userSubscription.support}`);
+    const cancelSubscriptionButton = document.getElementById(`cancel-button-${userSubscription.support}`);
+    subscriptionButton.classList.add('d-none');
+    cancelSubscriptionButton.classList.remove('d-none');
+    for (let button of subscribeButtons) {
+      button.textContent = 'Change';
+    }
+    const card = document.getElementById(`subscription-card-${userSubscription.support}`);
+    card.classList.add('selected-subscription');
 
   },
 
@@ -150,77 +213,37 @@ export const payments = {
     return response.data;
   },
 
-  async changeSupportSubscription() {
+  async cancelSubscription() {
     /**
-     * Change the user's level of support.
+     * Cancel a user's PayPal subscription.
      */
-    const newSupport = this.id.replace('support-option-', '');
-    const currentSupport = JSON.parse(document.getElementById('user_support').textContent);
-    document.getElementById('checkout-enterprise-button').classList.add('d-none');
-    document.getElementById('checkout-pro-button').classList.add('d-none');
-    document.getElementById('checkout-premium-button').classList.add('d-none');
-    if (newSupport === currentSupport) {
-      cannlytics.payments.cancelChangeSupportSubscription();
-    }
-    else {
-      if (newSupport === 'no-support' && currentSupport) {
-        document.getElementById('save-support-button').classList.remove('d-none');
-        document.getElementById('cancel-support-button').classList.remove('d-none');
-        document.getElementById('checkout-enterprise-button').classList.add('d-none');
-        document.getElementById('checkout-pro-button').classList.add('d-none');
-        document.getElementById('checkout-premium-button').classList.add('d-none');
-      } else {
-        document.getElementById('save-support-button').classList.add('d-none');
-        document.getElementById('cancel-support-button').classList.remove('d-none');
-        const checkoutButton = document.getElementById(`checkout-${newSupport}-button`);
-        checkoutButton.classList.remove('d-none');
-      }
-    }
-  },
 
-  cancelChangeSupportSubscription() {
-    /**
-     * Cancel the new support choice and return to the user's current level of support.
-     */
-    document.getElementById('save-support-button').classList.add('d-none');
-    document.getElementById('cancel-support-button').classList.add('d-none');
-    document.getElementById('checkout-enterprise-button').classList.add('d-none');
-    document.getElementById('checkout-pro-button').classList.add('d-none');
-    document.getElementById('checkout-premium-button').classList.add('d-none');
-    const support = JSON.parse(document.getElementById('user_support').textContent);
-    if (support) {
-      const supportId = support.toLowerCase();
-      document.getElementById(`support-option-${supportId}`).checked = true;
-      document.getElementById('support-option-no-support').checked = false;
-    }
-    else document.getElementById('support-option-no-support').checked = true;
-  },
-
-  async saveSupportSubscription() {
-    /**
-     * Save the user's decision about their support subscription.
-     */
-    const currentSupport = JSON.parse(document.getElementById('user_support').textContent);
-    await cancelSubscription(currentSupport);
-    await authRequest('/api/users', { support: 'no-support' });
-    const message = `You have been unsubscribed from ${currentSupport} support.`;
-    showNotification('Unsubscribed', message, /* type = */ 'success');
-    document.getElementById('save-support-button').classList.add('d-none');
-    document.getElementById('cancel-support-button').classList.add('d-none');
-  },
-
-  async cancelSubscription(planName) {
-    /**
-     * Cancel a PayPal subscription for a user.
-     * @param {String} planName The name of the subscription to cancel.
-     */
-    await authRequest('/api/payments/unsubscribe', { plan_name: planName });
+    // Make cancel subscription request.
+    const response = await authRequest('/api/payments/unsubscribe', { unsubscribe: true });
     if (response.success) {
-      const message = 'An error occurred when saving your account.';
+
+      // Show a notification.
+      const message = 'Successfully cancelled your Cannlytics AI subscription. You can subscribe again at any time.';
       showNotification('Subscription canceled', message, /* type = */ 'success');
+
+      // Reset the subscription buttons and cards.
+      const subscribeButtons = document.getElementsByClassName('subscribe-button');
+      const cancelSubscribeButtons = document.getElementsByClassName('cancel-button');
+      const subscribeCards = document.getElementsByClassName('subscription-card');
+      for (let button of cancelSubscribeButtons) {
+        button.classList.add('d-none');
+      }
+      for (let button of subscribeButtons) {
+        button.textContent = 'Subscribe';
+        button.classList.remove('d-none');
+      }
+      for (let card of subscribeCards) {
+        card.classList.remove('selected-subscription');
+      }
     } else {
-      const message = 'An error occurred when canceling your subscription. Please email support.';
-      showNotification('Error Canceling Subscription', message, /* type = */ 'error');
+      // Otherwise, show an error notification.
+      const message = 'An error occurred when cancelling your subscription. Please email dev@cannlytics.com for help unsubscribing.';
+      showNotification('Error cancelling subscription', message, /* type = */ 'error');
     }
   },
 
@@ -255,272 +278,6 @@ export const payments = {
       const message = 'You have been unsubscribed from the free newsletter.'
       showNotification('Unsubscribed', message, /* type = */ 'success');
     }
-  },
-
-  async subscribeToPremium() {
-    /**
-     * Subscribe the user to the free newsletter.
-     */
-    const premium = JSON.parse(document.getElementById('user_premium').textContent);
-    const premiumCheckbox = document.getElementById('premium-material-checkbox');
-    if (premiumCheckbox.checked) {
-      document.getElementById('cancel-premium-button').classList.remove('d-none');
-      document.getElementById('checkout-premium-button').classList.remove('d-none');
-    } else {
-      if (premium) {
-        document.getElementById('checkout-premium-button').classList.add('d-none');
-        document.getElementById('save-premium-button').classList.remove('d-none');
-        document.getElementById('cancel-premium-button').classList.remove('d-none');
-      }
-      else cannlytics.payments.cancelSubscribeToPremium();
-    }
-  },
-
-  cancelSubscribeToPremium() {
-    /**
-     * Cancel the option to subscribe to premium.
-     */
-    document.getElementById('save-premium-button').classList.add('d-none');
-    document.getElementById('cancel-premium-button').classList.add('d-none');
-    document.getElementById('checkout-premium-button').classList.add('d-none');
-    document.getElementById('premium-material-checkbox').checked = false;
-  },
-
-  async savePremiumSubscription() {
-    /**
-     * Save the user's decision about their premium subscription.
-     */
-    const premiumCheckbox = document.getElementById('premium-material-checkbox');
-    if (premiumCheckbox.checked) {
-      await authRequest('/api/users', { premium: true });
-      const message = 'You are now subscribed to premium material.'
-      showNotification('Subscribed', message, /* type = */ 'success');
-    } else {
-      await cancelSubscription('premium');
-      await authRequest('/api/users', { premium: false });
-      const message = 'You have been unsubscribed from premium material.'
-      showNotification('Unsubscribed', message, /* type = */ 'success');
-    }
-    document.getElementById('save-premium-button').classList.add('d-none');
-    document.getElementById('cancel-premium-button').classList.add('d-none');
-  },
-
-  /**---------------------------------------------------------------------------
-   * Sponsorships
-   *--------------------------------------------------------------------------*/
-
-   getSponsorshipTiers() {
-    /**
-     * Get sponsorship tiers loaded into a UI script from Django.
-     * @returns {Array} An array of sponsorship tier IDs.
-     */
-    const sponsorships = JSON.parse(
-      document.getElementById('sponsorships').textContent
-    );
-    return sponsorships.map(x => x.id);
-  },
-
-  initializeSponsorships() {
-    /**
-     * Initialize the user's current sponsorship tiers.
-     */
-    const sponsorshipTiers = this.getSponsorshipTiers();
-    const userSponsorships = JSON.parse(
-      document.getElementById('user_sponsorships').textContent
-    );
-    sponsorshipTiers.forEach(id => {
-      const tierInput = document.getElementById(`sponsor-tier-${id}`);
-      if (userSponsorships.includes(id)) tierInput.checked = true;
-      // TODO: Prefer to assign onchange from JavaScript file.
-      // tierInput.onchange = this.toggleSponsorCheckout;
-    });
-    document.getElementById('select-all-tiers-button').addEventListener('click', this.selectAllSponsorshipTiers);
-    document.getElementById('save-button').addEventListener('click', this.saveSponsorshipTiers);
-    document.getElementById('cancel-button').addEventListener('click', this.cancelNewSponsorships);
-  },
-
-  cancelNewSponsorships() {
-    /**
-     * Cancels a user's newly selected sponsorships.
-     */
-    document.getElementById('donate-button').classList.add('d-none');
-    document.getElementById('save-button').classList.add('d-none');
-    document.getElementById('cancel-button').classList.add('d-none');
-    const sponsorshipTiers = cannlytics.payments.getSponsorshipTiers();
-    const userSponsorships = JSON.parse(document.getElementById('user_sponsorships').textContent);
-    sponsorshipTiers.forEach(id => {
-      const tierInput = document.getElementById(`sponsor-tier-${id}`);
-      if (userSponsorships.includes(id)) tierInput.checked = true;
-      else tierInput.checked = false;
-    });
-  },
-
-  async saveSponsorshipTiers() {
-    /**
-     * Save the user's sponsorship tiers.
-     */
-    const sponsorships = [];
-    const sponsorshipTiers = cannlytics.payments.getSponsorshipTiers();
-    sponsorshipTiers.forEach(id => {
-      const tierInput = document.getElementById(`sponsor-tier-${id}`);
-      if (tierInput.checked) sponsorships.push(id);
-    });
-    try {
-      await authRequest('/api/users', { sponsorships });
-      // FIXME: Cancel a user's PayPal recurring donation through the API.
-      const randomInt = Math.floor(Math.random() * 99);
-      const staffMessage = {
-        name: 'CannBot',
-        subject: 'PayPal Recurring Donation Needs to be Canceled',
-        message: "A user has canceled a recurring PayPal donation. Please manually ensure the user's recurring donation is canceled.",
-        math_input: randomInt,
-        math_total: randomInt,
-      };
-      await authRequest('/src/email/send-message', staffMessage);
-    } catch(error) {
-      const message = 'An error occurred while changing your sponsorships. Please try again later or email support.';
-      showNotification('Error Saving Sponsorships', message, /* type = */ 'error');
-    }
-  },
-
-  selectAllSponsorshipTiers() {
-    /**
-     * Select all sponsorship tiers.
-     */
-    const sponsorshipTiers = cannlytics.payments.getSponsorshipTiers();
-    sponsorshipTiers.forEach(function(id) {
-      document.getElementById(`sponsor-tier-${id}`).checked = true;
-    });
-    document.getElementById('cancel-button').classList.remove('d-none');
-    cannlytics.payments.showDonateButton(sponsorshipTiers[0]);
-  },
-
-  showDonateButton(buttonId) {
-    /**
-     * Show a PayPal donation button.
-     * @param {String} buttonId PayPal's hosted button ID.
-     */
-    const button = document.getElementById('donate-button');
-    button.innerHTML = '';
-    button.classList.remove('d-none');
-    PayPal.Donation.Button({
-      env:'production',
-      hosted_button_id: buttonId,
-      image: {
-        src:'https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif',
-        alt:'Donate with PayPal button',
-        title:'PayPal - The safer, easier way to pay online!',
-      },
-      onApprove: function(data, actions) {
-        // Save user's new subscription to Firestore and notify staff.
-        try {
-          const { subscriptionID } = data;
-          return actions.order.capture().then(async function(details) {
-            const name = details.payer.name.given_name;
-            const email = details.payer.email_address;
-            const sponsorships = JSON.parse(
-              document.getElementById('user_sponsorships').textContent
-            ) || [];
-            sponsorships.push(subscriptionID);
-            try {
-              await authRequest('/api/users', { sponsorships });
-            } catch(error) { /* User may not be signed in. */ }
-            await reportSubscription(email, name, subscriptionID);
-          });
-        } catch(error) {
-          reportError();
-        }
-      },
-      onCancel: function (data) {
-        const message = 'You have canceled your payment. You can always do so later.';
-        showNotification('Payment Canceled', message, /* type = */ 'error');
-      },
-      onError: function (error) {
-        const message = 'A payment error occurred. Please try again later or email support.';
-        showNotification('Payment Error', message, /* type = */ 'error');
-        reportError();
-      },
-    }).render('#donate-button');
-  },
-
-  toggleSponsorCheckout(input) {
-    /**
-     * Show checkout if a user is selecting new sponsorship options,
-     * show save if a user deselects a current sponsorship, and
-     * hide the checkout button if the user returns to their original tiers.
-     */
-    const tier = input.id.replace('sponsor-tier-', '');
-    const userSponsorships = JSON.parse(
-      document.getElementById('user_sponsorships').textContent
-    ) || [];
-    if (input.checked) {
-      if (!userSponsorships.includes(tier)) {
-        const newTiers = JSON.parse(
-          localStorage.getItem('cannlytics_new_sponsor_tiers'
-        )) || userSponsorships;
-        newTiers.push(tier);
-        localStorage.setItem('cannlytics_new_sponsor_tiers', JSON.stringify(newTiers));
-        document.getElementById('cancel-button').classList.remove('d-none');
-        this.showDonateButton(tier);
-      }
-    } else {
-      let newTiers = JSON.parse(
-        localStorage.getItem('cannlytics_new_sponsor_tiers'
-      )) || userSponsorships;
-      newTiers = newTiers.filter(item => item !== tier)
-      localStorage.setItem('cannlytics_new_sponsor_tiers', JSON.stringify(newTiers));
-      if (newTiers.length !== userSponsorships.length) {
-        if (userSponsorships.length) {
-          document.getElementById('save-button').classList.remove('d-none');
-        }
-        document.getElementById('cancel-button').classList.remove('d-none');
-      } else {
-        document.getElementById('donate-button').classList.add('d-none');
-        document.getElementById('save-button').classList.add('d-none');
-        document.getElementById('cancel-button').classList.add('d-none');
-      }
-    }
-  },
-
-  /**---------------------------------------------------------------------------
-   * Checkout
-   *--------------------------------------------------------------------------*/
-
-  async initializeCheckout() {
-    
-    // Get subscription data.
-    const planName = JSON.parse(document.getElementById('plan_name').textContent);
-    const subscriptionData = await this.getSubscription(planName);
-    const planID = subscriptionData['plan_id'];
-
-    // Fill-in the template.
-    document.getElementById('subscription-title').textContent = planName;
-    document.getElementById('subscription-description').textContent = subscriptionData.plan_description;
-    document.getElementById('subscription-price').textContent = subscriptionData.price;
-    document.getElementById('subscription-price-now').textContent = `${subscriptionData.price_now} now`;
-
-    // Initialize PayPal buttons.
-    // FIXME: Popup is not working properly (double popup).
-    paypal.Buttons({
-      style: {
-          shape: 'rect',
-          color: 'silver',
-          layout: 'horizontal',
-          label: 'subscribe',
-      },
-      createSubscription: function(data, actions) {
-        // Optional: Validate the form.
-        return actions.subscription.create({ 'plan_id': planID });
-      },
-      onApprove: function(data, actions) {
-        const subscription = { ...data, ...{ 'plan_id': planID, 'plan_name': planName } };
-        cannlytics.payments.subscribe(subscription);
-      },
-      onError: function (error) {
-        alert('Unknown error subscribing, please contact support. Thank you for your patience and we will deliver you support.');
-      },
-    }).render('#paypal-button-container');
-
   },
 
   /**---------------------------------------------------------------------------
@@ -600,11 +357,8 @@ export const payments = {
             // Make an orders request.
             const tokens = document.getElementById('tokenSlider').value;
             const details = await authRequest('/src/payments/orders', { tokens });
-            console.log('DETAILS:');
-            console.log(details);
             return details.data.id;
           } catch (error) {
-            console.error(error);
             const message = `An error occurred when buying tokens. Please email dev@cannlytics.com for help.`;
             showNotification('Error buying tokens', message, /* type = */ 'error');
             return null;
@@ -685,10 +439,6 @@ export const payments = {
 
 };
 
-/**---------------------------------------------------------------------------
- * Notifications
- *--------------------------------------------------------------------------*/
-
 export const reportError = async () => {
   /**
    * Report a payment error so it can be corrected manually.
@@ -705,24 +455,5 @@ export const reportError = async () => {
     await authRequest('/src/email/send-message', data);
   } catch(error) {
     // Could not report error.
-  }
-}
-
-export const reportSubscription = async (email, name, id) => {
-  /**
-   * Report a new subscription to the staff.
-   */
-  try {
-    const randomInt = Math.floor(Math.random() * 99);
-    const data = {
-      name: 'CannBot',
-      subject: 'New PayPal Payment!',
-      message: `Payment by:\n\nEmail: ${email}\nName: ${name}\nPayPal ID: ${id}`,
-      math_input: randomInt,
-      math_total: randomInt,
-    };
-    await authRequest('/src/email/send-message', data);
-  } catch(error) {
-    // Could not report subscription.
   }
 }

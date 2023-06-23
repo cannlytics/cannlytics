@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 11/16/2021
-  Updated: 6/21/2023
+  Updated: 6/22/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -39,6 +39,9 @@
     .btn-green {
       background-color: #16c995 !important;
       color: white;
+    }
+    .selected-subscription {
+      border: 2px solid #16c995;
     }
   </style>
 
@@ -113,10 +116,7 @@
       </nav>
     </div>
 
-    <!-- FIXME: 
-     - If no subscription, then show Upgrade on all.
-     - If subscription, then show Cancel on current subscription and Change on others.
-    -->
+    <!-- Subscriptions -->
     <div class="markdown mt-3">
       <img src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_calyx_ai.png?alt=media&token=012e8364-8ee2-4d91-9ec2-ab5f55b23059"
         style="float:left;width:125px;height:125px;"
@@ -136,7 +136,7 @@
       <div class="row row-cols-1 row-cols-md-3 mb-3 mt-4 text-center">
         {% for item in subscription_plans %}
           <div class="col-8 col-md-6 col-lg-4">
-            <div class="card mb-4 shadow-sm">
+            <div id="subscription-card-{{ item.id }}" class="subscription-card card mb-4 shadow-sm">
               <div class="card-header bg-gradient-{{ item.color }}">
                 <h4 class="fw-bold text-white my-0">
                   {{ item.name }}
@@ -159,20 +159,22 @@
                   {% endfor %}
                 </ul>
                 <div class="d-grid gap-2">
-                  <button
-                    id="subscribe-{{ item.plan_name }}-button"
-                    class="btn bg-gradient-{{ item.color }} text-white serif"
+                  <a
+                    id="subscribe-button-{{ item.id }}"
+                    class="subscribe-button btn bg-gradient-{{ item.color }} text-white serif"
+                    href="{% url 'section' page='account' section='checkout' %}?subscription='{{ item.id }}'"
                   >
-                    {{ item.action|safe }}
-                  </button>
+                    Subscribe
+                  </a>
                   <button
-                    id="unsubscribe-{{ item.plan_name }}-button"
-                    class="btn bg-gradient-{{ item.color }} btn-lg d-none"
+                    id="cancel-button-{{ item.id }}"
+                    class="cancel-button btn btn-sm-light btn-lg-light serif text-dark d-none"
+                    data-bs-toggle="modal"
+                    data-bs-target="#cancel-subscription-dialog"
                   >
-                    Unsubscribe
+                    Cancel
                   </button>
                 </div>
-                <div id="paypal-{{ item.plan_name }}"></div>
               </div>
             </div>
           </div>
@@ -198,7 +200,7 @@
       <p class="mt-2">
         You can receive periodic newsletters and updates from Cannlytics if you
         believe that you will benefit from our free material, including novel
-        datasets and statistics.
+        datasets and statistics. You can unsubscribe anytime by unchecking the box.
       </p>
       <div class="card col-8 my-3 p-3 border rounded text-dark">
         <h3 class="mb-3 mt-0">Newsletters</h3>
@@ -221,10 +223,48 @@
       </div>
     </div>
 
-    <!-- List sponsorship packages -->
-    {% comment %} {% include "website/pages/subscriptions/sponsorships.html" %} {% endcomment %}
-
   </section>
+
+  <!-- Cancel subscription dialog -->
+  <div id="cancel-subscription-dialog" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title serif">Cancel your subscription?</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="modal-body serif">
+          Are you sure that you want to cancel your subscription?
+          If you do decide to cancel, then your tokens will still be valid
+          until the end of your billing period.
+          You may always subscribe again at any time.
+        </div>
+
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-sm-light btn-lg-light text-dark serif"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger serif"
+            onclick="cannlytics.payments.cancelSubscription()"
+          >
+            Yes, cancel my subscription
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
 {% endblock material %}
 
@@ -236,13 +276,13 @@
 {{ user.premium|json_script:"user_premium" }}
 {{ user.subscriptions|json_script:"user_subscriptions" }}
 {{ user.support|json_script:"user_support" }} {% endcomment %}
+{% comment %} {{ user.support|json_script:"user_support" }} {% endcomment %}
 
 <script>
 
   // FIXME:
   // Initialize the interface with the user's current subscriptions.
   cannlytics.payments.initializeSubscriptions();
-  // cannlytics.payments.initializeSupport();
 
   // Initialize the newsletter
   cannlytics.payments.initializeFreeNewsletter();
