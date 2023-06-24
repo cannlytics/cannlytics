@@ -4,12 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/19/2023
+// Updated: 6/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/common/buttons/download_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/services/download_service.dart';
 import 'package:cannlytics_data/ui/sales/receipt_card.dart';
 import 'package:cannlytics_data/ui/sales/sales_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
@@ -22,7 +23,7 @@ class UserReceiptsInterface extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Listen to the user's results.
+    // Listen to the user's receipts.
     final asyncData = ref.watch(userReceipts);
 
     // Render the data.
@@ -30,7 +31,7 @@ class UserReceiptsInterface extends ConsumerWidget {
       // Loading state.
       loading: () => _body(
         context,
-        children: [_userReceiptsPlaceholder(context, ref)],
+        children: [_placeholder(context, ref)],
       ),
 
       // Error state.
@@ -40,7 +41,7 @@ class UserReceiptsInterface extends ConsumerWidget {
       data: (items) => (items.length == 0)
           ? _body(
               context,
-              children: [_userReceiptsPlaceholder(context, ref)],
+              children: [_placeholder(context, ref)],
             )
           : UserReceiptsGrid(items: items),
     );
@@ -79,10 +80,7 @@ class UserReceiptsInterface extends ConsumerWidget {
   // TODO: Implement loading widget.
 
   /// Message displayed when there are no user receipts.
-  Widget _userReceiptsPlaceholder(BuildContext context, WidgetRef ref) {
-    // // Listen to the user.
-    // final user = ref.watch(authProvider).currentUser;
-
+  Widget _placeholder(BuildContext context, WidgetRef ref) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -140,7 +138,11 @@ class UserReceiptsInterface extends ConsumerWidget {
   }
 
   /// Message displayed when an error occurs.
-  Widget _errorMessage(BuildContext context, WidgetRef ref, String? message) {
+  Widget _errorMessage(
+    BuildContext context,
+    WidgetRef ref,
+    String? message,
+  ) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -210,7 +212,7 @@ class UserReceiptsInterface extends ConsumerWidget {
   }
 }
 
-/// A grid of the user's results.
+/// A grid of the user's receipts.
 class UserReceiptsGrid extends ConsumerWidget {
   const UserReceiptsGrid({super.key, required this.items});
 
@@ -253,7 +255,11 @@ class UserReceiptsGrid extends ConsumerWidget {
                 Spacer(),
 
                 // Download all receipts button.
-                if (user != null) DownloadButton(items: items),
+                if (user != null)
+                  DownloadButton(
+                    items: items,
+                    url: '/api/data/receipts/download',
+                  ),
               ],
             ),
             gapH12,
@@ -273,7 +279,8 @@ class UserReceiptsGrid extends ConsumerWidget {
                   return ReceiptCard(
                     item: SalesReceipt.fromMap(item ?? {}),
                     onDownload: () {
-                      DownloadService.downloadData([item!]);
+                      DownloadService.downloadData(
+                          [item!], '/api/data/receipts/download');
                     },
                     onDelete: () async {
                       final delete = await InterfaceUtils.showAlertDialog(
@@ -295,41 +302,5 @@ class UserReceiptsGrid extends ConsumerWidget {
         ),
       ),
     );
-  }
-}
-
-/// A download button with a circular progress indicator.
-class DownloadButton extends StatefulWidget {
-  DownloadButton({required this.items});
-
-  // Parameters.
-  final List<Map<dynamic, dynamic>?> items;
-
-  @override
-  _DownloadButtonState createState() => _DownloadButtonState();
-}
-
-/// Download button state
-class _DownloadButtonState extends State<DownloadButton> {
-  bool _isLoading = false;
-
-  Future<void> _downloadData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    await DownloadService.downloadData(widget.items);
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SecondaryButton(
-        onPressed: _isLoading ? null : _downloadData,
-        text: 'Download All',
-        isLoading: _isLoading);
   }
 }

@@ -10,6 +10,7 @@ import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/services/download_service.dart';
 import 'package:cannlytics_data/ui/sales/sales_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +102,10 @@ class UserReceiptsAnalytics extends ConsumerWidget {
                     onPressed: () {
                       var items = ref.read(userReceipts).value;
                       if (items == null || items.isEmpty) return;
-                      DownloadService.downloadData(items);
+                      DownloadService.downloadData(
+                        items,
+                        '/api/data/sales/download',
+                      );
                     },
                   ),
               ],

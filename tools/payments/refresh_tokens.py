@@ -13,7 +13,7 @@ from cannlytics import firebase
 
 
 # Get all subscribers.
-initialize_firebase()
+firebase.initialize_firebase()
 subscribers = firebase.get_collection('subscribers')
 
 # TODO: Give premium, pro, and enterprise users their alloted tokens

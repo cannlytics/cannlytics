@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/18/2023
+// Updated: 6/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -14,8 +14,6 @@ import 'dart:async';
 import 'package:cannlytics_data/services/api_service.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
-import 'package:cannlytics_data/utils/utils.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /* === Data === */
@@ -25,37 +23,30 @@ final userReceipts = StreamProvider<List<Map?>>((ref) async* {
   final FirestoreService _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(authProvider).currentUser;
   if (user == null) return;
-  print('STREAMING RECEIPTS FOR USER: ${user.uid}');
-  // FIXME: Apply limit based on user's subscription.
   yield* _dataSource.watchCollection(
     path: 'users/${user.uid}/receipts',
     builder: (data, documentId) => data!,
-    queryBuilder: (query) =>
-        query.orderBy('parsed_at', descending: true).limit(1000),
+    queryBuilder: (query) => query.orderBy('parsed_at', descending: true),
   );
 });
 
 // Receipt service provider.
 final receiptService = Provider<ReceiptService>((ref) {
-  return ReceiptService(ref.watch(firestoreProvider));
+  return ReceiptService();
 });
 
 /// Receipt service.
 class ReceiptService {
-  const ReceiptService(this._dataSource);
-  final FirestoreService _dataSource;
+  const ReceiptService();
 
   // Update receipt.
   Future<void> updateReceipt(String id, Map data) async {
-    print('Updating receipt...');
     String url = '/api/data/receipts/$id';
     await APIService.apiRequest(url, data: {'data': data});
   }
 
   // Delete receipt.
   Future<void> deleteReceipt(String id) async {
-    print('Delete receipt...');
-    // _dataSource.deleteData(path: 'users/$uid/receipts/$id');
     String url = '/api/data/receipts/$id';
     await APIService.apiRequest(url, options: {'delete': true});
   }
@@ -96,28 +87,7 @@ class ReceiptParser extends AsyncNotifier<List<Map?>> {
   }
 }
 
-// An instance of the user results provider.
+// An instance of the receipt parser.
 final receiptParser = AsyncNotifierProvider<ReceiptParser, List<Map?>>(() {
   return ReceiptParser();
 });
-
-/* === Downloads === */
-
-/// Data download service.
-class DownloadService {
-  const DownloadService._();
-
-  /// Download receipt data.
-  static Future<void> downloadData(List<Map<dynamic, dynamic>?> data) async {
-    var response = await APIService.apiRequest(
-      '/api/data/receipts/download',
-      data: {'data': data},
-    );
-    print('RESPONSE: $response');
-    if (kIsWeb) {
-      WebUtils.downloadUrl(response['download_url']);
-    } else {
-      // TODO: Implement mobile download.
-    }
-  }
-}

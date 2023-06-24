@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/13/2023
-// Updated: 6/17/2023
+// Updated: 6/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -15,29 +15,44 @@ import 'package:cannlytics_data/common/inputs/string_controller.dart';
 import 'package:cannlytics_data/services/api_service.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
-import 'package:cannlytics_data/utils/utils.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /* === Data === */
 
 /// Stream user results from Firebase.
-final userResults = StreamProvider.family<List<Map<String, dynamic>>, String>(
-    (ref, stateId) async* {
+final userResults = StreamProvider<List<Map?>>((ref) async* {
   final FirestoreService _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(authProvider).currentUser;
+  if (user == null) return;
   yield* _dataSource.watchCollection(
     path: 'users/${user!.uid}/lab_results',
     builder: (data, documentId) => data!,
-    queryBuilder: (query) =>
-        query.orderBy('coa_parsed_at', descending: true).limit(1000),
+    queryBuilder: (query) => query.orderBy('coa_parsed_at', descending: true),
   );
 });
 
-// TODO: Update user receipts.
+// Result service provider.
+final resultService = Provider<ResultService>((ref) {
+  return ResultService();
+});
 
-// TODO: Delete user receipts.
+/// Result service.
+class ResultService {
+  const ResultService();
+
+  // Update result.
+  Future<void> updateResult(String id, Map data) async {
+    String url = '/api/data/coas/$id';
+    await APIService.apiRequest(url, data: {'data': data});
+  }
+
+  // Delete result.
+  Future<void> deleteResult(String id) async {
+    String url = '/api/data/coas/$id';
+    await APIService.apiRequest(url, options: {'delete': true});
+  }
+}
 
 /* === Extraction === */
 
@@ -106,23 +121,3 @@ final coaParser = AsyncNotifierProvider<COAParser, List<Map?>>(() {
 final urlSearchController =
     StateNotifierProvider<StringController, TextEditingController>(
         (ref) => StringController());
-
-/* === Downloads === */
-
-/// Data download service.
-class DownloadService {
-  const DownloadService._();
-
-  /// Download COA data.
-  static Future<void> downloadData(List<Map<String, dynamic>> data) async {
-    var response = await APIService.apiRequest(
-      '/api/data/coas/download',
-      data: {'data': data},
-    );
-    if (kIsWeb) {
-      WebUtils.downloadUrl(response['download_url']);
-    } else {
-      // TODO: Implement mobile download.
-    }
-  }
-}

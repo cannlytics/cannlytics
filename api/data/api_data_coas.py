@@ -111,6 +111,7 @@ def api_data_coas(request, sample_id=None):
         print('POSTED URLS:', urls)
 
         # FIXME: Save the files from the URLs to Firebase Storage.
+        
 
         # Get any user-posted files.
         pdfs, images = [], []

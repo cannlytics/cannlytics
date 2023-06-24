@@ -8,7 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/ui/results/results_service.dart';
+import 'package:cannlytics_data/services/download_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -80,7 +80,10 @@ class LabResultItem extends StatelessWidget {
                       if (data['results'] == null) {
                         data['results'] = [];
                       }
-                      DownloadService.downloadData([data]);
+                      DownloadService.downloadData(
+                        [data],
+                        '/api/data/coas/download',
+                      );
                     },
                     child: Icon(
                       Icons.download_sharp,
