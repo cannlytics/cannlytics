@@ -1,10 +1,10 @@
 """
-CoA Data Endpoints | Cannlytics API
+COA Data Endpoints | Cannlytics API
 Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 6/23/2023
+Updated: 6/24/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with COA data.
@@ -14,14 +14,15 @@ from datetime import datetime
 from json import loads
 import os
 import tempfile
+import uuid
 
 # External imports
 import google.auth
-from django.http import HttpResponse
 from django.http.response import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+import pdfplumber
 
 # Internal imports
 from cannlytics.auth.auth import authenticate_request
@@ -55,8 +56,57 @@ FILE_TYPES = ['pdf', 'png', 'jpg', 'jpeg']
 MAX_OBSERVATIONS_PER_FILE = 200_000
 
 
-@api_view(['GET', 'POST'])
-def api_data_coas(request, sample_id=None):
+def save_file(uid, file, collection='files', project_id=None) -> dict:
+    """Save a user's file to Firebase Storage."""
+
+    # If the file is a URL, then download the file.
+    if file.startswith('https'):
+        ext = file.split('.')[-1].split('?')[0].lower()
+        response = requests.get(file)
+        temp = tempfile.mkstemp(f'.{ext}')
+        with os.fdopen(temp[0], 'wb') as temp_file:
+            temp_file.write(response.content)
+        filepath = temp[1]
+
+    # If the file is a PDF, then create an image of the first page.
+    elif filepath.endswith('.pdf'):
+        filepath = 'coa.png'
+        pdf = pdfplumber.open(filepath)
+        image = pdf.pages[0].to_image(resolution=96)
+        image.save(filepath)
+
+    # Otherwise, assume that it is an image.
+    else:
+        filepath = file
+
+    # Create a document ID.
+    doc_id = str(uuid.uuid4())
+
+    # Upload the file to Firebase Storage.
+    ext = filepath.split('.').pop()
+    ref = 'users/%s/%s/%s.%s' % (uid, collection, doc_id, ext)
+    upload_file(
+        destination_blob_name=ref,
+        source_file_name=image,
+        bucket_name=STORAGE_BUCKET
+    )
+
+    # Get download and short URLs.
+    download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
+    short_url = create_short_url(
+        api_key=FIREBASE_API_KEY,
+        long_url=download_url,
+        project_name=project_id,
+    )
+    return {
+        'file_ref': ref,
+        'download_url': download_url,
+        'short_url': short_url,
+    }
+
+
+@api_view(['GET', 'POST', 'DELETE'])
+def api_data_coas(request, coa_id=None):
     """Get COA data (public API endpoint)."""
 
     # Authenticate the user.
@@ -67,26 +117,101 @@ def api_data_coas(request, sample_id=None):
     if not claims:
         uid = 'cannlytics'
         public, throttle = True, True
-        # return HttpResponse(status=401)
     else:
         uid = claims['uid']
     
     # Log the user ID.
     print('USER:', uid)
 
-    # Get a specific CoA or query open-source CoAs.
+    # Get a specific COA or query public COAs.
     if request.method == 'GET':
 
-        # FIXME: Implement querying of pre-parsed COA data!
-        data = []
+         # Get a specific receipt.
+        if coa_id:
+            ref = f'users/{uid}/coas/{coa_id}'
+            data = get_document(ref)
+            response = {'success': True, 'data': data}
+            return Response(response, status=200)
+
+        # Query receipts.
+        data, filters = [], []
+        available_queries = [
+            {
+                'key': 'product_name',
+                'operation': '==',
+                'param': 'product_name',
+            },
+            {
+                'key': 'product_type',
+                'operation': '==',
+                'param': 'product_type',
+            },
+            {
+                'key': 'date_tested',
+                'operation': '>=',
+                'param': 'date',
+            },
+            {
+                'key': 'total_thc',
+                'operation': '>=',
+                'param': 'thc',
+            },
+            {
+                'key': 'total_cbd',
+                'operation': '>=',
+                'param': 'cbd',
+            },
+            {
+                'key': 'total_terpenes',
+                'operation': '>=',
+                'param': 'terpenes',
+            },
+            {
+                'key': 'lab',
+                'operation': '==',
+                'param': 'lab',
+            },
+            {
+                'key': 'producer',
+                'operation': '==',
+                'param': 'producer',
+            },
+        ]
         params = request.query_params
-        ref = 'public/data/lab_results'
+        for query in available_queries:
+            key = query['key']
+            value = params.get(key)
+            if value:
+                filters.append({
+                    'key': key,
+                    'operation': params.get(key + '_op', query['operation']),
+                    'value': value,
+                })
+
+        # Limit the number of observations.
+        limit = int(params.get('limit', 1000))
+        if limit > 1000:
+            limit = 1000
+        
+        # Order the data.
+        order_by = params.get('order_by', 'coa_parsed_at')
+        desc = params.get('desc', True)
+
+        # Query documents.
+        ref = f'public/data/lab_results'
+        data = get_collection(
+            ref,
+            desc=desc,
+            filters=filters,
+            limit=limit,
+            order_by=order_by,
+        )
 
         # Return the data.
         response = {'success': True, 'data': data}
         return Response(response, status=200)
 
-    # Parse posted CoA PDFs or URLs.
+    # Parse posted COA PDFs or URLs.
     if request.method == 'POST':
 
         # Get the user's level of support.
@@ -109,9 +234,6 @@ def api_data_coas(request, sample_id=None):
 
         # Log the posted data.
         print('POSTED URLS:', urls)
-
-        # FIXME: Save the files from the URLs to Firebase Storage.
-        
 
         # Get any user-posted files.
         pdfs, images = [], []
@@ -146,8 +268,6 @@ def api_data_coas(request, sample_id=None):
                 temp_file.close()
                 filepath = temp[1]
 
-                # FIXME: Save user's file to Firebase Storage.
-                
                 # Parse PDFs and images separately.
                 if ext.lower() == 'pdf':
                     pdfs.append(filepath)
@@ -199,11 +319,17 @@ def api_data_coas(request, sample_id=None):
         # Try to parse URLs and PDFs.
         for doc in urls + pdfs:
 
+            # Save user's file to Firebase Storage.
+            try:
+                file_data = save_file(uid, doc, 'coas', project_id=project_id)
+            except:
+                file_data = {}
+
             # Parse the document.
             try:
                 print('Parsing:', doc)
                 data = parser.parse(doc)
-                parsed_data.extend(data)
+                parsed_data.append({**data[0], **file_data})
             except:
                 try:
 
@@ -220,7 +346,7 @@ def api_data_coas(request, sample_id=None):
                         use_cached=True,
                         verbose=True,
                     )
-                    parsed_data.extend([data])
+                    parsed_data.append({**data, **file_data})
                     all_prompts.extend(prompts)
                     total_cost += cost
                     
@@ -234,17 +360,23 @@ def api_data_coas(request, sample_id=None):
                 except:
                     print('Failed to parse:', doc)
                     continue
-            
 
         # Try to parse images.
         for doc in images:
+
+            # Save user's file to Firebase Storage.
+            try:
+                file_data = save_file(uid, doc, 'coas', project_id=project_id)
+            except:
+                file_data = {}
+
             coa_url = None
             try:
                 print('Scanning:', doc)
                 coa_url = parser.scan(doc)
                 print('Scanned:', coa_url)
                 data = parser.parse(coa_url)
-                parsed_data.extend(data)
+                parsed_data.append({**data[0], **file_data})
             except:
 
                 # Require tokens to parse with AI.
@@ -261,7 +393,7 @@ def api_data_coas(request, sample_id=None):
                         use_cached=True,
                         verbose=True,
                     )
-                    parsed_data.extend([data])
+                    parsed_data.append({**data, **file_data})
                     all_prompts.extend(prompts)
                     total_cost += cost
 
@@ -278,8 +410,6 @@ def api_data_coas(request, sample_id=None):
 
         # Finish parsing.
         parser.quit()
-
-        # TODO: Create a thumbnail of PDFs.
 
         # Create a usage log and save any public lab results.
         changes, refs, docs = [], [], []
@@ -336,6 +466,33 @@ def api_data_coas(request, sample_id=None):
         # Return any extracted data.
         response = {'success': True, 'data': parsed_data}
         return Response(response, status=200)
+    
+    # Return the data.
+    if request.method == 'DELETE':
+
+        # Get the document ID.
+        if not coa_id:
+            try:
+                coa_id = loads(request.body.decode('utf-8'))['id']
+            except:
+                message = 'Please provide an `id` in the URL or your request body.'
+                response = {'success': False, message: message}
+                return Response(response, status=200)
+        
+        # Delete the document.
+        ref = f'users/{uid}/coas/{coa_id}'
+        doc = get_document(ref)
+        file_ref = doc.get('file_ref')
+        delete_document(ref)
+
+        # Delete any image file.
+        if file_ref:
+            delete_file(file_ref, bucket_name=STORAGE_BUCKET)
+
+        # Return a success message.
+        message = f'COA {coa_id} deleted.'
+        response = {'success': True, 'data': [], 'message': message}
+        return Response(response, status=200)
 
 
 @api_view(['POST'])
@@ -344,13 +501,12 @@ def download_coa_data(request):
     body with the data, an object or an array of objects, to standardize
     and save in a workbook."""
 
-    # TODO: Authenticate the user, throttle requests if unauthenticated.
-    public, throttle = False, False
+    # Authenticate the user, throttle requests if unauthenticated.
+    throttle = False
     claims = authenticate_request(request)
     if not claims:
         uid = 'cannlytics'
-        public, throttle = True, True
-        # return HttpResponse(status=401)
+        throttle = True
     else:
         uid = claims['uid']
 

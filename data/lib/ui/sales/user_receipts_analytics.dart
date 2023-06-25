@@ -9,8 +9,8 @@
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
-import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/download_service.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/sales/sales_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -80,7 +80,7 @@ class UserReceiptsAnalytics extends ConsumerWidget {
   /// Placeholder.
   Widget _analyticsPlaceholder(BuildContext context, WidgetRef ref) {
     // Listen to the user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
 
     return Center(
       child: Padding(

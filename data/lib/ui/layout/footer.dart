@@ -29,13 +29,15 @@ class Footer extends ConsumerWidget {
 
     // Build the footer.
     return Container(
-      margin: EdgeInsets.only(top: Insets(1).md),
+      margin: EdgeInsets.all(0),
+      padding: EdgeInsets.all(0),
       child: Center(
         child: SizedBox(
           width: Breakpoints.desktop.toDouble(),
           child: Padding(
             padding: EdgeInsets.only(
-              top: 48,
+              // top: 48,
+              top: 0,
               left: horizontalPadding(screenWidth),
               right: horizontalPadding(screenWidth),
             ),
@@ -45,6 +47,8 @@ class Footer extends ConsumerWidget {
               children: [
                 // Horizontal rule.
                 Container(
+                  margin: EdgeInsets.all(0),
+                  padding: EdgeInsets.all(0),
                   color: Theme.of(context).dividerColor,
                   height: 1,
                 ),

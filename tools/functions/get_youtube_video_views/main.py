@@ -1,10 +1,10 @@
 """
 Periodically Get YouTube Views | Cannlytics Website
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/23/2022
-Updated: 1/25/2022
+Updated: 6/24/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # Internal imports.
@@ -14,7 +14,6 @@ import requests
 
 # External imports.
 from cannlytics.firebase import (
-    # initialize_firebase,
     get_collection,
     update_documents,
 )
@@ -38,43 +37,26 @@ def get_youtube_video_views(event, context):
         return
 
     # Get YouTube API key saved as an environment variable.
-    print('Getting API Key...')
     api_key = os.environ.get('YOUTUBE_API_KEY')
-    if api_key is not None:
-        print('Found API key')
-    # if api_key is None:
-    #     import yaml
-    #     dir_path = os.path.dirname(os.path.realpath(__file__))
-    #     with open(f'{dir_path}/env.yaml', 'r') as env:
-    #         config = yaml.load(env, Loader=yaml.FullLoader)
-    #         api_key = config['YOUTUBE_API_KEY']
-    #         credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
-    #         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 
     # Initialize Firebase.
-    # initialize_firebase()
-    print('Initializing Firebase')
     try:
         initialize_app()
     except ValueError:
         pass
     database = firestore.client()
-    print('Initialized Firebase')
 
     # Get all videos.
-    print('Getting all videos')
     videos = get_collection(
         'public/videos/video_data',
         order_by='published_at',
         desc=True,
         database=database,
     )
-    print('Found %i videos' % len(videos))
 
     # Get view and like count for each video.
     refs = []
     updates = []
-    print('Getting views and likes...')
     for video in videos:
         video_id = video['id']
         youtube_id = video['youtube_id']
@@ -89,6 +71,5 @@ def get_youtube_video_views(event, context):
         refs.append(f'public/videos/video_data/{video_id}')
 
     # Update all videos with the latest view and like count.
-    print('Found all views and likes. Preparing to update videos...')
     update_documents(refs, updates, database=database)
     print('Updated all %i videos with view counts.' % len(videos))

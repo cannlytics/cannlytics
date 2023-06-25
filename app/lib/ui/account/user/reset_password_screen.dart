@@ -150,7 +150,8 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm>
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
+    ;
 
     // Render the widget.
     return Padding(

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 6/18/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 /// A sales receipt model.
@@ -49,15 +49,15 @@ class SalesReceipt {
     this.retailerLicenseNumber,
     this.retailerAddress,
     this.budtender,
-    this.fileRef,
-    this.downloadUrl,
-    this.shortUrl,
     this.totalTax,
     this.totalTransactions,
     this.parsedAt,
     this.algorithm,
     this.algorithmVersion,
     this.warning,
+    this.fileRef,
+    this.downloadUrl,
+    this.shortUrl,
   });
 
   // Properties.
@@ -99,15 +99,15 @@ class SalesReceipt {
   final String? retailerLicenseNumber;
   final String? retailerAddress;
   final String? budtender;
-  final String? fileRef;
-  final String? downloadUrl;
-  final String? shortUrl;
   final double? totalTax;
   final double? totalTransactions;
   final DateTime? parsedAt;
   final String? algorithm;
   final String? algorithmVersion;
   final String? warning;
+  final String? fileRef;
+  final String? downloadUrl;
+  final String? shortUrl;
 
   // Create model.
   factory SalesReceipt.fromMap(Map<dynamic, dynamic> data) {
@@ -156,15 +156,15 @@ class SalesReceipt {
       retailerLicenseNumber: data['retailer_license_number'] as String?,
       retailerAddress: data['retailer_address'] as String?,
       budtender: data['budtender'] as String?,
-      fileRef: data['file_ref'] as String?,
-      downloadUrl: data['download_url'] as String?,
-      shortUrl: data['short_url'] as String?,
       totalTax: data['total_tax'] as double?,
       totalTransactions: data['total_transactions'] as double?,
       parsedAt: DateTime.parse(data['parsed_at'] as String? ?? ''),
       algorithm: data['algorithm'] as String?,
       algorithmVersion: data['algorithm_version'] as String?,
       warning: data['warning'] as String?,
+      fileRef: data['file_ref'] as String?,
+      downloadUrl: data['download_url'] as String?,
+      shortUrl: data['short_url'] as String?,
     );
   }
 
@@ -215,6 +215,9 @@ class SalesReceipt {
       'algorithm': algorithm,
       'algorithm_version': algorithmVersion,
       'warning': warning,
+      'file_ref': fileRef,
+      'download_url': downloadUrl,
+      'short_url': shortUrl,
     };
   }
 }

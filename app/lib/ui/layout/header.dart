@@ -65,7 +65,8 @@ class DesktopNavigationLayout extends ConsumerWidget {
     bool isVeryWide = screenWidth > Breakpoints.desktop;
 
     // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
+    ;
 
     // Build the layout.
     return Container(

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 6/18/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -22,7 +22,6 @@ class LabResult {
     this.labId,
     this.batchNumber,
     this.productName,
-    this.downloadUrl,
     this.businessDbaName,
     this.lims,
     this.lab,
@@ -74,13 +73,21 @@ class LabResult {
     this.sampleId,
     this.strainName,
     this.results,
+    this.coaAlgorithm,
+    this.coaAlgorithmVersion,
+    this.coaParsedAt,
+    this.resultsHash,
+    this.sampleHash,
+    this.warning,
+    this.fileRef,
+    this.downloadUrl,
+    this.shortUrl,
   });
 
   // Properties.
   final String? labId;
   final String? batchNumber;
   final String? productName;
-  final String? downloadUrl;
   final String? businessDbaName;
   final String? lims;
   final String? lab;
@@ -133,6 +140,15 @@ class LabResult {
   final String? strainName;
   // final List<Result?>? results;
   final dynamic results;
+  final String? coaAlgorithm;
+  final String? coaAlgorithmVersion;
+  final String? coaParsedAt;
+  final String? resultsHash;
+  final String? sampleHash;
+  final String? warning;
+  final String? fileRef;
+  final String? downloadUrl;
+  final String? shortUrl;
 
   // @override
   // List<String?> get props => [labId];
@@ -156,7 +172,6 @@ class LabResult {
       labId: data['lab_id'] ?? '',
       batchNumber: data['batch_number'] ?? '',
       productName: data['product_name'] ?? '',
-      downloadUrl: data['download_url'] ?? '',
       businessDbaName: data['business_dba_name'] ?? '',
       lims: data['lims'] ?? '',
       lab: data['lab'] ?? '',
@@ -243,6 +258,15 @@ class LabResult {
       sampleId: data['sample_id'],
       strainName: data['strain_name'],
       results: results,
+      coaAlgorithm: data['coa_algorithm'],
+      coaAlgorithmVersion: data['coa_algorithm_version'],
+      coaParsedAt: data['coa_parsed_at'],
+      resultsHash: data['results_hash'],
+      sampleHash: data['sample_hash'],
+      warning: data['warning'],
+      fileRef: data['file_ref'] as String?,
+      downloadUrl: data['download_url'] as String?,
+      shortUrl: data['short_url'] as String?,
     );
   }
 
@@ -252,7 +276,6 @@ class LabResult {
       'lab_id': labId,
       'batch_number': batchNumber,
       'product_name': productName,
-      'download_url': downloadUrl,
       'business_dba_name': businessDbaName,
       'lims': lims,
       'lab': lab,
@@ -304,6 +327,15 @@ class LabResult {
       'sample_id': sampleId,
       'strain_name': strainName,
       'results': results,
+      'coa_algorithm': coaAlgorithm,
+      'coa_algorithm_version': coaAlgorithmVersion,
+      'coa_parsed_at': coaParsedAt,
+      'results_hash': resultsHash,
+      'sample_hash': sampleHash,
+      'warning': warning,
+      'file_ref': fileRef,
+      'download_url': downloadUrl,
+      'short_url': shortUrl,
     };
   }
 }

@@ -12,8 +12,8 @@ import 'dart:async';
 
 // Flutter imports:
 import 'package:cannlytics_data/services/api_service.dart';
-import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /* === Data === */
@@ -21,7 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Stream user receipts from Firebase.
 final userReceipts = StreamProvider<List<Map?>>((ref) async* {
   final FirestoreService _dataSource = ref.watch(firestoreProvider);
-  final user = ref.watch(authProvider).currentUser;
+  final user = ref.watch(userProvider).value;
   if (user == null) return;
   yield* _dataSource.watchCollection(
     path: 'users/${user.uid}/receipts',

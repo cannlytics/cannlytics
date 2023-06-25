@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 5/5/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -53,7 +53,18 @@ class AuthService {
       );
       return 'success';
     } catch (e) {
-      return e.toString();
+      String errorString = e.toString();
+      if (errorString.contains('invalid-email')) {
+        return 'The email address provided is not valid.';
+      } else if (errorString.contains('user-disabled')) {
+        return 'The user corresponding to the given email has been disabled.';
+      } else if (errorString.contains('user-not-found')) {
+        return 'There is no user corresponding to the given email.';
+      } else if (errorString.contains('wrong-password')) {
+        return 'The password is invalid for the given email, or the account corresponding to the email does not have a password set.';
+      } else {
+        return 'An unknown error occurred: $errorString';
+      }
     }
   }
 
@@ -69,7 +80,18 @@ class AuthService {
       );
       return 'success';
     } catch (e) {
-      return e.toString();
+      String errorString = e.toString();
+      if (errorString.contains('email-already-in-use')) {
+        return 'There already exists an account with the given email address.';
+      } else if (errorString.contains('invalid-email')) {
+        return 'The email address provided is not valid.';
+      } else if (errorString.contains('operation-not-allowed')) {
+        return 'Email/password accounts are not enabled. Please enable email/password accounts in the Firebase Console, under the Auth tab.';
+      } else if (errorString.contains('weak-password')) {
+        return 'The password is not strong enough.';
+      } else {
+        return 'An unknown error occurred: $errorString';
+      }
     }
   }
 
@@ -79,7 +101,7 @@ class AuthService {
       await _auth.signOut();
       return 'success';
     } catch (e) {
-      return e.toString();
+      return 'An error occurred: ${e.toString()}';
     }
   }
 
@@ -117,7 +139,16 @@ class AuthService {
       }
       return 'success';
     } catch (e) {
-      return e.toString();
+      String errorString = e.toString();
+      if (errorString.contains('permission-denied')) {
+        return 'You do not have the necessary permissions to change the photo.';
+      } else if (errorString.contains('network-request-failed')) {
+        return 'Network error occurred while trying to change the photo. Please try again.';
+      } else if (errorString.contains('unknown')) {
+        return 'An unknown error occurred while trying to change the photo. Please try again.';
+      } else {
+        return 'An error occurred: $errorString';
+      }
     }
   }
 
@@ -127,7 +158,26 @@ class AuthService {
       await _auth.sendPasswordResetEmail(email: email);
       return 'success';
     } catch (e) {
-      return e.toString();
+      String errorString = e.toString();
+      if (errorString.contains('invalid-email')) {
+        return 'The email address provided is not valid.';
+      } else if (errorString.contains('missing-email')) {
+        return 'Email address required.';
+      } else if (errorString.contains('missing-android-pkg-name')) {
+        return 'An Android package name must be provided if the Android app is required to be installed.';
+      } else if (errorString.contains('missing-continue-uri')) {
+        return 'A continue URL must be provided in the request.';
+      } else if (errorString.contains('missing-ios-bundle-id')) {
+        return 'An iOS Bundle ID must be provided if an App Store ID is provided.';
+      } else if (errorString.contains('invalid-continue-uri')) {
+        return 'The continue URL provided in the request is invalid.';
+      } else if (errorString.contains('unauthorized-continue-uri')) {
+        return 'The domain of the continue URL is not whitelisted. Please whitelist the domain in the Firebase console.';
+      } else if (errorString.contains('user-not-found')) {
+        return 'There is no user corresponding to the given email.';
+      } else {
+        return 'An unknown error occurred: $errorString';
+      }
     }
   }
 
@@ -145,7 +195,12 @@ class AuthService {
       await user!.delete();
       return 'success';
     } catch (e) {
-      return e.toString();
+      String errorString = e.toString();
+      if (errorString.contains('requires-recent-login')) {
+        return 'Your last sign-in time does not meet the security threshold. Please reauthenticate.';
+      } else {
+        return 'An unknown error occurred: $errorString';
+      }
     }
   }
 }

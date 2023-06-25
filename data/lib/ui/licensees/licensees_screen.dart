@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 5/24/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -22,14 +23,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/cards/card_grid.dart';
 import 'package:cannlytics_data/common/cards/stats_model_card.dart';
-import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
-import 'package:cannlytics_data/ui/layout/footer.dart';
-import 'package:cannlytics_data/ui/layout/header.dart';
-import 'package:cannlytics_data/ui/layout/sidebar.dart';
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/services/storage_service.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
@@ -42,17 +39,10 @@ class LicenseesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
     final screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      // App bar.
-      appBar: DashboardHeader(),
-
-      // Side menu.
-      drawer: Responsive.isMobile(context) ? MobileDrawer() : null,
-
-      // Body.
-      body: Console(slivers: [
+    return ConsoleScreen(
+      children: [
         // Title.
         SliverToBoxAdapter(child: _title(context, user)),
 
@@ -74,10 +64,7 @@ class LicenseesScreen extends ConsumerWidget {
 
         // License datasets.
         _datasetsCards(context, ref),
-
-        // Footer.
-        const SliverToBoxAdapter(child: Footer()),
-      ]),
+      ],
     );
   }
 
@@ -206,7 +193,7 @@ class LicenseesScreen extends ConsumerWidget {
     var datasets =
         mainDatasets.where((element) => element['type'] == 'licenses').toList();
     final screenWidth = MediaQuery.of(context).size.width;
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.symmetric(

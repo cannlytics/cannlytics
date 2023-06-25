@@ -23,7 +23,7 @@ import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/cards/wide_card.dart';
-import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/common/images/avatar.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/constants/design.dart';
@@ -59,7 +59,8 @@ class AccountManagement extends ConsumerWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
+    ;
 
     // Render the widget.
     return Padding(
@@ -168,12 +169,13 @@ class _AccountFormState extends ConsumerState<AccountForm>
               String message =
                   await ref.read(accountProvider.notifier).changePhoto();
               if (message != 'success') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    backgroundColor: LightColors.darkOrange.withOpacity(0.15),
-                    content: Text('Error changing image!'),
-                    duration: Duration(seconds: 4),
-                  ),
+                // Display an error message if an authentication error occurs.
+                message = message.replaceAll(RegExp(r'\[.*?\]'), '');
+                InterfaceUtils.showAlertDialog(
+                  context: context,
+                  title: 'Error changing image',
+                  content: message,
+                  primaryActionColor: Colors.redAccent,
                 );
               }
             },
@@ -203,7 +205,8 @@ class _AccountFormState extends ConsumerState<AccountForm>
     final state = ref.watch(accountProvider);
 
     // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
+    ;
 
     // Set the initial values.
     if (user != null) {

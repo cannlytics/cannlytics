@@ -11,6 +11,7 @@
 // - Highlight active route accordingly.
 
 // Flutter imports:
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -54,7 +55,7 @@ class SideMenu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
 
     // Render the side menu.
     return ListView(

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/11/2023
-// Updated: 6/13/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:flutter/material.dart';
@@ -65,10 +65,10 @@ class _ResultScreenState extends State<ResultScreen> {
         children: [
           // Results list, centered when there are no results, top-aligned otherwise.
           Container(
-            height: MediaQuery.of(context).size.height * 0.75,
+            // height: MediaQuery.of(context).size.height * 0.75,
             child: SingleChildScrollView(
               child: Card(
-                margin: EdgeInsets.only(top: 12),
+                // margin: EdgeInsets.only(top: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(3),
                 ),

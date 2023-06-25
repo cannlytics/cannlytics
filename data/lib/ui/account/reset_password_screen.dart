@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -19,12 +20,11 @@ import 'package:go_router/go_router.dart';
 import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/theme_button.dart';
-import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/ui/layout/footer.dart';
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
-import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
 // import 'package:cannlytics_data/utils/utils.dart';
 
@@ -72,6 +72,11 @@ class ResetPasswordScreen extends ConsumerWidget {
 
             // Account management.
             SliverToBoxAdapter(child: ResetPasswordForm(isDark: isDark)),
+            SliverToBoxAdapter(
+              child: Container(
+                height: MediaQuery.sizeOf(context).height * 0.3,
+              ),
+            ),
 
             // Footer
             const SliverToBoxAdapter(child: Footer()),
@@ -124,21 +129,21 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm>
       final controller = ref.read(accountProvider.notifier);
       var message = await controller.resetPassword(email);
       if (message == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('Check your email for a link to reset your password.'),
-            duration: Duration(seconds: 3),
-          ),
+        InterfaceUtils.showAlertDialog(
+          context: context,
+          title: 'Password reset email sent',
+          content: 'Check your email for a link to reset your password.',
+          primaryActionColor:
+              widget.isDark ? DarkColors.green : LightColors.green,
         );
       } else {
+        // Display an error message if an authentication error occurs.
         message = message.replaceAll(RegExp(r'\[.*?\]'), '');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.red.shade300,
-            content: Text('Error: $message'),
-            duration: Duration(seconds: 4),
-          ),
+        InterfaceUtils.showAlertDialog(
+          context: context,
+          title: 'Error',
+          content: message,
+          primaryActionColor: Colors.redAccent,
         );
       }
     }
@@ -149,17 +154,12 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm>
     // Listen to the account state.
     final state = ref.watch(accountProvider);
 
-    // FIXME: Listen to errors.
-    // ref.listen<AsyncValue>(
-    //   accountProvider,
-    //   (_, state) => state.showAlertDialogOnError(context),
-    // );
-
     // Get the screen width.
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
+    ;
 
     // Render the widget.
     return Padding(
@@ -167,6 +167,7 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm>
         left: sliverHorizontalPadding(screenWidth),
         right: sliverHorizontalPadding(screenWidth),
         top: 24,
+        // bottom: 128,
       ),
       child: PreferredSize(
         preferredSize: const Size.fromHeight(130.0),

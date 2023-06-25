@@ -4,10 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/14/2023
-// Updated: 4/14/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -21,7 +23,6 @@ import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
-import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:cannlytics_data/utils/validation_utils.dart';
 
 /// Sign in / create account form.
@@ -78,13 +79,13 @@ class _SignInDialogState extends ConsumerState<SignInDialog>
         // Close the dialog.
         Navigator.of(context).pop(false);
       } else {
+        // Display an error message if an authentication error occurs.
         message = message.replaceAll(RegExp(r'\[.*?\]'), '');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.red.shade300,
-            content: Text('Error: $message'),
-            duration: Duration(seconds: 4),
-          ),
+        InterfaceUtils.showAlertDialog(
+          context: context,
+          title: 'Error',
+          content: message,
+          primaryActionColor: Colors.redAccent,
         );
       }
     }
@@ -116,11 +117,6 @@ class _SignInDialogState extends ConsumerState<SignInDialog>
   @override
   Widget build(BuildContext context) {
     // Listen to the user's state.
-    // FIXME: Render errors as text.
-    // ref.listen<AsyncValue>(
-    //   signInProvider,
-    //   (_, state) => state.showAlertDialogOnError(context),
-    // );
     final state = ref.watch(signInProvider);
 
     // Get the theme.
@@ -151,7 +147,6 @@ class _SignInDialogState extends ConsumerState<SignInDialog>
               ),
               // Logo
               gapH24,
-              // ResponsiveAppLogo(isDark: isDark),
               SizedBox(
                 width: 200,
                 height: 50,

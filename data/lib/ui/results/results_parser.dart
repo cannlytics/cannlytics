@@ -40,7 +40,7 @@ class ResultsParserInterface extends HookConsumerWidget {
       data: (items) => (items.length == 0)
           ? _body(context, ref, child: CoAUpload())
           : Card(
-              margin: EdgeInsets.only(top: 12),
+              margin: EdgeInsets.all(0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(3),
               ),
@@ -165,98 +165,75 @@ class ResultsParserInterface extends HookConsumerWidget {
   /// The main dynamic body of the screen.
   Widget _body(BuildContext context, WidgetRef ref, {required Widget child}) {
     return SingleChildScrollView(
+        child: Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
-        children: [
-          Container(
-            height: MediaQuery.of(context).size.height * 0.75,
-            child: SingleChildScrollView(
-              child: Card(
-                margin: EdgeInsets.only(top: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(3),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      // Title.
-                      Text(
-                        'Parse lab results',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-
-                      // Parse COA URL textfield.
-                      gapH12,
-                      SizedBox(
-                        height: 42,
-                        child: COASearch(),
-                      ),
-
-                      // COA upload actions.
-                      gapH24,
-                      Row(
-                        children: [
-                          // Subtitle.
-                          Text(
-                            'File Upload',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-
-                          // Tooltip.
-                          IconButton(
-                            icon: Icon(Icons.info_outline),
-                            onPressed: () {},
-                            tooltip:
-                                'We support most COA formats: .pdf, .png, .jpeg, and .jpg',
-                          ),
-                          Spacer(),
-
-                          // Upload COAs button.
-                          // TODO: Make disabled when parsing.
-                          SecondaryButton(
-                            text: 'Upload COAs',
-                            onPressed: () async {
-                              FilePickerResult? result =
-                                  await FilePicker.platform.pickFiles(
-                                type: FileType.custom,
-                                allowedExtensions: [
-                                  'pdf',
-                                  'jpg',
-                                  'jpeg',
-                                  'png'
-                                ],
-                                withData: true,
-                                withReadStream: false,
-                              );
-                              if (result != null) {
-                                // Parse COAs.
-                                ref
-                                    .read(coaParser.notifier)
-                                    .parseCOAs(result.files);
-                              } else {
-                                // User canceled the picker
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-
-                      // Dynamic widget.
-                      gapH4,
-                      child,
-                      gapH12,
-                    ],
-                  ),
-                ),
-              ),
-            ),
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          // Title.
+          Text(
+            'Parse lab results',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
+
+          // Parse COA URL textfield.
+          gapH12,
+          SizedBox(
+            height: 42,
+            child: COASearch(),
+          ),
+
+          // COA upload actions.
+          gapH24,
+          Row(
+            children: [
+              // Subtitle.
+              Text(
+                'File Upload',
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+
+              // Tooltip.
+              IconButton(
+                icon: Icon(Icons.info_outline),
+                onPressed: () {},
+                tooltip:
+                    'We support most COA formats: .pdf, .png, .jpeg, and .jpg',
+              ),
+              Spacer(),
+
+              // Upload COAs button.
+              // TODO: Make disabled when parsing.
+              SecondaryButton(
+                text: 'Upload COAs',
+                onPressed: () async {
+                  FilePickerResult? result =
+                      await FilePicker.platform.pickFiles(
+                    type: FileType.custom,
+                    allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+                    withData: true,
+                    withReadStream: false,
+                  );
+                  if (result != null) {
+                    // Parse COAs.
+                    ref.read(coaParser.notifier).parseCOAs(result.files);
+                  } else {
+                    // User canceled the picker
+                  }
+                },
+              ),
+            ],
+          ),
+
+          // Dynamic widget.
+          gapH4,
+          child,
+          gapH12,
         ],
       ),
-    );
+    ));
   }
 }
 

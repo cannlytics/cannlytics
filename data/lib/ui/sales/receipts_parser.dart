@@ -122,83 +122,68 @@ class ReceiptsParserInterface extends HookConsumerWidget {
   /// The main dynamic body of the screen.
   Widget _body(BuildContext context, WidgetRef ref, {required Widget child}) {
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          Container(
-            height: MediaQuery.of(context).size.height * 0.75,
-            child: SingleChildScrollView(
-              child: Card(
-                margin: EdgeInsets.only(top: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(3),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      // Title.
-                      Text(
-                        'Parse receipts',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-
-                      // COA upload actions.
-                      gapH24,
-                      Row(
-                        children: [
-                          // Subtitle.
-                          Text(
-                            'File Upload',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-
-                          // Tooltip.
-                          IconButton(
-                            icon: Icon(Icons.info_outline),
-                            onPressed: () {},
-                            tooltip:
-                                'We support most image formats: .png, .jpeg, and .jpg',
-                          ),
-                          Spacer(),
-
-                          // Upload receipts button.
-                          // TODO: Make disabled when parsing.
-                          SecondaryButton(
-                            text: 'Upload receipts',
-                            onPressed: () async {
-                              FilePickerResult? result =
-                                  await FilePicker.platform.pickFiles(
-                                type: FileType.custom,
-                                allowedExtensions: ['jpg', 'jpeg', 'png'],
-                                withData: true,
-                                withReadStream: false,
-                              );
-                              if (result != null) {
-                                ref
-                                    .read(receiptParser.notifier)
-                                    .parseImages(result.files);
-                              } else {
-                                // User canceled the picker
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-
-                      // Dynamic widget.
-                      gapH4,
-                      child,
-                      gapH12,
-                    ],
-                  ),
-                ),
-              ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // Title.
+            Text(
+              'Parse receipts',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-          ),
-        ],
+
+            // COA upload actions.
+            gapH24,
+            Row(
+              children: [
+                // Subtitle.
+                Text(
+                  'File Upload',
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+
+                // Tooltip.
+                IconButton(
+                  icon: Icon(Icons.info_outline),
+                  onPressed: () {},
+                  tooltip:
+                      'We support most image formats: .png, .jpeg, and .jpg',
+                ),
+                Spacer(),
+
+                // Upload receipts button.
+                // TODO: Make disabled when parsing.
+                SecondaryButton(
+                  text: 'Upload receipts',
+                  onPressed: () async {
+                    FilePickerResult? result =
+                        await FilePicker.platform.pickFiles(
+                      type: FileType.custom,
+                      allowedExtensions: ['jpg', 'jpeg', 'png'],
+                      withData: true,
+                      withReadStream: false,
+                    );
+                    if (result != null) {
+                      ref
+                          .read(receiptParser.notifier)
+                          .parseImages(result.files);
+                    } else {
+                      // User canceled the picker
+                    }
+                  },
+                ),
+              ],
+            ),
+
+            // Dynamic widget.
+            gapH4,
+            child,
+            gapH12,
+          ],
+        ),
       ),
     );
   }

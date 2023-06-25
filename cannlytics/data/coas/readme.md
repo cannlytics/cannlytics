@@ -24,13 +24,13 @@ You can methodically get data from COAs for various labs with the combination of
 
 | Lab / LIMS | Algorithm | Status |
 |------------|-----------|--------|
-| ACS Labs | `parse_acs_coa` | 🟠 |
+| ACS Labs | `parse_acs_coa` | 🟡 |
 | Anresco Laboratories | `parse_anresco_coa` | 🟢 |
 | Cannalysis | `parse_cannalysis_coa` | 🟢 |
 | Confidence Analytics | `parse_confidence_coa` | 🟢 |
 | Confident Cannabis | `parse_cc_coa` | 🟢 |
 | Green Leaf Lab | `parse_green_leaf_lab_coa` | 🟢 |
-| Kaycha Labs | `parse_kaycha_coa` | 🟠 |
+| Kaycha Labs | `parse_kaycha_coa` | 🟡 |
 | KCA Labs | `parse_kca_coa` | 🟠 |
 | MCR Labs | `parse_mcr_labs_coa` | 🟢 |
 | Modern Canna Science | `parse_moderncanna_coa` | 🟠 |

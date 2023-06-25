@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/18/2023
-// Updated: 6/18/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
@@ -76,25 +76,23 @@ class ReceiptCard extends StatelessWidget {
                     surfaceTintColor: Colors.transparent,
                     onSelected: (String result) {
                       switch (result) {
-                        case 'Edit':
+                        case 'View':
                           context.go('/sales/${item.hash}');
                           break;
                         case 'Download':
-                          print('DOWNLOADING...');
-                          // FIXME:
-                          onDownload!;
+                          onDownload!();
                           break;
                         case 'Delete':
-                          onDelete!;
+                          onDelete!();
                           break;
                       }
                     },
                     itemBuilder: (BuildContext context) =>
                         <PopupMenuEntry<String>>[
                       PopupMenuItem<String>(
-                        value: 'Edit',
+                        value: 'View',
                         child: Text(
-                          'Edit',
+                          'View',
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall!

@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/13/2023
-Updated: 6/23/2023
+Updated: 6/24/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with receipt data.
@@ -374,13 +374,12 @@ def download_receipts_data(request):
     body with the data, an object or an array of objects, to standardize
     and save in a workbook."""
 
-    # TODO: Authenticate the user, throttle requests if unauthenticated.
+    # Authenticate the user, throttle requests if unauthenticated.
     throttle = False
     claims = authenticate_request(request)
     if not claims:
         uid = 'cannlytics'
         public, throttle = True, True
-        # return HttpResponse(status=401)
     else:
         uid = claims['uid']
 

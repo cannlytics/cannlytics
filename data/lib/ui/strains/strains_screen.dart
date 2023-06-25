@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 4/15/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -25,6 +25,7 @@ import 'package:cannlytics_data/constants/design.dart';
 // TODO: Allow user's to report new strains.
 
 /// TODO: Show newest strains, favorite strains, and "your" strains.
+///
 
 /// Screen.
 class StrainsScreen extends StatelessWidget {
@@ -50,7 +51,7 @@ class MainContent extends ConsumerWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Listen to the current user.
-    // final user = ref.watch(authProvider).currentUser;
+    // final user = ref.watch(userProvider).value;;
 
     // Render the widget.
     return Padding(

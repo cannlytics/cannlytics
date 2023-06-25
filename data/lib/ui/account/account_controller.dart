@@ -4,21 +4,95 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 6/23/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Package imports:
+import 'package:cannlytics_data/common/inputs/string_controller.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
-import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 
 /* === User === */
+
+// User type provider.
+final userTypeProvider = StateProvider<String>((ref) => 'consumer');
+
+// User provider.
+final userProvider = StreamProvider<User?>((ref) {
+  return ref.watch(authProvider).authStateChanges();
+});
+
+/* === Subscription === */
+
+/// Stream a user's subscription data from Firebase.
+final userSubscriptionProvider = StreamProvider.autoDispose<Map>((ref) {
+  final _database = ref.watch(firestoreProvider);
+  final user = ref.watch(userProvider).value;
+  return _database.watchDocument(
+    path: 'subscribers/${user!.uid}',
+    builder: (data, documentId) {
+      return data ?? {};
+    },
+  );
+});
+
+/* === User authentication === */
+
+// Email text field.
+final emailController =
+    StateNotifierProvider<StringController, TextEditingController>(
+        (ref) => StringController());
+
+// Password text field.
+final passwordController =
+    StateNotifierProvider<StringController, TextEditingController>(
+        (ref) => StringController());
+
+// Sign-in controller.
+final signInProvider = AutoDisposeAsyncNotifierProvider<SignInController, void>(
+    SignInController.new);
+
+/// [SignInController] manages the sign in, sign up, and reset password screens.
+class SignInController extends AutoDisposeAsyncNotifier<void> {
+  @override
+  FutureOr<void> build() {}
+
+  /// [signIn] signs the user in with their email and password.
+  Future<String> signIn({
+    required String email,
+    required String password,
+  }) async {
+    state = const AsyncValue.loading();
+    var message;
+    state = await AsyncValue.guard(() async {
+      message = await ref.read(authProvider).signIn(email, password);
+    });
+    return message;
+  }
+
+  /// [signUp] signs the user up with their email and password.
+  Future<String> signUp({
+    required String email,
+    required String password,
+  }) async {
+    state = const AsyncValue.loading();
+    var message;
+    state = await AsyncValue.guard(() async {
+      message = await ref.read(authProvider).signUp(email, password);
+    });
+    return message;
+  }
+}
+
+/* === User account === */
 
 // An instance of the account controller to use as a provider.
 final accountProvider =
@@ -112,15 +186,3 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
     });
   }
 }
-
-/// Stream a user's subscription data from Firebase.
-final userSubscriptionProvider = StreamProvider.autoDispose<Map>((ref) {
-  final _database = ref.watch(firestoreProvider);
-  final user = ref.watch(userProvider).value;
-  return _database.watchDocument(
-    path: 'subscribers/${user!.uid}',
-    builder: (data, documentId) {
-      return data ?? {};
-    },
-  );
-});

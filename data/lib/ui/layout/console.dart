@@ -92,6 +92,7 @@ class Console extends ConsumerWidget {
         Expanded(
           flex: 4,
           child: Container(
+            // height: MediaQuery.sizeOf(context).height,
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
@@ -119,20 +120,22 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      body: Container(
-        // Background gradient.
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(1, -1),
-            radius: 4.0,
-            colors: [
-              isDark ? Colors.transparent : Colors.white,
-              isDark ? Color(0xFF4E5165) : Color(0xFFe8e8e8),
-            ],
-          ),
+    return Container(
+      // Background gradient.
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment(1, -1),
+          radius: 4.0,
+          colors: [
+            isDark ? Colors.transparent : Colors.white,
+            isDark ? Color(0xFF4E5165) : Color(0xFFe8e8e8),
+          ],
         ),
-        child: CustomScrollView(slivers: slivers),
+      ),
+      child: CustomScrollView(
+        slivers: [
+          ...slivers,
+        ],
       ),
     );
   }

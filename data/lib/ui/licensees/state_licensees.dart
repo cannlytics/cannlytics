@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -18,7 +19,7 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
-import 'package:cannlytics_data/common/dialogs/auth_dialogs.dart';
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
 import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
@@ -27,7 +28,6 @@ import 'package:cannlytics_data/ui/layout/header.dart';
 import 'package:cannlytics_data/ui/layout/sidebar.dart';
 import 'package:cannlytics_data/common/tables/table_data.dart';
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/services/storage_service.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
@@ -141,7 +141,7 @@ class LicenseesTable extends ConsumerWidget {
     }
 
     // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
 
     // Responsive screen width.
     // final screenWidth = MediaQuery.of(context).size.width;

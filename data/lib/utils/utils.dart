@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/22/2023
-// Updated: 6/19/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -95,7 +95,7 @@ class InterfaceUtils {
     required String title,
     String? content,
     String? cancelActionText,
-    required String defaultActionText,
+    String? defaultActionText,
     Color? primaryActionColor,
   }) async {
     if (kIsWeb || !Platform.isIOS) {
@@ -124,7 +124,7 @@ class InterfaceUtils {
 
             // Confirm action.
             PrimaryButton(
-              text: defaultActionText,
+              text: defaultActionText ?? 'Okay',
               onPressed: () => Navigator.of(context).pop(true),
               backgroundColor: primaryActionColor,
             ),
@@ -144,7 +144,7 @@ class InterfaceUtils {
               onPressed: () => Navigator.of(context).pop(false),
             ),
           CupertinoDialogAction(
-            child: Text(defaultActionText),
+            child: Text(defaultActionText ?? 'Okay'),
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],

@@ -4,15 +4,15 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/18/2023
-// Updated: 6/23/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Receipt card.
-/// TODO: Add image.
+/// Result card.
 class ResultCard extends StatelessWidget {
   ResultCard({
     required this.item,
@@ -50,18 +50,20 @@ class ResultCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Receipt image.
-                  if (item.downloadUrl != null)
+                  // Image.
+                  if (item.downloadUrl != null && item.downloadUrl != '')
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: MouseRegion(
                         cursor: SystemMouseCursors.click,
                         child: GestureDetector(
                           onTap: () => context.go('/results/${item.labId}'),
+                          // FIXME: Render image
                           child: Image.network(
                             item.downloadUrl!,
                             height: (screenWidth < 720) ? 64 : 128,
                           ),
+                          // child: Text(item.downloadUrl ?? ''),
                         ),
                       ),
                     ),
@@ -75,25 +77,23 @@ class ResultCard extends StatelessWidget {
                     surfaceTintColor: Colors.transparent,
                     onSelected: (String result) {
                       switch (result) {
-                        case 'Edit':
-                          context.go('/results/${item.labId}');
+                        case 'View':
+                          context.go('/results/${item.sampleHash}');
                           break;
                         case 'Download':
-                          print('DOWNLOADING...');
-                          // FIXME:
-                          onDownload!;
+                          onDownload!();
                           break;
                         case 'Delete':
-                          onDelete!;
+                          onDelete!();
                           break;
                       }
                     },
                     itemBuilder: (BuildContext context) =>
                         <PopupMenuEntry<String>>[
                       PopupMenuItem<String>(
-                        value: 'Edit',
+                        value: 'View',
                         child: Text(
-                          'Edit',
+                          'View',
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall!
@@ -144,18 +144,15 @@ class ResultCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Products.
                     if (item.productName != null)
                       Text(
-                        'Products ${item.productName}',
+                        'Product: ${item.productName}',
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
                     Text(
                       'Products type: ${item.productType}',
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
-
-                    // Receipt details.
                     Text(
                       'Producer: ${item.producer}',
                       style: Theme.of(context).textTheme.labelMedium,
@@ -168,13 +165,11 @@ class ResultCard extends StatelessWidget {
                       'Total CBD: ${item.totalCbd.toString()}',
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
-
-                    // // Parsed at time.
-                    // if (item.dateTested != null)
-                    //   Text(
-                    //     'Parsed: ${TimeUtils.getReadableTime(item.dateTested!)}',
-                    //     style: Theme.of(context).textTheme.labelMedium,
-                    //   ),
+                    if (item.coaParsedAt != null)
+                      Text(
+                        'Parsed: ${TimeUtils.getReadableTime(DateTime.parse(item.coaParsedAt!))}',
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
                   ],
                 ),
               ),

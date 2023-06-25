@@ -4,13 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/13/2023
-// Updated: 6/23/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/download_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
-import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/download_service.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/results/result_card.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
@@ -53,23 +53,12 @@ class UserResultsInterface extends ConsumerWidget {
       child: Column(
         children: [
           Container(
-            height: MediaQuery.of(context).size.height * 0.75,
-            child: SingleChildScrollView(
-              child: Card(
-                margin: EdgeInsets.only(top: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(3),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: children,
-                  ),
-                ),
-              ),
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: children,
             ),
           ),
         ],
@@ -220,19 +209,19 @@ class UserResultsGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Calculate the aspect ratio of grid based on screen width
-    final screenWidth = MediaQuery.of(context).size.width;
-    final int crossAxisCount = screenWidth < 600
-        ? 1
-        : screenWidth < 1120
-            ? 2
-            : 2;
+    // final screenWidth = MediaQuery.of(context).size.width;
+    // final int crossAxisCount = screenWidth < 600
+    //     ? 1
+    //     : screenWidth < 1120
+    //         ? 2
+    //         : 2;
 
     // Listen to the user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
 
     // Render the card.
     return Card(
-      margin: EdgeInsets.only(top: 12),
+      margin: EdgeInsets.all(0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(3),
       ),
@@ -262,14 +251,20 @@ class UserResultsGrid extends ConsumerWidget {
             ),
             gapH12,
 
-            // Grid of receipts.
+            // Grid of results.
             Expanded(
               child: GridView.builder(
                 shrinkWrap: true,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  // crossAxisSpacing: 16,
-                  // mainAxisSpacing: 16,
+                // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                //   crossAxisCount: crossAxisCount,
+                //   crossAxisSpacing: 16,
+                //   mainAxisSpacing: 16,
+                // ),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 540.0,
+                  mainAxisSpacing: 10.0,
+                  crossAxisSpacing: 10.0,
+                  // childAspectRatio: 4.0,
                 ),
                 itemCount: items.length,
                 itemBuilder: (context, index) {
@@ -289,6 +284,7 @@ class UserResultsGrid extends ConsumerWidget {
                             'Are you sure that you want to delete this result?',
                         cancelActionText: 'Cancel',
                         defaultActionText: 'Delete',
+                        primaryActionColor: Colors.redAccent,
                       );
                       if (delete == true) {
                         ref.read(resultService).deleteResult(item!['id']);

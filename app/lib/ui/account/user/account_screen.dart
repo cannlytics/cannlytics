@@ -61,7 +61,8 @@ class AccountManagement extends ConsumerWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
+    ;
 
     // Render the widget.
     return Padding(
@@ -188,7 +189,8 @@ class _AccountFormState extends ConsumerState<AccountForm>
     final state = ref.watch(accountProvider);
 
     // Listen to the current user.
-    final user = ref.watch(authProvider).currentUser;
+    final user = ref.watch(userProvider).value;
+    ;
 
     // Set the initial values.
     if (user != null) {
