@@ -220,83 +220,75 @@ class UserResultsGrid extends ConsumerWidget {
     final user = ref.watch(userProvider).value;
 
     // Render the card.
-    return Card(
-      margin: EdgeInsets.all(0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(3),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // Title.
-            Row(
-              children: [
-                SelectableText(
-                  'Your results',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Spacer(),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        // Title.
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+          child: Row(
+            children: [
+              SelectableText(
+                'Your results',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Spacer(),
 
-                // Download all receipts button.
-                if (user != null)
-                  DownloadButton(
-                    items: items,
-                    url: '/api/data/coas/download',
-                  ),
-              ],
+              // Download all receipts button.
+              if (user != null)
+                DownloadButton(
+                  items: items,
+                  url: '/api/data/coas/download',
+                ),
+            ],
+          ),
+        ),
+        gapH12,
+
+        // Grid of results.
+        Expanded(
+          child: GridView.builder(
+            shrinkWrap: true,
+            // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            //   crossAxisCount: crossAxisCount,
+            //   crossAxisSpacing: 16,
+            //   mainAxisSpacing: 16,
+            // ),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 540.0,
+              mainAxisSpacing: 10.0,
+              crossAxisSpacing: 10.0,
             ),
-            gapH12,
-
-            // Grid of results.
-            Expanded(
-              child: GridView.builder(
-                shrinkWrap: true,
-                // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                //   crossAxisCount: crossAxisCount,
-                //   crossAxisSpacing: 16,
-                //   mainAxisSpacing: 16,
-                // ),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 540.0,
-                  mainAxisSpacing: 10.0,
-                  crossAxisSpacing: 10.0,
-                  // childAspectRatio: 4.0,
-                ),
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  return ResultCard(
-                    item: LabResult.fromMap(item ?? {}),
-                    onDownload: () {
-                      DownloadService.downloadData(
-                        [item!],
-                        '/api/data/coas/download',
-                      );
-                    },
-                    onDelete: () async {
-                      final delete = await InterfaceUtils.showAlertDialog(
-                        context: context,
-                        title:
-                            'Are you sure that you want to delete this result?',
-                        cancelActionText: 'Cancel',
-                        defaultActionText: 'Delete',
-                        primaryActionColor: Colors.redAccent,
-                      );
-                      if (delete == true) {
-                        ref.read(resultService).deleteResult(item!['id']);
-                      }
-                    },
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return ResultCard(
+                item: LabResult.fromMap(item ?? {}),
+                onDownload: () {
+                  DownloadService.downloadData(
+                    [item!],
+                    '/api/data/coas/download',
                   );
                 },
-              ),
-            ),
-          ],
+                onDelete: () async {
+                  final delete = await InterfaceUtils.showAlertDialog(
+                    context: context,
+                    title: 'Are you sure that you want to delete this result?',
+                    cancelActionText: 'Cancel',
+                    defaultActionText: 'Delete',
+                    primaryActionColor: Colors.redAccent,
+                  );
+                  if (delete == true) {
+                    ref.read(resultService).deleteResult(item!['id']);
+                  }
+                },
+              );
+            },
+          ),
         ),
-      ),
+      ],
     );
   }
 }

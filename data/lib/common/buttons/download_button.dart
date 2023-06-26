@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/23/2023
-// Updated: 6/23/2023
+// Updated: 6/25/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
@@ -13,11 +13,16 @@ import 'package:flutter/material.dart';
 
 /// A download button with a circular progress indicator.
 class DownloadButton extends StatefulWidget {
-  DownloadButton({required this.items, required this.url});
+  DownloadButton({
+    required this.items,
+    required this.url,
+    this.text,
+  });
 
   // Parameters.
   final List<Map<dynamic, dynamic>?> items;
   final String url;
+  final String? text;
 
   @override
   _DownloadButtonState createState() => _DownloadButtonState();
@@ -43,7 +48,7 @@ class _DownloadButtonState extends State<DownloadButton> {
   Widget build(BuildContext context) {
     return SecondaryButton(
         onPressed: _isLoading ? null : _downloadData,
-        text: 'Download All',
+        text: widget.text ?? 'Download All',
         isLoading: _isLoading);
   }
 }

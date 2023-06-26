@@ -78,7 +78,7 @@ class ResultCard extends StatelessWidget {
                     onSelected: (String result) {
                       switch (result) {
                         case 'View':
-                          context.go('/results/${item.sampleHash}');
+                          context.go('/results/${item.sampleId}');
                           break;
                         case 'Download':
                           onDownload!();

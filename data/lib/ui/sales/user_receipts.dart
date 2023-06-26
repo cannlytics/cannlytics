@@ -29,6 +29,7 @@ class UserReceiptsInterface extends ConsumerWidget {
     // Render the data.
     return asyncData.when(
       // Loading state.
+      // TODO: Implement loading widget.
       loading: () => _body(
         context,
         children: [_placeholder(context, ref)],
@@ -50,25 +51,27 @@ class UserReceiptsInterface extends ConsumerWidget {
   /// The main dynamic body of the screen.
   Widget _body(BuildContext context, {required List<Widget> children}) {
     return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: children,
-        ),
+      child: Column(
+        children: [
+          Container(
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: children,
+            ),
+          ),
+        ],
       ),
     );
   }
-
-  // TODO: Implement loading widget.
 
   /// Message displayed when there are no user receipts.
   Widget _placeholder(BuildContext context, WidgetRef ref) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -207,86 +210,86 @@ class UserReceiptsGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Calculate the aspect ratio of grid based on screen width
-    final screenWidth = MediaQuery.of(context).size.width;
-    final int crossAxisCount = screenWidth < 600
-        ? 1
-        : screenWidth < 1120
-            ? 2
-            : 2;
+    // final screenWidth = MediaQuery.of(context).size.width;
+    // final int crossAxisCount = screenWidth < 600
+    //     ? 1
+    //     : screenWidth < 1120
+    //         ? 2
+    //         : 2;
 
     // Listen to the user.
     final user = ref.watch(userProvider).value;
 
     // Render the card.
-    return Card(
-      margin: EdgeInsets.only(top: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(3),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // Title.
-            Row(
-              children: [
-                SelectableText(
-                  'Your receipts',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Spacer(),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        // Title.
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+          child: Row(
+            children: [
+              SelectableText(
+                'Your receipts',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Spacer(),
 
-                // Download all receipts button.
-                if (user != null)
-                  DownloadButton(
-                    items: items,
-                    url: '/api/data/receipts/download',
-                  ),
-              ],
+              // Download all receipts button.
+              if (user != null)
+                DownloadButton(
+                  items: items,
+                  url: '/api/data/receipts/download',
+                ),
+            ],
+          ),
+        ),
+        gapH12,
+
+        // Grid of receipts.
+        Expanded(
+          child: GridView.builder(
+            shrinkWrap: true,
+            // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            //   crossAxisCount: crossAxisCount,
+            //   // crossAxisSpacing: 16,
+            //   // mainAxisSpacing: 16,
+            // ),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 540.0,
+              mainAxisSpacing: 10.0,
+              crossAxisSpacing: 10.0,
             ),
-            gapH12,
-
-            // Grid of receipts.
-            Expanded(
-              child: GridView.builder(
-                shrinkWrap: true,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  // crossAxisSpacing: 16,
-                  // mainAxisSpacing: 16,
-                ),
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  return ReceiptCard(
-                    item: SalesReceipt.fromMap(item ?? {}),
-                    onDownload: () {
-                      DownloadService.downloadData(
-                          [item!], '/api/data/receipts/download');
-                    },
-                    onDelete: () async {
-                      final delete = await InterfaceUtils.showAlertDialog(
-                        context: context,
-                        title:
-                            'Are you sure that you want to delete this receipt?',
-                        cancelActionText: 'Cancel',
-                        defaultActionText: 'Delete',
-                        primaryActionColor: Colors.redAccent,
-                      );
-                      if (delete == true) {
-                        ref.read(receiptService).deleteReceipt(item!['id']);
-                      }
-                    },
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return ReceiptCard(
+                item: SalesReceipt.fromMap(item ?? {}),
+                onDownload: () {
+                  DownloadService.downloadData(
+                    [item!],
+                    '/api/data/receipts/download',
                   );
                 },
-              ),
-            ),
-          ],
+                onDelete: () async {
+                  final delete = await InterfaceUtils.showAlertDialog(
+                    context: context,
+                    title: 'Are you sure that you want to delete this receipt?',
+                    cancelActionText: 'Cancel',
+                    defaultActionText: 'Delete',
+                    primaryActionColor: Colors.redAccent,
+                  );
+                  if (delete == true) {
+                    ref.read(receiptService).deleteReceipt(item!['id']);
+                  }
+                },
+              );
+            },
+          ),
         ),
-      ),
+      ],
     );
   }
 }

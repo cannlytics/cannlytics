@@ -12,6 +12,7 @@ import 'dart:async';
 
 // Flutter imports:
 import 'package:cannlytics_data/common/inputs/string_controller.dart';
+import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/services/api_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
@@ -53,6 +54,21 @@ class ResultService {
     await APIService.apiRequest(url, options: {'delete': true});
   }
 }
+
+/// Stream a result from Firebase.
+final labResultProvider =
+    StreamProvider.autoDispose.family<LabResult?, String>((ref, hash) {
+  final _database = ref.watch(firestoreProvider);
+  final user = ref.watch(userProvider).value;
+  print('User: ${user?.uid}');
+  if (user == null) return Stream.value(null);
+  return _database.watchDocument(
+    path: 'users/${user.uid}/lab_results/$hash',
+    builder: (data, documentId) {
+      return LabResult.fromMap(data ?? {});
+    },
+  );
+});
 
 /* === Extraction === */
 

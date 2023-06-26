@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// Receipt card.
-/// TODO: Add image.
 class ReceiptCard extends StatelessWidget {
   ReceiptCard({
     required this.item,

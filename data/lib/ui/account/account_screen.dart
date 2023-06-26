@@ -60,7 +60,6 @@ class AccountManagement extends ConsumerWidget {
 
     // Listen to the current user.
     final user = ref.watch(userProvider).value;
-    ;
 
     // Render the widget.
     return Padding(

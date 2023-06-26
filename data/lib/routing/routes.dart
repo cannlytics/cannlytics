@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 6/23/2023
+// Updated: 6/25/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // Dart imports:
 
@@ -16,7 +16,9 @@ import 'package:cannlytics_data/ui/dashboard/dashboard.dart';
 import 'package:cannlytics_data/ui/licensees/licensee_screen.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_screen.dart';
 import 'package:cannlytics_data/ui/licensees/state_licensees.dart';
+import 'package:cannlytics_data/ui/results/result_screen.dart';
 import 'package:cannlytics_data/ui/results/results_screen.dart';
+import 'package:cannlytics_data/ui/sales/receipt_screen.dart';
 import 'package:cannlytics_data/ui/sales/sales_screen.dart';
 import 'package:cannlytics_data/ui/strains/strains_screen.dart';
 
@@ -90,12 +92,14 @@ class Routes {
       builder: (context, state) => LabResultsScreen(),
       useFade: true,
       routes: [
-        // AppRoute(
-        //   path: 'coa',
-        //   name: 'results-coa',
-        //   builder: (context, state) => COAScreen(),
-        //   useFade: true,
-        // ),
+        // Result screen.
+        AppRoute(
+          path: ':hash',
+          name: 'result',
+          builder: (context, state) {
+            return ResultScreen(labResultId: state.params['hash']!);
+          },
+        ),
       ],
     ),
 
@@ -105,6 +109,16 @@ class Routes {
       name: 'sales',
       builder: (context, state) => SalesScreen(),
       useFade: true,
+      routes: [
+        // Result screen.
+        AppRoute(
+          path: ':hash',
+          name: 'receipt',
+          builder: (context, state) {
+            return ReceiptScreen(salesReceiptId: state.params['hash']!);
+          },
+        ),
+      ],
     ),
   ];
 }

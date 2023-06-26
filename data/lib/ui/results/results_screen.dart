@@ -121,7 +121,7 @@ class _ResultsTabsState extends State<ResultsTabs>
           alignment: Alignment.centerLeft,
           child: TabBar(
             controller: _tabController,
-            padding: EdgeInsets.all(0),
+            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 0),
             labelPadding: EdgeInsets.symmetric(horizontal: 2, vertical: 0),
             isScrollable: true,
             unselectedLabelColor: Theme.of(context).textTheme.bodyMedium!.color,
@@ -139,7 +139,6 @@ class _ResultsTabsState extends State<ResultsTabs>
           ),
         ),
         Container(
-          padding: EdgeInsets.only(top: 12),
           height: MediaQuery.of(context).size.height,
           child: TabBarView(
             controller: _tabController,
@@ -156,7 +155,7 @@ class _ResultsTabsState extends State<ResultsTabs>
 
   Widget _buildTab(String text, int index, IconData icon) {
     bool isSelected = _selectedIndex == index;
-    Color lightScreenGold = Color(0xFFD4AF37);
+    Color lightScreenGold = Color(0xFFFFBF5F);
     Color darkScreenGold = Color(0xFFFFD700);
     Color goldColor = Theme.of(context).brightness == Brightness.light
         ? lightScreenGold

@@ -25,6 +25,7 @@ class LabResult {
     this.businessDbaName,
     this.lims,
     this.lab,
+    this.labLicenseNumber,
     this.labImageUrl,
     this.labAddress,
     this.labStreet,
@@ -91,6 +92,7 @@ class LabResult {
   final String? businessDbaName;
   final String? lims;
   final String? lab;
+  final String? labLicenseNumber;
   final String? labImageUrl;
   final String? labAddress;
   final String? labStreet;
@@ -163,9 +165,8 @@ class LabResult {
       try {
         results = data['results'] as List<dynamic>;
       } catch (error) {
-        results = null;
+        results = data['results'];
       }
-      results = data['results'] as List<dynamic>;
     }
 
     return LabResult(
@@ -175,6 +176,7 @@ class LabResult {
       businessDbaName: data['business_dba_name'] ?? '',
       lims: data['lims'] ?? '',
       lab: data['lab'] ?? '',
+      labLicenseNumber: data['lab_license_number'] ?? '',
       labImageUrl: data['lab_image_url'] ?? '',
       labAddress: data['lab_address'] ?? '',
       labStreet: data['lab_street'] ?? '',
@@ -279,6 +281,7 @@ class LabResult {
       'business_dba_name': businessDbaName,
       'lims': lims,
       'lab': lab,
+      'lab_license_number': labLicenseNumber,
       'lab_image_url': labImageUrl,
       'lab_address': labAddress,
       'lab_street': labStreet,
