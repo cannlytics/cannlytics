@@ -23,7 +23,7 @@ final userReceipts = StreamProvider<List<Map?>>((ref) async* {
   final FirestoreService _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
   if (user == null) return;
-  yield* _dataSource.watchCollection(
+  yield* _dataSource.streamCollection(
     path: 'users/${user.uid}/receipts',
     builder: (data, documentId) => data!,
     queryBuilder: (query) => query.orderBy('parsed_at', descending: true),

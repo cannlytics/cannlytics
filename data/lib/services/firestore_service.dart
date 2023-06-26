@@ -56,13 +56,12 @@ class FirestoreService {
   }
 
   /// Watch a document as streams.
-  Stream<T> watchDocument<T>({
+  Stream<T> streamDocument<T>({
     required String path,
     required T Function(
       Map<String, dynamic>? data,
       String documentID,
-    )
-        builder,
+    ) builder,
   }) {
     // Create a reference.
     final reference = FirebaseFirestore.instance.doc(path);
@@ -79,17 +78,15 @@ class FirestoreService {
   }
 
   /// Watch a collection as streams.
-  Stream<List<T>> watchCollection<T>({
+  Stream<List<T>> streamCollection<T>({
     required String path,
     required T Function(
       Map<String, dynamic>? data,
       String documentID,
-    )
-        builder,
+    ) builder,
     Query<Map<String, dynamic>>? Function(
       Query<Map<String, dynamic>> query,
-    )?
-        queryBuilder,
+    )? queryBuilder,
     int Function(T lhs, T rhs)? sort,
   }) {
     // Create a references.
@@ -119,7 +116,7 @@ class FirestoreService {
   }
 
   /// Set data in Firestore given a path, optionally merging data.
-  Future<void> setData({
+  Future<void> updateDocument({
     required String path,
     required Map<String, dynamic> data,
     bool merge = true,
@@ -129,7 +126,7 @@ class FirestoreService {
   }
 
   /// Delete a document from Firestore.
-  Future<void> deleteData({required String path}) async {
+  Future<void> deleteDocument({required String path}) async {
     final reference = FirebaseFirestore.instance.doc(path);
     await reference.delete();
   }

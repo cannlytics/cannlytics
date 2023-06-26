@@ -12,6 +12,8 @@
 
 import 'dart:convert';
 
+import 'package:cannlytics_data/utils/utils.dart';
+
 typedef LabTestResultId = String;
 typedef LabTestId = String;
 
@@ -140,8 +142,8 @@ class LabResult {
   final double? totalTerpenes;
   final String? sampleId;
   final String? strainName;
-  // final List<Result?>? results;
-  final dynamic results;
+  final List<Result?>? results;
+  // final dynamic results;
   final String? coaAlgorithm;
   final String? coaAlgorithmVersion;
   final String? coaParsedAt;
@@ -158,57 +160,48 @@ class LabResult {
   // Create model.
   factory LabResult.fromMap(Map data) {
     // Standardize results.
-    var results = null;
+    List<Result?>? results;
     try {
-      results = jsonDecode(data['results']) as List<dynamic>;
+      var resultsData = jsonDecode(data['results']) as List<dynamic>;
+      results = resultsData
+          .map((result) => Result.fromMap(result as Map<String, dynamic>))
+          .toList();
     } catch (error) {
       try {
-        results = data['results'] as List<dynamic>;
+        var resultsData = data['results'] as List<dynamic>;
+        results = resultsData
+            .map((result) => Result.fromMap(result as Map<String, dynamic>))
+            .toList();
       } catch (error) {
-        results = data['results'];
+        results = null;
       }
     }
 
     return LabResult(
-      labId: data['lab_id'] ?? '',
-      batchNumber: data['batch_number'] ?? '',
-      productName: data['product_name'] ?? '',
-      businessDbaName: data['business_dba_name'] ?? '',
-      lims: data['lims'] ?? '',
-      lab: data['lab'] ?? '',
-      labLicenseNumber: data['lab_license_number'] ?? '',
-      labImageUrl: data['lab_image_url'] ?? '',
-      labAddress: data['lab_address'] ?? '',
-      labStreet: data['lab_street'] ?? '',
-      labCity: data['lab_city'] ?? '',
-      labCounty: data['lab_county'] ?? '',
-      labState: data['lab_state'] ?? '',
-      labZipcode: data['lab_zipcode'] ?? '',
-      labPhone: data['lab_phone'] ?? '',
-      labEmail: data['lab_email'] ?? '',
-      labWebsite: data['lab_website'] ?? '',
-      labLatitude:
-          data['lab_latitude'] != null ? data['lab_latitude'].toDouble() : null,
-      labLongitude: data['lab_longitude'] != null
-          ? data['lab_longitude'].toDouble()
-          : null,
-      licensingAuthorityId: data['licensing_authority_id'] ?? '',
-      licensingAuthority: data['licensing_authority'] ?? '',
-      analyses: data['analyses'] is List<dynamic>
-          ? data['analyses']
-          : (data['analyses'] != null
-              ? jsonDecode(data['analyses']) as List<dynamic>
-              : null),
+      labId: data['lab_id'],
+      batchNumber: data['batch_number'],
+      productName: data['product_name'],
+      businessDbaName: data['business_dba_name'],
+      lims: data['lims'],
+      lab: data['lab'],
+      labLicenseNumber: data['lab_license_number'],
+      labImageUrl: data['lab_image_url'],
+      labAddress: data['lab_address'],
+      labStreet: data['lab_street'],
+      labCity: data['lab_city'],
+      labCounty: data['lab_county'],
+      labState: data['lab_state'],
+      labZipcode: data['lab_zipcode'],
+      labPhone: data['lab_phone'],
+      labEmail: data['lab_email'],
+      labWebsite: data['lab_website'],
+      labLatitude: DataUtils.formatNumber(data['lab_latitude']),
+      labLongitude: DataUtils.formatNumber(data['lab_longitude']),
+      licensingAuthorityId: data['licensing_authority_id'],
+      licensingAuthority: data['licensing_authority'],
+      analyses: DataUtils.formatList(data['analyses']),
       analysisStatus: data['analysis_status'],
-      methods: data['methods'] is List<dynamic>
-          ? (data['methods'] as List)
-              .map((method) => (method as Map).cast<String, dynamic>())
-              .toList()
-          : (data['methods'] != null
-              ? (jsonDecode(data['methods']) as List)
-                  .map((method) => (method as Map).cast<String, dynamic>())
-                  .toList()
-              : null),
+      methods: DataUtils.formatList(data['methods']),
       dateCollected: data['date_collected'],
       dateTested: data['date_tested'],
       dateReceived: data['date_received'],
@@ -219,43 +212,23 @@ class LabResult {
       distributorState: data['distributor_state'],
       distributorZipcode: data['distributor_zipcode'],
       distributorLicenseNumber: data['distributor_license_number'],
-      producer: data['producer'] ?? '',
-      producerLicenseNumber: data['producer_license_number'] ?? '',
+      producer: data['producer'],
+      producerLicenseNumber: data['producer_license_number'],
       producerAddress: data['producer_address'],
       producerStreet: data['producer_street'],
       producerCity: data['producer_city'],
       producerState: data['producer_state'],
       producerZipcode: data['producer_zipcode'],
       productType: data['product_type'],
-      traceabilityIds: data['traceability_ids'] is List<dynamic>
-          ? data['traceability_ids'] as List<dynamic>
-          : (data['traceability_ids'] != null
-              ? jsonDecode(data['traceability_ids']) as List<dynamic>
-              : null),
-      productSize: data['product_size'] is String
-          ? int.tryParse(data['product_size'] as String)
-          : data['product_size'] as int?,
-      servingSize: data['serving_size'] is String
-          ? int.tryParse(data['serving_size'] as String)
-          : data['serving_size'] as int?,
-      servingsPerPackage: data['servings_per_package'] is String
-          ? int.tryParse(data['servings_per_package'] as String)
-          : data['servings_per_package'] as int?,
-      sampleWeight: (data['sample_weight'] is String)
-          ? double.tryParse(data['sample_weight'] as String)
-          : (data['sample_weight'] as num?)?.toDouble(),
-      totalCannabinoids: (data['total_cannabinoids'] is String)
-          ? double.tryParse(data['total_cannabinoids'] as String)
-          : (data['total_cannabinoids'] as num?)?.toDouble(),
-      totalThc: (data['total_thc'] is String)
-          ? double.tryParse(data['total_thc'] as String)
-          : (data['total_thc'] as num?)?.toDouble(),
-      totalCbd: (data['total_cbd'] is String)
-          ? double.tryParse(data['total_cbd'] as String)
-          : (data['total_cbd'] as num?)?.toDouble(),
-      totalTerpenes: (data['total_terpenes'] is String)
-          ? double.tryParse(data['total_terpenes'] as String)
-          : (data['total_terpenes'] as num?)?.toDouble(),
+      traceabilityIds: DataUtils.formatList(data['traceability_ids']),
+      productSize: DataUtils.formatInt(data['product_size']),
+      servingSize: DataUtils.formatInt(data['serving_size']),
+      servingsPerPackage: DataUtils.formatInt(data['servings_per_package']),
+      sampleWeight: DataUtils.formatNumber(data['sample_weight']),
+      totalCannabinoids: DataUtils.formatNumber(data['total_cannabinoids']),
+      totalThc: DataUtils.formatNumber(data['total_thc']),
+      totalCbd: DataUtils.formatNumber(data['total_cbd']),
+      totalTerpenes: DataUtils.formatNumber(data['total_terpenes']),
       status: data['status'],
       sampleId: data['sample_id'],
       strainName: data['strain_name'],
@@ -266,9 +239,9 @@ class LabResult {
       resultsHash: data['results_hash'],
       sampleHash: data['sample_hash'],
       warning: data['warning'],
-      fileRef: data['file_ref'] as String?,
-      downloadUrl: data['download_url'] as String?,
-      shortUrl: data['short_url'] as String?,
+      fileRef: data['file_ref'],
+      downloadUrl: data['download_url'],
+      shortUrl: data['short_url'],
     );
   }
 
@@ -403,140 +376,3 @@ class Result {
     };
   }
 }
-
-/* === Metrc Lab Result Models === */
-
-// /// Model representing a lab test for traceability.
-// class LabTest {
-//   // Initialization.
-//   const LabTest({
-//     required this.id,
-//     required this.labFacilityLicenseNumber,
-//     required this.labFacilityName,
-//     required this.labTestDetailRevokedDate,
-//     required this.overallPassed,
-//     required this.packageId,
-//     required this.productCategoryName,
-//     required this.productName,
-//     required this.resultReleaseDateTime,
-//     required this.resultReleased,
-//     required this.revokedDate,
-//     required this.sourcePackageLabel,
-//     required this.testComment,
-//     required this.testInformationalOnly,
-//     required this.testPassed,
-//     required this.testPerformedDate,
-//     required this.testResultLevel,
-//     required this.testTypeName,
-//   });
-
-//   // Properties.
-//   final LabTestId id;
-//   final String labFacilityLicenseNumber;
-//   final String labFacilityName;
-//   final DateTime labTestDetailRevokedDate;
-//   final bool overallPassed;
-//   final int packageId;
-//   final String productCategoryName;
-//   final String productName;
-//   final DateTime resultReleaseDateTime;
-//   final bool resultReleased;
-//   final DateTime revokedDate;
-//   final String sourcePackageLabel;
-//   final String testComment;
-//   final bool testInformationalOnly;
-//   final bool testPassed;
-//   final DateTime testPerformedDate;
-//   final double testResultLevel;
-//   final String testTypeName;
-
-//   // Create model.
-//   factory LabTest.fromMap(Map<String, dynamic> data, String uid) {
-//     return LabTest(
-//       id: uid,
-//       labFacilityLicenseNumber: data['lab_facility_license_number'] as String,
-//       labFacilityName: data['lab_facility_name'] as String,
-//       labTestDetailRevokedDate:
-//           data['lab_test_detail_revoked_date'] as DateTime,
-//       overallPassed: data['overall_passed'] as bool,
-//       packageId: data['package_id'] as int,
-//       productCategoryName: data['product_category_name'] as String,
-//       productName: data['product_name'] as String,
-//       resultReleaseDateTime: data['result_release_date_time'] as DateTime,
-//       resultReleased: data['result_released'] as bool,
-//       revokedDate: data['revoked_date'] as DateTime,
-//       sourcePackageLabel: data['source_package_label'] as String,
-//       testComment: data['test_comment'] as String,
-//       testInformationalOnly: data['test_informational_only'] as bool,
-//       testPassed: data['test_passed'] as bool,
-//       testPerformedDate: data['test_performed_date'] as DateTime,
-//       testResultLevel: data['test_result_level'] as double,
-//       testTypeName: data['test_type_name'] as String,
-//     );
-//   }
-
-//   // Create JSON.
-//   Map<String, dynamic> toMap() {
-//     return <String, dynamic>{
-//       'id': id,
-//       'lab_facility_license_number': labFacilityLicenseNumber,
-//       'lab_facility_name': labFacilityName,
-//       'lab_test_detail_revoked_date': labTestDetailRevokedDate,
-//       'overall_passed': overallPassed,
-//       'package_id': packageId,
-//       'product_category_name': productCategoryName,
-//       'product_name': productName,
-//       'result_release_date_time': resultReleaseDateTime,
-//       'result_released': resultReleased,
-//       'revoked_date': revokedDate,
-//       'source_package_label': sourcePackageLabel,
-//       'test_comment': testComment,
-//       'test_informational_only': testInformationalOnly,
-//       'test_passed': testPassed,
-//       'test_performed_date': testPerformedDate,
-//       'test_result_level': testResultLevel,
-//       'test_type_name': testTypeName,
-//     };
-//   }
-// }
-
-// /// Model representing a singular lab test result for traceability.
-// class LabTestResult {
-//   // Initialization.
-//   const LabTestResult({
-//     this.id,
-//     this.labTestTypeName,
-//     this.notes,
-//     this.passed,
-//     this.quantity,
-//   });
-
-//   // Properties.
-//   final LabTestResultId? id;
-//   final String? labTestTypeName;
-//   final String? notes;
-//   final bool? passed;
-//   final double? quantity;
-
-//   // Create model.
-//   factory LabTestResult.fromMap(Map<String, dynamic> data) {
-//     return LabTestResult(
-//       id: data['id'].toString(),
-//       labTestTypeName: data['lab_test_type_name'] ?? '',
-//       notes: data['notes'] ?? '',
-//       passed: data['passed'] ?? false,
-//       quantity: data['quantity'] ?? 0.0,
-//     );
-//   }
-
-//   // Create JSON.
-//   Map<String, dynamic> toMap() {
-//     return <String, dynamic>{
-//       'id': id,
-//       'lab_test_type_name': labTestTypeName,
-//       'notes': notes,
-//       'passed': passed,
-//       'quantity': quantity,
-//     };
-//   }
-// }

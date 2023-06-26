@@ -160,3 +160,45 @@ class TimeUtils {
     return DateFormat('MMMM d, y HH:mm').format(date);
   }
 }
+
+/// Data utility functions.
+class DataUtils {
+  /// Format a list from a dynamic data type.
+  static List<String>? formatList(dynamic data) {
+    if (data == null) {
+      return [];
+    } else if (data is String) {
+      return data.split(',').map((e) => e.trim()).toList();
+    } else if (data is List<dynamic>) {
+      return data.cast<String>();
+    } else {
+      return null;
+    }
+  }
+
+  /// Format a number from a dynamic data type.
+  static double? formatNumber(dynamic data) {
+    if (data == null) {
+      return null;
+    } else if (data is String) {
+      return double.tryParse(data);
+    } else if (data is num) {
+      return data.toDouble();
+    } else {
+      return null;
+    }
+  }
+
+  /// Format an integer from a dynamic data type.
+  static int? formatInt(dynamic data) {
+    if (data == null) {
+      return null;
+    } else if (data is String) {
+      return int.tryParse(data);
+    } else if (data is int) {
+      return data;
+    } else {
+      return null;
+    }
+  }
+}

@@ -26,49 +26,72 @@ final userResults = StreamProvider<List<Map?>>((ref) async* {
   final FirestoreService _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
   if (user == null) return;
-  yield* _dataSource.watchCollection(
+  yield* _dataSource.streamCollection(
     path: 'users/${user.uid}/lab_results',
-    builder: (data, documentId) => data!,
+    builder: (data, documentId) {
+      print('DATA:');
+      print(data);
+      return data;
+    },
     queryBuilder: (query) => query.orderBy('coa_parsed_at', descending: true),
   );
 });
-
-// Result service provider.
-final resultService = Provider<ResultService>((ref) {
-  return ResultService();
-});
-
-/// Result service.
-class ResultService {
-  const ResultService();
-
-  // Update result.
-  Future<void> updateResult(String id, Map data) async {
-    String url = '/api/data/coas/$id';
-    await APIService.apiRequest(url, data: {'data': data});
-  }
-
-  // Delete result.
-  Future<void> deleteResult(String id) async {
-    String url = '/api/data/coas/$id';
-    await APIService.apiRequest(url, options: {'delete': true});
-  }
-}
 
 /// Stream a result from Firebase.
 final labResultProvider =
     StreamProvider.autoDispose.family<LabResult?, String>((ref, hash) {
   final _database = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
-  print('User: ${user?.uid}');
   if (user == null) return Stream.value(null);
-  return _database.watchDocument(
+  return _database.streamDocument(
     path: 'users/${user.uid}/lab_results/$hash',
     builder: (data, documentId) {
-      return LabResult.fromMap(data ?? {});
+      // Keep track of analysis results for editing.
+      var labResult = LabResult.fromMap(data ?? {});
+      var results =
+          labResult.results?.map((result) => result?.toMap()).toList();
+      ref.read(analysisResults.notifier).update((state) => results ?? []);
+      return labResult;
     },
   );
 });
+
+// Updated analysis results.
+final analysisResults = StateProvider<List<Map?>>((ref) => []);
+
+// Result service provider.
+final resultService = Provider<ResultService>((ref) {
+  final uid = ref.read(userProvider).value?.uid ?? 'cannlytics';
+  return ResultService(ref.watch(firestoreProvider), uid);
+});
+
+/// Result service.
+class ResultService {
+  const ResultService(this._dataSource, this.uid);
+
+  // Parameters.
+  final FirestoreService _dataSource;
+  final String uid;
+
+  // Update result.
+  Future<void> updateResult(String id, Map<String, dynamic> data) async {
+    await _dataSource.updateDocument(
+      path: 'users/$uid/lab_results/$id',
+      data: data,
+    );
+    // String url = '/api/data/coas/$id';
+    // await APIService.apiRequest(url, data: {'data': data});
+  }
+
+  // Delete result.
+  Future<void> deleteResult(String id) async {
+    await _dataSource.deleteDocument(
+      path: 'users/$uid/lab_results/$id',
+    );
+    // String url = '/api/data/coas/$id';
+    // await APIService.apiRequest(url, options: {'delete': true});
+  }
+}
 
 /* === Extraction === */
 

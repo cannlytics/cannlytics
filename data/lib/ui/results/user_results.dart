@@ -17,6 +17,8 @@ import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// FIXME: There is an error somewhere with navigation.
+
 /// User lab results user interface.
 class UserResultsInterface extends ConsumerWidget {
   const UserResultsInterface({super.key});
@@ -218,6 +220,7 @@ class UserResultsGrid extends ConsumerWidget {
 
     // Listen to the user.
     final user = ref.watch(userProvider).value;
+    print('RENDERING RESULTS FOR USER: ${user?.uid}');
 
     // Render the card.
     return Column(

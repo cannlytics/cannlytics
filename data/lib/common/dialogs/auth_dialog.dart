@@ -123,155 +123,154 @@ class _SignInDialogState extends ConsumerState<SignInDialog>
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
 
-    // Build the form.
-    Widget card = AlertDialog(
+    var column = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        // Close button.
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+          ],
+        ),
+        // Logo
+        gapH24,
+        SizedBox(
+          width: 200,
+          height: 50,
+          child: SvgPicture.asset(
+            isDark
+                ? 'assets/images/logos/logo_dark.svg'
+                : 'assets/images/logos/logo_light.svg',
+            semanticsLabel: 'Cannlytics',
+          ),
+        ),
+        gapH6,
+
+        // Title.
+        Text(
+          (_isSignUp) ? 'Sign Up' : 'Sign In',
+          style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                color: Theme.of(context).textTheme.titleLarge!.color,
+                fontSize: 18,
+              ),
+        ),
+        gapH18,
+
+        // Email field.
+        TextFormField(
+          controller: _emailController,
+          key: Key('email'),
+          autofocus: true,
+          autocorrect: false,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          validator: (email) =>
+              !_submitted ? null : emailErrorText(email ?? ''),
+          textInputAction: TextInputAction.next,
+          keyboardType: TextInputType.emailAddress,
+          keyboardAppearance: Brightness.light,
+          onEditingComplete: () => _emailEditingComplete(),
+          inputFormatters: <TextInputFormatter>[
+            ValidatorInputFormatter(
+              editingValidator: EmailEditingRegexValidator(),
+            ),
+          ],
+          style: Theme.of(context).textTheme.titleMedium,
+          decoration: InputDecoration(
+            labelText: 'Email',
+            // hintText: 'test@cannlytics.com',
+            enabled: !state.isLoading,
+            floatingLabelBehavior: FloatingLabelBehavior.auto,
+            contentPadding: EdgeInsets.only(
+              top: 18,
+              left: 8,
+              right: 8,
+              bottom: 8,
+            ),
+          ),
+        ),
+
+        // Spacer.
+        gapH18,
+
+        // Password field.
+        TextFormField(
+          key: Key('password'),
+          controller: _passwordController,
+          obscureText: true,
+          autocorrect: false,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          validator: (password) =>
+              !_submitted ? null : passwordErrorText(password ?? '', _isSignUp),
+          textInputAction: TextInputAction.done,
+          keyboardAppearance: Brightness.light,
+          onEditingComplete: () => _passwordEditingComplete(),
+          style: Theme.of(context).textTheme.titleMedium,
+          decoration: InputDecoration(
+            labelText: _isSignUp ? 'Password (8+ characters)' : 'Password',
+            enabled: !state.isLoading,
+            floatingLabelBehavior: FloatingLabelBehavior.auto,
+            contentPadding: EdgeInsets.only(
+              top: 18,
+              left: 8,
+              right: 8,
+              bottom: 8,
+            ),
+          ),
+        ),
+
+        // Spacer.
+        gapH18,
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Reset password button.
+            CustomTextButton(
+              text: 'Lost Password?',
+              onPressed: () {
+                context.go('/account/reset-password');
+              },
+            ),
+
+            // Submit button.
+            PrimaryButton(
+              text: _isSignUp ? 'Sign Up' : 'Sign In',
+              isLoading: state.isLoading,
+              onPressed: state.isLoading ? null : () => _submit(),
+            ),
+          ],
+        ),
+
+        // Spacer.
+        gapH48,
+
+        // Change forms (sign-in to register) button.
+        CustomTextButton(
+          text: _isSignUp ? 'Sign In' : 'Register',
+          onPressed: state.isLoading ? null : _updateFormType,
+        ),
+      ],
+    );
+
+    // Add an animation to the card.
+    return AlertDialog(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       contentPadding: EdgeInsets.all(16.0),
       content: FocusScope(
         node: _node,
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              // Close button.
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(false),
-                  ),
-                ],
-              ),
-              // Logo
-              gapH24,
-              SizedBox(
-                width: 200,
-                height: 50,
-                child: SvgPicture.asset(
-                  isDark
-                      ? 'assets/images/logos/logo_dark.svg'
-                      : 'assets/images/logos/logo_light.svg',
-                  semanticsLabel: 'Cannlytics',
-                ),
-              ),
-              gapH6,
-
-              // Title.
-              Text(
-                (_isSignUp) ? 'Sign Up' : 'Sign In',
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      color: Theme.of(context).textTheme.titleLarge!.color,
-                      fontSize: 18,
-                    ),
-              ),
-              gapH18,
-
-              // Email field.
-              TextFormField(
-                controller: _emailController,
-                key: Key('email'),
-                autofocus: true,
-                autocorrect: false,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (email) =>
-                    !_submitted ? null : emailErrorText(email ?? ''),
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.emailAddress,
-                keyboardAppearance: Brightness.light,
-                onEditingComplete: () => _emailEditingComplete(),
-                inputFormatters: <TextInputFormatter>[
-                  ValidatorInputFormatter(
-                    editingValidator: EmailEditingRegexValidator(),
-                  ),
-                ],
-                style: Theme.of(context).textTheme.titleMedium,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  // hintText: 'test@cannlytics.com',
-                  enabled: !state.isLoading,
-                  floatingLabelBehavior: FloatingLabelBehavior.auto,
-                  contentPadding: EdgeInsets.only(
-                    top: 18,
-                    left: 8,
-                    right: 8,
-                    bottom: 8,
-                  ),
-                ),
-              ),
-
-              // Spacer.
-              gapH18,
-
-              // Password field.
-              TextFormField(
-                key: Key('password'),
-                controller: _passwordController,
-                obscureText: true,
-                autocorrect: false,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (password) => !_submitted
-                    ? null
-                    : passwordErrorText(password ?? '', _isSignUp),
-                textInputAction: TextInputAction.done,
-                keyboardAppearance: Brightness.light,
-                onEditingComplete: () => _passwordEditingComplete(),
-                style: Theme.of(context).textTheme.titleMedium,
-                decoration: InputDecoration(
-                  labelText:
-                      _isSignUp ? 'Password (8+ characters)' : 'Password',
-                  enabled: !state.isLoading,
-                  floatingLabelBehavior: FloatingLabelBehavior.auto,
-                  contentPadding: EdgeInsets.only(
-                    top: 18,
-                    left: 8,
-                    right: 8,
-                    bottom: 8,
-                  ),
-                ),
-              ),
-
-              // Spacer.
-              gapH18,
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Reset password button.
-                  CustomTextButton(
-                    text: 'Lost Password?',
-                    onPressed: () {
-                      context.go('/account/reset-password');
-                    },
-                  ),
-
-                  // Submit button.
-                  PrimaryButton(
-                    text: _isSignUp ? 'Sign Up' : 'Sign In',
-                    isLoading: state.isLoading,
-                    onPressed: state.isLoading ? null : () => _submit(),
-                  ),
-                ],
-              ),
-
-              // Spacer.
-              gapH48,
-
-              // Change forms (sign-in to register) button.
-              CustomTextButton(
-                text: _isSignUp ? 'Sign In' : 'Register',
-                onPressed: state.isLoading ? null : _updateFormType,
-              ),
-            ],
+          child: SingleChildScrollView(
+            child: column,
           ),
         ),
       ),
-    );
-
-    // Add an animation to the card.
-    return card; // .animate().shimmer(duration: 800.ms)
+    ); // .animate().shimmer(duration: 800.ms)
   }
 }
 

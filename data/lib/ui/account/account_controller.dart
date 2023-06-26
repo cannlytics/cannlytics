@@ -36,7 +36,7 @@ final userProvider = StreamProvider<User?>((ref) {
 final userSubscriptionProvider = StreamProvider.autoDispose<Map>((ref) {
   final _database = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
-  return _database.watchDocument(
+  return _database.streamDocument(
     path: 'subscribers/${user!.uid}',
     builder: (data, documentId) {
       return data ?? {};
@@ -160,7 +160,7 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
       }
 
       // Update the user's data in Firestore.
-      await _firestore.setData(
+      await _firestore.updateDocument(
         path: 'users/${user.uid}',
         data: {
           'email': user.email,
@@ -178,7 +178,7 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
     state = await AsyncValue.guard(() async {
       final user = ref.read(userProvider).value;
       if (user != null) {
-        await _firestore.setData(
+        await _firestore.updateDocument(
           path: 'users/${user.uid}',
           data: data,
         );

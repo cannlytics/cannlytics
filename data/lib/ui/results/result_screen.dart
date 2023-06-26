@@ -14,6 +14,7 @@ import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
+import 'package:cannlytics_data/ui/results/result_table.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,15 +40,18 @@ class ResultScreen extends ConsumerStatefulWidget {
   _ResultScreenState createState() => _ResultScreenState();
 }
 
+/// Result screen state.
 class _ResultScreenState extends ConsumerState<ResultScreen>
     with SingleTickerProviderStateMixin {
   // State.
+  bool _isEditing = false;
   static const int _initialPage = 1;
   late PdfController _pdfController;
   late String _pdfUrl;
   late final TabController _tabController;
+  int _tabCount = 3;
   int _selectedIndex = 0;
-  bool _isEditing = false;
+  Future<void>? _updateFuture;
 
   // Define the TextEditingController instances.
   final _productNameController = TextEditingController();
@@ -103,7 +107,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
   void initState() {
     super.initState();
 
-    // Initialize PDF.
+    // FIXME: Initialize PDF.
     _pdfUrl =
         'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/tests%2Fassets%2Fcoas%2Facs%2F27675_0002355100.pdf?alt=media&token=bc9abde9-4fe6-4a45-8be4-68e92c8ea8f9';
     _pdfController = PdfController(
@@ -112,7 +116,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     );
 
     // Initialize tabs.
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: _tabCount, vsync: this);
     _tabController.addListener(() {
       setState(() {
         _selectedIndex = _tabController.index;
@@ -132,14 +136,26 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
   Widget build(BuildContext context) {
     if (widget.labResultId != null) {
       final asyncData = ref.watch(labResultProvider(widget.labResultId!));
-      print('asyncData: $asyncData');
       return asyncData.when(
+        // Loading UI.
+        loading: () => MainContent(
+          child: _loadingPlaceholder(context, ref),
+          fillRemaining: true,
+        ),
+
+        // Error UI.
+        error: (err, stack) => MainContent(
+          child: SelectableText('Error: $err'),
+        ),
+
+        // Data loaded UI.
         data: (labResult) {
-          // Set all values.
+          // Initialize the text editing controllers with values.
           _productNameController.text = labResult?.productName ?? '';
           _strainNameController.text = labResult?.strainName ?? '';
           _productTypeController.text = labResult?.productType ?? '';
-          _traceabilityIdsController.text = labResult?.traceabilityIds ?? '';
+          _traceabilityIdsController.text =
+              labResult?.traceabilityIds.join(', ') ?? '';
           _productSizeController.text = labResult?.productSize.toString() ?? '';
           _servingSizeController.text = labResult?.servingSize.toString() ?? '';
           _servingsPerPackageController.text =
@@ -150,11 +166,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           _totalCbdController.text = labResult?.totalCbd.toString() ?? '';
           _totalTerpenesController.text =
               labResult?.totalTerpenes.toString() ?? '';
-          _analysesController.text = labResult?.analyses ?? '';
+          _analysesController.text = labResult?.analyses.join(', ') ?? '';
           _statusController.text = labResult?.status ?? '';
           _batchNumberController.text = labResult?.batchNumber ?? '';
           _analysisStatusController.text = labResult?.analysisStatus ?? '';
-          _methodsController.text = labResult?.methods ?? '';
+          _methodsController.text = labResult?.methods.join(', ') ?? '';
           _dateCollectedController.text = labResult?.dateCollected ?? '';
           _dateTestedController.text = labResult?.dateTested ?? '';
           _dateReceivedController.text = labResult?.dateReceived ?? '';
@@ -196,10 +212,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           // Return the form.
           return _form(labResult);
         },
-        loading: () => MainContent(
-            child: _loadingPlaceholder(context, ref), fillRemaining: true),
-        error: (err, stack) =>
-            MainContent(child: SelectableText('Error: $err')),
       );
     } else {
       return _form(widget.labResult);
@@ -486,9 +498,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
             indicator: BoxDecoration(),
             dividerColor: Colors.transparent,
             tabs: [
-              _buildTab('Details', 0, Icons.info),
-              // _buildTab('Explore', 1, Icons.explore),
-              // _buildTab('Your Results', 2, Icons.science),
+              _buildTab('Details', 0, Icons.bar_chart),
+              _buildTab('Results', 1, Icons.science),
+              _buildTab('COA', 2, Icons.description),
+              // _buildTab('Notes', 2, Icons.science),
             ],
           ),
           Spacer(),
@@ -508,28 +521,135 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           if (_isEditing) ...[
             PrimaryButton(
               text: 'Save',
+              isLoading: _updateFuture != null,
               onPressed: () {
                 // Get the values from the TextEditingController instances.
                 final productName = _productNameController.text;
                 final strainName = _strainNameController.text;
                 final productType = _productTypeController.text;
-                final traceabilityIds = _traceabilityIdsController.text;
+                final traceabilityIds = _traceabilityIdsController.text
+                    .split(',')
+                    .map((item) => item.trim())
+                    .where((item) => item.isNotEmpty)
+                    .toList();
                 final productSize = int.tryParse(_productSizeController.text);
-                // FIXME: Get more values from the rest of the TextEditingController instances...
+                final servingSize = int.tryParse(_servingSizeController.text);
+                final servingsPerPackage =
+                    int.tryParse(_servingsPerPackageController.text);
+                final totalCannabinoids =
+                    double.tryParse(_totalCannabinoidsController.text);
+                final totalThc = double.tryParse(_totalThcController.text);
+                final totalCbd = double.tryParse(_totalCbdController.text);
+                final totalTerpenes =
+                    double.tryParse(_totalTerpenesController.text);
+                final analyses = _analysesController.text
+                    .split(',')
+                    .map((item) => item.trim())
+                    .where((item) => item.isNotEmpty)
+                    .toList();
+                final status = _statusController.text;
+                final batchNumber = _batchNumberController.text;
+                final analysisStatus = _analysisStatusController.text;
+                final methods = _methodsController.text;
+                final dateCollected = _dateCollectedController.text;
+                final dateTested = _dateTestedController.text;
+                final dateReceived = _dateReceivedController.text;
+                final sampleWeight =
+                    double.tryParse(_sampleWeightController.text);
+                final producer = _producerController.text;
+                final producerLicenseNumber =
+                    _producerLicenseNumberController.text;
+                final producerAddress = _producerAddressController.text;
+                final producerStreet = _producerStreetController.text;
+                final producerCity = _producerCityController.text;
+                final producerState = _producerStateController.text;
+                final producerZipcode = _producerZipcodeController.text;
+                final distributor = _distributorController.text;
+                final distributorAddress = _distributorAddressController.text;
+                final distributorStreet = _distributorStreetController.text;
+                final distributorCity = _distributorCityController.text;
+                final distributorState = _distributorStateController.text;
+                final distributorZipcode = _distributorZipcodeController.text;
+                final distributorLicenseNumber =
+                    _distributorLicenseNumberController.text;
+                final labId = _labIdController.text;
+                final lab = _labController.text;
+                final lims = _limsController.text;
+                final labImageUrl = _labImageUrlController.text;
+                final labAddress = _labAddressController.text;
+                final labStreet = _labStreetController.text;
+                final labCity = _labCityController.text;
+                final labCounty = _labCountyController.text;
+                final labState = _labStateController.text;
+                final labZipcode = _labZipcodeController.text;
+                final labPhone = _labPhoneController.text;
+                final labEmail = _labEmailController.text;
+                final labWebsite = _labWebsiteController.text;
 
-                // FIXME: Save through Firestore.
-                Map update = {
-                  'productName': productName,
-                  'strainName': strainName,
-                  'productType': productType,
-                  'traceabilityIds': traceabilityIds,
-                  'productSize': productSize,
+                // Prepare data for Firestore.
+                Map<String, dynamic> update = {
+                  'product_name': productName,
+                  'strain_name': strainName,
+                  'product_type': productType,
+                  'traceability_ids': traceabilityIds,
+                  'product_size': productSize,
+                  'serving_size': servingSize,
+                  'servings_per_package': servingsPerPackage,
+                  'total_cannabinoids': totalCannabinoids,
+                  'total_thc': totalThc,
+                  'total_cbd': totalCbd,
+                  'total_terpenes': totalTerpenes,
+                  'analyses': analyses,
+                  'status': status,
+                  'batch_number': batchNumber,
+                  'analysis_status': analysisStatus,
+                  'methods': methods,
+                  'date_collected': dateCollected,
+                  'date_tested': dateTested,
+                  'date_received': dateReceived,
+                  'sample_weight': sampleWeight,
+                  'producer': producer,
+                  'producer_license_number': producerLicenseNumber,
+                  'producer_address': producerAddress,
+                  'producer_street': producerStreet,
+                  'producer_city': producerCity,
+                  'producer_state': producerState,
+                  'producer_zipcode': producerZipcode,
+                  'distributor': distributor,
+                  'distributor_address': distributorAddress,
+                  'distributor_street': distributorStreet,
+                  'distributor_city': distributorCity,
+                  'distributor_state': distributorState,
+                  'distributor_zipcode': distributorZipcode,
+                  'distributor_license_number': distributorLicenseNumber,
+                  'lab_id': labId,
+                  'lab': lab,
+                  'lims': lims,
+                  'lab_image_url': labImageUrl,
+                  'lab_address': labAddress,
+                  'lab_street': labStreet,
+                  'lab_city': labCity,
+                  'lab_county': labCounty,
+                  'lab_state': labState,
+                  'lab_zipcode': labZipcode,
+                  'lab_phone': labPhone,
+                  'lab_email': labEmail,
+                  'lab_website': labWebsite,
                 };
-                print('Update: $update');
+
+                // Update any modified results.
+                update['results'] = ref.read(analysisResults);
+
+                // Update the data in Firestore.
+                _updateFuture = ref.read(resultService).updateResult(
+                      widget.labResultId ?? '',
+                      update,
+                    );
 
                 // Cancel editing.
                 setState(() {
                   _isEditing = !_isEditing;
+                  _updateFuture = null;
                 });
               },
             ),
@@ -561,6 +681,63 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       ),
     );
 
+    var _tabs = TabBarView(
+      controller: _tabController,
+      children: [
+        // Details tab.
+        CustomScrollView(
+          slivers: [
+            // Breadcrumbs.
+            _breadcrumbs,
+
+            // Tab bar and actions.
+            SliverToBoxAdapter(child: _actions),
+
+            // Fields.
+            _isEditing ? _editForm : _viewForm,
+          ],
+        ),
+
+        // Results tab.
+        CustomScrollView(
+          slivers: [
+            // Breadcrumbs.
+            _breadcrumbs,
+
+            // Tab bar and actions.
+            SliverToBoxAdapter(child: _actions),
+
+            // Results table.
+            SliverToBoxAdapter(
+              child: AnalysisResultsTable(
+                results: labResult?.results,
+                isEditing: _isEditing,
+              ),
+            ),
+          ],
+        ),
+
+        // COA tab.
+        CustomScrollView(
+          slivers: [
+            // Breadcrumbs.
+            _breadcrumbs,
+
+            // Tab bar and actions.
+            SliverToBoxAdapter(child: _actions),
+
+            // PDF options.
+            SliverToBoxAdapter(child: _pdfActions()),
+
+            // COA PDF.
+            SliverToBoxAdapter(child: _coaPDF()),
+          ],
+        ),
+
+        // TODO: Notes tab.
+      ],
+    );
+
     // Render.
     return MainContent(
       child: SingleChildScrollView(
@@ -571,35 +748,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
             Container(
               height: MediaQuery.of(context).size.height,
               child: DefaultTabController(
-                length: 2,
+                length: _tabCount,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          // Details tab.
-                          CustomScrollView(
-                            slivers: [
-                              // Breadcrumbs.
-                              _breadcrumbs,
-
-                              // Tab bar.
-                              SliverToBoxAdapter(child: _actions),
-
-                              // Fields.
-                              _isEditing ? _editForm : _viewForm,
-                            ],
-                          ),
-                          // TODO: Implement tabs:
-                          // - Results tab.
-                          // - Notes tab.
-                          // - COA tab.
-                        ],
-                      ),
-                    ),
+                    Expanded(child: _tabs),
                   ],
                 ),
               ),
@@ -683,7 +837,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     IconData icon,
   ) {
     bool isSelected = _selectedIndex == index;
-    // Color lightScreenGold = Color(0xFFD4AF37);
     Color lightScreenGold = Color(0xFFFFBF5F);
     Color darkScreenGold = Color(0xFFFFD700);
     Color goldColor = Theme.of(context).brightness == Brightness.light
@@ -865,97 +1018,3 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     );
   }
 }
-
-/// Main content.
-class MainContent extends ConsumerWidget {
-  const MainContent({
-    Key? key,
-    required this.child,
-    this.fillRemaining = false,
-  }) : super(key: key);
-
-  // Parameters.
-  final Widget child;
-  final bool? fillRemaining;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ConsoleScreen(
-      children: [
-        if (fillRemaining!)
-          SliverFillRemaining(child: child)
-        else
-          SliverToBoxAdapter(child: child),
-      ],
-    );
-  }
-}
-
-/// Lab result form.
-/// FIXME: Allow the user to edit and save the fields.
-// class LabResultForm extends StatefulWidget {
-//   @override
-//   _LabResultFormState createState() => _LabResultFormState();
-// }
-
-// class _LabResultFormState extends State<LabResultForm> {
-//   final _formKey = GlobalKey<FormState>();
-
-//   final _labIdController = TextEditingController();
-//   final _batchNumberController = TextEditingController();
-//   final _productNameController = TextEditingController();
-//   // ... Add the rest of the TextEditingController for other fields
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Form(
-//       key: _formKey,
-//       child: Column(
-//         children: <Widget>[
-//           TextFormField(
-//             controller: _labIdController,
-//             decoration: const InputDecoration(
-//               labelText: 'Lab ID',
-//             ),
-//           ),
-//           TextFormField(
-//             controller: _batchNumberController,
-//             decoration: const InputDecoration(
-//               labelText: 'Batch Number',
-//             ),
-//           ),
-//           TextFormField(
-//             controller: _productNameController,
-//             decoration: const InputDecoration(
-//               labelText: 'Product Name',
-//             ),
-//           ),
-//           // ... Add the rest of the TextFormFields for other fields
-//           Padding(
-//             padding: const EdgeInsets.symmetric(vertical: 16.0),
-//             child: ElevatedButton(
-//               onPressed: () {
-//                 if (_formKey.currentState!.validate()) {
-//                   ScaffoldMessenger.of(context).showSnackBar(
-//                     const SnackBar(content: Text('Processing Data')),
-//                   );
-//                 }
-//               },
-//               child: const Text('Submit'),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   @override
-//   void dispose() {
-//     _labIdController.dispose();
-//     _batchNumberController.dispose();
-//     _productNameController.dispose();
-//     // ... Dispose the rest of the TextEditingController for other fields
-
-//     super.dispose();
-//   }
-// }

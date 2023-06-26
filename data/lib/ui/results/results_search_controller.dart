@@ -133,7 +133,7 @@ class AsyncLabResultsNotifier extends AsyncNotifier<List<LabResult>> {
       'timestamp': timestamp,
       'user': _user?.uid ?? null,
     };
-    _dataSource.setData(path: logPath, data: logData);
+    _dataSource.updateDocument(path: logPath, data: logData);
 
     // Return the results.
     return results;

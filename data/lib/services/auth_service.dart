@@ -124,7 +124,7 @@ class AuthService {
           final downloadURL = await snapshot.ref.getDownloadURL();
 
           // Update the user's data in Firestore.
-          await _firestore.setData(
+          await _firestore.updateDocument(
             path: 'users/${user.uid}',
             data: {
               'photo_url': downloadURL,
@@ -186,7 +186,7 @@ class AuthService {
     User? user = FirebaseAuth.instance.currentUser;
     try {
       // Delete the user's data from Firestore.
-      _firestore.deleteData(path: 'users/${user?.uid}');
+      _firestore.deleteDocument(path: 'users/${user?.uid}');
     } catch (e) {
       // Unable to delete user data.
     }

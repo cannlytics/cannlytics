@@ -88,7 +88,7 @@ class Console extends ConsumerWidget {
             ),
           ),
 
-        // Main content.
+        // Main screen area.
         Expanded(
           flex: 4,
           child: Container(
@@ -137,6 +137,31 @@ class MainScreen extends StatelessWidget {
           ...slivers,
         ],
       ),
+    );
+  }
+}
+
+/// A console screen with one child of main content.
+class MainContent extends ConsumerWidget {
+  const MainContent({
+    Key? key,
+    required this.child,
+    this.fillRemaining = false,
+  }) : super(key: key);
+
+  // Parameters.
+  final Widget child;
+  final bool? fillRemaining;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ConsoleScreen(
+      children: [
+        if (fillRemaining!)
+          SliverFillRemaining(child: child)
+        else
+          SliverToBoxAdapter(child: child),
+      ],
     );
   }
 }
