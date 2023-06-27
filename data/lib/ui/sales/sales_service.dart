@@ -4,13 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/23/2023
+// Updated: 6/27/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/services/api_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
@@ -30,25 +31,51 @@ final userReceipts = StreamProvider<List<Map?>>((ref) async* {
   );
 });
 
+/// Stream a receipt from Firebase.
+final receiptProvider =
+    StreamProvider.autoDispose.family<SalesReceipt?, String>((ref, hash) {
+  final _database = ref.watch(firestoreProvider);
+  final user = ref.watch(userProvider).value;
+  if (user == null) return Stream.value(null);
+  return _database.streamDocument(
+    path: 'users/${user.uid}/receipts/$hash',
+    builder: (data, documentId) {
+      // Keep track of current values for editing.
+      var obj = SalesReceipt.fromMap(data ?? {});
+      ref.read(currentReceipt.notifier).update((state) => data ?? {});
+      return obj;
+    },
+  );
+});
+
+// Current receipt values.
+final currentReceipt = StateProvider<Map>((ref) => {});
+
 // Receipt service provider.
 final receiptService = Provider<ReceiptService>((ref) {
-  return ReceiptService();
+  final uid = ref.read(userProvider).value?.uid ?? 'cannlytics';
+  return ReceiptService(ref.watch(firestoreProvider), uid);
 });
 
 /// Receipt service.
 class ReceiptService {
-  const ReceiptService();
+  const ReceiptService(this._dataSource, this.uid);
+
+  // Parameters.
+  final FirestoreService _dataSource;
+  final String uid;
 
   // Update receipt.
-  Future<void> updateReceipt(String id, Map data) async {
-    String url = '/api/data/receipts/$id';
-    await APIService.apiRequest(url, data: {'data': data});
+  Future<void> updateReceipt(String id, Map<String, dynamic> data) async {
+    await _dataSource.updateDocument(
+      path: 'users/$uid/receipts/$id',
+      data: data,
+    );
   }
 
   // Delete receipt.
   Future<void> deleteReceipt(String id) async {
-    String url = '/api/data/receipts/$id';
-    await APIService.apiRequest(url, options: {'delete': true});
+    await _dataSource.deleteDocument(path: 'users/$uid/receipts/$id');
   }
 }
 

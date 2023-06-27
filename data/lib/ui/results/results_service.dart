@@ -79,17 +79,11 @@ class ResultService {
       path: 'users/$uid/lab_results/$id',
       data: data,
     );
-    // String url = '/api/data/coas/$id';
-    // await APIService.apiRequest(url, data: {'data': data});
   }
 
   // Delete result.
   Future<void> deleteResult(String id) async {
-    await _dataSource.deleteDocument(
-      path: 'users/$uid/lab_results/$id',
-    );
-    // String url = '/api/data/coas/$id';
-    // await APIService.apiRequest(url, options: {'delete': true});
+    await _dataSource.deleteDocument(path: 'users/$uid/lab_results/$id');
   }
 }
 

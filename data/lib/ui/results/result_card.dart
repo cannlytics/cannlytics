@@ -57,7 +57,7 @@ class ResultCard extends StatelessWidget {
                       child: MouseRegion(
                         cursor: SystemMouseCursors.click,
                         child: GestureDetector(
-                          onTap: () => context.go('/results/${item.labId}'),
+                          onTap: () => context.push('/results/${item.labId}'),
                           // FIXME: Render image
                           child: Image.network(
                             item.downloadUrl!,
@@ -78,7 +78,7 @@ class ResultCard extends StatelessWidget {
                     onSelected: (String result) {
                       switch (result) {
                         case 'View':
-                          context.go('/results/${item.sampleId}');
+                          context.push('/results/${item.sampleId}');
                           break;
                         case 'Download':
                           onDownload!();

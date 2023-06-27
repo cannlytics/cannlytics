@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
+import 'dart:convert';
 import 'dart:io';
 import 'dart:html' as html;
 
@@ -171,6 +172,21 @@ class DataUtils {
       return data.split(',').map((e) => e.trim()).toList();
     } else if (data is List<dynamic>) {
       return data.cast<String>();
+    } else {
+      return null;
+    }
+  }
+
+  // Format a list of Maps from a dynamic data type.
+  static List<dynamic>? formatListOfMaps(dynamic data) {
+    if (data == null) {
+      return [];
+    } else if (data is List<dynamic>) {
+      return data.cast<Map<String, dynamic>>();
+    } else if (data is String) {
+      return jsonDecode(data)
+          .map((item) => item as Map<String, dynamic>)
+          .toList();
     } else {
       return null;
     }

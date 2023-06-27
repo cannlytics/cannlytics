@@ -17,8 +17,6 @@ import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// FIXME: There is an error somewhere with navigation.
-
 /// User lab results user interface.
 class UserResultsInterface extends ConsumerWidget {
   const UserResultsInterface({super.key});
@@ -210,17 +208,8 @@ class UserResultsGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Calculate the aspect ratio of grid based on screen width
-    // final screenWidth = MediaQuery.of(context).size.width;
-    // final int crossAxisCount = screenWidth < 600
-    //     ? 1
-    //     : screenWidth < 1120
-    //         ? 2
-    //         : 2;
-
     // Listen to the user.
     final user = ref.watch(userProvider).value;
-    print('RENDERING RESULTS FOR USER: ${user?.uid}');
 
     // Render the card.
     return Column(
@@ -254,11 +243,6 @@ class UserResultsGrid extends ConsumerWidget {
         Expanded(
           child: GridView.builder(
             shrinkWrap: true,
-            // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            //   crossAxisCount: crossAxisCount,
-            //   crossAxisSpacing: 16,
-            //   mainAxisSpacing: 16,
-            // ),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 540.0,
               mainAxisSpacing: 10.0,

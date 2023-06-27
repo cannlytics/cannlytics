@@ -48,6 +48,31 @@ class LicenseesScreen extends ConsumerWidget {
 
         // Optional: Toggle between map and master list.
 
+        // DEV: Under development message.
+        SliverToBoxAdapter(
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.all(8.0),
+            color: Colors.yellow[100],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  Icons.warning,
+                  color: Colors.orange,
+                ),
+                SizedBox(width: 8.0),
+                Text(
+                  'Under development, please stay tuned for this data to be updated.',
+                  style: TextStyle(
+                    color: Colors.orange[800],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
         // Map.
         SliverToBoxAdapter(
           child: Padding(

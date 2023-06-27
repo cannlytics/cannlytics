@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 6/24/2023
+// Updated: 6/27/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO: Links to places where users can get their COAs:
@@ -22,6 +22,7 @@
 // TODO: Infinitely scrolling grid of recently added lab results.
 
 // Flutter imports:
+import 'package:cannlytics_data/common/layout/pill_tab.dart';
 import 'package:cannlytics_data/ui/results/results_parser.dart';
 import 'package:cannlytics_data/ui/results/results_search.dart';
 import 'package:cannlytics_data/ui/results/user_results.dart';
@@ -36,7 +37,7 @@ import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/constants/design.dart';
 
-/// Screen.
+/// Results screen.
 class LabResultsScreen extends StatelessWidget {
   const LabResultsScreen({super.key});
 
@@ -70,7 +71,7 @@ class MainContent extends ConsumerWidget {
                   BreadcrumbItem(
                       title: 'Data',
                       onTap: () {
-                        context.go('/');
+                        context.push('/');
                       }),
                   BreadcrumbItem(
                     title: 'Lab Results',
@@ -97,20 +98,17 @@ class ResultsTabs extends StatefulWidget {
   _ResultsTabsState createState() => _ResultsTabsState();
 }
 
+/// Tabs state.
 class _ResultsTabsState extends State<ResultsTabs>
     with SingleTickerProviderStateMixin {
+  // State.
   late final TabController _tabController;
-  int _selectedIndex = 0;
 
+  /// Initialize the tab controller.
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(() {
-      setState(() {
-        _selectedIndex = _tabController.index;
-      });
-    });
   }
 
   @override
@@ -132,9 +130,24 @@ class _ResultsTabsState extends State<ResultsTabs>
             indicator: BoxDecoration(),
             dividerColor: Colors.transparent,
             tabs: [
-              _buildTab('Parse', 0, Icons.auto_awesome),
-              _buildTab('Explore', 1, Icons.explore),
-              _buildTab('Your Results', 2, Icons.science),
+              PillTabButton(
+                controller: _tabController,
+                text: 'Parse',
+                index: 0,
+                icon: Icons.auto_awesome,
+              ),
+              PillTabButton(
+                controller: _tabController,
+                text: 'Explore',
+                index: 1,
+                icon: Icons.explore,
+              ),
+              PillTabButton(
+                controller: _tabController,
+                text: 'Your Results',
+                index: 2,
+                icon: Icons.science,
+              ),
             ],
           ),
         ),
@@ -150,57 +163,6 @@ class _ResultsTabsState extends State<ResultsTabs>
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildTab(String text, int index, IconData icon) {
-    bool isSelected = _selectedIndex == index;
-    Color lightScreenGold = Color(0xFFFFBF5F);
-    Color darkScreenGold = Color(0xFFFFD700);
-    Color goldColor = Theme.of(context).brightness == Brightness.light
-        ? lightScreenGold
-        : darkScreenGold;
-    ValueNotifier<bool> isHovered = ValueNotifier(false);
-    return MouseRegion(
-      onEnter: (_) => isHovered.value = true,
-      onExit: (_) => isHovered.value = false,
-      child: ValueListenableBuilder<bool>(
-        valueListenable: isHovered,
-        builder: (context, value, child) {
-          return GestureDetector(
-            onTap: () {
-              _tabController.animateTo(index);
-            },
-            child: InkWell(
-              borderRadius: BorderRadius.circular(30),
-              splashColor: Colors.blue.withOpacity(0.5),
-              hoverColor: Colors.blue.withOpacity(0.2),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  color: isSelected
-                      ? Colors.blue.withOpacity(0.1)
-                      : (value
-                          ? Colors.blue.withOpacity(0.05)
-                          : Colors.transparent),
-                ),
-                child: Row(
-                  children: [
-                    Icon(icon,
-                        size: 16,
-                        color: isSelected
-                            ? goldColor
-                            : Theme.of(context).colorScheme.secondary),
-                    SizedBox(width: 8),
-                    Text(text),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
     );
   }
 }

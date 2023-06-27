@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/24/2023
+// Updated: 6/26/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/download_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
@@ -29,7 +29,6 @@ class UserReceiptsInterface extends ConsumerWidget {
     // Render the data.
     return asyncData.when(
       // Loading state.
-      // TODO: Implement loading widget.
       loading: () => _body(
         context,
         children: [_placeholder(context, ref)],
@@ -209,14 +208,6 @@ class UserReceiptsGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Calculate the aspect ratio of grid based on screen width
-    // final screenWidth = MediaQuery.of(context).size.width;
-    // final int crossAxisCount = screenWidth < 600
-    //     ? 1
-    //     : screenWidth < 1120
-    //         ? 2
-    //         : 2;
-
     // Listen to the user.
     final user = ref.watch(userProvider).value;
 
@@ -252,11 +243,6 @@ class UserReceiptsGrid extends ConsumerWidget {
         Expanded(
           child: GridView.builder(
             shrinkWrap: true,
-            // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            //   crossAxisCount: crossAxisCount,
-            //   // crossAxisSpacing: 16,
-            //   // mainAxisSpacing: 16,
-            // ),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 540.0,
               mainAxisSpacing: 10.0,

@@ -1,16 +1,15 @@
-// Cannlytics Data
+// Cannlytics App
 // Copyright (c) 2023 Cannlytics
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 4/15/2023
-// Updated: 4/16/2023
+// Created: 3/6/2023
+// Updated: 3/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:flutter/material.dart';
-
-// FIXME: Make this widget obsolete.
+import 'package:go_router/go_router.dart';
 
 /// Breadcrumbs.
 class Breadcrumbs extends StatelessWidget {
@@ -69,4 +68,36 @@ class BreadcrumbItem {
     required this.title,
     this.onTap,
   });
+}
+
+/// A row of breadcrumbs.
+class BreadcrumbsRow extends StatelessWidget {
+  final List<Map<String, String?>> items;
+
+  BreadcrumbsRow({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.only(left: 16, top: 12),
+        child: Row(
+          children: [
+            Breadcrumbs(
+              items: items.map<BreadcrumbItem>((item) {
+                return BreadcrumbItem(
+                  title: item['label']!,
+                  onTap: item['path'] != null
+                      ? () {
+                          context.push(item['path']!);
+                        }
+                      : null,
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

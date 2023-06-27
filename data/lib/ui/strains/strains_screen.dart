@@ -35,6 +35,7 @@ class StrainsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConsoleScreen(
       children: [
+        // Main content.
         SliverToBoxAdapter(child: MainContent()),
       ],
     );
@@ -82,6 +83,29 @@ class MainContent extends ConsumerWidget {
                 ],
               ),
             ],
+          ),
+
+          // DEV: Under development message.
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+            padding: EdgeInsets.all(8.0),
+            color: Colors.yellow[100],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  Icons.warning,
+                  color: Colors.orange,
+                ),
+                SizedBox(width: 8.0),
+                Text(
+                  'Under development, please stay tuned for strain data.',
+                  style: TextStyle(
+                    color: Colors.orange[800],
+                  ),
+                ),
+              ],
+            ),
           ),
 
           // Sponsorship placeholder.

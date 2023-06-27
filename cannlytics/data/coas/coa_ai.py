@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 6/12/2023
-Updated: 6/17/2023
+Updated: 6/27/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -344,6 +344,9 @@ def parse_coa_with_ai(
         filename = coa_url.split('/')[-1].split('?')[0] + '.pdf'
         obs['coa_urls'] = json.dumps([{'url': coa_url, 'filename': filename}])
         obs['lab_results_url'] = coa_url
+    else:
+        obs['coa_urls'] = None
+        obs['lab_results_url'] = None
 
     # TODO: Get images from the PDF.
     images = []

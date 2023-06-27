@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 6/24/2023
+// Updated: 6/27/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -48,6 +48,8 @@ class LabResult {
     this.dateCollected,
     this.dateTested,
     this.dateReceived,
+    this.dateHarvested,
+    this.datePackaged,
     this.distributor,
     this.distributorAddress,
     this.distributorStreet,
@@ -85,6 +87,8 @@ class LabResult {
     this.fileRef,
     this.downloadUrl,
     this.shortUrl,
+    this.coaUrls,
+    this.labResultsUrl,
   });
 
   // Properties.
@@ -115,6 +119,8 @@ class LabResult {
   final String? dateCollected;
   final String? dateTested;
   final String? dateReceived;
+  final String? dateHarvested;
+  final String? datePackaged;
   final String? distributor;
   final String? distributorAddress;
   final String? distributorStreet;
@@ -143,7 +149,6 @@ class LabResult {
   final String? sampleId;
   final String? strainName;
   final List<Result?>? results;
-  // final dynamic results;
   final String? coaAlgorithm;
   final String? coaAlgorithmVersion;
   final String? coaParsedAt;
@@ -153,6 +158,8 @@ class LabResult {
   final String? fileRef;
   final String? downloadUrl;
   final String? shortUrl;
+  final List<dynamic>? coaUrls;
+  final String? labResultsUrl;
 
   // @override
   // List<String?> get props => [labId];
@@ -205,6 +212,8 @@ class LabResult {
       dateCollected: data['date_collected'],
       dateTested: data['date_tested'],
       dateReceived: data['date_received'],
+      dateHarvested: data['date_harvested'],
+      datePackaged: data['date_packaged'],
       distributor: data['distributor'],
       distributorAddress: data['distributor_address'],
       distributorStreet: data['distributor_street'],
@@ -242,6 +251,8 @@ class LabResult {
       fileRef: data['file_ref'],
       downloadUrl: data['download_url'],
       shortUrl: data['short_url'],
+      coaUrls: DataUtils.formatListOfMaps(data['coa_urls']),
+      labResultsUrl: data['lab_results_url'],
     );
   }
 
@@ -275,6 +286,8 @@ class LabResult {
       'date_collected': dateCollected,
       'date_tested': dateTested,
       'date_received': dateReceived,
+      'date_harvested': dateHarvested,
+      'date_packaged': datePackaged,
       'distributor': distributor,
       'distributor_address': distributorAddress,
       'distributor_street': distributorStreet,
@@ -312,6 +325,8 @@ class LabResult {
       'file_ref': fileRef,
       'download_url': downloadUrl,
       'short_url': shortUrl,
+      'coa_urls': coaUrls,
+      'lab_results_url': labResultsUrl,
     };
   }
 }

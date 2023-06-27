@@ -214,6 +214,8 @@ def api_data_coas(request, coa_id=None):
     # Parse posted COA PDFs or URLs.
     if request.method == 'POST':
 
+        # FIXME: Also save any PDF files for the user.
+
         # Get the user's level of support.
         user_subscription = get_document(f'subscribers/{uid}')
         if not user_subscription:
