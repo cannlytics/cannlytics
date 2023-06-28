@@ -151,7 +151,7 @@ class ResultsParserInterface extends HookConsumerWidget {
                     error.toString(),
                     // 'An unknown error occurred while parsing your COAs. Please report this issue on GitHub or to dev@cannlytics.com to get a human to help ASAP.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),
@@ -361,7 +361,7 @@ class CoAUpload extends ConsumerWidget {
           child: SelectableText(
             'Note: Data extraction can take a while. Please note that COAs may be parsed with AI and the data is an approximation, may contain incorrect values, and should be validated. Your data is private, but lab result data may be used in data analysis while preserving your anonymity.',
             textAlign: TextAlign.start,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
       ],
@@ -411,7 +411,7 @@ class LabResultsPlaceholder extends StatelessWidget {
                   TextSpan(
                       text:
                           subtitle ?? 'Drop COA PDFs or images here to parse.',
-                      style: Theme.of(context).textTheme.bodySmall),
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
             ),
@@ -497,7 +497,7 @@ class _ParsingResultsPlaceholderState extends State<ParsingResultsPlaceholder>
                     widget.subtitle ??
                         'Parsing results can take a while. Results from validated labs and LIMS will be parsed faster and with a high-degree of accuracy while all other results are parsed with AI. Results parsed with AI take longer, have uncertain results, and should be validated.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),

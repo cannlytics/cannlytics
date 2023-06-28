@@ -102,13 +102,13 @@ class ReceiptsParserInterface extends HookConsumerWidget {
                   SelectableText(
                     message ?? '',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   // PRODUCTION:
                   // SelectableText(
                   //   'An unknown error occurred while parsing your receipts. Please report this issue on GitHub or to dev@cannlytics.com to get a human to help ASAP.',
                   //   textAlign: TextAlign.center,
-                  //   style: Theme.of(context).textTheme.bodySmall,
+                  //   style: Theme.of(context).textTheme.bodyMedium,
                   // ),
                 ],
               ),
@@ -328,7 +328,7 @@ class ReceiptUpload extends ConsumerWidget {
           child: SelectableText(
             'Note: Data extraction can take a while. Please note that receipts are parsed with AI and the data is an approximation, may contain incorrect values, and should be validated. Your data is private, but may be used to calculate aggregate statistics while preserving your anonymity.',
             textAlign: TextAlign.start,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
       ],
@@ -380,7 +380,7 @@ class ReceiptsPlaceholder extends StatelessWidget {
                               Theme.of(context).textTheme.titleLarge!.color)),
                   TextSpan(
                       text: subtitle ?? 'You may add your receipt images here.',
-                      style: Theme.of(context).textTheme.bodySmall),
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
             ),
@@ -465,7 +465,7 @@ class _ParsingPlaceholderState extends State<ParsingPlaceholder>
                     widget.subtitle ??
                         'Data extraction can take a while. Please note that receipts are parsed with AI and the data is an approximation, may contain incorrect values, and should be validated.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),

@@ -512,6 +512,9 @@ def download_coa_data(request):
     else:
         uid = claims['uid']
 
+    # TODO: Allow the user to specify the Firestore query
+    # that they want to download.
+
     # Read the posted data.
     data = loads(request.body.decode('utf-8'))['data']
     if len(data) > MAX_OBSERVATIONS_PER_FILE:

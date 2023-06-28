@@ -54,7 +54,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
     /// No samples found placeholder.
     Widget _emptyResults() {
       return ResultsSearchPlaceholder(
-        title: 'Waiting to get your COAs, boss!\n',
+        title: 'Waiting to get your COAs, boss!',
         subtitle:
             'You can search by product name keywords, lab ID, or batch number.',
       );
@@ -63,7 +63,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
     /// No samples found placeholder.
     Widget _noResults() {
       return ResultsSearchPlaceholder(
-        title: 'No COAs found!\n',
+        title: 'No COAs found!',
         subtitle:
             "Sorry boss, I couldn't find any results. Please contact dev@cannlytics.com to get a person on this ASAP.",
       );
@@ -108,16 +108,15 @@ class LabResultsSearchForm extends HookConsumerWidget {
     }
 
     /// Search results list.
-    Widget _buildSearchResults(BuildContext context) {
-      return _resultsList();
-      // return asyncData.isLoading
-      //     ? _loadingResults()
-      //     : (_searchTextController.text.isEmpty && prodSearchList.isEmpty)
-      //         ? _emptyResults()
-      //         : _searchTextController.text.isNotEmpty && prodSearchList.isEmpty
-      //             ? _noResults()
-      //             : _resultsList();
-    }
+    // Widget _buildSearchResults(BuildContext context) {
+    //   return asyncData.isLoading
+    //       ? _loadingResults()
+    //       : (_searchTextController.text.isEmpty && prodSearchList.isEmpty)
+    //           ? _emptyResults()
+    //           : _searchTextController.text.isNotEmpty && prodSearchList.isEmpty
+    //               ? _noResults()
+    //               : _resultsList();
+    // }
 
     /// Search icon.
     Widget _searchIcon() {
@@ -162,26 +161,31 @@ class LabResultsSearchForm extends HookConsumerWidget {
     }
 
     /// Search results text field.
-    Widget _buildSearchTextField(BuildContext context) {
+    Widget _buildSearchTextField() {
       return TextField(
         controller: _searchTextController,
         autocorrect: false,
         focusNode: _node,
+        style: Theme.of(context).textTheme.bodyMedium,
         decoration: InputDecoration(
-          filled: true,
-          fillColor: Theme.of(context).cardColor,
           contentPadding: EdgeInsets.only(
             top: 18,
             left: 8,
             right: 8,
             bottom: 8,
           ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(3),
+              bottomLeft: Radius.circular(3),
+              topRight: Radius.zero,
+              bottomRight: Radius.zero,
+            ),
+          ),
 
           // Placeholder text.
-          labelText: 'Search',
-          labelStyle: TextStyle(
-            color: Theme.of(context).textTheme.labelMedium!.color,
-          ),
+          labelText: 'Search by keywords...',
+          labelStyle: Theme.of(context).textTheme.bodyMedium,
 
           // Search icon.
           suffixIcon: _searchIcon(),
@@ -198,7 +202,23 @@ class LabResultsSearchForm extends HookConsumerWidget {
     // Main section.
     return SingleChildScrollView(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Title.
+          Padding(
+            padding: EdgeInsets.only(left: 16, top: 12),
+            child: Text(
+              'Search lab results',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+          // Search field.
+          Container(
+            height: MediaQuery.of(context).size.height * 0.1,
+            padding: EdgeInsets.only(top: 12, left: 16, right: 24),
+            child: _buildSearchTextField(),
+          ),
+
           // Results list, centered when there are no results, top-aligned otherwise.
           Container(
             height: MediaQuery.of(context).size.height * 0.6,
@@ -207,7 +227,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
                 ? SingleChildScrollView(
                     child: Column(
                       children: [
-                        _buildSearchResults(context),
+                        _resultsList(),
                       ],
                     ),
                   )
@@ -215,23 +235,16 @@ class LabResultsSearchForm extends HookConsumerWidget {
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          _buildSearchResults(context),
+                          _resultsList(),
                         ],
                       ),
                     ),
                   ),
           ),
 
-          // Search field.
-          Container(
-            height: MediaQuery.of(context).size.height * 0.1,
-            padding: EdgeInsets.only(top: 16, left: 24, right: 24),
-            child: _buildSearchTextField(context),
-          ),
-
           // Disclaimer.
-          gapH8,
-          ModelInformationWidget(),
+          // gapH8,
+          // ModelInformationWidget(),
         ],
       ),
     );
@@ -270,10 +283,7 @@ class ResultsSearchPlaceholder extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Theme.of(context).textTheme.titleLarge!.color,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   Text(
                     subtitle,
