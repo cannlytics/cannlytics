@@ -118,14 +118,14 @@ class APIService {
         }
         try {
           // Add file from bytes.
-          request.files.add(await http.MultipartFile.fromBytes(
+          request.files.add(http.MultipartFile.fromBytes(
             'file',
             bytes,
             filename: filename,
           ));
         } catch (error) {
           // Add file from a string.
-          request.files.add(await http.MultipartFile.fromString(
+          request.files.add(http.MultipartFile.fromString(
             'file',
             bytes,
             filename: filename,

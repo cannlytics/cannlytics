@@ -159,7 +159,6 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm>
 
     // Listen to the current user.
     final user = ref.watch(userProvider).value;
-    ;
 
     // Render the widget.
     return Padding(

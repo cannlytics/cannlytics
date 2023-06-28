@@ -8,7 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/results/result_list_item.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';

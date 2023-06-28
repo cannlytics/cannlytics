@@ -39,7 +39,6 @@ class DashboardHeader extends ConsumerWidget implements PreferredSizeWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen to the current user.
     final user = ref.watch(userProvider).value;
-    ;
 
     // Listen to the user's current amount of tokens.
     final asyncSnapshot = ref.watch(userSubscriptionProvider);

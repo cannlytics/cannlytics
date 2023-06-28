@@ -205,7 +205,6 @@ class _AccountFormState extends ConsumerState<AccountForm>
 
     // Listen to the current user.
     final user = ref.watch(userProvider).value;
-    ;
 
     // Set the initial values.
     if (user != null) {
