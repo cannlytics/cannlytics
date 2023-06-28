@@ -22,6 +22,7 @@
 // TODO: Infinitely scrolling grid of recently added lab results.
 
 // Flutter imports:
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/pill_tab.dart';
 import 'package:cannlytics_data/ui/results/results_parser.dart';
 import 'package:cannlytics_data/ui/results/results_search.dart';
@@ -30,10 +31,8 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/constants/design.dart';
 
@@ -62,24 +61,11 @@ class MainContent extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // Breadcrumbs.
-        Padding(
-          padding: EdgeInsets.only(left: 16, top: 12),
-          child: Row(
-            children: [
-              Breadcrumbs(
-                items: [
-                  BreadcrumbItem(
-                      title: 'Data',
-                      onTap: () {
-                        context.push('/');
-                      }),
-                  BreadcrumbItem(
-                    title: 'Lab Results',
-                  )
-                ],
-              ),
-            ],
-          ),
+        BreadcrumbsRow(
+          items: [
+            {'label': 'Data', 'path': '/'},
+            {'label': 'Lab Results', 'path': null},
+          ],
         ),
 
         // Main interface.
@@ -109,6 +95,7 @@ class _ResultsTabsState extends State<ResultsTabs>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() => setState(() {}));
   }
 
   @override
@@ -131,22 +118,19 @@ class _ResultsTabsState extends State<ResultsTabs>
             dividerColor: Colors.transparent,
             tabs: [
               PillTabButton(
-                controller: _tabController,
                 text: 'Parse',
-                index: 0,
                 icon: Icons.auto_awesome,
+                isSelected: _tabController.index == 0,
               ),
               PillTabButton(
-                controller: _tabController,
                 text: 'Explore',
-                index: 1,
                 icon: Icons.explore,
+                isSelected: _tabController.index == 1,
               ),
               PillTabButton(
-                controller: _tabController,
                 text: 'Your Results',
-                index: 2,
                 icon: Icons.science,
+                isSelected: _tabController.index == 2,
               ),
             ],
           ),

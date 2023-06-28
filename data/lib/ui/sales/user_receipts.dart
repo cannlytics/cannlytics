@@ -7,6 +7,7 @@
 // Updated: 6/26/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/download_button.dart';
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/services/download_service.dart';
@@ -16,6 +17,7 @@ import 'package:cannlytics_data/ui/sales/sales_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 /// User receipts user interface.
 class UserReceiptsInterface extends ConsumerWidget {
@@ -254,6 +256,20 @@ class UserReceiptsGrid extends ConsumerWidget {
               return ReceiptCard(
                 item: SalesReceipt.fromMap(item ?? {}),
                 onDownload: () {
+                  // Show a downloading notification.
+                  Fluttertoast.showToast(
+                    msg: 'Preparing your download...',
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.TOP,
+                    timeInSecForIosWeb: 2,
+                    backgroundColor: LightColors.lightGreen.withAlpha(60),
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                    webPosition: 'center',
+                    webShowClose: true,
+                  );
+
+                  // Download the data.
                   DownloadService.downloadData(
                     [item!],
                     '/api/data/receipts/download',

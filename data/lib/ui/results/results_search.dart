@@ -4,17 +4,18 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/23/2023
-// Updated: 6/14/2023
+// Updated: 6/28/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/results/result_list_item.dart';
-import 'package:flutter/gestures.dart';
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import 'package:cannlytics_data/ui/results/results_search_controller.dart';
@@ -35,7 +36,9 @@ class LabResultsSearchForm extends HookConsumerWidget {
 
     // Search on enter.
     void _onSubmitted(String value) {
-      ref.watch(asyncLabResultsProvider.notifier).searchLabResults(value);
+      // ref.watch(asyncLabResultsProvider.notifier).searchLabResults(value);
+      ref.read(searchTermProvider.notifier).update((state) => value);
+      ref.read(keywordsQuery.notifier).update((state) => state);
     }
 
     /// Loading results placeholder.
@@ -50,7 +53,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
 
     /// No samples found placeholder.
     Widget _emptyResults() {
-      return UserResultsPlaceholder(
+      return ResultsSearchPlaceholder(
         title: 'Waiting to get your COAs, boss!\n',
         subtitle:
             'You can search by product name keywords, lab ID, or batch number.',
@@ -59,7 +62,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
 
     /// No samples found placeholder.
     Widget _noResults() {
-      return UserResultsPlaceholder(
+      return ResultsSearchPlaceholder(
         title: 'No COAs found!\n',
         subtitle:
             "Sorry boss, I couldn't find any results. Please contact dev@cannlytics.com to get a person on this ASAP.",
@@ -67,34 +70,53 @@ class LabResultsSearchForm extends HookConsumerWidget {
     }
 
     /// Results list.
+    /// FIXME: Redo as grid of cards?
+    /// TODO: Use a Grid / PaginatedDataTable to display the results.
+    /// Let the user chose the type of view.
     Widget _resultsList() {
       return SelectionArea(
-        child: ListView.builder(
+        child: FirestoreListView<LabResult>(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          itemCount: prodSearchList.length,
-          itemBuilder: (context, i) {
-            if (_searchTextController.text.isNotEmpty) {
-              return LabResultItem(labResult: prodSearchList[i]);
-            } else {
-              return null;
-            }
+          padding: EdgeInsets.only(top: 16, bottom: 48),
+          query: ref.watch(keywordsQuery),
+          pageSize: 20,
+          emptyBuilder: (context) => _searchTextController.text.isEmpty
+              ? _emptyResults()
+              : _noResults(),
+          errorBuilder: (context, error, stackTrace) => Text(error.toString()),
+          loadingBuilder: (context) => _loadingResults(),
+          itemBuilder: (context, doc) {
+            final item = doc.data();
+            return LabResultItem(labResult: item);
           },
         ),
+        // child: ListView.builder(
+        //   padding: EdgeInsets.only(top: 16, bottom: 48),
+        //   shrinkWrap: true,
+        //   physics: NeverScrollableScrollPhysics(),
+        //   itemCount: prodSearchList.length,
+        //   itemBuilder: (context, i) {
+        //     if (_searchTextController.text.isNotEmpty) {
+        //       return LabResultItem(labResult: prodSearchList[i]);
+        //     } else {
+        //       return null;
+        //     }
+        //   },
+        // ),
       );
     }
 
-    /// TODO: Use a PaginatedDataTable to display the results.
-
     /// Search results list.
     Widget _buildSearchResults(BuildContext context) {
-      return asyncData.isLoading
-          ? _loadingResults()
-          : (_searchTextController.text.isEmpty && prodSearchList.isEmpty)
-              ? _emptyResults()
-              : _searchTextController.text.isNotEmpty && prodSearchList.isEmpty
-                  ? _noResults()
-                  : _resultsList();
+      return _resultsList();
+      // return asyncData.isLoading
+      //     ? _loadingResults()
+      //     : (_searchTextController.text.isEmpty && prodSearchList.isEmpty)
+      //         ? _emptyResults()
+      //         : _searchTextController.text.isNotEmpty && prodSearchList.isEmpty
+      //             ? _noResults()
+      //             : _resultsList();
     }
 
     /// Search icon.
@@ -108,9 +130,11 @@ class LabResultsSearchForm extends HookConsumerWidget {
               onTap: () {
                 String value = _searchTextController.text;
                 print('Searching for value: $value');
-                ref
-                    .watch(asyncLabResultsProvider.notifier)
-                    .searchLabResults(value);
+                // ref
+                //     .watch(asyncLabResultsProvider.notifier)
+                //     .searchLabResults(value);
+                ref.read(searchTermProvider.notifier).update((state) => value);
+                ref.read(keywordsQuery.notifier).update((state) => state);
               },
               child: Icon(
                 Icons.send,
@@ -124,8 +148,10 @@ class LabResultsSearchForm extends HookConsumerWidget {
       return _searchTextController.text.isNotEmpty
           ? IconButton(
               onPressed: () {
-                ref.watch(asyncLabResultsProvider.notifier).clearLabResults();
+                // ref.watch(asyncLabResultsProvider.notifier).clearLabResults();
                 _searchTextController.clear();
+                ref.read(searchTermProvider.notifier).update((state) => '');
+                ref.read(keywordsQuery.notifier).update((state) => state);
               },
               icon: Icon(
                 Icons.close,
@@ -175,7 +201,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
         children: [
           // Results list, centered when there are no results, top-aligned otherwise.
           Container(
-            height: MediaQuery.of(context).size.height * 0.5,
+            height: MediaQuery.of(context).size.height * 0.6,
             child: _searchTextController.text.isNotEmpty &&
                     prodSearchList.isNotEmpty
                 ? SingleChildScrollView(
@@ -204,6 +230,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
           ),
 
           // Disclaimer.
+          gapH8,
           ModelInformationWidget(),
         ],
       ),
@@ -212,11 +239,11 @@ class LabResultsSearchForm extends HookConsumerWidget {
 }
 
 /// Sample results placeholder.
-class UserResultsPlaceholder extends StatelessWidget {
-  final String? title;
-  final String? subtitle;
+class ResultsSearchPlaceholder extends StatelessWidget {
+  final String title;
+  final String subtitle;
 
-  UserResultsPlaceholder({this.title, this.subtitle});
+  ResultsSearchPlaceholder({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -238,18 +265,20 @@ class UserResultsPlaceholder extends StatelessWidget {
               ),
             ),
             // Text.
-            RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                style: DefaultTextStyle.of(context).style,
-                children: <TextSpan>[
-                  TextSpan(
-                      text: title ?? 'Waiting on your COAs boss!\n',
-                      style: TextStyle(fontSize: 20)),
-                  TextSpan(
-                      text: subtitle ??
-                          'Drop a CoA PDF, image, or folder to parse.',
-                      style: Theme.of(context).textTheme.bodyMedium),
+            SelectionArea(
+              child: Column(
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Theme.of(context).textTheme.titleLarge!.color,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ],
               ),
             ),
@@ -265,7 +294,6 @@ class ModelInformationWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // constraints: BoxConstraints(maxWidth: 560),
       margin: EdgeInsets.symmetric(horizontal: 24),
       child: Text.rich(
         TextSpan(
@@ -286,18 +314,4 @@ class ModelInformationWidget extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Text link.
-class LinkTextSpan extends TextSpan {
-  LinkTextSpan({TextStyle? style, required String text, required String url})
-      : super(
-          style: style?.copyWith(
-            color: Colors.blue,
-            decoration: TextDecoration.underline,
-          ),
-          text: text,
-          recognizer: TapGestureRecognizer()
-            ..onTap = () => launchUrl(Uri.parse(url)),
-        );
 }

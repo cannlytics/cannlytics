@@ -119,6 +119,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
 
     // Initialize tabs.
     _tabController = TabController(length: _tabCount, vsync: this);
+    _tabController.addListener(() => setState(() {}));
   }
 
   // Dispose of the controllers.
@@ -625,12 +626,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     var _editForm = EditForm(textFormFields: textFormFields);
 
     // Breadcrumbs.
-    var _breadcrumbs = BreadcrumbsRow(
-      items: [
-        {'label': 'Data', 'path': '/'},
-        {'label': 'Lab Results', 'path': '/results'},
-        {'label': 'Result', 'path': '/results/${labResult?.sampleHash}'},
-      ],
+    var _breadcrumbs = SliverToBoxAdapter(
+      child: BreadcrumbsRow(
+        items: [
+          {'label': 'Data', 'path': '/'},
+          {'label': 'Lab Results', 'path': '/results'},
+          {'label': 'Result', 'path': '/results/${labResult?.sampleHash}'},
+        ],
+      ),
     );
 
     // Tab bar.
@@ -648,22 +651,19 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       dividerColor: Colors.transparent,
       tabs: [
         PillTabButton(
-          controller: _tabController,
           text: 'Details',
-          index: 0,
           icon: Icons.bar_chart,
+          isSelected: _tabController.index == 0,
         ),
         PillTabButton(
-          controller: _tabController,
           text: 'Results',
-          index: 1,
           icon: Icons.science,
+          isSelected: _tabController.index == 1,
         ),
         PillTabButton(
-          controller: _tabController,
           text: 'COA',
-          index: 2,
           icon: Icons.description,
+          isSelected: _tabController.index == 2,
         ),
         // _buildTab('Notes', 2, Icons.science),
       ],

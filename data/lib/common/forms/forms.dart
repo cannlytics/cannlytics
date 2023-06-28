@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +26,7 @@ class ViewForm extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
+            padding: EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 8),
             child: SelectionArea(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -94,19 +95,23 @@ class FormActions extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 tabBar,
-                Row(
-                  children: [
-                    if (!isEditing) editButton,
-                    if (isEditing) ...[
-                      saveButton,
-                      SizedBox(width: 4),
-                      cancelButton,
+                gapH16,
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4),
+                  child: Row(
+                    children: [
+                      if (!isEditing) editButton,
+                      if (isEditing) ...[
+                        cancelButton,
+                        gapW4,
+                        saveButton,
+                      ],
+                      if (!isEditing) ...[
+                        gapW4,
+                        downloadButton,
+                      ]
                     ],
-                    if (!isEditing) ...[
-                      SizedBox(width: 4),
-                      downloadButton,
-                    ]
-                  ],
+                  ),
                 ),
               ],
             )
@@ -116,12 +121,12 @@ class FormActions extends StatelessWidget {
                 Spacer(),
                 if (!isEditing) editButton,
                 if (isEditing) ...[
-                  saveButton,
-                  SizedBox(width: 4),
                   cancelButton,
+                  gapW4,
+                  saveButton,
                 ],
                 if (!isEditing) ...[
-                  SizedBox(width: 4),
+                  gapW4,
                   downloadButton,
                 ]
               ],

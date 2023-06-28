@@ -57,6 +57,10 @@ class SideMenu extends ConsumerWidget {
     // Listen to the current user.
     final user = ref.watch(userProvider).value;
 
+    print('CURRENT ROUTE:');
+    print(GoRouter.of(context).location);
+    final currentRoute = GoRouter.of(context).location;
+
     // Render the side menu.
     return ListView(
       children: [
@@ -78,6 +82,7 @@ class SideMenu extends ConsumerWidget {
             width: 28,
           ),
           onTap: () => context.push('/licenses'),
+          isSelected: currentRoute.contains('/licenses'),
         ),
 
         // Lab results link.
@@ -88,16 +93,18 @@ class SideMenu extends ConsumerWidget {
             width: 28,
           ),
           onTap: () => context.push('/results'),
+          isSelected: currentRoute.contains('/results'),
         ),
 
         // Sales link.
         DrawerListTile(
-          title: 'Sales',
+          title: 'Purchases',
           leading: SvgPicture.asset(
             'assets/icons/emoji/money_bag.svg',
             width: 28,
           ),
           onTap: () => context.push('/sales'),
+          isSelected: currentRoute.contains('/sales'),
         ),
 
         // Strains link.
@@ -108,6 +115,7 @@ class SideMenu extends ConsumerWidget {
             width: 28,
           ),
           onTap: () => context.push('/strains'),
+          isSelected: currentRoute.contains('/strains'),
         ),
 
         // // Products link.
@@ -163,6 +171,7 @@ class SideMenu extends ConsumerWidget {
               width: 28,
             ),
             onTap: () => context.push('/account'),
+            isSelected: currentRoute.contains('/account'),
           ),
 
         // Help link.
@@ -215,11 +224,13 @@ class DrawerListTile extends StatelessWidget {
     required this.title,
     required this.leading,
     required this.onTap,
+    this.isSelected = false,
   }) : super(key: key);
 
   final String title;
   final Widget leading;
   final VoidCallback onTap;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -239,6 +250,11 @@ class DrawerListTile extends StatelessWidget {
           ),
         ],
       ),
+
+      // Background color.
+      tileColor: isSelected
+          ? Theme.of(context).dialogBackgroundColor.withOpacity(0.66)
+          : null,
 
       // Action.
       onTap: onTap,

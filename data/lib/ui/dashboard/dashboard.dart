@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 6/19/2023
+// Updated: 6/27/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -48,7 +48,7 @@ class DashboardScreen extends ConsumerWidget {
         // AI cards.
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.only(left: 24, top: 24),
+            padding: EdgeInsets.only(left: 28, top: 24),
             child: Text('AI'),
           ),
         ),
@@ -78,7 +78,7 @@ class DashboardScreen extends ConsumerWidget {
         // Data cards.
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.only(left: 24, top: 24),
+            padding: EdgeInsets.only(left: 28, top: 24),
             child: Text('Data'),
           ),
         ),
@@ -108,13 +108,13 @@ class DashboardScreen extends ConsumerWidget {
         // Sponsorship
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.only(left: 24, top: 24),
+            padding: EdgeInsets.only(left: 28, top: 24),
             child: Text('Sponsor'),
           ),
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 24, horizontal: 28),
+            padding: EdgeInsets.only(top: 12, left: 28, right: 28, bottom: 48),
             child: SponsorshipCard(),
           ),
         ),

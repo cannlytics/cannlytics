@@ -8,8 +8,10 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/services/download_service.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 /// A download button with a circular progress indicator.
 class DownloadButton extends StatefulWidget {
@@ -33,12 +35,28 @@ class _DownloadButtonState extends State<DownloadButton> {
   bool _isLoading = false;
 
   Future<void> _downloadData() async {
+    // Show loading indicator.
     setState(() {
       _isLoading = true;
     });
 
+    // Show a downloading notification.
+    Fluttertoast.showToast(
+      msg: 'Preparing your download...',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.TOP,
+      timeInSecForIosWeb: 2,
+      backgroundColor: LightColors.lightGreen.withAlpha(60),
+      textColor: Colors.white,
+      fontSize: 16.0,
+      webPosition: 'center',
+      webShowClose: true,
+    );
+
+    // Download the data.
     await DownloadService.downloadData(widget.items, widget.url);
 
+    // Remove loading indicator.
     setState(() {
       _isLoading = false;
     });

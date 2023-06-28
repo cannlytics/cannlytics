@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,6 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -24,7 +24,6 @@ import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/cards/card_grid.dart';
 import 'package:cannlytics_data/common/cards/stats_model_card.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
-import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/services/data_service.dart';
@@ -105,18 +104,15 @@ class LicenseesScreen extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Breadcrumbs(
+          // Breadcrumbs.
+          BreadcrumbsRow(
             items: [
-              BreadcrumbItem(
-                  title: 'Data',
-                  onTap: () {
-                    context.push('/');
-                  }),
-              BreadcrumbItem(
-                title: 'Licenses',
-              ),
+              {'label': 'Data', 'path': '/'},
+              {'label': 'Licenses', 'path': null},
             ],
           ),
+
+          // Download Button.
           SecondaryButton(
             text: 'Download all licenses',
             onPressed: () async {

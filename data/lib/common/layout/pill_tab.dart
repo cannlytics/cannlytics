@@ -13,21 +13,19 @@ import 'package:flutter/material.dart';
 /// A pill-shaped tab button.
 class PillTabButton extends StatelessWidget {
   final String text;
-  final int index;
   final IconData icon;
-  final TabController controller;
+  final bool isSelected;
 
   PillTabButton({
     required this.text,
-    required this.index,
     required this.icon,
-    required this.controller,
+    this.isSelected = false,
   });
 
   @override
   Widget build(BuildContext context) {
     // Whether or not the tab is selected or hovered.
-    bool isSelected = controller.index == index;
+    // bool isSelected = controller.index == index;
     ValueNotifier<bool> isHovered = ValueNotifier(false);
 
     // Selected colors.
@@ -44,41 +42,35 @@ class PillTabButton extends StatelessWidget {
       child: ValueListenableBuilder<bool>(
         valueListenable: isHovered,
         builder: (context, value, child) {
-          return GestureDetector(
-            // Action.
-            onTap: () => controller.animateTo(index),
+          return InkWell(
+            borderRadius: BorderRadius.circular(30),
+            splashColor: Colors.blue.withOpacity(0.5),
+            hoverColor: Colors.blue.withOpacity(0.2),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                color: isSelected
+                    ? Colors.blue.withOpacity(0.1)
+                    : (value
+                        ? Colors.blue.withOpacity(0.05)
+                        : Colors.transparent),
+              ),
+              child: Row(
+                children: [
+                  // Icon.
+                  Icon(
+                    icon,
+                    size: 16,
+                    color: isSelected
+                        ? goldColor
+                        : Theme.of(context).colorScheme.secondary,
+                  ),
+                  SizedBox(width: 8),
 
-            // Pill.
-            child: InkWell(
-              borderRadius: BorderRadius.circular(30),
-              splashColor: Colors.blue.withOpacity(0.5),
-              hoverColor: Colors.blue.withOpacity(0.2),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  color: isSelected
-                      ? Colors.blue.withOpacity(0.1)
-                      : (value
-                          ? Colors.blue.withOpacity(0.05)
-                          : Colors.transparent),
-                ),
-                child: Row(
-                  children: [
-                    // Icon.
-                    Icon(
-                      icon,
-                      size: 16,
-                      color: isSelected
-                          ? goldColor
-                          : Theme.of(context).colorScheme.secondary,
-                    ),
-                    SizedBox(width: 8),
-
-                    // Text.
-                    Text(text),
-                  ],
-                ),
+                  // Text.
+                  Text(text),
+                ],
               ),
             ),
           );

@@ -4,22 +4,21 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/15/2023
-// Updated: 5/16/2023
+// Updated: 6/27/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/cards/wide_card.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
-import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/ui/layout/footer.dart';
 import 'package:cannlytics_data/ui/layout/header.dart';
@@ -94,7 +93,15 @@ class MainContent extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          _breadcrumbs(context),
+          // _breadcrumbs(context),
+          BreadcrumbsRow(
+            items: [
+              {'label': 'Data', 'path': '/'},
+              {'label': 'Licenses', 'path': '/licenses'},
+              {'label': stateId.toUpperCase(), 'path': '/licenses/$stateId'},
+              {'label': licenseId, 'path': null},
+            ],
+          ),
           gapH24,
           LicenseeForm(
             stateId: stateId,
@@ -103,37 +110,6 @@ class MainContent extends ConsumerWidget {
           gapH48,
         ],
       ),
-    );
-  }
-
-  /// Page breadcrumbs.
-  Widget _breadcrumbs(BuildContext context) {
-    return Row(
-      children: [
-        Breadcrumbs(
-          items: [
-            BreadcrumbItem(
-                title: 'Data',
-                onTap: () {
-                  context.push('/');
-                }),
-            BreadcrumbItem(
-                title: 'Licenses',
-                onTap: () {
-                  context.push('/licenses');
-                }),
-            BreadcrumbItem(
-              title: stateId.toUpperCase(),
-              onTap: () {
-                context.push('/licenses/$stateId');
-              },
-            ),
-            BreadcrumbItem(
-              title: licenseId,
-            ),
-          ],
-        ),
-      ],
     );
   }
 }

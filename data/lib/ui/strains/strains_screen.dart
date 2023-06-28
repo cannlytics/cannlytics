@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -17,7 +18,6 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
-import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/constants/design.dart';
 // import 'package:cannlytics_data/services/auth_service.dart';
@@ -65,23 +65,11 @@ class MainContent extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          // StrainsTable(),
-          Row(
-            children: [
-              Breadcrumbs(
-                items: [
-                  BreadcrumbItem(
-                      title: 'Data',
-                      onTap: () {
-                        context.go('/');
-                      }),
-                  BreadcrumbItem(
-                      title: 'Strains',
-                      onTap: () {
-                        // Add navigation to Category screen.
-                      })
-                ],
-              ),
+          // Breadcrumbs.
+          BreadcrumbsRow(
+            items: [
+              {'label': 'Data', 'path': '/'},
+              {'label': 'Strains', 'path': null},
             ],
           ),
 

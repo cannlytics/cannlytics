@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +22,6 @@ import 'package:go_router/go_router.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
-import 'package:cannlytics_data/ui/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/ui/layout/footer.dart';
 import 'package:cannlytics_data/ui/layout/header.dart';
@@ -60,7 +60,13 @@ class StateLicensesScreen extends StatelessWidget {
               right: sliverHorizontalPadding(screenWidth) / 2,
               top: 24,
             ),
-            child: _breadcrumbs(context),
+            child: BreadcrumbsRow(
+              items: [
+                {'label': 'Data', 'path': '/'},
+                {'label': 'Licenses', 'path': '/licenses'},
+                {'label': id.toUpperCase(), 'path': '/licenses/$id'},
+              ],
+            ),
           ),
         ),
 
@@ -81,31 +87,6 @@ class StateLicensesScreen extends StatelessWidget {
         // Footer.
         const SliverToBoxAdapter(child: Footer()),
       ]),
-    );
-  }
-
-  /// Page breadcrumbs.
-  Widget _breadcrumbs(BuildContext context) {
-    return Row(
-      children: [
-        Breadcrumbs(
-          items: [
-            BreadcrumbItem(
-                title: 'Data',
-                onTap: () {
-                  context.push('/');
-                }),
-            BreadcrumbItem(
-                title: 'Licenses',
-                onTap: () {
-                  context.push('/licenses');
-                }),
-            BreadcrumbItem(
-              title: id.toUpperCase(),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }

@@ -7,6 +7,7 @@
 // Updated: 6/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/services/download_service.dart';
@@ -15,6 +16,7 @@ import 'package:cannlytics_data/ui/sales/sales_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 /// User receipts user interface.
 class UserReceiptsAnalytics extends ConsumerWidget {
@@ -100,6 +102,20 @@ class UserReceiptsAnalytics extends ConsumerWidget {
                   SecondaryButton(
                     text: 'Download all',
                     onPressed: () {
+                      // Show a downloading notification.
+                      Fluttertoast.showToast(
+                        msg: 'Preparing your download...',
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.TOP,
+                        timeInSecForIosWeb: 2,
+                        backgroundColor: LightColors.lightGreen.withAlpha(60),
+                        textColor: Colors.white,
+                        fontSize: 16.0,
+                        webPosition: 'center',
+                        webShowClose: true,
+                      );
+
+                      // Download the data.
                       var items = ref.read(userReceipts).value;
                       if (items == null || items.isEmpty) return;
                       DownloadService.downloadData(

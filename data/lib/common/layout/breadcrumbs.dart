@@ -78,25 +78,23 @@ class BreadcrumbsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.only(left: 16, top: 12),
-        child: Row(
-          children: [
-            Breadcrumbs(
-              items: items.map<BreadcrumbItem>((item) {
-                return BreadcrumbItem(
-                  title: item['label']!,
-                  onTap: item['path'] != null
-                      ? () {
-                          context.push(item['path']!);
-                        }
-                      : null,
-                );
-              }).toList(),
-            ),
-          ],
-        ),
+    return Padding(
+      padding: EdgeInsets.only(left: 16, top: 12),
+      child: Row(
+        children: [
+          Breadcrumbs(
+            items: items.map<BreadcrumbItem>((item) {
+              return BreadcrumbItem(
+                title: item['label']!,
+                onTap: item['path'] != null
+                    ? () {
+                        context.push(item['path']!);
+                      }
+                    : null,
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }

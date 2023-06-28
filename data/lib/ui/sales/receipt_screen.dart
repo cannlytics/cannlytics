@@ -14,6 +14,7 @@ import 'package:cannlytics_data/common/forms/forms.dart';
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/loading_placeholder.dart';
 import 'package:cannlytics_data/common/layout/pill_tab.dart';
+import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/ui/sales/sales_service.dart';
@@ -42,25 +43,13 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
   // State.
   bool _isEditing = false;
   late final TabController _tabController;
-  int _tabCount = 3;
+  int _tabCount = 1;
   Future<void>? _updateFuture;
 
   // Define the TextEditingController instances.
   final _receiptNumberController = TextEditingController();
-  final _salesDateTimeController = TextEditingController();
-  final _salesCustomerTypeController = TextEditingController();
-  final _patientLicenseNumberController = TextEditingController();
-  final _caregiverLicenseNumberController = TextEditingController();
-  final _identificationMethodController = TextEditingController();
-  final _patientRegistrationLocationIdController = TextEditingController();
-  final _totalPackagesController = TextEditingController();
   final _totalPriceController = TextEditingController();
   final _transactionsController = TextEditingController();
-  final _isFinalController = TextEditingController();
-  final _archivedDateController = TextEditingController();
-  final _recordedDateTimeController = TextEditingController();
-  final _recordedByUserNameController = TextEditingController();
-  final _lastModifiedController = TextEditingController();
   final _dateSoldController = TextEditingController();
   final _productNamesController = TextEditingController();
   final _productTypesController = TextEditingController();
@@ -92,26 +81,15 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
     super.initState();
     // Initialize tabs.
     _tabController = TabController(length: _tabCount, vsync: this);
+    _tabController.addListener(() => setState(() {}));
   }
 
   // Dispose of the controllers.
   @override
   void dispose() {
     _receiptNumberController.dispose();
-    _salesDateTimeController.dispose();
-    _salesCustomerTypeController.dispose();
-    _patientLicenseNumberController.dispose();
-    _caregiverLicenseNumberController.dispose();
-    _identificationMethodController.dispose();
-    _patientRegistrationLocationIdController.dispose();
-    _totalPackagesController.dispose();
     _totalPriceController.dispose();
     _transactionsController.dispose();
-    _isFinalController.dispose();
-    _archivedDateController.dispose();
-    _recordedDateTimeController.dispose();
-    _recordedByUserNameController.dispose();
-    _lastModifiedController.dispose();
     _dateSoldController.dispose();
     _productNamesController.dispose();
     _productTypesController.dispose();
@@ -160,24 +138,8 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
         data: (data) {
           // Initialize the text editing controllers with values.
           _receiptNumberController.text = data?.receiptNumber ?? '';
-          _salesDateTimeController.text = data?.salesDateTime ?? '';
-          _salesCustomerTypeController.text = data?.salesCustomerType ?? '';
-          _patientLicenseNumberController.text =
-              data?.patientLicenseNumber ?? '';
-          _caregiverLicenseNumberController.text =
-              data?.caregiverLicenseNumber ?? '';
-          _identificationMethodController.text =
-              data?.identificationMethod ?? '';
-          _patientRegistrationLocationIdController.text =
-              data?.patientRegistrationLocationId ?? '';
-          _totalPackagesController.text = data?.totalPackages?.toString() ?? '';
           _totalPriceController.text = data?.totalPrice?.toString() ?? '';
           _transactionsController.text = data?.transactions?.join(',') ?? '';
-          _isFinalController.text = data?.isFinal?.toString() ?? '';
-          _archivedDateController.text = data?.archivedDate ?? '';
-          _recordedDateTimeController.text = data?.recordedDateTime ?? '';
-          _recordedByUserNameController.text = data?.recordedByUserName ?? '';
-          _lastModifiedController.text = data?.lastModified ?? '';
           _dateSoldController.text = data?.dateSold?.toIso8601String() ?? '';
           _productNamesController.text = data?.productNames?.join(',') ?? '';
           _productTypesController.text = data?.productTypes?.join(',') ?? '';
@@ -228,31 +190,18 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
 
     // Fields.
     var fields = [
-      // Sample details.
-      Text('Sample', style: labelStyle),
-      Text('Product Name: ${item?.productNames?.join(', ') ?? ''}'),
-      Text('Hash: ${item?.hash ?? ''}'),
-      Text('Receipt Number: ${item?.receiptNumber ?? ''}'),
-      Text('Sales Date Time: ${item?.salesDateTime ?? ''}'),
-      Text('Sales Customer Type: ${item?.salesCustomerType ?? ''}'),
-      Text('Patient License Number: ${item?.patientLicenseNumber ?? ''}'),
-      Text('Caregiver License Number: ${item?.caregiverLicenseNumber ?? ''}'),
-      Text('Identification Method: ${item?.identificationMethod ?? ''}'),
-      Text(
-          'Patient Registration Location ID: ${item?.patientRegistrationLocationId ?? ''}'),
-      Text('Total Packages: ${item?.totalPackages?.toString() ?? ''}'),
-      Text('Total Price: ${item?.totalPrice?.toString() ?? ''}'),
-      Text('Transactions: ${item?.transactions?.join(', ') ?? ''}'),
-      Text('Is Final: ${item?.isFinal?.toString() ?? ''}'),
-      Text('Archived Date: ${item?.archivedDate ?? ''}'),
-      Text('Recorded Date Time: ${item?.recordedDateTime ?? ''}'),
-      Text('Recorded By User Name: ${item?.recordedByUserName ?? ''}'),
-      Text('Last Modified: ${item?.lastModified ?? ''}'),
-      Text('Date Sold: ${item?.dateSold?.toIso8601String() ?? ''}'),
+      // Product details.
+      Text('Product', style: labelStyle),
+      Text('Product Names: ${item?.productNames?.join(', ') ?? ''}'),
       Text('Product Types: ${item?.productTypes?.join(', ') ?? ''}'),
       Text('Product Quantities: ${item?.productQuantities?.join(', ') ?? ''}'),
       Text('Product Prices: ${item?.productPrices?.join(', ') ?? ''}'),
       Text('Product IDs: ${item?.productIds?.join(', ') ?? ''}'),
+      gapH16,
+
+      // Price details.
+      Text('Pricing', style: labelStyle),
+      Text('Total Price: ${item?.totalPrice?.toString() ?? ''}'),
       Text('Total Amount: ${item?.totalAmount?.toString() ?? ''}'),
       Text('Subtotal: ${item?.subtotal?.toString() ?? ''}'),
       Text('Total Discount: ${item?.totalDiscount?.toString() ?? ''}'),
@@ -261,92 +210,50 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
       Text('Rewards Earned: ${item?.rewardsEarned?.toString() ?? ''}'),
       Text('Rewards Spent: ${item?.rewardsSpent?.toString() ?? ''}'),
       Text('Total Rewards: ${item?.totalRewards?.toString() ?? ''}'),
+      gapH16,
+
+      // Transaction data.
+      Text('Transaction', style: labelStyle),
+      Text('Transactions: ${item?.transactions?.join(', ') ?? ''}'),
+      Text('Total Transactions: ${item?.totalTransactions?.toString() ?? ''}'),
+      Text('Receipt Number: ${item?.receiptNumber ?? ''}'),
+      Text('Purchased at: ${item?.dateSold?.toIso8601String() ?? ''}'),
+      gapH16,
+
+      // Taxes data.
+      Text('Taxes', style: labelStyle),
       Text('City Tax: ${item?.cityTax?.toString() ?? ''}'),
       Text('County Tax: ${item?.countyTax?.toString() ?? ''}'),
       Text('State Tax: ${item?.stateTax?.toString() ?? ''}'),
       Text('Excise Tax: ${item?.exciseTax?.toString() ?? ''}'),
+      Text('Total Tax: ${item?.totalTax?.toString() ?? ''}'),
+      gapH16,
+
+      // Retailer data.
+      // TODO: Add a link to the retailer (/licenses/{licenseNumber}).
+      Text('Dispensary', style: labelStyle),
       Text('Retailer: ${item?.retailer ?? ''}'),
       Text('Retailer License Number: ${item?.retailerLicenseNumber ?? ''}'),
       Text('Retailer Address: ${item?.retailerAddress ?? ''}'),
       Text('Budtender: ${item?.budtender ?? ''}'),
-      Text('Total Tax: ${item?.totalTax?.toString() ?? ''}'),
-      Text('Total Transactions: ${item?.totalTransactions?.toString() ?? ''}'),
+      gapH16,
+
+      // Parsing data.
+      Text('Parsing details', style: labelStyle),
+      Text('Hash: ${item?.hash ?? ''}'),
+      gapH48,
     ];
 
     // Text fields.
     var textFormFields = [
-      // Sample details.
+      // Product fields.
       Padding(
         padding: labelPadding,
-        child: SelectableText('Sample', style: labelStyle),
+        child: SelectableText('Product', style: labelStyle),
       ),
       CustomTextField(
         controller: _productNamesController,
         label: 'Product Names',
-      ),
-      CustomTextField(
-        controller: _receiptNumberController,
-        label: 'Receipt Number',
-      ),
-      CustomTextField(
-        controller: _salesDateTimeController,
-        label: 'Sales Date Time',
-      ),
-      CustomTextField(
-        controller: _salesCustomerTypeController,
-        label: 'Sales Customer Type',
-      ),
-      CustomTextField(
-        controller: _patientLicenseNumberController,
-        label: 'Patient License Number',
-      ),
-      CustomTextField(
-        controller: _caregiverLicenseNumberController,
-        label: 'Caregiver License Number',
-      ),
-      CustomTextField(
-        controller: _identificationMethodController,
-        label: 'Identification Method',
-      ),
-      CustomTextField(
-        controller: _patientRegistrationLocationIdController,
-        label: 'Patient Registration Location ID',
-      ),
-      CustomTextField(
-        controller: _totalPackagesController,
-        label: 'Total Packages',
-      ),
-      CustomTextField(
-        controller: _totalPriceController,
-        label: 'Total Price',
-      ),
-      CustomTextField(
-        controller: _transactionsController,
-        label: 'Transactions',
-      ),
-      CustomTextField(
-        controller: _isFinalController,
-        label: 'Is Final',
-      ),
-      CustomTextField(
-        controller: _archivedDateController,
-        label: 'Archived Date',
-      ),
-      CustomTextField(
-        controller: _recordedDateTimeController,
-        label: 'Recorded Date Time',
-      ),
-      CustomTextField(
-        controller: _recordedByUserNameController,
-        label: 'Recorded By User Name',
-      ),
-      CustomTextField(
-        controller: _lastModifiedController,
-        label: 'Last Modified',
-      ),
-      CustomTextField(
-        controller: _dateSoldController,
-        label: 'Date Sold',
       ),
       CustomTextField(
         controller: _productTypesController,
@@ -363,6 +270,16 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
       CustomTextField(
         controller: _productIdsController,
         label: 'Product IDs',
+      ),
+
+      // Pricing fields.
+      Padding(
+        padding: labelPadding,
+        child: SelectableText('Pricing', style: labelStyle),
+      ),
+      CustomTextField(
+        controller: _totalPriceController,
+        label: 'Total Price',
       ),
       CustomTextField(
         controller: _totalAmountController,
@@ -396,6 +313,34 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
         controller: _totalRewardsController,
         label: 'Total Rewards',
       ),
+
+      // Transaction fields.
+      Padding(
+        padding: labelPadding,
+        child: SelectableText('Transaction', style: labelStyle),
+      ),
+      CustomTextField(
+        controller: _transactionsController,
+        label: 'Transactions',
+      ),
+      CustomTextField(
+        controller: _totalTransactionsController,
+        label: 'Total Transactions',
+      ),
+      CustomTextField(
+        controller: _receiptNumberController,
+        label: 'Receipt Number',
+      ),
+      CustomTextField(
+        controller: _dateSoldController,
+        label: 'Purchased at',
+      ),
+
+      // Taxes.
+      Padding(
+        padding: labelPadding,
+        child: SelectableText('Taxes', style: labelStyle),
+      ),
       CustomTextField(
         controller: _cityTaxController,
         label: 'City Tax',
@@ -413,6 +358,16 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
         label: 'Excise Tax',
       ),
       CustomTextField(
+        controller: _totalTaxController,
+        label: 'Total Tax',
+      ),
+
+      // Retailer.
+      Padding(
+        padding: labelPadding,
+        child: SelectableText('Dispensary', style: labelStyle),
+      ),
+      CustomTextField(
         controller: _retailerController,
         label: 'Retailer',
       ),
@@ -428,23 +383,18 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
         controller: _budtenderController,
         label: 'Budtender',
       ),
-      CustomTextField(
-        controller: _totalTaxController,
-        label: 'Total Tax',
-      ),
-      CustomTextField(
-        controller: _totalTransactionsController,
-        label: 'Total Transactions',
-      ),
+      gapH48,
     ];
 
     // Breadcrumbs.
-    var _breadcrumbs = BreadcrumbsRow(
-      items: [
-        {'label': 'Data', 'path': '/'},
-        {'label': 'Sales', 'path': '/sales'},
-        {'label': 'Receipt', 'path': '/sales/${item?.hash}'},
-      ],
+    var _breadcrumbs = SliverToBoxAdapter(
+      child: BreadcrumbsRow(
+        items: [
+          {'label': 'Data', 'path': '/'},
+          {'label': 'Sales', 'path': '/sales'},
+          {'label': 'Receipt', 'path': '/sales/${item?.hash}'},
+        ],
+      ),
     );
 
     // Tab bar.
@@ -462,10 +412,9 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
       dividerColor: Colors.transparent,
       tabs: [
         PillTabButton(
-          controller: _tabController,
           text: 'Details',
-          index: 0,
           icon: Icons.bar_chart,
+          isSelected: _tabController.index == 0,
         ),
       ],
     );
@@ -487,21 +436,8 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
       onPressed: () {
         // Get the values from the TextEditingController instances.
         final receiptNumber = _receiptNumberController.text;
-        final salesDateTime = _salesDateTimeController.text;
-        final salesCustomerType = _salesCustomerTypeController.text;
-        final patientLicenseNumber = _patientLicenseNumberController.text;
-        final caregiverLicenseNumber = _caregiverLicenseNumberController.text;
-        final identificationMethod = _identificationMethodController.text;
-        final patientRegistrationLocationId =
-            _patientRegistrationLocationIdController.text;
-        final totalPackages = int.tryParse(_totalPackagesController.text);
         final totalPrice = double.tryParse(_totalPriceController.text);
         final transactions = _transactionsController.text;
-        final isFinal = _isFinalController.text == 'true';
-        final archivedDate = _archivedDateController.text;
-        final recordedDateTime = _recordedDateTimeController.text;
-        final recordedByUserName = _recordedByUserNameController.text;
-        final lastModified = _lastModifiedController.text;
         final dateSold = DateTime.tryParse(_dateSoldController.text);
 
         final productNames = _productNamesController.text
@@ -559,20 +495,8 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
           'product_names': productNames,
           'product_types': productTypes,
           'receipt_number': receiptNumber,
-          'sales_date_time': salesDateTime,
-          'sales_customer_type': salesCustomerType,
-          'patient_license_number': patientLicenseNumber,
-          'caregiver_license_number': caregiverLicenseNumber,
-          'identification_method': identificationMethod,
-          'patient_registration_location_id': patientRegistrationLocationId,
-          'total_packages': totalPackages,
           'total_price': totalPrice,
           'transactions': transactions,
-          'is_final': isFinal,
-          'archived_date': archivedDate,
-          'recorded_date_time': recordedDateTime,
-          'recorded_by_user_name': recordedByUserName,
-          'last_modified': lastModified,
           'date_sold': dateSold?.toIso8601String(),
           'product_quantities': productQuantities,
           'product_prices': productPrices,

@@ -12,20 +12,6 @@
 {% extends "website/index.html" %}
 {% load static %}
 {% block title %}Welcome | Cannlytics{% endblock %}
-{% block page_css %}
-<!-- Shopify CSS -->
-<style>
-  body.dark h1.shopify-buy__product__title {
-    color: #fff !important;
-  }
-  body.dark .shopify-buy__option-select label {
-    color: #ccc !important;
-  }
-  body.dark .shopify-buy__product__actual-price {
-    color: #ccc !important;
-  }
-</style>
-{% endblock page_css %}
 {% block material %}
   <div class="homepage pb-5 overflow-hidden">
 
@@ -71,11 +57,6 @@
     <!-- List of Metrc Validations -->
     <div class="ground py-5">
       {% include "website/pages/homepage/components/metrc_state_list.html" with verifications=verifications only %}
-    </div>
-
-    <!-- Shopify products -->
-    <div class="ground pt-5">
-      {% include "./components/shopify_products.html" %}
     </div>
 
     <!-- Wave -->

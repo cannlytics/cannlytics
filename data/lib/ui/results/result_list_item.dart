@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/services/download_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +33,8 @@ class LabResultItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    print('Building list item:');
+    print(labResult.toMap());
     return GestureDetector(
       onTap: () {
         // showDialog(
@@ -75,11 +78,26 @@ class LabResultItem extends StatelessWidget {
                   // Download COA data.
                   GestureDetector(
                     onTap: () {
-                      // FIXME: Handle malformed results.
+                      // Handle malformed results.
                       var data = labResult.toMap();
                       if (data['results'] == null) {
                         data['results'] = [];
                       }
+
+                      // Show a downloading notification.
+                      Fluttertoast.showToast(
+                        msg: 'Preparing your download...',
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.TOP,
+                        timeInSecForIosWeb: 2,
+                        backgroundColor: LightColors.lightGreen.withAlpha(60),
+                        textColor: Colors.white,
+                        fontSize: 16.0,
+                        webPosition: 'center',
+                        webShowClose: true,
+                      );
+
+                      // Download the data.
                       DownloadService.downloadData(
                         [data],
                         '/api/data/coas/download',
@@ -93,8 +111,8 @@ class LabResultItem extends StatelessWidget {
                   ),
 
                   // Open COA URL link.
-                  if (labResult.downloadUrl!.isNotEmpty) gapW8,
-                  if (labResult.downloadUrl!.isNotEmpty)
+                  if (labResult.downloadUrl?.isNotEmpty ?? false) gapW8,
+                  if (labResult.downloadUrl?.isNotEmpty ?? false)
                     GestureDetector(
                       onTap: () {
                         launchUrl(Uri.parse(labResult.downloadUrl!));
@@ -148,8 +166,8 @@ class LabResultItem extends StatelessWidget {
               ),
 
               // Copy COA link.
-              if (labResult.downloadUrl!.isNotEmpty) gapH4,
-              if (labResult.downloadUrl!.isNotEmpty)
+              if (labResult.downloadUrl?.isNotEmpty ?? false) gapH4,
+              if (labResult.downloadUrl?.isNotEmpty ?? false)
                 _coaLink(context, labResult.downloadUrl!),
             ],
           ),

@@ -4,13 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/23/2023
-// Updated: 6/13/2023
+// Updated: 6/28/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -21,6 +22,35 @@ import 'package:cannlytics_data/common/inputs/string_controller.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
+
+// Search term.
+final searchTermProvider = StateProvider<String>((ref) => '');
+
+// Keywords-only query.
+final keywordsQuery = StateProvider<Query<LabResult>>((ref) {
+  // Get a list of keywords from the search term.
+  String searchTerm = ref.watch(searchTermProvider);
+  List<String> keywords = searchTerm.toLowerCase().split(' ');
+  print('KEYWORDS:');
+  print(keywords);
+
+  // Query by keywords.
+  return FirebaseFirestore.instance
+      .collection('public/data/lab_results')
+      .where('keywords', arrayContainsAny: keywords)
+      .withConverter(
+        fromFirestore: (snapshot, _) => LabResult.fromMap(snapshot.data()!),
+        toFirestore: (LabResult item, _) => item.toMap(),
+      );
+});
+// final keywordsQuery = FirebaseFirestore.instance
+//     .collection('public/data/lab_results')
+//     .where('keywords', arrayContainsAny: keywords)
+//     .withConverter(
+//       fromFirestore: (snapshot, _) => LabResult.fromMap(snapshot.data()!),
+//       toFirestore: (LabResult item, _) => item.toMap(),
+//     );
+//
 
 // Lab results search input.
 final resultsSearchController =
@@ -43,13 +73,14 @@ class AsyncLabResultsNotifier extends AsyncNotifier<List<LabResult>> {
     final _dataSource = ref.read(firestoreProvider);
 
     // FIXME: Let the user view lab results in different states.
-    final String _dataPath = 'data/lab_results/fl';
+    final String _dataPath = 'public/data/lab_results';
+    print('GETTING LAB RESULTS FROM: $_dataPath');
 
     // TODO: Allow the user to change ordered by?
     // final String orderBy = 'updated_at';
 
     // TODO: Allow the user to change limit?
-    final int limit = 1000;
+    final int limit = 10;
 
     // Query by product_name.
     var data = await _dataSource.getCollection(
@@ -66,7 +97,8 @@ class AsyncLabResultsNotifier extends AsyncNotifier<List<LabResult>> {
           //   isLessThanOrEqualTo: term + '\uf8ff',
           // )
         }
-        return query.orderBy('updated_at', descending: true).limit(limit);
+        // .orderBy('updated_at', descending: true)
+        return query.limit(limit);
       },
     );
     print('FOUND: ${data.length} BY PRODUCT NAME');
