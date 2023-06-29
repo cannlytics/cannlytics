@@ -4,9 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/13/2023
-// Updated: 6/24/2023
+// Updated: 6/28/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/download_button.dart';
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
@@ -21,7 +22,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 /// User lab results user interface.
 class UserResultsInterface extends ConsumerWidget {
-  const UserResultsInterface({super.key});
+  const UserResultsInterface({super.key, this.tabController});
+
+  // Parameters.
+  final TabController? tabController;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -113,10 +117,15 @@ class UserResultsInterface extends ConsumerWidget {
                         color: Theme.of(context).textTheme.titleLarge!.color),
                   ),
                   SelectableText(
-                    'If you are signed in, then we will save your parsed results and you will be able to access them here.',
+                    'If you are signed in, then we will save your parsed results.\n You will be able to access them here.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
+                  gapH12,
+                  PrimaryButton(
+                    text: 'Parse results',
+                    onPressed: () => tabController?.animateTo(1),
+                  )
                 ],
               ),
             ),
@@ -183,13 +192,13 @@ class UserResultsInterface extends ConsumerWidget {
                   SelectableText(
                     message ?? '',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   // PRODUCTION:
                   // SelectableText(
                   //   'An unknown error occurred while retrieving your receipts. Please report this issue on GitHub or to dev@cannlytics.com to get a human to help ASAP.',
                   //   textAlign: TextAlign.center,
-                  //   style: Theme.of(context).textTheme.bodySmall,
+                  //   style: Theme.of(context).textTheme.bodyMedium,
                   // ),
                 ],
               ),
@@ -213,6 +222,42 @@ class UserResultsGrid extends ConsumerWidget {
     // Listen to the user.
     final user = ref.watch(userProvider).value;
 
+    /// Download function.
+    var _onDownload = (item) {
+      // Show a downloading notification.
+      Fluttertoast.showToast(
+        msg: 'Preparing your download...',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 2,
+        backgroundColor: LightColors.lightGreen.withAlpha(60),
+        textColor: Colors.white,
+        fontSize: 16.0,
+        webPosition: 'center',
+        webShowClose: true,
+      );
+
+      // Download the data.
+      DownloadService.downloadData(
+        [item!],
+        '/api/data/coas/download',
+      );
+    };
+
+    /// Delete function.
+    var _onDelete = (item) async {
+      final delete = await InterfaceUtils.showAlertDialog(
+        context: context,
+        title: 'Are you sure that you want to delete this result?',
+        cancelActionText: 'Cancel',
+        defaultActionText: 'Delete',
+        primaryActionColor: Colors.redAccent,
+      );
+      if (delete == true) {
+        ref.read(resultService).deleteResult(item!['id']);
+      }
+    };
+
     // Render the card.
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -230,7 +275,7 @@ class UserResultsGrid extends ConsumerWidget {
               ),
               Spacer(),
 
-              // Download all receipts button.
+              // Download all button.
               if (user != null)
                 DownloadButton(
                   items: items,
@@ -255,38 +300,8 @@ class UserResultsGrid extends ConsumerWidget {
               final item = items[index];
               return ResultCard(
                 item: LabResult.fromMap(item ?? {}),
-                onDownload: () {
-                  // Show a downloading notification.
-                  Fluttertoast.showToast(
-                    msg: 'Preparing your download...',
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.TOP,
-                    timeInSecForIosWeb: 2,
-                    backgroundColor: LightColors.lightGreen.withAlpha(60),
-                    textColor: Colors.white,
-                    fontSize: 16.0,
-                    webPosition: 'center',
-                    webShowClose: true,
-                  );
-
-                  // Download the data.
-                  DownloadService.downloadData(
-                    [item!],
-                    '/api/data/coas/download',
-                  );
-                },
-                onDelete: () async {
-                  final delete = await InterfaceUtils.showAlertDialog(
-                    context: context,
-                    title: 'Are you sure that you want to delete this result?',
-                    cancelActionText: 'Cancel',
-                    defaultActionText: 'Delete',
-                    primaryActionColor: Colors.redAccent,
-                  );
-                  if (delete == true) {
-                    ref.read(resultService).deleteResult(item!['id']);
-                  }
-                },
+                onDownload: () => _onDownload(item),
+                onDelete: () => _onDelete(item),
               );
             },
           ),

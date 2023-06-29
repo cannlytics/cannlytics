@@ -218,6 +218,12 @@ class LabResultsSearchForm extends HookConsumerWidget {
             child: _buildSearchTextField(),
           ),
 
+          // TODO: Allow the user to Export All of a query.
+
+          // TODO: Allow the user to apply filters:
+          // - product type
+          // - state
+
           // Results list, centered when there are no results, top-aligned otherwise.
           Container(
             height: MediaQuery.of(context).size.height * 0.6,

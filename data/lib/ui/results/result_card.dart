@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/18/2023
-// Updated: 6/24/2023
+// Updated: 6/28/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';

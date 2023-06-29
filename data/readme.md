@@ -34,6 +34,13 @@ You can create launch icons with:
 flutter pub run flutter_launcher_icons
 ```
 
+You can fix minor errors in the app with:
+
+```shell
+dart fix --dry-run
+dart fix --apply
+```
+
 ### App Publishing
 
 First, build the app:

@@ -15,13 +15,41 @@ gcloud services enable cloudfunctions.googleapis.com cloudscheduler.googleapis.c
 
 ## Auth Sign Up
 
+The `auth_signup` cloud function is designed to create any new user data in Firestore when a new user is created in Firebase Authentication. Specifically, it populates the user's subscription with 10 trial tokens.
+
 You can deploy the `auth_signup` cloud function with:
 
 ```shell
 gcloud functions deploy auth_signup --source auth_signup --entry-point auth_signup  --trigger-event providers/firebase.auth/eventTypes/user.create  --trigger-resource cannlytics --runtime python39
 ```
 
-The `auth_signup` cloud function is designed to create any new user data in Firestore when a new user is created in Firebase Authentication. Specifically, it populates the user's subscription with 10 trial tokens.
+## Calculate Lab Results Statistics
+
+Triggered by changes in `users/{user_id}/results/{result_id}`. The function calculates the following statistics for each result:
+
+The data is saved to `public/data/lab_results/{lab_result_id}`.
+
+
+You can deploy the `calc_results_stats` cloud function with:
+
+```shell
+gcloud functions deploy calc_results_stats --source calc_results_stats --entry-point calc_results_stats  --trigger-event-filters providers/firebase.auth/eventTypes/user.create  --trigger-resource cannlytics --runtime python310 --gen2
+```
+
+
+## Calculate Strains Statistics
+
+Triggered by changes to `public/data/lab_results/{lab_result_id}`. The function calculates the following statistics for each strain:
+
+The data is saved to `public/data/strains/{strain_id}`.
+
+
+You can deploy the `calc_strains_stats` cloud function with:
+
+```shell
+gcloud functions deploy calc_strains_stats --source calc_strains_stats --entry-point calc_strains_stats  --trigger-event providers/firebase.auth/eventTypes/user.create  --trigger-resource cannlytics --runtime python310
+```
+
 
 ## CannBot
 

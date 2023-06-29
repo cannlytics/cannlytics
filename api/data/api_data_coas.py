@@ -110,18 +110,29 @@ def api_data_coas(request, coa_id=None):
     """Get COA data (public API endpoint)."""
 
     # Authenticate the user.
-    public, throttle = False, False
+    public, throttle = True, True
     claims = authenticate_request(request)
     total_cost = 0
     all_prompts = []
     if not claims:
         uid = 'cannlytics'
-        public, throttle = True, True
     else:
         uid = claims['uid']
-    
-    # Log the user ID.
+
+    # Log the user ID and their level of support.
+    support_level = claims.get('support_level', 'free')
     print('USER:', uid)
+    print('SUPPORT LEVEL:', support_level)
+
+    # Allow enterprise user's to have private lab results.
+    if support_level == 'enterprise':
+        public, throttle = False, False
+
+    # Allow pro and premium users to query more than 1000 observations.
+    elif support_level == 'pro' or support_level == 'premium':
+        throttle = False
+    
+
 
     # Get a specific COA or query public COAs.
     if request.method == 'GET':
@@ -190,8 +201,12 @@ def api_data_coas(request, coa_id=None):
 
         # Limit the number of observations.
         limit = int(params.get('limit', 1000))
-        if limit > 1000:
+
+        # Throttle the number of observations for free users.
+        if throttle and limit > 1000:
             limit = 1000
+        else:
+            limit = None
         
         # Order the data.
         order_by = params.get('order_by', 'coa_parsed_at')
@@ -216,7 +231,7 @@ def api_data_coas(request, coa_id=None):
 
         # FIXME: Also save any PDF files for the user.
 
-        # Get the user's level of support.
+        # Get the user's number of tokens.
         user_subscription = get_document(f'subscribers/{uid}')
         if not user_subscription:
             current_tokens = 0
@@ -230,6 +245,12 @@ def api_data_coas(request, coa_id=None):
         # Get any user-posted data.
         try:
             body = loads(request.body.decode('utf-8'))
+
+            # Allow enterprise users to post public or private lab results.
+            if support_level == 'enterprise':
+                public = body.get('public', public)
+
+        # Otherwise, the user must have only posted files.
         except:
             body = {}
         urls = body.get('urls', [])
@@ -429,6 +450,7 @@ def api_data_coas(request, coa_id=None):
                 docs.append(obs)
 
             # Create a log entry.
+            changes.append(sample_id)
             changes.append(obs)
 
         # Create a usage log.

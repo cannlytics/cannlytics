@@ -59,19 +59,23 @@ def api_data_receipts(request, receipt_id=None):
     """Manage receipt data (public API endpoint)."""
 
     # Authenticate the user.
-    public, throttle = False, False
+    throttle = False
     claims = authenticate_request(request)
     total_cost = 0
-    all_prompts = []
     if not claims:
         uid = 'cannlytics'
-        public, throttle = True, True
-        # return HttpResponse(status=401)
+        throttle = True
     else:
         uid = claims['uid']
 
-    # Log the user ID.
+    # Log the user ID and their level of support.
+    support_level = claims.get('support_level', 'free')
     print('USER:', uid)
+    print('SUPPORT LEVEL:', support_level)
+
+    # Allow enterprise, pro, and premium users to query more than 1000.
+    if support_level in ['enterprise', 'pro', 'premium']:
+        throttle = False
 
     # Get previously parsed receipts.
     if request.method == 'GET':
@@ -130,8 +134,12 @@ def api_data_receipts(request, receipt_id=None):
 
         # Limit the number of observations.
         limit = int(params.get('limit', 1000))
-        if limit > 1000:
+
+        # Throttle the number of observations for free users.
+        if throttle and limit > 1000:
             limit = 1000
+        else:
+            limit = None
         
         # Order the data.
         order_by = params.get('order_by', 'parsed_at')

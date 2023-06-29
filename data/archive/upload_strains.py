@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/26/2023
-Updated: 5/26/2023
+Updated: 6/28/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Command-line Usage:
@@ -233,6 +233,11 @@ def compile_strain_data(datafiles: list) -> pd.DataFrame:
 # - Florida
 # - Massachusetts
 # - Michigan
+
+# TODO: From WA traceability data, estimate:
+# - avg. yield per plant
+# - avg. growing time
+# - avg. price per gram
 
 
 #----------------------------------------------------------------------#
