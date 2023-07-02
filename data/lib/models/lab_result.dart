@@ -360,7 +360,7 @@ class Result {
   final String? status;
 
   // Create model.
-  factory Result.fromMap(Map<String, dynamic> data) {
+  factory Result.fromMap(Map<dynamic, dynamic> data) {
     return Result(
       analysis: data['analysis'] as String?,
       key: data['key'] as String?,

@@ -73,7 +73,7 @@ class FormActions extends StatelessWidget {
   final Widget editButton;
   final Widget saveButton;
   final Widget cancelButton;
-  final Widget downloadButton;
+  final Widget? downloadButton;
 
   FormActions({
     required this.isMobile,
@@ -82,7 +82,7 @@ class FormActions extends StatelessWidget {
     required this.editButton,
     required this.saveButton,
     required this.cancelButton,
-    required this.downloadButton,
+    this.downloadButton,
   });
 
   @override
@@ -106,9 +106,9 @@ class FormActions extends StatelessWidget {
                         gapW4,
                         saveButton,
                       ],
-                      if (!isEditing) ...[
+                      if (!isEditing && downloadButton != null) ...[
                         gapW4,
-                        downloadButton,
+                        downloadButton!,
                       ]
                     ],
                   ),
@@ -125,9 +125,9 @@ class FormActions extends StatelessWidget {
                   gapW4,
                   saveButton,
                 ],
-                if (!isEditing) ...[
+                if (!isEditing && downloadButton != null) ...[
                   gapW4,
-                  downloadButton,
+                  downloadButton!,
                 ]
               ],
             ),

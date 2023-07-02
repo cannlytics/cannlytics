@@ -132,8 +132,6 @@ def api_data_coas(request, coa_id=None):
     elif support_level == 'pro' or support_level == 'premium':
         throttle = False
     
-
-
     # Get a specific COA or query public COAs.
     if request.method == 'GET':
 
@@ -207,7 +205,7 @@ def api_data_coas(request, coa_id=None):
             limit = 1000
         else:
             limit = None
-        
+
         # Order the data.
         order_by = params.get('order_by', 'coa_parsed_at')
         desc = params.get('desc', True)
@@ -228,8 +226,6 @@ def api_data_coas(request, coa_id=None):
 
     # Parse posted COA PDFs or URLs.
     if request.method == 'POST':
-
-        # FIXME: Also save any PDF files for the user.
 
         # Get the user's number of tokens.
         user_subscription = get_document(f'subscribers/{uid}')

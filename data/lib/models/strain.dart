@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/25/2023
-// Updated: 6/28/2023
+// Updated: 6/29/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 typedef StrainId = String;
@@ -20,6 +20,9 @@ class Strain {
     this.cbdLevel,
     this.indicaPercentage,
     this.sativaPercentage,
+    this.imageUrl,
+    this.images,
+    this.comments,
   });
 
   // Properties.
@@ -30,7 +33,45 @@ class Strain {
   final double? cbdLevel;
   final double? indicaPercentage;
   final double? sativaPercentage;
-  // alias
+  final String? imageUrl;
+  final List<dynamic>? images;
+  final List<dynamic>? comments;
+
+  // Create model.
+  factory Strain.fromMap(Map<dynamic, dynamic> data) {
+    return Strain(
+      id: data['id'].toString(),
+      name: data['name'] ?? '',
+      testingStatus: data['testing_status'],
+      thcLevel: data['thc_level'],
+      cbdLevel: data['cbd_level'],
+      indicaPercentage: data['indica_percentage'],
+      sativaPercentage: data['sativa_percentage'],
+      imageUrl: data['image_url'],
+      images: data['images'],
+      comments: data['comments'],
+    );
+  }
+
+  // Create JSON.
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'name': name,
+      'testing_status': testingStatus,
+      'thc_level': thcLevel,
+      'cbd_level': cbdLevel,
+      'indica_percentage': indicaPercentage,
+      'sativa_percentage': sativaPercentage,
+      'image_url': imageUrl,
+      'images': images,
+      'comments': comments,
+    };
+  }
+}
+
+// Ideas for fields:
+// alias
   // description
   // origin
   // breeder
@@ -56,6 +97,7 @@ class Strain {
   // reviews (array of reviews)
   // sources (array of data sources)
   // 'imageUrl': imageUrl,
+  // strain_art_url
 //   Yield	The average yield of the strain when grown.
 // Flowering Time	The average time it takes for the strain to flower.
 // Plant Height	The average height of the plant.
@@ -98,34 +140,63 @@ class Strain {
 // Mold Resistance	The strain's resistance to mold.
 // Flower Appearance	The appearance of the strain's flowers.
 // Leaf Appearance	The appearance of the strain's leaves.
-// Aroma	The aroma of the strain.
+// Aroma	The aroma profile of the strain.
+// Color	The color of the strain's buds.
+// Taste	The taste of the strain when smoked or vaporized.
 // Parent Strains	The parent strains of
 // Child Strains	Any strains that have been bred using this strain as a parent.
 // Similar Strains	Strains that are similar in effects, flavor, or genetics.
-
-  // Create model.
-  factory Strain.fromMap(Map<String, dynamic> data) {
-    return Strain(
-      id: data['id'].toString(),
-      name: data['name'] ?? '',
-      testingStatus: data['testing_status'],
-      thcLevel: data['thc_level'],
-      cbdLevel: data['cbd_level'],
-      indicaPercentage: data['indica_percentage'],
-      sativaPercentage: data['sativa_percentage'],
-    );
-  }
-
-  // Create JSON.
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'id': id,
-      'name': name,
-      'testing_status': testingStatus,
-      'thc_level': thcLevel,
-      'cbd_level': cbdLevel,
-      'indica_percentage': indicaPercentage,
-      'sativa_percentage': sativaPercentage,
-    };
-  }
-}
+// Difficulty Level	The difficulty level of growing the strain.
+// Plant Height	The average height of the plant when grown.
+// Plant Width	The average width of the plant when grown.
+// Seed Availability	Whether seeds of the strain are available and where to buy them.
+// Clone Availability	Whether clones of the strain are available and where to buy them.
+// Phenotypes	Different phenotypes of the strain.
+// Genotype	The genotype of the strain.
+// Trichome Density	The density of trichomes on the strain's buds.
+// Bud Density	The density of the strain's buds.
+// Leaf-to-Bud Ratio	The ratio of leaves to buds on the plant.
+// CBN Percentage	The percentage of CBN in the strain.
+// CBG Percentage	The percentage of CBG in the strain.
+// CBC Percentage	The percentage of CBC in the strain.
+// THCV Percentage	The percentage of THCV in the strain.
+// CBDV Percentage	The percentage of CBDV in the strain.
+// CBGV Percentage	The percentage of CBGV in the strain.
+// CBCV Percentage	The percentage of CBCV in the strain.
+// CBL Percentage	The percentage of CBL in the strain.
+// CBT Percentage	The percentage of CBT in the strain.
+// CBE Percentage	The percentage of CBE in the strain.
+// CBND Percentage	The percentage of CBND in the strain.
+// CBF Percentage	The percentage of CBF in the strain.
+// Terpinolene Percentage	The percentage of Terpinolene in the strain.
+// Myrcene Percentage	The percentage of Myrcene in the strain.
+// Limonene Percentage	The percentage of Limonene in the strain.
+// Beta-Caryophyllene Percentage	The percentage of Beta-Caryophyllene in the strain.
+// Linalool Percentage	The percentage of Linalool in the strain.
+// Humulene Percentage	The percentage of Humulene in the strain.
+// Ocimene Percentage	The percentage of Ocimene in the strain.
+// Alpha-Pinene Percentage	The percentage of Alpha-Pinene in the strain.
+// Beta-Pinene Percentage	The percentage of Beta-Pinene in the strain.
+// Eucalyptol Percentage	The percentage of Eucalyptol in the strain.
+// Camphene Percentage	The percentage of Camphene in the strain.
+// Terpinene Percentage	The percentage of Terpinene in the strain.
+// Phellandrene Percentage	The percentage of Phellandrene in the strain.
+// Carene Percentage	The percentage of Carene in the strain.
+// Sabinene Percentage	The percentage of Sabinene in the strain.
+// Nerolidol Percentage	The percentage of Nerolidol in the strain.
+// Caryophyllene Oxide Percentage	The percentage of Caryophyllene Oxide in the strain.
+// Bisabolol Percentage	The percentage of Bisabolol in the strain.
+// Pulegone Percentage	The percentage of Pulegone in the strain.
+// Guaiol Percentage	The percentage of Guaiol in the strain.
+// Isopulegol Percentage	The percentage of Isopulegol in the strain.
+// Geraniol Percentage	The percentage of Geraniol in the strain.
+// Borneol Percentage	The percentage of Borneol in the strain.
+// Terpineol Percentage	The percentage of Terpineol in the strain.
+// Valencene Percentage	The percentage of Valencene in the strain.
+// Sesquiterpene Percentage	The percentage of Sesquiterpene in the strain.
+// Monoterpene Percentage	The percentage of Monoterpene in the strain.
+// Bibliographic References	Any bibliographic references related to the plant.
+// Patent Information	Any patents related to the plant.
+// First Cultivation	The first cultivation of the strain.
+// Folklore	Any folklore associated with the strain.
+// Etymology	The etymology of the strain's name.

@@ -4,10 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/6/2023
-// Updated: 3/6/2023
+// Updated: 6/29/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'dart:math';
+
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:flutter/material.dart';
@@ -15,15 +17,24 @@ import 'package:flutter/services.dart';
 
 /// A custom text field.
 class CustomTextField extends StatelessWidget {
-  final TextEditingController controller;
+  CustomTextField({
+    required this.label,
+    this.controller,
+    this.isNumeric = false,
+    this.value,
+    this.onChanged,
+    this.maxWidth,
+    this.maxLabelWidth,
+  });
+
+  // Parameters.
+  final TextEditingController? controller;
   final String label;
   final bool isNumeric;
-
-  CustomTextField({
-    required this.controller,
-    required this.label,
-    this.isNumeric = false,
-  });
+  final dynamic value;
+  final void Function(String)? onChanged;
+  final double? maxWidth;
+  final double? maxLabelWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +43,12 @@ class CustomTextField extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: (screenWidth < Breakpoints.tablet)
-              ? MediaQuery.of(context).size.width * 0.25
-              : MediaQuery.of(context).size.width * 0.125,
+          width: min(
+            (screenWidth < Breakpoints.tablet)
+                ? MediaQuery.of(context).size.width * 0.25
+                : MediaQuery.of(context).size.width * 0.125,
+            maxLabelWidth ?? double.infinity,
+          ),
           padding: EdgeInsets.only(left: 16, bottom: 8),
           child: SelectableText(
             label,
@@ -42,21 +56,40 @@ class CustomTextField extends StatelessWidget {
           ),
         ),
         Container(
-          width: isNumeric
-              ? (screenWidth < Breakpoints.tablet)
-                  ? MediaQuery.of(context).size.width * 0.25
-                  : MediaQuery.of(context).size.width * 0.15
-              : (screenWidth < Breakpoints.tablet)
-                  ? MediaQuery.of(context).size.width * 0.7
-                  : MediaQuery.of(context).size.width * 0.5,
+          // Width. Use the minimum of the calculated width and maxWidth.
+          width: min(
+            isNumeric
+                ? (screenWidth < Breakpoints.tablet)
+                    ? MediaQuery.of(context).size.width * 0.25
+                    : MediaQuery.of(context).size.width * 0.15
+                : (screenWidth < Breakpoints.tablet)
+                    ? MediaQuery.of(context).size.width * 0.7
+                    : MediaQuery.of(context).size.width * 0.5,
+            maxWidth ?? double.infinity,
+          ),
+
+          // Padding.
           padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+
+          // Text field.
           child: TextFormField(
+            // Controller.
             controller: controller,
-            style: Theme.of(context).textTheme.bodySmall,
+            initialValue: value?.toString() ?? '',
+
+            // Validation.
             keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
             inputFormatters: isNumeric
-                ? <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly]
+                ? <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))
+                  ]
                 : <TextInputFormatter>[],
+
+            // On change.
+            onChanged: onChanged,
+
+            // Style.
+            style: Theme.of(context).textTheme.bodySmall,
             decoration: InputDecoration(
               isDense: true,
               contentPadding: EdgeInsets.only(

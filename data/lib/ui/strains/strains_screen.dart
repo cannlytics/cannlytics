@@ -4,20 +4,19 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 6/24/2023
+// Updated: 6/30/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
+import 'package:cannlytics_data/common/layout/pill_tab.dart';
+import 'package:cannlytics_data/ui/strains/strain_search.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
-import 'package:cannlytics_data/common/forms/form_placeholder.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/constants/design.dart';
 // import 'package:cannlytics_data/services/auth_service.dart';
@@ -26,16 +25,14 @@ import 'package:cannlytics_data/constants/design.dart';
 
 /// TODO: Show newest strains, favorite strains, and "your" strains.
 ///
-
-/// Screen.
+/// Strains screen.
 class StrainsScreen extends StatelessWidget {
-  const StrainsScreen({super.key});
+  const StrainsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ConsoleScreen(
       children: [
-        // Main content.
         SliverToBoxAdapter(child: MainContent()),
       ],
     );
@@ -48,341 +45,107 @@ class MainContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Dynamic screen width.
-    final screenWidth = MediaQuery.of(context).size.width;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        // Breadcrumbs.
+        BreadcrumbsRow(
+          items: [
+            {'label': 'Data', 'path': '/'},
+            {'label': 'Strains', 'path': null},
+          ],
+        ),
 
-    // Listen to the current user.
-    // final user = ref.watch(userProvider).value;;
-
-    // Render the widget.
-    return Padding(
-      padding: EdgeInsets.only(
-        left: sliverHorizontalPadding(screenWidth),
-        right: sliverHorizontalPadding(screenWidth),
-        top: 24,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          // Breadcrumbs.
-          BreadcrumbsRow(
-            items: [
-              {'label': 'Data', 'path': '/'},
-              {'label': 'Strains', 'path': null},
-            ],
-          ),
-
-          // DEV: Under development message.
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
-            padding: EdgeInsets.all(8.0),
-            color: Colors.yellow[100],
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  Icons.warning,
-                  color: Colors.orange,
-                ),
-                SizedBox(width: 8.0),
-                Text(
-                  'Under development, please stay tuned for strain data.',
-                  style: TextStyle(
-                    color: Colors.orange[800],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Sponsorship placeholder.
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: SponsorshipCard(),
-          ),
-
-          // TODO: Your strains.
-
-          // TODO: Public strains.
-
-          gapH48,
-        ],
-      ),
+        // Main interface.
+        gapH12,
+        StrainsTabs(),
+      ],
     );
   }
 }
 
-enum Filter { newest, hot, yours }
+/// Tabs of strains.
+class StrainsTabs extends StatefulWidget {
+  const StrainsTabs({Key? key}) : super(key: key);
 
-/// Grid of strains.
-class MyHomePage extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _StrainsTabsState createState() => _StrainsTabsState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  ScrollController _scrollController = ScrollController();
-  List<String> _data = List.generate(20, (index) => "Item $index");
-  // Filter _filter = Filter.newest;
+/// Tabs state.
+class _StrainsTabsState extends State<StrainsTabs>
+    with SingleTickerProviderStateMixin {
+  // State.
+  late final TabController _tabController;
+  int _selectedIndex = 0;
 
+  /// Initialize the tab controller.
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        _loadMoreData();
-      }
-    });
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() => setState(() {
+          _selectedIndex = _tabController.index;
+        }));
+  }
+
+  // Dispose of the controllers.
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      GridView.builder(
-        controller: _scrollController,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+    return Column(
+      children: <Widget>[
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TabBar(
+            controller: _tabController,
+            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+            labelPadding: EdgeInsets.symmetric(horizontal: 2, vertical: 0),
+            isScrollable: true,
+            unselectedLabelColor: Theme.of(context).textTheme.bodyMedium!.color,
+            labelColor: Theme.of(context).textTheme.titleLarge!.color,
+            splashBorderRadius: BorderRadius.circular(30),
+            splashFactory: NoSplash.splashFactory,
+            overlayColor: MaterialStateProperty.all<Color>(Colors.transparent),
+            indicator: BoxDecoration(),
+            dividerColor: Colors.transparent,
+            tabs: [
+              PillTabButton(
+                text: 'New',
+                icon: Icons.update,
+                isSelected: _selectedIndex == 0,
+              ),
+              PillTabButton(
+                text: 'Hot',
+                icon: Icons.local_fire_department,
+                isSelected: _selectedIndex == 1,
+              ),
+              PillTabButton(
+                text: 'Favorites',
+                icon: Icons.favorite,
+                isSelected: _selectedIndex == 2,
+              ),
+            ],
+          ),
         ),
-        itemCount: _data.length,
-        itemBuilder: (context, index) {
-          return Card(
-            child: Center(
-              child: Text(_data[index]),
-            ),
-          );
-        },
-      ),
-    ]);
-    // appBar: AppBar(
-    //   title: Text('Infinite Scrolling Grid'),
-    //   actions: [
-    //     PopupMenuButton<Filter>(
-    //       onSelected: (Filter result) {
-    //         setState(() {
-    //           _filter = result;
-    //         });
-    //       },
-    //       itemBuilder: (BuildContext context) => <PopupMenuEntry<Filter>>[
-    //         const PopupMenuItem<Filter>(
-    //           value: Filter.newest,
-    //           child: Text('Newest'),
-    //         ),
-    //         const PopupMenuItem<Filter>(
-    //           value: Filter.hot,
-    //           child: Text('Hot'),
-    //         ),
-    //         const PopupMenuItem<Filter>(
-    //           value: Filter.yours,
-    //           child: Text('Yours'),
-    //         ),
-    //       ],
-    //     ),
-    //   ],
-    // ),
-  }
-
-  Future<void> _loadMoreData() async {
-    // Implement your logic here to fetch more data. For now, we will simply add 20 more items to the _data list.
-    await Future.delayed(Duration(seconds: 2)); // Emulates network delay
-    setState(() {
-      _data
-          .addAll(List.generate(20, (index) => "Item ${_data.length + index}"));
-    });
-  }
-}
-
-/// FIXME: Table.
-class StrainsTable extends ConsumerWidget {
-  const StrainsTable({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Get the filtered data.
-    // final data = ref.watch(filteredFacilitiesProvider);
-    final data = [];
-
-    // TODO: Actions and breadcrumbs.
-    Widget actions = Row(
-      children: [
-        Breadcrumbs(
-          items: [
-            BreadcrumbItem(
-                title: 'Data',
-                onTap: () {
-                  context.go('/');
-                }),
-            BreadcrumbItem(
-                title: 'Licensees',
-                onTap: () {
-                  // Add navigation to Category screen.
-                })
-          ],
+        Container(
+          height: MediaQuery.of(context).size.height,
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              StrainsSearch(orderBy: 'updated_at'),
+              StrainsSearch(orderBy: 'total_lab_results'),
+              StrainsSearch(orderBy: 'total_favorites'),
+            ],
+          ),
         ),
       ],
     );
-
-    // FIXME: Create a licensees table.
-    var table;
-
-    // // Define the cell builder function.
-    // _buildCells(Facility item) {
-    //   var values = [
-    //     item.id,
-    //     item.name,
-    //     item.displayName,
-    //     item.licenseType,
-    //   ];
-    //   return values.map((value) {
-    //     return DataCell(
-    //       Text(value),
-    //       onTap: () => context.go('/facilities/${item.id}'),
-    //     );
-    //   }).toList();
-    // }
-
-    // // Define the table headers.
-    // List<Map> headers = [
-    //   {'name': 'ID', 'key': 'id', 'sort': true},
-    //   {'name': 'Name', 'key': 'name', 'sort': true},
-    //   {'name': 'Display Name', 'key': 'display_name', 'sort': true},
-    //   {'name': 'License Type', 'key': 'license_type', 'sort': false},
-    // ];
-
-    // // Format the table headers.
-    // List<DataColumn> tableHeader = <DataColumn>[
-    //   for (Map header in headers)
-    //     DataColumn(
-    //       label: Expanded(
-    //         child: Text(
-    //           header['name'],
-    //           style: TextStyle(fontStyle: FontStyle.italic),
-    //         ),
-    //       ),
-    //       onSort: (columnIndex, sortAscending) {
-    //         var field = headers[columnIndex]['key'];
-    //         var sort = headers[columnIndex]['sort'];
-    //         if (!sort) return;
-    //         var sorted = data;
-    //         if (sortAscending) {
-    //           sorted = data.sortedBy((x) => x.toMap()[field]);
-    //         } else {
-    //           sorted = data.sortedByDescending((x) => x.toMap()[field]);
-    //         }
-    //         ref.read(facilitiesSortColumnIndex.notifier).state = columnIndex;
-    //         ref.read(facilitiesSortAscending.notifier).state = sortAscending;
-    //         ref.read(facilitiesProvider.notifier).setFacilities(sorted);
-    //       },
-    //     ),
-    // ];
-
-    // // Get the rows per page.
-    // final rowsPerPage = ref.watch(facilitiesRowsPerPageProvider);
-
-    // // Get the sorting state.
-    // final sortColumnIndex = ref.read(facilitiesSortColumnIndex);
-    // final sortAscending = ref.read(facilitiesSortAscending);
-
-    // // Build the data table.
-    // Widget table = PaginatedDataTable(
-    //   // Options.
-    //   showCheckboxColumn: false,
-    //   showFirstLastButtons: true,
-    //   sortColumnIndex: sortColumnIndex,
-    //   sortAscending: sortAscending,
-
-    //   // Columns
-    //   columns: tableHeader,
-
-    //   // Style.
-    //   dataRowHeight: 48,
-    //   columnSpacing: 48,
-    //   headingRowHeight: 48,
-    //   horizontalMargin: 12,
-
-    //   // Pagination.
-    //   availableRowsPerPage: [5, 10, 25, 50, 100],
-    //   rowsPerPage: rowsPerPage,
-    //   onRowsPerPageChanged: (index) {
-    //     ref.read(facilitiesRowsPerPageProvider.notifier).state = index!;
-    //   },
-
-    //   // Table.
-    //   source: TableData<Facility>(
-    //     data: data,
-    //     cellsBuilder: _buildCells,
-    //   ),
-    // );
-
-    // // Read the search controller.
-    // final _controller = ref.watch(facilitiesSearchController);
-
-    // // Define the table actions.
-    // var actions = Row(
-    //   children: [
-    //     // Search box.
-    //     SizedBox(
-    //       width: 175,
-    //       child: TypeAheadField(
-    //         textFieldConfiguration: TextFieldConfiguration(
-    //           // Controller.
-    //           controller: _controller,
-
-    //           // Decoration.
-    //           decoration: InputDecoration(
-    //             hintText: 'Search...',
-    //             contentPadding:
-    //                 EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    //             border: OutlineInputBorder(
-    //               borderRadius: BorderRadius.all(Radius.circular(3)),
-    //             ),
-    //             suffixIcon: _controller.text.isNotEmpty
-    //                 ? GestureDetector(
-    //                     onTap: () {
-    //                       ref.read(searchTermProvider.notifier).state = '';
-    //                       _controller.clear();
-    //                     },
-    //                     child: Icon(Icons.clear),
-    //                   )
-    //                 : null,
-    //           ),
-    //           style: DefaultTextStyle.of(context)
-    //               .style
-    //               .copyWith(fontStyle: FontStyle.italic),
-    //         ),
-    //         // Search engine function.
-    //         suggestionsCallback: (pattern) async {
-    //           ref.read(searchTermProvider.notifier).state = pattern;
-    //           final suggestions = ref.read(filteredFacilitiesProvider);
-    //           return suggestions;
-    //         },
-
-    //         // Autocomplete menu.
-    //         itemBuilder: (BuildContext context, Facility suggestion) {
-    //           return ListTile(title: Text(suggestion.name));
-    //         },
-
-    //         // Menu selection function.
-    //         onSuggestionSelected: (Facility suggestion) {
-    //           context.go('/facilities/${suggestion.id}');
-    //         },
-    //       ),
-    //     ),
-    //   ],
-    // );
-
-    // TODO: Loading placeholder.
-    if (data.isEmpty)
-      table = FormPlaceholder(
-        image: 'assets/images/icons/facilities.png',
-        title: 'Add a facility',
-        description:
-            'Facilities are used to track packages, items, and plants.',
-        onTap: () {
-          context.go('/facilities/new');
-        },
-      );
-    return Column(children: [actions, gapH12, table]);
   }
 }

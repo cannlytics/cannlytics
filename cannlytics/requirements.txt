@@ -10,6 +10,7 @@ google-cloud-firestore
 googlemaps
 matplotlib
 numpy
+openai
 openpyxl
 opencv-python
 pandas
@@ -21,8 +22,10 @@ pytesseract
 python-dateutil
 python-dotenv
 pyzbar
+scikit-learn
 selenium
 statsmodels
+tiktoken
 Wand
 ulid-py
 zipcodes

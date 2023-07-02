@@ -47,7 +47,6 @@ class DashboardHeader extends ConsumerWidget implements PreferredSizeWidget {
       loading: () => 0,
       error: (error, stack) => 0,
     );
-    print('CURRENT TOKENS: $currentTokens');
 
     // Get the theme.
     final themeMode = ref.watch(themeModeProvider);
@@ -307,7 +306,6 @@ class UserMenu extends ConsumerWidget {
               );
               if (logout == true) {
                 await ref.read(authProvider).signOut();
-                context.go('/sign-in');
               }
               break;
           }

@@ -18,6 +18,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Main datasets.
 /// TODO: Get this data from Firestore.
 final List<Map> mainDatasets = [
+  // TODO: Strains!
+  {
+    "title": "Cannabis Strains",
+    "image_url":
+        "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Flogos%2Fskunkfx_icon.png?alt=media&token=f508470f-5875-4833-b4cd-dc8f633c74b7",
+    "description":
+        "A collection of cannabis strains, derived from lab results.",
+    "tier": "Premium",
+    "path": "/strains",
+    "observations": 0,
+    "fields": 0,
+    "type": "strains",
+    "file_ref": "data/strains/all/strains-2023-07-01T00-00-00.csv",
+  },
+
+  // Licenses.
   {
     "title": "US Cannabis Licenses",
     "image_url":

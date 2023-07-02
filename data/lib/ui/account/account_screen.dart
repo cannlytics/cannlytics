@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 6/23/2023
+// Updated: 6/30/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -91,6 +91,7 @@ class AccountManagement extends ConsumerWidget {
 
           // Delete account option.
           if (user != null) DeleteAccountCard(),
+          gapH48,
         ],
       ),
     );
@@ -145,8 +146,6 @@ class _AccountFormState extends ConsumerState<AccountForm>
         backgroundColor: LightColors.lightGreen.withAlpha(60),
         textColor: Colors.white,
         fontSize: 16.0,
-        // webBgColor:
-        //     WebUtils.colorToHexCode(LightColors.lightGreen.withAlpha(60)),
         webPosition: 'center',
         webShowClose: true,
       );
@@ -519,9 +518,6 @@ class APIKeyManagement extends ConsumerWidget {
                   launchUrl(Uri.parse(url));
                 },
               ),
-
-              // Future work: Table of API keys.
-              // ApiKeysTable(),
             ],
           ),
         ],

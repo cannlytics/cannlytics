@@ -98,6 +98,13 @@ class _ResultsTabsState extends State<ResultsTabs>
     _tabController.addListener(() => setState(() {}));
   }
 
+  // Dispose the controllers.
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(

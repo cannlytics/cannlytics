@@ -166,6 +166,8 @@ def gpt_to_json(
         openai_api_key: Optional[str] = None,
         verbose: Optional[bool] = False,
         retry_pause: Optional[float] = 3.33,
+        text_label: Optional[str] = 'Text',
+        json_label: Optional[str] = 'JSON',
     ) -> dict:
     """Prompt GPT and convert the output content to JSON."""
 
@@ -175,7 +177,7 @@ def gpt_to_json(
         messages.append({'role': 'system', 'content': system_prompt})
     
     # Add the main prompt.
-    main_prompt = 'Text: ' + text + '\n\nJSON:'
+    main_prompt = f'{text_label}: ' + text + f'\n\n{json_label}:'
     messages.append({'role': 'user', 'content': main_prompt})
 
     # Make the request to the OpenAI API.

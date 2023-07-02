@@ -3,13 +3,14 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 5/23/2023
-// Updated: 6/29/2023
+// Created: 6/30/2023
+// Updated: 6/30/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/models/lab_result.dart';
-import 'package:cannlytics_data/ui/results/result_list_item.dart';
+import 'package:cannlytics_data/models/strain.dart';
+import 'package:cannlytics_data/ui/strains/strain_list_item.dart';
+import 'package:cannlytics_data/ui/strains/strains_service.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -19,15 +20,18 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_data/ui/results/results_search_controller.dart';
 
-/// Lab results search form.
-class LabResultsSearchForm extends HookConsumerWidget {
-  LabResultsSearchForm({Key? key}) : super(key: key);
+/// Strain search form.
+class StrainsSearch extends HookConsumerWidget {
+  StrainsSearch({Key? key, this.orderBy}) : super(key: key);
+
+  // Parameters.
+  final String? orderBy;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen to the data.
-    final asyncData = ref.watch(asyncLabResultsProvider);
-    final prodSearchList = asyncData.value ?? [];
+    // final asyncData = ref.watch(strainsQuery);
+    // final prodSearchList = asyncData.value ?? [];
 
     // Search text controller.
     final _searchTextController = ref.read(resultsSearchController);
@@ -35,9 +39,8 @@ class LabResultsSearchForm extends HookConsumerWidget {
 
     // Search on enter.
     void _onSubmitted(String value) {
-      // ref.watch(asyncLabResultsProvider.notifier).searchLabResults(value);
-      ref.read(searchTermProvider.notifier).update((state) => value);
-      ref.read(keywordsQuery.notifier).update((state) => state);
+      ref.read(strainSearchTerm.notifier).update((state) => value);
+      // ref.read(strainsQuery.notifier).update((state) => state);
     }
 
     /// Loading results placeholder.
@@ -53,32 +56,28 @@ class LabResultsSearchForm extends HookConsumerWidget {
     /// No samples found placeholder.
     Widget _emptyResults() {
       return ResultsSearchPlaceholder(
-        title: 'Waiting to get your COAs, boss!',
-        subtitle:
-            'You can search by product name keywords, lab ID, or batch number.',
+        title: 'Get your paws on the latest discovered strains!',
+        subtitle: 'You can search by keyword.',
       );
     }
 
     /// No samples found placeholder.
     Widget _noResults() {
       return ResultsSearchPlaceholder(
-        title: 'No COAs found!',
+        title: 'No strains found!',
         subtitle:
-            "Sorry boss, I couldn't find any results. Please contact dev@cannlytics.com to get a person on this ASAP.",
+            "Sorry, I couldn't find any strains. Please contact dev@cannlytics.com to get a person on this ASAP.",
       );
     }
 
     /// Results list.
-    /// FIXME: Redo as grid of cards?
-    /// TODO: Use a Grid / PaginatedDataTable to display the results.
-    /// Let the user chose the type of view.
     Widget _resultsList() {
       return SelectionArea(
-        child: FirestoreListView<LabResult>(
+        child: FirestoreListView<Strain>(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
           padding: EdgeInsets.only(top: 16, bottom: 48),
-          query: ref.watch(keywordsQuery),
+          query: ref.watch(strainsQuery(orderBy ?? 'updated_at')),
           pageSize: 20,
           emptyBuilder: (context) => _searchTextController.text.isEmpty
               ? _emptyResults()
@@ -87,58 +86,35 @@ class LabResultsSearchForm extends HookConsumerWidget {
           loadingBuilder: (context) => _loadingResults(),
           itemBuilder: (context, doc) {
             final item = doc.data();
-            return LabResultItem(labResult: item);
+            return StrainListItem(strain: item);
           },
         ),
-        // child: ListView.builder(
-        //   padding: EdgeInsets.only(top: 16, bottom: 48),
-        //   shrinkWrap: true,
-        //   physics: NeverScrollableScrollPhysics(),
-        //   itemCount: prodSearchList.length,
-        //   itemBuilder: (context, i) {
-        //     if (_searchTextController.text.isNotEmpty) {
-        //       return LabResultItem(labResult: prodSearchList[i]);
-        //     } else {
-        //       return null;
-        //     }
-        //   },
-        // ),
       );
     }
 
-    /// Search results list.
-    // Widget _buildSearchResults(BuildContext context) {
-    //   return asyncData.isLoading
-    //       ? _loadingResults()
-    //       : (_searchTextController.text.isEmpty && prodSearchList.isEmpty)
-    //           ? _emptyResults()
-    //           : _searchTextController.text.isNotEmpty && prodSearchList.isEmpty
-    //               ? _noResults()
-    //               : _resultsList();
-    // }
-
     /// Search icon.
     Widget _searchIcon() {
-      return asyncData.isLoading
-          ? Icon(
-              Icons.hourglass_full,
-              color: Theme.of(context).textTheme.labelMedium!.color,
-            )
-          : InkWell(
-              onTap: () {
-                String value = _searchTextController.text;
-                print('Searching for value: $value');
-                // ref
-                //     .watch(asyncLabResultsProvider.notifier)
-                //     .searchLabResults(value);
-                ref.read(searchTermProvider.notifier).update((state) => value);
-                ref.read(keywordsQuery.notifier).update((state) => state);
-              },
-              child: Icon(
-                Icons.send,
-                color: Theme.of(context).textTheme.labelMedium!.color,
-              ),
-            );
+      // return asyncData.isLoading
+      //     ? Icon(
+      //         Icons.hourglass_full,
+      //         color: Theme.of(context).textTheme.labelMedium!.color,
+      //       )
+      //     :
+      return InkWell(
+        onTap: () {
+          String value = _searchTextController.text;
+          print('Searching for value: $value');
+          // ref
+          //     .watch(asyncLabResultsProvider.notifier)
+          //     .searchLabResults(value);
+          ref.read(strainSearchTerm.notifier).update((state) => value);
+          // ref.read(strainsQuery.notifier).update((state) => state);
+        },
+        child: Icon(
+          Icons.send,
+          color: Theme.of(context).textTheme.labelMedium!.color,
+        ),
+      );
     }
 
     /// Clear icon.
@@ -148,8 +124,8 @@ class LabResultsSearchForm extends HookConsumerWidget {
               onPressed: () {
                 // ref.watch(asyncLabResultsProvider.notifier).clearLabResults();
                 _searchTextController.clear();
-                ref.read(searchTermProvider.notifier).update((state) => '');
-                ref.read(keywordsQuery.notifier).update((state) => state);
+                ref.read(strainSearchTerm.notifier).update((state) => '');
+                // ref.read(strainsQuery.notifier).update((state) => state);
               },
               icon: Icon(
                 Icons.close,
@@ -207,7 +183,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
           Padding(
             padding: EdgeInsets.only(left: 16, top: 12),
             child: Text(
-              'Search lab results',
+              'Search strains',
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
@@ -227,24 +203,33 @@ class LabResultsSearchForm extends HookConsumerWidget {
           // Results list, centered when there are no results, top-aligned otherwise.
           Container(
             height: MediaQuery.of(context).size.height * 0.6,
-            child: _searchTextController.text.isNotEmpty &&
-                    prodSearchList.isNotEmpty
-                ? SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        _resultsList(),
-                      ],
-                    ),
-                  )
-                : Center(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          _resultsList(),
-                        ],
-                      ),
-                    ),
-                  ),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _resultsList(),
+                  ],
+                ),
+              ),
+            ),
+            // child: _searchTextController.text.isNotEmpty &&
+            //         prodSearchList.isNotEmpty
+            //     ? SingleChildScrollView(
+            //         child: Column(
+            //           children: [
+            //             _resultsList(),
+            //           ],
+            //         ),
+            //       )
+            //     : Center(
+            //         child: SingleChildScrollView(
+            //           child: Column(
+            //             children: [
+            //               _resultsList(),
+            //             ],
+            //           ),
+            //         ),
+            //       ),
           ),
 
           // Disclaimer.

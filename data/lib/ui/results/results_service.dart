@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/13/2023
-// Updated: 6/23/2023
+// Updated: 6/29/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -28,11 +28,7 @@ final userResults = StreamProvider<List<Map?>>((ref) async* {
   if (user == null) return;
   yield* _dataSource.streamCollection(
     path: 'users/${user.uid}/lab_results',
-    builder: (data, documentId) {
-      print('DATA:');
-      print(data);
-      return data;
-    },
+    builder: (data, documentId) => data,
     queryBuilder: (query) => query.orderBy('coa_parsed_at', descending: true),
   );
 });
@@ -51,13 +47,20 @@ final labResultProvider =
       var results =
           labResult.results?.map((result) => result?.toMap()).toList();
       ref.read(analysisResults.notifier).update((state) => results ?? []);
+      ref.read(updatedLabResult.notifier).update((state) => labResult);
       return labResult;
     },
   );
 });
 
+// Updated result.
+final updatedLabResult = StateProvider<LabResult?>((ref) => null);
+
 // Updated analysis results.
 final analysisResults = StateProvider<List<Map?>>((ref) => []);
+
+// New analysis result.
+final newAnalysisResult = StateProvider<Map>((ref) => {});
 
 // Result service provider.
 final resultService = Provider<ResultService>((ref) {

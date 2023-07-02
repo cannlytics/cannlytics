@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/27/2023
-// Updated: 6/27/2023
+// Updated: 6/30/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -24,12 +24,12 @@ class PillTabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Whether or not the tab is selected or hovered.
-    // bool isSelected = controller.index == index;
+    // Whether or not the tab is hovered.
     ValueNotifier<bool> isHovered = ValueNotifier(false);
 
     // Selected colors.
-    Color lightScreenGold = Color(0xFFFFBF5F);
+    // Color lightScreenGold = Color(0xFFFFBF5F);
+    Color lightScreenGold = Theme.of(context).colorScheme.secondary;
     Color darkScreenGold = Color(0xFFFFD700);
     Color goldColor = Theme.of(context).brightness == Brightness.light
         ? lightScreenGold
@@ -64,7 +64,7 @@ class PillTabButton extends StatelessWidget {
                     size: 16,
                     color: isSelected
                         ? goldColor
-                        : Theme.of(context).colorScheme.secondary,
+                        : Theme.of(context).textTheme.bodyMedium?.color,
                   ),
                   SizedBox(width: 8),
 

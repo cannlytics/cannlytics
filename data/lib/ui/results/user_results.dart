@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/13/2023
-// Updated: 6/28/2023
+// Updated: 6/29/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/download_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
@@ -125,7 +125,7 @@ class UserResultsInterface extends ConsumerWidget {
                   PrimaryButton(
                     text: 'Parse results',
                     onPressed: () => tabController?.animateTo(1),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -266,7 +266,8 @@ class UserResultsGrid extends ConsumerWidget {
       children: <Widget>[
         // Title.
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+          padding:
+              const EdgeInsets.only(left: 16.0, right: 16, top: 16, bottom: 8),
           child: Row(
             children: [
               SelectableText(
@@ -306,6 +307,7 @@ class UserResultsGrid extends ConsumerWidget {
             },
           ),
         ),
+        gapH48,
       ],
     );
   }

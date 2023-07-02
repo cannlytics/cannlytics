@@ -4,20 +4,19 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/19/2023
-// Updated: 6/23/2023
+// Updated: 7/1/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
+import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
-import 'package:cannlytics_data/common/forms/form_container.dart';
-import 'package:cannlytics_data/ui/layout/footer.dart';
 import 'package:cannlytics_data/constants/design.dart';
+import 'package:go_router/go_router.dart';
 
 /// Simple not found screen used for 404 errors.
 class NotFoundScreen extends StatelessWidget {
@@ -25,42 +24,38 @@ class NotFoundScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Form.
-          SliverToBoxAdapter(
-              child: FormContainer(children: [
-            Text(
+    // Content.
+    var content = Center(
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // TODO: Add a 404 image.
+            SelectableText(
               'Page not found.',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             gapH6,
-            Text(
-              'You can use the following link to try to get to where you need to go.',
+            SelectableText(
+              'Please contact dev@cannlytics.com for help sorting this issue out.',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-
-            // Back to locations button.
-            gapH24,
-            Row(
-              children: [
-                CustomTextButton(
-                  text: 'Dashboard',
-                  onPressed: () {
-                    context.go('/');
-                  },
-                  fontStyle: FontStyle.italic,
-                ),
-              ],
-            ),
-            gapH48,
-          ])),
-
-          // Footer
-          const SliverToBoxAdapter(child: Footer()),
-        ],
+            gapH12,
+            PrimaryButton(text: 'Home', onPressed: () => context.go('/')),
+          ],
+        ),
       ),
+    );
+
+    // Render.
+    return ConsoleScreen(
+      children: [
+        SliverFillRemaining(
+          child: content,
+        ),
+      ],
     );
   }
 }

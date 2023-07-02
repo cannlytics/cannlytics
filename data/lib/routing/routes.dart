@@ -20,6 +20,7 @@ import 'package:cannlytics_data/ui/results/result_screen.dart';
 import 'package:cannlytics_data/ui/results/results_screen.dart';
 import 'package:cannlytics_data/ui/sales/receipt_screen.dart';
 import 'package:cannlytics_data/ui/sales/sales_screen.dart';
+import 'package:cannlytics_data/ui/strains/strain_screen.dart';
 import 'package:cannlytics_data/ui/strains/strains_screen.dart';
 
 // The main app routes.
@@ -83,6 +84,16 @@ class Routes {
       name: 'strains',
       builder: (context, state) => StrainsScreen(),
       useFade: true,
+      routes: [
+        // Result screen.
+        AppRoute(
+          path: ':hash',
+          name: 'strain',
+          builder: (context, state) {
+            return StrainScreen(strainId: state.params['hash']!);
+          },
+        ),
+      ],
     ),
 
     // Lab results screen.

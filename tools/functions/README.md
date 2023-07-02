@@ -33,7 +33,7 @@ The data is saved to `public/data/lab_results/{lab_result_id}`.
 You can deploy the `calc_results_stats` cloud function with:
 
 ```shell
-gcloud functions deploy calc_results_stats --source calc_results_stats --entry-point calc_results_stats  --trigger-event-filters providers/firebase.auth/eventTypes/user.create  --trigger-resource cannlytics --runtime python310 --gen2
+gcloud functions deploy calc_results_stats --source calc_results_stats --entry-point calc_results_stats  --trigger-event-filters providers/firebase.auth/eventTypes/user.create  --trigger-resource cannlytics --runtime python311 --gen2
 ```
 
 

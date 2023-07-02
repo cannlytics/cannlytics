@@ -4,11 +4,8 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/22/2023
-// Updated: 4/15/2023
+// Updated: 7/1/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// TODO:
-// - Highlight active route accordingly.
 
 // Flutter imports:
 import 'package:cannlytics_data/ui/account/account_controller.dart';
@@ -57,8 +54,7 @@ class SideMenu extends ConsumerWidget {
     // Listen to the current user.
     final user = ref.watch(userProvider).value;
 
-    print('CURRENT ROUTE:');
-    print(GoRouter.of(context).location);
+    // Get the current route.
     final currentRoute = GoRouter.of(context).location;
 
     // Render the side menu.
@@ -117,36 +113,6 @@ class SideMenu extends ConsumerWidget {
           onTap: () => context.push('/strains'),
           isSelected: currentRoute.contains('/strains'),
         ),
-
-        // // Products link.
-        // DrawerListTile(
-        //   title: 'Products',
-        //   leading: SvgPicture.asset(
-        //     'assets/icons/emoji/package.svg',
-        //     width: 28,
-        //   ),
-        //   onTap: () => context.push('/products'),
-        // ),
-
-        // // Industry link.
-        // DrawerListTile(
-        //   title: 'Industry',
-        //   leading: SvgPicture.asset(
-        //     'assets/icons/emoji/tractor.svg',
-        //     width: 28,
-        //   ),
-        //   onTap: () => context.push('/production'),
-        // ),
-
-        // // Research link.
-        // DrawerListTile(
-        //   title: 'Research',
-        //   leading: SvgPicture.asset(
-        //     'assets/icons/emoji/dna.svg',
-        //     width: 28,
-        //   ),
-        //   onTap: () => context.push('/research'),
-        // ),
 
         // Divider
         Divider(),
@@ -208,7 +174,6 @@ class SideMenu extends ConsumerWidget {
               );
               if (logout == true) {
                 await ref.read(authProvider).signOut();
-                context.push('/dashboard');
               }
             },
           ),

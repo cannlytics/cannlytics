@@ -107,10 +107,10 @@ class AppTheme {
           }
           return Colors.transparent;
         }),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(3),
-        ),
+        // decoration: BoxDecoration(
+        //   border: Border.all(color: Colors.grey),
+        //   borderRadius: BorderRadius.circular(3),
+        // ),
       ),
 
       // Dialog style.

@@ -1,12 +1,12 @@
 """
 Cannlytics Module Initialization | Cannlytics
-Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
+Copyright (c) 2021-2023 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 4/8/2023
+Updated: 7/1/2023
 """
-from .cannlytics import Cannlytics
+# from .cannlytics import Cannlytics
 import cannlytics.auth as auth
 import cannlytics.data as data
 import cannlytics.firebase as firebase
@@ -18,14 +18,13 @@ import cannlytics.utils as utils
 
 
 __all__ = [
-    'Cannlytics',
+    # 'Cannlytics',
     'auth',
     'data',
     'firebase',
     'lims',
     'metrc',
     'models',
-    'paypal',
     'stats',
     'utils',
 ]

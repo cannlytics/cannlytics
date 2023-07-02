@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/27/2023
+// Updated: 6/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -42,14 +42,14 @@ final receiptProvider =
     builder: (data, documentId) {
       // Keep track of current values for editing.
       var obj = SalesReceipt.fromMap(data ?? {});
-      ref.read(currentReceipt.notifier).update((state) => data ?? {});
+      ref.read(updatedReceipt.notifier).update((state) => obj);
       return obj;
     },
   );
 });
 
 // Current receipt values.
-final currentReceipt = StateProvider<Map>((ref) => {});
+final updatedReceipt = StateProvider<SalesReceipt?>((ref) => null);
 
 // Receipt service provider.
 final receiptService = Provider<ReceiptService>((ref) {

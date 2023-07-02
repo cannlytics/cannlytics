@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 6/27/2023
+// Updated: 6/29/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // Flutter imports:
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
@@ -82,6 +82,13 @@ class _ResultsTabsState extends State<ResultsTabs>
     _tabController.addListener(() => setState(() {}));
   }
 
+  // Dispose the controllers.
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -102,17 +109,13 @@ class _ResultsTabsState extends State<ResultsTabs>
             dividerColor: Colors.transparent,
             tabs: [
               PillTabButton(
-                text: 'Parse',
-                icon: Icons.auto_awesome,
-                isSelected: _tabController.index == 0,
-              ),
-              // PillTabButton(
-              //   text: 'Analytics',
-              //   icon: Icons.explore,
-              // ),
-              PillTabButton(
                 text: 'Your Receipts',
                 icon: Icons.science,
+                isSelected: _tabController.index == 0,
+              ),
+              PillTabButton(
+                text: 'Parse',
+                icon: Icons.auto_awesome,
                 isSelected: _tabController.index == 1,
               ),
             ],
@@ -123,9 +126,8 @@ class _ResultsTabsState extends State<ResultsTabs>
           child: TabBarView(
             controller: _tabController,
             children: [
+              UserReceiptsInterface(tabController: _tabController),
               ReceiptsParserInterface(),
-              // UserReceiptsInterface(),
-              UserReceiptsInterface(),
             ],
           ),
         ),

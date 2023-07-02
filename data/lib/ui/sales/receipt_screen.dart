@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/9/2023
-// Updated: 6/27/2023
+// Updated: 6/30/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/download_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
@@ -20,6 +20,7 @@ import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/ui/sales/sales_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Receipt screen.
 class ReceiptScreen extends ConsumerStatefulWidget {
@@ -46,135 +47,43 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
   int _tabCount = 1;
   Future<void>? _updateFuture;
 
-  // Define the TextEditingController instances.
-  final _receiptNumberController = TextEditingController();
-  final _totalPriceController = TextEditingController();
-  final _transactionsController = TextEditingController();
-  final _dateSoldController = TextEditingController();
-  final _productNamesController = TextEditingController();
-  final _productTypesController = TextEditingController();
-  final _productQuantitiesController = TextEditingController();
-  final _productPricesController = TextEditingController();
-  final _productIdsController = TextEditingController();
-  final _totalAmountController = TextEditingController();
-  final _subtotalController = TextEditingController();
-  final _totalDiscountController = TextEditingController();
-  final _totalPaidController = TextEditingController();
-  final _changeDueController = TextEditingController();
-  final _rewardsEarnedController = TextEditingController();
-  final _rewardsSpentController = TextEditingController();
-  final _totalRewardsController = TextEditingController();
-  final _cityTaxController = TextEditingController();
-  final _countyTaxController = TextEditingController();
-  final _stateTaxController = TextEditingController();
-  final _exciseTaxController = TextEditingController();
-  final _retailerController = TextEditingController();
-  final _retailerLicenseNumberController = TextEditingController();
-  final _retailerAddressController = TextEditingController();
-  final _budtenderController = TextEditingController();
-  final _totalTaxController = TextEditingController();
-  final _totalTransactionsController = TextEditingController();
-
   // Initialize the state.
   @override
   void initState() {
     super.initState();
+
     // Initialize tabs.
     _tabController = TabController(length: _tabCount, vsync: this);
     _tabController.addListener(() => setState(() {}));
   }
 
-  // Dispose of the controllers.
+  // Dispose the controllers.
   @override
   void dispose() {
-    _receiptNumberController.dispose();
-    _totalPriceController.dispose();
-    _transactionsController.dispose();
-    _dateSoldController.dispose();
-    _productNamesController.dispose();
-    _productTypesController.dispose();
-    _productQuantitiesController.dispose();
-    _productPricesController.dispose();
-    _productIdsController.dispose();
-    _totalAmountController.dispose();
-    _subtotalController.dispose();
-    _totalDiscountController.dispose();
-    _totalPaidController.dispose();
-    _changeDueController.dispose();
-    _rewardsEarnedController.dispose();
-    _rewardsSpentController.dispose();
-    _totalRewardsController.dispose();
-    _cityTaxController.dispose();
-    _countyTaxController.dispose();
-    _stateTaxController.dispose();
-    _exciseTaxController.dispose();
-    _retailerController.dispose();
-    _retailerLicenseNumberController.dispose();
-    _retailerAddressController.dispose();
-    _budtenderController.dispose();
-    _totalTaxController.dispose();
-    _totalTransactionsController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
   // Render the screen.
   @override
   Widget build(BuildContext context) {
-    if (widget.salesReceiptId != null) {
-      final asyncData = ref.watch(receiptProvider(widget.salesReceiptId!));
-      return asyncData.when(
-        // Loading UI.
-        loading: () => MainContent(
-          child: LoadingPlaceholder(),
-          fillRemaining: true,
-        ),
+    if (widget.salesReceipt != null) return _form(widget.salesReceipt);
+    final asyncData = ref.watch(receiptProvider(widget.salesReceiptId!));
+    return asyncData.when(
+      // Loading UI.
+      loading: () => MainContent(
+        child: LoadingPlaceholder(),
+        fillRemaining: true,
+      ),
 
-        // Error UI.
-        error: (err, stack) => MainContent(
-          child: SelectableText('Error: $err'),
-        ),
+      // Error UI.
+      error: (err, stack) => MainContent(
+        child: SelectableText('Error: $err'),
+      ),
 
-        // Data loaded UI.
-        data: (data) {
-          // Initialize the text editing controllers with values.
-          _receiptNumberController.text = data?.receiptNumber ?? '';
-          _totalPriceController.text = data?.totalPrice?.toString() ?? '';
-          _transactionsController.text = data?.transactions?.join(',') ?? '';
-          _dateSoldController.text = data?.dateSold?.toIso8601String() ?? '';
-          _productNamesController.text = data?.productNames?.join(',') ?? '';
-          _productTypesController.text = data?.productTypes?.join(',') ?? '';
-          _productQuantitiesController.text =
-              data?.productQuantities?.join(',') ?? '';
-          _productPricesController.text = data?.productPrices?.join(',') ?? '';
-          _productIdsController.text = data?.productIds?.join(',') ?? '';
-          _totalAmountController.text = data?.totalAmount?.toString() ?? '';
-          _subtotalController.text = data?.subtotal?.toString() ?? '';
-          _totalDiscountController.text = data?.totalDiscount?.toString() ?? '';
-          _totalPaidController.text = data?.totalPaid?.toString() ?? '';
-          _changeDueController.text = data?.changeDue?.toString() ?? '';
-          _rewardsEarnedController.text = data?.rewardsEarned?.toString() ?? '';
-          _rewardsSpentController.text = data?.rewardsSpent?.toString() ?? '';
-          _totalRewardsController.text = data?.totalRewards?.toString() ?? '';
-          _cityTaxController.text = data?.cityTax?.toString() ?? '';
-          _countyTaxController.text = data?.countyTax?.toString() ?? '';
-          _stateTaxController.text = data?.stateTax?.toString() ?? '';
-          _exciseTaxController.text = data?.exciseTax?.toString() ?? '';
-          _retailerController.text = data?.retailer ?? '';
-          _retailerLicenseNumberController.text =
-              data?.retailerLicenseNumber ?? '';
-          _retailerAddressController.text = data?.retailerAddress ?? '';
-          _budtenderController.text = data?.budtender ?? '';
-          _totalTaxController.text = data?.totalTax?.toString() ?? '';
-          _totalTransactionsController.text =
-              data?.totalTransactions?.toString() ?? '';
-
-          // Return the form.
-          return _form(data);
-        },
-      );
-    } else {
-      return _form(widget.salesReceipt);
-    }
+      // Data loaded UI.
+      data: (data) => _form(data),
+    );
   }
 
   /// Form.
@@ -187,6 +96,46 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
 
     // Screen size.
     bool isMobile = MediaQuery.of(context).size.width < 600;
+
+    /// Edit a field.
+    void _onEdit(key, value) {
+      ref.read(updatedReceipt.notifier).update((state) {
+        var update = state?.toMap() ?? {};
+        var parsedValue = double.tryParse(value);
+        update[key] = parsedValue ?? value;
+        return SalesReceipt.fromMap(update);
+      });
+    }
+
+    /// Cancel edit.
+    void _cancelEdit() {
+      // Reset analysis results.
+      ref.read(updatedReceipt.notifier).update((state) => null);
+
+      // Cancel editing.
+      setState(() {
+        _isEditing = !_isEditing;
+      });
+    }
+
+    /// Save edit.
+    void _saveEdit() {
+      // Update any modified details and results.
+      var update = ref.read(updatedReceipt)?.toMap() ?? {};
+      update['updated_at'] = DateTime.now().toUtc().toIso8601String();
+
+      // Update the data in Firestore.
+      _updateFuture = ref.read(receiptService).updateReceipt(
+            widget.salesReceiptId ?? widget.salesReceipt?.hash ?? '',
+            update,
+          );
+
+      // Finish editing.
+      setState(() {
+        _isEditing = !_isEditing;
+        _updateFuture = null;
+      });
+    }
 
     // Fields.
     var fields = [
@@ -244,7 +193,6 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
       gapH48,
     ];
 
-    // Text fields.
     var textFormFields = [
       // Product fields.
       Padding(
@@ -252,24 +200,42 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
         child: SelectableText('Product', style: labelStyle),
       ),
       CustomTextField(
-        controller: _productNamesController,
         label: 'Product Names',
+        value: item?.productNames?.join(', '),
+        onChanged: (value) {
+          _onEdit('product_names', value.split(', ').toList());
+        },
       ),
       CustomTextField(
-        controller: _productTypesController,
         label: 'Product Types',
+        value: item?.productTypes?.join(', '),
+        onChanged: (value) {
+          _onEdit('product_types', value.split(', ').toList());
+        },
       ),
       CustomTextField(
-        controller: _productQuantitiesController,
         label: 'Product Quantities',
+        value: item?.productQuantities?.join(', '),
+        onChanged: (value) {
+          _onEdit('product_quantities',
+              value.split(', ').map((e) => int.parse(e)).toList());
+        },
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _productPricesController,
         label: 'Product Prices',
+        value: item?.productPrices?.join(', '),
+        onChanged: (value) {
+          _onEdit('product_prices',
+              value.split(', ').map((e) => int.parse(e)).toList());
+        },
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _productIdsController,
         label: 'Product IDs',
+        value: item?.productIds?.join(', '),
+        onChanged: (value) =>
+            _onEdit('product_ids', value.split(', ').toList()),
       ),
 
       // Pricing fields.
@@ -278,40 +244,58 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
         child: SelectableText('Pricing', style: labelStyle),
       ),
       CustomTextField(
-        controller: _totalPriceController,
         label: 'Total Price',
+        value: item?.totalPrice.toString(),
+        onChanged: (value) => _onEdit('total_price', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _totalAmountController,
         label: 'Total Amount',
+        value: item?.totalAmount.toString(),
+        onChanged: (value) => _onEdit('total_amount', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _subtotalController,
         label: 'Subtotal',
+        value: item?.subtotal.toString(),
+        onChanged: (value) => _onEdit('subtotal', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _totalDiscountController,
         label: 'Total Discount',
+        value: item?.totalDiscount.toString(),
+        onChanged: (value) => _onEdit('total_discount', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _totalPaidController,
         label: 'Total Paid',
+        value: item?.totalPaid.toString(),
+        onChanged: (value) => _onEdit('total_paid', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _changeDueController,
         label: 'Change Due',
+        value: item?.changeDue.toString(),
+        onChanged: (value) => _onEdit('change_due', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _rewardsEarnedController,
         label: 'Rewards Earned',
+        value: item?.rewardsEarned.toString(),
+        onChanged: (value) => _onEdit('rewards_earned', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _rewardsSpentController,
         label: 'Rewards Spent',
+        value: item?.rewardsSpent.toString(),
+        onChanged: (value) => _onEdit('rewards_spent', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _totalRewardsController,
         label: 'Total Rewards',
+        value: item?.totalRewards.toString(),
+        onChanged: (value) => _onEdit('total_rewards', double.parse(value)),
+        isNumeric: true,
       ),
 
       // Transaction fields.
@@ -320,20 +304,27 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
         child: SelectableText('Transaction', style: labelStyle),
       ),
       CustomTextField(
-        controller: _transactionsController,
         label: 'Transactions',
+        value: item?.transactions?.join(', '),
+        onChanged: (value) =>
+            _onEdit('transactions', value.split(', ').toList()),
       ),
       CustomTextField(
-        controller: _totalTransactionsController,
         label: 'Total Transactions',
+        value: item?.totalTransactions.toString(),
+        onChanged: (value) =>
+            _onEdit('total_transactions', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _receiptNumberController,
         label: 'Receipt Number',
+        value: item?.receiptNumber,
+        onChanged: (value) => _onEdit('receipt_number', value),
       ),
       CustomTextField(
-        controller: _dateSoldController,
         label: 'Purchased at',
+        value: item?.dateSold?.toIso8601String(),
+        onChanged: (value) => _onEdit('date_sold', DateTime.parse(value)),
       ),
 
       // Taxes.
@@ -342,24 +333,34 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
         child: SelectableText('Taxes', style: labelStyle),
       ),
       CustomTextField(
-        controller: _cityTaxController,
         label: 'City Tax',
+        value: item?.cityTax.toString(),
+        onChanged: (value) => _onEdit('city_tax', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _countyTaxController,
         label: 'County Tax',
+        value: item?.countyTax.toString(),
+        onChanged: (value) => _onEdit('county_tax', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _stateTaxController,
         label: 'State Tax',
+        value: item?.stateTax.toString(),
+        onChanged: (value) => _onEdit('state_tax', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _exciseTaxController,
         label: 'Excise Tax',
+        value: item?.exciseTax.toString(),
+        onChanged: (value) => _onEdit('excise_tax', double.parse(value)),
+        isNumeric: true,
       ),
       CustomTextField(
-        controller: _totalTaxController,
         label: 'Total Tax',
+        value: item?.totalTax.toString(),
+        onChanged: (value) => _onEdit('total_tax', double.parse(value)),
+        isNumeric: true,
       ),
 
       // Retailer.
@@ -368,20 +369,24 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
         child: SelectableText('Dispensary', style: labelStyle),
       ),
       CustomTextField(
-        controller: _retailerController,
         label: 'Retailer',
+        value: item?.retailer,
+        onChanged: (value) => _onEdit('retailer', value),
       ),
       CustomTextField(
-        controller: _retailerLicenseNumberController,
         label: 'Retailer License Number',
+        value: item?.retailerLicenseNumber,
+        onChanged: (value) => _onEdit('retailer_license_number', value),
       ),
       CustomTextField(
-        controller: _retailerAddressController,
         label: 'Retailer Address',
+        value: item?.retailerAddress,
+        onChanged: (value) => _onEdit('retailer_address', value),
       ),
       CustomTextField(
-        controller: _budtenderController,
         label: 'Budtender',
+        value: item?.budtender,
+        onChanged: (value) => _onEdit('budtender', value),
       ),
       gapH48,
     ];
@@ -433,146 +438,13 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
     var _saveButton = PrimaryButton(
       text: 'Save',
       isLoading: _updateFuture != null,
-      onPressed: () {
-        // Get the values from the TextEditingController instances.
-        final receiptNumber = _receiptNumberController.text;
-        final totalPrice = double.tryParse(_totalPriceController.text);
-        final transactions = _transactionsController.text;
-        final dateSold = DateTime.tryParse(_dateSoldController.text);
-
-        final productNames = _productNamesController.text
-            .split(',')
-            .map((item) => item.trim())
-            .where((item) => item.isNotEmpty)
-            .toList();
-
-        final productTypes = _productTypesController.text
-            .split(',')
-            .map((item) => item.trim())
-            .where((item) => item.isNotEmpty)
-            .toList();
-
-        final productQuantities = _productQuantitiesController.text
-            .split(',')
-            .map((item) => int.tryParse(item.trim()))
-            .where((item) => item != null)
-            .toList();
-
-        final productPrices = _productPricesController.text
-            .split(',')
-            .map((item) => double.tryParse(item.trim()))
-            .where((item) => item != null)
-            .toList();
-
-        final productIds = _productIdsController.text
-            .split(',')
-            .map((item) => item.trim())
-            .where((item) => item.isNotEmpty)
-            .toList();
-
-        final totalAmount = double.tryParse(_totalAmountController.text);
-        final subtotal = double.tryParse(_subtotalController.text);
-        final totalDiscount = double.tryParse(_totalDiscountController.text);
-        final totalPaid = double.tryParse(_totalPaidController.text);
-        final changeDue = double.tryParse(_changeDueController.text);
-        final rewardsEarned = double.tryParse(_rewardsEarnedController.text);
-        final rewardsSpent = double.tryParse(_rewardsSpentController.text);
-        final totalRewards = double.tryParse(_totalRewardsController.text);
-        final cityTax = double.tryParse(_cityTaxController.text);
-        final countyTax = double.tryParse(_countyTaxController.text);
-        final stateTax = double.tryParse(_stateTaxController.text);
-        final exciseTax = double.tryParse(_exciseTaxController.text);
-        final retailer = _retailerController.text;
-        final retailerLicenseNumber = _retailerLicenseNumberController.text;
-        final retailerAddress = _retailerAddressController.text;
-        final budtender = _budtenderController.text;
-        final totalTax = double.tryParse(_totalTaxController.text);
-        final totalTransactions =
-            double.tryParse(_totalTransactionsController.text);
-
-        // Prepare data for Firestore.
-        Map<String, dynamic> update = {
-          'product_names': productNames,
-          'product_types': productTypes,
-          'receipt_number': receiptNumber,
-          'total_price': totalPrice,
-          'transactions': transactions,
-          'date_sold': dateSold?.toIso8601String(),
-          'product_quantities': productQuantities,
-          'product_prices': productPrices,
-          'product_ids': productIds,
-          'total_amount': totalAmount,
-          'subtotal': subtotal,
-          'total_discount': totalDiscount,
-          'total_paid': totalPaid,
-          'change_due': changeDue,
-          'rewards_earned': rewardsEarned,
-          'rewards_spent': rewardsSpent,
-          'total_rewards': totalRewards,
-          'city_tax': cityTax,
-          'county_tax': countyTax,
-          'state_tax': stateTax,
-          'excise_tax': exciseTax,
-          'retailer': retailer,
-          'retailer_license_number': retailerLicenseNumber,
-          'retailer_address': retailerAddress,
-          'budtender': budtender,
-          'total_tax': totalTax,
-          'total_transactions': totalTransactions,
-          'updated_at': DateTime.now().toUtc().toIso8601String(),
-        };
-
-        // Update the data in Firestore.
-        _updateFuture = ref.read(receiptService).updateReceipt(
-              widget.salesReceiptId ?? widget.salesReceipt?.hash ?? '',
-              update,
-            );
-
-        // Cancel editing.
-        setState(() {
-          _isEditing = !_isEditing;
-          _updateFuture = null;
-        });
-      },
+      onPressed: _saveEdit,
     );
 
     // Cancel editing button.
     var _cancelButton = SecondaryButton(
       text: 'Cancel',
-      onPressed: () {
-        // Reset the values in the TextEditingController instances.
-        _productNamesController.text = item?.productNames?.join(',') ?? '';
-        _productTypesController.text = item?.productTypes?.join(',') ?? '';
-        _productQuantitiesController.text =
-            item?.productQuantities?.join(',') ?? '';
-        _productPricesController.text = item?.productPrices?.join(',') ?? '';
-        _productIdsController.text = item?.productIds?.join(',') ?? '';
-        _totalAmountController.text = item?.totalAmount?.toString() ?? '';
-        _subtotalController.text = item?.subtotal?.toString() ?? '';
-        _totalDiscountController.text = item?.totalDiscount?.toString() ?? '';
-        _totalPaidController.text = item?.totalPaid?.toString() ?? '';
-        _changeDueController.text = item?.changeDue?.toString() ?? '';
-        _rewardsEarnedController.text = item?.rewardsEarned?.toString() ?? '';
-        _rewardsSpentController.text = item?.rewardsSpent?.toString() ?? '';
-        _totalRewardsController.text = item?.totalRewards?.toString() ?? '';
-        _cityTaxController.text = item?.cityTax?.toString() ?? '';
-        _countyTaxController.text = item?.countyTax?.toString() ?? '';
-        _stateTaxController.text = item?.stateTax?.toString() ?? '';
-        _exciseTaxController.text = item?.exciseTax?.toString() ?? '';
-        _retailerController.text = item?.retailer ?? '';
-        _retailerLicenseNumberController.text =
-            item?.retailerLicenseNumber ?? '';
-        _retailerAddressController.text = item?.retailerAddress ?? '';
-        _budtenderController.text = item?.budtender ?? '';
-        _totalTaxController.text = item?.totalTax?.toString() ?? '';
-        _totalTransactionsController.text =
-            item?.totalTransactions?.toString() ?? '';
-
-        // Cancel editing.
-        setState(() {
-          _isEditing = !_isEditing;
-        });
-      },
+      onPressed: _cancelEdit,
     );
 
     // Download button.
@@ -597,6 +469,69 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
     var _viewForm = ViewForm(fields: fields);
     var _editForm = EditForm(textFormFields: textFormFields);
 
+    // Image.
+    var _image = Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        height: 200,
+        width: 200,
+        child: InkWell(
+          // Wrap the image with InkWell to make it clickable.
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  titlePadding: EdgeInsets.all(0),
+                  actionsPadding: EdgeInsets.all(0),
+                  contentPadding: EdgeInsets.all(0),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.close,
+                          size: 18,
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                  content: Image.network(item.downloadUrl!),
+                  actions: [
+                    Tooltip(
+                      message: 'Open in a new tab',
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.open_in_new,
+                          size: 18,
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                        onPressed: () async {
+                          final url = item.downloadUrl!;
+                          launchUrl(Uri.parse(url));
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Image.network(
+              item.downloadUrl!,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      ),
+    );
+
     // Tabs.
     var _tabs = TabBarView(
       controller: _tabController,
@@ -606,6 +541,12 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
           slivers: [
             _breadcrumbs,
             SliverToBoxAdapter(child: _actions),
+            // Show the image here.
+            SliverToBoxAdapter(
+              child: item.downloadUrl != null
+                  ? _image
+                  : Container(), // Show an empty container when there's no image.
+            ),
             _isEditing ? _editForm : _viewForm,
           ],
         ),

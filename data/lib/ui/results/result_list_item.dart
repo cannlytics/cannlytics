@@ -35,142 +35,130 @@ class LabResultItem extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     print('Building list item:');
     print(labResult.toMap());
-    return GestureDetector(
-      onTap: () {
-        // showDialog(
-        //   context: context,
-        //   builder: (BuildContext context) {
-        //     return Dialog(
-        //       child: ResultScreen(labResult: labResult),
-        //     );
-        //   },
-        // );
-      },
-      child: Card(
-        margin: EdgeInsets.symmetric(horizontal: 24),
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-        color: Theme.of(context).scaffoldBackgroundColor,
-        surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-        child: Container(
-          margin: EdgeInsets.all(0),
-          padding: EdgeInsets.all(16.0),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(3.0)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Product name and COA link.
-              Row(
-                children: [
-                  if (screenWidth <= Breakpoints.tablet)
-                    Expanded(
-                      child: Text(
-                        labResult.productName ?? 'Unknown',
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
-                    ),
-                  if (screenWidth > Breakpoints.tablet)
-                    Text(
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: 24),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+      color: Theme.of(context).scaffoldBackgroundColor,
+      surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+      child: Container(
+        margin: EdgeInsets.all(0),
+        padding: EdgeInsets.all(16.0),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(3.0)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            // Product name and COA link.
+            Row(
+              children: [
+                if (screenWidth <= Breakpoints.tablet)
+                  Expanded(
+                    child: Text(
                       labResult.productName ?? 'Unknown',
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
+                  ),
+                if (screenWidth > Breakpoints.tablet)
+                  Text(
+                    labResult.productName ?? 'Unknown',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
 
-                  // Download COA data.
+                // Download COA data.
+                GestureDetector(
+                  onTap: () {
+                    // Handle malformed results.
+                    var data = labResult.toMap();
+                    if (data['results'] == null) {
+                      data['results'] = [];
+                    }
+
+                    // Show a downloading notification.
+                    Fluttertoast.showToast(
+                      msg: 'Preparing your download...',
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.TOP,
+                      timeInSecForIosWeb: 2,
+                      backgroundColor: LightColors.lightGreen.withAlpha(60),
+                      textColor: Colors.white,
+                      fontSize: 16.0,
+                      webPosition: 'center',
+                      webShowClose: true,
+                    );
+
+                    // Download the data.
+                    DownloadService.downloadData(
+                      [data],
+                      '/api/data/coas/download',
+                    );
+                  },
+                  child: Icon(
+                    Icons.download_sharp,
+                    color: Theme.of(context).textTheme.labelMedium!.color,
+                    size: 16,
+                  ),
+                ),
+
+                // Open COA URL link.
+                if (labResult.downloadUrl?.isNotEmpty ?? false) gapW8,
+                if (labResult.downloadUrl?.isNotEmpty ?? false)
                   GestureDetector(
                     onTap: () {
-                      // Handle malformed results.
-                      var data = labResult.toMap();
-                      if (data['results'] == null) {
-                        data['results'] = [];
-                      }
-
-                      // Show a downloading notification.
-                      Fluttertoast.showToast(
-                        msg: 'Preparing your download...',
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.TOP,
-                        timeInSecForIosWeb: 2,
-                        backgroundColor: LightColors.lightGreen.withAlpha(60),
-                        textColor: Colors.white,
-                        fontSize: 16.0,
-                        webPosition: 'center',
-                        webShowClose: true,
-                      );
-
-                      // Download the data.
-                      DownloadService.downloadData(
-                        [data],
-                        '/api/data/coas/download',
-                      );
+                      launchUrl(Uri.parse(labResult.downloadUrl!));
                     },
                     child: Icon(
-                      Icons.download_sharp,
+                      Icons.open_in_new,
                       color: Theme.of(context).textTheme.labelMedium!.color,
                       size: 16,
                     ),
                   ),
+              ],
+            ),
+            gapH8,
 
-                  // Open COA URL link.
-                  if (labResult.downloadUrl?.isNotEmpty ?? false) gapW8,
-                  if (labResult.downloadUrl?.isNotEmpty ?? false)
-                    GestureDetector(
-                      onTap: () {
-                        launchUrl(Uri.parse(labResult.downloadUrl!));
-                      },
-                      child: Icon(
-                        Icons.open_in_new,
-                        color: Theme.of(context).textTheme.labelMedium!.color,
-                        size: 16,
-                      ),
-                    ),
-                ],
-              ),
-              gapH8,
+            // Producer.
+            // Future work: Link to producer website.
+            Text(
+              'Producer: ${labResult.businessDbaName != null && labResult.businessDbaName!.isNotEmpty ? labResult.businessDbaName : labResult.producer}',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
 
-              // Producer.
-              // Future work: Link to producer website.
-              Text(
-                'Producer: ${labResult.businessDbaName != null && labResult.businessDbaName!.isNotEmpty ? labResult.businessDbaName : labResult.producer}',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
+            // IDs
+            Text(
+              'ID: ${labResult.labId}',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            Text(
+              'Batch: ${labResult.batchNumber}',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
 
-              // IDs
-              Text(
-                'ID: ${labResult.labId}',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              Text(
-                'Batch: ${labResult.batchNumber}',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-
-              // Lab.
-              Row(
-                children: [
-                  Text(
-                    'Lab: ',
-                    style: Theme.of(context).textTheme.labelMedium,
+            // Lab.
+            Row(
+              children: [
+                Text(
+                  'Lab: ',
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    launchUrl(Uri.parse(labResult.labWebsite!));
+                  },
+                  child: Text(
+                    labResult.lab!,
+                    style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                          color: Colors.blue,
+                        ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      launchUrl(Uri.parse(labResult.labWebsite!));
-                    },
-                    child: Text(
-                      labResult.lab!,
-                      style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                            color: Colors.blue,
-                          ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ),
 
-              // Copy COA link.
-              if (labResult.downloadUrl?.isNotEmpty ?? false) gapH4,
-              if (labResult.downloadUrl?.isNotEmpty ?? false)
-                _coaLink(context, labResult.downloadUrl!),
-            ],
-          ),
+            // Copy COA link.
+            if (labResult.downloadUrl?.isNotEmpty ?? false) gapH4,
+            if (labResult.downloadUrl?.isNotEmpty ?? false)
+              _coaLink(context, labResult.downloadUrl!),
+          ],
         ),
       ),
     );

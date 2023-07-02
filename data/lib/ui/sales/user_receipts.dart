@@ -4,9 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/26/2023
+// Updated: 6/29/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/download_button.dart';
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
@@ -21,7 +22,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 /// User receipts user interface.
 class UserReceiptsInterface extends ConsumerWidget {
-  const UserReceiptsInterface({super.key});
+  const UserReceiptsInterface({super.key, this.tabController});
+
+  // Parameters.
+  final TabController? tabController;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -113,9 +117,14 @@ class UserReceiptsInterface extends ConsumerWidget {
                         color: Theme.of(context).textTheme.titleLarge!.color),
                   ),
                   SelectableText(
-                    'If you are signed in, then we will save your parsed receipts and you will be able to access them here.',
+                    'If you are signed in, then we will save your parsed receipts.\nYou will be able to access them here.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  gapH12,
+                  PrimaryButton(
+                    text: 'Parse receipts',
+                    onPressed: () => tabController?.animateTo(1),
                   ),
                 ],
               ),
@@ -183,13 +192,13 @@ class UserReceiptsInterface extends ConsumerWidget {
                   SelectableText(
                     message ?? '',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   // PRODUCTION:
                   // SelectableText(
                   //   'An unknown error occurred while retrieving your receipts. Please report this issue on GitHub or to dev@cannlytics.com to get a human to help ASAP.',
                   //   textAlign: TextAlign.center,
-                  //   style: Theme.of(context).textTheme.bodySmall,
+                  //   style: Theme.of(context).textTheme.bodyMedium,
                   // ),
                 ],
               ),
