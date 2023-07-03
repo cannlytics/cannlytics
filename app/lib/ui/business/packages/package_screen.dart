@@ -23,7 +23,6 @@ import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/widgets/inputs/checkbox_input.dart';
 import 'package:cannlytics_app/widgets/layout/form_container.dart';
 
 /// Package screen.
@@ -98,7 +97,7 @@ class _PackageScreenState extends ConsumerState<PackageScreen> {
           PrimaryButton(
             text: (widget.id == 'new') ? 'Create' : 'Save',
             onPressed: () async {
-              var name = ref.read(nameController).value.text;
+              // var name = ref.read(nameController).value.text;
               var update = Package(id: widget.id);
               if (widget.id == 'new') {
                 await ref

@@ -49,7 +49,7 @@ class FacilitiesController extends AsyncNotifier<List<Facility>> {
       }
       print('FOUND FACILITIES!');
       return data;
-    } catch (error, stack) {
+    } catch (error) {
       // print(stack);
       // throw Exception("Error decoding JSON: [error=${error.toString()}]");
       print("Error decoding JSON: [error=${error.toString()}]");

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/25/2023
-// Updated: 6/29/2023
+// Updated: 7/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 typedef StrainId = String;
@@ -40,7 +40,7 @@ class Strain {
   // Create model.
   factory Strain.fromMap(Map<dynamic, dynamic> data) {
     return Strain(
-      id: data['id'].toString(),
+      id: data['id'] != null ? data['id'].toString() : '',
       name: data['name'] ?? '',
       testingStatus: data['testing_status'],
       thcLevel: data['thc_level'],
@@ -48,8 +48,8 @@ class Strain {
       indicaPercentage: data['indica_percentage'],
       sativaPercentage: data['sativa_percentage'],
       imageUrl: data['image_url'],
-      images: data['images'],
-      comments: data['comments'],
+      images: data['images'] ?? [],
+      comments: data['comments'] ?? [],
     );
   }
 

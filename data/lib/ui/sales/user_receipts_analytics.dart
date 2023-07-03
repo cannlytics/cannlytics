@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/18/2023
-// Updated: 6/18/2023
+// Updated: 7/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/colors.dart';
@@ -12,7 +12,7 @@ import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/services/download_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cannlytics_data/ui/sales/sales_service.dart';
+import 'package:cannlytics_data/ui/sales/receipts_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

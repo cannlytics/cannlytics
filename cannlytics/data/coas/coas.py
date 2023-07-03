@@ -22,7 +22,6 @@ Future work:
 
     - [ ] Integrate `create_hash` into `save` and `standardize`.
     - [ ] Improve the `standardize` method.
-    - [ ] Parse unidentified COAs with OpenAI's GPT model.
 
 """
 # Standard imports.

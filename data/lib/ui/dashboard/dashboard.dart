@@ -42,6 +42,10 @@ class DashboardScreen extends ConsumerWidget {
             ? 1.44
             : 1.66;
 
+    // Listen to the data providers.
+    final aiModels = ref.watch(aiModelsProvider).value ?? [];
+    final mainDatasets = ref.watch(datasetsProvider).value ?? [];
+
     // Render the widget.
     return ConsoleScreen(
       children: [

@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/30/2021
-Updated: 6/26/2022
+Updated: 7/2/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with datasets.
@@ -14,7 +14,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 # Internal imports
-from api.auth import auth
+from api.auth import api_auth
 
 
 @api_view(['GET', 'POST'])
@@ -52,7 +52,7 @@ def data_base(request, state=None):
     """Get or update information about datasets."""
 
     # Authenticate the user.
-    claims = auth.authenticate_request(request)
+    claims = api_auth.authenticate_request(request)
     uid = claims['uid']
 
     # TODO: Allow user to pass state as a parameter.

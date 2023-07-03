@@ -123,7 +123,7 @@ class PackagesTable extends ConsumerWidget {
     final rowsPerPage = ref.watch(packagesRowsPerPageProvider);
 
     // Get the selected rows.
-    List<Package> selectedRows = ref.watch(selectedPackagesProvider);
+    // List<Package> selectedRows = ref.watch(selectedPackagesProvider);
     // FIXME:
     // List<String> selectedIds = selectedRows.map((x) => x.id).toList();
     List<String> selectedIds = [];

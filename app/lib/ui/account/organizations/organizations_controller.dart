@@ -13,15 +13,10 @@ import 'dart:async';
 // Package imports:
 import 'package:cannlytics_app/widgets/inputs/string_controller.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/common/organization.dart';
-import 'package:cannlytics_app/services/api_service.dart';
-import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/services/firestore_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 // Organizations controller.
@@ -73,10 +68,10 @@ class OrganizationsController extends AutoDisposeAsyncNotifier<void> {
       String orgId = ref.read(joinOrgId).value.text;
 
       try {
-        var response = await APIService.apiRequest('/api/organizations', data: {
-          'organization_id': orgId,
-          'join': true,
-        });
+        // var response = await APIService.apiRequest('/api/organizations', data: {
+        //   'organization_id': orgId,
+        //   'join': true,
+        // });
         Fluttertoast.showToast(
             msg: 'Request to join $orgId sent.',
             toastLength: Toast.LENGTH_SHORT,

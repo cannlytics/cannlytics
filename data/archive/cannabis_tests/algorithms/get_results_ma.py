@@ -32,7 +32,8 @@ from cannlytics.utils.utils import to_excel_with_style
 
 
 # Specify where your data lives.
-DATA_DIR = r'D:\data\massachusetts\lab_results\mcr_labs'
+# DATA_DIR = r'D:\data\massachusetts\lab_results\mcr_labs'
+DATA_DIR = r'C:\.datasets\data\massachusetts\lab_results\mcr_labs'
 
 
 def upload_results(data: pd.DataFrame):

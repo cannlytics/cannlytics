@@ -65,6 +65,7 @@ class DeliveriesController extends AsyncNotifier<List<Delivery>> {
       final licenseNumber = ref.read(primaryLicenseProvider);
       final licenseState = ref.read(primaryStateProvider);
       final orgId = ref.read(primaryOrganizationProvider);
+      // ignore: unused_local_variable
       for (Delivery item in items) {
         await MetrcDeliveries.createDelivery(
           data: {}, // FIXME:
@@ -84,6 +85,7 @@ class DeliveriesController extends AsyncNotifier<List<Delivery>> {
       final licenseNumber = ref.read(primaryLicenseProvider);
       final licenseState = ref.read(primaryStateProvider);
       final orgId = ref.read(primaryOrganizationProvider);
+      // ignore: unused_local_variable
       for (Delivery item in items) {
         await MetrcDeliveries.updateDelivery(
           data: {}, // FIXME:

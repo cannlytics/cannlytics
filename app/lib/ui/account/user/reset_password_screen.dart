@@ -9,6 +9,7 @@
 
 // Flutter imports:
 import 'package:cannlytics_app/constants/colors.dart';
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -20,7 +21,6 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/routing/routes.dart';
-import 'package:cannlytics_app/services/auth_service.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/sign-in/sign_in_validators.dart';
 import 'package:cannlytics_app/ui/account/user/account_controller.dart';
@@ -113,6 +113,7 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm>
 
   // State.
   String get email => _emailController.text;
+  // ignore: unused_field
   var _submitted = false;
 
   // Dispose controllers.
@@ -151,7 +152,6 @@ class _ResetPasswordFormState extends ConsumerState<ResetPasswordForm>
 
     // Listen to the current user.
     final user = ref.watch(userProvider).value;
-    ;
 
     // Render the widget.
     return Padding(

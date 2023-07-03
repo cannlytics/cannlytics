@@ -12,8 +12,6 @@ import 'package:cannlytics_app/models/metrc/delivery.dart';
 import 'package:cannlytics_app/models/metrc/employee.dart';
 import 'package:cannlytics_app/models/metrc/facility.dart';
 import 'package:cannlytics_app/models/metrc/item.dart';
-import 'package:cannlytics_app/models/metrc/lab_result.dart';
-import 'package:cannlytics_app/models/metrc/lab_test.dart';
 import 'package:cannlytics_app/models/metrc/location.dart';
 import 'package:cannlytics_app/models/metrc/package.dart';
 import 'package:cannlytics_app/models/metrc/patient.dart';

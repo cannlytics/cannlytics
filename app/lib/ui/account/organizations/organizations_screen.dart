@@ -18,7 +18,6 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/models/common/organization.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/ui/main/app_controller.dart';
@@ -38,8 +37,8 @@ class OrganizationsScreen extends ConsumerWidget {
     final isWide = screenWidth > Breakpoints.tablet;
 
     // Get the theme.
-    final themeMode = ref.watch(themeModeProvider);
-    final bool isDark = themeMode == ThemeMode.dark;
+    // final themeMode = ref.watch(themeModeProvider);
+    // final bool isDark = themeMode == ThemeMode.dark;
 
     // Table actions.
     var actions = Row(children: [

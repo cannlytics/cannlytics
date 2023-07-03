@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/22/2023
-Updated: 6/28/2023
+Updated: 7/2/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Command-line Usage:

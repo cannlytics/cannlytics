@@ -24,7 +24,7 @@ import os
 from time import sleep
 
 # External imports:
-from cannlytics.data.coas import CoADoc
+from cannlytics.data.coas.coas import CoADoc
 from bs4 import BeautifulSoup
 from cannlytics.utils.constants import DEFAULT_HEADERS
 import pandas as pd
@@ -254,7 +254,8 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    DATA_DIR = 'D://data/california/lab_results'
+    # DATA_DIR = 'D://data/california/lab_results'
+    DATA_DIR = r'C:\.datasets\data\california\lab_results'
 
     # Get CA lab results.
     ca_results = get_glass_house_farms_lab_results(DATA_DIR)

@@ -9,6 +9,7 @@
 
 // Flutter imports:
 import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -27,7 +28,10 @@ class SubscriptionManagement extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Get subscriptions.
+    // Get app subscriptions.
+    final appSubscriptions = ref.watch(subscriptionsProvider).value ?? [];
+
+    // Get the user's subscription.
     final asyncSnapshot = ref.watch(userSubscriptionProvider);
 
     return asyncSnapshot.when(
@@ -55,8 +59,8 @@ class SubscriptionManagement extends ConsumerWidget {
                   // Subscriptions for user's without a subscription.
                   gapH8,
                   SubscriptionPlanCards(
-                    items: [],
-                    activeSubscription: data['support'],
+                    items: appSubscriptions,
+                    activeSubscription: data?['support'],
                   ),
                 ],
               ),
@@ -79,7 +83,7 @@ class SubscriptionPlanCards extends StatelessWidget {
   }) : super(key: key);
 
   // Parameters.
-  final List<Map> items;
+  final List<Map?> items;
   final String? activeSubscription;
 
   @override
@@ -88,60 +92,71 @@ class SubscriptionPlanCards extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Subscription cards.
-    // FIXME: Get from Firestore.
-    // var cards = items.map((item) {
-    //   return SubscriptionCard(
-    //     title: item['title'],
-    //     price: item['price'],
-    //     color: WebUtils.hexCodeToColor(item['color']),
-    //     features: item['features'],
-    //     notes: item['notes'],
-    //   );
-    // }).toList();
-    var cards = [
-      SubscriptionCard(
-          active: activeSubscription == 'free',
-          title: 'Free',
-          price: '\$0',
-          color: Color(0xff16c995),
-          features: [
-            '10 AI jobs',
-            'Personal archive',
-            'Access all data',
-          ],
-          notes: 'No credit card required'),
-      SubscriptionCard(
-        active: activeSubscription == 'premium',
-        title: 'Standard Plan',
-        price: '\$4.20',
-        color: Color(0xffFF7F00),
-        features: [
-          '100 AI jobs',
-          '4.2\u00A2 / additional job',
-          'Throttled API',
-        ],
-      ),
-      SubscriptionCard(
-        active: activeSubscription == 'pro',
-        title: 'Pro Plan',
-        price: '\$42',
-        color: Color(0xff7B4EA8),
-        features: [
-          '1,250 AI jobs',
-          '3.3\u00A2 / additional job',
-          '🚀 Unthrottled API',
-        ],
-      ),
-    ];
+    // FIXME: Get subscription data from Firestore.
+    var cards = items.map((item) {
+      return SubscriptionCard(
+        active: activeSubscription == item?['plan_name'],
+        title: item?['title'],
+        price: item?['price'],
+        color: WebUtils.hexCodeToColor(item?['color']),
+        features: item?['features'],
+        notes: item?['notes'],
+      );
+    }).toList();
+    // var cards = [
+    //   // SubscriptionCard(
+    //   //   active: activeSubscription == 'free',
+    //   //   title: 'Free',
+    //   //   price: '\$0',
+    //   //   color: Color(0xff16c995),
+    //   //   features: [
+    //   //     '10 AI jobs',
+    //   //     'Personal archive',
+    //   //     'Access all data',
+    //   //   ],
+    //   //   notes: 'No credit card required',
+    //   // ),
+    //   SubscriptionCard(
+    //     active: activeSubscription == 'premium',
+    //     title: 'Standard Plan',
+    //     price: '\$4.20',
+    //     color: Color(0xff16c995),
+    //     features: [
+    //       '100 AI jobs',
+    //       '4.2\u00A2 / additional job',
+    //       'Throttled API',
+    //     ],
+    //   ),
+    //   SubscriptionCard(
+    //     active: activeSubscription == 'pro',
+    //     title: 'Pro Plan',
+    //     price: '\$42',
+    //     color: Color(0xffFF7F00),
+    //     features: [
+    //       '1,250 AI jobs',
+    //       '3.3\u00A2 / additional job',
+    //       '🚀 Unthrottled API',
+    //     ],
+    //   ),
+    //   SubscriptionCard(
+    //     active: activeSubscription == 'enterprise',
+    //     title: 'Enterprise',
+    //     price: '\$420',
+    //     color: Color(0xff7B4EA8),
+    //     features: [
+    //       '17,500 AI jobs',
+    //       '2.4\u00A2 / additional job',
+    //       '🔒 Private API',
+    //     ],
+    //   ),
+    // ];
 
-    // Row of cards (column on tablet and mobile).
+    // Grid of cards.
     return GridView.builder(
       shrinkWrap: true,
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: (screenWidth < Breakpoints.tablet) ? 460 : 380,
         mainAxisExtent: (screenWidth < Breakpoints.tablet) ? 320 : 340,
-        // crossAxisCount: (screenWidth < Breakpoints.tablet) ? 2 : 3,
-        // childAspectRatio: 3 / 4,
       ),
       itemCount: cards.length,
       itemBuilder: (context, index) {

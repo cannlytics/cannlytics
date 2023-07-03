@@ -26,11 +26,11 @@ class Entry {
   final DateTime end;
   final String comment;
 
-  @override
-  List<Object> get props => [id, jobId, start, end, comment];
+  // @override
+  // List<Object> get props => [id, jobId, start, end, comment];
 
-  @override
-  bool get stringify => true;
+  // @override
+  // bool get stringify => true;
 
   double get durationInHours =>
       end.difference(start).inMinutes.toDouble() / 60.0;

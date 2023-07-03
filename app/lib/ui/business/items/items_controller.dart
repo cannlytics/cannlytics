@@ -7,6 +7,8 @@
 // Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// ignore_for_file: body_might_complete_normally_nullable
+
 // Dart imports:
 import 'dart:async';
 
@@ -61,19 +63,19 @@ class ItemsController extends AsyncNotifier<List<Item>> {
   Future<void> createItems(List<Item> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final licenseNumber = ref.read(primaryLicenseProvider);
-      final licenseState = ref.read(primaryStateProvider);
-      final orgId = ref.read(primaryOrganizationProvider);
-      for (Item item in items) {
-        // FIXME:
-        // await MetrcItems.createItem(
-        //   name: item.name,
-        //   itemTypeName: item.itemTypeName,
-        //   license: licenseNumber,
-        //   orgId: orgId,
-        //   state: licenseState,
-        // );
-      }
+      // final licenseNumber = ref.read(primaryLicenseProvider);
+      // final licenseState = ref.read(primaryStateProvider);
+      // final orgId = ref.read(primaryOrganizationProvider);
+      // for (Item item in items) {
+      //   // FIXME:
+      //   // await MetrcItems.createItem(
+      //   //   name: item.name,
+      //   //   itemTypeName: item.itemTypeName,
+      //   //   license: licenseNumber,
+      //   //   orgId: orgId,
+      //   //   state: licenseState,
+      //   // );
+      // }
       return await getItems();
     });
   }
@@ -82,20 +84,20 @@ class ItemsController extends AsyncNotifier<List<Item>> {
   Future<void> updateItems(List<Item> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final licenseNumber = ref.read(primaryLicenseProvider);
-      final licenseState = ref.read(primaryStateProvider);
-      final orgId = ref.read(primaryOrganizationProvider);
-      for (Item item in items) {
-        // FIXME:
-        // await MetrcItems.updateItem(
-        //   id: item.id,
-        //   name: item.name,
-        //   itemTypeName: item.itemTypeName ?? 'Default Item Type',
-        //   license: licenseNumber,
-        //   orgId: orgId,
-        //   state: licenseState,
-        // );
-      }
+      // final licenseNumber = ref.read(primaryLicenseProvider);
+      // final licenseState = ref.read(primaryStateProvider);
+      // final orgId = ref.read(primaryOrganizationProvider);
+      // for (Item item in items) {
+      //   // FIXME:
+      //   // await MetrcItems.updateItem(
+      //   //   id: item.id,
+      //   //   name: item.name,
+      //   //   itemTypeName: item.itemTypeName ?? 'Default Item Type',
+      //   //   license: licenseNumber,
+      //   //   orgId: orgId,
+      //   //   state: licenseState,
+      //   // );
+      // }
       return await getItems();
     });
   }
@@ -104,18 +106,18 @@ class ItemsController extends AsyncNotifier<List<Item>> {
   Future<void> deleteItems(List<Item> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final licenseNumber = ref.read(primaryLicenseProvider);
-      final licenseState = ref.read(primaryStateProvider);
-      final orgId = ref.read(primaryOrganizationProvider);
-      for (Item item in items) {
-        // FIXME:
-        // await MetrcItems.deleteItem(
-        //   id: item.id,
-        //   license: licenseNumber,
-        //   orgId: orgId,
-        //   state: licenseState,
-        // );
-      }
+      // final licenseNumber = ref.read(primaryLicenseProvider);
+      // final licenseState = ref.read(primaryStateProvider);
+      // final orgId = ref.read(primaryOrganizationProvider);
+      // for (Item item in items) {
+      //   // FIXME:
+      //   // await MetrcItems.deleteItem(
+      //   //   id: item.id,
+      //   //   license: licenseNumber,
+      //   //   orgId: orgId,
+      //   //   state: licenseState,
+      //   // );
+      // }
       return await getItems();
     });
   }
@@ -254,8 +256,8 @@ class ItemController extends FamilyAsyncNotifier<Item?, String?> {
       }
     }
     final licenseNumber = ref.watch(primaryLicenseProvider);
-    final orgId = ref.read(primaryOrganizationProvider);
-    final licenseState = ref.read(primaryStateProvider);
+    // final orgId = ref.read(primaryOrganizationProvider);
+    // final licenseState = ref.read(primaryStateProvider);
     if (licenseNumber == null) return null;
     if (id == 'new') return Item();
     print('GETTING ITEM...');
@@ -326,9 +328,9 @@ class ItemTypesNotifier extends AsyncNotifier<List<dynamic>> {
 
   // Get item types from Metrc.
   Future<List<dynamic>> getItemTypes() async {
-    final licenseNumber = ref.watch(primaryLicenseProvider);
-    final orgId = ref.watch(primaryOrganizationProvider);
-    final licenseState = ref.watch(primaryStateProvider);
+    // final licenseNumber = ref.watch(primaryLicenseProvider);
+    // final orgId = ref.watch(primaryOrganizationProvider);
+    // final licenseState = ref.watch(primaryStateProvider);
     List<dynamic> data;
     try {
       // FIXME:

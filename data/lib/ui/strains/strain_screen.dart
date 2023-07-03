@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/24/2023
-// Updated: 6/30/2023
+// Updated: 7/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
@@ -14,24 +14,21 @@ import 'package:cannlytics_data/common/forms/forms.dart';
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/loading_placeholder.dart';
 import 'package:cannlytics_data/common/layout/pill_tab.dart';
+import 'package:cannlytics_data/common/tables/key_value_datatable.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/strain.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
+import 'package:cannlytics_data/ui/strains/strain_history.dart';
 import 'package:cannlytics_data/ui/strains/strains_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// TODO: Allow user's to report incorrect / additional information.
-
-/// TODO: Display lab results for the strain.
-/// - list
-/// - grid
-/// - table
-
-/// Strain analytics
-/// - Scatter plots of lab results
-/// - Ability to select a lab result to view it's details and it's COA.
+// TODO: Add a button to allow a user to favorite a strain.
+// * The button should have a pink heart icon and be a SecondaryButton
+// * The data should be saved: users/{uid}/strains/{strainId}: {favorite: true}
+// * If the user is not authenticated, show a dialog that says "You must be logged in to favorite a strain."
+// * If the strain is already a favorite, then toggle the favorite to false.
 
 /// Strain screen.
 class StrainScreen extends ConsumerStatefulWidget {
@@ -77,7 +74,7 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
   @override
   Widget build(BuildContext context) {
     if (widget.strain != null) return _form(widget.strain);
-    final asyncData = ref.watch(strainProvider(widget.strainId!));
+    final asyncData = ref.watch(strainProvider(widget.strainId ?? ''));
     return asyncData.when(
       // Loading UI.
       loading: () => MainContent(
@@ -121,7 +118,6 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
 
     /// Cancel edit.
     void _cancelEdit() {
-      // Cancel editing.
       setState(() {
         _isEditing = !_isEditing;
       });
@@ -132,6 +128,8 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
       // Update any modified details.
       var update = ref.read(updatedStrain)?.toMap() ?? {};
       update['updated_at'] = DateTime.now().toUtc().toIso8601String();
+
+      // TODO: Create a log.
 
       // Update the data in Firestore.
       _updateFuture = ref.read(strainService).updateStrain(
@@ -158,18 +156,33 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
     );
 
     // Fields.
+    var fieldStyle = Theme.of(context).textTheme.bodySmall;
     var fields = [
       // Strain details.
-      Text('Strain', style: labelStyle),
-      Text('Name: ${strain?.name}'),
-      Text('Testing Status: ${strain?.testingStatus}'),
-      Text('THCLevel: ${strain?.thcLevel}'),
-      Text('CBD Level: ${strain?.cbdLevel}'),
-      Text('Indica Percentage: ${strain?.indicaPercentage}'),
-      Text('Sativa Percentage: ${strain?.sativaPercentage}'),
+      KeyValueDataTable(
+        tableName: 'Strain Details',
+        labels: [
+          'Name',
+          'Testing Status',
+          'THC Level',
+          'CBD Level',
+          'Indica Percentage',
+          'Sativa Percentage',
+        ],
+        values: [
+          Text('${strain?.name}', style: fieldStyle),
+          Text('${strain?.testingStatus}', style: fieldStyle),
+          Text('${strain?.thcLevel}', style: fieldStyle),
+          Text('${strain?.cbdLevel}', style: fieldStyle),
+          Text('${strain?.indicaPercentage}', style: fieldStyle),
+          Text('${strain?.sativaPercentage}', style: fieldStyle),
+        ],
+      ),
       gapH16,
 
-      // TODO: Images section.
+      // TODO: Images / gallery section.
+      // * Allow the user to upload images of the strain.
+      // * Allow the user to favorite images.
 
       // TODO: Comments section.
     ];
@@ -183,39 +196,38 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
       ),
       CustomTextField(
         label: 'Name',
-        value: strain?.name,
+        value: strain?.name ?? '',
         onChanged: (value) => _onEdit('name', value),
       ),
       CustomTextField(
         label: 'Testing Status',
-        value: strain?.testingStatus,
+        value: strain?.testingStatus ?? '',
         onChanged: (value) => _onEdit('testing_status', value),
       ),
       CustomTextField(
         label: 'THC Level',
-        value: strain?.thcLevel.toString(),
+        value: strain?.thcLevel.toString() ?? '',
         onChanged: (value) => _onEdit('thc_level', value),
         isNumeric: true,
       ),
       CustomTextField(
         label: 'CBD Level',
-        value: strain?.cbdLevel.toString(),
+        value: strain?.cbdLevel.toString() ?? '',
         onChanged: (value) => _onEdit('cbd_level', value),
         isNumeric: true,
       ),
       CustomTextField(
         label: 'Indica Percentage',
-        value: strain?.indicaPercentage.toString(),
+        value: strain?.indicaPercentage.toString() ?? '',
         onChanged: (value) => _onEdit('indica_percentage', value),
         isNumeric: true,
       ),
       CustomTextField(
         label: 'Sativa Percentage',
-        value: strain?.sativaPercentage.toString(),
+        value: strain?.sativaPercentage.toString() ?? '',
         onChanged: (value) => _onEdit('sativa_percentage', value),
         isNumeric: true,
       ),
-      // TODO: Implement image upload and comments fields here.
     ];
 
     // Edit button.
@@ -262,7 +274,7 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
         ),
         PillTabButton(
           text: 'History',
-          icon: Icons.science,
+          icon: Icons.history,
           isSelected: _tabController.index == 1,
         ),
       ],
@@ -313,7 +325,7 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
                       ),
                     ],
                   ),
-                  content: Image.network(strain?.imageUrl! ?? ''),
+                  content: Image.network(strain?.imageUrl ?? ''),
                   actions: [
                     Tooltip(
                       message: 'Open in a new tab',
@@ -324,7 +336,7 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
                           color: Theme.of(context).textTheme.bodyMedium?.color,
                         ),
                         onPressed: () async {
-                          final url = strain?.imageUrl! ?? '';
+                          final url = strain?.imageUrl ?? '';
                           launchUrl(Uri.parse(url));
                         },
                       ),
@@ -337,7 +349,7 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
           child: Align(
             alignment: Alignment.centerLeft,
             child: Image.network(
-              strain?.imageUrl! ?? '',
+              strain?.imageUrl ?? '',
               fit: BoxFit.contain,
             ),
           ),
@@ -364,13 +376,23 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
           ],
         ),
 
-        // TODO: History Tab.
+        /// TODO: Strain analytics
+        /// * Display lab results for the strain.
+        ///   - list
+        ///   - grid
+        ///   - table
+        /// * Scatter plots of lab results
+        /// * Ability to select a lab result to view it's details and it's COA.
+
+        // History Tab.
         CustomScrollView(
           slivers: [
             _breadcrumbs,
             SliverToBoxAdapter(child: _actions),
             SliverToBoxAdapter(
-              child: Text('History under development...'),
+              child: StrainLogs(
+                strainId: widget.strainId ?? '',
+              ),
             ),
           ],
         ),

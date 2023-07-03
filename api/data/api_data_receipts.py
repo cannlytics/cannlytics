@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/13/2023
-Updated: 6/24/2023
+Updated: 7/2/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with receipt data.
@@ -25,6 +25,7 @@ import pandas as pd
 # Internal imports
 from cannlytics.auth.auth import authenticate_request
 from cannlytics.data.sales.receipts_ai import ReceiptsParser
+from cannlytics.data.strains.strains_ai import identify_strains
 from cannlytics.firebase import (
     access_secret_version,
     create_log,
@@ -256,6 +257,19 @@ def api_data_receipts(request, receipt_id=None):
                 verbose=True,
                 user=uid,
             )
+
+            # Extract strain names from product names.
+            strain_names = []
+            for name in receipt_data.get('product_names', []):
+                try:
+                    names = identify_strains(name, user=uid)
+                    if names:
+                        strain_names.extend(names)
+                except:
+                    pass
+            
+            # Add the strain names to the receipt data.
+            receipt_data['strain_names'] = strain_names
 
             # Upload the file to Firebase Storage.
             ext = image.split('.').pop()

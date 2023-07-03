@@ -7,6 +7,8 @@
 // Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// ignore_for_file: unused_local_variable
+
 // Dart imports:
 import 'dart:async';
 
@@ -18,7 +20,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_app/models/metrc/transfer.dart';
-import 'package:cannlytics_app/services/metrc_service.dart';
 import 'package:cannlytics_app/ui/main/app_controller.dart';
 
 /* Transfers data */

@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 7/31/2022
+Updated: 7/3/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -31,12 +31,43 @@ def get_google_maps_api_key() -> str:
     """Get Google Maps API key.
     Returns:
         (str): Returns the Google Maps API key stored
-            in the Firestore database.
+            in a local .env file, Google Secret Manager, or Firestore.
     """
-    # TODO: Prefer using secret manager to Firestore for secrets.
-    database = initialize_firebase()
-    data = get_document('admin/google', database=database)
-    return data['google_maps_api_key']
+    import os
+    from dotenv import load_dotenv
+    
+    # Try to get the key from .env file.
+    load_dotenv()
+    google_maps_api_key = os.getenv('GOOGLE_MAPS_API_KEY')
+    if google_maps_api_key:
+        return google_maps_api_key
+
+    # Try to get the key from Google Secret Manager.
+    try:
+        from cannlytics.firebase import access_secret_version
+        import google.auth
+        _, project_id = google.auth.default()
+        google_maps_api_key = access_secret_version(
+            project_id=project_id,
+            secret_id='GOOGLE_MAPS_API_KEY',
+            version_id='latest',
+        )
+        if google_maps_api_key:
+            return google_maps_api_key
+    except Exception as e:
+        print(f"Failed to get Google Maps API key from Secret Manager: {e}")
+
+    # Try to get the key from Firestore.
+    try:
+        database = initialize_firebase()
+        data = get_document('admin/google', database=database)
+        if data and 'google_maps_api_key' in data:
+            return data['google_maps_api_key']
+    except Exception as e:
+        print(f"Failed to get Google Maps API key from Firestore: {e}")
+
+    # Raise an exception if the key is not found.
+    raise Exception("Failed to get Google Maps API key")
 
 
 def get_state_data(

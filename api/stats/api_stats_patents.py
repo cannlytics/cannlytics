@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/1/2021
-Updated: 6/1/2022
+Updated: 7/2/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Description: API to interface with cannabis patent statistics.
@@ -42,4 +42,7 @@ def patent_stats(request, format=None):
 
         # TODO: Predict if a given set of lab results would be a good
         # candidate for a patent.
+
+        
+
         raise NotImplementedError

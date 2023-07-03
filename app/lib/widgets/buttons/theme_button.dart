@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/theme.dart';
 import 'package:cannlytics_app/services/theme_service.dart';
 
 /// Light / dark theme toggle.

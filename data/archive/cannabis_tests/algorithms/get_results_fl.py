@@ -42,7 +42,7 @@ from typing import Optional
 
 # External imports:
 from bs4 import BeautifulSoup
-from cannlytics.data.coas import CoADoc
+from cannlytics.data.coas.coas import CoADoc
 from cannlytics.data.gis import geocode_addresses
 from cannlytics.utils.constants import DEFAULT_HEADERS
 from dotenv import dotenv_values
@@ -382,7 +382,8 @@ def parse_results_kaycha(
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    DATA_DIR = 'D://data/florida/lab_results'
+    # DATA_DIR = 'D://data/florida/lab_results'
+    DATA_DIR = r'C:\.datasets\data\florida\lab_results'
 
     # [✓] TEST: Get Kaycha COAs.
     kaycha_coas = get_results_kaycha(DATA_DIR)
@@ -602,7 +603,8 @@ def get_product_results_the_flowery(data_dir: str, overwrite = False, **kwargs):
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    DATA_DIR = 'D://data/florida/lab_results'
+    # DATA_DIR = 'D://data/florida/lab_results'
+    DATA_DIR = r'C:\.datasets\data\florida\lab_results'
     
     # [✓] TEST: Get The Flowery COAs.
     the_flowery_products = get_product_results_the_flowery(DATA_DIR)

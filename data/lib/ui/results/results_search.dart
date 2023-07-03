@@ -4,20 +4,18 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/23/2023
-// Updated: 6/29/2023
+// Updated: 7/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/results/result_list_item.dart';
+import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-// Project imports:
-import 'package:cannlytics_data/ui/results/results_search_controller.dart';
 
 /// Lab results search form.
 class LabResultsSearchForm extends HookConsumerWidget {
@@ -26,8 +24,8 @@ class LabResultsSearchForm extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen to the data.
-    final asyncData = ref.watch(asyncLabResultsProvider);
-    final prodSearchList = asyncData.value ?? [];
+    // final asyncData = ref.watch(asyncLabResultsProvider);
+    // final prodSearchList = asyncData.value ?? [];
 
     // Search text controller.
     final _searchTextController = ref.read(resultsSearchController);
@@ -36,7 +34,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
     // Search on enter.
     void _onSubmitted(String value) {
       // ref.watch(asyncLabResultsProvider.notifier).searchLabResults(value);
-      ref.read(searchTermProvider.notifier).update((state) => value);
+      ref.read(resultsSearchTerm.notifier).update((state) => value);
       ref.read(keywordsQuery.notifier).update((state) => state);
     }
 
@@ -119,26 +117,27 @@ class LabResultsSearchForm extends HookConsumerWidget {
 
     /// Search icon.
     Widget _searchIcon() {
-      return asyncData.isLoading
-          ? Icon(
-              Icons.hourglass_full,
-              color: Theme.of(context).textTheme.labelMedium!.color,
-            )
-          : InkWell(
-              onTap: () {
-                String value = _searchTextController.text;
-                print('Searching for value: $value');
-                // ref
-                //     .watch(asyncLabResultsProvider.notifier)
-                //     .searchLabResults(value);
-                ref.read(searchTermProvider.notifier).update((state) => value);
-                ref.read(keywordsQuery.notifier).update((state) => state);
-              },
-              child: Icon(
-                Icons.send,
-                color: Theme.of(context).textTheme.labelMedium!.color,
-              ),
-            );
+      // return asyncData.isLoading
+      //     ? Icon(
+      //         Icons.hourglass_full,
+      //         color: Theme.of(context).textTheme.labelMedium!.color,
+      //       )
+      //     :
+      return InkWell(
+        onTap: () {
+          String value = _searchTextController.text;
+          print('Searching for value: $value');
+          // ref
+          //     .watch(asyncLabResultsProvider.notifier)
+          //     .searchLabResults(value);
+          ref.read(resultsSearchTerm.notifier).update((state) => value);
+          ref.read(keywordsQuery.notifier).update((state) => state);
+        },
+        child: Icon(
+          Icons.send,
+          color: Theme.of(context).textTheme.labelMedium!.color,
+        ),
+      );
     }
 
     /// Clear icon.
@@ -148,7 +147,7 @@ class LabResultsSearchForm extends HookConsumerWidget {
               onPressed: () {
                 // ref.watch(asyncLabResultsProvider.notifier).clearLabResults();
                 _searchTextController.clear();
-                ref.read(searchTermProvider.notifier).update((state) => '');
+                ref.read(resultsSearchTerm.notifier).update((state) => '');
                 ref.read(keywordsQuery.notifier).update((state) => state);
               },
               icon: Icon(
@@ -227,8 +226,8 @@ class LabResultsSearchForm extends HookConsumerWidget {
           // Results list, centered when there are no results, top-aligned otherwise.
           Container(
             height: MediaQuery.of(context).size.height * 0.6,
-            child: _searchTextController.text.isNotEmpty &&
-                    prodSearchList.isNotEmpty
+            // && prodSearchList.isNotEmpty
+            child: _searchTextController.text.isNotEmpty
                 ? SingleChildScrollView(
                     child: Column(
                       children: [

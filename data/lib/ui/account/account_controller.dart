@@ -33,15 +33,28 @@ final userProvider = StreamProvider<User?>((ref) {
 /* === Subscription === */
 
 /// Stream a user's subscription data from Firebase.
-final userSubscriptionProvider = StreamProvider.autoDispose<Map>((ref) {
+final userSubscriptionProvider = StreamProvider.autoDispose<Map?>((ref) {
   final _database = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
+  if (user == null) return Stream.value(null);
   return _database.streamDocument(
-    path: 'subscribers/${user!.uid}',
+    path: 'subscribers/${user.uid}',
     builder: (data, documentId) {
       return data ?? {};
     },
   );
+});
+
+/// Get app subscriptions from Firestore.
+final subscriptionsProvider =
+    FutureProvider<List<Map<dynamic, dynamic>?>>((ref) async {
+  final _dataSource = ref.read(firestoreProvider);
+  var data = await _dataSource.getCollection(
+    path: 'public/subscriptions/data_subscriptions',
+    builder: (data, id) => data,
+    queryBuilder: (query) => query.orderBy('price_usd'),
+  );
+  return data;
 });
 
 /* === User authentication === */

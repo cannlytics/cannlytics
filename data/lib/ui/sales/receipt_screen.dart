@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/9/2023
-// Updated: 6/30/2023
+// Updated: 7/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/download_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
@@ -14,13 +14,23 @@ import 'package:cannlytics_data/common/forms/forms.dart';
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/loading_placeholder.dart';
 import 'package:cannlytics_data/common/layout/pill_tab.dart';
+import 'package:cannlytics_data/common/tables/key_value_datatable.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
-import 'package:cannlytics_data/ui/sales/sales_service.dart';
+import 'package:cannlytics_data/ui/sales/receipt_history.dart';
+import 'package:cannlytics_data/ui/sales/receipts_service.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+// TODO: Allow the user to upload product labels.
+// TODO: Parse the product labels with AI.
+// Optional: Allow the user to add additional fields to the receipt.
+
+// TODO: Allow the user to link lab results.
 
 /// Receipt screen.
 class ReceiptScreen extends ConsumerStatefulWidget {
@@ -138,58 +148,135 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
     }
 
     // Fields.
+    var fieldStyle = Theme.of(context).textTheme.bodySmall;
     var fields = [
-      // Product details.
-      Text('Product', style: labelStyle),
-      Text('Product Names: ${item?.productNames?.join(', ') ?? ''}'),
-      Text('Product Types: ${item?.productTypes?.join(', ') ?? ''}'),
-      Text('Product Quantities: ${item?.productQuantities?.join(', ') ?? ''}'),
-      Text('Product Prices: ${item?.productPrices?.join(', ') ?? ''}'),
-      Text('Product IDs: ${item?.productIds?.join(', ') ?? ''}'),
+      KeyValueDataTable(
+        tableName: 'Product Details',
+        labels: [
+          'Product Names',
+          'Strain Names',
+          'Product Types',
+          'Product Quantities',
+          'Product Prices',
+          'Product IDs',
+        ],
+        values: [
+          Text('${item?.productNames?.join(', ') ?? ''}', style: fieldStyle),
+          Wrap(
+            spacing: 4.0,
+            children: item?.strainNames != null
+                ? item!.strainNames!.map<Widget>((strainName) {
+                    var hash = DataUtils.createHash(strainName, privateKey: '');
+                    return InkWell(
+                      child: Text(strainName, style: fieldStyle),
+                      onTap: () {
+                        context.go('/strains/$hash');
+                      },
+                    );
+                  }).toList()
+                : [Container()],
+          ),
+          Text('${item?.productTypes?.join(', ') ?? ''}', style: fieldStyle),
+          Text('${item?.productQuantities?.join(', ') ?? ''}',
+              style: fieldStyle),
+          Text('${item?.productPrices?.join(', ') ?? ''}', style: fieldStyle),
+          Text('${item?.productIds?.join(', ') ?? ''}', style: fieldStyle),
+        ],
+      ),
       gapH16,
-
-      // Price details.
-      Text('Pricing', style: labelStyle),
-      Text('Total Price: ${item?.totalPrice?.toString() ?? ''}'),
-      Text('Total Amount: ${item?.totalAmount?.toString() ?? ''}'),
-      Text('Subtotal: ${item?.subtotal?.toString() ?? ''}'),
-      Text('Total Discount: ${item?.totalDiscount?.toString() ?? ''}'),
-      Text('Total Paid: ${item?.totalPaid?.toString() ?? ''}'),
-      Text('Change Due: ${item?.changeDue?.toString() ?? ''}'),
-      Text('Rewards Earned: ${item?.rewardsEarned?.toString() ?? ''}'),
-      Text('Rewards Spent: ${item?.rewardsSpent?.toString() ?? ''}'),
-      Text('Total Rewards: ${item?.totalRewards?.toString() ?? ''}'),
+      KeyValueDataTable(
+        tableName: 'Pricing Details',
+        labels: [
+          'Total Price',
+          'Total Amount',
+          'Subtotal',
+          'Total Discount',
+          'Total Paid',
+          'Change Due',
+          'Rewards Earned',
+          'Rewards Spent',
+          'Total Rewards',
+        ],
+        values: [
+          Text('${item?.totalPrice?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.totalAmount?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.subtotal?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.totalDiscount?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.totalPaid?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.changeDue?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.rewardsEarned?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.rewardsSpent?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.totalRewards?.toString() ?? ''}', style: fieldStyle),
+        ],
+      ),
       gapH16,
-
-      // Transaction data.
-      Text('Transaction', style: labelStyle),
-      Text('Transactions: ${item?.transactions?.join(', ') ?? ''}'),
-      Text('Total Transactions: ${item?.totalTransactions?.toString() ?? ''}'),
-      Text('Receipt Number: ${item?.receiptNumber ?? ''}'),
-      Text('Purchased at: ${item?.dateSold?.toIso8601String() ?? ''}'),
+      KeyValueDataTable(
+        tableName: 'Transaction Details',
+        labels: [
+          'Transactions',
+          'Total Transactions',
+          'Receipt Number',
+          'Purchased at',
+        ],
+        values: [
+          Text('${item?.transactions?.join(', ') ?? ''}', style: fieldStyle),
+          Text('${item?.totalTransactions?.toString() ?? ''}',
+              style: fieldStyle),
+          Text('${item?.receiptNumber ?? ''}', style: fieldStyle),
+          Text('${item?.dateSold?.toIso8601String() ?? ''}', style: fieldStyle),
+        ],
+      ),
       gapH16,
-
-      // Taxes data.
-      Text('Taxes', style: labelStyle),
-      Text('City Tax: ${item?.cityTax?.toString() ?? ''}'),
-      Text('County Tax: ${item?.countyTax?.toString() ?? ''}'),
-      Text('State Tax: ${item?.stateTax?.toString() ?? ''}'),
-      Text('Excise Tax: ${item?.exciseTax?.toString() ?? ''}'),
-      Text('Total Tax: ${item?.totalTax?.toString() ?? ''}'),
+      KeyValueDataTable(
+        tableName: 'Tax Details',
+        labels: [
+          'City Tax',
+          'County Tax',
+          'State Tax',
+          'Excise Tax',
+          'Total Tax',
+        ],
+        values: [
+          Text('${item?.cityTax?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.countyTax?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.stateTax?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.exciseTax?.toString() ?? ''}', style: fieldStyle),
+          Text('${item?.totalTax?.toString() ?? ''}', style: fieldStyle),
+        ],
+      ),
       gapH16,
-
-      // Retailer data.
-      // TODO: Add a link to the retailer (/licenses/{licenseNumber}).
-      Text('Dispensary', style: labelStyle),
-      Text('Retailer: ${item?.retailer ?? ''}'),
-      Text('Retailer License Number: ${item?.retailerLicenseNumber ?? ''}'),
-      Text('Retailer Address: ${item?.retailerAddress ?? ''}'),
-      Text('Budtender: ${item?.budtender ?? ''}'),
+      KeyValueDataTable(
+        tableName: 'Retailer Details',
+        labels: [
+          'Retailer',
+          'Retailer License Number',
+          'Retailer Address',
+          'Budtender',
+        ],
+        values: [
+          InkWell(
+            child: Text('${item?.retailer}', style: fieldStyle),
+            onTap: () {
+              var state = item?.retailerState?.toLowerCase() ?? 'all';
+              var id = item?.retailerLicenseNumber;
+              if (id != null) context.go('/licenses/$state/$id');
+            },
+          ),
+          Text('${item?.retailerLicenseNumber ?? ''}', style: fieldStyle),
+          Text('${item?.retailerAddress ?? ''}', style: fieldStyle),
+          Text('${item?.budtender ?? ''}', style: fieldStyle),
+        ],
+      ),
       gapH16,
-
-      // Parsing data.
-      Text('Parsing details', style: labelStyle),
-      Text('Hash: ${item?.hash ?? ''}'),
+      KeyValueDataTable(
+        tableName: 'Parsing Details',
+        labels: [
+          'Hash',
+        ],
+        values: [
+          Text('${item?.hash ?? ''}', style: fieldStyle),
+        ],
+      ),
       gapH48,
     ];
 
@@ -421,6 +508,11 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
           icon: Icons.bar_chart,
           isSelected: _tabController.index == 0,
         ),
+        PillTabButton(
+          text: 'History',
+          icon: Icons.history,
+          isSelected: _tabController.index == 1,
+        ),
       ],
     );
 
@@ -543,17 +635,24 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
             SliverToBoxAdapter(child: _actions),
             // Show the image here.
             SliverToBoxAdapter(
-              child: item.downloadUrl != null
-                  ? _image
-                  : Container(), // Show an empty container when there's no image.
+              child: item.downloadUrl != null ? _image : Container(),
             ),
             _isEditing ? _editForm : _viewForm,
           ],
         ),
 
-        // Future work:
-        // - Notes tab.
-        // - Images / gallery tab?
+        // History tab.
+        CustomScrollView(
+          slivers: [
+            _breadcrumbs,
+            SliverToBoxAdapter(child: _actions),
+            SliverToBoxAdapter(
+              child: ReceiptLogs(
+                receiptId: widget.salesReceiptId ?? '',
+              ),
+            ),
+          ],
+        ),
       ],
     );
 

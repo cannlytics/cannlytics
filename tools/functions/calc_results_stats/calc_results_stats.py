@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/28/2023
-Updated: 6/28/2023
+Updated: 7/2/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -55,6 +55,17 @@ def calc_results_stats(
     print('User:', uid, 'changed lab result:', lab_result_id)
 
     # TODO: Remove lab result from `public/data/lab_results` if it was deleted.
+
+
+    # TODO: Create a log of the changes if updated.
+    # create_log(
+    #     f'public/data/lab_results/{sample_id}/lab_result_logs',
+    #     claims=claims,
+    #     action='Parsed COAs.',
+    #     log_type='data',
+    #     key='api_data_coas',
+    #     changes=changes
+    # )
 
 
     # TODO: Update `public/data/lab_results` if there are new lab results.

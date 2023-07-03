@@ -4,12 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 6/24/2023
+// Updated: 7/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,6 @@ import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/services/storage_service.dart';
-import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:cannlytics_data/ui/licensees/usa_map.dart';
 
 /// Screen.
@@ -211,8 +211,10 @@ class LicenseesScreen extends ConsumerWidget {
 
   /// Dataset cards.
   Widget _datasetsCards(BuildContext context, WidgetRef ref) {
-    var datasets =
-        mainDatasets.where((element) => element['type'] == 'licenses').toList();
+    final mainDatasets = ref.watch(datasetsProvider).value ?? [];
+    var datasets = mainDatasets
+        .where((element) => element?['type'] == 'licenses')
+        .toList();
     final screenWidth = MediaQuery.of(context).size.width;
     final user = ref.watch(userProvider).value;
     return SliverToBoxAdapter(
@@ -236,14 +238,14 @@ class LicenseesScreen extends ConsumerWidget {
             childAspectRatio: 3,
             items: datasets.map((model) {
               return DatasetCard(
-                imageUrl: model['image_url'],
-                title: model['title'],
-                description: model['description'],
-                tier: model['tier'],
-                rows: NumberFormat('#,###').format(model['observations']) +
+                imageUrl: model?['image_url'],
+                title: model?['title'],
+                description: model?['description'],
+                tier: model?['tier'],
+                rows: NumberFormat('#,###').format(model?['observations']) +
                     ' rows',
                 columns:
-                    NumberFormat('#,###').format(model['fields']) + ' columns',
+                    NumberFormat('#,###').format(model?['fields']) + ' columns',
                 onTap: () async {
                   // Note: Requires the user to be signed in.
                   if (user == null) {
@@ -257,7 +259,7 @@ class LicenseesScreen extends ConsumerWidget {
                   }
                   // Get URL for file in Firebase Storage.
                   String? url =
-                      await StorageService.getDownloadUrl(model['file_ref']);
+                      await StorageService.getDownloadUrl(model?['file_ref']);
                   DataService.openInANewTab(url);
                 },
               );

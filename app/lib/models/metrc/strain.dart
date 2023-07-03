@@ -7,9 +7,6 @@
 // Updated: 3/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Project imports:
-import 'package:cannlytics_app/services/metrc_service.dart';
-
 typedef StrainId = String;
 
 /// Model representing a strain of cannabis.

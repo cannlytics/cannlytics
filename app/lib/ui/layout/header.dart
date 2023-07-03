@@ -176,7 +176,7 @@ class DesktopNavigationLayout extends ConsumerWidget {
             width: 45,
             height: 45,
             child: Avatar(
-              photoUrl: user!.photoURL ??
+              photoUrl: user.photoURL ??
                   'https://cannlytics.com/robohash/${user.uid}',
               radius: 30,
               borderColor: Theme.of(context).secondaryHeaderColor,

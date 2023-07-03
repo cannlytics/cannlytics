@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/6/2023
-Updated: 2/6/2023
+Updated: 7/2/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API to interface with AI.
@@ -84,6 +84,8 @@ def text_to_color_api(request: Request):
     if claims is None:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
     
+    # FIXME: Also allow the user to "GET" a color with a ?q= query parameter.
+    
     # Get the parameters.
     uid = claims.get('uid', 'cannlytics.eth')
     data = request.data.get('data', request.data)
@@ -147,6 +149,8 @@ def text_to_emoji_api(request: Request):
     claims = authenticate_request(request)
     if claims is None:
         return Response({'error': True, 'message': AUTH_ERROR}, status=403)
+    
+    # FIXME: Also allow the user to "GET" a color with a ?q= query parameter.
     
     # Get the parameters.
     uid = claims.get('uid', 'cannlytics.eth')

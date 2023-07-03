@@ -7,9 +7,6 @@
 // Updated: 3/17/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Project imports:
-import 'package:cannlytics_app/services/metrc_service.dart';
-
 typedef SalesReceiptId = String;
 
 class SalesReceipt {

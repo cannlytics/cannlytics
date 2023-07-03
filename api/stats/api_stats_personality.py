@@ -4,21 +4,18 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/20/2022
-Updated: 6/21/2022
+Updated: 7/2/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API to interface with the Big Five personality test.
 """
 # Standard imports.
-from datetime import datetime
 from json import loads
 
 # External imports.
-import pandas as pd
 from cannlytics.utils.utils import get_timestamp
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-import ulid
 
 # Internal imports.
 from cannlytics.auth.auth import authenticate_request

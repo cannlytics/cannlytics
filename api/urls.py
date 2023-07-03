@@ -15,8 +15,8 @@ from django.urls import include, path
 from rest_framework import urlpatterns #pylint: disable=unused-import
 
 # Core API imports.
-from api.auth import auth
-from api.base import base
+from api.auth import api_auth
+from api.base import api_base
 
 # Functional API imports.
 import api.ai
@@ -26,9 +26,9 @@ import api.stats
 import api.metrc
 
 # Administrative API imports.
-from api.organizations import organizations
-from api.users import users
-from api.settings import settings
+from api.organizations import api_organizations
+from api.users import api_users
+from api.settings import api_settings
 
 
 app_name = 'api' # pylint: disable=invalid-name
@@ -36,13 +36,13 @@ app_name = 'api' # pylint: disable=invalid-name
 urlpatterns = [
 
     # Base API endpoint for users to discover an index of endpoints.
-    path('', base.index, name='index'),
+    path('', api_base.index, name='index'),
 
     # Authentication API endpoints.
     path('auth', include([
-        path('/create-key', auth.create_api_key),
-        path('/delete-key', auth.delete_api_key),
-        path('/get-keys', auth.get_api_key_hmacs),
+        path('/create-key', api_auth.create_api_key),
+        path('/delete-key', api_auth.delete_api_key),
+        path('/get-keys', api_auth.get_api_key_hmacs),
     ])),
 
     # AI API endpoints.
@@ -195,26 +195,26 @@ urlpatterns = [
 
     # Organization API endpoints.
     path('organizations', include([
-        path('', organizations.organizations),
-        path('/<organization_id>', organizations.organizations),
-        path('/<organization_id>/settings', organizations.organizations),
-        path('/<organization_id>/team', organizations.organization_team),
-        path('/<organization_id>/team/<user_id>', organizations.organization_team),
-        path('/<organization_id>/join', organizations.join_organization),
+        path('', api_organizations.organizations),
+        path('/<organization_id>', api_organizations.organizations),
+        path('/<organization_id>/settings', api_organizations.organizations),
+        path('/<organization_id>/team', api_organizations.organization_team),
+        path('/<organization_id>/team/<user_id>', api_organizations.organization_team),
+        path('/<organization_id>/join', api_organizations.join_organization),
     ])),
 
     # User API Endpoints.
     path('users', include([
-        path('', users.users),
-        path('/<user_id>', users.users),
-        path('/<user_id>/about', users.users),
-        path('/<user_id>/consumption', users.users),
-        path('/<user_id>/spending', users.users),
+        path('', api_users.users),
+        path('/<user_id>', api_users.users),
+        path('/<user_id>/about', api_users.users),
+        path('/<user_id>/consumption', api_users.users),
+        path('/<user_id>/spending', api_users.users),
         path('/<user_id>/logs', include([
-            path('', settings.logs),
-            path('/<log_id>', settings.logs),
+            path('', api_settings.logs),
+            path('/<log_id>', api_settings.logs),
         ])),
-        path('/<user_id>/settings', users.users),
+        path('/<user_id>/settings', api_users.users),
     ])),
 
     # LIMS API endpoints.

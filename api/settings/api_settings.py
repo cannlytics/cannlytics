@@ -19,9 +19,6 @@ from rest_framework.response import Response
 from cannlytics.auth.auth import authenticate_request
 from api.api import get_objects, update_object
 
-#-----------------------------------------------------------------------
-# Logs
-#-----------------------------------------------------------------------
 
 @api_view(['GET', 'POST'])
 def logs(request, log_id=None):

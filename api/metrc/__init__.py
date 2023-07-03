@@ -8,7 +8,7 @@ Created: 9/8/2022
 Updated: 3/24/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
-from api.metrc.metrc import (
+from api.metrc.api_metrc import (
     add_metrc_user_api_key,
     delete_metrc_user_api_key,
     additive_types,

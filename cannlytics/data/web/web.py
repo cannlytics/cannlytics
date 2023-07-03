@@ -218,7 +218,7 @@ def find_company_linkedin():
     raise NotImplementedError
 
 
-def find_company_url():
+def find_company_url(company_name: str):
     """
     TODO: Find a company's website URL. (Google search for name?)
     """

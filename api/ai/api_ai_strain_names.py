@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/12/2023
-Updated: 4/12/2023
+Updated: 7/2/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -24,7 +24,7 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 
 # Internal imports:
-from api.ai.ai import (
+from api.ai.api_ai import (
     initialize_openai,
     increment_usage,
     AUTH_ERROR,

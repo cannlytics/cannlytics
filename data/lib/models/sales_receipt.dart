@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 6/24/2023
+// Updated: 7/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 /// A sales receipt model.
@@ -28,6 +28,7 @@ class SalesReceipt {
     this.recordedByUserName,
     this.lastModified,
     this.dateSold,
+    this.strainNames,
     this.productNames,
     this.productTypes,
     this.productQuantities,
@@ -48,6 +49,10 @@ class SalesReceipt {
     this.retailer,
     this.retailerLicenseNumber,
     this.retailerAddress,
+    this.retailerStreet,
+    this.retailerCity,
+    this.retailerState,
+    this.retailerZipcode,
     this.budtender,
     this.totalTax,
     this.totalTransactions,
@@ -78,6 +83,7 @@ class SalesReceipt {
   final String? recordedByUserName;
   final String? lastModified;
   final DateTime? dateSold;
+  final List<dynamic>? strainNames;
   final List<dynamic>? productNames;
   final List<dynamic>? productTypes;
   final List<int>? productQuantities;
@@ -98,6 +104,10 @@ class SalesReceipt {
   final String? retailer;
   final String? retailerLicenseNumber;
   final String? retailerAddress;
+  final String? retailerStreet;
+  final String? retailerCity;
+  final String? retailerState;
+  final String? retailerZipcode;
   final String? budtender;
   final double? totalTax;
   final double? totalTransactions;
@@ -130,6 +140,8 @@ class SalesReceipt {
       recordedByUserName: data['recorded_by_user_name'] as String?,
       lastModified: data['last_modified'] as String?,
       dateSold: DateTime.parse(data['date_sold'] as String? ?? ''),
+      strainNames:
+          List<String>.from(data['strain_names'] as List<dynamic>? ?? []),
       productNames:
           List<String>.from(data['product_names'] as List<dynamic>? ?? []),
       productTypes:
@@ -154,7 +166,11 @@ class SalesReceipt {
       exciseTax: data['excise_tax'] as double?,
       retailer: data['retailer'] as String?,
       retailerLicenseNumber: data['retailer_license_number'] as String?,
-      retailerAddress: data['retailer_address'] as String?,
+      retailerAddress: data['retailer_address'],
+      retailerStreet: data['retailer_street'],
+      retailerCity: data['retailer_city'],
+      retailerState: data['retailer_state'],
+      retailerZipcode: data['retailer_zipcode'],
       budtender: data['budtender'] as String?,
       totalTax: data['total_tax'] as double?,
       totalTransactions: data['total_transactions'] as double?,
@@ -188,6 +204,7 @@ class SalesReceipt {
       'recorded_by_user_name': recordedByUserName,
       'last_modified': lastModified,
       'date_sold': dateSold?.toIso8601String(),
+      'strain_names': strainNames,
       'product_names': productNames,
       'product_types': productTypes,
       'product_quantities': productQuantities,
@@ -208,6 +225,10 @@ class SalesReceipt {
       'retailer': retailer,
       'retailer_license_number': retailerLicenseNumber,
       'retailer_address': retailerAddress,
+      'retailer_street': retailerStreet,
+      'retailer_city': retailerCity,
+      'retailer_state': retailerState,
+      'retailer_zipcode': retailerZipcode,
       'budtender': budtender,
       'total_tax': totalTax,
       'total_transactions': totalTransactions,

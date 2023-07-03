@@ -15,12 +15,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/licenses/licenses_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
-import 'package:cannlytics_app/ui/main/app_controller.dart';
-import 'package:cannlytics_app/widgets/lists/list_items_builder.dart';
 
 /// Licenses screen.
 class LicensesScreen extends ConsumerWidget {
@@ -38,8 +35,8 @@ class LicensesScreen extends ConsumerWidget {
     final isWide = screenWidth > Breakpoints.tablet;
 
     // Get the theme.
-    final themeMode = ref.watch(themeModeProvider);
-    final bool isDark = themeMode == ThemeMode.dark;
+    // final themeMode = ref.watch(themeModeProvider);
+    // final bool isDark = themeMode == ThemeMode.dark;
 
     // Render the widget.
     return Scaffold(

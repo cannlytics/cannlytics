@@ -21,7 +21,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
 import 'package:cannlytics_app/ui/account/organizations/organizations_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';

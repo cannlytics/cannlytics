@@ -4,13 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/19/2023
+// Updated: 7/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/ui/sales/receipt_card.dart';
-import 'package:cannlytics_data/ui/sales/sales_service.dart';
+import 'package:cannlytics_data/ui/sales/receipts_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

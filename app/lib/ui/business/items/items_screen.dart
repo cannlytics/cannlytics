@@ -123,7 +123,7 @@ class ItemsTable extends ConsumerWidget {
     final rowsPerPage = ref.watch(itemsRowsPerPageProvider);
 
     // Get the selected rows.
-    List<Item> selectedRows = ref.watch(selectedItemsProvider);
+    // List<Item> selectedRows = ref.watch(selectedItemsProvider);
     // List<String> selectedIds = selectedRows.map((x) => x.id).toList();
     List<String> selectedIds = [];
 

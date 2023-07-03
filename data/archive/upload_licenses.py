@@ -66,7 +66,7 @@ def upload_cannabis_licenses_datafiles(
             if file.endswith('latest.csv'):
                 datafiles.append(os.path.join(root, file))
 
-    # Format the references.
+    # Format the storage references.
     refs = [storage_ref + x.split('./cannabis_licenses/data')[-1] for x in datafiles]
     refs = [x.replace('\\', '/') for x in refs]
     

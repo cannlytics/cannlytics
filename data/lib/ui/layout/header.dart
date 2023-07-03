@@ -43,7 +43,7 @@ class DashboardHeader extends ConsumerWidget implements PreferredSizeWidget {
     // Listen to the user's current amount of tokens.
     final asyncSnapshot = ref.watch(userSubscriptionProvider);
     final int currentTokens = asyncSnapshot.when(
-      data: (data) => data['tokens'] ?? 0,
+      data: (data) => data?['tokens'] ?? 0,
       loading: () => 0,
       error: (error, stack) => 0,
     );

@@ -4,10 +4,15 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/1/2021
-Updated: 6/1/2022
+Updated: 7/2/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Description: API to interface with cannabis patent statistics.
+
+References:
+
+- https://github.com/TracyRenee61/House-Prices/blob/master/Boston_Housing_SelectKBest_.ipynb
+
 """
 # Standard imports.
 from datetime import datetime
@@ -47,7 +52,6 @@ def recommendation_stats(request, format=None):
     data = []
     if request.method == 'GET':
 
-        # https://github.com/TracyRenee61/House-Prices/blob/master/Boston_Housing_SelectKBest_.ipynb
 
         # TODO: User passes list of desired effects / aromas.
         # A list of strains is returned that match the desired effects / aromas,

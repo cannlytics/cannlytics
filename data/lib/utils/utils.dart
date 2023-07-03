@@ -18,6 +18,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:crypto/crypto.dart';
 
 // Package imports:
 import 'package:url_launcher/url_launcher.dart';
@@ -216,5 +217,26 @@ class DataUtils {
     } else {
       return null;
     }
+  }
+
+  /// Compute the SHA-256 hash of a string.
+  static String sha256hash(String? data) {
+    if (data == null) return '';
+    var bytes = utf8.encode(data);
+    var digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  /// Create a hash (HMAC-SHA256) that is unique to the provided data.
+  static String createHash(
+    String? publicKey, {
+    String privateKey = 'cannlytics.eth',
+  }) {
+    if (publicKey == null) return '';
+    var key = utf8.encode(privateKey);
+    var msg = utf8.encode(publicKey);
+    var hmacSha256 = new Hmac(sha256, key); // HMAC-SHA256
+    var digest = hmacSha256.convert(msg);
+    return digest.toString();
   }
 }

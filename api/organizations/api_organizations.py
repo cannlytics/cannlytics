@@ -4,7 +4,7 @@ Copyright (c) Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/25/2021
-Updated: 3/7/2023
+Updated: 7/2/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-console/blob/main/LICENSE>
 
 Description: API to interface with organizations.
@@ -34,7 +34,7 @@ from cannlytics.firebase import (
     update_documents,
 )
 from cannlytics.auth.auth import authenticate_request
-from api.metrc.metrc import initialize_traceability
+from api.metrc.api_metrc import initialize_traceability
 from console.settings import DEFAULT_FROM_EMAIL, LIST_OF_EMAIL_RECIPIENTS
 
 

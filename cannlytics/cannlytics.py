@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 7/12/2022
+Updated: 7/2/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains the Cannlytics class,
@@ -33,10 +33,8 @@ class Cannlytics:
             license_number: Optional[str] = None,
             state: Optional[str] = None,
             firebase: Optional[bool] = False,
-            lims: Optional[bool] = False,
             metrc: Optional[bool] = False,
-            paypal: Optional[bool] = False,
-            quickbooks: Optional[bool] = False,
+            openai: Optional[bool] = False,
     ) -> None:
         """Initialize a Cannlytics class.
         Args:
@@ -46,6 +44,7 @@ class Cannlytics:
                 `METRC_VENDOR_API_KEY`
                 `METRC_USER_API_KEY`
                 `METRC_STATE`
+                `OPENAI_API_KEY`
             license_number (str): A primary license number (optional).
             state (str): A state abbreviation (optional).
             firebase (bool): Initialize the Firebase module, default `False` (optional).
@@ -73,10 +72,8 @@ class Cannlytics:
                 primary_license=self.license,
                 state=self.state
             )
-        # TODO: Initialize modules if specified.
-        # lims
-        # paypal
-        # quickbooks
+        if openai:
+            self.initialize_openai(self.config.get('OPENAI_API_KEY'))
 
 
     def create_log(self, message: str):
@@ -122,6 +119,26 @@ class Cannlytics:
         # TODO: Map all firebase function to cannlytics.<function_name>, passing DB as an argument.
         self.create_log('Firebase client initialized.')
         return self.database
+    
+
+    def initialize_openai(self, openai_api_key=None):
+        """Initialize OpenAI with Google Secret Manager or .env variable."""
+        import openai
+        if openai_api_key is None:
+            try:
+                import google.auth
+                from cannlytics.firebase import access_secret_version
+                self.initialize_firebase()
+                _, project_id = google.auth.default()
+                openai_api_key = access_secret_version(
+                    project_id=project_id,
+                    secret_id='OPENAI_API_KEY',
+                    version_id='latest',
+                )
+            except:
+                openai_api_key = self.config.get('OPENAI_API_KEY')
+        openai.api_key = openai_api_key
+        self.create_log('OpenAI initialized.')
 
 
     def initialize_traceability(self, config=None, primary_license=None, state=None):
@@ -142,27 +159,6 @@ class Cannlytics:
         )
         self.create_log('Traceability client initialized.')
         return self.track
-
-
-    # Optional: Make `paypal` available through the interface?
-
-
-    # Optional: Make `lims` available through the interface?
-
-
-    # Optional: Make `quickbooks` available through the interface?
-    
-
-    # Optional: Make `charts` available through the interface?
-
-
-    # Optional: Make `stats` available through the interface?
-
-
-    # Optional: Make `utils` available through the interface?
-
-
-    # Future work: Use models that have their own functions.
 
 
     # TODO: Make data and statistics readily available through

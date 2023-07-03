@@ -14,10 +14,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/models/common/user.dart';
 import 'package:cannlytics_app/models/metrc/license.dart';
-import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/services/firestore_service.dart';
 
 // Licenses provider.
 final licensesProvider =
@@ -31,7 +28,7 @@ class LicensesController extends AutoDisposeAsyncNotifier<void> {
 
   /// Save a license.
   Future<bool> addLicense(License data) async {
-    final currentUser = ref.read(authProvider).currentUser;
+    // final currentUser = ref.read(authProvider).currentUser;
     // final database = ref.read(licensesFirestoreProvider);
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {

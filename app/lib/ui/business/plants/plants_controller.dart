@@ -7,6 +7,8 @@
 // Updated: 3/16/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// ignore_for_file: unused_local_variable
+
 // Dart imports:
 import 'dart:async';
 

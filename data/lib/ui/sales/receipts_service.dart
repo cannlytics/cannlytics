@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 6/2/2023
+// Updated: 7/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -15,6 +15,7 @@ import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/services/api_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /* === Data === */
@@ -117,4 +118,24 @@ class ReceiptParser extends AsyncNotifier<List<Map?>> {
 // An instance of the receipt parser.
 final receiptParser = AsyncNotifierProvider<ReceiptParser, List<Map?>>(() {
   return ReceiptParser();
+});
+
+/* === Logs === */
+
+// Receipt edit history logs.
+final receiptLogs =
+    StateProvider.family<Query<Map<dynamic, dynamic>?>, String>((
+  ref,
+  hash,
+) {
+  final user = ref.watch(userProvider).value;
+  // if (user == null) return Stream.value(<Map<dynamic, dynamic>?>[]);
+  return FirebaseFirestore.instance
+      .collection('users/${user?.uid}/receipts/$hash/receipt_logs')
+      .orderBy('created_at', descending: true)
+      .withConverter<Map<dynamic, dynamic>?>(
+        fromFirestore: (snapshot, _) => snapshot.data()!,
+        toFirestore: (Map<dynamic, dynamic>? item, _) =>
+            item as Map<String, Object?>,
+      );
 });

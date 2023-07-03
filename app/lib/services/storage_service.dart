@@ -7,10 +7,6 @@
 // Updated: 2/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Package imports:
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 /// Storage service.
 class StorageService {
   const StorageService._();

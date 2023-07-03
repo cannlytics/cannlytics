@@ -8,6 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_app/ui/main/app_controller.dart';
 import 'package:cannlytics_app/widgets/cards/wide_card.dart';
 import 'package:cannlytics_app/widgets/layout/main_screen.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +63,6 @@ class AccountManagement extends ConsumerWidget {
 
     // Listen to the current user.
     final user = ref.watch(userProvider).value;
-    ;
 
     // Render the widget.
     return Padding(

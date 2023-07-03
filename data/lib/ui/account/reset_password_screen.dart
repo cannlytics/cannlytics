@@ -26,7 +26,6 @@ import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
-// import 'package:cannlytics_data/utils/utils.dart';
 
 /// Screen for the user to reset their password.
 class ResetPasswordScreen extends ConsumerWidget {

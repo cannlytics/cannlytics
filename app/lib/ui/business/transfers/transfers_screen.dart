@@ -111,7 +111,7 @@ class TransfersTable extends ConsumerWidget {
     final rowsPerPage = ref.watch(transfersRowsPerPageProvider);
 
     // Get the selected rows.
-    List<Transfer> selectedRows = ref.watch(selectedTransfersProvider);
+    // List<Transfer> selectedRows = ref.watch(selectedTransfersProvider);
     // FIXME:
     // List<String> selectedIds = selectedRows.map((x) => x.id).toList();
     List<String> selectedIds = [];

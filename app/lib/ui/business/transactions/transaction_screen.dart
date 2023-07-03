@@ -23,7 +23,6 @@ import 'package:cannlytics_app/ui/layout/header.dart';
 import 'package:cannlytics_app/widgets/buttons/custom_text_button.dart';
 import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
 import 'package:cannlytics_app/widgets/dialogs/alert_dialog_ui.dart';
-import 'package:cannlytics_app/widgets/inputs/checkbox_input.dart';
 import 'package:cannlytics_app/widgets/layout/form_container.dart';
 
 /// SalesTransaction screen.
@@ -100,7 +99,7 @@ class _SalesTransactionScreenState
           PrimaryButton(
             text: (widget.id == 'new') ? 'Create' : 'Save',
             onPressed: () async {
-              var name = ref.read(nameController).value.text;
+              // var name = ref.read(nameController).value.text;
               // FIXME:
               var update = SalesTransaction();
               if (widget.id == 'new') {

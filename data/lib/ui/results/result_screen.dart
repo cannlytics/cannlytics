@@ -21,13 +21,16 @@ import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/ui/results/result_coa.dart';
+import 'package:cannlytics_data/ui/results/result_history.dart';
 import 'package:cannlytics_data/ui/results/result_table.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:internet_file/internet_file.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Result screen.
 class ResultScreen extends ConsumerStatefulWidget {
@@ -54,7 +57,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
   late PdfController _pdfController;
   late String _pdfUrl;
   late final TabController _tabController;
-  int _tabCount = 3;
+  int _tabCount = 4;
   Future<void>? _updateFuture;
 
   // Initialize.
@@ -154,6 +157,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       update['results'] = ref.read(analysisResults);
       update['updated_at'] = DateTime.now().toUtc().toIso8601String();
 
+      // TODO: Create a log.
+
       // Update the data in Firestore.
       _updateFuture = ref.read(resultService).updateResult(
             widget.labResultId ?? widget.labResult?.sampleHash ?? '',
@@ -182,7 +187,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     var fieldStyle = Theme.of(context).textTheme.bodySmall;
     var fields = [
       // Sample data.
-      // TODO: Link to strains page (strains/{hash(strainName)}).
       KeyValueDataTable(
         tableName: 'Sample',
         labels: [
@@ -193,9 +197,23 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
         ],
         values: [
           Text('${labResult?.productName}', style: fieldStyle),
-          Text('${labResult?.strainName}', style: fieldStyle),
+          InkWell(
+            child: Text('${labResult?.strainName}', style: fieldStyle),
+            onTap: () {
+              var publicKey = labResult?.strainName;
+              var hash = DataUtils.createHash(publicKey, privateKey: '');
+              context.go('/strains/$hash');
+            },
+          ),
           Text('${labResult?.productType}', style: fieldStyle),
-          Text('${labResult?.traceabilityIds}', style: fieldStyle),
+          Wrap(
+            spacing: 4.0,
+            children: labResult?.traceabilityIds != null
+                ? labResult?.traceabilityIds
+                    .map<Widget>((x) => Text('${x}', style: fieldStyle))
+                    .toList()
+                : [Container()],
+          ),
         ],
       ),
       gapH24,
@@ -224,9 +242,36 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       ),
       gapH24,
 
+      // Analysis data.
+      KeyValueDataTable(
+        tableName: 'Analysis',
+        labels: [
+          'Status',
+          'Analyses',
+          'Batch Number',
+          'Date Tested',
+          'Date Received',
+          'Sample Weight',
+        ],
+        values: <Widget>[
+          StatusPill(labResult?.status ?? ''),
+          Wrap(
+            spacing: 4.0,
+            children: labResult?.analyses != null
+                ? labResult?.analyses
+                    .map<Widget>((analysis) => AnalysisPill(analysis))
+                    .toList()
+                : [Container()],
+          ),
+          Text('${labResult?.batchNumber}', style: fieldStyle),
+          Text('${labResult?.dateTested}', style: fieldStyle),
+          Text('${labResult?.dateReceived}', style: fieldStyle),
+          Text('${labResult?.sampleWeight}', style: fieldStyle),
+        ],
+      ),
+      gapH24,
+
       // Producer details.
-      // TODO: Link to producer (/licenses/{producerLicenseNumber}).
-      // TODO: Try to get and render producer image.
       KeyValueDataTable(
         tableName: 'Producer',
         labels: [
@@ -235,7 +280,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           'Producer License Number',
         ],
         values: [
-          Text('${labResult?.producer}', style: fieldStyle),
+          InkWell(
+            child: Text('${labResult?.producer}', style: fieldStyle),
+            onTap: () {
+              var state = labResult?.producerState?.toLowerCase() ?? 'all';
+              var id = labResult?.producerLicenseNumber;
+              if (id != null) context.go('/licenses/$state/$id');
+            },
+          ),
           Text('${labResult?.producerAddress}', style: fieldStyle),
           Text('${labResult?.producerLicenseNumber}', style: fieldStyle),
         ],
@@ -243,8 +295,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       gapH24,
 
       // Distributor details.
-      // TODO: Link to producer (/licenses/{producerLicenseNumber}).
-      // TODO: Try to get and render producer image.
       KeyValueDataTable(
         tableName: 'Distributor',
         labels: [
@@ -253,7 +303,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           'Distributor License Number',
         ],
         values: [
-          Text('${labResult?.distributor}', style: fieldStyle),
+          InkWell(
+            child: Text('${labResult?.distributor}', style: fieldStyle),
+            onTap: () {
+              var state = labResult?.distributorState?.toLowerCase() ?? 'all';
+              var id = labResult?.distributorLicenseNumber;
+              if (id != null) context.go('/licenses/$state/$id');
+            },
+          ),
           Text('${labResult?.distributorAddress}', style: fieldStyle),
           Text('${labResult?.distributorLicenseNumber}', style: fieldStyle),
         ],
@@ -261,8 +318,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       gapH24,
 
       // Lab details.
-// TODO: Link to lab (/licenses/{labLicenseNumber}).
-// TODO: Render lab image if there is one.
       KeyValueDataTable(
         tableName: 'Lab',
         labels: [
@@ -276,7 +331,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
         ],
         values: [
           Text('${labResult?.labId}', style: fieldStyle),
-          Text('${labResult?.lab}', style: fieldStyle),
+          InkWell(
+            child: Text('${labResult?.lab}', style: fieldStyle),
+            onTap: () {
+              var state = labResult?.producerState?.toLowerCase() ?? 'all';
+              var id = labResult?.labLicenseNumber;
+              if (id != null) context.go('/licenses/$state/$id');
+            },
+          ),
           Text('${labResult?.lims}', style: fieldStyle),
           Text('${labResult?.labAddress}', style: fieldStyle),
           Text('${labResult?.labPhone}', style: fieldStyle),
@@ -286,32 +348,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       ),
       gapH24,
 
-// Analysis data.
-// TODO: Style analyses as pills.
-// TODO: Format status as Pass / Fail
-      KeyValueDataTable(
-        tableName: 'Analysis',
-        labels: [
-          'Analyses',
-          'Batch Number',
-          'Date Collected',
-          'Date Tested',
-          'Date Received',
-          'Sample Weight',
-        ],
-        values: [
-          Text('${labResult?.analyses}', style: fieldStyle),
-          Text('${labResult?.batchNumber}', style: fieldStyle),
-          Text('${labResult?.dateCollected}', style: fieldStyle),
-          Text('${labResult?.dateTested}', style: fieldStyle),
-          Text('${labResult?.dateReceived}', style: fieldStyle),
-          Text('${labResult?.sampleWeight}', style: fieldStyle),
-        ],
-      ),
-      gapH24,
-
-// Parsing details.
-// TODO: Format URLs as links.
+      // Parsing details.
       KeyValueDataTable(
         tableName: 'Parsing details',
         labels: [
@@ -325,8 +362,22 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           Text('${labResult?.coaAlgorithm}', style: fieldStyle),
           Text('${labResult?.coaAlgorithmVersion}', style: fieldStyle),
           Text('${labResult?.coaParsedAt}', style: fieldStyle),
-          Text('${labResult?.downloadUrl}', style: fieldStyle),
-          Text('${labResult?.shortUrl}', style: fieldStyle),
+          InkWell(
+            child: Text('${labResult?.downloadUrl}', style: fieldStyle),
+            onTap: () {
+              if (labResult?.downloadUrl != null) {
+                launchUrl(Uri.parse(labResult?.downloadUrl ?? ''));
+              }
+            },
+          ),
+          InkWell(
+            child: Text('${labResult?.shortUrl}', style: fieldStyle),
+            onTap: () {
+              if (labResult?.shortUrl != null) {
+                launchUrl(Uri.parse(labResult?.shortUrl ?? ''));
+              }
+            },
+          ),
         ],
       ),
       gapH48,
@@ -647,7 +698,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           icon: Icons.description,
           isSelected: _tabController.index == 2,
         ),
-        // _buildTab('Notes', 2, Icons.science),
+        PillTabButton(
+          text: 'History',
+          icon: Icons.history,
+          isSelected: _tabController.index == 3,
+        ),
       ],
     );
 
@@ -744,7 +799,20 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           ],
         ),
 
-        // TODO: Notes tab.
+        // TODO: Comments tab.
+
+        // History tab.
+        CustomScrollView(
+          slivers: [
+            _breadcrumbs,
+            SliverToBoxAdapter(child: _actions),
+            SliverToBoxAdapter(
+              child: ResultLogs(
+                labResultId: widget.labResultId ?? '',
+              ),
+            ),
+          ],
+        ),
       ],
     );
 
@@ -803,5 +871,101 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
         ),
       ),
     );
+  }
+}
+
+/// A pill that displays the analysis type.
+class AnalysisPill extends StatelessWidget {
+  final String analysis;
+
+  AnalysisPill(this.analysis);
+
+  @override
+  Widget build(BuildContext context) {
+    // Map of analysis types to colors.
+    var colorMap = {
+      'cannabinoids': Colors.red.shade400,
+      'potency': Colors.red.shade400,
+      'terpenes': Colors.green.shade400,
+      'pesticide': Colors.purple.shade400,
+      'pesticides': Colors.purple.shade400,
+      'microbiological': Colors.blue.shade400,
+      'microbes': Colors.blue.shade400,
+      'heavy_metals': Colors.grey.shade600,
+      'mycotoxin': Colors.orange.shade400,
+      'mycotoxins': Colors.orange.shade400,
+      'water_activity': Colors.teal.shade400,
+      'moisture_content': Colors.teal.shade400,
+      'residual_solvents': Colors.amberAccent,
+      'foreign_matter': Colors.brown.shade400,
+    };
+
+    // TODO: Have unknown analysis get color from color API.
+
+    // Convert the analysis type to title case.
+    var titleCase = analysis.split('_').map((word) {
+      var lower = word.toLowerCase();
+      return '${lower[0].toUpperCase()}${lower.substring(1)}';
+    }).join(' ');
+
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 4),
+      margin: EdgeInsets.all(1),
+      decoration: BoxDecoration(
+        color: colorMap[analysis] ?? Colors.grey.shade400,
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: Text(
+        titleCase,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.white,
+            ),
+      ),
+    );
+  }
+}
+
+/// A pill that displays the status.
+class StatusPill extends StatelessWidget {
+  final String? status;
+
+  StatusPill(this.status);
+
+  @override
+  Widget build(BuildContext context) {
+    // Map of status types to colors.
+    var colorMap = {
+      'pass': Colors.green.shade400,
+      'fail': Colors.red.shade400,
+    };
+
+    // Define default color as yellow.
+    Color defaultColor = Colors.yellow.shade400;
+
+    // Get the color for the current status, or default color if the status is unknown.
+    Color backgroundColor = colorMap[status?.toLowerCase()] ?? defaultColor;
+
+    // Convert the status to title case.
+    var titleCase = status == null
+        ? ''
+        : '${status![0].toUpperCase()}${status!.substring(1).toLowerCase()}';
+
+    // Return a container with colored background and status text, if status is not null.
+    return status == null
+        ? Container()
+        : Container(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 4),
+            margin: EdgeInsets.all(1),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: Text(
+              titleCase,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white,
+                  ),
+            ),
+          );
   }
 }

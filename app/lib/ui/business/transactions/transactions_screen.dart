@@ -127,8 +127,8 @@ class SalesTransactionsTable extends ConsumerWidget {
     final rowsPerPage = ref.watch(salesTransactionsRowsPerPageProvider);
 
     // Get the selected rows.
-    List<SalesTransaction> selectedRows =
-        ref.watch(selectedSalesTransactionsProvider);
+    // List<SalesTransaction> selectedRows =
+    //     ref.watch(selectedSalesTransactionsProvider);
     // FIXME:
     // List<String> selectedIds = selectedRows.map((x) => x.id).toList();
     List<String> selectedIds = [];

@@ -7,9 +7,6 @@
 // Updated: 3/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Project imports:
-import 'package:cannlytics_app/services/metrc_service.dart';
-
 typedef LabTestId = int;
 
 /// Model representing a lab test.

@@ -10,31 +10,21 @@
 // Flutter imports:
 import 'package:cannlytics_app/widgets/layout/main_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:dartx/dartx.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:go_router/go_router.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:cannlytics_app/constants/design.dart';
 import 'package:cannlytics_app/models/metrc/employee.dart';
-import 'package:cannlytics_app/models/metrc/employee.dart';
-import 'package:cannlytics_app/ui/business/employees/employees_controller.dart';
 import 'package:cannlytics_app/ui/business/employees/employees_controller.dart';
 import 'package:cannlytics_app/ui/layout/footer.dart';
-import 'package:cannlytics_app/ui/layout/footer.dart';
 import 'package:cannlytics_app/ui/layout/header.dart';
-import 'package:cannlytics_app/ui/layout/header.dart';
-import 'package:cannlytics_app/widgets/buttons/primary_button.dart';
-import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/layout/custom_placeholder.dart';
 import 'package:cannlytics_app/widgets/tables/table_data.dart';
-import 'package:cannlytics_app/widgets/tables/table_form.dart';
 import 'package:cannlytics_app/widgets/tables/table_form.dart';
 
 /// Employees screen.
@@ -70,8 +60,8 @@ class EmployeesTable extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Determine the screen size.
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWide = screenWidth > Breakpoints.tablet;
+    // final screenWidth = MediaQuery.of(context).size.width;
+    // final isWide = screenWidth > Breakpoints.tablet;
 
     // Get the filtered data.
     final data = ref.watch(filteredEmployeesProvider);

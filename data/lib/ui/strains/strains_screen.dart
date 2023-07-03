@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 6/30/2023
+// Updated: 7/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -33,6 +33,32 @@ class StrainsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConsoleScreen(
       children: [
+        // DEV: Under development message.
+        SliverToBoxAdapter(
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.all(8.0),
+            color: Colors.yellow[100],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  Icons.warning,
+                  color: Colors.orange,
+                ),
+                SizedBox(width: 8.0),
+                Text(
+                  'Under development, please stay tuned for this data to be updated.',
+                  style: TextStyle(
+                    color: Colors.orange[800],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Main content.
         SliverToBoxAdapter(child: MainContent()),
       ],
     );

@@ -7,6 +7,8 @@
 // Updated: 3/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// ignore_for_file: body_might_complete_normally_nullable
+
 // Dart imports:
 import 'dart:async';
 
@@ -62,19 +64,19 @@ class PackagesController extends AsyncNotifier<List<Package>> {
   Future<void> createPackages(List<Package> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final licenseNumber = ref.read(primaryLicenseProvider);
-      final licenseState = ref.read(primaryStateProvider);
-      final orgId = ref.read(primaryOrganizationProvider);
-      for (Package item in items) {
-        // FIXME:
-        // await MetrcPackages.createPackage(
-        //   name: item.name,
-        //   packageTypeName: item.packageTypeName,
-        //   license: licenseNumber,
-        //   orgId: orgId,
-        //   state: licenseState,
-        // );
-      }
+      // final licenseNumber = ref.read(primaryLicenseProvider);
+      // final licenseState = ref.read(primaryStateProvider);
+      // final orgId = ref.read(primaryOrganizationProvider);
+      // for (Package item in items) {
+      //   // FIXME:
+      //   // await MetrcPackages.createPackage(
+      //   //   name: item.name,
+      //   //   packageTypeName: item.packageTypeName,
+      //   //   license: licenseNumber,
+      //   //   orgId: orgId,
+      //   //   state: licenseState,
+      //   // );
+      // }
       return await getPackages();
     });
   }
@@ -83,20 +85,20 @@ class PackagesController extends AsyncNotifier<List<Package>> {
   Future<void> updatePackages(List<Package> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final licenseNumber = ref.read(primaryLicenseProvider);
-      final licenseState = ref.read(primaryStateProvider);
-      final orgId = ref.read(primaryOrganizationProvider);
-      for (Package item in items) {
-        // FIXME:
-        // await MetrcPackages.updatePackage(
-        //   id: item.id,
-        //   name: item.name,
-        //   packageTypeName: item.packageTypeName ?? 'Default Package Type',
-        //   license: licenseNumber,
-        //   orgId: orgId,
-        //   state: licenseState,
-        // );
-      }
+      // final licenseNumber = ref.read(primaryLicenseProvider);
+      // final licenseState = ref.read(primaryStateProvider);
+      // final orgId = ref.read(primaryOrganizationProvider);
+      // for (Package item in items) {
+      //   // FIXME:
+      //   // await MetrcPackages.updatePackage(
+      //   //   id: item.id,
+      //   //   name: item.name,
+      //   //   packageTypeName: item.packageTypeName ?? 'Default Package Type',
+      //   //   license: licenseNumber,
+      //   //   orgId: orgId,
+      //   //   state: licenseState,
+      //   // );
+      // }
       return await getPackages();
     });
   }
@@ -105,18 +107,18 @@ class PackagesController extends AsyncNotifier<List<Package>> {
   Future<void> deletePackages(List<Package> items) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final licenseNumber = ref.read(primaryLicenseProvider);
-      final licenseState = ref.read(primaryStateProvider);
-      final orgId = ref.read(primaryOrganizationProvider);
-      for (Package item in items) {
-        // FIXME:
-        // await MetrcPackages.deletePackage(
-        //   id: item.id,
-        //   license: licenseNumber,
-        //   orgId: orgId,
-        //   state: licenseState,
-        // );
-      }
+      // final licenseNumber = ref.read(primaryLicenseProvider);
+      // final licenseState = ref.read(primaryStateProvider);
+      // final orgId = ref.read(primaryOrganizationProvider);
+      // for (Package item in items) {
+      //   // FIXME:
+      //   // await MetrcPackages.deletePackage(
+      //   //   id: item.id,
+      //   //   license: licenseNumber,
+      //   //   orgId: orgId,
+      //   //   state: licenseState,
+      //   // );
+      // }
       return await getPackages();
     });
   }
@@ -165,7 +167,7 @@ class FilteredPackagesNotifier extends StateNotifier<List<Package>> {
       state = items;
       return;
     }
-    String keyword = searchTerm.toLowerCase();
+    // String keyword = searchTerm.toLowerCase();
     List<Package> matched = [];
     items.forEach((x) {
       // Matching logic.
@@ -256,8 +258,8 @@ class PackageController extends FamilyAsyncNotifier<Package?, String?> {
       }
     }
     final licenseNumber = ref.watch(primaryLicenseProvider);
-    final orgId = ref.read(primaryOrganizationProvider);
-    final licenseState = ref.read(primaryStateProvider);
+    // final orgId = ref.read(primaryOrganizationProvider);
+    // final licenseState = ref.read(primaryStateProvider);
     if (licenseNumber == null) return null;
     if (id == 'new') return Package();
     print('GETTING...');
@@ -329,9 +331,9 @@ class PackageTypesNotifier extends AsyncNotifier<List<dynamic>> {
 
   // Get package types from Metrc.
   Future<List<dynamic>> getPackageTypes() async {
-    final licenseNumber = ref.watch(primaryLicenseProvider);
-    final orgId = ref.watch(primaryOrganizationProvider);
-    final licenseState = ref.watch(primaryStateProvider);
+    // final licenseNumber = ref.watch(primaryLicenseProvider);
+    // final orgId = ref.watch(primaryOrganizationProvider);
+    // final licenseState = ref.watch(primaryStateProvider);
     List<dynamic> data;
     try {
       // FIXME:

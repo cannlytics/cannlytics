@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/15/2023
-Updated: 6/15/2023
+Updated: 7/2/2023
 """
 # Standard imports:
 import json

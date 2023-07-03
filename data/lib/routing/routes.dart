@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 6/25/2023
+// Updated: 7/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // Dart imports:
 
@@ -15,11 +15,11 @@ import 'package:cannlytics_data/ui/account/reset_password_screen.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard.dart';
 import 'package:cannlytics_data/ui/licensees/licensee_screen.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_screen.dart';
-import 'package:cannlytics_data/ui/licensees/state_licensees.dart';
+import 'package:cannlytics_data/ui/licensees/licensees_table.dart';
 import 'package:cannlytics_data/ui/results/result_screen.dart';
 import 'package:cannlytics_data/ui/results/results_screen.dart';
 import 'package:cannlytics_data/ui/sales/receipt_screen.dart';
-import 'package:cannlytics_data/ui/sales/sales_screen.dart';
+import 'package:cannlytics_data/ui/sales/receipts_screen.dart';
 import 'package:cannlytics_data/ui/strains/strain_screen.dart';
 import 'package:cannlytics_data/ui/strains/strains_screen.dart';
 
@@ -63,7 +63,7 @@ class Routes {
       name: 'state_licenses',
       useFade: true,
       builder: (context, state) {
-        return StateLicensesScreen(id: state.params['state_id']!);
+        return StateLicensesScreen(stateId: state.params['state_id']!);
       },
     ),
 
@@ -73,7 +73,7 @@ class Routes {
       builder: (context, state) {
         return LicenseeScreen(
           stateId: state.params['state_id']!,
-          licenseId: state.params['license_number']!,
+          licenseeId: state.params['license_number']!,
         );
       },
     ),

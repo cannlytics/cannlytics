@@ -26,7 +26,7 @@ import 'package:path_drawing/path_drawing.dart';
 import 'package:xml/xml.dart';
 
 // Project imports:
-import 'package:cannlytics_data/ui/licensees/licensees_controller.dart';
+import 'package:cannlytics_data/ui/licensees/licensees_service.dart';
 
 // Global map properties.
 const Duration animationDuration = Duration(milliseconds: 0);

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/24/2023
-Updated: 6/16/2023
+Updated: 7/2/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -58,6 +58,10 @@ RECEIPTS_PROMPT = """Given text, extract JSON, where:
 | `retailer` | "BudHouse" | The name of the retailer. |
 | `retailer_license_number` | "C11-0000001-LIC" | The license number of the retailer. |
 | `retailer_address` | "1234 Main St, San Diego, CA 92101" | The address of the retailer. |
+| `retailer_street` | "420 State Ave" | The retailer street, if applicable. |
+| `retailer_city` | "Olympia" | The retailer city, if applicable. |
+| `retailer_state` | "CA" | The state of the retailer, if applicable. |
+| `retailer_zipcode` | "98506" | The zip code of the retailer, if applicable. |
 | `budtender` | "John Doe" | The name of the budtender. |
 """
 

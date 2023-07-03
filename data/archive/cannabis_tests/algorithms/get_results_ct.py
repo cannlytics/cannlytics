@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/8/2023
-Updated: 6/10/2023
+Updated: 7/3/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Data Source:
@@ -109,7 +109,7 @@ def flatten_results(x):
     """Flatten the results."""
     results = []
     for name, analyte in CT_CANNABINOIDS.items():
-        print(analyte, x[name])
+        # print(analyte, x[name])
         results.append({
             'key': analyte,
             'name': name,
@@ -118,7 +118,7 @@ def flatten_results(x):
             'analysis': 'cannabinoids',
         })
     for name, analyte in CT_TERPENES.items():
-        print(analyte, x[name])
+        # print(analyte, x[name])
         results.append({
             'key': analyte,
             'name': name,
@@ -238,8 +238,10 @@ if __name__ == '__main__':
         args = {}
 
     # Specify where your data lives.
-    DATA_DIR = 'D:/data/connecticut/lab_results'
-    PDF_DIR = 'D:/data/connecticut/lab_results/pdfs'
+    # DATA_DIR = 'D:/data/connecticut/lab_results'
+    # PDF_DIR = 'D:/data/connecticut/lab_results/pdfs'
+    DATA_DIR = 'C://.datasets/data/connecticut/lab_results'
+    PDF_DIR = 'C://.datasets/data/connecticut/lab_results/pdfs'
 
     # Set the destination for the PDFs.
     data_dir = args.get('data_dir', DATA_DIR)
