@@ -48,6 +48,7 @@ dependencies:
   internet_file: ^1.2.0
   pdfx: ^2.3.0
   firebase_ui_firestore: ^1.5.4
+  shared_preferences: ^2.2.0
 
 dev_dependencies:
   import_sorter: ^4.6.0

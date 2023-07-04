@@ -9,6 +9,7 @@
 // Dart imports:
 
 // Project imports:
+import 'package:cannlytics_data/common/dialogs/age_check_dialog.dart';
 import 'package:cannlytics_data/routing/app_router.dart';
 import 'package:cannlytics_data/ui/account/account_screen.dart';
 import 'package:cannlytics_data/ui/account/reset_password_screen.dart';
@@ -130,6 +131,14 @@ class Routes {
           },
         ),
       ],
+    ),
+
+    // Age verification screen.
+    AppRoute(
+      path: '/age-verification',
+      builder: (context, state) {
+        return AgeVerificationScreen();
+      },
     ),
   ];
 }

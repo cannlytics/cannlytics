@@ -21,6 +21,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cannlytics_data/routing/routes.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/ui/general/not_found_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // App navigation.
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -32,6 +33,20 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable:
         GoRouterRefreshStream(ref.watch(authProvider).authStateChanges()),
     routes: Routes.mainRoutes,
+    redirect: (BuildContext context, GoRouterState state) async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool? isOldEnough = prefs.getBool('isOldEnough');
+      // DEV: If you need to reset the age verification, uncomment the following line.
+      // SharedPreferences preferences = await SharedPreferences.getInstance();
+      // await preferences.clear();
+      if (state.location == '/age-verification' && isOldEnough == true) {
+        return '/'; // Redirect to home if user is old enough and on age-verification screen.
+      } else if (isOldEnough == null || !isOldEnough) {
+        return '/age-verification'; // Redirect to age verification if user is not old enough.
+      } else {
+        return null; // No redirect.
+      }
+    },
   );
 });
 
