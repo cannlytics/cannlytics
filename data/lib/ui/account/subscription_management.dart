@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/4/2023
-// Updated: 6/23/2023
+// Updated: 7/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -92,64 +92,15 @@ class SubscriptionPlanCards extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Subscription cards.
-    // FIXME: Get subscription data from Firestore.
     var cards = items.map((item) {
       return SubscriptionCard(
-        active: activeSubscription == item?['plan_name'],
-        title: item?['title'],
+        active: activeSubscription == item?['id'],
+        title: item?['name'],
         price: item?['price'],
-        color: WebUtils.hexCodeToColor(item?['color']),
-        features: item?['features'],
-        notes: item?['notes'],
+        color: WebUtils.hexCodeToColor(item?['color_hex']),
+        features: item?['attributes'],
       );
     }).toList();
-    // var cards = [
-    //   // SubscriptionCard(
-    //   //   active: activeSubscription == 'free',
-    //   //   title: 'Free',
-    //   //   price: '\$0',
-    //   //   color: Color(0xff16c995),
-    //   //   features: [
-    //   //     '10 AI jobs',
-    //   //     'Personal archive',
-    //   //     'Access all data',
-    //   //   ],
-    //   //   notes: 'No credit card required',
-    //   // ),
-    //   SubscriptionCard(
-    //     active: activeSubscription == 'premium',
-    //     title: 'Standard Plan',
-    //     price: '\$4.20',
-    //     color: Color(0xff16c995),
-    //     features: [
-    //       '100 AI jobs',
-    //       '4.2\u00A2 / additional job',
-    //       'Throttled API',
-    //     ],
-    //   ),
-    //   SubscriptionCard(
-    //     active: activeSubscription == 'pro',
-    //     title: 'Pro Plan',
-    //     price: '\$42',
-    //     color: Color(0xffFF7F00),
-    //     features: [
-    //       '1,250 AI jobs',
-    //       '3.3\u00A2 / additional job',
-    //       '🚀 Unthrottled API',
-    //     ],
-    //   ),
-    //   SubscriptionCard(
-    //     active: activeSubscription == 'enterprise',
-    //     title: 'Enterprise',
-    //     price: '\$420',
-    //     color: Color(0xff7B4EA8),
-    //     features: [
-    //       '17,500 AI jobs',
-    //       '2.4\u00A2 / additional job',
-    //       '🔒 Private API',
-    //     ],
-    //   ),
-    // ];
 
     // Grid of cards.
     return GridView.builder(
@@ -170,7 +121,7 @@ class SubscriptionPlanCards extends StatelessWidget {
 class SubscriptionCard extends StatelessWidget {
   final String title;
   final String price;
-  final List<String> features;
+  final List<dynamic> features;
   final Color? color;
   final String? notes;
   final bool? active;
@@ -199,32 +150,38 @@ class SubscriptionCard extends StatelessWidget {
         padding: EdgeInsets.only(top: 16, left: 16, right: 16),
         child: Column(
           children: [
-            // Title.
-            Text(
-              title,
-              textAlign: TextAlign.start,
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.bold,
+            SelectionArea(
+              child: Column(
+                children: [
+                  // Title.
+                  Text(
+                    title,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: color,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-            ),
 
-            // Price.
-            SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  price,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Text(
-                  ' / month',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+                  // Price.
+                  SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        price,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      Text(
+                        ' / month',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
 
             // Select plan button.
@@ -232,7 +189,8 @@ class SubscriptionCard extends StatelessWidget {
               margin: EdgeInsets.symmetric(vertical: 16),
               width: double.infinity,
               child: PrimaryButton(
-                backgroundColor: color,
+                backgroundColor:
+                    active! ? Theme.of(context).disabledColor : color,
                 text: active! ? 'Cancel' : 'Select Plan',
                 onPressed: () async {
                   const url = 'https://cannlytics.com/account/subscriptions';
@@ -242,28 +200,34 @@ class SubscriptionCard extends StatelessWidget {
             ),
 
             // Features.
-            ...features.map(
-              (feature) => Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Column(
-                  children: [
-                    Divider(
-                      color: Colors.grey,
-                      thickness: 1,
-                      height: 16,
+            SelectionArea(
+              child: Column(
+                children: [
+                  ...features.map(
+                    (feature) => Padding(
+                      padding: EdgeInsets.only(bottom: 4),
+                      child: Column(
+                        children: [
+                          Divider(
+                            color: Colors.grey,
+                            thickness: 1,
+                            height: 16,
+                          ),
+                          Row(
+                            children: [
+                              SvgPicture.asset(
+                                'assets/icons/emoji/green_check.svg',
+                                height: 24,
+                                width: 24,
+                              ),
+                              Text(feature),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    Row(
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/emoji/green_check.svg',
-                          height: 24,
-                          width: 24,
-                        ),
-                        Text(feature),
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],

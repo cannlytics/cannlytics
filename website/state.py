@@ -114,6 +114,7 @@ material = {
             "secondary_action_url": "https://app.cannlytics.com",
         },
     },
+    # TODO: Read from public/subscriptions/subscription_plans instead.
     "subscriptions": {
         "premium": {
             "name": "Premium",

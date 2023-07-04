@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 6/24/2023
+// Updated: 7/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -50,9 +50,18 @@ final subscriptionsProvider =
     FutureProvider<List<Map<dynamic, dynamic>?>>((ref) async {
   final _dataSource = ref.read(firestoreProvider);
   var data = await _dataSource.getCollection(
-    path: 'public/subscriptions/data_subscriptions',
+    path: 'public/subscriptions/subscription_plans',
     builder: (data, id) => data,
     queryBuilder: (query) => query.orderBy('price_usd'),
+  );
+  return data;
+});
+
+///  Get FAQ data from Firestore.
+final faqProvider = FutureProvider<Map<dynamic, dynamic>?>((ref) async {
+  final _dataSource = ref.read(firestoreProvider);
+  var data = await _dataSource.getDocument(
+    path: 'public/ai/info/faq',
   );
   return data;
 });

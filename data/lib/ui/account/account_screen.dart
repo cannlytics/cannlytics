@@ -4,11 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 6/30/2023
+// Updated: 7/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:cannlytics_data/constants/colors.dart';
+import 'package:cannlytics_data/ui/account/faq.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -91,6 +92,9 @@ class AccountManagement extends ConsumerWidget {
 
           // Delete account option.
           if (user != null) DeleteAccountCard(),
+
+          // FAQ section.
+          FAQCard(),
           gapH48,
         ],
       ),
