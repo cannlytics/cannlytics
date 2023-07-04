@@ -88,7 +88,7 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
                         style: Theme.of(context).textTheme.bodyLarge,
                         children: <TextSpan>[
                           TextSpan(
-                              text: 'By accessing this site, you accept our '),
+                              text: 'By accessing Cannlytics, you accept our '),
                           TextSpan(
                             text: 'terms of use',
                             style: TextStyle(color: Colors.blue),

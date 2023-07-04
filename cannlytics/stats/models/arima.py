@@ -11,7 +11,10 @@ License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 # External imports.
 import numpy as np
 import pandas as pd
-from statsmodels.tsa.arima_model import ARIMA
+try:
+    from statsmodels.tsa.arima_model import ARIMA
+except:
+    pass
 
 
 def RMSE(predictions, actuals):

@@ -6,11 +6,14 @@ NO warranty is provided for this software.
 """
 
 import numpy as np
-import statsmodels.api as sm
-import statsmodels.base.model as base
-from statsmodels.iolib import summary
-from statsmodels.tools.numdiff import approx_fprime
-from scipy.stats import norm
+try:
+    import statsmodels.api as sm
+    import statsmodels.base.model as base
+    from statsmodels.iolib import summary
+    from statsmodels.tools.numdiff import approx_fprime
+    from scipy.stats import norm
+except:
+    pass
 import warnings
 import pandas as pd
 

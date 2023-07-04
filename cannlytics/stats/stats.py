@@ -15,8 +15,11 @@ from typing import Any, Optional
 
 # External imports.
 import pandas as pd
-from sklearn.metrics import confusion_matrix
-import statsmodels.api as sm
+try:
+    from sklearn.metrics import confusion_matrix
+    import statsmodels.api as sm
+except:
+    pass
 
 # Internal imports.
 from cannlytics.firebase import (

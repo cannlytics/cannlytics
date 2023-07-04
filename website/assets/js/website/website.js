@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 12/3/2020
- * Updated: 1/5/2022
+ * Updated: 7/4/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { checkGoogleLogIn, onAuthChange } from '../firebase.js';
@@ -74,6 +74,35 @@ export const website = {
       toast.style.display = 'block';
       toast.style.opacity = 1;
     }
+  },
+
+  ageCheck() {
+    /**
+     * Checks if a user has or has not accepted age verification.
+     */
+    const acceptAge = localStorage.getItem('cannlytics_age');
+    if (!acceptAge) {
+      const toast = document.getElementById('age-verification');
+      toast.style.display = 'block';
+      toast.style.opacity = 1;
+    }
+  },
+
+  acceptAgeCheck() {
+    /**
+     * Save the user's choice to accept age verification.
+     */
+    localStorage.setItem('cannlytics_age', true);
+    const toast = document.getElementById('age-verification');
+    toast.style.display = 'none';
+    toast.style.opacity = 0;
+  },
+
+  rejectAgeCheck() {
+    /**
+     * Redirect the user to another site if they reject age verification.
+     */
+    window.location.href = "https://google.com";
   },
 
   changeTheme() {

@@ -1,6 +1,6 @@
 # Python Requirements | Cannlytics
 # Created 3/14/2022
-# Updated: 6/1/2023
+# Updated: 7/4/2023
 
 beautifulsoup4
 firebase-admin
@@ -16,6 +16,7 @@ opencv-python
 pandas
 pdfplumber
 Pillow
+pyarrow
 pydantic
 pypdf
 pytesseract
@@ -25,7 +26,7 @@ pyzbar
 scikit-learn
 selenium
 statsmodels
-tiktoken
 Wand
 ulid-py
+xxhash
 zipcodes

@@ -4,10 +4,11 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/15/2023
-Updated: 7/2/2023
+Updated: 7/4/2023
 """
 # Standard imports:
 import json
+import math
 import os
 from time import sleep
 from typing import List, Optional
@@ -15,7 +16,6 @@ from typing import List, Optional
 # External imports:
 import google.auth
 import openai
-import tiktoken
 
 # Internal imports:
 from cannlytics.firebase import access_secret_version
@@ -72,52 +72,35 @@ def initialize_openai(openai_api_key = None) -> None:
 # Token and cost management.
 #-----------------------------------------------------------------------
 
-def count_tokens_of_messages(messages: list, model: Optional[str] = 'gpt-4'):
-    """Returns the number of tokens used by a list of messages.
-    Credit: OpenAI
-    License: MIT <https://github.com/openai/openai-cookbook/blob/main/LICENSE>
-    """
-    try:
-        encoding = tiktoken.encoding_for_model(model)
-    except KeyError:
-        encoding = tiktoken.get_encoding('cl100k_base')
-    if model == 'gpt-3.5-turbo':
-        return count_tokens_of_messages(messages, model='gpt-3.5-turbo-0301')
-    elif model == 'gpt-4':
-        return count_tokens_of_messages(messages, model='gpt-4-0314')
-    elif model == 'gpt-3.5-turbo-0301':
-        tokens_per_message = 4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
-        tokens_per_name = -1  # if there's a name, the role is omitted
-    elif model == 'gpt-4-0314':
-        tokens_per_message = 3
-        tokens_per_name = 1
-    else:
-        raise NotImplementedError(f"""count_tokens_of_messages() is not implemented for model {model}. See https://github.com/openai/openai-python/blob/main/chatml.md for information on how messages are converted to tokens.""")
+def estimate_tokens_of_messages(messages: list, model: Optional[str] = 'gpt-4'):
+    """Returns the number of tokens used by a list of messages."""
+    tokens_per_message = 4 # every message follows <|start|>{role/name}\n{content}<|end|>\n
+    tokens_per_name = 1
     num_tokens = 0
     for message in messages:
         num_tokens += tokens_per_message
         for key, value in message.items():
-            num_tokens += len(encoding.encode(value))
+            num_tokens += math.ceil(len(value) / 4)
             if key == 'name':
                 num_tokens += tokens_per_name
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
     return num_tokens
 
 
-def count_tokens_of_string(string: str, model: Optional[str] = 'gpt-4') -> int:
+def estimate_tokens_of_string(string: str, model: Optional[str] = 'gpt-4') -> int:
     """Returns the number of tokens in a text string."""
-    return count_tokens_of_messages([{'role': 'user', 'content': string},], model=model)
+    return estimate_tokens_of_messages([{'role': 'user', 'content': string},], model=model)
 
 
 def get_prompt_price(prompt, model='gpt-4', prices=PRICE_PER_1000_TOKENS):
     """Returns the price to generate a prompt."""
-    num_tokens = count_tokens_of_string(prompt, model)
+    num_tokens = estimate_tokens_of_string(prompt, model)
     return num_tokens / 1_000 * prices[model]['prompt']
 
 
 def get_messages_price(messages, model='gpt-4', prices=PRICE_PER_1000_TOKENS):
     """Returns the price to generate a list of messages."""
-    num_tokens = count_tokens_of_messages(messages, model)
+    num_tokens = estimate_tokens_of_messages(messages, model)
     return num_tokens / 1_000 * prices[model]['prompt']
 
 
@@ -143,7 +126,7 @@ def split_into_token_chunks(
     chunks = []
     current_chunk = ''
     for line in lines:
-        if count_tokens_of_string(current_chunk + '\n' + line, model) <= max_prompt_length:
+        if estimate_tokens_of_string(current_chunk + '\n' + line, model) <= max_prompt_length:
             current_chunk += '\n' + line
         else:
             chunks.append(current_chunk)

@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<!--
+  Age verification and cookie notification
+  Created: 7/3/2023
+  Updated: 7/4/2023
+-->
+{% load icon %}
+<div class="modal" id="age-verification" tabindex="-1" style="display: none;">
+  <div class="modal-dialog modal-fullscreen">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+      <div class="modal-body markdown d-flex justify-content-center align-items-center text-center" style="height: 100vh;">
+        <div class="d-flex flex-column" style="max-width:420px;">
+
+          <!-- Title -->
+          <div class="d-flex text-start mb-3">
+            <img src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fplaceholders%2Fage-verification-symbol.png?alt=media&token=95abaeee-705e-44e9-841b-e32ac36dd7fe" 
+                 alt="Age Verification" 
+                 style="height:64px;" 
+                 class="me-2">
+            <h5 class="h2 mb-0">Are you 21 or older?</h5>
+          </div>
+
+          <!-- Message -->
+          <p class="text-start mt-0">
+            By accessing Cannlytics, you accept our
+            <a href="https://docs.cannlytics.com/terms">terms of use</a>
+            and acknowledge that you have read our
+            <a href="https://docs.cannlytics.com/privacy">privacy policy</a>.
+          </p>
+
+          <!-- Actions -->
+          <div class="d-flex justify-content-end mt-3">
+            <button
+              type="button"
+              class="btn btn-sm-light btn-md-light btn-set-width text-dark serif me-2"
+              onclick="cannlytics.website.rejectAgeCheck();"
+            >
+              No
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-set-width bg-gradient-green text-white serif"
+              onclick="cannlytics.website.acceptAgeCheck();"
+            >
+              Yes
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script>
+  cannlytics.website.ageCheck();
+</script>
+</html>

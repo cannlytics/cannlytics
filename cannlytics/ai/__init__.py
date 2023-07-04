@@ -4,12 +4,12 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/15/2023
-Updated: 6/15/2023
+Updated: 7/4/2023
 """
 from .ai import (
     initialize_openai,
-    count_tokens_of_messages,
-    count_tokens_of_string,
+    estimate_tokens_of_messages,
+    estimate_tokens_of_string,
     get_prompt_price,
     get_messages_price,
     get_tokens_price,
@@ -24,8 +24,8 @@ from .ai import (
 
 __all__ = [
     initialize_openai,
-    count_tokens_of_messages,
-    count_tokens_of_string,
+    estimate_tokens_of_messages,
+    estimate_tokens_of_string,
     get_prompt_price,
     get_messages_price,
     get_tokens_price,
