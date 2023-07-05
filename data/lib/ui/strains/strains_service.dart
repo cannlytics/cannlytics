@@ -4,11 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 7/3/2023
+// Updated: 7/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO:
-// - [ ] Searchable database of observed strains
 // - [ ] Variety Identification Prediction (V.I.P.) model
 // - [ ] Patented strains dataset
 // - [ ] Connecticut strains dataset
@@ -23,6 +22,7 @@ import 'package:cannlytics_data/models/strain.dart';
 import 'package:cannlytics_data/services/api_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,33 +43,78 @@ final strainsQuery = StateProvider.family<Query<Strain>, String>((
   orderBy,
 ) {
   // Get a list of keywords from the search term.
+  /// FIXME: Implement search based on keywords.
   String searchTerm = ref.watch(strainSearchTerm);
-  List<String> keywords = searchTerm.toLowerCase().split(' ');
-  print('STRAIN KEYWORDS:');
-  print(keywords);
+  // List<String> keywords = searchTerm.toLowerCase().split(' ');
+
+  // Query by search term.
+  if (searchTerm.isNotEmpty) {
+    return FirebaseFirestore.instance
+        .collection('public/data/strains')
+        .where('strain_name', isEqualTo: searchTerm)
+        .withConverter(
+          fromFirestore: (snapshot, _) => Strain.fromMap(snapshot.data()!),
+          toFirestore: (Strain item, _) => item.toMap(),
+        );
+  }
+
+  // TODO: Allow the user to sort by name, time, etc.
 
   // Query by time.
   return FirebaseFirestore.instance
       .collection('public/data/strains')
-      // .where('keywords', arrayContainsAny: keywords)
-      .orderBy(orderBy, descending: true)
+      .orderBy('strain_name', descending: false)
       .withConverter(
         fromFirestore: (snapshot, _) => Strain.fromMap(snapshot.data()!),
         toFirestore: (Strain item, _) => item.toMap(),
       );
+});
 
-  // Query by favorites.
+/// Query by popularity.
+final popularityQuery = StateProvider.family<Query<Strain>, String>((
+  ref,
+  orderBy,
+) {
+  /// FIXME: Implement search based on keywords.
+  String searchTerm = ref.watch(strainSearchTerm);
+  // List<String> keywords = searchTerm.toLowerCase().split(' ');
 
-  // Query by popularity.
+  // Query by search term and total favorites.
+  if (searchTerm.isNotEmpty) {
+    return FirebaseFirestore.instance
+        .collection('public/data/strains')
+        .where('strain_name', isEqualTo: searchTerm)
+        .orderBy('total_favorites', descending: true)
+        .withConverter(
+          fromFirestore: (snapshot, _) => Strain.fromMap(snapshot.data()!),
+          toFirestore: (Strain item, _) => item.toMap(),
+        );
+  }
 
-  // Query by keywords.
-  // return FirebaseFirestore.instance
-  //     .collection('public/data/strains')
-  //     .where('keywords', arrayContainsAny: keywords)
-  //     .withConverter(
-  //       fromFirestore: (snapshot, _) => Strain.fromMap(snapshot.data()!),
-  //       toFirestore: (Strain item, _) => item.toMap(),
-  //     );
+  // Query by time.
+  return FirebaseFirestore.instance
+      .collection('public/data/strains')
+      .orderBy('total_favorites', descending: true)
+      .withConverter(
+        fromFirestore: (snapshot, _) => Strain.fromMap(snapshot.data()!),
+        toFirestore: (Strain item, _) => item.toMap(),
+      );
+});
+
+/// Stream a user's favorite strains from Firebase.
+/// FIXME: Ensure that the statistics are consistent with the user's data.
+final userFavoriteStrains = StateProvider.family<Query<Strain>, String>((
+  ref,
+  uid,
+) {
+  return FirebaseFirestore.instance
+      .collection('users/$uid/strains')
+      .where('favorite', isEqualTo: true)
+      .orderBy('updated_at', descending: true)
+      .withConverter(
+        fromFirestore: (snapshot, _) => Strain.fromMap(snapshot.data()!),
+        toFirestore: (Strain item, _) => item.toMap(),
+      );
 });
 
 /* === Data === */
@@ -78,8 +123,10 @@ final strainsQuery = StateProvider.family<Query<Strain>, String>((
 final strainProvider =
     StreamProvider.autoDispose.family<Strain?, String>((ref, id) {
   final _database = ref.watch(firestoreProvider);
+  // FIXME: Move to hashes of the strain name.
+  String strainId = Uri.decodeComponent(id);
   return _database.streamDocument(
-    path: 'public/data/strains/$id',
+    path: 'public/data/strains/$strainId',
     builder: (data, documentId) => Strain.fromMap(data ?? {}),
   );
 });
@@ -124,6 +171,22 @@ class StrainService {
   // Delete strain.
   Future<void> deleteStrain(String id) async {
     await _dataSource.deleteDocument(path: 'public/data/strains/$id');
+  }
+
+  // Toggle favorite status of a strain.
+  Future<void> toggleFavorite(Strain strain, String uid) async {
+    var strainId = DataUtils.createHash(strain.name, privateKey: '');
+    final path = 'users/$uid/strains/$strainId';
+    final doc = await _dataSource.getDocument(path: path);
+    bool isFavorite = doc?['favorite'] ?? false;
+    Map<String, dynamic> data = strain.toMap();
+    data['favorite'] = !isFavorite;
+    data['uid'] = uid;
+    data['updated_at'] = DateTime.now().toIso8601String();
+    await _dataSource.updateDocument(
+      path: path,
+      data: data,
+    );
   }
 }
 

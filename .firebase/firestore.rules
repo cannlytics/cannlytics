@@ -114,7 +114,6 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-
     // === Data ===
 
     // Allow anyone to read the data subscriptions.
@@ -175,6 +174,25 @@ service cloud.firestore {
     // Allow users to read and write their own lab results.
     match /users/{userId}/lab_results/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow users to read and write their own strain data.
+    match /users/{userId}/strains/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // === User public data ===
+
+    // Allow user's to write and edit their own reviews about licensees.
+    match /public/data/licenses/{document=**}/reviews/{commentId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow write: if false;
+    }
+
+    // Allow user's to write and edit their own comments about strains.
+    match /public/data/strains/{document=**}/comments/{commentId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow write: if false;
     }
 
     // === Recipes ===

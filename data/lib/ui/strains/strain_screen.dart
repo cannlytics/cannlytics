@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/24/2023
-// Updated: 7/3/2023
+// Updated: 7/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
@@ -19,16 +19,11 @@ import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/strain.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/ui/strains/strain_history.dart';
+import 'package:cannlytics_data/ui/strains/strain_search.dart';
 import 'package:cannlytics_data/ui/strains/strains_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// TODO: Add a button to allow a user to favorite a strain.
-// * The button should have a pink heart icon and be a SecondaryButton
-// * The data should be saved: users/{uid}/strains/{strainId}: {favorite: true}
-// * If the user is not authenticated, show a dialog that says "You must be logged in to favorite a strain."
-// * If the strain is already a favorite, then toggle the favorite to false.
 
 /// Strain screen.
 class StrainScreen extends ConsumerStatefulWidget {
@@ -158,27 +153,38 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
     // Fields.
     var fieldStyle = Theme.of(context).textTheme.bodySmall;
     var fields = [
+      // Favorite a strain.
+      if (strain != null) FavoriteStrainButton(strain: strain),
+
       // Strain details.
       KeyValueDataTable(
         tableName: 'Strain Details',
         labels: [
           'Name',
-          'Testing Status',
-          'THC Level',
-          'CBD Level',
-          'Indica Percentage',
-          'Sativa Percentage',
         ],
         values: [
           Text('${strain?.name}', style: fieldStyle),
-          Text('${strain?.testingStatus}', style: fieldStyle),
-          Text('${strain?.thcLevel}', style: fieldStyle),
-          Text('${strain?.cbdLevel}', style: fieldStyle),
-          Text('${strain?.indicaPercentage}', style: fieldStyle),
-          Text('${strain?.sativaPercentage}', style: fieldStyle),
+          // FIXME: Add fields!
         ],
       ),
-      gapH16,
+      gapH24,
+
+      // TODO: Show total favorites.
+      // Text(
+      //   'Total favorites: ${strain.totalFavorites.toString()}',
+      //   style: Theme.of(context).textTheme.labelLarge,
+      // ),
+      KeyValueDataTable(
+        tableName: 'Statistics',
+        labels: [
+          'Total favorites',
+        ],
+        values: [
+          Text('${strain?.totalFavorites.toString()}', style: fieldStyle),
+          // FIXME: Add fields!
+        ],
+      ),
+      gapH24,
 
       // TODO: Images / gallery section.
       // * Allow the user to upload images of the strain.
@@ -198,36 +204,9 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
         label: 'Name',
         value: strain?.name ?? '',
         onChanged: (value) => _onEdit('name', value),
+        disabled: true,
       ),
-      CustomTextField(
-        label: 'Testing Status',
-        value: strain?.testingStatus ?? '',
-        onChanged: (value) => _onEdit('testing_status', value),
-      ),
-      CustomTextField(
-        label: 'THC Level',
-        value: strain?.thcLevel.toString() ?? '',
-        onChanged: (value) => _onEdit('thc_level', value),
-        isNumeric: true,
-      ),
-      CustomTextField(
-        label: 'CBD Level',
-        value: strain?.cbdLevel.toString() ?? '',
-        onChanged: (value) => _onEdit('cbd_level', value),
-        isNumeric: true,
-      ),
-      CustomTextField(
-        label: 'Indica Percentage',
-        value: strain?.indicaPercentage.toString() ?? '',
-        onChanged: (value) => _onEdit('indica_percentage', value),
-        isNumeric: true,
-      ),
-      CustomTextField(
-        label: 'Sativa Percentage',
-        value: strain?.sativaPercentage.toString() ?? '',
-        onChanged: (value) => _onEdit('sativa_percentage', value),
-        isNumeric: true,
-      ),
+      // FIXME: Add fields!
     ];
 
     // Edit button.

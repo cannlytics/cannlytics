@@ -4,13 +4,17 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/30/2023
-// Updated: 7/3/2023
+// Updated: 7/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
+import 'package:cannlytics_data/common/layout/search_placeholder.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/strain.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/strains/strains_service.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -27,9 +31,8 @@ class StrainsSearch extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Listen to the data.
-    // final asyncData = ref.watch(strainsQuery);
-    // final prodSearchList = asyncData.value ?? [];
+    // Listen to the user's state.
+    final user = ref.watch(userProvider).value;
 
     // Search text controller.
     final _searchTextController = ref.read(strainsSearchController);
@@ -38,7 +41,6 @@ class StrainsSearch extends HookConsumerWidget {
     // Search on enter.
     void _onSubmitted(String value) {
       ref.read(strainSearchTerm.notifier).update((state) => value);
-      // ref.read(strainsQuery.notifier).update((state) => state);
     }
 
     /// Loading results placeholder.
@@ -53,33 +55,82 @@ class StrainsSearch extends HookConsumerWidget {
 
     /// No samples found placeholder.
     Widget _emptyResults() {
-      return ResultsSearchPlaceholder(
+      return SearchPlaceholder(
         title: 'Get your paws on the latest discovered strains!',
         subtitle: 'You can search by keyword.',
+        imageUrl:
+            'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Flogos%2Fskunkfx_icon.png?alt=media&token=f508470f-5875-4833-b4cd-dc8f633c74b7',
       );
     }
 
     /// No samples found placeholder.
     Widget _noResults() {
-      return ResultsSearchPlaceholder(
+      return SearchPlaceholder(
         title: 'No strains found!',
         subtitle:
             "Sorry, I couldn't find any strains. Please contact dev@cannlytics.com to get a person on this ASAP.",
+        imageUrl:
+            'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Flogos%2Fskunkfx_icon.png?alt=media&token=f508470f-5875-4833-b4cd-dc8f633c74b7',
+      );
+    }
+
+    /// No user placeholder.
+    Widget _noUser() {
+      return SearchPlaceholder(
+        title: 'Sign in to track your favorite strains',
+        subtitle:
+            'If you sign in, then you can keep track of your favorite strains!',
+        imageUrl:
+            'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Flogos%2Fskunkfx_icon.png?alt=media&token=f508470f-5875-4833-b4cd-dc8f633c74b7',
+      );
+    }
+
+    /// User with no favorites placeholder.
+    Widget _userNoFavorites() {
+      return SearchPlaceholder(
+        title: 'Add some favorite strains',
+        subtitle:
+            'Search for and keep track of information for your favorite strains.',
+        imageUrl:
+            'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Flogos%2Fskunkfx_icon.png?alt=media&token=f508470f-5875-4833-b4cd-dc8f633c74b7',
       );
     }
 
     /// Results list.
     Widget _resultsList() {
-      return SelectionArea(
+      // Handle no user.
+      if (orderBy == 'favorites' && user == null) {
+        return _noUser();
+      }
+
+      // Dynamic query.
+      var query;
+      if (orderBy == 'favorites') {
+        query = ref.watch(userFavoriteStrains(user?.uid ?? ''));
+      } else if (orderBy == 'total_favorites') {
+        print('ORDERING BY POPULARITY');
+        query = ref.watch(popularityQuery('updated_at'));
+      } else {
+        query = ref.watch(strainsQuery('updated_at'));
+      }
+
+      // Render.
+      return Scrollbar(
         child: FirestoreListView<Strain>(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.only(top: 16, bottom: 48),
-          query: ref.watch(strainsQuery(orderBy ?? 'updated_at')),
-          pageSize: 20,
-          emptyBuilder: (context) => _searchTextController.text.isEmpty
-              ? _emptyResults()
-              : _noResults(),
+          physics: ScrollPhysics(),
+          // physics: NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.only(top: 16, bottom: 48, left: 16, right: 24),
+          query: query,
+          pageSize: 10,
+          emptyBuilder: (context) {
+            if (orderBy == 'favorites') {
+              return _userNoFavorites();
+            }
+            return _searchTextController.text.isEmpty
+                ? _emptyResults()
+                : _noResults();
+          },
           errorBuilder: (context, error, stackTrace) => Text(error.toString()),
           loadingBuilder: (context) => _loadingResults(),
           itemBuilder: (context, doc) {
@@ -101,15 +152,10 @@ class StrainsSearch extends HookConsumerWidget {
       return InkWell(
         onTap: () {
           String value = _searchTextController.text;
-          print('Searching for value: $value');
-          // ref
-          //     .watch(asyncLabResultsProvider.notifier)
-          //     .searchLabResults(value);
           ref.read(strainSearchTerm.notifier).update((state) => value);
-          // ref.read(strainsQuery.notifier).update((state) => state);
         },
         child: Icon(
-          Icons.send,
+          Icons.search,
           color: Theme.of(context).textTheme.labelMedium!.color,
         ),
       );
@@ -120,10 +166,8 @@ class StrainsSearch extends HookConsumerWidget {
       return _searchTextController.text.isNotEmpty
           ? IconButton(
               onPressed: () {
-                // ref.watch(asyncLabResultsProvider.notifier).clearLabResults();
                 _searchTextController.clear();
                 ref.read(strainSearchTerm.notifier).update((state) => '');
-                // ref.read(strainsQuery.notifier).update((state) => state);
               },
               icon: Icon(
                 Icons.close,
@@ -186,8 +230,7 @@ class StrainsSearch extends HookConsumerWidget {
             ),
           ),
           // Search field.
-          Container(
-            height: MediaQuery.of(context).size.height * 0.1,
+          Padding(
             padding: EdgeInsets.only(top: 12, left: 16, right: 24),
             child: _buildSearchTextField(),
           ),
@@ -199,116 +242,8 @@ class StrainsSearch extends HookConsumerWidget {
           // - state
 
           // Results list, centered when there are no results, top-aligned otherwise.
-          Container(
-            height: MediaQuery.of(context).size.height * 0.6,
-            child: Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _resultsList(),
-                  ],
-                ),
-              ),
-            ),
-            // child: _searchTextController.text.isNotEmpty &&
-            //         prodSearchList.isNotEmpty
-            //     ? SingleChildScrollView(
-            //         child: Column(
-            //           children: [
-            //             _resultsList(),
-            //           ],
-            //         ),
-            //       )
-            //     : Center(
-            //         child: SingleChildScrollView(
-            //           child: Column(
-            //             children: [
-            //               _resultsList(),
-            //             ],
-            //           ),
-            //         ),
-            //       ),
-          ),
-
-          // Disclaimer.
-          // gapH8,
-          // ModelInformationWidget(),
+          _resultsList(),
         ],
-      ),
-    );
-  }
-}
-
-/// Sample results placeholder.
-class ResultsSearchPlaceholder extends StatelessWidget {
-  final String title;
-  final String subtitle;
-
-  ResultsSearchPlaceholder({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Image.
-            Padding(
-              padding: EdgeInsets.only(top: 16),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3',
-                  width: 128,
-                  height: 128,
-                ),
-              ),
-            ),
-            // Text.
-            SelectionArea(
-              child: Column(
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Model information.
-class ModelInformationWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 24),
-      child: Text.rich(
-        TextSpan(
-          children: [
-            TextSpan(
-              text: 'This is a test release. ',
-              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            TextSpan(
-              text:
-                  'Please bear in mind that the data is incomplete and not up-to-date. Use at your own discretion.',
-            ),
-          ],
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
       ),
     );
   }
@@ -323,14 +258,19 @@ class StrainListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Render.
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 24),
-      elevation: 2,
+      // margin: EdgeInsets.only(left: 16, right: 24),
+      elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-      color: Theme.of(context).scaffoldBackgroundColor,
+      // color: Theme.of(context).scaffoldBackgroundColor,
+      color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          context.go('/strains/${strain.id}/');
+          // FIXME: Prefer to use hash. Use URL safe strain.name for now.
+          // var strainHash = DataUtils.createHash(strain.name, privateKey: '');
+          String strainId = Uri.encodeComponent(strain.name);
+          context.push('/strains/$strainId');
         },
         child: Container(
           margin: EdgeInsets.all(0),
@@ -354,24 +294,84 @@ class StrainListItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Strain name.
-                    Text(
-                      strain.name,
-                      style: Theme.of(context).textTheme.labelLarge,
+                    // Title row.
+                    Row(
+                      children: [
+                        // Favorite button.
+                        FavoriteStrainButton(strain: strain),
+                        gapW8,
+
+                        // Strain name.
+                        Text(
+                          strain.name,
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ],
                     ),
                     gapH8,
 
-                    // Strain ID.
+                    // Total favorites.
                     Text(
-                      'ID: ${strain.id}',
-                      style: Theme.of(context).textTheme.labelMedium,
+                      'Total favorites: ${strain.totalFavorites.toString()}',
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
+
+                    // TODO: Add more strain details.
+                    // - Strain image
+                    // - subtitle
+                    // - description
+                    // - facts
                   ],
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Favorite strain button.
+class FavoriteStrainButton extends ConsumerWidget {
+  const FavoriteStrainButton({
+    Key? key,
+    required this.strain,
+  }) : super(key: key);
+
+  // Parameters.
+  final Strain strain;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    var strainId = DataUtils.createHash(strain.name, privateKey: '');
+    final asyncData = ref.watch(userStrainData(strainId));
+    final user = ref.watch(userProvider).value;
+
+    return asyncData.when(
+      error: (error, stackTrace) => Text(error.toString()),
+      loading: () => IconButton(
+        icon: Icon(Icons.favorite_border), // Empty heart while loading
+        onPressed: null, // Disabling button while loading
+      ),
+      data: (data) => IconButton(
+        icon: Icon(
+          data?['favorite'] ?? false ? Icons.favorite : Icons.favorite_border,
+          color: data?['favorite'] ?? false ? Colors.pink : Colors.grey,
+        ),
+        onPressed: () async {
+          // Note: Requires the user to be signed in.
+          if (user == null) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return SignInDialog(isSignUp: false);
+              },
+            );
+            return;
+          }
+          await ref.read(strainService).toggleFavorite(strain, user.uid);
+        },
       ),
     );
   }

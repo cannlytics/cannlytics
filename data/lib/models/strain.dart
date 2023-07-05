@@ -23,6 +23,7 @@ class Strain {
     this.imageUrl,
     this.images,
     this.comments,
+    this.totalFavorites = 0,
   });
 
   // Properties.
@@ -36,12 +37,13 @@ class Strain {
   final String? imageUrl;
   final List<dynamic>? images;
   final List<dynamic>? comments;
+  final int totalFavorites;
 
   // Create model.
   factory Strain.fromMap(Map<dynamic, dynamic> data) {
     return Strain(
       id: data['id'] != null ? data['id'].toString() : '',
-      name: data['name'] ?? '',
+      name: data['strain_name'] ?? data['name'] ?? '',
       testingStatus: data['testing_status'],
       thcLevel: data['thc_level'],
       cbdLevel: data['cbd_level'],
@@ -50,6 +52,7 @@ class Strain {
       imageUrl: data['image_url'],
       images: data['images'] ?? [],
       comments: data['comments'] ?? [],
+      totalFavorites: data['total_favorites'] ?? 0,
     );
   }
 
@@ -66,6 +69,7 @@ class Strain {
       'image_url': imageUrl,
       'images': images,
       'comments': comments,
+      'total_favorites': totalFavorites,
     };
   }
 }

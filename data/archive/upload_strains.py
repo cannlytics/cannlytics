@@ -286,7 +286,7 @@ strain_data['keywords'] = strain_data['strain_name'].apply(
 )
 
 
-def upload_strains(collection: str = 'data/strains') -> list:
+def upload_strains(collection: str = 'public/data/strains') -> list:
     """Upload strain data to Firestore."""
 
     # FIXME: Compile the strain data.
@@ -301,9 +301,8 @@ def upload_strains(collection: str = 'data/strains') -> list:
     for _, row in strain_data.iterrows():
         doc = row.to_dict()
         _id = str(doc['strain_id'])
-        state = doc['lab_state'].lower()
         doc['updated_at'] = datetime.now().isoformat()
-        ref = f'{collection}/{state}/{_id}'
+        ref = f'{collection}/{_id}'
         refs.append(ref)
         docs.append(doc)
 

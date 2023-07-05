@@ -61,10 +61,12 @@ class LicenseesScreen extends ConsumerWidget {
                   color: Colors.orange,
                 ),
                 SizedBox(width: 8.0),
-                Text(
-                  'Under development, please stay tuned for this data to be updated.',
-                  style: TextStyle(
-                    color: Colors.orange[800],
+                Flexible(
+                  child: Text(
+                    'Under development, please stay tuned for this data to be updated.',
+                    style: TextStyle(
+                      color: Colors.orange[800],
+                    ),
                   ),
                 ),
               ],

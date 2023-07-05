@@ -25,6 +25,7 @@ class CustomTextField extends StatelessWidget {
     this.onChanged,
     this.maxWidth,
     this.maxLabelWidth,
+    this.disabled = false,
   });
 
   // Parameters.
@@ -35,6 +36,7 @@ class CustomTextField extends StatelessWidget {
   final void Function(String)? onChanged;
   final double? maxWidth;
   final double? maxLabelWidth;
+  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +78,7 @@ class CustomTextField extends StatelessWidget {
             // Controller.
             controller: controller,
             initialValue: value?.toString() ?? '',
+            enabled: !disabled,
 
             // Validation.
             keyboardType: isNumeric ? TextInputType.number : TextInputType.text,

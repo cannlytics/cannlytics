@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 7/3/2023
+// Updated: 7/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -13,18 +13,11 @@ import 'package:cannlytics_data/common/layout/pill_tab.dart';
 import 'package:cannlytics_data/ui/strains/strain_search.dart';
 import 'package:flutter/material.dart';
 
-// Package imports:
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 // Project imports:
 import 'package:cannlytics_data/ui/layout/console.dart';
-import 'package:cannlytics_data/constants/design.dart';
-// import 'package:cannlytics_data/services/auth_service.dart';
 
 // TODO: Allow user's to report new strains.
 
-/// TODO: Show newest strains, favorite strains, and "your" strains.
-///
 /// Strains screen.
 class StrainsScreen extends StatelessWidget {
   const StrainsScreen({Key? key}) : super(key: key);
@@ -47,10 +40,12 @@ class StrainsScreen extends StatelessWidget {
                   color: Colors.orange,
                 ),
                 SizedBox(width: 8.0),
-                Text(
-                  'Under development, please stay tuned for this data to be updated.',
-                  style: TextStyle(
-                    color: Colors.orange[800],
+                Flexible(
+                  child: Text(
+                    'Under development, please stay tuned for this data to be updated.',
+                    style: TextStyle(
+                      color: Colors.orange[800],
+                    ),
                   ),
                 ),
               ],
@@ -58,34 +53,20 @@ class StrainsScreen extends StatelessWidget {
           ),
         ),
 
-        // Main content.
-        SliverToBoxAdapter(child: MainContent()),
-      ],
-    );
-  }
-}
-
-/// Main content.
-class MainContent extends ConsumerWidget {
-  const MainContent({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
         // Breadcrumbs.
-        BreadcrumbsRow(
-          items: [
-            {'label': 'Data', 'path': '/'},
-            {'label': 'Strains', 'path': null},
-          ],
+        SliverToBoxAdapter(
+          child: BreadcrumbsRow(
+            items: [
+              {'label': 'Data', 'path': '/'},
+              {'label': 'Strains', 'path': null},
+            ],
+          ),
         ),
 
-        // Main interface.
-        gapH12,
-        StrainsTabs(),
+        // Main content.
+        SliverToBoxAdapter(
+          child: StrainsTabs(),
+        ),
       ],
     );
   }
@@ -143,8 +124,8 @@ class _StrainsTabsState extends State<StrainsTabs>
             dividerColor: Colors.transparent,
             tabs: [
               PillTabButton(
-                text: 'New',
-                icon: Icons.update,
+                text: 'All',
+                icon: Icons.apps,
                 isSelected: _selectedIndex == 0,
               ),
               PillTabButton(
@@ -165,9 +146,9 @@ class _StrainsTabsState extends State<StrainsTabs>
           child: TabBarView(
             controller: _tabController,
             children: [
-              StrainsSearch(orderBy: 'updated_at'),
-              StrainsSearch(orderBy: 'total_lab_results'),
+              StrainsSearch(orderBy: 'strain_name'),
               StrainsSearch(orderBy: 'total_favorites'),
+              StrainsSearch(orderBy: 'favorites'),
             ],
           ),
         ),

@@ -76,3 +76,6 @@ def calc_results_stats(
 
 
     # TODO: Calculate lab results statistics (once per day?).
+
+
+    # TODO: Update the strain statistics for the strain of the lab result.
