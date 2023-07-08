@@ -168,7 +168,7 @@ SOFTWARE.
 Please cite the following if you use the code examples in your research:
 
 ```bibtex
-@misc{cannlytics2022,
+@misc{cannlytics2023,
   title={Cannabis Data Science},
   author={Skeate, Keegan and Rice, Charles and O'Sullivan-Sutherland, Candace},
   journal={https://github.com/cannlytics/cannabis-data-science},

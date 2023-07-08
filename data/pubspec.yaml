@@ -49,6 +49,7 @@ dependencies:
   pdfx: ^2.3.0
   firebase_ui_firestore: ^1.5.4
   shared_preferences: ^2.2.0
+  cupertino_icons: ^1.0.5
 
 dev_dependencies:
   import_sorter: ^4.6.0
@@ -96,6 +97,7 @@ flutter_native_splash:
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/ai-icons/cannabis-leaf.svg
     - assets/images/maps/united_states_map.svg
     - assets/images/maps/us_map.svg
     - assets/images/maps/world.svg

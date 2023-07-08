@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 1/5/2021
-Updated: 1/31/2023
+Updated: 7/6/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Django settings powered by environment variables and
@@ -163,6 +163,8 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                # Include certain variables in all templates.
+                'website.core.context_processors.selected_settings',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',

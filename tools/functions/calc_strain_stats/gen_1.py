@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/28/2023
-Updated: 7/2/2023
+Updated: 7/4/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -26,12 +26,6 @@ def calc_strain_stats(event, context):
          event (dict): Event payload.
          context (google.cloud.functions.Context): Metadata for the event.
     """
-    resource_string = context.resource
-    # print out the resource string that triggered the function
-    print(f"Function triggered by change to: {resource_string}.")
-    # now print out the entire event object
-    print(str(event))
-
     # Get the document and the user.
     document = event['value']['fields']
     uid = document.get('uid', {}).get('stringValue', None)
@@ -57,16 +51,12 @@ def calc_strain_stats(event, context):
         data = doc.to_dict()
         if data.get('favorite'):
             total_favorites += 1
+
+    # Format stats.
+    stats = {'total_favorites': total_favorites}
     
     # Update the strain's statistics.
-    ref = f'public/data/strains/{strain_name}'
-    data = {'total_favorites': total_favorites}
     ref = db.collection('public').document('data').collection('strains').document(strain_name)
-    ref.update(data)
+    ref.update(stats)
     print('Updated strain statistics.')
 
-    # Also update the statistics in the user's document.
-    for doc in docs:
-        data = doc.to_dict()
-        ref = db.collect('users').document(uid).collection('strains').document(doc.id)
-        ref.update(data)

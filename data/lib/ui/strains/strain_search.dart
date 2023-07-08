@@ -7,6 +7,9 @@
 // Updated: 7/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// TODO:
+// - A to Z links for strains: add first letter field to make queries easy.
+
 // Flutter imports:
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/common/layout/search_placeholder.dart';
@@ -97,7 +100,7 @@ class StrainsSearch extends HookConsumerWidget {
     }
 
     /// Results list.
-    Widget _resultsList() {
+    Widget _resultsList(orderBy) {
       // Handle no user.
       if (orderBy == 'favorites' && user == null) {
         return _noUser();
@@ -108,7 +111,6 @@ class StrainsSearch extends HookConsumerWidget {
       if (orderBy == 'favorites') {
         query = ref.watch(userFavoriteStrains(user?.uid ?? ''));
       } else if (orderBy == 'total_favorites') {
-        print('ORDERING BY POPULARITY');
         query = ref.watch(popularityQuery('updated_at'));
       } else {
         query = ref.watch(strainsQuery('updated_at'));
@@ -135,7 +137,7 @@ class StrainsSearch extends HookConsumerWidget {
           loadingBuilder: (context) => _loadingResults(),
           itemBuilder: (context, doc) {
             final item = doc.data();
-            return StrainListItem(strain: item);
+            return StrainListItem(strain: item, orderBy: orderBy);
           },
         ),
       );
@@ -242,7 +244,7 @@ class StrainsSearch extends HookConsumerWidget {
           // - state
 
           // Results list, centered when there are no results, top-aligned otherwise.
-          _resultsList(),
+          _resultsList(orderBy),
         ],
       ),
     );
@@ -251,10 +253,11 @@ class StrainsSearch extends HookConsumerWidget {
 
 /// A strain list item.
 class StrainListItem extends StatelessWidget {
-  StrainListItem({required this.strain});
+  StrainListItem({required this.strain, this.orderBy});
 
   // Properties
   final Strain strain;
+  final String? orderBy;
 
   @override
   Widget build(BuildContext context) {
@@ -311,10 +314,11 @@ class StrainListItem extends StatelessWidget {
                     gapH8,
 
                     // Total favorites.
-                    Text(
-                      'Total favorites: ${strain.totalFavorites.toString()}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                    if (orderBy != 'favorites')
+                      Text(
+                        'Total favorites: ${strain.totalFavorites.toString()}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
 
                     // TODO: Add more strain details.
                     // - Strain image

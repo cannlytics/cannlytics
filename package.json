@@ -1,6 +1,6 @@
 {
   "name": "cannlytics",
-  "version": "0.0.15",
+  "version": "0.0.15+3",
   "license": "MIT",
   "homepage": "https://cannlytics.com",
   "description": "Cannlytics is a suite of tools that you can use to wrangle, standardize, and analyze cannabis data.",
@@ -46,7 +46,7 @@
     "console:livereload": "set PROJECT=console & python manage.py livereload --ignore-static-dirs",
     "console:dev": "set PROJECT=console & python manage.py runserver",
     "console:build": "cd console & webpack --env production & cd ../",
-    "console:collectstatic": "set PROJECT=console & python manage.py collectstatic --noinput",
+    "console:collectstatic": "set PROJECT=console & echo yes|python manage.py collectstatic",
     "console:container": "npm run console:collectstatic & gcloud builds submit . --tag gcr.io/cannlytics/cannlytics-console ./Dockerfile",
     "console:run": "gcloud run deploy cannlytics-console --image=gcr.io/cannlytics/cannlytics-console --set-env-vars=SETTINGS_NAME=cannlytics_platform_settings --region=us-central1 --allow-unauthenticated --platform=managed --memory=2Gi --cpu=2 --min-instances=1 --max-instances=99 --no-use-http2",
     "console:deploy": "firebase deploy --project cannlytics --only hosting:console",
@@ -63,12 +63,12 @@
     "website:livereload": "set PROJECT=website & python manage.py livereload --ignore-static-dirs",
     "website:dev": "set PROJECT=website & python manage.py runserver",
     "website:build": "cd website & webpack --env production & cd ../",
-    "website:collectstatic": "set PROJECT=website & python manage.py collectstatic --noinput",
+    "website:collectstatic": "set PROJECT=website & echo yes|python manage.py collectstatic",
     "website:container": "npm run website:collectstatic --noinput & gcloud builds submit --tag gcr.io/cannlytics/cannlytics-website",
     "website:run": "gcloud run deploy cannlytics-website --image=gcr.io/cannlytics/cannlytics-website --set-env-vars=SETTINGS_NAME=cannlytics_platform_settings --region=us-central1 --allow-unauthenticated --platform=managed --memory=2Gi --cpu=2 --min-instances=1 --max-instances=99 --no-use-http2",
     "website:deploy": "firebase deploy --project cannlytics --only hosting:cannlytics",
     "website:docker": "docker build . --tag gcr.io/cannlytics/cannlytics-website:latest & docker push gcr.io/cannlytics/cannlytics-website:latest",
-    "website:publish": "conda activate cds & npm run website:build & website:collectstatic & npm run website:docker & npm run website:run && npm run website:deploy"
+    "website:publish": "conda activate cds & npm run website:build & npm run website:collectstatic & npm run website:docker & npm run website:run & npm run website:deploy"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.6",

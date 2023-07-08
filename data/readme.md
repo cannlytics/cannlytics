@@ -46,7 +46,7 @@ dart fix --apply
 First, build the app:
 
 ```shell
-flutter build web --no-sound-null-safety --dart-define=PRODUCTION=true
+flutter build web --dart-define=PRODUCTION=true
 ```
 
 Second, publish the app to the web:

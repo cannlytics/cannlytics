@@ -17,6 +17,7 @@ import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/loading_placeholder.dart';
 import 'package:cannlytics_data/common/layout/pill_tab.dart';
 import 'package:cannlytics_data/common/tables/key_value_datatable.dart';
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
@@ -27,6 +28,7 @@ import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:internet_file/internet_file.dart';
@@ -164,6 +166,19 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
             widget.labResultId ?? widget.labResult?.sampleHash ?? '',
             update,
           );
+
+      // Show a success snackbar.
+      Fluttertoast.showToast(
+        msg: 'Lab result saved',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 2,
+        backgroundColor: LightColors.lightGreen.withAlpha(60),
+        textColor: Colors.white,
+        fontSize: 16.0,
+        webPosition: 'center',
+        webShowClose: true,
+      );
 
       // Finish editing.
       setState(() {

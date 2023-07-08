@@ -69,18 +69,19 @@ def get_paypal_access_token(
     Returns:
         (str): The PayPal access token.
     """
-    data = {'grant_type': 'client_credentials'}
-    url = f'{base}/v1/oauth2/token'
+    data = {"grant_type": "client_credentials"}
+    url = f"{base}/v1/oauth2/token"
     auth = (client_id, secret)
     headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Accept-Language': 'en_US',
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Accept-Language": "en_US",
     }
+    print('REQUEST TO PAYPAL:', url)
     response = requests.post(url, data=data, headers=headers, auth=auth)
     body = response.json()
     try:
-        return body['access_token']
+        return body["access_token"]
     except KeyError:
         print('ERROR:', body)
 
@@ -209,8 +210,8 @@ def create_order(request):
         # Make the request to create the order.
         url = f'{BASE}/v2/checkout/orders'
         headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {paypal_access_token}',
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {paypal_access_token}",
         }
         response = requests.post(url, data=dumps(payload), headers=headers)
         data = response.json()

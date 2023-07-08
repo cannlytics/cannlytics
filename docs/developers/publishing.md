@@ -12,6 +12,13 @@ Note, ensure that you have Docker running when you are publishing the website. Y
 error during connect: This error may indicate that the docker daemon is not running.
 ```
 
+You will also need to authenticate with Google Cloud:
+
+```shell
+gcloud auth login
+gcloud auth configure-docker
+```
+
 ## Create your secret environment variables
 
 Open [Google Cloud Shell](https://console.cloud.google.com/) and run the following command to ensure that you are working under the correct email and with the correct project:

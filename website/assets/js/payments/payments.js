@@ -27,6 +27,7 @@ export const payments = {
      * @param {String} tier The tier of subscription.
      */
     const subscriptionData = await this.getSubscription(tier);
+    console.log('SUBSCRIPTION DATA:');
     console.log(subscriptionData);
 
     // Add PayPal button.
@@ -48,7 +49,7 @@ export const payments = {
         createSubscription: function(data, actions) {
           /* Create a subscription with PayPal. */
           return actions.subscription.create({
-            plan_id: 'PROD-6B902169SV204835Y',
+            plan_id: subscriptionData['plan_id'],
           });
         },
 

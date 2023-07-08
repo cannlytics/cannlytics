@@ -2,11 +2,11 @@
 <html>
 <!--
   Subscription Management Page | Cannlytics Website
-  Copyright (c) 2021-2022 Cannlytics
+  Copyright (c) 2021-2023 Cannlytics
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 11/16/2021
-  Updated: 6/22/2023
+  Updated: 7/5/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -242,16 +242,8 @@
 <!-- JavaScript -->
 {% block page_js %}
 
-<!-- Make user's subscriptions available to JavaScript -->
-{% comment %} {{ user.newsletter|json_script:"user_newsletter" }}
-{{ user.premium|json_script:"user_premium" }}
-{{ user.subscriptions|json_script:"user_subscriptions" }}
-{{ user.support|json_script:"user_support" }} {% endcomment %}
-{% comment %} {{ user.support|json_script:"user_support" }} {% endcomment %}
-
 <script>
 
-  // FIXME:
   // Initialize the interface with the user's current subscriptions.
   cannlytics.payments.initializeSubscriptions();
 

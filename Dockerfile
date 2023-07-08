@@ -3,7 +3,7 @@
 #
 # Auhtors: Keegan Skeate <keegan@cannlytics.com>
 # Created: 1/5/2021
-# Updated: 1/31/2023
+# Updated: 7/5/2023
 # License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 #------------------------------------------------------------------
@@ -34,12 +34,14 @@ ENV PYTHONUNBUFFERED True
 #------------------------------------------------------------------
 
 # Install Chrome (to use Selenium for web automation).
-RUN apt-get update && apt-get install wget -y
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
+RUN apt-get update && \
+    apt-get install wget -y && \
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
 
 # Install C libraries (for image proecssing).
-RUN apt-get update && apt-get install -y gconf-service libasound2 libatk1.0-0 libcairo2 libcups2 libfontconfig1 libgdk-pixbuf2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libxss1 fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils imagemagick libzbar0
+RUN apt-get update && \
+    apt-get install -y gconf-service libasound2 libatk1.0-0 libcairo2 libcups2 libfontconfig1 libgdk-pixbuf2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libxss1 fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils imagemagick libzbar0
 
 # Install `zbar` and set its required environment variables (for QR codes).
 RUN apt-get update && apt-get install -y zbar-tools libzbar-dev
@@ -53,8 +55,8 @@ ENV LANG C.UTF-8
 
 # Install Python dependencies.
 COPY requirements.txt .
-RUN python -m pip install --upgrade pip
-RUN python -m pip install -r requirements.txt
+RUN python -m pip install --upgrade pip && \
+    python -m pip install -r requirements.txt
 
 # Specificy the app directory.
 ENV APP_HOME /app
@@ -65,6 +67,18 @@ COPY . ./
 
 # Switch to a non-root user.
 # See: https://aka.ms/vscode-docker-python-user-rights
+# RUN apt-get update && \
+#   apt-get install wget -y && \
+#   wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+#   dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install && \
+#   apt-get update && apt-get install -y gconf-service libasound2 libatk1.0-0 libcairo2 libcups2 libfontconfig1 libgdk-pixbuf2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libxss1 fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils imagemagick libzbar0 && \
+#   dpkg -L libzbar-dev; ls -l /usr/include/zbar.h && \
+#   python -m pip install --upgrade pip && \
+#   python -m pip install -r requirements.txt && \
+#   useradd appuser && \
+#   chown -R appuser /app
+# ENV LC_ALL C.UTF-8
+# ENV LANG C.UTF-8
 RUN useradd appuser && chown -R appuser /app
 USER appuser
 

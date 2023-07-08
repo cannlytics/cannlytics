@@ -39,8 +39,10 @@ RECEIPTS_PROMPT = """Given text, extract JSON, where:
 | `date_sold` | "2020-04-20" | The date the receipt was sold. |
 | `invoice_number` | "123456789" | The receipt number. |
 | `product_names` | ["Blue Rhino Pre-Roll"] | The names of the product purchased. |
+| `strain_names` | ["Blue Rhino"] | The strain names of the products purchased. |
 | `product_types` | ["flower"] | The types of the products purchased. |
 | `product_quantities` | [1] | The quantities of the products purchased. |
+| `product_weights` | [3.5g] | The weights of the products purchased. |
 | `product_prices` | [5.0] | The prices of the products purchased. |
 | `product_ids` | ["5f8b9c4b0f5c4b0008d1b2b0"] | The IDs of the products purchased. |
 | `total_amount` | 5.0 | The total amount of all product prices. |

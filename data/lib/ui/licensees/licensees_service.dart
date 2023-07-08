@@ -49,20 +49,11 @@ class LicenseesController extends AutoDisposeAsyncNotifier<List<Licensee?>> {
     if (stateId == null) {
       stateId = window.location.href.split('/').last;
     }
-    // Optional: If a user is not signed in, then get a sample instead.
-
-    // Optional: Get data from Firebase Storage.
-    // String? url = await StorageService.getDownloadUrl(
-    //     'data/licenses/$stateId/licenses-$stateId-latest.csv');
-    // if (url == null) return [];
-    // return await DataService.fetchCSVFromURL(url);
-
-    // Get data from Firestore.
     final _dataSource = ref.read(firestoreProvider);
     var data = await _dataSource.getCollection(
       path: 'data/licenses/$stateId',
       builder: (data, id) => Licensee.fromMap(data ?? {}),
-      queryBuilder: (query) => query.orderBy('business_legal_name').limit(10),
+      queryBuilder: (query) => query.orderBy('business_legal_name'),
     );
     return data;
   }

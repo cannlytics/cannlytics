@@ -107,7 +107,7 @@ class SideMenu extends ConsumerWidget {
         DrawerListTile(
           title: 'Strains',
           leading: SvgPicture.asset(
-            'assets/icons/emoji/tanabata_tree.svg',
+            'assets/images/ai-icons/cannabis-leaf.svg',
             width: 28,
           ),
           onTap: () => context.push('/strains'),

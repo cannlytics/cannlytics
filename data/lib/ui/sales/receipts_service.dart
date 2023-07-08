@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 7/2/2023
+// Updated: 7/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -138,4 +138,23 @@ final receiptLogs =
         toFirestore: (Map<dynamic, dynamic>? item, _) =>
             item as Map<String, Object?>,
       );
+});
+
+/* === Analytics === */
+
+/// Stream user receipt statistics from Firestore.
+final receiptsStats = StreamProvider<List<Map<String, dynamic>>>((ref) async* {
+  final _dataSource = ref.watch(firestoreProvider);
+  final user = ref.watch(userProvider).value;
+  if (user == null) return;
+  DateTime now = DateTime.now();
+  yield* _dataSource.streamCollection(
+    path: 'users/${user.uid}/receipts_stats',
+    builder: (data, documentId) => data!,
+    queryBuilder: (query) {
+      // TODO: Limit by time range.
+      //  .where('date', isGreaterThanOrEqualTo: DateTime(now.year, now.month - 1).toString())
+      return query.orderBy('date', descending: true).limit(60);
+    },
+  );
 });

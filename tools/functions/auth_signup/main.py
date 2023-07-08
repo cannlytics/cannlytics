@@ -1,10 +1,10 @@
 """
 Authentication Sign Up | Cannlytics
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/23/2023
-Updated: 6/28/2023
+Updated: 7/7/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -32,18 +32,17 @@ def auth_signup(data, context):
     """
     uid = data['uid']
     created_at = data['metadata']['createdAt']
-    print('Function triggered by creation/deletion of user: %s' % uid)
-    print('Created at: %s' % created_at)
+    print('Creation/deletion of user: %s' % uid)
 
     # Get the user's email.
     user_email = None
     if 'email' in data:
         user_email = data['email']
-        print('Email: %s' % user_email)
+        print('User email: %s' % user_email)
 
     # Add 10 trial tokens to the user's account.
     if created_at == data['metadata']['lastSignedInAt']:
-        print('User signed up for the first time.')
+        print('User signed up for the first time: %s' % created_at)
         try:
             initialize_app()
         except ValueError:

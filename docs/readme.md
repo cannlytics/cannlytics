@@ -107,7 +107,7 @@ Cannlytics is made available with ❤️ and <a href="https://opencollective.com
 ## 🏛️ License <a name="license"></a>
 
 ```
-Copyright (c) 2021 Cannlytics and Cannlytics Contributors
+Copyright (c) 2021-2023 Cannlytics and Cannlytics Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

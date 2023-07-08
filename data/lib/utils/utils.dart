@@ -107,13 +107,22 @@ class InterfaceUtils {
           // Title.
           title: Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: Theme.of(context).textTheme.titleLarge!.color,
-                ),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
 
           // Content.
-          content: content != null ? Text(content) : null,
+          content: content != null
+              ? Container(
+                  width: 420,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(content),
+                    ],
+                  ),
+                )
+              : null,
 
           // Actions.
           actions: <Widget>[

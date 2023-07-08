@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/18/2023
-// Updated: 7/2/2023
+// Updated: 7/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/colors.dart';
@@ -19,8 +19,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 /// User receipts user interface.
-class UserReceiptsAnalytics extends ConsumerWidget {
-  const UserReceiptsAnalytics({super.key});
+class ReceiptsAnalytics extends ConsumerWidget {
+  const ReceiptsAnalytics({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -403,5 +403,28 @@ class UserReceiptsChart extends StatelessWidget {
     //     ),
     //   ),
     // );
+  }
+}
+
+/// A card used to display statistics to the user.
+class StatisticsCard extends StatelessWidget {
+  final String title;
+  final String value;
+
+  StatisticsCard({required this.title, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleLarge),
+            Text(value, style: Theme.of(context).textTheme.bodyMedium),
+          ],
+        ),
+      ),
+    );
   }
 }

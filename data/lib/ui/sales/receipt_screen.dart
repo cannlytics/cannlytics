@@ -15,6 +15,7 @@ import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/loading_placeholder.dart';
 import 'package:cannlytics_data/common/layout/pill_tab.dart';
 import 'package:cannlytics_data/common/tables/key_value_datatable.dart';
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
@@ -23,6 +24,7 @@ import 'package:cannlytics_data/ui/sales/receipts_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -139,6 +141,19 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
             widget.salesReceiptId ?? widget.salesReceipt?.hash ?? '',
             update,
           );
+
+      // Show a success snackbar.
+      Fluttertoast.showToast(
+        msg: 'Receipt saved',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 2,
+        backgroundColor: LightColors.lightGreen.withAlpha(60),
+        textColor: Colors.white,
+        fontSize: 16.0,
+        webPosition: 'center',
+        webShowClose: true,
+      );
 
       // Finish editing.
       setState(() {

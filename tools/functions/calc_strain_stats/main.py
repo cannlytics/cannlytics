@@ -1,30 +1,51 @@
-from cloudevents.http import CloudEvent
-import functions_framework
-from google.events.cloud import firestore
+"""
+Calculate Strain Stats | Cannlytics
+Copyright (c) 2022 Cannlytics
+
+Authors: Keegan Skeate <https://github.com/keeganskeate>
+Created: 6/28/2023
+Updated: 7/5/2023
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+Description:
+
+    Calculate statistics for strains and save them to a
+    Firestore collection when a user's strain data changes.
+    Firebase Functions for Firestore.
+
+"""
+from firebase_functions import firestore_fn, options
 from firebase_admin import initialize_app, firestore
 
 # Initialize Firebase.
 initialize_app()
 
 
-@functions_framework.cloud_event
-def calc_strain_stats(cloud_event: CloudEvent) -> None:
-    """Triggers by a change to a Firestore document.
-    Args:
-        cloud_event: cloud event with information on the firestore event trigger
-    """
-    firestore_payload = firestore.DocumentEventData()
-    firestore_payload._pb.ParseFromString(cloud_event.data)
+# Set the region.
+options.set_global_options(region=options.SupportedRegion.US_CENTRAL1)
 
-    print(f"Function triggered by change to: {cloud_event['source']}")
 
-    print("\nOld value:")
-    print(firestore_payload.old_value)
+@firestore_fn.on_document_written(
+    document='users/{uid}/strains/{strain_id}',
+    timeout_sec=300,
+    memory=options.MemoryOption.MB_512,
+)
+def calc_strain_stats(
+        event: firestore_fn.Event[firestore_fn.Change],
+    ) -> None:
+    """Calculate statistics for a strain and save them to a
+    Firestore collection when a user's strain data changes."""
 
-    print("\nNew value:")
-    print(firestore_payload.value)
+    # Get an object with the current document values.
+    # If the document does not exist, it was deleted.
+    document = (event.data.after.to_dict()
+                if event.data.after is not None else None)
 
-    document = firestore_payload.value
+    # Get an object with the previous document values.
+    # If the document does not exist, it was newly created.
+    previous_values = (event.data.before.to_dict()
+                        if event.data.before is not None else None)
+
 
     # Get the user's ID.
     uid = cloud_event.params['uid']
@@ -46,16 +67,17 @@ def calc_strain_stats(cloud_event: CloudEvent) -> None:
 
     # Calculate the total number of users who have that strain as a favorite.
     total_favorites = 0
-    strains = db.collection_group('strains').where('strain_name', '==', strain_name)
+    strains = db.collection_group('strains').where('name', '==', strain_name)
     docs = strains.stream()
     for doc in docs:
         data = doc.to_dict()
         if data.get('favorite'):
             total_favorites += 1
+
+    # Format stats.
+    stats = {'total_favorites': total_favorites}
     
     # Update the strain's statistics.
-    ref = f'public/data/strains/{strain_name}'
-    data = {'total_favorites': total_favorites}
     ref = db.collection('public').document('data').collection('strains').document(strain_name)
-    ref.update(data)
+    ref.update(stats)
     print('Updated strain statistics.')
