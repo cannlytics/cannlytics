@@ -97,7 +97,9 @@ flutter_native_splash:
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/ai-icons/cannabis-dispensary.svg
     - assets/images/ai-icons/cannabis-leaf.svg
+    - assets/images/ai-icons/cannabis-receipt.svg
     - assets/images/maps/united_states_map.svg
     - assets/images/maps/us_map.svg
     - assets/images/maps/world.svg

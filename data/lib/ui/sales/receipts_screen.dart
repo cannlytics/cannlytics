@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 6/29/2023
+// Updated: 7/7/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // Flutter imports:
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
@@ -111,18 +111,18 @@ class _ResultsTabsState extends State<ResultsTabs>
             dividerColor: Colors.transparent,
             tabs: [
               PillTabButton(
+                text: 'Analytics',
+                icon: Icons.analytics,
+                isSelected: _tabController.index == 0,
+              ),
+              PillTabButton(
                 text: 'Your Receipts',
                 icon: Icons.science,
-                isSelected: _tabController.index == 0,
+                isSelected: _tabController.index == 1,
               ),
               PillTabButton(
                 text: 'Parse',
                 icon: Icons.auto_awesome,
-                isSelected: _tabController.index == 1,
-              ),
-              PillTabButton(
-                text: 'Analytics',
-                icon: Icons.analytics,
                 isSelected: _tabController.index == 2,
               ),
             ],
@@ -133,9 +133,9 @@ class _ResultsTabsState extends State<ResultsTabs>
           child: TabBarView(
             controller: _tabController,
             children: [
+              ReceiptsAnalytics(),
               UserReceiptsInterface(tabController: _tabController),
               ReceiptsParserInterface(),
-              ReceiptsAnalytics(),
             ],
           ),
         ),

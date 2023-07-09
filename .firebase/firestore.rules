@@ -166,6 +166,12 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Allow user's to read their own receipt statistics.
+    match /users/{userId}/receipts_stats/{document=**} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
     // Allow users to read and write their own COAs.
     match /users/{userId}/coas/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;

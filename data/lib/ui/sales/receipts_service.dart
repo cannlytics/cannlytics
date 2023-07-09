@@ -142,19 +142,49 @@ final receiptLogs =
 
 /* === Analytics === */
 
+// Create a state provider to store the selected date range
+final dateRangeProvider = StateProvider<String>((_) => '1M');
+
 /// Stream user receipt statistics from Firestore.
 final receiptsStats = StreamProvider<List<Map<String, dynamic>>>((ref) async* {
   final _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
   if (user == null) return;
-  DateTime now = DateTime.now();
+  DateTime endDate = DateTime.now();
+  DateTime startDate;
+  final dateRange = ref.watch(dateRangeProvider);
+  print('Toggling date range: ${dateRange}');
+  switch (dateRange) {
+    case '1M':
+      startDate = DateTime(endDate.year, endDate.month - 1, endDate.day);
+      break;
+    case '3M':
+      startDate = DateTime(endDate.year, endDate.month - 3, endDate.day);
+      break;
+    case 'YTD':
+      startDate = DateTime(endDate.year, 1, 1);
+      break;
+    case '1Y':
+      startDate = DateTime(endDate.year - 1, endDate.month, endDate.day);
+      break;
+    case 'All':
+      startDate = DateTime(endDate.year - 1, endDate.month, endDate.day);
+      break;
+    default:
+      startDate = DateTime(2018, 1, 1);
+  }
   yield* _dataSource.streamCollection(
     path: 'users/${user.uid}/receipts_stats',
     builder: (data, documentId) => data!,
     queryBuilder: (query) {
       // TODO: Limit by time range.
       //  .where('date', isGreaterThanOrEqualTo: DateTime(now.year, now.month - 1).toString())
-      return query.orderBy('date', descending: true).limit(60);
+      print('Starting after:');
+      print(startDate.toIso8601String());
+      return query
+          .orderBy('date', descending: false)
+          .startAfter([startDate.toIso8601String()]);
+      // .limit(60);
     },
   );
 });

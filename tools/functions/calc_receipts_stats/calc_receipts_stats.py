@@ -23,6 +23,9 @@ import pandas as pd
 firebase.initialize_firebase()
 
 
+TOTALS = ['total_transactions', 'total_tax', 'total_price']
+
+
 def calc_receipts_stats(event, context) -> None:
     """Calculate statistics for a user's receipts and save them to a
     Firestore collection when a user's receipt data changes."""
@@ -39,25 +42,33 @@ def calc_receipts_stats(event, context) -> None:
     # Get the user's receipts.
     docs = firebase.get_collection(f'users/{uid}/receipts')
     data = pd.DataFrame(docs)
+
+    # TODO: Handle no receipts or deleted receipts.
+
+
+    # Add a datetime column.
     data['date'] = pd.to_datetime(data['date_sold'])
 
-    # Group data by month.
+    # Calculate monthly totals.
     monthly = data.groupby(pd.Grouper(key='date', freq='M'))
+    monthly_totals = monthly[TOTALS].sum()
 
     # TODO: Calculate total transactions:
-    # - lifetime
-    # - by month
+    # ✓ lifetime
+    # ✓ by month
     # - by quarter
     # - by year
     # - by retailer
     # - by product type
     # - by strain
-    totals = ['total_transactions', 'total_tax', 'total_price']
-    monthly_totals = monthly[totals].sum()
 
-    # TODO: Calculate spending:
-    # - lifetime
-    # - by month
+    # Calculate lifetime totals.
+    lifetime_totals = data[TOTALS].sum()
+    lifetime_totals['updated_at'] = context.timestamp
+
+    # TODO: Calculate total spending:
+    # ✓ lifetime
+    # ✓ by month
     # - by quarter
     # - by year
     # - by retailer
@@ -66,19 +77,10 @@ def calc_receipts_stats(event, context) -> None:
 
 
     # TODO: Calculate total tax:
-    # - lifetime
-    # - by month
+    # ✓ lifetime
+    # ✓ by month
     # - by quarter
     # - by year
-
-    # TODO: Calculate total spend:
-    # - lifetime
-    # - by year
-    # - by quarter
-    # - by month
-    # - by retailer
-    # - by product type
-    # - by strain
 
     # TODO: Calculate average basket size:
     # - lifetime
@@ -90,15 +92,13 @@ def calc_receipts_stats(event, context) -> None:
     # TODO: Calculate average price per gram:
     # - flower
     # - concentrate
-    # - edible
+    # - edible (price per each)
 
     # TODO: Calculate proportion of spend on each product type:
     # - lifetime
     # - by year
     # - by quarter
     # - by month
-
-    # TODO: Handle no receipts.
 
     # Save monthly statistics.
     for index, row in monthly_totals.iterrows():
@@ -112,4 +112,9 @@ def calc_receipts_stats(event, context) -> None:
 
     # TODO: Save annual statistics.
 
-    # TODO: Save lifetime statistics.
+    # TODO: Save retailer, product type, and strain spending statistics.
+
+    # Save lifetime statistics.
+    lifetime_ref = f'users/{uid}/stats/spending'
+    lifetime_stats = lifetime_totals.to_dict()
+    firebase.update_document(lifetime_ref, lifetime_stats)
