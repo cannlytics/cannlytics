@@ -26,6 +26,28 @@ firebase.initialize_firebase()
 TOTALS = ['total_transactions', 'total_tax', 'total_price']
 
 
+def calc_product_type_proportions(data):
+    """Calculate the proportion of spend on each product type."""
+
+    # Explode the data frame on the product_types column
+    exploded_data = data.explode('product_types')
+
+    # Convert product_types to lowercase for case-insensitive grouping.
+    exploded_data['product_types'] = exploded_data['product_types'].str.lower()
+
+    # Calculate the proportion of spend by product type.
+    product_type_totals = exploded_data.groupby('product_types')['total_price'].sum()
+    total_spend = product_type_totals.sum()
+    product_type_proportions = product_type_totals / total_spend
+
+    # Group proportions less than 1% into "Other".
+    product_type_proportions = product_type_proportions[product_type_proportions >= 0.01]
+    product_type_proportions['other'] = 1 - product_type_proportions.sum()
+
+    # Create and return product type proportion dictionary.
+    return product_type_proportions.to_dict()
+
+
 def calc_receipts_stats(event, context) -> None:
     """Calculate statistics for a user's receipts and save them to a
     Firestore collection when a user's receipt data changes."""
@@ -114,8 +136,13 @@ def calc_receipts_stats(event, context) -> None:
     # TODO: Save annual statistics.
 
     # TODO: Save retailer, product type, and strain spending statistics.
+    # Group data by product type and calculate total spend for each product type
+
+    # Calculate product type proportions.
+    product_type_proportions = calc_product_type_proportions(data)
 
     # Save lifetime statistics.
     lifetime_ref = f'users/{uid}/stats/spending'
     lifetime_stats = lifetime_totals.to_dict()
+    lifetime_stats['product_type_proportions'] = product_type_proportions
     firebase.update_document(lifetime_ref, lifetime_stats)

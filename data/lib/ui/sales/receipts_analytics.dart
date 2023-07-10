@@ -70,7 +70,25 @@ class ReceiptsAnalytics extends ConsumerWidget {
             child: Row(children: [TotalSpendCard()]),
           ),
 
-          // TODO: Pie chart of spending by product type.
+          // Pie chart of spending by product type.
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+            child: Row(children: [
+              Text(
+                'Product Types',
+                style: Theme.of(context).textTheme.titleMedium,
+              )
+            ]),
+          ),
+          Container(
+            padding: EdgeInsets.only(left: 28, right: 28, bottom: 24),
+            margin: EdgeInsets.only(top: 28),
+            height: MediaQuery.sizeOf(context).height * 0.5,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: ProductTypeProportionsChart(),
+            ),
+          ),
         ],
       ),
     );
@@ -535,6 +553,59 @@ class TotalSpendCard extends ConsumerWidget {
           error: (_, __) => Text('Failed to load data'),
         ),
       ),
+    );
+  }
+}
+
+/// Product type proportions pie chart.
+class ProductTypeProportionsChart extends ConsumerWidget {
+  const ProductTypeProportionsChart({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Listen to the product type proportion statistics.
+    final asyncValue = ref.watch(totalSpendProvider);
+
+    // Theme.
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Dynamic render.
+    return asyncValue.when(
+      // Loading placeholder.
+      loading: () => CircularProgressIndicator(),
+      // Error placeholder.
+      error: (error, _) => Text('Error: $error'),
+      // Display the chart.
+      data: (data) {
+        var proportions = data?['product_type_proportions'];
+        if (proportions == null || proportions.isEmpty) {
+          // TODO: Spruce up this widget.
+          return Text('No data available');
+        }
+
+        // Create a list of PieChartSectionData objects
+        List<PieChartSectionData> sections = [];
+        proportions.forEach((productType, proportion) {
+          sections.add(PieChartSectionData(
+            color: isDark ? DarkColors.green : LightColors.green,
+            value: proportion.toDouble(),
+            title:
+                '${productType[0].toUpperCase()}${productType.substring(1)}: ${(proportion * 100).toStringAsFixed(2)}%',
+            radius: 74,
+          ));
+        });
+
+        // Render the pie chart.
+        return PieChart(
+          PieChartData(
+            sections: sections,
+            borderData: FlBorderData(show: false),
+            sectionsSpace: 0,
+            centerSpaceRadius: 74,
+            // sectionsSortDescending: true,
+          ),
+        );
+      },
     );
   }
 }
