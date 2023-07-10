@@ -187,6 +187,12 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Allow users to read their own statistics.
+    match /users/{userId}/stats/{document=**} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
     // === User public data ===
 
     // Allow user's to write and edit their own reviews about licensees.

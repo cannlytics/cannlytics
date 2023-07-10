@@ -106,7 +106,8 @@ def calc_receipts_stats(event, context) -> None:
         ref = f'users/{uid}/receipts_stats/{doc_id}'
         stats = row.to_dict()
         stats['updated_at'] = context.timestamp
-        stats['date'] = index.isoformat()
+        stats['date'] = doc_id
+        stats['timestamp'] = index.isoformat()
         firebase.update_document(ref, stats)
         print('Saved monthly statistics:', ref)
 

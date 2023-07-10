@@ -25,7 +25,7 @@
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/pill_tab.dart';
 import 'package:cannlytics_data/ui/results/results_parser.dart';
-import 'package:cannlytics_data/ui/results/results_search.dart';
+// import 'package:cannlytics_data/ui/results/results_search.dart';
 import 'package:cannlytics_data/ui/results/user_results.dart';
 import 'package:flutter/material.dart';
 
@@ -89,12 +89,13 @@ class _ResultsTabsState extends State<ResultsTabs>
     with SingleTickerProviderStateMixin {
   // State.
   late final TabController _tabController;
+  final int _tabCount = 2;
 
   /// Initialize the tab controller.
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: _tabCount, vsync: this);
     _tabController.addListener(() => setState(() {}));
   }
 
@@ -134,11 +135,11 @@ class _ResultsTabsState extends State<ResultsTabs>
                 icon: Icons.auto_awesome,
                 isSelected: _tabController.index == 1,
               ),
-              PillTabButton(
-                text: 'Explore',
-                icon: Icons.explore,
-                isSelected: _tabController.index == 2,
-              ),
+              // PillTabButton(
+              //   text: 'Explore',
+              //   icon: Icons.explore,
+              //   isSelected: _tabController.index == 2,
+              // ),
             ],
           ),
         ),
@@ -149,7 +150,7 @@ class _ResultsTabsState extends State<ResultsTabs>
             children: [
               UserResultsInterface(tabController: _tabController),
               ResultsParserInterface(),
-              LabResultsSearchForm(),
+              // LabResultsSearchForm(),
             ],
           ),
         ),

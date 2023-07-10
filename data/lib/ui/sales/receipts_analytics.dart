@@ -4,13 +4,17 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/18/2023
-// Updated: 7/8/2023
+// Updated: 7/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+import 'dart:math';
+
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
+import 'package:cannlytics_data/common/layout/search_placeholder.dart';
 import 'package:cannlytics_data/constants/colors.dart';
+import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/sales/receipts_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,78 +22,105 @@ import 'package:intl/intl.dart';
 
 /// User receipts user interface.
 class ReceiptsAnalytics extends ConsumerWidget {
-  const ReceiptsAnalytics({super.key});
+  const ReceiptsAnalytics({super.key, this.tabController});
+
+  // Parameters.
+  final TabController? tabController;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        // TODO: Total Spend.
+    // Display sign-in message when there is no user.
+    final user = ref.watch(userProvider).value;
+    if (user == null) return _body(context, ref, child: _noUser());
 
-        // Line chart.
-        Container(
-          padding: EdgeInsets.all(28),
-          margin: EdgeInsets.only(top: 28),
-          height: MediaQuery.sizeOf(context).height * 0.5,
-          child: UserReceiptsStatsChart(),
-        ),
+    return _body(
+      context,
+      ref,
+      child: Column(
+        children: [
+          // Change series buttons.
+          Padding(
+            padding: EdgeInsets.only(left: 28, right: 28, top: 24),
+            child: SeriesButtons(),
+          ),
 
-        // Date range selection.
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 28),
-          child: DateRangeButtons(),
-        ),
+          // Line chart.
+          Container(
+            padding: EdgeInsets.only(left: 28, right: 28, bottom: 24),
+            margin: EdgeInsets.only(top: 28),
+            height: MediaQuery.sizeOf(context).height * 0.5,
+            child: UserReceiptsStatsChart(tabController: tabController),
+          ),
 
-        // TODO: Lifetime taxes.
+          // Date range selection.
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 28),
+            child: DateRangeButtons(),
+          ),
 
-        // TODO: Total transactions.
-        // Datatables?
+          // Total spend statistics card.
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+            child: Row(children: [TotalSpendCard()]),
+          ),
 
-        // TODO: Pie chart of spending by product type.
-      ],
+          // TODO: Pie chart of spending by product type.
+        ],
+      ),
     );
   }
-}
 
-/// Date range options.
-class DateRangeButtons extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final dateRange = ref.watch(dateRangeProvider);
+  /// The main dynamic body of the screen.
+  Widget _body(BuildContext context, WidgetRef ref, {required Widget child}) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // Title.
+            Text(
+              'Spending Analytics',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
 
-    // Theme.
-    bool isDark = Theme.of(context).brightness == Brightness.dark;
+            // Dynamic widget.
+            gapH4,
+            child,
+            gapH12,
+          ],
+        ),
+      ),
+    );
+  }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <String>['1M', '3M', 'YTD', 'All'].map((String value) {
-        return TextButton(
-          child: Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: dateRange == value
-                      ? isDark
-                          ? DarkColors.green
-                          : LightColors.green
-                      : Theme.of(context).textTheme.bodySmall!.color,
-                  fontWeight:
-                      dateRange == value ? FontWeight.bold : FontWeight.normal,
-                ),
-          ),
-          onPressed: () {
-            ref.read(dateRangeProvider.notifier).state = value;
-          },
-        );
-      }).toList(),
+  /// No user placeholder.
+  Widget _noUser() {
+    return Padding(
+      padding: EdgeInsets.all(24),
+      child: SearchPlaceholder(
+        title: 'Sign in to trend your spending',
+        subtitle:
+            'If you sign in, then you can save your receipts and analyze your spending statistics.',
+        imageUrl:
+            'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ficons%2Fai-icons%2Fcannabis-receipt.png?alt=media&token=f56d630d-1f4a-4024-bd2c-899fc1f924f4',
+      ),
     );
   }
 }
 
 /// User receipts analytics chart.
 class UserReceiptsStatsChart extends ConsumerWidget {
+  const UserReceiptsStatsChart({super.key, this.tabController});
+
+  // Parameters.
+  final TabController? tabController;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final dateRange = ref.watch(dateRangeProvider).state;
+    // Listen to the receipts statistics.
     final asyncValue = ref.watch(receiptsStats);
 
     // Theme.
@@ -98,23 +129,75 @@ class UserReceiptsStatsChart extends ConsumerWidget {
 
     // Dynamic render.
     return asyncValue.when(
-      loading: () => CircularProgressIndicator(strokeWidth: 1.42),
-      // TODO: Custom error place.
-      error: (_, __) => SelectableText('Failed to load stats'),
-      data: (items) {
-        // Create spots for LineChart
-        List<FlSpot> spots = items.map((item) {
-          // X value.
-          // Calculated as number of months since the start of the time range.
-          DateTime date = DateTime.parse(item['date']);
-          double x =
-              date.difference(DateTime.parse(items.first['date'])).inDays / 30;
+      // Loading placeholder.
+      loading: () => _loadingPlaceholder(),
 
-          // Y value.
-          double y = item['total_price'].toDouble();
+      // Error placeholder.
+      error: (error, _) => _errorMessage(error.toString()),
+
+      // Display the chart.
+      data: (items) {
+        // Handle no items while loading.
+        if (items.isEmpty) {
+          // Render the no data placeholder.
+          return _noDataPlaceholder(context, ref);
+        }
+
+        // Get the date range.
+        String dateRange = ref.read(dateRangeProvider);
+
+        // Convert the list of items to a map for easy access.
+        Map<String, Map<dynamic, dynamic>> itemsMap = {
+          for (var item in items) item['date']: item
+        };
+
+        // Determine the start and end dates based on the selected range.
+        DateTime endDate = DateTime.now();
+        DateTime startDate;
+        switch (dateRange) {
+          case '1M':
+            startDate = DateTime(endDate.year, endDate.month - 1);
+            break;
+          case '3M':
+            startDate = DateTime(endDate.year, endDate.month - 3);
+            break;
+          case 'YTD':
+            startDate = DateTime(endDate.year, 1);
+            break;
+          case '1Y':
+            startDate = DateTime(endDate.year - 1, endDate.month, endDate.day);
+            break;
+          case 'All':
+            startDate = DateTime(endDate.year - 5);
+            break;
+          default:
+            startDate = DateTime(endDate.year, endDate.month - 1);
+        }
+
+        // Generate all the months between start and end date
+        List<String> allMonths = [];
+        while (startDate.isBefore(endDate) ||
+            startDate.isAtSameMomentAs(endDate)) {
+          allMonths.add(DateFormat('yyyy-MM').format(startDate));
+          startDate = DateTime(startDate.year, startDate.month + 1);
+        }
+
+        // Create the spots for the selected series.
+        String series = ref.read(seriesProvider);
+        List<FlSpot> spots = allMonths.asMap().entries.map((entry) {
+          int index = entry.key;
+          String month = entry.value;
+          double x = index.toDouble();
+          double y = itemsMap.containsKey(month)
+              ? itemsMap[month]![series].toDouble()
+              : 0;
           return FlSpot(x, y);
         }).toList();
 
+        // Define an amount to add to the y-axis.
+        var yPadding = (series == 'total_transactions') ? 5 : 10;
+
+        // Render the line chart.
         return LineChart(
           swapAnimationCurve: Curves.linear,
           LineChartData(
@@ -130,11 +213,36 @@ class UserReceiptsStatsChart extends ConsumerWidget {
               ),
             ),
             minX: 0,
-            maxX: (items.length - 1).toDouble(),
             minY: 0,
-            // maxY: items.map((item) => item['total_price']).reduce(max),
+            maxY: items.map((item) => item[series]).cast<double>().reduce(max) +
+                yPadding,
             lineTouchData: LineTouchData(
               enabled: true,
+              getTouchLineStart: (barData, spot) {
+                // Start the line at the y-coordinate of the spot.
+                return spot as double;
+              },
+              getTouchLineEnd: (barData, spot) {
+                // Start the line at the y-coordinate of the spot.
+                return spot as double;
+              },
+              touchTooltipData: LineTouchTooltipData(
+                tooltipBgColor: Theme.of(context).dialogBackgroundColor,
+                getTooltipItems: (touchedSpots) {
+                  return touchedSpots.map((touchedSpot) {
+                    // Calculate the date corresponding to the x value
+                    String date = allMonths[touchedSpot.x.toInt()];
+                    DateTime inputDate = DateFormat('yyyy-MM').parse(date);
+                    String outputDate =
+                        DateFormat('MMM yyyy').format(inputDate);
+                    return LineTooltipItem(
+                        (series == 'total_price' || series == 'total_tax')
+                            ? '\$${touchedSpot.y.toString()}\n$outputDate'
+                            : '${touchedSpot.y.toString()}\n$outputDate',
+                        Theme.of(context).textTheme.bodySmall!);
+                  }).toList();
+                },
+              ),
             ),
             lineBarsData: [
               LineChartBarData(
@@ -158,14 +266,12 @@ class UserReceiptsStatsChart extends ConsumerWidget {
               // X-axis.
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 22,
-                  getTitlesWidget: (value, titleMeta) {
-                    var date = items[value.toInt()]['date'];
-                    return Text(
-                      DateFormat.yM().format(DateTime.parse(date).toLocal()),
-                    );
-                  },
+                  showTitles: false,
+                  // reservedSize: 22,
+                  // getTitlesWidget: (value, titleMeta) {
+                  //   var date = allMonths[value.toInt()];
+                  //   return Text(date);
+                  // },
                 ),
               ),
 
@@ -174,7 +280,10 @@ class UserReceiptsStatsChart extends ConsumerWidget {
                 sideTitles: SideTitles(
                   showTitles: true,
                   getTitlesWidget: (value, titleMeta) {
-                    return Text('\$${value.toInt()}');
+                    return Text(
+                        (series == 'total_price' || series == 'total_tax')
+                            ? '\$${value.toInt()}'
+                            : '${value.toInt()}');
                   },
                   reservedSize: 28,
                 ),
@@ -185,59 +294,239 @@ class UserReceiptsStatsChart extends ConsumerWidget {
       },
     );
   }
-}
 
-/// Statistics cards.
-class StatisticsCards extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider).value;
-    if (user == null) return Text('Please log in');
+  /// Error placeholder.
+  Widget _errorMessage(String error) {
+    return Padding(
+      padding: EdgeInsets.all(24),
+      child: SearchPlaceholder(
+        title: 'Error loading receipts',
+        // TODO: Production error message.
+        subtitle: error,
+        // TODO: Different image.
+        imageUrl:
+            'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ficons%2Fai-icons%2Fcannabis-receipt.png?alt=media&token=f56d630d-1f4a-4024-bd2c-899fc1f924f4',
+      ),
+    );
+  }
 
-    return FutureBuilder<DocumentSnapshot>(
-      future:
-          FirebaseFirestore.instance.doc('users/${user.uid}/statistics').get(),
-      builder:
-          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
-        }
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Text('No statistics available');
-        }
+  /// Loading placeholder.
+  Widget _loadingPlaceholder() {
+    return Container(
+      height: 42,
+      child: Center(
+        child: CircularProgressIndicator(strokeWidth: 1.42),
+      ),
+    );
+  }
 
-        Map<String, dynamic> data =
-            snapshot.data!.data() as Map<String, dynamic>;
+  Widget _noDataPlaceholder(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Image.
+            Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: ClipOval(
+                child: Image.network(
+                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ficons%2Fai-icons%2Fcannabis-receipt.png?alt=media&token=f56d630d-1f4a-4024-bd2c-899fc1f924f4',
+                  width: 75,
+                  height: 75,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
 
-        return GridView.count(
-          crossAxisCount: 2,
-          children: data.entries.map((entry) {
-            return StatisticsCard(
-                title: entry.key, value: entry.value.toString());
-          }).toList(),
-        );
-      },
+            // Text.
+            Container(
+              width: 540,
+              child: Column(
+                children: <Widget>[
+                  SelectableText(
+                    'Sign in to trend your spending',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).textTheme.titleLarge!.color),
+                  ),
+                  SelectableText(
+                    'If you are signed in, then we will save your parsed receipts.\nYou will be able to view your spending statistics here.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  gapH12,
+                  PrimaryButton(
+                    text: 'Parse receipts',
+                    onPressed: () => tabController?.animateTo(2),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-/// A card used to display statistics to the user.
-class StatisticsCard extends StatelessWidget {
-  final String title;
-  final String value;
-
-  StatisticsCard({required this.title, required this.value});
+/// Date range options.
+class DateRangeButtons extends ConsumerWidget {
+  const DateRangeButtons({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dateRange = ref.watch(dateRangeProvider);
+
+    // Theme.
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Render.
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <String>['1M', '3M', 'YTD', '1Y', 'All'].map((String value) {
+        return TextButton(
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: dateRange == value
+                      ? isDark
+                          ? DarkColors.green
+                          : LightColors.green
+                      : Theme.of(context).textTheme.bodySmall!.color,
+                  fontWeight:
+                      dateRange == value ? FontWeight.bold : FontWeight.normal,
+                ),
+          ),
+          onPressed: () {
+            // Turn off auto-increment mode
+            ref.read(autoIncrementProvider.notifier).state = false;
+
+            // Change the date range.
+            ref.read(dateRangeProvider.notifier).state = value;
+          },
+        );
+      }).toList(),
+    );
+  }
+}
+
+/// Series options.
+class SeriesButtons extends ConsumerWidget {
+  const SeriesButtons({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final series = ref.watch(seriesProvider);
+
+    // Theme.
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Map the value to the displayed text.
+    Map<String, String> seriesMap = {
+      'total_price': 'Spend',
+      'total_tax': 'Tax',
+      'total_transactions': 'Transactions',
+    };
+
+    // Render.
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: seriesMap.entries.map((entry) {
+        String value = entry.key;
+        String text = entry.value;
+        return TextButton(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: series == value
+                      ? isDark
+                          ? DarkColors.green
+                          : LightColors.green
+                      : Theme.of(context).textTheme.bodySmall!.color,
+                  fontWeight:
+                      series == value ? FontWeight.bold : FontWeight.normal,
+                ),
+          ),
+          onPressed: () {
+            // Change the series.
+            ref.read(seriesProvider.notifier).state = value;
+            return ref.refresh(receiptsStats);
+          },
+        );
+      }).toList(),
+    );
+  }
+}
+
+/// Card to display a user's total spend.
+class TotalSpendCard extends ConsumerWidget {
+  const TotalSpendCard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Listen to total spend statistics.
+    final asyncData = ref.watch(totalSpendProvider);
+    var theme = Theme.of(context);
+
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(3),
+        side: BorderSide(color: theme.dividerColor),
+      ),
+      color: Colors.transparent,
+      elevation: 0,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            Text(value, style: Theme.of(context).textTheme.bodyMedium),
-          ],
+        padding: const EdgeInsets.all(16.0),
+        child: asyncData.when(
+          data: (data) => SelectionArea(
+              child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Total spend',
+                style: theme.textTheme.bodySmall,
+              ),
+              SizedBox(height: 8.0),
+              Text(
+                '\$${data?['total_price'].toStringAsFixed(2) ?? 0}',
+                style: theme.textTheme.titleLarge,
+              ),
+              Divider(
+                color: theme.dividerColor,
+                height: 16.0,
+              ),
+              DataTable(
+                columnSpacing: 24,
+                horizontalMargin: 0,
+                headingRowHeight: 0,
+                dataRowMinHeight: 24,
+                columns: const [
+                  DataColumn(label: SizedBox.shrink()),
+                  DataColumn(label: SizedBox.shrink()),
+                ],
+                rows: [
+                  DataRow(cells: [
+                    DataCell(Text('Total transactions',
+                        style: theme.textTheme.bodySmall)),
+                    DataCell(Text('${data?['total_transactions'] ?? 0}',
+                        style: theme.textTheme.bodySmall)),
+                  ]),
+                  DataRow(cells: [
+                    DataCell(
+                        Text('Total tax', style: theme.textTheme.bodySmall)),
+                    DataCell(Text(
+                        '\$${data?['total_tax'].toStringAsFixed(2) ?? 0}',
+                        style: theme.textTheme.bodySmall)),
+                  ]),
+                ],
+              ),
+            ],
+          )),
+          loading: () => CircularProgressIndicator(),
+          error: (_, __) => Text('Failed to load data'),
         ),
       ),
     );

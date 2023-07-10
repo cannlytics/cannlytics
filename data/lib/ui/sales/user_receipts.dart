@@ -124,7 +124,7 @@ class UserReceiptsInterface extends ConsumerWidget {
                   gapH12,
                   PrimaryButton(
                     text: 'Parse receipts',
-                    onPressed: () => tabController?.animateTo(1),
+                    onPressed: () => tabController?.animateTo(2),
                   ),
                 ],
               ),

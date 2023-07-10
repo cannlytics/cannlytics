@@ -112,12 +112,12 @@ class _ResultsTabsState extends State<ResultsTabs>
             tabs: [
               PillTabButton(
                 text: 'Analytics',
-                icon: Icons.analytics,
+                icon: Icons.bar_chart,
                 isSelected: _tabController.index == 0,
               ),
               PillTabButton(
                 text: 'Your Receipts',
-                icon: Icons.science,
+                icon: Icons.receipt_long,
                 isSelected: _tabController.index == 1,
               ),
               PillTabButton(
@@ -133,7 +133,7 @@ class _ResultsTabsState extends State<ResultsTabs>
           child: TabBarView(
             controller: _tabController,
             children: [
-              ReceiptsAnalytics(),
+              ReceiptsAnalytics(tabController: _tabController),
               UserReceiptsInterface(tabController: _tabController),
               ReceiptsParserInterface(),
             ],

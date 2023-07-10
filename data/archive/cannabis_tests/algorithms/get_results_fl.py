@@ -382,8 +382,8 @@ def parse_results_kaycha(
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    # DATA_DIR = 'D://data/florida/lab_results'
-    DATA_DIR = r'C:\.datasets\data\florida\lab_results'
+    DATA_DIR = 'D://data/florida/lab_results'
+    # DATA_DIR = r'C:\.datasets\data\florida\lab_results'
 
     # [✓] TEST: Get Kaycha COAs.
     kaycha_coas = get_results_kaycha(DATA_DIR)
@@ -580,11 +580,14 @@ def get_product_results_the_flowery(data_dir: str, overwrite = False, **kwargs):
         sleep(0.3)
 
         # Download the PDF.
-        response = requests.get(coa_url, headers=DEFAULT_HEADERS)
-        with open(outfile, 'wb') as pdf:
-            pdf.write(response.content)
-        print('Downloaded: %s' % outfile)
-        sleep(3.33)
+        try:
+            response = requests.get(coa_url, headers=DEFAULT_HEADERS)
+            with open(outfile, 'wb') as pdf:
+                pdf.write(response.content)
+            print('Downloaded: %s' % outfile)
+            sleep(3.33)
+        except:
+            print('Failed to download: %s' % coa_url)
 
     # Merge The Flowery data with the COA data.
     the_flowery = FLORIDA_LICENSES['MMTC-2019-0020']
@@ -603,12 +606,12 @@ def get_product_results_the_flowery(data_dir: str, overwrite = False, **kwargs):
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    # DATA_DIR = 'D://data/florida/lab_results'
-    DATA_DIR = r'C:\.datasets\data\florida\lab_results'
+    DATA_DIR = 'D://data/florida/lab_results'
+    # DATA_DIR = r'C:\.datasets\data\florida\lab_results'
     
     # [✓] TEST: Get The Flowery COAs.
-    the_flowery_products = get_product_results_the_flowery(DATA_DIR)
-    the_flowery_coas = get_results_the_flowery(DATA_DIR)
+    # the_flowery_products = get_product_results_the_flowery(DATA_DIR)
+    # the_flowery_coas = get_results_the_flowery(DATA_DIR)
 
 
 #-----------------------------------------------------------------------

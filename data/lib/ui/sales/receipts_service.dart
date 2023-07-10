@@ -142,11 +142,17 @@ final receiptLogs =
 
 /* === Analytics === */
 
-// Create a state provider to store the selected date range
-final dateRangeProvider = StateProvider<String>((_) => '1M');
+// Automatically increment date range.
+final autoIncrementProvider = StateProvider<bool>((_) => true);
+
+// Selected date range state provider.
+final dateRangeProvider = StateProvider<String>((_) => 'All');
+
+// Selected series state provider.
+final seriesProvider = StateProvider<String>((_) => 'total_price');
 
 /// Stream user receipt statistics from Firestore.
-final receiptsStats = StreamProvider<List<Map<String, dynamic>>>((ref) async* {
+final receiptsStats = StreamProvider<List<Map<dynamic, dynamic>>>((ref) async* {
   final _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
   if (user == null) return;
@@ -177,14 +183,22 @@ final receiptsStats = StreamProvider<List<Map<String, dynamic>>>((ref) async* {
     path: 'users/${user.uid}/receipts_stats',
     builder: (data, documentId) => data!,
     queryBuilder: (query) {
-      // TODO: Limit by time range.
-      //  .where('date', isGreaterThanOrEqualTo: DateTime(now.year, now.month - 1).toString())
       print('Starting after:');
       print(startDate.toIso8601String());
       return query
           .orderBy('date', descending: false)
           .startAfter([startDate.toIso8601String()]);
-      // .limit(60);
     },
+  );
+});
+
+/// Stream a user's spend statistics from Firebase.
+final totalSpendProvider = StreamProvider.autoDispose<Map?>((ref) {
+  final _database = ref.watch(firestoreProvider);
+  final user = ref.watch(userProvider).value;
+  if (user == null) return Stream.value(null);
+  return _database.streamDocument(
+    path: 'users/${user.uid}/stats/spending',
+    builder: (data, documentId) => data,
   );
 });

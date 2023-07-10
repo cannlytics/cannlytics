@@ -201,7 +201,7 @@ class DrawerListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       // Style.
-      horizontalTitleGap: 8.0,
+      horizontalTitleGap: 12.0,
 
       // Leading icon.
       leading: leading,

@@ -15,7 +15,6 @@ import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/loading_placeholder.dart';
 import 'package:cannlytics_data/common/layout/pill_tab.dart';
 import 'package:cannlytics_data/common/tables/key_value_datatable.dart';
-import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
@@ -56,7 +55,7 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
   // State.
   bool _isEditing = false;
   late final TabController _tabController;
-  int _tabCount = 1;
+  int _tabCount = 2;
   Future<void>? _updateFuture;
 
   // Initialize the state.
@@ -143,12 +142,13 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
           );
 
       // Show a success snackbar.
+      // FIXME: Replace with snackbar.
       Fluttertoast.showToast(
         msg: 'Receipt saved',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.TOP,
         timeInSecForIosWeb: 2,
-        backgroundColor: LightColors.lightGreen.withAlpha(60),
+        // backgroundColor: LightColors.lightGreen.withAlpha(60),
         textColor: Colors.white,
         fontSize: 16.0,
         webPosition: 'center',
@@ -461,7 +461,7 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
       CustomTextField(
         label: 'Total Tax',
         value: item?.totalTax.toString(),
-        onChanged: (value) => _onEdit('total_tax', double.parse(value)),
+        onChanged: (value) => _onEdit('total_tax', value),
         isNumeric: true,
       ),
 
