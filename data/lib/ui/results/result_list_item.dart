@@ -8,8 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/constants/colors.dart';
-import 'package:cannlytics_data/services/download_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -18,8 +16,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
+import 'package:cannlytics_data/services/download_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 
 /// A lab result list item.

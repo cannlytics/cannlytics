@@ -6,20 +6,21 @@
 // Created: 4/15/2023
 // Updated: 7/7/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
 // Flutter imports:
-import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
-import 'package:cannlytics_data/common/layout/pill_tab.dart';
-import 'package:cannlytics_data/ui/sales/receipts_analytics.dart';
-import 'package:cannlytics_data/ui/sales/receipts_parser.dart';
-import 'package:cannlytics_data/ui/sales/user_receipts.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_data/ui/layout/console.dart';
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
+import 'package:cannlytics_data/common/layout/pill_tab.dart';
 import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/ui/layout/console.dart';
+import 'package:cannlytics_data/ui/sales/receipts_analytics.dart';
+import 'package:cannlytics_data/ui/sales/receipts_parser.dart';
+import 'package:cannlytics_data/ui/sales/user_receipts.dart';
 
 /// Sales screen.
 class SalesScreen extends StatelessWidget {

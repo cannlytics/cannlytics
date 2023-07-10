@@ -8,10 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/buttons/primary_button.dart';
-import 'package:cannlytics_data/models/sales_receipt.dart';
-import 'package:cannlytics_data/ui/sales/receipt_card.dart';
-import 'package:cannlytics_data/ui/sales/receipts_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -22,8 +18,12 @@ import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 // Project imports:
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
+import 'package:cannlytics_data/models/sales_receipt.dart';
+import 'package:cannlytics_data/ui/sales/receipt_card.dart';
+import 'package:cannlytics_data/ui/sales/receipts_service.dart';
 
 /// Receipts parser interface.
 class ReceiptsParserInterface extends HookConsumerWidget {

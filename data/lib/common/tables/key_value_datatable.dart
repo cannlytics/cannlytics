@@ -7,6 +7,7 @@
 // Updated: 7/1/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 /// A simple data table used to display key, value pairs.

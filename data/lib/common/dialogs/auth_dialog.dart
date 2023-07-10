@@ -8,8 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -23,6 +21,8 @@ import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:cannlytics_data/utils/validation_utils.dart';
 
 /// Sign in / create account form.

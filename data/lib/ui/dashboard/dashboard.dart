@@ -8,18 +8,20 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
-import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 // Package imports:
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 // Project imports:
-// import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
+import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
+
+// Project imports:
+// import 'package:cannlytics_data/common/cards/sponsorship_card.dart';
 
 /// Dashboard screen.
 class DashboardScreen extends ConsumerWidget {

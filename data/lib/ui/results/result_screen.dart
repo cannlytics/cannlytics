@@ -6,8 +6,22 @@
 // Created: 6/11/2023
 // Updated: 7/1/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Dart imports:
 import 'dart:js_interop';
 
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
+import 'package:internet_file/internet_file.dart';
+import 'package:pdfx/pdfx.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/buttons/download_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
@@ -26,13 +40,6 @@ import 'package:cannlytics_data/ui/results/result_history.dart';
 import 'package:cannlytics_data/ui/results/result_table.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
-import 'package:pdfx/pdfx.dart';
-import 'package:internet_file/internet_file.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Result screen.
 class ResultScreen extends ConsumerStatefulWidget {

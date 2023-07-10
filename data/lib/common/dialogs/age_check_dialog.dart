@@ -8,14 +8,19 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 
+// Flutter imports:
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// An age verification screen.
 class AgeVerificationScreen extends StatelessWidget {

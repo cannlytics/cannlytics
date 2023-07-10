@@ -11,14 +11,18 @@
 import 'dart:async';
 
 // Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/inputs/string_controller.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/services/api_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /* === Data === */
 

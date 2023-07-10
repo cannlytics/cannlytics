@@ -7,6 +7,15 @@
 // Updated: 6/29/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Flutter imports:
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/forms/custom_text_field.dart';
@@ -14,10 +23,6 @@ import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
-import 'package:dotted_border/dotted_border.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // TODO:
 // - Finish styling the data table.

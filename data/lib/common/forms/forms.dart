@@ -8,9 +8,11 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
-import 'package:flutter/material.dart';
 
 /// A widget to view form fields.
 class ViewForm extends StatelessWidget {

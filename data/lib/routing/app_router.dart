@@ -16,12 +16,12 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:cannlytics_data/routing/routes.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/ui/general/not_found_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // App navigation.
 final goRouterProvider = Provider<GoRouter>((ref) {

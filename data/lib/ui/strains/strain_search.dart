@@ -11,6 +11,14 @@
 // - A to Z links for strains: add first letter field to make queries easy.
 
 // Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/common/layout/search_placeholder.dart';
 import 'package:cannlytics_data/constants/design.dart';
@@ -18,12 +26,6 @@ import 'package:cannlytics_data/models/strain.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/strains/strains_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
-import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
-// Package imports:
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Strain search form.
 class StrainsSearch extends HookConsumerWidget {

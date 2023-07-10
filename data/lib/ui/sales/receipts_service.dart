@@ -10,13 +10,15 @@
 // Dart imports:
 import 'dart:async';
 
-// Flutter imports:
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/services/api_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /* === Data === */
 

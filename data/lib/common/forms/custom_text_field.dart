@@ -7,13 +7,16 @@
 // Updated: 6/29/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Flutter imports:
+// Dart imports:
 import 'dart:math';
 
-import 'package:cannlytics_data/constants/colors.dart';
-import 'package:cannlytics_data/constants/design.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// Project imports:
+import 'package:cannlytics_data/constants/colors.dart';
+import 'package:cannlytics_data/constants/design.dart';
 
 /// A custom text field.
 class CustomTextField extends StatelessWidget {

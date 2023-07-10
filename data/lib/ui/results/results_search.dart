@@ -8,14 +8,16 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/models/lab_result.dart';
-import 'package:cannlytics_data/ui/results/result_list_item.dart';
-import 'package:cannlytics_data/ui/results/results_service.dart';
-import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+// Project imports:
+import 'package:cannlytics_data/models/lab_result.dart';
+import 'package:cannlytics_data/ui/results/result_list_item.dart';
+import 'package:cannlytics_data/ui/results/results_service.dart';
 
 /// Lab results search form.
 class LabResultsSearchForm extends HookConsumerWidget {

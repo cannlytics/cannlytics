@@ -6,6 +6,15 @@
 // Created: 6/15/2023
 // Updated: 7/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/buttons/download_button.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/colors.dart';
@@ -16,9 +25,6 @@ import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/sales/receipt_card.dart';
 import 'package:cannlytics_data/ui/sales/receipts_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 /// User receipts user interface.
 class UserReceiptsInterface extends ConsumerWidget {

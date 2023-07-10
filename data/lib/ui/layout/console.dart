@@ -14,11 +14,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:cannlytics_data/ui/layout/footer.dart';
 import 'package:cannlytics_data/ui/layout/header.dart';
 import 'package:cannlytics_data/ui/layout/sidebar.dart';
-import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 
 /// General console screen that renders given widgets.
 class ConsoleScreen extends StatelessWidget {

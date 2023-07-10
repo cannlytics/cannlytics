@@ -10,8 +10,10 @@
 // Package imports:
 // import 'package:equatable/equatable.dart';
 
+// Dart imports:
 import 'dart:convert';
 
+// Project imports:
 import 'package:cannlytics_data/utils/utils.dart';
 
 typedef LabTestResultId = String;

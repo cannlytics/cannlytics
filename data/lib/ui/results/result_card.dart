@@ -6,11 +6,17 @@
 // Created: 6/18/2023
 // Updated: 6/28/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:go_router/go_router.dart';
+
+// Project imports:
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/utils/utils.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 /// Result card.
 class ResultCard extends StatelessWidget {

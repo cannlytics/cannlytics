@@ -8,13 +8,13 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
-import 'package:cannlytics_data/common/layout/pill_tab.dart';
-import 'package:cannlytics_data/ui/strains/strain_search.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
+import 'package:cannlytics_data/common/layout/pill_tab.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
+import 'package:cannlytics_data/ui/strains/strain_search.dart';
 
 // TODO: Allow user's to report new strains.
 

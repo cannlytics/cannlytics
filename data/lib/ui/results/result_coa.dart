@@ -6,7 +6,11 @@
 // Created: 6/11/2023
 // Updated: 6/27/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:pdfx/pdfx.dart';
 import 'package:url_launcher/url_launcher.dart';
 

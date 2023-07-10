@@ -7,18 +7,24 @@
 // Updated: 7/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Dart imports:
 import 'dart:math';
 
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/layout/search_placeholder.dart';
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/sales/receipts_service.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 /// User receipts user interface.
 class ReceiptsAnalytics extends ConsumerWidget {

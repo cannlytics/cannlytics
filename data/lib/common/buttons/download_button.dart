@@ -7,11 +7,16 @@
 // Updated: 6/25/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:fluttertoast/fluttertoast.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/services/download_service.dart';
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 /// A download button with a circular progress indicator.
 class DownloadButton extends StatefulWidget {

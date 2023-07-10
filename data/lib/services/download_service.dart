@@ -7,9 +7,12 @@
 // Updated: 6/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
+// Project imports:
 import 'package:cannlytics_data/services/api_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
-import 'package:flutter/foundation.dart';
 
 /// Data download service.
 class DownloadService {

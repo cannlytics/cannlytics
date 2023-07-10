@@ -11,17 +11,17 @@
 import 'dart:html';
 
 // Flutter imports:
-import 'package:cannlytics_data/models/licensee.dart';
-import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/inputs/string_controller.dart';
+import 'package:cannlytics_data/models/licensee.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 
 // TODO: Add the ability for user's to upload images for licenses.
 // TODO: Add the ability for users to write reviews of licenses.

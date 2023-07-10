@@ -8,6 +8,12 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/forms/custom_text_field.dart';
@@ -16,16 +22,10 @@ import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/loading_placeholder.dart';
 import 'package:cannlytics_data/common/layout/pill_tab.dart';
 import 'package:cannlytics_data/common/tables/key_value_datatable.dart';
-import 'package:cannlytics_data/models/licensee.dart';
-import 'package:cannlytics_data/ui/licensees/licensee_history.dart';
-import 'package:flutter/material.dart';
-
-// Package imports:
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// Project imports:
-import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/models/licensee.dart';
+import 'package:cannlytics_data/ui/layout/console.dart';
+import 'package:cannlytics_data/ui/licensees/licensee_history.dart';
 import 'package:cannlytics_data/ui/licensees/licensees_service.dart';
 
 /// Licensee screen.

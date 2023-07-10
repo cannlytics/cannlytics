@@ -7,9 +7,14 @@
 // Updated: 7/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-import 'package:cannlytics_data/constants/design.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:intl/intl.dart';
+
+// Project imports:
+import 'package:cannlytics_data/constants/design.dart';
 
 /// A log item list card.
 class LogItem extends StatelessWidget {

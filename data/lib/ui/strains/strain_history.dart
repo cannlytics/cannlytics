@@ -7,12 +7,17 @@
 // Updated: 7/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/layout/search_placeholder.dart';
 import 'package:cannlytics_data/common/tables/log_item.dart';
 import 'package:cannlytics_data/ui/strains/strains_service.dart';
-import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Strain edit history.
 class StrainLogs extends ConsumerWidget {

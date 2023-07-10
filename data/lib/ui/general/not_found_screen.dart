@@ -8,15 +8,18 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/buttons/primary_button.dart';
-import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:go_router/go_router.dart';
+import 'package:cannlytics_data/ui/layout/console.dart';
+
+// Package imports:
+
 
 /// Simple not found screen used for 404 errors.
 class NotFoundScreen extends StatelessWidget {

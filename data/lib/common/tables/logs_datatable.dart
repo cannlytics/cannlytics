@@ -7,7 +7,10 @@
 // Updated: 7/2/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:intl/intl.dart';
 
 /// A datatable for displaying logs.

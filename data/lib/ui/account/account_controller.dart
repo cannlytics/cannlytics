@@ -10,13 +10,15 @@
 // Dart imports:
 import 'dart:async';
 
-// Package imports:
-import 'package:cannlytics_data/common/inputs/string_controller.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
+import 'package:cannlytics_data/common/inputs/string_controller.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 

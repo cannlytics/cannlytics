@@ -8,9 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
-import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -25,10 +22,13 @@ import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/cards/card_grid.dart';
 import 'package:cannlytics_data/common/cards/stats_model_card.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
-import 'package:cannlytics_data/ui/layout/console.dart';
+import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/services/data_service.dart';
 import 'package:cannlytics_data/services/storage_service.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
+import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/ui/licensees/usa_map.dart';
 
 /// Screen.

@@ -8,9 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/models/lab_result.dart';
-import 'package:cannlytics_data/ui/results/result_list_item.dart';
-import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -25,6 +22,9 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
+import 'package:cannlytics_data/models/lab_result.dart';
+import 'package:cannlytics_data/ui/results/result_list_item.dart';
+import 'package:cannlytics_data/ui/results/results_service.dart';
 
 class ResultsParserInterface extends HookConsumerWidget {
   ResultsParserInterface({Key? key}) : super(key: key);

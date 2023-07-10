@@ -9,21 +9,21 @@
 
 // Dart imports:
 import 'dart:convert';
-import 'dart:io';
 import 'dart:html' as html;
+import 'dart:io';
 
 // Flutter imports:
-import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:crypto/crypto.dart';
 
 // Package imports:
+import 'package:crypto/crypto.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 
 /// Utility functions for the web.

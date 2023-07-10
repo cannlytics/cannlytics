@@ -7,6 +7,15 @@
 // Updated: 7/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+// Project imports:
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/forms/custom_text_field.dart';
@@ -22,10 +31,6 @@ import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/ui/strains/strain_history.dart';
 import 'package:cannlytics_data/ui/strains/strain_search.dart';
 import 'package:cannlytics_data/ui/strains/strains_service.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Strain screen.
 class StrainScreen extends ConsumerStatefulWidget {

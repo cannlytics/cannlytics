@@ -8,8 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/constants/colors.dart';
-import 'package:cannlytics_data/ui/account/faq.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -18,6 +16,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
@@ -26,15 +25,16 @@ import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/common/cards/wide_card.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/common/images/avatar.dart';
-import 'package:cannlytics_data/ui/layout/console.dart';
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cannlytics_data/ui/account/faq.dart';
 import 'package:cannlytics_data/ui/account/subscription_management.dart';
+import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:cannlytics_data/utils/validation_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Account screen.
 class AccountScreen extends StatelessWidget {

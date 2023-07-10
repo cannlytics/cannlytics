@@ -8,7 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -19,6 +18,7 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_data/common/dialogs/help_dialog.dart';
 import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 
 /// Mobile side menu.
