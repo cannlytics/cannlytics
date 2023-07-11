@@ -11,12 +11,15 @@
 // - A to Z links for strains: add first letter field to make queries easy.
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 // Package imports:
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
@@ -126,7 +129,7 @@ class StrainsSearch extends HookConsumerWidget {
           // physics: NeverScrollableScrollPhysics(),
           padding: EdgeInsets.only(top: 16, bottom: 48, left: 16, right: 24),
           query: query,
-          pageSize: 10,
+          pageSize: 100,
           emptyBuilder: (context) {
             if (orderBy == 'favorites') {
               return _userNoFavorites();
@@ -135,7 +138,9 @@ class StrainsSearch extends HookConsumerWidget {
                 ? _emptyResults()
                 : _noResults();
           },
-          errorBuilder: (context, error, stackTrace) => Text(error.toString()),
+          // TODO: Add a custom error.
+          errorBuilder: (context, error, stackTrace) =>
+              SelectableText(error.toString()),
           loadingBuilder: (context) => _loadingResults(),
           itemBuilder: (context, doc) {
             final item = doc.data();
@@ -220,6 +225,34 @@ class StrainsSearch extends HookConsumerWidget {
       );
     }
 
+    /// Letter filter list.
+    // Widget _buildLetterFilterList() {
+    //   List<String> letters = List<String>.generate(
+    //       26, (i) => String.fromCharCode('A'.codeUnitAt(0) + i));
+    //   letters.insert(0, 'All');
+
+    //   return Container(
+    //     height: 50,
+    //     child: ListView.builder(
+    //       scrollDirection: Axis.horizontal,
+    //       itemCount: letters.length,
+    //       itemBuilder: (BuildContext context, int index) {
+    //         return GestureDetector(
+    //           onTap: () {
+    //             ref
+    //                 .read(strainSearchTerm.notifier)
+    //                 .update((state) => letters[index]);
+    //           },
+    //           child: Padding(
+    //             padding: const EdgeInsets.all(8.0),
+    //             child: Text(letters[index]),
+    //           ),
+    //         );
+    //       },
+    //     ),
+    //   );
+    // }
+
     // Main section.
     return SingleChildScrollView(
       child: Column(
@@ -233,6 +266,10 @@ class StrainsSearch extends HookConsumerWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
+
+          // Alphabetical letter filter list.
+          LetterFilterList(),
+
           // Search field.
           Padding(
             padding: EdgeInsets.only(top: 12, left: 16, right: 24),
@@ -299,28 +336,29 @@ class StrainListItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title row.
+                    // Strain name.
+                    Text(
+                      strain.name,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    gapH8,
+
+                    // Quick actions.
                     Row(
                       children: [
                         // Favorite button.
                         FavoriteStrainButton(strain: strain),
                         gapW8,
-
-                        // Strain name.
-                        Text(
-                          strain.name,
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
                       ],
                     ),
                     gapH8,
 
                     // Total favorites.
-                    if (orderBy != 'favorites')
-                      Text(
-                        'Total favorites: ${strain.totalFavorites.toString()}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
+                    // if (orderBy != 'favorites')
+                    //   Text(
+                    //     'Total favorites: ${strain.totalFavorites.toString()}',
+                    //     style: Theme.of(context).textTheme.bodyMedium,
+                    //   ),
 
                     // TODO: Add more strain details.
                     // - Strain image
@@ -355,29 +393,100 @@ class FavoriteStrainButton extends ConsumerWidget {
     final user = ref.watch(userProvider).value;
 
     return asyncData.when(
-      error: (error, stackTrace) => Text(error.toString()),
-      loading: () => IconButton(
-        icon: Icon(Icons.favorite_border), // Empty heart while loading
-        onPressed: null, // Disabling button while loading
-      ),
-      data: (data) => IconButton(
-        icon: Icon(
-          data?['favorite'] ?? false ? Icons.favorite : Icons.favorite_border,
-          color: data?['favorite'] ?? false ? Colors.pink : Colors.grey,
-        ),
-        onPressed: () async {
-          // Note: Requires the user to be signed in.
-          if (user == null) {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return SignInDialog(isSignUp: false);
+        error: (error, stackTrace) => Text(error.toString()),
+        loading: () => IconButton(
+              icon: Icon(Icons.favorite_border), // Empty heart while loading
+              onPressed: null, // Disabling button while loading
+            ),
+        data: (data) => Row(
+              children: [
+                Tooltip(
+                  message: 'Favorite',
+                  child: IconButton(
+                    icon: Icon(
+                      data?['favorite'] ?? false
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: data?['favorite'] ?? false
+                          ? Colors.pink
+                          : Colors.grey,
+                    ),
+                    onPressed: () async {
+                      // Note: Requires the user to be signed in.
+                      if (user == null) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return SignInDialog(isSignUp: false);
+                          },
+                        );
+                        return;
+                      }
+                      await ref
+                          .read(strainService)
+                          .toggleFavorite(strain, user.uid);
+                    },
+                  ),
+                ),
+                Text(
+                  '${strain.totalFavorites.toString()}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: data?['favorite'] ?? false
+                          ? Colors.pink
+                          : Colors.grey),
+                ),
+              ],
+            ));
+  }
+}
+
+/// Alphabetical letter filter list.
+class LetterFilterList extends HookConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedLetter = ref.watch(selectedLetterProvider);
+    List<String> letters = List<String>.generate(
+        26, (i) => String.fromCharCode('A'.codeUnitAt(0) + i));
+    letters.insert(0, 'All');
+
+    useEffect(() {
+      return () {
+        // Unsubscribe to state changes when the widget is disposed.
+        ref.read(selectedLetterProvider.notifier).state = '';
+      };
+    }, const []);
+
+    return Container(
+      child: Wrap(
+        direction: Axis.horizontal,
+        spacing: 8.0, // Gap between buttons
+        runSpacing: 0.0, // Gap between lines
+        children: letters.map((String letter) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final isSelected = selectedLetter == letter;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: TextButton(
+              onPressed: () {
+                String keyword = letter == 'All' ? '' : letter;
+                ref.read(selectedLetterProvider.notifier).state = letter;
+                ref.read(strainSearchTerm.notifier).state = keyword;
               },
-            );
-            return;
-          }
-          await ref.read(strainService).toggleFavorite(strain, user.uid);
-        },
+              child: Text(
+                letter,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: isSelected
+                          ? isDark
+                              ? DarkColors.green
+                              : LightColors.green
+                          : Theme.of(context).textTheme.bodySmall!.color,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

@@ -91,6 +91,11 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
 
       // Data loaded UI.
       data: (strain) {
+        // Generate the strain art and description if missing.
+        ref
+            .read(strainService)
+            .generateStrainArtAndDescriptionIfMissing(strain!, ref);
+
         // Return the form.
         return _form(strain);
       },
@@ -165,7 +170,7 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
         items: [
           {'label': 'Data', 'path': '/'},
           {'label': 'Strains', 'path': '/strains'},
-          {'label': 'Strain', 'path': '/strains/${strain?.id}'},
+          {'label': strain?.name ?? 'Strain', 'path': '/strains/${strain?.id}'},
         ],
       ),
     );
@@ -173,8 +178,22 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
     // Fields.
     var fieldStyle = Theme.of(context).textTheme.bodySmall;
     var fields = [
+      // Strain name.
+      SelectableText(
+        strain?.name ?? '',
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
+
+      // Strain art.
+      StrainArt(),
+      gapH24,
+
+      // Strain description.
+      StrainDescription(),
+
       // Favorite a strain.
       if (strain != null) FavoriteStrainButton(strain: strain),
+      if (strain != null) gapH24,
 
       // Strain details.
       KeyValueDataTable(
@@ -400,5 +419,79 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
 
     // Render.
     return TabbedForm(tabCount: _tabCount, tabs: _tabs);
+  }
+}
+
+/// Strain art.
+class StrainArt extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    StrainArtParams params = ref.watch(strainArtParams);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 250,
+          height: 250,
+          child: Image.network(
+            params.imageUrl ??
+                'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Flogos%2Fskunkfx_icon.png?alt=media&token=f508470f-5875-4833-b4cd-dc8f633c74b7',
+            fit: BoxFit.contain,
+          ),
+        ),
+        // Optional: Allow the user to specify image art parameters.
+        // TextFormField(
+        //   initialValue: params.artStyle,
+        //   decoration: InputDecoration(labelText: 'Art Style'),
+        //   onChanged: (value) {
+        //     ref.read(strainArtParams.notifier).update((state) {
+        //       return StrainArtParams(
+        //         artStyle: value,
+        //         imageUrl: state.imageUrl,
+        //         n: state.n,
+        //         size: state.size,
+        //       );
+        //     });
+        //   },
+        // ),
+        // Add similar fields for other parameters...
+      ],
+    );
+  }
+}
+
+/// Strain description.
+class StrainDescription extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    StrainDescriptionParams params = ref.watch(strainDescriptionParams);
+    return Column(
+      children: [
+        Text(
+          params.description ?? 'Generate a description.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        // Optional: Allow the user to specify description parameters.
+        // Slider(
+        //   value: ref.watch(strainDescriptionParams).temperature,
+        //   min: 0,
+        //   max: 1,
+        //   divisions: 100, // Increase this for more precision
+        //   label:
+        //       ref.watch(strainDescriptionParams).temperature.toStringAsFixed(2),
+        //   onChanged: (double value) {
+        //     ref.read(strainDescriptionParams.notifier).update((state) {
+        //       return StrainDescriptionParams(
+        //         model: state.model,
+        //         wordCount: state.wordCount,
+        //         temperature: value,
+        //         description: state.description,
+        //       );
+        //     });
+        //   },
+        // ),
+        // Add similar fields for other parameters...
+      ],
+    );
   }
 }

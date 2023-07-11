@@ -21,6 +21,7 @@ from api.data.api_data_licenses import api_data_licenses
 from api.data.patent_data import patent_data
 from api.data.regulation_data import regulation_data
 from api.data.api_data_receipts import api_data_receipts, download_receipts_data
+from api.data.api_data_strains import api_data_strains
 from api.data.state_data import state_data
 from api.data.strain_data import strain_data
 
@@ -38,6 +39,7 @@ __all__ = [
     patent_data,
     regulation_data,
     api_data_receipts,
+    api_data_strains,
     download_receipts_data,
     state_data,
     strain_data,

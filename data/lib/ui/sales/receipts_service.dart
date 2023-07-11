@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 7/8/2023
+// Updated: 7/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -23,7 +23,7 @@ import 'package:cannlytics_data/ui/account/account_controller.dart';
 /* === Data === */
 
 /// Stream user receipts from Firebase.
-final userReceipts = StreamProvider<List<Map?>>((ref) async* {
+final userReceipts = StreamProvider.autoDispose<List<Map?>>((ref) async* {
   final FirestoreService _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
   if (user == null) return;
@@ -154,7 +154,8 @@ final dateRangeProvider = StateProvider<String>((_) => 'All');
 final seriesProvider = StateProvider<String>((_) => 'total_price');
 
 /// Stream user receipt statistics from Firestore.
-final receiptsStats = StreamProvider<List<Map<dynamic, dynamic>>>((ref) async* {
+final receiptsStats =
+    StreamProvider.autoDispose<List<Map<dynamic, dynamic>>>((ref) async* {
   final _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
   if (user == null) return;

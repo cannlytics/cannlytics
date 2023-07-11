@@ -27,7 +27,7 @@ import 'package:cannlytics_data/ui/account/account_controller.dart';
 /* === Data === */
 
 /// Stream user results from Firebase.
-final userResults = StreamProvider<List<Map?>>((ref) async* {
+final userResults = StreamProvider.autoDispose<List<Map?>>((ref) async* {
   final FirestoreService _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
   if (user == null) return;

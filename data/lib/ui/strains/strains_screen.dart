@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 7/4/2023
+// Updated: 7/10/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -112,7 +112,7 @@ class _StrainsTabsState extends State<StrainsTabs>
           alignment: Alignment.centerLeft,
           child: TabBar(
             controller: _tabController,
-            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+            padding: EdgeInsets.only(left: 4, right: 4, top: 12),
             labelPadding: EdgeInsets.symmetric(horizontal: 2, vertical: 0),
             isScrollable: true,
             unselectedLabelColor: Theme.of(context).textTheme.bodyMedium!.color,

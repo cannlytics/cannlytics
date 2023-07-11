@@ -59,8 +59,8 @@ urlpatterns = [
         path('/color', api.ai.text_to_color_api),
         path('/emoji', api.ai.text_to_emoji_api),
 
-        # Strain name generation.
-        path('/strain/name', api.ai.recipes_api),
+        # Strain AI utilities: art, description, and name identification.
+        path('/strains/<strain_id>', api.data.api_data_strains),
 
     ])),
 

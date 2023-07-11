@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/25/2023
-// Updated: 7/2/2023
+// Updated: 7/10/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 typedef StrainId = String;
@@ -24,6 +24,8 @@ class Strain {
     this.images,
     this.comments,
     this.totalFavorites = 0,
+    this.favorite,
+    this.description,
   });
 
   // Properties.
@@ -38,6 +40,8 @@ class Strain {
   final List<dynamic>? images;
   final List<dynamic>? comments;
   final int totalFavorites;
+  final bool? favorite;
+  final String? description;
 
   // Create model.
   factory Strain.fromMap(Map<dynamic, dynamic> data) {
@@ -53,6 +57,8 @@ class Strain {
       images: data['images'] ?? [],
       comments: data['comments'] ?? [],
       totalFavorites: data['total_favorites'] ?? 0,
+      favorite: data['favorite'],
+      description: data['description'],
     );
   }
 
@@ -70,6 +76,8 @@ class Strain {
       'images': images,
       'comments': comments,
       'total_favorites': totalFavorites,
+      'favorite': favorite,
+      'description': description,
     };
   }
 }

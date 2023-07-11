@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/29/2023
-Updated: 7/2/2023
+Updated: 7/10/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -20,25 +20,93 @@ import pandas as pd
 import openai
 
 
-def generate_strain_art():
-    """Generate a description for a strain."""
-    # TODO: Implement!
-    raise NotImplementedError
+def generate_strain_art(
+        name: str,
+        openai_api_key: Optional[str] = None,
+        art_style=' in the style of pixel art',
+        n=1,
+        size='1024x1024',
+        user: Optional[str] = 'cannlytics',
+    ) -> str:
+    """Generate a strain art image URL given text."""
+    initialize_openai(openai_api_key)
+    response = openai.Image.create(
+        prompt=name + art_style,
+        n=n,
+        size=size,
+        user=user,
+    )
+    image_url = response['data'][0]['url']
+    return image_url
 
 
-def generate_strain_description():
-    """Generate a description for a strain."""
-    
+def generate_strain_description(
+        name: str,
+        stats: Optional[dict] = None,
+        model='gpt-4',
+        openai_api_key: Optional[str] = None,
+        max_tokens: Optional[int] = 1_000,
+        temperature: Optional[float] = 0.42,
+        word_count=50,
+        user: Optional[str] = 'cannlytics',
+        retry_pause: Optional[float] = 3.33,
+        verbose: Optional[bool] = False,
+    ) -> str:
+    """Generate a description for a strain or product given text."""
 
-    # TODO: Supplement with lab result data!
+    # Begin the message with the instructional prompt.
+    identification_prompt = f'Given the following cannabis strain, product name, or text, can you please provide a {word_count} word description? Please only answer with the description.'
+    messages = [{'role': 'system', 'content': identification_prompt}]
 
+    # Incorporate information, such as lab results or stats.
+    # if stats is not None:
+    #     info = json.dumps(stats)
+    #     messages.append({
+    #         'role': 'system',
+    #         'content': f'Try to incorporate this information in the description: {info}'
+    #     })
 
-    raise NotImplementedError
+    # Add the text and finish the prompt.
+    messages.append({
+        'role': 'user',
+        'content': f'Text: {name}\n\nDescription:',
+    })
+    print('MESSAGES:', messages)
+
+    # Make the request to OpenAI. 
+    try:
+        initialize_openai(openai_api_key)
+        response = openai.ChatCompletion.create(
+            model='gpt-4',
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            user=user,
+        )
+    except:
+        if retry_pause:
+            sleep(retry_pause)
+            initialize_openai(openai_api_key)
+            response = openai.ChatCompletion.create(
+                model='gpt-4',
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                user=user,
+            )
+
+    # Get the content of the response.
+    if verbose:
+        print('RESPONSE:', response)
+
+    # Return the content.
+    return response['choices'][0]['message']['content']
 
 
 def identify_strains(
         text,
         model='gpt-4',
+        openai_api_key: Optional[str] = None,
         max_tokens: Optional[int] = 1_000,
         temperature: Optional[float] = 0.0,
         user: Optional[str] = 'cannlytics',
@@ -133,7 +201,7 @@ def train_strain_name_identification_model():
 
 
 # === Tests ===
-# Performed 2023-07-01 by Keegan Skeate <admin@cannlytics.com>.
+# Performed 2023-07-10 by Keegan Skeate <admin@cannlytics.com>.
 if __name__ == '__main__':
 
     from dotenv import dotenv_values
@@ -147,3 +215,40 @@ if __name__ == '__main__':
     text = 'GARCIA HAND PICKED DARK KARMA'
     strain_names = identify_strains(text)
     print(strain_names)
+
+    # [✓] TEST: Generate strain art.
+    image_url = generate_strain_art(
+        text,
+        openai_api_key=openai_api_key,
+    )
+    print(image_url)
+
+    # [✓] TEST: Generate strain description.
+    short_description = generate_strain_description(
+        text,
+        model='gpt-3.5-turbo',
+        temperature=0.5,
+        word_count=15,
+        verbose=True,
+    )
+    long_description = generate_strain_description(
+        text,
+        model='gpt-3.5-turbo',
+        temperature=0.5,
+        word_count=300,
+        verbose=True,
+    )
+    creative_description = generate_strain_description(
+        text,
+        model='gpt-3.5-turbo',
+        temperature=1.0,
+        word_count=60,
+        verbose=True,
+    )
+    scientific_description = generate_strain_description(
+        text,
+        model='gpt-3.5-turbo',
+        temperature=0.0,
+        word_count=60,
+        verbose=True,
+    )

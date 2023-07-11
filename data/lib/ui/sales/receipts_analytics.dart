@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/18/2023
-// Updated: 7/9/2023
+// Updated: 7/10/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -71,24 +71,7 @@ class ReceiptsAnalytics extends ConsumerWidget {
           ),
 
           // Pie chart of spending by product type.
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-            child: Row(children: [
-              Text(
-                'Product Types',
-                style: Theme.of(context).textTheme.titleMedium,
-              )
-            ]),
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 28, right: 28, bottom: 24),
-            margin: EdgeInsets.only(top: 28),
-            height: MediaQuery.sizeOf(context).height * 0.5,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: ProductTypeProportionsChart(),
-            ),
-          ),
+          ProductTypeProportionsChart(),
         ],
       ),
     );
@@ -146,6 +129,7 @@ class UserReceiptsStatsChart extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen to the receipts statistics.
     final asyncValue = ref.watch(receiptsStats);
+    final user = ref.watch(userProvider).value;
 
     // Theme.
     bool isDark = Theme.of(context).brightness == Brightness.dark;
@@ -164,7 +148,7 @@ class UserReceiptsStatsChart extends ConsumerWidget {
         // Handle no items while loading.
         if (items.isEmpty) {
           // Render the no data placeholder.
-          return _noDataPlaceholder(context, ref);
+          return _noDataPlaceholder(context, ref, user: user);
         }
 
         // Get the date range.
@@ -289,14 +273,7 @@ class UserReceiptsStatsChart extends ConsumerWidget {
 
               // X-axis.
               bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: false,
-                  // reservedSize: 22,
-                  // getTitlesWidget: (value, titleMeta) {
-                  //   var date = allMonths[value.toInt()];
-                  //   return Text(date);
-                  // },
-                ),
+                sideTitles: SideTitles(showTitles: false),
               ),
 
               // Y-axis.
@@ -344,7 +321,7 @@ class UserReceiptsStatsChart extends ConsumerWidget {
     );
   }
 
-  Widget _noDataPlaceholder(BuildContext context, WidgetRef ref) {
+  Widget _noDataPlaceholder(BuildContext context, WidgetRef ref, {user}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -370,14 +347,18 @@ class UserReceiptsStatsChart extends ConsumerWidget {
               child: Column(
                 children: <Widget>[
                   SelectableText(
-                    'Sign in to trend your spending',
+                    (user == null)
+                        ? 'Sign in to trend your spending'
+                        : 'No spending for this period',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontSize: 20,
                         color: Theme.of(context).textTheme.titleLarge!.color),
                   ),
                   SelectableText(
-                    'If you are signed in, then we will save your parsed receipts.\nYou will be able to view your spending statistics here.',
+                    (user == null)
+                        ? 'If you are signed in, then we will save your parsed receipts.\nYou will be able to view your spending statistics here.'
+                        : 'Receipt statistics are calculated by date sold. If you have receipts in this period, then your statistics will appear here.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
@@ -572,15 +553,16 @@ class ProductTypeProportionsChart extends ConsumerWidget {
     // Dynamic render.
     return asyncValue.when(
       // Loading placeholder.
-      loading: () => CircularProgressIndicator(),
+      loading: () => Container(),
+
       // Error placeholder.
-      error: (error, _) => Text('Error: $error'),
+      error: (error, _) => Container(),
+
       // Display the chart.
       data: (data) {
         var proportions = data?['product_type_proportions'];
         if (proportions == null || proportions.isEmpty) {
-          // TODO: Spruce up this widget.
-          return Text('No data available');
+          return Container();
         }
 
         // Create a list of PieChartSectionData objects
@@ -596,14 +578,37 @@ class ProductTypeProportionsChart extends ConsumerWidget {
         });
 
         // Render the pie chart.
-        return PieChart(
+        var chart = PieChart(
           PieChartData(
             sections: sections,
             borderData: FlBorderData(show: false),
             sectionsSpace: 0,
             centerSpaceRadius: 74,
-            // sectionsSortDescending: true,
           ),
+        );
+
+        // Render the chart.
+        return Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+              child: Row(children: [
+                Text(
+                  'Product Types',
+                  style: Theme.of(context).textTheme.titleMedium,
+                )
+              ]),
+            ),
+            Container(
+              padding: EdgeInsets.only(left: 28, right: 28, bottom: 24),
+              margin: EdgeInsets.only(top: 28),
+              height: MediaQuery.sizeOf(context).height * 0.5,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: chart,
+              ),
+            ),
+          ],
         );
       },
     );

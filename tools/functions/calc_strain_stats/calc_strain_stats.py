@@ -15,6 +15,7 @@ Description:
 
 """
 # External imports:
+from cannlytics import firebase
 from firebase_functions import firestore_fn, options
 from firebase_admin import initialize_app, firestore
 

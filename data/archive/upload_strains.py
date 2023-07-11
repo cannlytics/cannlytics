@@ -335,3 +335,29 @@ if __name__ == '__main__':
     # Upload Firestore with cannabis license data.
     all_results = upload_strains(subset=subset)
     print('Uploaded strains data to Firestore.')
+
+
+# === DEV ===
+
+# Get strains from Firestore.
+strains = firebase.get_collection('public/data/strains')
+
+# Add keywords to strains.
+refs, updates = [], []
+for strain in strains:
+    # Get the name and convert it to lower case.
+    name = strain['strain_name'].lower()
+
+    # Tokenize the name into keywords and add the first letter of the name.
+    keywords = name.split() + [name[0]]
+
+    # Add unique keywords.
+    keywords = list(set(keywords))
+
+    # Add the document reference and the new keywords to the update lists.
+    doc_id = strain['id']
+    refs.append(f'public/data/strains/{doc_id}')
+    updates.append({'keywords': keywords})
+
+# Update the strains in Firestore.
+firebase.update_documents(refs, updates)
