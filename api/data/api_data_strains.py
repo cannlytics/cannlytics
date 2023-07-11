@@ -119,6 +119,7 @@ def api_data_strains(request, strain_id=None):
         # Create a unique ID for the generation.
         content_id = datetime.now().strftime('%Y%m%d%H%M%S')
         doc_id = body.get('id', content_id)
+        print('Edit to:', doc_id)
 
         # Generate a description.
         model = body.get('model', base_model)
@@ -155,7 +156,7 @@ def api_data_strains(request, strain_id=None):
             )
 
             # Save the image to a temporary file.
-            response = requests.get(content['image_url'], stream=True)
+            response = requests.get(content, stream=True)
             response.raise_for_status()
             temp_file = tempfile.NamedTemporaryFile(delete=False)
             for chunk in response.iter_content(chunk_size=8192): 
@@ -194,7 +195,7 @@ def api_data_strains(request, strain_id=None):
         if doc_id != content_id:
             ref = f'public/data/strains/{doc_id}'
             if strain_id == 'art':
-                image_ref = f'public/data/strains/{doc_id}/images/{content_id}'
+                image_ref = f'{ref}/images/{content_id}'
                 update_document(ref, {'image_url': content})
                 update_document(image_ref, {
                     'strain_id': doc_id,
@@ -203,7 +204,7 @@ def api_data_strains(request, strain_id=None):
                     'user': uid,
                 })
             elif strain_id == 'description':
-                description_ref = f'public/data/strains/{doc_id}/descriptions/{content_id}'
+                description_ref = f'{ref}/descriptions/{content_id}'
                 update_document(ref, {'description': content})
                 update_document(description_ref, {
                     'strain_id': doc_id,
@@ -214,9 +215,9 @@ def api_data_strains(request, strain_id=None):
 
         # Create a strain log.
         create_log(
-            f'public/data/strains/{strain_id}/strain_logs',
+            f'public/data/strains/{doc_id}/strain_logs',
             claims=claims,
-            action='Edited strain %s' % strain_id,
+            action='Edited strain %s' % doc_id,
             log_type='data',
             key='api_data_strains',
             changes=[content]

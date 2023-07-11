@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/24/2023
-// Updated: 7/4/2023
+// Updated: 7/10/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -183,15 +183,17 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
         strain?.name ?? '',
         style: Theme.of(context).textTheme.titleLarge,
       ),
+      gapH12,
 
       // Strain art.
-      StrainArt(),
+      StrainArt(imageUrl: strain?.imageUrl ?? ''),
       gapH24,
 
       // Strain description.
-      StrainDescription(),
+      StrainDescription(description: strain?.description ?? ''),
 
       // Favorite a strain.
+      if (strain != null) gapH8,
       if (strain != null) FavoriteStrainButton(strain: strain),
       if (strain != null) gapH24,
 
@@ -385,11 +387,11 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
             _breadcrumbs,
             SliverToBoxAdapter(child: _actions),
             // Show the image here.
-            SliverToBoxAdapter(
-              child: strain?.imageUrl != null
-                  ? _image
-                  : Container(), // Show an empty container when there's no image.
-            ),
+            // SliverToBoxAdapter(
+            //   child: strain?.imageUrl != null
+            //       ? _image
+            //       : Container(), // Show an empty container when there's no image.
+            // ),
             _isEditing ? _editForm : _viewForm,
           ],
         ),
@@ -423,7 +425,13 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
 }
 
 /// Strain art.
+/// FIXME Have an error placeholder.
 class StrainArt extends ConsumerWidget {
+  StrainArt({this.imageUrl});
+
+  // Parameters.
+  final String? imageUrl;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     StrainArtParams params = ref.watch(strainArtParams);
@@ -434,7 +442,7 @@ class StrainArt extends ConsumerWidget {
           width: 250,
           height: 250,
           child: Image.network(
-            params.imageUrl ??
+            imageUrl ??
                 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Flogos%2Fskunkfx_icon.png?alt=media&token=f508470f-5875-4833-b4cd-dc8f633c74b7',
             fit: BoxFit.contain,
           ),
@@ -462,13 +470,18 @@ class StrainArt extends ConsumerWidget {
 
 /// Strain description.
 class StrainDescription extends ConsumerWidget {
+  StrainDescription({this.description});
+
+  // Parameters.
+  final String? description;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     StrainDescriptionParams params = ref.watch(strainDescriptionParams);
     return Column(
       children: [
         Text(
-          params.description ?? 'Generate a description.',
+          description ?? 'Generate a description.',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         // Optional: Allow the user to specify description parameters.

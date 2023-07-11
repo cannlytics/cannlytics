@@ -132,7 +132,10 @@ final strainProvider =
   String strainId = Uri.decodeComponent(id);
   return _database.streamDocument(
     path: 'public/data/strains/$strainId',
-    builder: (data, documentId) => Strain.fromMap(data ?? {}),
+    builder: (data, documentId) {
+      data?['id'] = documentId;
+      return Strain.fromMap(data ?? {});
+    },
   );
 });
 
@@ -146,7 +149,10 @@ final userStrainData =
   if (user == null) return Stream.value(null);
   return _database.streamDocument(
     path: 'users/${user.uid}/strains/$id',
-    builder: (data, documentId) => data ?? {},
+    builder: (data, documentId) {
+      data?['id'] = documentId;
+      return data ?? {};
+    },
   );
 });
 
@@ -270,6 +276,11 @@ class StrainService {
 
     // If both are present, no need to make any API call.
     if (!shouldGenerateDescription && !shouldGenerateImageUrl) return;
+
+    // FIXME: Strain ID is null.
+    print('STRAIN ID:');
+    print(strain.id);
+    if (strain.id.isEmpty) return;
 
     // Call your API to generate the description and imageUrl, as needed.
     var updatedFields = {};
