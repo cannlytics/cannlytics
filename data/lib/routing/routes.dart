@@ -12,6 +12,7 @@
 import 'package:cannlytics_data/common/dialogs/age_check_dialog.dart';
 import 'package:cannlytics_data/routing/app_router.dart';
 import 'package:cannlytics_data/ui/account/account_screen.dart';
+import 'package:cannlytics_data/ui/account/profile_screen.dart';
 import 'package:cannlytics_data/ui/account/reset_password_screen.dart';
 import 'package:cannlytics_data/ui/dashboard/dashboard.dart';
 import 'package:cannlytics_data/ui/licensees/licensee_screen.dart';
@@ -40,6 +41,16 @@ class Routes {
           builder: (context, state) => ResetPasswordScreen(),
         ),
       ],
+    ),
+
+    // User profile screen.
+    AppRoute(
+      path: '/users/:uid',
+      builder: (context, state) {
+        return UserProfileScreen(
+          uid: state.params['uid']!,
+        );
+      },
     ),
 
     // Dashboard screen.

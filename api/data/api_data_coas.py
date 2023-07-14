@@ -204,7 +204,7 @@ def api_data_coas(request, coa_id=None):
         if throttle and limit > 1000:
             limit = 1000
         else:
-            limit = None
+            limit = params.get('limit')
 
         # Order the data.
         order_by = params.get('order_by', 'coa_parsed_at')

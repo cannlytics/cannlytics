@@ -60,6 +60,7 @@ urlpatterns = [
         path('/emoji', api.ai.text_to_emoji_api),
 
         # Strain AI utilities: art, description, and name identification.
+        path('/strains', api.data.api_data_strains),
         path('/strains/<strain_id>', api.data.api_data_strains),
 
     ])),

@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/pill_tab.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
-import 'package:cannlytics_data/ui/strains/strain_search.dart';
+import 'package:cannlytics_data/ui/strains/strains_search.dart';
 
 // TODO: Allow user's to report new strains.
 
@@ -26,33 +26,6 @@ class StrainsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConsoleScreen(
       children: [
-        // DEV: Under development message.
-        SliverToBoxAdapter(
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: EdgeInsets.all(8.0),
-            color: Colors.yellow[100],
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  Icons.warning,
-                  color: Colors.orange,
-                ),
-                SizedBox(width: 8.0),
-                Flexible(
-                  child: Text(
-                    'Under development, please stay tuned for this data to be updated.',
-                    style: TextStyle(
-                      color: Colors.orange[800],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
         // Breadcrumbs.
         SliverToBoxAdapter(
           child: BreadcrumbsRow(

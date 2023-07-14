@@ -4,11 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 7/2/2023
-// Updated: 7/2/2023
+// Updated: 7/11/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 // Package imports:
 import 'package:intl/intl.dart';
@@ -26,54 +27,55 @@ class LogItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 24),
+      margin: EdgeInsets.only(left: 24, right: 24, bottom: 16),
       padding: EdgeInsets.all(16.0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // User image.
-          if (log['user_photo_url'] != null)
-            Padding(
-              padding: EdgeInsets.only(right: 16.0),
-              child: CircleAvatar(
-                radius: 32,
-                backgroundImage: NetworkImage(log['user_photo_url']),
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: Tooltip(
+              message: log['user_name'] ?? 'Anonymous',
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(50),
+                  onTap: () {
+                    if (log['user'] == null) return;
+                    context.push('/users/${log['user']}');
+                  },
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Theme.of(context).dialogBackgroundColor,
+                    backgroundImage: NetworkImage(log['user_photo_url'] ??
+                        'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fplaceholders%2Fhomegrower-placeholder.png?alt=media&token=29331691-c2ef-4bc5-89e8-cec58a7913e4'),
+                  ),
+                  splashColor: Colors.blue
+                      .withAlpha(30), // Change to your preferred color
+                ),
               ),
             ),
+          ),
 
           // Log details.
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // User name.
+                // Log action.
                 Text(
-                  log['user_name'] ?? '',
-                  style: Theme.of(context).textTheme.labelLarge,
+                  log['action'],
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
-                gapH8,
+                gapH4,
 
                 // Log timestamp.
                 Text(
-                  'Timestamp: ${DateFormat('yMMMd').add_jm().format(DateTime.parse(log['created_at']))}',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-
-                // Log action.
-                Text(
-                  'Action: ${log['action']}',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-
-                // Log type.
-                Text(
-                  'Type: ${log['type']}',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-
-                // Log key.
-                Text(
-                  'Key: ${log['key']}',
-                  style: Theme.of(context).textTheme.labelMedium,
+                  DateFormat('yMMMd')
+                      .add_jm()
+                      .format(DateTime.parse(log['created_at'])),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),

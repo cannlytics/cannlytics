@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 7/10/2023
+// Updated: 7/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO:
@@ -183,11 +183,19 @@ class StrainService {
   final FirestoreService _dataSource;
 
   // Update strain.
-  Future<void> updateStrain(String id, Map<dynamic, dynamic> data) async {
-    await _dataSource.updateDocument(
-      path: 'public/data/strains/$id',
-      data: data as Map<String, dynamic>,
-    );
+  Future<String> updateStrain(Map<String, dynamic> data) async {
+    try {
+      final response = await APIService.apiRequest(
+        '/api/ai/strains',
+        data: data,
+      );
+      if (response['success'] == false) {
+        return response['message'];
+      }
+      return 'success';
+    } catch (error) {
+      return error.toString();
+    }
   }
 
   // Delete strain.
@@ -220,7 +228,7 @@ class StrainService {
   }
 
   // Generate a strain description.
-  Future<String> generateStrainDescription(
+  Future<String?> generateStrainDescription(
     String name, {
     Map<String, dynamic>? stats,
     String? model,
@@ -229,40 +237,48 @@ class StrainService {
     double? temperature,
     String? id,
   }) async {
-    final response = await APIService.apiRequest(
-      '/api/ai/strains/description',
-      data: {
-        'id': id,
-        'text': name,
-        // 'stats': stats,
-        // 'model': model,
-        // 'max_tokens': maxTokens,
-        'word_count': wordCount ?? 60,
-        'temperature': temperature ?? 0.042,
-      },
-    );
-    return response['description'];
+    try {
+      final response = await APIService.apiRequest(
+        '/api/ai/strains/description',
+        data: {
+          'id': id,
+          'text': name,
+          // 'stats': stats,
+          // 'model': model,
+          // 'max_tokens': maxTokens,
+          'word_count': wordCount ?? 200,
+          'temperature': temperature ?? 0.42,
+        },
+      );
+      return response['description'];
+    } catch (e) {
+      return null;
+    }
   }
 
   // Generate strain art.
-  Future<String> generateStrainArt(
+  Future<String?> generateStrainArt(
     String name, {
     String? artStyle,
     int? n,
     String? size,
     String? id,
   }) async {
-    final response = await APIService.apiRequest(
-      '/api/ai/strains/art',
-      data: {
-        'id': id,
-        'text': name,
-        'art_style': artStyle ?? ' in the style of pixel art',
-        'size': size ?? '1024x1024',
-        'n': n ?? 1,
-      },
-    );
-    return response['art_url'];
+    try {
+      final response = await APIService.apiRequest(
+        '/api/ai/strains/art',
+        data: {
+          'id': id,
+          'text': name,
+          'art_style': artStyle ?? ' in the style of pixel art',
+          'size': size ?? '1024x1024',
+          'n': n ?? 1,
+        },
+      );
+      return response['art_url'];
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Generate strain descriptions and art images through the API.
@@ -274,35 +290,21 @@ class StrainService {
     bool shouldGenerateDescription = strain.description == null;
     bool shouldGenerateImageUrl = strain.imageUrl == null;
 
-    // If both are present, no need to make any API call.
+    // If both are present, then there is no need to generate.
     if (!shouldGenerateDescription && !shouldGenerateImageUrl) return;
 
-    // FIXME: Strain ID is null.
-    print('STRAIN ID:');
-    print(strain.id);
+    // If there is no strain ID, then return.
     if (strain.id.isEmpty) return;
 
-    // Call your API to generate the description and imageUrl, as needed.
-    var updatedFields = {};
-    if (shouldGenerateDescription) {
-      // Call your API to generate the description.
-      String newDescription = await generateStrainDescription(
-        strain.name,
-        id: strain.id,
-      );
-      updatedFields['description'] = newDescription;
-    }
+    // Generate strain art.
     if (shouldGenerateImageUrl) {
-      // Call your API to generate the imageUrl.
-      String newImageUrl = await generateStrainArt(
-        strain.name,
-        id: strain.id,
-      );
-      updatedFields['imageUrl'] = newImageUrl;
+      await generateStrainArt(strain.name, id: strain.id);
     }
 
-    // Update the document in Firestore.
-    // await ref.read(strainService).updateStrain(strain.id, updatedFields);
+    // Generate strain description.
+    if (shouldGenerateDescription) {
+      await generateStrainDescription(strain.name, id: strain.id);
+    }
   }
 }
 
@@ -346,7 +348,7 @@ class StrainArtParams {
   final String? imageUrl;
 }
 
-/* === Extraction === */
+/* === Images === */
 
 // /// Generate strain descriptions and art images through the API.
 // class StrainGenerator extends AsyncNotifier<List<Map?>> {
@@ -402,6 +404,8 @@ class StrainArtParams {
 //   }
 // }
 
+/* === Comments === */
+
 // // Strain comments provider.
 // final strainCommentsProvider =
 //     StreamProvider.autoDispose.family<List<dynamic>, String>((ref, id) {
@@ -445,7 +449,8 @@ final strainLogs = StateProvider.family<Query<Map<dynamic, dynamic>?>, String>((
   strainId,
 ) {
   return FirebaseFirestore.instance
-      .collection('public/data/strains/$strainId/strain_logs')
+      .collection('public/logs/strain_logs')
+      .where('key', isEqualTo: strainId)
       .orderBy('created_at', descending: true)
       .withConverter(
         fromFirestore: (snapshot, _) => snapshot.data()!,

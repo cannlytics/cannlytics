@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/23/2023
-Updated: 7/7/2023
+Updated: 7/11/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -56,6 +56,14 @@ def auth_signup(data, context):
         }
         firebase.update_document(f'subscribers/{uid}', entry)
         print('Added 10 tokens for user: %s' % uid)
+
+    # Create the user's profile in the database.
+    ref = 'users/%s/public_user_data/profile' % uid
+    profile_data = {
+        'created_at': created_at,
+        'uid': uid,
+    }
+    firebase.update_document(ref, profile_data)
 
     # Get email credentials.
     admin_email = os.environ.get('EMAIL_HOST_USER')

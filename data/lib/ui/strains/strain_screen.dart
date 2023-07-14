@@ -4,15 +4,17 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/24/2023
-// Updated: 7/10/2023
+// Updated: 7/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
+import 'package:cannlytics_data/common/layout/shimmer.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
@@ -29,7 +31,7 @@ import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/strain.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/ui/strains/strain_history.dart';
-import 'package:cannlytics_data/ui/strains/strain_search.dart';
+import 'package:cannlytics_data/ui/strains/strains_search.dart';
 import 'package:cannlytics_data/ui/strains/strains_service.dart';
 
 /// Strain screen.
@@ -53,7 +55,7 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
     with SingleTickerProviderStateMixin {
   // State.
   bool _isEditing = false;
-  Future<void>? _updateFuture;
+  String? _updateFuture;
   late final TabController _tabController;
   int _tabCount = 2;
 
@@ -113,6 +115,9 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
     // Screen size.
     bool isMobile = MediaQuery.of(context).size.width < 600;
 
+    // Theme.
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     /// Edit a field.
     void _onEdit(key, value) {
       ref.read(updatedStrain.notifier).update((state) {
@@ -131,31 +136,46 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
     }
 
     /// Save edit.
-    void _saveEdit() {
+    void _saveEdit() async {
       // Update any modified details.
       var update = ref.read(updatedStrain)?.toMap() ?? {};
       update['updated_at'] = DateTime.now().toUtc().toIso8601String();
-
-      // TODO: Create a log.
+      update['id'] = widget.strainId ?? widget.strain?.id ?? '';
 
       // Update the data in Firestore.
-      _updateFuture = ref.read(strainService).updateStrain(
-            widget.strainId ?? widget.strain?.id ?? '',
-            update,
-          );
+      _updateFuture = await ref.read(strainService).updateStrain(update);
 
       // Show a success snackbar.
-      Fluttertoast.showToast(
-        msg: 'Strain saved',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-        timeInSecForIosWeb: 2,
-        backgroundColor: LightColors.lightGreen.withAlpha(60),
-        textColor: Colors.white,
-        fontSize: 16.0,
-        webPosition: 'center',
-        webShowClose: true,
-      );
+      if (_updateFuture == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Strain saved',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
+            showCloseIcon: true,
+            // action: SnackBarAction(
+            //   label: 'Close',
+            //   textColor: Colors.white,
+            //   onPressed: () {
+            //     ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            //   },
+            // ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving strain'),
+            duration: Duration(seconds: 4),
+            backgroundColor:
+                isDark ? DarkColors.darkOrange : LightColors.darkOrange,
+            showCloseIcon: true,
+          ),
+        );
+      }
 
       // Finish editing.
       setState(() {
@@ -179,18 +199,51 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
     var fieldStyle = Theme.of(context).textTheme.bodySmall;
     var fields = [
       // Strain name.
-      SelectableText(
-        strain?.name ?? '',
-        style: Theme.of(context).textTheme.titleLarge,
+      Row(
+        children: [
+          SelectableText(
+            strain?.name ?? '',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          gapW2,
+          InformationIcon(),
+        ],
       ),
       gapH12,
 
       // Strain art.
-      StrainArt(imageUrl: strain?.imageUrl ?? ''),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          StrainArt(
+            imageUrl: strain?.imageUrl,
+            tooltip: strain?.imageCaption ?? '',
+          ),
+          gapW2,
+          if (strain?.imageUrl != null) RefreshButton(strain: strain!),
+          // Tooltip(
+          //   message:
+          //       "Note: Re-generating strain art requires a premium level subscription.",
+          //   child: IconButton(
+          //     icon: Icon(
+          //       Icons.refresh,
+          //       size: 18,
+          //       color: Theme.of(context).textTheme.bodyMedium?.color,
+          //     ),
+          //     onPressed: () async {
+          //       if (strain == null) return;
+          //       await ref
+          //           .read(strainService)
+          //           .generateStrainArt(strain.name, id: strain.id);
+          //     },
+          //   ),
+          // ),
+        ],
+      ),
       gapH24,
 
       // Strain description.
-      StrainDescription(description: strain?.description ?? ''),
+      StrainDescription(description: strain?.description),
 
       // Favorite a strain.
       if (strain != null) gapH8,
@@ -241,19 +294,40 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
         padding: labelPadding,
         child: SelectableText('Strain', style: labelStyle),
       ),
+
+      // Strain name.
       CustomTextField(
         label: 'Name',
         value: strain?.name ?? '',
         onChanged: (value) => _onEdit('name', value),
         disabled: true,
       ),
-      // FIXME: Add fields!
+
+      // Description field
+      CustomTextField(
+        label: 'Description',
+        value: strain?.description ?? '',
+        onChanged: (value) => _onEdit('description', value),
+        disabled: false,
+        maxLines: 8,
+      ),
     ];
 
     // Edit button.
     var _editButton = SecondaryButton(
       text: 'Edit',
       onPressed: () {
+        // Show sign in dialog if no user.
+        final user = ref.read(userProvider).value;
+        if (user == null) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return SignInDialog(isSignUp: false);
+            },
+          );
+          return;
+        }
         setState(() {
           _isEditing = !_isEditing;
         });
@@ -314,69 +388,6 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
     var _viewForm = ViewForm(fields: fields);
     var _editForm = EditForm(textFormFields: textFormFields);
 
-    // Image.
-    var _image = Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        height: 200,
-        width: 200,
-        child: InkWell(
-          // Wrap the image with InkWell to make it clickable.
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  titlePadding: EdgeInsets.all(0),
-                  actionsPadding: EdgeInsets.all(0),
-                  contentPadding: EdgeInsets.all(0),
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.close,
-                          size: 18,
-                          color: Theme.of(context).textTheme.bodyMedium?.color,
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  ),
-                  content: Image.network(strain?.imageUrl ?? ''),
-                  actions: [
-                    Tooltip(
-                      message: 'Open in a new tab',
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.open_in_new,
-                          size: 18,
-                          color: Theme.of(context).textTheme.bodyMedium?.color,
-                        ),
-                        onPressed: () async {
-                          final url = strain?.imageUrl ?? '';
-                          launchUrl(Uri.parse(url));
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Image.network(
-              strain?.imageUrl ?? '',
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      ),
-    );
-
     // Tabs.
     var _tabs = TabBarView(
       controller: _tabController,
@@ -386,12 +397,6 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
           slivers: [
             _breadcrumbs,
             SliverToBoxAdapter(child: _actions),
-            // Show the image here.
-            // SliverToBoxAdapter(
-            //   child: strain?.imageUrl != null
-            //       ? _image
-            //       : Container(), // Show an empty container when there's no image.
-            // ),
             _isEditing ? _editForm : _viewForm,
           ],
         ),
@@ -425,48 +430,111 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
 }
 
 /// Strain art.
-/// FIXME Have an error placeholder.
 class StrainArt extends ConsumerWidget {
-  StrainArt({this.imageUrl});
+  StrainArt({
+    this.imageUrl,
+    this.tooltip = 'Click to enlarge',
+  });
 
   // Parameters.
   final String? imageUrl;
+  final String tooltip;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    StrainArtParams params = ref.watch(strainArtParams);
+    // StrainArtParams params = ref.watch(strainArtParams);
+    // Theme.
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Render.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 250,
-          height: 250,
-          child: Image.network(
-            imageUrl ??
-                'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Flogos%2Fskunkfx_icon.png?alt=media&token=f508470f-5875-4833-b4cd-dc8f633c74b7',
-            fit: BoxFit.contain,
+        InkWell(
+          // Wrap the image with InkWell to make it clickable.
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  titlePadding: EdgeInsets.all(0),
+                  actionsPadding: EdgeInsets.all(0),
+                  contentPadding: EdgeInsets.all(0),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.close,
+                          size: 18,
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                  content:
+                      imageUrl == null ? Container() : Image.network(imageUrl!),
+                  actions: [
+                    Tooltip(
+                      message: 'Open in a new tab',
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.open_in_new,
+                          size: 18,
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                        onPressed: () async {
+                          final url = imageUrl ?? '';
+                          launchUrl(Uri.parse(url));
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          child: Container(
+            height: 250,
+            child: ShimmerLoading(
+              isLoading: imageUrl == null,
+              child: Tooltip(
+                message: tooltip,
+                child: ImageShimmer(
+                  isDark: isDark,
+                  isLoading: imageUrl == null,
+                  imageUrl: imageUrl != null
+                      ? imageUrl ??
+                          'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Flogos%2Fskunkfx_icon.png?alt=media&token=f508470f-5875-4833-b4cd-dc8f633c74b7'
+                      : 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Flogos%2Fskunkfx_icon.png?alt=media&token=f508470f-5875-4833-b4cd-dc8f633c74b7',
+                ),
+              ),
+            ),
           ),
         ),
-        // Optional: Allow the user to specify image art parameters.
-        // TextFormField(
-        //   initialValue: params.artStyle,
-        //   decoration: InputDecoration(labelText: 'Art Style'),
-        //   onChanged: (value) {
-        //     ref.read(strainArtParams.notifier).update((state) {
-        //       return StrainArtParams(
-        //         artStyle: value,
-        //         imageUrl: state.imageUrl,
-        //         n: state.n,
-        //         size: state.size,
-        //       );
-        //     });
-        //   },
-        // ),
-        // Add similar fields for other parameters...
       ],
     );
   }
 }
+// Optional: Allow the user to specify image art parameters.
+// TextFormField(
+//   initialValue: params.artStyle,
+//   decoration: InputDecoration(labelText: 'Art Style'),
+//   onChanged: (value) {
+//     ref.read(strainArtParams.notifier).update((state) {
+//       return StrainArtParams(
+//         artStyle: value,
+//         imageUrl: state.imageUrl,
+//         n: state.n,
+//         size: state.size,
+//       );
+//     });
+//   },
+// ),
+// Add similar fields for other parameters...
 
 /// Strain description.
 class StrainDescription extends ConsumerWidget {
@@ -477,13 +545,26 @@ class StrainDescription extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    StrainDescriptionParams params = ref.watch(strainDescriptionParams);
+    // StrainDescriptionParams params = ref.watch(strainDescriptionParams);
+    // Theme.
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Render
     return Column(
       children: [
-        Text(
-          description ?? 'Generate a description.',
-          style: Theme.of(context).textTheme.bodyMedium,
+        // Shimmer while description loads.
+        Container(
+          width: MediaQuery.sizeOf(context).width * 0.5,
+          child: ShimmerLoading(
+            isLoading: description == null,
+            child: TextShimmer(
+              isDark: isDark,
+              isLoading: description == null,
+              text: description ?? '',
+            ),
+          ),
         ),
+
         // Optional: Allow the user to specify description parameters.
         // Slider(
         //   value: ref.watch(strainDescriptionParams).temperature,
@@ -505,6 +586,83 @@ class StrainDescription extends ConsumerWidget {
         // ),
         // Add similar fields for other parameters...
       ],
+    );
+  }
+}
+
+/// Refresh button.
+class RefreshButton extends ConsumerStatefulWidget {
+  const RefreshButton({
+    Key? key,
+    required this.strain,
+  }) : super(key: key);
+
+  final Strain strain;
+
+  @override
+  _RefreshButtonState createState() => _RefreshButtonState();
+}
+
+class _RefreshButtonState extends ConsumerState<RefreshButton> {
+  Future<void>? _refreshFuture;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message:
+          "Note: Re-generating strain art requires a premium level subscription.",
+      child: IconButton(
+        icon: _refreshFuture == null
+            ? Icon(
+                Icons.refresh,
+                size: 18,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              )
+            : SizedBox(
+                height: 18,
+                width: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 1.42,
+                ),
+              ),
+        onPressed: () {
+          if (_refreshFuture == null) {
+            setState(() {
+              _refreshFuture = ref.read(strainService).generateStrainArt(
+                    widget.strain.name,
+                    id: widget.strain.id,
+                  )..then((_) {
+                  if (mounted) {
+                    setState(() {
+                      _refreshFuture = null;
+                    });
+                  }
+                });
+            });
+          }
+        },
+      ),
+    );
+  }
+}
+
+/// Information icon with tooltip.
+class InformationIcon extends StatelessWidget {
+  const InformationIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 100),
+      child: Tooltip(
+        message:
+            'Note: The strain art is generated by DALL·E 2.\nThe original description is generated by ChatGPT\nand may include inaccurate information.',
+        child: Icon(
+          Icons.info_outline,
+          size: 18,
+          color: Theme.of(context).textTheme.bodySmall?.color,
+        ),
+      ),
     );
   }
 }

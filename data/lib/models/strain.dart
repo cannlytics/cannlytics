@@ -7,8 +7,6 @@
 // Updated: 7/10/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-typedef StrainId = String;
-
 /// Model representing a strain of cannabis.
 class Strain {
   // Initialization.
@@ -26,10 +24,11 @@ class Strain {
     this.totalFavorites = 0,
     this.favorite,
     this.description,
+    this.imageCaption,
   });
 
   // Properties.
-  final StrainId id;
+  final String id;
   final String name;
   final String? testingStatus;
   final double? thcLevel;
@@ -42,6 +41,7 @@ class Strain {
   final int totalFavorites;
   final bool? favorite;
   final String? description;
+  final String? imageCaption;
 
   // Create model.
   factory Strain.fromMap(Map<dynamic, dynamic> data) {
@@ -59,6 +59,7 @@ class Strain {
       totalFavorites: data['total_favorites'] ?? 0,
       favorite: data['favorite'],
       description: data['description'],
+      imageCaption: data['image_caption'],
     );
   }
 
@@ -78,13 +79,24 @@ class Strain {
       'total_favorites': totalFavorites,
       'favorite': favorite,
       'description': description,
+      'image_caption': imageCaption,
     };
   }
 }
 
+// TODO: Strain review model
+// reviews (array of reviews)
+// - user
+// - user_name
+// - user_photo_url
+// - rating
+// - created_at
+// - updated_at
+// - review
+
+
 // Ideas for fields:
-// alias
-  // description
+  // alias
   // origin
   // breeder
   // feminized
@@ -102,11 +114,9 @@ class Strain {
   // - CBD ≈ THC (min. 2:3 CBD:THC - max. 3:2 CBD:THC)
   // - CBD > THC (min. 3:2 CBD:THC)
   // - CBD ONLY (< 2% THC)
-  // lab_results (array of lab results)
-  // images (array of images)
+  // lab_results (array of lab result IDs)
   // genealogy (array of parent strains)
   // crossbreeds (array of children)
-  // reviews (array of reviews)
   // sources (array of data sources)
   // 'imageUrl': imageUrl,
   // strain_art_url
@@ -212,3 +222,4 @@ class Strain {
 // First Cultivation	The first cultivation of the strain.
 // Folklore	Any folklore associated with the strain.
 // Etymology	The etymology of the strain's name.
+// Seed Availability	Whether seeds are available and where.

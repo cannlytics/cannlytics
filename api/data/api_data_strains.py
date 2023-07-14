@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/13/2023
-Updated: 7/10/2023
+Updated: 7/13/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with strain data.
@@ -31,12 +31,26 @@ from cannlytics.data.strains.strains_ai import (
 from cannlytics.firebase import (
     access_secret_version,
     create_log,
+    get_collection,
     get_document,
     get_file_url,
     update_document,
     upload_file,
 )
 from website.settings import STORAGE_BUCKET
+
+
+# Default instructions for generating strain art.
+DEFAULT_ART_INSTRUCTIONS = ' in the style of a high-quality scientific image'
+
+# Default instructions for generating strain descriptions.
+DEFAULT_DESCRIPTION_INSTRUCTIONS = 'Please be as scientific as possible and avoid references to purported effects and medical uses.'
+
+# Default temperature for generating strain descriptions.
+DEFAULT_TEMPERATURE = 0.42
+
+# Default word count for generating strain descriptions.
+DEFAULT_WORD_COUNT = 200
 
 
 @api_view(['GET', 'POST'])
@@ -77,62 +91,130 @@ def api_data_strains(request, strain_id=None):
             response = {'success': True, 'data': data}
             return Response(response, status=200)
 
-        # TODO: Query strains.
-        print('Throttle queries:', throttle)
+        # Query strains.
+        data, filters = [], []
+        available_queries = [
+            {
+                'key': 'name',
+                'operation': '==',
+                'param': 'name',
+            },
+            {
+                'key': 'keywords',
+                'operation': 'array_contains_any',
+                'param': 'keyword',
+            },
+            # Add more filters based on strain data fields...
+        ]
+        params = request.query_params
+        for query in available_queries:
+            key = query['key']
+            value = params.get(key)
+            if value:
+                filters.append({
+                    'key': key,
+                    'operation': params.get(key + '_op', query['operation']),
+                    'value': value,
+                })
+
+        # Limit the number of observations.
+        limit = int(params.get('limit', 1000))
+
+        # Throttle the number of observations for free users.
+        if throttle and limit > 1000:
+            limit = 1000
+        else:
+            limit = params.get('limit')
+        
+        # Order the data.
+        order_by = params.get('order_by', 'strain_name')
+        desc = params.get('desc', False)
+
+        # Query documents.
+        ref = 'public/data/strains'
+        data = get_collection(
+            ref,
+            desc=desc,
+            filters=filters,
+            limit=limit,
+            order_by=order_by,
+        )
+
+        # Return the data.
+        response = {'success': True, 'data': data}
+        return Response(response, status=200)
 
     # Create or update strain data.
     elif request.method == 'POST':
-        # Get strain data from request
-        body = request.data
-        text = body.get('text')
-        if not text:
-            message = 'No text provided.'
-            response = {'success': False, 'message': message}
-            return Response(response, status=400)
 
-        # Initialize OpenAI.
-        try:
-            _, project_id = google.auth.default()
-            openai_api_key = access_secret_version(
-                project_id=project_id,
-                secret_id='OPENAI_API_KEY',
-                version_id='latest',
-            )
-        except:
+        # Get the posted data.
+        body = request.data
+
+        # Initialize OpenAI if text is posted.
+        text = body.get('text')
+        openai_api_key = None
+        if text:
             try:
-                openai_api_key = os.environ['OPENAI_API_KEY']
+                _, project_id = google.auth.default()
+                openai_api_key = access_secret_version(
+                    project_id=project_id,
+                    secret_id='OPENAI_API_KEY',
+                    version_id='latest',
+                )
             except:
-                # Load credentials from a local environment variables file if provided.
-                from dotenv import dotenv_values
-                env_file = os.path.join('../../', '.env')
-                if os.path.isfile(env_file):
-                    config = dotenv_values(env_file)
-                    key = 'OPENAI_API_KEY'
-                    os.environ[key] = config[key]
+                try:
+                    openai_api_key = os.environ['OPENAI_API_KEY']
+                except:
+                    # Load credentials from a local environment variables file if provided.
+                    from dotenv import dotenv_values
+                    env_file = os.path.join('../../', '.env')
+                    if os.path.isfile(env_file):
+                        config = dotenv_values(env_file)
+                        key = 'OPENAI_API_KEY'
+                        os.environ[key] = config[key]
 
         # Return an error if OpenAI can't be initialized.
-        if not openai_api_key:
+        if not openai_api_key and text:
             message = 'OpenAI API key not found.'
             response = {'success': False, 'message': message}
             return Response(response, status=400)
-        
+
         # Create a unique ID for the generation.
         content_id = datetime.now().strftime('%Y%m%d%H%M%S')
         doc_id = body.get('id', content_id)
         print('Edit to:', doc_id)
 
         # Generate a description.
-        model = body.get('model', base_model)
-        temperature = body.get('temperature', 0.042)
-        word_count = body.get('word_count', 60)
-        stats = body.get('stats', {})
-        try:
-            stats = loads(stats)
-        except:
-            pass
         if strain_id == 'description':
+
+            # Get parameters.
+            model = body.get('model', base_model)
+            temperature = body.get('temperature', DEFAULT_TEMPERATURE)
+            word_count = body.get('word_count', DEFAULT_WORD_COUNT)
+            stats = body.get('stats', {})
+            instructions = body.get('instructions', DEFAULT_DESCRIPTION_INSTRUCTIONS)
+            try:
+                stats = loads(stats)
+            except:
+                pass
+            action = f'Generated strain description for {doc_id}.'
+
+            # If the strain already has a description, then
+            # require the user to have a subscription to generate a new one.
+            doc = get_document(f'public/data/strains/{doc_id}')
+            if doc.get('description'):
+                support_level = claims.get('support_level', 'free')
+                print('USER:', uid)
+                print('SUPPORT LEVEL:', support_level)
+                if support_level in ['enterprise', 'pro', 'premium']:
+                    message = 'A Cannlytics subscription is required to re-generate a description. You can get a subscription at https://cannlytics.com/account/subscriptions.'
+                    response = {'success': False, 'message': message}
+                    return Response(response, status=402)
+
+            # Generate the description.
             content = generate_strain_description(
                 text,
+                instructions=instructions,
                 model=model,
                 openai_api_key=openai_api_key,
                 temperature=temperature,
@@ -144,8 +226,24 @@ def api_data_strains(request, strain_id=None):
 
         # Generate art.
         elif strain_id == 'art':
-            art_style = body.get('style', ' in the style of pixel art')
+            # Get parameters.
+            action = f'Generated strain art for {doc_id}.'
+            art_style = body.get('style', DEFAULT_ART_INSTRUCTIONS)
             size = body.get('size', '1024x1024')
+
+            # If the strain already has an image, then
+            # require the user to have a subscription to generate a new one.
+            doc = get_document(f'public/data/strains/{doc_id}')
+            if doc.get('image_url'):
+                support_level = claims.get('support_level', 'free')
+                print('USER:', uid)
+                print('SUPPORT LEVEL:', support_level)
+                if support_level in ['enterprise', 'pro', 'premium']:
+                    message = 'A Cannlytics subscription is required to re-generate strain art. You can get a subscription at https://cannlytics.com/account/subscriptions.'
+                    response = {'success': False, 'message': message}
+                    return Response(response, status=402)
+
+            # Generate art.
             content = generate_strain_art(
                 text,
                 openai_api_key=openai_api_key,
@@ -180,7 +278,55 @@ def api_data_strains(request, strain_id=None):
 
         # Identify strain names.
         elif strain_id == 'name':
+            action = 'Identified strain names.'
             content = identify_strains(text)
+
+        # Allow users with subscriptions to save edits to strains.
+        elif uid != 'cannlytics':
+
+            # Require the user to have a subscription to edit strains.
+            support_level = claims.get('support_level', 'free')
+            print('USER:', uid)
+            print('SUPPORT LEVEL:', support_level)
+            if support_level in ['enterprise', 'pro', 'premium']:
+                message = 'A Cannlytics subscription is required to edit strains. You can get a subscription at https://cannlytics.com/account/subscriptions.'
+                response = {'success': False, 'message': message}
+                return Response(response, status=402)
+
+            # Prepare data to be saved to Firestore
+            content = {
+                'updated_by': uid,
+                'updated_at': datetime.now().isoformat(),
+                'description': body.get('description'),
+                'aliases': body.get('aliases'),
+                'origin': body.get('origin'),
+                'chemotype': body.get('chemotype'),
+                'folklore': body.get('folklore'),
+                'etymology': body.get('etymology'),
+                'history': body.get('history'),
+                'references': body.get('references'),
+                'awards': body.get('awards'),
+            }
+
+            # Remove keys with None values
+            content = {k: v for k, v in content.items() if v is not None}
+
+            # Define the action.
+            fields = [k.replace('_', ' ') for k, v in content.items() if k not in ['updated_at', 'updated_by']]
+            if not fields:
+                message = 'Invalid data, no fields were fiybd.'
+                response = {'success': False, 'message': message}
+                return Response(response, status=400)
+            elif len(fields) == 1:
+                action = f'Edited {doc_id} {fields[0]}.'
+            else:
+                # Join the fields with commas and 'and' before the last one
+                action = f"Edited {doc_id} {', '.join(fields[:-1])} and {fields[-1]}."
+
+            # Save the data to Firestore.
+            strain_id = body.get('id', strain_id)
+            ref = f'public/data/strains/{strain_id}'
+            update_document(ref, content)
 
         # Return an error if the strain ID is invalid.
         else:
@@ -188,8 +334,6 @@ def api_data_strains(request, strain_id=None):
             response = {'success': False, 'message': message}
             return Response(response, status=400)
         
-        # TODO: Allow the user to save edits to strains.
-
         # Record the image and description for known strains.
         # Also save the images and descriptions to galleries.
         if doc_id != content_id:
@@ -199,6 +343,7 @@ def api_data_strains(request, strain_id=None):
                 update_document(ref, {'image_url': content})
                 update_document(image_ref, {
                     'strain_id': doc_id,
+                    'image_caption': text + art_style,
                     'image_url': content,
                     'updated_at': datetime.now(),
                     'user': uid,
@@ -215,9 +360,20 @@ def api_data_strains(request, strain_id=None):
 
         # Create a strain log.
         create_log(
-            f'public/data/strains/{doc_id}/strain_logs',
+            f'public/logs/strain_logs',
             claims=claims,
-            action='Edited strain %s' % doc_id,
+            action=action,
+            log_type='data',
+            key=doc_id,
+            changes=[content]
+        )
+
+        # Create a redundant user log.
+        # TODO: Figure out how to make this not necessary?
+        create_log(
+            f'users/{uid}/public_logs',
+            claims=claims,
+            action=action,
             log_type='data',
             key='api_data_strains',
             changes=[content]

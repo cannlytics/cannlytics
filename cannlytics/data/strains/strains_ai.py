@@ -43,6 +43,7 @@ def generate_strain_art(
 def generate_strain_description(
         name: str,
         stats: Optional[dict] = None,
+        instructions: Optional[str] = None,
         model='gpt-4',
         openai_api_key: Optional[str] = None,
         max_tokens: Optional[int] = 1_000,
@@ -57,6 +58,10 @@ def generate_strain_description(
     # Begin the message with the instructional prompt.
     identification_prompt = f'Given the following cannabis strain, product name, or text, can you please provide a {word_count} word description? Please only answer with the description.'
     messages = [{'role': 'system', 'content': identification_prompt}]
+
+    # Add any additional instructions.
+    if instructions is not None:
+        messages.append({'role': 'system', 'content': instructions})
 
     # Incorporate information, such as lab results or stats.
     # if stats is not None:

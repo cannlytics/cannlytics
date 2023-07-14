@@ -319,6 +319,8 @@ class _AccountFormState extends ConsumerState<AccountForm>
             _userEmail(),
             gapH12,
 
+            // TODO: Add view profile button.
+
             // Additional account options.
             gapH12,
             Row(

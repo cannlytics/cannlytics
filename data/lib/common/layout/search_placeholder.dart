@@ -42,19 +42,17 @@ class SearchPlaceholder extends StatelessWidget {
               ),
             ),
             // Text.
-            SelectionArea(
-              child: Column(
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
+            Column(
+              children: [
+                SelectableText(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                SelectableText(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
             ),
           ],
         ),

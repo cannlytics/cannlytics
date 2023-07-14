@@ -12,6 +12,7 @@ import 'dart:async';
 
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
@@ -192,6 +193,8 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
           'phone_number': user.phoneNumber,
         },
       );
+
+      // TODO: Update the user's profile.
     });
   }
 
@@ -210,3 +213,29 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
     });
   }
 }
+
+/* === User profile === */
+
+// User logs provider.
+final userLogsProvider =
+    StateProvider.family<Query<Map<dynamic, dynamic>?>, String>((ref, uid) {
+  return FirebaseFirestore.instance
+      .collection('users/$uid/public_logs')
+      .orderBy('created_at', descending: true)
+      .withConverter(
+        fromFirestore: (snapshot, _) => snapshot.data()!,
+        toFirestore: (item, _) => item as Map<String, Object?>,
+      );
+});
+
+// User profile provider.
+final userProfileProvider = StreamProvider.autoDispose.family<Map?, String>((
+  ref,
+  uid,
+) {
+  final _database = ref.watch(firestoreProvider);
+  return _database.streamDocument(
+    path: 'users/$uid/public_user_data/profile',
+    builder: (data, documentId) => data ?? {},
+  );
+});

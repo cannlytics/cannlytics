@@ -29,6 +29,7 @@ class CustomTextField extends StatelessWidget {
     this.maxWidth,
     this.maxLabelWidth,
     this.disabled = false,
+    this.maxLines = 1,
   });
 
   // Parameters.
@@ -40,6 +41,7 @@ class CustomTextField extends StatelessWidget {
   final double? maxWidth;
   final double? maxLabelWidth;
   final bool disabled;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +84,9 @@ class CustomTextField extends StatelessWidget {
             controller: controller,
             initialValue: value?.toString() ?? '',
             enabled: !disabled,
+
+            // Allow multiple lines
+            maxLines: maxLines,
 
             // Validation.
             keyboardType: isNumeric ? TextInputType.number : TextInputType.text,

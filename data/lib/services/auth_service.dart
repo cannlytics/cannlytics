@@ -134,7 +134,7 @@ class AuthService {
 
           // Update the user's photo URL in Firebase Authentication.
           await user.updatePhotoURL(downloadURL);
-          // await user.reload();
+          await user.reload();
         }
       }
       return 'success';

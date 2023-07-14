@@ -4,11 +4,13 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/30/2023
-// Updated: 7/4/2023
+// Updated: 7/13/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO:
-// - A to Z links for strains: add first letter field to make queries easy.
+// Total number of strains counter?
+// Allow user to sort by:
+// - avg cannabinoids and terpenes | ratios
 
 // Flutter imports:
 import 'package:cannlytics_data/constants/colors.dart';
@@ -126,7 +128,6 @@ class StrainsSearch extends HookConsumerWidget {
         child: FirestoreListView<Strain>(
           shrinkWrap: true,
           physics: ScrollPhysics(),
-          // physics: NeverScrollableScrollPhysics(),
           padding: EdgeInsets.only(top: 16, bottom: 48, left: 16, right: 24),
           query: query,
           pageSize: 100,
@@ -225,34 +226,6 @@ class StrainsSearch extends HookConsumerWidget {
       );
     }
 
-    /// Letter filter list.
-    // Widget _buildLetterFilterList() {
-    //   List<String> letters = List<String>.generate(
-    //       26, (i) => String.fromCharCode('A'.codeUnitAt(0) + i));
-    //   letters.insert(0, 'All');
-
-    //   return Container(
-    //     height: 50,
-    //     child: ListView.builder(
-    //       scrollDirection: Axis.horizontal,
-    //       itemCount: letters.length,
-    //       itemBuilder: (BuildContext context, int index) {
-    //         return GestureDetector(
-    //           onTap: () {
-    //             ref
-    //                 .read(strainSearchTerm.notifier)
-    //                 .update((state) => letters[index]);
-    //           },
-    //           child: Padding(
-    //             padding: const EdgeInsets.all(8.0),
-    //             child: Text(letters[index]),
-    //           ),
-    //         );
-    //       },
-    //     ),
-    //   );
-    // }
-
     // Main section.
     return SingleChildScrollView(
       child: Column(
@@ -300,12 +273,9 @@ class StrainListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Render.
     return Card(
-      // margin: EdgeInsets.only(left: 16, right: 24),
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-      // color: Theme.of(context).scaffoldBackgroundColor,
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
@@ -326,9 +296,25 @@ class StrainListItem extends StatelessWidget {
                   padding: EdgeInsets.only(right: 16.0),
                   child: Image.network(
                     strain.imageUrl!,
-                    width: 64,
-                    height: 64,
+                    width: 128,
+                    height: 128,
                   ),
+                  // child: Container(
+                  //   width: MediaQuery.sizeOf(context).width * 0.222,
+                  //   child: AspectRatio(
+                  //     aspectRatio: 1 / 1,
+                  //     child: Container(
+                  //       width: double.infinity,
+                  //       child: ClipRRect(
+                  //         borderRadius: BorderRadius.circular(3),
+                  //         child: Image.network(
+                  //           strain.imageUrl!,
+                  //           fit: BoxFit.contain,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                 ),
 
               // Strain details.
@@ -343,11 +329,20 @@ class StrainListItem extends StatelessWidget {
                     ),
                     gapH8,
 
+                    // Description.
+                    if (strain.description != null)
+                      Text(
+                        (strain.description!.length <= 250)
+                            ? strain.description!
+                            : '${strain.description!.substring(0, 250)}...',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+
                     // Quick actions.
                     Row(
                       children: [
                         // Favorite button.
-                        FavoriteStrainButton(strain: strain),
+                        // FavoriteStrainButton(strain: strain),
                         gapW8,
                       ],
                     ),
@@ -361,10 +356,8 @@ class StrainListItem extends StatelessWidget {
                     //   ),
 
                     // TODO: Add more strain details.
-                    // - Strain image
-                    // - subtitle
-                    // - description
-                    // - facts
+                    // - avg cannabinoids, avg terpenes, ratios
+                    gapH48,
                   ],
                 ),
               ),
