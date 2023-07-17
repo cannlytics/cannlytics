@@ -139,6 +139,6 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D:\\data\\washington\\'
-    data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
+    data_dir = f'{base}\\CCRS PRR (6-6-23)\\CCRS PRR (6-6-23)\\'
     stats_dir = f'{base}\\ccrs-stats\\'
     curate_ccrs_strains(data_dir, stats_dir)

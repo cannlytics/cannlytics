@@ -79,7 +79,8 @@ def calc_daily_sales(
     Note: The absolute value of the `Discount` is used.
     """
     group = ['licensee_id', 'sale_date']
-    daily = df.groupby(group, as_index=False).sum()
+    sum_columns = ['unit_price', 'discount', 'sales_tax', 'other_tax']  # replace with your column names
+    daily = df.groupby(group, as_index=False)[sum_columns].sum()
     for _, row in daily.iterrows():
         licensee_id = row['licensee_id']
         date = row['sale_date'].isoformat()[:10]
@@ -179,10 +180,10 @@ def stats_to_df(stats: dict[dict]) -> pd.DataFrame:
 if __name__ == '__main__':
 
     base = 'D:\\data\\washington\\'
-    data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
+    data_dir = f'{base}\\CCRS PRR (6-6-23)\\CCRS PRR (6-6-23)\\'
     stats_dir = f'{base}\\ccrs-stats\\'
-    first_file = 1
-    last_file = 2
+    first_file = 85
+    last_file = None
     reverse = False
 
     print('Curating sales...')
@@ -372,20 +373,20 @@ if __name__ == '__main__':
     print('✓ Finished curating sales in', end - start)
 
 
-# === Test ===
-if __name__ == '__main__':
+# # === Test ===
+# if __name__ == '__main__':
 
-    # Specify where your data lives.
-    base = 'D:\\data\\washington\\'
-    data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
-    stats_dir = f'{base}\\ccrs-stats\\'
-    # curate_ccrs_sales(
-    #     data_dir,
-    #     stats_dir,
-    #     reverse=False,
-    #     first_file=0,
-    #     last_file=1,
-    # )
+#     # Specify where your data lives.
+#     base = 'D:\\data\\washington\\'
+#     data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
+#     stats_dir = f'{base}\\ccrs-stats\\'
+#     curate_ccrs_sales(
+#         data_dir,
+#         stats_dir,
+#         reverse=True,
+#         first_file=None,
+#         last_file=None,
+#     )
 
     # DEV: Aggregate monthly sales items.
     # aggregate_monthly_sales(

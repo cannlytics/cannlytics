@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/25/2023
-// Updated: 7/10/2023
+// Updated: 7/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 /// Model representing a strain of cannabis.
@@ -25,6 +25,53 @@ class Strain {
     this.favorite,
     this.description,
     this.imageCaption,
+    this.aliases,
+    this.origin,
+    this.breeder,
+    this.chemotype,
+    this.firstCultivation,
+    this.folklore,
+    this.etymology,
+    this.seedAvailability,
+    this.firstTestedAt,
+    this.firstObservedBy,
+    this.firstSoldBy,
+    this.firstSoldAt,
+    this.history,
+    this.references,
+    this.awards,
+    this.avgPricePerGram,
+    this.avgTotalThc,
+    this.avgTotalCbd,
+    this.avgTotalCannabinoids,
+    this.avgCbg,
+    this.avgCbga,
+    this.avgThca,
+    this.avgDelta9Thc,
+    this.avgThcv,
+    this.avgBetaPinene,
+    this.avgDLimonene,
+    this.avgMyrcene,
+    this.avgHumulene,
+    this.avgBetaCaryophyllene,
+    this.avgTerpinene,
+    this.avgLinalool,
+    this.avgOcimene,
+    this.avgNerolidol,
+    this.alphaPinenePercentage,
+    this.eucalyptolPercentage,
+    this.camphenePercentage,
+    this.phellandrenePercentage,
+    this.carenePercentage,
+    this.sabinenePercentage,
+    this.caryophylleneOxidePercentage,
+    this.bisabololPercentage,
+    this.pulegonePercentage,
+    this.guaiolPercentage,
+    this.isopulegolPercentage,
+    this.geraniolPercentage,
+    this.borneolPercentage,
+    this.valencenePercentage,
   });
 
   // Properties.
@@ -42,6 +89,53 @@ class Strain {
   final bool? favorite;
   final String? description;
   final String? imageCaption;
+  final List<String>? aliases;
+  final String? origin;
+  final String? breeder;
+  final String? chemotype;
+  final String? firstCultivation;
+  final String? folklore;
+  final String? etymology;
+  final String? seedAvailability;
+  final String? firstTestedAt;
+  final String? firstObservedBy;
+  final String? firstSoldBy;
+  final String? firstSoldAt;
+  final String? history;
+  final List<String>? references;
+  final List<String>? awards;
+  final double? avgPricePerGram;
+  final double? avgTotalThc;
+  final double? avgTotalCbd;
+  final double? avgTotalCannabinoids;
+  final double? avgCbg;
+  final double? avgCbga;
+  final double? avgThca;
+  final double? avgDelta9Thc;
+  final double? avgThcv;
+  final double? avgBetaPinene;
+  final double? avgDLimonene;
+  final double? avgMyrcene;
+  final double? avgHumulene;
+  final double? avgBetaCaryophyllene;
+  final double? avgTerpinene;
+  final double? avgLinalool;
+  final double? avgOcimene;
+  final double? avgNerolidol;
+  final double? alphaPinenePercentage;
+  final double? eucalyptolPercentage;
+  final double? camphenePercentage;
+  final double? phellandrenePercentage;
+  final double? carenePercentage;
+  final double? sabinenePercentage;
+  final double? caryophylleneOxidePercentage;
+  final double? bisabololPercentage;
+  final double? pulegonePercentage;
+  final double? guaiolPercentage;
+  final double? isopulegolPercentage;
+  final double? geraniolPercentage;
+  final double? borneolPercentage;
+  final double? valencenePercentage;
 
   // Create model.
   factory Strain.fromMap(Map<dynamic, dynamic> data) {
@@ -60,6 +154,56 @@ class Strain {
       favorite: data['favorite'],
       description: data['description'],
       imageCaption: data['image_caption'],
+      aliases:
+          data['aliases'] != null ? List<String>.from(data['aliases']) : null,
+      origin: data['origin'],
+      breeder: data['breeder'],
+      chemotype: data['chemotype'],
+      firstCultivation: data['first_cultivation'],
+      folklore: data['folklore'],
+      etymology: data['etymology'],
+      seedAvailability: data['seed_availability'],
+      firstTestedAt: data['first_tested_at'],
+      firstObservedBy: data['first_observed_by'],
+      firstSoldBy: data['first_sold_by'],
+      firstSoldAt: data['first_sold_at'],
+      history: data['history'],
+      references: data['references'] != null
+          ? List<String>.from(data['references'])
+          : null,
+      awards: data['awards'] != null ? List<String>.from(data['awards']) : null,
+      avgPricePerGram: data['avg_price_per_gram'],
+      avgTotalThc: data['avg_total_thc'],
+      avgTotalCbd: data['avg_total_cbd'],
+      avgTotalCannabinoids: data['avg_total_cannabinoids'],
+      avgCbg: data['avg_cbg'],
+      avgCbga: data['avg_cbga'],
+      avgThca: data['avg_thca'],
+      avgDelta9Thc: data['avg_delta_9_thc'],
+      avgThcv: data['avg_thcv'],
+      avgBetaPinene: data['avg_beta_pinene'],
+      avgDLimonene: data['avg_d_limonene'],
+      avgMyrcene: data['avg_myrcene'],
+      avgHumulene: data['avg_humulene'],
+      avgBetaCaryophyllene: data['avg_beta_caryophyllene'],
+      avgTerpinene: data['avg_terpinene'],
+      avgLinalool: data['avg_linalool'],
+      avgOcimene: data['avg_ocimene'],
+      avgNerolidol: data['avg_nerolidol'],
+      alphaPinenePercentage: data['alpha_pinene_percentage'],
+      eucalyptolPercentage: data['eucalyptol_percentage'],
+      camphenePercentage: data['camphene_percentage'],
+      phellandrenePercentage: data['phellandrene_percentage'],
+      carenePercentage: data['carene_percentage'],
+      sabinenePercentage: data['sabinene_percentage'],
+      caryophylleneOxidePercentage: data['caryophyllene_oxide_percentage'],
+      bisabololPercentage: data['bisabolol_percentage'],
+      pulegonePercentage: data['pulegone_percentage'],
+      guaiolPercentage: data['guaiol_percentage'],
+      isopulegolPercentage: data['isopulegol_percentage'],
+      geraniolPercentage: data['geraniol_percentage'],
+      borneolPercentage: data['borneol_percentage'],
+      valencenePercentage: data['valencene_percentage'],
     );
   }
 
@@ -80,146 +224,175 @@ class Strain {
       'favorite': favorite,
       'description': description,
       'image_caption': imageCaption,
+      'aliases': aliases,
+      'origin': origin,
+      'breeder': breeder,
+      'chemotype': chemotype,
+      'first_cultivation': firstCultivation,
+      'folklore': folklore,
+      'etymology': etymology,
+      'seed_availability': seedAvailability,
+      'first_tested_at': firstTestedAt,
+      'first_observed_by': firstObservedBy,
+      'first_sold_by': firstSoldBy,
+      'first_sold_at': firstSoldAt,
+      'history': history,
+      'references': references,
+      'awards': awards,
+      'avg_price_per_gram': avgPricePerGram,
+      'avg_total_thc': avgTotalThc,
+      'avg_total_cbd': avgTotalCbd,
+      'avg_total_cannabinoids': avgTotalCannabinoids,
+      'avg_cbg': avgCbg,
+      'avg_cbga': avgCbga,
+      'avg_thca': avgThca,
+      'avg_delta_9_thc': avgDelta9Thc,
+      'avg_thcv': avgThcv,
+      'avg_beta_pinene': avgBetaPinene,
+      'avg_d_limonene': avgDLimonene,
+      'avg_myrcene': avgMyrcene,
+      'avg_humulene': avgHumulene,
+      'avg_beta_caryophyllene': avgBetaCaryophyllene,
+      'avg_terpinene': avgTerpinene,
+      'avg_linalool': avgLinalool,
+      'avg_ocimene': avgOcimene,
+      'avg_nerolidol': avgNerolidol,
+      'alpha_pinene_percentage': alphaPinenePercentage,
+      'eucalyptol_percentage': eucalyptolPercentage,
+      'camphene_percentage': camphenePercentage,
+      'phellandrene_percentage': phellandrenePercentage,
+      'carene_percentage': carenePercentage,
+      'sabinene_percentage': sabinenePercentage,
+      'caryophyllene_oxide_percentage': caryophylleneOxidePercentage,
+      'bisabolol_percentage': bisabololPercentage,
+      'pulegone_percentage': pulegonePercentage,
+      'guaiol_percentage': guaiolPercentage,
+      'isopulegol_percentage': isopulegolPercentage,
+      'geraniol_percentage': geraniolPercentage,
+      'borneol_percentage': borneolPercentage,
+      'valencene_percentage': valencenePercentage,
     };
   }
 }
 
-// TODO: Strain review model
-// reviews (array of reviews)
-// - user
-// - user_name
-// - user_photo_url
-// - rating
-// - created_at
-// - updated_at
-// - review
+/// Model representing a comment for a strain of cannabis.
+class StrainReview {
+  // Initialization.
+  const StrainReview({
+    required this.strainId,
+    required this.strainName,
+    required this.user,
+    required this.userName,
+    required this.userPhotoUrl,
+    required this.rating,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.review,
+  });
 
+  // Properties.
+  final String strainId;
+  final String strainName;
+  final String user;
+  final String userName;
+  final String userPhotoUrl;
+  final double rating;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String review;
 
-// Ideas for fields:
-  // alias
-  // origin
-  // breeder
-  // feminized
-  // autoflowering
-  // avg_flowering_time
-  // strain_url
-  // avg_yield_indoor
-  // avg_yield_outdoor
-  // avg_height_indoor
-  // avg_height_outdoor
-  // location (indoor, outdoor, greenhouse)
-  // chemotype (type 1, type 2, type 3)
-  // - NOT CBD RICH (< 2% CBD || < approx. 1:8 CBD:THC)
-  // - CBD < THC (max. 2:3 CBD:THC)
-  // - CBD ≈ THC (min. 2:3 CBD:THC - max. 3:2 CBD:THC)
-  // - CBD > THC (min. 3:2 CBD:THC)
-  // - CBD ONLY (< 2% THC)
-  // lab_results (array of lab result IDs)
-  // genealogy (array of parent strains)
-  // crossbreeds (array of children)
-  // sources (array of data sources)
-  // 'imageUrl': imageUrl,
-  // strain_art_url
-//   Yield	The average yield of the strain when grown.
-// Flowering Time	The average time it takes for the strain to flower.
-// Plant Height	The average height of the plant.
-// Difficulty Level	The difficulty level to grow the strain (Easy, Moderate, Difficult).
-// Awards	Any awards or recognitions the strain has received.
-// Availability	Where the strain is available (dispensaries, online, etc.).
-// Price	The average price of the strain.
-// number of breeders
-// ID	A unique identifier for the strain.
-// Name	The name of the strain.
-// Type	The type of the strain (Indica, Sativa, Hybrid).
-// Breeder	The breeder or company that developed the strain.
-// Lineage	The genetic lineage of the strain.
-// Flavor Profile	The flavor profile of the strain (Earthy, Sweet, Citrus, etc.).
-// Effect Profile	The effect profile of the strain (Euphoric, Relaxing, Uplifted, etc.).
-// THC Percentage	The percentage of THC in the strain.
-// CBD Percentage	The percentage of CBD in the strain.
-// Terpene Profile	The terpene profile of the strain.
-// Description	A description of the strain, including its appearance, aroma, flavor, and effects.
-// Image URL	A URL for an image of the strain.
-// Medical Uses	Medical conditions that the strain is commonly used to treat.
-// Grow Information	Information about how to grow the strain.
-// User Reviews	Reviews from users about the strain.
-// Average Rating	The average rating of the strain based on user reviews.
-// Flowering Time	The time it takes for the strain to flower when grown.
-// Yield	The amount of product that can be expected from the strain when grown.
-// Difficulty Level	The difficulty level of growing the strain.
-// Plant Height	The average height of the plant when grown.
-// Plant Type	The type of plant (auto-flowering, feminized, regular).
-// Seed Availability	Whether seeds are available and where.
-// Climate	The ideal climate for growing the strain.
-// Indoor/Outdoor	Whether the strain is best grown indoors or outdoors.
-// Harvest Month	The best month to harvest the strain.
-// Soil Type	The best type of soil for growing the strain.
-// Nutrient Requirements	The nutrient requirements of the strain.
-// Lighting Requirements	The lighting requirements of the strain.
-// Watering Schedule	The recommended watering schedule for the strain.
-// Pest Resistance	The strain's resistance to common pests.
-// Disease Resistance	The strain's resistance to common diseases.
-// Mold Resistance	The strain's resistance to mold.
-// Flower Appearance	The appearance of the strain's flowers.
-// Leaf Appearance	The appearance of the strain's leaves.
-// Aroma	The aroma profile of the strain.
-// Color	The color of the strain's buds.
-// Taste	The taste of the strain when smoked or vaporized.
-// Parent Strains	The parent strains of
-// Child Strains	Any strains that have been bred using this strain as a parent.
-// Similar Strains	Strains that are similar in effects, flavor, or genetics.
-// Difficulty Level	The difficulty level of growing the strain.
-// Plant Height	The average height of the plant when grown.
-// Plant Width	The average width of the plant when grown.
-// Seed Availability	Whether seeds of the strain are available and where to buy them.
-// Clone Availability	Whether clones of the strain are available and where to buy them.
-// Phenotypes	Different phenotypes of the strain.
-// Genotype	The genotype of the strain.
-// Trichome Density	The density of trichomes on the strain's buds.
-// Bud Density	The density of the strain's buds.
-// Leaf-to-Bud Ratio	The ratio of leaves to buds on the plant.
-// CBN Percentage	The percentage of CBN in the strain.
-// CBG Percentage	The percentage of CBG in the strain.
-// CBC Percentage	The percentage of CBC in the strain.
-// THCV Percentage	The percentage of THCV in the strain.
-// CBDV Percentage	The percentage of CBDV in the strain.
-// CBGV Percentage	The percentage of CBGV in the strain.
-// CBCV Percentage	The percentage of CBCV in the strain.
-// CBL Percentage	The percentage of CBL in the strain.
-// CBT Percentage	The percentage of CBT in the strain.
-// CBE Percentage	The percentage of CBE in the strain.
-// CBND Percentage	The percentage of CBND in the strain.
-// CBF Percentage	The percentage of CBF in the strain.
-// Terpinolene Percentage	The percentage of Terpinolene in the strain.
-// Myrcene Percentage	The percentage of Myrcene in the strain.
-// Limonene Percentage	The percentage of Limonene in the strain.
-// Beta-Caryophyllene Percentage	The percentage of Beta-Caryophyllene in the strain.
-// Linalool Percentage	The percentage of Linalool in the strain.
-// Humulene Percentage	The percentage of Humulene in the strain.
-// Ocimene Percentage	The percentage of Ocimene in the strain.
-// Alpha-Pinene Percentage	The percentage of Alpha-Pinene in the strain.
-// Beta-Pinene Percentage	The percentage of Beta-Pinene in the strain.
-// Eucalyptol Percentage	The percentage of Eucalyptol in the strain.
-// Camphene Percentage	The percentage of Camphene in the strain.
-// Terpinene Percentage	The percentage of Terpinene in the strain.
-// Phellandrene Percentage	The percentage of Phellandrene in the strain.
-// Carene Percentage	The percentage of Carene in the strain.
-// Sabinene Percentage	The percentage of Sabinene in the strain.
-// Nerolidol Percentage	The percentage of Nerolidol in the strain.
-// Caryophyllene Oxide Percentage	The percentage of Caryophyllene Oxide in the strain.
-// Bisabolol Percentage	The percentage of Bisabolol in the strain.
-// Pulegone Percentage	The percentage of Pulegone in the strain.
-// Guaiol Percentage	The percentage of Guaiol in the strain.
-// Isopulegol Percentage	The percentage of Isopulegol in the strain.
-// Geraniol Percentage	The percentage of Geraniol in the strain.
-// Borneol Percentage	The percentage of Borneol in the strain.
-// Terpineol Percentage	The percentage of Terpineol in the strain.
-// Valencene Percentage	The percentage of Valencene in the strain.
-// Sesquiterpene Percentage	The percentage of Sesquiterpene in the strain.
-// Monoterpene Percentage	The percentage of Monoterpene in the strain.
-// Bibliographic References	Any bibliographic references related to the plant.
-// Patent Information	Any patents related to the plant.
-// First Cultivation	The first cultivation of the strain.
-// Folklore	Any folklore associated with the strain.
-// Etymology	The etymology of the strain's name.
-// Seed Availability	Whether seeds are available and where.
+  // Create model.
+  factory StrainReview.fromMap(Map<String, dynamic> data) {
+    return StrainReview(
+      strainId: data['strain_id'],
+      strainName: data['strain_name'],
+      user: data['user'],
+      userName: data['user_name'],
+      userPhotoUrl: data['user_photo_url'],
+      rating: data['rating'],
+      createdAt: DateTime.parse(data['created_at']),
+      updatedAt: DateTime.parse(data['updated_at']),
+      review: data['review'],
+    );
+  }
+
+  // Create JSON.
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'strain_id': strainId,
+      'strain_name': strainName,
+      'user': user,
+      'user_name': userName,
+      'user_photo_url': userPhotoUrl,
+      'rating': rating,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+      'review': review,
+    };
+  }
+}
+
+/// Model representing an image for a strain of cannabis.
+class StrainImage {
+  // Initialization.
+  const StrainImage({
+    required this.user,
+    required this.userName,
+    required this.userPhotoUrl,
+    required this.uploadedAt,
+    required this.fileSize,
+    required this.fileType,
+    required this.fileRef,
+    required this.imageUrl,
+    required this.shortUrl,
+    required this.strainId,
+    required this.strainName,
+  });
+
+  // Properties.
+  final String user;
+  final String userName;
+  final String userPhotoUrl;
+  final DateTime uploadedAt;
+  final int fileSize;
+  final String fileType;
+  final String fileRef;
+  final String imageUrl;
+  final String shortUrl;
+  final String strainId;
+  final String strainName;
+
+  // Create model.
+  factory StrainImage.fromMap(Map<String, dynamic> data) {
+    return StrainImage(
+      user: data['user'],
+      userName: data['user_name'],
+      userPhotoUrl: data['user_photo_url'],
+      uploadedAt: DateTime.parse(data['uploaded_at']),
+      fileSize: data['file_size'],
+      fileType: data['file_type'],
+      fileRef: data['file_ref'],
+      imageUrl: data['image_url'],
+      shortUrl: data['short_url'],
+      strainId: data['strain_id'],
+      strainName: data['strain_name'],
+    );
+  }
+
+  // Create JSON.
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'user': user,
+      'user_name': userName,
+      'user_photo_url': userPhotoUrl,
+      'uploaded_at': uploadedAt.toIso8601String(),
+      'file_size': fileSize,
+      'file_type': fileType,
+      'file_ref': fileRef,
+      'image_url': imageUrl,
+      'short_url': shortUrl,
+      'strain_id': strainId,
+      'strain_name': strainName,
+    };
+  }
+}

@@ -218,7 +218,7 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D:\\data\\washington\\'
-    DATA_DIR = f'{base}\\CCRS PRR (5-7-23)\\CCRS PRR (5-7-23)\\'
+    DATA_DIR = f'{base}\\CCRS PRR (6-6-23)\\CCRS PRR (6-6-23)\\'
     STATS_DIR = f'{base}\\ccrs-stats\\'
     lab_results = curate_ccrs_lab_results(DATA_DIR, STATS_DIR)
     print('Curated %i WA lab results.' % len(lab_results))

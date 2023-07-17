@@ -386,23 +386,23 @@ if __name__ == '__main__':
     # DATA_DIR = r'C:\.datasets\data\florida\lab_results'
 
     # [✓] TEST: Get Kaycha COAs.
-    kaycha_coas = get_results_kaycha(DATA_DIR)
+    # kaycha_coas = get_results_kaycha(DATA_DIR)
 
     # [✓] TEST: Parse Kaycha COAs.
     # Note: This is a super, super long process
-    # pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
-    # date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    # for folder in os.listdir(pdf_dir):
-    #     if folder.startswith('MMTC-2015-0002'):
-    #         data_dir = os.path.join(pdf_dir, folder)
-    #         outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
-    #         print('Parsing:', folder)
-    #         coa_data = parse_results_kaycha(
-    #             data_dir,
-    #             outfile,
-    #             reverse=True,
-    #             completed=[]
-    #         )
+    pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
+    date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    for folder in os.listdir(pdf_dir):
+        if folder.startswith('MMTC-2015-0002'):
+            data_dir = os.path.join(pdf_dir, folder)
+            outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
+            print('Parsing:', folder)
+            coa_data = parse_results_kaycha(
+                data_dir,
+                outfile,
+                reverse=True,
+                completed=[]
+            )
 
 
 #-----------------------------------------------------------------------
@@ -610,7 +610,7 @@ if __name__ == '__main__':
     # DATA_DIR = r'C:\.datasets\data\florida\lab_results'
     
     # [✓] TEST: Get The Flowery COAs.
-    # the_flowery_products = get_product_results_the_flowery(DATA_DIR)
+    the_flowery_products = get_product_results_the_flowery(DATA_DIR)
     # the_flowery_coas = get_results_the_flowery(DATA_DIR)
 
 

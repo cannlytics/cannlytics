@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 7/13/2023
+// Updated: 7/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO:
@@ -107,7 +107,6 @@ final popularityQuery = StateProvider.family<Query<Strain>, String>((
 });
 
 /// Stream a user's favorite strains from Firebase.
-/// FIXME: Ensure that the statistics are consistent with the user's data.
 final userFavoriteStrains = StateProvider.family<Query<Strain>, String>((
   ref,
   uid,

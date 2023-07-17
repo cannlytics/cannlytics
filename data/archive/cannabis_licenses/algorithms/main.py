@@ -89,7 +89,7 @@ ALGORITHMS = {
     # 'ut': 'get_licenses_ut',
     # 'wv': 'get_licenses_wv'
 }
-DATA_DIR = '../data'
+DATA_DIR = 'D:\\data\\cannabis_licenses\\data'
 
 
 def main(data_dir, env_file):
@@ -102,6 +102,7 @@ def main(data_dir, env_file):
 
         # Import the module and get the entry point.
         # FIXME: Requires the module to be in the same directory.
+        # TODO: Or change the directory to the module directory.
         module = importlib.import_module(f'{algorithm}')
         entry_point = getattr(module, algorithm)
 

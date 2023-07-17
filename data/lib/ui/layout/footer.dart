@@ -81,6 +81,9 @@ class FooterLinks extends StatelessWidget {
       children: [
         // Contact link.
         if (isWide) const SizedBox(width: 8),
+        // FIXME: Replace with CC logo: assets/images/logos/cc_heart.svg
+        // TODO: Add a tooltip: "Except where otherwise noted, this website is licensed under a Creative Commons Attribution 4.0 International Public License."
+        // TODO: Add a link to: 'https://creativecommons.org/licenses/by/4.0/'
         const FooterLink(
           text: 'CC BY 4.0',
           route: 'https://creativecommons.org/licenses/by/4.0/',

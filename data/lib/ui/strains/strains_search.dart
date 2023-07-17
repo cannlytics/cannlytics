@@ -13,6 +13,7 @@
 // - avg cannabinoids and terpenes | ratios
 
 // Flutter imports:
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -234,9 +235,18 @@ class StrainsSearch extends HookConsumerWidget {
           // Title.
           Padding(
             padding: EdgeInsets.only(left: 16, top: 12),
-            child: Text(
-              'Search strains',
-              style: Theme.of(context).textTheme.titleLarge,
+            child: Row(
+              children: [
+                Text(
+                  'Search strains',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                PrimaryButton(
+                    text: 'Submit a strain',
+                    onPressed: () {
+                      context.push('/strains/new');
+                    }),
+              ],
             ),
           ),
 

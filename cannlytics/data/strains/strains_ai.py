@@ -64,25 +64,26 @@ def generate_strain_description(
         messages.append({'role': 'system', 'content': instructions})
 
     # Incorporate information, such as lab results or stats.
-    # if stats is not None:
-    #     info = json.dumps(stats)
-    #     messages.append({
-    #         'role': 'system',
-    #         'content': f'Try to incorporate this information in the description: {info}'
-    #     })
+    if stats is not None:
+        info = json.dumps(stats)
+        messages.append({
+            'role': 'system',
+            'content': f'Try to incorporate this information in the description: {info}'
+        })
 
     # Add the text and finish the prompt.
     messages.append({
         'role': 'user',
         'content': f'Text: {name}\n\nDescription:',
     })
-    print('MESSAGES:', messages)
+    if verbose:
+        print('MESSAGES:', messages)
 
     # Make the request to OpenAI. 
     try:
         initialize_openai(openai_api_key)
         response = openai.ChatCompletion.create(
-            model='gpt-4',
+            model=model,
             messages=messages,
             max_tokens=max_tokens,
             temperature=temperature,
@@ -93,7 +94,7 @@ def generate_strain_description(
             sleep(retry_pause)
             initialize_openai(openai_api_key)
             response = openai.ChatCompletion.create(
-                model='gpt-4',
+                model=model,
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=temperature,

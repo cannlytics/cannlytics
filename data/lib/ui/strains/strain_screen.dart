@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
@@ -93,10 +94,17 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
 
       // Data loaded UI.
       data: (strain) {
-        // Generate the strain art and description if missing.
-        ref
-            .read(strainService)
-            .generateStrainArtAndDescriptionIfMissing(strain!, ref);
+        // Set to editing if a new strain.
+        if (widget.strainId == 'new') {
+          setState(() {
+            _isEditing = true;
+          });
+        } else {
+          // Generate the strain art and description if missing.
+          ref
+              .read(strainService)
+              .generateStrainArtAndDescriptionIfMissing(strain!, ref);
+        }
 
         // Return the form.
         return _form(strain);
@@ -130,6 +138,9 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
 
     /// Cancel edit.
     void _cancelEdit() {
+      if (widget.strainId == 'new') {
+        context.push('/strains');
+      }
       setState(() {
         _isEditing = !_isEditing;
       });
@@ -141,6 +152,8 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
       var update = ref.read(updatedStrain)?.toMap() ?? {};
       update['updated_at'] = DateTime.now().toUtc().toIso8601String();
       update['id'] = widget.strainId ?? widget.strain?.id ?? '';
+
+      // FIXME: Handle submitting new strains.
 
       // Update the data in Firestore.
       _updateFuture = await ref.read(strainService).updateStrain(update);
@@ -212,38 +225,40 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
       gapH12,
 
       // Strain art.
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          StrainArt(
-            imageUrl: strain?.imageUrl,
-            tooltip: strain?.imageCaption ?? '',
-          ),
-          gapW2,
-          if (strain?.imageUrl != null) RefreshButton(strain: strain!),
-          // Tooltip(
-          //   message:
-          //       "Note: Re-generating strain art requires a premium level subscription.",
-          //   child: IconButton(
-          //     icon: Icon(
-          //       Icons.refresh,
-          //       size: 18,
-          //       color: Theme.of(context).textTheme.bodyMedium?.color,
-          //     ),
-          //     onPressed: () async {
-          //       if (strain == null) return;
-          //       await ref
-          //           .read(strainService)
-          //           .generateStrainArt(strain.name, id: strain.id);
-          //     },
-          //   ),
-          // ),
-        ],
-      ),
+      if (widget.strainId != 'new')
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            StrainArt(
+              imageUrl: strain?.imageUrl,
+              tooltip: strain?.imageCaption ?? '',
+            ),
+            gapW2,
+            if (strain?.imageUrl != null) RefreshButton(strain: strain!),
+            // Tooltip(
+            //   message:
+            //       "Note: Re-generating strain art requires a premium level subscription.",
+            //   child: IconButton(
+            //     icon: Icon(
+            //       Icons.refresh,
+            //       size: 18,
+            //       color: Theme.of(context).textTheme.bodyMedium?.color,
+            //     ),
+            //     onPressed: () async {
+            //       if (strain == null) return;
+            //       await ref
+            //           .read(strainService)
+            //           .generateStrainArt(strain.name, id: strain.id);
+            //     },
+            //   ),
+            // ),
+          ],
+        ),
       gapH24,
 
       // Strain description.
-      StrainDescription(description: strain?.description),
+      if (widget.strainId != 'new')
+        StrainDescription(description: strain?.description),
 
       // Favorite a strain.
       if (strain != null) gapH8,
@@ -300,7 +315,7 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
         label: 'Name',
         value: strain?.name ?? '',
         onChanged: (value) => _onEdit('name', value),
-        disabled: true,
+        disabled: widget.strainId != 'new',
       ),
 
       // Description field
@@ -371,6 +386,7 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
           icon: Icons.history,
           isSelected: _tabController.index == 1,
         ),
+        // TODO: Comments, images, lab results
       ],
     );
 

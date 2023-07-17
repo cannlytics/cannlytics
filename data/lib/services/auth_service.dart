@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 6/24/2023
+// Updated: 7/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -130,6 +130,12 @@ class AuthService {
               'photo_url': downloadURL,
               'photo_ref': photoRef,
             },
+          );
+
+          // Update the user's photo URL in their public profile.
+          await _firestore.updateDocument(
+            path: 'users/${user.uid}/public_user_data/profile',
+            data: {'photo_url': downloadURL},
           );
 
           // Update the user's photo URL in Firebase Authentication.

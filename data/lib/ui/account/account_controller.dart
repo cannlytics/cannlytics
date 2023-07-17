@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 7/3/2023
+// Updated: 7/14/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -194,7 +194,11 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
         },
       );
 
-      // TODO: Update the user's profile.
+      // Update the user's profile.
+      await _firestore.updateDocument(
+        path: 'users/${user.uid}/public_user_data/profile',
+        data: {'display_name': user.displayName},
+      );
     });
   }
 
