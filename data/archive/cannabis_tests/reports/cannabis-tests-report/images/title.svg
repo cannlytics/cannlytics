@@ -7,8 +7,8 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="726.1076mm"
-   height="177.46927mm"
+   width="2744.3438"
+   height="670.75"
    viewBox="0 0 726.1076 177.46927"
    version="1.1"
    id="svg1330"
@@ -29,6 +29,18 @@
        height="6"
        x="0"
        y="0" />
+    <rect
+       x="-81.38353"
+       y="-101.29771"
+       width="383.79904"
+       height="107.97689"
+       id="rect873" />
+    <rect
+       x="-81.38353"
+       y="-101.29771"
+       width="383.79904"
+       height="107.97689"
+       id="rect1560" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -38,8 +50,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.35"
-     inkscape:cx="1100.2112"
-     inkscape:cy="66.148851"
+     inkscape:cx="1236.5518"
+     inkscape:cy="71.339291"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -48,7 +60,8 @@
      inkscape:window-height="1094"
      inkscape:window-x="-11"
      inkscape:window-y="-11"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1"
+     units="px" />
   <metadata
      id="metadata1327">
     <rdf:RDF>
@@ -57,7 +70,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -72,32 +85,11 @@
        style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect1895);fill:#000000;fill-opacity:1;stroke:none;" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:400;font-size:50.8px;line-height:125%;font-family:Calibri;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="-6.3296218"
-       y="131.76172"
-       id="text1908"><tspan
-         sodipodi:role="line"
-         x="-6.3296218"
-         y="131.76172"
-         id="tspan1906"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:50.8px;font-family:Ovo;-inkscape-font-specification:Ovo;stroke-width:0.264583"><tspan
-           dx="0"
-           dy="0"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:50.8px;font-family:Ovo;-inkscape-font-specification:Ovo;fill:#000000;stroke-width:0.264583"
-           id="tspan1902">Identifying Cannabis Dispensary</tspan></tspan><tspan
-         sodipodi:role="line"
-         x="-6.3296218"
-         y="196.18776"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:50.8px;font-family:Ovo;-inkscape-font-specification:Ovo;fill:#000000;stroke-width:0.264583"
-         id="tspan1931">Purchase Patterns with</tspan><tspan
-         sodipodi:role="line"
-         x="-6.3296218"
-         y="260.6138"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:50.8px;font-family:Ovo;-inkscape-font-specification:Ovo;stroke-width:0.264583"
-         id="tspan1936"><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:50.8px;font-family:Ovo;-inkscape-font-specification:Ovo;fill:#000000;stroke-width:0.264583"
-           id="tspan1938"
-           dx="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.27511215"
-           dy="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0">Market Basket Analysis </tspan></tspan></text>
+       id="text871"
+       style="font-size:50.8px;line-height:1.25;font-family:Forte;-inkscape-font-specification:Forte;white-space:pre;shape-inside:url(#rect873);fill:#e2e8d0;fill-opacity:1;stroke-width:0.522037;"
+       transform="matrix(1.9155662,0,0,1.9155662,147.56437,322.3239)"><tspan
+         x="-81.382812"
+         y="-55.55847"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:50.8px;font-family:Forum;-inkscape-font-specification:Forum;fill:#e2e8d0;fill-opacity:1;stroke-width:0.522037">Cannabis Lab Data</tspan></tspan></text>
   </g>
 </svg>
