@@ -1,11 +1,18 @@
-# <img width="20" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics
-<!-- TODO: FIx reference to calyx image -->
+| Cannlytics SOP-0005 |  |
+|---------------------|--|
+| Title | Development |
+| Version | 1.0.0 |
+| Created At | 2023-07-18 |
+| Updated At | 2023-07-18 |
+| Review Period | Annual |
+| Last Review | 2023-07-18 |
+| Author | Keegan Skeate, Founder |
+| Approved by | Keegan Skeate, Founder |
+| Status | Active |
 
-![version](https://img.shields.io/badge/version-0.0.9-darkgreen)
-[![License: MIT](https://img.shields.io/badge/License-MIT-darkgreen.svg)](https://opensource.org/licenses/MIT)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)](https://github.com/cannlytics/cannlytics/fork)
+# Development
 
-Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software designed to make your data and information accessible. Cannlytics makes cannabis analysis **simple** and **easy** through data accessibility. We believe that everyone in the cannabis industry should be able to access rich, valuable data quickly and easily and that you will be better off for it. This documentation covers the Cannlytics architecture and how to build, develop, and publish the Cannlytics platform. You can view the platform live at <https://console.cannlytics.com> and the documentation at <https://docs.cannlytics.com>.
+This SOP covers the Cannlytics architecture and how to build, develop, and publish the Cannlytics platform. You can view the platform live at <https://cannlytics.com> and read the documentation at <https://docs.cannlytics.com>.
 
 - [Introduction](#introduction)
 - [Installation](#installation)
@@ -23,11 +30,8 @@ Cannlytics is simple, easy-to-use, **end-to-end** cannabis analytics software de
   * [Building and running the project with Docker](#docker)
 - [Testing](#testing)
 - [Publishing](#publishing)
-- [Contributing](#contributing)
+- [Conclusion](#conclusion)
 - [Resources](#resources)
-- [License](#license)
-<!-- -  -->
-<!-- - [Administration](#administration) -->
 
 ## Introduction <a name="introduction"></a>
 
@@ -130,6 +134,121 @@ You will need to grant your service key *Secret Manager Admin* permissions in [C
     }
   }
 }
+```
+
+For downloading files from Firebase Storage, you should set your CORS rules. If you don't want any domain-based restrictions (the most common scenario), then copy the following JSON to a file named `cors.json`:
+
+```json
+[
+  {
+    "origin": ["*"],
+    "method": ["GET"],
+    "maxAgeSeconds": 3600
+  }
+]
+```
+
+Then deploy the rules with:
+
+```shell
+gsutil cors set cors.json gs://<your-cloud-storage-bucket>
+```
+
+> Note: Your service account will need `gcloud.builds.submit` and `storage.objects.get` permissions to deploy the rules.
+
+2.7 Create your production secret environment variables
+
+Now, you will need to set your environment variables for production.
+
+Open [Google Cloud Shell](https://console.cloud.google.com/) and run the following command to ensure that you are working under the correct email and with the correct project:
+
+```shell
+gcloud init
+```
+
+Next, ensure that your project has billing enabled, then enable the Cloud APIs that are used:
+
+```shell
+gcloud services enable \
+  run.googleapis.com \
+  sql-component.googleapis.com \
+  sqladmin.googleapis.com \
+  compute.googleapis.com \
+  cloudbuild.googleapis.com \
+  secretmanager.googleapis.com
+```
+
+Create a secret with:
+
+```shell
+gcloud secrets create \
+  cannlytics_lims_settings \
+  --replication-policy automatic
+```
+
+Allow Cloud Run access to access this secret:
+
+```shell
+PROJECT_ID=$(gcloud config get-value project)
+PROJECTNUM=$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumber)')
+CLOUDRUN=${PROJECTNUM}-compute@developer.gserviceaccount.com
+
+gcloud secrets add-iam-policy-binding \
+  cannlytics_settings \
+  --member serviceAccount:${CLOUDRUN} \
+  --role roles/secretmanager.secretAccessor
+```
+
+
+Cloud Build will run Django commands, so Cloud Build will also need access to this secret:
+
+```shell
+PROJECT_ID=$(gcloud config get-value project)
+PROJECTNUM=$(gcloud projects describe ${PROJECT_ID} --format 'value(projectNumber)')
+CLOUDBUILD=${PROJECTNUM}@cloudbuild.gserviceaccount.com
+
+gcloud secrets add-iam-policy-binding \
+  cannlytics_settings \
+  --member serviceAccount:${CLOUDBUILD} \
+  --role roles/secretmanager.secretAccessor
+```
+
+Create a Cloud Storage bucket with a globally unique name:
+
+```shell
+REGION=us-central1
+GS_BUCKET_NAME=${PROJECT_ID}-media
+gsutil mb -l ${REGION} gs://${GS_BUCKET_NAME}
+```
+
+Then create your environment variables and save them to the secret:
+
+```shell
+APP_ID=cannlytics
+REGION=us-central1
+DJPASS="$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 30 | head -n 1)"
+echo DATABASE_URL=\"postgres://djuser:${DJPASS}@//cloudsql/${APP_ID}:${REGION}:cannlytics-sql/cannlytics-sql-database\" > .env
+echo GS_BUCKET_NAME=\"${GS_BUCKET_NAME}\" >> .env
+echo SECRET_KEY=\"$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 50 | head -n 1)\" >> .env
+echo DEBUG=\"False\" >> .env
+echo EMAIL_HOST_USER=\"your-email\" >> .env
+echo EMAIL_HOST_PASSWORD=\"your-email-password\" >> .env
+gcloud secrets versions add cannlytics_settings --data-file .env
+rm .env
+```
+
+> Set `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` with your email and [app password](https://dev.to/abderrahmanemustapha/how-to-send-email-with-django-and-gmail-in-production-the-right-way-24ab). If you do not plan to use Django's email interface, then you exclude `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD`.
+
+Update your IAM policy:
+
+```shell
+gcloud beta run services add-iam-policy-binding --region=us-central1 --member=allUsers --role=roles/run.invoker your-lims
+```
+
+You can confirm that the secret was created or updated with:
+
+```shell
+gcloud secrets versions list cannlytics_settings
 ```
 
 ### 3. Installing project dependencies and development tools <a name="installing-dependencies"></a>
@@ -517,26 +636,36 @@ This step provides access to this containerized app from a [Firebase Hosting] UR
 firebase deploy --only hosting:production
 ```
 
-## Contributing <a name="contributing"></a>
+> Note: You can setup a custom domain. You can register a domain with [Google Domains](https://domains.google.com/registrar/). You can then add a custom domain in the Firebase Hosting console. If you are using Google Domains, then use '@' for your root domain name and 'www' or 'www.domain.com' for your subdomains when registering your DNS A records.
 
-Contributions are always welcome! You are encouraged to submit issues, functionality, and features that you want to be addressed. See [the contributing guide](https://docs.cannlytics.com/developers/contributing/) to get started. Anyone is welcome to contribute anything. Email <dev@cannlytics.com> for a quick onboarding. Currently, the Cannlytics Console would love:
+### Security rules
 
-* Art;
-* More code;
-* More documentation;
-* Ideas.
+You can deploy a new set of security rules with the Firebase CLI.
 
-### Contributors
+```shell
+firebase deploy --only firestore:rules
+```
 
-- Charles Rice <charles@ufosoftwarellc.com>
-- Carlos Krefft <carlos@krefft.org>
-- Keegan Skeate <keegan@cannlytics.com>
-- Michael Pilosov <https://www.mathematicalmichael.com>
+### Monitoring
 
-## License <a name="license"></a>
+You can now monitor your app with the following tools.
 
-**Cannlytics** Copyright (©) 2020-2021 Cannlytics and Cannlytics Contributors.
+| Resource | Description |
+| ---------- | ------------ |
+| [Cloud Run Console](https://console.cloud.google.com/run) | Manage your app's container. |
+| [Logs Explorer](https://console.cloud.google.com/logs) | Realtime logs for your app. |
+| [Error Reporting](https://console.cloud.google.com/errors) | Provides detailed historic errors that occurred when running your app. |
 
-[MIT License](https://opensource.org/licenses/MIT)
+## Conclusion
 
-Made with 🧡 and <a href="https://opencollective.com/cannlytics-company">your good will</a>.
+Congratulations, you have developed, built, and published Cannlytics! You now have a simple, yet complex, website running on Cloud Run, which will automatically scale to handle your website's traffic, optimizing CPU and memory so that your website runs with the smallest footprint possible, saving you money. If you desire, you can now seamlessly integrate services such as Cloud Storage into your Django website. You can now plug and play and tinker to your heart's content while your users enjoy your well-organized cannabis data and analytics!
+
+## Resources
+
+- [Running Django on Cloud Run](https://cloud.google.com/python/django/run#gcloud)
+- [Django on Cloud Run Code Lab](https://codelabs.developers.google.com/codelabs/cloud-run-django/index.html#7)
+- [Generating Django Secret Keys](https://stackoverflow.com/questions/4664724/distributing-django-projects-with-unique-secret-keys)
+- [Granting permissions](https://cloud.google.com/container-registry/docs/access-control#grant)
+- [Permission Denied - GCP Cloud Resource Manager setIamPolicy](https://stackoverflow.com/questions/53163115/permission-denied-gcp-cloud-resource-manager-setiampolicy)
+- [Secret manager access denied despite correct roles for service account](https://stackoverflow.com/questions/62444867/secret-manager-access-denied-despite-correct-roles-for-service-account)
+- [Troubleshooting group membership](https://cloud.google.com/iam/docs/troubleshooting-access#troubleshooting_group_membership)

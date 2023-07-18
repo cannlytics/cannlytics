@@ -1,4 +1,19 @@
+| Cannlytics SOP-0009 |  |
+|---------------------|--|
+| Title | Publishing |
+| Version | 1.0.0 |
+| Created At | 2023-07-18 |
+| Updated At | 2023-07-18 |
+| Review Period | Annual |
+| Last Review | 2023-07-18 |
+| Author | Keegan Skeate, Founder |
+| Approved by | Keegan Skeate, Founder |
+| Status | Active |
+
+
 # Publishing
+
+This SOP guides you through publishing the Cannlytics platform to the web.
 
 First, you will need to save your environment variables as a secret. Then, you may want to walk through the build process one time manually. Afterwards, publishing the website is done with one command:
 

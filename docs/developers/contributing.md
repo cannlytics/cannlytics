@@ -1,3 +1,15 @@
+| Cannlytics SOP-0011 |  |
+|---------------------|--|
+| Title | Contributing |
+| Version | 1.0.0 |
+| Created At | 2023-07-18 |
+| Updated At | 2023-07-18 |
+| Review Period | Annual |
+| Last Review | 2023-07-18 |
+| Author | Keegan Skeate, Founder |
+| Approved by | Keegan Skeate, Founder |
+| Status | Active |
+
 # Contributing
 
 ## Become a Sponsor

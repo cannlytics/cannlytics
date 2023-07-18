@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Cannlytics <contact@cannlytics.com>
+# Copyright (c) 2023 Cannlytics <contact@cannlytics.com>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
@@ -71,9 +71,9 @@ theme:
       
 # Extensions
 markdown_extensions:
-  - markdown.extensions.toc:
-      slugify: !!python/name:pymdownx.slugs.uslugify
-      permalink: ""
+  # - markdown.extensions.toc:
+  #     slugify: !!python/name:pymdownx.slugs.uslugify
+  #     permalink: ""
   - markdown.extensions.admonition:
   - markdown.extensions.smarty:
       smart_quotes: false
@@ -160,30 +160,13 @@ plugins:
         - tests/*
         - tools/*
         - website/*
-  # - mkdocstrings:
-  #     handlers:
-  #       python:
-  #         setup_commands:
-  #           - import sys
-  #           - from unittest.mock import MagicMock as mock
-  #           - sys.path.append('cannlytics')
-  #           - sys.modules["numpy"] = mock()
-  #           - sys.modules["pandas"] = mock()
-  #           - sys.modules["firebase_admin"] = mock()
-  #           - sys.modules["googlemaps"] = mock()
-  #           - sys.modules["google-cloud"] = mock()
-  #           - sys.modules["google-cloud-firestore"] = mock()
-  #           - sys.modules["ulid"] = mock()
-  #           - sys.modules["requests"] = mock()
-  #           - sys.modules["django"] = mock()
-  #           - sys.modules["xlwings"] = mock()
-  #           - sys.modules["dotenv"] = mock()
-  #           - sys.modules["enforce_typing"] = mock()
-  #           - sys.modules["pytz"] = mock()
 
-# Site map
+# Index
 nav:
-  # - Home: index.md
+
+  # About
+  #------------
+  - Home: docs/index.md
 
   # About
   #------------
@@ -201,68 +184,35 @@ nav:
   - API:
     - Overview: api/readme.md
     - Authentication: api/auth/readme.md
+    - AI: api/ai/readme.md
     - Data: api/data/readme.md
-    # - LIMS:
-    #   - Analyses: api/analyses/readme.md
-    #   - Analytes: api/analytes/readme.md
-    #   - Areas: api/areas/readme.md
-    #   - Contacts: api/contacts/readme.md
-    #   - Instruments: api/instruments/readme.md
-    #   - Inventory: api/inventory/readme.md
-    #   - Invoices: invoices/readme.md
-    #   - Measurements: api/measurements/readme.md
-    #   - Projects: api/projects/readme.md
-    #   - Results: api/results/readme.md
-    #   - Samples: api/samples/readme.md
-    #   - Transfers: api/transfers/readme.md
-      # TODO: Add waste docs
-    - Organizations: api/organizations/readme.md
+    - Stats: api/stats/readme.md
+    - Metrc: api/metrc/readme.md
     - Users: api/users/readme.md
+    - Organizations: api/organizations/readme.md
     - Settings: api/settings/readme.md
-    - Metrc: api/traceability/readme.md
-    # TODO: Flesh out traceability documentation.
+    
 
   # Data
   #------------
+  - Data:
+    - Overview: data/readme.md
+    - Archive: data/archive/readme.md
+    - Licenses: data/archive/cannabis_licenses/readme.md
+    - Lab Results: data/archive/cannabis_tests/readme.md
+    - Patents: data/archive/cannabis_patents/readme.md
+    - Strains: data/archive/cannabis_strains/readme.md
+    - Sales: data/archive/cannabis_sales/readme.md
 
-  # TODO: Examples
-  #------------
-
-  # TODO: 
-  #------------
-  # - Quickstart Guide
-  
   # Users
   #------------
+  # TODO: Write general user documentation.
   # - Users:
   #   - Getting Started: console/get-started.md
   #   - Authentication: console/authentication.md
-  #   - Analyses: console/lims/analyses.md
-  #   - Analytes: console/lims/analytes.md
-  #   - Areas: console/lims/areas.md
-  #   - Contacts: console/lims/contacts.md
-  #   # FIXME: Touch up, remove, or condense these documents.
-  #   - Data:
-  #     # - Overview: console/lims/data/data.md
-  #     - Data Collection: console/lims/data/data_collection.md
-  #     # - Data Analysis: console/lims/data/data_analysis.md
-  #     # - Data Review: console/lims/data/data_review.md
-  #     # - Importing and exporting data: console/lims/data/exports.md
-  #     # - Generating CoAs: console/lims/generating_coas.md
-  #     # - Posting Results: console/lims/posting_results.md
-  #     # - Quality Control: console/lims/qc.md
-  #     - Logs: console/lims/data/logs.md
-  #   - Instruments: console/lims/instruments.md
-  #   - Inventory: console/lims/inventory.md
-  #   - Invoices: console/lims/invoices.md
-  #   - Organizations: console/lims/organizations.md
-  #   - Projects: console/lims/projects.md
-  #   - Results: console/lims/results.md
-  #   - Samples: console/lims/samples.md
-  #   - Transfers: console/lims/transfers.md
-  #   - Traceability: console/lims/traceability.md
-  #   - Worksheets: console/lims/worksheets.md
-  #   - Settings: console/lims/settings.md
+  #   - Quickstart Guide
+  #   - Examples
+
 
   # Cannlytics SDK
   #---------------
@@ -271,29 +221,32 @@ nav:
     - Auth: cannlytics/auth/readme.md
     - Data:
       - Overview: cannlytics/data/readme.md
-      - CoAs: cannlytics/data/coas/readme.md
+      - CCRS: cannlytics/data/ccrs/readme.md
+      - COAs: cannlytics/data/coas/readme.md
       - Market: cannlytics/data/market/readme.md
+      - Sales: cannlytics/data/sales/readme.md
+      - Strains: cannlytics/data/strains/readme.md
     - Firebase: cannlytics/firebase/readme.md
     - LIMS: cannlytics/lims/readme.md
     - Metrc: cannlytics/metrc/readme.md
+    - Models: cannlytics/models/readme.md
     - Stats: cannlytics/stats/readme.md
     - Utils: cannlytics/utils/readme.md
-    # - API References:
-    #   - Firebase: cannlytics/firebase/firebase.md
-    #   - Utils: cannlytics/utils/firebase.md
+    # TODO: Examples
   
   # Developers
   #------------
-  # - Developers:
-  #   - Getting Started: developers/development.md
-  #   - Installation: developers/installation.md
-  #   - Contributing: developers/contributing.md
-  #   - Packaging: developers/packaging.md
-  #   - Publishing: developers/publishing.md
-  #   - Roadmap: developers/roadmap.md
-  #   - Security: developers/security.md
-  #   - Testing: developers/testing.md
-  #   - Version control: developers/version_control.md
-  #   - SOPs:
-  #     - Control of Documents: developers/sops/control-of-documents.md
-  #     - COA Parsing: developers/sops/coa-parsing.md
+  - Developers:
+    - Overview: README.md
+    - Getting Started: docs/developers/development.md
+    - Contributing: docs/developers/contributing.md
+    - Testing: docs/developers/testing.md
+    - Security: docs/developers/security.md
+    - Control of Documents: docs/developers/control-of-documents.md
+    - Data Collection: docs/developers/data-collection.md
+    - COA Parsing: docs/developers/coa-parsing.md
+    - Datasets: docs/developers/datasets.md
+    - Packaging: docs/developers/packaging.md
+    - Publishing: docs/developers/publishing.md
+    - Documentation: docs/developers/documentation.md
+    - Change Log: docs/changelog.md

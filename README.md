@@ -40,7 +40,7 @@ Do you want to join a team of data scientists from around the world who are adva
 Contributions are always welcome! You are encouraged to submit [issues](https://github.com/cannlytics/cannlytics/issues), functionality, and features that you want to be addressed. See [the contributing guide](https://docs.cannlytics.com/developers/contributing/) to get started. Anyone is welcome to contribute anything. Currently, the project could greatly benefit from:
 
 - 🎨 [Art](https://github.com/cannlytics/cannlytics/tree/main/website/static/website/images);
-- 👨‍💻 [Code refactoring](.docs/developers/contributing.md);
+- 👨‍💻 [Code refactoring](https://docs.cannlytics.com/developers/contributing/);
 - 💡 [General ideas for improvement](mailto:contact@cannlytics.com);
 - 👷 [Tests](https://github.com/cannlytics/cannlytics/tree/main/tests);
 - 🖊️ [User documentation](https://github.com/cannlytics/cannlytics/tree/main/docs);

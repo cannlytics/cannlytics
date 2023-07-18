@@ -1,4 +1,16 @@
-# Data Wrangling for Cannlytics Developers
+| Cannlytics SOP-0004 |  |
+|---------------------|--|
+| Title | Datasets |
+| Version | 1.0.0 |
+| Created At | 2023-07-18 |
+| Updated At | 2023-07-18 |
+| Review Period | Annual |
+| Last Review | 2023-07-18 |
+| Author | Keegan Skeate, Founder |
+| Approved by | Keegan Skeate, Founder |
+| Status | Active |
+
+# Datasets
 
 The following documentation is intended for Cannlytics Data Scientists who wish to use or publish datasets on Hugging Face. The documentation covers:
 
@@ -70,7 +82,7 @@ A dataset is composed of:
 
 ## Making a Dataset Pull Request
 
-When you want to make a pull request to a specific dataset, first, create a pull request branch on [Hugging Face](huggingface.co), then checkout the branch:
+When you want to make a pull request to a specific dataset, first, create a pull request branch on [Hugging Face](https://huggingface.co), then checkout the branch:
 
 ```bash
 git fetch origin refs/pr/2:pr/2
