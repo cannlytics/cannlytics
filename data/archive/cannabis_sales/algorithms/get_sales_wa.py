@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 4/17/2023
+Updated: 7/18/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -167,6 +167,40 @@ def stats_to_df(stats: dict[dict]) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
+def ripple_list(file_paths, n):
+    """
+    Given a list of file paths and a starting point 'n', generates an
+    ordered list of dataset paths spiraling outwards. The order starts
+    at the given index 'n' and then alternates between one less and one
+    greater, continuing to spiral out from the initial index.
+
+    Args:
+        file_paths (list): The list of file paths.
+        n (int): The starting index for the datasets.
+
+    Returns:
+        list: A list of dataset paths in the order they should be
+        searched, starting from 'n' and spiraling outwards.
+
+    Example:
+        file_paths = ['file_path_0', 'file_path_1', ..., 'file_path_96']
+        ripple_list(file_paths, 25)
+        >> ['file_path_25', 'file_path_24', 'file_path_26', 'file_path_23', 'file_path_27', ... , 'file_path_96']
+    """
+    dataset_paths = []
+    dataset_paths.append(file_paths[n])
+    left, right = n - 1, n + 1
+    total_paths = len(file_paths)
+    while left >= 0 or right < total_paths:
+        if left >= 0:
+            dataset_paths.append(file_paths[left])
+            left -= 1
+        if right < total_paths:
+            dataset_paths.append(file_paths[right])
+            right += 1
+    return dataset_paths
+
+
 # def curate_ccrs_sales(
 #         data_dir,
 #         stats_dir,
@@ -182,9 +216,9 @@ if __name__ == '__main__':
     base = 'D:\\data\\washington\\'
     data_dir = f'{base}\\CCRS PRR (6-6-23)\\CCRS PRR (6-6-23)\\'
     stats_dir = f'{base}\\ccrs-stats\\'
-    first_file = 90
+    first_file = 77
     last_file = None
-    reverse = True
+    reverse = False
 
     print('Curating sales...')
     start = datetime.now()
@@ -238,19 +272,14 @@ if __name__ == '__main__':
             (items['IsDeleted'] != True)
         ]
 
-        # Iterate over the sales headers until all items have been augmented.
-        # Note: There is probably a clever way to reduce the number of times
-        # that the headers are read. Currently reads all sale headers from
-        # current to earliest then reads earliest to current for the
-        # 2nd half to try to reduce unnecessary reads.
+        # Efficiently order sales headers.
         print('Merging sale header data...')
-        if i < len(sales_items_files) / 2 and reverse:
-            desc = False
-        elif i < len(sales_items_files) / 2 or reverse:
-            desc = True
-        else:
-            desc = False
-        sale_headers_files = get_datafiles(data_dir, 'SaleHeader_', desc=desc)
+        basename = datafile.split('\\')[-1]
+        index = int(basename.split('_')[-1].split('.')[0])
+        sale_headers_files = get_datafiles(data_dir, 'SaleHeader_', desc=False)
+        sale_headers_files = ripple_list(sale_headers_files, index)
+
+        # Iterate over the sales headers until all items have been augmented.
         items = merge_datasets(
             items,
             sale_headers_files,
@@ -265,6 +294,8 @@ if __name__ == '__main__':
         items = standardize_dataset(items)
 
         # Augment with curated inventory.
+        # TODO: This takes the most amount of time to run if this
+        # portion of code can be refactored.
         print('Merging inventory data...')
         for datafile in inventory_files:
 

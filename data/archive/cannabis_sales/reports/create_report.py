@@ -13,17 +13,17 @@ class CannabisReport:
         self.clean_data()
 
     def load_data(self):
-        # Concatenate dataframes from all paths
+        # Concatenate data from all paths.
         data = pd.concat((pd.read_csv(path) for path in self.data_paths))
         return data
 
     def clean_data(self):
-        # Perform necessary data cleaning
+        # Perform necessary data cleaning.
         # Remove NA values for now, you may want to fill them appropriately based on your specific needs
         self.data = self.data.dropna()
 
     def analyze(self):
-        # Perform necessary data analysis
+        # Perform necessary data analysis.
         results = {}
 
         # Example: Count of lab results by state
@@ -43,8 +43,8 @@ class CannabisReport:
         return results
     
     def analyze_time_series(self):
-        # Analyze time series data
-        # Convert date columns to datetime
+        # Analyze time series data.
+        # Convert date columns to datetime.
         for col in ['date_collected', 'date_tested', 'date_received']:
             self.data[col] = pd.to_datetime(self.data[col])
             
