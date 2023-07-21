@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/26/2023
+// Updated: 6/11/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -14,8 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/utils/web_utils.dart';
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 
 /// A footer with links at the bottom of the app.
 class Footer extends ConsumerWidget {
@@ -29,33 +29,26 @@ class Footer extends ConsumerWidget {
 
     // Build the footer.
     return Container(
-      // color: Theme.of(context).scaffoldBackgroundColor,
-      margin: EdgeInsets.only(top: Insets(1).md),
+      margin: EdgeInsets.all(0),
+      padding: EdgeInsets.all(0),
       child: Center(
         child: SizedBox(
           width: Breakpoints.desktop.toDouble(),
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding(screenWidth),
+            padding: EdgeInsets.only(
+              // top: 48,
+              top: 0,
+              left: horizontalPadding(screenWidth),
+              right: horizontalPadding(screenWidth),
             ),
             child: Column(
               crossAxisAlignment:
                   isWide ? CrossAxisAlignment.start : CrossAxisAlignment.center,
               children: [
-                // Copyright and version.
-                Row(
-                  mainAxisAlignment: isWide
-                      ? MainAxisAlignment.spaceBetween
-                      : MainAxisAlignment.center,
-                  children: [
-                    _copyright(context),
-                    if (isWide) _version(context),
-                  ],
-                ),
-                gapH6,
-
                 // Horizontal rule.
                 Container(
+                  margin: EdgeInsets.all(0),
+                  padding: EdgeInsets.all(0),
                   color: Theme.of(context).dividerColor,
                   height: 1,
                 ),
@@ -68,28 +61,6 @@ class Footer extends ConsumerWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  /// Copyright widget.
-  Widget _copyright(BuildContext context) {
-    return SizedBox(
-      height: 32,
-      child: FooterLink(
-        text: 'Copyright © 2023 Cannlytics',
-        route: 'https://github.com/cannlytics/cannlytics',
-      ),
-    );
-  }
-
-  /// Version widget.
-  Widget _version(BuildContext context) {
-    return SizedBox(
-      height: 32,
-      child: FooterLink(
-        text: 'v1.0.0',
-        route: 'https://github.com/cannlytics/cannlytics',
       ),
     );
   }
@@ -109,30 +80,34 @@ class FooterLinks extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Contact link.
+        if (isWide) const SizedBox(width: 8),
+        // FIXME: Replace with CC logo: assets/images/logos/cc_heart.svg
+        // TODO: Add a tooltip: "Except where otherwise noted, this website is licensed under a Creative Commons Attribution 4.0 International Public License."
+        // TODO: Add a link to: 'https://creativecommons.org/licenses/by/4.0/'
         const FooterLink(
-          text: 'Contact',
-          route: 'https://cannlytics.com/contact',
+          text: 'CC BY 4.0',
+          route: 'https://creativecommons.org/licenses/by/4.0/',
         ),
 
         // Spacer.
         if (isWide) const Spacer(),
 
-        // Terms links.
-        if (!isWide) const SizedBox(width: 32),
+        // Links.
         const FooterLink(
-          text: 'Privacy',
-          route: 'https://docs.cannlytics.com/about/privacy-policy',
+          text: 'Contact',
+          route: 'https://cannlytics.com/contact',
         ),
-        const SizedBox(width: 32),
+        if (isWide) const SizedBox(width: 8),
         const FooterLink(
-          text: 'Security',
-          route: 'https://docs.cannlytics.com/about/security-policy',
+          text: 'GitHub',
+          route: 'https://github.com/cannlytics/cannlytics',
         ),
-        const SizedBox(width: 32),
+        if (isWide) const SizedBox(width: 8),
         const FooterLink(
           text: 'Terms',
           route: 'https://docs.cannlytics.com/about/terms-of-service',
         ),
+        if (isWide) const SizedBox(width: 8),
       ],
     );
   }
@@ -153,7 +128,7 @@ class FooterLink extends StatelessWidget {
     return TextButton(
       child: Text(
         text,
-        style: Theme.of(context).textTheme.titleSmall,
+        style: Theme.of(context).textTheme.bodySmall,
       ),
       onPressed: () {
         WebUtils.launchURL(route);

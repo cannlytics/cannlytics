@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 3/27/2023
+// Updated: 6/17/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
+import 'dart:async';
 import 'dart:convert';
 
 // Package imports:
@@ -16,8 +17,12 @@ import 'package:http/http.dart' as http;
 
 /// Service to interface with the Cannlytics API.
 class APIService {
+  const APIService._();
+
   // Define the base URL.
+  // FIXME: Smoothly switch between dev and production.
   static String _baseUrl = 'http://127.0.0.1:8000/api';
+  // static String _baseUrl = 'https://cannlytics.com/api';
 
   /// Initialize the API service.
   static void initialize() {
@@ -42,6 +47,8 @@ class APIService {
   static Future<dynamic> apiRequest(
     String endpoint, {
     dynamic data,
+    dynamic files,
+    dynamic fileNames,
     Map? options,
   }) async {
     // Create default body, method, and headers.
@@ -82,9 +89,54 @@ class APIService {
     // Make the request.
     final client = http.Client();
     final request;
-    if (body == null) {
+    if (files != null) {
+      // Create a multipart request.
+      request = http.MultipartRequest(
+        'POST',
+        Uri.parse(url),
+      )..headers.addAll(headers);
+
+      // Add the files to the request.
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var bytes;
+        var filename;
+        try {
+          // PlatformFile to bytes.
+          bytes = await file.bytes;
+          filename = file.name;
+        } catch (error) {
+          try {
+            // File to bytes.
+            bytes = await file.readAsBytes();
+            filename = file.name;
+          } catch (error) {
+            // File already in bytes.
+            bytes = file;
+            filename = fileNames[i];
+          }
+        }
+        try {
+          // Add file from bytes.
+          request.files.add(http.MultipartFile.fromBytes(
+            'file',
+            bytes,
+            filename: filename,
+          ));
+        } catch (error) {
+          // Add file from a string.
+          request.files.add(http.MultipartFile.fromString(
+            'file',
+            bytes,
+            filename: filename,
+          ));
+        }
+      }
+    } else if (body == null) {
+      // Create a GET request.
       request = http.Request(method, Uri.parse(url))..headers.addAll(headers);
     } else {
+      // Create a POST request.
       request = http.Request(method, Uri.parse(url))
         ..headers.addAll(headers)
         ..body = body;
@@ -100,7 +152,6 @@ class APIService {
           ? responseData['data']
           : responseData;
     } catch (error) {
-      print("Request error: [error=${error.toString()}]");
       return response;
     }
   }

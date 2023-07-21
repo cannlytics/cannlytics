@@ -4,13 +4,29 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/26/2023
+// Updated: 6/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'colors.dart';
+
+/// An instance of the theme provider.
+final themeModeProvider = StateProvider<ThemeMode>((ref) {
+  // Get the current time of day.
+  final now = TimeOfDay.now();
+
+  // Determine whether it is daytime (between 8am and 8pm).
+  final isDaytime = now.hour >= 8 && now.hour < 20;
+
+  // Set the theme mode based on the time of day.
+  return isDaytime ? ThemeMode.light : ThemeMode.dark;
+});
 
 /// Colors used in the app for theming.
 class AppTheme {
@@ -33,7 +49,7 @@ class AppTheme {
       onError: Colors.white,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
-      error: Colors.red.shade400,
+      error: isDark ? DarkColors.darkOrange : LightColors.darkOrange,
     );
 
     // Create the ThemeData with the ColorScheme and TextTheme.
@@ -84,19 +100,17 @@ class AppTheme {
 
       // Data table style.
       dataTableTheme: DataTableThemeData(
-        // headingTextStyle: TextStyle(
-        //   fontWeight: FontWeight.bold,
-        //   fontSize: 16.0,
+        dataRowColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
+          if (states.contains(MaterialState.hovered)) {
+            return isDark ? DarkColors.mantle : LightColors.mantle;
+          }
+          return Colors.transparent;
+        }),
+        // decoration: BoxDecoration(
+        //   border: Border.all(color: Colors.grey),
+        //   borderRadius: BorderRadius.circular(3),
         // ),
-        // dataTextStyle: TextStyle(
-        //   fontSize: 14.0,
-        // ),
-        // headingRowColor: MaterialStateProperty.all(Colors.transparent),
-        // dataRowColor: MaterialStateProperty.all(Colors.transparent),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(3),
-        ),
       ),
 
       // Dialog style.
@@ -128,7 +142,7 @@ class AppTheme {
           fontFamily: 'SourceSerifPro',
         ),
         errorStyle: TextStyle(
-          color: isDark ? DarkColors.red : LightColors.red,
+          color: isDark ? DarkColors.darkOrange : LightColors.darkOrange,
           fontFamily: 'SourceSerifPro',
         ),
         isDense: true,
@@ -205,12 +219,12 @@ class AppTheme {
         ),
         titleSmall: TextStyle(
           color: isDark ? DarkColors.text : LightColors.text,
-          fontFamily: 'CormorantGaramond',
+          fontFamily: 'SourceSerifPro',
           fontSize: 16,
         ),
         bodyLarge: TextStyle(
           color: isDark ? DarkColors.text : LightColors.text,
-          fontFamily: 'CormorantGaramond',
+          fontFamily: 'SourceSerifPro',
           fontSize: 18,
           height: 1.5,
         ),
@@ -234,12 +248,12 @@ class AppTheme {
         labelMedium: TextStyle(
           fontSize: 16,
           color: isDark ? DarkColors.text : LightColors.text,
-          fontFamily: 'IBMPlexSans',
+          fontFamily: 'SourceSerifPro',
         ),
         labelSmall: TextStyle(
           fontSize: 15,
           color: isDark ? DarkColors.text : LightColors.text,
-          fontFamily: 'IBMPlexSans',
+          fontFamily: 'SourceSerifPro',
           fontWeight: FontWeight.w700,
           letterSpacing: 0.25,
         ),

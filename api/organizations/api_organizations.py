@@ -35,7 +35,7 @@ from cannlytics.firebase import (
 )
 from cannlytics.auth.auth import authenticate_request
 from api.metrc.api_metrc import initialize_traceability
-from console.settings import DEFAULT_FROM_EMAIL, LIST_OF_EMAIL_RECIPIENTS
+from website.settings import DEFAULT_FROM_EMAIL, LIST_OF_EMAIL_RECIPIENTS
 
 
 @api_view(['GET'])

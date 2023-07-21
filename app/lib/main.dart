@@ -1,17 +1,15 @@
-// Cannlytics App
+// Cannlytics Data
 // Copyright (c) 2023 Cannlytics
 // Copyright (c) 2021 Coding With Flutter Limited
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 3/25/2023
+// Updated: 6/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 
 // Flutter imports:
-import 'package:cannlytics_app/constants/licenses.dart';
-import 'package:cannlytics_app/utils/error_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -21,11 +19,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/theme.dart';
-import 'package:cannlytics_app/firebase_options.dart';
-import 'package:cannlytics_app/routing/app_router.dart';
-import 'package:cannlytics_app/services/theme_service.dart';
-import 'package:cannlytics_app/ui/main/app_controller.dart';
+import 'package:cannlytics_data/constants/errors.dart';
+import 'package:cannlytics_data/constants/licenses.dart';
+import 'package:cannlytics_data/constants/theme.dart';
+import 'package:cannlytics_data/firebase_options.dart';
+import 'package:cannlytics_data/routing/app_router.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 
 // ignore:depend_on_referenced_packages
 

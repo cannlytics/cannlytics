@@ -137,8 +137,8 @@ extra:
   social:
     - icon: fontawesome/brands/github-alt
       link: https://github.com/cannlytics
-    - icon: fontawesome/brands/docker
-      link: https://hub.docker.com/r/cannlytics/
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/cannlytics/
     - icon: fontawesome/brands/linkedin
       link: https://linkedin.com/company/cannlytics
 
@@ -167,6 +167,28 @@ nav:
   # About
   #------------
   - Home: docs/index.md
+
+  # Cannlytics
+  #---------------
+  - Cannlytics:
+    - Overview: cannlytics/readme.md
+    - Data:
+      - Archive: cannlytics/data/readme.md
+      - CCRS: cannlytics/data/ccrs/readme.md
+      - Lab Results: cannlytics/data/coas/readme.md
+      # TODO: Add licenses.
+      # - Licenses: cannlytics/data/coas/readme.md
+      # - Market: cannlytics/data/market/readme.md
+      - Sales and Receipts: cannlytics/data/sales/readme.md
+      - Strains: cannlytics/data/strains/readme.md
+    - Authentication: cannlytics/auth/readme.md
+    - Firebase: cannlytics/firebase/readme.md
+    # - LIMS: cannlytics/lims/readme.md
+    - Metrc: cannlytics/metrc/readme.md
+    # - Models: cannlytics/models/readme.md
+    # - Stats: cannlytics/stats/readme.md
+    - Utils: cannlytics/utils/readme.md
+    # TODO: Examples
 
   # About
   #------------
@@ -212,27 +234,6 @@ nav:
   #   - Authentication: console/authentication.md
   #   - Quickstart Guide
   #   - Examples
-
-
-  # Cannlytics SDK
-  #---------------
-  - Python SDK:
-    - Overview: cannlytics/readme.md
-    - Auth: cannlytics/auth/readme.md
-    - Data:
-      - Overview: cannlytics/data/readme.md
-      - CCRS: cannlytics/data/ccrs/readme.md
-      - COAs: cannlytics/data/coas/readme.md
-      - Market: cannlytics/data/market/readme.md
-      - Sales: cannlytics/data/sales/readme.md
-      - Strains: cannlytics/data/strains/readme.md
-    - Firebase: cannlytics/firebase/readme.md
-    - LIMS: cannlytics/lims/readme.md
-    - Metrc: cannlytics/metrc/readme.md
-    - Models: cannlytics/models/readme.md
-    - Stats: cannlytics/stats/readme.md
-    - Utils: cannlytics/utils/readme.md
-    # TODO: Examples
   
   # Developers
   #------------

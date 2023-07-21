@@ -1,11 +1,11 @@
 {
-    "name": "cannlytics_app",
-    "short_name": "cannlytics_app",
+    "name": "cannlytics_data",
+    "short_name": "cannlytics_data",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#ff9500",
-    "description": "Manage your cannabis data and analytics like a pro with Cannlytics.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

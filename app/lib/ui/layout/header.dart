@@ -1,672 +1,316 @@
-// Cannlytics App
+// Cannlytics Data
 // Copyright (c) 2023 Cannlytics
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 2/20/2023
-// Updated: 4/2/2023
+// Created: 4/14/2023
+// Updated: 6/23/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_app/services/auth_service.dart';
-import 'package:cannlytics_app/widgets/layout/shimmer.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
-import 'package:cannlytics_app/constants/design.dart';
-import 'package:cannlytics_app/models/metrc/facility.dart';
-import 'package:cannlytics_app/routing/routes.dart';
-import 'package:cannlytics_app/ui/account/user/account_controller.dart';
-import 'package:cannlytics_app/ui/business/facilities/facilities_controller.dart';
-import 'package:cannlytics_app/ui/main/app_controller.dart';
-import 'package:cannlytics_app/widgets/buttons/theme_button.dart';
-import 'package:cannlytics_app/widgets/dialogs/alert_dialogs.dart';
-import 'package:cannlytics_app/widgets/images/app_logo.dart';
-import 'package:cannlytics_app/widgets/images/avatar.dart';
+import 'package:cannlytics_data/common/buttons/custom_text_button.dart';
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
+import 'package:cannlytics_data/common/images/avatar.dart';
+import 'package:cannlytics_data/constants/colors.dart';
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/constants/theme.dart';
+import 'package:cannlytics_data/services/auth_service.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard_controller.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 
-// TODO:
-// - Better theme toggle / perhaps in settings?
-// - Show about dialog (i).
-// - A sidebar menu is needed for desktop.
-// - Style the organization and facility selection.
-//     * Outline
-//     * Icons
-
-/// The main navigation header.
-class AppHeader extends StatelessWidget {
-  const AppHeader({Key? key}) : super(key: key);
+/// Dashboard header.
+class DashboardHeader extends ConsumerWidget implements PreferredSizeWidget {
+  DashboardHeader({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    bool isWide = screenWidth > Breakpoints.tablet;
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: isWide
-          ? const DesktopNavigationLayout()
-          : const MobileNavigationLayout(),
-    );
-  }
-}
-
-/// Navigation layout for desktop.
-class DesktopNavigationLayout extends ConsumerWidget {
-  const DesktopNavigationLayout({Key? key}) : super(key: key);
+  Size get preferredSize => AppBar().preferredSize;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Get the screen width.
-    final screenWidth = MediaQuery.of(context).size.width;
-    bool isVeryWide = screenWidth > Breakpoints.desktop;
-
     // Listen to the current user.
     final user = ref.watch(userProvider).value;
-    ;
 
-    // Build the layout.
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(3),
-          bottomRight: Radius.circular(3),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).dividerColor,
-            spreadRadius: 1,
-            blurRadius: 1,
-            offset: Offset(0, 1),
-          ),
+    // Listen to the user's current amount of tokens.
+    final asyncSnapshot = ref.watch(userSubscriptionProvider);
+    final int currentTokens = asyncSnapshot.when(
+      data: (data) => data?['tokens'] ?? 0,
+      loading: () => 0,
+      error: (error, stack) => 0,
+    );
+
+    // Get the theme.
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
+
+    // Dynamic width.
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Render the widget.
+    return AppBar(
+      // Menu button.
+      leading: Responsive.isMobile(context)
+          ? null
+          : IconButton(
+              onPressed: () {
+                ref.read(sideMenuOpen.notifier).state = !ref.read(sideMenuOpen);
+              },
+              icon: Icon(
+                Icons.menu,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+
+      // Title.
+      centerTitle: false,
+      titleSpacing: 0,
+      title: Row(
+        children: [
+          if (screenWidth > Breakpoints.tablet - 200)
+            GestureDetector(
+              onTap: () => context.go('/'),
+              child: Image.asset(
+                isDark
+                    ? 'assets/images/logos/cannlytics_logo_with_text_dark.png'
+                    : 'assets/images/logos/cannlytics_logo_with_text_light.png',
+                height: 28,
+              ),
+            ),
         ],
       ),
-      child: SizedBox(
-        height: 48,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            gapW24,
-            AppIcon(),
 
-            // Organization selection.
-            SizedBox(width: isVeryWide ? 24 : 12),
-            OrganizationSelection(),
-
-            // License / facility selection.
-            gapW6,
-            FacilitySelection(),
-
-            // User photo menu.
-            const Spacer(),
-            if (user != null) _userPhotoMenu(context, ref, user),
-            SizedBox(width: isVeryWide ? 24 : 12),
-
-            // Theme toggle.
-            const ThemeToggle(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// User photo menu.
-  Widget _userPhotoMenu(
-    BuildContext context,
-    WidgetRef ref,
-    User? user,
-  ) {
-    return PopupMenuButton<String>(
-      surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(3),
-      ),
-      offset: Offset(0, 46),
-      onSelected: (value) async {
-        if (value == 'home') {
-          context.goNamed(AppRoutes.dashboard.name);
-        } else if (value == 'account') {
-          context.goNamed(AppRoutes.account.name);
-        } else if (value == 'sign-out') {
-          final logout = await showAlertDialog(
-            context: context,
-            title: 'Are you sure?',
-            cancelActionText: 'Cancel',
-            defaultActionText: 'Sign out',
-          );
-          if (logout == true) {
-            await ref.read(authProvider).signOut();
-            context.go('/sign-in');
-          }
-        }
-      },
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        PopupMenuItem<String>(
-          value: 'home',
-          child: Text(
-            'Home',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ),
-        PopupMenuItem<String>(
-          value: 'account',
-          child: Text(
-            'Account',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ),
-        PopupMenuItem<String>(
-          value: 'sign-out',
-          child: Text(
-            'Sign Out',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ),
-      ],
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        child: ShimmerLoading(
-          isLoading: user!.photoURL == null,
-          child: SizedBox(
-            width: 45,
-            height: 45,
-            child: Avatar(
-              photoUrl: user.photoURL ??
-                  'https://cannlytics.com/robohash/${user.uid}',
-              radius: 30,
-              borderColor: Theme.of(context).secondaryHeaderColor,
-              borderWidth: 1.0,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Navigation layout for mobile.
-class MobileNavigationLayout extends ConsumerStatefulWidget {
-  const MobileNavigationLayout({Key? key}) : super(key: key);
-
-  @override
-  MobileNavigationLayoutState createState() => MobileNavigationLayoutState();
-}
-
-class MobileNavigationLayoutState extends ConsumerState<MobileNavigationLayout>
-    with SingleTickerProviderStateMixin {
-  late final _menuController = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 150),
-  );
-
-  /// Open / close the menu.
-  void _toggleMenu() {
-    if (_menuController.isCompleted) {
-      _menuController.reverse();
-    } else {
-      _menuController.forward();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Get the user type.
-    final userType = ref.watch(userTypeProvider);
-
-    // Build the layout.
-    return AnimatedBuilder(
-      animation: _menuController,
-      builder: (context, _) {
-        // Get the user type.
-        final List<ScreenData> screens = (userType == 'consumer')
-            ? ScreenData.consumerScreens
-            : ScreenData.businessScreens;
-
-        // Format the height.
-        final int screenCount = screens.length;
-        final menuHeight = 56 * screenCount + 48;
-        final height = 48 + _menuController.value * menuHeight;
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(3),
-              bottomRight: Radius.circular(3),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).dividerColor,
-                spreadRadius: 1,
-                blurRadius: 1,
-                offset: Offset(0, 1),
+      // Actions.
+      actions: [
+        if (user == null)
+          Row(
+            children: [
+              // Sign in button.
+              CustomTextButton(
+                text: 'Sign In',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SignInDialog(isSignUp: false);
+                    },
+                  );
+                },
               ),
+
+              // Space.
+              gapW8,
+
+              // Sign up button.
+              PrimaryButton(
+                text: 'Sign Up',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SignInDialog(isSignUp: true);
+                    },
+                  );
+                },
+              ),
+
+              // Space.
+              gapW16,
             ],
           ),
-          child: SizedBox(
-            height: height,
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 48,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Icon.
-                      gapW6,
-                      AppIcon(),
-
-                      // Organization selection.
-                      gapW12,
-                      OrganizationSelection(),
-
-                      // License / facility selection.
-                      gapW6,
-                      FacilitySelection(),
-
-                      // Spacer.
-                      const Spacer(),
-
-                      // Open / close menu button.
-                      GestureDetector(
-                        onTap: _toggleMenu,
-                        child: AnimatedIcon(
-                          icon: AnimatedIcons.menu_close,
-                          progress: _menuController,
-                        ),
-                      ),
-                      gapW24,
-                    ],
-                  ),
-                ),
-
-                // List of routes.
-                Expanded(child: MobileNavigationMenu(screens: screens)),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// The main navigation for user's on mobile.
-class MobileNavigationMenu extends ConsumerWidget {
-  const MobileNavigationMenu({
-    Key? key,
-    required this.screens,
-  }) : super(key: key);
-  final List<ScreenData> screens;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Listen to the current user.
-    final state = ref.watch(accountProvider);
-    final user = ref.watch(userProvider).value;
-    if (user == null) return Container();
-
-    return Material(
-      elevation: 8,
-      child: ListView(
-        shrinkWrap: true,
-        children: [
-          // Account.
-          Container(
-            child: Column(
-              children: [
-                // User photo, name, and email.
-                gapH6,
-                Row(
-                  children: [
-                    // User photo.
-                    gapW12,
-                    Avatar(
-                      photoUrl: user.photoURL!,
-                      radius: 24,
-                      borderColor: Theme.of(context).secondaryHeaderColor,
-                      borderWidth: 1.0,
-                    ),
-                    gapW12,
-
-                    // User name and email.
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        if (user != null)
+          Row(children: [
+            // Token count and coin image.
+            Padding(
+              padding: EdgeInsets.only(right: 4),
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Tooltip(
+                  message:
+                      "Each AI job requires 1 token.\nYou can get tokens with a\nsubscription or piecemeal.",
+                  child: InkWell(
+                    onTap: () {
+                      const url =
+                          'https://cannlytics.com/account/subscriptions';
+                      launchUrl(Uri.parse(url));
+                    },
+                    child: Row(
                       children: [
-                        // User name.
+                        Image.network(
+                          'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fopenmoji%2Fai-coin.png?alt=media&token=465724f9-8e53-44f7-bd47-698cc90bc2c6',
+                          height: 24,
+                          width: 24,
+                        ),
+                        gapW2,
                         Text(
-                          user.displayName!,
-                          textAlign: TextAlign.start,
+                          '$currentTokens tokens',
                           style: Theme.of(context)
                               .textTheme
-                              .labelMedium!
+                              .bodyLarge!
                               .copyWith(
-                                  fontWeight: FontWeight.bold,
                                   color: Theme.of(context)
                                       .textTheme
                                       .titleLarge!
                                       .color),
                         ),
-
-                        // User email.
-                        Text(
-                          user.email!,
-                          textAlign: TextAlign.start,
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
                       ],
                     ),
-
-                    // Theme toggle.
-                    const Spacer(),
-                    const ThemeToggle(),
-                  ],
-                ),
-
-                // Divider.
-                Divider(
-                  color: Theme.of(context).dividerColor,
-                  thickness: 0.25,
-                ),
-
-                // Manage account.
-                InkWell(
-                  onTap: () {
-                    context.goNamed(AppRoutes.account.name);
-                  },
-                  child: ListTile(
-                    dense: true,
-                    title: Text(
-                      'Manage account',
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: Theme.of(context).textTheme.titleLarge!.color),
-                    ),
                   ),
                 ),
+              ),
+            ),
 
-                // Sign out.
-                InkWell(
-                  onTap: state.isLoading
-                      ? null
-                      : () async {
-                          final logout = await showAlertDialog(
-                            context: context,
-                            title: 'Are you sure?',
-                            cancelActionText: 'Cancel',
-                            defaultActionText: 'Sign out',
-                          );
-                          if (logout == true) {
-                            ref.read(accountProvider.notifier).signOut();
-                          }
-                        },
-                  child: ListTile(
-                    dense: true,
-                    title: Text(
-                      'Sign out',
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: Theme.of(context).textTheme.titleLarge!.color),
-                    ),
+            // User profile image.
+            UserMenu(
+              displayName: user.displayName ?? '',
+              email: user.email ?? '',
+              photoUrl: user.photoURL ??
+                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fplaceholders%2Fhomegrower-placeholder.png?alt=media&token=29331691-c2ef-4bc5-89e8-cec58a7913e4',
+            ),
+          ]),
+      ],
+    );
+  }
+}
+
+/// User menu.
+class UserMenu extends ConsumerWidget {
+  UserMenu({
+    Key? key,
+    required this.photoUrl,
+    required this.displayName,
+    required this.email,
+  }) : super(key: key);
+
+  // Parameters.
+  final String photoUrl;
+  final String displayName;
+  final String email;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get the theme.
+    final themeMode = ref.watch(themeModeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
+
+    // Render.
+    return Padding(
+      padding: EdgeInsets.only(top: 8, bottom: 8, right: 8),
+      child: PopupMenuButton<String>(
+        tooltip: 'User menu',
+        offset: Offset(0, 40),
+        padding: EdgeInsets.all(0),
+        surfaceTintColor: Colors.transparent,
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            enabled: false,
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                  child: Text(
+                    displayName,
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                  child: Text(
+                    email,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                Divider(),
               ],
             ),
           ),
-
-          // Divider.
-          Divider(
-            color: Theme.of(context).dividerColor,
-            thickness: 0.25,
-          ),
-
-          // Links.
-          for (ScreenData screen in screens)
-            MobileMenuListTile(
-              title: screen.title,
-              route: screen.route,
-              description: screen.description,
-              imageName: screen.imageName,
+          PopupMenuItem(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+            value: 'account',
+            child: Text(
+              'Your account',
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).textTheme.bodyLarge!.color),
             ),
+          ),
+          PopupMenuItem(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+            value: 'subscription',
+            child: Text(
+              'Manage your subscription',
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).textTheme.bodyLarge!.color),
+            ),
+          ),
+          PopupMenuItem(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+            value: 'api-keys',
+            child: Text(
+              'Manage your API keys',
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).textTheme.bodyLarge!.color),
+            ),
+          ),
+          PopupMenuItem(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+            value: 'sign-out',
+            child: Text(
+              'Sign out',
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).textTheme.bodyLarge!.color),
+            ),
+          ),
         ],
-      ),
-    );
-  }
-}
-
-/// Mobile menu list item.
-class MobileMenuListTile extends StatelessWidget {
-  const MobileMenuListTile({
-    Key? key,
-    required this.title,
-    required this.description,
-    required this.route,
-    required this.imageName,
-  }) : super(key: key);
-  final String title;
-  final String description;
-  final String route;
-  final String imageName;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      child: InkWell(
-        // splashColor: AppColors.accent1,
-        onTap: () {
-          context.goNamed(route);
-        },
-        child: ListTile(
-          dense: true,
-          leading: Image.asset(
-            imageName,
-            height: 45,
-          ),
-          title: Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: Theme.of(context).textTheme.titleLarge!.color,
-                ),
-          ),
-          subtitle: Text(
-            description,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
+        icon: Avatar(
+          key: Key('user_avatar'),
+          photoUrl: photoUrl,
+          radius: 33,
+          borderColor: Theme.of(context).secondaryHeaderColor,
+          borderWidth: 2.0,
         ),
-      ),
-    );
-  }
-}
-
-/// Link used for navigation.
-class NavigationLink extends StatelessWidget {
-  const NavigationLink({
-    Key? key,
-    required this.text,
-    required this.path,
-  }) : super(key: key);
-  final String text;
-  final String path;
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        context.goNamed(path);
-      },
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-              color: Theme.of(context).textTheme.titleLarge!.color,
-            ),
-      ),
-    );
-  }
-}
-
-/// Primary organization selection.
-class OrganizationSelection extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Get the user's organizations.
-    final orgs = ref.watch(organizationsProvider).value ?? [];
-
-    // Return organizations link button.
-    if (orgs.isEmpty) {
-      return NavigationLink(
-        text: 'Organizations',
-        path: AppRoutes.organizations.name,
-      );
-    }
-
-    // Get the user's current organization.
-    var value = ref.watch(primaryOrganizationProvider) ?? orgs[0].id;
-
-    // Build the selection.
-    var dropdown = DropdownButton(
-      underline: Container(),
-      isDense: true,
-      isExpanded: true,
-      // icon: Icon(Icons.business_center_outlined),
-      // iconSize: 18,
-      value: value,
-      items: orgs
-              .map(
-                (item) => DropdownMenuItem<String>(
-                  onTap: () => item.id,
-                  value: item.id,
-                  child: ListTile(
-                    dense: true,
-                    title: Text(item.id),
-                  ),
-                ),
-              )
-              .toList() +
-          [
-            DropdownMenuItem<String>(
-              onTap: () => 'organizations',
-              value: 'organizations',
-              child: ListTile(
-                dense: true,
-                title: Text('Manage organizations'),
-              ),
-            ),
-          ],
-      onChanged: (String? value) {
-        if (value == 'organizations') {
-          GoRouter.of(context).go('/organizations');
-          return;
-        }
-        ref.read(primaryOrganizationProvider.notifier).state = value!;
-      },
-    );
-
-    // Render the dropdown.
-    return Container(
-      // height: 45.0,
-      width: 150.0,
-      child: dropdown,
-    );
-  }
-}
-
-/// Primary license selection.
-class FacilitySelection extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Get the user's organizations.
-    final orgs = ref.watch(organizationsProvider).value ?? [];
-    if (orgs.isEmpty) return Container();
-
-    // Get the active organization.
-    final primaryOrg = ref.watch(primaryOrganizationProvider);
-    if (primaryOrg == null) return Container();
-
-    // Get all organization's licenses.
-    List<String> licenseIds = [];
-    for (var org in orgs) {
-      if (org.id == primaryOrg) {
-        var licenses = org.licenses ?? [];
-        if (licenses.isEmpty) continue;
-        for (var license in licenses) {
-          licenseIds.add(license!['license_number']);
-        }
-      }
-    }
-
-    // Return prompt to add a license if no licenses.
-    if (licenseIds.isEmpty) {
-      return NavigationLink(
-        text: '+ Add a license',
-        path: AppRoutes.addLicense.name,
-      );
-    }
-
-    /// Get the user's facilities.
-    final facilities = ref.watch(facilitiesProvider).value ?? [];
-
-    // Return prompt to add a license if no facilities.
-    if (facilities.isEmpty) {
-      return NavigationLink(
-        text: '+ Add a license',
-        path: AppRoutes.addLicense.name,
-      );
-    }
-
-    // Get the current facility.
-    var currentFacility = ref.watch(primaryFacility) ?? facilities[0];
-
-    // TODO: Add licenses and facilities to dropdown.
-
-    // Build the dropdown.
-    var dropdown = DropdownButton(
-      underline: Container(),
-      isDense: true,
-      isExpanded: true,
-      value: currentFacility.id,
-      items: facilities
-              .map(
-                (item) => DropdownMenuItem<String>(
-                  onTap: () => item.id,
-                  value: item.id,
-                  child: ListTile(
-                    dense: true,
-                    title: Text(item.id),
-                  ),
-                ),
-              )
-              .toList() +
-          [
-            DropdownMenuItem<String>(
-              onTap: () => 'add',
-              value: 'add',
-              child: ListTile(
-                dense: true,
-                title: Text('+ Add a license'),
-              ),
-            ),
-          ],
-      onChanged: (String? value) {
-        if (value == 'add') {
-          GoRouter.of(context).go('/licenses/add');
-          return;
-        }
-        for (Facility x in facilities) {
-          if (x.id == value) {
-            ref.read(primaryLicenseProvider.notifier).state = x.licenseNumber;
-            ref.read(primaryFacility.notifier).state = x;
+        onSelected: (value) async {
+          // Handle menu selection
+          switch (value) {
+            case 'account':
+              // Navigate to the account page.
+              context.push('/account');
+              break;
+            case 'subscription':
+              // Navigate to the subscriptions page.
+              launchUrl(
+                  Uri.parse('https://cannlytics.com/account/subscriptions'));
+              break;
+            case 'api-keys':
+              // Navigate to the API keys page.
+              launchUrl(Uri.parse('https://cannlytics.com/account/api-keys'));
+              break;
+            case 'sign-out':
+              // Sign out.
+              final logout = await InterfaceUtils.showAlertDialog(
+                context: context,
+                title: 'Are you sure that you want to sign out?',
+                cancelActionText: 'Cancel',
+                defaultActionText: 'Sign out',
+                primaryActionColor:
+                    isDark ? DarkColors.orange : LightColors.orange,
+              );
+              if (logout == true) {
+                await ref.read(authProvider).signOut();
+              }
+              break;
           }
-        }
-      },
-    );
-
-    // Render the dropdown.
-    return Container(
-      height: 45.0,
-      width: 150.0,
-      child: dropdown,
+        },
+      ),
     );
   }
 }

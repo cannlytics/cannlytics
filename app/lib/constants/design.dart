@@ -10,6 +10,14 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+// Defaults.
+class Defaults {
+  static const primaryColor = Color(0xFF2697FF);
+  static const secondaryColor = Color(0xFF2A2D3E);
+  static const bgColor = Color(0xFF212332);
+  static const defaultPadding = 16.0;
+}
+
 // Constant breakpoints.
 class Breakpoints {
   static const desktop = 1060.0;
@@ -50,6 +58,7 @@ class Insets {
 
 // Constant paddings.
 class Sizes {
+  static const p2 = 2.0;
   static const p4 = 4.0;
   static const p6 = 6.0;
   static const p8 = 8.0;
@@ -64,6 +73,7 @@ class Sizes {
 }
 
 // Constant gap widths.
+const gapW2 = SizedBox(width: Sizes.p2);
 const gapW4 = SizedBox(width: Sizes.p4);
 const gapW6 = SizedBox(width: Sizes.p6);
 const gapW8 = SizedBox(width: Sizes.p8);
@@ -77,6 +87,7 @@ const gapW48 = SizedBox(width: Sizes.p48);
 const gapW64 = SizedBox(width: Sizes.p64);
 
 // Constant gap heights.
+const gapH2 = SizedBox(height: Sizes.p2);
 const gapH4 = SizedBox(height: Sizes.p4);
 const gapH6 = SizedBox(height: Sizes.p6);
 const gapH8 = SizedBox(height: Sizes.p8);
@@ -108,5 +119,44 @@ double sliverHorizontalPadding(double screenWidth) {
     return 28;
   } else {
     return 20;
+  }
+}
+
+/// Render a widget depending on the screen size.
+class Responsive extends StatelessWidget {
+  final Widget mobile;
+  final Widget? tablet;
+  final Widget desktop;
+
+  const Responsive({
+    Key? key,
+    required this.mobile,
+    this.tablet,
+    required this.desktop,
+  }) : super(key: key);
+
+  /// Check if the screen is mobile size.
+  static bool isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < Breakpoints.tablet;
+
+  /// Check if the screen is tablet size.
+  static bool isTablet(BuildContext context) =>
+      MediaQuery.of(context).size.width < Breakpoints.desktop &&
+      MediaQuery.of(context).size.width >= Breakpoints.tablet;
+
+  /// Check if the screen is desktop size.
+  static bool isDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= Breakpoints.desktop;
+
+  @override
+  Widget build(BuildContext context) {
+    final Size _size = MediaQuery.of(context).size;
+    if (_size.width >= 1100) {
+      return desktop;
+    } else if (_size.width >= 850 && tablet != null) {
+      return tablet!;
+    } else {
+      return mobile;
+    }
   }
 }

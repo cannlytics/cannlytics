@@ -1,35 +1,55 @@
-name: cannlytics_app
-description: An app to interface with Cannlytics, cannabis data and analytics.
+name: cannlytics_data
+description: An app to interface with cannabis data and analytics.
 
 publish_to: 'none'
-version: 1.0.0
+version: 0.2.0
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
+  flutter:
+    sdk: flutter
   cloud_firestore: ^4.4.4
+  csv: ^5.0.2
   dartx: ^1.1.0
+  dotted_border: ^2.0.0+3
+  excel: ^2.1.0
   file_picker: ^5.2.5
   firebase_auth: ^4.2.10
   firebase_core: ^2.7.1
   firebase_storage: ^11.0.15
-  flutter:
-    sdk: flutter
+  fl_chart: ^0.61.0
   flutter_animate: ^4.1.0
+  flutter_downloader: ^1.10.2
+  flutter_dropzone: ^3.0.5
   flutter_layout_grid: ^2.0.1
+  flutter_launcher_icons: ^0.13.0
   flutter_native_splash: ^2.2.18
+  flutter_openmoji: ^0.0.8
   flutter_riverpod: ^2.3.1
   flutter_svg: ^2.0.3
-  # fuzzy: 0.3.0
   fluttertoast: ^8.2.1
   flutter_typeahead: ^4.3.7
+  google_maps_flutter: ^2.2.6
+  google_maps_flutter_web: ^0.4.0+8
   go_router: ^6.2.0
+  hooks_riverpod: ^2.3.6
   http: ^0.13.5
-  intl: ^0.17.0
+  intl: ^0.18.0
+  mobile_scanner: ^3.2.0
+  path_drawing: ^1.0.1
+  path_provider: ^2.0.15
+  pdf_render: ^1.4.0
   rxdart: ^0.27.7
   url_launcher: ^6.1.10
   uuid: ^3.0.7
+  flutter_cache_manager: ^3.3.0
+  internet_file: ^1.2.0
+  pdfx: ^2.3.0
+  firebase_ui_firestore: ^1.5.4
+  shared_preferences: ^2.2.0
+  cupertino_icons: ^1.0.5
 
 dev_dependencies:
   import_sorter: ^4.6.0
@@ -42,10 +62,10 @@ dev_dependencies:
 
 flutter_icons:
   android: "launcher_icon"
-  ios: true
-  image_path: "assets/images/logos/cannlytics_calyx_192.png"
   min_sdk_android: 21
+  ios: false
   remove_alpha_ios: true
+  image_path: "assets/images/logos/cannlytics_calyx_192.png"
   web:
     generate: true
     image_path: "assets/images/logos/cannlytics_calyx_192.png"
@@ -60,15 +80,9 @@ flutter_icons:
     image_path: "assets/images/logos/cannlytics_calyx_192.png"
 
 flutter_native_splash:
-  color: "#ffffff"
-  image: assets/images/logos/cannlytics_calyx_192.png
-  branding: assets/images/logos/cannlytics_brand_small.png
-  branding_mode: bottom
-  color_dark: "#24292e"
-  image_dark: assets/images/logos/cannlytics_calyx_192.png
-  branding_dark: assets/images/logos/cannlytics_brand_small_dark.png
-  background_image: assets/images/logos/cannlytics_background_light.png
-  background_image_dark: assets/images/logos/cannlytics_background_dark.png
+  color: "#062a00"
+  image: assets/images/logos/cannlytics_logo_with_text_small_dark.png
+  background_image: assets/images/logos/cannlytics_background_dark.png
   android: false
   ios: false
   web: true
@@ -83,6 +97,36 @@ flutter_native_splash:
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/logos/cc_heart.svg
+    - assets/images/ai-icons/cannabis-dispensary.svg
+    - assets/images/ai-icons/cannabis-leaf.svg
+    - assets/images/ai-icons/cannabis-receipt.svg
+    - assets/images/maps/united_states_map.svg
+    - assets/images/maps/us_map.svg
+    - assets/images/maps/world.svg
+    - assets/images/maps/usa-with-labels.svg
+    - assets/icons/
+    - assets/icons/emoji/coin.svg
+    - assets/icons/emoji/dispensary.svg
+    - assets/icons/emoji/dispensary-plain.svg
+    - assets/icons/emoji/farmer.svg
+    - assets/icons/emoji/rocket.svg
+    - assets/icons/emoji/green_check.svg
+    - assets/icons/emoji/glowing_star.svg
+    - assets/icons/emoji/house_with_garden.svg
+    - assets/icons/emoji/microscope.svg
+    - assets/icons/emoji/money_bag.svg
+    - assets/icons/emoji/package.svg
+    - assets/icons/emoji/ring_buoy.svg
+    - assets/icons/emoji/scroll.svg
+    - assets/icons/emoji/sign_out.svg
+    - assets/icons/emoji/tanabata_tree.svg
+    - assets/icons/emoji/tractor.svg
+    - assets/icons/emoji/broccoli.svg
+    - assets/icons/emoji/dna.svg
+    - assets/icons/emoji/gear.svg
+    - assets/images/logo.png
+    - assets/images/profile_pic.png
     - assets/images/logos/logo_dark.svg
     - assets/images/logos/logo_light.svg
     - assets/images/logos/cannlytics_calyx_192.png

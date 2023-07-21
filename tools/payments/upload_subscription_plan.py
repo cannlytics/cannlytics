@@ -19,7 +19,7 @@ from dotenv import dotenv_values
 root = '../../../'
 sys.path.append(root)
 from cannlytics import firebase # pylint: disable=import-error
-from console import state # pylint: disable=import-error
+from lims import state # pylint: disable=import-error
 
 
 # === Test ===

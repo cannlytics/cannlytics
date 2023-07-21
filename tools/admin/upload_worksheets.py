@@ -25,7 +25,7 @@ from dotenv import dotenv_values
 # Internal imports.
 sys.path.append('../../')
 from cannlytics import firebase # pylint: disable=import-error
-from console import state # pylint: disable=import-error
+from lims import state # pylint: disable=import-error
 
 
 # === Test ===

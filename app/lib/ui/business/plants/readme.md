@@ -1,5 +1,0 @@
-# Plants
-
-## Plant Batches
-
-## Harvests

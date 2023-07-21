@@ -1,678 +1,155 @@
-// Cannlytics App
+// Cannlytics Data
 // Copyright (c) 2023 Cannlytics
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 3/18/2023
+// Updated: 7/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // Dart imports:
 
 // Project imports:
-import 'package:cannlytics_app/routing/app_router.dart';
-import 'package:cannlytics_app/ui/account/licenses/add_license_screen.dart';
-import 'package:cannlytics_app/ui/account/licenses/licenses_screen.dart';
-import 'package:cannlytics_app/ui/account/organizations/organization_screen.dart';
-import 'package:cannlytics_app/ui/account/organizations/organizations_screen.dart';
-import 'package:cannlytics_app/ui/account/sign-in/sign_in_screen.dart';
-import 'package:cannlytics_app/ui/account/sign-in/sign_in_text.dart';
-import 'package:cannlytics_app/ui/account/user/account_screen.dart';
-import 'package:cannlytics_app/ui/account/user/reset_password_screen.dart';
-import 'package:cannlytics_app/ui/business/deliveries/deliveries_screen.dart';
-import 'package:cannlytics_app/ui/business/deliveries/delivery_screen.dart';
-import 'package:cannlytics_app/ui/business/employees/employee_screen.dart';
-import 'package:cannlytics_app/ui/business/employees/employees_screen.dart';
-import 'package:cannlytics_app/ui/business/facilities/facilities_screen.dart';
-import 'package:cannlytics_app/ui/business/facilities/facility_screen.dart';
-import 'package:cannlytics_app/ui/business/items/item_screen.dart';
-import 'package:cannlytics_app/ui/business/items/items_screen.dart';
-import 'package:cannlytics_app/ui/business/locations/location_screen.dart';
-import 'package:cannlytics_app/ui/business/locations/locations_screen.dart';
-import 'package:cannlytics_app/ui/business/packages/package_screen.dart';
-import 'package:cannlytics_app/ui/business/packages/packages_screen.dart';
-import 'package:cannlytics_app/ui/business/patients/patient_screen.dart';
-import 'package:cannlytics_app/ui/business/patients/patients_screen.dart';
-import 'package:cannlytics_app/ui/business/plant_batches/plant_batch_screen.dart';
-import 'package:cannlytics_app/ui/business/plant_batches/plant_batches_screen.dart';
-import 'package:cannlytics_app/ui/business/plant_harvests/plant_harvest_screen.dart';
-import 'package:cannlytics_app/ui/business/plant_harvests/plant_harvests_screen.dart';
-import 'package:cannlytics_app/ui/business/plants/plant_screen.dart';
-import 'package:cannlytics_app/ui/business/plants/plants_screen.dart';
-import 'package:cannlytics_app/ui/business/receipts/receipt_screen.dart';
-import 'package:cannlytics_app/ui/business/receipts/receipts_screen.dart';
-import 'package:cannlytics_app/ui/business/results/result_screen.dart';
-import 'package:cannlytics_app/ui/business/results/results_screen.dart';
-import 'package:cannlytics_app/ui/business/strains/strain_screen.dart';
-import 'package:cannlytics_app/ui/business/strains/strains_screen.dart';
-import 'package:cannlytics_app/ui/business/transactions/transaction_screen.dart';
-import 'package:cannlytics_app/ui/business/transactions/transactions_screen.dart';
-import 'package:cannlytics_app/ui/business/transfers/transfer_screen.dart';
-import 'package:cannlytics_app/ui/business/transfers/transfers_screen.dart';
-import 'package:cannlytics_app/ui/layout/search_screen.dart';
-import 'package:cannlytics_app/ui/main/dashboard.dart';
+import 'package:cannlytics_data/common/dialogs/age_check_dialog.dart';
+import 'package:cannlytics_data/routing/app_router.dart';
+import 'package:cannlytics_data/ui/account/account_screen.dart';
+import 'package:cannlytics_data/ui/account/profile_screen.dart';
+import 'package:cannlytics_data/ui/account/reset_password_screen.dart';
+import 'package:cannlytics_data/ui/dashboard/dashboard.dart';
+import 'package:cannlytics_data/ui/licensees/licensee_screen.dart';
+import 'package:cannlytics_data/ui/licensees/licensees_screen.dart';
+import 'package:cannlytics_data/ui/licensees/licensees_table.dart';
+import 'package:cannlytics_data/ui/results/result_screen.dart';
+import 'package:cannlytics_data/ui/results/results_screen.dart';
+import 'package:cannlytics_data/ui/sales/receipt_screen.dart';
+import 'package:cannlytics_data/ui/sales/receipts_screen.dart';
+import 'package:cannlytics_data/ui/strains/strain_screen.dart';
+import 'package:cannlytics_data/ui/strains/strains_screen.dart';
 
 // The main app routes.
 class Routes {
   static List<AppRoute> mainRoutes = [
-    // Sign in screen.
-    AppRoute(
-      path: '/sign-in',
-      name: AppRoutes.signIn.name,
-      builder: (context, state) => EmailPasswordSignInScreen(
-        formType: SignInFormType.signIn,
-      ),
-    ),
-
     // User account screens.
     AppRoute(
       path: '/account',
-      name: AppRoutes.account.name,
+      name: 'account',
       builder: (context, state) => AccountScreen(),
       routes: [
         // Reset password screen.
         AppRoute(
           path: 'reset-password',
-          name: AppRoutes.resetPassword.name,
+          name: 'resetPassword',
           builder: (context, state) => ResetPasswordScreen(),
         ),
       ],
     ),
 
-    // Organizations screen.
+    // User profile screen.
     AppRoute(
-      path: '/organizations',
-      name: AppRoutes.organizations.name,
-      builder: (context, state) => OrganizationsScreen(),
-      routes: [
-        // Organization screen.
-        AppRoute(
-          path: 'new',
-          name: AppRoutes.organization.name,
-          builder: (context, state) => OrganizationScreen(),
-        ),
-        // AppRoute(
-        //   path: 'join',
-        //   name: AppRoutes.organization.name,
-        //   builder: (context, state) => OrganizationScreen(),
-        // ),
-      ],
-    ),
-
-    // License management screen.
-    AppRoute(
-      path: '/licenses',
-      name: AppRoutes.licenses.name,
-      builder: (context, state) => LicensesScreen(),
-      routes: [
-        // Delivery screen.
-        AppRoute(
-          path: 'add',
-          name: AppRoutes.addLicense.name,
-          builder: (context, state) => AddLicenseScreen(),
-        ),
-      ],
+      path: '/users/:uid',
+      builder: (context, state) {
+        return UserProfileScreen(
+          uid: state.params['uid']!,
+        );
+      },
     ),
 
     // Dashboard screen.
     AppRoute(
-      path: '/dashboard',
-      name: AppRoutes.dashboard.name,
+      path: '/',
+      name: 'dashboard',
       builder: (context, state) => DashboardScreen(),
+      useFade: true,
     ),
 
-    // Search screen.
+    // Licensees screen.
     AppRoute(
-      path: '/search',
-      name: AppRoutes.search.name,
-      builder: (context, state) => SearchScreen(),
+      path: '/licenses',
+      name: 'licenses',
+      useFade: true,
+      builder: (context, state) => LicenseesScreen(),
     ),
 
-    /* Business screens */
-
-    // Deliveries screens.
+    // Licenses by state screen.
     AppRoute(
-      path: '/deliveries',
-      name: AppRoutes.deliveries.name,
-      builder: (context, state) => DeliveriesScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.delivery.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return DeliveryScreen(id: id);
-          },
-        ),
-      ],
+      path: '/licenses/:state_id',
+      name: 'state_licenses',
+      useFade: true,
+      builder: (context, state) {
+        return StateLicensesScreen(stateId: state.params['state_id']!);
+      },
     ),
 
-    // Employees screens.
+    // Licensee screen if a license number is passed.
     AppRoute(
-      path: '/employees',
-      name: AppRoutes.employees.name,
-      builder: (context, state) => EmployeesScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.employee.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return EmployeeScreen(id: id);
-          },
-        ),
-      ],
+      path: '/licenses/:state_id/:license_number',
+      builder: (context, state) {
+        return LicenseeScreen(
+          stateId: state.params['state_id']!,
+          licenseeId: state.params['license_number']!,
+        );
+      },
     ),
 
-    // Facilities screens.
-    AppRoute(
-      path: '/facilities',
-      name: AppRoutes.facilities.name,
-      builder: (context, state) => FacilitiesScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.facility.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return FacilityScreen(id: id);
-          },
-        ),
-      ],
-    ),
-
-    // Locations screens.
-    AppRoute(
-      path: '/locations',
-      name: AppRoutes.locations.name,
-      builder: (context, state) => LocationsScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.location.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return LocationScreen(id: id);
-          },
-        ),
-      ],
-    ),
-
-    // Patients screens.
-    AppRoute(
-      path: '/patients',
-      name: AppRoutes.patients.name,
-      builder: (context, state) => PatientsScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.patient.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return PatientScreen(id: id);
-          },
-        ),
-      ],
-    ),
-
-    // Packages screens.
-    AppRoute(
-      path: '/packages',
-      name: AppRoutes.packages.name,
-      builder: (context, state) => PackagesScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.package.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return PackageScreen(id: id);
-          },
-        ),
-      ],
-    ),
-
-    // Items screens.
-    AppRoute(
-      path: '/items',
-      name: AppRoutes.items.name,
-      builder: (context, state) => ItemsScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.item.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return ItemScreen(id: id);
-          },
-        ),
-      ],
-    ),
-
-    // Plants screens.
-    AppRoute(
-      path: '/plants',
-      name: AppRoutes.plants.name,
-      builder: (context, state) => PlantsScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.plant.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return PlantScreen(id: id);
-          },
-        ),
-      ],
-    ),
-
-    // Plant batches screens.
-    AppRoute(
-      path: '/batches',
-      name: AppRoutes.plantBatches.name,
-      builder: (context, state) => PlantBatchesScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.plantBatch.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return PlantBatchScreen(id: id);
-          },
-        ),
-      ],
-    ),
-
-    // Harvests screens.
-    AppRoute(
-      path: '/harvests',
-      name: AppRoutes.plantHarvests.name,
-      builder: (context, state) => PlantHarvestsScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.plantHarvest.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return PlantHarvestScreen(id: id);
-          },
-        ),
-      ],
-    ),
-
-    // Lab results screens.
-    AppRoute(
-      path: '/results',
-      name: AppRoutes.results.name,
-      builder: (context, state) => LabResultsScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.result.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return LabResultScreen(id: id);
-          },
-        ),
-      ],
-    ),
-
-    // Sales receipts
-    AppRoute(
-      path: '/receipts',
-      name: AppRoutes.receipts.name,
-      builder: (context, state) => SalesReceiptsScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.receipt.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return SalesReceiptScreen(id: id);
-          },
-        ),
-      ],
-    ),
-
-    // Sales transactions
-    AppRoute(
-      path: '/transactions',
-      name: AppRoutes.transactions.name,
-      builder: (context, state) => SalesTransactionsScreen(),
-      routes: [
-        AppRoute(
-          path: ':id',
-          name: AppRoutes.transaction.name,
-          builder: (context, state) {
-            final id = state.params['id']!;
-            return SalesTransactionScreen(id: id);
-          },
-        ),
-      ],
-    ),
-
-    // Strains screens.
+    // Strains screen.
     AppRoute(
       path: '/strains',
-      name: AppRoutes.strains.name,
+      name: 'strains',
       builder: (context, state) => StrainsScreen(),
+      useFade: true,
       routes: [
+        // Result screen.
         AppRoute(
-          path: ':id',
-          name: AppRoutes.strain.name,
+          path: ':hash',
+          name: 'strain',
           builder: (context, state) {
-            final id = state.params['id']!;
-            return StrainScreen(id: id);
+            return StrainScreen(strainId: state.params['hash']!);
           },
         ),
       ],
     ),
 
-    // Transfers screens.
+    // Lab results screen.
     AppRoute(
-      path: '/transfers',
-      name: AppRoutes.transfers.name,
-      builder: (context, state) => TransfersScreen(),
+      path: '/results',
+      name: 'results',
+      builder: (context, state) => LabResultsScreen(),
+      useFade: true,
       routes: [
+        // Result screen.
         AppRoute(
-          path: ':id',
-          name: AppRoutes.transfer.name,
+          path: ':hash',
+          name: 'result',
           builder: (context, state) {
-            final id = state.params['id']!;
-            return TransferScreen(id: id);
+            return ResultScreen(labResultId: state.params['hash']!);
           },
         ),
       ],
     ),
 
-    // TODO: Transfer templates screen.
-
-    /* Consumer screens */
-
-    // TODO: homegrow
-
-    // TODO: products
-
-    // TODO: retailers
-
-    // TODO: brands
-
-    // TODO: spending
-  ];
-}
-
-// Routes.
-enum AppRoutes {
-  /* General pages */
-
-  // Account management.
-  account,
-  dashboard,
-  onboarding,
-  resetPassword,
-  signIn,
-
-  // Organization pages.
-  organizations,
-  organization,
-
-  // Utility pages.
-  search,
-
-  /* Business screens */
-
-  // Licenses
-  addLicense,
-  licenses,
-
-  // Deliveries
-  deliveries,
-  delivery,
-  addDelivery,
-  editDelivery,
-  vehicles,
-  vehicle,
-  drivers,
-  driver,
-
-  // Employees
-  employees,
-  employee,
-  addEmployee,
-  editEmployee,
-
-  // Facilities
-  facilities,
-  facility,
-  addFacility,
-
-  // Locations
-  locations,
-  location,
-  addLocation,
-  editLocation,
-
-  // Patients
-  patients,
-  patient,
-  addPatient,
-  editPatient,
-
-  // Plants
-  plants,
-  plant,
-  addPlant,
-  editPlant,
-
-  // Plant batches
-  plantBatches,
-  plantBatch,
-
-  // Harvests
-  plantHarvests,
-  plantHarvest,
-
-  // Results
-  results,
-  result,
-  addResult,
-  editResult,
-
-  // Sales
-  receipts,
-  receipt,
-  addReceipt,
-  editReceipt,
-  transactions,
-  transaction,
-  addTransaction,
-  editTransaction,
-
-  // Strains
-  strains,
-  strain,
-  addStrain,
-  editStrain,
-
-  // Transfers
-  transfers,
-  transfer,
-  addTransfer,
-  editTransfer,
-
-  // Packages
-  packages,
-  package,
-  addPackage,
-  editPackage,
-
-  // Items
-  items,
-  item,
-  addItem,
-  editItem,
-
-  /* Consumer screens */
-
-  // Homegrow
-  garden,
-  gardenPlant,
-  addGardenPlant,
-  editGardenPlant,
-
-  // Products
-  products,
-  product,
-  addProduct,
-  editProduct,
-
-  // Retailers and brands (licensees).
-  retailers,
-  retailer,
-  brands,
-  brand,
-
-  // Spending
-  spending,
-  spend,
-  addSpend,
-  editSpend,
-}
-
-/// Data for each screen.
-class ScreenData {
-  const ScreenData({
-    required this.imageName,
-    required this.title,
-    required this.description,
-    required this.route,
-    this.permissions = '',
-  });
-  final String imageName;
-  final String title;
-  final String description;
-  final String route;
-  final String? permissions;
-
-  // Business screens.
-  static const businessScreens = [
-    ScreenData(
-      imageName: 'assets/images/icons/facilities.png',
-      title: 'Facilities',
-      description: 'Manage your facilities and locations.',
-      route: 'facilities',
+    // Sales screen.
+    AppRoute(
+      path: '/sales',
+      name: 'sales',
+      builder: (context, state) => SalesScreen(),
+      useFade: true,
+      routes: [
+        // Result screen.
+        AppRoute(
+          path: ':hash',
+          name: 'receipt',
+          builder: (context, state) {
+            return ReceiptScreen(salesReceiptId: state.params['hash']!);
+          },
+        ),
+      ],
     ),
-    ScreenData(
-      imageName: 'assets/images/icons/employees.png',
-      title: 'Employees',
-      description: 'Manage your employees and staff.',
-      route: 'employees',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/locations.png',
-      title: 'Locations',
-      description: 'Manage your locations and addresses.',
-      route: 'locations',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/packages.png',
-      title: 'Packages',
-      description: 'Manage your packages and their items.',
-      route: 'packages',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/item.png',
-      title: 'Items',
-      description: 'Manage your items.',
-      route: 'items',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/strains.png',
-      title: 'Strains',
-      description: 'Manage your strains and variety catalog.',
-      route: 'strains',
-      permissions: 'can_report_strain_properties',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/plant.png',
-      title: 'Plants',
-      description: 'Manage your plants and cultivation processes.',
-      route: 'plants',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/chemistry.png',
-      title: 'Results',
-      description: 'Manage your test results and analyses.',
-      route: 'results',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/sales.png',
-      title: 'Sales',
-      description: 'Manage your sale receipts, transactions, and revenue.',
-      route: 'receipts',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/patients.png',
-      title: 'Patients',
-      description: 'Manage your patients and customers.',
-      route: 'patients',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/spending.png',
-      title: 'Deliveries',
-      description: 'Manage your deliveries to consumers.',
-      route: 'deliveries',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/transfers.png',
-      title: 'Transfers',
-      description: 'Manage your transfers and shipments.',
-      route: 'transfers',
-    ),
-  ];
 
-  // Consumer screens.
-  static const consumerScreens = [
-    ScreenData(
-      imageName: 'assets/images/icons/indoor.png',
-      title: 'Homegrow',
-      description: 'Manage your home cultivation.',
-      route: 'garden',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/product.png',
-      title: 'Products',
-      description: 'Manage your cannabis products.',
-      route: 'products',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/chemistry.png',
-      title: 'Results',
-      description: 'Explore lab results.',
-      route: 'results',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/shop.png',
-      title: 'Retailers',
-      description: 'Find cannabis retailers.',
-      route: 'retailers',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/award.png',
-      title: 'Brands',
-      description: 'Explore cannabis brands and their products.',
-      route: 'brands',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/strains.png',
-      title: 'Strains',
-      description: 'Explore cannabis varieties.',
-      route: 'strains',
-    ),
-    ScreenData(
-      imageName: 'assets/images/icons/spending.png',
-      title: 'Spending',
-      description: 'Manage your cannabis spending.',
-      route: 'spend',
+    // Age verification screen.
+    AppRoute(
+      path: '/age-verification',
+      builder: (context, state) {
+        return AgeVerificationScreen();
+      },
     ),
   ];
 }
