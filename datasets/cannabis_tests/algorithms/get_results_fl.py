@@ -386,23 +386,23 @@ if __name__ == '__main__':
     # DATA_DIR = r'C:\.datasets\data\florida\lab_results'
 
     # [✓] TEST: Get Kaycha COAs.
-    # kaycha_coas = get_results_kaycha(DATA_DIR)
+    kaycha_coas = get_results_kaycha(DATA_DIR)
 
     # [✓] TEST: Parse Kaycha COAs.
     # Note: This is a super, super long process
-    pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
-    date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    for folder in os.listdir(pdf_dir):
-        if folder.startswith('MMTC-2015-0002'):
-            data_dir = os.path.join(pdf_dir, folder)
-            outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
-            print('Parsing:', folder)
-            coa_data = parse_results_kaycha(
-                data_dir,
-                outfile,
-                reverse=True,
-                completed=[]
-            )
+    # pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
+    # date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    # for folder in os.listdir(pdf_dir):
+    #     if folder.startswith('MMTC-2015-0002'):
+    #         data_dir = os.path.join(pdf_dir, folder)
+    #         outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
+    #         print('Parsing:', folder)
+    #         coa_data = parse_results_kaycha(
+    #             data_dir,
+    #             outfile,
+    #             reverse=True,
+    #             completed=[]
+    #         )
 
 
 #-----------------------------------------------------------------------
@@ -429,7 +429,9 @@ def get_results_the_flowery(
         options.add_argument('--no-sandbox')
         driver = webdriver.Chrome(options=options, service=service)
     except:
-        driver = webdriver.Edge()
+        options = EdgeOptions()
+        options.add_argument('--headless')
+        driver = webdriver.Edge(options=options)
 
     # Load the lists page to get each list of COAs.
     coa_lists = []
@@ -709,7 +711,6 @@ def get_results_terplife(
         driver = webdriver.Chrome(options=options, service=service)
     except:
         options = EdgeOptions()
-        # options.use_chromium = True
         options.add_experimental_option('prefs', {
             'download.default_directory': 'D:\\data\\florida\\lab_results\\.datasets\\pdfs\\terplife',
             'download.prompt_for_download': False,

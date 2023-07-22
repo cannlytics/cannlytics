@@ -380,16 +380,16 @@ if __name__ == '__main__':
 
         # Save the augmented sales items.
         print('Saving augmented sales data...')
-        outfile = os.path.join(sales_dir, f'sales_{i}.xlsx')
-        items.to_excel(outfile, index=False)
+        outfile = os.path.join(sales_dir, f'sales_{i}.csv')
+        items.to_csv(outfile, index=False)
         print('Saved augmented sales datafile:', index)
 
         # TODO: Create a hash of the augmented sales data
         # and save a log of the hash and the datafile name.
 
-        # At this stage, sales by licensee by day can be incremented.
-        print('Updating sales statistics...')
-        daily_licensee_sales = calc_daily_sales(items, daily_licensee_sales)
+        # # At this stage, sales by licensee by day can be incremented.
+        # print('Updating sales statistics...')
+        # daily_licensee_sales = calc_daily_sales(items, daily_licensee_sales)
 
         # Save augmented sales to licensee-specific files by month.
         print('Saving augmented sales by month...')
@@ -403,6 +403,49 @@ if __name__ == '__main__':
         midpoint_end = datetime.now()
         print('Curated sales file in:', midpoint_end - midpoint_start)
 
+    # # Compile the sales statistics.
+    # print('Compiling licensee sales statistics...')
+    # stats = stats_to_df(daily_licensee_sales)
+
+    # # Save the compiled statistics.
+    # min_date = stats['date'].min()
+    # max_date = stats['date'].max()
+    # stats_file = f'{sales_stats_dir}/sales-by-licensee-{min_date}-to-{max_date}.xlsx'
+    # stats.to_excel(stats_file, index=False)
+
+    # # Save the statistics by month.
+    # save_stats_by_month(stats, sales_stats_dir, 'sales-by-licensee')
+
+    # TODO: Calculate and save aggregate statistics.
+
+    # Finish curating sales.
+    end = datetime.now()
+    print('✓ Finished curating sales in', end - start)
+
+
+def calculate_and_save_stats(file_paths, sales_stats_dir):
+    """
+    Iterates over a list of file paths, each representing sales items.
+    Calculates daily sales statistics for each licensee, compiles these
+    statistics, and saves the results to an Excel file in the specified directory.
+    Also saves the monthly statistics for each licensee for easy future reference.
+
+    Args:
+        file_paths (list of str): List of file paths, each pointing to a file
+            representing sales items.
+        sales_stats_dir (str): Directory path where the sales statistics 
+            Excel file should be saved.
+
+    Returns:
+        dict: Dictionary with the updated daily sales statistics for each licensee.
+    """
+    # Increment sales by licensee by day.
+    daily_licensee_sales = {}
+    for file_path in file_paths:
+        print(f'Updating sales statistics for {file_path}...')
+        items = pd.read_csv(file_path)
+        daily_licensee_sales = calc_daily_sales(items, daily_licensee_sales)
+
     # Compile the sales statistics.
     print('Compiling licensee sales statistics...')
     stats = stats_to_df(daily_licensee_sales)
@@ -415,12 +458,13 @@ if __name__ == '__main__':
 
     # Save the statistics by month.
     save_stats_by_month(stats, sales_stats_dir, 'sales-by-licensee')
+    return daily_licensee_sales
 
-    # TODO: Calculate and save aggregate statistics.
 
-    # Finish curating sales.
-    end = datetime.now()
-    print('✓ Finished curating sales in', end - start)
+# Calculate sales by licensee by day.
+augmented_files = sorted_nicely(os.listdir(sales_dir))
+augmented_files = [os.path.join(sales_dir, f) for f in augmented_files if not f.startswith('~$')]
+daily_licensee_sales = calculate_and_save_stats(augmented_files, sales_stats_dir)
 
 
 # # === Test ===
@@ -444,3 +488,4 @@ if __name__ == '__main__':
     #     start=pd.to_datetime('2023-01-01'),
     #     end=pd.to_datetime('2023-03-01'),
     # )
+
