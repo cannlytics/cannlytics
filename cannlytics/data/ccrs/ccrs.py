@@ -6,13 +6,17 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/10/2022
-Updated: 4/16/2023
+Updated: 7/23/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
+import functools
+from glob import glob
+from pathlib import Path
 import os
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Union
 from zipfile import ZipFile
+import numpy as np
 
 # External imports:
 import pandas as pd
@@ -26,24 +30,39 @@ from cannlytics.data.ccrs.constants import (
 )
 from cannlytics.utils.utils import (
     camel_to_snake,
-    convert_to_numeric,
     rmerge,
     sorted_nicely,
 )
 
 
+# Cache the to_numeric function.
+@functools.lru_cache
+def to_numeric(val, errors: Optional[str] = 'coerce'):
+    return pd.to_numeric(val, errors=errors)
+
+
 def anonymize(
         df: pd.DataFrame,
-        columns: Optional[List[str]] = None,
+        columns: Optional[List[str]] = None
     ) -> pd.DataFrame:
-    """Anonymize a CCRS dataset."""
+    """Anonymize a CCRS dataset by creating a hash for fields that end
+    in "_by" or "_By."""
     if columns is None:
         columns = df.filter(regex=r'.*_by$|.*_By$', axis=1).columns
-    for column in columns:
-        df.loc[:, column] = df[column].astype(str).apply(create_hash)
+    df.loc[:, columns] = df.loc[:, columns].astype(str).apply(create_hash)
     return df
 
 
+# FIXME:
+# def get_datafiles(
+#         data_dir: str,
+#         dataset: Optional[str] = '',
+#         desc: Optional[bool] = True,
+#         ext: Optional[str] = 'csv',
+#     ) -> list:
+#     """Get all CCRS datafiles of a given type in a directory."""
+#     datafiles = sorted_nicely(glob(os.path.join(data_dir, dataset + f"*.{ext}")))
+#     return datafiles[::-1] if desc else datafiles
 def get_datafiles(
         data_dir: str,
         dataset: Optional[str] = '',
@@ -59,13 +78,40 @@ def get_datafiles(
     return datafiles
 
 
-def format_test_value(tests, compound, value_key='TestValue'):
+def format_test_value(
+        tests: pd.DataFrame,
+        compound: str,
+        value_key: str = 'TestValue',
+    ) -> Union[float, None]:
     """Format a lab result test value from a DataFrame of tests."""
-    value = tests.loc[(tests.key == compound)]
-    try:
-        return convert_to_numeric(value.iloc[0][value_key])
-    except:
+    compound_value = tests.loc[(tests.key == compound), value_key]
+    if compound_value.empty:
         return None
+    compound_value = to_numeric(compound_value.iloc[0], errors='coerce')
+    if np.isnan(compound_value):
+        return None
+    return compound_value
+
+
+# TODO: Determine fastest version of find_detections.
+# def find_detections(
+#         tests,
+#         analysis,
+#         analysis_key='analysis',
+#         analyte_key='key',
+#         value_key='value',
+#     ) -> List[str]:
+#     """Find compounds detected for a given analysis from given tests."""
+#     tests = pd.DataFrame(tests)
+#     analysis_tests = tests.loc[tests[analysis_key] == analysis]
+#     if analysis_tests.empty:
+#         return []
+#     values = pd.to_numeric(analysis_tests[value_key], errors='coerce')
+#     analysis_tests.loc[:, value_key] = values
+#     detected = analysis_tests.loc[analysis_tests[value_key] > 0]
+#     if detected.empty:
+#         return []
+#     return detected[analyte_key].to_list()
 
 
 def find_detections(
@@ -76,86 +122,124 @@ def find_detections(
         value_key='value',
     ) -> List[str]:
     """Find compounds detected for a given analysis from given tests."""
-
-    # Find detections in a list of results.
     if isinstance(tests, list):
-        detected = []
-        for test in tests:
-            if test[analysis_key] == analysis:
-                value = pd.to_numeric(test[value_key], errors='coerce')
-                if value > 0:
-                    detected.append(test[analyte_key])
-        return detected
-
-    # Find detections in a DataFrame.
-    analysis_tests = tests.loc[tests[analysis_key] == analysis]
-    if analysis_tests.empty:
-        return []
-    values = analysis_tests[value_key].apply(
-        lambda x: pd.to_numeric(x, errors='coerce')
-    )
-    analysis_tests = analysis_tests.assign(**{value_key: values})
-    detected = analysis_tests.loc[analysis_tests[value_key] > 0]
-    if detected.empty:
-        return []
-    return detected[analyte_key].to_list()
+        return [test[analyte_key] for test in tests if test[analysis_key] == analysis and to_numeric(test[value_key], errors='coerce') > 0]
+    tests = tests[tests[analysis_key] == analysis]
+    tests[value_key] = to_numeric(tests[value_key], errors='coerce')
+    return tests[tests[value_key] > 0][analyte_key].to_list()
 
 
-def format_lab_results(
-        df: pd.DataFrame,
-        results: pd.DataFrame,
-        item_key: Optional[str] = 'InventoryId',
-        analysis_name: Optional[str] = 'TestName',
-        analysis_key: Optional[str] = 'TestValue',
-    ) -> pd.DataFrame:
+# def format_lab_results(
+#         df: pd.DataFrame,
+#         results: pd.DataFrame,
+#         item_key: Optional[str] = 'InventoryId',
+#         analysis_name: Optional[str] = 'TestName',
+#         analysis_key: Optional[str] = 'TestValue',
+#     ) -> pd.DataFrame:
+#     """Format CCRS lab results to merge into another dataset."""
+#     analyte_data = results[analysis_name].map(CCRS_ANALYTES)
+#     results = results.join(pd.DataFrame(analyte_data.values.tolist()))
+#     results['type'] = results['type'].map(CCRS_ANALYSES)
+#     item_ids = df[item_key].unique()
+#     formatted = []
+#     for item_id in item_ids:
+#         item_results = results.loc[results[item_key] == item_id]
+#         if item_results.empty:
+#             continue
+#         values = item_results.iloc[0].to_dict()
+#         [values.pop(key, None) for key in [analysis_name, analysis_key]]
+#         entry = {
+#             **values,
+#             'analyses': item_results['type'].unique().tolist(),
+#             'delta_9_thc': format_test_value(item_results, 'delta_9_thc'),
+#             'thca': format_test_value(item_results, 'thca'),
+#             'total_thc': format_test_value(item_results, 'total_thc'),
+#             'cbd': format_test_value(item_results, 'cbd'),
+#             'cbda': format_test_value(item_results, 'cbda'),
+#             'total_cbd': format_test_value(item_results, 'total_cbd'),
+#             'moisture_content': format_test_value(item_results, 'moisture_content'),
+#             'water_activity': format_test_value(item_results, 'water_activity'),
+#             'status': 'Fail' if 'Fail' in item_results['LabTestStatus'].unique() else 'Pass',
+#             'pesticides': find_detections(item_results, 'pesticides'),
+#             'residual_solvents': find_detections(item_results, 'residual_solvent'),
+#             'heavy_metals': find_detections(item_results, 'heavy_metals'),
+#         }
+#         formatted.append(entry)
+#     return pd.DataFrame(formatted)
+
+
+# TODO: Test if this function is faster.
+def format_lab_results(df: pd.DataFrame, results: pd.DataFrame, item_key: Optional[str] = 'InventoryId',
+                       analysis_name: Optional[str] = 'TestName', analysis_key: Optional[str] = 'TestValue') -> pd.DataFrame:
     """Format CCRS lab results to merge into another dataset."""
-
     # Curate lab results.
-    analyte_data = results[analysis_name].map(CCRS_ANALYTES).values.tolist()
-    results = results.join(pd.DataFrame(analyte_data))
+    analyte_data = results[analysis_name].map(CCRS_ANALYTES)
+    results = pd.concat([results, pd.DataFrame(analyte_data)], axis=1)
     results['type'] = results['type'].map(CCRS_ANALYSES)
 
     # Find lab results for each item.
-    formatted = []
-    item_ids = list(df[item_key].unique())
-    for item_id in item_ids:
-        item_results = results.loc[results[item_key].astype(str) == item_id]
-        if item_results.empty:
-            continue
+    item_results = results[results[item_key].astype(str).isin(df[item_key].unique())]
+    if item_results.empty:
+        return []
 
-        # Map certain test values.
-        values = item_results.iloc[0].to_dict()
-        [values.pop(key) for key in [analysis_name, analysis_key]]
-        entry = {
-            **values,
-            'analyses': list(item_results['type'].unique()),
-            'delta_9_thc': format_test_value(item_results, 'delta_9_thc'),
-            'thca': format_test_value(item_results, 'thca'),
-            'total_thc': format_test_value(item_results, 'total_thc'),
-            'cbd': format_test_value(item_results, 'cbd'),
-            'cbda': format_test_value(item_results, 'cbda'),
-            'total_cbd': format_test_value(item_results, 'total_cbd'),
-            'moisture_content': format_test_value(item_results, 'moisture_content'),
-            'water_activity': format_test_value(item_results, 'water_activity'),
-        }
-
-        # Determine `status`.
-        statuses = list(item_results['LabTestStatus'].unique())
-        if 'Fail' in statuses:
-            entry['status'] = 'Fail'
-        else:
-            entry['status'] = 'Pass'
-
-        # Determine detected contaminants.
-        entry['pesticides'] = find_detections(item_results, 'pesticides')
-        entry['residual_solvents'] = find_detections(item_results, 'residual_solvent')
-        entry['heavy_metals'] = find_detections(item_results, 'heavy_metals')
-
-        # Record the lab results for the item.
-        formatted.append(entry)
+    # Map certain test values.
+    entries = item_results.apply(lambda row: {
+        **row.drop([analysis_name, analysis_key]),
+        'analyses': list(item_results['type'].unique()),
+        'delta_9_thc': format_test_value(item_results, 'delta_9_thc'),
+        'thca': format_test_value(item_results, 'thca'),
+        'total_thc': format_test_value(item_results, 'total_thc'),
+        'cbd': format_test_value(item_results, 'cbd'),
+        'cbda': format_test_value(item_results, 'cbda'),
+        'total_cbd': format_test_value(item_results, 'total_cbd'),
+        'moisture_content': format_test_value(item_results, 'moisture_content'),
+        'water_activity': format_test_value(item_results, 'water_activity'),
+        'status': 'Fail' if 'Fail' in item_results['LabTestStatus'].unique() else 'Pass',
+        'pesticides': find_detections(item_results, 'pesticides'),
+        'residual_solvents': find_detections(item_results, 'residual_solvent'),
+        'heavy_metals': find_detections(item_results, 'heavy_metals')
+    }, axis=1).tolist()
 
     # Return the lab results.
-    return pd.DataFrame(formatted)
+    return pd.DataFrame(entries)
+
+
+def load_supplement_data(
+        datafile: Path,
+        dtype: dict,
+        usecols: List[str],
+        parse_dates: List[str],
+        on_bad_lines: str,
+        sep: str = '\t',
+        encoding: str = 'utf-16',
+        engine: str = 'python',
+    ) -> pd.DataFrame:
+    """Load supplement data from a specified data file."""
+    return pd.read_csv(datafile,
+                       sep=sep,
+                       encoding=encoding,
+                       engine=engine,
+                       parse_dates=parse_dates,
+                       dtype=dtype,
+                       usecols=usecols,
+                       on_bad_lines=on_bad_lines)
+
+
+def preprocess_supplement(
+        supplement: pd.DataFrame,
+        on: str,
+        rename: Optional[dict],
+        drop: Optional[dict],
+        dedupe: Optional[bool],
+    ) -> pd.DataFrame:
+    """Preprocess the supplement data."""
+    if dedupe:
+        supplement = supplement.drop_duplicates(subset=[on])
+    if rename is not None:
+        supplement = supplement.rename(rename, axis=1)
+    if drop is not None:
+        supplement = supplement.drop(drop, axis=1)
+    return supplement
 
 
 def merge_datasets(
@@ -176,10 +260,29 @@ def merge_datasets(
             'IsDeleted', 'UnitWeightGrams',
             'TestValue', 'IsQuarantine'],
     ) -> pd.DataFrame:
-    """Merge a supplemental CCRS dataset to an existing dataset.
-    Note: Certain columns are treated as strings due to `ValueError`s.
-    Lab results cannot be split between datafiles.
     """
+    Merge multiple datasets into a single DataFrame.
+
+    Args:
+        df: The initial DataFrame to merge onto.
+        datafiles: A list of file paths containing the datasets to merge.
+        dataset: The name of the dataset being merged.
+        on: The column to merge on. Defaults to 'id'.
+        target: The target column. Defaults to empty string.
+        how: How to merge the dataframes. Defaults to 'left'.
+        sep: The separator used in the data files. Defaults to '\t'.
+        validate: Validate argument for pandas merge function. Defaults to 'm:1'.
+        dedupe: Whether to drop duplicates. Defaults to False.
+        drop: Columns to drop from the supplemental dataset. Defaults to None.
+        rename: Columns to rename in the supplemental dataset. Defaults to None.
+        break_once_matched: Whether to break after a match is found. Defaults to True.
+        on_bad_lines: What to do when bad lines are encountered. Defaults to 'skip'.
+        string_columns: Columns to force read as strings. Defaults to ['IsDeleted', 'UnitWeightGrams', 'TestValue', 'IsQuarantine'].
+
+    Returns:
+        A DataFrame that is the result of merging all datasets.
+    """
+
     n = len(df)
     augmented = pd.DataFrame()
     fields = CCRS_DATASETS[dataset]['fields']
@@ -190,35 +293,15 @@ def merge_datasets(
         if dtype.get(column):
             dtype[column] = 'string'
     for datafile in datafiles:
-        print(datafile)
-        supplement = pd.read_csv(
-            datafile,
-            sep=sep,
-            encoding='utf-16',
-            engine='python',
-            parse_dates=parse_dates,
-            dtype=dtype,
-            usecols=usecols,
-            on_bad_lines=on_bad_lines,
-        )
-        if dedupe:
-            supplement.drop_duplicates(subset=[on], inplace=True)
-        if rename is not None:
-            supplement.rename(rename, axis=1, inplace=True)
-        if drop is not None:
-            supplement.drop(drop, axis=1, inplace=True)
+        datafile = Path(datafile)
+        print(datafile) # TODO: replace with logging
+        supplement = load_supplement_data(datafile, dtype, usecols, parse_dates, on_bad_lines, sep)
+        supplement = preprocess_supplement(supplement, on, rename, drop, dedupe)
         if dataset == 'lab_results':
             supplement = format_lab_results(df, supplement)
-        match = rmerge(
-            df,
-            supplement,
-            on=on,
-            how=how,
-            validate=validate,
-        )
+        match = rmerge(df, supplement, on=on, how=how, validate=validate)
         matched = match.loc[~match[target].isna()]
         augmented = pd.concat([augmented, matched], ignore_index=True)
-        # FIXME: This is a hack to prevent the loop from running forever.
         if len(augmented) == n and break_once_matched:
             break
     return augmented
@@ -229,18 +312,14 @@ def save_dataset(
         data_dir: str,
         name: str,
         ext: Optional[str] = 'xlsx',
-        rows: Optional[float] = 1e6,
+        rows: Optional[int] = 1_000_000,
     ) -> None:
     """Save a curated dataset, determining the number of datafiles
     (1 million per file) and saving each shard of the dataset."""
     if not os.path.exists(data_dir): os.makedirs(data_dir)
-    file_count = round((len(data) + rows) / rows)
-    for i in range(0, file_count):
-        start = int(0 + rows * i)
-        stop = int(rows + rows * i)
-        shard = data.iloc[start: stop, :]
-        outfile = os.path.join(data_dir, f'{name}_{i}.{ext}')
-        shard.to_excel(outfile, index=False)
+    num_files = -(-len(data) // rows) # equivalent to math.ceil(len(data) / rows)
+    for i in range(num_files):
+        data.iloc[i*rows : (i+1)*rows].to_excel(os.path.join(data_dir, f'{name}_{i}.{ext}'), index=False)
 
 
 def standardize_dataset(
@@ -248,15 +327,8 @@ def standardize_dataset(
         rename_function: Optional[Callable] = camel_to_snake,
     ) -> pd.DataFrame:
     """Standardize a given DataFrame."""
-    # Standardize column names.
-    columns = {col: rename_function(col) for col in df.columns}
-    df.rename(columns=columns, inplace=True)
-
-    # Anonymize the data.
-    df = anonymize(df)
-
-    # Return the sorted data.
-    return df.sort_index(axis=1)
+    df.rename(columns={col: rename_function(col) for col in df.columns}, inplace=True)
+    return anonymize(df).sort_index(axis=1)
 
 
 def unzip_datafiles(
@@ -268,11 +340,9 @@ def unzip_datafiles(
     for zip_file in zip_files:
         filename = os.path.join(data_dir, zip_file)
         zip_dest = filename.rstrip('.zip')
-        if not os.path.exists(zip_dest):
-            os.makedirs(zip_dest)
-        zip_ref = ZipFile(filename)
-        zip_ref.extractall(zip_dest)
-        zip_ref.close()
+        os.makedirs(zip_dest, exist_ok=True)
+        with ZipFile(filename) as zip_ref:
+            zip_ref.extractall(zip_dest)
         os.remove(filename)
         if verbose:
             print('Unzipped:', zip_file)

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 7/20/2023
+Updated: 7/23/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -66,8 +66,9 @@ def read_lab_results(
             # nrows=1000,
         )
         lab_results = pd.concat([lab_results, data])
-    values = lab_results[value_key].apply(convert_to_numeric)
-    lab_results = lab_results.assign(TestValue=values)
+    if 'TestValue' in lab_results.columns:
+        lab_results[value_key] = lab_results[value_key].apply(convert_to_numeric)
+    # lab_results = lab_results.assign(TestValue=values)
     return lab_results
 
 
@@ -85,7 +86,7 @@ def augment_lab_results(
         lambda x: x.replace('Pesticides - ', '').replace(' (ppm) (ppm)', '')
     )
 
-    # Future work: Handle unidentified analyses. Ask GPT?
+    # Future work: Handle unidentified analyses. Ask ChatGPT?
     test_names = list(results[analysis_name].unique())
     known_analytes = list(CCRS_ANALYTES.keys())
     missing = list(set(test_names) - set(known_analytes))
@@ -104,7 +105,7 @@ def augment_lab_results(
     results[item_key] = results[item_key].astype(str)
 
     # Setup for iteration.    
-    curated_results = []
+    # curated_results = []
     item_ids = list(results[item_key].unique())
     drop = [
         analysis_name,
@@ -120,13 +121,13 @@ def augment_lab_results(
         print('Estimated runtime:', round(N * 0.000245, 2), 'minutes')
 
     # Find lab results for each item by iterating over all items.
-    n = 0
-    for _, item_results in results.groupby(item_key):
+    # n = 0
+    # for _, item_results in results.groupby(item_key):
+    def augment_item(item_results):
 
         # Skip items with no lab results.
-        n += 1
         if item_results.empty:
-            continue
+            return None
 
         # Record important test values for future queries.
         item = item_results.iloc[0].to_dict()
@@ -174,14 +175,18 @@ def augment_lab_results(
         entry['residual_solvents'] = find_detections(entry_results, 'residual_solvents')
         entry['heavy_metals'] = find_detections(entry_results, 'heavy_metals')
 
-        # Record the lab results for the item.
-        curated_results.append(entry)
-        if verbose and (n) % 1_000 == 0:
-            percent = round((n) / N * 100, 2)
-            print(f'Curated: {n} ({percent}%)')
+        # Return the entry.
+        return entry
+
+        # # Record the lab results for the item.
+        # curated_results.append(entry)
+        # if verbose and (n) % 1_000 == 0:
+        #     percent = round((n) / N * 100, 2)
+        #     print(f'Curated: {n} ({percent}%)')
 
     # Return the curated lab results.
-    return pd.DataFrame(curated_results)
+    return results.groupby(item_key).apply(augment_item).dropna().tolist()
+    # return pd.DataFrame(curated_results)
 
 
 def curate_ccrs_lab_results(data_dir: str, stats_dir: str) -> pd.DataFrame:
@@ -218,7 +223,7 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D:\\data\\washington\\'
-    DATA_DIR = f'{base}\\CCRS PRR (6-6-23)\\CCRS PRR (6-6-23)\\'
-    STATS_DIR = f'{base}\\ccrs-stats\\'
-    lab_results = curate_ccrs_lab_results(DATA_DIR, STATS_DIR)
+    data_dir = f'{base}\\CCRS PRR (6-6-23)\\CCRS PRR (6-6-23)\\'
+    stats_dir = f'{base}\\ccrs-stats\\'
+    lab_results = curate_ccrs_lab_results(data_dir, stats_dir)
     print('Curated %i WA lab results.' % len(lab_results))

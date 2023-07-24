@@ -1,0 +1,28 @@
+{
+    "schema_version": "v1",
+    "version": "1.0.0",
+    "name_for_human": "Cannlytics",
+    "name_for_model": "cannlytics",
+    "description_for_human": "The Cannlytics API allows users to interface with cannabis data and statistics. Each API endpoints handle authentication, error handling, and identifying the precise logic to perform.",
+    "description_for_model": "Help the user make requests to the Cannlytics API. The user can get lab results, licenses, strains, as well as parse COAs and receipts.",
+    "auth": {
+      "type": "service_http",
+      "HttpAuthorizationType": "bearer",
+      "ManifestAuthType": "service_http",
+      "instructions": "Get an API at https://cannlytics.com/account/api-keys to integrate with Cannlytics. Include this key in the Authorization header of your HTTP requests like this: 'Bearer your_api_key'",
+      "api_key": "Your API Key",
+      "api_secret": "Your API Secret"
+    },
+    "api": {
+      "type": "openapi",
+      "url": "https://raw.githubusercontent.com/cannlytics/cannlytics/main/api/openapi.yaml"
+    },
+    "errors": {
+      "401": "Unauthorized - Check your API key",
+      "404": "Not Found - Check your endpoint URL",
+      "500": "Internal Server Error - Please try again later or contact dev@cannlytics.com"
+    },
+    "logo_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Flogos%2Fcannlytics_logo_with_text_light.png?alt=media&token=de4dae26-a3ec-4c8a-a9cd-54a4cbddf11b",
+    "contact_email": "dev@cannlytics.com",
+    "legal_info_url": "https://docs.cannlytics.com/about/terms-of-service"
+}

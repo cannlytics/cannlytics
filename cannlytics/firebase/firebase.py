@@ -847,7 +847,7 @@ def upload_file(
         data_url: Optional[str] = None,
         content_type: Optional[str] = 'image/jpg',
         bucket_name: Optional[str] = None,
-):
+    ):
     """Upload file to Firebase Storage.
     Args:
         destination_blob_name (str): The name to save the file as.

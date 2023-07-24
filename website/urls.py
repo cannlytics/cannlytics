@@ -9,7 +9,8 @@ License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main
 """
 # External imports.
 from django.conf import settings
-from django.conf.urls import handler404, handler500 #pylint: disable=unused-import
+from django.conf.urls import handler404, handler500
+from django.http import HttpResponse #pylint: disable=unused-import
 from django.urls import include, path
 from django.views.generic.base import RedirectView
 from django_robohash.views import robohash
@@ -25,6 +26,17 @@ from website.views import (
     testing,
     videos,
 )
+
+
+def read_file(request):
+    """Read a file from the filesystem."""
+    # TODO: Test if this works:
+    # os.path.join(os.path.dirname(__file__), 'openapi.yaml')
+    f = open('static/ai-plugin.json', 'r')
+    file_content = f.read()
+    f.close()
+    return HttpResponse(file_content, content_type='text/plain')
+
 
 # Main URLs.
 urlpatterns = [
@@ -72,7 +84,9 @@ urlpatterns = [
     path('<page>', main.GeneralView.as_view(), name='page'),
     path('<page>/<section>', main.GeneralView.as_view(), name='section'),
     path('<page>/<section>/<str:unit>', main.GeneralView.as_view(), name='unit'),
+    path('.well-known/ai-plugin.json', read_file),
 ]
+
 
 # Serve static assets in development and production.
 if settings.DEBUG:

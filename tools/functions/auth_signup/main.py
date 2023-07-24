@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/23/2023
-Updated: 7/11/2023
+Updated: 7/22/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -72,9 +72,12 @@ def auth_signup(data, context):
     admin_email_port = os.environ.get('EMAIL_PORT')
 
     # Start the email server.
-    server = smtplib.SMTP(admin_email_host, admin_email_port)
-    server.starttls()
-    server.login(admin_email, admin_email_password)
+    try:
+        server = smtplib.SMTP_SSL(admin_email_host, admin_email_port)
+        server.login(admin_email, admin_email_password)
+    except Exception as e:
+        print('Error connecting to SMTP server: ', str(e))
+        return
 
     # Send a welcome email.
     try:
@@ -136,7 +139,10 @@ def auth_signup(data, context):
         print('Failed to send email to admin about new user: %s' % uid)
 
     # Close the email server.
-    server.quit()
+    try:
+        server.quit()
+    except:
+        pass
 
 
 # === Test ===

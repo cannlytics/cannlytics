@@ -205,7 +205,7 @@ def merge_lab_results_with_products(
 
 
 
-def merge_products(items, product_files, results_file):
+def merge_products(items, product_files):
     """Merge products with inventory items using `ProductId`."""
     items = merge_datasets(
         items,
@@ -315,10 +315,10 @@ def curate_ccrs_inventory(data_dir, stats_dir):
         items = merge_licensees(items, licensees)
 
         # Merge product data.
-        print('Merging product data...')
-        lab_results_dir = os.path.join(stats_dir, 'lab_results')
-        results_file = os.path.join(lab_results_dir, 'lab_results_0.xlsx')
-        items = merge_products(items, product_files, results_file)
+        # print('Merging product data...')
+        # lab_results_dir = os.path.join(stats_dir, 'lab_results')
+        # results_file = os.path.join(lab_results_dir, 'lab_results_0.xlsx')
+        items = merge_products(items, product_files)
 
         # Merge strain data.
         print('Merging strain data...')
@@ -339,8 +339,8 @@ def curate_ccrs_inventory(data_dir, stats_dir):
 
         # Save the curated inventory data.
         print('Saving curated inventory data...')
-        outfile = os.path.join(inventory_dir, f'inventory_{i}.xlsx')
-        items.to_excel(outfile, index=False)
+        outfile = os.path.join(inventory_dir, f'inventory_{i}.csv')
+        items.to_csv(outfile, index=False)
         print('Curated inventory datafile:', i + 1, '/', len(inventory_files))
 
         # Perform garbage cleaning.
