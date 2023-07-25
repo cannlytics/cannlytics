@@ -49,7 +49,7 @@ def anonymize(
     in "_by" or "_By."""
     if columns is None:
         columns = df.filter(regex=r'.*_by$|.*_By$', axis=1).columns
-    df.loc[:, columns] = df.loc[:, columns].astype(str).apply(create_hash)
+    df.loc[:, columns] = df.loc[:, columns].astype(str).applymap(create_hash)
     return df
 
 

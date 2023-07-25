@@ -9,7 +9,7 @@ License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE
 
 Description:
 
-    CannBot is an agentic AI that performs automated cannabis research.
+    CannBot is an AI agent that performs automated cannabis research.
 
 References:
 
@@ -114,7 +114,7 @@ def cannbot(event, context=None):
         database = firestore.client()
 
     # FIXME: Initialize OpenAI.
-    config = dotenv_values('../../.env')
+    config = dotenv_values('../../../.env')
     openai.api_key = config['OPENAI_API_KEY']
 
     # Get latest Cannabis Data Science material.

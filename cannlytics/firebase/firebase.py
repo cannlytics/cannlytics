@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/7/2021
-Updated: 1/10/2023
+Updated: 7/24/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: A wrapper of `firebase_admin` to make interacting with a Firestore
@@ -761,25 +761,41 @@ def create_short_url(
         api_key: str,
         long_url: str,
         project_name: str,
+        suffix_option: str = 'UNGUESSABLE',
+        social_title: Optional[str] = None,
+        social_description: Optional[str] = None,
+        social_image_link: Optional[str] = None
     ) -> str:
     """Create a short URL to a specified file.
     Args:
         api_key (str): An API key for Firebase dynamic links.
         long_url (str): A URL to create a short, dynamic link.
         project_name (str): The name of the Firebase project.
+        suffix_option (str): The suffix option for the short link, either 'SHORT' or 'UNGUESSABLE'.
+            Defaults to 'UNGUESSABLE'.
+        social_title (str): The title to use when the Dynamic Link is shared in a social post.
+        social_description (str): The description to use when the Dynamic Link is shared in a social post.
+        social_image_link (str): The URL to an image related to this link.
     Returns:
         (str): A short link to the given URL.
     """
     try:
         url = f'https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key={api_key}'
-        data= {
+        data = {
             'dynamicLinkInfo': {
                 'domainUriPrefix': f'https://{project_name}.page.link',
                 'link': long_url,
+                'socialMetaTagInfo': {
+                    'socialTitle': social_title,
+                    'socialDescription': social_description,
+                    'socialImageLink': social_image_link
+                }
             },
-            # TODO: Make suffix a argument.
-            'suffix': {'option': 'UNGUESSABLE'}
+            'suffix': {'option': suffix_option}
         }
+        # Remove None values from the dictionary
+        data = {k: v for k, v in data.items() if v is not None}
+        data['dynamicLinkInfo'] = {k: v for k, v in data['dynamicLinkInfo'].items() if v is not None}
         response = requests.post(url, json=data)
         return response.json()['shortLink']
     except ConnectionError:
