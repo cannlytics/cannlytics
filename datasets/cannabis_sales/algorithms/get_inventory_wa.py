@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 5/30/2023
+Updated: 7/28/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -15,7 +15,7 @@ Original license: MIT <https://github.com/cannabisdata/cannabisdata/blob/main/LI
 Data Source:
 
     - WSLCB PRR (latest)
-    URL: <https://lcb.app.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml>
+    URL: <https://lcb.box.com/s/d0g3mhtdyohhi4ic3zucekpnz017fy9o>
 
 """
 # Standard imports:
@@ -27,6 +27,7 @@ from typing import Optional
 # External imports:
 from cannlytics.data.ccrs import (
     CCRS_DATASETS,
+    CURATED_CCRS_DATASETS,
     anonymize,
     get_datafiles,
     merge_datasets,
@@ -116,52 +117,20 @@ def read_products(
     return products
 
 
-
-def merge_lab_results(
-        results_file: str,
-        directory: str,
-        on: Optional[str] = 'inventory_id',
-        target: Optional[str] = 'lab_result_id',
-        verbose: Optional[bool] = True,
-    ) -> pd.DataFrame:
-    """Merge lab results with items in a given directory."""
-
-    # Read the lab results.
-    lab_results = pd.read_excel(results_file)
-
-    # Clean the lab results
-    # lab_results.rename(columns={
-    #     'inventory_id': 'InventoryId',
-    #     'lab_result_id': target,
-    # }, inplace=True)
-    lab_results[on] = lab_results[on].astype(str)
-
-    # Iterate over all datafiles in the directory.
-    matched = pd.DataFrame()
-    datafiles = sorted_nicely(os.listdir(directory))
-    for datafile in datafiles:
-
-        # Skip temporary files.
-        if datafile.startswith('~$'):
-            continue
-
-        # Merge the lab results with the datafile.
-        data = pd.read_excel(os.path.join(directory, datafile))
-        data[on] = data[on].astype(str)
-        match = rmerge(
-            data,
-            lab_results,
-            on=on,
-            how='left',
-            validate='m:1',
-        )
-        match = match.loc[~match[target].isna()]
-        matched = pd.concat([matched, match], ignore_index=True)
-        if verbose:
-            print('Matched', len(matched), 'lab results...')
-    
-    # Return the matched lab results.
-    return matched
+def merge_areas(items, area_files):
+    """Merge areas with inventory items using `AreaId`."""
+    return merge_datasets(
+        items,
+        area_files,
+        dataset='areas',
+        on='AreaId',
+        target='AreaId',
+        how='left',
+        validate='m:1',
+        rename={'Name': 'area_name'},
+        drop=['LicenseeId', 'IsQuarantine', 'ExternalIdentifier',
+        'IsDeleted', 'CreatedBy', 'CreatedDate', 'UpdatedBy', 'UpdatedDate']
+    )
 
 
 def merge_licensees(items, licensees):
@@ -175,6 +144,64 @@ def merge_licensees(items, licensees):
     )
 
 
+def merge_lab_results(
+        results_file: str,
+        directory: str,
+        on: Optional[str] = 'inventory_id',
+        target: Optional[str] = 'lab_result_id',
+        verbose: Optional[bool] = True,
+    ) -> pd.DataFrame:
+    """Merge lab results with items in a given directory."""
+
+    # Read the standardized lab results.
+    lab_results = pd.read_excel(results_file)
+    lab_results.rename(columns={
+        'inventory_id': on,
+        'lab_result_id': target,
+    }, inplace=True)
+    lab_results[on] = lab_results[on].astype(str)
+
+    # Get inventory item fields.
+    fields = CURATED_CCRS_DATASETS['inventory']['fields']
+    parse_dates = CURATED_CCRS_DATASETS['inventory']['date_fields']
+    use_cols = list(fields.keys()) + parse_dates
+
+    # Iterate over all datafiles in the directory.
+    matched = pd.DataFrame()
+    datafiles = sorted_nicely(os.listdir(directory))
+    for datafile in datafiles:
+        if datafile.startswith('~$') or not datafile.endswith('.xlsx'):
+            continue
+
+        # Read the standardized inventory.
+        filename = os.path.join(directory, datafile)
+        data = pd.read_excel(
+            filename,
+            dtype=fields,
+            parse_dates=parse_dates,
+            usecols=use_cols,
+        )
+        data[on] = data[on].astype(str)
+        
+        # Merge the lab results with the datafile.
+        match = rmerge(
+            data,
+            lab_results,
+            on=on,
+            how='left',
+            validate='m:1',
+        )
+
+        # Record rows with matching lab results.
+        match = match.loc[~match[target].isna()]
+        matched = pd.concat([matched, match], ignore_index=True)
+        if verbose:
+            print('Matched', len(matched), 'lab results...')
+    
+    # Return the matched lab results.
+    return matched
+
+
 def merge_lab_results_with_products(
         products,
         results_file: str,
@@ -183,11 +210,8 @@ def merge_lab_results_with_products(
         verbose: Optional[bool] = True,
     ):
     """Merge lab results with products data."""
-    # Read the lab results.
     lab_results = pd.read_excel(results_file)
     lab_results[on] = lab_results[on].astype(str)
-
-    # Merge the lab results with the products.
     merged_data = rmerge(
         products,
         lab_results,
@@ -196,13 +220,8 @@ def merge_lab_results_with_products(
         validate='m:1',
     )
     merged_data = merged_data.loc[~merged_data[target].isna()]
-
-    if verbose:
-        print('Matched', len(merged_data), 'lab results with products...')
-    
-    # Return the merged data.
+    if verbose: print('Matched', len(merged_data), 'lab results with products...')
     return merged_data
-
 
 
 def merge_products(items, product_files):
@@ -214,7 +233,7 @@ def merge_products(items, product_files):
         on='ProductId',
         target='InventoryType',
         how='left',
-        # FIXME: This may not be right.
+        # FIXME: This mapping may not be right.
         validate='m:m',
         rename={
             'CreatedDate': 'product_created_at',
@@ -243,7 +262,7 @@ def merge_strains(items, strain_files):
         validate='m:1',
         rename={
             'Name': 'strain_name',
-            'CreatedDate': 'strain_created_date',
+            'CreatedDate': 'strain_created_at',
         },
         drop=['CreatedBy', 'UpdatedBy', 'UpdatedDate'],
         dedupe=True,
@@ -254,25 +273,8 @@ def merge_strains(items, strain_files):
     return items
 
 
-def merge_areas(items, area_files):
-    """Merge areas with inventory items using `AreaId`."""
-    return merge_datasets(
-        items,
-        area_files,
-        dataset='areas',
-        on='AreaId',
-        target='AreaId',
-        how='left',
-        validate='m:1',
-        rename={'Name': 'area_name'},
-        drop=['LicenseeId', 'IsQuarantine', 'ExternalIdentifier',
-        'IsDeleted', 'CreatedBy', 'CreatedDate', 'UpdatedBy', 'UpdatedDate']
-    )
-
-
 def curate_ccrs_inventory(data_dir, stats_dir):
     """Curate CCRS inventory by merging additional datasets."""
-
     print('Curating inventory...')
     start = datetime.now()
 
@@ -287,12 +289,11 @@ def curate_ccrs_inventory(data_dir, stats_dir):
     licensees = read_licensees(data_dir)
 
     # Define all fields.
+    # Note: `IsDeleted` throws a `ValueError` if defined as a bool.
     fields = CCRS_DATASETS['inventory']['fields']
     date_fields = CCRS_DATASETS['inventory']['date_fields']
     item_cols = list(fields.keys()) + date_fields
     item_types = {k: fields[k] for k in fields if k not in date_fields}
-
-    # Note: `IsDeleted` throws a `ValueError` if defined as a bool.
     item_types['IsDeleted'] = 'string'
 
     # Get all datafiles.
@@ -315,9 +316,7 @@ def curate_ccrs_inventory(data_dir, stats_dir):
         items = merge_licensees(items, licensees)
 
         # Merge product data.
-        # print('Merging product data...')
-        # lab_results_dir = os.path.join(stats_dir, 'lab_results')
-        # results_file = os.path.join(lab_results_dir, 'lab_results_0.xlsx')
+        print('Merging product data...')
         items = merge_products(items, product_files)
 
         # Merge strain data.
@@ -329,18 +328,20 @@ def curate_ccrs_inventory(data_dir, stats_dir):
         items = merge_areas(items, area_files)
 
         # Standardize column names.
+        print('Standardizing...')
         items.rename(
             columns={col: camel_to_snake(col) for col in items.columns},
             inplace=True
         )
 
         # Anonymize the data.
+        print('Anonymizing...')
         items = anonymize(items)
 
         # Save the curated inventory data.
         print('Saving curated inventory data...')
-        outfile = os.path.join(inventory_dir, f'inventory_{i}.csv')
-        items.to_csv(outfile, index=False)
+        outfile = os.path.join(inventory_dir, f'inventory_{i}.xlsx')
+        items.to_excel(outfile, index=False)
         print('Curated inventory datafile:', i + 1, '/', len(inventory_files))
 
         # Perform garbage cleaning.
@@ -361,52 +362,57 @@ def curate_ccrs_inventory(data_dir, stats_dir):
         print('Failed to merge lab results. Curate lab results first.')
 
     # FIXME: Attach lab results to products.
-    # matched = pd.DataFrame()
-    # inventory_results_file = results_file = os.path.join(lab_results_dir, 'inventory_lab_results_0.xlsx')
-    # lab_results = pd.read_excel(inventory_results_file)
-    # augmented_inventory_files = sorted_nicely(os.listdir(inventory_dir))
-    # augmented_inventory_files = [os.path.join(inventory_dir, f) for f in augmented_inventory_files if not f.startswith('~$')]
-    # for i, product_file in enumerate(product_files):
+    matched = pd.DataFrame()
+    lab_results_dir = os.path.join(stats_dir, 'lab_results')
+    inventory_results_file = results_file = os.path.join(lab_results_dir, 'inventory_lab_results_0.xlsx')
+    lab_results = pd.read_excel(inventory_results_file)
+    augmented_inventory_files = sorted_nicely(os.listdir(inventory_dir))
+    augmented_inventory_files = [os.path.join(inventory_dir, f) for f in augmented_inventory_files if not f.startswith('~$')]
+    for i, product_file in enumerate(product_files):
 
-    #     # Read products.
-    #     products = read_products(product_file)
+        # Read products.
+        products = read_products(product_file)
 
-    #     # TODO: Match products with inventory.
-    #     products.rename(columns={'product_id': 'ProductId'}, inplace=True)
+        # TODO: Match products with inventory.
+        products.rename(columns={'product_id': 'ProductId'}, inplace=True)
+        # for inventory_file in augmented_inventory_files:
+        #     inventory = pd.read_excel(
+        #         inventory_file
+        #     )
 
-    #     for inventory_file in augmented_inventory_files:
-    #         inventory = pd.read_excel(
-    #             inventory_file
-    #         )
+        # FIXME: This is not working.
+        products = merge_datasets(
+            products,
+            augmented_inventory_files,
+            dataset='inventory',
+            on='ProductId',
+            target='inventory_id',
+            how='left',
+            validate='m:1',
+            rename={
+                'CreatedBy': 'inventory_created_by',
+                'UpdatedBy': 'inventory_updated_by',
+                'CreatedDate': 'inventory_created_at',
+                'updatedDate': 'inventory_updated_at',
+                'UpdatedDate': 'inventory_updated_at',
+                'Name': 'inventory_name',
+            },
+        )
 
-    #     products = merge_datasets(
-    #         products,
-    #         inventory_files,
-    #         dataset='inventory',
-    #         on='ProductId',
-    #         target='InventoryId',
-    #         how='left',
-    #         # validate='1:m',
-    #         rename={
-    #             'CreatedBy': 'inventory_created_by',
-    #             'UpdatedBy': 'inventory_updated_by',
-    #             'CreatedDate': 'inventory_created_at',
-    #             'updatedDate': 'inventory_updated_at',
-    #             'UpdatedDate': 'inventory_updated_at',
-    #             'Name': 'inventory_name',
-    #         },
-    #     )
+        # Merge the lab results with the products.
+        match = rmerge(
+            products,
+            lab_results,
+            on='product_id',
+            how='left',
+            validate='m:1',
+        )
+        match = match.loc[~match['lab_result_id'].isna()]
+        matched = pd.concat([matched, match], ignore_index=True)
+        print('Matched', len(matched), 'lab results with products...')
 
-    #     # Merge the lab results with the products.
-    #     match = rmerge(
-    #         products,
-    #         lab_results,
-    #         on='inventory_id',
-    #         how='left',
-    #         validate='m:1',
-    #     )
-    #     match = match.loc[~match['lab_result_id'].isna()]
-    #     matched = pd.concat([matched, match], ignore_index=True)
+    # Save the matched product lab results.
+    save_dataset(matched, lab_results_dir, 'product_lab_results')
 
     # Complete curation.
     end = datetime.now()
@@ -417,7 +423,7 @@ def curate_ccrs_inventory(data_dir, stats_dir):
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    base = 'D:\\data\\washington\\'
-    data_dir = f'{base}\\CCRS PRR (6-6-23)\\CCRS PRR (6-6-23)\\'
-    stats_dir = f'{base}\\ccrs-stats\\'
+    base = 'D://data/washington/'
+    data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
+    stats_dir = f'{base}/ccrs-stats/'
     curate_ccrs_inventory(data_dir, stats_dir)

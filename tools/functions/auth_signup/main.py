@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/23/2023
-Updated: 7/22/2023
+Updated: 7/27/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -17,6 +17,7 @@ Description:
 # Standard imports:
 import os
 import smtplib
+import ssl
 from email.mime.text import MIMEText
 
 # External imports:
@@ -69,11 +70,15 @@ def auth_signup(data, context):
     admin_email = os.environ.get('EMAIL_HOST_USER')
     admin_email_password = os.environ.get('EMAIL_HOST_PASSWORD')
     admin_email_host = os.environ.get('EMAIL_HOST')
-    admin_email_port = os.environ.get('EMAIL_PORT')
+    admin_email_port = int(os.environ.get('EMAIL_PORT', 587))
 
     # Start the email server.
     try:
-        server = smtplib.SMTP_SSL(admin_email_host, admin_email_port)
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+        server = smtplib.SMTP(admin_email_host, admin_email_port)
+        server.ehlo()
+        server.starttls(context=context)
+        server.ehlo()
         server.login(admin_email, admin_email_password)
     except Exception as e:
         print('Error connecting to SMTP server: ', str(e))

@@ -6,14 +6,17 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/10/2022
-Updated: 7/23/2023
+Updated: 7/28/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
+from datetime import datetime
 import functools
 from glob import glob
+import logging
 from pathlib import Path
 import os
+import tempfile
 from typing import Callable, List, Optional, Union
 from zipfile import ZipFile
 import numpy as np
@@ -53,16 +56,6 @@ def anonymize(
     return df
 
 
-# FIXME:
-# def get_datafiles(
-#         data_dir: str,
-#         dataset: Optional[str] = '',
-#         desc: Optional[bool] = True,
-#         ext: Optional[str] = 'csv',
-#     ) -> list:
-#     """Get all CCRS datafiles of a given type in a directory."""
-#     datafiles = sorted_nicely(glob(os.path.join(data_dir, dataset + f"*.{ext}")))
-#     return datafiles[::-1] if desc else datafiles
 def get_datafiles(
         data_dir: str,
         dataset: Optional[str] = '',
@@ -93,27 +86,6 @@ def format_test_value(
     return compound_value
 
 
-# TODO: Determine fastest version of find_detections.
-# def find_detections(
-#         tests,
-#         analysis,
-#         analysis_key='analysis',
-#         analyte_key='key',
-#         value_key='value',
-#     ) -> List[str]:
-#     """Find compounds detected for a given analysis from given tests."""
-#     tests = pd.DataFrame(tests)
-#     analysis_tests = tests.loc[tests[analysis_key] == analysis]
-#     if analysis_tests.empty:
-#         return []
-#     values = pd.to_numeric(analysis_tests[value_key], errors='coerce')
-#     analysis_tests.loc[:, value_key] = values
-#     detected = analysis_tests.loc[analysis_tests[value_key] > 0]
-#     if detected.empty:
-#         return []
-#     return detected[analyte_key].to_list()
-
-
 def find_detections(
         tests,
         analysis,
@@ -129,46 +101,6 @@ def find_detections(
     return tests[tests[value_key] > 0][analyte_key].to_list()
 
 
-# def format_lab_results(
-#         df: pd.DataFrame,
-#         results: pd.DataFrame,
-#         item_key: Optional[str] = 'InventoryId',
-#         analysis_name: Optional[str] = 'TestName',
-#         analysis_key: Optional[str] = 'TestValue',
-#     ) -> pd.DataFrame:
-#     """Format CCRS lab results to merge into another dataset."""
-#     analyte_data = results[analysis_name].map(CCRS_ANALYTES)
-#     results = results.join(pd.DataFrame(analyte_data.values.tolist()))
-#     results['type'] = results['type'].map(CCRS_ANALYSES)
-#     item_ids = df[item_key].unique()
-#     formatted = []
-#     for item_id in item_ids:
-#         item_results = results.loc[results[item_key] == item_id]
-#         if item_results.empty:
-#             continue
-#         values = item_results.iloc[0].to_dict()
-#         [values.pop(key, None) for key in [analysis_name, analysis_key]]
-#         entry = {
-#             **values,
-#             'analyses': item_results['type'].unique().tolist(),
-#             'delta_9_thc': format_test_value(item_results, 'delta_9_thc'),
-#             'thca': format_test_value(item_results, 'thca'),
-#             'total_thc': format_test_value(item_results, 'total_thc'),
-#             'cbd': format_test_value(item_results, 'cbd'),
-#             'cbda': format_test_value(item_results, 'cbda'),
-#             'total_cbd': format_test_value(item_results, 'total_cbd'),
-#             'moisture_content': format_test_value(item_results, 'moisture_content'),
-#             'water_activity': format_test_value(item_results, 'water_activity'),
-#             'status': 'Fail' if 'Fail' in item_results['LabTestStatus'].unique() else 'Pass',
-#             'pesticides': find_detections(item_results, 'pesticides'),
-#             'residual_solvents': find_detections(item_results, 'residual_solvent'),
-#             'heavy_metals': find_detections(item_results, 'heavy_metals'),
-#         }
-#         formatted.append(entry)
-#     return pd.DataFrame(formatted)
-
-
-# TODO: Test if this function is faster.
 def format_lab_results(df: pd.DataFrame, results: pd.DataFrame, item_key: Optional[str] = 'InventoryId',
                        analysis_name: Optional[str] = 'TestName', analysis_key: Optional[str] = 'TestValue') -> pd.DataFrame:
     """Format CCRS lab results to merge into another dataset."""
@@ -316,6 +248,7 @@ def save_dataset(
     ) -> None:
     """Save a curated dataset, determining the number of datafiles
     (1 million per file) and saving each shard of the dataset."""
+    # FIXME: There may be values that begin with an "=".
     if not os.path.exists(data_dir): os.makedirs(data_dir)
     num_files = -(-len(data) // rows) # equivalent to math.ceil(len(data) / rows)
     for i in range(num_files):
@@ -346,3 +279,104 @@ def unzip_datafiles(
         os.remove(filename)
         if verbose:
             print('Unzipped:', zip_file)
+
+
+class CCRS(object):
+    """An instance of this class manages CCRS data curation."""
+
+    def __init__(self, data_dir, stats_dir, logs=True):
+        """Initialize a CCRS API client.
+        Args:
+            logs (bool): Whether or not to log CCRS API requests, True by default.
+
+        Example:
+
+        ```py
+        track = CCRS(logs=True)
+        ```
+        """
+        self.data_dir = data_dir
+        self.stats_dir = stats_dir
+        self.inventory_dir = os.path.join(stats_dir, 'inventory')
+        self.licensees = None
+        self.fields = None
+        self.date_fields = None
+        self.item_cols = None
+        self.item_types = None
+        self.inventory_files = None
+        self.product_files = None
+        self.strain_files = None
+        self.area_files = None
+        self.logs = logs
+        if logs:
+            self.initialize_logs()
+
+
+    def create_log(self, response):
+        """Create a log given an HTTP response.
+        Args:
+            response (HTTPResponse): An HTTP request response.
+        """
+        try:
+            self.logger.debug(f'Request: {response.request.method} {response.request.url}')
+            self.logger.debug(f'Body: {response.request.body}')
+            self.logger.debug(f'Status code: {response.status_code}')
+            self.logger.debug(f'Response: {response.text}')
+        except KeyError:
+            raise ValueError({'message': '`logs=True` but no logger initialized. Use `client.initialize_logs()`.'})
+
+
+    def initialize_logs(self):
+        """Initialize CCRS logs."""
+        timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+        temp_dir = tempfile.gettempdir()
+        temp_file = os.path.join(temp_dir, f'ccrs-{timestamp}.log')
+        logging.getLogger('ccrs').handlers.clear()
+        logging.basicConfig(
+            filename=temp_file,
+            filemode='w+',
+            level=logging.DEBUG,
+            format='%(asctime)s %(message)s',
+            datefmt='%Y-%m-%dT%H:%M:%S',
+        )
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.DEBUG)
+        self.logger = logging.getLogger('ccrs')
+        self.logger.addHandler(handler)
+        self.logger.debug('CCRS data manager initialized.')
+
+
+    def format_test_value(self, tests, compound, value_key='TestValue'):
+        """Format a lab result test value from a DataFrame of tests."""
+        compound_value = self.extract_compound_value(tests, compound, value_key)
+        return self.check_and_convert(compound_value)
+
+
+    def extract_compound_value(self, tests, compound, value_key):
+        """Extract compound value from a set of tests."""
+        compound_value = tests.loc[(tests.key == compound), value_key]
+        return compound_value if not compound_value.empty else None
+
+
+    def check_and_convert(self, compound_value):
+        """Check compound value and convert to numeric if not None."""
+        if compound_value is not None:
+            compound_value = to_numeric(compound_value.iloc[0], errors='coerce')
+            if np.isnan(compound_value):
+                return None
+        return compound_value
+
+
+    def find_detections(self, tests, analysis, analysis_key='analysis', analyte_key='key', value_key='value'):
+        """Find compounds detected for a given analysis from given tests."""
+        if isinstance(tests, list):
+            return [test[analyte_key] for test in tests if test[analysis_key] == analysis and to_numeric(test[value_key], errors='coerce') > 0]
+        else:
+            return self.find_detections_in_df(tests, analysis, analysis_key, analyte_key, value_key)
+
+
+    def find_detections_in_df(self, tests, analysis, analysis_key, analyte_key, value_key):
+        """Find detections in a DataFrame."""
+        tests = tests[tests[analysis_key] == analysis]
+        tests[value_key] = to_numeric(tests[value_key], errors='coerce')
+        return tests[tests[value_key] > 0][analyte_key].to_list()

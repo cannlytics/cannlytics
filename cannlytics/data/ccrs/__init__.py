@@ -25,6 +25,7 @@ from .constants import (
     CCRS_PLANT_HARVEST_CYCLES,
     CCRS_PLANTS_SOURCES,
     CCRS_PLANT_STATES,
+    CURATED_CCRS_DATASETS,
 )
 
 __all__ = [
@@ -35,6 +36,7 @@ __all__ = [
     CCRS_PLANT_HARVEST_CYCLES,
     CCRS_PLANTS_SOURCES,
     CCRS_PLANT_STATES,
+    CURATED_CCRS_DATASETS,
     anonymize,
     find_detections,
     format_lab_results,

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 7/20/2023
+Updated: 7/28/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -15,7 +15,7 @@ Original license: MIT <https://github.com/cannabisdata/cannabisdata/blob/main/LI
 Data Source:
 
     - WSLCB PRR (latest)
-    URL: <https://lcb.app.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml>
+    URL: <https://lcb.box.com/s/d0g3mhtdyohhi4ic3zucekpnz017fy9o>
 
 """
 # Standard imports:
@@ -218,9 +218,9 @@ def ripple_list(file_paths, n):
 # DEV:
 if __name__ == '__main__':
 
-    base = 'D:\\data\\washington\\'
-    data_dir = f'{base}\\CCRS PRR (6-6-23)\\CCRS PRR (6-6-23)\\'
-    stats_dir = f'{base}\\ccrs-stats\\'
+    base = 'D://data/washington/'
+    data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
+    stats_dir = f'{base}/ccrs-stats/'
     first_file = 73
     last_file = None
     reverse = False
@@ -281,7 +281,7 @@ if __name__ == '__main__':
 
         # Efficiently order sales headers.
         print('Merging sale header data...')
-        basename = datafile.split('\\')[-1]
+        basename = datafile.split('/')[-1]
         index = int(basename.split('_')[-1].split('.')[0])
         sale_headers_files = get_datafiles(data_dir, 'SaleHeader_', desc=False)
         try:
@@ -471,9 +471,9 @@ daily_licensee_sales = calculate_and_save_stats(augmented_files, sales_stats_dir
 # if __name__ == '__main__':
 
 #     # Specify where your data lives.
-#     base = 'D:\\data\\washington\\'
-#     data_dir = f'{base}\\CCRS PRR (3-6-23)\\CCRS PRR (3-6-23)\\'
-#     stats_dir = f'{base}\\ccrs-stats\\'
+#     base = 'D://data/washington/'
+#     data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
+#     stats_dir = f'{base}/ccrs-stats/'
 #     curate_ccrs_sales(
 #         data_dir,
 #         stats_dir,
@@ -484,8 +484,7 @@ daily_licensee_sales = calculate_and_save_stats(augmented_files, sales_stats_dir
 
     # DEV: Aggregate monthly sales items.
     # aggregate_monthly_sales(
-    #     data_dir=f'{base}\\ccrs-stats\\sales',
+    #     data_dir=f'{base}/ccrs-stats/sales',
     #     start=pd.to_datetime('2023-01-01'),
     #     end=pd.to_datetime('2023-03-01'),
     # )
-

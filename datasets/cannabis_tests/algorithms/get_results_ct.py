@@ -177,12 +177,13 @@ def get_results_ct(url: str = CT_RESULTS_URL) -> pd.DataFrame:
     except:
         df.to_excel(datafile)
     print('Connecticut lab results archived:', datafile)
+    return df
 
 
 def download_pdfs_ct(
         df: pd.DataFrame,
         download_path: str,
-        column_name: Optional[str] = 'lab_analysis',
+        column_name: Optional[str] = 'lab_results_url',
         id_column: Optional[str] = 'id',
         verbose: Optional[bool] = True,
     ) -> None:
@@ -238,10 +239,8 @@ if __name__ == '__main__':
         args = {}
 
     # Specify where your data lives.
-    # DATA_DIR = 'D:/data/connecticut/lab_results'
-    # PDF_DIR = 'D:/data/connecticut/lab_results/pdfs'
-    DATA_DIR = 'C://.datasets/data/connecticut/lab_results'
-    PDF_DIR = 'C://.datasets/data/connecticut/lab_results/pdfs'
+    DATA_DIR = 'D:/data/connecticut/lab_results'
+    PDF_DIR = 'D:/data/connecticut/lab_results/pdfs'
 
     # Set the destination for the PDFs.
     data_dir = args.get('data_dir', DATA_DIR)

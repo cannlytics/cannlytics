@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 7/23/2023
+Updated: 7/28/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -15,7 +15,7 @@ Original license: MIT <https://github.com/cannabisdata/cannabisdata/blob/main/LI
 Data Source:
 
     - WSLCB PRR (latest)
-    URL: <https://lcb.app.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml>
+    URL: <https://lcb.box.com/s/d0g3mhtdyohhi4ic3zucekpnz017fy9o>
 
 """
 # Standard imports:
@@ -72,6 +72,63 @@ def read_lab_results(
     return lab_results
 
 
+def format_result(item_results, drop: Optional[list] = []):
+    """Format results for a lab sample."""
+
+    # Skip items with no lab results.
+    if item_results.empty:
+        return None
+
+    # Record item metadata and important results.
+    item = item_results.iloc[0].to_dict()
+    [item.pop(key) for key in drop]
+    entry = {
+        **item,
+        'delta_9_thc': format_test_value(item_results, 'delta_9_thc'),
+        'thca': format_test_value(item_results, 'thca'),
+        'total_thc': format_test_value(item_results, 'total_thc'),
+        'cbd': format_test_value(item_results, 'cbd'),
+        'cbda': format_test_value(item_results, 'cbda'),
+        'total_cbd': format_test_value(item_results, 'total_cbd'),
+        'moisture_content': format_test_value(item_results, 'moisture_content'),
+        'water_activity': format_test_value(item_results, 'water_activity'),
+    }
+
+    # Determine "Pass" or "Fail" status.
+    statuses = list(item_results['LabTestStatus'].unique())
+    if 'Fail' in statuses:
+        entry['status'] = 'Fail'
+    else:
+        entry['status'] = 'Pass'
+
+    # Augment the complete `results`.
+    entry_results = []
+    for _, item_result in item_results.iterrows():
+        test_name = item_result['TestName']
+        analyte = CCRS_ANALYTES[test_name]
+        try:
+            analysis = CCRS_ANALYSES[analyte['type']]
+        except KeyError:
+            print('Unidentified analysis:', analyte['type'])
+            analysis = analyte['type']
+        entry_results.append({
+            'analysis': analysis,
+            'key': analyte['key'],
+            'name': item_result['TestName'],
+            'units': analyte['units'],
+            'value': item_result['TestValue'],
+        })
+    entry['results'] = entry_results
+
+    # Determine detected contaminants.
+    entry['pesticides'] = find_detections(entry_results, 'pesticides')
+    entry['residual_solvents'] = find_detections(entry_results, 'residual_solvents')
+    entry['heavy_metals'] = find_detections(entry_results, 'heavy_metals')
+
+    # Return the entry.
+    return entry
+
+
 def augment_lab_results(
         results: pd.DataFrame,
         item_key: Optional[str] = 'InventoryId',
@@ -86,6 +143,7 @@ def augment_lab_results(
         lambda x: x.replace('Pesticides - ', '').replace(' (ppm) (ppm)', '')
     )
 
+    # Map `TestName` to `type` and `key`.
     # Future work: Handle unidentified analyses. Ask ChatGPT?
     test_names = list(results[analysis_name].unique())
     known_analytes = list(CCRS_ANALYTES.keys())
@@ -105,88 +163,16 @@ def augment_lab_results(
     results[item_key] = results[item_key].astype(str)
 
     # Setup for iteration.    
-    # curated_results = []
     item_ids = list(results[item_key].unique())
-    drop = [
-        analysis_name,
-        analysis_key,
-        'LabTestStatus',
-        'key',
-        'type',
-        'units',
-    ]
+    drop = [analysis_name, analysis_key, 'LabTestStatus', 'key', 'type', 'units']
     N = len(item_ids)
     if verbose:
         print('Curating', N, 'items...')
-        print('Estimated runtime:', round(N * 0.000245, 2), 'minutes')
-
-    # Find lab results for each item by iterating over all items.
-    # n = 0
-    # for _, item_results in results.groupby(item_key):
-    def augment_item(item_results):
-
-        # Skip items with no lab results.
-        if item_results.empty:
-            return None
-
-        # Record important test values for future queries.
-        item = item_results.iloc[0].to_dict()
-        [item.pop(key) for key in drop]
-        entry = {
-            **item,
-            'delta_9_thc': format_test_value(item_results, 'delta_9_thc'),
-            'thca': format_test_value(item_results, 'thca'),
-            'total_thc': format_test_value(item_results, 'total_thc'),
-            'cbd': format_test_value(item_results, 'cbd'),
-            'cbda': format_test_value(item_results, 'cbda'),
-            'total_cbd': format_test_value(item_results, 'total_cbd'),
-            'moisture_content': format_test_value(item_results, 'moisture_content'),
-            'water_activity': format_test_value(item_results, 'water_activity'),
-        }
-
-        # Determine "Pass" or "Fail" status.
-        statuses = list(item_results['LabTestStatus'].unique())
-        if 'Fail' in statuses:
-            entry['status'] = 'Fail'
-        else:
-            entry['status'] = 'Pass'
-
-        # Augment the `results`.
-        entry_results = []
-        for _, item_result in item_results.iterrows():
-            test_name = item_result['TestName']
-            analyte = CCRS_ANALYTES[test_name]
-            try:
-                analysis = CCRS_ANALYSES[analyte['type']]
-            except KeyError:
-                print('Unidentified analysis:', analyte['type'])
-                analysis = analyte['type']
-            entry_results.append({
-                'analysis': analysis,
-                'key': analyte['key'],
-                'name': item_result['TestName'],
-                'units': analyte['units'],
-                'value': item_result['TestValue'],
-            })
-        entry['results'] = entry_results
-
-        # Determine detected contaminants.
-        entry['pesticides'] = find_detections(entry_results, 'pesticides')
-        entry['residual_solvents'] = find_detections(entry_results, 'residual_solvents')
-        entry['heavy_metals'] = find_detections(entry_results, 'heavy_metals')
-
-        # Return the entry.
-        return entry
-
-        # # Record the lab results for the item.
-        # curated_results.append(entry)
-        # if verbose and (n) % 1_000 == 0:
-        #     percent = round((n) / N * 100, 2)
-        #     print(f'Curated: {n} ({percent}%)')
+        print('Estimated runtime:', round(N * 0.00011, 2), 'minutes')
 
     # Return the curated lab results.
-    return results.groupby(item_key).apply(augment_item).dropna().tolist()
-    # return pd.DataFrame(curated_results)
+    group = results.groupby(item_key).apply(format_result, drop=drop).dropna()
+    return pd.DataFrame(group.tolist())
 
 
 def curate_ccrs_lab_results(data_dir: str, stats_dir: str) -> pd.DataFrame:
@@ -222,8 +208,8 @@ def curate_ccrs_lab_results(data_dir: str, stats_dir: str) -> pd.DataFrame:
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    base = 'D:\\data\\washington\\'
-    data_dir = f'{base}\\CCRS PRR (6-6-23)\\CCRS PRR (6-6-23)\\'
-    stats_dir = f'{base}\\ccrs-stats\\'
+    base = 'D://data/washington/'
+    data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
+    stats_dir = f'{base}/ccrs-stats/'
     lab_results = curate_ccrs_lab_results(data_dir, stats_dir)
     print('Curated %i WA lab results.' % len(lab_results))

@@ -180,8 +180,12 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
         except:
             print('No content found:', obs['strain_url'])
             continue
-        lineage = divs[2].text.split('Lineage')[1].replace('\n', '').strip()
-        obs['lineage'] = lineage.split(' x ')
+        try:
+            lineage = divs[2].text.split('Lineage')[1].replace('\n', '').strip()
+            obs['lineage'] = lineage.split(' x ')
+        except:
+            print('No lineage found:', obs['strain_url'])
+            obs['lineage'] = []
 
         # Get all of the COA PDF links found.
         pdf_links = []
@@ -254,8 +258,8 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    # DATA_DIR = 'D://data/california/lab_results'
-    DATA_DIR = r'C:\.datasets\data\california\lab_results'
+    DATA_DIR = 'D://data/california/lab_results'
+    # DATA_DIR = r'C:\.datasets\data\california\lab_results'
 
     # Get CA lab results.
     ca_results = get_glass_house_farms_lab_results(DATA_DIR)
