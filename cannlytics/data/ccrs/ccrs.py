@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/10/2022
-Updated: 7/28/2023
+Updated: 7/30/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -27,9 +27,14 @@ import pandas as pd
 # Internal imports:
 from cannlytics.data import create_hash
 from cannlytics.data.ccrs.constants import (
-    CCRS_ANALYTES,
     CCRS_ANALYSES,
+    CCRS_ANALYTES,
     CCRS_DATASETS,
+    CCRS_PLANT_GROWTH_STAGES,
+    CCRS_PLANT_HARVEST_CYCLES,
+    CCRS_PLANTS_SOURCES,
+    CCRS_PLANT_STATES,
+    CURATED_CCRS_DATASETS,
 )
 from cannlytics.utils.utils import (
     camel_to_snake,
@@ -284,7 +289,7 @@ def unzip_datafiles(
 class CCRS(object):
     """An instance of this class manages CCRS data curation."""
 
-    def __init__(self, data_dir, stats_dir, logs=True):
+    def __init__(self, data_dir='./', stats_dir='./', logs=True):
         """Initialize a CCRS API client.
         Args:
             logs (bool): Whether or not to log CCRS API requests, True by default.
@@ -308,20 +313,34 @@ class CCRS(object):
         self.strain_files = None
         self.area_files = None
         self.logs = logs
+        self.analyses = CCRS_ANALYSES
+        self.analytes = CCRS_ANALYTES
+        self.datasets = CCRS_DATASETS
+        self.plant_growth_stages = CCRS_PLANT_GROWTH_STAGES
+        self.plant_harvest_cycles = CCRS_PLANT_HARVEST_CYCLES
+        self.plants_sources = CCRS_PLANTS_SOURCES
+        self.plant_states = CCRS_PLANT_STATES
+        self.curated_datasets = CURATED_CCRS_DATASETS
+        self.anonymize = anonymize
+        self.find_detections = find_detections
+        self.format_lab_results = format_lab_results
+        self.format_test_value = format_test_value
+        self.get_datafiles = get_datafiles
+        self.merge_datasets = merge_datasets
+        self.save_dataset = save_dataset
+        self.standardize_dataset = standardize_dataset
+        self.unzip_datafiles = unzip_datafiles
         if logs:
             self.initialize_logs()
 
 
-    def create_log(self, response):
+    def create_log(self, action, data=None):
         """Create a log given an HTTP response.
         Args:
             response (HTTPResponse): An HTTP request response.
         """
         try:
-            self.logger.debug(f'Request: {response.request.method} {response.request.url}')
-            self.logger.debug(f'Body: {response.request.body}')
-            self.logger.debug(f'Status code: {response.status_code}')
-            self.logger.debug(f'Response: {response.text}')
+            self.logger.debug(f'Action: {action}, Data: {str(data)}')
         except KeyError:
             raise ValueError({'message': '`logs=True` but no logger initialized. Use `client.initialize_logs()`.'})
 
@@ -346,37 +365,37 @@ class CCRS(object):
         self.logger.debug('CCRS data manager initialized.')
 
 
-    def format_test_value(self, tests, compound, value_key='TestValue'):
-        """Format a lab result test value from a DataFrame of tests."""
-        compound_value = self.extract_compound_value(tests, compound, value_key)
-        return self.check_and_convert(compound_value)
+    # def format_test_value(self, tests, compound, value_key='TestValue'):
+    #     """Format a lab result test value from a DataFrame of tests."""
+    #     compound_value = self.extract_compound_value(tests, compound, value_key)
+    #     return self.check_and_convert(compound_value)
 
 
-    def extract_compound_value(self, tests, compound, value_key):
-        """Extract compound value from a set of tests."""
-        compound_value = tests.loc[(tests.key == compound), value_key]
-        return compound_value if not compound_value.empty else None
+    # def extract_compound_value(self, tests, compound, value_key):
+    #     """Extract compound value from a set of tests."""
+    #     compound_value = tests.loc[(tests.key == compound), value_key]
+    #     return compound_value if not compound_value.empty else None
 
 
-    def check_and_convert(self, compound_value):
-        """Check compound value and convert to numeric if not None."""
-        if compound_value is not None:
-            compound_value = to_numeric(compound_value.iloc[0], errors='coerce')
-            if np.isnan(compound_value):
-                return None
-        return compound_value
+    # def check_and_convert(self, compound_value):
+    #     """Check compound value and convert to numeric if not None."""
+    #     if compound_value is not None:
+    #         compound_value = to_numeric(compound_value.iloc[0], errors='coerce')
+    #         if np.isnan(compound_value):
+    #             return None
+    #     return compound_value
 
 
-    def find_detections(self, tests, analysis, analysis_key='analysis', analyte_key='key', value_key='value'):
-        """Find compounds detected for a given analysis from given tests."""
-        if isinstance(tests, list):
-            return [test[analyte_key] for test in tests if test[analysis_key] == analysis and to_numeric(test[value_key], errors='coerce') > 0]
-        else:
-            return self.find_detections_in_df(tests, analysis, analysis_key, analyte_key, value_key)
+    # def find_detections(self, tests, analysis, analysis_key='analysis', analyte_key='key', value_key='value'):
+    #     """Find compounds detected for a given analysis from given tests."""
+    #     if isinstance(tests, list):
+    #         return [test[analyte_key] for test in tests if test[analysis_key] == analysis and to_numeric(test[value_key], errors='coerce') > 0]
+    #     else:
+    #         return self.find_detections_in_df(tests, analysis, analysis_key, analyte_key, value_key)
 
 
-    def find_detections_in_df(self, tests, analysis, analysis_key, analyte_key, value_key):
-        """Find detections in a DataFrame."""
-        tests = tests[tests[analysis_key] == analysis]
-        tests[value_key] = to_numeric(tests[value_key], errors='coerce')
-        return tests[tests[value_key] > 0][analyte_key].to_list()
+    # def find_detections_in_df(self, tests, analysis, analysis_key, analyte_key, value_key):
+    #     """Find detections in a DataFrame."""
+    #     tests = tests[tests[analysis_key] == analysis]
+    #     tests[value_key] = to_numeric(tests[value_key], errors='coerce')
+    #     return tests[tests[value_key] > 0][analyte_key].to_list()

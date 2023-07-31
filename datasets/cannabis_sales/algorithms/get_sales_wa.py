@@ -221,7 +221,7 @@ if __name__ == '__main__':
     base = 'D://data/washington/'
     data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
     stats_dir = f'{base}/ccrs-stats/'
-    first_file = 73
+    first_file = 0
     last_file = None
     reverse = False
 

@@ -7,6 +7,7 @@ Created: 11/6/2021
 Updated: 1/3/2023
 """
 from .ccrs import (
+    CCRS,
     anonymize,
     find_detections,
     format_lab_results,
@@ -29,6 +30,7 @@ from .constants import (
 )
 
 __all__ = [
+    CCRS,
     CCRS_ANALYSES,
     CCRS_ANALYTES,
     CCRS_DATASETS,
