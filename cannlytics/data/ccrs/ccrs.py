@@ -334,13 +334,13 @@ class CCRS(object):
             self.initialize_logs()
 
 
-    def create_log(self, action, data=None):
+    def create_log(self, action):
         """Create a log given an HTTP response.
         Args:
             response (HTTPResponse): An HTTP request response.
         """
         try:
-            self.logger.debug(f'Action: {action}, Data: {str(data)}')
+            self.logger.debug(str(action))
         except KeyError:
             raise ValueError({'message': '`logs=True` but no logger initialized. Use `client.initialize_logs()`.'})
 

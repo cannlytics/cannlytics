@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 6/10/2023
+Updated: 8/3/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -390,19 +390,19 @@ if __name__ == '__main__':
 
     # [✓] TEST: Parse Kaycha COAs.
     # Note: This is a super, super long process
-    pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
-    date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    for folder in os.listdir(pdf_dir):
-        if folder.startswith('MMTC-2015-0002'):
-            data_dir = os.path.join(pdf_dir, folder)
-            outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
-            print('Parsing:', folder)
-            coa_data = parse_results_kaycha(
-                data_dir,
-                outfile,
-                reverse=True,
-                completed=[]
-            )
+    # pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
+    # date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    # for folder in os.listdir(pdf_dir):
+    #     if folder.startswith('MMTC-2015-0002'):
+    #         data_dir = os.path.join(pdf_dir, folder)
+    #         outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
+    #         print('Parsing:', folder)
+    #         coa_data = parse_results_kaycha(
+    #             data_dir,
+    #             outfile,
+    #             reverse=True,
+    #             completed=[]
+    #         )
 
 
 #-----------------------------------------------------------------------
@@ -680,10 +680,19 @@ def download_search_results(driver, license_pdf_dir, wait=10):
     return True
 
 
-def get_results_terplife(
-        url = 'https://www.terplifelabs.com/coa/',
-    ):
-    """Get lab results published by TerpLife Labs on the public web."""
+# def get_results_terplife(
+#         url = 'https://www.terplifelabs.com/coa/',
+#     ):
+#     """Get lab results published by TerpLife Labs on the public web."""
+
+
+
+# DEV:
+# === Test ===
+if __name__ == '__main__':
+
+    url = 'https://www.terplifelabs.com/coa/'
+
 
     # Create an output directory.
     datasets_dir = os.path.join(DATA_DIR, '.datasets')
@@ -756,7 +765,7 @@ def get_results_terplife(
     driver.quit()
 
     # TODO: Return the COA PDF paths.
-    return []
+    # return []
 
 
 # TODO: Search TerpLife for known strains.

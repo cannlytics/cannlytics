@@ -23,8 +23,8 @@
       ]
     },
     {
-      "target": "data",
-      "public": "data/build/web",
+      "target": "metrc",
+      "public": "metrc/build/web",
       "rewrites": [
         {
           "source": "**",

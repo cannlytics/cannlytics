@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 7/28/2023
+Updated: 8/1/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -22,10 +22,11 @@ Data Source:
 from datetime import datetime
 import gc
 import os
-from typing import  Optional
+from typing import  List, Optional
 
 # External imports:
 from cannlytics.data.ccrs import (
+    CCRS,
     CCRS_DATASETS,
     get_datafiles,
     merge_datasets,
@@ -34,9 +35,6 @@ from cannlytics.data.ccrs import (
 )
 from cannlytics.utils import rmerge, sorted_nicely
 import pandas as pd
-
-
-# TODO: Implement logging.
 
 
 # TODO: Integrate Google Cloud Storage.
@@ -102,6 +100,7 @@ def calc_daily_sales(
 
 
 def save_licensee_items_by_month(
+        manager: CCRS,
         df: pd.DataFrame,
         data_dir: str,
         item_type: Optional[str] = 'sales',
@@ -142,7 +141,7 @@ def save_licensee_items_by_month(
                 pass
             month_items.sort_index(axis=1).to_excel(outfile, index=False)
             if verbose:
-                print('Saved', licensee_id, month, 'items:', len(month_items))
+                manager.create_log('Saved', licensee_id, month, 'items:', len(month_items))
 
 
 def save_stats_by_month(
@@ -218,14 +217,19 @@ def ripple_list(file_paths, n):
 # DEV:
 if __name__ == '__main__':
 
+    # Specify where your data lives.
     base = 'D://data/washington/'
     data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
     stats_dir = f'{base}/ccrs-stats/'
-    first_file = 0
+
+    # Parameters.
+    first_file = 95
     last_file = None
     reverse = False
 
-    print('Curating sales...')
+    # Initialize.
+    manager = CCRS()
+    manager.create_log('Curating sales...')
     start = datetime.now()
 
     # Unzip all CCRS datafiles.
@@ -260,7 +264,7 @@ if __name__ == '__main__':
     if reverse:
         sales_items_files.reverse()
     for i, datafile in enumerate(sales_items_files[first_file:]):
-        print('Augmenting:', datafile)
+        manager.create_log('Augmenting: ' + datafile)
         midpoint_start = datetime.now()
 
         # Read in the sales items.
@@ -280,7 +284,7 @@ if __name__ == '__main__':
         ]
 
         # Efficiently order sales headers.
-        print('Merging sale header data...')
+        manager.create_log('Merging sale header data...')
         basename = datafile.split('/')[-1]
         index = int(basename.split('_')[-1].split('.')[0])
         sale_headers_files = get_datafiles(data_dir, 'SaleHeader_', desc=False)
@@ -306,7 +310,7 @@ if __name__ == '__main__':
         # Augment with curated inventory.
         # TODO: This takes the most amount of time to run if this
         # portion of code can be refactored.
-        print('Merging inventory data...')
+        manager.create_log('Merging inventory data...')
         for datafile in inventory_files:
 
             # Read inventory data file.
@@ -329,82 +333,83 @@ if __name__ == '__main__':
                 validate='m:1',
             )
 
-        # Augment with curated lab results.
-        # FIXME: This may be overwriting data points.
-        # Note: I think a product lab results file is needed.
-        print('Merging lab result data...')
-        lab_results_columns = {
-            'inventory_id': str,
-            'lab_id': str,
-            'created_by': str,
-            'created_date': str,
-            'updated_by': str,
-            'updated_date': str,
-            'delta_9_thc': str,
-            'thca': str,
-            'total_thc': str,
-            'cbd': str,
-            'cbda': str,
-            'total_cbd': str,
-            'moisture_content': str,
-            'water_activity': str,
-            'status': str,
-            'results': str,
-            'pesticides': str,
-            'residual_solvents': str,
-            'heavy_metals': str,
-        }
-        lab_results = pd.read_excel(
-            results_file,
-            usecols=list(lab_results_columns.keys()),
-            dtype=lab_results_columns,
-        )
-        lab_results.rename(columns={
-            'created_by': 'lab_result_created_by',
-            'created_date': 'lab_result_created_date',
-            'updated_by': 'lab_result_updated_by',
-            'updated_date': 'lab_result_updated_date',
-        }, inplace=True)
-        # TODO: Convert certain values to numeric?
-        # lab_results['inventory_id'] = lab_results['inventory_id'].astype(str)
-        lab_results.drop_duplicates(subset='inventory_id', keep='first', inplace=True)
-        items = rmerge(
-            items,
-            lab_results,
-            on='inventory_id',
-            how='left',
-            validate='m:1',
-        )
-        del lab_results
-        gc.collect()
+        # # Augment with curated lab results.
+        # # FIXME: This may be overwriting data points.
+        # # Note: I think a product lab results file is needed.
+        # manager.create_log('Merging lab result data...')
+        # lab_results_columns = {
+        #     'inventory_id': str,
+        #     'lab_id': str,
+        #     'created_by': str,
+        #     'created_date': str,
+        #     'updated_by': str,
+        #     'updated_date': str,
+        #     'delta_9_thc': str,
+        #     'thca': str,
+        #     'total_thc': str,
+        #     'cbd': str,
+        #     'cbda': str,
+        #     'total_cbd': str,
+        #     'moisture_content': str,
+        #     'water_activity': str,
+        #     'status': str,
+        #     'results': str,
+        #     'pesticides': str,
+        #     'residual_solvents': str,
+        #     'heavy_metals': str,
+        # }
+        # lab_results = pd.read_excel(
+        #     results_file,
+        #     usecols=list(lab_results_columns.keys()),
+        #     dtype=lab_results_columns,
+        # )
+        # lab_results.rename(columns={
+        #     'created_by': 'lab_result_created_by',
+        #     'created_date': 'lab_result_created_date',
+        #     'updated_by': 'lab_result_updated_by',
+        #     'updated_date': 'lab_result_updated_date',
+        # }, inplace=True)
+        # # TODO: Convert certain values to numeric?
+        # # lab_results['inventory_id'] = lab_results['inventory_id'].astype(str)
+        # lab_results.drop_duplicates(subset='inventory_id', keep='first', inplace=True)
+        # items = rmerge(
+        #     items,
+        #     lab_results,
+        #     on='inventory_id',
+        #     how='left',
+        #     validate='m:1',
+        # )
+        # del lab_results
+        # gc.collect()
 
         # Save the augmented sales items.
-        print('Saving augmented sales data...')
-        outfile = os.path.join(sales_dir, f'sales_{i}.csv')
+        manager.create_log('Saving augmented sales data...')
+        outfile = os.path.join(sales_dir, f'sales_{index}.csv')
         items.to_csv(outfile, index=False)
-        print('Saved augmented sales datafile:', index)
+        manager.create_log('Saved augmented sales datafile: ' + str(index))
 
         # TODO: Create a hash of the augmented sales data
         # and save a log of the hash and the datafile name.
 
         # # At this stage, sales by licensee by day can be incremented.
-        # print('Updating sales statistics...')
+        # manager.create_log('Updating sales statistics...')
         # daily_licensee_sales = calc_daily_sales(items, daily_licensee_sales)
 
         # Save augmented sales to licensee-specific files by month.
-        print('Saving augmented sales by month...')
+        manager.create_log('Saving augmented sales by month...')
         items['month'] = items['sale_date'].apply(lambda x: x.isoformat()[:7])
         save_licensee_items_by_month(
+            manager,
             items,
             licensees_dir,
             subset='sale_detail_id',
             verbose=False,
         )
         midpoint_end = datetime.now()
-        print('Curated sales file in:', midpoint_end - midpoint_start)
+        manager.create_log('Curated sales file in: ' + str(midpoint_end - midpoint_start))
 
     # # Compile the sales statistics.
-    # print('Compiling licensee sales statistics...')
+    # manager.create_log('Compiling licensee sales statistics...')
     # stats = stats_to_df(daily_licensee_sales)
 
     # # Save the compiled statistics.
@@ -420,10 +425,14 @@ if __name__ == '__main__':
 
     # Finish curating sales.
     end = datetime.now()
-    print('✓ Finished curating sales in', end - start)
+    manager.create_log('✓ Finished curating sales in' + str(end - start))
 
 
-def calculate_and_save_stats(file_paths, sales_stats_dir):
+def calculate_and_save_stats(
+        manager: CCRS,
+        file_paths: List[str],
+        sales_stats_dir: str,
+    ):
     """
     Iterates over a list of file paths, each representing sales items.
     Calculates daily sales statistics for each licensee, compiles these
@@ -442,12 +451,12 @@ def calculate_and_save_stats(file_paths, sales_stats_dir):
     # Increment sales by licensee by day.
     daily_licensee_sales = {}
     for file_path in file_paths:
-        print(f'Updating sales statistics for {file_path}...')
+        manager.create_log(f'Updating sales statistics for {file_path}...')
         items = pd.read_csv(file_path)
         daily_licensee_sales = calc_daily_sales(items, daily_licensee_sales)
 
     # Compile the sales statistics.
-    print('Compiling licensee sales statistics...')
+    manager.create_log('Compiling licensee sales statistics...')
     stats = stats_to_df(daily_licensee_sales)
 
     # Save the compiled statistics.
@@ -464,7 +473,7 @@ def calculate_and_save_stats(file_paths, sales_stats_dir):
 # Calculate sales by licensee by day.
 augmented_files = sorted_nicely(os.listdir(sales_dir))
 augmented_files = [os.path.join(sales_dir, f) for f in augmented_files if not f.startswith('~$')]
-daily_licensee_sales = calculate_and_save_stats(augmented_files, sales_stats_dir)
+daily_licensee_sales = calculate_and_save_stats(manager, augmented_files, sales_stats_dir)
 
 
 # # === Test ===

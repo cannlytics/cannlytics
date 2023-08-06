@@ -26,6 +26,7 @@ from typing import Optional
 
 # External imports:
 from cannlytics.data.ccrs import (
+    CCRS,
     CCRS_DATASETS,
     CURATED_CCRS_DATASETS,
     anonymize,
@@ -145,6 +146,7 @@ def merge_licensees(items, licensees):
 
 
 def merge_lab_results(
+        manager: CCRS,
         results_file: str,
         directory: str,
         on: Optional[str] = 'inventory_id',
@@ -196,13 +198,14 @@ def merge_lab_results(
         match = match.loc[~match[target].isna()]
         matched = pd.concat([matched, match], ignore_index=True)
         if verbose:
-            print('Matched', len(matched), 'lab results...')
+            manager.create_log('Matched ' + str(len(matched)) + 'lab results...')
     
     # Return the matched lab results.
     return matched
 
 
 def merge_lab_results_with_products(
+        manager: CCRS,
         products,
         results_file: str,
         on: Optional[str] = 'ProductId',
@@ -220,7 +223,7 @@ def merge_lab_results_with_products(
         validate='m:1',
     )
     merged_data = merged_data.loc[~merged_data[target].isna()]
-    if verbose: print('Matched', len(merged_data), 'lab results with products...')
+    if verbose: manager.create_log('Matched ' +  str(len(merged_data)) + ' lab results with products...')
     return merged_data
 
 
@@ -246,7 +249,7 @@ def merge_products(items, product_files):
         },
     )
     # FIXME: Merge products with lab results.
-    # items = merge_lab_results_with_products(items, results_file)
+    # items = merge_lab_results_with_products(manager, items, results_file)
     return items
 
 
@@ -273,9 +276,9 @@ def merge_strains(items, strain_files):
     return items
 
 
-def curate_ccrs_inventory(data_dir, stats_dir):
+def curate_ccrs_inventory(manager: CCRS, data_dir: str, stats_dir: str):
     """Curate CCRS inventory by merging additional datasets."""
-    print('Curating inventory...')
+    manager.create_log('Curating inventory...')
     start = datetime.now()
 
     # Unzip all CCRS datafiles.
@@ -303,63 +306,63 @@ def curate_ccrs_inventory(data_dir, stats_dir):
     area_files = get_datafiles(data_dir, 'Areas_')
 
     # Curate inventory datafiles.
-    print(len(inventory_files), 'datafiles to curate.')
-    print('Estimated runtime:', len(inventory_files) * 0.25 + 1.5, 'hours')
+    manager.create_log(str(len(inventory_files)) + ' datafiles to curate.')
+    manager.create_log('Estimated runtime: ' + str(len(inventory_files) * 0.25 + 1.5) + ' hours')
     for i, datafile in enumerate(inventory_files):
 
         # Read in the items.
-        print('Augmenting:', datafile)
+        manager.create_log('Augmenting: ' + datafile)
         items = read_items(datafile, item_cols, item_types, date_fields)
 
         # Merge licensee data.
-        print('Merging licensee data...')
+        manager.create_log('Merging licensee data...')
         items = merge_licensees(items, licensees)
 
         # Merge product data.
-        print('Merging product data...')
+        manager.create_log('Merging product data...')
         items = merge_products(items, product_files)
 
         # Merge strain data.
-        print('Merging strain data...')
+        manager.create_log('Merging strain data...')
         items = merge_strains(items, strain_files)
 
         # Merge area data.
-        print('Merging area data...')
+        manager.create_log('Merging area data...')
         items = merge_areas(items, area_files)
 
         # Standardize column names.
-        print('Standardizing...')
+        manager.create_log('Standardizing...')
         items.rename(
             columns={col: camel_to_snake(col) for col in items.columns},
             inplace=True
         )
 
         # Anonymize the data.
-        print('Anonymizing...')
+        manager.create_log('Anonymizing...')
         items = anonymize(items)
 
         # Save the curated inventory data.
-        print('Saving curated inventory data...')
+        manager.create_log('Saving curated inventory data...')
         outfile = os.path.join(inventory_dir, f'inventory_{i}.xlsx')
         items.to_excel(outfile, index=False)
-        print('Curated inventory datafile:', i + 1, '/', len(inventory_files))
+        manager.create_log('Curated inventory datafile: ' + str(i + 1) + '/' + str(len(inventory_files)))
 
         # Perform garbage cleaning.
         gc.collect()
 
     # Merge and save inventory data with curated lab result data.
     try:
-        print('Merging lab results...')
+        manager.create_log('Merging lab results...')
         inventory_dir = os.path.join(stats_dir, 'inventory')
         inventory_files = sorted_nicely(os.listdir(inventory_dir))
         lab_results_dir = os.path.join(stats_dir, 'lab_results')
         results_file = os.path.join(lab_results_dir, 'lab_results_0.xlsx')
-        matched = merge_lab_results(results_file, inventory_dir)
+        matched = merge_lab_results(manager, results_file, inventory_dir)
         matched.rename(columns=lambda x: camel_to_snake(x), inplace=True)
         save_dataset(matched, lab_results_dir, 'inventory_lab_results')
-        print('Merged inventory items with curated lab results.')
+        manager.create_log('Merged inventory items with curated lab results.')
     except:
-        print('Failed to merge lab results. Curate lab results first.')
+        manager.create_log('Failed to merge lab results. Curate lab results first.')
 
     # FIXME: Attach lab results to products.
     matched = pd.DataFrame()
@@ -409,14 +412,14 @@ def curate_ccrs_inventory(data_dir, stats_dir):
         )
         match = match.loc[~match['lab_result_id'].isna()]
         matched = pd.concat([matched, match], ignore_index=True)
-        print('Matched', len(matched), 'lab results with products...')
+        manager.create_log('Matched ' + str(len(matched)) + ' lab results with products...')
 
     # Save the matched product lab results.
     save_dataset(matched, lab_results_dir, 'product_lab_results')
 
     # Complete curation.
     end = datetime.now()
-    print('✓ Finished curating inventory in', end - start)
+    manager.create_log('✓ Finished curating inventory in ' + str(end - start))
 
 
 # === Test ===
@@ -426,4 +429,5 @@ if __name__ == '__main__':
     base = 'D://data/washington/'
     data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
     stats_dir = f'{base}/ccrs-stats/'
-    curate_ccrs_inventory(data_dir, stats_dir)
+    manager = CCRS()
+    curate_ccrs_inventory(manager, data_dir, stats_dir)

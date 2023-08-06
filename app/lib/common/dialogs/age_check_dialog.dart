@@ -41,21 +41,58 @@ class AgeCheckDialog extends StatefulWidget {
 }
 
 class _AgeCheckDialogState extends State<AgeCheckDialog> {
+  // State.
+  DateTime? _selectedDate;
+  bool _isOldEnough = false;
+  final TextEditingController _monthController = TextEditingController();
+  final TextEditingController _dayController = TextEditingController();
+  final TextEditingController _yearController = TextEditingController();
+
+  // Initialization.
   @override
   void initState() {
     super.initState();
     _checkAge();
   }
 
+  /// Check if the user is old enough to access the site.
   Future<void> _checkAge() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? isOldEnough = prefs.getBool('isOldEnough');
-
     if (isOldEnough == null) {
       _showDialog();
     }
   }
 
+  // FIXME:
+  /// Select the date and check the age.
+  Future<void> _selectDateAndCheckAge() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        _isOldEnough = DateTime.now().year - _selectedDate!.year >= 21;
+      });
+    }
+  }
+
+  // FIXME:
+  /// Calculate the age and check if the user is old enough.
+  void _calculateAgeAndCheck() {
+    int day = int.parse(_dayController.text);
+    int month = int.parse(_monthController.text);
+    int year = int.parse(_yearController.text);
+    DateTime birthDate = DateTime(year, month, day);
+    _isOldEnough = DateTime.now().year - birthDate.year >= 21;
+    setState(() {}); // refresh the UI
+  }
+
+  /// Show the age verification dialog.
   void _showDialog() {
     showDialog(
       context: context,
@@ -76,7 +113,7 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
                   ),
                   gapW8,
                   Text(
-                    'Are you 21 or older?',
+                    'Enter your birthdate',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ],
@@ -87,6 +124,35 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // Date Picker.
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _monthController,
+                            decoration: InputDecoration(hintText: "MM"),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _dayController,
+                            decoration: InputDecoration(hintText: "DD"),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _yearController,
+                            decoration: InputDecoration(hintText: "YYYY"),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                      ],
+                    ),
+
                     // Terms.
                     RichText(
                       text: TextSpan(
@@ -156,13 +222,8 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
                 PrimaryButton(
                   text: 'Yes',
                   onPressed: () async {
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    await prefs.setBool('isOldEnough', true);
-                    // if (_isChecked) {
-                    //   await prefs.setBool('rememberMe', true);
-                    // }
-                    context.go('/');
+                    _calculateAgeAndCheck();
+                    // ...
                   },
                 ),
               ],

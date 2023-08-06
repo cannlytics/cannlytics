@@ -26,6 +26,7 @@ from typing import Optional
 
 # External imports:
 from cannlytics.data.ccrs import (
+    CCRS,
     CCRS_ANALYTES,
     CCRS_ANALYSES,
     CCRS_DATASETS,
@@ -72,7 +73,11 @@ def read_lab_results(
     return lab_results
 
 
-def format_result(item_results, drop: Optional[list] = []):
+def format_result(
+        item_results,
+        manager: Optional[CCRS] = None,
+        drop: Optional[list] = []
+    ) -> dict:
     """Format results for a lab sample."""
 
     # Skip items with no lab results.
@@ -109,7 +114,10 @@ def format_result(item_results, drop: Optional[list] = []):
         try:
             analysis = CCRS_ANALYSES[analyte['type']]
         except KeyError:
-            print('Unidentified analysis:', analyte['type'])
+            if manager is not None:
+                manager.create_log('Unidentified analysis: ' + str(analyte['type']))
+            else:
+                print('Unidentified analysis:', analyte['type'])
             analysis = analyte['type']
         entry_results.append({
             'analysis': analysis,
@@ -130,6 +138,7 @@ def format_result(item_results, drop: Optional[list] = []):
 
 
 def augment_lab_results(
+        manager: CCRS,
         results: pd.DataFrame,
         item_key: Optional[str] = 'InventoryId',
         analysis_name: Optional[str] = 'TestName',
@@ -153,7 +162,7 @@ def augment_lab_results(
         del test_names, known_analytes, missing
         gc.collect()
     except:
-        print('Unidentified analytes:', len(missing))
+        manager.create_log('Unidentified analytes: ' + str(len(missing)))
         raise ValueError('Unidentified analytes. Standardize with `CCRS_ANALYTES`.')
 
     # Augment lab results with standard analyses and analyte keys.
@@ -167,19 +176,23 @@ def augment_lab_results(
     drop = [analysis_name, analysis_key, 'LabTestStatus', 'key', 'type', 'units']
     N = len(item_ids)
     if verbose:
-        print('Curating', N, 'items...')
-        print('Estimated runtime:', round(N * 0.00011, 2), 'minutes')
+        manager.create_log(f'Curating {N} items...')
+        manager.create_log('Estimated runtime: ' + str(round(N * 0.00011, 2)) + ' minutes')
 
     # Return the curated lab results.
-    group = results.groupby(item_key).apply(format_result, drop=drop).dropna()
+    group = results.groupby(item_key).apply(format_result, drop=drop, manager=manager).dropna()
     return pd.DataFrame(group.tolist())
 
 
-def curate_ccrs_lab_results(data_dir: str, stats_dir: str) -> pd.DataFrame:
+def curate_ccrs_lab_results(
+        manager: CCRS,
+        data_dir: str,
+        stats_dir: str
+    ) -> pd.DataFrame:
     """Curate CCRS lab results."""
 
     # Start curating lab results.
-    print('Curating lab results...')
+    manager.create_log('Curating lab results...')
     start = datetime.now()
 
     # Unzip all CCRS datafiles.
@@ -189,7 +202,7 @@ def curate_ccrs_lab_results(data_dir: str, stats_dir: str) -> pd.DataFrame:
     lab_results = read_lab_results(data_dir)
 
     # Curate all lab results.
-    lab_results = augment_lab_results(lab_results)
+    lab_results = augment_lab_results(manager, lab_results)
 
     # Save the curated lab results.
     lab_results_dir = os.path.join(stats_dir, 'lab_results')
@@ -200,7 +213,7 @@ def curate_ccrs_lab_results(data_dir: str, stats_dir: str) -> pd.DataFrame:
 
     # Finish curating lab results.
     end = datetime.now()
-    print('✓ Finished curating lab results in', end - start)
+    manager.create_log('✓ Finished curating lab results in ' + str(end - start))
     return lab_results
 
 
@@ -211,5 +224,6 @@ if __name__ == '__main__':
     base = 'D://data/washington/'
     data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
     stats_dir = f'{base}/ccrs-stats/'
-    lab_results = curate_ccrs_lab_results(data_dir, stats_dir)
-    print('Curated %i WA lab results.' % len(lab_results))
+    manager = CCRS()
+    lab_results = curate_ccrs_lab_results(manager, data_dir, stats_dir)
+    manager.create_log('Curated %i WA lab results.' % len(lab_results))

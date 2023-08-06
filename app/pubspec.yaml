@@ -2,7 +2,7 @@ name: cannlytics_data
 description: An app to interface with cannabis data and analytics.
 
 publish_to: 'none'
-version: 0.2.0
+version: 0.3.0
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
@@ -29,7 +29,6 @@ dependencies:
   flutter_openmoji: ^0.0.8
   flutter_riverpod: ^2.3.1
   flutter_svg: ^2.0.3
-  fluttertoast: ^8.2.1
   flutter_typeahead: ^4.3.7
   google_maps_flutter: ^2.2.6
   google_maps_flutter_web: ^0.4.0+8
