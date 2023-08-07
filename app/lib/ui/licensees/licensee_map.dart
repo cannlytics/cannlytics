@@ -8,7 +8,7 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
-import 'dart:html';
+import 'dart:html' as html if (dart.library.io) 'dart:io';
 import 'dart:ui' as ui;
 
 // Flutter imports:
@@ -60,7 +60,7 @@ Widget getMap(double latitude, double longitude, String title) {
       ..center = new LatLng(latitude, longitude);
 
     // Map style.
-    final elem = DivElement()
+    final elem = html.DivElement()
       ..id = htmlId
       ..style.width = '100%'
       ..style.height = '100%'

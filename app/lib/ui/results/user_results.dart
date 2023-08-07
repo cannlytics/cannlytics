@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/13/2023
-// Updated: 6/29/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/buttons/download_button.dart';
@@ -228,19 +227,22 @@ class UserResultsGrid extends ConsumerWidget {
     // Listen to the user.
     final user = ref.watch(userProvider).value;
 
+    // Get the theme.
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     /// Download function.
     var _onDownload = (item) {
       // Show a downloading notification.
-      Fluttertoast.showToast(
-        msg: 'Preparing your download...',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-        timeInSecForIosWeb: 2,
-        backgroundColor: LightColors.lightGreen.withAlpha(60),
-        textColor: Colors.white,
-        fontSize: 16.0,
-        webPosition: 'center',
-        webShowClose: true,
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Preparing your download...',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
+          showCloseIcon: true,
+        ),
       );
 
       // Download the data.

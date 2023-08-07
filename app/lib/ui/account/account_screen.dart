@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 7/3/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -14,7 +14,6 @@ import 'package:flutter/services.dart';
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -136,23 +135,39 @@ class _AccountFormState extends ConsumerState<AccountForm>
     setState(() => _submitted = true);
     if (_formKey.currentState!.validate()) {
       // Save the user's data.
-      await ref.read(accountProvider.notifier).updateUser(
-            email: email,
-            displayName: displayName,
-          );
+      String _updateFuture =
+          await ref.read(accountProvider.notifier).updateUser(
+                email: email,
+                displayName: displayName,
+              );
 
-      // Show a notification upon save.
-      Fluttertoast.showToast(
-        msg: 'Your account has been saved.',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-        timeInSecForIosWeb: 2,
-        backgroundColor: LightColors.lightGreen.withAlpha(60),
-        textColor: Colors.white,
-        fontSize: 16.0,
-        webPosition: 'center',
-        webShowClose: true,
-      );
+      // Get the theme.
+      bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+      // Show notification snackbar.
+      if (_updateFuture == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Your account has been saved',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
+            showCloseIcon: true,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving your account'),
+            duration: Duration(seconds: 4),
+            backgroundColor:
+                isDark ? DarkColors.darkOrange : LightColors.darkOrange,
+            showCloseIcon: true,
+          ),
+        );
+      }
     }
   }
 

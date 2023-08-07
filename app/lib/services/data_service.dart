@@ -4,21 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/7/2023
-// Updated: 6/28/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// import 'dart:io';
-
-// Dart imports:
-// import 'dart:convert';
-
-// Dart imports:
-import 'dart:html' as html;
 
 // Package imports:
 import 'package:csv/csv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Data service.
 class DataService {
@@ -34,10 +27,11 @@ class DataService {
 
   /// Open a datafile in a new tab.
   static openInANewTab(url) {
-    DateTime now = DateTime.now();
-    String formattedDateTime = DateFormat('yyyy-MM-dd-HH-mm-ss').format(now);
-    String fileName = 'cannlytics-data-$formattedDateTime';
-    html.window.open(url, fileName);
+    // DateTime now = DateTime.now();
+    // String formattedDateTime = DateFormat('yyyy-MM-dd-HH-mm-ss').format(now);
+    // String fileName = 'cannlytics-data-$formattedDateTime';
+    // html.window.open(url, fileName);
+    launchUrl(Uri.parse(url));
   }
 
   /// Load data from a CSV file.

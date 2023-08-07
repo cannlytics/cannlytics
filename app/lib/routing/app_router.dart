@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 5/15/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -39,7 +39,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // DEV: If you need to reset the age verification, uncomment the following line.
       // SharedPreferences preferences = await SharedPreferences.getInstance();
       // await preferences.clear();
-      if (state.location == '/age-verification' && isOldEnough == true) {
+      if (state.uri.toString() == '/age-verification' && isOldEnough == true) {
         return '/'; // Redirect to home if user is old enough and on age-verification screen.
       } else if (isOldEnough == null || !isOldEnough) {
         return '/age-verification'; // Redirect to age verification if user is not old enough.

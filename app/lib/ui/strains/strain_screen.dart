@@ -158,7 +158,7 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
       // Update the data in Firestore.
       _updateFuture = await ref.read(strainService).updateStrain(update);
 
-      // Show a success snackbar.
+      // Show notification snackbar.
       if (_updateFuture == 'success') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -169,13 +169,6 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
             duration: Duration(seconds: 2),
             backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
             showCloseIcon: true,
-            // action: SnackBarAction(
-            //   label: 'Close',
-            //   textColor: Colors.white,
-            //   onPressed: () {
-            //     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            //   },
-            // ),
           ),
         );
       } else {

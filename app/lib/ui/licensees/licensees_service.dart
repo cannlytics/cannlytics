@@ -7,9 +7,6 @@
 // Updated: 7/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Dart imports:
-import 'dart:html';
-
 // Flutter imports:
 import 'package:flutter/material.dart';
 
@@ -47,7 +44,8 @@ class LicenseesController extends AutoDisposeAsyncNotifier<List<Licensee?>> {
   Future<List<Licensee?>> _getLicensees() async {
     var stateId = ref.watch(activeStateProvider);
     if (stateId == null) {
-      stateId = window.location.href.split('/').last;
+      // FIXME:
+      // stateId = window.location.href.split('/').last;
     }
     final _dataSource = ref.read(firestoreProvider);
     var data = await _dataSource.getCollection(
@@ -148,7 +146,9 @@ class FilteredLicenseesNotifier
 final licenseeProvider =
     StreamProvider.autoDispose.family<Licensee?, String>((ref, licenseNumber) {
   final _database = ref.watch(firestoreProvider);
-  var pathSegments = window.location.href.split('/');
+  // FIXME:
+  // var pathSegments = window.location.href.split('/');
+  var pathSegments = [];
   var stateId = ref.watch(activeStateProvider);
   if (stateId == null) {
     if (pathSegments.length > 2) {
@@ -201,9 +201,10 @@ class LicenseeService {
   }
 
   // Upload image.
-  Future<void> uploadImage(File imageFile) async {
-    // TODO: Implement your image upload logic here. You can use Firebase Storage if you want.
-  }
+  // FIXME:
+  // Future<void> uploadImage(File imageFile) async {
+  //   // TODO: Implement your image upload logic here. You can use Firebase Storage if you want.
+  // }
 
   // // Get gallery images.
   // Stream<List<String>> getGalleryImages(String stateId, String licenseNumber) {

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 6/17/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -34,7 +34,7 @@ class APIService {
   static String get baseUrl => _baseUrl;
 
   /// Get a user's token. Set [refresh] to renew credentials.
-  static Future<String> getUserToken({bool refresh = false}) async {
+  static Future<String?> getUserToken({bool refresh = false}) async {
     final tokenResult = FirebaseAuth.instance.currentUser;
     if (tokenResult == null) {
       return '';

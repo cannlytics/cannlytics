@@ -363,39 +363,3 @@ class CCRS(object):
         self.logger = logging.getLogger('ccrs')
         self.logger.addHandler(handler)
         self.logger.debug('CCRS data manager initialized.')
-
-
-    # def format_test_value(self, tests, compound, value_key='TestValue'):
-    #     """Format a lab result test value from a DataFrame of tests."""
-    #     compound_value = self.extract_compound_value(tests, compound, value_key)
-    #     return self.check_and_convert(compound_value)
-
-
-    # def extract_compound_value(self, tests, compound, value_key):
-    #     """Extract compound value from a set of tests."""
-    #     compound_value = tests.loc[(tests.key == compound), value_key]
-    #     return compound_value if not compound_value.empty else None
-
-
-    # def check_and_convert(self, compound_value):
-    #     """Check compound value and convert to numeric if not None."""
-    #     if compound_value is not None:
-    #         compound_value = to_numeric(compound_value.iloc[0], errors='coerce')
-    #         if np.isnan(compound_value):
-    #             return None
-    #     return compound_value
-
-
-    # def find_detections(self, tests, analysis, analysis_key='analysis', analyte_key='key', value_key='value'):
-    #     """Find compounds detected for a given analysis from given tests."""
-    #     if isinstance(tests, list):
-    #         return [test[analyte_key] for test in tests if test[analysis_key] == analysis and to_numeric(test[value_key], errors='coerce') > 0]
-    #     else:
-    #         return self.find_detections_in_df(tests, analysis, analysis_key, analyte_key, value_key)
-
-
-    # def find_detections_in_df(self, tests, analysis, analysis_key, analyte_key, value_key):
-    #     """Find detections in a DataFrame."""
-    #     tests = tests[tests[analysis_key] == analysis]
-    #     tests[value_key] = to_numeric(tests[value_key], errors='coerce')
-    #     return tests[tests[value_key] > 0][analyte_key].to_list()

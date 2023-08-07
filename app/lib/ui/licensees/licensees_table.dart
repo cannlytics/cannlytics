@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/7/2023
-// Updated: 7/3/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -188,7 +188,7 @@ class LicenseesTable extends ConsumerWidget {
                     ? Container()
                     : Text('$value', style: fieldStyle),
                 onTap: () {
-                  String slug = WebUtils.slugify(item['license_number']);
+                  String slug = StringUtils.slugify(item['license_number']);
                   context.go('/licenses/$stateId/$slug');
                 },
               );

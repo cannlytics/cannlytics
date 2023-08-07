@@ -13,7 +13,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -42,17 +41,44 @@ class AgeCheckDialog extends StatefulWidget {
 
 class _AgeCheckDialogState extends State<AgeCheckDialog> {
   // State.
-  DateTime? _selectedDate;
-  bool _isOldEnough = false;
+  // DateTime? _selectedDate;
+  // bool _isOldEnough = false;
   final TextEditingController _monthController = TextEditingController();
   final TextEditingController _dayController = TextEditingController();
   final TextEditingController _yearController = TextEditingController();
+  // final monthFocus = FocusNode();
+  // final dayFocus = FocusNode();
+  // final yearFocus = FocusNode();
 
   // Initialization.
   @override
   void initState() {
     super.initState();
+    // Check if the user has already confirmed their age.
     _checkAge();
+
+    // // Add listener to month controller
+    // _monthController.addListener(() {
+    //   if (_monthController.text.length == 2) {
+    //     FocusScope.of(context).requestFocus(dayFocus);
+    //   }
+    // });
+
+    // // Add listener to day controller
+    // _dayController.addListener(() {
+    //   if (_dayController.text.length == 2) {
+    //     FocusScope.of(context).requestFocus(yearFocus);
+    //   }
+    // });
+  }
+
+  // Dispose controllers.
+  @override
+  void dispose() {
+    _monthController.dispose();
+    _dayController.dispose();
+    _yearController.dispose();
+    super.dispose();
   }
 
   /// Check if the user is old enough to access the site.
@@ -64,32 +90,32 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
     }
   }
 
-  // FIXME:
-  /// Select the date and check the age.
-  Future<void> _selectDateAndCheckAge() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        _isOldEnough = DateTime.now().year - _selectedDate!.year >= 21;
-      });
-    }
-  }
+  // /// Select the date and check the age.
+  // Future<void> _selectDateAndCheckAge() async {
+  //   final DateTime? picked = await showDatePicker(
+  //     context: context,
+  //     initialDate: DateTime.now(),
+  //     firstDate: DateTime(1900),
+  //     lastDate: DateTime.now(),
+  //   );
+  //   if (picked != null && picked != _selectedDate) {
+  //     setState(() {
+  //       _selectedDate = picked;
+  //       _isOldEnough = DateTime.now().year - _selectedDate!.year >= 21;
+  //     });
+  //   }
+  // }
 
-  // FIXME:
   /// Calculate the age and check if the user is old enough.
-  void _calculateAgeAndCheck() {
+  void _calculateAgeAndCheck() async {
     int day = int.parse(_dayController.text);
     int month = int.parse(_monthController.text);
     int year = int.parse(_yearController.text);
     DateTime birthDate = DateTime(year, month, day);
-    _isOldEnough = DateTime.now().year - birthDate.year >= 21;
-    setState(() {}); // refresh the UI
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isOldEnough = DateTime.now().year - birthDate.year >= 21;
+    await prefs.setBool('isOldEnough', isOldEnough);
+    setState(() {});
   }
 
   /// Show the age verification dialog.
@@ -112,9 +138,12 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
                     height: 64,
                   ),
                   gapW8,
-                  Text(
-                    'Enter your birthdate',
-                    style: Theme.of(context).textTheme.titleLarge,
+                  Container(
+                    width: 200,
+                    child: Text(
+                      'Are you 21 or older?',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
                 ],
               ),
@@ -124,36 +153,47 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // Instructions.
+                    Text(
+                      'Confirm your birthdate here:',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    gapH8,
+
                     // Date Picker.
                     Row(
                       children: [
                         Expanded(
                           child: TextFormField(
                             controller: _monthController,
-                            decoration: InputDecoration(hintText: "MM"),
+                            decoration: InputDecoration(hintText: 'MM'),
                             keyboardType: TextInputType.number,
+                            // focusNode: monthFocus,
                           ),
                         ),
-                        SizedBox(width: 8),
+                        gapW8,
                         Expanded(
                           child: TextFormField(
                             controller: _dayController,
-                            decoration: InputDecoration(hintText: "DD"),
+                            decoration: InputDecoration(hintText: 'DD'),
                             keyboardType: TextInputType.number,
+                            // focusNode: dayFocus,
                           ),
                         ),
-                        SizedBox(width: 8),
+                        gapW8,
                         Expanded(
                           child: TextFormField(
                             controller: _yearController,
-                            decoration: InputDecoration(hintText: "YYYY"),
+                            decoration: InputDecoration(hintText: 'YYYY'),
                             keyboardType: TextInputType.number,
+                            // focusNode: yearFocus,
                           ),
                         ),
                       ],
                     ),
 
                     // Terms.
+                    gapH8,
                     RichText(
                       text: TextSpan(
                         style: Theme.of(context).textTheme.bodyLarge,
@@ -223,7 +263,6 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
                   text: 'Yes',
                   onPressed: () async {
                     _calculateAgeAndCheck();
-                    // ...
                   },
                 ),
               ],

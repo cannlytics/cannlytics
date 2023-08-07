@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/4/2023
-// Updated: 7/3/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -97,7 +97,7 @@ class SubscriptionPlanCards extends StatelessWidget {
         active: activeSubscription == item?['id'],
         title: item?['name'],
         price: item?['price'],
-        color: WebUtils.hexCodeToColor(item?['color_hex']),
+        color: StringUtils.hexCodeToColor(item?['color_hex']),
         features: item?['attributes'],
       );
     }).toList();

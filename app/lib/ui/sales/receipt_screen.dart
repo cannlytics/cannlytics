@@ -4,15 +4,15 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/9/2023
-// Updated: 7/3/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -111,8 +111,9 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
           fontWeight: FontWeight.bold,
         );
 
-    // Screen size.
+    // Screen size and theme.
     bool isMobile = MediaQuery.of(context).size.width < 600;
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     /// Edit a field.
     void _onEdit(key, value) {
@@ -147,19 +148,30 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
             update,
           );
 
-      // Show a success snackbar.
-      // FIXME: Replace with snackbar.
-      Fluttertoast.showToast(
-        msg: 'Receipt saved',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-        timeInSecForIosWeb: 2,
-        // backgroundColor: LightColors.lightGreen.withAlpha(60),
-        textColor: Colors.white,
-        fontSize: 16.0,
-        webPosition: 'center',
-        webShowClose: true,
-      );
+      // Show notification snackbar.
+      if (_updateFuture == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Receipt saved',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
+            showCloseIcon: true,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving receipt'),
+            duration: Duration(seconds: 4),
+            backgroundColor:
+                isDark ? DarkColors.darkOrange : LightColors.darkOrange,
+            showCloseIcon: true,
+          ),
+        );
+      }
 
       // Finish editing.
       setState(() {

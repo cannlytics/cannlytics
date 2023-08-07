@@ -223,9 +223,9 @@ if __name__ == '__main__':
     stats_dir = f'{base}/ccrs-stats/'
 
     # Parameters.
-    first_file = 95
+    first_file = 43
     last_file = None
-    reverse = False
+    reverse = True
 
     # Initialize.
     manager = CCRS()

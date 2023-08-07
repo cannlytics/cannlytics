@@ -4,21 +4,18 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/9/2023
-// Updated: 6/14/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-// Package imports:
-import 'package:fluttertoast/fluttertoast.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/services/data_service.dart';
-import 'package:cannlytics_data/utils/utils.dart';
 
 /// Sponsorship card.
 class SponsorshipCard extends StatelessWidget {
@@ -186,23 +183,25 @@ class SponsorshipCard extends StatelessWidget {
     );
   }
 
+  /// Share link.
   Widget _shareLink(BuildContext context) {
+    // Theme.
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       onTap: () async {
         String url = 'https://opencollective.com/cannlytics-company/donate';
         await Clipboard.setData(ClipboardData(text: url));
-        Fluttertoast.showToast(
-          msg: 'Copied link!',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).dialogBackgroundColor,
-          textColor: Theme.of(context).textTheme.titleLarge!.color,
-          fontSize: 16.0,
-          webBgColor:
-              WebUtils.colorToHexCode(Theme.of(context).dialogBackgroundColor),
-          webPosition: 'center',
-          webShowClose: true,
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Copied link!',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
+            showCloseIcon: true,
+          ),
         );
       },
       child: Padding(

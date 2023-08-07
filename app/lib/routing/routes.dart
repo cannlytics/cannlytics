@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 7/3/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // Dart imports:
 
@@ -48,7 +48,7 @@ class Routes {
       path: '/users/:uid',
       builder: (context, state) {
         return UserProfileScreen(
-          uid: state.params['uid']!,
+          uid: state.uri.queryParameters['uid']!,
         );
       },
     ),
@@ -75,7 +75,8 @@ class Routes {
       name: 'state_licenses',
       useFade: true,
       builder: (context, state) {
-        return StateLicensesScreen(stateId: state.params['state_id']!);
+        return StateLicensesScreen(
+            stateId: state.uri.queryParameters['state_id']!);
       },
     ),
 
@@ -84,8 +85,8 @@ class Routes {
       path: '/licenses/:state_id/:license_number',
       builder: (context, state) {
         return LicenseeScreen(
-          stateId: state.params['state_id']!,
-          licenseeId: state.params['license_number']!,
+          stateId: state.uri.queryParameters['state_id']!,
+          licenseeId: state.uri.queryParameters['license_number']!,
         );
       },
     ),
@@ -102,7 +103,7 @@ class Routes {
           path: ':hash',
           name: 'strain',
           builder: (context, state) {
-            return StrainScreen(strainId: state.params['hash']!);
+            return StrainScreen(strainId: state.uri.queryParameters['hash']!);
           },
         ),
       ],
@@ -120,7 +121,8 @@ class Routes {
           path: ':hash',
           name: 'result',
           builder: (context, state) {
-            return ResultScreen(labResultId: state.params['hash']!);
+            return ResultScreen(
+                labResultId: state.uri.queryParameters['hash']!);
           },
         ),
       ],
@@ -138,7 +140,8 @@ class Routes {
           path: ':hash',
           name: 'receipt',
           builder: (context, state) {
-            return ReceiptScreen(salesReceiptId: state.params['hash']!);
+            return ReceiptScreen(
+                salesReceiptId: state.uri.queryParameters['hash']!);
           },
         ),
       ],

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/22/2023
-// Updated: 7/1/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -55,7 +55,7 @@ class SideMenu extends ConsumerWidget {
     final user = ref.watch(userProvider).value;
 
     // Get the current route.
-    final currentRoute = GoRouter.of(context).location;
+    final currentRoute = GoRouterState.of(context).uri.toString();
 
     // Render the side menu.
     return ListView(

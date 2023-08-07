@@ -4,15 +4,16 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/22/2023
-// Updated: 6/24/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:convert';
-import 'dart:html' as html;
-import 'dart:io';
+import 'dart:io' show Platform;
 
 // Flutter imports:
+import 'package:cannlytics_data/utils/web_utils.dart'
+    if (dart.library.io) 'package:cannlytics_data/utils/mobile_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -20,74 +21,20 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 
-/// Utility functions for the web.
-class WebUtils {
-  /// Launch a website.
-  static Future<void> launchURL(String url) async {
-    Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  /// Download a file from a URL.
-  static void downloadUrl(String url) {
-    html.AnchorElement anchorElement = new html.AnchorElement(href: url);
-    anchorElement.download = url;
-    anchorElement.click();
-  }
-
-  /// Download a file from bytes.
-  static Future<void> downloadBytes(List<String> bytes, String filename) async {
-    final blob = html.Blob(bytes);
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    final anchor = html.document.createElement('a') as html.AnchorElement
-      ..href = url
-      ..style.display = 'none'
-      ..download = filename;
-    html.document.body?.children.add(anchor);
-    anchor.click();
-    html.document.body?.children.remove(anchor);
-    html.Url.revokeObjectUrl(url);
-  }
-
-  /// Convert a color to a HTML hex code.
-  static String colorToHexCode(Color color) {
-    return '#' + color.value.toRadixString(16).substring(2).toUpperCase();
-  }
-
-  /// Convert a HTML hex code to a color.
-  static Color hexCodeToColor(String hexCode) {
-    return Color(int.parse(hexCode.substring(1, 7), radix: 16) + 0xFF000000);
-  }
-
-  /// Slugify text.
-  static String slugify(String input) {
-    // Remove leading and trailing whitespace and convert to lowercase.
-    String result = input.trim().toLowerCase();
-
-    // Replace special characters with a hyphen.
-    result = result.replaceAll(RegExp(r"[^\w\s-]"), "-");
-
-    // Replace consecutive whitespace and hyphens with a single hyphen.
-    result = result.replaceAll(RegExp(r"[\s-]+"), "-");
-
-    // Remove leading and trailing hyphens.
-    result = result
-        .replaceAll(RegExp(r"^[-]+"), "")
-        .replaceAll(RegExp(r"[-]+$"), "");
-
-    return result;
-  }
+// File utility class that will work for web and mobile platforms.
+abstract class PlatformFileUtils {
+  void downloadUrl(String url, String filename);
+  Future<void> downloadBytes(String fileName, List<dynamic> bytes);
 }
+
+/// Utility functions for the file system.
+PlatformFileUtils FileUtils =
+    Platform.isAndroid || Platform.isIOS ? MobileUtils() : WebUtils();
 
 /// Utility functions for the interface.
 class InterfaceUtils {
@@ -247,5 +194,37 @@ class DataUtils {
     var hmacSha256 = new Hmac(sha256, key); // HMAC-SHA256
     var digest = hmacSha256.convert(msg);
     return digest.toString();
+  }
+}
+
+/// String utility functions.
+class StringUtils {
+  /// Convert a color to a HTML hex code.
+  static String colorToHexCode(Color color) {
+    return '#' + color.value.toRadixString(16).substring(2).toUpperCase();
+  }
+
+  /// Convert a HTML hex code to a color.
+  static Color hexCodeToColor(String hexCode) {
+    return Color(int.parse(hexCode.substring(1, 7), radix: 16) + 0xFF000000);
+  }
+
+  /// Slugify text.
+  static String slugify(String input) {
+    // Remove leading and trailing whitespace and convert to lowercase.
+    String result = input.trim().toLowerCase();
+
+    // Replace special characters with a hyphen.
+    result = result.replaceAll(RegExp(r"[^\w\s-]"), "-");
+
+    // Replace consecutive whitespace and hyphens with a single hyphen.
+    result = result.replaceAll(RegExp(r"[\s-]+"), "-");
+
+    // Remove leading and trailing hyphens.
+    result = result
+        .replaceAll(RegExp(r"^[-]+"), "")
+        .replaceAll(RegExp(r"[-]+$"), "");
+
+    return result;
   }
 }

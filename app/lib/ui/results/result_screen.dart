@@ -4,20 +4,15 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/11/2023
-// Updated: 7/1/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// Dart imports:
-import 'dart:js_interop';
 
 // Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
-import 'package:internet_file/internet_file.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -112,11 +107,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
         } else {
           _pdfUrl = labResult?.labResultsUrl ?? '';
         }
-        if (_pdfUrl.isNotEmpty && _pdfController.document.isNull) {
-          _pdfController = PdfController(
-            document: PdfDocument.openData(InternetFile.get(_pdfUrl)),
-            initialPage: _initialPage,
-          );
+        if (_pdfUrl.isNotEmpty && _pdfController.document == null) {
+          // FIXME:
+          // _pdfController = PdfController(
+          //   document: PdfDocument.openData(InternetFile.get(_pdfUrl)),
+          //   initialPage: _initialPage,
+          // );
         }
 
         // Return the form.
@@ -128,6 +124,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
   /// Form.
   Widget _form(LabResult? labResult) {
     // Style.
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
     var labelPadding = EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8);
     var labelStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
           fontWeight: FontWeight.bold,
@@ -174,18 +171,30 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
             update,
           );
 
-      // Show a success snackbar.
-      Fluttertoast.showToast(
-        msg: 'Lab result saved',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-        timeInSecForIosWeb: 2,
-        backgroundColor: LightColors.lightGreen.withAlpha(60),
-        textColor: Colors.white,
-        fontSize: 16.0,
-        webPosition: 'center',
-        webShowClose: true,
-      );
+      // Show notification snackbar.
+      if (_updateFuture == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Lab result saved',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            duration: Duration(seconds: 2),
+            backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
+            showCloseIcon: true,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving lab result'),
+            duration: Duration(seconds: 4),
+            backgroundColor:
+                isDark ? DarkColors.darkOrange : LightColors.darkOrange,
+            showCloseIcon: true,
+          ),
+        );
+      }
 
       // Finish editing.
       setState(() {

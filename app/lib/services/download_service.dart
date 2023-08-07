@@ -4,11 +4,8 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/23/2023
-// Updated: 6/23/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
-
-// Flutter imports:
-import 'package:flutter/foundation.dart';
 
 // Project imports:
 import 'package:cannlytics_data/services/api_service.dart';
@@ -27,10 +24,6 @@ class DownloadService {
       url,
       data: {'data': data},
     );
-    if (kIsWeb) {
-      WebUtils.downloadUrl(response['download_url']);
-    } else {
-      // TODO: Implement mobile download.
-    }
+    FileUtils.downloadUrl(response['download_url'], response['filename']);
   }
 }

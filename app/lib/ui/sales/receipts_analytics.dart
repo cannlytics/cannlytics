@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/18/2023
-// Updated: 7/10/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -207,7 +207,7 @@ class UserReceiptsStatsChart extends ConsumerWidget {
 
         // Render the line chart.
         return LineChart(
-          swapAnimationCurve: Curves.linear,
+          curve: Curves.linear,
           LineChartData(
             // Style.
             baselineY: 0,

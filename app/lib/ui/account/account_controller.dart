@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 7/14/2023
+// Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -160,11 +160,12 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
   }
 
   /// Update the user's display name and email.
-  Future<void> updateUser({
+  Future<String> updateUser({
     String? email,
     String? displayName,
     String? phoneNumber,
   }) async {
+    var message;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       // Get the appropriate providers.
@@ -172,7 +173,10 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
       final _firestore = ref.watch(firestoreProvider);
 
       // Return if there is no user.
-      if (user == null) return;
+      if (user == null) {
+        message = 'No user found.';
+        return;
+      }
 
       // Update the user's display name.
       if (displayName != null && displayName != user.displayName) {
@@ -199,7 +203,11 @@ class AccountController extends AutoDisposeAsyncNotifier<void> {
         path: 'users/${user.uid}/public_user_data/profile',
         data: {'display_name': user.displayName},
       );
+
+      // Set the message to success.
+      message = 'success';
     });
+    return message;
   }
 
   /// Save the user's data.
