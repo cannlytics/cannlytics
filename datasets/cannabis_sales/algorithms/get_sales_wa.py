@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 8/1/2023
+Updated: 8/7/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -86,7 +86,7 @@ def calc_daily_sales(
     daily = df.groupby(group, as_index=False)[sum_columns].sum()
     for _, row in daily.iterrows():
         licensee_id = row['licensee_id']
-        date = row['sale_date'].isoformat()[:10]
+        date = row['sale_date'][:10]
         licensee_data = stats.get(licensee_id, {})
         date_data = licensee_data.get(date, {})
         licensee_data[date] = {
@@ -205,30 +205,19 @@ def ripple_list(file_paths, n):
     return dataset_paths
 
 
-# def curate_ccrs_sales(
-#         data_dir,
-#         stats_dir,
-#         reverse: Optional[bool] = False,
-#         first_file: Optional[int] = 0,
-#         last_file: Optional[int] = None,
-#     ):
-#     """Curate CCRS sales by merging additional datasets."""
-
-# DEV:
-if __name__ == '__main__':
-
-    # Specify where your data lives.
-    base = 'D://data/washington/'
-    data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
-    stats_dir = f'{base}/ccrs-stats/'
-
-    # Parameters.
-    first_file = 43
-    last_file = None
-    reverse = True
+def curate_ccrs_sales(
+        data_dir,
+        stats_dir,
+        reverse: Optional[bool] = False,
+        first_file: Optional[int] = 0,
+        last_file: Optional[int] = None,
+        manager: Optional[CCRS] = None,
+    ):
+    """Curate CCRS sales by merging additional datasets."""
 
     # Initialize.
-    manager = CCRS()
+    if manager is None:
+        manager = CCRS()
     manager.create_log('Curating sales...')
     start = datetime.now()
 
@@ -255,16 +244,16 @@ if __name__ == '__main__':
     inventory_dir = os.path.join(stats_dir, 'inventory')
     inventory_files = sorted_nicely(os.listdir(inventory_dir))
     sales_items_files = get_datafiles(data_dir, 'SalesDetail_')
-    lab_results_dir = os.path.join(stats_dir, 'lab_results')
-    results_file = os.path.join(lab_results_dir, 'inventory_lab_results_0.xlsx')
+    # lab_results_dir = os.path.join(stats_dir, 'lab_results')
+    # results_file = os.path.join(lab_results_dir, 'inventory_lab_results_0.xlsx')
 
     # Iterate over all sales items files to calculate stats.
-    daily_licensee_sales = {}
+    # daily_licensee_sales = {}
     if last_file: sales_items_files = sales_items_files[:last_file]
     if reverse:
         sales_items_files.reverse()
-    for i, datafile in enumerate(sales_items_files[first_file:]):
-        manager.create_log('Augmenting: ' + datafile)
+    for datafile in sales_items_files[first_file:]:
+        manager.create_log(f'Augmenting: {datafile}')
         midpoint_start = datetime.now()
 
         # Read in the sales items.
@@ -308,8 +297,6 @@ if __name__ == '__main__':
         items = standardize_dataset(items)
 
         # Augment with curated inventory.
-        # TODO: This takes the most amount of time to run if this
-        # portion of code can be refactored.
         manager.create_log('Merging inventory data...')
         for datafile in inventory_files:
 
@@ -388,7 +375,7 @@ if __name__ == '__main__':
         items.to_csv(outfile, index=False)
         manager.create_log('Saved augmented sales datafile: ' + str(index))
 
-        # TODO: Create a hash of the augmented sales data
+        # Optional: Create a hash of the augmented sales data
         # and save a log of the hash and the datafile name.
 
         # # At this stage, sales by licensee by day can be incremented.
@@ -470,30 +457,44 @@ def calculate_and_save_stats(
     return daily_licensee_sales
 
 
-# Calculate sales by licensee by day.
-augmented_files = sorted_nicely(os.listdir(sales_dir))
-augmented_files = [os.path.join(sales_dir, f) for f in augmented_files if not f.startswith('~$')]
-daily_licensee_sales = calculate_and_save_stats(manager, augmented_files, sales_stats_dir)
+# === Test ===
+if __name__ == '__main__':
 
+    # Parameters.
+    manager = CCRS()
+    first_file = 56
+    last_file = None
+    reverse = False
 
-# # === Test ===
-# if __name__ == '__main__':
+    # Specify where your data lives.
+    base = 'D://data/washington/'
+    data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
+    stats_dir = f'{base}/ccrs-stats/'
+    sales_dir = os.path.join(stats_dir, 'sales')
+    sales_stats_dir = os.path.join(stats_dir, 'sales_stats')
 
-#     # Specify where your data lives.
-#     base = 'D://data/washington/'
-#     data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
-#     stats_dir = f'{base}/ccrs-stats/'
-#     curate_ccrs_sales(
-#         data_dir,
-#         stats_dir,
-#         reverse=True,
-#         first_file=None,
-#         last_file=None,
-#     )
-
-    # DEV: Aggregate monthly sales items.
-    # aggregate_monthly_sales(
-    #     data_dir=f'{base}/ccrs-stats/sales',
-    #     start=pd.to_datetime('2023-01-01'),
-    #     end=pd.to_datetime('2023-03-01'),
+    # Curate CCRS sales.
+    # curate_ccrs_sales(
+    #     data_dir,
+    #     stats_dir,
+    #     reverse=reverse,
+    #     first_file=first_file,
+    #     last_file=last_file,
+    #     manager=manager,
     # )
+
+    # Aggregate monthly sales items.
+    # aggregate_monthly_sales(
+    #     data_dir=f'{base}/ccrs-stats/sales_stats',
+    #     start=pd.to_datetime('2023-01-01'),
+    #     end=pd.to_datetime('2023-08-01'),
+    # )
+
+    # Calculate sales by licensee by day.
+    augmented_files = sorted_nicely(os.listdir(sales_dir))
+    augmented_files = [os.path.join(sales_dir, f) for f in augmented_files if not f.startswith('~$')]
+    daily_licensee_sales = calculate_and_save_stats(
+        manager=manager,
+        file_paths=augmented_files,
+        sales_stats_dir=sales_stats_dir,
+    )
