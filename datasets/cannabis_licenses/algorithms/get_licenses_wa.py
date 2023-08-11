@@ -34,7 +34,7 @@ import requests
 
 # Specify where your data lives.
 DATA_DIR = '../data/wa'
-ENV_FILE = '../../../../.env'
+ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'WA'
@@ -253,6 +253,7 @@ def get_licenses_wa(
     return retailers
 
 
+# === Test ===
 if __name__ == '__main__':
 
     # Support command line usage.
