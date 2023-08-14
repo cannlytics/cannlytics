@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 9/29/2022
+Updated: 8/13/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -113,6 +113,7 @@ def get_licenses_nj(
 
 
 # === Test ===
+# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.

@@ -32,8 +32,7 @@ from cannlytics.utils.utils import to_excel_with_style
 
 
 # Specify where your data lives.
-DATA_DIR = r'D:\data\massachusetts\lab_results\mcr_labs'
-# DATA_DIR = r'C:\.datasets\data\massachusetts\lab_results\mcr_labs'
+DATA_DIR = 'D://data/massachusetts/lab_results/mcr_labs'
 
 
 def upload_results(data: pd.DataFrame):
@@ -82,6 +81,7 @@ def get_results_mcrlabs(
 
 
 # === Test ===
+# [ ] Tested:
 if __name__ == '__main__':
 
     # Get all of the MCR Labs test results.

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 4/24/2023
+Updated: 8/13/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -35,7 +35,7 @@ import requests
 
 # Specify where your data lives.
 DATA_DIR = '../data/il'
-ENV_FILE = '../../../../.env'
+ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'IL'
@@ -125,8 +125,9 @@ def get_licenses_il(
 
     # Separate address into 'street', 'city', 'state', 'zip_code', 'phone_number'.
     streets, cities, states, zip_codes, phone_numbers = [], [], [], [], []
-    for index, row in retailers.iterrows():
-        parts = row.address.split(' \n')
+    for _, row in retailers.iterrows():
+        parts = row.address.split('\n')
+        parts = [part.strip() for part in parts]
         streets.append(parts[0])
         phone_numbers.append(parts[-1])
         locales = parts[1]
@@ -180,6 +181,7 @@ def get_licenses_il(
 
 
 # === Test ===
+# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.

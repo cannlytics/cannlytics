@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/10/2023
-Updated: 5/15/2023
+Updated: 8/13/2023
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 
 Data Source:
@@ -30,7 +30,7 @@ from selenium.webdriver.common.by import By
 
 # Specify where your data lives.
 DATA_DIR = '../data/south-africa'
-ENV_FILE = '../../../../.env'
+ENV_FILE = '../../../.env'
 
 
 def get_licenses_south_africa(
@@ -114,6 +114,7 @@ def get_licenses_south_africa(
 
 
 # === Test ===
+# [ ] Tested:
 if __name__ == '__main__':
 
     # Support command line usage.

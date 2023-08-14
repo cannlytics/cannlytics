@@ -1,12 +1,12 @@
 """
 Cannabis Licenses | Get Washington Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 10/7/2022
+Updated: 8/9/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -254,6 +254,7 @@ def get_licenses_wa(
 
 
 # === Test ===
+# [✓] Tested: 2023-08-09 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.

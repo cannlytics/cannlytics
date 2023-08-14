@@ -423,6 +423,7 @@ def curate_ccrs_inventory(manager: CCRS, data_dir: str, stats_dir: str):
 
 
 # === Test ===
+# [ ] Tested:
 if __name__ == '__main__':
 
     # Specify where your data lives.

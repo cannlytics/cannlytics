@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/28/2022
-Updated: 10/7/2022
+Updated: 8/13/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -33,7 +33,7 @@ from cannlytics.data.gis import geocode_addresses
 
 # Specify where your data lives.
 DATA_DIR = '../data/or'
-ENV_FILE = '../../../../.env'
+ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 OREGON = {
@@ -195,6 +195,8 @@ def get_licenses_or(
     return data
 
 
+# === Test ===
+# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.

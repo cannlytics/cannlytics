@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/27/2022
-Updated: 4/25/2023
+Updated: 8/13/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -52,7 +52,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 # Specify where your data lives.
 DATA_DIR = '../data/az'
-ENV_FILE = '../../../../.env'
+ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'AZ'
@@ -96,9 +96,9 @@ def click_load_more(driver, container):
         more = int(counter.text.replace(' more', ''))
 
 
-def get_license_data_from_html(el):
+def get_license_data_from_html(index, el):
     """Get a retailer's data."""
-    xpath = f'/html/body/div[3]/div[2]/div/div[2]/div[2]/div/div/c-azcc-portal-home/c-azcc-map/div/div[2]/div[2]/div[2]/div[{count}]/c-azcc-map-list-item/div'
+    xpath = f'/html/body/div[3]/div[2]/div/div[2]/div[2]/div/div/c-azcc-portal-home/c-azcc-map/div/div[2]/div[2]/div[2]/div[{index + 1}]/c-azcc-map-list-item/div'
     list_item = el.find_element(by=By.XPATH, value=xpath)
     body = list_item.find_element(by=By.CLASS_NAME, value='slds-media__body')
     divs = body.find_elements(by=By.TAG_NAME, value='div')
@@ -165,8 +165,8 @@ def get_licenses_az(
     # Get license data for each retailer.
     data = []
     els = container.find_elements(by=By.CLASS_NAME, value='map-list__item')
-    for el in els:
-        data.append(get_license_data_from_html(el))
+    for index, el in enumerate(els):
+        data.append(get_license_data_from_html(index, el))
 
     # Standardize the retailer data.
     retailers = pd.DataFrame(data)
@@ -254,15 +254,21 @@ def get_licenses_az(
 
         # Get the `license_designation` ("Services").
         key = 'Services'
-        el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-rich-text")
-        col = retailers.columns.get_loc('license_designation')
-        retailers.iat[index, col] = el.text
+        try:
+            el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-rich-text")
+            col = retailers.columns.get_loc('license_designation')
+            retailers.iat[index, col] = el.text
+        except:
+            pass
 
         # Create entries for cultivations.
         cultivator = retailers.iloc[index].copy()
         key = 'Offsite Cultivation Address'
-        el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
-        address = el.text
+        try:
+            el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
+            address = el.text
+        except:
+            address = None
         if address:
             parts = address.split(',')
             cultivator['address'] = address
@@ -270,13 +276,17 @@ def get_licenses_az(
             cultivator['premise_city'] = parts[1].strip()
             cultivator['premise_zip_code'] = parts[-1].replace(STATE, '').strip()
             cultivator['license_type'] = 'Offsite Cultivation'
-            cultivators.append(cultivator, ignore_index=True)
+            # cultivators.append(cultivator, ignore_index=True)
+            cultivators.loc[len(cultivators)] = cultivator
 
         # Create entries for manufacturers.
         manufacturer = retailers.iloc[index].copy()
         key = 'Manufacture Address'
-        el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
-        address = el.text
+        try:
+            el = container.find_element('xpath', f"//p[contains(text(),'{key}')]/following-sibling::lightning-formatted-text")
+            address = el.text
+        except:
+            address = None
         if address:
             parts = address.split(',')
             manufacturer['address'] = address
@@ -284,7 +294,8 @@ def get_licenses_az(
             manufacturer['premise_city'] = parts[1].strip()
             manufacturer['premise_zip_code'] = parts[-1].replace(STATE, '').strip()
             manufacturer['license_type'] = 'Offsite Cultivation'
-            manufacturers.append(manufacturer, ignore_index=True)
+            # manufacturers.append(manufacturer, ignore_index=True)
+            manufacturers.loc[len(manufacturers)] = manufacturer
 
     # End the browser session.
     try:
@@ -342,6 +353,7 @@ def get_licenses_az(
 
 
 # === Test ===
+# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.

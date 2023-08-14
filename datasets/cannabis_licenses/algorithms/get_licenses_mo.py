@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/26/2023
-Updated: 4/27/2023
+Updated: 8/13/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -47,7 +47,7 @@ import zipcodes
 
 # Specify where your data lives.
 DATA_DIR = '../data/mo'
-ENV_FILE = '../../../../.env'
+ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'MO'
@@ -122,9 +122,9 @@ def get_licenses_mo(
 
     # Download the files to the download directory.
     datafiles = []
-    base = 'https://health.mo.gov'
+    base = 'https://health.mo.gov/safety/cannabis/xls/'
     for link in xlsx_links:
-        file_url = base + link.get('href')
+        file_url = base + link.get('href').split('/')[-1]
         file_name = os.path.join(download_dir, os.path.basename(file_url))
         with open(file_name, 'wb') as file:
             response = requests.get(file_url)
@@ -237,6 +237,7 @@ def get_licenses_mo(
 
 
 # === Test ===
+# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/27/2022
-Updated: 10/5/2022
+Updated: 8/13/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -35,7 +35,7 @@ import requests
 
 # Specify where your data lives.
 DATA_DIR = '../data/mt'
-ENV_FILE = '../../../../.env'
+ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'MT'
@@ -67,9 +67,11 @@ MONTANA = {
         ]
     },
     'retailers': {
-        'url': 'https://mtrevenue.gov/?mdocs-file=60245',
+        'url': 'https://mtrevenue.gov/wp-content/uploads/dlm_uploads/2023/08/Dispensary-8-2023.pdf',
         'columns': ['city', 'dba', 'license_type', 'phone']
     },
+    # FIXME: Add other license types.
+    # https://mtrevenue.gov/cannabis/#CannabisLicenses
     'processors': {'url': 'https://mtrevenue.gov/?mdocs-file=60250'},
     'cultivators': {'url': 'https://mtrevenue.gov/?mdocs-file=60252'},
     'labs': {'url': 'https://mtrevenue.gov/?mdocs-file=60248'},
@@ -250,17 +252,20 @@ def get_licenses_mt(
     # Get the refreshed date.
     retailers['data_refreshed_date'] = datetime.now().isoformat()
 
-    # Save and return the data.
+    # Save the data.
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
         timestamp = datetime.now().isoformat()[:19].replace(':', '-')
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
         retailers.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
         retailers.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
+    
+    # Return the data.
     return retailers
 
 
 # === Test ===
+# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.

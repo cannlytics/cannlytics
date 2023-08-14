@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 11/29/2022
-Updated: 5/1/2023
+Updated: 8/13/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -126,11 +126,16 @@ def get_retailers_ny(
     data = []
     for page in doc.pages:
         table = page.extract_table()
+        if table is None:
+            continue
         rows = [x for x in table if x[0] and x[0] != 'License Number' and x[0] != 'Application ID']
         data.extend(rows)
 
     # Close the PDF.
     doc.close()
+
+    # Remove the empty columns.
+    data = [[x for x in sublist if x is not None] for sublist in data]
 
     # Create a dataframe.
     columns = [
@@ -198,11 +203,16 @@ def get_cultivators_ny(
     data = []
     for page in doc.pages:
         table = page.extract_table()
+        if table is None:
+            continue
         rows = [x for x in table if x[0] and x[0] != 'License Number' and x[0] != 'Application ID']
         data.extend(rows)
 
     # Close the PDF.
     doc.close()
+
+    # Remove the empty columns.
+    data = [[x for x in sublist if x is not None] for sublist in data]
 
     # Create a dataframe.
     columns = [
@@ -392,26 +402,28 @@ def get_licenses_ny(
     retailers = get_retailers_ny(data_dir, env_file)
     labs = get_labs_ny(data_dir, env_file)
     # FIXME: The following are not yet implemented.
-    cultivators = get_cultivators_ny(data_dir, env_file)
-    processors = get_processors_ny(data_dir, env_file)
+    # cultivators = get_cultivators_ny(data_dir, env_file)
+    # processors = get_processors_ny(data_dir, env_file)
     # Future work:
     # medical = get_medical_ny(data_dir, env_file)
 
     # Compile the data.
-    sets = [retailers, cultivators, processors, labs]
+    # sets = [retailers, cultivators, processors, labs]
+    sets = [retailers, labs]
     licenses = pd.concat(sets, ignore_index=True)
 
     # Save all of the licenses.
     if data_dir is not None:
         date = datetime.now().isoformat()[:10]
         outfile = f'{data_dir}/licenses-{STATE.lower()}-{date}.csv'
-        data.to_csv(outfile, index=False)
+        licenses.to_csv(outfile, index=False)
 
     # Return the licenses.
     return licenses
 
 
 # === Test ===
+# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.

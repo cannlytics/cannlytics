@@ -395,6 +395,8 @@ def curate_ccrs_sales(
         midpoint_end = datetime.now()
         manager.create_log('Curated sales file in: ' + str(midpoint_end - midpoint_start))
 
+    # === Deprecated ===
+
     # # Compile the sales statistics.
     # manager.create_log('Compiling licensee sales statistics...')
     # stats = stats_to_df(daily_licensee_sales)
@@ -458,13 +460,14 @@ def calculate_and_save_stats(
 
 
 # === Test ===
+# [ ] Tested:
 if __name__ == '__main__':
 
     # Parameters.
     manager = CCRS()
-    first_file = 56
-    last_file = None
-    reverse = False
+    first_file = 0
+    last_file = 1
+    reverse = True
 
     # Specify where your data lives.
     base = 'D://data/washington/'
@@ -474,21 +477,21 @@ if __name__ == '__main__':
     sales_stats_dir = os.path.join(stats_dir, 'sales_stats')
 
     # Curate CCRS sales.
-    # curate_ccrs_sales(
-    #     data_dir,
-    #     stats_dir,
-    #     reverse=reverse,
-    #     first_file=first_file,
-    #     last_file=last_file,
-    #     manager=manager,
-    # )
+    curate_ccrs_sales(
+        data_dir,
+        stats_dir,
+        reverse=reverse,
+        first_file=first_file,
+        last_file=last_file,
+        manager=manager,
+    )
 
     # Aggregate monthly sales items.
-    # aggregate_monthly_sales(
-    #     data_dir=f'{base}/ccrs-stats/sales_stats',
-    #     start=pd.to_datetime('2023-01-01'),
-    #     end=pd.to_datetime('2023-08-01'),
-    # )
+    aggregate_monthly_sales(
+        data_dir=f'{base}/ccrs-stats/sales_stats',
+        start=pd.to_datetime('2023-01-01'),
+        end=pd.to_datetime('2023-08-01'),
+    )
 
     # Calculate sales by licensee by day.
     augmented_files = sorted_nicely(os.listdir(sales_dir))

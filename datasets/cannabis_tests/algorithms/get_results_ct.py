@@ -226,6 +226,7 @@ def download_pdfs_ct(
 
 
 # === Test ===
+# [ ] Tested:
 if __name__ == '__main__':
 
     # Command line usage.

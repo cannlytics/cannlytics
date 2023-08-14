@@ -823,6 +823,8 @@ if __name__ == '__main__' and False:
 # Aggregate all parsed COAs.
 #-----------------------------------------------------------------------
 
+# === Tests ===
+# [ ] Tested:
 if __name__ == '__main__' and False:
 
     from datetime import datetime

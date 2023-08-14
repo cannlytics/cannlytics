@@ -4,9 +4,9 @@ Copyright (c) 2021-2023 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 7/1/2023
+Updated: 8/13/2023
 """
-# from .cannlytics import Cannlytics
+from .cannlytics import Cannlytics
 import cannlytics.auth as auth
 import cannlytics.data as data
 import cannlytics.firebase as firebase
@@ -18,18 +18,18 @@ import cannlytics.utils as utils
 
 
 __all__ = [
-    # 'Cannlytics',
-    'auth',
-    'data',
-    'firebase',
-    'lims',
-    'metrc',
-    'models',
-    'stats',
-    'utils',
+    Cannlytics,
+    auth,
+    data,
+    firebase,
+    lims,
+    metrc,
+    models,
+    stats,
+    utils,
 ]
 __title__ = 'cannlytics'
-__version__ = '0.0.15'
+__version__ = '0.0.16'
 __author__ = 'Keegan Skeate <https://github.com/keeganskeate>'
 __license__ = 'MIT <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>'
-__copyright__ = 'Copyright (c) 2022-2023 Cannlytics'
+__copyright__ = 'Copyright (c) 2021-2023 Cannlytics'

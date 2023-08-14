@@ -1,3 +1,23 @@
+"""
+Get MD Lab Result Data
+Copyright (c) 2023 Cannlytics
+
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+    Candace O'Sullivan-Sutherland <https://github.com/candy-o>
+Created: 8/13/2023
+Updated: 8/13/2023
+License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
+
+Description:
+
+    Collect all public Maryland lab result data.
+
+Data Sources:
+    
+    - Public records request from the Maryland Cannabis Administration (MCA).
+
+"""
 import os
 import pandas as pd
 import pdfplumber
@@ -64,5 +84,9 @@ def save_data(all_results):
         print("Error occurred when saving the data to Excel.")
 
 
-# Call the function
-extract_data_from_pdf("D://data/maryland/raw/public-records-request-md-2023-06-30.pdf")
+# === Test ===
+# [ ] Tested:
+if __name__ == "__main__":
+
+    # Call the function
+    extract_data_from_pdf("D://data/maryland/raw/public-records-request-md-2023-06-30.pdf")
