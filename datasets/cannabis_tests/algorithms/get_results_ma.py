@@ -81,7 +81,7 @@ def get_results_mcrlabs(
 
 
 # === Test ===
-# [ ] Tested:
+# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Get all of the MCR Labs test results.

@@ -135,7 +135,7 @@ def curate_ccrs_strains(data_dir, stats_dir):
 
 
 # === Test ===
-# [ ] Tested:
+# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Specify where your data lives.

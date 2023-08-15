@@ -226,7 +226,7 @@ def download_pdfs_ct(
 
 
 # === Test ===
-# [ ] Tested:
+# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Command line usage.
@@ -256,13 +256,13 @@ if __name__ == '__main__':
     if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
     download_pdfs_ct(results, pdf_dir)
 
-    # # Save the results to Excel.
-    # date = datetime.now().isoformat()[:10]
-    # datafile = f'{data_dir}/ct-lab-results-{date}.xlsx'
-    # try:
-    #     cannlytics.utils.to_excel_with_style(results, datafile)
-    # except:
-    #     results.to_excel(datafile)
-    # print('Connecticut lab results archived:', datafile)
+    # Save the results to Excel.
+    date = datetime.now().isoformat()[:10]
+    datafile = f'{data_dir}/ct-lab-results-{date}.xlsx'
+    try:
+        cannlytics.utils.to_excel_with_style(results, datafile)
+    except:
+        results.to_excel(datafile)
+    print('Connecticut lab results archived:', datafile)
 
     # Future work: Parse the PDFs with CoADoc (to train a custom GPT model).

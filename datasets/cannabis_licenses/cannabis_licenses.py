@@ -19,7 +19,7 @@ import pandas as pd
 
 # Constants.
 _SCRIPT = 'cannabis_licenses.py'
-_VERSION = '1.0.0'
+_VERSION = '1.0.1'
 _HOMEPAGE = 'https://huggingface.co/datasets/cannlytics/cannabis_licenses'
 _LICENSE = "https://opendatacommons.org/licenses/by/4-0/"
 _DESCRIPTION = """\
@@ -29,16 +29,33 @@ sub-datasets for each state with permitted adult-use cannabis, as well
 as a sub-dataset that includes all licenses.
 """
 _CITATION = """\
-@inproceedings{cannlytics2022cannabis_licenses,
+@inproceedings{cannlytics2023cannabis_licenses,
   author    = {Skeate, Keegan and O'Sullivan-Sutherland, Candace},
   title     = {Cannabis Licenses},
   booktitle = {Cannabis Data Science},
-  month     = {October},
-  year      = {2022},
+  month     = {August},
+  year      = {2023},
   address   = {United States of America},
   publisher = {Cannlytics}
 }
 """
+
+
+# Read subsets from local source.
+try:
+    try:
+        with open('./cannabis_licenses.json', 'r') as f:
+            SUBSETS = json.loads(f.read())
+    except:
+        with open('./datasets/cannabis_licenses/cannabis_licenses.json', 'r') as f:
+            SUBSETS = json.loads(f.read())
+
+# Otherwise, read subsets from Hugging Face.
+except:
+    with urllib.request.urlopen('https://huggingface.co/datasets/cannlytics/cannabis_licenses/raw/main/cannabis_licenses.json') as url:
+        SUBSETS = json.load(url)
+
+
 
 # Dataset fields.
 FIELDS = datasets.Features({
@@ -72,15 +89,6 @@ FIELDS = datasets.Features({
     'premise_longitude': datasets.Value(dtype='float'),
     'data_refreshed_date': datasets.Value(dtype='string'),
 })
-
-# DEV: Read subsets from local source.
-# with open('cannabis_licenses.json', 'r') as f:
-#     SUBSETS = json.loads(f.read())
-
-# PRODUCTION: Read subsets from the official source.
-import urllib.request
-with urllib.request.urlopen('https://huggingface.co/datasets/cannlytics/cannabis_licenses/raw/main/cannabis_licenses.json') as url:
-    SUBSETS = json.load(url)
 
 
 class CannabisLicensesConfig(datasets.BuilderConfig):
@@ -121,6 +129,7 @@ class CannabisLicenses(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
         config_name = self.config.name
         data_url = SUBSETS[config_name]['data_url']
+        print(data_url)
         urls = {config_name: data_url}
         downloaded_files = dl_manager.download_and_extract(urls)
         filepath = downloaded_files[config_name]
@@ -129,6 +138,7 @@ class CannabisLicenses(datasets.GeneratorBasedBuilder):
     
     def _generate_examples(self, filepath):
         """Returns the examples in raw text form."""
+        print(filepath)
         with open(filepath) as f:
             df = pd.read_csv(filepath)
             for index, row in df.iterrows():
@@ -137,6 +147,7 @@ class CannabisLicenses(datasets.GeneratorBasedBuilder):
 
 
 # === Test ===
+# [ ] Tested:
 if __name__ == '__main__':
 
     from datasets import load_dataset

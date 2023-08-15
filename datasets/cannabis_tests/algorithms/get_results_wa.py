@@ -218,7 +218,7 @@ def curate_ccrs_lab_results(
 
 
 # === Test ===
-# [ ] Tested:
+# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Specify where your data lives.

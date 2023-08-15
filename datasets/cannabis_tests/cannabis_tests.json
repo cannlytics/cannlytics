@@ -1,8 +1,8 @@
 {
   "all": {
     "title": "Aggregated Lab Results 2023-05-30",
-    "data_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/data/all/all-lab-results-latest.csv",
-    "data_path": "data/lab_results/ca/ca-lab-results-latest.csv"
+    "data_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/datasets%2Fcannabis_tests%2Fall%2Fall-lab-results-latest.csv?alt=media&token=71dfe411-519b-46cc-9884-b62373705881",
+    "data_path": "data/all/all-lab-results-latest.csv"
   },
   "ca": {
     "title": "California Lab Results Non-Random Sample 2023-05-30",
@@ -10,7 +10,7 @@
     "observations": 1202,
     "fields": 106,
     "file_ref": "data/lab_results/ca/ca-lab-results-latest.csv",
-    "data_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/data/ca/ca-lab-results-latest.csv",
+    "data_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/datasets%2Fcannabis_tests%2Fca%2Fca-lab-results-latest.csv?alt=media&token=7655965c-d7d7-4d52-8a45-1f2a5116b913",
     "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fcalifornia-flag.png?alt=media&token=f64aaaba-d9cf-4e6f-9f06-4d431cb01d31",
     "algorithm_url": "https://huggingface.co/datasets/cannlytics/cannabis_tests/resolve/main/algorithms/get_results_ca.py",
     "license_url": "https://creativecommons.org/licenses/by/4.0/",

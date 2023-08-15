@@ -10,6 +10,11 @@ tags:
   - cannabis
   - lab results
   - tests
+configs:
+  - config_name: all
+    data_files: "data/all/all-lab-results-latest.csv"
+  - config_name: ca
+    data_files: "data/all/ca-lab-results-latest.csv"
 ---
 
 # Cannabis Tests

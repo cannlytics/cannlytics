@@ -198,7 +198,7 @@ def merge_lab_results(
         match = match.loc[~match[target].isna()]
         matched = pd.concat([matched, match], ignore_index=True)
         if verbose:
-            manager.create_log('Matched ' + str(len(matched)) + 'lab results...')
+            manager.create_log('Matched ' + str(len(matched)) + ' lab results...')
     
     # Return the matched lab results.
     return matched
@@ -365,57 +365,57 @@ def curate_ccrs_inventory(manager: CCRS, data_dir: str, stats_dir: str):
         manager.create_log('Failed to merge lab results. Curate lab results first.')
 
     # FIXME: Attach lab results to products.
-    matched = pd.DataFrame()
-    lab_results_dir = os.path.join(stats_dir, 'lab_results')
-    inventory_results_file = results_file = os.path.join(lab_results_dir, 'inventory_lab_results_0.xlsx')
-    lab_results = pd.read_excel(inventory_results_file)
-    augmented_inventory_files = sorted_nicely(os.listdir(inventory_dir))
-    augmented_inventory_files = [os.path.join(inventory_dir, f) for f in augmented_inventory_files if not f.startswith('~$')]
-    for i, product_file in enumerate(product_files):
+    # matched = pd.DataFrame()
+    # lab_results_dir = os.path.join(stats_dir, 'lab_results')
+    # inventory_results_file = results_file = os.path.join(lab_results_dir, 'inventory_lab_results_0.xlsx')
+    # lab_results = pd.read_excel(inventory_results_file)
+    # augmented_inventory_files = sorted_nicely(os.listdir(inventory_dir))
+    # augmented_inventory_files = [os.path.join(inventory_dir, f) for f in augmented_inventory_files if not f.startswith('~$')]
+    # for i, product_file in enumerate(product_files):
 
-        # Read products.
-        products = read_products(product_file)
+    #     # Read products.
+    #     products = read_products(product_file)
 
-        # TODO: Match products with inventory.
-        products.rename(columns={'product_id': 'ProductId'}, inplace=True)
-        # for inventory_file in augmented_inventory_files:
-        #     inventory = pd.read_excel(
-        #         inventory_file
-        #     )
+    #     # TODO: Match products with inventory.
+    #     products.rename(columns={'product_id': 'ProductId'}, inplace=True)
+    #     # for inventory_file in augmented_inventory_files:
+    #     #     inventory = pd.read_excel(
+    #     #         inventory_file
+    #     #     )
 
-        # FIXME: This is not working.
-        products = merge_datasets(
-            products,
-            augmented_inventory_files,
-            dataset='inventory',
-            on='ProductId',
-            target='inventory_id',
-            how='left',
-            validate='m:1',
-            rename={
-                'CreatedBy': 'inventory_created_by',
-                'UpdatedBy': 'inventory_updated_by',
-                'CreatedDate': 'inventory_created_at',
-                'updatedDate': 'inventory_updated_at',
-                'UpdatedDate': 'inventory_updated_at',
-                'Name': 'inventory_name',
-            },
-        )
+    #     # FIXME: This is not working.
+    #     products = merge_datasets(
+    #         products,
+    #         augmented_inventory_files,
+    #         dataset='inventory',
+    #         on='ProductId',
+    #         target='inventory_id',
+    #         how='left',
+    #         validate='m:1',
+    #         rename={
+    #             'CreatedBy': 'inventory_created_by',
+    #             'UpdatedBy': 'inventory_updated_by',
+    #             'CreatedDate': 'inventory_created_at',
+    #             'updatedDate': 'inventory_updated_at',
+    #             'UpdatedDate': 'inventory_updated_at',
+    #             'Name': 'inventory_name',
+    #         },
+    #     )
 
-        # Merge the lab results with the products.
-        match = rmerge(
-            products,
-            lab_results,
-            on='product_id',
-            how='left',
-            validate='m:1',
-        )
-        match = match.loc[~match['lab_result_id'].isna()]
-        matched = pd.concat([matched, match], ignore_index=True)
-        manager.create_log('Matched ' + str(len(matched)) + ' lab results with products...')
+    #     # Merge the lab results with the products.
+    #     match = rmerge(
+    #         products,
+    #         lab_results,
+    #         on='product_id',
+    #         how='left',
+    #         validate='m:1',
+    #     )
+    #     match = match.loc[~match['lab_result_id'].isna()]
+    #     matched = pd.concat([matched, match], ignore_index=True)
+    #     manager.create_log('Matched ' + str(len(matched)) + ' lab results with products...')
 
-    # Save the matched product lab results.
-    save_dataset(matched, lab_results_dir, 'product_lab_results')
+    # # Save the matched product lab results.
+    # save_dataset(matched, lab_results_dir, 'product_lab_results')
 
     # Complete curation.
     end = datetime.now()
@@ -423,7 +423,7 @@ def curate_ccrs_inventory(manager: CCRS, data_dir: str, stats_dir: str):
 
 
 # === Test ===
-# [ ] Tested:
+# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Specify where your data lives.

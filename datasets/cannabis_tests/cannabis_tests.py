@@ -16,7 +16,7 @@ import urllib.request
 
 
 # Constants.
-_ALGORITHM = 'cannabis_tests.py'
+_ALGORITHM = './cannabis_tests.py'
 _VERSION = '1.1.0'
 _HOMEPAGE = 'https://huggingface.co/datasets/cannlytics/cannabis_tests'
 _LICENSE = "https://opendatacommons.org/licenses/by/4-0/"
@@ -29,7 +29,7 @@ _CITATION = """\
   author    = {Skeate, Keegan and O'Sullivan-Sutherland, Candace},
   title     = {Cannabis Tests: Aggregated Cannabis Lab Test Results},
   booktitle = {Cannabis Data Science},
-  month     = {June},
+  month     = {August},
   year      = {2023},
   address   = {United States of America},
   publisher = {Cannlytics}
@@ -38,12 +38,16 @@ _CITATION = """\
 
 # Read subsets from local source.
 try:
-    with open('cannabis_results.json', 'r') as f:
-        SUBSETS = json.loads(f.read())
+    try:
+        with open('./cannabis_tests.json', 'r') as f:
+            SUBSETS = json.loads(f.read())
+    except:
+        with open('./datasets/cannabis_tests/cannabis_tests.json', 'r') as f:
+            SUBSETS = json.loads(f.read())
 
 # Otherwise, read subsets from Hugging Face.
 except:
-    with urllib.request.urlopen('https://huggingface.co/datasets/cannlytics/cannabis_tests/raw/main/cannabis_results.json') as url:
+    with urllib.request.urlopen('https://huggingface.co/datasets/cannlytics/cannabis_tests/raw/main/cannabis_tests.json') as url:
         SUBSETS = json.load(url)
 
 # Lab result model.
@@ -145,8 +149,65 @@ _FEATURES = datasets.Features({
     'total_thcv': datasets.Value(dtype='float64'),
     'url': datasets.Value(dtype='string'),
     'water_activity_method': datasets.Value(dtype='string'),
-    'water_activity_status': datasets.Value(dtype='string')
+    'water_activity_status': datasets.Value(dtype='string'),
+    # New:
+    # 'business_dba_name': datasets.Value(dtype='string'),
+    # 'business_image_url': datasets.Value(dtype='string'),
+    # 'business_legal_name': datasets.Value(dtype='string'),
+    # 'business_owner_name': datasets.Value(dtype='string'),
+    # 'business_phone': datasets.Value(dtype='string'),
+    # 'business_structure': datasets.Value(dtype='string'),
+    # 'business_website': datasets.Value(dtype='string'),
+    'category': datasets.Value(dtype='string'),
+    'classification': datasets.Value(dtype='string'),
+    'coa_algorithm_version': datasets.Value(dtype='string'),
+    'coa_url': datasets.Value(dtype='string'),
+    'distributor_license_type': datasets.Value(dtype='string'),
+    'expiration_date': datasets.Value(dtype='string'),
+    # 'homogeneity_status': datasets.Value(dtype='string'),
+    'image_url': datasets.Value(dtype='string'),
+    'indica_percentage': datasets.Value(dtype='string'),
+    'sativa_percentage': datasets.Value(dtype='string'),
+    # 'issue_date': datasets.Value(dtype='string'),
+    # 'license_designation': datasets.Value(dtype='string'),
+    # 'license_status': datasets.Value(dtype='string'),
+    # 'license_status_date': datasets.Value(dtype='string'),
+    # 'license_term': datasets.Value(dtype='string'),
+    # 'license_type': datasets.Value(dtype='string'),
+    # 'licensing_authority': datasets.Value(dtype='string'),
+    # 'licensing_authority_id': datasets.Value(dtype='string'),
+    'lineage': datasets.Value(dtype='string'),
+    # 'microbial_method': datasets.Value(dtype='string'),
+    # 'moisture_status': datasets.Value(dtype='string'),
+    # 'moisture_units': datasets.Value(dtype='string'),
+    # 'parcel_number': datasets.Value(dtype='string'),
+    'predicted_aromas': datasets.Value(dtype='string'),
+    'producer_county': datasets.Value(dtype='string'),
+    'producer_latitude': datasets.Value(dtype='string'),
+    'producer_longitude': datasets.Value(dtype='string'),
+    # 'producer_street_address': datasets.Value(dtype='string'),
+    # 'solvents_status': datasets.Value(dtype='string'),
+    'strain_id': datasets.Value(dtype='string'),
+    'strain_name': datasets.Value(dtype='string'),
+    'strain_type': datasets.Value(dtype='string'),
+    'strain_url': datasets.Value(dtype='string'),
+    # 'total_aflatoxins': datasets.Value(dtype='string'),
+    # 'total_xylenes': datasets.Value(dtype='string'),
+    # FIXME: `uid` should be mapped to `metrc_source_id`
+    # 'uid': datasets.Value(dtype='string')
 })
+
+# Fields that should be mapped to features.
+FIELD_TO_FEATURE_MAP = {
+    'business_dba_name': 'producer_dba_name',
+    'business_image_url': 'producer_image_url',
+    'business_legal_name': 'producer_legal_name',
+    'business_owner_name': 'producer_owner_name',
+    'business_phone': 'producer_phone',
+    'business_structure': 'producer_structure',
+    'business_website': 'producer_website',
+    'producer_street_address': 'producer_street',
+}
 
 
 class CannabisTestsConfig(datasets.BuilderConfig):
@@ -157,6 +218,7 @@ class CannabisTestsConfig(datasets.BuilderConfig):
         description = _DESCRIPTION
         description += f'This configuration is for the `{name}` subset.'
         super().__init__(name=name, description=description, **kwargs)
+
 
 class CannabisTests(datasets.GeneratorBasedBuilder):
     """The Cannabis Tests dataset."""
@@ -183,6 +245,7 @@ class CannabisTests(datasets.GeneratorBasedBuilder):
         """Returns SplitGenerators."""
         config_name = self.config.name
         data_url = SUBSETS[config_name]['data_url']
+        print('data_url:', data_url)
         urls = {config_name: data_url}
         downloaded_files = dl_manager.download_and_extract(urls)
         filepath = downloaded_files[config_name]
@@ -191,26 +254,56 @@ class CannabisTests(datasets.GeneratorBasedBuilder):
     
     def _generate_examples(self, filepath):
         """Returns the examples in raw text form."""
+        print('filepath:', filepath)
         with open(filepath) as f:
-            df = pd.read_csv(filepath)
+            try:
+                df = pd.read_excel(filepath)
+            except:
+                df = pd.read_csv(filepath)
+
+            # Rename columns.
+            df = df.rename(columns=FIELD_TO_FEATURE_MAP)
+
+            # Get the features we want to keep.
             for index, row in df.iterrows():
-                obs = row.to_dict()
+
+                # Get observation features.
+                obs = {key: None for key in _FEATURES.keys()}
+                
+                # Populate our structure with values from the row wherever available.
+                for key in obs.keys():
+                    if key in row:
+                        obs[key] = row[key]
+
                 yield index, obs
 
 
 # === Tests ===
+# [ ] Tested:
 if __name__ == '__main__':
 
     from datasets import load_dataset
+    import tempfile
 
     # Define all of the dataset subsets.
     subsets = list(SUBSETS.keys())
+
+    # Get the default temporary directory in a cross-platform manner.
+    cache_directory = tempfile.gettempdir()
+    cache_path = os.path.join(cache_directory, 'cache')
+    if not os.path.exists(cache_path):
+        os.makedirs(cache_path)
 
     # Load each dataset subset.
     aggregate = {}
     for subset in subsets:
         print('Loading subset:', subset)
-        dataset = load_dataset(_ALGORITHM, subset)
+        dataset = load_dataset(
+            _ALGORITHM,
+            subset,
+            download_mode='force_redownload',
+            cache_dir=cache_directory
+        )
         data = dataset['data']
         assert len(data) > 0
         print('Read %i %s data points.' % (len(data), subset))

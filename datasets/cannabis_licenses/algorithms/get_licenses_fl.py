@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 5/23/2023
+Updated: 8/14/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -36,11 +36,6 @@ from cannlytics.data.gis import geocode_addresses
 from dotenv import dotenv_values
 import pandas as pd
 import requests
-
-
-# Specify where your data lives.
-DATA_DIR = '../data/fl'
-ENV_FILE = '../../../../.env'
 
 
 # Specify state-specific constants.
@@ -170,6 +165,28 @@ def get_retailers_fl(
         print(f"Request failed with status {response.status_code}")
 
     # TODO: Get the retailers from each page!
+
+    # Geocode licenses.
+    if google_maps_api_key is not None:
+        df = geocode_addresses(
+            df,
+            api_key=google_maps_api_key,
+            address_field='address',
+        )
+        # FIXME: Would be ideal to also get the county.
+        df['premise_county'] = None
+        df.rename(columns={
+            # 'county': 'premise_county',
+            'latitude': 'premise_latitude',
+            'longitude': 'premise_longitude'
+        }, inplace=True)
+        parts = df['formatted_address'].str.split(',', n=3, expand=True)
+        df['premise_street'] = parts[0]
+        df['premise_city'] = parts[1]
+        df['premise_state'] = STATE
+        df['premise_zip_code'] = parts[2].str.replace(STATE, '').str.strip()
+        drop_cols = ['address', 'formatted_address']
+        df.drop(columns=drop_cols, inplace=True)
     
     raise NotImplementedError
 
@@ -209,13 +226,17 @@ def get_licenses_fl(
     df = pd.DataFrame(rows)
     df.columns = list(columns.values())
 
-    # Get business websites and license URLs.
-    links = table.find_all('a')
-    hrefs = [x['href'] for x in links]
-    hrefs = [x for x in hrefs if 'http' in x]
-    pairs = [hrefs[i: i+2] for i in range(0, len(hrefs), 2)]
-    df['business_website'] = [x[0] for x in pairs]
-    df['license_url'] = [x[1] for x in pairs]
+    # Get the business website and license URLs from each row.
+    business_websites, license_urls = [], []
+    table_rows = table.find_all('tr')[1:]
+    for row in table_rows:
+        columns = row.find_all('td')
+        business_link = columns[0].find('a')
+        business_websites.append(business_link['href'] if business_link else None)
+        license_link = columns[-1].find('a')
+        license_urls.append(license_link['href'] if license_link else None)
+    df['business_website'] = business_websites
+    df['license_url'] = license_urls
 
     # TODO: Get issue date from the license PDF.
     # (Will need to apply OCR to get a PDF first.)
@@ -223,28 +244,6 @@ def get_licenses_fl(
 
     # TODO: Get the business legal name from the license PDF.
     df['business_legal_name'] = df['business_dba_name']
-
-    # Geocode licenses.
-    if google_maps_api_key is not None:
-        df = geocode_addresses(
-            df,
-            api_key=google_maps_api_key,
-            address_field='address',
-        )
-        # FIXME: Would be ideal to also get the county.
-        df['premise_county'] = None
-        df.rename(columns={
-            # 'county': 'premise_county',
-            'latitude': 'premise_latitude',
-            'longitude': 'premise_longitude'
-        }, inplace=True)
-        parts = df['formatted_address'].str.split(',', n=3, expand=True)
-        df['premise_street'] = parts[0]
-        df['premise_city'] = parts[1]
-        df['premise_state'] = STATE
-        df['premise_zip_code'] = parts[2].str.replace(STATE, '').str.strip()
-        drop_cols = ['address', 'formatted_address']
-        df.drop(columns=drop_cols, inplace=True)
 
     # Standardize the licenses data.
     df = df.assign(
@@ -275,16 +274,19 @@ def get_licenses_fl(
     return df
 
 
-#-----------------------------------------------------------------------
 # === Tests ===
-#-----------------------------------------------------------------------
+# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
-    
+
+    # Specify where your data lives.
+    data_dir = '../data/fl'
+    env_file = '../../../.env'
+
     # [✓] TEST: Get Florida labs.
-    labs = get_labs_fl(data_dir=DATA_DIR, env_file=ENV_FILE)
+    labs = get_labs_fl(data_dir=data_dir, env_file=env_file)
 
     # [ ] TEST: Get Florida retailers.
 
 
-    # [ ] TEST: Get Florida licenses.
-    # licenses = get_licenses_fl(data_dir=DATA_DIR, env_file=ENV_FILE)
+    # [✓] TEST: Get Florida licenses.
+    licenses = get_licenses_fl(data_dir=data_dir, env_file=env_file)

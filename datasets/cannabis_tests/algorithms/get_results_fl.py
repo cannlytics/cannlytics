@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 8/3/2023
+Updated: 8/14/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -325,6 +325,7 @@ def parse_results_kaycha(
         temp_path: Optional[str] = None,
         reverse: Optional[bool] = True,
         completed: Optional[list] = [],
+        license_number: Optional[str] = None,
     ):
     """Parse lab results from Kaycha Labs COAs."""
     # Initialize a parser.
@@ -361,6 +362,8 @@ def parse_results_kaycha(
             try:
                 doc = os.path.join(path, filename)
                 data = parser.parse(doc, temp_path=temp_path)
+                if license_number is not None:
+                    data['license_number'] = license_number
                 all_data.extend(data)
                 print('Parsed:', doc)
             except:
@@ -379,7 +382,7 @@ def parse_results_kaycha(
 
 
 # === Test ===
-if __name__ == '__main__':
+if __name__ == '__main__' and False:
 
     # Specify where your data lives.
     DATA_DIR = 'D://data/florida/lab_results'
@@ -605,11 +608,10 @@ def get_product_results_the_flowery(data_dir: str, overwrite = False, **kwargs):
 
 
 # === Test ===
-if __name__ == '__main__':
+if __name__ == '__main__' and False:
 
     # Specify where your data lives.
     DATA_DIR = 'D://data/florida/lab_results'
-    # DATA_DIR = r'C:\.datasets\data\florida\lab_results'
     
     # [✓] TEST: Get The Flowery COAs.
     the_flowery_products = get_product_results_the_flowery(DATA_DIR)
@@ -824,13 +826,30 @@ if __name__ == '__main__' and False:
 #-----------------------------------------------------------------------
 
 # === Tests ===
-# [ ] Tested:
-if __name__ == '__main__' and False:
+# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
+if __name__ == '__main__':
 
     from datetime import datetime
     import os
     from cannlytics.data.coas import CoADoc
     import pandas as pd
+
+    # [✓] TEST: Parse Kaycha COAs.
+    # Note: This is a super, super long process
+    pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
+    date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    for folder in os.listdir(pdf_dir):
+        if folder.startswith('MMTC'):
+            data_dir = os.path.join(pdf_dir, folder)
+            outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
+            print('Parsing:', folder)
+            coa_data = parse_results_kaycha(
+                data_dir,
+                outfile,
+                reverse=True,
+                completed=[],
+                license_number=folder,
+            )
     
     # Lab result constants.
     CONSTANTS = {
@@ -875,18 +894,20 @@ if __name__ == '__main__' and False:
 
     # FIXME: Standardize the data.
     for constant, value in CONSTANTS.items():
-        data[constant] = value
+        aggregate[constant] = value
 
     # FIXME: Augment license data.
+    import sys
+    sys.path.append('./datasets')
+    sys.path.append('../../../datasets')
     from cannabis_licenses.algorithms.get_licenses_fl import get_licenses_fl
     licenses = get_licenses_fl()
     licenses['license_type'] = 'Medical - Retailer'
     data = pd.merge(
-        data,
+        aggregate,
         licenses,
         suffixes=['', '_copy'],
-        left_on='producer_license_number',
-        right_on='license_number',
+        on='license_number',
     )
     data = data.filter(regex='^(?!.*_copy$)')
 

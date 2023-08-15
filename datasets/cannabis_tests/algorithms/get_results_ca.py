@@ -255,7 +255,7 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
 
 
 # === Test ===
-# [ ] Tested:
+# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Specify where your data lives.
