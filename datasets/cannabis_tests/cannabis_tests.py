@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/10/2022
-Updated: 6/9/2023
+Updated: 8/15/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 import json
@@ -21,8 +21,7 @@ _VERSION = '1.1.0'
 _HOMEPAGE = 'https://huggingface.co/datasets/cannlytics/cannabis_tests'
 _LICENSE = "https://opendatacommons.org/licenses/by/4-0/"
 _DESCRIPTION = """\
-Cannabis results (https://cannlytics.com/data/results) is a
-dataset of curated cannabis lab test results.
+Cannabis results is a dataset of curated cannabis lab test results. The dataset consists of sub-datasets for each state with any public cannabis lab tests, as well as a sub-dataset that includes all licenses.
 """
 _CITATION = """\
 @inproceedings{cannlytics2023cannabis_tests,

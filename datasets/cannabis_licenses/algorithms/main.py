@@ -154,3 +154,6 @@ if __name__ == '__main__':
 
     # Get licenses for each state.
     all_licenses = main(data_dir, env_file)
+
+    # TODO: Upload all CSVs to Firebase Storage.
+    

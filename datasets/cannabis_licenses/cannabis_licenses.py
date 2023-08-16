@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 10/8/2022
+Updated: 8/15/2023
 License: <https://huggingface.co/datasets/cannlytics/cannabis_licenses/blob/main/LICENSE>
 """
 # Standard imports.
@@ -19,14 +19,11 @@ import pandas as pd
 
 # Constants.
 _SCRIPT = 'cannabis_licenses.py'
-_VERSION = '1.0.1'
+_VERSION = '1.1.0'
 _HOMEPAGE = 'https://huggingface.co/datasets/cannlytics/cannabis_licenses'
 _LICENSE = "https://opendatacommons.org/licenses/by/4-0/"
 _DESCRIPTION = """\
-Cannabis Licenses (https://cannlytics.com/data/licenses) is a
-dataset of curated cannabis license data. The dataset consists of 18
-sub-datasets for each state with permitted adult-use cannabis, as well
-as a sub-dataset that includes all licenses.
+Cannabis Licenses is a dataset of curated cannabis license data. The dataset consists of sub-datasets for each state with permitted adult-use cannabis, as well as a sub-dataset that includes all licenses.
 """
 _CITATION = """\
 @inproceedings{cannlytics2023cannabis_licenses,
