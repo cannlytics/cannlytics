@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/13/2023
+Updated: 8/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -75,6 +75,7 @@ def get_licenses_nj(
     )
 
     # Standardize the data.
+    timestamp = datetime.now().isoformat()
     drop_cols = ['dispensary_location', 'location', 'website']
     data.drop(columns=drop_cols, inplace=True)
     data.rename(columns=NEW_JERSEY['retailers']['columns'], inplace=True)
@@ -96,7 +97,7 @@ def get_licenses_nj(
     data['id'] = None
     data['license_number'] = None
     data['license_status'] = None
-    data['data_refreshed_date'] = datetime.now().isoformat()
+    data['data_refreshed_date'] = timestamp
 
     # Convert certain columns from upper case title case.
     cols = ['premise_city', 'premise_county', 'premise_street_address']
@@ -106,8 +107,8 @@ def get_licenses_nj(
     # Save and return the data.
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-        data.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+        date = timestamp[:10]
+        data.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
         data.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
     return data
 

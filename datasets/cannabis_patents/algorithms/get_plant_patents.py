@@ -388,11 +388,11 @@ if __name__ == '__main__':
     queries = [
         # 'cannabis',
         # 'cannabis plant',
-        # 'cannabis cultivar',
-        # 'cannabis variety',
-        'hemp plant',
-        # 'hemp cultivar',
-        # 'hemp variety',
+        'cannabis cultivar',
+        'cannabis variety',
+        # 'hemp plant',
+        'hemp cultivar',
+        'hemp variety',
         # 'marijuana plant',
     ]
     limit = 1000

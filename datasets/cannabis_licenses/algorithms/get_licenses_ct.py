@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/13/2023
+Updated: 8/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -133,14 +133,15 @@ def get_licenses_ct(
     retailers.rename(columns=gis_cols, inplace=True)
 
     # Get the refreshed date.
-    retailers['data_refreshed_date'] = datetime.now().isoformat()
+    timestamp = datetime.now().isoformat()
+    retailers['data_refreshed_date'] = timestamp
 
     # Save the data.
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
-        retailers.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+        date = timestamp[:10]
+        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{date}.csv', index=False)
+        retailers.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
         retailers.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
 
     # Return the licenses.

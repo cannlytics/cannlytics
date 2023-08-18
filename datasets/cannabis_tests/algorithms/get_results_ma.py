@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 5/30/2023
+Updated: 8/17/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Description:
@@ -31,10 +31,6 @@ from cannlytics.firebase import initialize_firebase, update_documents
 from cannlytics.utils.utils import to_excel_with_style
 
 
-# Specify where your data lives.
-DATA_DIR = 'D://data/massachusetts/lab_results/mcr_labs'
-
-
 def upload_results(data: pd.DataFrame):
     """Upload test results to Firestore."""
     refs, updates = [], []
@@ -48,7 +44,7 @@ def upload_results(data: pd.DataFrame):
 
 
 def get_results_mcrlabs(
-        data_dir: str = DATA_DIR,
+        data_dir: str = '.',
         starting_page: int = 1,
         pause: int = 3,
         upload: bool = False,
@@ -83,6 +79,9 @@ def get_results_mcrlabs(
 # === Test ===
 # [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = 'D://data/massachusetts/lab_results/mcr_labs'
 
     # Get all of the MCR Labs test results.
     ma_results = get_results_mcrlabs(DATA_DIR)

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/13/2023
+Updated: 8/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -151,8 +151,8 @@ def get_licenses_co(
     config = dotenv_values(env_file)
     api_key = config['GOOGLE_MAPS_API_KEY']
     cols = ['business_dba_name', 'premise_city', 'premise_state', 'premise_zip_code']
-    retailers = licenses.loc[licenses['license_type'] == 'Stores']
-    retailers['query'] = retailers[cols].apply(
+    retailers = licenses.loc[licenses['license_type'] == 'Stores'].copy()
+    retailers['query'] = retailers.loc[:, cols].apply(
         lambda row: ', '.join(row.values.astype(str)),
         axis=1,
     )

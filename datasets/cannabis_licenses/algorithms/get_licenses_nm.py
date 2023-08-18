@@ -109,17 +109,18 @@ def get_licenses_nm(
     #     WebDriverWait(driver, 15).until(EC.presence_of_element_located(el))
     # except TimeoutException:
     #     print('Failed to load page within %i seconds.' % (30))
-    sleep(5)
+    sleep(6)
 
     # Get the main content and click "License Type" radio.
     content = driver.find_element(by=By.CLASS_NAME, value='siteforceContentArea')
     radio = content.find_element(by=By.CLASS_NAME, value='slds-radio--faux')
     radio.click()
-    sleep(2)
+    sleep(3)
 
     # Select retailers.
     # TODO: Also get "Cannabis Manufacturer", "Cannabis Producer", and
     # "Cannabis Producer Microbusiness".
+    # FIXME: Handle NoSuchElementException 
     search = content.find_element(by=By.ID, value='comboboxId-40')
     search.click()
     choices = content.find_elements(by=By.CLASS_NAME, value='slds-listbox__item')

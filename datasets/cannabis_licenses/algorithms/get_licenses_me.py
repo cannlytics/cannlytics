@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/13/2023
+Updated: 8/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -173,8 +173,8 @@ def get_licenses_me(
 
     # Save and return the data.
     if data_dir is not None:
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+        date = datetime.now().strftime('%Y-%m-%d')
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
         # TODO: Save the retailers in a stand-alone data file.
 

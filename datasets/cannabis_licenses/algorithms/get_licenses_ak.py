@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/13/2023
+Updated: 8/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -163,7 +163,7 @@ def search_for_license_addresses(
 def save_license_data(
         licenses: pd.DataFrame,
         state: str,
-        data_dir: str = None,
+        data_dir: str = '.',
     ) -> None:
     """
     Save license data to CSV files.
@@ -172,17 +172,13 @@ def save_license_data(
         state (str): The two-letter abbreviation for the state associated with the licenses.
         data_dir (str, optional): The directory in which to save the data. If None, the data will not be saved. Defaults to None.
     """
-    # Set the timestamp and create the data directory, if necessary.
-    if data_dir is not None:
-        if not os.path.exists(data_dir):
-            os.makedirs(data_dir)
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-
-        # Filter for retail licenses and save both the full DataFrame and the filtered DataFrame.
-        retailers = licenses.loc[licenses['license_type'] == 'Retail Marijuana Store']
-        licenses.to_csv(f'{data_dir}/licenses-{state.lower()}-{timestamp}.csv', index=False)
-        licenses.to_csv(f'{data_dir}/licenses-{state.lower()}-latest.csv', index=False)
-        retailers.to_csv(f'{data_dir}/retailers-{state.lower()}-{timestamp}.csv', index=False)
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+    date = datetime.now().strftime('%Y-%m-%d')
+    retailers = licenses.loc[licenses['license_type'] == 'Retail Marijuana Store']
+    licenses.to_csv(f'{data_dir}/licenses-{state.lower()}-{date}.csv', index=False)
+    licenses.to_csv(f'{data_dir}/licenses-{state.lower()}-latest.csv', index=False)
+    retailers.to_csv(f'{data_dir}/retailers-{state.lower()}-{date}.csv', index=False)
 
 
 def get_licenses_ak(
@@ -193,7 +189,7 @@ def get_licenses_ak(
 
     # Load the environment variables.
     config = dotenv_values(env_file)
-    api_key = config['GOOGLE_MAPS_API_KEY']
+    google_maps_api_key = config.get('GOOGLE_MAPS_API_KEY')
 
     # Initiate a Selenium driver.
     # FIXME: ChromeDriver is not working on Windows.
@@ -250,17 +246,18 @@ def get_licenses_ak(
     )
 
     # Search for address for each retail license.
-    fields = [
-        'formatted_address',
-        'formatted_phone_number',
-        'geometry/location/lat',
-        'geometry/location/lng',
-        'website',
-    ]
-    licenses = search_for_license_addresses(licenses, api_key, fields)
+    if google_maps_api_key:
+        fields = [
+            'formatted_address',
+            'formatted_phone_number',
+            'geometry/location/lat',
+            'geometry/location/lng',
+            'website',
+        ]
+        licenses = search_for_license_addresses(licenses, google_maps_api_key, fields)
 
-    # Clean-up after adding GIS data.
-    licenses.drop(columns=['address'], inplace=True)
+        # Clean-up after adding GIS data.
+        licenses.drop(columns=['address'], inplace=True)
 
     # Optional: Search for business website for email and a photo.
     licenses['business_email'] = None
@@ -270,7 +267,8 @@ def get_licenses_ak(
     licenses['data_refreshed_date'] = datetime.now().isoformat()
 
     # Save and return the data.
-    save_license_data(licenses, STATE, data_dir)
+    if data_dir is not None:
+        save_license_data(licenses, STATE, data_dir)
     return licenses
 
 

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/27/2022
-Updated: 8/13/2023
+Updated: 8/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -341,12 +341,12 @@ def get_licenses_az(
 
     # Save and return the data.
     if data_dir is not None:
-        timestamp = timestamp[:19].replace(':', '-')
-        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
+        date = timestamp[:10]
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
-        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
-        cultivators.to_csv(f'{data_dir}/cultivators-{STATE.lower()}-{timestamp}.csv', index=False)
-        manufacturers.to_csv(f'{data_dir}/manufacturers-{STATE.lower()}-{timestamp}.csv', index=False)
+        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{date}.csv', index=False)
+        cultivators.to_csv(f'{data_dir}/cultivators-{STATE.lower()}-{date}.csv', index=False)
+        manufacturers.to_csv(f'{data_dir}/manufacturers-{STATE.lower()}-{date}.csv', index=False)
 
     # Return the licenses.
     return licenses

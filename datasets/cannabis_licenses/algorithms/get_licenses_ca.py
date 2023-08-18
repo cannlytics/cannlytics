@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/16/2022
-Updated: 8/13/2023
+Updated: 8/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -90,8 +90,8 @@ def get_licenses_ca(
     # Save and return the data.
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-        license_data.to_csv(f'{data_dir}/licenses-ca-{timestamp}.csv', index=False)
+        date = datetime.now().strftime('%Y-%m-%d')
+        license_data.to_csv(f'{data_dir}/licenses-ca-{date}.csv', index=False)
         license_data.to_csv(f'{data_dir}/licenses-ca-latest.csv', index=False)
     return license_data
 

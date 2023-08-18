@@ -6,27 +6,27 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/13/2023
+Updated: 8/17/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
     Collect all cannabis license data from states with permitted adult-use:
 
-        ✓ Alaska (Requires Selenium) (FIXME)
-        ✓ Arizona (Requires Selenium) (FIXME)
+        ✓ Alaska (Requires Selenium)
+        ✓ Arizona (Requires Selenium)
         ✓ California
-        ✓ Colorado (FIXME)
+        ✓ Colorado
         ✓ Connecticut
         ✓ Delaware
         ✓ Illinois (FIXME)
-        ✓ Maine (FIXME)
+        ✓ Maine
         ✓ Maryland
         ✓ Massachusetts
-        ✓ Michigan (Requires Selenium) (FIXME)
-        - Minnesota (TODO)
-        ✓ Missouri (FIXME)
-        ✓ Montana (FIXME)
+        ✓ Michigan (Requires Selenium)
+        ✓ Minnesota
+        ✓ Missouri
+        ✓ Montana
         ✓ Nevada
         ✓ New Jersey
         ✓ New York
@@ -49,21 +49,21 @@ import pandas as pd
 
 # Specify state-specific algorithms.
 ALGORITHMS = {
-    'ak': 'get_licenses_ak',
-    'az': 'get_licenses_az',
-    'ca': 'get_licenses_ca',
-    'co': 'get_licenses_co',
-    'ct': 'get_licenses_ct',
-    'de': 'get_licenses_de',
-    'il': 'get_licenses_il',
-    'ma': 'get_licenses_ma',
-    'md': 'get_licenses_md',
-    'me': 'get_licenses_me',
-    'mi': 'get_licenses_mi',
-    'mo': 'get_licenses_mo',
-    'mt': 'get_licenses_mt',
-    'nj': 'get_licenses_nj',
-    'nm': 'get_licenses_nm',
+    # 'ak': 'get_licenses_ak',
+    # 'az': 'get_licenses_az',
+    # 'ca': 'get_licenses_ca',
+    # 'co': 'get_licenses_co',
+    # 'ct': 'get_licenses_ct',
+    # 'de': 'get_licenses_de',
+    # 'il': 'get_licenses_il',
+    # 'ma': 'get_licenses_ma',
+    # 'md': 'get_licenses_md',
+    # 'me': 'get_licenses_me',
+    # 'mi': 'get_licenses_mi',
+    # 'mo': 'get_licenses_mo',
+    # 'mt': 'get_licenses_mt',
+    # 'nj': 'get_licenses_nj',
+    # 'nm': 'get_licenses_nm',
     'nv': 'get_licenses_nv',
     'ny': 'get_licenses_ny',
     'or': 'get_licenses_or',
@@ -90,7 +90,6 @@ ALGORITHMS = {
     # 'ut': 'get_licenses_ut',
     # 'wv': 'get_licenses_wv'
 }
-DATA_DIR = 'D:\\data\\cannabis_licenses\\data'
 
 
 def main(data_dir, env_file):
@@ -110,25 +109,23 @@ def main(data_dir, env_file):
     for state, algorithm in ALGORITHMS.items():
 
         # Import the module and get the entry point.
-        # FIXME: Requires the module to be in the same directory.
-        # TODO: Or change the directory to the module directory.
         module = importlib.import_module(f'{algorithm}')
         entry_point = getattr(module, algorithm)
 
         # Collect licenses for the state.
-        try:
-            manager.create_log(f'Getting license data for {state.upper()}.')
-            data = entry_point(data_dir, env_file=env_file)
-            if not os.path.exists(f'{DATA_DIR}/{state}'):
-                os.makedirs(f'{DATA_DIR}/{state}')
-            data.to_csv(f'{DATA_DIR}/{state}/licenses-{state}-{date}.csv', index=False)
-            manager.create_log(f'Collected {state.upper()} licenses.')
-            licenses = pd.concat([licenses, data])
-        except:
-            manager.create_log(f'Failed to aggregate {state.upper()} licenses.')
+        # try:
+        manager.create_log(f'Getting license data for {state.upper()}.')
+        data = entry_point(data_dir, env_file=env_file)
+        if not os.path.exists(f'{data_dir}/{state}'):
+            os.makedirs(f'{data_dir}/{state}')
+        data.to_csv(f'{data_dir}/{state}/licenses-{state}-{date}.csv', index=False)
+        manager.create_log(f'Collected {state.upper()} licenses.')
+        licenses = pd.concat([licenses, data])
+        # except:
+        #     manager.create_log(f'Failed to aggregate {state.upper()} licenses.')
 
     # Save all of the retailers.
-    licenses.to_csv(f'{DATA_DIR}/all/licenses-{date}.csv', index=False)
+    licenses.to_csv(f'{data_dir}/all/licenses-{date}.csv', index=False)
     manager.create_log(f'Finished collecting licenses data.')
     return licenses
 
@@ -146,7 +143,7 @@ if __name__ == '__main__':
         arg_parser.add_argument('--env', dest='env_file', type=str)
         args = arg_parser.parse_args()
     except SystemExit:
-        args = {'d': '../data/all', 'env_file': '../.env'}
+        args = {'d': '../data/all', 'env_file': '../../../.env'}
 
     # Get arguments.
     data_dir = args.get('d', args.get('data_dir'))
@@ -156,4 +153,4 @@ if __name__ == '__main__':
     all_licenses = main(data_dir, env_file)
 
     # TODO: Upload all CSVs to Firebase Storage.
-    
+
