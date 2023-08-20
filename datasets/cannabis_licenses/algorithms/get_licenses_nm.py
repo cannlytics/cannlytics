@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/13/2023
+Updated: 8/18/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -51,10 +51,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 # except ImportError:
 #     pass # Otherwise, ChromeDriver should be in your path.
 
-
-# Specify where your data lives.
-DATA_DIR = '../data/nm'
-ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'NM'
@@ -338,6 +334,10 @@ def get_licenses_nm(
 # === Test ===
 # [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/nm'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse

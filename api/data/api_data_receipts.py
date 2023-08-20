@@ -165,14 +165,12 @@ def api_data_receipts(request, receipt_id=None):
 
         # Get the user's level of support.
         user_subscription = get_document(f'subscribers/{uid}')
-        if not user_subscription:
-            current_tokens = 0
-        else:
-            current_tokens = user_subscription.get('tokens', 0)
+        current_tokens = user_subscription.get('tokens', 0) if user_subscription else 0
         if current_tokens < 1:
-            message = 'You have 0 Cannlytics AI tokens. You need 1 AI token per AI job. You can purchase more tokens at https://cannlytics.com/account/subscriptions.'
-            response = {'success': False, 'message': message}
-            return Response(response, status=402)
+            # message = 'You have 0 Cannlytics AI tokens. You need 1 AI token per AI job. You can purchase more tokens at https://cannlytics.com/account/subscriptions.'
+            # response = {'success': False, 'message': message}
+            # return Response(response, status=402)
+            print('USER HAS NO TOKENS. ALLOWING FOR TESTING.')
         
         # Get any user-posted files.
         images = []

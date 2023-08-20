@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 8/6/2023
+// Updated: 8/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -15,7 +15,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/utils/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A footer with links at the bottom of the app.

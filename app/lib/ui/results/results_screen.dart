@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 6/28/2023
+// Updated: 8/18/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO: Links to places where users can get their COAs:
@@ -36,8 +36,6 @@ import 'package:cannlytics_data/ui/results/results_parser.dart';
 import 'package:cannlytics_data/ui/results/user_results.dart';
 
 // import 'package:cannlytics_data/ui/results/results_search.dart';
-
-
 
 /// Results screen.
 class LabResultsScreen extends StatelessWidget {
@@ -129,15 +127,16 @@ class _ResultsTabsState extends State<ResultsTabs>
             dividerColor: Colors.transparent,
             tabs: [
               PillTabButton(
-                text: 'Your Results',
-                icon: Icons.science,
+                text: 'Parse',
+                icon: Icons.auto_awesome,
                 isSelected: _tabController.index == 0,
               ),
               PillTabButton(
-                text: 'Parse',
-                icon: Icons.auto_awesome,
+                text: 'Your Results',
+                icon: Icons.science,
                 isSelected: _tabController.index == 1,
               ),
+
               // PillTabButton(
               //   text: 'Explore',
               //   icon: Icons.explore,
@@ -151,8 +150,8 @@ class _ResultsTabsState extends State<ResultsTabs>
           child: TabBarView(
             controller: _tabController,
             children: [
-              UserResultsInterface(tabController: _tabController),
               ResultsParserInterface(),
+              UserResultsInterface(tabController: _tabController),
               // LabResultsSearchForm(),
             ],
           ),

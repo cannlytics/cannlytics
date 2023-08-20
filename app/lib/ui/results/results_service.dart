@@ -138,7 +138,17 @@ class COAParser extends AsyncNotifier<List<Map?>> {
         files: files,
         fileNames: fileNames,
       );
-      return items.cast<Map<dynamic, dynamic>?>();
+      if (items is Map) {
+        // handle it as a single map
+        return [items];
+      } else if (items is List<Map>) {
+        // handle it as a list of maps
+        return items;
+      } else {
+        // throw Exception("Unexpected type for items");
+        return items.cast<Map<dynamic, dynamic>?>();
+      }
+      // return items.cast<Map<dynamic, dynamic>?>();
     });
   }
 

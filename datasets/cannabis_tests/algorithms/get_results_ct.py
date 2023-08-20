@@ -226,7 +226,7 @@ def download_pdfs_ct(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-08-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Command line usage.

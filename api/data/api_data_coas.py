@@ -110,14 +110,13 @@ def api_data_coas(request, coa_id=None):
     """Get COA data (public API endpoint)."""
 
     # Authenticate the user.
-    public, throttle = True, True
     claims = authenticate_request(request)
+    uid = claims['uid'] if claims else 'cannlytics'
+
+    # Parameters.
+    public, throttle = True, True
     total_cost = 0
     all_prompts = []
-    if not claims:
-        uid = 'cannlytics'
-    else:
-        uid = claims['uid']
 
     # Log the user ID and their level of support.
     support_level = claims.get('support_level', 'free')
@@ -229,14 +228,12 @@ def api_data_coas(request, coa_id=None):
 
         # Get the user's number of tokens.
         user_subscription = get_document(f'subscribers/{uid}')
-        if not user_subscription:
-            current_tokens = 0
-        else:
-            current_tokens = user_subscription.get('tokens', 0)
+        current_tokens = user_subscription.get('tokens', 0) if user_subscription else 0
         if current_tokens < 1:
-            message = 'You have 0 Cannlytics AI tokens. You need 1 AI token per AI job. You can purchase more tokens at https://cannlytics.com/account/subscriptions.'
-            response = {'success': False, 'message': message}
-            return Response(response, status=402)
+            # message = 'You have 0 Cannlytics AI tokens. You need 1 AI token per AI job. You can purchase more tokens at https://cannlytics.com/account/subscriptions.'
+            # response = {'success': False, 'message': message}
+            # return Response(response, status=402)
+            print('USER HAS NO TOKENS. ALLOWING FOR TESTING.')
 
         # Get any user-posted data.
         try:
@@ -522,19 +519,15 @@ def download_coa_data(request):
     and save in a workbook."""
 
     # Authenticate the user, throttle requests if unauthenticated.
-    throttle = False
     claims = authenticate_request(request)
-    if not claims:
-        uid = 'cannlytics'
-        throttle = True
-    else:
-        uid = claims['uid']
+    uid = claims['uid'] if claims else 'cannlytics'
 
     # TODO: Allow the user to specify the Firestore query
     # that they want to download.
 
     # Read the posted data.
     data = loads(request.body.decode('utf-8'))['data']
+    print(f'USER {uid} POSTED OBSERVATIONS:', len(data))
     if len(data) > MAX_OBSERVATIONS_PER_FILE:
         message = f'Too many observations, please limit your request to {MAX_OBSERVATIONS_PER_FILE} observations at a time.'
         response = {'success': False, 'message': message}
@@ -563,6 +556,7 @@ def download_coa_data(request):
         source_file_name=temp.name,
         bucket_name=STORAGE_BUCKET
     )
+    print('UPLOADED FILE:', ref)
 
     # Get download and short URLs.
     download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
@@ -572,10 +566,12 @@ def download_coa_data(request):
         project_name=project_id
     )
     data = {
+        'filename': filename,
         'file_ref': ref,
         'download_url': download_url,
         'short_url': short_url,
     }
+    print('FILE DATA:', data)
 
     # Delete the temporary file and return the data.
     os.unlink(temp.name)

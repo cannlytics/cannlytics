@@ -79,9 +79,11 @@ class ResultsParserInterface extends HookConsumerWidget {
                         shrinkWrap: true,
                         children: [
                           for (final item in items)
-                            LabResultItem(
-                              labResult: LabResult.fromMap(item ?? {}),
-                            ),
+                            item?['sample_hash'] == null
+                                ? Container()
+                                : LabResultItem(
+                                    labResult: LabResult.fromMap(item ?? {}),
+                                  ),
                         ],
                       ),
                     ),

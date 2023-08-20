@@ -9,8 +9,10 @@
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 // Package imports:
 import 'package:shared_preferences/shared_preferences.dart';
@@ -108,14 +110,65 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
 
   /// Calculate the age and check if the user is old enough.
   void _calculateAgeAndCheck() async {
-    int day = int.parse(_dayController.text);
-    int month = int.parse(_monthController.text);
-    int year = int.parse(_yearController.text);
+    // Check if any date input fields are empty.
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+    if (_dayController.text.isEmpty ||
+        _monthController.text.isEmpty ||
+        _yearController.text.isEmpty) {
+      final snackBar = SnackBar(
+        content: Text('Please enter a valid birthdate.'),
+        duration: Duration(seconds: 2),
+        backgroundColor:
+            isDark ? DarkColors.darkOrange : LightColors.darkOrange,
+        showCloseIcon: true,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+
+    // Try to parse the user input into integers.
+    int day;
+    int month;
+    int year;
+    try {
+      day = int.parse(_dayController.text);
+      month = int.parse(_monthController.text);
+      year = int.parse(_yearController.text);
+    } catch (e) {
+      final snackBar = SnackBar(
+        content: Text('Please enter a valid birthdate.'),
+        duration: Duration(seconds: 2),
+        backgroundColor:
+            isDark ? DarkColors.darkOrange : LightColors.darkOrange,
+        showCloseIcon: true,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+
+    // If the user is old enough, close the dialog.
     DateTime birthDate = DateTime(year, month, day);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isOldEnough = DateTime.now().year - birthDate.year >= 21;
     await prefs.setBool('isOldEnough', isOldEnough);
-    setState(() {});
+    print("Stored isOldEnough: $isOldEnough");
+    if (isOldEnough) {
+      Navigator.of(context).pop();
+    } else {
+      final snackBar = SnackBar(
+        content: Text('You must be at least 21 years old to access this site.'),
+        duration: Duration(seconds: 2),
+        backgroundColor:
+            isDark ? DarkColors.darkOrange : LightColors.darkOrange,
+        showCloseIcon: true,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+
+    // Update the UI.
+    setState(() {
+      context.go('/');
+    });
   }
 
   /// Show the age verification dialog.

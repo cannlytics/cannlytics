@@ -16,11 +16,10 @@ import requests
 from dotenv import load_dotenv
 
 # API constants.
-DEV = 'http://127.0.0.1:8000/api/'
-BASE = 'https://api.cannlytics.com'
+BASE = 'https://cannlytics.com'
 
 
-def test_api_parse_coa_pdf(api_key: str, doc: str, base=DEV):
+def test_api_parse_coa_pdf(api_key: str, doc: str, base=BASE):
     """Test the API endpoint for parsing a COA PDF."""
     print('Testing:', doc)
     headers = {
@@ -29,7 +28,10 @@ def test_api_parse_coa_pdf(api_key: str, doc: str, base=DEV):
     url = urljoin(base, 'data/coas')
     with open(doc, 'rb') as pdf:
         files = {'file': pdf}
+        print('URL:', url)
         response = requests.post(url, files=files, headers=headers)
+        print(response.status_code)
+        print(response.text)
         if response.status_code == 200:
             data = response.json()['data']
             print('Successfully parsed PDF. Response data:', data)
@@ -40,7 +42,7 @@ def test_api_parse_coa_pdf(api_key: str, doc: str, base=DEV):
             return response.json()
 
 
-def test_api_parse_coa_image(api_key: str, doc: str, base=DEV):
+def test_api_parse_coa_image(api_key: str, doc: str, base=BASE):
     """Test the API endpoint for parsing a COA image."""
     print('Testing:', doc)
     headers = {
@@ -60,7 +62,7 @@ def test_api_parse_coa_image(api_key: str, doc: str, base=DEV):
             return response.json()
 
 
-def test_api_parse_coa_url(api_key: str, urls: list, base=DEV):
+def test_api_parse_coa_url(api_key: str, urls: list, base=BASE):
     """Test the API endpoint for parsing a COA URL."""
     print('Testing:', urls)
     headers = {
@@ -88,17 +90,38 @@ if __name__ == '__main__':
     load_dotenv('../../../.env')
     api_key = os.getenv('CANNLYTICS_API_KEY')
 
+    # Handle development and production environments.
+    DEV = True
+    if DEV:
+        BASE = 'http://127.0.0.1:8000/api/'
+
     # [✓] TEST: Parse a single COA PDF.
-    test_api_parse_coa_pdf(api_key, '../../assets/coas/acs/27675_0002407047.pdf')
+    test_api_parse_coa_pdf(
+        api_key,
+        doc='../../assets/coas/acs/27675_0002407047.pdf',
+        base=BASE,
+    )
 
     # [✓] TEST: Parse a single COA image.
-    test_api_parse_coa_image(api_key, '../../assets/qr-codes/0dC3ZxO.png')
+    test_api_parse_coa_image(
+        api_key,
+        doc='../../assets/qr-codes/0dC3ZxO.png',
+        base=BASE,
+    )
 
     # [✓] TEST: Parse a single COA URL.
-    test_api_parse_coa_url(api_key, ['https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTM3N181NzU5NDAwMDQwMzA0NTVfMDQxNzIwMjNfNjQzZDhiOTcyMzE1YQ=='])
+    test_api_parse_coa_url(
+        api_key,
+        ['https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTM3N181NzU5NDAwMDQwMzA0NTVfMDQxNzIwMjNfNjQzZDhiOTcyMzE1YQ=='],
+        base=BASE,
+    )
 
     # [✓] TEST: Parse a unidentified COA with AI!
-    test_api_parse_coa_pdf(api_key, '../../assets/coas/gtl/Pineapple-XX-5-13-2129146.pdf')
+    # test_api_parse_coa_pdf(
+    #     api_key,
+    #     doc='../../assets/coas/gtl/Pineapple-XX-5-13-2129146.pdf',
+    #     base=BASE,
+    # )
 
     # [ ] TEST: Query COAs.
 

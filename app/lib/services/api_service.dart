@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 8/6/2023
+// Updated: 8/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -147,7 +147,7 @@ class APIService {
 
     // Return the data.
     try {
-      var responseData = jsonDecode(response.body);
+      var responseData = jsonDecode(response.body) as Map<String, dynamic>;
       return responseData.containsKey('data')
           ? responseData['data']
           : responseData;

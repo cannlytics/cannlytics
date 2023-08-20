@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/17/2023
+Updated: 8/18/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -31,10 +31,10 @@ Description:
         ✓ New Jersey
         ✓ New York
         ✓ New Mexico (Requires Selenium) (FIXME)
-        ✓ Oregon (FIXME)
-        ✓ Rhode Island (FIXME)
-        ✓ Vermont (FIXME)
-        ✓ Washington (FIXME)
+        ✓ Oregon
+        ✓ Rhode Island
+        ✓ Vermont
+        ✓ Washington
 """
 # Standard imports.
 from datetime import datetime
@@ -63,13 +63,13 @@ ALGORITHMS = {
     # 'mo': 'get_licenses_mo',
     # 'mt': 'get_licenses_mt',
     # 'nj': 'get_licenses_nj',
-    # 'nm': 'get_licenses_nm',
-    'nv': 'get_licenses_nv',
-    'ny': 'get_licenses_ny',
-    'or': 'get_licenses_or',
-    'ri': 'get_licenses_ri',
-    'vt': 'get_licenses_vt',
-    'wa': 'get_licenses_wa',
+    'nm': 'get_licenses_nm',
+    # 'nv': 'get_licenses_nv',
+    # 'ny': 'get_licenses_ny',
+    # 'or': 'get_licenses_or',
+    # 'ri': 'get_licenses_ri',
+    # 'vt': 'get_licenses_vt',
+    # 'wa': 'get_licenses_wa',
     # Future:
     # 'va': 'get_licenses_va',
     # 'mn': 'get_licenses_mn',
@@ -91,7 +91,6 @@ ALGORITHMS = {
     # 'wv': 'get_licenses_wv'
 }
 
-
 def main(data_dir, env_file):
     """Collect all cannabis license data from states with permitted adult-use,
     dynamically importing modules and finding the entry point for each of the
@@ -103,29 +102,38 @@ def main(data_dir, env_file):
     manager = Cannlytics()
 
     # Add the state_modules directory to sys.path for dynamic imports
-    sys.path.append(os.path.join(os.getcwd()))
+    sys.path.append(os.getcwd())
 
     # Collect licenses for each state.
     for state, algorithm in ALGORITHMS.items():
 
         # Import the module and get the entry point.
-        module = importlib.import_module(f'{algorithm}')
+        module = importlib.import_module(algorithm)
         entry_point = getattr(module, algorithm)
 
         # Collect licenses for the state.
         # try:
         manager.create_log(f'Getting license data for {state.upper()}.')
         data = entry_point(data_dir, env_file=env_file)
-        if not os.path.exists(f'{data_dir}/{state}'):
-            os.makedirs(f'{data_dir}/{state}')
-        data.to_csv(f'{data_dir}/{state}/licenses-{state}-{date}.csv', index=False)
+        
+        state_data_dir = os.path.join(data_dir, state)
+        if not os.path.exists(state_data_dir):
+            os.makedirs(state_data_dir)
+        
+        state_data_file = os.path.join(state_data_dir, f'licenses-{state}-{date}.csv')
+        data.to_csv(state_data_file, index=False)
         manager.create_log(f'Collected {state.upper()} licenses.')
         licenses = pd.concat([licenses, data])
         # except:
         #     manager.create_log(f'Failed to aggregate {state.upper()} licenses.')
 
     # Save all of the retailers.
-    licenses.to_csv(f'{data_dir}/all/licenses-{date}.csv', index=False)
+    all_data_dir = os.path.join(data_dir, 'all')
+    if not os.path.exists(all_data_dir):
+        os.makedirs(all_data_dir)
+    
+    all_data_file = os.path.join(all_data_dir, f'licenses-{date}.csv')
+    licenses.to_csv(all_data_file, index=False)
     manager.create_log(f'Finished collecting licenses data.')
     return licenses
 
@@ -143,7 +151,7 @@ if __name__ == '__main__':
         arg_parser.add_argument('--env', dest='env_file', type=str)
         args = arg_parser.parse_args()
     except SystemExit:
-        args = {'d': '../data/all', 'env_file': '../../../.env'}
+        args = {'d': '../data', 'env_file': '../../../.env'}
 
     # Get arguments.
     data_dir = args.get('d', args.get('data_dir'))

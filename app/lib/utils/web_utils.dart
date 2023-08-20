@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 8/6/2023
-// Updated: 8/6/2023
+// Updated: 8/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 import 'dart:html' as html if (dart.library.io) 'dart:io';
@@ -25,7 +25,7 @@ class MobileUtils implements PlatformFileUtils {
 class WebUtils implements PlatformFileUtils {
   /// Download a file from a URL.
   @override
-  void downloadUrl(String url, String filename) {
+  void downloadUrl(String url, String? filename) {
     html.AnchorElement anchorElement = new html.AnchorElement(href: url);
     anchorElement.download = url;
     anchorElement.click();

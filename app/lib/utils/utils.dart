@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/22/2023
-// Updated: 8/6/2023
+// Updated: 8/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -26,6 +26,12 @@ import 'package:intl/intl.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
 
+class PlatformChecker {
+  bool get isAndroid => !kIsWeb && Platform.isAndroid;
+  bool get isIOS => !kIsWeb && Platform.isIOS;
+  bool get isWeb => kIsWeb;
+}
+
 // File utility class that will work for web and mobile platforms.
 abstract class PlatformFileUtils {
   void downloadUrl(String url, String filename);
@@ -33,8 +39,13 @@ abstract class PlatformFileUtils {
 }
 
 /// Utility functions for the file system.
-PlatformFileUtils FileUtils =
-    Platform.isAndroid || Platform.isIOS ? MobileUtils() : WebUtils();
+final platformChecker = PlatformChecker();
+
+PlatformFileUtils FileUtils = platformChecker.isWeb
+    ? WebUtils()
+    : (platformChecker.isAndroid || platformChecker.isIOS
+        ? MobileUtils()
+        : throw UnsupportedError('Unsupported platform'));
 
 /// Utility functions for the interface.
 class InterfaceUtils {

@@ -65,9 +65,9 @@ urlpatterns = [
     path('data/market/<dataset_id>', market.DatasetView.as_view(), name='dataset'),
     path('testing', include([
         path('', testing.TestingView.as_view(), name='testing'),
-        path('/labs', testing.TestingView.as_view(), name='labs'),
-        path('/labs/new', testing.NewLabView.as_view(), name='new-lab'),
-        path('/labs/<lab>', testing.LabView.as_view(), name='lab'),
+        path('labs', testing.TestingView.as_view(), name='labs'),
+        path('labs/new', testing.NewLabView.as_view(), name='new-lab'),
+        path('labs/<lab>', testing.LabView.as_view(), name='lab'),
         # TODO: Add regulation and analysis specific pages.
         # path('/analyses', testing.TestingView.as_view(), name='analyses'),
         # path('/analyses/<analysis_id>', testing.TestingView.as_view(), name='analysis'),
@@ -85,6 +85,7 @@ urlpatterns = [
     path('<page>/<section>', main.GeneralView.as_view(), name='section'),
     path('<page>/<section>/<str:unit>', main.GeneralView.as_view(), name='unit'),
     path('.well-known/ai-plugin.json', read_file),
+    path('None', main.GeneralView.as_view()),
 ]
 
 

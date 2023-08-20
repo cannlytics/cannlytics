@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/11/2023
-// Updated: 8/6/2023
+// Updated: 8/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -57,7 +57,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     with SingleTickerProviderStateMixin {
   // State.
   bool _isEditing = false;
-  static const int _initialPage = 1;
+  // static const int _initialPage = 1;
   late PdfController _pdfController;
   late String _pdfUrl;
   late final TabController _tabController;
@@ -107,8 +107,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
         } else {
           _pdfUrl = labResult?.labResultsUrl ?? '';
         }
-        if (_pdfUrl.isNotEmpty && _pdfController.document == null) {
+        if (_pdfUrl.isNotEmpty) {
           // FIXME:
+          // && _pdfController.document == null
           // _pdfController = PdfController(
           //   document: PdfDocument.openData(InternetFile.get(_pdfUrl)),
           //   initialPage: _initialPage,
