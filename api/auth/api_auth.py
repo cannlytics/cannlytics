@@ -63,6 +63,8 @@ def create_api_key(request, *args, **argv):
         (JsonResponse): A JSON response containing the API key in an
             `api_key` field.
     """
+    # FIXME: This endpoint is throwing a 403 error.
+
     # Authenticate the user.
     try:
         user_claims = authenticate_request(request)

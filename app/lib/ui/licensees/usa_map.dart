@@ -197,7 +197,7 @@ class _InteractiveMapState extends ConsumerState<InteractiveMap>
             }
             String stateId = stateData.id.toLowerCase();
             ref.read(activeStateProvider.notifier).state = stateId;
-            context.push('/licenses/$stateId');
+            context.go('/licenses/$stateId');
           },
 
           // Optional: Label.

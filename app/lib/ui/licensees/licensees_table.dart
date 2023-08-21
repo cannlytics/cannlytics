@@ -96,7 +96,7 @@ class LicenseesTable extends ConsumerWidget {
       description:
           'Either there are no active licenses in this state or the data has not yet been populated.\nPlease contact dev@cannlytics.com to get a person on this ASAP.',
       onTap: () {
-        context.push('/licenses');
+        context.go('/licenses');
       },
     );
   }
@@ -109,7 +109,7 @@ class LicenseesTable extends ConsumerWidget {
       description:
           'Either there are no active licenses in this state or the data has not yet been populated.\nPlease contact dev@cannlytics.com to get a person on this ASAP.',
       onTap: () {
-        context.push('/licenses');
+        context.go('/licenses');
       },
     );
   }
@@ -360,8 +360,8 @@ class LicenseesTable extends ConsumerWidget {
                   // Menu selection function.
                   onSuggestionSelected: (Licensee? suggestion) {
                     // Navigate to the licenses page on selection.
-                    context.push(
-                        '/licenses/$stateId/${suggestion!.licenseNumber}');
+                    context
+                        .go('/licenses/$stateId/${suggestion!.licenseNumber}');
                   },
 
                   // Loading indicator.

@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 1/5/2021
-Updated: 7/6/2023
+Updated: 8/20/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Django settings powered by environment variables and
@@ -130,10 +130,13 @@ MIDDLEWARE = [
     # f'{PROJECT_NAME}.core.middleware.open_access_middleware',
     "corsheaders.middleware.CorsMiddleware",
     f'{PROJECT_NAME}.core.middleware.AppendOrRemoveSlashMiddleware',
+    f'{PROJECT_NAME}.core.middleware.BlockUserAgentsMiddleware',
 ]
 
 # Allow CORS from the following domains.
 CORS_ALLOWED_ORIGIN_REGEXES = [
+    # FIXME: Having CORS errors when accessing the API from the app.
+    '*',
     r"^https://\w+\.cannlytics\.com$",
 ]
 

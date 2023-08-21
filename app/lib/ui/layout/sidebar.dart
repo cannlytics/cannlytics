@@ -67,7 +67,7 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/house_with_garden.svg',
             width: 28,
           ),
-          onTap: () => context.push('/'),
+          onTap: () => context.go('/'),
         ),
 
         // Licensees link.
@@ -77,7 +77,7 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/dispensary-plain.svg',
             width: 28,
           ),
-          onTap: () => context.push('/licenses'),
+          onTap: () => context.go('/licenses'),
           isSelected: currentRoute.contains('/licenses'),
         ),
 
@@ -88,7 +88,7 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/microscope.svg',
             width: 28,
           ),
-          onTap: () => context.push('/results'),
+          onTap: () => context.go('/results'),
           isSelected: currentRoute.contains('/results'),
         ),
 
@@ -99,7 +99,7 @@ class SideMenu extends ConsumerWidget {
             'assets/icons/emoji/money_bag.svg',
             width: 28,
           ),
-          onTap: () => context.push('/sales'),
+          onTap: () => context.go('/sales'),
           isSelected: currentRoute.contains('/sales'),
         ),
 
@@ -110,7 +110,7 @@ class SideMenu extends ConsumerWidget {
             'assets/images/ai-icons/cannabis-leaf.svg',
             width: 28,
           ),
-          onTap: () => context.push('/strains'),
+          onTap: () => context.go('/strains'),
           isSelected: currentRoute.contains('/strains'),
         ),
 
@@ -125,7 +125,7 @@ class SideMenu extends ConsumerWidget {
               'assets/icons/emoji/glowing_star.svg',
               width: 28,
             ),
-            onTap: () => context.push('/account?upgrade=true'),
+            onTap: () => context.go('/account?upgrade=true'),
           ),
 
         // Settings link.
@@ -136,7 +136,7 @@ class SideMenu extends ConsumerWidget {
               'assets/icons/emoji/gear.svg',
               width: 28,
             ),
-            onTap: () => context.push('/account'),
+            onTap: () => context.go('/account'),
             isSelected: currentRoute.contains('/account'),
           ),
 

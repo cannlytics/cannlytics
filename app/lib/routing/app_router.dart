@@ -39,8 +39,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // DEV: If you need to reset the age verification, uncomment the following lines.
       // SharedPreferences preferences = await SharedPreferences.getInstance();
       // await preferences.clear();
-      print("Current URI: ${state.uri.toString()}");
-      print("Is old enough: $isOldEnough");
       if (state.uri.toString() == '/age-verification' && isOldEnough == true) {
         return '/'; // Redirect to home if user is old enough and on age-verification screen.
       } else if (isOldEnough == null || !isOldEnough) {

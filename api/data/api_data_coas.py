@@ -481,8 +481,9 @@ def api_data_coas(request, coa_id=None):
             update_documents(refs, docs)
 
         # Return any extracted data.
-        response = {'success': True, 'data': parsed_data}
-        return Response(response, status=200)
+        response = Response({'success': True, 'data': parsed_data}, status=200)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
     
     # Return the data.
     if request.method == 'DELETE':
@@ -573,7 +574,10 @@ def download_coa_data(request):
     }
     print('FILE DATA:', data)
 
-    # Delete the temporary file and return the data.
+    # Delete the temporary file.
     os.unlink(temp.name)
-    response = {'success': True, 'data': data}
-    return Response(response, status=200)
+
+    # Return the data.
+    response = Response({'success': True, 'data': data}, status=200)
+    response['Access-Control-Allow-Origin'] = '*'
+    return response

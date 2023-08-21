@@ -3,7 +3,7 @@
 <!--
   Age verification and cookie notification
   Created: 7/3/2023
-  Updated: 7/4/2023
+  Updated: 8/20/2023
 -->
 {% load icon %}
 <div class="modal" id="age-verification" tabindex="-1" style="display: none;">
@@ -24,12 +24,14 @@
           </div>
 
           <!-- Birthdate input -->
-          <h6 class="h6 serif text-start">Confirm your birthdate here:</h6>
-          <input
-            id="birthdate"
-            type="date"
-            class="form-control mb-3 serif"
-          >
+          <p class="text-start mt-2 mb-2">Confirm your birthdate here:</p>
+          <div>
+            <input
+              id="birthdate"
+              type="date"
+              class="form-control mb-3 serif"
+            >
+          </div>
 
           <!-- Message -->
           <p class="text-start mt-0">
@@ -40,22 +42,24 @@
           </p>
 
           <!-- Actions -->
-          {% comment %} <div class="d-flex justify-content-end mt-3">
+          <div class="d-flex justify-content-end mt-3">
             <button
               type="button"
-              class="btn btn-sm-light btn-md-light btn-set-width text-dark serif me-2"
+              class="btn btn-sm-light btn-md-light text-dark serif me-2"
               onclick="cannlytics.website.rejectAgeCheck();"
             >
-              No
+              No, not today
             </button>
             <button
+              id="accept-age-verification-button"
               type="button"
-              class="btn btn-sm btn-set-width bg-gradient-green text-white serif"
+              class="btn btn-sm bg-gradient-green text-white serif"
               onclick="cannlytics.website.acceptAgeCheck();"
+              disabled="true"
             >
-              Yes
+              Yes, I'm 21+
             </button>
-          </div> {% endcomment %}
+          </div>
 
         </div>
       </div>

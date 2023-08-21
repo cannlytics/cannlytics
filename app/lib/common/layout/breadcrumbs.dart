@@ -90,7 +90,7 @@ class BreadcrumbsRow extends StatelessWidget {
                 title: item['label']!,
                 onTap: item['path'] != null
                     ? () {
-                        context.push(item['path']!);
+                        context.go(item['path']!);
                       }
                     : null,
               );

@@ -21,8 +21,8 @@ class APIService {
 
   // Define the base URL.
   // FIXME: Smoothly switch between dev and production.
-  static String _baseUrl = 'http://127.0.0.1:8000/api';
-  // static String _baseUrl = 'https://cannlytics.com/api';
+  // static String _baseUrl = 'http://127.0.0.1:8000/api';
+  static String _baseUrl = 'https://cannlytics.com/api';
 
   /// Initialize the API service.
   static void initialize() {

@@ -26,6 +26,7 @@ class GeneralView(BaseMixin, TemplateView):
         """Get the context for a page."""
         context = super().get_context_data(**kwargs)
         context = get_page_docs(self.request, context)
+        print("Accessed from: %s", self.request.META.get('HTTP_REFERER'))
         return context
 
 

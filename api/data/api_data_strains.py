@@ -50,7 +50,7 @@ DEFAULT_DESCRIPTION_INSTRUCTIONS = 'Please be as scientific as possible and avoi
 DEFAULT_TEMPERATURE = 0.42
 
 # Default word count for generating strain descriptions.
-DEFAULT_WORD_COUNT = 200
+DEFAULT_WORD_COUNT = 100
 
 
 @api_view(['GET', 'POST'])

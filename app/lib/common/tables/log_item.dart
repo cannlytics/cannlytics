@@ -43,7 +43,7 @@ class LogItem extends StatelessWidget {
                   borderRadius: BorderRadius.circular(50),
                   onTap: () {
                     if (log['user'] == null) return;
-                    context.push('/users/${log['user']}');
+                    context.go('/users/${log['user']}');
                   },
                   child: CircleAvatar(
                     radius: 28,

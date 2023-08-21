@@ -139,7 +139,7 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
     /// Cancel edit.
     void _cancelEdit() {
       if (widget.strainId == 'new') {
-        context.push('/strains');
+        context.go('/strains');
       }
       setState(() {
         _isEditing = !_isEditing;

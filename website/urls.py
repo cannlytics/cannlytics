@@ -85,7 +85,6 @@ urlpatterns = [
     path('<page>/<section>', main.GeneralView.as_view(), name='section'),
     path('<page>/<section>/<str:unit>', main.GeneralView.as_view(), name='unit'),
     path('.well-known/ai-plugin.json', read_file),
-    path('None', main.GeneralView.as_view()),
 ]
 
 

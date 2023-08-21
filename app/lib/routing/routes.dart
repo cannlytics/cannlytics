@@ -48,7 +48,7 @@ class Routes {
       path: '/users/:uid',
       builder: (context, state) {
         return UserProfileScreen(
-          uid: state.uri.queryParameters['uid']!,
+          uid: state.pathParameters['uid']!,
         );
       },
     ),
@@ -75,8 +75,7 @@ class Routes {
       name: 'state_licenses',
       useFade: true,
       builder: (context, state) {
-        return StateLicensesScreen(
-            stateId: state.uri.queryParameters['state_id']!);
+        return StateLicensesScreen(stateId: state.pathParameters['state_id']!);
       },
     ),
 
@@ -85,8 +84,8 @@ class Routes {
       path: '/licenses/:state_id/:license_number',
       builder: (context, state) {
         return LicenseeScreen(
-          stateId: state.uri.queryParameters['state_id']!,
-          licenseeId: state.uri.queryParameters['license_number']!,
+          stateId: state.pathParameters['state_id']!,
+          licenseeId: state.pathParameters['license_number']!,
         );
       },
     ),
@@ -103,7 +102,7 @@ class Routes {
           path: ':hash',
           name: 'strain',
           builder: (context, state) {
-            return StrainScreen(strainId: state.uri.queryParameters['hash']!);
+            return StrainScreen(strainId: state.pathParameters['hash']);
           },
         ),
       ],
@@ -121,8 +120,7 @@ class Routes {
           path: ':hash',
           name: 'result',
           builder: (context, state) {
-            return ResultScreen(
-                labResultId: state.uri.queryParameters['hash']!);
+            return ResultScreen(labResultId: state.pathParameters['hash']!);
           },
         ),
       ],
@@ -140,8 +138,7 @@ class Routes {
           path: ':hash',
           name: 'receipt',
           builder: (context, state) {
-            return ReceiptScreen(
-                salesReceiptId: state.uri.queryParameters['hash']!);
+            return ReceiptScreen(salesReceiptId: state.pathParameters['hash']!);
           },
         ),
       ],

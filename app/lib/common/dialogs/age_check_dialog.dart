@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 7/3/2023
-// Updated: 7/3/2023
+// Updated: 8/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 // License: MIT License <https://github.com/bizz84/code_with_andrea_flutter/blob/main/LICENSE.md>
 
@@ -35,22 +35,18 @@ class AgeVerificationScreen extends StatelessWidget {
   }
 }
 
-/// A dialog that asks the user if they are old enough to access the site.
+/// Age verification dialog.
 class AgeCheckDialog extends StatefulWidget {
   @override
   _AgeCheckDialogState createState() => _AgeCheckDialogState();
 }
 
+/// Age verification dialog state.
 class _AgeCheckDialogState extends State<AgeCheckDialog> {
-  // State.
-  // DateTime? _selectedDate;
-  // bool _isOldEnough = false;
+  // Controllers.
   final TextEditingController _monthController = TextEditingController();
   final TextEditingController _dayController = TextEditingController();
   final TextEditingController _yearController = TextEditingController();
-  // final monthFocus = FocusNode();
-  // final dayFocus = FocusNode();
-  // final yearFocus = FocusNode();
 
   // Initialization.
   @override
@@ -58,20 +54,6 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
     super.initState();
     // Check if the user has already confirmed their age.
     _checkAge();
-
-    // // Add listener to month controller
-    // _monthController.addListener(() {
-    //   if (_monthController.text.length == 2) {
-    //     FocusScope.of(context).requestFocus(dayFocus);
-    //   }
-    // });
-
-    // // Add listener to day controller
-    // _dayController.addListener(() {
-    //   if (_dayController.text.length == 2) {
-    //     FocusScope.of(context).requestFocus(yearFocus);
-    //   }
-    // });
   }
 
   // Dispose controllers.
@@ -91,22 +73,6 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
       _showDialog();
     }
   }
-
-  // /// Select the date and check the age.
-  // Future<void> _selectDateAndCheckAge() async {
-  //   final DateTime? picked = await showDatePicker(
-  //     context: context,
-  //     initialDate: DateTime.now(),
-  //     firstDate: DateTime(1900),
-  //     lastDate: DateTime.now(),
-  //   );
-  //   if (picked != null && picked != _selectedDate) {
-  //     setState(() {
-  //       _selectedDate = picked;
-  //       _isOldEnough = DateTime.now().year - _selectedDate!.year >= 21;
-  //     });
-  //   }
-  // }
 
   /// Calculate the age and check if the user is old enough.
   void _calculateAgeAndCheck() async {
@@ -151,7 +117,6 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isOldEnough = DateTime.now().year - birthDate.year >= 21;
     await prefs.setBool('isOldEnough', isOldEnough);
-    print("Stored isOldEnough: $isOldEnough");
     if (isOldEnough) {
       Navigator.of(context).pop();
     } else {
@@ -239,6 +204,9 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
                             controller: _yearController,
                             decoration: InputDecoration(hintText: 'YYYY'),
                             keyboardType: TextInputType.number,
+                            onFieldSubmitted: (value) {
+                              _calculateAgeAndCheck();
+                            },
                             // focusNode: yearFocus,
                           ),
                         ),
@@ -298,7 +266,7 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
               actions: <Widget>[
                 // Reject button.
                 SecondaryButton(
-                  text: 'No',
+                  text: 'No, not today',
                   onPressed: () async {
                     SharedPreferences prefs =
                         await SharedPreferences.getInstance();
@@ -313,10 +281,8 @@ class _AgeCheckDialogState extends State<AgeCheckDialog> {
 
                 // Accept button.
                 PrimaryButton(
-                  text: 'Yes',
-                  onPressed: () async {
-                    _calculateAgeAndCheck();
-                  },
+                  text: "Yes, I'm 21+",
+                  onPressed: _calculateAgeAndCheck,
                 ),
               ],
             );

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/13/2023
-// Updated: 7/3/2023
+// Updated: 8/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -190,8 +190,6 @@ final keywordsQuery = StateProvider<Query<LabResult>>((ref) {
   // Get a list of keywords from the search term.
   String searchTerm = ref.watch(resultsSearchTerm);
   List<String> keywords = searchTerm.toLowerCase().split(' ');
-  print('KEYWORDS:');
-  print(keywords);
 
   // Query by keywords.
   return FirebaseFirestore.instance

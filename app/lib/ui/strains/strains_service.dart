@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 7/14/2023
+// Updated: 8/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO:
@@ -124,10 +124,10 @@ final userFavoriteStrains = StateProvider.family<Query<Strain>, String>((
 /* === Data === */
 
 /// Stream a strain from Firebase.
+/// FIXME: Move to hashes of the strain name.
 final strainProvider =
     StreamProvider.autoDispose.family<Strain?, String>((ref, id) {
   final _database = ref.watch(firestoreProvider);
-  // FIXME: Move to hashes of the strain name.
   String strainId = Uri.decodeComponent(id);
   return _database.streamDocument(
     path: 'public/data/strains/$strainId',
@@ -245,7 +245,7 @@ class StrainService {
           // 'stats': stats,
           // 'model': model,
           // 'max_tokens': maxTokens,
-          'word_count': wordCount ?? 200,
+          'word_count': wordCount ?? 100,
           'temperature': temperature ?? 0.42,
         },
       );

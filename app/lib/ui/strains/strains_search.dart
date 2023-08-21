@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/30/2023
-// Updated: 7/13/2023
+// Updated: 8/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // TODO:
@@ -13,7 +13,7 @@
 // - avg cannabinoids and terpenes | ratios
 
 // Flutter imports:
-import 'package:cannlytics_data/common/buttons/primary_button.dart';
+// import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -241,11 +241,13 @@ class StrainsSearch extends HookConsumerWidget {
                   'Search strains',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                PrimaryButton(
-                    text: 'Submit a strain',
-                    onPressed: () {
-                      context.push('/strains/new');
-                    }),
+                // FIXME: Implement.
+                // PrimaryButton(
+                //   text: 'Submit a strain',
+                //   onPressed: () {
+                //     context.go('/strains/new');
+                //   },
+                // ),
               ],
             ),
           ),
@@ -292,7 +294,7 @@ class StrainListItem extends StatelessWidget {
           // FIXME: Prefer to use hash. Use URL safe strain.name for now.
           // var strainHash = DataUtils.createHash(strain.name, privateKey: '');
           String strainId = Uri.encodeComponent(strain.name);
-          context.push('/strains/$strainId');
+          context.go('/strains/$strainId');
         },
         child: Container(
           margin: EdgeInsets.all(0),

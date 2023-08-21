@@ -20,7 +20,7 @@ class DownloadService {
     List<Map<dynamic, dynamic>?> data,
     String url,
   ) async {
-    var response = await APIService.apiRequest(
+    Map response = await APIService.apiRequest(
       url,
       data: {'data': data},
     );

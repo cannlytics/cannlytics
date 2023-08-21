@@ -3,14 +3,14 @@
   <!--
     Hero | Cannlytics Website
     Created: 1/5/2021
-    Updated: 5/28/2023
+    Updated: 8/20/2023
   -->
   {% load static %}
   <div class="position-relative overflow-hidden text-lg-start pb-3"
     style="
     background-image: url({{ hero.image }});
-    background-size:contain;
-    background-position:bottom right;
+    background-size:cover;
+    background-position:top right;
     background-repeat: no-repeat;
     background-color: #101013ff;"
   >
@@ -18,18 +18,19 @@
 
     <!-- Hero Text -->
     <div class="d-flex mt-auto justify-content-start flex-wrap-reverse mx-5">
-      <div class="col-lg-5 mt-4 px-3 px-lg-0" style="z-index:1001;">
+      
+      <div class="col-lg-5 card card-opaque mt-4 px-3 py-3" style="z-index:1001;">
         
         <!-- Title -->
-        <h1 class="display-4 fw-bold text-white light-only">
+        <h1 class="display-4 fw-bold text-dark light-only">
           {{ hero.title | safe }}
         </h1>
-        <h1 class="display-4 fw-bold text-white dark-only">
+        <h1 class="display-4 fw-bold text-dark dark-only">
           {{ hero.title | safe }}
         </h1>
         
         <!-- Message -->
-        <p class="text-white mt-2 mb-3" style="max-width:540px;">
+        <p class="text-dark mt-2 mb-3" style="max-width:540px;">
           {{ hero.message }}
         </p>
   

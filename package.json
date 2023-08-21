@@ -31,6 +31,8 @@
   },
   "private": true,
   "scripts": {
+    "app:web": "cd app & flutter run -d chrome --web-browser-flag '--disable-web-security' & cd ../",
+    "app:publish": "cd app & flutter build web --dart-define=PRODUCTION=true & firebase deploy --project cannlytics --only hosting:app & cd ../",
     "metrc": "cd metrc & flutter run --no-sound-null-safety & cd ../",
     "metrc:lint": "cd metrc & flutter pub run import_sorter:main & cd ../",
     "metrc:web": "cd metrc & flutter run -d chrome --web-browser-flag '--disable-web-security' & cd ../",
@@ -52,8 +54,6 @@
     "console:deploy": "firebase deploy --project cannlytics --only hosting:console",
     "console:docker": "docker build . --tag gcr.io/cannlytics/cannlytics-console:latest & docker push gcr.io/cannlytics/cannlytics-console:latest",
     "console:publish": "npm run console:build & npm run console:docker & npm run console:run & npm run console:deploy",
-    "app:web": "cd app & flutter run -d chrome --web-browser-flag '--disable-web-security' & cd ../",
-    "app:publish": "cd app & flutter build web --dart-define=PRODUCTION=true & firebase deploy --project cannlytics --only hosting:app & cd ../",
     "docs:install": "docker pull squidfunk/mkdocs-material & docker build -t squidfunk/mkdocs-material docs",
     "docs:build": "mkdocs build",
     "docs:serve": "mkdocs serve",
@@ -66,7 +66,7 @@
     "website:build": "cd website & webpack --env production & cd ../",
     "website:collectstatic": "set PROJECT=website & echo yes|python manage.py collectstatic",
     "website:container": "npm run website:collectstatic --noinput & gcloud builds submit --tag gcr.io/cannlytics/cannlytics-website",
-    "website:run": "gcloud run deploy cannlytics-website --image=gcr.io/cannlytics/cannlytics-website --set-env-vars=SETTINGS_NAME=cannlytics_platform_settings --region=us-central1 --allow-unauthenticated --platform=managed --memory=2Gi --cpu=2 --min-instances=1 --max-instances=99 --no-use-http2",
+    "website:run": "gcloud run deploy cannlytics-website --image=gcr.io/cannlytics/cannlytics-website --set-env-vars=SETTINGS_NAME=cannlytics_platform_settings --region=us-central1 --allow-unauthenticated --platform=managed --memory=4Gi --cpu=2 --min-instances=1 --max-instances=99 --no-use-http2",
     "website:deploy": "firebase deploy --project cannlytics --only hosting:cannlytics",
     "website:docker": "docker build . --tag gcr.io/cannlytics/cannlytics-website:latest & docker push gcr.io/cannlytics/cannlytics-website:latest",
     "website:publish": "conda activate cds & npm run website:build & npm run website:collectstatic & npm run website:docker & npm run website:run & npm run website:deploy"

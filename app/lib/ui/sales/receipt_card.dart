@@ -63,7 +63,7 @@ class ReceiptCard extends StatelessWidget {
                       child: MouseRegion(
                         cursor: SystemMouseCursors.click,
                         child: GestureDetector(
-                          onTap: () => context.push('/sales/${item.hash}'),
+                          onTap: () => context.go('/sales/${item.hash}'),
                           child: Image.network(
                             item.downloadUrl!,
                             height: (screenWidth < 720) ? 64 : 128,
@@ -82,7 +82,7 @@ class ReceiptCard extends StatelessWidget {
                     onSelected: (String result) {
                       switch (result) {
                         case 'View':
-                          context.push('/sales/${item.hash}');
+                          context.go('/sales/${item.hash}');
                           break;
                         case 'Download':
                           onDownload!();

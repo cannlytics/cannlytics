@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 12/3/2020
- * Updated: 8/19/2023
+ * Updated: 8/20/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { checkGoogleLogIn, onAuthChange } from '../firebase.js';
@@ -39,11 +39,13 @@ export const website = {
           document.getElementById('user-photo').src = robohash;
         }
         this.toggleAuthenticatedMaterial(true);
+        console.log('Request to /src/auth/login');
         await authRequest('/src/auth/login');
         if (user.metadata.createdAt == user.metadata.lastLoginAt) {
           const { email } = user;
           const defaultPhoto = `${window.location.origin}/robohash/${user.email}/?width=60&height=60`;
           const data = { email, photo_url: defaultPhoto };
+          console.log('Request to /api/users');
           await apiRequest('/api/users', data);
         }
       } else {
@@ -91,10 +93,13 @@ export const website = {
       modal.style.opacity = 1;
       const birthdateInput = document.getElementById('birthdate');
       birthdateInput.addEventListener('change', (event) => {
+        console.log('event.target.value', event.target.value);
         if (cannlytics.website.verifyAge(event.target.value)) {
-          document.getElementById('proceed-btn').disabled = false;
+          document.getElementById('accept-age-verification-button').disabled = false;
+          console.log('age verified');
         } else {
-          document.getElementById('proceed-btn').disabled = true;
+          document.getElementById('accept-age-verification-button').disabled = true;
+          console.log('age not verified');
         }
       });
     }
@@ -105,8 +110,10 @@ export const website = {
      * Determines if the provided birthdate is for someone 21 years or older.
      */
     const birthdate = new Date(date);
+    const year = birthdate.getFullYear();
+    if (year < 1900 || year > 2099) return false;
     const currentTime = new Date();
-    const age = currentTime.getFullYear() - birthdate.getFullYear();
+    let age = currentTime.getFullYear() - birthdate.getFullYear();
     const m = currentTime.getMonth() - birthdate.getMonth();
     if (m < 0 || (m === 0 && currentTime.getDate() < birthdate.getDate())) {
       age--;
@@ -210,6 +217,7 @@ async function checkForCredentials() {
    */
   try {
     await checkGoogleLogIn();
+    console.log('Request to /src/auth/login');
     await authRequest('/src/auth/login');
   } catch(error) {
     // No Google sign-in token.

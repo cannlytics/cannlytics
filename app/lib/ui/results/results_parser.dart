@@ -39,56 +39,49 @@ class ResultsParserInterface extends HookConsumerWidget {
       // Data loaded state.
       data: (items) => (items.length == 0)
           ? _body(context, ref, child: CoAUpload())
-          : Card(
-              margin: EdgeInsets.all(0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    // Title.
-                    Row(
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  // Title.
+                  Row(
+                    children: [
+                      Text(
+                        'Parsed lab results',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      Spacer(),
+                      IconButton(
+                        icon: Icon(
+                          Icons.refresh,
+                          color: Theme.of(context).textTheme.bodyMedium!.color,
+                        ),
+                        onPressed: () {
+                          ref.read(coaParser.notifier).clear();
+                        },
+                      ),
+                    ],
+                  ),
+                  gapH16,
+
+                  // List of parsed lab results.
+                  Expanded(
+                    child: ListView(
+                      shrinkWrap: true,
                       children: [
-                        Text(
-                          'Parsed lab results',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        Spacer(),
-                        IconButton(
-                          icon: Icon(
-                            Icons.refresh,
-                            color:
-                                Theme.of(context).textTheme.bodyMedium!.color,
-                          ),
-                          onPressed: () {
-                            ref.read(coaParser.notifier).clear();
-                          },
-                        ),
+                        for (final item in items)
+                          item?['sample_hash'] == null
+                              ? Container()
+                              : LabResultItem(
+                                  labResult: LabResult.fromMap(item ?? {}),
+                                ),
                       ],
                     ),
-                    gapH16,
-
-                    // List of parsed lab results.
-                    Expanded(
-                      child: ListView(
-                        shrinkWrap: true,
-                        children: [
-                          for (final item in items)
-                            item?['sample_hash'] == null
-                                ? Container()
-                                : LabResultItem(
-                                    labResult: LabResult.fromMap(item ?? {}),
-                                  ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 

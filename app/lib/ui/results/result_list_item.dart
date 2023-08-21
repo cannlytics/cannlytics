@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/23/2023
-// Updated: 8/6/2023
+// Updated: 8/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -32,10 +32,39 @@ class LabResultItem extends StatelessWidget {
   Widget build(BuildContext context) {
     // Style and theme.
     final screenWidth = MediaQuery.of(context).size.width;
-    bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    print('Building list item:');
-    print(labResult.toMap());
+    // Download logic.
+    void handleDownload(BuildContext context, LabResult labResult) {
+      // Handle malformed results.
+      var data = labResult.toMap();
+      if (data['results'] == null) {
+        data['results'] = [];
+      }
+
+      // Determine if the theme is dark
+      bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+      // Show a downloading notification.
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Preparing your download...',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
+          showCloseIcon: true,
+        ),
+      );
+
+      // Download the data.
+      DownloadService.downloadData(
+        [data],
+        '/api/data/coas/download',
+      );
+    }
+
+    // Render.
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 24),
       elevation: 2,
@@ -66,53 +95,28 @@ class LabResultItem extends StatelessWidget {
                   ),
 
                 // Download COA data.
-                GestureDetector(
-                  onTap: () {
-                    // Handle malformed results.
-                    var data = labResult.toMap();
-                    if (data['results'] == null) {
-                      data['results'] = [];
-                    }
-
-                    // Show a downloading notification.
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Preparing your download...',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        duration: Duration(seconds: 2),
-                        backgroundColor:
-                            isDark ? DarkColors.green : LightColors.lightGreen,
-                        showCloseIcon: true,
-                      ),
-                    );
-
-                    // Download the data.
-                    DownloadService.downloadData(
-                      [data],
-                      '/api/data/coas/download',
-                    );
-                  },
-                  child: Icon(
+                Spacer(),
+                IconButton(
+                  icon: Icon(
                     Icons.download_sharp,
-                    color: Theme.of(context).textTheme.labelMedium!.color,
-                    size: 16,
+                    color: Theme.of(context).textTheme.bodyMedium!.color,
                   ),
+                  onPressed: () {
+                    handleDownload(context, labResult);
+                  },
                 ),
 
                 // Open COA URL link.
                 if (labResult.downloadUrl?.isNotEmpty ?? false) gapW8,
                 if (labResult.downloadUrl?.isNotEmpty ?? false)
-                  GestureDetector(
-                    onTap: () {
-                      launchUrl(Uri.parse(labResult.downloadUrl!));
-                    },
-                    child: Icon(
+                  IconButton(
+                    icon: Icon(
                       Icons.open_in_new,
                       color: Theme.of(context).textTheme.labelMedium!.color,
-                      size: 16,
                     ),
+                    onPressed: () {
+                      launchUrl(Uri.parse(labResult.downloadUrl!));
+                    },
                   ),
               ],
             ),

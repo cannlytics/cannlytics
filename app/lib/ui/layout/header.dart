@@ -283,7 +283,7 @@ class UserMenu extends ConsumerWidget {
           switch (value) {
             case 'account':
               // Navigate to the account page.
-              context.push('/account');
+              context.go('/account');
               break;
             case 'subscription':
               // Navigate to the subscriptions page.

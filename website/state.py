@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/15/2020
-Updated: 5/29/2023
+Updated: 8/20/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 # pylint:disable=line-too-long
@@ -104,10 +104,9 @@ material = {
     "homepage": {
         "hero": {
             # Colors: ffa600 f8e496
-            "title": '<span class="serif" style="color: #ffa600;">Cann</span>abis Data and Ana<span class="serif" style="color: #ffa600;">lytics</span>',
+            "title": 'Cannabis Data and Analytics',
             "message": "And a suite of tools that you can use to wrangle, standardize, and analyze cannabis data.",
-            "image": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_A_super_wealthy_Hippie_muscular_gorilla_with_a_glue__e978598d-f8af-4f28-94c9-7064815d80e8.png?alt=media&token=0655d43c-456b-48cb-9703-2b49d8ed8a13",
-            # "image": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2Fgolden-goat.png?alt=media&token=1d84439d-2de8-4b40-9107-2623ad581ec2",
+            "image": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fwebsite%2FPXL_20230725_183052221.jpg?alt=media&token=639d1ed0-b88c-45be-9c54-1697a57f2e5c",
             "primary_action": "Get Started 🌱",
             "primary_action_url": "https://data.cannlytics.com",
             "secondary_action": "Sign Up 🚀",

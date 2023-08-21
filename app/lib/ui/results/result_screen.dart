@@ -894,7 +894,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
                   gapH12,
                   PrimaryButton(
                     text: 'Parse results',
-                    onPressed: () => context.push('/results'),
+                    onPressed: () => context.go('/results'),
                   ),
                 ],
               ),
