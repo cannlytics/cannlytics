@@ -25,7 +25,7 @@ def test_api_parse_coa_pdf(api_key: str, doc: str, base=BASE):
     headers = {
         'Authorization': 'Bearer %s' % api_key,
     }
-    url = urljoin(base, 'data/coas')
+    url = urljoin(base, 'api/data/coas')
     with open(doc, 'rb') as pdf:
         files = {'file': pdf}
         print('URL:', url)
@@ -48,7 +48,7 @@ def test_api_parse_coa_image(api_key: str, doc: str, base=BASE):
     headers = {
         'Authorization': 'Bearer %s' % api_key,
     }
-    url = urljoin(base, 'data/coas')
+    url = urljoin(base, 'api/data/coas')
     with open(doc, 'rb') as img:
         files = {'file': img}
         response = requests.post(url, files=files, headers=headers)
@@ -70,7 +70,7 @@ def test_api_parse_coa_url(api_key: str, urls: list, base=BASE):
         'Content-type': 'application/json',
     }
     body = {'urls': urls}
-    url = urljoin(base, 'data/coas')
+    url = urljoin(base, 'api/data/coas')
     response = requests.post(url, json=body, headers=headers)
     if response.status_code == 200:
         data = response.json()['data']
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     api_key = os.getenv('CANNLYTICS_API_KEY')
 
     # Handle development and production environments.
-    DEV = True
+    DEV = False
     if DEV:
         BASE = 'http://127.0.0.1:8000/api/'
 

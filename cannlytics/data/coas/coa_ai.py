@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 6/12/2023
-Updated: 7/4/2023
+Updated: 8/21/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -291,7 +291,7 @@ def parse_coa_with_ai(
         })
         content = metadata_response['choices'][0]['message']['content']
         if verbose:
-            print('CONTENT:', content)
+            print('CONTENT:', json.dumps(content))
     except:
         if verbose:
             print('Parse metadata OpenAI query failed.')
@@ -319,12 +319,10 @@ def parse_coa_with_ai(
     substrings = split_into_token_chunks(all_text, max_prompt_length)
 
     # Format the message.
-    # content = 'Text: ' + all_text + '\n\nList of results as JSON:'
     for substring in substrings:
         messages = [
             {'role': 'system', 'content': results_prompt},
             {'role': 'system', 'content': instructional_prompt},
-            # {'role': 'system', 'content': content},
         ]
         content = 'Text: ' + substring + '\n\nList of results as JSON:'
         messages.append({'role': 'user', 'content': content})
@@ -365,7 +363,7 @@ def parse_coa_with_ai(
             for choice in results_response['choices']:
                 content = choice['message']['content']
                 if verbose:
-                    print('CONTENT:', content)
+                    print('CONTENT:', json.dumps(content))
                 start_index = content.find('{')
                 end_index = content.rfind('}') + 1
                 try:
@@ -402,7 +400,7 @@ def parse_coa_with_ai(
     # - lab_latitude
     # - lab_longitude
 
-    # TODO: Standardize results.
+    # Standardize results.
     for i, result in enumerate(results):
         key = snake_case(result['name'])
         results[i]['key'] = parser.analytes.get(key, key)

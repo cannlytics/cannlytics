@@ -14,7 +14,7 @@ import 'package:cannlytics_data/utils/utils.dart';
 class MobileUtils implements PlatformFileUtils {
   /// Download a file from a URL.
   @override
-  Future<void> downloadUrl(String url, String filename) async {}
+  Future<void> downloadUrl(String url, String? filename) async {}
 
   /// Download a file from bytes.
   @override

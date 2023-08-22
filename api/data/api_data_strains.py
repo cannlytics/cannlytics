@@ -31,13 +31,14 @@ from cannlytics.data.strains.strains_ai import (
 from cannlytics.firebase import (
     access_secret_version,
     create_log,
+    create_short_url,
     get_collection,
     get_document,
     get_file_url,
     update_document,
     upload_file,
 )
-from website.settings import STORAGE_BUCKET
+from website.settings import FIREBASE_API_KEY, STORAGE_BUCKET
 
 
 # Default instructions for generating strain art.
@@ -271,10 +272,34 @@ def api_data_strains(request, strain_id=None):
             )
 
             # Generate a download URL.
-            content = get_file_url(
-                ref=destination_blob_name,
-                bucket_name=STORAGE_BUCKET,
-            )
+            credentials, project_id = google.auth.default()
+            try:
+                download_url = get_file_url(
+                    ref=destination_blob_name,
+                    bucket_name=STORAGE_BUCKET,
+                    credentials=credentials,
+                    version='v4',
+                )
+            except:
+                download_url = None
+            try:
+                short_url = create_short_url(
+                    api_key=FIREBASE_API_KEY,
+                    long_url=download_url,
+                    project_name=project_id
+                )
+                print('SHORT URL:', short_url)
+            except Exception as e:
+                print('Failed to create short URL:', e)
+                short_url = None
+
+            # Format image data.
+            content = data = {
+                'filename': temp_file.name,
+                'file_ref': destination_blob_name,
+                'download_url': download_url,
+                'short_url': short_url,
+            }
 
         # Identify strain names.
         elif strain_id == 'name':
@@ -340,11 +365,11 @@ def api_data_strains(request, strain_id=None):
             ref = f'public/data/strains/{doc_id}'
             if strain_id == 'art':
                 image_ref = f'{ref}/images/{content_id}'
-                update_document(ref, {'image_url': content})
+                update_document(ref, {'image_url': download_url})
                 update_document(image_ref, {
                     'strain_id': doc_id,
                     'image_caption': text + art_style,
-                    'image_url': content,
+                    'image_url': download_url,
                     'updated_at': datetime.now(),
                     'user': uid,
                 })
@@ -379,8 +404,10 @@ def api_data_strains(request, strain_id=None):
             changes=[content]
         )
 
-        response = {'success': True, 'data': content}
-        return Response(response, status=200)
+        # Return the response.
+        response = Response({'success': True, 'data': content}, status=200)
+        response["Access-Control-Allow-Origin"] = '*'
+        return response
 
 
 # Future work: Allow user's to download all of the lab results

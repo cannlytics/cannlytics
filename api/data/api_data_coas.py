@@ -56,7 +56,14 @@ FILE_TYPES = ['pdf', 'png', 'jpg', 'jpeg']
 MAX_OBSERVATIONS_PER_FILE = 200_000
 
 
-def save_file(uid, file, collection='files', project_id=None) -> dict:
+def save_file(
+        uid,
+        file,
+        collection='files',
+        project_id=None,
+        credentials=None,
+        version='v4'
+    ) -> dict:
     """Save a user's file to Firebase Storage."""
 
     # If the file is a URL, then download the file.
@@ -92,13 +99,23 @@ def save_file(uid, file, collection='files', project_id=None) -> dict:
     )
 
     # Get download and short URLs.
-    download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
-    short_url = create_short_url(
-        api_key=FIREBASE_API_KEY,
-        long_url=download_url,
-        project_name=project_id,
-    )
+    try:
+        download_url = get_file_url(
+            ref,
+            bucket_name=STORAGE_BUCKET,
+            credentials=credentials,
+            version=version,
+        )
+        short_url = create_short_url(
+            api_key=FIREBASE_API_KEY,
+            long_url=download_url,
+            project_name=project_id,
+        )
+    except:
+        download_url, short_url = None, None
+    filename = filepath.split('/')[-1].split('.')[0]
     return {
+        'filename': filename,
         'file_ref': ref,
         'download_url': download_url,
         'short_url': short_url,
@@ -139,7 +156,9 @@ def api_data_coas(request, coa_id=None):
             ref = f'users/{uid}/coas/{coa_id}'
             data = get_document(ref)
             response = {'success': True, 'data': data}
-            return Response(response, status=200)
+            response = Response(response, status=200)
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
 
         # Query receipts.
         data, filters = [], []
@@ -221,7 +240,9 @@ def api_data_coas(request, coa_id=None):
 
         # Return the data.
         response = {'success': True, 'data': data}
-        return Response(response, status=200)
+        response = Response(response, status=200)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
 
     # Parse posted COA PDFs or URLs.
     if request.method == 'POST':
@@ -308,7 +329,7 @@ def api_data_coas(request, coa_id=None):
 
         # Initialize OpenAI.
         try:
-            _, project_id = google.auth.default()
+            credentials, project_id = google.auth.default()
             openai_api_key = access_secret_version(
                 project_id=project_id,
                 secret_id='OPENAI_API_KEY',
@@ -337,7 +358,7 @@ def api_data_coas(request, coa_id=None):
 
             # Save user's file to Firebase Storage.
             try:
-                file_data = save_file(uid, doc, 'coas', project_id=project_id)
+                file_data = save_file(uid, doc, 'coas', project_id=project_id, credentials=credentials)
             except:
                 file_data = {}
 
@@ -382,7 +403,7 @@ def api_data_coas(request, coa_id=None):
 
             # Save user's file to Firebase Storage.
             try:
-                file_data = save_file(uid, doc, 'coas', project_id=project_id)
+                file_data = save_file(uid, doc, 'coas', project_id=project_id, credentials=credentials)
             except:
                 file_data = {}
 
@@ -494,8 +515,10 @@ def api_data_coas(request, coa_id=None):
                 coa_id = loads(request.body.decode('utf-8'))['id']
             except:
                 message = 'Please provide an `id` in the URL or your request body.'
-                response = {'success': False, message: message}
-                return Response(response, status=200)
+                response = {'success': False, 'message': message}
+                response = Response(response, status=200)
+                response['Access-Control-Allow-Origin'] = '*'
+                return response
         
         # Delete the document.
         ref = f'users/{uid}/coas/{coa_id}'
@@ -510,7 +533,9 @@ def api_data_coas(request, coa_id=None):
         # Return a success message.
         message = f'COA {coa_id} deleted.'
         response = {'success': True, 'data': [], 'message': message}
-        return Response(response, status=200)
+        response = Response(response, status=200)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
 
 
 @api_view(['POST'])
@@ -551,7 +576,7 @@ def download_coa_data(request):
 
     # Upload the file to Firebase Storage.
     ref = 'users/%s/lab_results/%s' % (uid, filename)
-    _, project_id = google.auth.default()
+    credentials, project_id = google.auth.default()
     upload_file(
         destination_blob_name=ref,
         source_file_name=temp.name,
@@ -560,12 +585,28 @@ def download_coa_data(request):
     print('UPLOADED FILE:', ref)
 
     # Get download and short URLs.
-    download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
-    short_url = create_short_url(
-        api_key=FIREBASE_API_KEY,
-        long_url=download_url,
-        project_name=project_id
-    )
+    # FIXME:
+    try:
+        download_url = get_file_url(
+            ref,
+            bucket_name=STORAGE_BUCKET,
+            credentials=credentials,
+            version='v4'
+        )
+        print('DOWNLOAD URL:', download_url)
+    except Exception as e:
+        print('Failed to get download URL:', e)
+        download_url = ''
+    try:
+        short_url = create_short_url(
+            api_key=FIREBASE_API_KEY,
+            long_url=download_url,
+            project_name=project_id
+        )
+        print('SHORT URL:', short_url)
+    except Exception as e:
+        print('Failed to create short URL:', e)
+        short_url = ''
     data = {
         'filename': filename,
         'file_ref': ref,
@@ -573,6 +614,8 @@ def download_coa_data(request):
         'short_url': short_url,
     }
     print('FILE DATA:', data)
+
+    # TODO: Save the file data?
 
     # Delete the temporary file.
     os.unlink(temp.name)

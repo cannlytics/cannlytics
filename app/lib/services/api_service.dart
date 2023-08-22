@@ -34,12 +34,12 @@ class APIService {
   static String get baseUrl => _baseUrl;
 
   /// Get a user's token. Set [refresh] to renew credentials.
-  static Future<String?> getUserToken({bool refresh = false}) async {
+  static Future<String> getUserToken({bool refresh = false}) async {
     final tokenResult = FirebaseAuth.instance.currentUser;
     if (tokenResult == null) {
       return '';
     } else {
-      return await tokenResult.getIdToken(refresh);
+      return await tokenResult.getIdToken(refresh) ?? '';
     }
   }
 
@@ -53,10 +53,11 @@ class APIService {
   }) async {
     // Create default body, method, and headers.
     var body;
-    var method = 'GET';
-    final idToken = await getUserToken();
+    String method = 'GET';
+    String idToken = await getUserToken();
     final headers = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json;charset=UTF-8',
+      'Accept': 'application/json',
       'Authorization': 'Bearer $idToken',
     };
 
@@ -82,9 +83,11 @@ class APIService {
     }
 
     // Format the URL
-    final url = endpoint.startsWith(baseUrl)
+    String url = endpoint.startsWith(baseUrl)
         ? endpoint
         : '$baseUrl${endpoint.replaceFirst('/api', '')}';
+
+    print('API Request: $method $url');
 
     // Make the request.
     final client = http.Client();

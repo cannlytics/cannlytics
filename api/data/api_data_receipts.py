@@ -435,6 +435,7 @@ def download_receipts_data(request):
         project_name=project_id
     )
     data = {
+        'filename': filename,
         'file_ref': ref,
         'download_url': download_url,
         'short_url': short_url,

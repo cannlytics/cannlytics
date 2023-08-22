@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 1/5/2021
-Updated: 8/20/2023
+Updated: 8/21/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Django settings powered by environment variables and
@@ -116,8 +116,11 @@ INSTALLED_APPS = [
 #----------------------------------------------------------------------#
 
 # Define middleware that is executed by Django.
+# CorsMiddleware should be placed before any middleware that can generate responses.
 # WhiteNoise should be below SecurityMiddleWare and above all others.
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    f'{PROJECT_NAME}.core.middleware.BlockUserAgentsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django_permissions_policy.PermissionsPolicyMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -127,16 +130,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # f'{PROJECT_NAME}.core.middleware.open_access_middleware',
-    "corsheaders.middleware.CorsMiddleware",
     f'{PROJECT_NAME}.core.middleware.AppendOrRemoveSlashMiddleware',
-    f'{PROJECT_NAME}.core.middleware.BlockUserAgentsMiddleware',
 ]
 
 # Allow CORS from the following domains.
+# See: https://github.com/adamchainz/django-cors-headers/tree/main
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    # FIXME: Having CORS errors when accessing the API from the app.
-    '*',
     r"^https://\w+\.cannlytics\.com$",
 ]
 

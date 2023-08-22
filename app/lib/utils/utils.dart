@@ -34,7 +34,7 @@ class PlatformChecker {
 
 // File utility class that will work for web and mobile platforms.
 abstract class PlatformFileUtils {
-  void downloadUrl(String url, String filename);
+  void downloadUrl(String url, String? filename);
   Future<void> downloadBytes(String fileName, List<dynamic> bytes);
 }
 

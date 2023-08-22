@@ -18,7 +18,7 @@ import 'package:path_provider/path_provider.dart';
 class MobileUtils implements PlatformFileUtils {
   /// Download a file from a URL.
   @override
-  Future<void> downloadUrl(String url, String filename) async {
+  Future<void> downloadUrl(String url, String? filename) async {
     var response = await http.get(Uri.parse(url));
     final directory = (await getApplicationDocumentsDirectory()).path;
     final filePath = '$directory/$filename';
@@ -39,7 +39,7 @@ class MobileUtils implements PlatformFileUtils {
 class WebUtils implements PlatformFileUtils {
   /// Download a file from a URL.
   @override
-  Future<void> downloadUrl(String url, String filename) async {}
+  Future<void> downloadUrl(String url, String? filename) async {}
 
   /// Download a file from bytes.
   @override

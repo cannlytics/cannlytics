@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/1/2021
-Updated: 8/20/2023
+Updated: 8/21/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
 from urllib.parse import quote
@@ -12,6 +12,30 @@ from django import http
 from django import urls
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
+
+
+def generate_url(request, path):
+    if request.get_host():
+        new_url = "%s://%s%s" % (request.is_secure() and 'https' or 'http',
+                                request.get_host(),
+                                quote(path))
+    else:
+        new_url = quote(path)
+    if request.GET:
+        new_url += '?' + request.META['QUERY_STRING']
+    return new_url
+
+
+def is_valid_path(path, urlconf=None):
+    """
+    Returns True if the given path resolves against the default URL resolver,
+    False otherwise.
+    """
+    try:
+        urls.resolve(path, urlconf)
+        return True
+    except urls.Resolver404:
+        return False
 
 
 class AppendOrRemoveSlashMiddleware(MiddlewareMixin):
@@ -33,12 +57,12 @@ class AppendOrRemoveSlashMiddleware(MiddlewareMixin):
         adding/removing the trailing slash helps. If the new url is valid, redirect to it.
         """
         urlconf = getattr(request, 'urlconf', None)
-        if not _is_valid_path(request.path_info, urlconf):
+        if not is_valid_path(request.path_info, urlconf):
             if request.path_info.endswith('/'):
                 new_path = request.path_info[:-1]
             else:
                 new_path = request.path_info + '/'
-            if _is_valid_path(new_path, urlconf):
+            if is_valid_path(new_path, urlconf):
                 return http.HttpResponsePermanentRedirect(
                     generate_url(request, new_path))
 
@@ -55,47 +79,13 @@ class AppendOrRemoveSlashMiddleware(MiddlewareMixin):
                 new_path = None
             if new_path:
                 urlconf = getattr(request, 'urlconf', None)
-                if _is_valid_path(new_path, urlconf):
+                if is_valid_path(new_path, urlconf):
                     return http.HttpResponsePermanentRedirect(
                         generate_url(request, new_path))
         return response
 
 
-def generate_url(request, path):
-    if request.get_host():
-        new_url = "%s://%s%s" % (request.is_secure() and 'https' or 'http',
-                                 request.get_host(),
-                                 quote(path))
-    else:
-        new_url = quote(path)
-    if request.GET:
-        new_url += '?' + request.META['QUERY_STRING']
-    return new_url
-
-
-def _is_valid_path(path, urlconf=None):
-    """
-    Returns True if the given path resolves against the default URL resolver,
-    False otherwise.
-    """
-    try:
-        urls.resolve(path, urlconf)
-        return True
-    except urls.Resolver404:
-        return False
-
-
-def open_access_middleware(get_response):
-    """Allow all requests to access the API."""
-    def middleware(request):
-        response = get_response(request)
-        response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Headers'] = '*'
-        return response
-    return middleware
-
-
-class BlockUserAgentsMiddleware:
+class BlockUserAgentsMiddleware(object):
     # See: https://github.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/blob/master/_generator_lists/bad-user-agents.list
     # Last updated: 8/20/2023
     BLOCKED_USER_AGENTS = {

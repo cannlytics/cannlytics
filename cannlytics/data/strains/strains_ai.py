@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/29/2023
-Updated: 7/10/2023
+Updated: 8/21/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -103,7 +103,7 @@ def generate_strain_description(
 
     # Get the content of the response.
     if verbose:
-        print('RESPONSE:', response)
+        print('RESPONSE:', json.dumps(response))
 
     # Return the content.
     return response['choices'][0]['message']['content']
@@ -161,7 +161,7 @@ def identify_strains(
     
     # Get the content of the response.
     if verbose:
-        print('RESPONSE:', response)
+        print('RESPONSE:', json.dumps(response))
     content = response['choices'][0]['message']['content']
     start_index = content.find('{')
     end_index = content.rfind('}') + 1
