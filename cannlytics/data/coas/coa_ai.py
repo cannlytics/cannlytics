@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 6/12/2023
-Updated: 8/21/2023
+Updated: 8/22/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -331,6 +331,8 @@ def parse_coa_with_ai(
         # json_data = json.dumps(obs)
         # compressed_data = zlib.compress(json_data.encode())
 
+        # Extend results.
+        # FIXME: The logic is overly complicated.
         try:
             if verbose:
                 print('MESSAGES:', messages)
@@ -360,14 +362,35 @@ def parse_coa_with_ai(
                 'messages': messages,
                 'completion': json.dumps(results_response.to_dict()),
             })
+
+            # Extend results from each prompt.
             for choice in results_response['choices']:
                 content = choice['message']['content']
                 if verbose:
                     print('CONTENT:', json.dumps(content))
-                start_index = content.find('{')
-                end_index = content.rfind('}') + 1
+
+                # Handle results that are a list.
+                if content.startswith('['):
+                    start_index = content.find('[')
+                    end_index = content.rfind(']') + 1
+                    partial_results = json.loads(content[start_index:end_index])
+
+                # Handle results that are JSON.
+                else:
+                    try:
+                        start_index = content.find('{')
+                        end_index = content.rfind('}') + 1
+                        partial_results = json.loads(content[start_index:end_index])['results']
+
+                    # Otherwise, try to handle as a list.
+                    except:
+                        start_index = content.find('[')
+                        end_index = content.rfind(']') + 1
+                        partial_results = json.loads(content[start_index:end_index])
+                
+                # Extend the results.
                 try:
-                    results.extend(json.loads(content[start_index:end_index])['results'])
+                    results.extend(partial_results)
                 except:
                     if verbose:
                         print('Failed to extend results.')

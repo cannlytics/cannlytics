@@ -4,18 +4,21 @@ Copyright (c) 2020-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/29/2020
-Updated: 6/20/2023
+Updated: 8/22/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 """
-# External imports.
+# Standard imports:
+import os
+
+# External imports:
 from django.conf import settings
 from django.conf.urls import handler404, handler500
-from django.http import HttpResponse #pylint: disable=unused-import
+from django.http import HttpResponse, Http404
 from django.urls import include, path
 from django.views.generic.base import RedirectView
 from django_robohash.views import robohash
 
-# Internal imports.
+# Internal imports:
 from website.views import (
     auth,
     data,
@@ -28,14 +31,29 @@ from website.views import (
 )
 
 
-def read_file(request):
+def read_file(request, filename):
     """Read a file from the filesystem."""
-    # TODO: Test if this works:
-    # os.path.join(os.path.dirname(__file__), 'openapi.yaml')
-    f = open('static/ai-plugin.json', 'r')
-    file_content = f.read()
-    f.close()
-    return HttpResponse(file_content, content_type='text/plain')
+    # Dictionary to hold content types based on file extensions
+    content_types = {
+        '.json': 'application/json',
+        '.ico': 'image/x-icon',
+    }
+    
+    # Build the file path dynamically
+    file_path = os.path.join('static', filename)
+
+    # Check if the file exists, and raise a 404 if not.
+    if not os.path.exists(file_path):
+        raise Http404
+
+    # Read the file's content.
+    with open(file_path, 'r') as f:
+        file_content = f.read()
+
+    # Get the file's extension and determine the content type.
+    file_extension = os.path.splitext(filename)[1]
+    content_type = content_types.get(file_extension, 'text/plain')
+    return HttpResponse(file_content, content_type=content_type)
 
 
 # Main URLs.
@@ -81,10 +99,12 @@ urlpatterns = [
     path('community', RedirectView.as_view(url='/testing', permanent=False)),
     path('effects', RedirectView.as_view(url='/stats/effects', permanent=False)),
     path('labs', RedirectView.as_view(url='/testing/labs', permanent=False)),
+    path('subscriptions', RedirectView.as_view(url='/account/subscriptions', permanent=False)),
+    path('.well-known/<filename>', read_file),
+    path('favicon.ico', read_file, {'filename': 'favicon.ico'}),
     path('<page>', main.GeneralView.as_view(), name='page'),
     path('<page>/<section>', main.GeneralView.as_view(), name='section'),
     path('<page>/<section>/<str:unit>', main.GeneralView.as_view(), name='unit'),
-    path('.well-known/ai-plugin.json', read_file),
 ]
 
 

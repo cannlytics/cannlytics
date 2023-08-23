@@ -135,9 +135,24 @@ MIDDLEWARE = [
 
 # Allow CORS from the following domains.
 # See: https://github.com/adamchainz/django-cors-headers/tree/main
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://\w+\.cannlytics\.com$",
-]
+# CORS_ALLOWED_ORIGIN_REGEXES = [
+#     r"^https://\w+\.cannlytics\.com$",
+#     r"^https://cannlytics-website-[\w-]+\.a\.run\.app$",
+# ]
+CORS_ALLOWED_ORIGINS = ['*']
+# CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "Origin",
+    "token",
+)
+SESSION_COOKIE_SAMESITE = 'None'
 
 #----------------------------------------------------------------------#
 # Livereload

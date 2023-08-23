@@ -56,7 +56,8 @@ class APIService {
     String method = 'GET';
     String idToken = await getUserToken();
     final headers = {
-      'Content-Type': 'application/json;charset=UTF-8',
+      // 'Content-Type': 'application/json;charset=UTF-8',
+      'Content-Type': 'text/plain',
       'Accept': 'application/json',
       'Authorization': 'Bearer $idToken',
     };
@@ -145,8 +146,13 @@ class APIService {
         ..body = body;
     }
 
+    // Ensure the client doesn't add cookies.
+    request.headers.remove('Cookie');
+
     // Get the response.
     final response = await client.send(request).then(http.Response.fromStream);
+    print('API RESPONSE:');
+    print(response.body);
 
     // Return the data.
     try {

@@ -91,6 +91,7 @@ if __name__ == '__main__':
     api_key = os.getenv('CANNLYTICS_API_KEY')
 
     # Handle development and production environments.
+    BASE = 'https://cannlytics-website-deeuhexjlq-uc.a.run.app'
     DEV = False
     if DEV:
         BASE = 'http://127.0.0.1:8000/api/'

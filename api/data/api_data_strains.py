@@ -1,27 +1,28 @@
 """
 Strain Data Endpoints | Cannlytics API
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/13/2023
-Updated: 7/13/2023
+Updated: 8/22/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with strain data.
 """
-# Standard imports.
+# Standard imports:
 from datetime import datetime
 from json import loads
 import os
 import tempfile
 
-# External imports
+# External imports:
+from django.views.decorators.csrf import csrf_exempt
 import google.auth
 import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-# Internal imports
+# Internal imports:
 from cannlytics.auth.auth import authenticate_request
 from cannlytics.data.strains.strains_ai import (
     generate_strain_art,
@@ -54,7 +55,8 @@ DEFAULT_TEMPERATURE = 0.42
 DEFAULT_WORD_COUNT = 100
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'OPTIONS'])
+@csrf_exempt
 def api_data_strains(request, strain_id=None):
     """Manage strain data (public API endpoint)."""
 
@@ -89,8 +91,9 @@ def api_data_strains(request, strain_id=None):
         if strain_id:
             ref = f'users/{uid}/strains/{strain_id}'
             data = get_document(ref)
-            response = {'success': True, 'data': data}
-            return Response(response, status=200)
+            response = Response({'success': True, 'data': data}, status=200)
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
 
         # Query strains.
         data, filters = [], []
@@ -142,8 +145,9 @@ def api_data_strains(request, strain_id=None):
         )
 
         # Return the data.
-        response = {'success': True, 'data': data}
-        return Response(response, status=200)
+        response = Response({'success': True, 'data': data}, status=200)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
 
     # Create or update strain data.
     elif request.method == 'POST':
@@ -177,8 +181,9 @@ def api_data_strains(request, strain_id=None):
         # Return an error if OpenAI can't be initialized.
         if not openai_api_key and text:
             message = 'OpenAI API key not found.'
-            response = {'success': False, 'message': message}
-            return Response(response, status=400)
+            response = Response({'error': True, 'message': message}, status=400)
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
 
         # Create a unique ID for the generation.
         content_id = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -209,8 +214,9 @@ def api_data_strains(request, strain_id=None):
                 print('SUPPORT LEVEL:', support_level)
                 if support_level in ['enterprise', 'pro', 'premium']:
                     message = 'A Cannlytics subscription is required to re-generate a description. You can get a subscription at https://cannlytics.com/account/subscriptions.'
-                    response = {'success': False, 'message': message}
-                    return Response(response, status=402)
+                    response = Response({'error': True, 'message': message}, status=402)
+                    response['Access-Control-Allow-Origin'] = '*'
+                    return response
 
             # Generate the description.
             content = generate_strain_description(
@@ -241,8 +247,9 @@ def api_data_strains(request, strain_id=None):
                 print('SUPPORT LEVEL:', support_level)
                 if support_level in ['enterprise', 'pro', 'premium']:
                     message = 'A Cannlytics subscription is required to re-generate strain art. You can get a subscription at https://cannlytics.com/account/subscriptions.'
-                    response = {'success': False, 'message': message}
-                    return Response(response, status=402)
+                    response = Response({'error': True, 'message': message}, status=402)
+                    response['Access-Control-Allow-Origin'] = '*'
+                    return response
 
             # Generate art.
             content = generate_strain_art(
@@ -315,8 +322,9 @@ def api_data_strains(request, strain_id=None):
             print('SUPPORT LEVEL:', support_level)
             if support_level in ['enterprise', 'pro', 'premium']:
                 message = 'A Cannlytics subscription is required to edit strains. You can get a subscription at https://cannlytics.com/account/subscriptions.'
-                response = {'success': False, 'message': message}
-                return Response(response, status=402)
+                response = Response({'error': True, 'message': message}, status=402)
+                response['Access-Control-Allow-Origin'] = '*'
+                return response
 
             # Prepare data to be saved to Firestore
             content = {
@@ -339,9 +347,10 @@ def api_data_strains(request, strain_id=None):
             # Define the action.
             fields = [k.replace('_', ' ') for k, v in content.items() if k not in ['updated_at', 'updated_by']]
             if not fields:
-                message = 'Invalid data, no fields were fiybd.'
-                response = {'success': False, 'message': message}
-                return Response(response, status=400)
+                message = 'Invalid data, no fields were provided.'
+                response = Response({'error': True, 'message': message}, status=400)
+                response['Access-Control-Allow-Origin'] = '*'
+                return response
             elif len(fields) == 1:
                 action = f'Edited {doc_id} {fields[0]}.'
             else:
@@ -356,8 +365,9 @@ def api_data_strains(request, strain_id=None):
         # Return an error if the strain ID is invalid.
         else:
             message = 'Invalid action, expecting: art, description, or name.'
-            response = {'success': False, 'message': message}
-            return Response(response, status=400)
+            response = Response({'error': True, 'message': message}, status=400)
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
         
         # Record the image and description for known strains.
         # Also save the images and descriptions to galleries.

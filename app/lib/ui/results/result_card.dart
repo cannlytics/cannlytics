@@ -24,12 +24,14 @@ class ResultCard extends StatelessWidget {
     required this.item,
     this.onDownload,
     this.onDelete,
+    // this.onShare,
   });
 
   // Properties
   final LabResult item;
   final VoidCallback? onDownload;
   final VoidCallback? onDelete;
+  // final Function? onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +83,7 @@ class ResultCard extends StatelessWidget {
 
                     padding: EdgeInsets.all(2),
                     surfaceTintColor: Colors.transparent,
-                    onSelected: (String result) {
+                    onSelected: (String result) async {
                       switch (result) {
                         case 'View':
                           context.go('/results/${item.sampleId}');
@@ -89,56 +91,35 @@ class ResultCard extends StatelessWidget {
                         case 'Download':
                           onDownload!();
                           break;
+                        // case 'Copy link':
+                        //   await onShare!();
+                        //   break;
                         case 'Delete':
                           onDelete!();
                           break;
                       }
                     },
-                    itemBuilder: (BuildContext context) =>
-                        <PopupMenuEntry<String>>[
-                      PopupMenuItem<String>(
-                        value: 'View',
-                        child: Text(
-                          'View',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .color),
-                        ),
-                      ),
-                      PopupMenuItem<String>(
-                        value: 'Download',
-                        child: Text(
-                          'Download',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .color),
-                        ),
-                      ),
-                      PopupMenuItem<String>(
-                        value: 'Delete',
-                        child: Text(
-                          'Delete',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .color),
-                        ),
-                      ),
-                    ],
+                    itemBuilder: (BuildContext context) {
+                      const menuOptions = [
+                        'View',
+                        'Download',
+                        // 'Share',
+                        'Delete'
+                      ];
+                      final textStyle = Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .copyWith(
+                              color:
+                                  Theme.of(context).textTheme.bodyLarge!.color);
+
+                      return menuOptions.map((option) {
+                        return PopupMenuItem<String>(
+                          value: option,
+                          child: Text(option, style: textStyle),
+                        );
+                      }).toList();
+                    },
                   ),
                 ],
               ),

@@ -8,7 +8,10 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+// import 'package:cannlytics_data/services/api_service.dart';
+// import 'package:cannlytics_data/services/storage_service.dart';
 import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -231,7 +234,7 @@ class UserResultsGrid extends ConsumerWidget {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     /// Download function.
-    var _onDownload = (item) {
+    var _onDownload = (dynamic item) {
       // Show a downloading notification.
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -252,8 +255,68 @@ class UserResultsGrid extends ConsumerWidget {
       );
     };
 
+    /// Share function.
+    // Future<void> _onShare(dynamic item) async {
+    //   // Show a 'preparing' snackbar notification.
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text(
+    //         'Preparing your shareable link...',
+    //         style: Theme.of(context).textTheme.bodyMedium,
+    //       ),
+    //       duration: Duration(seconds: 2),
+    //       backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
+    //       showCloseIcon: true,
+    //     ),
+    //   );
+
+    //   // Get the data for sharing (similar to download).
+    //   Map response = await APIService.apiRequest(
+    //     '/api/data/coas/download',
+    //     data: {
+    //       'data': [item!]
+    //     },
+    //   );
+
+    //   // Get the download URL from the response.
+    //   String? shareableUrl =
+    //       await StorageService.getDownloadUrl(response['file_ref']);
+
+    //   if (shareableUrl != null) {
+    //     // Copy the URL to the clipboard.
+    //     await Clipboard.setData(ClipboardData(text: shareableUrl));
+
+    //     // Show a 'copied to clipboard' snackbar notification.
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text(
+    //           'Link copied to clipboard!',
+    //           style: Theme.of(context).textTheme.bodyMedium,
+    //         ),
+    //         duration: Duration(seconds: 2),
+    //         backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
+    //         showCloseIcon: true,
+    //       ),
+    //     );
+    //   } else {
+    //     // Handle errors or null URLs here.
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text(
+    //           'Failed to generate shareable link.',
+    //           style: Theme.of(context).textTheme.bodyMedium,
+    //         ),
+    //         duration: Duration(seconds: 2),
+    //         backgroundColor:
+    //             isDark ? DarkColors.darkOrange : LightColors.darkOrange,
+    //         showCloseIcon: true,
+    //       ),
+    //     );
+    //   }
+    // }
+
     /// Delete function.
-    var _onDelete = (item) async {
+    var _onDelete = (dynamic item) async {
       final delete = await InterfaceUtils.showAlertDialog(
         context: context,
         title: 'Are you sure that you want to delete this result?',
@@ -311,6 +374,7 @@ class UserResultsGrid extends ConsumerWidget {
                 item: LabResult.fromMap(item ?? {}),
                 onDownload: () => _onDownload(item),
                 onDelete: () => _onDelete(item),
+                // onShare: () => _onShare(item),
               );
             },
           ),

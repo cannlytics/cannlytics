@@ -843,7 +843,7 @@ def download_files(
 def get_file_url(
         ref: str,
         bucket_name: Optional[str] = None,
-        expiration=None,
+        expiration: Optional[int] = 604800,
         credentials: Optional[dict] = None,
         version: Optional[str] = None,
     ) -> str:
@@ -855,8 +855,6 @@ def get_file_url(
     Returns:
         (str): The storage URL of the file.
     """
-    if expiration is None:
-        expiration = datetime.now() + timedelta(days=100 * 365)
     bucket = storage.bucket(name=bucket_name)
     blob = bucket.blob(ref)
     return blob.generate_signed_url(

@@ -1,6 +1,6 @@
 """
 COA Data Endpoints | Cannlytics API
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
@@ -17,8 +17,8 @@ import tempfile
 import uuid
 
 # External imports
+from django.views.decorators.csrf import csrf_exempt
 import google.auth
-from django.http.response import JsonResponse
 import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -122,7 +122,8 @@ def save_file(
     }
 
 
-@api_view(['GET', 'POST', 'DELETE'])
+@api_view(['GET', 'POST', 'DELETE', 'OPTIONS'])
+@csrf_exempt
 def api_data_coas(request, coa_id=None):
     """Get COA data (public API endpoint)."""
 
@@ -289,14 +290,16 @@ def api_data_coas(request, coa_id=None):
                 # Reject files that are too large.
                 if coa_file.size >= MAX_FILE_SIZE:
                     message = 'File too large. The maximum number of bytes is %i.' % MAX_FILE_SIZE
-                    response = {'error': True, 'message': message}
-                    return JsonResponse(response, status=406)
+                    response = Response({'error': True, 'message': message}, status=406)
+                    response['Access-Control-Allow-Origin'] = '*'
+                    return response
                 
                 # Reject files that are not PDFs or ZIPs or common image types.
                 if ext.lower() not in FILE_TYPES:
                     message = 'Invalid file type. Valid file types are: %s' % ', '.join(FILE_TYPES)
-                    response = {'error': True, 'message': message}
-                    return JsonResponse(response, status=406)
+                    response = Response({'error': True, 'message': message}, status=406)
+                    response['Access-Control-Allow-Origin'] = '*'
+                    return response
 
                 # Save the file as a temp file for parsing.
                 temp = tempfile.mkstemp(f'.{ext}')
@@ -314,14 +317,16 @@ def api_data_coas(request, coa_id=None):
         # Return an error if no PDFs or URLs are passed.
         if not urls and not pdfs and not images:
             message = 'Expecting an array of `urls`, `pdfs`, or `images` in the request body.'
-            response = {'success': False, 'message': message}
-            return Response(response, status=400)
+            response = Response({'error': True, 'message': message}, status=400)
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
 
         # Return an error if too many PDFs or URLs are passed.
         if len(urls) > MAX_NUMBER_OF_FILES:
             message = f'Too many files, please limit your request to {MAX_NUMBER_OF_FILES} files at a time.'
-            response = {'success': False, 'message': message}
-            return Response(response, status=400)
+            response = Response({'error': True, 'message': message}, status=400)
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
 
         # Parse COA data.
         parser = CoADoc()
@@ -350,8 +355,9 @@ def api_data_coas(request, coa_id=None):
         # Return an error if OpenAI can't be initialized.
         if not openai_api_key:
             message = 'OpenAI API key not found.'
-            response = {'success': False, 'message': message}
-            return Response(response, status=400)
+            response = Response({'error': True, 'message': message}, status=400)
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
 
         # Try to parse URLs and PDFs.
         for doc in urls + pdfs:
@@ -538,7 +544,8 @@ def api_data_coas(request, coa_id=None):
         return response
 
 
-@api_view(['POST'])
+@api_view(['POST', 'OPTIONS'])
+@csrf_exempt
 def download_coa_data(request):
     """Download posted data as a .xlsx file. Pass a `data` field in the
     body with the data, an object or an array of objects, to standardize
@@ -556,8 +563,9 @@ def download_coa_data(request):
     print(f'USER {uid} POSTED OBSERVATIONS:', len(data))
     if len(data) > MAX_OBSERVATIONS_PER_FILE:
         message = f'Too many observations, please limit your request to {MAX_OBSERVATIONS_PER_FILE} observations at a time.'
-        response = {'success': False, 'message': message}
-        return Response(response, status=400)
+        response = Response({'error': True, 'message': message}, status=400)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
     
     # Specify the filename.
     timestamp = datetime.now().isoformat()[:19].replace(':', '-')

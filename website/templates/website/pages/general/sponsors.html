@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/9/2021
-  Updated: 1/2/2022
+  Updated: 8/22/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -65,10 +65,12 @@
       link="https://www.paypal.com/paypalme/cannlytics"
     %}
 
-    <!-- List sponsorship packages -->
+    {% comment %}
+    <!-- FIXME: List sponsorship packages -->
     <div class="container mb-5 mt-3">
-      {% include "website/pages/subscriptions/sponsorships.html" %}
+      {% include "website/pages/general/sponsorships.html" %}
     </div>
+    {% endcomment %}
   
   </div>
 
