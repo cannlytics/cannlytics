@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:internet_file/internet_file.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/buttons/download_button.dart';
@@ -57,9 +58,9 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     with SingleTickerProviderStateMixin {
   // State.
   bool _isEditing = false;
-  // static const int _initialPage = 1;
-  late PdfController _pdfController;
-  late String _pdfUrl;
+  static const int _initialPage = 1;
+  late PdfController? _pdfController;
+  late String? _pdfUrl;
   late final TabController _tabController;
   int _tabCount = 4;
   Future<void>? _updateFuture;
@@ -77,9 +78,26 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
   // Dispose of the controllers.
   @override
   void dispose() {
-    _pdfController.dispose();
+    _pdfController?.dispose();
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// Load the PDF.
+  Future<PdfController?> loadPdf() async {
+    if (_pdfUrl!.isNotEmpty) {
+      print('PDF URL: $_pdfUrl');
+      try {
+        return PdfController(
+          document: PdfDocument.openData(InternetFile.get(_pdfUrl!)),
+          initialPage: _initialPage,
+        );
+      } catch (error) {
+        print('Error loading PDF: $error');
+        return null;
+      }
+    }
+    return null;
   }
 
   // Render the screen.
@@ -102,19 +120,30 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       // Data loaded UI.
       data: (labResult) {
         // Initialize the COA, if it is empty.
-        if (labResult?.coaUrls?.isNotEmpty == true) {
-          _pdfUrl = labResult?.coaUrls?[0]?['url'] ?? '';
+        // FIXME:
+        // if (labResult?.coaUrls?.isNotEmpty == true) {
+        //   _pdfUrl = labResult?.coaUrls?[0]?['url'] ?? '';
+        // } else {
+        //   _pdfUrl = labResult?.labResultsUrl ?? '';
+        // }
+        if (labResult?.downloadUrl?.isNotEmpty == true) {
+          _pdfUrl = labResult?.downloadUrl ?? '';
         } else {
-          _pdfUrl = labResult?.labResultsUrl ?? '';
+          // _pdfUrl = labResult?.labResultsUrl ?? '';
+          _pdfUrl = null;
         }
-        if (_pdfUrl.isNotEmpty) {
-          // FIXME:
-          // && _pdfController.document == null
-          // _pdfController = PdfController(
-          //   document: PdfDocument.openData(InternetFile.get(_pdfUrl)),
-          //   initialPage: _initialPage,
-          // );
-        }
+        // if (_pdfUrl.isNotEmpty) {
+        //   // && _pdfController.document == null
+        //   print('PDF URL: $_pdfUrl');
+        //   try {
+        //     _pdfController = PdfController(
+        //       document: PdfDocument.openData(InternetFile.get(_pdfUrl)),
+        //       initialPage: _initialPage,
+        //     );
+        //   } catch (error) {
+        //     _pdfController = null;
+        //   }
+        // }
 
         // Return the form.
         return _form(labResult);
@@ -811,25 +840,62 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           slivers: [
             _breadcrumbs,
             SliverToBoxAdapter(child: _actions),
-            // No COA placeholder.
-            if (_pdfUrl.isEmpty)
-              SliverToBoxAdapter(child: _placeholder(context, ref)),
-            if (_pdfUrl.isNotEmpty) ...[
-              /// COA PDF actions.
-              SliverToBoxAdapter(
-                child: CoaPdfActions(
-                  pdfController: _pdfController,
-                  pdfUrl: _pdfUrl,
-                ),
-              ),
+            // FIXME:
+            SliverToBoxAdapter(child: _placeholder(context, ref)),
+            // // No COA placeholder.
+            // if (_pdfUrl.isEmpty)
+            //   SliverToBoxAdapter(child: _placeholder(context, ref)),
+            // if (_pdfUrl.isNotEmpty && _pdfController != null) ...[
+            //   /// COA PDF actions.
+            //   SliverToBoxAdapter(
+            //     child: CoaPdfActions(
+            //       pdfController: _pdfController!,
+            //       pdfUrl: _pdfUrl,
+            //     ),
+            //   ),
 
-              /// COA PDF.
-              SliverToBoxAdapter(
-                child: CoaPdf(pdfController: _pdfController),
-              ),
-            ],
+            //   /// COA PDF.
+            //   SliverToBoxAdapter(
+            //     child: CoaPdf(pdfController: _pdfController!),
+            //   ),
+            // ],
           ],
         ),
+        // FutureBuilder<PdfController?>(
+        //   future: loadPdf(),
+        //   builder: (context, snapshot) {
+        //     if (snapshot.connectionState == ConnectionState.done) {
+        //       if (snapshot.hasError) {
+        //         return SliverToBoxAdapter(
+        //             child: Text('Error loading PDF: ${snapshot.error}'));
+        //       }
+        //       final controller = snapshot.data;
+        //       if (controller != null) {
+        //         return CustomScrollView(
+        //           slivers: [
+        //             _breadcrumbs,
+        //             SliverToBoxAdapter(child: _actions),
+        //             if (_pdfUrl!.isEmpty)
+        //               SliverToBoxAdapter(child: _placeholder(context, ref)),
+        //             SliverToBoxAdapter(
+        //               child: CoaPdfActions(
+        //                 pdfController: controller,
+        //                 pdfUrl: _pdfUrl!,
+        //               ),
+        //             ),
+        //             SliverToBoxAdapter(
+        //               child: CoaPdf(pdfController: controller),
+        //             ),
+        //           ],
+        //         );
+        //       } else {
+        //         return SliverToBoxAdapter(child: _placeholder(context, ref));
+        //       }
+        //     } else {
+        //       return SliverToBoxAdapter(child: CircularProgressIndicator());
+        //     }
+        //   },
+        // ),
 
         // TODO: Comments tab.
 
@@ -936,6 +1002,7 @@ class AnalysisPill extends StatelessWidget {
 
     // Convert the analysis type to title case.
     var titleCase = analysis.split('_').map((word) {
+      if (word.isEmpty) return ''; // handle empty words
       var lower = word.toLowerCase();
       return '${lower[0].toUpperCase()}${lower.substring(1)}';
     }).join(' ');
@@ -978,7 +1045,7 @@ class StatusPill extends StatelessWidget {
     Color backgroundColor = colorMap[status?.toLowerCase()] ?? defaultColor;
 
     // Convert the status to title case.
-    var titleCase = status == null
+    var titleCase = status == null || status!.isEmpty
         ? ''
         : '${status![0].toUpperCase()}${status!.substring(1).toLowerCase()}';
 

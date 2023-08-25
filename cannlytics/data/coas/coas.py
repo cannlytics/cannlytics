@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 6/11/2023
+Updated: 8/24/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -33,6 +33,7 @@ from io import BytesIO
 import json
 import operator
 import os
+import tempfile
 from typing import Any, List, Optional
 
 # External imports.
@@ -999,13 +1000,38 @@ class CoADoc:
         # Remove individual PDF files.
         if cleanup:
             for pdf in pdf_files:
-                os.remove(pdf)
+                try:
+                    os.remove(pdf)
+                except PermissionError:
+                    pass
 
         # Remove all `magick-*` files from the temp directory.
         # for i in os.listdir(temp_path):
         #     path = os.path.join(temp_path, i)
         #     if os.path.isfile(path) and i.startswith('magick-'):
         #         os.remove(path)
+    
+    def open_pdf_with_ocr(self, doc: str) -> pdfplumber.pdf.PDF:
+        """
+        Tries to open a PDF document. If an error occurs when opening the PDF,
+        then OCR is applied and the PDF is reopened.
+        Args:
+            parser (Any): An instance of a parser, expected to have a pdf_ocr method.
+            doc (str): Path to the PDF document to be parsed.
+        Returns:
+            pdfplumber.pdf.PDF: An opened PDF document via pdfplumber.
+        """
+        try:
+            report = pdfplumber.open(doc)
+        except:
+            temp = tempfile.mkstemp('.pdf')[1]
+            temp_path = tempfile.gettempdir()
+            self.pdf_ocr(doc, temp, temp_path=temp_path)
+            try:
+                report = pdfplumber.open(temp)
+            except:
+                raise Exception('Failed to open the PDF even after applying OCR.')
+        return report
 
     def save(
             self,

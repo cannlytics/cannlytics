@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 1/5/2021
-Updated: 8/21/2023
+Updated: 8/24/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Django settings powered by environment variables and
@@ -139,9 +139,8 @@ MIDDLEWARE = [
 #     r"^https://\w+\.cannlytics\.com$",
 #     r"^https://cannlytics-website-[\w-]+\.a\.run\.app$",
 # ]
-CORS_ALLOWED_ORIGINS = ['*']
-# CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_URLS_REGEX = r"^/api/.*$"
 CORS_ALLOW_HEADERS = (
     "accept",
     "authorization",
@@ -149,10 +148,9 @@ CORS_ALLOW_HEADERS = (
     "user-agent",
     "x-csrftoken",
     "x-requested-with",
-    "Origin",
+    "origin",
     "token",
 )
-SESSION_COOKIE_SAMESITE = 'None'
 
 #----------------------------------------------------------------------#
 # Livereload

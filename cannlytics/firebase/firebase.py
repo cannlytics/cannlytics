@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/7/2021
-Updated: 8/21/2023
+Updated: 8/24/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: A wrapper of `firebase_admin` to make interacting with a Firestore
@@ -27,9 +27,6 @@ from typing import Any, List, Optional, Tuple
 from dotenv import dotenv_values
 
 # External imports
-# from google.auth.transport import requests as gauth_requests
-# from google.auth import default, compute_engine
-# from google.cloud import storage
 import requests
 import ulid
 from firebase_admin import (
@@ -844,8 +841,6 @@ def get_file_url(
         ref: str,
         bucket_name: Optional[str] = None,
         expiration: Optional[int] = 604800,
-        credentials: Optional[dict] = None,
-        version: Optional[str] = None,
     ) -> str:
     """Return the storage URL of a given file reference.
     Args:
@@ -857,46 +852,14 @@ def get_file_url(
     """
     bucket = storage.bucket(name=bucket_name)
     blob = bucket.blob(ref)
-    return blob.generate_signed_url(
-        expiration,
-        credentials=credentials,
-        version=version,
-    )
-
-
-# def generate_signed_url(bucket_name, blob_name, expiration_time=3600):
-#     """
-#     Generate a signed URL for a given blob in Google Cloud Storage.
-    
-#     Parameters:
-#     - bucket_name (str): The name of the bucket.
-#     - blob_name (str): The name of the blob.
-#     - expiration_time (int): Time in seconds for the URL to expire. Default is 1 hour.
-    
-#     Returns:
-#     - str: The signed URL or an empty string if an error occurs.
-#     """
-#     credentials, _ = default()
-#     auth_request = gauth_requests.Request()
-#     credentials.refresh(auth_request)
-#     signing_credentials = compute_engine.IDTokenCredentials(
-#         auth_request,
-#         "",  # Add target_audience value if necessary
-#         service_account_email=credentials.service_account_email
-#     )
-#     client = storage.Client(credentials=credentials)
-#     bucket = client.bucket(bucket_name)
-#     blob = bucket.blob(blob_name)
-#     try:
-#         url = blob.generate_signed_url(
-#             expiration=expiration_time,
-#             credentials=signing_credentials,
-#             version="v4"
-#         )
-#         return url
-#     except Exception as e:
-#         print(f"Failed to generate signed URL: {e}")
-#         return ""
+    blob.make_public()
+    return blob.public_url
+    # Deprecated (8/24/2023):
+    # return blob.generate_signed_url(
+    #     expiration,
+    #     credentials=credentials,
+    #     version=version,
+    # )
 
 
 def upload_file(

@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 7/2/2023
+Updated: 8/24/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with COA data.
@@ -61,8 +61,6 @@ def save_file(
         file,
         collection='files',
         project_id=None,
-        credentials=None,
-        version='v4'
     ) -> dict:
     """Save a user's file to Firebase Storage."""
 
@@ -76,11 +74,11 @@ def save_file(
         filepath = temp[1]
 
     # If the file is a PDF, then create an image of the first page.
-    elif filepath.endswith('.pdf'):
-        filepath = 'coa.png'
-        pdf = pdfplumber.open(filepath)
-        image = pdf.pages[0].to_image(resolution=96)
-        image.save(filepath)
+    # elif filepath.endswith('.pdf'):
+    #     filepath = 'coa.png'
+    #     pdf = pdfplumber.open(filepath)
+    #     image = pdf.pages[0].to_image(resolution=96)
+    #     image.save(filepath)
 
     # Otherwise, assume that it is an image.
     else:
@@ -94,25 +92,23 @@ def save_file(
     ref = 'users/%s/%s/%s.%s' % (uid, collection, doc_id, ext)
     upload_file(
         destination_blob_name=ref,
-        source_file_name=image,
+        source_file_name=filepath,
         bucket_name=STORAGE_BUCKET
     )
 
     # Get download and short URLs.
+    download_url, short_url = None, None
     try:
-        download_url = get_file_url(
-            ref,
-            bucket_name=STORAGE_BUCKET,
-            credentials=credentials,
-            version=version,
-        )
+        download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
         short_url = create_short_url(
             api_key=FIREBASE_API_KEY,
             long_url=download_url,
             project_name=project_id,
         )
-    except:
-        download_url, short_url = None, None
+    except Exception as e:
+        print('Failed to create URLs:', e)
+
+    # Return the file data.
     filename = filepath.split('/')[-1].split('.')[0]
     return {
         'filename': filename,
@@ -334,7 +330,7 @@ def api_data_coas(request, coa_id=None):
 
         # Initialize OpenAI.
         try:
-            credentials, project_id = google.auth.default()
+            _, project_id = google.auth.default()
             openai_api_key = access_secret_version(
                 project_id=project_id,
                 secret_id='OPENAI_API_KEY',
@@ -364,8 +360,14 @@ def api_data_coas(request, coa_id=None):
 
             # Save user's file to Firebase Storage.
             try:
-                file_data = save_file(uid, doc, 'coas', project_id=project_id, credentials=credentials)
+                file_data = save_file(
+                    uid=uid,
+                    file=doc,
+                    collection='coas',
+                    project_id=project_id,
+                )
             except:
+                print('Failed to save file:', doc)
                 file_data = {}
 
             # Parse the document.
@@ -376,9 +378,9 @@ def api_data_coas(request, coa_id=None):
             except:
                 try:
 
-                    # Require tokens to parse with AI.
-                    if current_tokens < 1:
-                        continue
+                    # DEV: Require tokens to parse with AI.
+                    # if current_tokens < 1:
+                    #     continue
 
                     # Parse COA with AI.
                     print('Parsing with AI:', doc)
@@ -388,18 +390,24 @@ def api_data_coas(request, coa_id=None):
                         user=uid,
                         use_cached=True,
                         verbose=True,
+                        # model='gpt-3.5-turbo',
+                        max_tokens=4_000,
+                        max_prompt_length=2_400,
                     )
                     parsed_data.append({**data, **file_data})
                     all_prompts.extend(prompts)
                     total_cost += cost
                     
                     # Debit the tokens from the user's account.
-                    current_tokens -= 1
-                    increment_value(
-                        ref=f'subscribers/{uid}',
-                        field='tokens',
-                        amount=-1,
-                    )
+                    try:
+                        current_tokens -= 1
+                        increment_value(
+                            ref=f'subscribers/{uid}',
+                            field='tokens',
+                            amount=-1,
+                        )
+                    except:
+                        print('Failed to debit tokens from user:', uid)
                 except:
                     print('Failed to parse:', doc)
                     continue
@@ -409,8 +417,14 @@ def api_data_coas(request, coa_id=None):
 
             # Save user's file to Firebase Storage.
             try:
-                file_data = save_file(uid, doc, 'coas', project_id=project_id, credentials=credentials)
+                file_data = save_file(
+                    uid=uid,
+                    file=doc,
+                    collection='coas',
+                    project_id=project_id,
+                )
             except:
+                print('Failed to save file:', doc)
                 file_data = {}
 
             coa_url = None
@@ -422,9 +436,9 @@ def api_data_coas(request, coa_id=None):
                 parsed_data.append({**data[0], **file_data})
             except:
 
-                # Require tokens to parse with AI.
-                if current_tokens < 1:
-                    continue
+                # DEV: Require tokens to parse with AI.
+                # if current_tokens < 1:
+                #     continue
 
                 # Try to parse with AI.
                 try:
@@ -433,20 +447,25 @@ def api_data_coas(request, coa_id=None):
                         doc,
                         openai_api_key=openai_api_key,
                         user=uid,
-                        use_cached=True,
+                        # use_cached=True,
                         verbose=True,
+                        max_tokens=4_000,
+                        max_prompt_length=2_400,
                     )
                     parsed_data.append({**data, **file_data})
                     all_prompts.extend(prompts)
                     total_cost += cost
 
                     # Debit the tokens from the user's account.
-                    current_tokens -= 1
-                    increment_value(
-                        ref=f'subscribers/{uid}',
-                        field='tokens',
-                        amount=-1,
-                    )
+                    try:
+                        current_tokens -= 1
+                        increment_value(
+                            ref=f'subscribers/{uid}',
+                            field='tokens',
+                            amount=-1,
+                        )
+                    except:
+                        print('Failed to debit tokens from user:', uid)
                 except:
                     print('Failed to parse URL:', coa_url)
                     continue
@@ -545,7 +564,6 @@ def api_data_coas(request, coa_id=None):
 
 
 @api_view(['POST', 'OPTIONS'])
-@csrf_exempt
 def download_coa_data(request):
     """Download posted data as a .xlsx file. Pass a `data` field in the
     body with the data, an object or an array of objects, to standardize
@@ -555,13 +573,11 @@ def download_coa_data(request):
     claims = authenticate_request(request)
     uid = claims['uid'] if claims else 'cannlytics'
 
-    # TODO: Allow the user to specify the Firestore query
-    # that they want to download.
-
     # Read the posted data.
     data = loads(request.body.decode('utf-8'))['data']
-    print(f'USER {uid} POSTED OBSERVATIONS:', len(data))
-    if len(data) > MAX_OBSERVATIONS_PER_FILE:
+    count = len(data)
+    print(f'USER {uid} POSTED OBSERVATIONS:', count)
+    if count > MAX_OBSERVATIONS_PER_FILE:
         message = f'Too many observations, please limit your request to {MAX_OBSERVATIONS_PER_FILE} observations at a time.'
         response = Response({'error': True, 'message': message}, status=400)
         response['Access-Control-Allow-Origin'] = '*'
@@ -584,49 +600,45 @@ def download_coa_data(request):
 
     # Upload the file to Firebase Storage.
     ref = 'users/%s/lab_results/%s' % (uid, filename)
-    credentials, project_id = google.auth.default()
+    _, project_id = google.auth.default()
     upload_file(
         destination_blob_name=ref,
         source_file_name=temp.name,
         bucket_name=STORAGE_BUCKET
     )
-    print('UPLOADED FILE:', ref)
 
-    # Get download and short URLs.
-    # FIXME:
+    # Delete the temporary file.
+    os.unlink(temp.name)
+
+    # Get download URL and create a short URL.
+    download_url, short_url = None, None
     try:
-        download_url = get_file_url(
-            ref,
-            bucket_name=STORAGE_BUCKET,
-            credentials=credentials,
-            version='v4'
-        )
-        print('DOWNLOAD URL:', download_url)
-    except Exception as e:
-        print('Failed to get download URL:', e)
-        download_url = ''
-    try:
+        download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
         short_url = create_short_url(
             api_key=FIREBASE_API_KEY,
             long_url=download_url,
             project_name=project_id
         )
-        print('SHORT URL:', short_url)
     except Exception as e:
-        print('Failed to create short URL:', e)
-        short_url = ''
+        print('Failed to get download URL:', e)
+
+    # Format file data.
     data = {
         'filename': filename,
         'file_ref': ref,
         'download_url': download_url,
         'short_url': short_url,
     }
-    print('FILE DATA:', data)
 
-    # TODO: Save the file data?
-
-    # Delete the temporary file.
-    os.unlink(temp.name)
+    # Save the file data as a log.
+    create_log(
+        f'users/{uid}/downloads',
+        claims=claims,
+        action=f'Downloaded {count} COAs.',
+        log_type='data',
+        key='download_coa_data',
+        changes=[data]
+    )
 
     # Return the data.
     response = Response({'success': True, 'data': data}, status=200)

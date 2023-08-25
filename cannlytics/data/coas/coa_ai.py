@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 6/12/2023
-Updated: 8/22/2023
+Updated: 8/24/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -133,6 +133,7 @@ Where:
 | `status` | "pass" | The pass / fail status for contaminant screening analyses. |
 """
 
+
 def parse_coa_with_ai(
         parser: Any,
         doc: str,
@@ -205,17 +206,17 @@ def parse_coa_with_ai(
                 response = requests.get(doc, headers=headers)
             with open(coa_pdf, 'wb') as pdf:
                 pdf.write(response.content)
-            report = pdfplumber.open(coa_pdf)
+            report = parser.open_pdf_with_ocr(coa_pdf)
             obs['coa_pdf'] = filename
         else:
-            report = pdfplumber.open(doc)
+            report = parser.open_pdf_with_ocr(doc)
             obs['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
     else:
         report = doc
         obs['coa_pdf'] = report.stream.name.replace('\\', '/').split('/')[-1]
 
     # Get the text of the PDF.
-    report = pdfplumber.open(doc)
+    report = parser.open_pdf_with_ocr(doc)
     front_page_text = report.pages[0].extract_text()
     all_text = '\n\n'.join([page.extract_text() for page in report.pages])
 
@@ -425,7 +426,7 @@ def parse_coa_with_ai(
 
     # Standardize results.
     for i, result in enumerate(results):
-        key = snake_case(result['name'])
+        key = snake_case(result.get('name', 'Unknown'))
         results[i]['key'] = parser.analytes.get(key, key)
 
     # Standardize dates.

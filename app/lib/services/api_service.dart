@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/20/2023
-// Updated: 8/19/2023
+// Updated: 8/24/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -56,8 +56,7 @@ class APIService {
     String method = 'GET';
     String idToken = await getUserToken();
     final headers = {
-      // 'Content-Type': 'application/json;charset=UTF-8',
-      'Content-Type': 'text/plain',
+      'Content-Type': 'application/json;charset=UTF-8',
       'Accept': 'application/json',
       'Authorization': 'Bearer $idToken',
     };
@@ -147,7 +146,7 @@ class APIService {
     }
 
     // Ensure the client doesn't add cookies.
-    request.headers.remove('Cookie');
+    // request.headers.remove('Cookie');
 
     // Get the response.
     final response = await client.send(request).then(http.Response.fromStream);

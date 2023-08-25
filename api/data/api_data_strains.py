@@ -18,6 +18,8 @@ import tempfile
 # External imports:
 from django.views.decorators.csrf import csrf_exempt
 import google.auth
+from google.auth import compute_engine
+import google.auth.transport.requests as g_requests
 import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -279,26 +281,20 @@ def api_data_strains(request, strain_id=None):
             )
 
             # Generate a download URL.
-            credentials, project_id = google.auth.default()
+            download_url, short_url = None, None
+            _, project_id = google.auth.default()
             try:
                 download_url = get_file_url(
                     ref=destination_blob_name,
                     bucket_name=STORAGE_BUCKET,
-                    credentials=credentials,
-                    version='v4',
                 )
-            except:
-                download_url = None
-            try:
                 short_url = create_short_url(
                     api_key=FIREBASE_API_KEY,
                     long_url=download_url,
                     project_name=project_id
                 )
-                print('SHORT URL:', short_url)
             except Exception as e:
-                print('Failed to create short URL:', e)
-                short_url = None
+                print('Failed to create URLs:', e)
 
             # Format image data.
             content = data = {

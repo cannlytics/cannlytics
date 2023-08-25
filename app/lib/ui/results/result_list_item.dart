@@ -37,9 +37,9 @@ class LabResultItem extends StatelessWidget {
     void handleDownload(BuildContext context, LabResult labResult) {
       // Handle malformed results.
       var data = labResult.toMap();
-      if (data['results'] == null) {
-        data['results'] = [];
-      }
+      // if (data['results'] == null) {
+      //   data['results'] = [];
+      // }
 
       // Determine if the theme is dark
       bool isDark = Theme.of(context).brightness == Brightness.dark;
@@ -58,6 +58,7 @@ class LabResultItem extends StatelessWidget {
       );
 
       // Download the data.
+      print(data);
       DownloadService.downloadData(
         [data],
         '/api/data/coas/download',

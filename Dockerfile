@@ -79,5 +79,5 @@ USER appuser
 # For environments with multiple CPU cores, you can increase
 # the number of workers to be equal to the cores available.
 # See: https://docs.gunicorn.org/en/stable/design.html
-# --worker-class gevent --preload --concurrency 80
-CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 4 --threads 16 --timeout 200 -m 4096M $APP.core.wsgi:application
+# --worker-class gevent --preload --concurrency 80 -m 4000m
+CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0 $APP.core.wsgi:application

@@ -249,6 +249,7 @@ class UserResultsGrid extends ConsumerWidget {
       );
 
       // Download the data.
+      print(item);
       DownloadService.downloadData(
         [item!],
         '/api/data/coas/download',

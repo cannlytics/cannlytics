@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/22/2021
-Updated: 7/2/2023
+Updated: 8/24/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: Authentication mechanisms for the Cannlytics API,
@@ -48,7 +48,7 @@ def authenticate_request(request):
             except:
                 claims = verify_token(key)
         except:
-            claims = {}
+            pass
     return claims
 
 

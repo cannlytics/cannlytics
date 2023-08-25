@@ -31,29 +31,29 @@ from website.views import (
 )
 
 
-def read_file(request, filename):
-    """Read a file from the filesystem."""
-    # Dictionary to hold content types based on file extensions
-    content_types = {
-        '.json': 'application/json',
-        '.ico': 'image/x-icon',
-    }
+# def read_file(request, filename):
+#     """Read a file from the filesystem."""
+#     # Dictionary to hold content types based on file extensions
+#     content_types = {
+#         '.json': 'application/json',
+#         '.ico': 'image/x-icon',
+#     }
     
-    # Build the file path dynamically
-    file_path = os.path.join('static', filename)
+#     # Build the file path dynamically
+#     file_path = os.path.join('static', filename)
 
-    # Check if the file exists, and raise a 404 if not.
-    if not os.path.exists(file_path):
-        raise Http404
+#     # Check if the file exists, and raise a 404 if not.
+#     if not os.path.exists(file_path):
+#         raise Http404
 
-    # Read the file's content.
-    with open(file_path, 'r') as f:
-        file_content = f.read()
+#     # Read the file's content.
+#     with open(file_path, 'r') as f:
+#         file_content = f.read()
 
-    # Get the file's extension and determine the content type.
-    file_extension = os.path.splitext(filename)[1]
-    content_type = content_types.get(file_extension, 'text/plain')
-    return HttpResponse(file_content, content_type=content_type)
+#     # Get the file's extension and determine the content type.
+#     file_extension = os.path.splitext(filename)[1]
+#     content_type = content_types.get(file_extension, 'text/plain')
+#     return HttpResponse(file_content, content_type=content_type)
 
 
 # Main URLs.
@@ -100,8 +100,9 @@ urlpatterns = [
     path('effects', RedirectView.as_view(url='/stats/effects', permanent=False)),
     path('labs', RedirectView.as_view(url='/testing/labs', permanent=False)),
     path('subscriptions', RedirectView.as_view(url='/account/subscriptions', permanent=False)),
-    path('.well-known/<filename>', read_file),
-    path('favicon.ico', read_file, {'filename': 'favicon.ico'}),
+    path('.well-known/ai-plugin.json', RedirectView.as_view(url='/static/ai-plugin.json', permanent=False)),
+    path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=False)),
+    path('robots.txt', RedirectView.as_view(url='/static/robots.txt', permanent=False)),
     path('<page>', main.GeneralView.as_view(), name='page'),
     path('<page>/<section>', main.GeneralView.as_view(), name='section'),
     path('<page>/<section>/<str:unit>', main.GeneralView.as_view(), name='unit'),
