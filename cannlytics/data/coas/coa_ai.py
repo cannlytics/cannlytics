@@ -286,10 +286,18 @@ def parse_coa_with_ai(
                     temperature=temperature,
                     user=user,
                 )
+        
+        # Print the response.
+        if verbose:
+            print('RESPONSE:', json.dumps(metadata_response.to_dict()))
+        
+        # Record the prompt.
         prompts.append({
             'messages': messages,
             'completion': json.dumps(metadata_response.to_dict()),
         })
+
+        # Record the content.
         content = metadata_response['choices'][0]['message']['content']
         if verbose:
             print('CONTENT:', json.dumps(content))
@@ -359,6 +367,9 @@ def parse_coa_with_ai(
                         temperature=temperature,
                         user=user,
                     )
+            if verbose:
+                print('RESPONSE:', json.dumps(results_response.to_dict()))
+
             prompts.append({
                 'messages': messages,
                 'completion': json.dumps(results_response.to_dict()),

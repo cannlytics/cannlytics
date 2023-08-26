@@ -1468,7 +1468,10 @@ class CoADoc:
                 # Map keys to analysis for ordering for Values worksheet columns.
                 # FIXME: Handle observations without results.
                 pairs = []
-                analytes = list(results_data['key'].unique())
+                try:
+                    analytes = list(results_data['key'].unique())
+                except:
+                    analytes = []
                 for a in analytes:
                     try:
                         analyses = results_data.loc[results_data['key'] == a]

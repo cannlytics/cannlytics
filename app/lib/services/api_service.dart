@@ -21,13 +21,16 @@ class APIService {
 
   // Define the base URL.
   // FIXME: Smoothly switch between dev and production.
-  // static String _baseUrl = 'http://127.0.0.1:8000/api';
-  static String _baseUrl = 'https://cannlytics.com/api';
+  static String _baseUrl = 'http://127.0.0.1:8000/api';
+  // static String _baseUrl = 'https://cannlytics.com/api';
 
   /// Initialize the API service.
   static void initialize() {
     bool isProduction = bool.fromEnvironment('dart.vm.product');
-    if (isProduction) _baseUrl = 'https://cannlytics.com/api';
+    if (isProduction) {
+      print('Using production API.');
+      _baseUrl = 'https://cannlytics.com/api';
+    }
   }
 
   /// API base URL.

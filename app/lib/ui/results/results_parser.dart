@@ -32,7 +32,8 @@ class ResultsParserInterface extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen the the COA parser provider.
-    final asyncData = ref.watch(coaParser);
+    // final asyncData = ref.watch(coaParser);
+    final asyncData = ref.watch(userJobsProvider);
 
     // Dynamic rendering.
     return asyncData.when(
@@ -73,9 +74,11 @@ class ResultsParserInterface extends HookConsumerWidget {
                       shrinkWrap: true,
                       children: [
                         for (final item in items)
-                          LabResultItem(
-                            labResult: LabResult.fromMap(item ?? {}),
-                          ),
+                          item?['job_finished']
+                              ? LabResultItem(
+                                  labResult: LabResult.fromMap(item ?? {}),
+                                )
+                              : Text('Processing job...'),
                       ],
                     ),
                   ),

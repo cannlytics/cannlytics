@@ -115,6 +115,18 @@ class FirestoreService {
     });
   }
 
+  /// 
+
+  /// Add a document data to a given collection.
+  Future<String> addDocument({
+    required String path,
+    required Map<String, dynamic> data,
+  }) async {
+    final reference = FirebaseFirestore.instance.collection(path);
+    DocumentReference<Map<String, dynamic>> doc = await reference.add(data);
+    return doc.id;
+  }
+
   /// Set data in Firestore given a path, optionally merging data.
   Future<void> updateDocument({
     required String path,

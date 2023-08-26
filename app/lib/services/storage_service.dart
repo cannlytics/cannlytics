@@ -12,6 +12,7 @@
 
 // Package imports:
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/services.dart';
 
 // import 'package:path_provider/path_provider.dart';
 
@@ -19,9 +20,37 @@ import 'package:firebase_storage/firebase_storage.dart';
 class StorageService {
   const StorageService._();
 
-  // TODO: Upload file(s).
+  static final storage = FirebaseStorage.instance;
 
-  // TODO: Download file(s).
+  // Upload a file to Firebase Storage.
+  // static Future<String> uploadFile(File file, {String? filePath}) async {
+  //   if (filePath == null) {
+  //     filePath = 'uploads/${DateTime.now().toIso8601String()}_${file.basename}';
+  //   }
+  //   final ref = storage.ref().child(filePath);
+  //   await ref.putFile(file);
+  //   return ref.fullPath;
+  // }
+
+  // Upload raw data to Firebase Storage.
+  static Future<void> uploadRawData(String fileRef, Uint8List data) async {
+    final ref = storage.ref().child(fileRef);
+    await ref.putData(data);
+  }
+
+  // Get a download URL.
+  static Future<String?> getDownloadUrl(String path) async {
+    try {
+      return await storage.ref(path).getDownloadURL();
+    } on FirebaseException catch (e) {
+      // User likely canceled.
+      print(e);
+      return null;
+    }
+  }
+}
+
+    // TODO: Download file(s).
   // static Future<void> downloadFile(String path) async {
   //   FirebaseStorage storage = FirebaseStorage.instance;
   //   Directory directory = await getApplicationDocumentsDirectory();
@@ -33,21 +62,8 @@ class StorageService {
   //   }
   // }
 
-  // Get a download URL.
-  static Future<String?> getDownloadUrl(String path) async {
-    FirebaseStorage storage = FirebaseStorage.instance;
-    try {
-      return await storage.ref(path).getDownloadURL();
-    } on FirebaseException catch (e) {
-      // User likely canceled.
-      print(e);
-      return null;
-    }
-  }
-
   // TODO: Create short URL.
 
   // TODO: Delete file(s).
 
   // TODO: Rename file(s).
-}

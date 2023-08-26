@@ -22,12 +22,10 @@ class DownloadService {
     List<Map<dynamic, dynamic>?> data,
     String url,
   ) async {
-    print('Downloading from URL: $url');
     var response = await APIService.apiRequest(
       url,
       data: {'data': data},
     );
-    print('Download response: $response');
     try {
       FileUtils.downloadUrl(response['download_url'], response['filename']);
     } catch (error) {

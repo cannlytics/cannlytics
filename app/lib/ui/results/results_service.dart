@@ -11,6 +11,7 @@
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_data/services/storage_service.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -55,6 +56,18 @@ final labResultProvider =
       ref.read(updatedLabResult.notifier).update((state) => labResult);
       return labResult;
     },
+  );
+});
+
+/// Stream user's COA parsing jobs from Firebase.
+final userJobsProvider = StreamProvider.autoDispose<List<Map?>>((ref) async* {
+  final FirestoreService _dataSource = ref.watch(firestoreProvider);
+  final user = ref.watch(userProvider).value;
+  if (user == null) return;
+  yield* _dataSource.streamCollection(
+    path: 'users/${user.uid}/parse_coa_jobs',
+    builder: (data, documentId) => data,
+    queryBuilder: (query) => query.orderBy('job_created_at', descending: true),
   );
 });
 
@@ -105,24 +118,60 @@ class COAParser extends AsyncNotifier<List<Map?>> {
     return [];
   }
 
+  /// TODO: Load un-finished jobs.
+
+  /// Common method to create a job in Firestore and return data for it
+  Future<Map<String, dynamic>> _createJob(
+    String uid, {
+    dynamic file,
+    String? fileName,
+    String? fileUrl,
+  }) async {
+    // Create a job document in Firestore.
+    DocumentReference docRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('parse_coa_jobs')
+        .doc();
+    String jobId = docRef.id;
+    String fileRef = 'users/$uid/parse_coa_jobs/$jobId';
+
+    // If there's a file, upload it to Firebase Storage and get the download URL.
+    if (file != null) {
+      await StorageService.uploadRawData(fileRef, file);
+      fileUrl = await StorageService.getDownloadUrl(fileRef);
+    }
+
+    // Return the job data.
+    return {
+      'uid': uid,
+      'job_id': jobId,
+      'job_created_at': DateTime.now().toIso8601String(),
+      'job_finished_at': null,
+      'job_error': false,
+      'job_error_message': null,
+      'job_duration': 0,
+      'job_file_ref': fileRef,
+      'job_file_url': fileUrl,
+      'job_file_name': fileName,
+    };
+  }
+
   /// Parse a COA from a URL.
   /// [✓]: TEST: https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTM3N181NzU5NDAwMDQwMzA0NTVfMDQxNzIwMjNfNjQzZDhiOTcyMzE1YQ==
-  Future<void> parseUrl(String url) async {
+  Future<void> parseUrl(String fileUrl) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final items = await APIService.apiRequest('/api/data/coas', data: {
-        'urls': [url]
-      });
-      if (items is List<dynamic>) {
-        List<Map<String, dynamic>> mappedItems = items.map((item) {
-          return item as Map<String, dynamic>;
-        }).toList();
-
-        return mappedItems;
-      } else {
-        throw Exception(
-            'Invalid data format. Expected List<Map<String, dynamic>>.');
-      }
+      var allData = state.value ?? [];
+      final user = ref.watch(userProvider).value;
+      if (user == null) return [];
+      Map<String, dynamic> data = await _createJob(user.uid, fileUrl: fileUrl);
+      allData.add(data);
+      String docRef = 'users/${user.uid}/parse_coa_jobs/${data['job_id']}';
+      await ref
+          .read(firestoreProvider)
+          .updateDocument(path: docRef, data: data);
+      return allData;
     });
   }
 
@@ -133,22 +182,39 @@ class COAParser extends AsyncNotifier<List<Map?>> {
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      var items = await APIService.apiRequest(
-        '/api/data/coas',
-        files: files,
-        fileNames: fileNames,
-      );
-      if (items is Map) {
-        // handle it as a single map
-        return [items];
-      } else if (items is List<Map>) {
-        // handle it as a list of maps
-        return items;
-      } else {
-        // throw Exception("Unexpected type for items");
-        return items.cast<Map<dynamic, dynamic>?>();
+      var allData = state.value ?? [];
+      final user = ref.watch(userProvider).value;
+      if (user == null) return [];
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var fileName =
+            fileNames != null && fileNames.length > i ? fileNames[i] : null;
+        String? extension = file.extension;
+        String? mimeType;
+        switch (extension) {
+          case 'pdf':
+            mimeType = 'application/pdf';
+            break;
+          case 'jpg':
+          case 'jpeg':
+            mimeType = 'image/jpeg';
+            break;
+          case 'png':
+            mimeType = 'image/png';
+            break;
+        }
+        Map<String, dynamic> data = await _createJob(
+          user.uid,
+          file: file,
+          fileName: fileName,
+        );
+        allData.add(data);
+        String docRef = 'users/${user.uid}/parse_coa_jobs/${data['job_id']}';
+        await ref
+            .read(firestoreProvider)
+            .updateDocument(path: docRef, data: data);
       }
-      // return items.cast<Map<dynamic, dynamic>?>();
+      return allData;
     });
   }
 
