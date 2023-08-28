@@ -17,54 +17,51 @@ from datetime import datetime
 import os
 
 # External imports:
+from cloudevents.http import CloudEvent
 from firebase_admin import initialize_app, firestore
-from firebase_functions import options
-from firebase_functions.firestore_fn import (
-  on_document_created,
-  Event,
-  Change,
-  DocumentSnapshot,
-)
+import functions_framework
+from google.events.cloud import firestore
 import requests
-
 
 # Initialize Firebase.
 initialize_app()
 
-# Set the region.
-options.set_global_options(region=options.SupportedRegion.US_CENTRAL1)
 
+@functions_framework.cloud_event
+def parse_coa_jobs(cloud_event: CloudEvent) -> None:
+    """Triggers by a change to a Firestore document.
+    Args:
+        cloud_event: cloud event with information on the firestore event trigger
+    """
+    # Extract the Firestore event data.
+    firestore_payload = firestore.DocumentEventData()
+    firestore_payload._pb.ParseFromString(cloud_event.data)
 
-@on_document_created(
-    document='users/{uid}/parse_coa_jobs/{job_id}',
-    timeout_sec=900,
-    memory=options.MemoryOption.MB_512,
-)
-def parse_coa_jobs(event: Event[Change[DocumentSnapshot]]) -> None:
-    """Perform COA parsing jobs when a user's jobs changes."""
+    # Extract parameters from the resource name.
+    # Assuming the document name format is: projects/{project_id}/databases/(default)/documents/users/{uid}/parse_coa_jobs/{job_id}
+    resource_name = cloud_event['source'].split('/')
+    uid = resource_name[-3]
+    job_id = resource_name[-1]
+    print('User:', uid, 'Job:', job_id)
 
     # Initialize Firestore DB.
-    db = firestore.client()
-
-    # Get a dictionary representing the document
-    uid = event.params['uid']
-    job_id = event.params['job_id']
-    print('User:', uid, 'Job:', job_id)
+    db = firestore.Client()
 
     # Read Cannlytics API key.
     cannlytics_api_key = os.getenv('CANNLYTICS_API_KEY')
     if cannlytics_api_key is not None:
         print('Found API key.')
 
-    # If the document is new, it's a new job being created.
-    print("New job being created")
+    # Check if the document is new.
+    # TODO: This part may need some refinement, because it's not clear how you determine a new job.
+    print('New job being created')
     start_time = datetime.now()
 
     # Get the COA URL.
-    job_information = event.data.to_dict()
-    coa_url = job_information.get('job_file_url')
+    job_information = firestore_payload.value.fields
+    coa_url = job_information.get('job_file_url').string_value
     print('COA URL:', coa_url)
-    if coa_url is None:
+    if not coa_url:
         print('No COA URL provided')
         return
 
@@ -73,6 +70,7 @@ def parse_coa_jobs(event: Event[Change[DocumentSnapshot]]) -> None:
     headers = {'Authorization': 'Bearer %s' % cannlytics_api_key}
     response = requests.post(api_url, data={'urls': [coa_url]}, headers=headers)
     print('Response:', response.status_code)
+
     try:
         lab_result_data = response.json()
     except:
