@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/30/2022
+Updated: 8/28/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -160,14 +160,17 @@ def parse_cc_url(
     obs = {'lims': 'Confident Cannabis'}
 
     # Find the sample image.
-    el = parser.driver.find_element(
-        by=By.CLASS_NAME,
-        value='product-box-cc'
-    )
-    img = el.find_element(by=By.TAG_NAME, value='img')
-    image_url = img.get_attribute('src')
-    filename = image_url.split('/')[-1]
-    obs['images'] = [{'url': image_url, 'filename': filename}]
+    try:
+        el = parser.driver.find_element(
+            by=By.CLASS_NAME,
+            value='product-box-cc'
+        )
+        img = el.find_element(by=By.TAG_NAME, value='img')
+        image_url = img.get_attribute('src')
+        filename = image_url.split('/')[-1]
+        obs['images'] = [{'url': image_url, 'filename': filename}]
+    except:
+        obs['images'] = []
 
     # Try to get the sample details.
     el = parser.driver.find_element(
@@ -238,7 +241,10 @@ def parse_cc_url(
             # Get the cannabinoids totals.
             # Future work: Make the columns dynamic.
             columns = ['name', 'value', 'mg_g']
-            table = el.find_element(by=By.TAG_NAME, value='table')
+            try:
+                table = el.find_element(by=By.TAG_NAME, value='table')
+            except NoSuchElementException:
+                continue
             rows = table.find_elements(by=By.TAG_NAME, value='tr')
             for row in rows[1:]:
                 result = {'analysis': 'cannabinoids', 'units': 'percent'}
@@ -354,7 +360,11 @@ def parse_cc_url(
         # Try to get lab data.
         producer = ''
         if title == 'order info':
-            img = el.find_element(by=By.TAG_NAME, value='img')
+            try:
+                img = el.find_element(by=By.TAG_NAME, value='img')
+                lab_image_url = img.get_attribute('src')
+            except:
+                lab_image_url = None
             producer = el.find_element(
                 by=By.CLASS_NAME,
                 value='public-name',
@@ -375,21 +385,67 @@ def parse_cc_url(
                 by=By.CLASS_NAME,
                 value='address-email',
             ).text
-            block = el.find_element(
-                by=By.TAG_NAME,
-                value='confident-address',
-            ).text.split('\n')
-            street = block[1]
-            address = tuple(block[2].split(', '))
-            obs['lab'] = lab
-            obs['lab_address'] = f'{street} {", ".join(address)}'
-            obs['lab_image_url'] = img.get_attribute('src')
-            obs['lab_street'] = street
-            obs['lab_city'] = address[0]
-            obs['lab_state'], obs['lab_zipcode'] = tuple(address[-1].split(' '))
-            obs['lab_phone'] = lab_phone
-            obs['lab_email'] = lab_email
-            obs['producer'] = producer
+
+            # Extract the street, address line 1.
+            try:
+                lab_street = el.find_element(
+                    by=By.CSS_SELECTOR,
+                    value='div[ng-if="address.addressLine1 || address.address_line_1"]'
+                ).text
+            except NoSuchElementException:
+                lab_street = ''
+
+            # Extract address line 2, if it exists.
+            try:
+                suite = el.find_element(
+                    by=By.CSS_SELECTOR,
+                    value='div[ng-if="address.addressLine2 || address.address_line_2"]'
+                ).text
+                if suite:
+                    lab_street = f'{lab_street} {suite}'
+            except NoSuchElementException:
+                pass
+
+            # Extract city, state, and zipcode.
+            try:
+                address_el = el.find_element(
+                    by=By.TAG_NAME,
+                    value='confident-address',
+                )
+                city_state_zip_div = address_el.find_element(
+                    by=By.XPATH,
+                    value='.//div[contains(@class, "address-url")]/preceding-sibling::div[1]'
+                )
+                city_state_zip = city_state_zip_div.text
+                lab_city, state_zip = city_state_zip.split(', ')
+                lab_state, lab_zipcode = state_zip.split(' ')
+            except:
+                lab_city, lab_state, lab_zipcode = '', '', ''
+
+            # Extract the lab's website
+            try:
+                lab_website = address_el.find_element(
+                    by=By.CSS_SELECTOR,
+                    value='.address-url'
+                ).text
+            except NoSuchElementException:
+                lab_website = ''
+
+            # Aggregate observation data.
+            obs = {
+                **obs,
+                'lab': lab,
+                'lab_address': f'{lab_street}, {lab_city}, {lab_state} {lab_zipcode}',
+                'lab_street': lab_street,
+                'lab_city': lab_city,
+                'lab_state': lab_state,
+                'lab_zipcode': lab_zipcode,
+                'lab_phone': lab_phone,
+                'lab_email': lab_email,
+                'lab_image_url': lab_image_url,
+                'lab_website': lab_website,
+                'producer': producer
+            }
 
     # Return the sample with a freshly minted sample ID.
     obs = {**CONFIDENT_CANNABIS, **obs}
@@ -452,13 +508,18 @@ def parse_cc_coa(
     return data
 
 
+# === Tests ===
 if __name__ == '__main__':
 
     # Test Confident Cannabis CoAs parsing.
     from cannlytics.data.coas import CoADoc
 
-    # Specify where your test data lives.
-    DATA_DIR = '../../../tests/assets/coas'
+    # # [✓] Test: Ensure that the web driver works.
+    # parser = CoADoc()
+    # parser.driver = webdriver.Chrome(
+    #     options=parser.options,
+    #     service=parser.service,
+    # )
 
     # # [✓] TEST: Parse a CoA URL.
     # cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'

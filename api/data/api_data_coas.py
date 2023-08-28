@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 8/24/2023
+Updated: 8/28/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with COA data.
@@ -66,7 +66,9 @@ def save_file(
 
     # If the file is a URL, then download the file.
     if file.startswith('https'):
-        ext = file.split('.')[-1].split('?')[0].lower()
+        # FIXME: This isn't working as intended with Firebase Storage URLs.
+        # ext = file.split('.')[-1].split('?')[0].lower()
+        ext = '.pdf'
         response = requests.get(file)
         temp = tempfile.mkstemp(f'.{ext}')
         with os.fdopen(temp[0], 'wb') as temp_file:
@@ -88,7 +90,9 @@ def save_file(
     doc_id = str(uuid.uuid4())
 
     # Upload the file to Firebase Storage.
-    ext = filepath.split('.').pop()
+    # FIXME: This isn't working as intended with Firebase Storage URLs.
+    # ext = filepath.split('.').pop()
+    ext = '.pdf'
     ref = 'users/%s/%s/%s.%s' % (uid, collection, doc_id, ext)
     upload_file(
         destination_blob_name=ref,
@@ -111,6 +115,7 @@ def save_file(
     # Return the file data.
     filename = filepath.split('/')[-1].split('.')[0]
     return {
+        'filepath': filepath,
         'filename': filename,
         'file_ref': ref,
         'download_url': download_url,
@@ -371,46 +376,47 @@ def api_data_coas(request, coa_id=None):
                 file_data = {}
 
             # Parse the document.
-            try:
-                print('Parsing:', doc)
-                data = parser.parse(doc)
-                parsed_data.append({**data[0], **file_data})
-            except:
-                try:
+            # try:
+            print('Parsing:', doc)
+            report_text = pdfplumb
+            data = parser.parse(doc)
+            parsed_data.append({**data[0], **file_data})
+            # except:
+            #     try:
 
-                    # DEV: Require tokens to parse with AI.
-                    # if current_tokens < 1:
-                    #     continue
+            #         # DEV: Require tokens to parse with AI.
+            #         # if current_tokens < 1:
+            #         #     continue
 
-                    # Parse COA with AI.
-                    print('Parsing with AI:', doc)
-                    data, prompts, cost = parser.parse_with_ai(
-                        doc,
-                        openai_api_key=openai_api_key,
-                        user=uid,
-                        use_cached=True,
-                        verbose=True,
-                        # model='gpt-3.5-turbo',
-                        max_tokens=4_000,
-                        max_prompt_length=2_400,
-                    )
-                    parsed_data.append({**data, **file_data})
-                    all_prompts.extend(prompts)
-                    total_cost += cost
+            #         # Parse COA with AI.
+            #         print('Parsing with AI:', doc)
+            #         data, prompts, cost = parser.parse_with_ai(
+            #             doc,
+            #             openai_api_key=openai_api_key,
+            #             user=uid,
+            #             use_cached=True,
+            #             verbose=True,
+            #             # model='gpt-3.5-turbo',
+            #             max_tokens=4_000,
+            #             max_prompt_length=2_400,
+            #         )
+            #         parsed_data.append({**data, **file_data})
+            #         all_prompts.extend(prompts)
+            #         total_cost += cost
                     
-                    # Debit the tokens from the user's account.
-                    try:
-                        current_tokens -= 1
-                        increment_value(
-                            ref=f'subscribers/{uid}',
-                            field='tokens',
-                            amount=-1,
-                        )
-                    except:
-                        print('Failed to debit tokens from user:', uid)
-                except:
-                    print('Failed to parse:', doc)
-                    continue
+            #         # Debit the tokens from the user's account.
+            #         try:
+            #             current_tokens -= 1
+            #             increment_value(
+            #                 ref=f'subscribers/{uid}',
+            #                 field='tokens',
+            #                 amount=-1,
+            #             )
+            #         except:
+            #             print('Failed to debit tokens from user:', uid)
+            #     except:
+            #         print('Failed to parse:', doc)
+            #         continue
 
         # Try to parse images.
         for doc in images:
