@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 8/7/2023
+Updated: 8/29/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -15,7 +15,7 @@ Original license: MIT <https://github.com/cannabisdata/cannabisdata/blob/main/LI
 Data Source:
 
     - WSLCB PRR (latest)
-    URL: <https://lcb.box.com/s/d0g3mhtdyohhi4ic3zucekpnz017fy9o>
+    URL: <https://lcb.app.box.com/s/plb3dr2fvsuvgixb38g10tbwqos73biz>
 
 """
 # Standard imports:
@@ -466,12 +466,12 @@ if __name__ == '__main__':
     # Parameters.
     manager = CCRS()
     first_file = 0
-    last_file = 1
-    reverse = True
+    last_file = 10
+    reverse = False
 
     # Specify where your data lives.
     base = 'D://data/washington/'
-    data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
+    data_dir = f'{base}/CCRS PRR (8-4-23)/CCRS PRR (8-4-23)/'
     stats_dir = f'{base}/ccrs-stats/'
     sales_dir = os.path.join(stats_dir, 'sales')
     sales_stats_dir = os.path.join(stats_dir, 'sales_stats')

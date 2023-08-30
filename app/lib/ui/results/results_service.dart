@@ -21,7 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_data/common/inputs/string_controller.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
-import 'package:cannlytics_data/services/api_service.dart';
+// import 'package:cannlytics_data/services/api_service.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
 
@@ -63,6 +63,7 @@ final labResultProvider =
 final userJobsProvider = StreamProvider.autoDispose<List<Map?>>((ref) async* {
   final FirestoreService _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
+  yield* Stream.value(<Map<dynamic, dynamic>?>[]);
   if (user == null) return;
   yield* _dataSource.streamCollection(
     path: 'users/${user.uid}/parse_coa_jobs',
@@ -115,10 +116,23 @@ class COAParser extends AsyncNotifier<List<Map?>> {
   /// Initialize the parser.
   @override
   Future<List<Map?>> build() async {
-    return [];
+    return await _loadUnfinishedJobs();
+    // return [];
   }
 
-  /// TODO: Load un-finished jobs.
+  /// Load un-finished jobs.
+  Future<List<Map?>> _loadUnfinishedJobs() async {
+    final user = ref.watch(userProvider).value;
+    if (user == null) return [];
+    var snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('parse_coa_jobs')
+        .where('job_finished', isEqualTo: false)
+        .get();
+
+    return snapshot.docs.map((doc) => doc.data()).toList();
+  }
 
   /// Common method to create a job in Firestore and return data for it
   Future<Map<String, dynamic>> _createJob(
@@ -189,20 +203,20 @@ class COAParser extends AsyncNotifier<List<Map?>> {
         var file = files[i];
         var fileName =
             fileNames != null && fileNames.length > i ? fileNames[i] : null;
-        String? extension = file.extension;
-        String? mimeType;
-        switch (extension) {
-          case 'pdf':
-            mimeType = 'application/pdf';
-            break;
-          case 'jpg':
-          case 'jpeg':
-            mimeType = 'image/jpeg';
-            break;
-          case 'png':
-            mimeType = 'image/png';
-            break;
-        }
+        // String? extension = file.extension;
+        // String? mimeType;
+        // switch (extension) {
+        //   case 'pdf':
+        //     mimeType = 'application/pdf';
+        //     break;
+        //   case 'jpg':
+        //   case 'jpeg':
+        //     mimeType = 'image/jpeg';
+        //     break;
+        //   case 'png':
+        //     mimeType = 'image/png';
+        //     break;
+        // }
         Map<String, dynamic> data = await _createJob(
           user.uid,
           file: file,

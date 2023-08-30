@@ -375,11 +375,13 @@ def api_data_coas(request, coa_id=None):
                 print('Failed to save file:', doc)
                 file_data = {}
 
+            # Use the temporary file for parsing.
+            coa_file = file_data.get('filepath', doc)
+
             # Parse the document.
             # try:
-            print('Parsing:', doc)
-            report_text = pdfplumb
-            data = parser.parse(doc)
+            print('Parsing:', coa_file)
+            data = parser.parse(coa_file)
             parsed_data.append({**data[0], **file_data})
             # except:
             #     try:

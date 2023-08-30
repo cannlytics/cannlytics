@@ -127,16 +127,15 @@ class _ResultsTabsState extends State<ResultsTabs>
             dividerColor: Colors.transparent,
             tabs: [
               PillTabButton(
-                text: 'Parse',
-                icon: Icons.auto_awesome,
+                text: 'Your Results',
+                icon: Icons.science,
                 isSelected: _tabController.index == 0,
               ),
               PillTabButton(
-                text: 'Your Results',
-                icon: Icons.science,
+                text: 'Parse',
+                icon: Icons.auto_awesome,
                 isSelected: _tabController.index == 1,
               ),
-
               // PillTabButton(
               //   text: 'Explore',
               //   icon: Icons.explore,
@@ -146,12 +145,12 @@ class _ResultsTabsState extends State<ResultsTabs>
           ),
         ),
         Container(
-          height: MediaQuery.of(context).size.height,
+          height: MediaQuery.of(context).size.height * 2,
           child: TabBarView(
             controller: _tabController,
             children: [
-              ResultsParserInterface(),
               UserResultsInterface(tabController: _tabController),
+              ResultsParserInterface(tabController: _tabController),
               // LabResultsSearchForm(),
             ],
           ),

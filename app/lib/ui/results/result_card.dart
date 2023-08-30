@@ -59,22 +59,22 @@ class ResultCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Image.
-                  if (item.downloadUrl != null && item.downloadUrl != '')
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () => context.go('/results/${item.labId}'),
-                          // FIXME: Render image
-                          child: Image.network(
-                            item.downloadUrl!,
-                            height: (screenWidth < 720) ? 64 : 128,
-                          ),
-                          // child: Text(item.downloadUrl ?? ''),
-                        ),
-                      ),
-                    ),
+                  // if (item.downloadUrl != null && item.downloadUrl != '')
+                  //   Padding(
+                  //     padding: const EdgeInsets.only(bottom: 8.0),
+                  //     child: MouseRegion(
+                  //       cursor: SystemMouseCursors.click,
+                  //       child: GestureDetector(
+                  //         onTap: () => context.go('/results/${item.labId}'),
+                  //         // FIXME: Render image
+                  //         child: Image.network(
+                  //           item.downloadUrl!,
+                  //           height: (screenWidth < 720) ? 64 : 128,
+                  //         ),
+                  //         // child: Text(item.downloadUrl ?? ''),
+                  //       ),
+                  //     ),
+                  //   ),
                   Spacer(),
 
                   // Menu button here:

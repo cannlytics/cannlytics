@@ -10,6 +10,7 @@
 // Flutter imports:
 // import 'package:cannlytics_data/services/api_service.dart';
 // import 'package:cannlytics_data/services/storage_service.dart';
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 
@@ -57,6 +58,7 @@ class UserResultsInterface extends ConsumerWidget {
               context,
               children: [_placeholder(context, ref)],
             )
+          // FIXME: Replace with a table!
           : UserResultsGrid(items: items),
     );
   }
@@ -102,13 +104,11 @@ class UserResultsInterface extends ConsumerWidget {
             // Image.
             Padding(
               padding: EdgeInsets.only(top: 16),
-              child: ClipOval(
-                child: Image.network(
-                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_a_scroll_with_robot_arms_and_a_disguise_for_a_face_a_57549317-7365-4350-9b7b-84fd7421b103.png?alt=media&token=72631010-56c8-4981-a936-58b89294f336',
-                  width: 128,
-                  height: 128,
-                  fit: BoxFit.cover,
-                ),
+              child: Image.network(
+                'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3',
+                // width: 128,
+                height: 128,
+                fit: BoxFit.cover,
               ),
             ),
 
@@ -131,8 +131,15 @@ class UserResultsInterface extends ConsumerWidget {
                   ),
                   gapH12,
                   PrimaryButton(
-                    text: 'Parse results',
-                    onPressed: () => tabController?.animateTo(1),
+                    text: 'Sign in',
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SignInDialog(isSignUp: false);
+                        },
+                      );
+                    },
                   ),
                 ],
               ),

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 7/28/2023
+Updated: 8/29/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -218,12 +218,12 @@ def curate_ccrs_lab_results(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-08-29 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D://data/washington/'
-    data_dir = f'{base}/June 2023 CCRS Monthly Reports/June 2023 CCRS Monthly Reports/'
+    data_dir = f'{base}/CCRS PRR (8-4-23)/CCRS PRR (8-4-23)/'
     stats_dir = f'{base}/ccrs-stats/'
     manager = CCRS()
     lab_results = curate_ccrs_lab_results(manager, data_dir, stats_dir)
