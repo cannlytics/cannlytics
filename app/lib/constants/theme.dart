@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/17/2023
-// Updated: 6/18/2023
+// Updated: 9/1/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -18,13 +18,9 @@ import 'colors.dart';
 
 /// An instance of the theme provider.
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
-  // Get the current time of day.
+  // Set the initial theme mode based on the time of day.
   final now = TimeOfDay.now();
-
-  // Determine whether it is daytime (between 8am and 8pm).
   final isDaytime = now.hour >= 8 && now.hour < 20;
-
-  // Set the theme mode based on the time of day.
   return isDaytime ? ThemeMode.light : ThemeMode.dark;
 });
 
@@ -53,17 +49,20 @@ class AppTheme {
     );
 
     // Create the ThemeData with the ColorScheme and TextTheme.
-    // Also add on extra properties that ColorScheme seems to miss.
+    // Note: Also adds extra properties that `ColorScheme` seems to miss.
     // See: https://medium.com/@omlondhe/themedata-in-flutter-f6a67d9c636d
     var t = ThemeData.from(
       textTheme: textTheme,
       colorScheme: colorScheme,
     ).copyWith(
-      useMaterial3: true,
+      // General theme settings.
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      useMaterial3: true,
+      visualDensity: VisualDensity.compact,
+
+      // Color scheme.
       highlightColor:
           isDark ? DarkColors.primaryColors : LightColors.primaryColors,
-      visualDensity: VisualDensity.compact,
       scaffoldBackgroundColor: isDark ? const Color(0xFF323443) : Colors.white,
       dividerColor: isDark ? DarkColors.surface2 : LightColors.surface2,
       canvasColor: isDark
@@ -107,10 +106,6 @@ class AppTheme {
           }
           return Colors.transparent;
         }),
-        // decoration: BoxDecoration(
-        //   border: Border.all(color: Colors.grey),
-        //   borderRadius: BorderRadius.circular(3),
-        // ),
       ),
 
       // Dialog style.

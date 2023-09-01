@@ -4,12 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 8/29/2023
+// Updated: 9/1/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
+import 'package:cannlytics_data/common/layout/sign_in_placeholder.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/results/results_parser_job.dart';
 import 'package:flutter/foundation.dart';
@@ -41,83 +41,85 @@ class ResultsParserInterface extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen the the COA parser provider.
     final asyncData = ref.watch(coaParser);
-    final asyncJobs = ref.watch(userJobsProvider);
 
-    // Handle no-user.
+    // No-user interface.
     final user = ref.watch(userProvider).value;
-    if (user == null)
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SignInPlaceholder(
-            titleText: 'Parse results',
-            imageUrl:
-                'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3',
-            mainText: 'Sign in to parse your results',
-            subTitle:
-                'If you are signed in, then you can extract data from your certificates of analysis (COAs).',
-            onButtonPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return SignInDialog(isSignUp: false);
-                },
-              );
-            },
-            buttonText: 'Sign in',
-          ),
-        ],
-      );
+    if (user == null) return _noUser(context);
 
-    // Dynamic rendering.
+    // Dynamic interface.
     return asyncData.when(
-      // Data loaded state.
-      data: (items) => Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _body(context, ref, child: CoAUpload()),
-          asyncJobs.when(
-            data: (jobs) => _parsingJobs(context, ref, items: jobs),
-            error: (err, stack) => Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(Icons.error, color: Colors.red, size: 48.0),
-                    SizedBox(height: 16),
-                    Text(
-                      'An error occurred while loading jobs.',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            loading: () => Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          ),
-        ],
-      ),
-
-      // Loading state.
+      data: (items) => _dataLoaded(context, ref, items: items),
       loading: () => _body(context, ref, child: ParsingResultsPlaceholder()),
-
-      // Error state.
       error: (err, stack) => _errorMessage(context, ref, error: err),
     );
   }
 
-  /// Message displayed when an error occurs.
+  /// Data loaded interface.
+  Widget _dataLoaded(BuildContext context, WidgetRef ref, {dynamic items}) {
+    final asyncJobs = ref.watch(userJobsProvider);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _body(context, ref, child: CoAUpload()),
+        asyncJobs.when(
+          data: (jobs) => _parsingJobs(context, ref, items: jobs),
+          error: (err, stack) => Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.error, color: Colors.red, size: 48.0),
+                  SizedBox(height: 16),
+                  Text(
+                    'An error occurred while loading jobs.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          loading: () => Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// No user interface.
+  Widget _noUser(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SignInPlaceholder(
+          titleText: 'Parse results',
+          imageUrl:
+              'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3',
+          mainText: 'Sign in to parse your results',
+          subTitle:
+              'If you are signed in, then you can extract data from your certificates of analysis (COAs).',
+          onButtonPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) => SignInDialog(isSignUp: false),
+            );
+          },
+          buttonText: 'Sign in',
+        ),
+      ],
+    );
+  }
+
+  /// Error interface.
   Widget _errorMessage(BuildContext context, WidgetRef ref, {dynamic error}) {
     return Center(
       child: Padding(
@@ -274,6 +276,7 @@ class ResultsParserInterface extends HookConsumerWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Spacer(),
+                // Deprecated: Refresh button.
                 // IconButton(
                 //   icon: Icon(
                 //     Icons.refresh,
@@ -288,11 +291,60 @@ class ResultsParserInterface extends HookConsumerWidget {
             gapH16,
 
             // List of parsed lab results.
-            ListView(
-              shrinkWrap: true,
-              children: [
-                for (final item in items) ResultsParserJob(item: item)
-              ],
+            items.isEmpty
+                ? _placeholder(context, ref)
+                : ListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (final item in items) ResultsParserJob(item: item)
+                    ],
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Message displayed when there are no jobs.
+  Widget _placeholder(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Image.
+            Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: ClipOval(
+                child: Image.network(
+                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ficons%2Fai-icons%2Fcertificate.png?alt=media&token=8aa0ebbd-1625-4ff4-9843-9bf9d5646490',
+                  width: 128,
+                  height: 128,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+
+            // Text.
+            Container(
+              width: 540,
+              child: Column(
+                children: <Widget>[
+                  SelectableText(
+                    'No current jobs',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).textTheme.titleLarge!.color),
+                  ),
+                  SelectableText(
+                    'You can monitor your COA parsing jobs here.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -648,88 +700,6 @@ class COASearch extends ConsumerWidget {
         child: Icon(
           Icons.search_sharp,
           color: Theme.of(context).textTheme.labelMedium!.color,
-        ),
-      ),
-    );
-  }
-}
-
-/// Sign-in placeholder.
-class SignInPlaceholder extends StatelessWidget {
-  final String titleText;
-  final String? imageUrl;
-  final String mainText;
-  final String? subTitle;
-  final VoidCallback? onButtonPressed;
-  final String buttonText;
-
-  SignInPlaceholder({
-    required this.titleText,
-    this.imageUrl,
-    required this.mainText,
-    this.subTitle,
-    required this.onButtonPressed,
-    required this.buttonText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Title.
-            Row(
-              children: [
-                SelectableText(
-                  titleText,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-
-            // Image.
-            if (imageUrl != null)
-              Padding(
-                padding: EdgeInsets.only(top: 16),
-                child: Image.network(
-                  imageUrl!,
-                  // width: 128,
-                  height: 128,
-                  fit: BoxFit.cover,
-                ),
-              ),
-
-            // Text.
-            Container(
-              width: 540,
-              child: Column(
-                children: <Widget>[
-                  SelectableText(
-                    mainText,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 20,
-                        color: Theme.of(context).textTheme.titleLarge!.color),
-                  ),
-                  if (subTitle != null)
-                    SelectableText(
-                      subTitle!,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  gapH12,
-                  PrimaryButton(
-                    text: buttonText,
-                    onPressed: onButtonPressed,
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );

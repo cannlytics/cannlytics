@@ -70,17 +70,6 @@ class SideMenu extends ConsumerWidget {
           onTap: () => context.go('/'),
         ),
 
-        // Licensees link.
-        DrawerListTile(
-          title: 'Companies',
-          leading: SvgPicture.asset(
-            'assets/icons/emoji/dispensary-plain.svg',
-            width: 28,
-          ),
-          onTap: () => context.go('/licenses'),
-          isSelected: currentRoute.contains('/licenses'),
-        ),
-
         // Lab results link.
         DrawerListTile(
           title: 'Lab Results',
@@ -90,6 +79,17 @@ class SideMenu extends ConsumerWidget {
           ),
           onTap: () => context.go('/results'),
           isSelected: currentRoute.contains('/results'),
+        ),
+
+        // Licensees link.
+        DrawerListTile(
+          title: 'Licenses',
+          leading: SvgPicture.asset(
+            'assets/icons/emoji/dispensary-plain.svg',
+            width: 28,
+          ),
+          onTap: () => context.go('/licenses'),
+          isSelected: currentRoute.contains('/licenses'),
         ),
 
         // Sales link.

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/22/2023
-// Updated: 8/19/2023
+// Updated: 9/1/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -12,6 +12,7 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/utils/web_utils.dart'
     if (dart.library.io) 'package:cannlytics_data/utils/mobile_utils.dart';
 import 'package:flutter/cupertino.dart';
@@ -118,6 +119,45 @@ class InterfaceUtils {
           ),
         ],
       ),
+    );
+  }
+
+  /// Show a date picker.
+  static Future<DateTime?> themedDatePicker({
+    required BuildContext context,
+    required DateTime initialDate,
+    required DateTime firstDate,
+    required DateTime lastDate,
+    required bool isDark,
+  }) async {
+    return await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      builder: (BuildContext context, Widget? child) {
+        ThemeData baseTheme = isDark ? ThemeData.dark() : ThemeData.light();
+        return Theme(
+          data: baseTheme.copyWith(
+            colorScheme: baseTheme.colorScheme.copyWith(
+              primary: isDark ? DarkColors.green : LightColors.green,
+              onPrimary: baseTheme.colorScheme.onSurface,
+              surface: baseTheme.colorScheme.surface,
+              onSurface: baseTheme.colorScheme.onSurface,
+            ),
+            dialogBackgroundColor: baseTheme.colorScheme.surface,
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: baseTheme.colorScheme.onSurface,
+                    ),
+              ),
+            ),
+            splashFactory: InkRipple.splashFactory,
+          ),
+          child: child!,
+        );
+      },
     );
   }
 }
