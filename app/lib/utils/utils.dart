@@ -128,6 +128,22 @@ class TimeUtils {
   static String getReadableTime(DateTime date) {
     return DateFormat('MMMM d, y HH:mm').format(date);
   }
+
+  /// Convert a string to a DateTime.
+  static DateTime? parseDate(String? date) {
+    if (date == null) return null;
+    try {
+      return DateTime.parse(date);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Format a DateTime as a string.
+  static String formatDate(DateTime? date) {
+    if (date == null) return '';
+    return '${date.month}/${date.day}/${date.year}';
+  }
 }
 
 /// Data utility functions.

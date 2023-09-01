@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/18/2023
-// Updated: 8/6/2023
+// Updated: 8/30/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -73,9 +73,14 @@ class AppRoute extends GoRoute {
           routes: routes,
           pageBuilder: (context, state) {
             // Screen scaffold.
-            final pageContent = Scaffold(
-              body: builder(context, state),
-              resizeToAvoidBottomInset: false,
+            final pageContent = Title(
+              // TODO: Dynamic titles.
+              title: 'Cannlytics',
+              color: Colors.white,
+              child: Scaffold(
+                body: builder(context, state),
+                resizeToAvoidBottomInset: false,
+              ),
             );
 
             // Fade transition screen.

@@ -168,8 +168,6 @@ class LabResult {
 
   // Create model.
   factory LabResult.fromMap(Map data) {
-    print('LAB RESULT DATA:');
-    print(data);
     // Standardize results.
     List<Result?>? results;
     try {

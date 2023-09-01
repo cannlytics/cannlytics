@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/13/2023
-// Updated: 8/20/2023
+// Updated: 8/31/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -28,6 +28,7 @@ import 'package:cannlytics_data/ui/account/account_controller.dart';
 /* === Data === */
 
 /// Stream user results from Firebase.
+/// FIXME: Implement pagination.
 final userResults = StreamProvider.autoDispose<List<Map?>>((ref) async* {
   final FirestoreService _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
@@ -35,7 +36,8 @@ final userResults = StreamProvider.autoDispose<List<Map?>>((ref) async* {
   yield* _dataSource.streamCollection(
     path: 'users/${user.uid}/lab_results',
     builder: (data, documentId) => data,
-    queryBuilder: (query) => query.orderBy('coa_parsed_at', descending: true),
+    queryBuilder: (query) =>
+        query.orderBy('coa_parsed_at', descending: true).limit(10),
   );
 });
 
@@ -117,7 +119,6 @@ class COAParser extends AsyncNotifier<List<Map?>> {
   @override
   Future<List<Map?>> build() async {
     return await _loadUnfinishedJobs();
-    // return [];
   }
 
   /// Load un-finished jobs.
@@ -203,20 +204,6 @@ class COAParser extends AsyncNotifier<List<Map?>> {
         var file = files[i];
         var fileName =
             fileNames != null && fileNames.length > i ? fileNames[i] : null;
-        // String? extension = file.extension;
-        // String? mimeType;
-        // switch (extension) {
-        //   case 'pdf':
-        //     mimeType = 'application/pdf';
-        //     break;
-        //   case 'jpg':
-        //   case 'jpeg':
-        //     mimeType = 'image/jpeg';
-        //     break;
-        //   case 'png':
-        //     mimeType = 'image/png';
-        //     break;
-        // }
         Map<String, dynamic> data = await _createJob(
           user.uid,
           file: file,
@@ -230,6 +217,14 @@ class COAParser extends AsyncNotifier<List<Map?>> {
       }
       return allData;
     });
+  }
+
+  /// Delete a job.
+  Future<void> deleteJob(String uid, String jobId) async {
+    String docRef = 'users/$uid/parse_coa_jobs/$jobId';
+    await ref.read(firestoreProvider).deleteDocument(path: docRef);
+    state = AsyncValue.data(
+        (state.value ?? [])..removeWhere((item) => item?['job_id'] == jobId));
   }
 
   // Clear parsing results.

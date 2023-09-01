@@ -411,7 +411,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
 
       // Parsing details.
       KeyValueDataTable(
-        tableName: 'Parsing details',
+        tableName: 'Details',
         labels: [
           'COA Algorithm',
           'COA Algorithm Version',

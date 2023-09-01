@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 8/28/2023
+Updated: 8/31/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with COA data.
@@ -75,7 +75,7 @@ def save_file(
             temp_file.write(response.content)
         filepath = temp[1]
 
-    # If the file is a PDF, then create an image of the first page.
+    # Deprecated: If the file is a PDF, then create an image of the first page.
     # elif filepath.endswith('.pdf'):
     #     filepath = 'coa.png'
     #     pdf = pdfplumber.open(filepath)
@@ -149,7 +149,7 @@ def api_data_coas(request, coa_id=None):
     # Allow pro and premium users to query more than 1000 observations.
     elif support_level == 'pro' or support_level == 'premium':
         throttle = False
-    
+
     # Get a specific COA or query public COAs.
     if request.method == 'GET':
 
@@ -253,10 +253,9 @@ def api_data_coas(request, coa_id=None):
         user_subscription = get_document(f'subscribers/{uid}')
         current_tokens = user_subscription.get('tokens', 0) if user_subscription else 0
         if current_tokens < 1:
-            # message = 'You have 0 Cannlytics AI tokens. You need 1 AI token per AI job. You can purchase more tokens at https://cannlytics.com/account/subscriptions.'
-            # response = {'success': False, 'message': message}
-            # return Response(response, status=402)
-            print('USER HAS NO TOKENS. ALLOWING FOR TESTING.')
+            message = 'You have 0 Cannlytics AI tokens. You need 1 AI token per AI job. You can purchase more tokens at https://cannlytics.com/account/subscriptions.'
+            response = {'success': False, 'message': message}
+            return Response(response, status=402)
 
         # Get any user-posted data.
         try:
@@ -379,46 +378,46 @@ def api_data_coas(request, coa_id=None):
             coa_file = file_data.get('filepath', doc)
 
             # Parse the document.
-            # try:
-            print('Parsing:', coa_file)
-            data = parser.parse(coa_file)
-            parsed_data.append({**data[0], **file_data})
-            # except:
-            #     try:
+            try:
+                print('Parsing:', coa_file)
+                data = parser.parse(coa_file)
+                parsed_data.append({**data[0], **file_data})
+            except:
+                try:
 
-            #         # DEV: Require tokens to parse with AI.
-            #         # if current_tokens < 1:
-            #         #     continue
+                    # Require tokens to parse with AI.
+                    if current_tokens < 1:
+                        continue
 
-            #         # Parse COA with AI.
-            #         print('Parsing with AI:', doc)
-            #         data, prompts, cost = parser.parse_with_ai(
-            #             doc,
-            #             openai_api_key=openai_api_key,
-            #             user=uid,
-            #             use_cached=True,
-            #             verbose=True,
-            #             # model='gpt-3.5-turbo',
-            #             max_tokens=4_000,
-            #             max_prompt_length=2_400,
-            #         )
-            #         parsed_data.append({**data, **file_data})
-            #         all_prompts.extend(prompts)
-            #         total_cost += cost
+                    # Parse COA with AI.
+                    print('Parsing with AI:', doc)
+                    data, prompts, cost = parser.parse_with_ai(
+                        doc,
+                        openai_api_key=openai_api_key,
+                        user=uid,
+                        use_cached=True,
+                        verbose=True,
+                        # model='gpt-3.5-turbo',
+                        max_tokens=4_000,
+                        max_prompt_length=2_750,
+                    )
+                    parsed_data.append({**data, **file_data})
+                    all_prompts.extend(prompts)
+                    total_cost += cost
                     
-            #         # Debit the tokens from the user's account.
-            #         try:
-            #             current_tokens -= 1
-            #             increment_value(
-            #                 ref=f'subscribers/{uid}',
-            #                 field='tokens',
-            #                 amount=-1,
-            #             )
-            #         except:
-            #             print('Failed to debit tokens from user:', uid)
-            #     except:
-            #         print('Failed to parse:', doc)
-            #         continue
+                    # Debit the tokens from the user's account.
+                    try:
+                        current_tokens -= 1
+                        increment_value(
+                            ref=f'subscribers/{uid}',
+                            field='tokens',
+                            amount=-1,
+                        )
+                    except:
+                        print('Failed to debit tokens from user:', uid)
+                except:
+                    print('Failed to parse:', doc)
+                    continue
 
         # Try to parse images.
         for doc in images:
@@ -444,9 +443,9 @@ def api_data_coas(request, coa_id=None):
                 parsed_data.append({**data[0], **file_data})
             except:
 
-                # DEV: Require tokens to parse with AI.
-                # if current_tokens < 1:
-                #     continue
+                # Require tokens to parse with AI.
+                if current_tokens < 1:
+                    continue
 
                 # Try to parse with AI.
                 try:
@@ -458,7 +457,7 @@ def api_data_coas(request, coa_id=None):
                         # use_cached=True,
                         verbose=True,
                         max_tokens=4_000,
-                        max_prompt_length=2_400,
+                        max_prompt_length=2_750,
                     )
                     parsed_data.append({**data, **file_data})
                     all_prompts.extend(prompts)

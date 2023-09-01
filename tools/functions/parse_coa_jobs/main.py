@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/25/2023
-Updated: 8/29/2023
+Updated: 8/31/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -12,17 +12,23 @@ Description:
     Perform COA parsing jobs in a cloud function upon job creation in
     Firestore. Outputs job data back to Firestore.
 
+Note:
+
+    This function is written for Gen 1 Google Cloud Functions.
+    In the future, it may be necessary to migrate the code to Gen 2.
+
 """
 # Standard imports:
 from datetime import datetime
 import os
 
 # External imports:
-# from cloudevents.http import CloudEvent
-# import functions_framework
-# from google.events.cloud import firestore
 from firebase_admin import initialize_app, firestore
 import requests
+
+# Gen 2 imports:
+# from cloudevents.http import CloudEvent
+# import functions_framework
 
 
 # Define the API URL.
@@ -40,21 +46,20 @@ except ValueError:
 
 # Gen 1:
 def parse_coa_jobs(event, context) -> None:
+    """Perform COA parsing jobs when a user's jobs changes."""
 
 # Gen 2:
 # def parse_coa_jobs(cloud_event: CloudEvent):
-    """Perform COA parsing jobs when a user's jobs changes."""
 
     # Initialization.
     start_time = datetime.now()
 
     # Gen 1: Get the necessary data.
     data = event['value']
-    print(data)
     uid = data['fields']['uid']['stringValue']
     job_id = data['fields']['job_id']['stringValue']
-    print('User:', uid, 'Job:', job_id)
-    job_file_url = data['fields']['job_file_url']['stringValue']
+    print('USER:', uid)
+    print('JOB ID:', job_id)
 
     # Gen 2: Get the necessary data.
     # firestore_payload = firestore.DocumentEventData()
@@ -68,11 +73,12 @@ def parse_coa_jobs(event, context) -> None:
     # coa_url = firestore_payload.value.fields['job_file_url'].string_value
 
     # Ensure the user passed a COA URL.
+    job_file_url = data['fields']['job_file_url']['stringValue']
     print('JOB FILE URL:', job_file_url)
     if job_file_url is None:
         print('No job file URL provided.')
         return
-    
+
     # Read Cannlytics API key.
     cannlytics_api_key = os.getenv('CANNLYTICS_API_KEY')
     if cannlytics_api_key is not None:

@@ -88,32 +88,31 @@ if __name__ == '__main__':
     if DEV:
         BASE = 'http://127.0.0.1:8000'
 
-    # # # [✓] TEST: Parse a single COA PDF.
-    # test_api_parse_coa_pdf(
-    #     api_key,
-    #     doc='../../assets/coas/acs/27675_0002407047.pdf',
-    #     base=BASE,
-    # )
+    # [✓] TEST: Parse a single COA PDF.
+    test_api_parse_coa_pdf(
+        api_key,
+        doc='../../assets/coas/acs/27675_0002407047.pdf',
+        base=BASE,
+    )
 
-    # # [✓] TEST: Parse a single COA image.
-    # test_api_parse_coa_image(
-    #     api_key,
-    #     doc='../../assets/qr-codes/0dC3ZxO.png',
-    #     base=BASE,
-    # )
+    # [✓] TEST: Parse a single COA image.
+    test_api_parse_coa_image(
+        api_key,
+        doc='../../assets/qr-codes/0dC3ZxO.png',
+        base=BASE,
+    )
 
-    # # [✓] TEST: Parse a single COA URL.
-    # test_api_parse_coa_url(
-    #     api_key,
-    #     ['https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTM3N181NzU5NDAwMDQwMzA0NTVfMDQxNzIwMjNfNjQzZDhiOTcyMzE1YQ=='],
-    #     base=BASE,
-    # )
+    # [✓] TEST: Parse a single COA URL.
+    test_api_parse_coa_url(
+        api_key,
+        ['https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTM3N181NzU5NDAwMDQwMzA0NTVfMDQxNzIwMjNfNjQzZDhiOTcyMzE1YQ=='],
+        base=BASE,
+    )
 
     # [✓] TEST: Parse a unidentified COA with AI!
     test_api_parse_coa_pdf(
         api_key,
-        # doc='../../assets/coas/gtl/Pineapple-XX-5-13-2129146.pdf',
-        doc=r"C:\Users\keega\Downloads\ArcannaCitrusTest.pdf",
+        doc='../../assets/coas/gtl/Pineapple-XX-5-13-2129146.pdf',
         base=BASE,
     )
 

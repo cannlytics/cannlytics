@@ -259,7 +259,42 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    DATA_DIR = 'D://data/california/lab_results'
+    data_dir = 'D://data/california/lab_results'
 
     # Get CA lab results.
-    ca_results = get_glass_house_farms_lab_results(DATA_DIR)
+    # ca_results = get_glass_house_farms_lab_results(data_dir)
+
+
+# DEV: Parse all COAs in directory.
+parser = CoADoc()
+license_number = GLASS_HOUSE_FARMS['producer_license_number']
+license_pdf_dir = os.path.join(data_dir, f'.datasets/{license_number}/pdfs')
+pdf_files = os.listdir(license_pdf_dir)
+pdf_files.reverse()
+
+# Parse the data from all COAs.
+coa_data = []
+for pdf_file in pdf_files:
+    try:
+        file_name = os.path.join(license_pdf_dir, pdf_file)
+        obs = parser.parse(file_name)
+        coa_data.append(obs[0])
+        print('Parsed:', pdf_file)
+    except Exception as e:
+        print('Error parsing:', pdf_file)
+        print(e)
+        continue
+
+# Save the lab results.
+date = datetime.now().strftime('%Y-%m-%d')
+outfile = os.path.join(data_dir, f'ca-lab-results-{date}.xlsx')
+try:
+    parser.save(coa_data, outfile)
+except:
+    try:
+        coa_df = pd.DataFrame(coa_data)
+        coa_df.to_excel(outfile, index=False)
+    except:
+        print('Error saving:', outfile)
+
+print('Saved %i results:' % len(coa_data), outfile)

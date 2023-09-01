@@ -126,20 +126,20 @@ class ResultsParserInterface extends HookConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Reset button.
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.end,
-            //   children: [
-            //     IconButton(
-            //       icon: Icon(
-            //         Icons.refresh,
-            //         color: Theme.of(context).textTheme.bodyMedium!.color,
-            //       ),
-            //       onPressed: () {
-            //         ref.read(coaParser.notifier).clear();
-            //       },
-            //     ),
-            //   ],
-            // ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.refresh,
+                    color: Theme.of(context).textTheme.bodyMedium!.color,
+                  ),
+                  onPressed: () {
+                    ref.read(coaParser.notifier).clear();
+                  },
+                ),
+              ],
+            ),
 
             // Image.
             Padding(
@@ -258,8 +258,6 @@ class ResultsParserInterface extends HookConsumerWidget {
 
   /// Parsing jobs.
   Widget _parsingJobs(BuildContext context, WidgetRef ref, {required items}) {
-    print('ITEMS:');
-    print(items);
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -276,15 +274,15 @@ class ResultsParserInterface extends HookConsumerWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Spacer(),
-                IconButton(
-                  icon: Icon(
-                    Icons.refresh,
-                    color: Theme.of(context).textTheme.bodyMedium!.color,
-                  ),
-                  onPressed: () {
-                    ref.read(coaParser.notifier).clear();
-                  },
-                ),
+                // IconButton(
+                //   icon: Icon(
+                //     Icons.refresh,
+                //     color: Theme.of(context).textTheme.bodyMedium!.color,
+                //   ),
+                //   onPressed: () {
+                //     ref.read(coaParser.notifier).clear();
+                //   },
+                // ),
               ],
             ),
             gapH16,

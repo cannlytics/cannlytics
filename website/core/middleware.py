@@ -89,6 +89,7 @@ class BlockUserAgentsMiddleware(object):
     # See: https://github.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/blob/master/_generator_lists/bad-user-agents.list
     # Last updated: 8/20/2023
     BLOCKED_USER_AGENTS = {
+        'Firefox 56', 'Go-http-client/2.0', 'empty',
         '01h4x.com', '360Spider', '404checker', '404enemy', '80legs', 
         'ADmantX', 'AIBOT', 'ALittle\ Client', 'ALittle Client', 'ASPSeek', 'Abonti', 
         'Aboundex', 'Aboundexbot', 'Acunetix', 'AdsTxtCrawlerTP', 'AfD-Verbotsverfahren',

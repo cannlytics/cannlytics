@@ -11,6 +11,7 @@
 // import 'package:cannlytics_data/services/api_service.dart';
 // import 'package:cannlytics_data/services/storage_service.dart';
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
+import 'package:cannlytics_data/ui/results/user_results_table.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 
@@ -59,7 +60,21 @@ class UserResultsInterface extends ConsumerWidget {
               children: [_placeholder(context, ref)],
             )
           // FIXME: Replace with a table!
-          : UserResultsGrid(items: items),
+          // : UserResultsGrid(items: items),
+          : SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 24,
+                ),
+                child: Column(
+                  children: [
+                    UserResultsTable(),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 
@@ -256,7 +271,6 @@ class UserResultsGrid extends ConsumerWidget {
       );
 
       // Download the data.
-      print(item);
       DownloadService.downloadData(
         [item!],
         '/api/data/coas/download',
@@ -337,6 +351,9 @@ class UserResultsGrid extends ConsumerWidget {
       }
     };
 
+    /// Listen to the selected items for downloading.
+    final downloadItems = ref.watch(resultsFilterProvider).value;
+
     // Render the card.
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -358,7 +375,7 @@ class UserResultsGrid extends ConsumerWidget {
               // Download all button.
               if (user != null)
                 DownloadButton(
-                  items: items,
+                  items: downloadItems ?? items,
                   url: '/api/data/coas/download',
                 ),
             ],

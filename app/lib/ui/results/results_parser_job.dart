@@ -10,6 +10,8 @@
 // Flutter imports:
 import 'dart:async';
 
+import 'package:cannlytics_data/ui/results/results_service.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -21,17 +23,18 @@ import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 // import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/services/download_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A results parser job item.
 /// Optional: Add image.
-class ResultsParserJob extends StatelessWidget {
+class ResultsParserJob extends ConsumerWidget {
   ResultsParserJob({required this.item});
 
   // Properties
   final Map item;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Render.
     return Card(
       margin: EdgeInsets.only(left: 24, right: 24, bottom: 24),
@@ -43,14 +46,15 @@ class ResultsParserJob extends StatelessWidget {
         margin: EdgeInsets.all(0),
         padding: EdgeInsets.all(16.0),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(3.0)),
-        child: SelectionArea(child: _content(context)),
+        child: SelectionArea(child: _content(context, ref)),
       ),
     );
   }
 
-  Widget _content(BuildContext context) {
+  Widget _content(BuildContext context, WidgetRef ref) {
     // Style and theme.
     final screenWidth = MediaQuery.of(context).size.width;
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Download logic.
     void handleDownload(BuildContext context, Map data) {
@@ -59,9 +63,6 @@ class ResultsParserJob extends StatelessWidget {
       // if (data['results'] == null) {
       //   data['results'] = [];
       // }
-
-      // Determine if the theme is dark
-      bool isDark = Theme.of(context).brightness == Brightness.dark;
 
       // Show a downloading notification.
       ScaffoldMessenger.of(context).showSnackBar(
@@ -77,7 +78,6 @@ class ResultsParserJob extends StatelessWidget {
       );
 
       // Download the data.
-      print(data);
       DownloadService.downloadData(
         [data],
         '/api/data/coas/download',
@@ -116,22 +116,30 @@ class ResultsParserJob extends StatelessWidget {
                 },
               ),
 
-            // TODO: Delete job.
+            // Delete a job.
+            IconButton(
+              icon: Icon(
+                Icons.delete,
+                color: Theme.of(context).textTheme.bodyMedium!.color,
+              ),
+              onPressed: () async {
+                final delete = await InterfaceUtils.showAlertDialog(
+                  context: context,
+                  title: 'Are you sure that you want to delete this job?',
+                  cancelActionText: 'Cancel',
+                  defaultActionText: 'Delete',
+                  primaryActionColor:
+                      isDark ? DarkColors.orange : LightColors.orange,
+                );
+                if (delete == true) {
+                  await ref
+                      .read(coaParser.notifier)
+                      .deleteJob(item['uid'], item['job_id']);
+                }
+              },
+            ),
 
-            // TODO: Open job.
-
-            // // Open COA URL link.
-            // if (item['download_url']?.isNotEmpty ?? false) gapW8,
-            // if (item['download_url']?.isNotEmpty ?? false)
-            //   IconButton(
-            //     icon: Icon(
-            //       Icons.open_in_new,
-            //       color: Theme.of(context).textTheme.labelMedium!.color,
-            //     ),
-            //     onPressed: () {
-            //       launchUrl(Uri.parse(item['download_url']!));
-            //     },
-            //   ),
+            // FUTURE WORK: Open a job.
           ],
         ),
         Text(

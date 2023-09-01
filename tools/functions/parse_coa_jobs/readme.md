@@ -6,11 +6,11 @@ The `parse_coa_jobs` cloud function is designed to execute COA (Certificate of A
 
 ## Trigger
 
-The function is triggered by any change (creation, update, or delete) in Firestore at the path: `users/{uid}/parse_coa_jobs/{job_id}`.
+The function is triggered by the creation of a document in Firestore at the path: `users/{uid}/parse_coa_jobs/{job_id}`.
 
 ## Inputs
 
-When the function is triggered by a Firestore change, it expects the document to have the following fields:
+When the function is triggered by a Firestore document creation, it expects the document to have the following fields:
 
 - `uid`: The unique identifier of the user.
 - `job_id`: A unique identifier for the job.
@@ -29,6 +29,14 @@ If successful, additional lab result data from the parsed COA will be added to t
 
 `job_error_message`: A message describing the error.
 
+## Dependencies
+
+The `parse_coa_jobs` cloud function requires a `env.yaml` file in the root directory of the function. This file should contain the following environment variables:
+
+- `CANNLYTICS_API_KEY`: The API key for the Cannlytics API, used for parsing COAs.
+
+See the `requirements.txt` file for a list of Python dependencies.
+
 ## Deployment
 
 You can deploy the `parse_coa_jobs` cloud function using the Google Cloud SDK with the following command:
@@ -36,7 +44,7 @@ You can deploy the `parse_coa_jobs` cloud function using the Google Cloud SDK wi
 *Gen 1*
 
 ```shell
-gcloud functions deploy parse_coa_jobs --entry-point=parse_coa_jobs --trigger-event="providers/cloud.firestore/eventTypes/document.write" --trigger-resource="projects/cannlytics/databases/(default)/documents/users/{uid}/parse_coa_jobs/{job_id}" --runtime python311 --source=. --memory=512MB --timeout=540s
+gcloud functions deploy parse_coa_jobs --entry-point=parse_coa_jobs --trigger-event="providers/cloud.firestore/eventTypes/document.created" --trigger-resource="projects/cannlytics/databases/(default)/documents/users/{uid}/parse_coa_jobs/{job_id}" --runtime python311 --source=. --memory=512MB --timeout=540s
 ```
 
 *Gen 2*
@@ -52,7 +60,7 @@ The provided code contains a test block that mocks data for testing the function
 ```py
 if __name__ == '__main__':
 
-    # Mock authentication sign up.
+    # Mock document.
     data = {
         'uid': 'qXRaz2QQW8RwTlJjpP39c1I8xM03',
         'email': 'help@cannlytics.com',
