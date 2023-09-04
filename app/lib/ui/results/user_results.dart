@@ -8,16 +8,16 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
-import 'package:cannlytics_data/common/layout/sign_in_placeholder.dart';
-import 'package:cannlytics_data/ui/results/user_results_table.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
+import 'package:cannlytics_data/common/layout/sign_in_placeholder.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cannlytics_data/ui/results/user_results_table.dart';
 
 /// User lab results user interface.
 class UserResultsInterface extends ConsumerWidget {

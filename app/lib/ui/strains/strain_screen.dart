@@ -8,9 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
-import 'package:cannlytics_data/common/layout/shimmer.dart';
-import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -21,15 +18,18 @@ import 'package:url_launcher/url_launcher.dart';
 // Project imports:
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/common/forms/custom_text_field.dart';
 import 'package:cannlytics_data/common/forms/forms.dart';
 import 'package:cannlytics_data/common/layout/breadcrumbs.dart';
 import 'package:cannlytics_data/common/layout/loading_placeholder.dart';
 import 'package:cannlytics_data/common/layout/pill_tab.dart';
+import 'package:cannlytics_data/common/layout/shimmer.dart';
 import 'package:cannlytics_data/common/tables/key_value_datatable.dart';
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/strain.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
 import 'package:cannlytics_data/ui/strains/strain_history.dart';
 import 'package:cannlytics_data/ui/strains/strains_search.dart';

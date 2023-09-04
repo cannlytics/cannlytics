@@ -7,7 +7,10 @@
 // Updated: 8/19/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Dart imports:
 import 'dart:html' as html if (dart.library.io) 'dart:io';
+
+// Project imports:
 import 'package:cannlytics_data/utils/utils.dart';
 
 /// Utility functions for the web.

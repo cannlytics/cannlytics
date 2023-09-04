@@ -8,15 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/inputs/date_range_buttons.dart';
-import 'package:cannlytics_data/common/inputs/string_controller.dart';
-import 'package:cannlytics_data/common/tables/table_data_source.dart';
-import 'package:cannlytics_data/constants/colors.dart';
-import 'package:cannlytics_data/constants/theme.dart';
-import 'package:cannlytics_data/routing/app_router.dart';
-import 'package:cannlytics_data/services/download_service.dart';
-import 'package:cannlytics_data/ui/sales/receipts_service.dart';
-import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -27,8 +18,17 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/common/forms/form_placeholder.dart';
+import 'package:cannlytics_data/common/inputs/date_range_buttons.dart';
+import 'package:cannlytics_data/common/inputs/string_controller.dart';
+import 'package:cannlytics_data/common/tables/table_data_source.dart';
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/constants/theme.dart';
+import 'package:cannlytics_data/routing/app_router.dart';
+import 'package:cannlytics_data/services/download_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
+import 'package:cannlytics_data/ui/sales/receipts_service.dart';
+import 'package:cannlytics_data/utils/utils.dart';
 
 /* === Logic === */
 

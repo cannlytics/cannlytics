@@ -24,21 +24,15 @@ class ResultCard extends StatelessWidget {
     required this.item,
     this.onDownload,
     this.onDelete,
-    // this.onShare,
   });
 
   // Properties
   final LabResult item;
   final VoidCallback? onDownload;
   final VoidCallback? onDelete;
-  // final Function? onShare;
 
   @override
   Widget build(BuildContext context) {
-    // Screen width.
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Render
     return GestureDetector(
       onTap: () {},
       child: Card(

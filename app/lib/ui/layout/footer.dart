@@ -12,10 +12,10 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// A footer with links at the bottom of the app.
 class Footer extends ConsumerWidget {

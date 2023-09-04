@@ -10,9 +10,11 @@
 // Package imports:
 // import 'dart:io';
 
+// Flutter imports:
+import 'package:flutter/services.dart';
+
 // Package imports:
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/services.dart';
 
 // import 'package:path_provider/path_provider.dart';
 

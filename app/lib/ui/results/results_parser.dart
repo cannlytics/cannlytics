@@ -8,10 +8,6 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
-import 'package:cannlytics_data/common/forms/job_list.dart';
-import 'package:cannlytics_data/common/layout/sign_in_placeholder.dart';
-import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -24,8 +20,12 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
+import 'package:cannlytics_data/common/forms/job_list.dart';
+import 'package:cannlytics_data/common/layout/sign_in_placeholder.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
 
 class ResultsParserInterface extends HookConsumerWidget {

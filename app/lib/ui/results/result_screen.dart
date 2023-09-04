@@ -13,9 +13,9 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:internet_file/internet_file.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:internet_file/internet_file.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/buttons/download_button.dart';
@@ -31,7 +31,6 @@ import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
-import 'package:cannlytics_data/ui/results/result_coa.dart';
 import 'package:cannlytics_data/ui/results/result_history.dart';
 import 'package:cannlytics_data/ui/results/result_table.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';

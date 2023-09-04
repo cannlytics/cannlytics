@@ -12,9 +12,6 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 
 // Flutter imports:
-import 'package:cannlytics_data/constants/colors.dart';
-import 'package:cannlytics_data/utils/web_utils.dart'
-    if (dart.library.io) 'package:cannlytics_data/utils/mobile_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +23,12 @@ import 'package:intl/intl.dart';
 // Project imports:
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/common/buttons/secondary_button.dart';
+import 'package:cannlytics_data/constants/colors.dart';
+
+import 'package:cannlytics_data/utils/web_utils.dart'
+    if (dart.library.io) 'package:cannlytics_data/utils/mobile_utils.dart';
+
+
 
 class PlatformChecker {
   bool get isAndroid => !kIsWeb && Platform.isAndroid;

@@ -14,19 +14,21 @@
 
 // Flutter imports:
 // import 'package:cannlytics_data/common/buttons/primary_button.dart';
-import 'package:cannlytics_data/constants/colors.dart';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
 // Package imports:
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/common/layout/search_placeholder.dart';
+import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/strain.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';

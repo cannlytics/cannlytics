@@ -11,13 +11,13 @@
 import 'dart:async';
 
 // Package imports:
-import 'package:cannlytics_data/services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:cannlytics_data/models/sales_receipt.dart';
 import 'package:cannlytics_data/services/firestore_service.dart';
+import 'package:cannlytics_data/services/storage_service.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
 
 /* === Data === */
@@ -261,7 +261,6 @@ final receiptsStats =
   DateTime endDate = DateTime.now();
   DateTime startDate;
   final dateRange = ref.watch(dateRangeProvider);
-  print('Toggling date range: ${dateRange}');
   switch (dateRange) {
     case '1M':
       startDate = DateTime(endDate.year, endDate.month - 1, endDate.day);
@@ -285,8 +284,6 @@ final receiptsStats =
     path: 'users/${user.uid}/receipts_stats',
     builder: (data, documentId) => data!,
     queryBuilder: (query) {
-      print('Starting after:');
-      print(startDate.toIso8601String());
       return query
           .orderBy('date', descending: false)
           .startAfter([startDate.toIso8601String()]);

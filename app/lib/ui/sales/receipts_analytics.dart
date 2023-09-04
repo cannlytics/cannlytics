@@ -11,8 +11,6 @@
 import 'dart:math';
 
 // Flutter imports:
-import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
-import 'package:cannlytics_data/common/layout/sign_in_placeholder.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -22,7 +20,9 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
 import 'package:cannlytics_data/common/layout/search_placeholder.dart';
+import 'package:cannlytics_data/common/layout/sign_in_placeholder.dart';
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';

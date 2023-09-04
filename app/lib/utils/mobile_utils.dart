@@ -7,12 +7,17 @@
 // Updated: 8/6/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
+// Dart imports:
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:cannlytics_data/utils/utils.dart';
+
+// Package imports:
 import 'package:flutter_file_saver/flutter_file_saver.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+
+// Project imports:
+import 'package:cannlytics_data/utils/utils.dart';
 
 /// Utility functions for the web.
 class MobileUtils implements PlatformFileUtils {
