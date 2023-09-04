@@ -1,0 +1,5 @@
+# Function dependencies, for example:
+# package>=version
+# cloudevents
+# functions-framework==3.*
+firebase_admin

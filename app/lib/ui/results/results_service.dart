@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/13/2023
-// Updated: 9/1/2023
+// Updated: 9/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -30,13 +30,11 @@ import 'package:cannlytics_data/ui/account/account_controller.dart';
 final currentPageProvider = StateProvider<int>((ref) => 0);
 final startDateProvider = StateProvider<DateTime?>((ref) {
   DateTime now = DateTime.now();
-  DateTime endOfMonth = DateTime(now.year, now.month + 1, 0);
-  return endOfMonth;
+  return DateTime(now.year, now.month + 1, 0);
 });
 final endDateProvider = StateProvider<DateTime?>((ref) {
   DateTime now = DateTime.now();
-  DateTime startOfMonth = DateTime(now.year, now.month - 1, 1);
-  return startOfMonth;
+  return DateTime(now.year, now.month - 3, 1);
 });
 
 /// Stream user results from Firebase.
@@ -46,7 +44,6 @@ final userResults = StreamProvider.autoDispose<List<Map?>>((ref) async* {
   if (user == null) return;
   final startDate = ref.watch(startDateProvider);
   final endDate = ref.watch(endDateProvider);
-  print('RANGE: $endDate to $startDate');
   final snapshotStream = _dataSource.streamCollection(
     path: 'users/${user.uid}/lab_results',
     builder: (data, documentId) => data,
@@ -54,7 +51,7 @@ final userResults = StreamProvider.autoDispose<List<Map?>>((ref) async* {
       Query<Map<String, dynamic>> paginatedQuery = query
           .orderBy('coa_parsed_at', descending: true)
           .startAt([startDate?.toIso8601String()]).endAt(
-              [endDate?.toIso8601String()]).limit(1000);
+              [endDate?.toIso8601String()]).limit(2000);
       return paginatedQuery;
     },
   );
@@ -95,7 +92,7 @@ final labResultProvider =
 });
 
 /// Stream user's COA parsing jobs from Firebase.
-final userJobsProvider = StreamProvider.autoDispose<List<Map?>>((ref) async* {
+final resultJobsProvider = StreamProvider.autoDispose<List<Map?>>((ref) async* {
   final FirestoreService _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
   yield* Stream.value(<Map<dynamic, dynamic>?>[]);
@@ -155,19 +152,19 @@ class COAParser extends AsyncNotifier<List<Map?>> {
     return [];
   }
 
-  /// Load un-finished jobs.
-  Future<List<Map?>> _loadUnfinishedJobs() async {
-    final user = ref.watch(userProvider).value;
-    if (user == null) return [];
-    var snapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('parse_coa_jobs')
-        .where('job_finished', isEqualTo: false)
-        .get();
+  // /// Load un-finished jobs.
+  // Future<List<Map?>> _loadUnfinishedJobs() async {
+  //   final user = ref.watch(userProvider).value;
+  //   if (user == null) return [];
+  //   var snapshot = await FirebaseFirestore.instance
+  //       .collection('users')
+  //       .doc(user.uid)
+  //       .collection('parse_coa_jobs')
+  //       .where('job_finished', isEqualTo: false)
+  //       .get();
 
-    return snapshot.docs.map((doc) => doc.data()).toList();
-  }
+  //   return snapshot.docs.map((doc) => doc.data()).toList();
+  // }
 
   /// Common method to create a job in Firestore and return data for it
   Future<Map<String, dynamic>> _createJob(

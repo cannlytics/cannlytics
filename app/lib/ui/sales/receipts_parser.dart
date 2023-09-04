@@ -4,10 +4,14 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 7/2/2023
+// Updated: 9/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
+import 'package:cannlytics_data/common/forms/job_list.dart';
+import 'package:cannlytics_data/common/layout/sign_in_placeholder.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -21,8 +25,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/constants/theme.dart';
-import 'package:cannlytics_data/models/sales_receipt.dart';
-import 'package:cannlytics_data/ui/sales/receipt_card.dart';
 import 'package:cannlytics_data/ui/sales/receipts_service.dart';
 
 /// Receipts parser interface.
@@ -34,18 +36,80 @@ class ReceiptsParserInterface extends HookConsumerWidget {
     // Listen the the receipts parser provider.
     final asyncData = ref.watch(receiptParser);
 
+    // No-user interface.
+    final user = ref.watch(userProvider).value;
+    if (user == null) return _noUser(context);
+
     // Dynamic rendering.
     return asyncData.when(
-      // Loading state.
+      data: (items) => _dataLoaded(context, ref, items: items),
       loading: () => _body(context, ref, child: ParsingPlaceholder()),
-
-      // Error state.
       error: (err, stack) => _errorMessage(context, ref, err.toString()),
+    );
+  }
 
-      // Data loaded state.
-      data: (items) => (items.length == 0)
-          ? _body(context, ref, child: ReceiptUpload())
-          : ReceiptsParserForm(items: items, ref: ref),
+  /// Data loaded interface.
+  Widget _dataLoaded(BuildContext context, WidgetRef ref, {dynamic items}) {
+    final asyncJobs = ref.watch(receiptJobsProvider);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _body(context, ref, child: ReceiptUpload()),
+        asyncJobs.when(
+          data: (jobs) => _parsingJobs(context, ref, items: jobs),
+          error: (err, stack) => Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.error, color: Colors.red, size: 48.0),
+                  SizedBox(height: 16),
+                  Text(
+                    'An error occurred while loading jobs.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          loading: () => Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// No user interface.
+  Widget _noUser(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SignInPlaceholder(
+          titleText: 'Parse receipts',
+          imageUrl:
+              'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fbud_spender.png?alt=media&token=e0de707b-9c18-44b9-9944-b36fcffd9fd3',
+          mainText: 'Sign in to parse your receipts',
+          subTitle:
+              'If you are signed in, then you can extract data from your receipts.',
+          onButtonPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) => SignInDialog(isSignUp: false),
+            );
+          },
+          buttonText: 'Sign in',
+        ),
+      ],
     );
   }
 
@@ -119,6 +183,109 @@ class ReceiptsParserInterface extends HookConsumerWidget {
     );
   }
 
+  /// Parsing jobs.
+  Widget _parsingJobs(BuildContext context, WidgetRef ref, {required items}) {
+    JobConfig resultsConfig = JobConfig(
+      title: 'Result: ',
+      downloadApiPath: '/api/data/receipts/download',
+      deleteJobFunction: (uid, jobId) =>
+          ref.read(receiptParser.notifier).deleteJob(uid, jobId),
+    );
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // Title.
+            Row(
+              children: [
+                Text(
+                  'Parsing jobs',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Spacer(),
+
+                // Future work: Delete all button?
+                // Deprecated: Refresh button.
+                // IconButton(
+                //   icon: Icon(
+                //     Icons.refresh,
+                //     color: Theme.of(context).textTheme.bodyMedium!.color,
+                //   ),
+                //   onPressed: () {
+                //     ref.read(coaParser.notifier).clear();
+                //   },
+                // ),
+              ],
+            ),
+            gapH16,
+
+            // List of parsed lab results.
+            items.isEmpty
+                ? _placeholder(context, ref)
+                : ListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (final item in items)
+                        JobItem(item: item, config: resultsConfig),
+                    ],
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Message displayed when there are no jobs.
+  Widget _placeholder(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Image.
+            Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: ClipOval(
+                child: Image.network(
+                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ficons%2Fai-icons%2Fcannabis-receipt.png?alt=media&token=f56d630d-1f4a-4024-bd2c-899fc1f924f4',
+                  width: 128,
+                  height: 128,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+
+            // Text.
+            Container(
+              width: 540,
+              child: Column(
+                children: <Widget>[
+                  SelectableText(
+                    'No current jobs',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).textTheme.titleLarge!.color),
+                  ),
+                  SelectableText(
+                    'You can monitor your receipt parsing jobs here.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// The main dynamic body of the screen.
   Widget _body(BuildContext context, WidgetRef ref, {required Widget child}) {
     return SingleChildScrollView(
@@ -182,68 +349,6 @@ class ReceiptsParserInterface extends HookConsumerWidget {
             gapH4,
             child,
             gapH12,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Receipt parsing form
-class ReceiptsParserForm extends StatelessWidget {
-  ReceiptsParserForm({required this.items, required this.ref});
-
-  // Parameters.
-  final List<Map<dynamic, dynamic>?> items;
-  final WidgetRef ref;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.only(top: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(3),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // Title.
-            Row(
-              children: [
-                SelectableText(
-                  'Parsed receipts',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Spacer(),
-                IconButton(
-                  icon: Icon(
-                    Icons.refresh,
-                    color: Theme.of(context).textTheme.bodyMedium!.color,
-                  ),
-                  onPressed: () {
-                    ref.read(receiptParser.notifier).clear();
-                  },
-                ),
-              ],
-            ),
-            gapH16,
-
-            // Grid of parsed receipts.
-            Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  for (final item in items)
-                    ReceiptCard(
-                      item: SalesReceipt.fromMap(item ?? {}),
-                    ),
-                ],
-              ),
-            ),
           ],
         ),
       ),

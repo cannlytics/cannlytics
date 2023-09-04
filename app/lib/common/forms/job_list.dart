@@ -1,33 +1,42 @@
-// Cannlytics Data
+// Cannlytics App
 // Copyright (c) 2023 Cannlytics
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 8/29/2023
-// Updated: 8/29/2023
+// Created: 9/3/2023
+// Updated: 9/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-// Flutter imports:
 import 'dart:async';
 
-import 'package:cannlytics_data/ui/results/results_service.dart';
-import 'package:cannlytics_data/utils/utils.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-// Project imports:
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/services/download_service.dart';
+import 'package:cannlytics_data/utils/utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// A results parser job item.
-/// Optional: Add image.
-class ResultsParserJob extends ConsumerWidget {
-  ResultsParserJob({required this.item});
+/// API job configuration.
+class JobConfig {
+  final String title;
+  final String downloadApiPath;
+  final Function deleteJobFunction;
 
-  // Properties
+  JobConfig({
+    required this.title,
+    required this.downloadApiPath,
+    required this.deleteJobFunction,
+  });
+}
+
+/// An API job item.
+class JobItem extends ConsumerWidget {
+  JobItem({required this.item, required this.config});
+
+  // Parameters.
   final Map item;
+  final JobConfig config;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -76,7 +85,7 @@ class ResultsParserJob extends ConsumerWidget {
       // Download the data.
       DownloadService.downloadData(
         [data],
-        '/api/data/coas/download',
+        config.downloadApiPath,
       );
     }
 
@@ -128,9 +137,7 @@ class ResultsParserJob extends ConsumerWidget {
                       isDark ? DarkColors.orange : LightColors.orange,
                 );
                 if (delete == true) {
-                  await ref
-                      .read(coaParser.notifier)
-                      .deleteJob(item['uid'], item['job_id']);
+                  await config.deleteJobFunction();
                 }
               },
             ),
@@ -175,7 +182,7 @@ class ResultsParserJob extends ConsumerWidget {
     );
   }
 
-  /// Copy COA link.
+  /// Copy file link.
   Widget _coaLink(BuildContext context, String url) {
     // Theme.
     bool isDark = Theme.of(context).brightness == Brightness.dark;
@@ -204,7 +211,7 @@ class ResultsParserJob extends ConsumerWidget {
             Icon(Icons.link, size: 12, color: Colors.blueAccent),
             SizedBox(width: 4),
             Text(
-              'Copy COA link',
+              'Copy file link',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -218,7 +225,7 @@ class ResultsParserJob extends ConsumerWidget {
   }
 }
 
-/// Progress bar for a job.
+/// Progress bar for an API job.
 class JobProgressBar extends StatefulWidget {
   final DateTime jobCreatedAt;
   final bool jobFinished;

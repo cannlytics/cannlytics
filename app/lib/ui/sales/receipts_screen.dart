@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 7/7/2023
+// Updated: 9/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -112,31 +112,31 @@ class _ResultsTabsState extends State<ResultsTabs>
             dividerColor: Colors.transparent,
             tabs: [
               PillTabButton(
-                text: 'Analytics',
-                icon: Icons.bar_chart,
-                isSelected: _tabController.index == 0,
-              ),
-              PillTabButton(
                 text: 'Your Receipts',
                 icon: Icons.receipt_long,
-                isSelected: _tabController.index == 1,
+                isSelected: _tabController.index == 0,
               ),
               PillTabButton(
                 text: 'Parse',
                 icon: Icons.auto_awesome,
+                isSelected: _tabController.index == 1,
+              ),
+              PillTabButton(
+                text: 'Analytics',
+                icon: Icons.bar_chart,
                 isSelected: _tabController.index == 2,
               ),
             ],
           ),
         ),
         Container(
-          height: MediaQuery.of(context).size.height,
+          height: MediaQuery.of(context).size.height * 2,
           child: TabBarView(
             controller: _tabController,
             children: [
-              ReceiptsAnalytics(tabController: _tabController),
               UserReceiptsInterface(tabController: _tabController),
               ReceiptsParserInterface(),
+              ReceiptsAnalytics(tabController: _tabController),
             ],
           ),
         ),

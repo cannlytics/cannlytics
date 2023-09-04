@@ -206,8 +206,11 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Allow users to read and write their own COA parsing jobs.
+    // Allow users to read and write their own AI parsing jobs.
     match /users/{userId}/parse_coa_jobs/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /users/{userId}/parse_receipt_jobs/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 

@@ -9,9 +9,9 @@
 
 // Flutter imports:
 import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
+import 'package:cannlytics_data/common/forms/job_list.dart';
 import 'package:cannlytics_data/common/layout/sign_in_placeholder.dart';
 import 'package:cannlytics_data/ui/account/account_controller.dart';
-import 'package:cannlytics_data/ui/results/results_parser_job.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -56,7 +56,7 @@ class ResultsParserInterface extends HookConsumerWidget {
 
   /// Data loaded interface.
   Widget _dataLoaded(BuildContext context, WidgetRef ref, {dynamic items}) {
-    final asyncJobs = ref.watch(userJobsProvider);
+    final asyncJobs = ref.watch(resultJobsProvider);
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,6 +260,12 @@ class ResultsParserInterface extends HookConsumerWidget {
 
   /// Parsing jobs.
   Widget _parsingJobs(BuildContext context, WidgetRef ref, {required items}) {
+    JobConfig resultsConfig = JobConfig(
+      title: 'Result: ',
+      downloadApiPath: '/api/data/coas/download',
+      deleteJobFunction: (uid, jobId) =>
+          ref.read(coaParser.notifier).deleteJob(uid, jobId),
+    );
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -296,7 +302,9 @@ class ResultsParserInterface extends HookConsumerWidget {
                 : ListView(
                     shrinkWrap: true,
                     children: [
-                      for (final item in items) ResultsParserJob(item: item)
+                      // for (final item in items) ResultsParserJob(item: item)
+                      for (final item in items)
+                        JobItem(item: item, config: resultsConfig),
                     ],
                   ),
           ],

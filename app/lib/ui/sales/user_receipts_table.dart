@@ -3,7 +3,7 @@
 
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
-// Created: 8/31/2023
+// Created: 9/2/2023
 // Updated: 9/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
@@ -15,7 +15,7 @@ import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/theme.dart';
 import 'package:cannlytics_data/routing/app_router.dart';
 import 'package:cannlytics_data/services/download_service.dart';
-import 'package:cannlytics_data/ui/results/results_service.dart';
+import 'package:cannlytics_data/ui/sales/receipts_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -33,62 +33,59 @@ import 'package:cannlytics_data/ui/account/account_controller.dart';
 /* === Logic === */
 
 // Rows per page.
-final resultsRowsPerPageProvider = StateProvider<int>((ref) => 10);
+final receiptsRowsPerPageProvider = StateProvider<int>((ref) => 10);
 
 // Sorting.
-final resultsSortColumnIndex = StateProvider<int>((ref) => 0);
-final resultsSortAscending = StateProvider<bool>((ref) => true);
+final receiptsSortColumnIndex = StateProvider<int>((ref) => 0);
+final receiptsSortAscending = StateProvider<bool>((ref) => true);
 
 // Search term.
-final resultsSearchTerm = StateProvider<String>((ref) => '');
+final receiptsSearchTerm = StateProvider<String>((ref) => '');
 
 // Search input.
-final resultsSearchController =
+final receiptsSearchController =
     StateNotifierProvider<StringController, TextEditingController>(
         (ref) => StringController());
 
 // Selection.
-final resultsSelectedProvider = StateProvider.autoDispose<int>((ref) => 0);
+final receiptsSelectedProvider = StateProvider.autoDispose<int>((ref) => 0);
 
 // Selected data.
-final resultsDataSourceProvider = StateNotifierProvider.family<CustomDataSource,
-    List<CustomRowData>, List<dynamic>>((ref, data) {
+final receiptsDataSourceProvider = StateNotifierProvider.family<
+    CustomDataSource, List<CustomRowData>, List<dynamic>>((ref, data) {
   return CustomDataSource(
     ref: ref,
     data: data as List<Map<dynamic, dynamic>?>,
     onRowLongPressed: (id) {
-      ref.read(goRouterProvider).go('/results/$id');
+      ref.read(goRouterProvider).go('/sales/$id');
     },
     config: TableConfig(
       fields: [
-        'product_name',
-        'product_type',
-        'producer',
-        'lab',
-        'date_tested',
-        'total_thc',
-        'total_cbd',
-        'total_terpenes',
+        'product_names',
+        'retailer',
+        'date_sold',
+        'total_transactions',
+        'total_price',
       ],
-      idKey: 'sample_id',
-      selectedCountProvider: resultsSelectedProvider,
-      columnWidths: [160.0, 160.0, 160.0, 160.0, 160.0, 120.0, 120.0, 120.0],
+      idKey: 'hash',
+      selectedCountProvider: receiptsSelectedProvider,
+      columnWidths: [240.0, 160.0, 160.0, 160.0, 120.0, 120.0],
     ),
   );
 });
 
 /// Filter.
-final resultsFilterProvider = StateNotifierProvider.autoDispose<
-    ResultsFilterNotifier, AsyncValue<List<Map?>>>(
+final receiptsFilterProvider = StateNotifierProvider.autoDispose<
+    ReceiptsFilterNotifier, AsyncValue<List<Map?>>>(
   (ref) {
-    final searchTerm = ref.watch(resultsSearchTerm);
-    final data = ref.watch(userResults).value;
-    return ResultsFilterNotifier(ref, data ?? [], searchTerm);
+    final searchTerm = ref.watch(receiptsSearchTerm);
+    final data = ref.watch(userReceipts).value;
+    return ReceiptsFilterNotifier(ref, data ?? [], searchTerm);
   },
 );
 
-/// Filtered results.
-class ResultsFilterNotifier extends StateNotifier<AsyncValue<List<Map?>>> {
+/// Filtered receipts.
+class ReceiptsFilterNotifier extends StateNotifier<AsyncValue<List<Map?>>> {
   // Properties.
   final StateNotifierProviderRef<dynamic, dynamic> ref;
   final List<Map?> items;
@@ -96,7 +93,7 @@ class ResultsFilterNotifier extends StateNotifier<AsyncValue<List<Map?>>> {
 
   // Search function.
   // FUTURE WORK: Have search query the database.
-  ResultsFilterNotifier(
+  ReceiptsFilterNotifier(
     this.ref,
     this.items,
     this.searchTerm,
@@ -116,33 +113,30 @@ class ResultsFilterNotifier extends StateNotifier<AsyncValue<List<Map?>>> {
   /// Filter logic.
   bool _itemContainsKeyword(Map? item, String keyword) {
     Map<String, dynamic> itemMap = {
-      'product_name': item?['product_name'],
-      'product_type': item?['product_type'],
-      'producer': item?['producer'],
-      'lab': item?['lab'],
-      'date_tested': item?['date_tested'],
-      'total_thc': item?['total_thc'],
-      'total_cbd': item?['total_cbd'],
-      'total_terpenes': item?['total_terpenes'],
+      'product_names': item?['product_names'],
+      'retailer': item?['retailer'],
+      'date_sold': item?['date_sold'],
+      'total_transactions': item?['total_transactions'],
+      'total_price': item?['total_price'],
     };
     return itemMap.values.any((value) =>
         value != null && value.toString().toLowerCase().contains(keyword));
   }
 
   /// Sort function.
-  void sortResults(
+  void sortReceipts(
     List<Map<dynamic, dynamic>> headers,
     int columnIndex,
   ) {
     var field = headers[columnIndex]['key'];
-    bool currentAscending = ref.read(resultsSortAscending.notifier).state;
+    bool currentAscending = ref.read(receiptsSortAscending.notifier).state;
     if (currentAscending) {
       items.sort((a, b) => compareValues(a?[field], b?[field]));
     } else {
       items.sort((a, b) => compareValues(b?[field], a?[field]));
     }
-    ref.read(resultsSortColumnIndex.notifier).state = columnIndex;
-    ref.read(resultsSortAscending.notifier).state = !currentAscending;
+    ref.read(receiptsSortColumnIndex.notifier).state = columnIndex;
+    ref.read(receiptsSortAscending.notifier).state = !currentAscending;
     state = AsyncValue.data([...items]);
   }
 
@@ -160,8 +154,8 @@ class ResultsFilterNotifier extends StateNotifier<AsyncValue<List<Map?>>> {
 /* === UI === */
 
 /// Table.
-class UserResultsTable extends ConsumerWidget {
-  const UserResultsTable({
+class UserReceiptsTable extends ConsumerWidget {
+  const UserReceiptsTable({
     super.key,
   });
 
@@ -169,9 +163,9 @@ class UserResultsTable extends ConsumerWidget {
   Widget _errorMessage(BuildContext context) {
     return FormPlaceholder(
       image: 'assets/images/icons/document.png',
-      title: 'No results found',
+      title: 'No receipts found',
       description:
-          "You don't have any results. You can begin parsing your COAs and your aggregated data will appear here.",
+          "You don't have any receipts. You can begin parsing your receipts and your aggregated data will appear here.",
       onTap: () {
         // context.go('/licenses');
         // TODO: Open the parse tab.
@@ -179,7 +173,7 @@ class UserResultsTable extends ConsumerWidget {
     );
   }
 
-  /// Loading results placeholder.
+  /// Loading receipts placeholder.
   Widget _loadingPlaceholder() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +189,7 @@ class UserResultsTable extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Listen to the filtered data.
-    final asyncData = ref.watch(resultsFilterProvider);
+    final asyncData = ref.watch(receiptsFilterProvider);
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
     return asyncData.when(
@@ -215,14 +209,11 @@ class UserResultsTable extends ConsumerWidget {
 
           // Define the table headers.
           List<Map> headers = [
-            {'name': 'Product Name', 'key': 'product_name', 'sort': true},
-            {'name': 'Type', 'key': 'product_type', 'sort': true},
-            {'name': 'Producer', 'key': 'producer', 'sort': true},
-            {'name': 'Lab', 'key': 'lab', 'sort': true},
-            {'name': 'Date Tested', 'key': 'date_tested', 'sort': true},
-            {'name': 'THC', 'key': 'total_thc', 'sort': true},
-            {'name': 'CBD', 'key': 'total_cbd', 'sort': true},
-            {'name': 'Terpenes', 'key': 'total_terpenes', 'sort': true},
+            {'name': 'Products', 'key': 'product_names', 'sort': true},
+            {'name': 'Retailer', 'key': 'retailer', 'sort': true},
+            {'name': 'Date', 'key': 'date_sold', 'sort': true},
+            {'name': 'Items', 'key': 'total_transactions', 'sort': true},
+            {'name': 'Total Price', 'key': 'total_price', 'sort': true},
           ];
 
           // Format the table headers.
@@ -239,14 +230,14 @@ class UserResultsTable extends ConsumerWidget {
                 // Sorting logic.
                 onSort: (columnIndex, ascending) {
                   ref
-                      .read(resultsFilterProvider.notifier)
-                      .sortResults(headers, columnIndex);
+                      .read(receiptsFilterProvider.notifier)
+                      .sortReceipts(headers, columnIndex);
                 },
               ),
           ];
 
           // Get the rows per page.
-          var rowsPerPage = ref.watch(resultsRowsPerPageProvider);
+          var rowsPerPage = ref.watch(receiptsRowsPerPageProvider);
           if (rowsPerPage > data.length) rowsPerPage = data.length;
           if (rowsPerPage == 0) rowsPerPage = 1;
           var availableRowsPerPage = <int>[
@@ -261,11 +252,11 @@ class UserResultsTable extends ConsumerWidget {
           }
 
           // Get the sorting state.
-          final sortColumnIndex = ref.watch(resultsSortColumnIndex);
-          final sortAscending = ref.watch(resultsSortAscending);
+          final sortColumnIndex = ref.watch(receiptsSortColumnIndex);
+          final sortAscending = ref.watch(receiptsSortAscending);
 
           // Read the search controller.
-          final _searchController = ref.watch(resultsSearchController);
+          final _searchController = ref.watch(receiptsSearchController);
 
           // Search box.
           var searchBox = SizedBox(
@@ -315,7 +306,7 @@ class UserResultsTable extends ConsumerWidget {
                                 Theme.of(context).textTheme.labelMedium!.color,
                           ),
                           onPressed: () {
-                            ref.read(resultsSearchTerm.notifier).state = '';
+                            ref.read(receiptsSearchTerm.notifier).state = '';
                             _searchController.clear();
                           },
                         )
@@ -339,15 +330,17 @@ class UserResultsTable extends ConsumerWidget {
 
               // Search engine function.
               suggestionsCallback: (pattern) async {
-                ref.read(resultsSearchTerm.notifier).update((state) => pattern);
-                final suggestions = ref.read(resultsFilterProvider);
+                ref
+                    .read(receiptsSearchTerm.notifier)
+                    .update((state) => pattern);
+                final suggestions = ref.read(receiptsFilterProvider);
                 return suggestions.value!;
               },
 
               // Menu selection function.
               onSuggestionSelected: (Map? suggestion) {
-                String slug = suggestion?['sample_id'];
-                context.go('/results/$slug');
+                String slug = suggestion?['hash'];
+                context.go('/sales/$slug');
               },
 
               // Loading indicator.
@@ -370,7 +363,7 @@ class UserResultsTable extends ConsumerWidget {
           );
 
           // Define the table actions.
-          final selectedRowCount = ref.watch(resultsSelectedProvider);
+          final selectedRowCount = ref.watch(receiptsSelectedProvider);
           var actions = Row(
             children: [
               // Delete button.
@@ -384,16 +377,14 @@ class UserResultsTable extends ConsumerWidget {
                     final delete = await InterfaceUtils.showAlertDialog(
                       context: context,
                       title:
-                          'Are you sure that you want to delete these results?',
+                          'Are you sure that you want to delete these receipts?',
                       cancelActionText: 'Cancel',
                       defaultActionText: 'Delete',
                       primaryActionColor: Colors.redAccent,
                     );
                     if (delete == true) {
                       for (var item in data) {
-                        ref
-                            .read(resultService)
-                            .deleteResult(item?['sample_id'] ?? item?['id']);
+                        ref.read(receiptService).deleteReceipt(item?['hash']);
                       }
                     }
                   },
@@ -419,7 +410,7 @@ class UserResultsTable extends ConsumerWidget {
                   }
                   DownloadService.downloadData(
                     data,
-                    '/api/data/coas/download',
+                    '/api/data/receipts/download',
                   );
                 },
                 tooltip: 'Download',
@@ -442,21 +433,20 @@ class UserResultsTable extends ConsumerWidget {
             arrowHeadColor: Theme.of(context).textTheme.titleLarge?.color,
             dataRowMinHeight: 24,
             columnSpacing: 18,
-            // headingRowHeight: 28,
             horizontalMargin: 8,
 
             // Pagination.
             availableRowsPerPage: availableRowsPerPage,
             rowsPerPage: rowsPerPage,
             onRowsPerPageChanged: (index) {
-              ref.read(resultsRowsPerPageProvider.notifier).state = index!;
+              ref.read(receiptsRowsPerPageProvider.notifier).state = index!;
             },
 
             // Selection.
             onSelectAll: (bool? selected) {
               if (selected != null) {
                 final dataSource =
-                    ref.read(resultsDataSourceProvider(data).notifier);
+                    ref.read(receiptsDataSourceProvider(data).notifier);
                 dataSource.dataTableSource.selectAll(selected);
               }
             },
@@ -467,12 +457,12 @@ class UserResultsTable extends ConsumerWidget {
               actions,
               DateRangeButtons(
                 isDark: true,
-                startDateProvider: startDateProvider,
-                endDateProvider: endDateProvider,
+                startDateProvider: receiptsStartDateProvider,
+                endDateProvider: receiptsEndDateProvider,
               ),
             ],
             source: ref
-                .read(resultsDataSourceProvider(data).notifier)
+                .read(receiptsDataSourceProvider(data).notifier)
                 .dataTableSource,
           );
 

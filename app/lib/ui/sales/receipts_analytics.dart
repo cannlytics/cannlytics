@@ -4,13 +4,15 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/18/2023
-// Updated: 8/6/2023
+// Updated: 9/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:math';
 
 // Flutter imports:
+import 'package:cannlytics_data/common/dialogs/auth_dialog.dart';
+import 'package:cannlytics_data/common/layout/sign_in_placeholder.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -37,7 +39,7 @@ class ReceiptsAnalytics extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Display sign-in message when there is no user.
     final user = ref.watch(userProvider).value;
-    if (user == null) return _body(context, ref, child: _noUser());
+    if (user == null) return _body(context, ref, child: _noUser(context));
 
     return _body(
       context,
@@ -104,16 +106,27 @@ class ReceiptsAnalytics extends ConsumerWidget {
   }
 
   /// No user placeholder.
-  Widget _noUser() {
-    return Padding(
-      padding: EdgeInsets.all(24),
-      child: SearchPlaceholder(
-        title: 'Sign in to trend your spending',
-        subtitle:
-            'If you sign in, then you can save your receipts and analyze your spending statistics.',
-        imageUrl:
-            'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ficons%2Fai-icons%2Fcannabis-receipt.png?alt=media&token=f56d630d-1f4a-4024-bd2c-899fc1f924f4',
-      ),
+  Widget _noUser(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SignInPlaceholder(
+          imageUrl:
+              'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ficons%2Fai-icons%2Fcannabis-receipt.png?alt=media&token=f56d630d-1f4a-4024-bd2c-899fc1f924f4',
+          mainText: 'Sign in to trend your spending',
+          subTitle:
+              'If you sign in, then you can save your receipts and analyze your spending.',
+          onButtonPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) => SignInDialog(isSignUp: false),
+            );
+          },
+          buttonText: 'Sign in',
+        ),
+      ],
     );
   }
 }

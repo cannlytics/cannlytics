@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 9/1/2023
-// Updated: 9/1/2023
+// Updated: 9/3/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 import 'package:cannlytics_data/common/buttons/primary_button.dart';
@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 
 /// Sign-in placeholder.
 class SignInPlaceholder extends StatelessWidget {
-  final String titleText;
+  final String? titleText;
   final String? imageUrl;
   final String mainText;
   final String? subTitle;
@@ -21,7 +21,7 @@ class SignInPlaceholder extends StatelessWidget {
   final String buttonText;
 
   SignInPlaceholder({
-    required this.titleText,
+    this.titleText,
     this.imageUrl,
     required this.mainText,
     this.subTitle,
@@ -38,15 +38,16 @@ class SignInPlaceholder extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Title.
-            Row(
-              children: [
-                SelectableText(
-                  titleText,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
+            if (titleText != null)
+              Row(
+                children: [
+                  SelectableText(
+                    titleText!,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ],
+              ),
+            if (titleText != null) SizedBox(height: 16),
 
             // Image.
             if (imageUrl != null)

@@ -1,16 +1,16 @@
 """
-Parse COA Jobs | Cannlytics
+Parse Receipt Jobs | Cannlytics
 Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
-Created: 8/25/2023
-Updated: 8/31/2023
+Created: 9/3/2023
+Updated: 9/3/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Perform COA parsing jobs in a cloud function upon job creation in
-    Firestore. Outputs job data back to Firestore.
+    Perform receipt parsing jobs in a cloud function upon job creation
+    in Firestore. Outputs job data back to Firestore.
 
 Note:
 
@@ -26,16 +26,12 @@ import os
 from firebase_admin import initialize_app, firestore
 import requests
 
-# Gen 2 imports:
-# from cloudevents.http import CloudEvent
-# import functions_framework
-
 
 # Define the API URL.
 DEBUG = False
-API_URL = 'https://cannlytics.com/api/data/coas'
+API_URL = 'https://cannlytics.com/api/data/receipts'
 if DEBUG:
-    API_URL = 'http://127.0.0.1:8000//api/data/coas'
+    API_URL = 'http://127.0.0.1:8000//api/data/receipts'
 
 # Initialize Firebase.
 try:
@@ -45,32 +41,18 @@ except ValueError:
 
 
 # Gen 1:
-def parse_coa_jobs(event, context) -> None:
-    """Perform COA parsing jobs when a user's jobs changes."""
-
-# Gen 2:
-# def parse_coa_jobs(cloud_event: CloudEvent):
+def parse_receipt_jobs(event, context) -> None:
+    """Perform receipt parsing jobs when a user's jobs changes."""
 
     # Initialization.
     start_time = datetime.now()
 
-    # Gen 1: Get the necessary data.
+    # Get the necessary data.
     data = event['value']
     uid = data['fields']['uid']['stringValue']
     job_id = data['fields']['job_id']['stringValue']
     print('USER:', uid)
     print('JOB ID:', job_id)
-
-    # Gen 2: Get the necessary data.
-    # firestore_payload = firestore.DocumentEventData()
-    # firestore_payload._pb.ParseFromString(cloud_event.data)
-    # print(f"Function triggered by change to: {cloud_event['source']}")
-    # print("Value:")
-    # print(firestore_payload.value)
-    # uid = firestore_payload.value.fields['uid'].string_value
-    # job_id = firestore_payload.value.fields['job_id'].string_value
-    # print('User:', uid, 'Job:', job_id)
-    # coa_url = firestore_payload.value.fields['job_file_url'].string_value
 
     # Ensure the user passed a COA URL.
     job_file_url = data['fields']['job_file_url']['stringValue']
@@ -119,7 +101,7 @@ def parse_coa_jobs(event, context) -> None:
 
     # Save the data to Firestore.
     db = firestore.client()
-    ref = db.collection('users').document(uid).collection('parse_coa_jobs').document(job_id)
+    ref = db.collection('users').document(uid).collection('parse_receipt_jobs').document(job_id)
     ref.set(job_data, merge=True)
 
 
@@ -130,7 +112,8 @@ if __name__ == '__main__':
     data = {
         'uid': 'qXRaz2QQW8RwTlJjpP39c1I8xM03',
         'email': 'help@cannlytics.com',
+        # FIXME:
         'job_id': 'qTgyQPGxuIob84hjoUKG',
         'job_file_url': 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/users%2FqXRaz2QQW8RwTlJjpP39c1I8xM03%2Fparse_coa_jobs%2FqTgyQPGxuIob84hjoUKG?alt=media&token=2c91bd89-d5d7-4c03-a313-dbb19ba876c2',
     }
-    parse_coa_jobs(data, {})
+    parse_receipt_jobs(data, {})

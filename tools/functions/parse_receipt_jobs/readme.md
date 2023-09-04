@@ -1,12 +1,12 @@
-# Parse COA Jobs Cloud Function
+# Parse Receipt Jobs Cloud Function
 
 ## Overview
 
-The `parse_coa_jobs` cloud function is designed to execute COA (Certificate of Analysis) parsing jobs when there's a creation or change in Firestore. When this cloud function detects a new or updated job in Firestore, it makes a request to the Cannlytics API to parse the associated COA URL. Once completed, it outputs job data back to Firestore.
+The `parse_receipt_jobs` cloud function is designed to execute receipt parsing jobs when there's a creation or change in Firestore. When this cloud function detects a new or updated job in Firestore, it makes a request to the Cannlytics API to parse the associated receipt URL. Once completed, it outputs job data back to Firestore.
 
 ## Trigger
 
-The function is triggered by the creation of a document in Firestore at the path: `users/{uid}/parse_coa_jobs/{job_id}`.
+The function is triggered by the creation of a document in Firestore at the path: `users/{uid}/parse_receipt_jobs/{job_id}`.
 
 ## Inputs
 
@@ -18,7 +18,7 @@ When the function is triggered by a Firestore document creation, it expects the 
 
 ## Outputs
 
-After successfully processing the COA, or if there's an error, the function updates the Firestore document at `users/{uid}/parse_coa_jobs/{job_id}` with the following fields:
+After successfully processing the COA, or if there's an error, the function updates the Firestore document at `users/{uid}/parse_receipt_jobs/{job_id}` with the following fields:
 
 - `job_finished_at`: The time the job finished.
 - `job_error`: Boolean indicating if there was an error.
@@ -31,7 +31,7 @@ If successful, additional lab result data from the parsed COA will be added to t
 
 ## Dependencies
 
-The `parse_coa_jobs` cloud function requires a `env.yaml` file in the root directory of the function. This file should contain the following environment variables:
+The `parse_receipt_jobs` cloud function requires a `env.yaml` file in the root directory of the function. This file should contain the following environment variables:
 
 - `CANNLYTICS_API_KEY`: The API key for the Cannlytics API, used for parsing COAs.
 
@@ -39,18 +39,10 @@ See the `requirements.txt` file for a list of Python dependencies.
 
 ## Deployment
 
-You can deploy the `parse_coa_jobs` cloud function using the Google Cloud SDK with the following command:
-
-*Gen 1*
+You can deploy the `parse_receipt_jobs` cloud function using the Google Cloud SDK with the following command:
 
 ```shell
-gcloud functions deploy parse_coa_jobs --entry-point=parse_coa_jobs --trigger-event="providers/cloud.firestore/eventTypes/document.create" --trigger-resource="projects/cannlytics/databases/(default)/documents/users/{uid}/parse_coa_jobs/{job_id}" --runtime python311 --source=. --memory=512MB --timeout=540s
-```
-
-*Gen 2*
-
-```shell
-gcloud functions deploy parse_coa_jobs --gen2 --runtime=python311 --source=. --entry-point=parse_coa_jobs --trigger-event-filters=type=google.cloud.firestore.document.v1.created --trigger-event-filters=database="(default)" --trigger-event-filters-path-pattern=document="users/{uid}/parse_coa_jobs/{job_id}"
+gcloud functions deploy parse_receipt_jobs --entry-point=parse_receipt_jobs --trigger-event="providers/cloud.firestore/eventTypes/document.create" --trigger-resource="projects/cannlytics/databases/(default)/documents/users/{uid}/parse_receipt_jobs/{job_id}" --runtime python311 --source=. --memory=512MB --timeout=540s
 ```
 
 ## Local Testing
